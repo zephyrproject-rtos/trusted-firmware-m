@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2017, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+/* The file is meant to be included twice */
+#ifndef __SPM_DECLARE_USER_SERVICES__
+#define __SPM_DECLARE_USER_SERVICES__
+
+#include "platform_retarget.h"
+#include "target_cfg.h"
+#include "service_defs.h"
+
+SERVICE_DECLARE(TFM_SEC_FUNC_STORAGE)
+#ifdef CORE_TEST_SERVICES
+SERVICE_DECLARE(TFM_SEC_FUNC_CORE_TEST)
+SERVICE_DECLARE(TFM_SEC_FUNC_CORE_TEST_2)
+#endif /* CORE_TEST_SERVICES */
+
+#elif !defined(__SPM_ADD_USER_SERVICES__) /*__SPM_DECLARE_USER_SERVICES__*/
+#define __SPM_ADD_USER_SERVICES__
+
+/* Order must be same as id!!! */
+SERVICE_ADD(TFM_SEC_FUNC_STORAGE)
+#ifdef CORE_TEST_SERVICES
+SERVICE_ADD(TFM_SEC_FUNC_CORE_TEST)
+SERVICE_ADD(TFM_SEC_FUNC_CORE_TEST_2)
+#endif /* CORE_TEST_SERVICES */
+
+SERVICE_ADD_INIT_FUNC(TFM_SEC_FUNC_STORAGE, sst_am_prepare)
+
+#ifdef CORE_TEST_SERVICES
+SERVICE_ADD_INIT_FUNC(TFM_SEC_FUNC_CORE_TEST, core_test_init)
+SERVICE_ADD_PERIPHERAL(TFM_SEC_FUNC_CORE_TEST,
+    MPS2_IO_FPGAIO_BASE_S, MPS2_IO_FPGAIO_BASE_S + 0xFFF,
+    PPC_SP_APB_PPC_EXP2, CMSDK_FPGA_IO_PPC_POS)
+SERVICE_ADD_INIT_FUNC(TFM_SEC_FUNC_CORE_TEST_2, core_test_2_init)
+#endif /* CORE_TEST_SERVICES */
+
+#else /* __SPM_ADD_USER_SERVICES__ */
+#error "unexpected inclusion of the file"
+#endif /* __SPM_ADD_USER_SERVICES__ */
