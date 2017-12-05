@@ -1,0 +1,127 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2017, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+cmake_minimum_required(VERSION 3.7)
+
+#Tell cmake where our modules can be found
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
+
+#Include common stuff to control cmake.
+include("Common/BuildSys")
+
+#Start an embedded project.
+embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
+project(tfm_ns LANGUAGES ASM C)
+embedded_project_fixup()
+
+set(APP_DIR ${CMAKE_CURRENT_LIST_DIR})
+get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
+set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
+
+#Set variables
+get_filename_component(CMSIS_5_DIR ${TFM_ROOT_DIR}/../CMSIS_5 ABSOLUTE)
+
+if(NOT EXISTS ${CMSIS_5_DIR})
+	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_5_DIR}\".")
+endif()
+
+set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
+	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
+	"${APP_DIR}/main_ns.c"
+	"${APP_DIR}/ext/tz_context.c"
+	"${APP_DIR}/tfm_integ_test.c"
+	"${APP_DIR}/os_wrapper_rtx.c"
+	"${INTERFACE_DIR}/src/tfm_sst_api.c"
+	"${INTERFACE_DIR}/src/tfm_sst_svc_handler.c"
+	"${INTERFACE_DIR}/src/tfm_id_mngr_dummy.c"
+	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
+	)
+
+set(MPS2_SSE200_BUILD_CMSIS_CORE On)
+set(MPS2_SSE200_BUILD_RETARGET On)
+set(MPS2_SSE200_BUILD_NATIVE_DRIVERS On)
+set(MPS2_SSE200_BUILD_MPS2_TIME Off)
+set(MPS2_SSE200_BUILD_STARTUP On)
+set(MPS2_SSE200_BUILD_TARGET_CFG Off)
+set(MPS2_SSE200_BUILD_TARGET_HARDWARE_KEYS Off)
+set(MPS2_SSE200_BUILD_CMSIS_DRIVERS On)
+set(MPS2_SSE200_BUILD_UART_STDOUT Off)
+set(MPS2_SSE200_BUILD_MPS2_BOARD_LEDS On)
+set(MPS2_SSE200_BUILD_MPS2_BOARD_TIME On)
+include(${TFM_ROOT_DIR}/platform/ext/Mps2SSE200.cmake)
+
+#Set include directories.
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/common/sct ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${INTERFACE_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
+
+#Create an executable
+add_executable(${PROJECT_NAME} ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${NS_APP_SRC})
+#Add the RTX library
+target_link_libraries(${PROJECT_NAME} "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+#Set macro definitions
+target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED
+    )
+
+if (NOT DEFINED CORE_TEST)
+	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
+elseif(CORE_TEST)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE CORE_TEST)
+endif()
+
+if (NOT DEFINED CORE_TEST_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_SERVICES is undefined. ")
+elseif (CORE_TEST_SERVICES)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
+endif()
+
+#Set MCUBOOT specific settings.
+if (NOT DEFINED MCUBOOT)
+	message(FATAL_ERROR "Incomplete build configuration: MCUBOOT is undefined. ")
+elseif (MCUBOOT)
+    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DMCUBOOT\"")
+endif()
+
+
+if(NOT TARGET tfm_s)
+	#We need access to the secure veneers. If the location is not already
+	#specified, then set it.
+	if (NOT DEFINED S_VENEER_FILE)
+		set(S_VENEER_FILE "${CMAKE_CURRENT_BINARY_DIR}/s_veneers.o")
+	endif()
+	add_subdirectory(../secure_fw ${CMAKE_CURRENT_BINARY_DIR}/secure_fw)
+endif()
+
+#We depend on the non secure tests. See if the library target is available.
+if(TARGET tfm_non_secure_tests)
+	#If yes, then use the library.
+	target_link_libraries(${PROJECT_NAME} tfm_non_secure_tests)
+	#Ensure library is built first.
+	#add_dependencies(${PROJECT_NAME} tfm_non_secure_tests)
+else()
+	#If not, add the test source to the build.
+	#As of today since secufre_fw is built as a sub-project this code will never
+	#execute.
+	option(ENABLE_INVERT_SERVICE_TESTS "" TRUE)
+	option(ENABLE_SECURE_STORAGE_SERVICE_TESTS "" TRUE)
+	include(../test/CMakeLists.inc)
+	target_sources(${PROJECT_NAME} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
+endif()
+
+#Ensure secure_fw is built before our executable.
+add_dependencies(${PROJECT_NAME} tfm_s)
+
+#Add the veneers to the executable.
+set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
+
+#Finally let cmake system apply changes after the whole project is defined.
+embedded_project_end(${PROJECT_NAME})

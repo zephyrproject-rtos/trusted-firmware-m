@@ -1,0 +1,14 @@
+# List of files and extensions to be ignored
+
+# Eclipse projects
+*.project
+*.cproject
+.settings/
+
+# Garbage files
+build/
+objects/
+bin/
+test/*.a
+secure_fw/services/secure_storage/*.o
+secure_fw/services/secure_storage/*.a
