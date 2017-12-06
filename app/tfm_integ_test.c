@@ -84,6 +84,11 @@ enum test_type {
     TEST_TYPE_5,     /*!< non-NS lock, core locked: high priority tries to
                           overcome the NS lock but finds TFM core locked by
                           lower priority task and fails */
+    TEST_TYPE_6      /*!< Like TEST_TYPE_2, but the high priority task has now a
+                          timeout to acquire the NS lock. The timeout will
+                          expire only if TFM Core is built with the
+                          de-prioritization disabled (i.e. TFM_API_SVCCLEAR
+                          defined) */
 };
 
 static const osThreadAttr_t tattr_seq = {
@@ -139,13 +144,26 @@ void svc_dispatch(enum tfm_svc_num svc_num)
 }
 
 /**
+ * \brief TFM NS lock options
+ *
+ * \details Options used while acquiring the NS lock
+ */
+struct tfm_ns_lock_options
+{
+    bool use_ns_lock;
+    uint32_t timeout;
+};
+
+/**
  * \brief tfm_service_request
  *
  * \details This function is used to request a TFM
  *          service in handler mode, using SVC.
- *          Optionally uses the NS lock
+ *          Optionally uses the NS lock and specifies
+ *          a timeout for obtaining the NS lock
  */
-static void tfm_service_request(enum tfm_svc_num svc_num, bool use_ns_lock)
+static void tfm_service_request(enum tfm_svc_num svc_num,
+                                struct tfm_ns_lock_options *ns_lock_options_p)
 {
     osStatus_t result;
 
@@ -160,23 +178,47 @@ static void tfm_service_request(enum tfm_svc_num svc_num, bool use_ns_lock)
 
     LOG_MSG_THREAD("Trying to acquire the TFM core from NS");
 
-    if (use_ns_lock) {
+    if (ns_lock_options_p->use_ns_lock) {
         result = osMutexAcquire(mutex_id,0);
         if (result == osOK) {
             LOG_MSG_THREAD("NS Lock: acquired");
+            /* Add a delay here just to let the pri_task try to
+             * acquire the NS lock before seq_task enters secure world
+             */
+            if (!strcmp(osThreadGetName(osThreadGetId()),"seq_task")) {
+                osDelay(100U);
+            }
             svc_dispatch(svc_num);
             LOG_MSG_THREAD("NS Lock: releasing...");
             osMutexRelease(mutex_id);
         } else {
-            LOG_MSG_THREAD("Failed to acquire the NS lock");
 
-            osMutexAcquire(mutex_id,osWaitForever);
-            LOG_MSG_THREAD("NS Lock: acquired");
-            svc_dispatch(svc_num);
-            LOG_MSG_THREAD("NS Lock: releasing...");
-            osMutexRelease(mutex_id);
+            if (ns_lock_options_p->timeout == osWaitForever) {
+                LOG_MSG_THREAD("Failed to acquire NS lock, keep waiting");
+            } else {
+                LOG_MSG_THREAD("Failed to acquire NS lock, wait with timeout");
+            }
+
+            result = osMutexAcquire(mutex_id,ns_lock_options_p->timeout);
+            if (result == osOK) {
+                LOG_MSG_THREAD("NS Lock: acquired");
+                svc_dispatch(svc_num);
+                LOG_MSG_THREAD("NS Lock: releasing...");
+                osMutexRelease(mutex_id);
+            } else if (result == osErrorTimeout) {
+                LOG_MSG_THREAD("NS Lock: failed to acquire, timeout expired");
+            } else {
+                LOG_MSG_THREAD("NS Lock: unexpected failure trying to acquire");
+            }
         }
     } else {
+        /* Add a delay here to let the seq_task (which always uses the NS lock)
+         * enter secure world before the pri_task (which can try to overcome the
+         * NS lock in test scenario 5)
+         */
+        if (!strcmp(osThreadGetName(osThreadGetId()),"pri_task")) {
+            osDelay(100U);
+        }
         svc_dispatch(svc_num);
     }
 }
@@ -227,7 +269,8 @@ static void pri_task(void *argument)
     osDelay(100U);
 
     /* After wake up, try to get hold of the NS lock */
-    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_2, *((bool *)argument));
+    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_2,
+                            (struct tfm_ns_lock_options *)argument);
 
     osThreadExit();
 }
@@ -240,40 +283,43 @@ __attribute__((noreturn))
 static void seq_task(void *argument)
 {
     osThreadId_t thread_id, thread_id_mid;
-    bool use_ns_lock, use_ns_lock_pri;
     enum test_type test_type;
+
+    /* By default, use NS lock and wait forever if busy, i.e. until unblocked */
+    struct tfm_ns_lock_options ns_lock_opt =
+                                  {.use_ns_lock=true, .timeout=osWaitForever};
+    struct tfm_ns_lock_options ns_lock_opt_pri =
+                                  {.use_ns_lock=true, .timeout=osWaitForever};
 
     test_type = *((enum test_type *)argument);
 
     if (test_type == TEST_TYPE_1) {
         LOG_MSG("Scenario 1 - Sequential");
-        use_ns_lock = true;
     } else if (test_type == TEST_TYPE_2) {
         LOG_MSG("Scenario 2 - Priority");
-        use_ns_lock = true;
-        use_ns_lock_pri = true;
-        thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
+        thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
     } else if (test_type == TEST_TYPE_3) {
         LOG_MSG("Scenario 3 - Priority inversion");
-        use_ns_lock = true;
-        use_ns_lock_pri = true;
-        thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
+        thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
         thread_id_mid = osThreadNew(mid_task, &thread_id, &tattr_mid);
     } else if (test_type == TEST_TYPE_4) {
         LOG_MSG("Scenario 4 - non-NS lock");
-        use_ns_lock = false;
+        ns_lock_opt.use_ns_lock = false;
     } else if (test_type == TEST_TYPE_5) {
         LOG_MSG("Scenario 5 - non-NS lock, core locked");
-        use_ns_lock = true;
-        use_ns_lock_pri = false;
-        thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
+        ns_lock_opt_pri.use_ns_lock = false;
+        thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
+    } else if (test_type == TEST_TYPE_6) {
+        LOG_MSG("Scenario 6 - Core prioritization effects on NS world");
+        ns_lock_opt_pri.timeout = 0x10000; /* timed_wait for NS lock */
+        thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
     } else {
         LOG_MSG("Scenario not supported");
         osThreadExit();
     }
 
     /* Try to acquire the NS lock */
-    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_1, use_ns_lock);
+    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_1, &ns_lock_opt);
 
     if (test_type == TEST_TYPE_1) {
         LOG_MSG("Scenario 1 - test finished\n");
@@ -289,6 +335,9 @@ static void seq_task(void *argument)
     } else if (test_type == TEST_TYPE_5) {
         osThreadJoin(thread_id);
         LOG_MSG("Scenario 5 - test finished\n");
+    } else if (test_type == TEST_TYPE_6) {
+        osThreadJoin(thread_id);
+        LOG_MSG("Scenario 6 - test finished\n");
     }
 
     osThreadExit();
@@ -306,7 +355,7 @@ void execute_ns_interactive_tests(void)
 
     /* Test type list */
     enum test_type test_type[] = {TEST_TYPE_1, TEST_TYPE_2, TEST_TYPE_3,
-                                  TEST_TYPE_4, TEST_TYPE_5};
+                                  TEST_TYPE_4, TEST_TYPE_5, TEST_TYPE_6};
 
     /* Create the NS lock -- shared among testing scenarios */
     mutex_id = osMutexNew(&mattr_ns_lock);

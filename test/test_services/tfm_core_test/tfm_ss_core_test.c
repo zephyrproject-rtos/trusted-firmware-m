@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -283,6 +283,7 @@ int32_t test_wait_button(void)
     LOG_MSG("Inside the service, press button to continue...");
     wait_button_event();
     LOG_MSG("Leaving the service");
+    return TFM_SUCCESS;
 }
 #endif
 
@@ -290,10 +291,7 @@ static int32_t test_block(int32_t arg1, int32_t arg2, int32_t arg3)
 {
 #ifdef CORE_TEST_INTERACTIVE
     /* Only block if interactive test is turned on */
-    LOG_MSG("Inside the service, press button to continue...");
-    wait_button_event();
-    LOG_MSG("Leaving the service");
-    return TFM_SUCCESS;
+    return test_wait_button();
 #else
     /* This test should not be run if interactive tests are disabled */
     return CORE_TEST_ERRNO_TEST_FAULT;
