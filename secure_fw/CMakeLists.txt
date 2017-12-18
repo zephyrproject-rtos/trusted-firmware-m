@@ -72,7 +72,14 @@ add_dependencies(${PROJECT_NAME} tfm_secure_tests)
 
 #Set macro definitions for the project.
 embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} DAUTH_CHIP_DEFAULT APPEND)
-target_link_libraries(${PROJECT_NAME} tfm_storage tfm_secure_tests)
+
+if (REGRESSION OR CORE_TEST)
+	#The test service veneers may not be referenced in the secure binary so the
+	#veneer objects are explicitly loaded from the secure tests library.
+	target_link_libraries(${PROJECT_NAME} tfm_storage $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+else()
+	target_link_libraries(${PROJECT_NAME} tfm_storage)
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS " --predefine=\"-DTFM_LVL=${TFM_LVL}\"")
 
@@ -80,6 +87,12 @@ if (NOT DEFINED CORE_TEST_SERVICES)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_SERVICES is undefined. ")
 elseif (CORE_TEST_SERVICES)
 	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
+endif()
+
+if (NOT DEFINED SST_TEST_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined. ")
+elseif (SST_TEST_SERVICES)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DSST_TEST_SERVICES\"")
 endif()
 
 if (NOT DEFINED BL2)
@@ -122,4 +135,3 @@ install(FILES ${S_VENEER_FILE}
 
 #Finally let cmake system apply changes after the whole project is defined.
 embedded_project_end(${PROJECT_NAME})
-

@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
 
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,12 @@ LR_CODE S_CODE_START {
     }
 #endif /* CORE_TEST_SERVICES */
 
+#ifdef SST_TEST_SERVICES
+    TFM_SEC_FUNC_SST_TEST_SERVICE +0 ALIGN 32 {
+        *sst_test_service.* (+RO)
+    }
+#endif /* SST_TEST_SERVICES */
+
     ER_TFM_DATA S_DATA_START S_DATA_SIZE {
         .ANY (+RW +ZI)
     }
@@ -95,6 +101,15 @@ LR_CODE S_CODE_START {
     TFM_SEC_FUNC_CORE_TEST_2_STACK +0 ALIGN 128 EMPTY 0x2000 {
     }
 #endif /* CORE_TEST_SERVICES */
+
+#ifdef SST_TEST_SERVICES
+    TFM_SEC_FUNC_SST_TEST_SERVICE_DATA +0 ALIGN 32 {
+        sst_test_service.o (+RW +ZI)
+    }
+
+    TFM_SEC_FUNC_SST_TEST_SERVICE_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+#endif /* SST_TEST_SERVICES */
 
 #endif /* TFM_LVL == 1 */
 

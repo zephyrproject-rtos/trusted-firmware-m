@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,9 @@
 #include "tfm_ns_lock.h"
 #ifdef CORE_TEST_SERVICES
 #include "test/suites/core/non_secure/svc_core_test_ns.h"
+#endif
+#ifdef SST_TEST_SERVICES
+#include "test/test_services/tfm_sst_test_service/sst_test_service_svc.h"
 #endif
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/integ_test.h"
@@ -55,6 +58,13 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
   (void *)svc_tfm_core_test,
   (void *)svc_tfm_core_test_multiple_calls,
 #endif /* CORE_TEST_SERVICES */
+
+#if defined(SST_TEST_SERVICES)
+  (void *)sst_test_service_svc_setup,
+  (void *)sst_test_service_svc_dummy_encrypt,
+  (void *)sst_test_service_svc_dummy_decrypt,
+  (void *)sst_test_service_svc_clean,
+#endif /* SST_TEST_SERVICES */
 
 //(void *)user_function1,
 // ...
