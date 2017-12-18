@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -101,7 +101,7 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
 
     if (err == TFM_SST_ERR_SUCCESS) {
         if (app_id != S_APP_ID) {
-            if (request_type == SST_PERM_READ) {
+            if (request_type & SST_PERM_READ) {
                 access = SST_PERM_REFERENCE;
             } else {
                 /* Other permissions can not be delegated */
@@ -342,6 +342,7 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
     struct sst_asset_info_t *db_entry;
     struct tfm_sst_attribs_t tmp_attrib;
     enum tfm_sst_err_t err;
+    uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
 
     bound_check = sst_utils_memory_bound_check(attrib,
                                                sizeof(struct tfm_sst_attribs_t),
@@ -350,8 +351,7 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
         return TFM_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle,
-                                       SST_PERM_REFERENCE);
+    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
