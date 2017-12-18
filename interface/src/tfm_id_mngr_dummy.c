@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,6 +42,7 @@ static struct thread_sst_appid_pair sst_ns_policy_table[] =
     {"Thread_A", 9},
     {"Thread_B", 10},
     {"Thread_C", 11},
+    {"Thread_D", 12},
 };
 
 static const char* get_active_task_name(void)

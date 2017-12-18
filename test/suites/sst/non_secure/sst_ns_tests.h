@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,13 @@ extern "C" {
  * \param[in] p_test_suite  The test suite to be executed.
  */
 void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite);
+
+/**
+ * \brief Register testsuite for the non-secure SST referenced access tests.
+ *
+ * \param[in] p_test_suite  The test suite to be executed.
+ */
+void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite);
 
 #ifdef __cplusplus
 }

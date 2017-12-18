@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,6 +38,12 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 		)
 
 	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c")
+
+	if (NOT DEFINED SST_TEST_SERVICES)
+		message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined.")
+	elseif (SST_TEST_SERVICES)
+		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
+	endif()
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
