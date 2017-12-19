@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,9 +17,19 @@
 #include "s_test_helpers.h"
 
 /* Test suite defines */
-#define LOOP_ITERATION   15UL
-#define READ_BUF_SIZE    11UL
-#define WRITE_BUF_SIZE    5UL
+#define LOOP_ITERATIONS_001 5U
+
+/* Perform one more create/delete than the number of assets to check that
+ * object metadata is being freed correctly.
+ */
+#define LOOP_ITERATIONS_002 (SST_NUM_ASSETS + 1U)
+
+#define WRITE_BUF_SIZE      33U
+#define READ_BUF_SIZE       (WRITE_BUF_SIZE + 6U)
+
+#define WRITE_DATA          "PACKMYBOXWITHFIVEDOZENLIQUORJUGS"
+#define READ_DATA           "######################################"
+#define RESULT_DATA         ("###" WRITE_DATA "###")
 
 /* Define test suite for SST reliability tests */
 /* List of tests */
@@ -57,8 +67,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     struct tfm_sst_buf_t data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    uint8_t wrt_data[WRITE_BUF_SIZE] = "GOOD";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXX";
+    uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
+    uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -81,7 +91,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     /* Sets write and read sizes */
     data.size = WRITE_BUF_SIZE-1;
 
-    for (itr = 0; itr < LOOP_ITERATION; itr++) {
+    for (itr = 0; itr < LOOP_ITERATIONS_001; itr++) {
         do {
             /* Sets data structure */
             data.data = wrt_data;
@@ -105,7 +115,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             }
 
             /* Checks read data buffer content */
-            if (memcmp(read_data, "XXXGOODXXX", READ_BUF_SIZE) != 0) {
+            if (memcmp(read_data, RESULT_DATA, READ_BUF_SIZE) != 0) {
                 TEST_FAIL("Read buffer contains incorrect data");
                 return;
             }
@@ -148,8 +158,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
     struct tfm_sst_buf_t data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    uint8_t wrt_data[WRITE_BUF_SIZE] = "GOOD";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXX";
+    uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
+    uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -159,7 +169,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
     /* Sets write and read sizes */
     data.size = WRITE_BUF_SIZE-1;
 
-    for (itr = 0; itr < LOOP_ITERATION; itr++) {
+    for (itr = 0; itr < LOOP_ITERATIONS_002; itr++) {
         /* Checks write permissions in create function */
         err = tfm_sst_veneer_create(app_id, asset_uuid);
         if (err != TFM_SST_ERR_SUCCESS) {
@@ -196,7 +206,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             }
 
             /* Checks read data buffer content */
-            if (memcmp(read_data, "XXXGOODXXX", READ_BUF_SIZE) != 0) {
+            if (memcmp(read_data, RESULT_DATA, READ_BUF_SIZE) != 0) {
                 read_data[READ_BUF_SIZE-1] = 0;
                 TEST_FAIL("Read buffer contains incorrect data");
                 return;

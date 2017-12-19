@@ -148,8 +148,7 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 
 ```
 
-Note: SST reliability tests may take more than 40 minutes to run on the
-      MPS2.
+Note: SST reliability tests take approximately three minutes to run on the MPS2.
 
 ## Software upgrade and image validation with BL2 bootloader
 
