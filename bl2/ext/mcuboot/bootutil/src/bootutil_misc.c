@@ -22,11 +22,8 @@
 #include <inttypes.h>
 #include <stddef.h>
 
-#include "sysflash/sysflash.h"
-#include "hal/hal_bsp.h"
 #include "hal/hal_flash.h"
 #include "flash_map/flash_map.h"
-#include "os/os.h"
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "bootutil_priv.h"
@@ -43,7 +40,7 @@ const uint32_t boot_img_magic[] = {
     0x8079b62c,
 };
 
-const uint32_t BOOT_MAGIC_SZ = sizeof boot_img_magic;
+const uint32_t BOOT_MAGIC_SZ = sizeof(boot_img_magic);
 const uint32_t BOOT_MAX_ALIGN = MAX_FLASH_ALIGN;
 
 struct boot_swap_table {
@@ -95,7 +92,7 @@ static const struct boot_swap_table boot_swap_tables[] = {
 };
 
 #define BOOT_SWAP_TABLES_COUNT \
-    (sizeof boot_swap_tables / sizeof boot_swap_tables[0])
+    (sizeof(boot_swap_tables) / sizeof(boot_swap_tables[0]))
 
 int
 boot_magic_code(const uint32_t *magic)
@@ -106,7 +103,7 @@ boot_magic_code(const uint32_t *magic)
         return BOOT_MAGIC_GOOD;
     }
 
-    for (i = 0; i < BOOT_MAGIC_SZ / sizeof *magic; i++) {
+    for (i = 0; i < BOOT_MAGIC_SZ / sizeof(*magic); i++) {
         if (magic[i] != 0xffffffff) {
             return BOOT_MAGIC_BAD;
         }
@@ -217,14 +214,15 @@ boot_read_swap_state(const struct flash_area *fap,
 
     if (fap->fa_id != FLASH_AREA_IMAGE_SCRATCH) {
         off = boot_copy_done_off(fap);
-        rc = flash_area_read(fap, off, &state->copy_done, sizeof state->copy_done);
+        rc = flash_area_read(fap, off, &state->copy_done,
+                             sizeof(state->copy_done));
         if (rc != 0) {
             return BOOT_EFLASH;
         }
     }
 
     off = boot_image_ok_off(fap);
-    rc = flash_area_read(fap, off, &state->image_ok, sizeof state->image_ok);
+    rc = flash_area_read(fap, off, &state->image_ok, sizeof(state->image_ok));
     if (rc != 0) {
         return BOOT_EFLASH;
     }
@@ -310,7 +308,7 @@ boot_read_swap_size(uint32_t *swap_size)
     }
 
     off = boot_swap_size_off(fap);
-    rc = flash_area_read(fap, off, swap_size, sizeof *swap_size);
+    rc = flash_area_read(fap, off, swap_size, sizeof(*swap_size));
     if (rc != 0) {
         rc = BOOT_EFLASH;
     }
@@ -392,11 +390,11 @@ boot_write_swap_size(const struct flash_area *fap, uint32_t swap_size)
     off = boot_swap_size_off(fap);
     align = hal_flash_align(fap->fa_device_id);
     assert(align <= BOOT_MAX_ALIGN);
-    if (align < sizeof swap_size) {
-        align = sizeof swap_size;
+    if (align < sizeof(swap_size)) {
+        align = sizeof(swap_size);
     }
     memset(buf, 0xFF, BOOT_MAX_ALIGN);
-    memcpy(buf, (uint8_t *)&swap_size, sizeof swap_size);
+    memcpy(buf, (uint8_t *)&swap_size, sizeof(swap_size));
 
     rc = flash_area_write(fap, off, buf, align);
     if (rc != 0) {
@@ -463,7 +461,7 @@ boot_swap_type(void)
 int
 boot_set_pending(int permanent)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     struct boot_swap_state state_slot1;
     int rc;
 
@@ -500,14 +498,15 @@ boot_set_pending(int permanent)
 }
 
 /**
- * Marks the image in slot 0 as confirmed.  The system will continue booting into the image in slot 0 until told to boot from a different slot.
+ * Marks the image in slot 0 as confirmed.  The system will continue booting
+ * into the image in slot 0 until told to boot from a different slot.
  *
- * @return                  0 on success; nonzero on failure.
+ * @return  0 on success; non-zero on failure.
  */
 int
 boot_set_confirmed(void)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     struct boot_swap_state state_slot0;
     int rc;
 

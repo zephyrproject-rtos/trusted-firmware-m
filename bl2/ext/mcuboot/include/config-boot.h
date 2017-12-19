@@ -23,7 +23,7 @@
 /*
  * Minimal configuration for using TLS in the bootloader
  *
- * - RSA or ECDSA signature verification
+ * - RSA signature verification
  */
 
 #ifndef MBEDTLS_CONFIG_BOOT_H
@@ -53,16 +53,6 @@
 #else
 #define MBEDTLS_ENTROPY_C
 #define MBEDTLS_TEST_NULL_ENTROPY
-#endif
-
-/* mbed TLS feature support */
-#ifdef CONFIG_BOOT_VERIFY_ECDSA_SIGNATURE
-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
-#define MBEDTLS_ECP_DP_SECP224R1_ENABLED
-#define MBEDTLS_ECP_NIST_OPTIM
-#define MBEDTLS_ECDSA_C
-#define MBEDTLS_ECDH_C
-#define MBEDTLS_ECP_C
 #endif
 
 #ifdef CONFIG_BOOT_VERIFY_RSA_SIGNATURE

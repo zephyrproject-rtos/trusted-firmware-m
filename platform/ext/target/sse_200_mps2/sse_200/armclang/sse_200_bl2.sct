@@ -1,5 +1,7 @@
+#! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
+
 /*
- * Copyright (c) 2017 Linaro Limited
+ * Copyright (c) 2017 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +16,15 @@
  * limitations under the License.
  */
 
-#include <bootutil/caps.h>
+#include "../partition/region_defs.h"
 
-uint32_t bootutil_get_caps(void)
-{
-        uint32_t res = 0;
+LR_CODE BL2_CODE_START {
+    ER_CODE BL2_CODE_START BL2_CODE_SIZE {
+        *.o (RESET +First)
+        .ANY (+RO)
+    }
 
-#if defined(MCUBOOT_SIGN_RSA)
-        res |= BOOTUTIL_CAP_RSA2048;
-#endif
-#if defined(MCUBOOT_OVERWRITE_ONLY)
-        res |= BOOTUTIL_CAP_OVERWRITE_UPGRADE;
-#else
-        res |= BOOTUTIL_CAP_SWAP_UPGRADE;
-#endif
-
-        return res;
+    ER_DATA BL2_DATA_START BL2_DATA_SIZE {
+        .ANY (+ZI +RW)
+    }
 }

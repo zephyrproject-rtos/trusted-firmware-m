@@ -30,10 +30,8 @@ IMAGE_F = {
 
 TLV_VALUES = {
         'KEYHASH': 0x01,
-        'SHA256': 0x10,
-        'RSA2048': 0x20,
-        'ECDSA224': 0x21,
-        'ECDSA256': 0x22, }
+        'SHA256' : 0x10,
+        'RSA2048': 0x20, }
 
 TLV_INFO_SIZE = 4
 TLV_INFO_MAGIC = 0x6907
@@ -110,8 +108,6 @@ class Image():
 
         tlv = TLV()
 
-        # Note that ecdsa wants to do the hashing itself, which means
-        # we get to hash it twice.
         sha = hashlib.sha256()
         sha.update(self.payload)
         digest = sha.digest()

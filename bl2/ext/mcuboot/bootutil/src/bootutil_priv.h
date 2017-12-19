@@ -20,7 +20,6 @@
 #ifndef H_BOOTUTIL_PRIV_
 #define H_BOOTUTIL_PRIV_
 
-#include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"
 #include "bootutil/image.h"
 

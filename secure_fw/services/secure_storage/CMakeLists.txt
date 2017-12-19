@@ -25,6 +25,7 @@ get_filename_component(TFM_ROOT_DIR "${SECURE_STORAGE_DIR}/../../.." ABSOLUTE)
 get_filename_component(MBEDTLS_SOURCE_DIR "${TFM_ROOT_DIR}/../mbedtls" ABSOLUTE)
 set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
 set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
+set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 
 ###Get the definition of what files we need to build
 set (ENABLE_SECURE_STORAGE ON)
@@ -48,13 +49,13 @@ endif()
 #Build mbedtls as external project.
 #This ensures mbedtls is built with exactly defined settings.
 #mbedtls will be used from is't install location
-include(BuildMbedtls.cmake)
+include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 # Specify what we build (for the secure storage service, build as a static library)
 add_library(tfm_storage STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
 embedded_set_target_compile_defines(TARGET tfm_storage LANGUAGE C DEFINES __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
 #Add a dependency on the mbed_tls_lib_install target.
-add_dependencies(tfm_storage mbedtls_lib_install)
+add_dependencies(tfm_storage ${MBEDTLS_TARGET_NAME}_install)
 #Ask the compiler to merge the mbedtls and the secure storage libraries.
 compiler_merge_library(DEST tfm_storage LIBS "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
 

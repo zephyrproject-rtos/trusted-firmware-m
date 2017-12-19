@@ -20,7 +20,7 @@ include("Common/${ARMCLANG_MODULE}")
 #definitions) based on these.
 set (REGRESSION False)
 set (CORE_TEST True)
-set (MCUBOOT False)
+set (BL2 True)
 
 ##Shared compiler and linker settings.
 function(config_setting_shared_flags tgt)
@@ -86,8 +86,8 @@ if (CORE_TEST_SERVICES)
 	add_definitions(-DCORE_TEST_SERVICES)
 endif()
 
-if (MCUBOOT)
-	add_definitions(-DMCUBOOT)
+if (BL2)
+	add_definitions(-DBL2)
 endif()
 
 ##Secure side
@@ -111,3 +111,7 @@ set (MBEDTLS_DEBUG ON)
 ##Tests
 config_setting_shared_flags(tfm_secure_tests)
 config_setting_shared_flags(tfm_non_secure_tests)
+
+##BL2
+config_setting_shared_flags(mcuboot)
+set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse  -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")

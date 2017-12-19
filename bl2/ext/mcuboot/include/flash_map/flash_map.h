@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/*
+ Original code taken from mcuboot project at:
+ https://github.com/runtimeco/mcuboot
+ Modifications are Copyright (c) 2018 Arm Limited.
+ */
+
 #ifndef H_UTIL_FLASH_MAP_
 #define H_UTIL_FLASH_MAP_
 
@@ -42,6 +48,10 @@ extern "C" {
  * and match the target offset specified in download script.
  */
 #include <inttypes.h>
+
+#define FLASH_AREA_IMAGE_0       1
+#define FLASH_AREA_IMAGE_1       2
+#define FLASH_AREA_IMAGE_SCRATCH 3
 
 /**
  * @brief Structure describing an area on a flash device.
@@ -107,23 +117,25 @@ int flash_device_base(uint8_t fd_id, uintptr_t *ret);
 /*
  * Start using flash area.
  */
-int flash_area_open(uint8_t id, const struct flash_area **);
+int flash_area_open(uint8_t id, const struct flash_area **area);
 
-void flash_area_close(const struct flash_area *);
+void flash_area_close(const struct flash_area *area);
 
 /*
  * Read/write/erase. Offset is relative from beginning of flash area.
  */
-int flash_area_read(const struct flash_area *, uint32_t off, void *dst,
-  uint32_t len);
-int flash_area_write(const struct flash_area *, uint32_t off, const void *src,
-  uint32_t len);
-int flash_area_erase(const struct flash_area *, uint32_t off, uint32_t len);
+int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
+                    uint32_t len);
+
+int flash_area_write(const struct flash_area *area, uint32_t off,
+                     const void *src, uint32_t len);
+
+int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len);
 
 /*
  * Alignment restriction for flash writes.
  */
-uint8_t flash_area_align(const struct flash_area *);
+uint8_t flash_area_align(const struct flash_area *area);
 
 /*
  * Given flash area ID, return info about sectors within the area.
@@ -140,6 +152,7 @@ int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
 
 int flash_area_id_from_image_slot(int slot);
 int flash_area_id_to_image_slot(int area_id);
+void flash_area_warn_on_open(void);
 
 #ifdef __cplusplus
 }

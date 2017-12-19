@@ -19,10 +19,6 @@
 
 #include <string.h>
 
-#ifdef MCUBOOT_MYNEWT
-#include "mcuboot_config/mcuboot_config.h"
-#endif
-
 #ifdef MCUBOOT_SIGN_RSA
 #include "bootutil/sign_key.h"
 #include "bootutil/sha256.h"
@@ -68,11 +64,12 @@ static const uint8_t pss_zeros[8] = {0};
 static int
 bootutil_parse_rsakey(mbedtls_rsa_context *ctx, uint8_t **p, uint8_t *end)
 {
-    int rc;
+    int rc, rc2;
     size_t len;
 
-    if ((rc = mbedtls_asn1_get_tag(p, end, &len,
-          MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE)) != 0) {
+    rc = mbedtls_asn1_get_tag(p, end, &len,
+                            MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    if (rc != 0) {
         return -1;
     }
 
@@ -80,8 +77,9 @@ bootutil_parse_rsakey(mbedtls_rsa_context *ctx, uint8_t **p, uint8_t *end)
         return -2;
     }
 
-    if ((rc = mbedtls_asn1_get_mpi(p, end, &ctx->N)) != 0 ||
-      (rc = mbedtls_asn1_get_mpi(p, end, &ctx->E)) != 0) {
+    rc  = mbedtls_asn1_get_mpi(p, end, &ctx->N);
+    rc2 = mbedtls_asn1_get_mpi(p, end, &ctx->E);
+    if ((rc != 0) || (rc2 != 0)) {
         return -3;
     }
 
@@ -89,7 +87,8 @@ bootutil_parse_rsakey(mbedtls_rsa_context *ctx, uint8_t **p, uint8_t *end)
         return -4;
     }
 
-    if ((rc = mbedtls_rsa_check_pubkey(ctx)) != 0) {
+    rc = mbedtls_rsa_check_pubkey(ctx);
+    if (rc != 0) {
         return -5;
     }
 

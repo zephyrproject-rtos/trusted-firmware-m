@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/*
+ Original code taken from mcuboot project at:
+ https://github.com/runtimeco/mcuboot
+ Modifications are Copyright (c) 2018 Arm Limited.
+ */
+
 /**
  * This file provides an interface to the boot loader.  Functions defined in
  * this file should only be called while the boot loader is running.
@@ -36,10 +42,6 @@
 
 #define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
-
-#ifdef MCUBOOT_MYNEWT
-#include "mcuboot_config/mcuboot_config.h"
-#endif
 
 static struct boot_loader_state boot_data;
 
@@ -124,7 +126,7 @@ static const struct boot_status_table boot_status_tables[] = {
 };
 
 #define BOOT_STATUS_TABLES_COUNT \
-    (sizeof boot_status_tables / sizeof boot_status_tables[0])
+    (sizeof(boot_status_tables) / sizeof(boot_status_tables[0]))
 
 #define BOOT_LOG_SWAP_STATE(area, state)                            \
     BOOT_LOG_INF("%s: magic=%s, copy_done=0x%x, image_ok=0x%x",     \
@@ -136,11 +138,12 @@ static const struct boot_status_table boot_status_tables[] = {
                  (state)->image_ok)
 
 /**
- * Determines where in flash the most recent boot status is stored.  The boot
+ * Determines where in flash the most recent boot status is stored. The boot
  * status is necessary for completing a swap that was interrupted by a boot
  * loader reset.
  *
- * @return                      A BOOT_STATUS_SOURCE_[...] code indicating where *                                  status should be read from.
+ * @return  BOOT_STATUS_SOURCE_[...] code indicating where
+ *          status should be read from.
  */
 static int
 boot_status_source(void)
@@ -198,9 +201,9 @@ boot_previous_swap_type(void)
     post_swap_type = boot_swap_type();
 
     switch (post_swap_type) {
-    case BOOT_SWAP_TYPE_NONE   : return BOOT_SWAP_TYPE_PERM;
-    case BOOT_SWAP_TYPE_REVERT : return BOOT_SWAP_TYPE_TEST;
-    case BOOT_SWAP_TYPE_PANIC  : return BOOT_SWAP_TYPE_PANIC;
+    case BOOT_SWAP_TYPE_NONE:   return BOOT_SWAP_TYPE_PERM;
+    case BOOT_SWAP_TYPE_REVERT: return BOOT_SWAP_TYPE_TEST;
+    case BOOT_SWAP_TYPE_PANIC:  return BOOT_SWAP_TYPE_PANIC;
     }
 
     return BOOT_SWAP_TYPE_FAIL;
@@ -214,7 +217,7 @@ boot_previous_swap_type(void)
 static int
 boot_read_image_size(int slot, struct image_header *hdr, uint32_t *size)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     struct image_tlv_info info;
     int area_id;
     int rc;
@@ -248,7 +251,7 @@ done:
 static int
 boot_read_image_header(int slot, struct image_header *out_hdr)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     int area_id;
     int rc;
 
@@ -259,7 +262,7 @@ boot_read_image_header(int slot, struct image_header *out_hdr)
         goto done;
     }
 
-    rc = flash_area_read(fap, 0, out_hdr, sizeof *out_hdr);
+    rc = flash_area_read(fap, 0, out_hdr, sizeof(*out_hdr));
     if (rc != 0) {
         rc = BOOT_EFLASH;
         goto done;
@@ -432,7 +435,7 @@ boot_read_status(struct boot_status *bs)
     int area_id;
     int rc;
 
-    memset(bs, 0, sizeof *bs);
+    memset(bs, 0, sizeof(*bs));
 
     status_loc = boot_status_source();
     switch (status_loc) {
@@ -474,7 +477,7 @@ boot_read_status(struct boot_status *bs)
 int
 boot_write_status(struct boot_status *bs)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     uint32_t off;
     int area_id;
     int rc;
@@ -533,35 +536,6 @@ boot_image_check(struct image_header *hdr, const struct flash_area *fap)
                               NULL, 0, NULL)) {
         return BOOT_EBADIMAGE;
     }
-    return 0;
-}
-
-static int
-split_image_check(struct image_header *app_hdr,
-                  const struct flash_area *app_fap,
-                  struct image_header *loader_hdr,
-                  const struct flash_area *loader_fap)
-{
-    static void *tmpbuf;
-    uint8_t loader_hash[32];
-
-    if (!tmpbuf) {
-        tmpbuf = malloc(BOOT_TMPBUF_SZ);
-        if (!tmpbuf) {
-            return BOOT_ENOMEM;
-        }
-    }
-
-    if (bootutil_img_validate(loader_hdr, loader_fap, tmpbuf, BOOT_TMPBUF_SZ,
-                              NULL, 0, loader_hash)) {
-        return BOOT_EBADIMAGE;
-    }
-
-    if (bootutil_img_validate(app_hdr, app_fap, tmpbuf, BOOT_TMPBUF_SZ,
-                              loader_hash, 32, NULL)) {
-        return BOOT_EBADIMAGE;
-    }
-
     return 0;
 }
 
@@ -682,7 +656,7 @@ boot_copy_sz(int last_sector_idx, int *out_first_sector_idx)
 static int
 boot_erase_sector(int flash_area_id, uint32_t off, uint32_t sz)
 {
-    const struct flash_area *fap;
+    const struct flash_area *fap = NULL;
     int rc;
 
     rc = flash_area_open(flash_area_id, &fap);
@@ -747,8 +721,8 @@ boot_copy_sector(int flash_area_id_src, int flash_area_id_dst,
 
     bytes_copied = 0;
     while (bytes_copied < sz) {
-        if (sz - bytes_copied > sizeof buf) {
-            chunk_sz = sizeof buf;
+        if (sz - bytes_copied > sizeof(buf)) {
+            chunk_sz = sizeof(buf);
         } else {
             chunk_sz = sz - bytes_copied;
         }
@@ -1250,6 +1224,7 @@ boot_go(struct boot_rsp *rsp)
      */
     static boot_sector_t slot0_sectors[BOOT_MAX_IMG_SECTORS];
     static boot_sector_t slot1_sectors[BOOT_MAX_IMG_SECTORS];
+
     boot_data.imgs[0].sectors = slot0_sectors;
     boot_data.imgs[1].sectors = slot1_sectors;
 
@@ -1289,7 +1264,8 @@ boot_go(struct boot_rsp *rsp)
          * The following states need image_ok be explicitly set after the
          * swap was finished to avoid a new revert.
          */
-        if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_FAIL) {
+        if (swap_type == BOOT_SWAP_TYPE_REVERT ||
+            swap_type == BOOT_SWAP_TYPE_FAIL) {
 #ifndef MCUBOOT_OVERWRITE_ONLY
             rc = boot_set_image_ok();
             if (rc != 0) {
@@ -1337,7 +1313,8 @@ boot_go(struct boot_rsp *rsp)
         assert(0);
 
         /* Loop forever... */
-        while (1) {}
+        while (1)
+            ;
     }
 
 #ifdef MCUBOOT_VALIDATE_SLOT0
@@ -1374,67 +1351,5 @@ boot_go(struct boot_rsp *rsp)
     for (slot = 0; slot < BOOT_NUM_SLOTS; slot++) {
         flash_area_close(BOOT_IMG_AREA(&boot_data, BOOT_NUM_SLOTS - 1 - slot));
     }
-    return rc;
-}
-
-int
-split_go(int loader_slot, int split_slot, void **entry)
-{
-    boot_sector_t *sectors;
-    uintptr_t entry_val;
-    int loader_flash_id;
-    int split_flash_id;
-    int rc;
-
-    sectors = malloc(BOOT_MAX_IMG_SECTORS * 2 * sizeof *sectors);
-    if (sectors == NULL) {
-        return SPLIT_GO_ERR;
-    }
-    boot_data.imgs[loader_slot].sectors = sectors + 0;
-    boot_data.imgs[split_slot].sectors = sectors + BOOT_MAX_IMG_SECTORS;
-
-    loader_flash_id = flash_area_id_from_image_slot(loader_slot);
-    rc = flash_area_open(loader_flash_id,
-                         &BOOT_IMG_AREA(&boot_data, split_slot));
-    assert(rc == 0);
-    split_flash_id = flash_area_id_from_image_slot(split_slot);
-    rc = flash_area_open(split_flash_id,
-                         &BOOT_IMG_AREA(&boot_data, split_slot));
-    assert(rc == 0);
-
-    /* Determine the sector layout of the image slots and scratch area. */
-    rc = boot_read_sectors();
-    if (rc != 0) {
-        rc = SPLIT_GO_ERR;
-        goto done;
-    }
-
-    rc = boot_read_image_headers();
-    if (rc != 0) {
-        goto done;
-    }
-
-    /* Don't check the bootable image flag because we could really call a
-     * bootable or non-bootable image.  Just validate that the image check
-     * passes which is distinct from the normal check.
-     */
-    rc = split_image_check(boot_img_hdr(&boot_data, split_slot),
-                           BOOT_IMG_AREA(&boot_data, split_slot),
-                           boot_img_hdr(&boot_data, loader_slot),
-                           BOOT_IMG_AREA(&boot_data, loader_slot));
-    if (rc != 0) {
-        rc = SPLIT_GO_NON_MATCHING;
-        goto done;
-    }
-
-    entry_val = boot_img_slot_off(&boot_data, split_slot) +
-                boot_img_hdr(&boot_data, split_slot)->ih_hdr_size;
-    *entry = (void *) entry_val;
-    rc = SPLIT_GO_OK;
-
-done:
-    flash_area_close(BOOT_IMG_AREA(&boot_data, split_slot));
-    flash_area_close(BOOT_IMG_AREA(&boot_data, loader_slot));
-    free(sectors);
     return rc;
 }

@@ -17,12 +17,16 @@
  * under the License.
  */
 
-#include <zephyr.h>
+/*
+ Original code taken from mcuboot project at:
+ https://github.com/runtimeco/mcuboot
+ Modifications are Copyright (c) 2018 Arm Limited.
+ */
+
+#include <stdlib.h>
 #include <string.h>
 
 #include "os/os_heap.h"
-
-#define MBEDTLS_CONFIG_FILE CONFIG_MBEDTLS_CFG_FILE
 #include <mbedtls/platform.h>
 
 /* D(void *os_malloc(size_t size)) */
@@ -31,7 +35,8 @@ void *os_calloc(size_t nelem, size_t size)
     /* Note that this doesn't check for overflow.  Assume the
      * calls only come from within the app. */
     size_t total = nelem * size;
-    void *buf = k_malloc(total);
+    void *buf = malloc(total);
+
     if (buf) {
         memset(buf, 0, total);
     }
@@ -40,7 +45,7 @@ void *os_calloc(size_t nelem, size_t size)
 
 void os_free(void *ptr)
 {
-    k_free(ptr);
+    free(ptr);
 }
 
 /*

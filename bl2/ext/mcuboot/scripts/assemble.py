@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 #
 # Copyright 2017 Linaro Limited
+# Copyright (c) 2017, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,24 +23,15 @@ import argparse
 import errno
 import io
 import re
-import os.path
+import os
+import shutil
 
-def same_keys(a, b):
-    """Determine if the dicts a and b have the same keys in them"""
-    for ak in a.keys():
-        if ak not in b:
-            return False
-    for bk in b.keys():
-        if bk not in a:
-            return False
-    return True
-
-offset_re = re.compile(r"^#define FLASH_AREA_([0-9A-Z_]+)_OFFSET_0\s+((0x)?[0-9a-fA-F]+)")
-size_re   = re.compile(r"^#define FLASH_AREA_([0-9A-Z_]+)_SIZE_0\s+((0x)?[0-9a-fA-F]+)")
+offset_re = re.compile(r"^#define ([0-9A-Z_]+)_IMAGE_OFFSET\s+((0x)?[0-9a-fA-F]+)")
+size_re   = re.compile(r"^#define ([0-9A-Z_]+)_IMAGE_MAX_SIZE\s+((0x)?[0-9a-fA-F]+)")
 
 class Assembly():
-    def __init__(self, output, bootdir):
-        self.find_slots(bootdir)
+    def __init__(self, output):
+        self.find_slots()
         try:
             os.unlink(output)
         except OSError as e:
@@ -47,10 +39,15 @@ class Assembly():
                 raise
         self.output = output
 
-    def find_slots(self, bootdir):
+    def find_slots(self):
         offsets = {}
         sizes = {}
-        with open(os.path.join(bootdir, 'include', 'generated', 'generated_dts_board.h'), 'r') as fd:
+
+        scriptsDir = os.path.dirname(os.path.abspath(__file__))
+        path = '../../../../platform/ext/target/sse_200_mps2/sse_200/partition/flash_layout.h'
+        configFile = os.path.join(scriptsDir, path)
+
+        with open(configFile, 'r') as fd:
             for line in fd:
                 m = offset_re.match(line)
                 if m is not None:
@@ -59,18 +56,11 @@ class Assembly():
                 if m is not None:
                     sizes[m.group(1)] = int(m.group(2), 0)
 
-        if not same_keys(offsets, sizes):
-            raise Exception("Inconsistent data in generated_dts_board.h")
+        if 'SECURE' not in offsets:
+            raise Exception("Image config does not have secure partition")
 
-        # We care about the MCUBOOT, IMAGE_0, and IMAGE_1 partitions.
-        if 'MCUBOOT' not in offsets:
-            raise Exception("Board partition table does not have mcuboot partition")
-
-        if 'IMAGE_0' not in offsets:
-            raise Exception("Board partition table does not have image-0 partition")
-
-        if 'IMAGE_1' not in offsets:
-            raise Exception("Board partition table does not have image-1 partition")
+        if 'NON_SECURE' not in offsets:
+            raise Exception("Image config does not have non-secure partition")
 
         self.offsets = offsets
         self.sizes = sizes
@@ -78,37 +68,32 @@ class Assembly():
     def add_image(self, source, partition):
         with open(self.output, 'ab') as ofd:
             pos = ofd.tell()
-            print("partition {}, pos={}, offset={}".format(partition, pos, self.offsets[partition]))
             if pos > self.offsets[partition]:
                 raise Exception("Partitions not in order, unsupported")
             if pos < self.offsets[partition]:
-                buf = b'\xFF' * (self.offsets[partition] - pos)
-                ofd.write(buf)
+                ofd.write(b'\xFF' * (self.offsets[partition] - pos))
+            statinfo = os.stat(source)
+            if statinfo.st_size > self.sizes[partition]:
+                raise Exception("Image {} is too large for partition".format(source))
             with open(source, 'rb') as rfd:
-                ibuf = rfd.read()
-                if len(ibuf) > self.sizes[partition]:
-                    raise Exception("Image {} is too large for partition".format(source))
-            ofd.write(ibuf)
+                shutil.copyfileobj(rfd, ofd, 0x10000)
 
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-b', '--bootdir', required=True,
-            help='Directory of built bootloader')
-    parser.add_argument('-p', '--primary', required=True,
-            help='Signed image file for primary image')
-    parser.add_argument('-s', '--secondary',
-            help='Signed image file for secondary image')
+    parser.add_argument('-s', '--secure', required=True,
+            help='Unsigned secure image')
+    parser.add_argument('-n', '--non_secure',
+            help='Unsigned non-secure image')
     parser.add_argument('-o', '--output', required=True,
             help='Filename to write full image to')
 
     args = parser.parse_args()
-    output = Assembly(args.output, args.bootdir)
+    output = Assembly(args.output)
 
-    output.add_image(os.path.join(args.bootdir, "zephyr.bin"), 'MCUBOOT')
-    output.add_image(args.primary, "IMAGE_0")
-    if args.secondary is not None:
-        output.add_image(args.secondary, "IMAGE_1")
+
+    output.add_image(args.secure, "SECURE")
+    output.add_image(args.non_secure, "NON_SECURE")
 
 if __name__ == '__main__':
     main()

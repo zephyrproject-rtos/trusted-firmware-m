@@ -83,9 +83,9 @@ endfunction()
 
 function(compiler_merge_library)
 	set( _OPTIONS_ARGS )			#Option (on/off) arguments.
-    set( _ONE_VALUE_ARGS DEST)		#Single option arguments.
-    set( _MULTI_VALUE_ARGS LIBS)	#List arguments
-    cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+	set( _ONE_VALUE_ARGS DEST)		#Single option arguments.
+	set( _MULTI_VALUE_ARGS LIBS)	#List arguments
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
 
 	#Check passed parameters
 	if(NOT _MY_PARAMS_DEST)
@@ -109,11 +109,15 @@ function(compiler_merge_library)
 	#Mark each library file as a generated external object. This is needed to
 	#avoid error because CMake has no info how these can be built.
 	SET_SOURCE_FILES_PROPERTIES(
-	  ${_MY_PARAMS_LIBS}
-	  PROPERTIES
-	  EXTERNAL_OBJECT true
-	  GENERATED true)
+		${_MY_PARAMS_LIBS}
+		PROPERTIES
+		EXTERNAL_OBJECT true
+		GENERATED true)
 
 	#Add additional input to target
 	target_sources(${_MY_PARAMS_DEST} PRIVATE ${_MY_PARAMS_LIBS})
+endfunction()
+
+function(compiler_generate_binary_output TARGET)
+	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_ARMCCLANG_FROMELF} ARGS --bincombined --output=$<TARGET_FILE_DIR:${TARGET}>/${TARGET}.bin $<TARGET_FILE:${TARGET}>)
 endfunction()

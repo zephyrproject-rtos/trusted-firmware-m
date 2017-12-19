@@ -1,4 +1,5 @@
 # Copyright 2017 Linaro Limited
+# Copyright (c) 2017, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +20,6 @@ Cryptographic key management for imgtool.
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
-from ecdsa import SigningKey, NIST256p, util
 import hashlib
 from pyasn1.type import namedtype, univ
 from pyasn1.codec.der.encoder import encode
@@ -67,18 +67,6 @@ class RSA2048():
         print("\n};")
         print("const unsigned int rsa_pub_key_len = {};".format(len(encoded)))
 
-    def emit_rust(self):
-        print(AUTOGEN_MESSAGE)
-        print("static RSA_PUB_KEY: &'static [u8] = &[", end='')
-        encoded = self.get_public_bytes()
-        for count, b in enumerate(encoded):
-            if count % 8 == 0:
-                print("\n    ", end='')
-            else:
-                print(" ", end='')
-            print("0x{:02x},".format(b), end='')
-        print("\n];")
-
     def sig_type(self):
         """Return the type of this signature (as a string)"""
         if sign_rsa_pss:
@@ -93,7 +81,8 @@ class RSA2048():
         return "RSA2048"
 
     def sign(self, payload):
-        sha = SHA256.new(payload)
+        converted_payload = bytes(payload)
+        sha = SHA256.new(converted_payload)
         if sign_rsa_pss:
             signer = PKCS1_PSS.new(self.key)
         else:
@@ -101,72 +90,6 @@ class RSA2048():
         signature = signer.sign(sha)
         assert len(signature) == self.sig_len()
         return signature
-
-class ECDSA256P1():
-    def __init__(self, key):
-        """Construct an ECDSA P-256 private key"""
-        self.key = key
-
-    @staticmethod
-    def generate():
-        return ECDSA256P1(SigningKey.generate(curve=NIST256p))
-
-    def export_private(self, path):
-        with open(path, 'wb') as f:
-            f.write(self.key.to_pem())
-
-    def get_public_bytes(self):
-        vk = self.key.get_verifying_key()
-        return bytes(vk.to_der())
-
-    def emit_c(self):
-        vk = self.key.get_verifying_key()
-        print(AUTOGEN_MESSAGE)
-        print("const unsigned char ecdsa_pub_key[] = {", end='')
-        encoded = bytes(vk.to_der())
-        for count, b in enumerate(encoded):
-            if count % 8 == 0:
-                print("\n\t", end='')
-            else:
-                print(" ", end='')
-            print("0x{:02x},".format(b), end='')
-        print("\n};")
-        print("const unsigned int ecdsa_pub_key_len = {};".format(len(encoded)))
-
-    def emit_rust(self):
-        vk = self.key.get_verifying_key()
-        print(AUTOGEN_MESSAGE)
-        print("static ECDSA_PUB_KEY: &'static [u8] = &[", end='')
-        encoded = bytes(vk.to_der())
-        for count, b in enumerate(encoded):
-            if count % 8 == 0:
-                print("\n    ", end='')
-            else:
-                print(" ", end='')
-            print("0x{:02x},".format(b), end='')
-        print("\n];")
-
-    def sign(self, payload):
-        # To make this fixed length, possibly pad with zeros.
-        sig = self.key.sign(payload, hashfunc=hashlib.sha256, sigencode=util.sigencode_der)
-        sig += b'\000' * (self.sig_len() - len(sig))
-        return sig
-
-    def sig_len(self):
-        # The DER encoding depends on the high bit, and can be
-        # anywhere from 70 to 72 bytes.  Because we have to fill in
-        # the length field before computing the signature, however,
-        # we'll give the largest, and the sig checking code will allow
-        # for it to be up to two bytes larger than the actual
-        # signature.
-        return 72
-
-    def sig_type(self):
-        """Return the type of this signature (as a string)"""
-        return "ECDSA256_SHA256"
-
-    def sig_tlv(self):
-        return "ECDSA256"
 
 def load(path):
     with open(path, 'rb') as f:
@@ -177,7 +100,4 @@ def load(path):
             raise Exception("Unsupported RSA bit length, only 2048 supported")
         return RSA2048(key)
     except ValueError:
-        key = SigningKey.from_pem(pem)
-        if key.curve.name != 'NIST256p':
-            raise Exception("Unsupported ECDSA curve")
-        return ECDSA256P1(key)
+        raise Exception("Unsupported RSA key file")

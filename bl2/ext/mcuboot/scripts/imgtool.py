@@ -22,15 +22,9 @@ import sys
 
 def gen_rsa2048(args):
     keys.RSA2048.generate().export_private(args.key)
-def gen_ecdsa_p256(args):
-    keys.ECDSA256P1.generate().export_private(args.key)
-def gen_ecdsa_p224(args):
-    print("TODO: p-224 not yet implemented")
 
 keygens = {
-        'rsa-2048': gen_rsa2048,
-        'ecdsa-p256': gen_ecdsa_p256,
-        'ecdsa-p224': gen_ecdsa_p224, }
+        'rsa-2048': gen_rsa2048, }
 
 def do_keygen(args):
     if args.type not in keygens:
@@ -42,10 +36,8 @@ def do_getpub(args):
     key = keys.load(args.key)
     if args.lang == 'c':
         key.emit_c()
-    elif args.lang == 'rust':
-        key.emit_rust()
     else:
-        msg = "Unsupported language, valid are: c, or rust"
+        msg = "Unsupported language, valid are: c"
         raise argparse.ArgumentTypeError(msg)
 
 def do_sign(args):

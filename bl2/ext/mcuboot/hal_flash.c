@@ -17,8 +17,6 @@
  * under the License.
  */
 
-#include <zephyr.h>
-
 #include "target.h"
 
 #include "hal/hal_flash.h"

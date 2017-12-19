@@ -28,16 +28,10 @@
 #include "bootutil/sha256.h"
 #include "bootutil/sign_key.h"
 
-#ifdef MCUBOOT_MYNEWT
-#include "mcuboot_config/mcuboot_config.h"
-#endif
-
 #ifdef MCUBOOT_SIGN_RSA
 #include "mbedtls/rsa.h"
 #endif
-#if defined(MCUBOOT_SIGN_EC) || defined(MCUBOOT_SIGN_EC256)
-#include "mbedtls/ecdsa.h"
-#endif
+
 #include "mbedtls/asn1.h"
 
 #include "bootutil_priv.h"
@@ -60,7 +54,7 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
 
     /* in some cases (split image) the hash is seeded with data from
      * the loader image */
-    if(seed && (seed_len > 0)) {
+    if (seed && (seed_len > 0)) {
         bootutil_sha256_update(&sha256_ctx, seed, seed_len);
     }
 
@@ -96,18 +90,6 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
 #if defined(MCUBOOT_SIGN_RSA)
 #    define EXPECTED_SIG_TLV IMAGE_TLV_RSA2048_PSS
 #    define EXPECTED_SIG_LEN(x) ((x) == 256) /* 2048 bits */
-#    if defined(MCUBOOT_SIGN_EC) || defined(MCUBOOT_SIGN_EC256)
-#        error "Multiple signature types not yet supported"
-#    endif
-#elif defined(MCUBOOT_SIGN_EC)
-#    define EXPECTED_SIG_TLV IMAGE_TLV_ECDSA224
-#    define EXPECTED_SIG_LEN(x) ((x) >= 64) /* oids + 2 * 28 bytes */
-#    if defined(MCUBOOT_SIGN_EC256)
-#        error "Multiple signature types not yet supported"
-#    endif
-#elif defined(MCUBOOT_SIGN_EC256)
-#    define EXPECTED_SIG_TLV IMAGE_TLV_ECDSA256
-#    define EXPECTED_SIG_LEN(x) ((x) >= 72) /* oids + 2 * 32 bytes */
 #endif
 
 #ifdef EXPECTED_SIG_TLV
@@ -153,7 +135,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
 #endif
     struct image_tlv tlv;
     uint8_t buf[256];
-    uint8_t hash[32];
+    uint8_t hash[32] = {0};
     int rc;
 
     rc = bootutil_img_hash(hdr, fap, tmp_buf, tmp_buf_sz, hash,
@@ -185,7 +167,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
      * and are able to do.
      */
     for (; off < end; off += sizeof(tlv) + tlv.it_len) {
-        rc = flash_area_read(fap, off, &tlv, sizeof tlv);
+        rc = flash_area_read(fap, off, &tlv, sizeof(tlv));
         if (rc) {
             return rc;
         }
@@ -198,7 +180,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (tlv.it_len != sizeof(hash)) {
                 return -1;
             }
-            rc = flash_area_read(fap, off + sizeof(tlv), buf, sizeof hash);
+            rc = flash_area_read(fap, off + sizeof(tlv), buf, sizeof(hash));
             if (rc) {
                 return rc;
             }
@@ -215,7 +197,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (tlv.it_len > 32) {
                 return -1;
             }
-            rc = flash_area_read(fap, off + sizeof tlv, buf, tlv.it_len);
+            rc = flash_area_read(fap, off + sizeof(tlv), buf, tlv.it_len);
             if (rc) {
                 return rc;
             }
@@ -237,7 +219,8 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (rc) {
                 return -1;
             }
-            rc = bootutil_verify_sig(hash, sizeof(hash), buf, tlv.it_len, key_id);
+            rc = bootutil_verify_sig(hash, sizeof(hash), buf, tlv.it_len,
+                                     key_id);
             if (rc == 0) {
                 valid_signature = 1;
             }
