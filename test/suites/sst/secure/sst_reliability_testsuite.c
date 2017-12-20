@@ -92,6 +92,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     data.size = WRITE_BUF_SIZE-1;
 
     for (itr = 0; itr < LOOP_ITERATIONS_001; itr++) {
+        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_001);
+
         do {
             /* Sets data structure */
             data.data = wrt_data;
@@ -132,6 +134,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         asset_offset = 0;
     }
 
+    TEST_LOG("\n");
+
     /* Checks write permissions in delete function */
     err = tfm_sst_veneer_delete(app_id, hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
@@ -170,6 +174,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
     data.size = WRITE_BUF_SIZE-1;
 
     for (itr = 0; itr < LOOP_ITERATIONS_002; itr++) {
+        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
+
         /* Checks write permissions in create function */
         err = tfm_sst_veneer_create(app_id, asset_uuid);
         if (err != TFM_SST_ERR_SUCCESS) {
@@ -230,6 +236,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         /* Resets asset_offset */
         asset_offset = 0;
     }
+
+    TEST_LOG("\n");
 
     ret->val = TEST_PASSED;
 }

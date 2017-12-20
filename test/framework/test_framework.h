@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,13 +8,14 @@
 #ifndef __TEST_FRAMEWORK_H__
 #define __TEST_FRAMEWORK_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <stdarg.h>
 #include <stdint.h>
 
 #include "helpers.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum test_status_t {
     TEST_PASSED = 0,  /*!< Test has passed */
@@ -132,6 +133,8 @@ void set_test_failed(const char *info_msg, const char *filename, uint32_t line,
                      struct test_result_t *ret);
 
 #define TEST_FAIL(info_msg)  set_test_failed(info_msg, __FILE__, __LINE__, ret)
+
+#define TEST_LOG(...) printf(__VA_ARGS__)
 
 #ifdef __cplusplus
 }
