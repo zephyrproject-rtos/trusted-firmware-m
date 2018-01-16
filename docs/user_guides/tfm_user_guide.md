@@ -21,7 +21,6 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---start cpu0=0x10000004 \
 --parameter cpu0.INITVTOR_S=0x10080200 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
@@ -41,7 +40,6 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---start cpu0=0x10000004 \
 --parameter cpu0.INITVTOR_S=0x10080200 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
@@ -81,9 +79,9 @@ The MPS2 board tested is HBI0263C referred also as MPS2+.
 
 #### Example application
 
-1. Copy tfm_s.axf and tfm_ns.axf files in <MPS2 device name>/SOFTWARE/
-2. Open <MPS2 device name>/MB/HBI0263<board revision letter>/AN521/images.txt
-3. Update the AN521/images.txt file as follows:
+1. Copy `mcuboot.axf` and `tfm_sign.bin` files in `<MPS2 device name>/SOFTWARE/`
+2. Open `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
+3. Update the `AN521/images.txt` file as follows:
 ```
 TITLE: Versatile Express Images Configuration File
 [IMAGES]
@@ -93,8 +91,8 @@ IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
 IMAGE1ADDRESS: 0x10080000
 IMAGE1FILE: \Software\tfm_sign.bin ; TF-M example application binary blob
 ```
-4. Close <MPS2 device name>/MB/HBI0263C/AN521/images.txt
-5. Unmount/eject the <MPS2 device name> unit
+4. Close `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
+5. Unmount/eject the `<MPS2 device name>` unit
 6. Reset the board to execute the TF-M example application
 7. After completing the procedure you should be able to visualize on the serial
    port (baud 115200 8n1) the following messages:
@@ -217,7 +215,6 @@ software. Follow the previous instructions with small changes.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---start cpu0=0x10000004 \
 --parameter cpu0.INITVTOR_S=0x10000000 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
@@ -264,4 +261,4 @@ This indicates that software upgrade happened.
 
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.*
