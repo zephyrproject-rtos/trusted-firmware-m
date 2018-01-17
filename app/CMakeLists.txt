@@ -75,13 +75,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __AR
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
-#Generate MCUBoot compatiable payload
-if (DEFINED BL2)
-	#Include Python3.x interpreter
-	set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
-	find_package(PythonInterp)
+#Generate MCUBoot compatible payload
+if (BL2)
+	#Find Python3.x interpreter
+	find_package(PythonInterp 3)
+
 	if (NOT PYTHONINTERP_FOUND)
-		message(FATAL_ERROR "Missing Python3.x interpreter, install it!")
+		message(FATAL_ERROR "Failed to find Python3.x interpreter. Pyhton3 must be installed an available on the PATH.")
 	endif()
 
 	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)

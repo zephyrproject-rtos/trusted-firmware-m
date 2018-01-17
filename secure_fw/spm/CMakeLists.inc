@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -40,7 +40,7 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 
-set(PLATFORM_DIR ${TFM_ROOT_DIR}/platform)
+set(PLATFORM_DIR ${TFM_ROOT_DIR}/platform/ext)
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/sse_200_mps2/cmsis_core" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}//target/sse_200_mps2/sse_200/retarget" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/sse_200_mps2/sse_200/retarget" ABSOLUTE)
