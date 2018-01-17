@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +61,12 @@
  * It is less than the FLASH_PARTITION_SIZE because we reserve space
  * for the image header and trailer introduced by the bootloader. */
 #ifdef BL2
-#define BL2_HEADER_SIZE      (0x200)
+#define BL2_HEADER_SIZE      (0x400)
 #define BL2_TRAILER_SIZE     (0x10000)
 #else
 /* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
 #define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x10200)
+#define BL2_TRAILER_SIZE     (0x10400)
 #endif /* BL2 */
 
 #define IMAGE_CODE_SIZE \

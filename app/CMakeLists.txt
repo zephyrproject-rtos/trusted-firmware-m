@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -101,7 +101,7 @@ if (BL2)
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
 							 -v 1.0
-							 -H 0x200
+							 -H 0x400
 							 --pad 0x100000
 							 ${CMAKE_BINARY_DIR}/app/tfm_full.bin
 							 ${CMAKE_BINARY_DIR}/app/tfm_sign.bin

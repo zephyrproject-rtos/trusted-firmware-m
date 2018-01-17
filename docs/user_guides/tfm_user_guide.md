@@ -21,7 +21,7 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080200 \
+--parameter cpu0.INITVTOR_S=0x10080400 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
 --parameter fvp_mps2.telnetterminal0.start_telnet=1 \
@@ -40,7 +40,7 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080200 \
+--parameter cpu0.INITVTOR_S=0x10080400 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
 --parameter fvp_mps2.telnetterminal0.start_telnet=1 \
@@ -181,10 +181,10 @@ The device memory is partitioned in the following way:
 - 0x0000_0000 - 0x0007_FFFF:    BL2 bootloader
 - 0x0008_0000 - 0x000F_FFFF:    Slot 0 : Single binary blob: Secure + Non-Secure
                                 image; Primary memory partition
-  - 0x0008_0000 - 0x0008_01FF:  Common image header
-  - 0x0008_0200 - 0x0008_xxxx:  Secure image
-  - 0x0008_xxxx - 0x0010_01FF:  Padding (with 0xFF)
-  - 0x0010_0200 - 0x0010_xxxx:  Non-secure image
+  - 0x0008_0000 - 0x0008_03FF:  Common image header
+  - 0x0008_0400 - 0x0008_xxxx:  Secure image
+  - 0x0008_xxxx - 0x0010_03FF:  Padding (with 0xFF)
+  - 0x0010_0400 - 0x0010_xxxx:  Non-secure image
   - 0x0010_xxxx - 0x0010_xxxx:  Hash value(SHA256) and RSA signature
                                 of combined image
 
