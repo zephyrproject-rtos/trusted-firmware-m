@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -54,6 +54,11 @@ if(NOT DEFINED ARM_CPU_ARHITECTURE)
 		set (CMAKE_CXX_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m33")
 		set (CMAKE_ASM_FLAGS_CPU "--cpu=Cortex-M33")
 		set (CMAKE_LINK_FLAGS_CPU "--cpu=Cortex-M33")
+	elseif(${ARM_CPU_TYPE} STREQUAL "Cortex-M23")
+		set (CMAKE_C_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23")
+		set (CMAKE_CXX_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23")
+		set (CMAKE_ASM_FLAGS_CPU "--cpu=Cortex-M23")
+		set (CMAKE_LINK_FLAGS_CPU "--cpu=Cortex-M23")
 	else()
 		message(FATAL_ERROR "Unknown ARM cpu setting.")
 	endif()
