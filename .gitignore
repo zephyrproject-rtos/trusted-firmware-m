@@ -6,9 +6,10 @@
 .settings/
 
 # Garbage files
-build/
+build*/
 objects/
 bin/
 test/*.a
 secure_fw/services/secure_storage/*.o
 secure_fw/services/secure_storage/*.a
+*.orig

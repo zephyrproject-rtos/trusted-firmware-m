@@ -23,10 +23,12 @@ This project contains code from other projects as listed below. The code from
 external projects is limited to `app` and `platform` folders.
 The original license text is included in those source files.
 
-* The platform folder currently contains drivers imported from external project
+* The `platform` folder currently contains drivers imported from external
+  project and the files have Apache 2.0 license.
+* The `app` folder contains files imported from CMSIS_5 project
   and the files have Apache 2.0 license.
-* The app folder contains files imported from CMSIS_5 project
-  and the files have Apache 2.0 license.
+* The `bl2` folder contains files imported from MCUBoot project and the files
+  have Apache 2.0 license.
 
 *Note* Any code that has license other than BSD-3-Clause is kept in
 specific sub folders named `ext` so that it can isolated if required.
@@ -43,9 +45,11 @@ This release includes
 * Testcases running baremetal and with RTX to test the functionality.
 * Basic support for higher level isolation but it is `in progress with
 limited testing`.
+* BL2 bootloader for image authentication based on SHA256 and RSA-2048 digital
+  signature.
 * Build system based on cmake and armclang.
 
-### in progress
+### In progress
 
 * GCC support
 * Ongoing and incremental support for PSA features.

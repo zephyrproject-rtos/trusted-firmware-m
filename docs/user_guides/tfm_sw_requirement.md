@@ -16,6 +16,10 @@ on specific products and licenses as explained in
 - Cmake v3.7.0
   https://cmake.org/download/
 - GNU Make v3.81
+- Python3, with the following libraries:
+  - pycrypto
+  - pyasn1
+  - sudo apt-get install python3-crypto python3-pyasn1
 
 ### Setup a shell to enable ARM Compiler v6.7.1 and cmake after installation.
 
@@ -37,7 +41,12 @@ export PATH=<CMAKE_PATH>/bin:$PATH
 - Git client latest version (https://git-scm.com/download/win)
 - Cmake v3.7.0 ( https://cmake.org/download/ )
 - Cygwin ( https://www.cygwin.com/ ). Tests done with version 2.877 (64 bits)
-- GNU make should be installed by selecting appropriate package during cygwin installation.
+- GNU make should be installed by selecting appropriate package during cygwin
+  installation.
+- Python3(native Windows version), with the following libraries:
+  - pycryptodome (pip3 install --user pycryptodome)
+  - pyasn1 (pip3 install --user pyasn1)
+- Python3 pip
 
 ### Setup Cygwin to enable ARM Compiler v6.7.1 and cmake after installation.
 

@@ -52,6 +52,7 @@ set(MPS2_SSE200_BUILD_CMSIS_DRIVERS On)
 set(MPS2_SSE200_BUILD_UART_STDOUT Off)
 set(MPS2_SSE200_BUILD_MPS2_BOARD_LEDS On)
 set(MPS2_SSE200_BUILD_MPS2_BOARD_TIME On)
+set(MPS2_SSE200_BUILD_MPS2_BOARD_FLASH Off)
 include(${TFM_ROOT_DIR}/platform/ext/Mps2SSE200.cmake)
 
 #Set include directories.
@@ -69,8 +70,43 @@ add_executable(${PROJECT_NAME} ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${
 #Add the RTX library
 target_link_libraries(${PROJECT_NAME} "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
 #Set macro definitions
-target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED
-    )
+target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
+
+#Generate binary file from axf
+compiler_generate_binary_output(${PROJECT_NAME})
+
+#Generate MCUBoot compatiable payload
+if (DEFINED BL2)
+	#Include Python3.x interpreter
+	set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+	find_package(PythonInterp)
+	if (NOT PYTHONINTERP_FOUND)
+		message(FATAL_ERROR "Missing Python3.x interpreter, install it!")
+	endif()
+
+	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)
+
+	add_custom_command(TARGET ${PROJECT_NAME}
+						POST_BUILD
+
+						#Create concatenated binary image from tfm_ns.bin and tfm_s.bin
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
+						ARGS -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
+							 -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
+							 -o ${CMAKE_BINARY_DIR}/app/tfm_full.bin
+
+						#Sign concatenated binary image with default public key in mcuboot folder
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
+						ARGS sign
+							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
+							 --align 1
+							 -v 1.0
+							 -H 0x200
+							 --pad 0x100000
+							 ${CMAKE_BINARY_DIR}/app/tfm_full.bin
+							 ${CMAKE_BINARY_DIR}/app/tfm_sign.bin
+				)
+endif()
 
 if (NOT DEFINED CORE_TEST)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
@@ -84,11 +120,11 @@ elseif (CORE_TEST_SERVICES)
 	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
 endif()
 
-#Set MCUBOOT specific settings.
-if (NOT DEFINED MCUBOOT)
-	message(FATAL_ERROR "Incomplete build configuration: MCUBOOT is undefined. ")
-elseif (MCUBOOT)
-    set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DMCUBOOT\"")
+#Set BL2 specific settings.
+if (NOT DEFINED BL2)
+	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
+elseif (BL2)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DBL2\"")
 endif()
 
 

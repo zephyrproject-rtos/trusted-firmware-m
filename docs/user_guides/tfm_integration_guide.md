@@ -27,6 +27,8 @@ blink LEDs or count time in the MPS2 board. When a new platform is added, the
 files being built by the build systems need to be updated manually, as the
 platform folder being used is currently hardcoded to `sse_200_mps2`.
 
+`Note: Currently SST and BL2 bootloader use different flash interface`
+
 #### target configuration files
 Inside the base root folder of the selected target, each implementation has to
 provide its own copy of `target_cfg.c/.h`. This file has target specific
