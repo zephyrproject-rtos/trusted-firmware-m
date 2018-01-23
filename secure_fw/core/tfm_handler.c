@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -141,6 +141,7 @@ void PPC_Handler(void)
     }
 }
 
+#if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM(
@@ -154,6 +155,29 @@ __attribute__((naked)) void SVC_Handler(void)
     "BL      SVCHandler_main\n"
     "POP     {r1, pc}\n");
 }
+#elif defined(__ARM_ARCH_8M_BASE__)
+__attribute__((naked)) void SVC_Handler(void)
+{
+    __ASM(
+    "MOVS    r0, #4\n"  /* Check store SP in thread mode to r0 */
+    "MOV     r1, lr\n"
+    "TST     r0, r1\n"
+    "BEQ     handler\n"
+    "MRS     r0, PSP\n"  /* Coming from thread mode */
+    "B sp_stored\n"
+    "handler:\n"
+    "MRS     r0, MSP\n"  /* Coming from handler mode */
+    "sp_stored:\n"
+    "PUSH    {r0, lr}\n"
+    "MOV     r1, sp\n"
+    "adds    r1, r1, #4\n"
+    "BL      SVCHandler_main\n"
+    "POP     {r1, pc}\n");
+}
+#else
+#error "Unsupported ARM Architecture."
+#endif
+
 
 int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
 {
