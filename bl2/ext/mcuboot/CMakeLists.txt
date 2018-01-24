@@ -56,7 +56,6 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
-
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
 		"${MCUBOOT_DIR}/flash_map.c"
@@ -99,9 +98,12 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/inclu
 embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
 
 #Define linker file
-embedded_set_target_linker_file(TARGET mcuboot PATH "${TFM_ROOT_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_bl2.sct")
+if(NOT DEFINED BL2_LINKER_CONFIG)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: BL2_LINKER_CONFIG is not defined.")
+endif()
+embedded_set_target_linker_file(TARGET mcuboot PATH "${BL2_LINKER_CONFIG}")
 
-add_executable(${PROJECT_NAME} ${MCUBOOT_SRC} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
+add_executable(${PROJECT_NAME} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
 
 #Add BL2 define to linker to resolve symbols in region_defs.h
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DBL2\"")

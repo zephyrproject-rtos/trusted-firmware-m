@@ -6,7 +6,7 @@
  */
 
 #include "mpu_armv8m_drv.h"
-#include "core_cm33.h"
+#include "cmsis_cpu.h"
 
 /*
  * FixMe:

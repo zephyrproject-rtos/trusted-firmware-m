@@ -51,6 +51,11 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
+if(NOT DEFINED S_SCATTER_FILE_NAME)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: S_SCATTER_FILE_NAME not defined, Include this file from a Config*.cmake")
+endif()
+embedded_set_target_linker_file(TARGET tfm_s PATH "${S_SCATTER_FILE_NAME}")
+
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 
 #Specify what we build

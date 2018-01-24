@@ -13,6 +13,31 @@ elseif(NOT DEFINED BL2)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: BL2 not defined, Include this file from a Config*.cmake")
 endif()
 
+set(BUILD_CMSIS_CORE Off)
+set(BUILD_RETARGET Off)
+set(BUILD_NATIVE_DRIVERS Off)
+set(BUILD_TIME Off)
+set(BUILD_STARTUP Off)
+set(BUILD_TARGET_CFG Off)
+set(BUILD_TARGET_HARDWARE_KEYS Off)
+set(BUILD_CMSIS_DRIVERS Off)
+set(BUILD_UART_STDOUT Off)
+set(BUILD_FLASH Off)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
+endif()
+
+
+#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
+#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
+#must be present with a matching version.
+include("Common/FindArmClang")
+include("Common/${ARMCLANG_MODULE}")
+
 ##Shared compiler and linker settings.
 function(config_setting_shared_flags tgt)
 	embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse -Wall -Werror)
@@ -83,11 +108,9 @@ endif()
 
 ##Secure side
 config_setting_shared_flags(tfm_s)
-embedded_set_target_linker_file(TARGET tfm_s PATH "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_s.sct")
 
 ##Non secure side
 config_setting_shared_flags(tfm_ns)
-embedded_set_target_linker_file(TARGET tfm_ns PATH  "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_ns.sct")
 
 ##TF-M storage
 config_setting_shared_flags(tfm_storage)

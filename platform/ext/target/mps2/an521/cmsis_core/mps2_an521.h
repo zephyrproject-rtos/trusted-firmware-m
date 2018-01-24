@@ -19,17 +19,7 @@
 
 #include "platform_irq.h"         /* Platform IRQ numbers */
 
-/* --------  Configuration of the Cortex-M33 Processor and Core Peripherals  ------ */
-#define __CM33_REV                0x0000U   /* Core revision r0p1 */
-#define __MPU_PRESENT             1U        /* MPU present */
-#define __SAUREGION_PRESENT       1U        /* SAU regions present */
-#define __VTOR_PRESENT            1U        /* VTOR present */
-#define __NVIC_PRIO_BITS          3U        /* Number of Bits used for Priority Levels */
-#define __Vendor_SysTickConfig    0U        /* Set to 1 if different SysTick Config is used */
-#define __FPU_PRESENT             0U        /* no FPU present */
-#define __DSP_PRESENT             0U        /* no DSP extension present */
-
-#include <core_cm33.h>                 /* Processor and core peripherals */
+#include "cmsis_cpu.h"                 /* Processor and core peripherals */
 #include "system_cmsdk_mps2_an521.h"   /* System Header */
 
 #include "platform_regs.h"        /* Platform registers */

@@ -59,6 +59,11 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
+if(NOT DEFINED NS_SCATTER_FILE_NAME)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: NS_SCATTER_FILE_NAME not defined, Include this file from a Config*.cmake")
+endif()
+embedded_set_target_linker_file(TARGET tfm_ns PATH  "${NS_SCATTER_FILE_NAME}")
+
 #Set include directories.
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/common/sct ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${INTERFACE_DIR}/include ABSOLUTE APPEND)
@@ -72,7 +77,10 @@ embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/C
 #Create an executable
 add_executable(${PROJECT_NAME} ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${NS_APP_SRC})
 #Add the RTX library
-target_link_libraries(${PROJECT_NAME} "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+if(NOT DEFINED RTX_LIB_PATH)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
+endif()
+target_link_libraries(${PROJECT_NAME} "${RTX_LIB_PATH}")
 #Set macro definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
 
@@ -90,12 +98,17 @@ if (BL2)
 
 	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)
 
+if(NOT DEFINED FLASH_LAYOUT)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: FLASH_LAYOUT is not defined.")
+endif()
+
 	add_custom_command(TARGET ${PROJECT_NAME}
 						POST_BUILD
 
 						#Create concatenated binary image from tfm_ns.bin and tfm_s.bin
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
-						ARGS -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
+						ARGS -l ${FLASH_LAYOUT}
+							 -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
 							 -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
 							 -o ${CMAKE_BINARY_DIR}/tfm_full.bin
 

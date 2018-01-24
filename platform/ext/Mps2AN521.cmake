@@ -7,7 +7,24 @@
 
 #This file gathers all MPS2/AN521 specific files in the application.
 
+#MPS2/AN521 has a Cortex M33 CPU.
+include("Common/CpuM33")
+
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+#Specify the location of platform specific build dependencies.
+set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_bl2.sct")
+set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_s.sct")
+set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_ns.sct")
+set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/mps2/an521/partition/flash_layout.h")
+if (DEFINED CMSIS_5_DIR)
+  # not all project defines CMSIS_5_DIR, only the ones that use it.
+  set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+endif()
+
+if (BL2)
+  set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
+endif()
 
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2" ABSOLUTE)
@@ -33,7 +50,7 @@ endif()
 if (NOT DEFINED BUILD_UART_STDOUT)
   message(FATAL_ERROR "Configuration variable BUILD_UART_STDOUT (true|false) is undefined!")
 elseif(BUILD_UART_STDOUT)
-  LIST(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/uart_stdout.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/uart_stdout.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
   set(BUILD_NATIVE_DRIVERS true)
   set(BUILD_CMSIS_DRIVERS true)
@@ -52,7 +69,7 @@ endif()
 if (NOT DEFINED BUILD_TIME)
   message(FATAL_ERROR "Configuration variable BUILD_TIME (true|false) is undefined!")
 elseif(BUILD_TIME)
-  LIST(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/native_drivers/timer_cmsdk/timer_cmsdk.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/native_drivers/timer_cmsdk/timer_cmsdk.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an521/native_drivers/timer_cmsdk" ABSOLUTE)
 endif()
 
@@ -77,15 +94,15 @@ endif()
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)
-  LIST(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/dummy_crypto_keys.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/dummy_crypto_keys.c")
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
   message(FATAL_ERROR "Configuration variable BUILD_CMSIS_DRIVERS (true|false) is undefined!")
 elseif(BUILD_CMSIS_DRIVERS)
-  LIST(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers/Driver_MPC.c"
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers/Driver_MPC.c"
     "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers/Driver_PPC.c")
-  LIST(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers/Driver_USART.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers/Driver_USART.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
