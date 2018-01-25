@@ -15,16 +15,20 @@ Maintainers should be consulted if this needs to be revisited.
 This folder contains core and compiler specific header files imported from the
 CMSIS_5 project.
 
+### common
+This folder contains stdout redirection to UART, a temporary memory mapped
+flash implementation for the bootloader and mbedtls_config.h for all
+the targets.
+
 ### drivers
 
 This folder contains the headers with CMSIS compliant driver definitions that
 that TF-M project expects a target to provide.
 
 ### target
-This folder contains the files for individual target and also any wrapper that
-can be across targets.
+This folder contains the files for individual target.
 
 
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*

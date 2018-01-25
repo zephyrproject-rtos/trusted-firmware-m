@@ -91,7 +91,7 @@ embedded_set_target_linker_file(TARGET tfm_ns PATH  "${CMAKE_CURRENT_LIST_DIR}/p
 
 ##TF-M storage
 config_setting_shared_flags(tfm_storage)
-set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse  -DMBEDTLS_CONFIG_FILE=\\\\\\\"mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/common")
+set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse  -DMBEDTLS_CONFIG_FILE=\\\\\\\"mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 set (SST_ENCRYPTION ON)
 set (SST_RAM_FS ON)
