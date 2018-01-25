@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __ARM_LTD_SSE_200_REGS_H__
-#define __ARM_LTD_SSE_200_REGS_H__
+#ifndef __ARM_LTD_AN521_REGS_H__
+#define __ARM_LTD_AN521_REGS_H__
 
 #include <stdint.h>
 
@@ -332,4 +332,4 @@ struct nspctrl_def {
 
 /* End of ARM AHB PPCEXP3 peripherals definition */
 
-#endif /* __ARM_LTD_SSE_200_REGS_H__ */
+#endif /* __ARM_LTD_AN521_REGS_H__ */

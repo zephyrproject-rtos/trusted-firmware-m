@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # Copyright 2017 Linaro Limited
-# Copyright (c) 2017, Arm Limited.
+# Copyright (c) 2017-2018, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class Assembly():
         sizes = {}
 
         scriptsDir = os.path.dirname(os.path.abspath(__file__))
-        path = '../../../../platform/ext/target/sse_200_mps2/sse_200/partition/flash_layout.h'
+        path = '../../../../platform/ext/target/mps2/an521/partition/flash_layout.h'
         configFile = os.path.join(scriptsDir, path)
 
         with open(configFile, 'r') as fd:

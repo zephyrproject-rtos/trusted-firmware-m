@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
  * \brief This file defines all the peripheral base addresses for MPS2/SSE-200 platform.
  */
 
-#ifndef __ARM_LTD_SSE_200_RETARGET_H__
-#define __ARM_LTD_SSE_200_RETARGET_H__
+#ifndef __ARM_LTD_AN521_RETARGET_H__
+#define __ARM_LTD_AN521_RETARGET_H__
 
 #include "platform_regs.h"           /* Platform registers */
 #include "platform_irq.h"            /* IRQ numbers */
@@ -132,4 +132,4 @@
 #define MPC_CODE_SRAM3_RANGE_BASE_S    0x38200000
 #define MPC_CODE_SRAM3_RANGE_LIMIT_S   0x383FFFFF
 
-#endif  /* __ARM_LTD_SSE_200_RETARGET_H__ */
+#endif  /* __ARM_LTD_AN521_RETARGET_H__ */

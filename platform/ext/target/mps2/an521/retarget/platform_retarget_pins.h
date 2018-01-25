@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
  * \brief This file defines all the pins for this platform.
  */
 
-#ifndef __ARM_LTD_SSE_200_RETARGET_PINS_H__
-#define __ARM_LTD_SSE_200_RETARGET_PINS_H__
+#ifndef __ARM_LTD_AN521_RETARGET_PINS_H__
+#define __ARM_LTD_AN521_RETARGET_PINS_H__
 
 /* AHB GPIO pin names */
 enum arm_gpio_pin_name_t {
@@ -135,4 +135,4 @@ enum arm_gpio_pin_name_t {
 #define BT_UART_TX    AHB_GPIO1_8
 #define BT_BOOT       AHB_GPIO1_9
 
-#endif  /* __ARM_LTD_SSE_200_RETARGET_PINS_H__ */
+#endif  /* __ARM_LTD_AN521_RETARGET_PINS_H__ */

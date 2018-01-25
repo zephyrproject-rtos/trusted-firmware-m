@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __ARM_LTD_SSE_200_IRQN_H__
-#define __ARM_LTD_SSE_200_IRQN_H__
+#ifndef __ARM_LTD_AN521_IRQN_H__
+#define __ARM_LTD_AN521_IRQN_H__
 
 typedef enum _IRQn_Type {
     NonMaskableInt_IRQn         = -14,  /* Non Maskable Interrupt */
@@ -153,4 +153,4 @@ typedef enum _IRQn_Type {
     GPIO3_3_IRQn                = 123,
 }IRQn_Type;
 
-#endif  /* __ARM_LTD_SSE_200_IRQN_H__ */
+#endif  /* __ARM_LTD_AN521_IRQN_H__ */

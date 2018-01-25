@@ -83,11 +83,11 @@ endif()
 
 ##Secure side
 config_setting_shared_flags(tfm_s)
-embedded_set_target_linker_file(TARGET tfm_s PATH "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/sse_200_mps2/sse_200/armclang/sse_200_s.sct")
+embedded_set_target_linker_file(TARGET tfm_s PATH "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_s.sct")
 
 ##Non secure side
 config_setting_shared_flags(tfm_ns)
-embedded_set_target_linker_file(TARGET tfm_ns PATH  "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/sse_200_mps2/sse_200/armclang/sse_200_ns.sct")
+embedded_set_target_linker_file(TARGET tfm_ns PATH  "${CMAKE_CURRENT_LIST_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_ns.sct")
 
 ##TF-M storage
 config_setting_shared_flags(tfm_storage)

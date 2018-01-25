@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,20 +157,12 @@ struct arm_mps2_scc_t {
                                         *                   revision number */
 };
 
-/* Peripheral memory map */
-#define MPS2_FPGAIO_BASE_NS  0x40302000  /* FPGAIO Base Address */
-#define MPS2_SCC_BASE_NS     0x40300000  /* SCC Base Address */
-
-/* Secure Peripheral memory map */
-#define MPS2_FPGAIO_BASE_S   0x50302000  /* FPGAIO Base Address */
-#define MPS2_SCC_BASE_S      0x50300000  /* SCC Base Address */
-
 /* Peripheral declaration */
-#define MPS2_FPGAIO      ((struct arm_mps2_fpgaio_t*) MPS2_FPGAIO_BASE_NS)
-#define MPS2_SCC         ((struct arm_mps2_scc_t*) MPS2_SCC_BASE_NS)
+#define MPS2_FPGAIO      ((struct arm_mps2_fpgaio_t*) MPS2_IO_FPGAIO_BASE_NS)
+#define MPS2_SCC         ((struct arm_mps2_scc_t*) MPS2_IO_SCC_BASE_NS)
 
 /* Secure Peripheral declaration */
-#define SEC_MPS2_FPGAIO  ((struct arm_mps2_fpgaio_t*) MPS2_FPGAIO_BASE_S)
-#define SEC_MPS2_SCC     ((struct arm_mps2_scc_t*) MPS2_SCC_BASE_S)
+#define SEC_MPS2_FPGAIO  ((struct arm_mps2_fpgaio_t*) MPS2_IO_FPGAIO_BASE_S)
+#define SEC_MPS2_SCC     ((struct arm_mps2_scc_t*) MPS2_IO_SCC_BASE_S)
 
 #endif /* __SMM_MPS2_H__ */

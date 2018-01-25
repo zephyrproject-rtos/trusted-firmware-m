@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef REGION_LIMITS_H
-#define REGION_LIMITS_H
+#ifndef __MPS2_AN521_CMSIS_H__
+#define __MPS2_AN521_CMSIS_H__
 
-#define TOTAL_ROM_SIZE (0x00400000) /* 4 MB */
-#define TOTAL_RAM_SIZE (0x00200000) /* 2 MB */
+/* SMM-SSE-200 for for MPS2+ */
+#include "mps2_an521.h"
 
-/* Use SRAM1 memory to store Code data */
-#define S_ROM_ALIAS_BASE  (0x10000000)
-#define NS_ROM_ALIAS_BASE (0x00000000)
-
-/* Use SRAM2 memory to store RW data as Internal RAM has issues in the FPGA */
-#define S_RAM_ALIAS_BASE  (0x38000000)
-#define NS_RAM_ALIAS_BASE (0x28000000)
-
-#endif /*REGION_LIMITS_H*/
+#endif /*__MPS2_AN521_CMSIS_H__ */

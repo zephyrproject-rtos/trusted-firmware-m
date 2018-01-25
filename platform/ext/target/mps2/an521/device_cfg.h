@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,11 @@
  */
 
 /* ARM Memory Protection Controller (MPC) */
-#define MPC_ISRAM0_S
-#define MPC_ISRAM1_S
-#define MPC_ISRAM2_S
-#define MPC_ISRAM3_S
 #define MPC_CODE_SRAM1_S
 #define MPC_CODE_SRAM2_S
-#define MPC_CODE_SRAM3_S
 
 /* ARM Peripheral Protection Controllers (PPC) */
-#define AHB_PPCEXP0_S
-#define APB_PPC0_S
-#define APB_PPC1_S
-#define APB_PPCEXP0_S
-#define APB_PPCEXP1_S
 #define APB_PPCEXP2_S
-#define APB_PPCEXP3_S
 
 /* ARM UART */
 #define DEFAULT_UART_BAUDRATE  9600
@@ -50,12 +39,6 @@
 #define ARM_UART0_NS
 #define ARM_UART1_S
 #define ARM_UART1_NS
-#define ARM_UART2_S
-#define ARM_UART2_NS
-#define ARM_UART3_S
-#define ARM_UART3_NS
-#define ARM_UART4_S
-#define ARM_UART4_NS
 
 /* CMSDK Timers */
 #define CMSDK_TIMER0_S

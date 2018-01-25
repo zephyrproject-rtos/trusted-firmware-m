@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,19 +38,24 @@ endif()
 set(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(TFM_ROOT_DIR "${MCUBOOT_DIR}/../../.." ABSOLUTE)
 
-set(MPS2_SSE200_BUILD_CMSIS_CORE On)
-set(MPS2_SSE200_BUILD_RETARGET On)
-set(MPS2_SSE200_BUILD_NATIVE_DRIVERS On)
-set(MPS2_SSE200_BUILD_STARTUP On)
-set(MPS2_SSE200_BUILD_TARGET_CFG Off)
-set(MPS2_SSE200_BUILD_TARGET_HARDWARE_KEYS Off)
-set(MPS2_SSE200_BUILD_CMSIS_DRIVERS On)
-set(MPS2_SSE200_BUILD_MPS2_TIME Off)
-set(MPS2_SSE200_BUILD_UART_STDOUT On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_LEDS Off)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_TIME On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_FLASH On)
-include(${TFM_ROOT_DIR}/platform/ext/Mps2SSE200.cmake)
+set(BUILD_CMSIS_CORE On)
+set(BUILD_RETARGET On)
+set(BUILD_NATIVE_DRIVERS On)
+set(BUILD_STARTUP On)
+set(BUILD_TARGET_CFG Off)
+set(BUILD_TARGET_HARDWARE_KEYS Off)
+set(BUILD_CMSIS_DRIVERS On)
+set(BUILD_TIME Off)
+set(BUILD_UART_STDOUT On)
+set(BUILD_FLASH On)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
+endif()
+
 
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
@@ -94,7 +99,7 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/inclu
 embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
 
 #Define linker file
-embedded_set_target_linker_file(TARGET mcuboot PATH "${TFM_ROOT_DIR}/platform/ext/target/sse_200_mps2/sse_200/armclang/sse_200_bl2.sct")
+embedded_set_target_linker_file(TARGET mcuboot PATH "${TFM_ROOT_DIR}/platform/ext/target/mps2/an521/armclang/mps2_an521_bl2.sct")
 
 add_executable(${PROJECT_NAME} ${MCUBOOT_SRC} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
 

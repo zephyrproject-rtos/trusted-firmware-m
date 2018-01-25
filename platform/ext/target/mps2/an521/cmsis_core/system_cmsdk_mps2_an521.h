@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __SYSTEM_CMSDK_MPS2_SSE_200_H__
-#define __SYSTEM_CMSDK_MPS2_SSE_200_H__
+#ifndef __SYSTEM_CMSDK_MPS2_AN521_H__
+#define __SYSTEM_CMSDK_MPS2_AN521_H__
 
 #include <stdint.h>
 
@@ -40,4 +40,4 @@ void SystemCoreClockUpdate(void);
 }
 #endif
 
-#endif /* __SYSTEM_CMSDK_MPS2_SSE_200_H__ */
+#endif /* __SYSTEM_CMSDK_MPS2_AN521_H__ */

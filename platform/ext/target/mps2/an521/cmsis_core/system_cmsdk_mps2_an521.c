@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "cmsis.h"
 
 /*
- * MPS2 SSE-200 has different frequencies for system core clock (20MHz) and
+ * MPS2 AN521 has different frequencies for system core clock (20MHz) and
  * peripherals clock (25MHz).
  */
 #define  XTAL             (40000000UL)
