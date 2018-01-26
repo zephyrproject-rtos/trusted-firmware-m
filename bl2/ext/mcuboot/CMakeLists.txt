@@ -59,7 +59,6 @@ endif()
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
 		"${MCUBOOT_DIR}/flash_map.c"
-		"${MCUBOOT_DIR}/os.c"
 		"${MCUBOOT_DIR}/keys.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"

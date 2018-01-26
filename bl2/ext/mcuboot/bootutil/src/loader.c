@@ -35,7 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "flash_map/flash_map.h"
-#include <os/os_malloc.h>
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "bootutil_priv.h"

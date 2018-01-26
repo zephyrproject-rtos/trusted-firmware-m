@@ -34,7 +34,7 @@ Stack_Mem       SPACE   Stack_Size
 __initial_msp
 __initial_sp    EQU     __initial_msp - MSP_STACK_SIZE
 
-Heap_Size       EQU     0x00010000
+Heap_Size       EQU     0x00001000
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
 __heap_base

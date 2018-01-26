@@ -21,7 +21,7 @@
 #include "cmsis.h"
 #include "uart_stdout.h"
 #include "Driver_Flash.h"
-
+#include "mbedtls/memory_buffer_alloc.h"
 #define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
 #include "bootutil/image.h"
@@ -36,7 +36,9 @@ __asm("  .global __ARM_use_no_argv\n");
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
-void os_heap_init(void);
+#define BL2_MBEDTLS_MEM_BUF_LEN 0x2000
+/* Static buffer to be used by mbedtls for memory allocation */
+static uint8_t mbedtls_mem_buf[BL2_MBEDTLS_MEM_BUF_LEN];
 
 struct arm_vector_table {
     uint32_t msp;
@@ -82,7 +84,10 @@ int main(void)
 
     BOOT_LOG_INF("Starting bootloader");
 
-    os_heap_init();
+    /* Initialise the mbedtls static memory allocator so that mbedtls allocates
+     * memory from the provided static buffer instead of from the heap.
+     */
+    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
     /* Initialize Flash driver */
     FLASH_DEV_NAME.Initialize(NULL);
