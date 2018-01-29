@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,11 +8,12 @@
 #ifndef __SST_FLASH_H__
 #define __SST_FLASH_H__
 
+#include <stdint.h>
+#include "tfm_sst_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
 
 /* Adjust to match your system's block size */
 #define SST_BLOCK_SIZE 4096
@@ -27,9 +28,6 @@ extern "C" {
 /* Invalid block index */
 #define SST_BLOCK_INVALID_ID 0xFFFFFFFF
 
-#define SST_FLASH_SUCCESS  0
-#define SST_FLASH_ERROR    1
-
 /**
  * \brief Reads block data from the position specifed by block ID and offset.
  *
@@ -42,10 +40,11 @@ extern "C" {
  *       the range of address, based on blockid + offset + size, are always
  *       valid in the memory.
  *
- * \return Returns 0 if the function succeeds, otherwise 1.
+ * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
  */
-uint32_t flash_read(uint32_t block_id, uint8_t *buff,
-                    uint32_t offset, uint32_t size);
+enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
+                                  uint32_t offset, uint32_t size);
 
 /**
  * \brief Writes block data from the position specifed by block ID and offset.
@@ -59,20 +58,11 @@ uint32_t flash_read(uint32_t block_id, uint8_t *buff,
  *       the range of address, based on blockid + offset + size, are always
  *       valid in the memory.
  *
- * \return Returns 0 if the function succeeds, otherwise 1.
+ * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
  */
-uint32_t flash_write(uint32_t block_id, const uint8_t *buff,
-                     uint32_t offset, uint32_t size);
-
-/**
- * \brief Gets physical address of the given block ID.
- *
- * \param[in]  block_id  Block ID
- * \param[in]  offset    Offset position from the init of the block
- *
- * \returns Returns physical address for the given block ID.
- */
-uint32_t flash_get_phys_address(uint32_t block_id, uint32_t offset);
+enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
+                                   uint32_t offset, uint32_t size);
 
 /**
  * \brief Moves data from src block ID to destination block ID.
@@ -88,12 +78,17 @@ uint32_t flash_get_phys_address(uint32_t block_id, uint32_t offset);
  * \note This function considers all input values are valid. That means,
  *       the range of address, based on block_id + offset + size, are always
  *       valid in the memory.
+ *       It also considers that the destination block is already erased and
+ *       ready to be written.
  *
- * \return Returns 0 if the function succeeds, otherwise 1.
+ * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
  */
-uint32_t flash_block_to_block_move(uint32_t dst_block, uint32_t dst_offset,
-                                   uint32_t src_block, uint32_t src_offset,
-                                   uint32_t size);
+enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
+                                                 uint32_t dst_offset,
+                                                 uint32_t src_block,
+                                                 uint32_t src_offset,
+                                                 uint32_t size);
 
 /**
  * \brief Erases block ID data.
@@ -102,9 +97,10 @@ uint32_t flash_block_to_block_move(uint32_t dst_block, uint32_t dst_offset,
  *
  * \note This function considers all input values valids.
  *
- * \return Returns 0 if the function succeeds, otherwise 1.
+ * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
  */
-uint32_t flash_erase_block(uint32_t block_id);
+enum tfm_sst_err_t sst_flash_erase_block(uint32_t block_id);
 
 #ifdef __cplusplus
 }

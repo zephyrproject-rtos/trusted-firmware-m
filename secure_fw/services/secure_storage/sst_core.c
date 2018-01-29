@@ -336,8 +336,8 @@ static enum tfm_sst_err_t sst_meta_read_block_metadata(uint32_t lblock,
 
     metablock = sst_meta_cur_meta_active();
     pos = sst_meta_block_meta_offset(lblock);
-    err = flash_read(metablock, (uint8_t *)block_meta,
-                     pos, sizeof(struct sst_block_metadata));
+    err = sst_flash_read(metablock, (uint8_t *)block_meta,
+                         pos, sizeof(struct sst_block_metadata));
 
 #ifdef SST_VALIDATE_METADATA_FROM_FLASH
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -418,8 +418,8 @@ enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
     uint32_t offset;
 
     offset = sst_meta_object_meta_offset(object_index);
-    err = flash_read(sst_system_ctx.active_metablock,
-                    (uint8_t *)meta, offset, sizeof(struct sst_assetmeta));
+    err = sst_flash_read(sst_system_ctx.active_metablock,
+                         (uint8_t *)meta, offset, sizeof(struct sst_assetmeta));
 
 #ifdef SST_VALIDATE_METADATA_FROM_FLASH
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -504,7 +504,7 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
 
     scratch_block = sst_meta_cur_data_scratch(cur_logical_block);
 
-    err = flash_write(scratch_block, data, offset, size);
+    err = sst_flash_write(scratch_block, data, offset, size);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -512,11 +512,11 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
     if (offset > block_meta->data_start) {
         /* Copy rest of the block data from previous block */
         /* Data before updated content */
-        err = flash_block_to_block_move(scratch_block,
-                                        block_meta->data_start,
-                                        block_meta->phys_id,
-                                        block_meta->data_start,
-                                        (offset - block_meta->data_start));
+        err = sst_flash_block_to_block_move(scratch_block,
+                                            block_meta->data_start,
+                                            block_meta->phys_id,
+                                            block_meta->data_start,
+                                            (offset - block_meta->data_start));
         if (err != TFM_SST_ERR_SUCCESS) {
             return err;
         }
@@ -526,9 +526,9 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
     end_data = (SST_BLOCK_SIZE - (offset + size) - block_meta->free_size);
 
     /* Data after updated content */
-    err = flash_block_to_block_move(scratch_block, (offset + size),
-                                    block_meta->phys_id, (offset + size),
-                                    end_data);
+    err = sst_flash_block_to_block_move(scratch_block, (offset + size),
+                                        block_meta->phys_id, (offset + size),
+                                        end_data);
     return err;
 }
 
@@ -551,8 +551,8 @@ static enum tfm_sst_err_t sst_mblock_update_scratch_object_meta(
     scratch_block = sst_meta_cur_meta_scratch();
     /* Calculate the position */
     pos = sst_meta_object_meta_offset(object_index);
-    err = flash_write(scratch_block, (uint8_t *)obj_meta, pos,
-                      sizeof(struct sst_assetmeta));
+    err = sst_flash_write(scratch_block, (uint8_t *)obj_meta, pos,
+                          sizeof(struct sst_assetmeta));
     return err;
 }
 
@@ -571,7 +571,7 @@ static enum tfm_sst_err_t sst_meta_erase_scratch_blocks(void)
      * and power-failure-safe operation, it is necessary that
      * metadata scratch block is erased before data block.
      */
-    err = flash_erase_block(scratch_metablock);
+    err = sst_flash_erase_block(scratch_metablock);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -584,7 +584,7 @@ static enum tfm_sst_err_t sst_meta_erase_scratch_blocks(void)
      */
     if (SST_TOTAL_NUM_OF_BLOCKS > 2) {
         scratch_datablock = sst_meta_cur_data_scratch(SST_LOGICAL_DBLOCK0+1);
-        err = flash_erase_block(scratch_datablock);
+        err = sst_flash_erase_block(scratch_datablock);
     }
 
     return err;
@@ -608,8 +608,8 @@ static enum tfm_sst_err_t sst_mblock_update_scratch_block_meta(uint32_t lblock,
     meta_block = sst_meta_cur_meta_scratch();
     /* Calculate the position */
     pos = sst_meta_block_meta_offset(lblock);
-    err = flash_write(meta_block, (uint8_t *)block_meta, pos,
-                      sizeof(struct sst_block_metadata));
+    err = sst_flash_write(meta_block, (uint8_t *)block_meta, pos,
+                          sizeof(struct sst_block_metadata));
     return err;
 }
 
@@ -636,8 +636,9 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_object_meta(
     pos = sst_meta_object_meta_offset(0);
     /* Copy rest of the block data from previous blok */
     /* Data before updated content */
-    err = flash_block_to_block_move(scratch_block, pos, meta_block, pos,
-                                 (object_index * sizeof(struct sst_assetmeta)));
+    err = sst_flash_block_to_block_move(scratch_block, pos, meta_block, pos,
+                                        (object_index *
+                                         sizeof(struct sst_assetmeta)));
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -650,8 +651,8 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_object_meta(
      */
     end = sst_meta_object_meta_offset(SST_NUM_ASSETS);
     if (end > pos) {
-        err = flash_block_to_block_move(scratch_block, pos, meta_block,
-                                        pos, (end - pos));
+        err = sst_flash_block_to_block_move(scratch_block, pos, meta_block,
+                                            pos, (end - pos));
     }
 
     return err;
@@ -710,8 +711,8 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
 
             /* Copy rest of the block data from previous block */
             /* Data before updated content */
-            err = flash_block_to_block_move(scratch_block, pos, meta_block,
-                                            pos, size);
+            err = sst_flash_block_to_block_move(scratch_block, pos, meta_block,
+                                                pos, size);
             if (err != TFM_SST_ERR_SUCCESS) {
                 return err;
             }
@@ -723,7 +724,8 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
 
     size = sst_meta_object_meta_offset(0) - pos;
 
-    err = flash_block_to_block_move(scratch_block, pos, meta_block, pos, size);
+    err = sst_flash_block_to_block_move(scratch_block, pos,
+                                        meta_block, pos, size);
 
     return err;
 }
@@ -757,7 +759,7 @@ static enum tfm_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta)
 #endif
     /* Pedantic: clear the buffer from any previous residue */
     sst_utils_memset(read_buf, 0x00, SST_MAX_ASSET_SIZE);
-    err = flash_read(phys_block, read_buf, pos, size);
+    err = sst_flash_read(phys_block, read_buf, pos, size);
 
     return err;
 }
@@ -804,7 +806,7 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
            + SST_AUTH_METADATA_OFFSET;
 
     /* Commit metadata header to flash, except for the non-authenticated part */
-    err = flash_write(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
+    err = sst_flash_write(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -815,7 +817,7 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
     /* Read all metadata to be authenticated
      * FIXME: no need to read back metadata header we just wrote.
      */
-    err = flash_read(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
+    err = sst_flash_read(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -836,8 +838,8 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
     }
 
     /* Commit non-authenticated part of metadata header to flash */
-    err = flash_write(block_id, (uint8_t *)crypto, 0,
-                      SST_NON_AUTH_METADATA_SIZE);
+    err = sst_flash_write(block_id, (uint8_t *)crypto, 0,
+                          SST_NON_AUTH_METADATA_SIZE);
     return err;
 }
 
@@ -857,14 +859,14 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
 
     metablock_header = (struct sst_metadata_block_header *)sst_data_buf;
 
-    /* read block table and lookups (all metadata and header) */
-    err = flash_read(block, (uint8_t *)metablock_header, 0,
-                     SST_ALL_METADATA_SIZE);
+    /* Read block table and lookups (all metadata and header) */
+    err = sst_flash_read(block, (uint8_t *)metablock_header, 0,
+                         SST_ALL_METADATA_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
-    /* address position and size of the meta-data to be authenticated */
+    /* Address position and size of the meta-data to be authenticated */
     addr = sst_data_buf + SST_AUTH_METADATA_OFFSET;
     addr_len = authenticated_meta_data_size();
 
@@ -878,7 +880,7 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
         return err;
     }
 
-    /* authenticate meta-data */
+    /* Authenticate meta-data */
     err = sst_crypto_authenticate(&metablock_header->crypto, addr, addr_len);
 
     return err;
@@ -1071,18 +1073,19 @@ static enum tfm_sst_err_t sst_meta_write_scratch_meta_header(void)
                                  active_swap_count);
 
     /* Write the metadata block header up to the swap count */
-    err = flash_write(scratch_metablock,
-                      (uint8_t *)(&sst_system_ctx.meta_block_header),
-                      0, swap_count_offset);
+    err = sst_flash_write(scratch_metablock,
+                          (uint8_t *)(&sst_system_ctx.meta_block_header),
+                          0, swap_count_offset);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Write the swap count, the last member in the metadata block header */
-    err = flash_write(scratch_metablock,
-                    &sst_system_ctx.meta_block_header.active_swap_count,
-                    swap_count_offset,
-                    sizeof(sst_system_ctx.meta_block_header.active_swap_count));
+    err = sst_flash_write(scratch_metablock,
+                          &sst_system_ctx.meta_block_header.active_swap_count,
+                          swap_count_offset,
+                          sizeof(
+                           sst_system_ctx.meta_block_header.active_swap_count));
 #endif
 
     return err;
@@ -1097,9 +1100,9 @@ static enum tfm_sst_err_t sst_meta_read_meta_header(void)
 {
     enum tfm_sst_err_t err;
 
-    err = flash_read(sst_system_ctx.active_metablock,
-                     (uint8_t *)&sst_system_ctx.meta_block_header, 0,
-                     sizeof(struct sst_metadata_block_header));
+    err = sst_flash_read(sst_system_ctx.active_metablock,
+                         (uint8_t *)&sst_system_ctx.meta_block_header, 0,
+                         sizeof(struct sst_metadata_block_header));
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -1140,9 +1143,11 @@ static enum tfm_sst_err_t sst_mblock_migrate_data_to_scratch(void)
     /* Calculate data size stored in the B0 block */
     data_size = (SST_BLOCK_SIZE - block_meta.data_start - block_meta.free_size);
 
-    err = flash_block_to_block_move(scratch_metablock, block_meta.data_start,
-                                    current_metablock, block_meta.data_start,
-                                    data_size);
+    err = sst_flash_block_to_block_move(scratch_metablock,
+                                        block_meta.data_start,
+                                        current_metablock,
+                                        block_meta.data_start,
+                                        data_size);
     return err;
 }
 
@@ -1472,9 +1477,9 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
         /* Move data from source offset in current data block to scratch block
          * destination offset.
          */
-        err = flash_block_to_block_move(scratch_dblock_id, dst_offset,
-                                        block_meta.phys_id, src_offset,
-                                        size);
+        err = sst_flash_block_to_block_move(scratch_dblock_id, dst_offset,
+                                            block_meta.phys_id, src_offset,
+                                            size);
         if (err != TFM_SST_ERR_SUCCESS) {
             return TFM_SST_ERR_SYSTEM_ERROR;
         }
@@ -1484,11 +1489,11 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
         /* Copy data from the beginning of data block until
          * the position where the data will be realocated later
          */
-        err = flash_block_to_block_move(scratch_dblock_id,
-                                        block_meta.data_start,
-                                        block_meta.phys_id,
-                                        block_meta.data_start,
-                                        (dst_offset-block_meta.data_start));
+        err = sst_flash_block_to_block_move(scratch_dblock_id,
+                                            block_meta.data_start,
+                                            block_meta.phys_id,
+                                            block_meta.data_start,
+                                            (dst_offset-block_meta.data_start));
         if (err != TFM_SST_ERR_SUCCESS) {
             return TFM_SST_ERR_SYSTEM_ERROR;
         }
@@ -1685,14 +1690,14 @@ static enum tfm_sst_err_t sst_init_get_active_metablock(void)
      */
 
     /* Read the header of both the metdata blocks */
-    err = flash_read(SST_METADATA_BLOCK0, (uint8_t *)&meta0,
-                     0, sizeof(struct sst_metadata_block_header));
+    err = sst_flash_read(SST_METADATA_BLOCK0, (uint8_t *)&meta0,
+                         0, sizeof(struct sst_metadata_block_header));
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
 
-    err = flash_read(SST_METADATA_BLOCK1, (uint8_t *) &meta1,
-                     0, sizeof(struct sst_metadata_block_header));
+    err = sst_flash_read(SST_METADATA_BLOCK1, (uint8_t *) &meta1,
+                         0, sizeof(struct sst_metadata_block_header));
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
@@ -1759,6 +1764,7 @@ enum tfm_sst_err_t sst_core_prepare(void)
 #if SST_ENCRYPTION
     sst_crypto_init();
 #endif
+
     err = sst_init_get_active_metablock();
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
@@ -1783,8 +1789,7 @@ enum tfm_sst_err_t sst_core_prepare(void)
 enum tfm_sst_err_t sst_core_wipe_all(void)
 {
     uint32_t i;
-    uint32_t flash_err;
-    enum tfm_sst_err_t err = TFM_SST_ERR_SUCCESS;
+    enum tfm_sst_err_t err;
     uint32_t metablock_to_erase_first = SST_METADATA_BLOCK0;
     struct sst_block_metadata block_meta;
     struct sst_assetmeta object_metadata;
@@ -1801,21 +1806,14 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
         metablock_to_erase_first = sst_system_ctx.scratch_metablock;
     }
 
-    flash_err = flash_erase_block(metablock_to_erase_first);
-    if (flash_err != SST_FLASH_SUCCESS) {
-        /* If an error is detected while erasing the flash, then return a
-         * system error to abort core wipe process.
-         */
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    err = sst_flash_erase_block(metablock_to_erase_first);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return err;
     }
 
-    flash_err = flash_erase_block(SST_OTHER_META_BLOCK(
-                                                     metablock_to_erase_first));
-    if (flash_err != SST_FLASH_SUCCESS) {
-        /* If an error is detected while erasing the flash, then return a
-         * system error to abort core wipe process.
-         */
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    err = sst_flash_erase_block(SST_OTHER_META_BLOCK(metablock_to_erase_first));
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return err;
     }
 
     sst_system_ctx.meta_block_header.active_swap_count = 0;
@@ -1841,13 +1839,10 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
     block_meta.data_start = 0;
     block_meta.free_size = SST_BLOCK_SIZE;
     for (i = SST_INIT_DBLOCK_START; i < SST_NUM_DEDICATED_DBLOCKS; i++) {
-        flash_err = flash_erase_block(i);
-        if (flash_err != SST_FLASH_SUCCESS) {
-            /* If a flash error is detected, the code erases the rest
-             * of the blocks anyway to remove all data stored in them.
-             */
-            err = TFM_SST_ERR_SYSTEM_ERROR;
-        }
+        /* If a flash error is detected, the code erases the rest
+         * of the blocks anyway to remove all data stored in them.
+         */
+        err |= sst_flash_erase_block(i);
     }
 
     /* If an error is detected while erasing the flash, then return a
