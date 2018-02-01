@@ -19,28 +19,12 @@
 
 #include "flash_layout.h"
 
-#define TOTAL_ROM_SIZE (0x00400000) /* 4MB */
-#define TOTAL_RAM_SIZE (0x00200000) /* 2MB */
+#define TOTAL_ROM_SIZE FLASH_TOTAL_SIZE
+#define TOTAL_RAM_SIZE (0x00200000)     /* 2 MB */
 
 /*
  * MPC granularity is 128 KB on AN519 MPS2 FPGA image. Alignment
  * of partitions is defined in accordance with this constraint.
- */
-
-/*Flash partitions on MPS2 AN519 with BL2:
- *
- * 0x0000_0000 BL2 - MCUBoot
- * 0x0008_0000 Flash_area_image_0:
- *    0x0008_0000 Secure     image primary
- *    0x0010_0000 Non-secure image primary
- * 0x0018_0000 Flash_area_image_1:
- *    0x0018_0000 Secure     image secondary
- *    0x0020_0000 Non-secure image secondary
- * 0x0028_0000 Scratch area
- *
- * Flash partitions on bare metal, if BL2 not defined:
- * 0x0000_0000 Secure     image
- * 0x0010_0000 Non-secure image
  */
 
 #ifdef BL2
@@ -54,7 +38,7 @@
 /*
  * Boot partition structure if MCUBoot is used:
  * 0x0_0000 Bootloader header
- * 0x0_0200 Image area
+ * 0x0_0400 Image area
  * 0x7_0000 Trailer
  */
 /* IMAGE_CODE_SIZE is the space available for the software binary image.

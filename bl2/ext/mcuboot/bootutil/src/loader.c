@@ -34,7 +34,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hal/hal_flash.h>
+#include "flash_map/flash_map.h"
 #include <os/os_malloc.h>
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
@@ -302,15 +302,25 @@ boot_read_image_headers(void)
 static uint8_t
 boot_write_sz(void)
 {
+    const struct flash_area *fap;
     uint8_t elem_sz;
     uint8_t align;
+    int rc;
 
     /* Figure out what size to write update status update as.  The size depends
      * on what the minimum write size is for scratch area, active image slot.
      * We need to use the bigger of those 2 values.
      */
-    elem_sz = hal_flash_align(boot_img_fa_device_id(&boot_data, 0));
-    align = hal_flash_align(boot_scratch_fa_device_id(&boot_data));
+    rc = flash_area_open(FLASH_AREA_IMAGE_0, &fap);
+    assert(rc == 0);
+    elem_sz = flash_area_align(fap);
+    flash_area_close(fap);
+
+    rc = flash_area_open(FLASH_AREA_IMAGE_SCRATCH, &fap);
+    assert(rc == 0);
+    align = flash_area_align(fap);
+    flash_area_close(fap);
+
     if (align > elem_sz) {
         elem_sz = align;
     }
@@ -507,7 +517,7 @@ boot_write_status(struct boot_status *bs)
           boot_status_internal_off(bs->idx, bs->state,
                                    BOOT_WRITE_SZ(&boot_data));
 
-    align = hal_flash_align(fap->fa_device_id);
+    align = flash_area_align(fap);
     memset(buf, 0xFF, BOOT_MAX_ALIGN);
     buf[0] = bs->state;
 

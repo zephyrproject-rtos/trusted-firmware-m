@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017, Arm Limited.
+ * Copyright (c) 2017-2018 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #include "target.h"
 #include "cmsis.h"
 #include "uart_stdout.h"
-
+#include "Driver_Flash.h"
 
 #define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
@@ -33,9 +33,8 @@
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
-/* Keep these variables to be compatible with flash API */
-struct device tmp;
-struct device *boot_flash_device = &tmp;
+/* Flash device name must be specified by target */
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 void os_heap_init(void);
 
@@ -85,6 +84,8 @@ int main(void)
 
     os_heap_init();
 
+    /* Initialize Flash driver */
+    FLASH_DEV_NAME.Initialize(NULL);
     rc = boot_go(&rsp);
     if (rc != 0) {
         BOOT_LOG_ERR("Unable to find bootable image");

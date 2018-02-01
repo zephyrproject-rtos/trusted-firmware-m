@@ -84,7 +84,7 @@ struct boot_swap_state {
 };
 
 #define BOOT_STATUS_STATE_COUNT 3
-#define BOOT_STATUS_MAX_ENTRIES 128
+#define BOOT_STATUS_MAX_ENTRIES 256
 
 #define BOOT_STATUS_SOURCE_NONE    0
 #define BOOT_STATUS_SOURCE_SCRATCH 1
@@ -102,7 +102,7 @@ extern const uint32_t BOOT_MAGIC_SZ;
 #define BOOT_NUM_SLOTS              2
 
 /** Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS        120
+#define BOOT_MAX_IMG_SECTORS        256
 
 /**
  * Compatibility shim for flash sector type.

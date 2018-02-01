@@ -59,7 +59,6 @@ endif()
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
 		"${MCUBOOT_DIR}/flash_map.c"
-		"${MCUBOOT_DIR}/hal_flash.c"
 		"${MCUBOOT_DIR}/os.c"
 		"${MCUBOOT_DIR}/keys.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
@@ -122,7 +121,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 							MCUBOOT_VALIDATE_SLOT0
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 							MBEDTLS_CONFIG_FILE="config-boot.h"
-							MCUBOOT_TARGET_CONFIG="flash_layout.h"
 						)
 
 #Finally let cmake system apply changes after the whole project is defined.

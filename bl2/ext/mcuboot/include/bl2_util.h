@@ -30,10 +30,6 @@
 #define CONTAINER_OF(ptr, type, field) \
         ((type *)(((char *)(ptr)) - offsetof(type, field)))
 
-struct device {
-    int device_id;
-};
-
 #ifdef __cplusplus
 }
 #endif

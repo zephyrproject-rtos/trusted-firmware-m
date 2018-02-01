@@ -21,15 +21,16 @@
 #include <stdbool.h>
 
 #include "target.h"
-#include <flash.h>
+#include "bl2_util.h"
+#include "Driver_Flash.h"
 
 #include <flash_map/flash_map.h>
-#include <hal/hal_flash.h>
 
 #define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
 
-extern struct device *boot_flash_device;
+/* Flash device name must be specified by target */
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 /*
  * For now, we only support one flash device.
@@ -157,36 +158,51 @@ void flash_area_warn_on_open(void)
 int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
             uint32_t len)
 {
-    BOOT_LOG_DBG("area=%d, off=%x, len=%x", area->fa_id, off, len);
-    return flash_read(boot_flash_device, area->fa_off + off, dst, len);
+    BOOT_LOG_DBG("read  area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+    return FLASH_DEV_NAME.ReadData(area->fa_off + off, dst, len);
 }
 
 int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len)
 {
-    int rc = 0;
-
-    BOOT_LOG_DBG("area=%d, off=%x, len=%x", area->fa_id, off, len);
-    flash_write_protection_set(boot_flash_device, false);
-    rc = flash_write(boot_flash_device, area->fa_off + off, src, len);
-    flash_write_protection_set(boot_flash_device, true);
-    return rc;
+    BOOT_LOG_DBG("write area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+    return FLASH_DEV_NAME.ProgramData(area->fa_off + off, src, len);
 }
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 {
-    int rc;
+    ARM_FLASH_INFO *flash_info;
+    uint32_t deleted_len = 0;
+    int32_t rc = 0;
 
-    BOOT_LOG_DBG("area=%d, off=%x, len=%x", area->fa_id, off, len);
-    flash_write_protection_set(boot_flash_device, false);
-    rc = flash_erase(boot_flash_device, area->fa_off + off, len);
-    flash_write_protection_set(boot_flash_device, true);
+    BOOT_LOG_DBG("erase area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+    flash_info = FLASH_DEV_NAME.GetInfo();
+
+    if (flash_info->sector_info == NULL) {
+        /* Uniform sector layout */
+        while (deleted_len < len) {
+            rc = FLASH_DEV_NAME.EraseSector(area->fa_off + off);
+            if (rc != 0) {
+                break;
+            }
+            deleted_len += flash_info->sector_size;
+            off         += flash_info->sector_size;
+        }
+    } else {
+        /* Inhomogeneous sector layout, explicitly defined
+         * Currently not supported.
+         */
+    }
+
     return rc;
 }
 
 uint8_t flash_area_align(const struct flash_area *area)
 {
-    return hal_flash_align(area->fa_id);
+    ARM_FLASH_INFO *flash_info;
+
+    flash_info = FLASH_DEV_NAME.GetInfo();
+    return flash_info->program_unit;
 }
 
 /*
@@ -261,7 +277,7 @@ int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret)
         rem_len -= FLASH_AREA_IMAGE_SECTOR_SIZE;
     }
 
-    if (*cnt >= max_cnt) {
+    if (*cnt > max_cnt) {
         BOOT_LOG_ERR("flash area %d sector count overflow", idx);
         return -1;
     }
@@ -305,7 +321,7 @@ int flash_area_get_sectors(int idx, uint32_t *cnt, struct flash_sector *ret)
         rem_len -= FLASH_AREA_IMAGE_SECTOR_SIZE;
     }
 
-    if (*cnt >= max_cnt) {
+    if (*cnt > max_cnt) {
         BOOT_LOG_ERR("flash area %d sector count overflow", idx);
         return -1;
     }
