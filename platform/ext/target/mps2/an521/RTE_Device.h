@@ -89,6 +89,11 @@
 #define   RTE_USART4                     0
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART4]
 
+// <e> FLASH (Flash Memory) [Driver_FLASH0]
+// <i> Configuration settings for Driver_FLASH0 in component ::Drivers:FLASH
+#define   RTE_FLASH0                     1
+// </e> FLASH (Flash Memory) [Driver_FLASH0]
+
 // <e> MPC (Memory Protection Controller) [Driver_ISRAM0_MPC]
 // <i> Configuration settings for Driver_ISRAM0_MPC in component ::Drivers:MPC
 #define   RTE_ISRAM0_MPC                 0
