@@ -19,7 +19,7 @@ Both need to be cloned manually in the current release.
 cd <TF-M base folder>
 git clone https://github.com/ARM-software/trusted-firmware-m.git
 git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.5.1
-git clone https://github.com/ARM-software/CMSIS_5.git
+git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
 cd trusted-firmware-m
 mkdir cmake_build
 cd cmake_build
@@ -79,4 +79,4 @@ explains further details of creating a new NS app.
 
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.*
