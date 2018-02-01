@@ -62,7 +62,7 @@ previous command for this:
 --parameter cpu0.INITVTOR_S=0x10000000 \
 ...
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<build_dir>/app/tfm_sign.bin@0x10080000
+--data cpu0=<build_dir>/tfm_sign.bin@0x10080000
 ```
 
 ### To run the example code on SSE 200 FPGA on MPS2 board
@@ -173,7 +173,7 @@ which is contiguous in the device memory. At compile time these images are
 concatenated and signed with RSA-2048 digital signature. At the end of a
 successful build signed TF-M payload can be found here:
 ```
-<build_dir>/app/tfm_sign.bin
+<build_dir>/tfm_sign.bin
 ```
 
 The device memory is partitioned in the following way:
@@ -225,8 +225,8 @@ software. Follow the previous instructions with small changes.
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<example_app_build_dir>/app/tfm_sign.bin@0x10080000 \
---data cpu0=<regresssion_test_build_dir>/app/tfm_sign.bin@0x10180000
+--data cpu0=<example_app_build_dir>/tfm_sign.bin@0x10080000 \
+--data cpu0=<regresssion_test_build_dir>/tfm_sign.bin@0x10180000
 ```
 
 #### Test software upgrade on SSE 200 FPGA on MPS2 board

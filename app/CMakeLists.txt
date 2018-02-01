@@ -97,7 +97,7 @@ if (BL2)
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
 						ARGS -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
 							 -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-							 -o ${CMAKE_BINARY_DIR}/app/tfm_full.bin
+							 -o ${CMAKE_BINARY_DIR}/tfm_full.bin
 
 						#Sign concatenated binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
@@ -107,8 +107,8 @@ if (BL2)
 							 -v 1.0
 							 -H 0x400
 							 --pad 0x100000
-							 ${CMAKE_BINARY_DIR}/app/tfm_full.bin
-							 ${CMAKE_BINARY_DIR}/app/tfm_sign.bin
+							 ${CMAKE_BINARY_DIR}/tfm_full.bin
+							 ${CMAKE_BINARY_DIR}/tfm_sign.bin
 				)
 endif()
 
