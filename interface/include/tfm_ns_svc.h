@@ -45,7 +45,8 @@ extern "C" {
     X(SVC_TFM_SST_GET_ATTRIBUTES, tfm_sst_svc_get_attributes) \
     X(SVC_TFM_SST_READ, tfm_sst_svc_read) \
     X(SVC_TFM_SST_WRITE, tfm_sst_svc_write) \
-    X(SVC_TFM_SST_DELETE, tfm_sst_svc_delete)
+    X(SVC_TFM_SST_DELETE, tfm_sst_svc_delete) \
+    X(SVC_TFM_LOG_RETRIEVE, NULL)
 
 /**
  * \def LIST_SVC_CORE_TEST_INTERACTIVE
