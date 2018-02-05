@@ -10,12 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cmsis.h"
-#include "cmsis_os2.h"
-#include "os_wrapper.h"
-
-#include "test/framework/helpers.h"
+#include "ns_test_helpers.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
+#include "test/framework/helpers.h"
 #include "tfm_sst_api.h"
 
 /* Test suite defines */
@@ -35,17 +32,13 @@
 #define WRITE_DATA_SHA224_2 "(ABCDEFGHIJKLMNOPQRSTUVWXYZ)"
 #define BUF_SIZE_SHA224     (SST_ASSET_MAX_SIZE_SHA224_HASH + 1)
 
-/* test tasks's stack size */
-#define SST_TEST_TASK_STACK_SIZE 2048
-static uint32_t tfm_sst_test_sema;
-static struct test_result_t transient_result;
-
-/* shared asset handles for multithreaded tests */
+/* Shared asset handles for multithreaded tests */
 static uint32_t tfm_sst_test_1004_handle;
 static uint32_t tfm_sst_test_1006_handle;
 static uint32_t tfm_sst_test_1008_handle;
 static uint32_t tfm_sst_test_1017_asset1_handle;
 static uint32_t tfm_sst_test_1017_asset2_handle;
+
 /* Define test suite for asset manager tests */
 /* List of tests */
 static void tfm_sst_test_1001(struct test_result_t *ret);
@@ -148,93 +141,27 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  */
 
 /**
- * \brief Executes given test from specified thread context
- */
-
-static void tfm_sst_run_test(const char *name, struct test_result_t *ret,
-                             os_wrapper_thread_func func)
-{
-    uint32_t err;
-    uint32_t current_thread_id;
-    uint32_t current_thread_priority;
-    uint32_t thread;
-
-    tfm_sst_test_sema = os_wrapper_semaphore_create(1, 0, "sst_tests_mutex");
-    if (tfm_sst_test_sema == OS_WRAPPER_ERROR) {
-        TEST_FAIL("semaphore creation has failed\n");
-        return;
-    }
-
-    current_thread_id = os_wrapper_get_thread_id();
-    if (current_thread_id == OS_WRAPPER_ERROR) {
-        os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("get current thread ID has failed");
-        return;
-    }
-
-    current_thread_priority = os_wrapper_get_thread_priority(current_thread_id);
-    if (current_thread_priority == OS_WRAPPER_ERROR) {
-        os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("get current thread priority has failed");
-        return;
-    }
-
-    /* increase the priority of the new thread */
-    current_thread_priority += 1;
-
-    thread = os_wrapper_new_thread(name, SST_TEST_TASK_STACK_SIZE,
-                                   func, current_thread_priority);
-    if (thread == OS_WRAPPER_ERROR) {
-        os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("thread creation has failed");
-        return;
-    }
-
-    /* wait for the test to finish and release the semaphore */
-    err = os_wrapper_semaphore_acquire(tfm_sst_test_sema, 0xFFFFFFFF);
-    if (err == OS_WRAPPER_ERROR) {
-        os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("semaphore wait has failed");
-        return;
-    }
-
-    err = os_wrapper_join_thread(thread);
-    if (err == OS_WRAPPER_ERROR) {
-        os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("join thread has failed");
-        return;
-    }
-
-    /* populate the results */
-    memcpy(ret, &transient_result, sizeof(struct test_result_t));
-    os_wrapper_semaphore_delete(tfm_sst_test_sema);
-}
-
-/**
  * \brief Tests create function against:
  * - Valid application ID and asset ID
  * - Invalid asset ID
  * - Invalid application ID
  */
-static void tfm_sst_test_1001_task(void *arg)
+static void tfm_sst_test_1001_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
     uint32_t hdl;
-    struct test_result_t *ret = &transient_result;
 
     /* Checks write permissions in create function */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -242,7 +169,6 @@ static void tfm_sst_test_1001_task(void *arg)
     err = tfm_sst_create(INVALID_ASSET_ID);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should fail for invalid ASSET ID");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -250,27 +176,23 @@ static void tfm_sst_test_1001_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1002_task(void *arg)
+static void tfm_sst_test_1002_task(struct test_result_t *ret)
 {
-    struct test_result_t *ret = &transient_result;
-    enum tfm_sst_err_t err;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+
     /* Calls create with invalid application ID */
     ret->val = TEST_PASSED;
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should fail for thread without write permissions");
     }
-
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -279,10 +201,9 @@ static void tfm_sst_test_1002_task(void *arg)
  * - Valid asset ID and created asset
  * - Invalid asset ID
  */
-static void tfm_sst_test_1003_task(void *arg)
+static void tfm_sst_test_1003_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct test_result_t *ret = &transient_result;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -290,7 +211,6 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should fail as the asset is not created");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -298,8 +218,6 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        /* wait for the test to finish and release the semaphore */
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -307,8 +225,6 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        /* wait for the test to finish and release the semaphore */
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -316,8 +232,6 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_get_handle(INVALID_ASSET_ID, &hdl);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should fail as asset hanlde is invalid");
-        /* wait for the test to finish and release the semaphore */
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -325,8 +239,6 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, NULL);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should fail as handle pointer is invalid");
-        /* wait for the test to finish and release the semaphore */
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -334,14 +246,10 @@ static void tfm_sst_test_1003_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        /* wait for the test to finish and release the semaphore */
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    /* wait for the test to finish and release the semaphore */
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -351,10 +259,9 @@ static void tfm_sst_test_1003_task(void *arg)
  * - Invalid asset handle
  * - Invalid attributes struct pointer
  */
-static void tfm_sst_test_1004_task(void *arg)
+static void tfm_sst_test_1004_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct test_result_t *ret = &transient_result;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -363,7 +270,6 @@ static void tfm_sst_test_1004_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -371,9 +277,10 @@ static void tfm_sst_test_1004_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
+
+    /* Make handle available to the next test */
     tfm_sst_test_1004_handle = hdl;
 
     /* Calls get_attributes with valid application ID, asset handle and
@@ -382,20 +289,17 @@ static void tfm_sst_test_1004_task(void *arg)
     err = tfm_sst_get_attributes(hdl, &asset_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the attributes of this asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Checks attributes */
     if (asset_attrs.size_current != 0) {
         TEST_FAIL("Asset current size should be 0 as it is only created");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
         TEST_FAIL("Max size of the asset is incorrect");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -404,7 +308,6 @@ static void tfm_sst_test_1004_task(void *arg)
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get attributes function should fail for an invalid "
                   "asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -413,7 +316,6 @@ static void tfm_sst_test_1004_task(void *arg)
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get attributes function should fail for an invalid "
                   "struct attributes pointer");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -421,17 +323,14 @@ static void tfm_sst_test_1004_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1005_task(void *arg)
+static void tfm_sst_test_1005_task(struct test_result_t *ret)
 {
-    struct test_result_t *ret = &transient_result;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
 
@@ -442,7 +341,6 @@ static void tfm_sst_test_1005_task(void *arg)
         TEST_FAIL("Get attributes function should fail for an invalid "
                   "application ID");
     }
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -456,10 +354,9 @@ static void tfm_sst_test_1005_task(void *arg)
 /* handle to be shared between tasks for testing write api
  * from non authorised task with valid handle
  */
-static void tfm_sst_test_1006_task(void *arg)
+static void tfm_sst_test_1006_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct test_result_t *ret = &transient_result;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -470,7 +367,6 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -478,11 +374,10 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
-    /* for the next test */
+    /* Make handle available to the next test */
     tfm_sst_test_1006_handle = hdl;
 
     /* Sets data structure */
@@ -494,7 +389,6 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -504,14 +398,12 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_get_attributes(hdl, &asset_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the attributes of this asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Checks attributes */
     if (asset_attrs.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Asset current size should be size of the write data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -519,7 +411,6 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_write(0, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Invalid asset handle should not write in the asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -527,7 +418,6 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_write(hdl, NULL);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("NULL data pointer should make the write fail");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -543,7 +433,6 @@ static void tfm_sst_test_1006_task(void *arg)
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Offset + write data size larger than max asset size "
                   "should make the write fail");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -551,17 +440,14 @@ static void tfm_sst_test_1006_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1007_task(void *arg)
+static void tfm_sst_test_1007_task(struct test_result_t *ret)
 {
-    struct test_result_t *ret = &transient_result;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
@@ -572,7 +458,6 @@ static void tfm_sst_test_1007_task(void *arg)
         TEST_FAIL("Thread_A should not write in the asset as it doesn't have"
                   " write permissions");
     }
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -583,10 +468,9 @@ static void tfm_sst_test_1007_task(void *arg)
  * - NULL pointer as write buffer
  * - Offet + read data size larger than current asset size
  */
-static void tfm_sst_test_1008_task(void *arg)
+static void tfm_sst_test_1008_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct test_result_t *ret = &transient_result;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     struct tfm_sst_attribs_t asset_attrs;
@@ -598,7 +482,6 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -606,10 +489,10 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
-    /* for next test */
+
+    /* Make handle available to the next test */
     tfm_sst_test_1008_handle = hdl;
 
     /* Sets data structure */
@@ -621,7 +504,6 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -634,25 +516,21 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should works correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, "XXX", 3) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp((read_data+3), wrt_data, WRITE_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp((read_data+8), "XXX", 3) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -661,7 +539,6 @@ static void tfm_sst_test_1008_task(void *arg)
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
                   "asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -670,7 +547,6 @@ static void tfm_sst_test_1008_task(void *arg)
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
                   "data pointer");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -678,14 +554,12 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_get_attributes(hdl, &asset_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the attributes of this asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Checks attributes */
     if (asset_attrs.size_current == 0) {
         TEST_FAIL("Asset current size should be bigger than 0");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -700,17 +574,14 @@ static void tfm_sst_test_1008_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Offset + read data size larger than current asset size");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1009_task(void *arg)
+static void tfm_sst_test_1009_task(struct test_result_t *ret)
 {
-    struct test_result_t *ret = &transient_result;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
@@ -727,12 +598,10 @@ static void tfm_sst_test_1009_task(void *arg)
         TEST_FAIL("Read should fail when read is called from thread without "
                   "read permissions");
     }
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1010_task(void *arg)
+static void tfm_sst_test_1010_task(struct test_result_t *ret)
 {
-    struct test_result_t *ret = &transient_result;
     enum tfm_sst_err_t err;
 
     ret->val = TEST_PASSED;
@@ -741,7 +610,6 @@ static void tfm_sst_test_1010_task(void *arg)
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
     }
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -752,45 +620,39 @@ static void tfm_sst_test_1010_task(void *arg)
  * - Remove first asset in the data block and check if
  *   next asset's data is compacted correctly.
  */
-static void tfm_sst_test_1011_task(void *arg)
+static void tfm_sst_test_1011_task(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
+    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    uint32_t hdl_1;
-
-    struct test_result_t *ret = &transient_result;
+    uint32_t hdl;
 
     ret->val = TEST_PASSED;
     /* Creates assset 1 to get a valid handle */
-    err = tfm_sst_create(asset_uuid_1);
+    err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
-    /* Gets asset 1 handle */
-    err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
+    /* Gets asset handle */
+    err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl_1);
+    err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should not fail as thread has"
                   " write permissions");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Calls delete with a deleted asset handle */
-    err = tfm_sst_delete(hdl_1);
+    err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("The delete action should fail as handle is not valid");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -799,7 +661,6 @@ static void tfm_sst_test_1011_task(void *arg)
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("The delete action should fail handle is not valid");
     }
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -809,12 +670,11 @@ static void tfm_sst_test_1011_task(void *arg)
  *        1 and remove asset 2. If delete works correctly, when the code
  *        reads back the asset 1 data, the data must be correct.
  */
-static void tfm_sst_test_1012_part1_task(void *arg)
+static void tfm_sst_test_1012_part1_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum tfm_sst_err_t err;
     uint32_t hdl_2;
-    struct test_result_t *ret = &transient_result;
 
     ret->val = TEST_PASSED;
 
@@ -822,7 +682,6 @@ static void tfm_sst_test_1012_part1_task(void *arg)
     err = tfm_sst_create(asset_uuid_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -831,18 +690,15 @@ static void tfm_sst_test_1012_part1_task(void *arg)
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
     }
-
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1012_part2_task(void *arg)
+static void tfm_sst_test_1012_part2_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t hdl_1;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
-    struct test_result_t *ret = &transient_result;
 
     ret->val = TEST_PASSED;
 
@@ -850,7 +706,6 @@ static void tfm_sst_test_1012_part2_task(void *arg)
     err = tfm_sst_create(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -858,7 +713,6 @@ static void tfm_sst_test_1012_part2_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -873,22 +727,19 @@ static void tfm_sst_test_1012_part2_task(void *arg)
         TEST_FAIL("Write should not fail for Thread_B");
     }
 
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1012_part3_task(void *arg)
+static void tfm_sst_test_1012_part3_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum tfm_sst_err_t err;
     uint32_t hdl_2;
-    struct test_result_t *ret = &transient_result;
 
     ret->val = TEST_PASSED;
 
     err = tfm_sst_get_handle(asset_uuid_2, &hdl_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -897,11 +748,9 @@ static void tfm_sst_test_1012_part3_task(void *arg)
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
     }
-
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1012_part4_task(void *arg)
+static void tfm_sst_test_1012_part4_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -909,13 +758,12 @@ static void tfm_sst_test_1012_part4_task(void *arg)
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
-    struct test_result_t *ret = &transient_result;
 
     ret->val = TEST_PASSED;
+
     err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -927,13 +775,11 @@ static void tfm_sst_test_1012_part4_task(void *arg)
     err = tfm_sst_read(hdl_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, wrt_data, BUF_SIZE_SHA224) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -942,20 +788,17 @@ static void tfm_sst_test_1012_part4_task(void *arg)
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
     }
-
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write and partial reads.
  */
-static void tfm_sst_test_1013_task(void *arg)
+static void tfm_sst_test_1013_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    struct test_result_t *ret = &transient_result;
     uint32_t i;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
@@ -964,7 +807,6 @@ static void tfm_sst_test_1013_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -972,7 +814,6 @@ static void tfm_sst_test_1013_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -985,7 +826,6 @@ static void tfm_sst_test_1013_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -999,7 +839,6 @@ static void tfm_sst_test_1013_task(void *arg)
         err = tfm_sst_read(hdl, &io_data);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Read should works correctly");
-            os_wrapper_semaphore_release(tfm_sst_test_sema);
             return;
         }
 
@@ -1010,19 +849,16 @@ static void tfm_sst_test_1013_task(void *arg)
 
     if (memcmp(read_data, "XXX", 3) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp((read_data + 3), wrt_data, WRITE_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp((read_data + 8), "XXX", 3) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1030,32 +866,28 @@ static void tfm_sst_test_1013_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum assert size.
  */
-static void tfm_sst_test_1014_task(void *arg)
+static void tfm_sst_test_1014_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    struct test_result_t *ret = &transient_result;
     uint8_t wrt_data[BUF_SIZE_SHA224] = {0};
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1063,7 +895,6 @@ static void tfm_sst_test_1014_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1076,7 +907,6 @@ static void tfm_sst_test_1014_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Should have failed asset write of too large");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1084,18 +914,16 @@ static void tfm_sst_test_1014_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write function against multiple writes.
  */
-static void tfm_sst_test_1015_task(void *arg)
+static void tfm_sst_test_1015_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -1104,13 +932,11 @@ static void tfm_sst_test_1015_task(void *arg)
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
     uint8_t wrt_data2[WRITE_BUF_SIZE+1] = "World";
-    struct test_result_t *ret = &transient_result;
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1118,7 +944,6 @@ static void tfm_sst_test_1015_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1131,7 +956,6 @@ static void tfm_sst_test_1015_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1144,7 +968,6 @@ static void tfm_sst_test_1015_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 failed");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1157,13 +980,11 @@ static void tfm_sst_test_1015_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1171,18 +992,16 @@ static void tfm_sst_test_1015_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-static void tfm_sst_test_1016_task(void *arg)
+static void tfm_sst_test_1016_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -1191,13 +1010,11 @@ static void tfm_sst_test_1016_task(void *arg)
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
     uint8_t wrt_data2[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_2;
-    struct test_result_t *ret = &transient_result;
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1205,7 +1022,6 @@ static void tfm_sst_test_1016_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1218,7 +1034,6 @@ static void tfm_sst_test_1016_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1232,7 +1047,6 @@ static void tfm_sst_test_1016_task(void *arg)
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
                   "write more bytes that the max size");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1245,7 +1059,6 @@ static void tfm_sst_test_1016_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 3 failed");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1258,13 +1071,11 @@ static void tfm_sst_test_1016_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, wrt_data, BUF_SIZE_SHA224) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1272,30 +1083,25 @@ static void tfm_sst_test_1016_task(void *arg)
     err = tfm_sst_delete(hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write and read to/from 2 assets.
  */
-static void tfm_sst_test_1017_part1_task(void *arg)
+static void tfm_sst_test_1017_part1_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_1 = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
     uint32_t hdl_1;
 
-    struct test_result_t *ret = &transient_result;
-
     /* Creates asset 1 to get a valid handle */
     err = tfm_sst_create(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1303,27 +1109,24 @@ static void tfm_sst_test_1017_part1_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     tfm_sst_test_1017_asset1_handle = hdl_1;
+
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part2_task(void *arg)
+static void tfm_sst_test_1017_part2_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     uint32_t hdl_2;
-    struct test_result_t *ret = &transient_result;
 
     /* Creates asset 2 to get a valid handle */
     err = tfm_sst_create(asset_uuid_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1331,22 +1134,19 @@ static void tfm_sst_test_1017_part2_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid_2, &hdl_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     tfm_sst_test_1017_asset2_handle = hdl_2;
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part3_task(void *arg)
+static void tfm_sst_test_1017_part3_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
-    struct test_result_t *ret = &transient_result;
 
     /* Sets data structure */
     io_data.data = wrt_data;
@@ -1357,20 +1157,17 @@ static void tfm_sst_test_1017_part3_task(void *arg)
     err = tfm_sst_write(tfm_sst_test_1017_asset1_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part4_task(void *arg)
+static void tfm_sst_test_1017_part4_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data2[3] = "Hi";
-    struct test_result_t *ret = &transient_result;
 
     /* Write data 2 in asset 2 */
     /* Sets data structure */
@@ -1381,20 +1178,17 @@ static void tfm_sst_test_1017_part4_task(void *arg)
     err = tfm_sst_write(tfm_sst_test_1017_asset2_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part5_task(void *arg)
+static void tfm_sst_test_1017_part5_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data3[WRITE_BUF_SIZE+1] = "World";
-    struct test_result_t *ret = &transient_result;
 
     /* Sets data structure */
     io_data.data = wrt_data3;
@@ -1405,19 +1199,17 @@ static void tfm_sst_test_1017_part5_task(void *arg)
     err = tfm_sst_write(tfm_sst_test_1017_asset1_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
+
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part6_task(void *arg)
+static void tfm_sst_test_1017_part6_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data4[WRITE_BUF_SIZE+1] = "12345";
-    struct test_result_t *ret = &transient_result;
 
     /* Sets data structure */
     io_data.data = wrt_data4;
@@ -1428,20 +1220,17 @@ static void tfm_sst_test_1017_part6_task(void *arg)
     err = tfm_sst_write(tfm_sst_test_1017_asset2_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part7_task(void *arg)
+static void tfm_sst_test_1017_part7_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
-    struct test_result_t *ret = &transient_result;
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1453,26 +1242,22 @@ static void tfm_sst_test_1017_part7_task(void *arg)
     err = tfm_sst_read(tfm_sst_test_1017_asset1_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part8_task(void *arg)
+static void tfm_sst_test_1017_part8_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
-    struct test_result_t *ret = &transient_result;
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1483,13 +1268,11 @@ static void tfm_sst_test_1017_part8_task(void *arg)
     err = tfm_sst_read(tfm_sst_test_1017_asset2_handle, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     if (memcmp(read_data, "Hi12345XXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1497,29 +1280,24 @@ static void tfm_sst_test_1017_part8_task(void *arg)
     err = tfm_sst_delete(tfm_sst_test_1017_asset2_handle);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
-static void tfm_sst_test_1017_part9_task(void *arg)
+static void tfm_sst_test_1017_part9_task(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
-    struct test_result_t *ret = &transient_result;
 
     /* Calls delete asset 1 */
     err = tfm_sst_delete(tfm_sst_test_1017_asset1_handle);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
@@ -1529,20 +1307,17 @@ static void tfm_sst_test_1017_part9_task(void *arg)
  * - Secure memory
  * - Non existing memory location
  */
-static void tfm_sst_test_1018_task(void *arg)
+static void tfm_sst_test_1018_task(struct test_result_t *ret)
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-
     uint32_t hdl;
-    struct test_result_t *ret = &transient_result;
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1550,7 +1325,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1562,7 +1336,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, (uint32_t *)ROM_ADDR_LOCATION);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get handle should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1575,7 +1348,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1583,7 +1355,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1595,7 +1366,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, (uint32_t *)DEV_ADDR_LOCATION);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get handle should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1606,7 +1376,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1614,7 +1383,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1627,7 +1395,6 @@ static void tfm_sst_test_1018_task(void *arg)
                              (uint32_t *)SECURE_ADDR_LOCATION);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get handle should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1638,7 +1405,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1646,7 +1412,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1659,7 +1424,6 @@ static void tfm_sst_test_1018_task(void *arg)
                              (uint32_t *)NON_EXIST_ADDR_LOCATION);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get handle should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1670,7 +1434,6 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1678,25 +1441,22 @@ static void tfm_sst_test_1018_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 /**
  * \brief Tests write data to the middle of an existing asset
  */
-static void tfm_sst_test_1019_task(void *arg)
+static void tfm_sst_test_1019_task(struct test_result_t *ret)
 {
     struct tfm_sst_attribs_t asset_attrs;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    struct test_result_t *ret = &transient_result;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
     uint8_t wrt_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t wrt_data_2[2] = "B";
@@ -1705,7 +1465,6 @@ static void tfm_sst_test_1019_task(void *arg)
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1713,7 +1472,6 @@ static void tfm_sst_test_1019_task(void *arg)
     err = tfm_sst_get_handle(asset_uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get handle should return a valid asset handle");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1726,21 +1484,18 @@ static void tfm_sst_test_1019_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("First write should not fail");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     err = tfm_sst_get_attributes(hdl, &asset_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the attributes of this asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Checks attributes */
     if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
         TEST_FAIL("Current size should be equal to write size");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1753,21 +1508,18 @@ static void tfm_sst_test_1019_task(void *arg)
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Second write should not fail");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     err = tfm_sst_get_attributes(hdl, &asset_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the attributes of this asset");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     /* Checks that the asset's current size has not changed */
     if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
         TEST_FAIL("Current size should not have changed");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1779,7 +1531,6 @@ static void tfm_sst_test_1019_task(void *arg)
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1788,7 +1539,6 @@ static void tfm_sst_test_1019_task(void *arg)
      */
     if (memcmp(read_data, "XXXABAAXXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer is incorrect");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
@@ -1801,12 +1551,10 @@ static void tfm_sst_test_1019_task(void *arg)
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write must fail if the offset is bigger than the current"
                   " asset's size");
-        os_wrapper_semaphore_release(tfm_sst_test_sema);
         return;
     }
 
     ret->val = TEST_PASSED;
-    os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
 static void tfm_sst_test_1001(struct test_result_t *ret)

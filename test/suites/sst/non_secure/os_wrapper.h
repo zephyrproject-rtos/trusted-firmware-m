@@ -67,12 +67,14 @@ uint32_t os_wrapper_semaphore_delete(uint32_t sema);
  * \param[in] name        Name of the thread
  * \param[in] stack_size  Size of stack to be allocated for this thread
  * \param[in] func        Pointer to the function invoked by thread
+ * \param[in] arg         Argument to pass to the function invoked by thread
  * \param[in] priority    Initial thread priority
  *
  * \return Returns thread ID, or OS_WRAPPER_ERROR in case of error
  */
 uint32_t os_wrapper_new_thread(const char *name, uint32_t stack_size,
-                               os_wrapper_thread_func func, uint32_t priority);
+                               os_wrapper_thread_func func, void *arg,
+                               uint32_t priority);
 /**
  * \brief Gets current thread ID
  *

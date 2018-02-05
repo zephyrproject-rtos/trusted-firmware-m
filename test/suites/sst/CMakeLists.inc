@@ -24,10 +24,6 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
-if(NOT DEFINED CMSIS_5_DIR)
-	message(FATAL_ERROR "Please set CMSIS_5_DIR before including this file.")
-endif()
-
 if (NOT DEFINED ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_SECURE_STORAGE_SERVICE_TESTS is undefined. ")
 elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
@@ -37,7 +33,8 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 			"${SECURE_STORAGE_TEST_DIR}/secure/sst_policy_testsuite.c"
 		)
 
-	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c")
+	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
+			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c")
 
 	if (NOT DEFINED TFM_PARTITION_TEST_SST)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
@@ -49,8 +46,4 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/test/interface/include ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-
-	embedded_include_directories(PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE)
-	embedded_include_directories(PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE)
-	embedded_include_directories(PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE)
 endif()

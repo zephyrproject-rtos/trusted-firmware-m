@@ -15,7 +15,8 @@
  * environment */
 
 uint32_t os_wrapper_new_thread(const char* name, uint32_t stack_size,
-                               os_wrapper_thread_func func, uint32_t priority)
+                               os_wrapper_thread_func func, void *arg,
+                               uint32_t priority)
 {
     osThreadAttr_t task_attribs = {.tz_module = 1};
     osThreadId_t thread_id;
@@ -25,7 +26,7 @@ uint32_t os_wrapper_new_thread(const char* name, uint32_t stack_size,
     task_attribs.name = name;
     task_attribs.priority = priority;
 
-    thread_id = osThreadNew(func, NULL, &task_attribs);
+    thread_id = osThreadNew(func, arg, &task_attribs);
     if (thread_id == NULL) {
         return OS_WRAPPER_ERROR;
     }
