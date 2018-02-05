@@ -163,6 +163,9 @@ set (SST_VALIDATE_METADATA_FROM_FLASH ON)
 set (ENABLE_SECURE_STORAGE ON)
 set (MBEDTLS_DEBUG ON)
 
+##TF-M audit logging
+config_setting_shared_flags(tfm_audit)
+
 ##Tests
 config_setting_shared_flags(tfm_secure_tests)
 config_setting_shared_flags(tfm_non_secure_tests)

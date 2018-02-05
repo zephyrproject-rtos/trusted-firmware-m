@@ -32,7 +32,7 @@ PARTITION_ADD_INIT_FUNC(TFM_SP_STORAGE, sst_am_prepare);
 /******************************* TFM_SP_AUDIT_LOG *****************************/
 PARTITION_DECLARE(TFM_SP_AUDIT_LOG,
                   SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED);
-//PARTITION_ADD_INIT_FUNC(TFM_SP_AUDIT_LOG, log_core_init);
+PARTITION_ADD_INIT_FUNC(TFM_SP_AUDIT_LOG, log_core_init);
 
 #ifdef TFM_PARTITION_TEST_SST
 /**************************** TFM_SP_SST_TEST_PARTITION ***********************/

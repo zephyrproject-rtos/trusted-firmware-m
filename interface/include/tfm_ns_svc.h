@@ -19,6 +19,7 @@ extern "C" {
  * \brief Include all the SVC handler headers
  */
 #include "tfm_sst_svc_handler.h"
+#include "tfm_log_svc_handler.h"
 #include "svc_core_test_ns.h"
 #include "sst_test_service_svc.h"
 
@@ -46,7 +47,7 @@ extern "C" {
     X(SVC_TFM_SST_READ, tfm_sst_svc_read) \
     X(SVC_TFM_SST_WRITE, tfm_sst_svc_write) \
     X(SVC_TFM_SST_DELETE, tfm_sst_svc_delete) \
-    X(SVC_TFM_LOG_RETRIEVE, NULL)
+    X(SVC_TFM_LOG_RETRIEVE, tfm_log_svc_retrieve)
 
 /**
  * \def LIST_SVC_CORE_TEST_INTERACTIVE
