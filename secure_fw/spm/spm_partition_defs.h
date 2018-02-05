@@ -39,5 +39,6 @@
 
 /* ***** Normal partition ID-s ***** */
 #define TFM_SP_STORAGE_ID (TFM_SP_BASE)
+#define TFM_SP_AUDIT_LOG_ID (TFM_SP_BASE + 1)
 
 #endif /* __SPM_PARTITION_DEFS_H__ */

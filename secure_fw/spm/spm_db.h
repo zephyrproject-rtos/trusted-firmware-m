@@ -17,7 +17,7 @@
  * partitions. There's no requirement that it match the number of partitions
  * that get registered in a specific build
  */
-#define SPM_MAX_PARTITIONS (6)
+#define SPM_MAX_PARTITIONS (7)
 
 struct spm_partition_desc_t;
 struct spm_partition_db_t;
