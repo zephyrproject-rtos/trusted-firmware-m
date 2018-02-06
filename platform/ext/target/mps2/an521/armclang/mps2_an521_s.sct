@@ -51,6 +51,10 @@ LR_CODE S_CODE_START {
         *tfm_storage* (+RO)
     }
 
+    TFM_SP_AUDIT_LOG +0 ALIGN 32 {
+        *tfm_audit* (+RO)
+    }
+
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST +0 ALIGN 32 {
         *tfm_ss_core_test.* (+RO)
@@ -84,6 +88,13 @@ LR_CODE S_CODE_START {
     }
 
     TFM_SP_STORAGE_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+
+    TFM_SP_AUDIT_LOG_DATA +0 ALIGN 32 {
+        *tfm_audit* (+RW +ZI)
+    }
+
+    TFM_SP_AUDIT_LOG_STACK +0 ALIGN 128 EMPTY 0x1000 {
     }
 
 #ifdef TFM_PARTITION_TEST_CORE
