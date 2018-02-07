@@ -146,7 +146,7 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  * - Invalid asset ID
  * - Invalid application ID
  */
-static void tfm_sst_test_1001_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1001, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
@@ -182,7 +182,7 @@ static void tfm_sst_test_1001_task(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1002_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1002, "Thread_A")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
@@ -201,7 +201,7 @@ static void tfm_sst_test_1002_task(struct test_result_t *ret)
  * - Valid asset ID and created asset
  * - Invalid asset ID
  */
-static void tfm_sst_test_1003_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1003, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
@@ -259,7 +259,7 @@ static void tfm_sst_test_1003_task(struct test_result_t *ret)
  * - Invalid asset handle
  * - Invalid attributes struct pointer
  */
-static void tfm_sst_test_1004_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1004, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_attribs_t asset_attrs;
@@ -329,7 +329,7 @@ static void tfm_sst_test_1004_task(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1005_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1005, "Thread_INVALID")
 {
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
@@ -354,7 +354,7 @@ static void tfm_sst_test_1005_task(struct test_result_t *ret)
 /* handle to be shared between tasks for testing write api
  * from non authorised task with valid handle
  */
-static void tfm_sst_test_1006_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1006, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_attribs_t asset_attrs;
@@ -446,7 +446,7 @@ static void tfm_sst_test_1006_task(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1007_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1007, "Thread_A")
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -468,7 +468,7 @@ static void tfm_sst_test_1007_task(struct test_result_t *ret)
  * - NULL pointer as write buffer
  * - Offet + read data size larger than current asset size
  */
-static void tfm_sst_test_1008_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1008, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
@@ -580,7 +580,7 @@ static void tfm_sst_test_1008_task(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1009_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1009, "Thread_A")
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -600,7 +600,7 @@ static void tfm_sst_test_1009_task(struct test_result_t *ret)
     }
 }
 
-static void tfm_sst_test_1010_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1010, "Thread_C")
 {
     enum tfm_sst_err_t err;
 
@@ -620,7 +620,7 @@ static void tfm_sst_test_1010_task(struct test_result_t *ret)
  * - Remove first asset in the data block and check if
  *   next asset's data is compacted correctly.
  */
-static void tfm_sst_test_1011_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1011, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -793,7 +793,7 @@ static void tfm_sst_test_1012_part4_task(struct test_result_t *ret)
 /**
  * \brief Tests write and partial reads.
  */
-static void tfm_sst_test_1013_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1013, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
@@ -876,7 +876,7 @@ static void tfm_sst_test_1013_task(struct test_result_t *ret)
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum assert size.
  */
-static void tfm_sst_test_1014_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1014, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -923,7 +923,7 @@ static void tfm_sst_test_1014_task(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes.
  */
-static void tfm_sst_test_1015_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1015, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -1001,7 +1001,7 @@ static void tfm_sst_test_1015_task(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-static void tfm_sst_test_1016_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1016, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -1307,7 +1307,7 @@ static void tfm_sst_test_1017_part9_task(struct test_result_t *ret)
  * - Secure memory
  * - Non existing memory location
  */
-static void tfm_sst_test_1018_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1018, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
@@ -1450,7 +1450,7 @@ static void tfm_sst_test_1018_task(struct test_result_t *ret)
 /**
  * \brief Tests write data to the middle of an existing asset
  */
-static void tfm_sst_test_1019_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(1019, "Thread_C")
 {
     struct tfm_sst_attribs_t asset_attrs;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
@@ -1557,183 +1557,67 @@ static void tfm_sst_test_1019_task(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1001(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1001_task);
-}
-
-static void tfm_sst_test_1002(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_A", ret,
-                     tfm_sst_test_1002_task);
-}
-
-static void tfm_sst_test_1003(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1003_task);
-}
-
-static void tfm_sst_test_1004(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1004_task);
-}
-
-static void tfm_sst_test_1005(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_INVALID", ret,
-                     tfm_sst_test_1005_task);
-}
-
-static void tfm_sst_test_1006(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1006_task);
-}
-
-static void tfm_sst_test_1007(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_A", ret,
-                     tfm_sst_test_1007_task);
-}
-
-static void tfm_sst_test_1008(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1008_task);
-}
-
-static void tfm_sst_test_1009(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_A", ret,
-                     tfm_sst_test_1009_task);
-}
-
-static void tfm_sst_test_1010(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1010_task);
-}
-
-static void tfm_sst_test_1011(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1011_task);
-}
-
 static void tfm_sst_test_1012(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1012_part1_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1012_part1_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1012_part2_task);
+
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1012_part2_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1012_part3_task);
+
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1012_part3_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1012_part4_task);
-}
 
-static void tfm_sst_test_1013(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1013_task);
-}
-
-static void tfm_sst_test_1014(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1014_task);
-}
-
-static void tfm_sst_test_1015(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1015_task);
-}
-
-static void tfm_sst_test_1016(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1016_task);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1012_part4_task);
 }
 
 static void tfm_sst_test_1017(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1017_part1_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1017_part1_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1017_part2_task);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1017_part2_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1017_part3_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1017_part3_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1017_part4_task);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1017_part4_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1017_part5_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1017_part5_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1017_part6_task);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1017_part6_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1017_part7_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1017_part7_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1017_part8_task);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1017_part8_task);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1017_part9_task);
-    if (ret->val != TEST_PASSED) {
-        return;
-    }
-
-}
-
-static void tfm_sst_test_1018(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_B", ret,
-                     tfm_sst_test_1018_task);
-}
-
-static void tfm_sst_test_1019(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret,
-                     tfm_sst_test_1019_task);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1017_part9_task);
 }

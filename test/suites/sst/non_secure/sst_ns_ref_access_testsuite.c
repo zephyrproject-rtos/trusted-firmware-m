@@ -59,7 +59,7 @@ void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite)
 /**
  * \brief Tests the set-up of the SST test service
  */
-static void tfm_sst_test_5001_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(5001, "Thread_D")
 {
     enum tfm_sst_err_t err;
 
@@ -75,7 +75,7 @@ static void tfm_sst_test_5001_task(struct test_result_t *ret)
 /**
  * \brief Test SST referenced access with correct permissions
  */
-static void tfm_sst_test_5002_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(5002, "Thread_D")
 {
     enum tfm_sst_err_t err;
     uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
@@ -83,7 +83,7 @@ static void tfm_sst_test_5002_task(struct test_result_t *ret)
 
     err = sst_test_service_dummy_encrypt(key_uuid, buf, BUF_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Encryption should be successful for SST_APP_ID_3");
+        TEST_FAIL("Encryption should be successful for Thread_D");
         return;
     }
 
@@ -94,7 +94,7 @@ static void tfm_sst_test_5002_task(struct test_result_t *ret)
 
     err = sst_test_service_dummy_decrypt(key_uuid, buf, BUF_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Decryption should be successful for SST_APP_ID_3");
+        TEST_FAIL("Decryption should be successful for Thread_D");
         return;
     }
 
@@ -110,7 +110,7 @@ static void tfm_sst_test_5002_task(struct test_result_t *ret)
 /**
  * \brief Test SST referenced access with incorrect permissions
  */
-static void tfm_sst_test_5003_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(5003, "Thread_C")
 {
     enum tfm_sst_err_t err;
     uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
@@ -118,13 +118,13 @@ static void tfm_sst_test_5003_task(struct test_result_t *ret)
 
     err = sst_test_service_dummy_encrypt(key_uuid, buf, BUF_SIZE);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Encryption should not be successful for SST_APP_ID_2");
+        TEST_FAIL("Encryption should not be successful for Thread_C");
         return;
     }
 
     err = sst_test_service_dummy_decrypt(key_uuid, buf, BUF_SIZE);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Decryption should not be successful for SST_APP_ID_2");
+        TEST_FAIL("Decryption should not be successful for Thread_C");
         return;
     }
 
@@ -134,7 +134,7 @@ static void tfm_sst_test_5003_task(struct test_result_t *ret)
 /**
  * \brief Clean the SST referenced access service at the end of the tests
  */
-static void tfm_sst_test_5004_task(struct test_result_t *ret)
+TFM_SST_NS_TEST(5004, "Thread_D")
 {
     enum tfm_sst_err_t err;
 
@@ -145,24 +145,4 @@ static void tfm_sst_test_5004_task(struct test_result_t *ret)
     }
 
     ret->val = TEST_PASSED;
-}
-
-static void tfm_sst_test_5001(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_D", ret, tfm_sst_test_5001_task);
-}
-
-static void tfm_sst_test_5002(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_D", ret, tfm_sst_test_5002_task);
-}
-
-static void tfm_sst_test_5003(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_5003_task);
-}
-
-static void tfm_sst_test_5004(struct test_result_t *ret)
-{
-    tfm_sst_run_test("Thread_D", ret, tfm_sst_test_5004_task);
 }
