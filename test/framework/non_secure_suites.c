@@ -11,6 +11,7 @@
 
 /* Service specific includes */
 #include "test/suites/sst/non_secure/sst_ns_tests.h"
+#include "test/suites/log/non_secure/log_ns_tests.h"
 #include "test/suites/invert/non_secure/invert_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
 
@@ -24,6 +25,9 @@ static struct test_suite_t test_suites[] = {
     /* Non-secure SST referenced access testsuite */
     {&register_testsuite_ns_sst_ref_access, 0, 0, 0},
 #endif
+
+    /* Non-secure LOG test cases */
+    {&register_testsuite_ns_log_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */
