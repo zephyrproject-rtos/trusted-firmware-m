@@ -24,7 +24,7 @@
 
 /* Memory bounds to check */
 #define ROM_ADDR_LOCATION        0x10000000
-#define DEV_ADDR_LOCATION        0x20000000
+#define DEV_ADDR_LOCATION        0x50000000
 #define NON_EXIST_ADDR_LOCATION  0xFFFFFFFF
 
 /* Test data sized to fill the SHA224 asset */
@@ -49,6 +49,14 @@ static void tfm_sst_test_2011(struct test_result_t *ret);
 static void tfm_sst_test_2012(struct test_result_t *ret);
 static void tfm_sst_test_2013(struct test_result_t *ret);
 static void tfm_sst_test_2014(struct test_result_t *ret);
+static void tfm_sst_test_2015(struct test_result_t *ret);
+static void tfm_sst_test_2016(struct test_result_t *ret);
+static void tfm_sst_test_2017(struct test_result_t *ret);
+static void tfm_sst_test_2018(struct test_result_t *ret);
+static void tfm_sst_test_2019(struct test_result_t *ret);
+static void tfm_sst_test_2020(struct test_result_t *ret);
+static void tfm_sst_test_2021(struct test_result_t *ret);
+static void tfm_sst_test_2022(struct test_result_t *ret);
 
 static struct test_t write_tests[] = {
     {&tfm_sst_test_2001, "TFM_SST_TEST_2001",
@@ -56,28 +64,44 @@ static struct test_t write_tests[] = {
     {&tfm_sst_test_2002, "TFM_SST_TEST_2002",
      "Get handle interface", {0} },
     {&tfm_sst_test_2003, "TFM_SST_TEST_2003",
-     "Get attributes interface", {0} },
+     "Get handle with null handle pointer", {0} },
     {&tfm_sst_test_2004, "TFM_SST_TEST_2004",
-     "Write interface", {0} },
+     "Get attributes interface", {0} },
     {&tfm_sst_test_2005, "TFM_SST_TEST_2005",
-     "Read interface", {0} },
+     "Get attributes with null attributes struct pointer", {0} },
     {&tfm_sst_test_2006, "TFM_SST_TEST_2006",
-     "Delete interface", {0} },
+     "Write interface", {0} },
     {&tfm_sst_test_2007, "TFM_SST_TEST_2007",
-     "Write and partial reads", {0} },
+     "Write with null buffer pointers", {0} },
     {&tfm_sst_test_2008, "TFM_SST_TEST_2008",
-     "Write partial data in an asset and reload secure storage area", {0} },
+     "Write beyond end of asset", {0} },
     {&tfm_sst_test_2009, "TFM_SST_TEST_2009",
-     "Write more data than asset max size", {0} },
+     "Read interface", {0} },
     {&tfm_sst_test_2010, "TFM_SST_TEST_2010",
-     "Appending data to an asset", {0} },
+     "Read with null buffer pointers", {0} },
     {&tfm_sst_test_2011, "TFM_SST_TEST_2011",
-     "Appending data to an asset until eof", {0} },
+     "Read beyond current size of asset", {0} },
     {&tfm_sst_test_2012, "TFM_SST_TEST_2012",
-     "Write data to two assets alternately", {0} },
+     "Delete interface", {0} },
     {&tfm_sst_test_2013, "TFM_SST_TEST_2013",
-     "Write and read data from illegal locations", {0} },
+     "Write and partial reads", {0} },
     {&tfm_sst_test_2014, "TFM_SST_TEST_2014",
+     "Write partial data in an asset and reload secure storage area", {0} },
+    {&tfm_sst_test_2015, "TFM_SST_TEST_2015",
+     "Write more data than asset max size", {0} },
+    {&tfm_sst_test_2016, "TFM_SST_TEST_2016",
+     "Append data to an asset", {0} },
+    {&tfm_sst_test_2017, "TFM_SST_TEST_2017",
+     "Append data to an asset until EOF", {0} },
+    {&tfm_sst_test_2018, "TFM_SST_TEST_2018",
+     "Write data to two assets alternately", {0} },
+    {&tfm_sst_test_2019, "TFM_SST_TEST_2019",
+     "Access an illegal location: ROM", {0} },
+    {&tfm_sst_test_2020, "TFM_SST_TEST_2020",
+     "Access an illegal location: device memory", {0} },
+    {&tfm_sst_test_2021, "TFM_SST_TEST_2021",
+     "Access an illegal location: non-existant memory", {0} },
+    {&tfm_sst_test_2022, "TFM_SST_TEST_2022",
      "Write data to the middle of an existing asset", {0} },
 };
 
@@ -103,6 +127,7 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -110,6 +135,13 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
     err = tfm_sst_veneer_create(app_id, asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Attempts to create the asset a second time */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Should not fail to create an already-created asset");
         return;
     }
 
@@ -134,6 +166,7 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
  * \brief Tests get handle function against:
  * - Valid asset ID and not created file
  * - Valid asset ID and created file
+ * - Invalid app ID
  * - Invalid asset ID
  */
 static void tfm_sst_test_2002(struct test_result_t *ret)
@@ -145,6 +178,7 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -182,7 +216,25 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
     /* Calls get handle with invalid asset ID */
     err = tfm_sst_veneer_get_handle(app_id, INVALID_ASSET_ID, &hdl);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should fail as asset hanlder is invalid");
+        TEST_FAIL("Get handle should fail as asset handle is invalid");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests the get handle function with an invalid handle pointer.
+ */
+static void tfm_sst_test_2003(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -201,9 +253,8 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
  * - Valid application ID, asset handle and attributes struct pointer
  * - Invalid application ID
  * - Invalid asset handle
- * - Invalid attributes struct pointer
  */
-static void tfm_sst_test_2003(struct test_result_t *ret)
+static void tfm_sst_test_2004(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
@@ -213,6 +264,7 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -267,6 +319,40 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
         return;
     }
 
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests get attributes function with an invalid attributes struct
+ *        pointer.
+ */
+static void tfm_sst_test_2005(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    uint32_t hdl;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
+
     /* Calls get_attributes with invalid struct attributes pointer */
     err = tfm_sst_veneer_get_attributes(app_id, hdl, NULL);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
@@ -283,10 +369,8 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
  * - Valid application ID, asset handle and data pointer
  * - Invalid application ID
  * - Invalid asset handle
- * - NULL pointer as write buffer
- * - Offset + write data size larger than max asset size
  */
-static void tfm_sst_test_2004(struct test_result_t *ret)
+static void tfm_sst_test_2006(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
@@ -298,6 +382,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -320,7 +405,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
@@ -357,25 +442,115 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
         return;
     }
 
-    /* Calls write function with invalid asset handle */
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests write function with:
+ * - Null tfm_sst_buf_t pointer
+ * - Null write buffer pointer
+ */
+static void tfm_sst_test_2007(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
+
+    /* Calls write function with tfm_sst_buf_t pointer set to NULL */
     err = tfm_sst_veneer_write(app_id, hdl, NULL);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("NULL data pointer should make the write fail");
+        TEST_FAIL("Write should fail with tfm_sst_buf_t pointer set to NULL");
         return;
     }
 
     /* Sets data structure */
+    io_data.data = NULL;
+    io_data.size = 1;
+    io_data.offset = 0;
+
+    /* Calls write function with data pointer set to NULL */
+    err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+        TEST_FAIL("Write should fail with data pointer set to NULL");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests write function with offset + write data size larger than max
+ *        asset size.
+ */
+static void tfm_sst_test_2008(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+    uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
+
+    /* Attempts to write beyond end of asset starting from a valid offset */
     io_data.data = wrt_data;
+    io_data.size = 2;
+    io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE - 1;
+
+    err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+    if (err == TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Writing beyond end of asset should not succeed");
+        return;
+    }
+
+    /* Attempts to write to an offset beyond the end of the asset */
     io_data.size = 1;
     io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE;
 
-    /* Calls write function with offset + write data size larger than
-     * max asset size
-     */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Offset + write data size larger than max asset size "
-                  "should make the write fail");
+        TEST_FAIL("Write to an offset beyond end of asset should not succeed");
         return;
     }
 
@@ -387,22 +562,20 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
  * - Valid application ID, asset handle and data pointer
  * - Invalid application ID
  * - Invalid asset handle
- * - NULL pointer as write buffer
- * - Offset + read data size larger than current asset size
  */
-static void tfm_sst_test_2005(struct test_result_t *ret)
+static void tfm_sst_test_2009(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    struct tfm_sst_attribs_t asset_attrs;
     uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -425,7 +598,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
@@ -475,11 +648,107 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
         return;
     }
 
-    /* Calls read with invalid asset handle */
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests read function with:
+ * - Null tfm_sst_buf_t pointer
+ * - Null read buffer pointer
+ */
+static void tfm_sst_test_2010(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
+
+    /* Calls read with invalid tfm_sst_buf_t pointer */
     err = tfm_sst_veneer_read(app_id, hdl, NULL);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read should fail when read is called with an invalid "
-                  "data pointer");
+        TEST_FAIL("Read with tfm_sst_buf_t pointer set to NULL should fail");
+        return;
+    }
+
+    io_data.data = NULL;
+    io_data.size = 1;
+    io_data.offset = 0;
+
+    /* Calls read with invalid data pointer */
+    err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+        TEST_FAIL("Read with read data pointer set to NULL should fail");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests read function with offset + read data size larger than current
+ *        asset size.
+ */
+static void tfm_sst_test_2011(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    struct tfm_sst_attribs_t asset_attrs;
+    uint32_t hdl;
+    uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
+
+    /* Sets data structure */
+    io_data.data = wrt_data;
+    io_data.size = WRITE_BUF_SIZE;
+    io_data.offset = 0;
+
+    /* Writes data in the asset */
+    err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
@@ -497,17 +766,24 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
         return;
     }
 
-    /* Sets data structure */
+    /* Attempts to read beyond the current size starting from a valid offset */
     io_data.data = read_data;
+    io_data.size = 2;
+    io_data.offset = asset_attrs.size_current - 1;
+
+    err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+    if (err == TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Read beyond current size should not succeed");
+        return;
+    }
+
+    /* Attempts to read from an offset beyond the current size of the asset */
     io_data.size = 1;
     io_data.offset = asset_attrs.size_current;
 
-    /* Calls write function with offset + read data size larger than current
-     * asset size
-     */
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Offset + read data size larger than current asset size");
+        TEST_FAIL("Read from an offset beyond current size should not succeed");
         return;
     }
 
@@ -522,7 +798,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
  * - Remove first asset in the data block and check if
  *   next asset's data is compacted correctly.
  */
-static void tfm_sst_test_2006(struct test_result_t *ret)
+static void tfm_sst_test_2012(struct test_result_t *ret)
 {
     const uint32_t app_id_1 = S_APP_ID;
     const uint32_t app_id_2 = S_APP_ID;
@@ -537,6 +813,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -626,7 +903,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     io_data.size = SST_ASSET_MAX_SIZE_SHA224_HASH;
     io_data.offset = 0;
 
-    /* Write data in asset 1 */
+    /* Writes data in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, hdl_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
@@ -669,7 +946,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 /**
  * \brief Tests write and partial reads.
  */
-static void tfm_sst_test_2007(struct test_result_t *ret)
+static void tfm_sst_test_2013(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
@@ -682,6 +959,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -704,7 +982,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
@@ -753,7 +1031,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
  *        The expected behaviour is to read back the data wrote
  *        before the seconds perpare call.
  */
-static void tfm_sst_test_2008(struct test_result_t *ret)
+static void tfm_sst_test_2014(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
@@ -765,6 +1043,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -787,7 +1066,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should works correctly");
@@ -806,7 +1085,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Read back the data after the prepare */
+    /* Reads back the data after the prepare */
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
@@ -835,7 +1114,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum assert size.
  */
-static void tfm_sst_test_2009(struct test_result_t *ret)
+static void tfm_sst_test_2015(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
@@ -846,6 +1125,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -868,7 +1148,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     io_data.size = SST_ASSET_MAX_SIZE_SHA224_HASH + 1;
     io_data.offset = 0;
 
-    /* Write data in the asset when data size is bigger than asset size */
+    /* Writes data in the asset when data size is bigger than asset size */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Should have failed asset write of too large");
@@ -881,7 +1161,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes.
  */
-static void tfm_sst_test_2010(struct test_result_t *ret)
+static void tfm_sst_test_2016(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
@@ -894,6 +1174,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -916,7 +1197,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
@@ -928,7 +1209,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = WRITE_BUF_SIZE;
 
-    /* Write data 2 in the asset */
+    /* Writes data 2 in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 failed");
@@ -961,7 +1242,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-static void tfm_sst_test_2011(struct test_result_t *ret)
+static void tfm_sst_test_2017(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
@@ -974,6 +1255,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -996,7 +1278,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
@@ -1008,7 +1290,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     io_data.size = (SST_ASSET_MAX_SIZE_SHA224_HASH - WRITE_BUF_SIZE) + 1;
     io_data.offset = WRITE_BUF_SIZE;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
@@ -1021,7 +1303,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     io_data.size = SST_ASSET_MAX_SIZE_SHA224_HASH - WRITE_BUF_SIZE;
     io_data.offset = WRITE_BUF_SIZE;
 
-    /* Write data in the asset */
+    /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 3 failed");
@@ -1047,10 +1329,11 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+
 /**
- * \brief Tests write and read to/from 2 assets.
+ * \brief Tests writing data to two assets alternately before read-back.
  */
-static void tfm_sst_test_2012(struct test_result_t *ret)
+static void tfm_sst_test_2018(struct test_result_t *ret)
 {
 
     const uint32_t app_id_1 = S_APP_ID;
@@ -1069,6 +1352,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -1105,7 +1389,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
-    /* Write data in asset 1 */
+    /* Writes data in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, hdl_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
@@ -1117,7 +1401,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     io_data.size = 2;
     io_data.offset = 0;
 
-    /* Write data 2 in asset 2 */
+    /* Writes data 2 in asset 2 */
     err = tfm_sst_veneer_write(app_id_2, hdl_2, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
@@ -1129,7 +1413,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = WRITE_BUF_SIZE;
 
-    /* Write data 3 in asset 1 */
+    /* Writes data 3 in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, hdl_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
@@ -1141,7 +1425,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 2;
 
-    /* Write data 4 in asset 2 */
+    /* Writes data 4 in asset 2 */
     err = tfm_sst_veneer_write(app_id_2, hdl_2, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
@@ -1189,12 +1473,9 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 }
 
 /**
- * \brief Tests write and read to/from the follow illegal locations:
- * - ROM memory
- * - Device memory
- * - Non existing memory location
+ * \brief Tests read from and write to an illegal location: ROM.
  */
-static void tfm_sst_test_2013(struct test_result_t *ret)
+static void tfm_sst_test_2019(struct test_result_t *ret)
 {
     uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
@@ -1204,6 +1485,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
         return;
     }
 
@@ -1220,8 +1502,6 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
         TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
-
-    /*** Check functions against ROM address location ***/
 
     /* Gets asset's handle with a ROM address location to store asset's
      * handle
@@ -1252,7 +1532,39 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
         return;
     }
 
-    /*** Check functions against devices address location ***/
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests read from and write to an illegal location: device memory.
+ */
+static void tfm_sst_test_2020(struct test_result_t *ret)
+{
+    uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
 
     /* Gets asset's handle with a devices address location to store asset's
      * handle
@@ -1266,6 +1578,8 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Sets data structure */
     io_data.data = (uint8_t *)DEV_ADDR_LOCATION;
+    io_data.size = 1;
+    io_data.offset = 0;
 
     /* Calls write with a device address location */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
@@ -1281,7 +1595,39 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
         return;
     }
 
-    /*** Check functions against non existing address location ***/
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests read from and write to an illegal location: non-existant memory.
+ */
+static void tfm_sst_test_2021(struct test_result_t *ret)
+{
+    uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    /* Creates asset to get a valid handle */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        return;
+    }
 
     /* Gets asset's handle with a non existing address location to store asset's
      * handle
@@ -1295,6 +1641,8 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Sets data structure */
     io_data.data = (uint8_t *)NON_EXIST_ADDR_LOCATION;
+    io_data.size = 1;
+    io_data.offset = 0;
 
     /* Calls write with a non-existing address location */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
@@ -1316,7 +1664,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 /**
  * \brief Writes data to the middle of an existing asset.
  */
-static void tfm_sst_test_2014(struct test_result_t *ret)
+static void tfm_sst_test_2022(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
