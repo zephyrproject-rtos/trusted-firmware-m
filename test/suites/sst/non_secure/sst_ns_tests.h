@@ -8,11 +8,11 @@
 #ifndef __SST_NS_TESTS_H__
 #define __SST_NS_TESTS_H__
 
+#include "test/framework/test_framework.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "test/framework/test_framework.h"
 
 /**
  * \brief Register testsuite for the SST tests.
@@ -27,6 +27,13 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite);
  * \param[in] p_test_suite  The test suite to be executed.
  */
 void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite);
+
+/**
+ * \brief Register testsuite for the SST policy tests.
+ *
+ * \param[in] p_test_suite  The test suite to be executed.
+ */
+void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite);
 
 #ifdef __cplusplus
 }

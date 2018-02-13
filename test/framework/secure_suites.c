@@ -20,12 +20,6 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
 
-    /* FIXME: this test suite needs to be refactored to accomodate it to
-     *        use only secure application ID.
-     *
-     * {&register_testsuite_s_sst_interface, 0, 0, 0},
-     */
-
 #ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */
     /* Note: since this is sample code, only run if test services are enabled */

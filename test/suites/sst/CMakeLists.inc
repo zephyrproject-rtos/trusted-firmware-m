@@ -30,11 +30,12 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 	list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/s_test_helpers.c"
 			"${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c"
 			"${SECURE_STORAGE_TEST_DIR}/secure/sst_reliability_testsuite.c"
-			"${SECURE_STORAGE_TEST_DIR}/secure/sst_policy_testsuite.c"
 		)
 
 	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
-			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c")
+			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c"
+			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_policy_testsuite.c"
+		)
 
 	if (NOT DEFINED TFM_PARTITION_TEST_SST)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")

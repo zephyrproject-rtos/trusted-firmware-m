@@ -18,6 +18,7 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
     /* Non-secure SST test cases */
     {&register_testsuite_ns_sst_interface, 0, 0, 0},
+    {&register_testsuite_ns_sst_policy, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_SST
     /* Non-secure SST referenced access testsuite */
