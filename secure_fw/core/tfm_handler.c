@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -55,6 +55,7 @@ struct tfm_fault_context_s {
     uint32_t RETPSR;
 } tfm_fault_context;
 
+#if defined(__ARM_ARCH_8M_MAIN__)
 /**
  * \brief Overwrites default Secure fault handler.
  */
@@ -86,28 +87,32 @@ void SecureFault_Handler(void)
         memcpy(&tfm_fault_context, (const void *)sp, sizeof(tfm_fault_context));
     }
 
-    /*
-     * FixMe: Due to an issue on the FVP, the MPC fault doesn't trigger a
-     * MPC IRQ which is handled by the MPC_handler.
-     * In the FVP, the MPC fault is handled by the SecureFault_handler.
-     */
-
-    if (Driver_SRAM1_MPC.InterruptState() != 0) {
-        /* Clear MPC interrupt flag and pending MPC IRQ */
-        Driver_SRAM1_MPC.ClearInterrupt();
-        NVIC_ClearPendingIRQ(MPC_IRQn);
-        /* Print fault message and block execution */
-        LOG_MSG("Oops... MPC/Secure fault!!!");
-        while (1) {
-            ;
-        }
-    } else {
-        LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
-        while (1) {
-            ;
-        }
+    LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    while (1) {
+        ;
     }
 }
+#elif defined(__ARM_ARCH_8M_BASE__)
+/**
+ * \brief Overwrites default Hard fault handler.
+ *
+ * In case of a baseline implementation fault conditions that would generate a
+ * SecureFault in a mainline implementation instead generate a Secure HardFault.
+ */
+void HardFault_Handler(void)
+{
+    /* In a baseline implementation there is no way, to find out whether this is
+     * a hard fault triggered directly, or another fault that has been
+     * escalated.
+     */
+    while (1) {
+        ;
+    }
+}
+#else
+#error "Unsupported ARM Architecture."
+#endif
+
 
 void MPC_Handler(void)
 {
@@ -141,6 +146,7 @@ void PPC_Handler(void)
     }
 }
 
+#if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM(
@@ -154,6 +160,29 @@ __attribute__((naked)) void SVC_Handler(void)
     "BL      SVCHandler_main\n"
     "POP     {r1, pc}\n");
 }
+#elif defined(__ARM_ARCH_8M_BASE__)
+__attribute__((naked)) void SVC_Handler(void)
+{
+    __ASM(
+    "MOVS    r0, #4\n"  /* Check store SP in thread mode to r0 */
+    "MOV     r1, lr\n"
+    "TST     r0, r1\n"
+    "BEQ     handler\n"
+    "MRS     r0, PSP\n"  /* Coming from thread mode */
+    "B sp_stored\n"
+    "handler:\n"
+    "MRS     r0, MSP\n"  /* Coming from handler mode */
+    "sp_stored:\n"
+    "PUSH    {r0, lr}\n"
+    "MOV     r1, sp\n"
+    "adds    r1, r1, #4\n"
+    "BL      SVCHandler_main\n"
+    "POP     {r1, pc}\n");
+}
+#else
+#error "Unsupported ARM Architecture."
+#endif
+
 
 int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
 {

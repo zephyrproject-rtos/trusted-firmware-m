@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,19 +33,28 @@ include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
 include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
 
-set(MPS2_SSE200_BUILD_CMSIS_CORE On)
-set(MPS2_SSE200_BUILD_RETARGET On)
-set(MPS2_SSE200_BUILD_NATIVE_DRIVERS On)
-set(MPS2_SSE200_BUILD_STARTUP On)
-set(MPS2_SSE200_BUILD_TARGET_CFG On)
-set(MPS2_SSE200_BUILD_TARGET_HARDWARE_KEYS On)
-set(MPS2_SSE200_BUILD_CMSIS_DRIVERS On)
-set(MPS2_SSE200_BUILD_MPS2_TIME Off)
-set(MPS2_SSE200_BUILD_UART_STDOUT On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_LEDS Off)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_TIME On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_FLASH Off)
-include(${TFM_ROOT_DIR}/platform/ext/Mps2SSE200.cmake)
+set(BUILD_CMSIS_CORE On)
+set(BUILD_RETARGET On)
+set(BUILD_NATIVE_DRIVERS On)
+set(BUILD_STARTUP On)
+set(BUILD_TARGET_CFG On)
+set(BUILD_TARGET_HARDWARE_KEYS On)
+set(BUILD_CMSIS_DRIVERS On)
+set(BUILD_TIME Off)
+set(BUILD_UART_STDOUT On)
+set(BUILD_FLASH Off)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
+endif()
+
+if(NOT DEFINED S_SCATTER_FILE_NAME)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: S_SCATTER_FILE_NAME not defined, Include this file from a Config*.cmake")
+endif()
+embedded_set_target_linker_file(TARGET tfm_s PATH "${S_SCATTER_FILE_NAME}")
 
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 

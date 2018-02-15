@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -82,9 +82,24 @@ if (ENABLE_SECURE_STORAGE)
 	embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
 
-	set(PLATFORM_DIR ${TFM_ROOT_DIR}/platform)
-	embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
-	embedded_include_directories(PATH "${PLATFORM_DIR}/target/sse_200_mps2/cmsis_core" ABSOLUTE)
-	embedded_include_directories(PATH "${PLATFORM_DIR}/target/sse_200_mps2/sse_200/retarget" ABSOLUTE)
+	set(BUILD_CMSIS_CORE Off)
+	set(BUILD_RETARGET Off)
+	set(BUILD_NATIVE_DRIVERS Off)
+	set(BUILD_STARTUP Off)
+	set(BUILD_TARGET_CFG Off)
+	set(BUILD_TARGET_HARDWARE_KEYS Off)
+	set(BUILD_CMSIS_DRIVERS Off)
+	set(BUILD_TIME Off)
+	set(BUILD_UART_STDOUT Off)
+	set(BUILD_FLASH Off)
+	if(NOT DEFINED PLATFORM_CMAKE_FILE)
+		message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+	elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+		message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+	else()
+		include(${PLATFORM_CMAKE_FILE})
+	endif()
+
 endif()

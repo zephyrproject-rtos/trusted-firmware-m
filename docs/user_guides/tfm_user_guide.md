@@ -21,7 +21,7 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080200 \
+--parameter cpu0.INITVTOR_S=0x10080400 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
 --parameter fvp_mps2.telnetterminal0.start_telnet=1 \
@@ -40,7 +40,7 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080200 \
+--parameter cpu0.INITVTOR_S=0x10080400 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
 --parameter fvp_mps2.telnetterminal0.start_telnet=1 \
@@ -62,7 +62,7 @@ previous command for this:
 --parameter cpu0.INITVTOR_S=0x10000000 \
 ...
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<build_dir>/app/tfm_sign.bin@0x10080000
+--data cpu0=<build_dir>/tfm_sign.bin@0x10080000
 ```
 
 ### To run the example code on SSE 200 FPGA on MPS2 board
@@ -173,7 +173,7 @@ which is contiguous in the device memory. At compile time these images are
 concatenated and signed with RSA-2048 digital signature. At the end of a
 successful build signed TF-M payload can be found here:
 ```
-<build_dir>/app/tfm_sign.bin
+<build_dir>/tfm_sign.bin
 ```
 
 The device memory is partitioned in the following way:
@@ -181,10 +181,10 @@ The device memory is partitioned in the following way:
 - 0x0000_0000 - 0x0007_FFFF:    BL2 bootloader
 - 0x0008_0000 - 0x000F_FFFF:    Slot 0 : Single binary blob: Secure + Non-Secure
                                 image; Primary memory partition
-  - 0x0008_0000 - 0x0008_01FF:  Common image header
-  - 0x0008_0200 - 0x0008_xxxx:  Secure image
-  - 0x0008_xxxx - 0x0010_01FF:  Padding (with 0xFF)
-  - 0x0010_0200 - 0x0010_xxxx:  Non-secure image
+  - 0x0008_0000 - 0x0008_03FF:  Common image header
+  - 0x0008_0400 - 0x0008_xxxx:  Secure image
+  - 0x0008_xxxx - 0x0010_03FF:  Padding (with 0xFF)
+  - 0x0010_0400 - 0x0010_xxxx:  Non-secure image
   - 0x0010_xxxx - 0x0010_xxxx:  Hash value(SHA256) and RSA signature
                                 of combined image
 
@@ -225,8 +225,8 @@ software. Follow the previous instructions with small changes.
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<example_app_build_dir>/app/tfm_sign.bin@0x10080000 \
---data cpu0=<regresssion_test_build_dir>/app/tfm_sign.bin@0x10180000
+--data cpu0=<example_app_build_dir>/tfm_sign.bin@0x10080000 \
+--data cpu0=<regresssion_test_build_dir>/tfm_sign.bin@0x10180000
 ```
 
 #### Test software upgrade on SSE 200 FPGA on MPS2 board

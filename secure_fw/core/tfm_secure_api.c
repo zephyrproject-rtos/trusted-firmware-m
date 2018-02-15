@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -313,6 +313,7 @@ static int32_t tfm_core_deconfigure_secure_exception(void)
     return TFM_SUCCESS;
 }
 
+#if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
 {
     /* Save all callee-saved registers to prevent malicious service from
@@ -327,6 +328,42 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
 "return_from_service:\n"
     "POP    {r4-r12, pc}\n");
 }
+#elif defined(__ARM_ARCH_8M_BASE__)
+__attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
+{
+    /* Save all callee-saved registers to prevent malicious service from
+     * modifying execution state.
+     * Save LR for return address.
+     * r12 is used as padding for 8-byte stack alignment
+     */
+    __ASM(
+    "PUSH   {lr}\n"
+    "PUSH   {r4-r7}\n"
+    "MOV    r4, r8\n"
+    "MOV    r5, r9\n"
+    "MOV    r6, r10\n"
+    "MOV    r7, r11\n"
+    "PUSH   {r4-r7}\n"
+    "MOV    r4, r12\n"
+    "PUSH   {r4}\n"
+    "MOVS   r0, #2\n"
+    "MVNS   r0, r0\n"
+    "BX     r0\n"
+"return_from_service:\n"
+    "POP    {r4}\n"
+    "MOV    r12, r4\n"
+    "POP    {r4-r7}\n"
+    "MOV    r8, r4\n"
+    "MOV    r9, r5\n"
+    "MOV    r10, r6\n"
+    "MOV    r11, r7\n"
+    "POP    {r4-r7}\n"
+    "POP    {pc}\n");
+}
+#else
+#error "Unsupported ARM Architecture."
+#endif
+
 extern void return_from_service(void);
 
 static int32_t tfm_core_call_service(struct tfm_sfn_req_s *desc_ptr)

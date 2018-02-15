@@ -13,7 +13,7 @@ environment. The instructions are below.
 
 Both need to be cloned manually in the current release.
 
-### Build steps:
+### Build steps for the AN521 FPGA:
 
 ```
 cd <TF-M base folder>
@@ -23,13 +23,28 @@ git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
 cd trusted-firmware-m
 mkdir cmake_build
 cd cmake_build
-cmake ../ -G"Unix Makefiles"
+cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521
 make
 ```
 
-### Regression Tests
+### Concept of build config files
+The build configuration for TF-M is provided to the build system by two
+different components:
+* The way applications are built is specified by providing one of the
+`Config<APP_NAME>.cmake` files to the build system. This can be done by adding
+the `` -DPROJ_CONFIG=<absolute file path> `` i.e. on Linux:
+`` -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` `` parameter to the
+cmake command. (See examples below.)
+* The target platform can be specified by adding the
+`-DTARGET_PLATFORM=<target platform name>` option to the cmake command (See
+  examples below.)
+
+*Note* For all the applications we build the level 2 bootloader
+
+### Regression Tests for AN521
 The default option build doesn't include regression tests. Procedure for
-building the regression tests is below.
+building the regression tests is below. Compiling for other target hardware
+is possible by selecting a different build config file.
 
 `It is recommended that tests are built in a different directory.`
 
@@ -40,7 +55,7 @@ cd <TF-M base folder>
 cd trusted-firmware-m
 mkdir cmake_test
 cd cmake_test
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` ../
+cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 ../
 make
 ```
 
@@ -51,7 +66,7 @@ cd <TF-M base folder>
 cd trusted-firmware-m
 mkdir cmake_test
 cd cmake_test
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` ../
+cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 ../
 make
 ```
 
@@ -63,14 +78,14 @@ system can export these files using "install" target in to a single folder.
 *On Windows*
 
 ```
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` ../
+cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 ../
 make install
 ```
 
 *On Linux*
 
 ```
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` ../
+cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 ../
 make install
 ```
 

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -41,19 +41,28 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
 	)
 
-set(MPS2_SSE200_BUILD_CMSIS_CORE On)
-set(MPS2_SSE200_BUILD_RETARGET On)
-set(MPS2_SSE200_BUILD_NATIVE_DRIVERS On)
-set(MPS2_SSE200_BUILD_MPS2_TIME Off)
-set(MPS2_SSE200_BUILD_STARTUP On)
-set(MPS2_SSE200_BUILD_TARGET_CFG Off)
-set(MPS2_SSE200_BUILD_TARGET_HARDWARE_KEYS Off)
-set(MPS2_SSE200_BUILD_CMSIS_DRIVERS On)
-set(MPS2_SSE200_BUILD_UART_STDOUT Off)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_LEDS On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_TIME On)
-set(MPS2_SSE200_BUILD_MPS2_BOARD_FLASH Off)
-include(${TFM_ROOT_DIR}/platform/ext/Mps2SSE200.cmake)
+set(BUILD_CMSIS_CORE On)
+set(BUILD_RETARGET On)
+set(BUILD_NATIVE_DRIVERS On)
+set(BUILD_TIME Off)
+set(BUILD_STARTUP On)
+set(BUILD_TARGET_CFG Off)
+set(BUILD_TARGET_HARDWARE_KEYS Off)
+set(BUILD_CMSIS_DRIVERS On)
+set(BUILD_UART_STDOUT Off)
+set(BUILD_FLASH Off)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
+endif()
+
+if(NOT DEFINED NS_SCATTER_FILE_NAME)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: NS_SCATTER_FILE_NAME not defined, Include this file from a Config*.cmake")
+endif()
+embedded_set_target_linker_file(TARGET tfm_ns PATH  "${NS_SCATTER_FILE_NAME}")
 
 #Set include directories.
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/common/sct ABSOLUTE APPEND)
@@ -68,32 +77,40 @@ embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/C
 #Create an executable
 add_executable(${PROJECT_NAME} ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${NS_APP_SRC})
 #Add the RTX library
-target_link_libraries(${PROJECT_NAME} "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+if(NOT DEFINED RTX_LIB_PATH)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
+endif()
+target_link_libraries(${PROJECT_NAME} "${RTX_LIB_PATH}")
 #Set macro definitions
 target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
 
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
-#Generate MCUBoot compatiable payload
-if (DEFINED BL2)
-	#Include Python3.x interpreter
-	set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
-	find_package(PythonInterp)
+#Generate MCUBoot compatible payload
+if (BL2)
+	#Find Python3.x interpreter
+	find_package(PythonInterp 3)
+
 	if (NOT PYTHONINTERP_FOUND)
-		message(FATAL_ERROR "Missing Python3.x interpreter, install it!")
+		message(FATAL_ERROR "Failed to find Python3.x interpreter. Pyhton3 must be installed an available on the PATH.")
 	endif()
 
 	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)
+
+if(NOT DEFINED FLASH_LAYOUT)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: FLASH_LAYOUT is not defined.")
+endif()
 
 	add_custom_command(TARGET ${PROJECT_NAME}
 						POST_BUILD
 
 						#Create concatenated binary image from tfm_ns.bin and tfm_s.bin
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
-						ARGS -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
+						ARGS -l ${FLASH_LAYOUT}
+							 -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
 							 -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-							 -o ${CMAKE_BINARY_DIR}/app/tfm_full.bin
+							 -o ${CMAKE_BINARY_DIR}/tfm_full.bin
 
 						#Sign concatenated binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
@@ -101,10 +118,10 @@ if (DEFINED BL2)
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
 							 -v 1.0
-							 -H 0x200
+							 -H 0x400
 							 --pad 0x100000
-							 ${CMAKE_BINARY_DIR}/app/tfm_full.bin
-							 ${CMAKE_BINARY_DIR}/app/tfm_sign.bin
+							 ${CMAKE_BINARY_DIR}/tfm_full.bin
+							 ${CMAKE_BINARY_DIR}/tfm_sign.bin
 				)
 endif()
 

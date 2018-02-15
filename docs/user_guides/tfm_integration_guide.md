@@ -8,12 +8,15 @@ Follow the [Build instructions](tfm_build_instruction.md).
 Explained in the [Build instructions](tfm_build_instruction.md).
 
 ## How to add a new platform
-The SSE-200 sybsystem on the MPS2 board is the hardware platform currently
-supported by TF-M. The files related to the platform being used are contained
-under the `platform` subfolder, in particular inside `platform/target`. The TF-M
-current implementation has the `platform/target/sse_200_mps2` platform, and
-a `platform/target/common` folder which is used to store source and header files
-which are platform generic.
+The Soft Macro Model (SMM) SSE-200 subsystem for MPS2 board (AN521) is the
+hardware platform currently supported by TF-M. The files related to the platform
+being used are contained under the `platform` subfolder, in particular inside
+`platform/target`. The TF-M current implementation has the
+`platform/target/mps2/an521` platform, and a `platform/target/common` folder
+which is used to store source and header files which are platform generic.
+More information about SMM-SSE-200 subsystem for MPS2 board (AN521) can be
+found in:
+[MPS2 homepage](https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2)
 
 #### generic drivers and startup/scatter files
 The addition of a new platform means the creation of a new subfolder inside
@@ -25,7 +28,7 @@ board specific drivers which are used by the board platform to interact with the
 external world, for example during tests, that have to be provided, e.g. to
 blink LEDs or count time in the MPS2 board. When a new platform is added, the
 files being built by the build systems need to be updated manually, as the
-platform folder being used is currently hardcoded to `sse_200_mps2`.
+platform folder being used is currently hardcoded to `mps2/an521`.
 
 `Note: Currently SST and BL2 bootloader use different flash interface`
 
@@ -90,4 +93,4 @@ to be able to run the tests.
 
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*

@@ -1,0 +1,112 @@
+#! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
+
+/*
+ * Copyright (c) 2017-2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "../partition/region_defs.h"
+
+LR_CODE S_CODE_START {
+
+    /****  This initial section contains common code for TEE */
+    ER_TFM_CODE S_CODE_START S_CODE_SIZE {
+        *.o (RESET +First)
+        .ANY (+RO)
+    }
+
+#if TFM_LVL == 1
+
+    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+        .ANY (+RW +ZI)
+    }
+
+    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x4000 {
+    }
+
+    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
+    }
+
+#else /* TFM_LVL == 1 */
+
+    /**** Unprivileged Secure code start here */
+    TFM_UNPRIV_CODE +0 ALIGN 32 {
+        tfm_unpriv_api.o (+RO)
+        platform_retarget_dev.o (+RO)
+        *(SFN)
+    }
+
+    TFM_SEC_FUNC_STORAGE +0 ALIGN 32 {
+        *tfm_storage* (+RO)
+    }
+
+#ifdef CORE_TEST_SERVICES
+    TFM_SEC_FUNC_CORE_TEST +0 ALIGN 32 {
+        *tfm_ss_core_test.* (+RO)
+    }
+
+    TFM_SEC_FUNC_CORE_TEST_2 +0 ALIGN 32 {
+        *tfm_ss_core_test_2.* (+RO)
+    }
+#endif /* CORE_TEST_SERVICES */
+
+    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+        .ANY (+RW +ZI)
+    }
+
+    TFM_UNPRIV_RO_DATA +0 ALIGN 32 {
+        tfm_unpriv_api.o (+RW +ZI)
+        platform_retarget_dev.o (+RW +ZI)
+    }
+
+    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
+    }
+
+    TFM_SEC_FUNC_STORAGE_DATA +0 ALIGN 32 {
+        *tfm_storage* (+RW +ZI)
+    }
+
+    TFM_SEC_FUNC_STORAGE_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+
+#ifdef CORE_TEST_SERVICES
+    TFM_SEC_FUNC_CORE_TEST_DATA +0 ALIGN 32 {
+        tfm_ss_core_test.o (+RW +ZI)
+    }
+
+    TFM_SEC_FUNC_CORE_TEST_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+
+    TFM_SEC_FUNC_CORE_TEST_2_DATA +0 ALIGN 32 {
+        tfm_ss_core_test_2.o (+RW +ZI)
+    }
+
+    TFM_SEC_FUNC_CORE_TEST_2_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+#endif /* CORE_TEST_SERVICES */
+
+#endif /* TFM_LVL == 1 */
+
+}
+
+LR_VENEER CMSE_VENEER_REGION_START {
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) in a separate
+     * 32 bytes aligned region so that the SAU can be programmed to
+     * just set this region as Non-Secure Callable.
+     */
+    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+        *(Veneer$$CMSE)
+    }
+}

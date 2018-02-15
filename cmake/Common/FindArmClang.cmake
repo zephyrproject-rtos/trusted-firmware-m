@@ -111,3 +111,6 @@ endif()
 
 STRING(REGEX REPLACE "([0-9]+)\.([0-9]+)(\.[0-9]+)*.*" "CompilerArmClang\\1\\2" ARMCLANG_MODULE "${ARMCLANG_VER}")
 
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/${ARMCLANG_MODULE}.cmake")
+	message(FATAL_ERROR "ERROR: Unsupported ARMCLANG compiler version found on PATH.")
+endif()

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # Copyright 2017 Linaro Limited
-# Copyright (c) 2017, Arm Limited.
+# Copyright (c) 2017-2018, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,22 +30,22 @@ offset_re = re.compile(r"^#define ([0-9A-Z_]+)_IMAGE_OFFSET\s+((0x)?[0-9a-fA-F]+
 size_re   = re.compile(r"^#define ([0-9A-Z_]+)_IMAGE_MAX_SIZE\s+((0x)?[0-9a-fA-F]+)")
 
 class Assembly():
-    def __init__(self, output):
+    def __init__(self, layout_path, output):
+        self.output = output
+        self.layout_path = layout_path
         self.find_slots()
         try:
             os.unlink(output)
         except OSError as e:
             if e.errno != errno.ENOENT:
                 raise
-        self.output = output
 
     def find_slots(self):
         offsets = {}
         sizes = {}
 
         scriptsDir = os.path.dirname(os.path.abspath(__file__))
-        path = '../../../../platform/ext/target/sse_200_mps2/sse_200/partition/flash_layout.h'
-        configFile = os.path.join(scriptsDir, path)
+        configFile = os.path.join(scriptsDir, self.layout_path)
 
         with open(configFile, 'r') as fd:
             for line in fd:
@@ -81,6 +81,8 @@ class Assembly():
 def main():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('-l', '--layout', required=True,
+            help='Location of the memory layout file')
     parser.add_argument('-s', '--secure', required=True,
             help='Unsigned secure image')
     parser.add_argument('-n', '--non_secure',
@@ -89,7 +91,7 @@ def main():
             help='Filename to write full image to')
 
     args = parser.parse_args()
-    output = Assembly(args.output)
+    output = Assembly(args.layout, args.output)
 
 
     output.add_image(args.secure, "SECURE")
