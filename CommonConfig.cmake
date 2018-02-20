@@ -157,13 +157,27 @@ config_setting_shared_flags(tfm_ns)
 config_setting_shared_flags(tfm_storage)
 set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
-set (SST_ENCRYPTION ON)
-if (NOT DEFINED SST_RAM_FS)
-	set (SST_RAM_FS OFF)
+#Default TF-M secure storage flags.
+#These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
+if (NOT DEFINED ENABLE_SECURE_STORAGE)
+	set (ENABLE_SECURE_STORAGE ON)
+
+	if (NOT DEFINED SST_ENCRYPTION)
+		set (SST_ENCRYPTION ON)
+	endif()
+
+	if (NOT DEFINED SST_RAM_FS)
+		set (SST_RAM_FS OFF)
+	endif()
+
+	if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
+		set (SST_VALIDATE_METADATA_FROM_FLASH ON)
+	endif()
 endif()
-set (SST_VALIDATE_METADATA_FROM_FLASH ON)
-set (ENABLE_SECURE_STORAGE ON)
-set (MBEDTLS_DEBUG ON)
+
+if (NOT DEFINED MBEDTLS_DEBUG)
+	set (MBEDTLS_DEBUG ON)
+endif()
 
 ##TF-M audit logging
 config_setting_shared_flags(tfm_audit)
