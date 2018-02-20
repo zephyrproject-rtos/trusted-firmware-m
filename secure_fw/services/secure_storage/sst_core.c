@@ -64,17 +64,37 @@
 #define SST_NUM_ACTIVE_DBLOCKS (SST_NUM_DEDICATED_DBLOCKS + 1)
 
 #define SST_LOGICAL_DBLOCK0  0
+#define SST_DEFAULT_EMPTY_BUFF_VAL 0
 
-static struct sst_asset_system_context sst_system_ctx;
+#ifndef SST_FLASH_PROGRAM_UNIT
+#error "SST_FLASH_PROGRAM_UNIT must be defined in flash_layout.h"
+#endif
+
+/* FIXME: Support other flash program units.*/
+#if ((SST_FLASH_PROGRAM_UNIT != 1) && (SST_FLASH_PROGRAM_UNIT != 2) \
+      && (SST_FLASH_PROGRAM_UNIT != 4))
+#error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4 bytes"
+#endif
+
+#if ((SST_MAX_ASSET_SIZE % SST_FLASH_PROGRAM_UNIT) != 0)
+/* SST_ALIGNED_MAX_ASSET_SIZE aligns the SST_MAX_ASSET_SIZE with the
+ * SST_FLASH_PROGRAM_UNIT
+ */
+#define SST_ALIGNED_MAX_ASSET_SIZE \
+((SST_FLASH_PROGRAM_UNIT - (SST_MAX_ASSET_SIZE % SST_FLASH_PROGRAM_UNIT)) \
+  + SST_MAX_ASSET_SIZE)
+#else
+#define SST_ALIGNED_MAX_ASSET_SIZE SST_MAX_ASSET_SIZE
+#endif
 
 /*
  * SST data buffer is used for metadata autentication, plain text and
  * encrypted data.
  */
 #ifdef SST_ENCRYPTION
-static uint8_t sst_data_buf[SST_MAX_ASSET_SIZE * 2];
+static uint8_t sst_data_buf[SST_ALIGNED_MAX_ASSET_SIZE * 2];
 #else
-static uint8_t sst_data_buf[SST_MAX_ASSET_SIZE];
+static uint8_t sst_data_buf[SST_ALIGNED_MAX_ASSET_SIZE];
 #endif
 
 static uint8_t *sst_buf_plain_text = sst_data_buf;
@@ -82,8 +102,10 @@ static uint8_t *sst_buf_plain_text = sst_data_buf;
 /* Plain text is stored at the beginning of SST data buffer. Encrypted data is
  * located from the middle to the end of SST data buffer.
  */
-static uint8_t *sst_buf_encrypted = sst_data_buf + SST_MAX_ASSET_SIZE;
+static uint8_t *sst_buf_encrypted = sst_data_buf + SST_ALIGNED_MAX_ASSET_SIZE;
 #endif
+
+static struct sst_asset_system_context sst_system_ctx;
 
 #define SST_ALL_METADATA_SIZE \
 (sizeof(struct sst_metadata_block_header) + \
@@ -111,10 +133,10 @@ SST_UTILS_BOUND_CHECK(METADATA_NOT_FIT_IN_DATA_BUF,
  * created, at least, when the SST area is empty.
  */
 /* Check if the largest asset fits in the asset's data area */
-#if (SST_MAX_ASSET_SIZE > SST_BLOCK_SIZE)
-#error "Current design limits maximum size of an asset to a block size"
-#elif (SST_TOTAL_NUM_OF_BLOCKS == 2)
-SST_UTILS_BOUND_CHECK(ASSET_NOT_FIT_IN_DATA_AREA, SST_MAX_ASSET_SIZE,
+SST_UTILS_BOUND_CHECK(LARGEST_ASSET_NOT_FIT_IN_DATA_BLOCK,
+                      SST_ALIGNED_MAX_ASSET_SIZE, SST_BLOCK_SIZE);
+#if (SST_TOTAL_NUM_OF_BLOCKS == 2)
+SST_UTILS_BOUND_CHECK(ASSET_NOT_FIT_IN_DATA_AREA, SST_ALIGNED_MAX_ASSET_SIZE,
                       (SST_BLOCK_SIZE - SST_ALL_METADATA_SIZE));
 #endif
 
@@ -122,6 +144,32 @@ SST_UTILS_BOUND_CHECK(ASSET_NOT_FIT_IN_DATA_AREA, SST_MAX_ASSET_SIZE,
 SST_UTILS_BOUND_CHECK(METADATA_NOT_FIT_IN_METADATA_BLOCK,
                       SST_ALL_METADATA_SIZE, SST_BLOCK_SIZE);
 
+/**
+ * \brief Gets the number of bytes aligned with the SST_FLASH_PROGRAM_UNIT.
+ *
+ * \param[in] nbr_bytes  Number of bytes to write
+ *
+ * \return Return number of bytes aligned with SST_FLASH_PROGRAM_UNIT
+ */
+static uint32_t sst_get_aligned_flash_bytes(uint32_t nbr_bytes)
+{
+    uint32_t align_flash_size;
+
+    /* Check if write parameters are aligned with the flash write
+     * program unit.
+     */
+    align_flash_size = (nbr_bytes % SST_FLASH_PROGRAM_UNIT);
+    if (align_flash_size != 0) {
+        /* Add offset to align object's size required with the flash write
+         * program unit.
+         */
+        align_flash_size = (SST_FLASH_PROGRAM_UNIT - align_flash_size);
+    }
+
+    align_flash_size += nbr_bytes;
+
+    return align_flash_size;
+}
 
 /**
  * \brief Gets offset of a logical block's metadata in metadata block
@@ -758,7 +806,8 @@ static enum tfm_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta)
     read_buf = sst_buf_plain_text;
 #endif
     /* Pedantic: clear the buffer from any previous residue */
-    sst_utils_memset(read_buf, 0x00, SST_MAX_ASSET_SIZE);
+    sst_utils_memset(read_buf, SST_DEFAULT_EMPTY_BUFF_VAL,
+                     SST_ALIGNED_MAX_ASSET_SIZE);
     err = sst_flash_read(phys_block, read_buf, pos, size);
 
     return err;
@@ -913,7 +962,8 @@ static enum tfm_sst_err_t sst_block_object_decrypt(
     }
 
     /* Pedantic: clear the decryption buffer */
-    sst_utils_memset(sst_buf_plain_text, 0x00, SST_MAX_ASSET_SIZE);
+    sst_utils_memset(sst_buf_plain_text, SST_DEFAULT_EMPTY_BUFF_VAL,
+                     SST_ALIGNED_MAX_ASSET_SIZE);
     err = sst_crypto_auth_and_decrypt(&meta->crypto, 0, 0,
                                       sst_buf_encrypted, sst_buf_plain_text,
                                       meta->cur_size);
@@ -1192,16 +1242,19 @@ static enum tfm_sst_err_t sst_meta_reserve_object(
 {
     uint32_t i;
     enum tfm_sst_err_t err;
+    uint32_t size_in_flash;
+
+    size_in_flash = sst_get_aligned_flash_bytes(size);
 
     for (i = 0; i < SST_NUM_ACTIVE_DBLOCKS; i++) {
         err = sst_meta_read_block_metadata(i, block_meta);
         if (err != TFM_SST_ERR_SUCCESS) {
             return TFM_SST_ERR_SYSTEM_ERROR;
         }
-        if (block_meta->free_size >= size) {
+        if (block_meta->free_size >= size_in_flash) {
             object_meta->lblock = i;
             object_meta->data_index = SST_BLOCK_SIZE - block_meta->free_size;
-            block_meta->free_size -= size;
+            block_meta->free_size -= size_in_flash;
             object_meta->max_size = size;
             return TFM_SST_ERR_SUCCESS;
         }
@@ -1313,6 +1366,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     const uint8_t *prepared_buf = sst_buf_plain_text;
     struct sst_assetmeta object_meta;
     struct sst_block_metadata block_meta;
+    uint32_t align_flash_nbr_bytes;
 
     /* Get the meta data index */
     object_index = sst_utils_extract_index_from_handle(asset_handle);
@@ -1335,6 +1389,11 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     if (offset > object_meta.cur_size) {
         return TFM_SST_ERR_PARAM_ERROR;
     }
+
+    /* Clean previous data in sst_buf_plain_text */
+    sst_utils_memset(sst_buf_plain_text, SST_DEFAULT_EMPTY_BUFF_VAL,
+                     SST_ALIGNED_MAX_ASSET_SIZE);
+
 
     if (object_meta.cur_size > 0) {
         /* Copy the current asset's data into the sst_buf_plain_text buffer
@@ -1378,10 +1437,11 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     prepared_buf = sst_buf_encrypted;
 #endif
 
-    /* Copy the content into scratch data buffer */
+    align_flash_nbr_bytes = sst_get_aligned_flash_bytes(object_meta.cur_size);
+
     err = sst_dblock_update_scratch(object_meta.lblock, &block_meta,
                                     prepared_buf, object_meta.data_index,
-                                    object_meta.cur_size);
+                                    align_flash_nbr_bytes);
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
@@ -1553,7 +1613,7 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t asset_handle)
     /* Save logical block, data_index and max_size to be used later on */
     del_obj_lblock = object_meta.lblock;
     del_obj_data_index = object_meta.data_index;
-    del_obj_max_size = object_meta.max_size;
+    del_obj_max_size = sst_get_aligned_flash_bytes(object_meta.max_size);
 
     /* Remove object metadata */
     object_meta.unique_id = SST_INVALID_UUID;
@@ -1596,7 +1656,8 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t asset_handle)
                 object_meta.data_index -= del_obj_max_size;
 
                 /* Increase number of bytes to move */
-                nbr_bytes_to_move += object_meta.max_size;
+                nbr_bytes_to_move += sst_get_aligned_flash_bytes(
+                                                          object_meta.max_size);
             }
         }
         /* Update object's metadata in to the scratch block */
@@ -1861,7 +1922,8 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
     }
 
     /* Initialize object metadata table */
-    sst_utils_memset(&object_metadata, 0x00, sizeof(struct sst_assetmeta));
+    sst_utils_memset(&object_metadata, SST_DEFAULT_EMPTY_BUFF_VAL,
+                     sizeof(struct sst_assetmeta));
     for (i = 0; i < SST_NUM_ASSETS; i++) {
         /* In the beginning phys id is same as logical id */
         /* Update object's metadata to reflect new attributes */

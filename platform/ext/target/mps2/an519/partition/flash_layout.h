@@ -27,7 +27,8 @@
  *    0x0018_0000 Secure     image secondary
  *    0x0020_0000 Non-secure image secondary
  * 0x0028_0000 Scratch area(1 MB)
- * 0x0038_0000 Unused(0.5 MB)
+ * 0x0038_0000 Secure Storage Area (0.02 MB)
+ * 0x0038_5000 Unused(0.482 MB)
  *
  * Flash layout on MPS2 AN519, if BL2 not defined:
  * 0x0000_0000 Secure     image
@@ -71,6 +72,9 @@
 #define FLASH_AREA_IMAGE_SCRATCH_OFFSET (0x280000)
 #define FLASH_AREA_IMAGE_SCRATCH_SIZE   (2 * FLASH_PARTITION_SIZE)
 
+#define FLASH_SST_AREA_OFFSET           (0x380000)
+#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+
 /* Offset and size definition in flash area, used by assemble.py */
 #define SECURE_IMAGE_OFFSET             0x0
 #define SECURE_IMAGE_MAX_SIZE           0x80000
@@ -82,5 +86,16 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+
+/* Secure Storage (SST) Service definitions */
+/* In this target the CMSIS driver requires only the offset from the base
+ * address instead of the full memory address.
+ */
+#define SST_FLASH_AREA_ADDR  FLASH_SST_AREA_OFFSET
+#define SST_SECTOR_SIZE      FLASH_AREA_IMAGE_SECTOR_SIZE
+/* The sectors must be in consecutive memory location */
+#define SST_NBR_OF_SECTORS  (FLASH_SST_AREA_SIZE / SST_SECTOR_SIZE)
+/* Specifies the smallest flash programmable unit in bytes */
+#define SST_FLASH_PROGRAM_UNIT  0x1
 
 #endif /* __FLASH_LAYOUT_H__ */

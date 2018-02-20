@@ -10,16 +10,27 @@
 
 #include <stdint.h>
 #include "tfm_sst_defs.h"
+#include "flash_layout.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Adjust to match your system's block size */
-#define SST_BLOCK_SIZE 4096
+#ifndef SST_SECTOR_SIZE
+#error "SST_SECTOR_SIZE must be defined by the target in flash_layout.h file"
+#define SST_BLOCK_SIZE 0
+#else
+#define SST_BLOCK_SIZE SST_SECTOR_SIZE
+#endif
 
 /* Adjust to a size that will allow all assets to fit */
-#define SST_TOTAL_NUM_OF_BLOCKS 5
+#ifndef SST_NBR_OF_SECTORS
+#error "SST_NBR_OF_SECTORS must be defined by the target in flash_layout.h file"
+#define SST_TOTAL_NUM_OF_BLOCKS 0
+#else
+#define SST_TOTAL_NUM_OF_BLOCKS SST_NBR_OF_SECTORS
+#endif
 
 /* Default value of flash when erased */
 #define SST_FLASH_DEFAULT_VAL 0xFF
@@ -47,7 +58,7 @@ enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
                                   uint32_t offset, uint32_t size);
 
 /**
- * \brief Writes block data from the position specifed by block ID and offset.
+ * \brief Writes block data to the position specifed by block ID and offset.
  *
  * \param[in] block_id  Block ID
  * \param[in] buff      Buffer pointer to the write data

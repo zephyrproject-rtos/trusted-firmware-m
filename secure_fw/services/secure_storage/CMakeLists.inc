@@ -38,25 +38,21 @@ if (ENABLE_SECURE_STORAGE)
 	if (NOT DEFINED SST_ENCRYPTION)
 		message(FATAL_ERROR "Incomplete build configuration: SST_ENCRYPTION is undefined. ")
 	endif()
+
 	if (NOT DEFINED SST_RAM_FS)
 		message(FATAL_ERROR "Incomplete build configuration: SST_RAM_FS is undefined. ")
 	endif()
+
 	if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
 		message(FATAL_ERROR "Incomplete build configuration: SST_VALIDATE_METADATA_FROM_FLASH is undefined. ")
 	endif()
 
 	set (SECURE_STORAGE_C_SRC "${SECURE_STORAGE_DIR}/sst_core.c"
-	        "${SECURE_STORAGE_DIR}/sst_core_interface.c"
-	        "${SECURE_STORAGE_DIR}/sst_asset_management.c"
-	        "${SECURE_STORAGE_DIR}/sst_utils.c"
-	        "${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"
-	        "${SECURE_STORAGE_DIR}/flash/sst_flash_memory_mapped.c"
-	        )
-
-	if(NOT SST_RAM_FS)
-		list(APPEND SECURE_STORAGE_C_SRC
-			"${SECURE_STORAGE_DIR}/flash/sst_flash_file_mapped.c")
-	endif()
+		"${SECURE_STORAGE_DIR}/sst_core_interface.c"
+		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
+		"${SECURE_STORAGE_DIR}/sst_utils.c"
+		"${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"
+		"${SECURE_STORAGE_DIR}/flash/sst_flash.c")
 
 	if (SST_ENCRYPTION)
 	    list (APPEND SECURE_STORAGE_C_SRC

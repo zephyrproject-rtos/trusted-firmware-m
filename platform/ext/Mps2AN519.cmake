@@ -112,5 +112,12 @@ if (NOT DEFINED BUILD_FLASH)
   message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif(BUILD_FLASH)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers/Driver_Flash.c")
+  # There is no real flash memory for code on MPS2 board. Instead a code SRAM is
+  # used for code storage: ZBT SSRAM1. The Driver_Flash driver just emulates a flash
+  # interface and behaviour on top of the SRAM memory.
+  # As the SST area is going to be in RAM, it is required to set SST_RAM_FS to be sure the
+  # SST service knows that when it starts the SST area does not contain any valid block and
+  # it needs  to create an empty one.
+  set(SST_RAM_FS True)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers" ABSOLUTE)
 endif()
