@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,9 +7,6 @@
 
 #ifndef __SST_ASSET_DEFS_H__
 #define __SST_ASSET_DEFS_H__
-
-#include "tfm_sst_defs.h"
-#include "secure_fw/services/secure_storage/sst_asset_management.h"
 
 #ifdef __cplusplus
 extern "C" {

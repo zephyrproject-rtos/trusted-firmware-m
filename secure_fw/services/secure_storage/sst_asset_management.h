@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,12 +8,12 @@
 #ifndef __SST_ASSET_MANAGEMENT_H__
 #define __SST_ASSET_MANAGEMENT_H__
 
+#include <stdint.h>
+#include "tfm_sst_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <inttypes.h>
-#include <limits.h>
 
 #define SST_PERM_BYPASS     (1<<3) /*!< Permission check bypassed. Used when
                                     *   secure a secure entity calls as itself

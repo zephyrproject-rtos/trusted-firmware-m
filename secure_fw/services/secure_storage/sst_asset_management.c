@@ -5,14 +5,15 @@
  *
  */
 
-#include <stddef.h>
-#include "tfm_secure_api.h"
-#include "tfm_sst_defs.h"
-#include "assets/sst_asset_defs.h"
 #include "sst_asset_management.h"
-#include "sst_core.h"
+
+#include <stddef.h>
+
+#include "assets/sst_asset_defs.h"
 #include "sst_core_interface.h"
 #include "sst_utils.h"
+#include "tfm_secure_api.h"
+#include "tfm_sst_defs.h"
 
 /******************************/
 /* Asset management functions */

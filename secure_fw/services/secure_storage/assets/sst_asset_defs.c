@@ -6,6 +6,7 @@
  */
 
 #include "sst_asset_defs.h"
+#include "secure_fw/services/secure_storage/sst_asset_management.h"
 
 struct sst_asset_info_t asset_perms[] = {
 {
