@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,7 +31,7 @@ __attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
  * \param[out] out_ptr  Buffer to store the inverted data.
  * \param[in] len       Number of bytes to be inverted.
  *
- * \return Returns \ref TFM_SUCCESS on success, TFM_SERVICE_BUSY otherwise.
+ * \return Returns \ref TFM_SUCCESS on success, TFM_PARTITION_BUSY otherwise.
  */
 __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
 int32_t tfm_core_test_2_sfn_invert(

@@ -33,14 +33,14 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 #endif
 
-extern void tfm_core_service_return_svc(void);
+extern void tfm_core_partition_return_svc(void);
 
 /* This is the "Big Lock" on the secure side, to guarantee single entry
  * to SPE
  */
 static int32_t tfm_secure_lock;
 
-static uint32_t *prepare_service_ctx(
+static uint32_t *prepare_partition_ctx(
             struct tfm_sfn_req_s *desc_ptr, uint32_t *dst)
 {
     /* XPSR  = Thumb, nothing else */
@@ -48,7 +48,7 @@ static uint32_t *prepare_service_ctx(
     /* ReturnAddress = sfn to be executed */
     *(--dst) = (uint32_t)(desc_ptr->sfn);
     /* LR = function to be called when sfn exits */
-    *(--dst) = (uint32_t)tfm_core_service_return_svc;
+    *(--dst) = (uint32_t)tfm_core_partition_return_svc;
     /* R12 = don't care */
     *(--dst) = 0;
 
@@ -67,41 +67,41 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
     uint32_t caller_partition_id = tfm_spm_partition_get_running_partition_id();
 
     if (caller_partition_id >= TFM_SP_BASE &&
-        /* Also check service state consistency */
+        /* Also check partition state consistency */
         (caller_partition_id == TFM_SP_NON_SECURE_ID) ==
                 (desc_ptr->ns_caller != 0)) {
         register uint32_t partition_id = desc_ptr->ss_id;
         uint32_t psp = __get_PSP();
-        uint32_t service_psp, service_psplim;
+        uint32_t partition_psp, partition_psplim;
         uint32_t partition_state = tfm_spm_partition_get_state(partition_id);
 
         if (partition_state == SPM_PARTITION_STATE_RUNNING ||
             partition_state == SPM_PARTITION_STATE_SUSPENDED ||
             partition_state == SPM_PARTITION_STATE_BLOCKED) {
             /* Recursion is not permitted! */
-            return TFM_ERROR_SERVICE_NON_REENTRANT;
+            return TFM_ERROR_PARTITION_NON_REENTRANT;
         } else if (partition_state != SPM_PARTITION_STATE_IDLE) {
-            /* The service to be called is not in a proper state */
+            /* The partition to be called is not in a proper state */
             return TFM_SECURE_LOCK_FAILED;
         }
 
 #if TFM_LVL == 1
-        /* Prepare switch to shared secure service stack */
-        service_psp =
+        /* Prepare switch to shared secure partition stack */
+        partition_psp =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
-        service_psplim =
+        partition_psplim =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 #else
         if (caller_partition_id != TFM_SP_NON_SECURE_ID) {
-            /* Store the caller PSP in case we are doing a service to
-             * service call
+            /* Store the caller PSP in case we are doing a partition to
+             * partition call
              */
             tfm_spm_partition_set_stack(caller_partition_id, psp);
         }
-        service_psp = tfm_spm_partition_get_stack(partition_id);
-        service_psplim = tfm_spm_partition_get_stack_bottom(partition_id);
+        partition_psp = tfm_spm_partition_get_stack(partition_id);
+        partition_psplim = tfm_spm_partition_get_stack_bottom(partition_id);
 #endif
-        /* Stack the context for the service call */
+        /* Stack the context for the partition call */
         tfm_spm_partition_set_orig_psp(partition_id, psp);
         tfm_spm_partition_set_orig_psplim(partition_id, __get_PSPLIM());
         tfm_spm_partition_set_orig_lr(partition_id, lr);
@@ -109,18 +109,20 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
                                                   caller_partition_id);
 
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
-        /* Dynamic service partitioning is only done is TFM level 3 */
+        /* Dynamic partition partitioning is only done is TFM level 3 */
         if (caller_partition_id != TFM_SP_NON_SECURE_ID) {
-            /* In a service to service call, deconfigure the caller service */
+            /* In a partition to partition call, deconfigure the
+             * caller partition
+             */
             tfm_spm_partition_sandbox_deconfig(caller_partition_id);
         }
 
-        /* Configure service execution environment */
+        /* Configure partition execution environment */
         tfm_spm_partition_sandbox_config(partition_id);
 #endif
 
-        /* Default share to scratch area in case of service-to-service calls
-         * this way services always get default access to input buffers
+        /* Default share to scratch area in case of partition to partition calls
+         * this way partitions always get default access to input buffers
          */
         /* FixMe: return value/error handling TBD */
         tfm_spm_partition_set_share(partition_id, desc_ptr->ns_caller ?
@@ -131,17 +133,18 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
          * handler mode
          */
         if (desc_ptr->exc_num != EXC_NUM_THREAD_MODE) {
-            /* Prepare the service context, update stack ptr */
-            psp = (uint32_t)prepare_service_ctx(
-                        desc_ptr, (uint32_t *)service_psp);
+            /* Prepare the partition context, update stack ptr */
+            psp = (uint32_t)prepare_partition_ctx(
+                        desc_ptr, (uint32_t *)partition_psp);
             __set_PSP(psp);
-            __set_PSPLIM(service_psplim);
+            __set_PSPLIM(partition_psplim);
         }
 #else
-        /* Prepare the service context, update stack ptr */
-        psp = (uint32_t)prepare_service_ctx(desc_ptr, (uint32_t *)service_psp);
+        /* Prepare the partition context, update stack ptr */
+        psp = (uint32_t)prepare_partition_ctx(desc_ptr,
+                                              (uint32_t *)partition_psp);
         __set_PSP(psp);
-        __set_PSPLIM(service_psplim);
+        __set_PSPLIM(partition_psplim);
 #endif
 
         tfm_spm_partition_set_state(caller_partition_id,
@@ -151,7 +154,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 
         return TFM_SUCCESS;
     } else {
-        /* Secure Service stacking limit exceeded */
+        /* Secure partition stacking limit exceeded */
         return TFM_SECURE_LOCK_FAILED;
     }
 }
@@ -170,11 +173,11 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
     if (return_partition_id >= TFM_SP_BASE) {
         tfm_secure_lock--;
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
-        /* Deconfigure completed service environment */
+        /* Deconfigure completed partition environment */
         tfm_spm_partition_sandbox_deconfig(current_partition_id);
         if (return_partition_id != TFM_SP_NON_SECURE_ID) {
-            /* Configure the caller service environment in case this was a
-             * service to service call
+            /* Configure the caller partition environment in case this was a
+             * partition to partition call
              */
             tfm_spm_partition_sandbox_config(return_partition_id);
             /* Restore share status */
@@ -218,7 +221,7 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 
         return TFM_SUCCESS;
     } else {
-        /* Secure Service stack count incorrect */
+        /* Secure partition stack count incorrect */
         return TFM_SECURE_UNLOCK_FAILED;
     }
 }
@@ -242,7 +245,8 @@ static int32_t tfm_check_sfn_req_integrity(struct tfm_sfn_req_s *desc_ptr)
     return TFM_SUCCESS;
 }
 
-static int32_t tfm_core_check_service_req_rules(struct tfm_sfn_req_s *desc_ptr)
+static int32_t tfm_core_check_sfn_req_rules(
+        struct tfm_sfn_req_s *desc_ptr)
 {
     if ((desc_ptr->exc_num != EXC_NUM_THREAD_MODE) &&
         (desc_ptr->exc_num != EXC_NUM_SVCALL)) {
@@ -266,7 +270,7 @@ static int32_t tfm_core_check_service_req_rules(struct tfm_sfn_req_s *desc_ptr)
         }
     } else {
         if (desc_ptr->exc_num != EXC_NUM_THREAD_MODE) {
-            /* Secure service can only call a different secure service
+            /* Secure partition can only call a different secure partition
              * from thread mode
              */
             return TFM_ERROR_INVALID_EXC_MODE;
@@ -319,7 +323,7 @@ static int32_t tfm_core_deconfigure_secure_exception(void)
 
     /*
      * SPSEL value is cleared by HW when entering Handler mode (e.g.
-     * service return SVC).
+     * partition return SVC).
      * If execution is returned to NS instead of performing an Exception
      * return, HW will not restore original SPSEL value so this has to
      * be done manually.
@@ -330,9 +334,9 @@ static int32_t tfm_core_deconfigure_secure_exception(void)
 }
 
 #if defined(__ARM_ARCH_8M_MAIN__)
-__attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
+__attribute__((naked)) static int32_t tfm_core_exc_return_to_sfn(void)
 {
-    /* Save all callee-saved registers to prevent malicious service from
+    /* Save all callee-saved registers to prevent malicious partition from
      * modifying execution state.
      * Save LR for return address.
      * r12 is used as padding for 8-byte stack alignment
@@ -341,13 +345,13 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
     "PUSH   {r4-r12, lr}\n"
     "MVN    r0, #2\n"
     "BX     r0\n"
-"return_from_service:\n"
+"return_from_sfn:\n"
     "POP    {r4-r12, pc}\n");
 }
 #elif defined(__ARM_ARCH_8M_BASE__)
-__attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
+__attribute__((naked)) static int32_t tfm_core_exc_return_to_sfn(void)
 {
-    /* Save all callee-saved registers to prevent malicious service from
+    /* Save all callee-saved registers to prevent malicious partition from
      * modifying execution state.
      * Save LR for return address.
      * r12 is used as padding for 8-byte stack alignment
@@ -365,7 +369,7 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
     "MOVS   r0, #2\n"
     "MVNS   r0, r0\n"
     "BX     r0\n"
-"return_from_service:\n"
+"return_from_sfn:\n"
     "POP    {r4}\n"
     "MOV    r12, r4\n"
     "POP    {r4-r7}\n"
@@ -380,13 +384,13 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_service(void)
 #error "Unsupported ARM Architecture."
 #endif
 
-extern void return_from_service(void);
+extern void return_from_sfn(void);
 
-static int32_t tfm_core_call_service(struct tfm_sfn_req_s *desc_ptr)
+static int32_t tfm_core_call_sfn(struct tfm_sfn_req_s *desc_ptr)
 {
 #if TFM_LVL == 1
     if (desc_ptr->exc_num == EXC_NUM_THREAD_MODE) {
-        /* service to service call in TFM level 1 */
+        /* Secure partition to secure partition call in TFM level 1 */
         int32_t res;
         uint32_t *args = desc_ptr->args;
         int32_t retVal = desc_ptr->sfn(args[0], args[1], args[2], args[3]);
@@ -406,11 +410,11 @@ static int32_t tfm_core_call_service(struct tfm_sfn_req_s *desc_ptr)
     }
 #endif
 
-    /* Exception return to service start */
-    return tfm_core_exc_return_to_service();
+    /* Exception return to partition start */
+    return tfm_core_exc_return_to_sfn();
 }
 
-int32_t tfm_core_service_request_function(struct tfm_sfn_req_s *desc_ptr)
+int32_t tfm_core_sfn_request_function(struct tfm_sfn_req_s *desc_ptr)
 {
     int32_t res;
 
@@ -420,14 +424,14 @@ int32_t tfm_core_service_request_function(struct tfm_sfn_req_s *desc_ptr)
     }
 
     __disable_irq();
-    res = tfm_core_check_service_req_rules(desc_ptr);
+    res = tfm_core_check_sfn_req_rules(desc_ptr);
     if (res != TFM_SUCCESS) {
         __enable_irq();
         return TFM_ERROR_STATUS(res);
     }
 
-    /* return to ASM label in call_service() function */
-    res = tfm_push_lock(desc_ptr, (uint32_t)return_from_service | 1);
+    /* return to ASM label in tfm_core_exc_return_to_sfn() function */
+    res = tfm_push_lock(desc_ptr, (uint32_t)return_from_sfn | 1);
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
         __enable_irq();
@@ -439,7 +443,7 @@ int32_t tfm_core_service_request_function(struct tfm_sfn_req_s *desc_ptr)
     }
 
     __enable_irq();
-    res = tfm_core_call_service(desc_ptr);
+    res = tfm_core_call_sfn(desc_ptr);
 
     if (desc_ptr->ns_caller) {
         __disable_irq();
@@ -458,8 +462,8 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
             tfm_spm_partition_get_running_partition_id();
 
     if (running_partition_id == TFM_SP_NON_SECURE_ID)  {
-        /* This handler shouldn't be called from outside service context.
-         * Services are only allowed to run while S domain is locked.
+        /* This handler shouldn't be called from outside partition context.
+         * Partitions are only allowed to run while S domain is locked.
          */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -485,8 +489,8 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
             tfm_spm_partition_get_running_partition_id();
 
     if ((running_partition_id == TFM_SP_NON_SECURE_ID) || (size == 0)) {
-        /* This handler shouldn't be called from outside service context.
-         * Services are only allowed to run while S domain is locked.
+        /* This handler shouldn't be called from outside partition context.
+         * Partitions are only allowed to run while S domain is locked.
          */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -505,7 +509,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
         flags |= CMSE_MPU_READ;
     }
 
-    /* Check if service access to address would fail */
+    /* Check if partition access to address would fail */
     void *rangeptr = cmse_check_address_range((void *)ptr, size, flags);
 
     /* Get regions associated with address */
@@ -518,7 +522,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
     if (addr_info.flags.secure) {
 #if TFM_LVL == 1
-        /* For privileged service execution, all secure data memory is
+        /* For privileged partition execution, all secure data memory is
          * accessible
          */
         max_buf_size = S_DATA_SIZE;
@@ -544,14 +548,14 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
                 res = TFM_ERROR_INVALID_PARAMETER;
             } else {
                 /* Currently TF-M does not support checks for NS Memory
-                 * accesses by services
+                 * accesses by partitions
                  */
                 res = TFM_SUCCESS;
             }
             break;
         case TFM_NS_REGION_DATA:
             /* Currently TF-M does not support checks for NS Memory
-             * accesses by services
+             * accesses by partitions
              */
             res = TFM_SUCCESS;
             break;
@@ -576,16 +580,16 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 }
 
 /* This SVC handler is called if veneer is running in thread mode */
-void tfm_core_service_request_svc_handler(
+void tfm_core_partition_request_svc_handler(
         uint32_t *svc_ctx, uint32_t *lr_ptr)
 {
     if (!(*lr_ptr & EXC_RETURN_STACK_PROCESS)) {
-        /* Service request SVC called with MSP active.
+        /* Partition request SVC called with MSP active.
          * Either invalid configuration for Thread mode or SVC called
          * from Handler mode, which is not supported.
          * FixMe: error severity TBD
          */
-        ERROR_MSG("Service request SVC called with MSP active!");
+        ERROR_MSG("Partition request SVC called with MSP active!");
         tfm_secure_api_error_handler();
     }
 
@@ -607,37 +611,39 @@ void tfm_core_service_request_svc_handler(
          */
         svc_ctx[0] = TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
     } else {
-        svc_ctx[0] = (uint32_t)tfm_core_service_request_function(desc_ptr);
+        svc_ctx[0] = (uint32_t)tfm_core_sfn_request_function(desc_ptr);
     }
     return;
 }
 
 /* This SVC handler is called when sfn returns */
-int32_t tfm_core_service_return_handler(uint32_t *lr_ptr)
+int32_t tfm_core_partition_return_handler(uint32_t *lr_ptr)
 {
     int32_t res;
 
     __disable_irq();
 
-    /* Store return value from secure service */
+    /* Store return value from secure partition */
     if (!(*lr_ptr & EXC_RETURN_STACK_PROCESS)) {
-        /* Service return SVC called with MSP active. This should not happen! */
-        ERROR_MSG("Service return SVC called with MSP active!");
+        /* Partition return SVC called with MSP active.
+         * This should not happen!
+         */
+        ERROR_MSG("Partition return SVC called with MSP active!");
         tfm_secure_api_error_handler();
     }
     int32_t retVal = *(int32_t *)__get_PSP();
 
     switch (retVal) {
     case TFM_SUCCESS:
-    case TFM_SERVICE_BUSY:
-        /* Secure service is allowed to return these pre-defined values */
+    case TFM_PARTITION_BUSY:
+        /* Secure partition is allowed to return these pre-defined values */
         break;
     default:
         if ((retVal > TFM_SUCCESS) &&
-            (retVal < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+            (retVal < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
             /* Secure function returned a reserved value */
 #ifdef TFM_CORE_DEBUG
-            LOG_MSG("Invalid return value from secure service!");
+            LOG_MSG("Invalid return value from secure partition!");
 #endif
             /* FixMe: error can be traced to specific secure partition
              * and Core is not compromised. Error handling flow can be
@@ -663,7 +669,7 @@ int32_t tfm_core_service_return_handler(uint32_t *lr_ptr)
     /* FixMe: keeping legacy requirement to check consistency, can be removed
      * when push/pop lock is updated to not store redundant return value
      */
-    if (*lr_ptr != ((uint32_t)return_from_service | 1)) {
+    if (*lr_ptr != ((uint32_t)return_from_sfn | 1)) {
         /* Return address does not match expected value
          * This indicates an inconsistency in ctx database
          */
@@ -688,7 +694,7 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
     int32_t *res_ptr = (int32_t *)&args[0];
 
     if (running_partition_id == TFM_SP_NON_SECURE_ID) {
-        /* This handler shouldn't be called from outside service context. */
+        /* This handler shouldn't be called from outside partition context. */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@ extern "C" {
  * \brief Tests whether the initialisation of the service was successful.
  *
  * \return Returns \ref CORE_TEST_ERRNO_SUCCESS on success, and
- *                 \ref CORE_TEST_ERRNO_SERVICE_NOT_INITED on failure.
+ *                 \ref CORE_TEST_ERRNO_SP_NOT_INITED on failure.
  */
 int32_t tfm_core_test_sfn_init_success(void)
 __attribute__((cmse_nonsecure_entry, noinline, section("SFN")));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -113,7 +113,7 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret)
 
     int32_t err = tfm_core_test_svc(tfm_core_test_sfn, args);
 
-    if ((err != TFM_SUCCESS) && (err < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }
@@ -141,7 +141,7 @@ static void tfm_core_test_check_init(struct test_result_t *ret)
 
     err = tfm_core_test_svc(tfm_core_test_sfn_init_success, args);
 
-    if ((err != TFM_SUCCESS) && (err < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }
@@ -176,7 +176,7 @@ static void tfm_core_test_recursion(struct test_result_t *ret)
     case CORE_TEST_ERRNO_SUCCESS:
         ret->val = TEST_PASSED;
         return;
-    case CORE_TEST_ERRNO_SERVICE_RECURSION_NOT_REJECTED:
+    case CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED:
         TEST_FAIL("TF-M Core failed to reject recursive service call.");
         return;
     default:
@@ -209,7 +209,7 @@ static void tfm_core_test_mpu_access(struct test_result_t *ret)
 
     err = tfm_core_test_svc(tfm_core_test_sfn, args);
 
-    if (err != TFM_SUCCESS && err < TFM_SERVICE_SPECIFIC_ERROR_MIN) {
+    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }
@@ -237,7 +237,7 @@ static void tfm_core_test_permissions(struct test_result_t *ret)
 
     err = tfm_core_test_svc(tfm_core_test_sfn, args);
 
-    if (err != TFM_SUCCESS && err < TFM_SERVICE_SPECIFIC_ERROR_MIN) {
+    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }
@@ -263,7 +263,7 @@ static void tfm_core_test_buffer_check(struct test_result_t *ret)
                   (int32_t)outbuf, (int32_t)sizeof(inbuf) >> 2};
 
     res = tfm_core_test_svc(tfm_core_test_2_sfn_invert, args);
-    if ((res != TFM_SUCCESS) && (res < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
     }
@@ -295,7 +295,7 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
     args[0] = CORE_TEST_ID_SS_TO_SS;
     err = tfm_core_test_svc(tfm_core_test_sfn, args);
 
-    if (err != TFM_SUCCESS && err < TFM_SERVICE_SPECIFIC_ERROR_MIN) {
+    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
     }
@@ -315,7 +315,7 @@ static void tfm_core_test_share_change(struct test_result_t *ret)
     args[0] = CORE_TEST_ID_SHARE_REDIRECTION;
     err = tfm_core_test_svc(tfm_core_test_sfn, args);
 
-    if ((err != TFM_SUCCESS) && (err < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }
@@ -338,7 +338,7 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
                   (int32_t)outbuf, (int32_t)sizeof(inbuf) >> 2};
 
     res = tfm_core_test_svc(tfm_core_test_sfn, args);
-    if ((res != TFM_SUCCESS) && (res < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
     }
@@ -361,10 +361,10 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
     case CORE_TEST_ERRNO_INVALID_BUFFER:
         TEST_FAIL("NS buffer rejected by TF-M core.");
         return;
-    case CORE_TEST_ERRNO_SLAVE_SERVICE_CALL_FAILURE:
+    case CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE:
         TEST_FAIL("Slave service call failed.");
         return;
-    case CORE_TEST_ERRNO_SLAVE_SERVICE_BUFFER_FAILURE:
+    case CORE_TEST_ERRNO_SLAVE_SP_BUFFER_FAILURE:
         TEST_FAIL("Slave secure function failed to modify buffer.");
         return;
     default:
@@ -380,7 +380,7 @@ static void tfm_core_test_two_sfn_one_svc(struct test_result_t *ret)
     args[0] = CORE_TEST_ID_TWO_SFN_ONE_SVC;
     err = tfm_core_test_multiple_calls_svc(tfm_core_test_sfn, args);
 
-    if ((err != TFM_SUCCESS) && (err < TFM_SERVICE_SPECIFIC_ERROR_MIN)) {
+    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
         return;
     }

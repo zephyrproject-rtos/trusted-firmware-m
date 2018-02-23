@@ -29,10 +29,10 @@
             case TFM_SUCCESS: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") successful!");\
                 break; \
-            case TFM_SERVICE_PENDED: \
+            case TFM_PARTITION_PENDED: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") pended!"); \
                 break; \
-            case TFM_ERROR_SERVICE_ALREADY_PENDED: \
+            case TFM_ERROR_PARTITION_ALREADY_PENDED: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
                                                             "already pended!");\
                 break; \

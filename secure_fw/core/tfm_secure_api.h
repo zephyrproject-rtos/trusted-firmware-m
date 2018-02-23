@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "secure_utilities.h"
 #include "tfm_core.h"
 
-/* Currently only fully blocking NS while services are running is supported */
+/* Currently only fully blocking NS while partitions are running is supported */
 #define TFM_API_DEPRIORITIZE
 
 #if !(defined(TFM_API_DEPRIORITIZE) || defined(TFM_API_SVCCLEAR))
@@ -24,7 +24,7 @@
 #ifdef TFM_CORE_DEBUG
 #define TFM_ERROR_STATUS(status) (status)
 #else
-#define TFM_ERROR_STATUS(status) (TFM_SERVICE_BUSY)
+#define TFM_ERROR_STATUS(status) (TFM_PARTITION_BUSY)
 #endif
 
 #ifndef TFM_LVL
@@ -65,7 +65,7 @@ enum tfm_memory_access_e {
 };
 
 /* This function is called if veneer is running in handler mode */
-extern int32_t tfm_core_service_request_function(
+extern int32_t tfm_core_sfn_request_function(
         struct tfm_sfn_req_s *desc_ptr);
 
 extern int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share);
@@ -75,12 +75,12 @@ extern int32_t tfm_core_validate_secure_caller(void);
 extern int32_t tfm_core_memory_permission_check(
         void *ptr, uint32_t size, int32_t access);
 
-#define TFM_CORE_SERVICE_REQUEST(id, fn, a, b, c, d) \
-        return tfm_core_service_request(id, fn, (int32_t)a, (int32_t)b, \
+#define TFM_CORE_SFN_REQUEST(id, fn, a, b, c, d) \
+        return tfm_core_partition_request(id, fn, (int32_t)a, (int32_t)b, \
             (int32_t)c, (int32_t)d)
 
 __attribute__ ((always_inline)) __STATIC_INLINE
-int32_t tfm_core_service_request(uint32_t id, void *fn,
+int32_t tfm_core_partition_request(uint32_t id, void *fn,
             int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
 {
     uint32_t args[4] = {arg1, arg2, arg3, arg4};
@@ -99,12 +99,12 @@ int32_t tfm_core_service_request(uint32_t id, void *fn,
               "SVC %2\n"
               "MOV %0, r0\n"
               : "=r" (res)
-              : "r" (desc_ptr), "I" (TFM_SVC_SERVICE_REQUEST)
+              : "r" (desc_ptr), "I" (TFM_SVC_SFN_REQUEST)
               : "r0");
         return res;
     }
 #endif
-    return tfm_core_service_request_function(desc_ptr);
+    return tfm_core_sfn_request_function(desc_ptr);
 }
 
 #endif /* __TFM_SECURE_API_H__ */

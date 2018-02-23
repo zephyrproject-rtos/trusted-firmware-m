@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,18 +23,18 @@ extern "C" {
 enum tfm_status_e
 {
     TFM_SUCCESS = 0,
-    TFM_SERVICE_PENDED,
-    TFM_SERVICE_BUSY,
-    TFM_ERROR_SERVICE_ALREADY_PENDED,
+    TFM_PARTITION_PENDED,
+    TFM_PARTITION_BUSY,
+    TFM_ERROR_PARTITION_ALREADY_PENDED,
     TFM_ERROR_SECURE_DOMAIN_LOCKED,
     TFM_ERROR_INVALID_PARAMETER,
-    TFM_ERROR_SERVICE_NON_REENTRANT,
+    TFM_ERROR_PARTITION_NON_REENTRANT,
     TFM_ERROR_NS_THREAD_MODE_CALL,
     TFM_ERROR_INVALID_EXC_MODE,
     TFM_SECURE_LOCK_FAILED,
     TFM_SECURE_UNLOCK_FAILED,
     TFM_ERROR_GENERIC = 0x1F,
-    TFM_SERVICE_SPECIFIC_ERROR_MIN,
+    TFM_PARTITION_SPECIFIC_ERROR_MIN,
 };
 
 //==================== Secure function declarations ==========================//

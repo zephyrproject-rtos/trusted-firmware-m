@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,9 @@
 uint8_t *tfm_scratch_area;
 int32_t tfm_scratch_area_size;
 
-__attribute__((naked)) void tfm_core_service_return_svc(void)
+__attribute__((naked)) void tfm_core_partition_return_svc(void)
 {
-    SVC(TFM_SVC_SERVICE_RETURN);
+    SVC(TFM_SVC_SFN_RETURN);
 }
 
 __attribute__((naked))

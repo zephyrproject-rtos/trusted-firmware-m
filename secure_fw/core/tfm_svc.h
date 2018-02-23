@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,8 +11,8 @@
 #include "cmsis.h"
 
 typedef enum {
-    TFM_SVC_SERVICE_REQUEST = 0,
-    TFM_SVC_SERVICE_RETURN,
+    TFM_SVC_SFN_REQUEST = 0,
+    TFM_SVC_SFN_RETURN,
     TFM_SVC_VALIDATE_SECURE_CALLER,
     TFM_SVC_MEMORY_CHECK,
     TFM_SVC_SET_SHARE_AREA,

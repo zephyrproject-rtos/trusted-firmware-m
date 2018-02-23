@@ -15,13 +15,13 @@ enum tfm_sst_err_t tfm_sst_veneer_get_handle(uint32_t app_id,
                                              uint16_t asset_uuid,
                                              uint32_t *hdl)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_get_handle,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_get_handle,
                              app_id, asset_uuid, hdl, 0);
 }
 
 enum tfm_sst_err_t tfm_sst_veneer_create(uint32_t app_id, uint16_t asset_uuid)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_create,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_create,
                              app_id, asset_uuid, 0, 0);
 }
 
@@ -30,27 +30,27 @@ enum tfm_sst_err_t tfm_sst_veneer_get_attributes(
                                              uint32_t asset_handle,
                                              struct tfm_sst_attribs_t *attrib)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_get_attributes,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_get_attributes,
                              app_id, asset_handle, attrib, 0);
 }
 
 enum tfm_sst_err_t tfm_sst_veneer_read(uint32_t app_id, uint32_t asset_handle,
                                        struct tfm_sst_buf_t *data)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_read, app_id,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_read, app_id,
                              asset_handle, data, 0);
 }
 
 enum tfm_sst_err_t tfm_sst_veneer_write(uint32_t app_id, uint32_t asset_handle,
                                         struct tfm_sst_buf_t *data)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_write, app_id,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_write, app_id,
                              asset_handle, data, 0);
 }
 
 enum tfm_sst_err_t tfm_sst_veneer_delete(uint32_t app_id, uint32_t asset_handle)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SP_STORAGE_ID, sst_am_delete, app_id,
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_delete, app_id,
                              asset_handle, 0, 0);
 }
 

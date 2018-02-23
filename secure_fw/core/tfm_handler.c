@@ -22,16 +22,11 @@
 extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
 
 /* This SVC handler is called if veneer is running in thread mode */
-extern void tfm_core_service_request_svc_handler(
+extern void tfm_core_partition_request_svc_handler(
         uint32_t *svc_args, uint32_t *lr_ptr);
 
-/* This SVC handler is called if veneer was called in handler and set
- * SV pending
- */
-extern void tfm_core_pended_service_request_handler(uint32_t *lr_ptr);
-
 /* This SVC handler is called when sfn returns */
-extern int32_t tfm_core_service_return_handler(uint32_t *lr_ptr);
+extern int32_t tfm_core_partition_return_handler(uint32_t *lr_ptr);
 
 extern int32_t
         tfm_core_validate_secure_caller_handler(const uint32_t svc_args[]);
@@ -39,8 +34,8 @@ extern int32_t
 extern int32_t
         tfm_core_memory_permission_check_handler(const uint32_t svc_args[]);
 
-/* This SVC handler is called when a secure service requests access to a buffer
- * area
+/* This SVC handler is called when a secure partition requests access to a
+ * buffer area
  */
 extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
 
@@ -205,11 +200,11 @@ int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
         return TFM_ERROR_GENERIC;
     }
     switch (svc_number) {
-    case TFM_SVC_SERVICE_REQUEST:
-        tfm_core_service_request_svc_handler(svc_args, lr_ptr);
+    case TFM_SVC_SFN_REQUEST:
+        tfm_core_partition_request_svc_handler(svc_args, lr_ptr);
         return TFM_SUCCESS;
-    case TFM_SVC_SERVICE_RETURN:
-        return tfm_core_service_return_handler(lr_ptr);
+    case TFM_SVC_SFN_RETURN:
+        return tfm_core_partition_return_handler(lr_ptr);
     case TFM_SVC_VALIDATE_SECURE_CALLER:
         tfm_core_validate_secure_caller_handler(svc_args);
         return TFM_SUCCESS;

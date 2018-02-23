@@ -30,7 +30,7 @@ int32_t spm_core_test_sfn_init_success(void)
     if (partition_init_done) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
-        return CORE_TEST_ERRNO_SERVICE_NOT_INITED;
+        return CORE_TEST_ERRNO_SP_NOT_INITED;
     }
 }
 
@@ -38,7 +38,7 @@ int32_t spm_core_test_sfn_direct_recursion(int32_t depth)
 {
     if (depth != 0) {
         /* Protect against scenario where TF-M core fails to block recursion */
-        return CORE_TEST_ERRNO_SERVICE_RECURSION_NOT_REJECTED;
+        return CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED;
     }
     /* Call to the same service again, should be rejected */
     int32_t ret = tfm_core_test_sfn_direct_recursion(++depth);
@@ -46,9 +46,9 @@ int32_t spm_core_test_sfn_direct_recursion(int32_t depth)
     if (ret == TFM_SUCCESS) {
         /* This is an unexpected return value */
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    } else if (ret == CORE_TEST_ERRNO_SERVICE_RECURSION_NOT_REJECTED) {
+    } else if (ret == CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED) {
         /* This means that service was started in recursion */
-        return CORE_TEST_ERRNO_SERVICE_RECURSION_NOT_REJECTED;
+        return CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED;
     } else {
         return CORE_TEST_ERRNO_SUCCESS;
     }
@@ -218,12 +218,12 @@ int32_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr, int32_t len)
                                          slave_buffer, len);
 
     if (res != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_SLAVE_SERVICE_CALL_FAILURE;
+        return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
     }
 
     for (i = 0; i < len; i++) {
         if (slave_buffer[i] != ~ss_buffer[i]) {
-            return CORE_TEST_ERRNO_SLAVE_SERVICE_BUFFER_FAILURE;
+            return CORE_TEST_ERRNO_SLAVE_SP_BUFFER_FAILURE;
         }
         ss_buffer[i] = slave_buffer[i];
     }
@@ -248,7 +248,7 @@ static int32_t test_ss_to_ss(void)
     if (ret == TFM_SUCCESS) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
-        return CORE_TEST_ERRNO_SLAVE_SERVICE_CALL_FAILURE;
+        return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
     }
 }
 

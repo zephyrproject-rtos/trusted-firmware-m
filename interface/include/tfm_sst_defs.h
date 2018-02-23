@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,7 +38,7 @@ extern "C" {
 /* The return value is shared with the TFM service status value. The SST return
  * codes shouldn't overlap with predefined TFM status values.
  */
-#define TFM_SST_ERR_OFFSET (TFM_SERVICE_SPECIFIC_ERROR_MIN)
+#define TFM_SST_ERR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
 
 enum tfm_sst_err_t {
     TFM_SST_ERR_SUCCESS = 0,

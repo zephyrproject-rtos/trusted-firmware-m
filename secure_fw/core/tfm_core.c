@@ -31,7 +31,7 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Only TFM_LVL 1 and 3 are supported!
 #endif
 
-/* Macros to pick linker symbols and allow to form the service data base */
+/* Macros to pick linker symbols and allow to form the partition data base */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
@@ -139,7 +139,7 @@ int main(void)
     tfm_spm_mpu_init();
 #endif
     if (tfm_spm_partition_init() != SPM_ERR_OK) {
-        /* Certain systems might refuse to boot altogether if services fail
+        /* Certain systems might refuse to boot altogether if partitions fail
          * to initialize. This is a placeholder for such an error handler
          */
     }
@@ -160,7 +160,7 @@ int main(void)
 #endif
 
 #if TFM_LVL != 1
-    /* FixMe: service MPU regions need to be overloaded for snippet of
+    /* FixMe: partition MPU regions need to be overloaded for snippet of
      * code jumping to NS to work in unprivileged thread mode
      */
 #ifdef UNPRIV_JUMP_TO_NS
@@ -175,7 +175,7 @@ int main(void)
 #endif
 #endif
 
-    /* We close the TFM_SP_CORE_ID service, because its only purpose is
+    /* We close the TFM_SP_CORE_ID partition, because its only purpose is
      * to be able to pass the state checks for the tests started from secure.
      */
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
