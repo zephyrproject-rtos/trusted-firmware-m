@@ -83,16 +83,16 @@ endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS " --predefine=\"-DTFM_LVL=${TFM_LVL}\"")
 
-if (NOT DEFINED CORE_TEST_SERVICES)
-	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_SERVICES is undefined. ")
-elseif (CORE_TEST_SERVICES)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
+if (NOT DEFINED TFM_PARTITION_TEST_CORE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
+elseif (TFM_PARTITION_TEST_CORE)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_CORE\"")
 endif()
 
-if (NOT DEFINED SST_TEST_SERVICES)
-	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined. ")
-elseif (SST_TEST_SERVICES)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DSST_TEST_SERVICES\"")
+if (NOT DEFINED TFM_PARTITION_TEST_SST)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
+elseif (TFM_PARTITION_TEST_SST)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_SST\"")
 endif()
 
 if (NOT DEFINED BL2)
@@ -102,10 +102,10 @@ elseif (BL2)
 endif()
 
 if(CORE_TEST)
-	embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE C DEFINES TFM_CORE_DEBUG CORE_TEST_SERVICES APPEND)
+	embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE C DEFINES TFM_CORE_DEBUG TFM_PARTITION_TEST_CORE APPEND)
 	set(SECURE_AXF_DIR_PREFIX "${CMAKE_BINARY_DIR}/unit_test/")
 	set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${SECURE_AXF_DIR_PREFIX})
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_CORE\"")
 endif()
 
 #Generate binary file from axf

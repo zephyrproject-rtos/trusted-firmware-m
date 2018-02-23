@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 /* Add functions to the service*/
 int32_t tfm_core_test_2_veneer_slave_service(void)
 {
-   TFM_CORE_SERVICE_REQUEST(TFM_SEC_FUNC_CORE_TEST_2_ID,
+   TFM_CORE_SERVICE_REQUEST(TFM_SP_CORE_TEST_2_ID,
                             spm_core_test_2_slave_service,
                             0, 0, 0, 0);
 }
@@ -21,7 +21,7 @@ int32_t tfm_core_test_2_veneer_slave_service(void)
 int32_t tfm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
                                    uint32_t *out_ptr, int32_t len)
 {
-    TFM_CORE_SERVICE_REQUEST(TFM_SEC_FUNC_CORE_TEST_2_ID,
+    TFM_CORE_SERVICE_REQUEST(TFM_SP_CORE_TEST_2_ID,
                              spm_core_test_2_sfn_invert,
                              res_ptr, in_ptr, out_ptr, len);
 }

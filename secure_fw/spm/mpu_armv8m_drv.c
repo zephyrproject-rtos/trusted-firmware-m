@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -63,7 +63,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
         return MPU_ARMV8M_ERROR;
     }
     /* region_limit doesn't need to be aligned but the scatter
-     * file needs to be setup to ensure that services do not overlap.
+     * file needs to be setup to ensure that partitions do not overlap.
      */
 
     ctrl_before = mpu->CTRL;

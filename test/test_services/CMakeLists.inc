@@ -42,9 +42,9 @@ elseif(ENABLE_CORE_TESTS_2)
 		)
 endif()
 
-if (NOT DEFINED SST_TEST_SERVICES)
-	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined. ")
-elseif (SST_TEST_SERVICES)
+if (NOT DEFINED TFM_PARTITION_TEST_SST)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
+elseif (TFM_PARTITION_TEST_SST)
 	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service.c"
 		"${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_veneers.c"
 		)

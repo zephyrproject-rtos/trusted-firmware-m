@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,9 +24,9 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
-if (NOT DEFINED CORE_TEST_SERVICES)
+if (NOT DEFINED TFM_PARTITION_TEST_CORE)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
-elseif (CORE_TEST_SERVICES)
+elseif (TFM_PARTITION_TEST_CORE)
 	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/non_secure/core_test_api.c"
 		"${CORE_TEST_DIR}/non_secure/svc_core_test_ns.c")
 endif()

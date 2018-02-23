@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,7 +26,7 @@ static struct test_suite_t test_suites[] = {
      * {&register_testsuite_s_sst_interface, 0, 0, 0},
      */
 
-#ifdef CORE_TEST_SERVICES
+#ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */
     /* Note: since this is sample code, only run if test services are enabled */
     {&register_testsuite_s_invert_interface, 0, 0, 0},

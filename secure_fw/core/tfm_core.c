@@ -138,13 +138,13 @@ int main(void)
 #if TFM_LVL != 1
     tfm_spm_mpu_init();
 #endif
-    if (tfm_spm_service_init() != SPM_ERR_OK) {
+    if (tfm_spm_partition_init() != SPM_ERR_OK) {
         /* Certain systems might refuse to boot altogether if services fail
          * to initialize. This is a placeholder for such an error handler
          */
     }
 
-    tfm_spm_service_set_state(TFM_SEC_FUNC_CORE_ID, SPM_PART_STATE_RUNNING);
+    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
     extern uint32_t Stack_Mem[];
 
@@ -175,12 +175,12 @@ int main(void)
 #endif
 #endif
 
-    /* We close the TFM_SEC_FUNC_CORE_ID service, because its only purpose is
+    /* We close the TFM_SP_CORE_ID service, because its only purpose is
      * to be able to pass the state checks for the tests started from secure.
      */
-    tfm_spm_service_set_state(TFM_SEC_FUNC_CORE_ID, SPM_PART_STATE_CLOSED);
-    tfm_spm_service_set_state(TFM_SEC_FUNC_NON_SECURE_ID,
-                              SPM_PART_STATE_RUNNING);
+    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
+    tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
+                              SPM_PARTITION_STATE_RUNNING);
 
     jump_to_ns_code();
 }

@@ -16,10 +16,10 @@
 #include "tfm_ns_svc.h"
 #include "tfm_sst_svc_handler.h"
 #include "tfm_ns_lock.h"
-#ifdef CORE_TEST_SERVICES
+#ifdef TFM_PARTITION_TEST_CORE
 #include "test/suites/core/non_secure/svc_core_test_ns.h"
 #endif
-#ifdef SST_TEST_SERVICES
+#ifdef TFM_PARTITION_TEST_SST
 #include "test/test_services/tfm_sst_test_service/sst_test_service_svc.h"
 #endif
 #ifdef TEST_FRAMEWORK_NS
@@ -54,17 +54,17 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
   (void *)svc_secure_decrement_ns_lock_2,
 #endif /* CORE_TEST_INTERACTIVE */
 
-#if defined(CORE_TEST_SERVICES)
+#if defined(TFM_PARTITION_TEST_CORE)
   (void *)svc_tfm_core_test,
   (void *)svc_tfm_core_test_multiple_calls,
-#endif /* CORE_TEST_SERVICES */
+#endif /* TFM_PARTITION_TEST_CORE */
 
-#if defined(SST_TEST_SERVICES)
+#if defined(TFM_PARTITION_TEST_SST)
   (void *)sst_test_service_svc_setup,
   (void *)sst_test_service_svc_dummy_encrypt,
   (void *)sst_test_service_svc_dummy_decrypt,
   (void *)sst_test_service_svc_clean,
-#endif /* SST_TEST_SERVICES */
+#endif /* TFM_PARTITION_TEST_SST */
 
 //(void *)user_function1,
 // ...

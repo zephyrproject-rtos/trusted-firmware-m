@@ -39,9 +39,9 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 
 	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c")
 
-	if (NOT DEFINED SST_TEST_SERVICES)
-		message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined.")
-	elseif (SST_TEST_SERVICES)
+	if (NOT DEFINED TFM_PARTITION_TEST_SST)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
+	elseif (TFM_PARTITION_TEST_SST)
 		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
 	endif()
 

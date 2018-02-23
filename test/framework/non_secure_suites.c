@@ -19,12 +19,12 @@ static struct test_suite_t test_suites[] = {
     /* Non-secure SST test cases */
     {&register_testsuite_ns_sst_interface, 0, 0, 0},
 
-#ifdef SST_TEST_SERVICES
+#ifdef TFM_PARTITION_TEST_SST
     /* Non-secure SST referenced access testsuite */
     {&register_testsuite_ns_sst_ref_access, 0, 0, 0},
 #endif
 
-#ifdef CORE_TEST_SERVICES
+#ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */
     /* Note: since this is sample code, only run if test services are enabled */
     {&register_testsuite_ns_invert_interface, 0, 0, 0},

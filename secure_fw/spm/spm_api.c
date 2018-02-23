@@ -5,7 +5,7 @@
  *
  */
 
-/* This file contains the apis exported by the SPM to tfm core */
+/* This file contains the APIs exported by the SPM to tfm core */
 
 #include <stdio.h>
 #include "spm_api.h"
@@ -15,16 +15,16 @@
 #include "region_defs.h"
 #include "secure_fw/core/tfm_core.h"
 
-struct spm_service_db_t g_spm_service_db = {0,};
+struct spm_partition_db_t g_spm_partition_db = {0,};
 
 #define MPU_REGION_VENEERS   0
 #define MPU_REGION_TFM_UNPRIV_CODE   1
 #define MPU_REGION_TFM_UNPRIV_DATA   2
 #define MPU_REGION_NS_DATA      3
-#define SERVICE_REGION_RO       4
-#define SERVICE_REGION_RW_STACK 5
-#define SERVICE_REGION_PERIPH   6
-#define SERVICE_REGION_SHARE    7
+#define PARTITION_REGION_RO       4
+#define PARTITION_REGION_RW_STACK 5
+#define PARTITION_REGION_PERIPH   6
+#define PARTITION_REGION_SHARE    7
 
 /* This should move to platform retarget */
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
@@ -34,35 +34,36 @@ typedef enum {
 } ss_error_type_t;
 
 /*
- * This function is called when a secure service causes an error.
+ * This function is called when a secure partition causes an error.
  * In case of an error in the error handling, a non-zero value have to be
  * returned.
  */
-static void tfm_spm_service_err_handler(
-    struct spm_service_region_t *service,
+static void tfm_spm_partition_err_handler(
+    struct spm_partition_region_t *partition,
     ss_error_type_t err_type,
     int32_t err_code)
 {
 #ifdef TFM_CORE_DEBUG
     if (err_type == TFM_INIT_FAILURE) {
-        printf("Service init failed for service id 0x%08X\r\n",
-                service->service_id);
+        printf("Partition init failed for partition id 0x%08X\r\n",
+                partition->partition_id);
     } else {
-        printf("Unknown service error %d for service id 0x%08X\r\n",
-            err_type, service->service_id);
+        printf("Unknown partition error %d for partition id 0x%08X\r\n",
+            err_type, partition->partition_id);
     }
 #endif
-    tfm_spm_service_set_state(service->service_id, SPM_PART_STATE_CLOSED);
+    tfm_spm_partition_set_state(partition->partition_id,
+            SPM_PARTITION_STATE_CLOSED);
 }
 
 enum spm_err_t tfm_spm_db_init(void)
 {
-    /* This function initialises service db */
-    g_spm_service_db.is_init = 1;
-    g_spm_service_db.running_service_id = INVALID_PARITION_ID;
+    /* This function initialises partition db */
+    g_spm_partition_db.is_init = 1;
+    g_spm_partition_db.running_partition_id = INVALID_PARITION_ID;
 
-    g_spm_service_db.services_count =
-        create_user_service_db(&g_spm_service_db, SPM_MAX_SERVICES);
+    g_spm_partition_db.partition_count =
+        create_user_partition_db(&g_spm_partition_db, SPM_MAX_PARTITIONS);
 
     return SPM_ERR_OK;
 }
@@ -127,7 +128,7 @@ enum spm_err_t tfm_spm_mpu_init(void)
 }
 
 /**
- * Set share region to which the service needs access
+ * Set share region to which the partition needs access
  */
 static enum spm_err_t tfm_spm_set_share_region(
             enum tfm_buffer_share_region_e share)
@@ -141,17 +142,17 @@ static enum spm_err_t tfm_spm_set_share_region(
     mpu_armv8m_disable(&dev_mpu_s);
 
     if (share == TFM_BUFFER_SHARE_DISABLE) {
-        mpu_armv8m_region_disable(&dev_mpu_s, SERVICE_REGION_SHARE);
+        mpu_armv8m_region_disable(&dev_mpu_s, PARTITION_REGION_SHARE);
     } else {
         struct mpu_armv8m_region_cfg_t region_cfg;
 
-        region_cfg.region_nr = SERVICE_REGION_SHARE;
+        region_cfg.region_nr = PARTITION_REGION_SHARE;
         region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
         region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
         region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
         switch (share) {
         case TFM_BUFFER_SHARE_SCRATCH:
-            /* Use scratch area for service-to-service data sharing */
+            /* Use scratch area for SP-to-SP data sharing */
             region_cfg.region_base = scratch_base;
             region_cfg.region_limit = scratch_limit;
             res = SPM_ERR_OK;
@@ -179,33 +180,34 @@ static enum spm_err_t tfm_spm_set_share_region(
 }
 #endif
 
-enum spm_err_t tfm_spm_service_init(void)
+enum spm_err_t tfm_spm_partition_init(void)
 {
-    struct spm_service_region_t *serv;
+    struct spm_partition_region_t *serv;
     int32_t fail_cnt = 0;
     uint32_t i;
 
-    /* Call the init function for each service */
+    /* Call the init function for each partition */
     /* FixMe: This implementation only fits level 1 isolation.
      * On higher levels MPU (and PPC) configuration need to be in place to have
      * proper isolation during init.
      */
-    for (i = 0; i < g_spm_service_db.services_count; ++i) {
-        serv = &g_spm_service_db.services[i];
+    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
+        serv = &g_spm_partition_db.partitions[i];
         if (serv->periph_start) {
             ppc_configure_to_secure(serv->periph_ppc_bank,
                                     serv->periph_ppc_loc);
         }
-        if (serv->service_init == NULL) {
-            tfm_spm_service_set_state(serv->service_id, SPM_PART_STATE_IDLE);
+        if (serv->partition_init == NULL) {
+            tfm_spm_partition_set_state(serv->partition_id,
+                    SPM_PARTITION_STATE_IDLE);
         } else {
-            int32_t ret = serv->service_init();
+            int32_t ret = serv->partition_init();
 
             if (ret == TFM_SUCCESS) {
-                tfm_spm_service_set_state(
-                        serv->service_id, SPM_PART_STATE_IDLE);
+                tfm_spm_partition_set_state(
+                        serv->partition_id, SPM_PARTITION_STATE_IDLE);
             } else {
-                tfm_spm_service_err_handler(serv, TFM_INIT_FAILURE, ret);
+                tfm_spm_partition_err_handler(serv, TFM_INIT_FAILURE, ret);
                 fail_cnt++;
             }
         }
@@ -214,33 +216,33 @@ enum spm_err_t tfm_spm_service_init(void)
     if (fail_cnt == 0) {
         return SPM_ERR_OK;
     } else {
-        return SPM_ERR_SERV_NOT_AVAILABLE;
+        return SPM_ERR_PARTITION_NOT_AVAILABLE;
     }
 }
 
 #if TFM_LVL != 1
-enum spm_err_t tfm_spm_service_sandbox_config(uint32_t service_id)
+enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_id)
 {
-    /* This function takes a service id and enables the
-     * SPM partition for that service
+    /* This function takes a partition id and enables the
+     * SPM partition for that partition
      */
 
-    struct spm_service_region_t *serv;
+    struct spm_partition_region_t *serv;
     struct mpu_armv8m_region_cfg_t region_cfg;
 
-    if (!g_spm_service_db.is_init) {
-        return SPM_ERR_SERV_DB_NOT_INIT;
+    if (!g_spm_partition_db.is_init) {
+        return SPM_ERR_PARTITION_DB_NOT_INIT;
     }
 
     /*brute force id*/
-    serv = &g_spm_service_db.services[SERVICE_ID_GET(service_id)];
+    serv = &g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)];
 
     mpu_armv8m_disable(&dev_mpu_s);
 
     /* Configure Regions */
 
     /* RO region*/
-    region_cfg.region_nr = SERVICE_REGION_RO;
+    region_cfg.region_nr = PARTITION_REGION_RO;
     region_cfg.region_base = serv->ro_start;
     region_cfg.region_limit = serv->ro_limit;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
@@ -250,7 +252,7 @@ enum spm_err_t tfm_spm_service_sandbox_config(uint32_t service_id)
     mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
 
     /* RW, ZI and stack as one region*/
-    region_cfg.region_nr = SERVICE_REGION_RW_STACK;
+    region_cfg.region_nr = PARTITION_REGION_RW_STACK;
     region_cfg.region_base = serv->rw_start;
     region_cfg.region_limit = serv->stack_top;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
@@ -261,7 +263,7 @@ enum spm_err_t tfm_spm_service_sandbox_config(uint32_t service_id)
 
     if (serv->periph_start) {
         /* Peripheral */
-        region_cfg.region_nr = SERVICE_REGION_PERIPH;
+        region_cfg.region_nr = PARTITION_REGION_PERIPH;
         region_cfg.region_base = serv->periph_start;
         region_cfg.region_limit = serv->periph_limit;
         region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
@@ -292,10 +294,10 @@ enum spm_err_t tfm_spm_service_sandbox_config(uint32_t service_id)
     return SPM_ERR_OK;
 }
 
-enum spm_err_t tfm_spm_service_sandbox_deconfig(uint32_t service_id)
+enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_id)
 {
-    /* This function takes a service id and disables the
-     * SPM partition for that service
+    /* This function takes a partition id and disables the
+     * SPM partition for that partition
      */
 
 #ifndef UNPRIV_JUMP_TO_NS
@@ -311,9 +313,9 @@ enum spm_err_t tfm_spm_service_sandbox_deconfig(uint32_t service_id)
     __ISB();
 #endif
 
-    struct spm_service_region_t *serv;
+    struct spm_partition_region_t *serv;
 
-    serv = &g_spm_service_db.services[SERVICE_ID_GET(service_id)];
+    serv = &g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)];
 
     if (serv->periph_start) {
         /* Peripheral */
@@ -321,100 +323,113 @@ enum spm_err_t tfm_spm_service_sandbox_deconfig(uint32_t service_id)
     }
 
     mpu_armv8m_disable(&dev_mpu_s);
-    mpu_armv8m_region_disable(&dev_mpu_s, SERVICE_REGION_RO);
-    mpu_armv8m_region_disable(&dev_mpu_s, SERVICE_REGION_RW_STACK);
-    mpu_armv8m_region_disable(&dev_mpu_s, SERVICE_REGION_PERIPH);
-    mpu_armv8m_region_disable(&dev_mpu_s, SERVICE_REGION_SHARE);
+    mpu_armv8m_region_disable(&dev_mpu_s, PARTITION_REGION_RO);
+    mpu_armv8m_region_disable(&dev_mpu_s, PARTITION_REGION_RW_STACK);
+    mpu_armv8m_region_disable(&dev_mpu_s, PARTITION_REGION_PERIPH);
+    mpu_armv8m_region_disable(&dev_mpu_s, PARTITION_REGION_SHARE);
     mpu_armv8m_enable(&dev_mpu_s, 1, 1);
 
     return SPM_ERR_OK;
 }
 
-uint32_t tfm_spm_service_get_stack(uint32_t service_id)
+uint32_t tfm_spm_partition_get_stack(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].stack_ptr;
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            stack_ptr;
 }
 
-uint32_t tfm_spm_service_get_stack_bottom(uint32_t service_id)
+uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].stack_bottom;
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            stack_bottom;
 }
 
-uint32_t tfm_spm_service_get_stack_top(uint32_t service_id)
+uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].stack_top;
+    return
+      g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].stack_top;
 }
 
-void tfm_spm_service_set_stack(uint32_t service_id, uint32_t stack_ptr)
+void tfm_spm_partition_set_stack(uint32_t partition_id, uint32_t stack_ptr)
 {
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].stack_ptr = stack_ptr;
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].stack_ptr =
+            stack_ptr;
 }
 #endif
 
-uint32_t tfm_spm_service_get_state(uint32_t service_id)
+uint32_t tfm_spm_partition_get_state(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].
-            service_state;
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            partition_state;
 }
 
-uint32_t tfm_spm_service_get_caller_service_id(uint32_t service_id)
+uint32_t tfm_spm_partition_get_caller_partition_id(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].
-            caller_service_id;
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            caller_partition_id;
 }
 
-uint32_t tfm_spm_service_get_orig_psp(uint32_t service_id)
+uint32_t tfm_spm_partition_get_orig_psp(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psp;
+    return
+      g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].orig_psp;
 }
 
-uint32_t tfm_spm_service_get_orig_psplim(uint32_t service_id)
+uint32_t tfm_spm_partition_get_orig_psplim(uint32_t partition_id)
 {
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psplim;
-}
-
-uint32_t tfm_spm_service_get_orig_lr(uint32_t service_id)
-{
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_lr;
-}
-
-uint32_t tfm_spm_service_get_share(uint32_t service_id)
-{
-    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].share;
-}
-
-void tfm_spm_service_set_state(uint32_t service_id, uint32_t state)
-{
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].service_state = state;
-    if (state == SPM_PART_STATE_RUNNING) {
-        g_spm_service_db.running_service_id = service_id;
-    }
-}
-
-void tfm_spm_service_set_caller_service_id(uint32_t service_id,
-                                           uint32_t caller_service_id)
-{
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].caller_service_id =
-            caller_service_id;
-}
-
-void tfm_spm_service_set_orig_psp(uint32_t service_id, uint32_t orig_psp)
-{
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psp = orig_psp;
-}
-
-void tfm_spm_service_set_orig_psplim(uint32_t service_id, uint32_t orig_psplim)
-{
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psplim =
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
             orig_psplim;
 }
 
-void tfm_spm_service_set_orig_lr(uint32_t service_id, uint32_t orig_lr)
+uint32_t tfm_spm_partition_get_orig_lr(uint32_t partition_id)
 {
-    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_lr = orig_lr;
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            orig_lr;
 }
 
-enum spm_err_t tfm_spm_service_set_share(uint32_t service_id, uint32_t share)
+uint32_t tfm_spm_partition_get_share(uint32_t partition_id)
+{
+    return g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].share;
+}
+
+void tfm_spm_partition_set_state(uint32_t partition_id, uint32_t state)
+{
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+                       partition_state = state;
+    if (state == SPM_PARTITION_STATE_RUNNING) {
+        g_spm_partition_db.running_partition_id = partition_id;
+    }
+}
+
+void tfm_spm_partition_set_caller_partition_id(uint32_t partition_id,
+                                               uint32_t caller_partition_id)
+{
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].
+            caller_partition_id = caller_partition_id;
+}
+
+void tfm_spm_partition_set_orig_psp(uint32_t partition_id,
+                                    uint32_t orig_psp)
+{
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].orig_psp =
+            orig_psp;
+}
+
+void tfm_spm_partition_set_orig_psplim(uint32_t partition_id,
+                                       uint32_t orig_psplim)
+{
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].orig_psplim =
+            orig_psplim;
+}
+
+void tfm_spm_partition_set_orig_lr(uint32_t partition_id, uint32_t orig_lr)
+{
+    g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].orig_lr =
+            orig_lr;
+}
+
+enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_id,
+                                           uint32_t share)
 {
     enum spm_err_t ret = SPM_ERR_OK;
 
@@ -424,24 +439,25 @@ enum spm_err_t tfm_spm_service_set_share(uint32_t service_id, uint32_t share)
 #endif
 
     if (ret == SPM_ERR_OK) {
-        g_spm_service_db.services[SERVICE_ID_GET(service_id)].share = share;
+        g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)].share =
+                share;
     }
     return ret;
 }
 
-uint32_t tfm_spm_service_get_running_service_id(void)
+uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    return g_spm_service_db.running_service_id;
+    return g_spm_partition_db.running_partition_id;
 }
 
-void tfm_spm_service_cleanup_context(uint32_t service_id)
+void tfm_spm_partition_cleanup_context(uint32_t partition_id)
 {
-    struct spm_service_region_t *service =
-            &g_spm_service_db.services[SERVICE_ID_GET(service_id)];
-    service->service_state = 0;
-    service->caller_service_id = 0;
-    service->orig_psp = 0;
-    service->orig_psplim = 0;
-    service->orig_lr = 0;
-    service->share = 0;
+    struct spm_partition_region_t *partition =
+            &g_spm_partition_db.partitions[PARTITION_ID_GET(partition_id)];
+    partition->partition_state = 0;
+    partition->caller_partition_id = 0;
+    partition->orig_psp = 0;
+    partition->orig_psplim = 0;
+    partition->orig_lr = 0;
+    partition->share = 0;
 }

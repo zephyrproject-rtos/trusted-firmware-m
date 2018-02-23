@@ -16,18 +16,18 @@
 
 #include "smm_mps2.h"
 
-static int32_t service_init_done;
+static int32_t partition_init_done;
 
 int32_t core_test_init(void)
 {
-    service_init_done = 1;
+    partition_init_done = 1;
     return TFM_SUCCESS;
 }
 
 
 int32_t spm_core_test_sfn_init_success(void)
 {
-    if (service_init_done) {
+    if (partition_init_done) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
         return CORE_TEST_ERRNO_SERVICE_NOT_INITED;
