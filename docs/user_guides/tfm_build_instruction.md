@@ -7,8 +7,13 @@ Please make sure you have all required software installed as explained in the
 TF-M uses [cmake](https://cmake.org/overview/) to provide an out-of-tree build
 environment. The instructions are below.
 
+*Note* In the cmake configuration step, to enable debug symbols, the following
+option should be added:
+
+`-DCMAKE_BUILD_TYPE=Debug`
+
 ### External dependency
-* CMSIS_5 is used to import RTX for tests and apps
+* CMSIS_5 is used to import RTX for the example non-secure app
 * mbedtls is used as crypto library on the secure side
 
 Both need to be cloned manually in the current release.
