@@ -13,6 +13,13 @@
 #include "target_cfg.h"
 #include "service_defs.h"
 
+/* TFM_SEC_FUNC_NON_SECURE and TFM_SEC_FUNC_CORE are not real services, we
+ * only created them to have an entry for them in the database. They don't have
+ * their dedicated sections in the scatter file, so no symbols are needed to
+ * be declared.
+ */
+/* SERVICE_DECLARE(TFM_SEC_FUNC_NON_SECURE) */
+/* SERVICE_DECLARE(TFM_SEC_FUNC_CORE) */
 SERVICE_DECLARE(TFM_SEC_FUNC_STORAGE)
 
 #ifdef CORE_TEST_SERVICES
@@ -28,6 +35,8 @@ SERVICE_DECLARE(TFM_SEC_FUNC_SST_TEST_SERVICE)
 #define __SPM_ADD_USER_SERVICES__
 
 /* Order must be same as id!!! */
+DUMMY_SERVICE_ADD(TFM_SEC_FUNC_NON_SECURE)
+DUMMY_SERVICE_ADD(TFM_SEC_FUNC_CORE)
 SERVICE_ADD(TFM_SEC_FUNC_STORAGE)
 
 #ifdef CORE_TEST_SERVICES

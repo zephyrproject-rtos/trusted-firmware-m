@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,8 +8,9 @@
 /* This file contains the apis exported by the SPM to tfm core */
 
 #include <stdio.h>
-#include "spm_db.h"
 #include "spm_api.h"
+#include "spm_db.h"
+#include "tfm_api.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "secure_fw/core/tfm_core.h"
@@ -34,29 +35,31 @@ typedef enum {
 
 /*
  * This function is called when a secure service causes an error.
+ * In case of an error in the error handling, a non-zero value have to be
+ * returned.
  */
 static void tfm_spm_service_err_handler(
-    uint32_t ss_id, ss_error_type_t err_type, int32_t err_code)
+    struct spm_service_region_t *service,
+    ss_error_type_t err_type,
+    int32_t err_code)
 {
-    /*
-     * FixMe: error handling to be added. E.g. service info to be updated with
-     * init failed so that calls to the service are rejected
-     */
 #ifdef TFM_CORE_DEBUG
     if (err_type == TFM_INIT_FAILURE) {
-        printf("Service init failed for service id 0x%08X\r\n", ss_id);
+        printf("Service init failed for service id 0x%08X\r\n",
+                service->service_id);
     } else {
         printf("Unknown service error %d for service id 0x%08X\r\n",
-            err_type,
-            ss_id);
+            err_type, service->service_id);
     }
 #endif
+    tfm_spm_service_set_state(service->service_id, SPM_PART_STATE_CLOSED);
 }
 
 enum spm_err_t tfm_spm_db_init(void)
 {
     /* This function initialises service db */
     g_spm_service_db.is_init = 1;
+    g_spm_service_db.running_service_id = INVALID_PARITION_ID;
 
     g_spm_service_db.services_count =
         create_user_service_db(&g_spm_service_db, SPM_MAX_SERVICES);
@@ -123,7 +126,11 @@ enum spm_err_t tfm_spm_mpu_init(void)
     return SPM_ERR_OK;
 }
 
-enum spm_err_t tfm_spm_set_share_region(enum tfm_buffer_share_region_e share)
+/**
+ * Set share region to which the service needs access
+ */
+static enum spm_err_t tfm_spm_set_share_region(
+            enum tfm_buffer_share_region_e share)
 {
     enum spm_err_t res = SPM_ERR_INVALID_CONFIG;
     uint32_t scratch_base =
@@ -189,12 +196,16 @@ enum spm_err_t tfm_spm_service_init(void)
             ppc_configure_to_secure(serv->periph_ppc_bank,
                                     serv->periph_ppc_loc);
         }
-        if (serv->service_init != 0) {
+        if (serv->service_init == NULL) {
+            tfm_spm_service_set_state(serv->service_id, SPM_PART_STATE_IDLE);
+        } else {
             int32_t ret = serv->service_init();
 
-            if (ret != 0) {
-                tfm_spm_service_err_handler(serv->service_id,
-                    TFM_INIT_FAILURE, ret);
+            if (ret == TFM_SUCCESS) {
+                tfm_spm_service_set_state(
+                        serv->service_id, SPM_PART_STATE_IDLE);
+            } else {
+                tfm_spm_service_err_handler(serv, TFM_INIT_FAILURE, ret);
                 fail_cnt++;
             }
         }
@@ -339,3 +350,98 @@ void tfm_spm_service_set_stack(uint32_t service_id, uint32_t stack_ptr)
     g_spm_service_db.services[SERVICE_ID_GET(service_id)].stack_ptr = stack_ptr;
 }
 #endif
+
+uint32_t tfm_spm_service_get_state(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].
+            service_state;
+}
+
+uint32_t tfm_spm_service_get_caller_service_id(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].
+            caller_service_id;
+}
+
+uint32_t tfm_spm_service_get_orig_psp(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psp;
+}
+
+uint32_t tfm_spm_service_get_orig_psplim(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psplim;
+}
+
+uint32_t tfm_spm_service_get_orig_lr(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_lr;
+}
+
+uint32_t tfm_spm_service_get_share(uint32_t service_id)
+{
+    return g_spm_service_db.services[SERVICE_ID_GET(service_id)].share;
+}
+
+void tfm_spm_service_set_state(uint32_t service_id, uint32_t state)
+{
+    g_spm_service_db.services[SERVICE_ID_GET(service_id)].service_state = state;
+    if (state == SPM_PART_STATE_RUNNING) {
+        g_spm_service_db.running_service_id = service_id;
+    }
+}
+
+void tfm_spm_service_set_caller_service_id(uint32_t service_id,
+                                           uint32_t caller_service_id)
+{
+    g_spm_service_db.services[SERVICE_ID_GET(service_id)].caller_service_id =
+            caller_service_id;
+}
+
+void tfm_spm_service_set_orig_psp(uint32_t service_id, uint32_t orig_psp)
+{
+    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psp = orig_psp;
+}
+
+void tfm_spm_service_set_orig_psplim(uint32_t service_id, uint32_t orig_psplim)
+{
+    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_psplim =
+            orig_psplim;
+}
+
+void tfm_spm_service_set_orig_lr(uint32_t service_id, uint32_t orig_lr)
+{
+    g_spm_service_db.services[SERVICE_ID_GET(service_id)].orig_lr = orig_lr;
+}
+
+enum spm_err_t tfm_spm_service_set_share(uint32_t service_id, uint32_t share)
+{
+    enum spm_err_t ret = SPM_ERR_OK;
+
+#if TFM_LVL != 1
+    /* Only need to set configuration on levels higher than 1 */
+    ret = tfm_spm_set_share_region(share);
+#endif
+
+    if (ret == SPM_ERR_OK) {
+        g_spm_service_db.services[SERVICE_ID_GET(service_id)].share = share;
+    }
+    return ret;
+}
+
+uint32_t tfm_spm_service_get_running_service_id(void)
+{
+    return g_spm_service_db.running_service_id;
+}
+
+void tfm_spm_service_cleanup_context(uint32_t service_id)
+{
+    struct spm_service_region_t *service =
+            &g_spm_service_db.services[SERVICE_ID_GET(service_id)];
+    service->service_state = 0;
+    service->caller_service_id = 0;
+    service->orig_psp = 0;
+    service->orig_psplim = 0;
+    service->orig_lr = 0;
+    service->share = 0;
+}

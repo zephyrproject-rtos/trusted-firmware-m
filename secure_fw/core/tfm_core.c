@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -144,6 +144,8 @@ int main(void)
          */
     }
 
+    tfm_spm_service_set_state(TFM_SEC_FUNC_CORE_ID, SPM_PART_STATE_RUNNING);
+
     extern uint32_t Stack_Mem[];
 
     __set_PSPLIM((uint32_t)Stack_Mem);
@@ -172,6 +174,13 @@ int main(void)
     __ISB();
 #endif
 #endif
+
+    /* We close the TFM_SEC_FUNC_CORE_ID service, because its only purpose is
+     * to be able to pass the state checks for the tests started from secure.
+     */
+    tfm_spm_service_set_state(TFM_SEC_FUNC_CORE_ID, SPM_PART_STATE_CLOSED);
+    tfm_spm_service_set_state(TFM_SEC_FUNC_NON_SECURE_ID,
+                              SPM_PART_STATE_RUNNING);
 
     jump_to_ns_code();
 }

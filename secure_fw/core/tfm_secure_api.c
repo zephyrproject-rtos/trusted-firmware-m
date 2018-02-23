@@ -16,19 +16,8 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 
-#define SECURE_LOCK_STACK_LIMIT 5
-
 /* NOTE: this does not account for possible FP stacking */
 #define SVC_STACK_FRAME_SIZE 0x20
-
-static struct tfm_secure_lock_ctx_t {
-    uint32_t service_id;
-    uint32_t orig_psp;
-    uint32_t orig_psplim;
-    uint32_t orig_lr;
-    int32_t  ns_caller;
-    enum tfm_buffer_share_region_e share;
-} ctx[SECURE_LOCK_STACK_LIMIT];
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
@@ -46,7 +35,10 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 
 extern void tfm_core_service_return_svc(void);
 
-static int32_t lock_cnt;
+/* This is the "Big Lock" on the secure side, to guarantee single entry
+ * to SPE
+ */
+static int32_t tfm_secure_lock;
 
 static uint32_t *prepare_service_ctx(
             struct tfm_sfn_req_s *desc_ptr, uint32_t *dst)
@@ -72,59 +64,66 @@ static uint32_t *prepare_service_ctx(
 
 static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 {
-    if ((lock_cnt >= 0) && (lock_cnt < SECURE_LOCK_STACK_LIMIT)) {
+    uint32_t caller_service_id = tfm_spm_service_get_running_service_id();
+
+    if (caller_service_id >= TFM_SEC_FUNC_BASE &&
+        /* Also check service state consistency */
+        (caller_service_id == TFM_SEC_FUNC_NON_SECURE_ID) ==
+                (desc_ptr->ns_caller != 0)) {
         register uint32_t service_id = desc_ptr->ss_id;
         uint32_t psp = __get_PSP();
         uint32_t service_psp, service_psplim;
+        uint32_t service_state = tfm_spm_service_get_state(service_id);
+
+        if (service_state == SPM_PART_STATE_RUNNING ||
+            service_state == SPM_PART_STATE_SUSPENDED ||
+            service_state == SPM_PART_STATE_BLOCKED) {
+            /* Recursion is not permitted! */
+            return TFM_ERROR_SERVICE_NON_REENTRANT;
+        } else if (service_state != SPM_PART_STATE_IDLE) {
+            /* The service to be called is not in a proper state */
+            return TFM_SECURE_LOCK_FAILED;
+        }
+
 #if TFM_LVL == 1
         /* Prepare switch to shared secure service stack */
         service_psp =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
         service_psplim =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
-        if ((lock_cnt > 0) && (ctx[lock_cnt-1].service_id == desc_ptr->ss_id)) {
-            /* Direct recursion is not permitted! */
-            return TFM_ERROR_SERVICE_NON_REENTRANT;
-        }
 #else
-        if (lock_cnt > 0) {
+        if (caller_service_id != TFM_SEC_FUNC_NON_SECURE_ID) {
             /* Store the caller PSP in case we are doing a service to
              * service call
              */
-            tfm_spm_service_set_stack(ctx[lock_cnt-1].service_id, psp);
+            tfm_spm_service_set_stack(caller_service_id, psp);
         }
-
         service_psp = tfm_spm_service_get_stack(service_id);
-        if (service_psp != tfm_spm_service_get_stack_top(service_id)) {
-            /* We can't stack a service if it's already running, i.e. it has a
-             * context stacked
-             */
-            return TFM_ERROR_SERVICE_NON_REENTRANT;
-        }
         service_psplim = tfm_spm_service_get_stack_bottom(service_id);
 #endif
         /* Stack the context for the service call */
-        ctx[lock_cnt].service_id = service_id;
-        ctx[lock_cnt].orig_psp = psp;
-        ctx[lock_cnt].orig_psplim = __get_PSPLIM();
-        ctx[lock_cnt].orig_lr = lr;
-        ctx[lock_cnt].ns_caller = desc_ptr->ns_caller;
-        /* Default share to scratch area in case of service-to-service calls
-         * this way services always get default access to input buffers
-         */
-        ctx[lock_cnt].share = desc_ptr->ns_caller ?
-            TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH;
+        tfm_spm_service_set_orig_psp(service_id, psp);
+        tfm_spm_service_set_orig_psplim(service_id, __get_PSPLIM());
+        tfm_spm_service_set_orig_lr(service_id, lr);
+        tfm_spm_service_set_caller_service_id(service_id, caller_service_id);
 
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
         /* Dynamic service partitioning is only done is TFM level 3 */
-        if (lock_cnt > 0) {
+        if (caller_service_id != TFM_SEC_FUNC_NON_SECURE_ID) {
             /* In a service to service call, deconfigure the caller service */
-            tfm_spm_service_sandbox_deconfig(ctx[lock_cnt-1].service_id);
+            tfm_spm_service_sandbox_deconfig(caller_service_id);
         }
 
         /* Configure service execution environment */
         tfm_spm_service_sandbox_config(service_id);
 #endif
+
+        /* Default share to scratch area in case of service-to-service calls
+         * this way services always get default access to input buffers
+         */
+        /* FixMe: return value/error handling TBD */
+        tfm_spm_service_set_share(service_id, desc_ptr->ns_caller ?
+            TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH);
 
 #if TFM_LVL == 1
         /* In level one, only switch context and return from exception if in
@@ -138,16 +137,15 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
             __set_PSPLIM(service_psplim);
         }
 #else
-        /* FixMe: return value/error handling TBD */
-        tfm_spm_set_share_region(ctx[lock_cnt].share);
-
         /* Prepare the service context, update stack ptr */
         psp = (uint32_t)prepare_service_ctx(desc_ptr, (uint32_t *)service_psp);
         __set_PSP(psp);
         __set_PSPLIM(service_psplim);
 #endif
 
-        lock_cnt++;
+        tfm_spm_service_set_state(caller_service_id, SPM_PART_STATE_BLOCKED);
+        tfm_spm_service_set_state(service_id, SPM_PART_STATE_RUNNING);
+        tfm_secure_lock++;
 
         return TFM_SUCCESS;
     } else {
@@ -158,46 +156,59 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 
 static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 {
-    if ((lock_cnt > 0) && (lock_cnt <= SECURE_LOCK_STACK_LIMIT)) {
-        lock_cnt--;
+    uint32_t current_service_id = tfm_spm_service_get_running_service_id();
+    uint32_t return_service_id =
+            tfm_spm_service_get_caller_service_id(current_service_id);
+
+    if (current_service_id < TFM_SEC_FUNC_BASE) {
+        return TFM_SECURE_UNLOCK_FAILED;
+    }
+
+    if (return_service_id >= TFM_SEC_FUNC_BASE) {
+        tfm_secure_lock--;
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
         /* Deconfigure completed service environment */
-        tfm_spm_service_sandbox_deconfig(ctx[lock_cnt].service_id);
-        if (lock_cnt > 0) {
+        tfm_spm_service_sandbox_deconfig(current_service_id);
+        if (return_service_id != TFM_SEC_FUNC_NON_SECURE_ID) {
             /* Configure the caller service environment in case this was a
              * service to service call
              */
-            tfm_spm_service_sandbox_config(ctx[lock_cnt-1].service_id);
+            tfm_spm_service_sandbox_config(return_service_id);
             /* Restore share status */
-            tfm_spm_set_share_region(ctx[lock_cnt-1].share);
+            tfm_spm_service_set_share(return_service_id,
+                    tfm_spm_service_get_share(return_service_id));
         }
 #endif
 
 #if TFM_LVL == 1
-        if (ctx[lock_cnt].ns_caller) {
+        if (tfm_spm_service_get_caller_service_id(current_service_id) ==
+                TFM_SEC_FUNC_NON_SECURE_ID) {
             /* In TFM level 1 context restore is only done when
              * returning to NS
              */
             /* Restore caller PSP and LR ptr */
-            __set_PSP(ctx[lock_cnt].orig_psp);
-            __set_PSPLIM(ctx[lock_cnt].orig_psplim);
-            *lr_ptr = ctx[lock_cnt].orig_lr;
+            __set_PSP(tfm_spm_service_get_orig_psp(current_service_id));
+            __set_PSPLIM(tfm_spm_service_get_orig_psplim(current_service_id));
+            *lr_ptr = tfm_spm_service_get_orig_lr(current_service_id);
         }
 #else
         uint32_t psp = __get_PSP();
 
         /* Discount SVC call stack frame when storing sfn ctx */
         tfm_spm_service_set_stack(
-                    ctx[lock_cnt].service_id, psp + SVC_STACK_FRAME_SIZE);
+                    current_service_id, psp + SVC_STACK_FRAME_SIZE);
 
         /* Restore caller PSP and LR ptr */
-        __set_PSP(ctx[lock_cnt].orig_psp);
-        __set_PSPLIM(ctx[lock_cnt].orig_psplim);
-        *lr_ptr = ctx[lock_cnt].orig_lr;
+        __set_PSP(tfm_spm_service_get_orig_psp(current_service_id));
+        __set_PSPLIM(tfm_spm_service_get_orig_psplim(current_service_id));
+        *lr_ptr = tfm_spm_service_get_orig_lr(current_service_id);
 #endif
 
         /* Clear the context entry in the context stack before returning */
-        memset(&ctx[lock_cnt], 0, sizeof(ctx[0]));
+        tfm_spm_service_cleanup_context(current_service_id);
+
+        tfm_spm_service_set_state(current_service_id, SPM_PART_STATE_IDLE);
+        tfm_spm_service_set_state(return_service_id, SPM_PART_STATE_RUNNING);
 
         return TFM_SUCCESS;
     } else {
@@ -239,7 +250,7 @@ static int32_t tfm_core_check_service_req_rules(struct tfm_sfn_req_s *desc_ptr)
              */
             return TFM_ERROR_NS_THREAD_MODE_CALL;
         }
-        if (lock_cnt != 0) {
+        if (tfm_secure_lock != 0) {
             /*
              * Secure domain is already locked!
              * This should only happen if caller is secure function!
@@ -438,8 +449,9 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
 {
 
     int32_t res = TFM_ERROR_GENERIC;
+    uint32_t running_service_id = tfm_spm_service_get_running_service_id();
 
-    if (lock_cnt == 0)  {
+    if (running_service_id == TFM_SEC_FUNC_NON_SECURE_ID)  {
         /* This handler shouldn't be called from outside service context.
          * Services are only allowed to run while S domain is locked.
          */
@@ -448,7 +460,8 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
 
     /* Store return value in r0 */
-    if (!ctx[lock_cnt-1].ns_caller) {
+    if (tfm_spm_service_get_caller_service_id(running_service_id) !=
+            TFM_SEC_FUNC_NON_SECURE_ID) {
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
@@ -462,8 +475,9 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
     uint32_t max_buf_size, ptr_start, range_limit, range_check = false;
     int32_t res;
+    uint32_t running_service_id = tfm_spm_service_get_running_service_id();
 
-    if ((lock_cnt == 0) || (size == 0)) {
+    if ((running_service_id == TFM_SEC_FUNC_NON_SECURE_ID) || (size == 0)) {
         /* This handler shouldn't be called from outside service context.
          * Services are only allowed to run while S domain is locked.
          */
@@ -473,7 +487,8 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
     int32_t flags = 0;
 
-    if (ctx[lock_cnt-1].share != TFM_BUFFER_SHARE_PRIV) {
+    if (tfm_spm_service_get_share(running_service_id) !=
+            TFM_BUFFER_SHARE_PRIV) {
         flags |= CMSE_MPU_UNPRIV;
     }
 
@@ -657,12 +672,12 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
      * Store input parameter before writing return value to that address
      */
     enum tfm_buffer_share_region_e share;
+    uint32_t running_service_id = tfm_spm_service_get_running_service_id();
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];
 
-    if (lock_cnt == 0) {
+    if (running_service_id == TFM_SEC_FUNC_NON_SECURE_ID) {
         /* This handler shouldn't be called from outside service context.
-         * Services are only allowed to run while S domain is locked
          */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -670,7 +685,8 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
 
     switch (args[0]) {
     case TFM_BUFFER_SHARE_DEFAULT:
-        share = (ctx[lock_cnt-1].ns_caller) ?
+        share = (tfm_spm_service_get_caller_service_id(running_service_id) ==
+                TFM_SEC_FUNC_NON_SECURE_ID) ?
             (TFM_BUFFER_SHARE_NS_CODE) : (TFM_BUFFER_SHARE_SCRATCH);
         break;
     case TFM_BUFFER_SHARE_SCRATCH:
@@ -682,18 +698,11 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
         return;
     }
 
-#if TFM_LVL == 1
-    /* No configuration needed in level 1 */
-    ctx[lock_cnt-1].share = share;
-    *res_ptr = TFM_SUCCESS;
-#else
-    if (tfm_spm_set_share_region(share) == SPM_ERR_OK) {
-        ctx[lock_cnt-1].share = share;
+    if (tfm_spm_service_set_share(running_service_id, share) == SPM_ERR_OK) {
         *res_ptr = TFM_SUCCESS;
     } else {
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
     }
-#endif
 
     return;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,13 @@
 #include "tfm_secure_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 
+/* FIXME: Add a testcase to test that a failed init makes the secure partition
+ * closed, and none of its functions can be called.
+ * A new test service for this purpose is to be added.
+ */
 int32_t core_test_2_init(void)
 {
-    return TFM_ERROR_GENERIC;
+    return TFM_SUCCESS;
 }
 
 int32_t spm_core_test_2_slave_service(void)

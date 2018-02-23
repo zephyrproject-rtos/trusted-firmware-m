@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,6 +23,12 @@ typedef int32_t(*ss_init_function)(void);
 #if TFM_LVL == 1
 struct spm_service_region_t {
     uint32_t service_id;
+    uint32_t service_state;
+    uint32_t caller_service_id;
+    uint32_t orig_psp;
+    uint32_t orig_psplim;
+    uint32_t orig_lr;
+    uint32_t share;
     uint32_t stack_ptr;
     uint32_t periph_start;
     uint32_t periph_limit;
@@ -33,6 +39,12 @@ struct spm_service_region_t {
 #else
 struct spm_service_region_t {
     uint32_t service_id;
+    uint32_t service_state;
+    uint32_t caller_service_id;
+    uint32_t orig_psp;
+    uint32_t orig_psplim;
+    uint32_t orig_lr;
+    uint32_t share;
     uint32_t code_start;
     uint32_t code_limit;
     uint32_t ro_start;
@@ -55,6 +67,7 @@ struct spm_service_region_t {
 struct spm_service_db_t {
     uint32_t is_init;
     uint32_t services_count;
+    uint32_t running_service_id;
     struct spm_service_region_t services[SPM_MAX_SERVICES];
 };
 
@@ -87,6 +100,12 @@ struct spm_service_db_t {
      }                                                        \
      db_ptr = (uint32_t *)&(db->services[index]);             \
     *db_ptr++ = service##_ID;                                 \
+    *db_ptr++ = SPM_PART_STATE_UNINIT; /* service_state  */   \
+    *db_ptr++ = 0U;     /* caller service id */               \
+    *db_ptr++ = 0U;     /* original psp */                    \
+    *db_ptr++ = 0U;     /* original psplim */                 \
+    *db_ptr++ = 0U;     /* original lr */                     \
+    *db_ptr++ = 0U;     /* share */                           \
     *db_ptr++ = 0U;     /* stack pointer on service enter */  \
     *db_ptr++ = 0U;     /* peripheral start */                \
     *db_ptr++ = 0U;     /* peripheral limit */                \
@@ -101,6 +120,12 @@ struct spm_service_db_t {
      }                                                                       \
      db_ptr = (uint32_t *)&(db->services[index]);                            \
     *db_ptr++ = service##_ID;                                                \
+    *db_ptr++ = SPM_PART_STATE_UNINIT; /* service_state  */                  \
+    *db_ptr++ = 0U;     /* caller service id */                              \
+    *db_ptr++ = 0U;     /* original psp */                                   \
+    *db_ptr++ = 0U;     /* original psplim */                                \
+    *db_ptr++ = 0U;     /* original lr */                                    \
+    *db_ptr++ = 0U;     /* share */                                          \
     *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, service, $$Base);            \
     *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, service, $$Limit);           \
     *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, service, $$RO$$Base);        \
@@ -117,6 +142,58 @@ struct spm_service_db_t {
     *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */                \
     *db_ptr++ = 0U;     /* service init function*/                           \
     index++;                                                                 \
+}
+#endif
+
+#if TFM_LVL == 1
+#define DUMMY_SERVICE_ADD(service) {                          \
+     if (index >= max_services) {                             \
+         return max_services;                                 \
+     }                                                        \
+     db_ptr = (uint32_t *)&(db->services[index]);             \
+    *db_ptr++ = service##_ID;                                 \
+    *db_ptr++ = SPM_PART_STATE_UNINIT; /* service_state  */   \
+    *db_ptr++ = 0U;     /* caller service id */               \
+    *db_ptr++ = 0U;     /* original psp */                    \
+    *db_ptr++ = 0U;     /* original psplim */                 \
+    *db_ptr++ = 0U;     /* original lr */                     \
+    *db_ptr++ = 0U;     /* share */                           \
+    *db_ptr++ = 0U;     /* stack pointer on service enter */  \
+    *db_ptr++ = 0U;     /* peripheral start */                \
+    *db_ptr++ = 0U;     /* peripheral limit */                \
+    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */ \
+    *db_ptr++ = 0U;     /* service init function*/            \
+    index++;                                                  \
+    }
+#else
+#define DUMMY_SERVICE_ADD(service) {                          \
+     if (index >= max_services) {                             \
+         return max_services;                                 \
+     }                                                        \
+     db_ptr = (uint32_t *)&(db->services[index]);             \
+    *db_ptr++ = service##_ID;                                 \
+    *db_ptr++ = SPM_PART_STATE_UNINIT; /* service_state  */   \
+    *db_ptr++ = 0U;     /* caller service id */               \
+    *db_ptr++ = 0U;     /* original_psp */                    \
+    *db_ptr++ = 0U;     /* original_psplim */                 \
+    *db_ptr++ = 0U;     /* original_lr */                     \
+    *db_ptr++ = 0U;     /* share */                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;                                           \
+    *db_ptr++ = 0U;     /* peripheral start */                \
+    *db_ptr++ = 0U;     /* peripheral limit */                \
+    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */ \
+    *db_ptr++ = 0U;     /* service init function*/            \
+    index++;                                                  \
 }
 #endif
 
