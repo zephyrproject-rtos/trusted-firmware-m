@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,22 +27,26 @@
         enum tfm_status_e res = (enum tfm_status_e) fn(__VA_ARGS__); \
         switch(res) { \
             case TFM_SUCCESS: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") successful!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") successful!");\
                 break; \
             case TFM_SERVICE_PENDED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") pended!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") pended!"); \
                 break; \
             case TFM_ERROR_SERVICE_ALREADY_PENDED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, already pended!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                                                            "already pended!");\
                 break; \
             case TFM_ERROR_SECURE_DOMAIN_LOCKED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, S domain locked!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                                                           "S domain locked!");\
                 break; \
             case TFM_ERROR_NS_THREAD_MODE_CALL: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, NS thread mode!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                                                            "NS thread mode!");\
                 break; \
             default: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, generic!!"); \
+                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                                                                   "generic!");\
         } \
     } while(0)
 /**
@@ -67,14 +71,19 @@ void svc_secure_decrement_ns_lock_2(void)
  *        scenarios
  */
 enum test_type {
-    TEST_TYPE_1 = 1, /*!< Sequential test: single task using the NS lock to access TFM */
-    TEST_TYPE_2,     /*!< Priority test: high priority tries to preempt TFM, gets delayed */
-    TEST_TYPE_3,     /*!< Priority inversion: classical scenario with high priority task
-                          waiting on lower priority task undefinitely if NS lock is configured
-                          without priority inheritance */
-    TEST_TYPE_4,     /*!< non-NS lock: like sequential, but doesn't use any NS lock mechanism */
-    TEST_TYPE_5      /*!< non-NS lock, core locked: high priority tries to overcome the NS lock
-                          but finds TFM core locked by lower priority task and fails */
+    TEST_TYPE_1 = 1, /*!< Sequential test: single task using the NS lock to
+                          access TFM */
+    TEST_TYPE_2,     /*!< Priority test: high priority tries to preempt TFM,
+                          gets delayed */
+    TEST_TYPE_3,     /*!< Priority inversion: classical scenario with high
+                          priority task waiting on lower priority task
+                          undefinitely if NS lock is configured without priority
+                          inheritance */
+    TEST_TYPE_4,     /*!< non-NS lock: like sequential, but doesn't use any NS
+                          lock mechanism */
+    TEST_TYPE_5,     /*!< non-NS lock, core locked: high priority tries to
+                          overcome the NS lock but finds TFM core locked by
+                          lower priority task and fails */
 };
 
 static const osThreadAttr_t tattr_seq = {
@@ -114,7 +123,8 @@ static const osMutexAttr_t mattr_ns_lock = {
 /**
  * \brief SVC dispatcher
  */
-__attribute__((always_inline)) __STATIC_INLINE void svc_dispatch(enum tfm_svc_num svc_num)
+__attribute__((always_inline)) __STATIC_INLINE
+void svc_dispatch(enum tfm_svc_num svc_num)
 {
     switch (svc_num) {
     case SVC_SECURE_DECREMENT_NS_LOCK_1:
@@ -142,11 +152,11 @@ static void tfm_service_request(enum tfm_svc_num svc_num, bool use_ns_lock)
     char buffer[80];
 
 #define LOG_MSG_THREAD(MSG_THREAD) \
-    do { \
-        sprintf(buffer,"%s [%s]", MSG_THREAD, osThreadGetName(osThreadGetId())); \
-        LOG_MSG(buffer); \
-    } \
-    while(0)
+  do { \
+      sprintf(buffer,"%s [%s]", MSG_THREAD, osThreadGetName(osThreadGetId())); \
+      LOG_MSG(buffer); \
+  } \
+  while(0)
 
     LOG_MSG_THREAD("Trying to acquire the TFM core from NS");
 
@@ -157,8 +167,7 @@ static void tfm_service_request(enum tfm_svc_num svc_num, bool use_ns_lock)
             svc_dispatch(svc_num);
             LOG_MSG_THREAD("NS Lock: releasing...");
             osMutexRelease(mutex_id);
-        }
-        else {
+        } else {
             LOG_MSG_THREAD("Failed to acquire the NS lock");
 
             osMutexAcquire(mutex_id,osWaitForever);
@@ -167,8 +176,7 @@ static void tfm_service_request(enum tfm_svc_num svc_num, bool use_ns_lock)
             LOG_MSG_THREAD("NS Lock: releasing...");
             osMutexRelease(mutex_id);
         }
-    }
-    else {
+    } else {
         svc_dispatch(svc_num);
     }
 }
@@ -193,11 +201,9 @@ static void mid_task(void *argument)
 
     if (thread_pri_state == osThreadBlocked) {
         LOG_MSG("Running [mid_task] while [pri_task] is blocked");
-    }
-    else if (thread_pri_state == osThreadTerminated) {
+    } else if (thread_pri_state == osThreadTerminated) {
         LOG_MSG("Running [mid_task] while [pri_task] is terminated");
-    }
-    else {
+    } else {
         LOG_MSG("Running [mid_task]");
     }
 
@@ -242,31 +248,26 @@ static void seq_task(void *argument)
     if (test_type == TEST_TYPE_1) {
         LOG_MSG("Scenario 1 - Sequential");
         use_ns_lock = true;
-    }
-    else if (test_type == TEST_TYPE_2) {
+    } else if (test_type == TEST_TYPE_2) {
         LOG_MSG("Scenario 2 - Priority");
         use_ns_lock = true;
         use_ns_lock_pri = true;
         thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
-    }
-    else if (test_type == TEST_TYPE_3) {
+    } else if (test_type == TEST_TYPE_3) {
         LOG_MSG("Scenario 3 - Priority inversion");
         use_ns_lock = true;
         use_ns_lock_pri = true;
         thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
         thread_id_mid = osThreadNew(mid_task, &thread_id, &tattr_mid);
-    }
-    else if (test_type == TEST_TYPE_4) {
+    } else if (test_type == TEST_TYPE_4) {
         LOG_MSG("Scenario 4 - non-NS lock");
         use_ns_lock = false;
-    }
-    else if (test_type == TEST_TYPE_5) {
+    } else if (test_type == TEST_TYPE_5) {
         LOG_MSG("Scenario 5 - non-NS lock, core locked");
         use_ns_lock = true;
         use_ns_lock_pri = false;
         thread_id = osThreadNew(pri_task, &use_ns_lock_pri, &tattr_pri);
-    }
-    else {
+    } else {
         LOG_MSG("Scenario not supported");
         osThreadExit();
     }
@@ -276,20 +277,16 @@ static void seq_task(void *argument)
 
     if (test_type == TEST_TYPE_1) {
         LOG_MSG("Scenario 1 - test finished\n");
-    }
-    else if (test_type == TEST_TYPE_2) {
+    } else if (test_type == TEST_TYPE_2) {
         osThreadJoin(thread_id);
         LOG_MSG("Scenario 2 - test finished\n");
-    }
-    else if (test_type == TEST_TYPE_3) {
+    } else if (test_type == TEST_TYPE_3) {
         osThreadJoin(thread_id);
         osThreadJoin(thread_id_mid);
         LOG_MSG("Scenario 3 - test finished\n");
-    }
-    else if (test_type == TEST_TYPE_4) {
+    } else if (test_type == TEST_TYPE_4) {
         LOG_MSG("Scenario 4 - test finished\n");
-    }
-    else if (test_type == TEST_TYPE_5) {
+    } else if (test_type == TEST_TYPE_5) {
         osThreadJoin(thread_id);
         LOG_MSG("Scenario 5 - test finished\n");
     }
@@ -308,7 +305,8 @@ void execute_ns_interactive_tests(void)
     osThreadId_t thread_id;
 
     /* Test type list */
-    enum test_type test_type[] = {TEST_TYPE_1, TEST_TYPE_2, TEST_TYPE_3, TEST_TYPE_4, TEST_TYPE_5};
+    enum test_type test_type[] = {TEST_TYPE_1, TEST_TYPE_2, TEST_TYPE_3,
+                                  TEST_TYPE_4, TEST_TYPE_5};
 
     /* Create the NS lock -- shared among testing scenarios */
     mutex_id = osMutexNew(&mattr_ns_lock);
