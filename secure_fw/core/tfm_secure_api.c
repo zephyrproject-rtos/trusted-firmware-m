@@ -65,6 +65,7 @@ static uint32_t *prepare_partition_ctx(
 static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 {
     uint32_t caller_partition_id = tfm_spm_partition_get_running_partition_id();
+    const struct spm_partition_runtime_data_t *curr_part_data;
 
     if (caller_partition_id >= TFM_SP_BASE &&
         /* Also check partition state consistency */
@@ -73,7 +74,10 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
         register uint32_t partition_id = desc_ptr->ss_id;
         uint32_t psp = __get_PSP();
         uint32_t partition_psp, partition_psplim;
-        uint32_t partition_state = tfm_spm_partition_get_state(partition_id);
+        uint32_t partition_state;
+
+        curr_part_data = tfm_spm_partition_get_runtime_data(partition_id);
+        partition_state = curr_part_data->partition_state;
 
         if (partition_state == SPM_PARTITION_STATE_RUNNING ||
             partition_state == SPM_PARTITION_STATE_SUSPENDED ||
@@ -98,7 +102,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
              */
             tfm_spm_partition_set_stack(caller_partition_id, psp);
         }
-        partition_psp = tfm_spm_partition_get_stack(partition_id);
+        partition_psp = curr_part_data->stack_ptr;
         partition_psplim = tfm_spm_partition_get_stack_bottom(partition_id);
 #endif
         /* Stack the context for the partition call */
@@ -163,8 +167,10 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 {
     uint32_t current_partition_id =
             tfm_spm_partition_get_running_partition_id();
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(current_partition_id);
     uint32_t return_partition_id =
-            tfm_spm_partition_get_caller_partition_id(current_partition_id);
+            curr_part_data->caller_partition_id;
 
     if (current_partition_id < TFM_SP_BASE) {
         return TFM_SECURE_UNLOCK_FAILED;
@@ -182,21 +188,19 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
             tfm_spm_partition_sandbox_config(return_partition_id);
             /* Restore share status */
             tfm_spm_partition_set_share(return_partition_id,
-                    tfm_spm_partition_get_share(return_partition_id));
+               tfm_spm_partition_get_runtime_data(return_partition_id)->share);
         }
 #endif
 
 #if TFM_LVL == 1
-        if (tfm_spm_partition_get_caller_partition_id(current_partition_id) ==
-                TFM_SP_NON_SECURE_ID) {
+        if (return_partition_id == TFM_SP_NON_SECURE_ID) {
             /* In TFM level 1 context restore is only done when
              * returning to NS
              */
             /* Restore caller PSP and LR ptr */
-            __set_PSP(tfm_spm_partition_get_orig_psp(current_partition_id));
-            __set_PSPLIM(
-                    tfm_spm_partition_get_orig_psplim(current_partition_id));
-            *lr_ptr = tfm_spm_partition_get_orig_lr(current_partition_id);
+            __set_PSP(curr_part_data->orig_psp);
+            __set_PSPLIM(curr_part_data->orig_psplim);
+            *lr_ptr = curr_part_data->orig_lr;
         }
 #else
         uint32_t psp = __get_PSP();
@@ -206,9 +210,9 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
                     current_partition_id, psp + SVC_STACK_FRAME_SIZE);
 
         /* Restore caller PSP and LR ptr */
-        __set_PSP(tfm_spm_partition_get_orig_psp(current_partition_id));
-        __set_PSPLIM(tfm_spm_partition_get_orig_psplim(current_partition_id));
-        *lr_ptr = tfm_spm_partition_get_orig_lr(current_partition_id);
+        __set_PSP(curr_part_data->orig_psp);
+        __set_PSPLIM(curr_part_data->orig_psplim);
+        *lr_ptr = curr_part_data->orig_lr;
 #endif
 
         /* Clear the context entry in the context stack before returning */
@@ -460,6 +464,8 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     int32_t res = TFM_ERROR_GENERIC;
     uint32_t running_partition_id =
             tfm_spm_partition_get_running_partition_id();
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(running_partition_id);
 
     if (running_partition_id == TFM_SP_NON_SECURE_ID)  {
         /* This handler shouldn't be called from outside partition context.
@@ -470,8 +476,7 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
 
     /* Store return value in r0 */
-    if (tfm_spm_partition_get_caller_partition_id(running_partition_id) !=
-            TFM_SP_NON_SECURE_ID) {
+    if (curr_part_data->caller_partition_id != TFM_SP_NON_SECURE_ID) {
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
@@ -487,6 +492,8 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     int32_t res;
     uint32_t running_partition_id =
             tfm_spm_partition_get_running_partition_id();
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(running_partition_id);
 
     if ((running_partition_id == TFM_SP_NON_SECURE_ID) || (size == 0)) {
         /* This handler shouldn't be called from outside partition context.
@@ -498,8 +505,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
     int32_t flags = 0;
 
-    if (tfm_spm_partition_get_share(running_partition_id) !=
-            TFM_BUFFER_SHARE_PRIV) {
+    if (curr_part_data->share != TFM_BUFFER_SHARE_PRIV) {
         flags |= CMSE_MPU_UNPRIV;
     }
 
@@ -687,8 +693,9 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
     enum tfm_buffer_share_region_e share;
     uint32_t running_partition_id =
             tfm_spm_partition_get_running_partition_id();
-    uint32_t caller_partition_id =
-            tfm_spm_partition_get_caller_partition_id(running_partition_id);
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(running_partition_id);
+    uint32_t caller_partition_id = curr_part_data->caller_partition_id;
 
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];

@@ -30,6 +30,21 @@ enum spm_part_state_t {
 };
 
 /**
+ * \brief Runtime context information of a partition
+ */
+struct spm_partition_runtime_data_t {
+    uint32_t partition_state;
+    uint32_t caller_partition_id;
+    uint32_t orig_psp;
+    uint32_t orig_psplim;
+    uint32_t orig_lr;
+    uint32_t share;
+#if TFM_LVL != 1
+    uint32_t stack_ptr;
+#endif
+};
+
+/**
  * \brief Configure isolated sandbox for a partition
  *
  * \param[in] partition_id     Partition id
@@ -50,17 +65,6 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_id);
  * \note This function doesn't check if partition_id is valid.
  */
 enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_id);
-
-/**
- * \brief Get saved stack pointer for a partition
- *
- * \param[in] partition_id     Partition id
- *
- * \return Stack pointer value
- *
- * \note This function doesn't check if partition_id is valid.
- */
-uint32_t tfm_spm_partition_get_stack(uint32_t partition_id);
 
 /**
  * \brief Get bottom of stack region for a partition
@@ -85,72 +89,16 @@ uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_id);
 uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_id);
 
 /**
- * \brief Get the current state of a partition
+ * \brief Get the current runtime data of a partition
  *
  * \param[in] partition_id     Partition id
  *
- * \return The state of the specified partition
- *
- * \note This function doesn't check if partition_id is valid.
- * \note The returned value has the value set of \ref spm_part_state_t.
- */
-uint32_t tfm_spm_partition_get_state(uint32_t partition_id);
-
-/**
- * \brief Get the Id of the caller of the partition given
- *
- * \param[in] partition_id     Partition id to get the caller of
- *
- * \return The Id of the caller partition
+ * \return The runtime data of the specified partition
  *
  * \note This function doesn't check if partition_id is valid.
  */
-uint32_t tfm_spm_partition_get_caller_partition_id(uint32_t partition_id);
-
-/**
- * \brief Get the original PSP of the partition
- *
- * \param[in] partition_id     Partition id
- *
- * \return The original PSP of the partition
- *
- * \note This function doesn't check if partition_id is valid.
- */
-uint32_t tfm_spm_partition_get_orig_psp(uint32_t partition_id);
-
-/**
- * \brief Get the original PSP limit of the partition
- *
- * \param[in] partition_id     Partition id
- *
- * \return The original PSP limit of the partition
- *
- * \note This function doesn't check if partition_id is valid.
- */
-uint32_t tfm_spm_partition_get_orig_psplim(uint32_t partition_id);
-
-/**
- * \brief Get the original link register value of the partition
- *
- * \param[in] partition_id     Partition id
- *
- * \return The original link register value of the partition
- *
- * \note This function doesn't check if partition_id is valid.
- */
-uint32_t tfm_spm_partition_get_orig_lr(uint32_t partition_id);
-
-/**
- * \brief Get the buffer share region of the partition
- *
- * \param[in] partition_id     Partition id
- *
- * \return The buffer share region of the partition
- *
- * \note This function doesn't check if partition_id is valid.
- * \note The returned value has the value set of \ref tfm_buffer_share_region_e
- */
-uint32_t tfm_spm_partition_get_share(uint32_t partition_id);
+const struct spm_partition_runtime_data_t *
+             tfm_spm_partition_get_runtime_data(uint32_t partition_id);
 
 /**
  * \brief Returns the id of the partition that has running state

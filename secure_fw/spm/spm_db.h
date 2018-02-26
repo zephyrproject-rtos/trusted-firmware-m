@@ -20,31 +20,9 @@
 
 typedef int32_t(*sp_init_function)(void);
 
-#if TFM_LVL == 1
-struct spm_partition_region_t {
+struct spm_partition_static_data_t {
     uint32_t partition_id;
-    uint32_t partition_state;
-    uint32_t caller_partition_id;
-    uint32_t orig_psp;
-    uint32_t orig_psplim;
-    uint32_t orig_lr;
-    uint32_t share;
-    uint32_t stack_ptr;
-    uint32_t periph_start;
-    uint32_t periph_limit;
-    uint16_t periph_ppc_bank;
-    uint16_t periph_ppc_loc;
-    sp_init_function partition_init;
-};
-#else
-struct spm_partition_region_t {
-    uint32_t partition_id;
-    uint32_t partition_state;
-    uint32_t caller_partition_id;
-    uint32_t orig_psp;
-    uint32_t orig_psplim;
-    uint32_t orig_lr;
-    uint32_t share;
+#if TFM_LVL != 1
     uint32_t code_start;
     uint32_t code_limit;
     uint32_t ro_start;
@@ -55,20 +33,24 @@ struct spm_partition_region_t {
     uint32_t zi_limit;
     uint32_t stack_bottom;
     uint32_t stack_top;
-    uint32_t stack_ptr;
+#endif
     uint32_t periph_start;
     uint32_t periph_limit;
     uint16_t periph_ppc_bank;
     uint16_t periph_ppc_loc;
     sp_init_function partition_init;
 };
-#endif
+
+struct spm_partition_desc_t {
+    struct spm_partition_static_data_t static_data;
+    struct spm_partition_runtime_data_t runtime_data;
+};
 
 struct spm_partition_db_t {
     uint32_t is_init;
     uint32_t partition_count;
     uint32_t running_partition_id;
-    struct spm_partition_region_t partitions[SPM_MAX_PARTITIONS];
+    struct spm_partition_desc_t partitions[SPM_MAX_PARTITIONS];
 };
 
 /* Macros to pick linker symbols and allow to form the partition data base */
@@ -78,6 +60,8 @@ struct spm_partition_db_t {
 #define REGION_DECLARE(a, b, c)
 #else
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+#define PART_REGION_ADDR(partition, region) \
+    (uint32_t)&REGION_NAME(Image$$, partition, region)
 #endif
 
 #define PARTITION_DECLARE(partition)                       \
@@ -94,123 +78,134 @@ struct spm_partition_db_t {
 
 
 #if TFM_LVL == 1
-#define PARTITION_ADD(partition) {                                  \
-     if (index >= max_partitions) {                                 \
-         return max_partitions;                                     \
-     }                                                              \
-     db_ptr = (uint32_t *)&(db->partitions[index]);                 \
-    *db_ptr++ = partition##_ID;                                     \
-    *db_ptr++ = SPM_PARTITION_STATE_UNINIT; /* partition_state  */  \
-    *db_ptr++ = 0U;     /* caller partition id */                   \
-    *db_ptr++ = 0U;     /* original psp */                          \
-    *db_ptr++ = 0U;     /* original psplim */                       \
-    *db_ptr++ = 0U;     /* original lr */                           \
-    *db_ptr++ = 0U;     /* share */                                 \
-    *db_ptr++ = 0U;     /* stack pointer on partition enter */      \
-    *db_ptr++ = 0U;     /* peripheral start */                      \
-    *db_ptr++ = 0U;     /* peripheral limit */                      \
-    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */       \
-    *db_ptr++ = 0U;     /* partition init function*/                \
-    index++;                                                        \
-    }
+#define PARTITION_INIT_STATIC_DATA(data, partition) \
+    data.partition_id    = partition##_ID;          \
+    data.periph_start    = 0U;                      \
+    data.periph_limit    = 0U;                      \
+    data.periph_ppc_bank = 0U;                      \
+    data.periph_ppc_loc  = 0U;                      \
+    data.partition_init  = 0U
 #else
-#define PARTITION_ADD(partition) {                                             \
-     if (index >= max_partitions) {                                            \
-         return max_partitions;                                                \
-     }                                                                         \
-     db_ptr = (uint32_t *)&(db->partitions[index]);                            \
-    *db_ptr++ = partition##_ID;                                                \
-    *db_ptr++ = SPM_PARTITION_STATE_UNINIT; /* partition_state  */             \
-    *db_ptr++ = 0U;     /* caller partition id */                              \
-    *db_ptr++ = 0U;     /* original psp */                                     \
-    *db_ptr++ = 0U;     /* original psplim */                                  \
-    *db_ptr++ = 0U;     /* original lr */                                      \
-    *db_ptr++ = 0U;     /* share */                                            \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, $$Base);            \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, $$Limit);           \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, $$RO$$Base);        \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, $$RO$$Limit);       \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _DATA$$RW$$Base);   \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _DATA$$RW$$Limit);  \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _DATA$$ZI$$Base);   \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _DATA$$ZI$$Limit);  \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _STACK$$ZI$$Base);  \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _STACK$$ZI$$Limit); \
-    *db_ptr++ = (uint32_t)&REGION_NAME(Image$$, partition, _STACK$$ZI$$Limit); \
-    *db_ptr++ = 0U;     /* peripheral start */                                 \
-    *db_ptr++ = 0U;     /* peripheral limit */                                 \
-    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */                  \
-    *db_ptr++ = 0U;     /* partition init function*/                           \
-    index++;                                                                   \
-}
+#define PARTITION_INIT_STATIC_DATA(data, partition)                        \
+    data.partition_id    = partition##_ID;                                 \
+    data.code_start      = PART_REGION_ADDR(partition, $$Base);            \
+    data.code_limit      = PART_REGION_ADDR(partition, $$Limit);           \
+    data.ro_start        = PART_REGION_ADDR(partition, $$RO$$Base);        \
+    data.ro_limit        = PART_REGION_ADDR(partition, $$RO$$Limit);       \
+    data.rw_start        = PART_REGION_ADDR(partition, _DATA$$RW$$Base);   \
+    data.rw_limit        = PART_REGION_ADDR(partition, _DATA$$RW$$Limit);  \
+    data.zi_start        = PART_REGION_ADDR(partition, _DATA$$ZI$$Base);   \
+    data.zi_limit        = PART_REGION_ADDR(partition, _DATA$$ZI$$Limit);  \
+    data.stack_bottom    = PART_REGION_ADDR(partition, _STACK$$ZI$$Base);  \
+    data.stack_top       = PART_REGION_ADDR(partition, _STACK$$ZI$$Limit); \
+    data.periph_start    = 0U;                                             \
+    data.periph_limit    = 0U;                                             \
+    data.periph_ppc_bank = 0U;                                             \
+    data.periph_ppc_loc  = 0U;                                             \
+    data.partition_init  = 0U
 #endif
 
 #if TFM_LVL == 1
-#define DUMMY_PARTITION_ADD(partition) {                            \
-     if (index >= max_partitions) {                                 \
-         return max_partitions;                                     \
-     }                                                              \
-     db_ptr = (uint32_t *)&(db->partitions[index]);                 \
-    *db_ptr++ = partition##_ID;                                     \
-    *db_ptr++ = SPM_PARTITION_STATE_UNINIT; /* partition_state  */  \
-    *db_ptr++ = 0U;     /* caller partition id */                   \
-    *db_ptr++ = 0U;     /* original psp */                          \
-    *db_ptr++ = 0U;     /* original psplim */                       \
-    *db_ptr++ = 0U;     /* original lr */                           \
-    *db_ptr++ = 0U;     /* share */                                 \
-    *db_ptr++ = 0U;     /* stack pointer on partition enter */      \
-    *db_ptr++ = 0U;     /* peripheral start */                      \
-    *db_ptr++ = 0U;     /* peripheral limit */                      \
-    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */       \
-    *db_ptr++ = 0U;     /* partition init function*/                \
-    index++;                                                        \
-    }
+#define DUMMY_PARTITION_INIT_STATIC_DATA(data, partition)                     \
+        /* In case of TFM_LVL1 the static data is initialised the same way */ \
+        PARTITION_INIT_STATIC_DATA(data, partition)
 #else
-#define DUMMY_PARTITION_ADD(partition) {                           \
-     if (index >= max_partitions) {                                \
-         return max_partitions;                                    \
-     }                                                             \
-     db_ptr = (uint32_t *)&(db->partitions[index]);                \
-    *db_ptr++ = partition##_ID;                                    \
-    *db_ptr++ = SPM_PARTITION_STATE_UNINIT; /* partition_state  */ \
-    *db_ptr++ = 0U;     /* caller partition id */                  \
-    *db_ptr++ = 0U;     /* original_psp */                         \
-    *db_ptr++ = 0U;     /* original_psplim */                      \
-    *db_ptr++ = 0U;     /* original_lr */                          \
-    *db_ptr++ = 0U;     /* share */                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;                                                \
-    *db_ptr++ = 0U;     /* peripheral start */                     \
-    *db_ptr++ = 0U;     /* peripheral limit */                     \
-    *db_ptr++ = 0U;     /* uint16_t[2] peripheral bank/loc */      \
-    *db_ptr++ = 0U;     /* partition init function*/               \
-    index++;                                                       \
-}
+#define DUMMY_PARTITION_INIT_STATIC_DATA(data, partition) \
+    data.partition_id    = partition##_ID;                \
+    data.code_start      = 0U;                            \
+    data.code_limit      = 0U;                            \
+    data.ro_start        = 0U;                            \
+    data.ro_limit        = 0U;                            \
+    data.rw_start        = 0U;                            \
+    data.rw_limit        = 0U;                            \
+    data.zi_start        = 0U;                            \
+    data.zi_limit        = 0U;                            \
+    data.stack_bottom    = 0U;                            \
+    data.stack_top       = 0U;                            \
+    data.periph_start    = 0U;                            \
+    data.periph_limit    = 0U;                            \
+    data.periph_ppc_bank = 0U;                            \
+    data.periph_ppc_loc  = 0U;                            \
+    data.partition_init  = 0U
 #endif
 
-#define PARTITION_ADD_PERIPHERAL(partition, start, limit, bank, loc) {         \
-        db_ptr =                                                               \
-               (uint32_t *)&(db->partitions[PARTITION_ID_GET(partition##_ID)]);\
-        ((struct spm_partition_region_t *)db_ptr)->periph_start = start;       \
-        ((struct spm_partition_region_t *)db_ptr)->periph_limit = limit;       \
-        ((struct spm_partition_region_t *)db_ptr)->periph_ppc_bank = bank;     \
-        ((struct spm_partition_region_t *)db_ptr)->periph_ppc_loc = loc;       \
+
+#if TFM_LVL == 1
+#define PARTITION_INIT_RUNTIME_DATA(data, partition)                           \
+    data.partition_state     = SPM_PARTITION_STATE_UNINIT;                     \
+    data.caller_partition_id = 0U;                                             \
+    data.orig_psp            = 0U;                                             \
+    data.orig_psplim         = 0U;                                             \
+    data.orig_lr             = 0U;                                             \
+    data.share               = 0U
+#else
+#define PARTITION_INIT_RUNTIME_DATA(data, partition)                           \
+    data.partition_state     = SPM_PARTITION_STATE_UNINIT;                     \
+    data.caller_partition_id = 0U;                                             \
+    data.orig_psp            = 0U;                                             \
+    data.orig_psplim         = 0U;                                             \
+    data.orig_lr             = 0U;                                             \
+    data.share               = 0U;                                             \
+    data.stack_ptr           = PART_REGION_ADDR(partition, _STACK$$ZI$$Limit)
+#endif
+
+#if TFM_LVL == 1
+#define DUMMY_PARTITION_INIT_RUNTIME_DATA(data, partition) \
+    data.partition_state     = SPM_PARTITION_STATE_UNINIT; \
+    data.caller_partition_id = 0U;                         \
+    data.orig_psp            = 0U;                         \
+    data.orig_psplim         = 0U;                         \
+    data.orig_lr             = 0U;                         \
+    data.share               = 0U
+#else
+#define DUMMY_PARTITION_INIT_RUNTIME_DATA(data, partition) \
+    data.partition_state     = SPM_PARTITION_STATE_UNINIT; \
+    data.caller_partition_id = 0U;                         \
+    data.orig_psp            = 0U;                         \
+    data.orig_psplim         = 0U;                         \
+    data.orig_lr             = 0U;                         \
+    data.share               = 0U;                         \
+    data.stack_ptr           = 0U
+#endif
+
+#define PARTITION_ADD(partition) {                                      \
+    if (index >= max_partitions) {                                      \
+        return max_partitions;                                          \
+    }                                                                   \
+    part_ptr = (struct spm_partition_desc_t *)&(db->partitions[index]); \
+    PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition);       \
+    PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition);     \
+    index++;                                                            \
     }
 
-#define PARTITION_ADD_INIT_FUNC(partition, init_func) {                        \
-        extern int32_t init_func(void);                                        \
-        db_ptr =                                                               \
-               (uint32_t *)&(db->partitions[PARTITION_ID_GET(partition##_ID)]);\
-        ((struct spm_partition_region_t *)db_ptr)->partition_init = init_func; \
+#define DUMMY_PARTITION_ADD(partition) {                                  \
+    if (index >= max_partitions) {                                        \
+        return max_partitions;                                            \
+    }                                                                     \
+    part_ptr = (struct spm_partition_desc_t *)&(db->partitions[index]);   \
+    DUMMY_PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition);   \
+    /* The runtime data is the same for the dummy partitions*/            \
+    DUMMY_PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition); \
+    index++;                                                              \
+    }
+
+#define PARTITION_ADD_PERIPHERAL(partition, start, limit, bank, loc) {  \
+        part_ptr = &(db->partitions[PARTITION_ID_GET(partition##_ID)]); \
+        ((struct spm_partition_desc_t *)part_ptr)->                     \
+               static_data.periph_start = start;                        \
+        ((struct spm_partition_desc_t *)part_ptr)->                     \
+               static_data.periph_limit = limit;                        \
+        ((struct spm_partition_desc_t *)part_ptr)->                     \
+               static_data.periph_ppc_bank = bank;                      \
+        ((struct spm_partition_desc_t *)part_ptr)->                     \
+               static_data.periph_ppc_loc = loc;                        \
+    }
+
+#define PARTITION_ADD_INIT_FUNC(partition, init_func) {                 \
+        extern int32_t init_func(void);                                 \
+        part_ptr = &(db->partitions[PARTITION_ID_GET(partition##_ID)]); \
+        ((struct spm_partition_desc_t *)part_ptr)->                     \
+               static_data.partition_init = init_func;                  \
     }
 
 /*This file is meant to be included twice*/
@@ -222,7 +217,7 @@ uint32_t create_user_partition_db(struct spm_partition_db_t *db,
                                 uint32_t max_partitions)
 {
     uint32_t index = 0;
-    uint32_t *db_ptr;
+    struct spm_partition_desc_t *part_ptr;
 
 #include "user_service_defines.inc"
 
