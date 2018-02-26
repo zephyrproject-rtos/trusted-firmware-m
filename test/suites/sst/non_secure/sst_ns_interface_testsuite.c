@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -195,10 +195,10 @@ static void tfm_sst_run_test(const char *name, struct test_result_t *ret,
         return;
     }
 
-    err = os_wrapper_delete_thread(thread);
+    err = os_wrapper_join_thread(thread);
     if (err == OS_WRAPPER_ERROR) {
         os_wrapper_semaphore_delete(tfm_sst_test_sema);
-        TEST_FAIL("delete thread has failed");
+        TEST_FAIL("join thread has failed");
         return;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -90,13 +90,13 @@ uint32_t os_wrapper_get_thread_id(void);
 uint32_t os_wrapper_get_thread_priority(uint32_t id);
 
 /**
- * \brief Deletes thread
+ * \brief Waits for the thread to terminate
  *
  * \param[in] id  Thread ID
  *
- * \return 0 in case of successful delete or OS_WRAPPER_ERROR in case of error.
+ * \return 0 in case of successful join or OS_WRAPPER_ERROR in case of error.
  */
-uint32_t os_wrapper_delete_thread(uint32_t id);
+uint32_t os_wrapper_join_thread(uint32_t id);
 
 #ifdef __cplusplus
 }
