@@ -9,8 +9,10 @@
 #define __SPM_API_H__
 
 /* This file contains the apis exported by the SPM to tfm core */
-#include "service_defs.h"
+#include "spm_partition_defs.h"
 #include "secure_fw/core/tfm_secure_api.h"
+
+#define SPM_INVALID_PARTITION_IDX     (~0U)
 
 enum spm_err_t {
     SPM_ERR_OK = 0,
@@ -34,7 +36,7 @@ enum spm_part_state_t {
  */
 struct spm_partition_runtime_data_t {
     uint32_t partition_state;
-    uint32_t caller_partition_id;
+    uint32_t caller_partition_idx;
     uint32_t orig_psp;
     uint32_t orig_psplim;
     uint32_t orig_lr;
@@ -44,145 +46,167 @@ struct spm_partition_runtime_data_t {
 #endif
 };
 
+
 /**
- * \brief Configure isolated sandbox for a partition
+ * \brief Returns the index of the partition with the given partition ID.
  *
  * \param[in] partition_id     Partition id
  *
+ * \return the partition idx if partition_id is valid,
+ *         \ref SPM_INVALID_PARTITION_IDX othervise
+ */
+uint32_t get_partition_idx(uint32_t partition_id);
+
+/**
+ * \brief Configure isolated sandbox for a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
  * \return Error code \ref spm_err_t
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_id);
+enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx);
 
 /**
  * \brief Deconfigure sandbox for a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx     Partition index
  *
  * \return Error code \ref spm_err_t
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_id);
+enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx);
 
 /**
  * \brief Get bottom of stack region for a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx     Partition index
  *
  * \return Stack region bottom value
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_id);
+uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
 
 /**
  * \brief Get top of stack region for a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx     Partition index
  *
  * \return Stack region top value
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_id);
+uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
+
+/**
+ * \brief Get the id of the partition for its index from the db
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Partition ID for that partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
 
 /**
  * \brief Get the current runtime data of a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx     Partition index
  *
  * \return The runtime data of the specified partition
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
 const struct spm_partition_runtime_data_t *
-             tfm_spm_partition_get_runtime_data(uint32_t partition_id);
+             tfm_spm_partition_get_runtime_data(uint32_t partition_idx);
 
 /**
- * \brief Returns the id of the partition that has running state
+ * \brief Returns the index of the partition that has running state
  *
- * \return The Id of the partition with the running state, if there is any set.
- *         0 otherwise.
+ * \return The index of the partition with the running state, if there is any
+ *         set. 0 otherwise.
  */
-uint32_t tfm_spm_partition_get_running_partition_id(void);
+uint32_t tfm_spm_partition_get_running_partition_idx(void);
 
 /**
  * \brief Save stack pointer for partition in database
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] stack_ptr      Stack pointer to be stored
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
 void tfm_spm_partition_set_stack(uint32_t partition_id, uint32_t stack_ptr);
 
 /**
  * \brief Set the current state of a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] state          The state to be set
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  * \note The \ref state has to have the value set of \ref spm_part_state_t.
  */
-void tfm_spm_partition_set_state(uint32_t partition_id, uint32_t state);
+void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state);
 
 /**
  * \brief Set the caller partition Id for a given partition
  *
- * \param[in] partition_id         Partition id
+ * \param[in] partition_idx        Partition index
  * \param[in] caller_partition_id  The Id of the caller partition
  *
  * \note This function doesn't check if any of the partition_ids is valid.
  */
-void tfm_spm_partition_set_caller_partition_id(uint32_t partition_id,
+void tfm_spm_partition_set_caller_partition_id(uint32_t partition_idx,
                                            uint32_t caller_partition_id);
 
 /**
  * \brief Set the original PSP value of a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] orig_psp       The PSP value to set
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-void tfm_spm_partition_set_orig_psp(uint32_t partition_id, uint32_t orig_psp);
+void tfm_spm_partition_set_orig_psp(uint32_t partition_idx, uint32_t orig_psp);
 
 /**
  * \brief Set the original PSP limit value of a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] orig_psplim    The PSP limit value to set
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-void tfm_spm_partition_set_orig_psplim(uint32_t partition_id,
+void tfm_spm_partition_set_orig_psplim(uint32_t partition_idx,
                                        uint32_t orig_psplim);
 
 /**
  * \brief Set the original link register value of a partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] orig_lr        The link register value to set
  *
  * \note This function doesn't check if partition_id is valid.
  */
-void tfm_spm_partition_set_orig_lr(uint32_t partition_id, uint32_t orig_lr);
+void tfm_spm_partition_set_orig_lr(uint32_t partition_idx, uint32_t orig_lr);
 
 /**
  * \brief Set the buffer share region of the partition
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx  Partition index
  * \param[in] share          The buffer share region to be set
  *
  * \return Error code \ref spm_err_t
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  * \note share has to have the value set of \ref tfm_buffer_share_region_e
  */
-enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_id,
+enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share);
 
 /**
@@ -209,10 +233,10 @@ enum spm_err_t tfm_spm_partition_init(void);
 /**
  * \brief Clears the context info from the database for a partition.
  *
- * \param[in] partition_id     Partition id
+ * \param[in] partition_idx     Partition index
  *
- * \note This function doesn't check if partition_id is valid.
+ * \note This function doesn't check if partition_idx is valid.
  */
-void tfm_spm_partition_cleanup_context(uint32_t partition_id);
+void tfm_spm_partition_cleanup_context(uint32_t partition_idx);
 
 #endif /*__SPM_API_H__ */

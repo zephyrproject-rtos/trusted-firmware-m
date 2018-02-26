@@ -9,7 +9,7 @@
 
 #include "sst_test_service.h"
 #include "secure_fw/core/tfm_secure_api.h"
-#include "secure_fw/spm/service_defs.h"
+#include "secure_fw/spm/spm_partition_defs.h"
 
 __tfm_secure_gateway_attributes__
 enum tfm_sst_err_t sst_test_service_veneer_setup(void)

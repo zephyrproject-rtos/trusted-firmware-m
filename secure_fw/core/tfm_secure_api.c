@@ -64,19 +64,21 @@ static uint32_t *prepare_partition_ctx(
 
 static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 {
-    uint32_t caller_partition_id = tfm_spm_partition_get_running_partition_id();
+    uint32_t caller_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data;
 
-    if (caller_partition_id >= TFM_SP_BASE &&
+    if (caller_partition_idx != SPM_INVALID_PARTITION_IDX &&
         /* Also check partition state consistency */
-        (caller_partition_id == TFM_SP_NON_SECURE_ID) ==
+        (tfm_spm_partition_get_partition_id(caller_partition_idx) ==
+                TFM_SP_NON_SECURE_ID) ==
                 (desc_ptr->ns_caller != 0)) {
-        register uint32_t partition_id = desc_ptr->ss_id;
+        register uint32_t partition_idx = get_partition_idx(desc_ptr->ss_id);
         uint32_t psp = __get_PSP();
         uint32_t partition_psp, partition_psplim;
         uint32_t partition_state;
 
-        curr_part_data = tfm_spm_partition_get_runtime_data(partition_id);
+        curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
         partition_state = curr_part_data->partition_state;
 
         if (partition_state == SPM_PARTITION_STATE_RUNNING ||
@@ -96,40 +98,42 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
         partition_psplim =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 #else
-        if (caller_partition_id != TFM_SP_NON_SECURE_ID) {
+        if (tfm_spm_partition_get_partition_id(caller_partition_idx) !=
+                TFM_SP_NON_SECURE_ID) {
             /* Store the caller PSP in case we are doing a partition to
              * partition call
              */
-            tfm_spm_partition_set_stack(caller_partition_id, psp);
+            tfm_spm_partition_set_stack(caller_partition_idx, psp);
         }
         partition_psp = curr_part_data->stack_ptr;
-        partition_psplim = tfm_spm_partition_get_stack_bottom(partition_id);
+        partition_psplim = tfm_spm_partition_get_stack_bottom(partition_idx);
 #endif
         /* Stack the context for the partition call */
-        tfm_spm_partition_set_orig_psp(partition_id, psp);
-        tfm_spm_partition_set_orig_psplim(partition_id, __get_PSPLIM());
-        tfm_spm_partition_set_orig_lr(partition_id, lr);
-        tfm_spm_partition_set_caller_partition_id(partition_id,
-                                                  caller_partition_id);
+        tfm_spm_partition_set_orig_psp(partition_idx, psp);
+        tfm_spm_partition_set_orig_psplim(partition_idx, __get_PSPLIM());
+        tfm_spm_partition_set_orig_lr(partition_idx, lr);
+        tfm_spm_partition_set_caller_partition_id(partition_idx,
+                                                  caller_partition_idx);
 
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
         /* Dynamic partition partitioning is only done is TFM level 3 */
-        if (caller_partition_id != TFM_SP_NON_SECURE_ID) {
+        if (tfm_spm_partition_get_partition_id(caller_partition_idx) !=
+                TFM_SP_NON_SECURE_ID) {
             /* In a partition to partition call, deconfigure the
              * caller partition
              */
-            tfm_spm_partition_sandbox_deconfig(caller_partition_id);
+            tfm_spm_partition_sandbox_deconfig(caller_partition_idx);
         }
 
         /* Configure partition execution environment */
-        tfm_spm_partition_sandbox_config(partition_id);
+        tfm_spm_partition_sandbox_config(partition_idx);
 #endif
 
         /* Default share to scratch area in case of partition to partition calls
          * this way partitions always get default access to input buffers
          */
         /* FixMe: return value/error handling TBD */
-        tfm_spm_partition_set_share(partition_id, desc_ptr->ns_caller ?
+        tfm_spm_partition_set_share(partition_idx, desc_ptr->ns_caller ?
             TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH);
 
 #if TFM_LVL == 1
@@ -151,9 +155,9 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
         __set_PSPLIM(partition_psplim);
 #endif
 
-        tfm_spm_partition_set_state(caller_partition_id,
+        tfm_spm_partition_set_state(caller_partition_idx,
                                     SPM_PARTITION_STATE_BLOCKED);
-        tfm_spm_partition_set_state(partition_id, SPM_PARTITION_STATE_RUNNING);
+        tfm_spm_partition_set_state(partition_idx, SPM_PARTITION_STATE_RUNNING);
         tfm_secure_lock++;
 
         return TFM_SUCCESS;
@@ -165,35 +169,38 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 
 static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 {
-    uint32_t current_partition_id =
-            tfm_spm_partition_get_running_partition_id();
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(current_partition_id);
-    uint32_t return_partition_id =
-            curr_part_data->caller_partition_id;
+    uint32_t current_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
+    const struct spm_partition_runtime_data_t *curr_part_data;
+    uint32_t return_partition_idx;
 
-    if (current_partition_id < TFM_SP_BASE) {
+    if (current_partition_idx == SPM_INVALID_PARTITION_IDX) {
         return TFM_SECURE_UNLOCK_FAILED;
     }
 
-    if (return_partition_id >= TFM_SP_BASE) {
+    curr_part_data = tfm_spm_partition_get_runtime_data(current_partition_idx);
+    return_partition_idx = curr_part_data->caller_partition_idx;
+
+    if (return_partition_idx!= SPM_INVALID_PARTITION_IDX) {
         tfm_secure_lock--;
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
         /* Deconfigure completed partition environment */
-        tfm_spm_partition_sandbox_deconfig(current_partition_id);
-        if (return_partition_id != TFM_SP_NON_SECURE_ID) {
+        tfm_spm_partition_sandbox_deconfig(current_partition_idx);
+        if (tfm_spm_partition_get_partition_id(return_partition_idx) !=
+                TFM_SP_NON_SECURE_ID) {
             /* Configure the caller partition environment in case this was a
              * partition to partition call
              */
-            tfm_spm_partition_sandbox_config(return_partition_id);
+            tfm_spm_partition_sandbox_config(return_partition_idx);
             /* Restore share status */
-            tfm_spm_partition_set_share(return_partition_id,
-               tfm_spm_partition_get_runtime_data(return_partition_id)->share);
+            tfm_spm_partition_set_share(return_partition_idx,
+               tfm_spm_partition_get_runtime_data(return_partition_idx)->share);
         }
 #endif
 
 #if TFM_LVL == 1
-        if (return_partition_id == TFM_SP_NON_SECURE_ID) {
+        if (tfm_spm_partition_get_partition_id(return_partition_idx) ==
+                TFM_SP_NON_SECURE_ID) {
             /* In TFM level 1 context restore is only done when
              * returning to NS
              */
@@ -207,7 +214,7 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 
         /* Discount SVC call stack frame when storing sfn ctx */
         tfm_spm_partition_set_stack(
-                    current_partition_id, psp + SVC_STACK_FRAME_SIZE);
+                    current_partition_idx, psp + SVC_STACK_FRAME_SIZE);
 
         /* Restore caller PSP and LR ptr */
         __set_PSP(curr_part_data->orig_psp);
@@ -216,11 +223,11 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 #endif
 
         /* Clear the context entry in the context stack before returning */
-        tfm_spm_partition_cleanup_context(current_partition_id);
+        tfm_spm_partition_cleanup_context(current_partition_idx);
 
-        tfm_spm_partition_set_state(current_partition_id,
+        tfm_spm_partition_set_state(current_partition_idx,
                                     SPM_PARTITION_STATE_IDLE);
-        tfm_spm_partition_set_state(return_partition_id,
+        tfm_spm_partition_set_state(return_partition_idx,
                                     SPM_PARTITION_STATE_RUNNING);
 
         return TFM_SUCCESS;
@@ -462,12 +469,13 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
 {
 
     int32_t res = TFM_ERROR_GENERIC;
-    uint32_t running_partition_id =
-            tfm_spm_partition_get_running_partition_id();
+    uint32_t running_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_id);
+            tfm_spm_partition_get_runtime_data(running_partition_idx);
 
-    if (running_partition_id == TFM_SP_NON_SECURE_ID)  {
+    if (tfm_spm_partition_get_partition_id(running_partition_idx) ==
+            TFM_SP_NON_SECURE_ID)  {
         /* This handler shouldn't be called from outside partition context.
          * Partitions are only allowed to run while S domain is locked.
          */
@@ -476,7 +484,8 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
 
     /* Store return value in r0 */
-    if (curr_part_data->caller_partition_id != TFM_SP_NON_SECURE_ID) {
+    if (tfm_spm_partition_get_partition_id(curr_part_data->caller_partition_idx)
+            != TFM_SP_NON_SECURE_ID) {
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
@@ -490,12 +499,13 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
     uint32_t max_buf_size, ptr_start, range_limit, range_check = false;
     int32_t res;
-    uint32_t running_partition_id =
-            tfm_spm_partition_get_running_partition_id();
+    uint32_t running_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_id);
+            tfm_spm_partition_get_runtime_data(running_partition_idx);
 
-    if ((running_partition_id == TFM_SP_NON_SECURE_ID) || (size == 0)) {
+    if ((tfm_spm_partition_get_partition_id(running_partition_idx) ==
+            TFM_SP_NON_SECURE_ID) || (size == 0)) {
         /* This handler shouldn't be called from outside partition context.
          * Partitions are only allowed to run while S domain is locked.
          */
@@ -691,16 +701,17 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
      * Store input parameter before writing return value to that address
      */
     enum tfm_buffer_share_region_e share;
-    uint32_t running_partition_id =
-            tfm_spm_partition_get_running_partition_id();
+    uint32_t running_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_id);
-    uint32_t caller_partition_id = curr_part_data->caller_partition_id;
+            tfm_spm_partition_get_runtime_data(running_partition_idx);
+    uint32_t caller_partition_idx = curr_part_data->caller_partition_idx;
 
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];
 
-    if (running_partition_id == TFM_SP_NON_SECURE_ID) {
+    if (tfm_spm_partition_get_partition_id(running_partition_idx) ==
+            TFM_SP_NON_SECURE_ID) {
         /* This handler shouldn't be called from outside partition context. */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -708,7 +719,8 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
 
     switch (args[0]) {
     case TFM_BUFFER_SHARE_DEFAULT:
-        share = (caller_partition_id == TFM_SP_NON_SECURE_ID) ?
+        share = (tfm_spm_partition_get_partition_id(caller_partition_idx) ==
+                TFM_SP_NON_SECURE_ID) ?
             (TFM_BUFFER_SHARE_NS_CODE) : (TFM_BUFFER_SHARE_SCRATCH);
         break;
     case TFM_BUFFER_SHARE_SCRATCH:
@@ -720,7 +732,7 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
         return;
     }
 
-    if (tfm_spm_partition_set_share(running_partition_id, share) ==
+    if (tfm_spm_partition_set_share(running_partition_idx, share) ==
             SPM_ERR_OK) {
         *res_ptr = TFM_SUCCESS;
     } else {
