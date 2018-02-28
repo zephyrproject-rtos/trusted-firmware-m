@@ -31,6 +31,11 @@ enum spm_part_state_t {
     SPM_PARTITION_STATE_CLOSED
 };
 
+enum spm_part_flag_mask_t {
+    SPM_PART_FLAG_SECURE  = 0x01,
+    SPM_PART_FLAG_TRUSTED = 0x02,
+};
+
 /**
  * \brief Runtime context information of a partition
  */
@@ -111,6 +116,17 @@ uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
  * \note This function doesn't check if partition_idx is valid.
  */
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
+
+/**
+ * \brief Get the flags associated with a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Flags associated with the partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
 
 /**
  * \brief Get the current runtime data of a partition

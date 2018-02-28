@@ -93,6 +93,7 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr = &(g_spm_partition_db.partitions[
             g_spm_partition_db.partition_count]);
     part_ptr->static_data.partition_id = TFM_SP_NON_SECURE_ID;
+    part_ptr->static_data.partition_flags = 0;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     ++g_spm_partition_db.partition_count;
 
@@ -103,6 +104,8 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr = &(g_spm_partition_db.partitions[
             g_spm_partition_db.partition_count]);
     part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
+    part_ptr->static_data.partition_flags =
+                    SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     ++g_spm_partition_db.partition_count;
 
@@ -400,8 +403,14 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
             partition_id;
 }
 
+uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data.
+            partition_flags;
+}
+
 const struct spm_partition_runtime_data_t *
-             tfm_spm_partition_get_runtime_data(uint32_t partition_idx)
+            tfm_spm_partition_get_runtime_data(uint32_t partition_idx)
 {
     return &(g_spm_partition_db.partitions[partition_idx].runtime_data);
 }

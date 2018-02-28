@@ -28,6 +28,7 @@ typedef int32_t(*sp_init_function)(void);
 
 struct spm_partition_static_data_t {
     uint32_t partition_id;
+    uint32_t partition_flags;
 #if TFM_LVL != 1
     uint32_t code_start;
     uint32_t code_limit;
@@ -72,19 +73,21 @@ struct spm_partition_db_t {
 
 
 #if TFM_LVL == 1
-#define PARTITION_INIT_STATIC_DATA(data, partition)     \
-    do {                                                \
-        data.partition_id    = partition##_ID;          \
-        data.periph_start    = 0U;                      \
-        data.periph_limit    = 0U;                      \
-        data.periph_ppc_bank = 0U;                      \
-        data.periph_ppc_loc  = 0U;                      \
-        data.partition_init  = 0U;                      \
+#define PARTITION_INIT_STATIC_DATA(data, partition, flags) \
+    do {                                                   \
+        data.partition_id    = partition##_ID;             \
+        data.partition_flags = flags;                      \
+        data.periph_start    = 0U;                         \
+        data.periph_limit    = 0U;                         \
+        data.periph_ppc_bank = 0U;                         \
+        data.periph_ppc_loc  = 0U;                         \
+        data.partition_init  = 0U;                         \
     } while (0)
 #else
-#define PARTITION_INIT_STATIC_DATA(data, partition)                            \
+#define PARTITION_INIT_STATIC_DATA(data, partition, flags)                     \
     do {                                                                       \
         data.partition_id    = partition##_ID;                                 \
+        data.partition_flags = flags;                                          \
         data.code_start      = PART_REGION_ADDR(partition, $$Base);            \
         data.code_limit      = PART_REGION_ADDR(partition, $$Limit);           \
         data.ro_start        = PART_REGION_ADDR(partition, $$RO$$Base);        \
@@ -127,27 +130,27 @@ struct spm_partition_db_t {
     } while (0)
 #endif
 
-#define PARTITION_DECLARE(partition)                                    \
-    do {                                                                \
-        REGION_DECLARE(Image$$, partition, $$Base);                     \
-        REGION_DECLARE(Image$$, partition, $$Limit);                    \
-        REGION_DECLARE(Image$$, partition, $$RO$$Base);                 \
-        REGION_DECLARE(Image$$, partition, $$RO$$Limit);                \
-        REGION_DECLARE(Image$$, partition, _DATA$$RW$$Base);            \
-        REGION_DECLARE(Image$$, partition, _DATA$$RW$$Limit);           \
-        REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Base);            \
-        REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Limit);           \
-        REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Base);           \
-        REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Limit);          \
-        struct spm_partition_desc_t *part_ptr;                          \
-        if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) { \
-            return SPM_ERR_INVALID_CONFIG;                              \
-        }                                                               \
-        part_ptr = &(g_spm_partition_db.partitions[                     \
-            g_spm_partition_db.partition_count]);                       \
-        PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition);   \
-        PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition); \
-        ++g_spm_partition_db.partition_count;                           \
+#define PARTITION_DECLARE(partition, flags)                                  \
+    do {                                                                     \
+        REGION_DECLARE(Image$$, partition, $$Base);                          \
+        REGION_DECLARE(Image$$, partition, $$Limit);                         \
+        REGION_DECLARE(Image$$, partition, $$RO$$Base);                      \
+        REGION_DECLARE(Image$$, partition, $$RO$$Limit);                     \
+        REGION_DECLARE(Image$$, partition, _DATA$$RW$$Base);                 \
+        REGION_DECLARE(Image$$, partition, _DATA$$RW$$Limit);                \
+        REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Base);                 \
+        REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Limit);                \
+        REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Base);                \
+        REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Limit);               \
+        struct spm_partition_desc_t *part_ptr;                               \
+        if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {      \
+            return SPM_ERR_INVALID_CONFIG;                                   \
+        }                                                                    \
+        part_ptr = &(g_spm_partition_db.partitions[                          \
+            g_spm_partition_db.partition_count]);                            \
+        PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition, flags); \
+        PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition);      \
+        ++g_spm_partition_db.partition_count;                                \
     } while (0)
 
 #define PARTITION_ADD_INIT_FUNC(partition, init_func)                 \

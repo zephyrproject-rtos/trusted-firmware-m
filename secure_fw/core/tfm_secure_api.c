@@ -67,17 +67,22 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
     uint32_t caller_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data;
+    uint32_t caller_flags;
+    register uint32_t partition_idx;
+    uint32_t psp;
+    uint32_t partition_psp, partition_psplim;
+    uint32_t partition_state;
 
-    if (caller_partition_idx != SPM_INVALID_PARTITION_IDX &&
-        /* Also check partition state consistency */
-        (tfm_spm_partition_get_partition_id(caller_partition_idx) ==
-                TFM_SP_NON_SECURE_ID) ==
-                (desc_ptr->ns_caller != 0)) {
-        register uint32_t partition_idx = get_partition_idx(desc_ptr->ss_id);
-        uint32_t psp = __get_PSP();
-        uint32_t partition_psp, partition_psplim;
-        uint32_t partition_state;
+    if (caller_partition_idx == SPM_INVALID_PARTITION_IDX) {
+        return TFM_SECURE_LOCK_FAILED;
+    }
 
+    caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
+
+    /* Check partition state consistency */
+    if (((caller_flags&SPM_PART_FLAG_SECURE) != 0) == (!desc_ptr->ns_caller)) {
+        partition_idx = get_partition_idx(desc_ptr->ss_id);
+        psp = __get_PSP();
         curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
         partition_state = curr_part_data->partition_state;
 
@@ -98,8 +103,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
         partition_psplim =
             (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 #else
-        if (tfm_spm_partition_get_partition_id(caller_partition_idx) !=
-                TFM_SP_NON_SECURE_ID) {
+        if (caller_flags&SPM_PART_FLAG_SECURE) {
             /* Store the caller PSP in case we are doing a partition to
              * partition call
              */
@@ -117,8 +121,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
 
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
         /* Dynamic partition partitioning is only done is TFM level 3 */
-        if (tfm_spm_partition_get_partition_id(caller_partition_idx) !=
-                TFM_SP_NON_SECURE_ID) {
+        if (caller_flags&SPM_PART_FLAG_SECURE) {
             /* In a partition to partition call, deconfigure the
              * caller partition
              */
@@ -173,6 +176,10 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data;
     uint32_t return_partition_idx;
+    uint32_t return_partition_flags;
+#if TFM_LVL != 1
+    uint32_t psp;
+#endif
 
     if (current_partition_idx == SPM_INVALID_PARTITION_IDX) {
         return TFM_SECURE_UNLOCK_FAILED;
@@ -181,60 +188,59 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
     curr_part_data = tfm_spm_partition_get_runtime_data(current_partition_idx);
     return_partition_idx = curr_part_data->caller_partition_idx;
 
-    if (return_partition_idx!= SPM_INVALID_PARTITION_IDX) {
-        tfm_secure_lock--;
+    if (return_partition_idx == SPM_INVALID_PARTITION_IDX) {
+        return TFM_SECURE_UNLOCK_FAILED;
+    }
+
+    return_partition_flags = tfm_spm_partition_get_flags(return_partition_idx);
+
+    tfm_secure_lock--;
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
-        /* Deconfigure completed partition environment */
-        tfm_spm_partition_sandbox_deconfig(current_partition_idx);
-        if (tfm_spm_partition_get_partition_id(return_partition_idx) !=
-                TFM_SP_NON_SECURE_ID) {
-            /* Configure the caller partition environment in case this was a
-             * partition to partition call
-             */
-            tfm_spm_partition_sandbox_config(return_partition_idx);
-            /* Restore share status */
-            tfm_spm_partition_set_share(return_partition_idx,
-               tfm_spm_partition_get_runtime_data(return_partition_idx)->share);
-        }
+    /* Deconfigure completed partition environment */
+    tfm_spm_partition_sandbox_deconfig(current_partition_idx);
+    if (return_partition_flags&SPM_PART_FLAG_SECURE) {
+        /* Configure the caller partition environment in case this was a
+         * partition to partition call
+         */
+        tfm_spm_partition_sandbox_config(return_partition_idx);
+        /* Restore share status */
+        tfm_spm_partition_set_share(return_partition_idx,
+           tfm_spm_partition_get_runtime_data(return_partition_idx)->share);
+    }
 #endif
 
 #if TFM_LVL == 1
-        if (tfm_spm_partition_get_partition_id(return_partition_idx) ==
-                TFM_SP_NON_SECURE_ID) {
-            /* In TFM level 1 context restore is only done when
-             * returning to NS
-             */
-            /* Restore caller PSP and LR ptr */
-            __set_PSP(curr_part_data->orig_psp);
-            __set_PSPLIM(curr_part_data->orig_psplim);
-            *lr_ptr = curr_part_data->orig_lr;
-        }
-#else
-        uint32_t psp = __get_PSP();
-
-        /* Discount SVC call stack frame when storing sfn ctx */
-        tfm_spm_partition_set_stack(
-                    current_partition_idx, psp + SVC_STACK_FRAME_SIZE);
-
+    if (!(return_partition_flags&SPM_PART_FLAG_SECURE)) {
+        /* In TFM level 1 context restore is only done when
+         * returning to NS
+         */
         /* Restore caller PSP and LR ptr */
         __set_PSP(curr_part_data->orig_psp);
         __set_PSPLIM(curr_part_data->orig_psplim);
         *lr_ptr = curr_part_data->orig_lr;
+    }
+#else
+    psp = __get_PSP();
+
+    /* Discount SVC call stack frame when storing sfn ctx */
+    tfm_spm_partition_set_stack(
+                current_partition_idx, psp + SVC_STACK_FRAME_SIZE);
+
+    /* Restore caller PSP and LR ptr */
+    __set_PSP(curr_part_data->orig_psp);
+    __set_PSPLIM(curr_part_data->orig_psplim);
+    *lr_ptr = curr_part_data->orig_lr;
 #endif
 
-        /* Clear the context entry in the context stack before returning */
-        tfm_spm_partition_cleanup_context(current_partition_idx);
+    /* Clear the context entry in the context stack before returning */
+    tfm_spm_partition_cleanup_context(current_partition_idx);
 
-        tfm_spm_partition_set_state(current_partition_idx,
-                                    SPM_PARTITION_STATE_IDLE);
-        tfm_spm_partition_set_state(return_partition_idx,
-                                    SPM_PARTITION_STATE_RUNNING);
+    tfm_spm_partition_set_state(current_partition_idx,
+                                SPM_PARTITION_STATE_IDLE);
+    tfm_spm_partition_set_state(return_partition_idx,
+                                SPM_PARTITION_STATE_RUNNING);
 
-        return TFM_SUCCESS;
-    } else {
-        /* Secure partition stack count incorrect */
-        return TFM_SECURE_UNLOCK_FAILED;
-    }
+    return TFM_SUCCESS;
 }
 
 void tfm_secure_api_error_handler(void)
@@ -473,9 +479,12 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data =
             tfm_spm_partition_get_runtime_data(running_partition_idx);
+    uint32_t running_partition_flags =
+            tfm_spm_partition_get_flags(running_partition_idx);
+    uint32_t caller_partition_flags =
+            tfm_spm_partition_get_flags(curr_part_data->caller_partition_idx);
 
-    if (tfm_spm_partition_get_partition_id(running_partition_idx) ==
-            TFM_SP_NON_SECURE_ID)  {
+    if (!(running_partition_flags&SPM_PART_FLAG_SECURE))  {
         /* This handler shouldn't be called from outside partition context.
          * Partitions are only allowed to run while S domain is locked.
          */
@@ -484,8 +493,7 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
 
     /* Store return value in r0 */
-    if (tfm_spm_partition_get_partition_id(curr_part_data->caller_partition_idx)
-            != TFM_SP_NON_SECURE_ID) {
+    if (caller_partition_flags&SPM_PART_FLAG_SECURE) {
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
@@ -503,17 +511,16 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data =
             tfm_spm_partition_get_runtime_data(running_partition_idx);
+    uint32_t running_partition_flags =
+            tfm_spm_partition_get_flags(running_partition_idx);
+    int32_t flags = 0;
+    void *rangeptr;
 
-    if ((tfm_spm_partition_get_partition_id(running_partition_idx) ==
-            TFM_SP_NON_SECURE_ID) || (size == 0)) {
-        /* This handler shouldn't be called from outside partition context.
-         * Partitions are only allowed to run while S domain is locked.
-         */
+    if (!(running_partition_flags&SPM_PART_FLAG_SECURE) || (size == 0)) {
+        /* This handler should only be called from a secure partition. */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
     }
-
-    int32_t flags = 0;
 
     if (curr_part_data->share != TFM_BUFFER_SHARE_PRIV) {
         flags |= CMSE_MPU_UNPRIV;
@@ -526,7 +533,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     }
 
     /* Check if partition access to address would fail */
-    void *rangeptr = cmse_check_address_range((void *)ptr, size, flags);
+    rangeptr = cmse_check_address_range((void *)ptr, size, flags);
 
     /* Get regions associated with address */
     cmse_address_info_t addr_info = cmse_TT((void *)ptr);
@@ -706,21 +713,23 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
     const struct spm_partition_runtime_data_t *curr_part_data =
             tfm_spm_partition_get_runtime_data(running_partition_idx);
     uint32_t caller_partition_idx = curr_part_data->caller_partition_idx;
+    uint32_t running_partition_flags =
+            tfm_spm_partition_get_flags(running_partition_idx);
+    uint32_t caller_partition_flags =
+            tfm_spm_partition_get_flags(caller_partition_idx);
 
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];
 
-    if (tfm_spm_partition_get_partition_id(running_partition_idx) ==
-            TFM_SP_NON_SECURE_ID) {
-        /* This handler shouldn't be called from outside partition context. */
+    if (!(running_partition_flags&SPM_PART_FLAG_SECURE)) {
+        /* This handler should only be called from a secure partition. */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
     }
 
     switch (args[0]) {
     case TFM_BUFFER_SHARE_DEFAULT:
-        share = (tfm_spm_partition_get_partition_id(caller_partition_idx) ==
-                TFM_SP_NON_SECURE_ID) ?
+        share = (!(caller_partition_flags&SPM_PART_FLAG_SECURE)) ?
             (TFM_BUFFER_SHARE_NS_CODE) : (TFM_BUFFER_SHARE_SCRATCH);
         break;
     case TFM_BUFFER_SHARE_SCRATCH:
