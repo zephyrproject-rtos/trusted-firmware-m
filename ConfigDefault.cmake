@@ -26,6 +26,9 @@ endif()
 #definitions) based on these.
 set (REGRESSION False)
 set (CORE_TEST False)
+
+#BL2 bootloader(MCUBoot) related settings
 set (BL2 True)
+set (MCUBOOT_NO_SWAP False)
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")

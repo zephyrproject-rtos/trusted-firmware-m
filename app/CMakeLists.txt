@@ -23,12 +23,20 @@ get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
 set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
 set(TEST_INTERFACE_DIR ${TFM_ROOT_DIR}/test/interface)
 
+#Include BL2 bootloader related functions
+set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")
+include("${MCUBOOT_DIR}/MCUBoot.cmake")
+
 #Set variables
 get_filename_component(CMSIS_5_DIR ${TFM_ROOT_DIR}/../CMSIS_5 ABSOLUTE)
 
 if(NOT EXISTS ${CMSIS_5_DIR})
 	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_5_DIR}\".")
 endif()
+
+if (NOT DEFINED BL2)
+	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
+endif ()
 
 set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
@@ -67,134 +75,205 @@ if(NOT DEFINED NS_SCATTER_FILE_NAME)
 endif()
 embedded_set_target_linker_file(TARGET ${PROJECT_NAME} PATH  "${NS_SCATTER_FILE_NAME}")
 
-if(NOT DEFINED PLATFORM_LINK_INCLUDES)
-	message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
-endif()
-embedded_set_target_link_includes(TARGET ${PROJECT_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
+#Create an object library to avoid compiling all source files twice, when two executables
+#with different memory map need to be linked(BL2 non-swapping)
+set(PROJECT_OBJ_LIB ${PROJECT_NAME}_obj_lib)
+add_library(${PROJECT_OBJ_LIB} OBJECT ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${NS_APP_SRC})
+
+#Set common compiler flags
+config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
+
+#Set macro definitions
+target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
 
 #Set include directories.
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TEST_INTERFACE_DIR}/include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${INTERFACE_DIR}/include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
-
-#Create an executable
-add_executable(${PROJECT_NAME} ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM_NS} ${NS_APP_SRC})
-#Add the RTX library
-if(NOT DEFINED RTX_LIB_PATH)
-	message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
-endif()
-target_link_libraries(${PROJECT_NAME} "${RTX_LIB_PATH}")
-#Set macro definitions
-target_compile_definitions(${PROJECT_NAME} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
-
-#Generate binary file from axf
-compiler_generate_binary_output(${PROJECT_NAME})
-
-#Generate MCUBoot compatible payload
-if (BL2)
-	#Find Python3.x interpreter
-	find_package(PythonInterp 3)
-
-	if (NOT PYTHONINTERP_FOUND)
-		message(FATAL_ERROR "Failed to find Python3.x interpreter. Python3 must be installed and available on the PATH.")
-	endif()
-
-	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)
-
-if(NOT DEFINED FLASH_LAYOUT)
-	message(FATAL_ERROR "ERROR: Incomplete Configuration: FLASH_LAYOUT is not defined.")
-endif()
-
-	add_custom_command(TARGET ${PROJECT_NAME}
-						POST_BUILD
-
-						#Create concatenated binary image from tfm_ns.bin and tfm_s.bin
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
-						ARGS -l ${FLASH_LAYOUT}
-							 -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
-							 -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-							 -o ${CMAKE_BINARY_DIR}/tfm_full.bin
-
-						#Sign concatenated binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
-						ARGS sign
-							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
-							 --align 1
-							 -v 1.0
-							 -H 0x400
-							 --pad ${SIGN_BIN_SIZE}
-							 ${CMAKE_BINARY_DIR}/tfm_full.bin
-							 ${CMAKE_BINARY_DIR}/tfm_sign.bin
-				)
-endif()
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TEST_INTERFACE_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${INTERFACE_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
 
 if (NOT DEFINED CORE_TEST)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
 elseif(CORE_TEST)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE CORE_TEST)
+	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE CORE_TEST)
 endif()
 
-if (NOT DEFINED TFM_PARTITION_TEST_CORE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
-elseif (TFM_PARTITION_TEST_CORE)
-	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
-endif()
+# For the non-swapping BL2 configuration two executables need to be built.
+# One can be executed from flash partition slot_0 and other from slot_1.
+# Only the linking phase is different. This function captures common settings
+# and eliminates copy-paste.
+function(set_up_app_build)
+	set( _OPTIONS_ARGS)                                                            #Option (on/off) arguments (e.g. IGNORE_CASE)
+	set( _ONE_VALUE_ARGS NS_TARGET S_TARGET FULL_BIN SIGN_BIN VENEER_NAME POSTFIX) #Single option arguments (e.g. PATH "./foo/bar")
+	set( _MULTI_VALUE_ARGS LINK_DEFINES)                                           #List arguments (e.g. LANGUAGES C ASM CXX)
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN})
 
-if (NOT DEFINED TFM_PARTITION_TEST_SST)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
-elseif (TFM_PARTITION_TEST_SST)
-	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SST")
-endif()
-
-if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
-    message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
-elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
-    embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
-endif()
-
-#Set BL2 specific settings.
-if (NOT DEFINED BL2)
-	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
-elseif (BL2)
-	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
-endif()
-
-
-if(NOT TARGET tfm_s)
-	#We need access to the secure veneers. If the location is not already
-	#specified, then set it.
-	if (NOT DEFINED S_VENEER_FILE)
-		set(S_VENEER_FILE "${CMAKE_CURRENT_BINARY_DIR}/s_veneers.o")
+	if (NOT DEFINED _MY_PARAMS_NS_TARGET)
+		message(FATAL_ERROR "set_up_app_build(): mandatory parameter 'NS_TARGET' missing.")
 	endif()
+
+	if (NOT DEFINED _MY_PARAMS_S_TARGET)
+		message(FATAL_ERROR "set_up_app_build(): mandatory parameter 'S_TARGET' missing.")
+	endif()
+
+	if (NOT DEFINED _MY_PARAMS_FULL_BIN)
+		message(FATAL_ERROR "set_up_app_build(): mandatory parameter 'FULL_BIN' missing.")
+	endif()
+
+	if (NOT DEFINED _MY_PARAMS_SIGN_BIN)
+		message(FATAL_ERROR "set_up_app_build(): mandatory parameter 'SIGN_BIN' missing.")
+	endif()
+
+	if (NOT DEFINED _MY_PARAMS_VENEER_NAME)
+		message(FATAL_ERROR "set_up_app_build(): mandatory parameter 'VENEER_NAME' missing.")
+	endif()
+
+	set(EXE_NAME ${_MY_PARAMS_NS_TARGET}${_MY_PARAMS_POSTFIX})
+	set(S_BIN ${_MY_PARAMS_S_TARGET}${_MY_PARAMS_POSTFIX})
+	set(FULL_NAME ${_MY_PARAMS_FULL_BIN}${_MY_PARAMS_POSTFIX})
+	set(SIGN_NAME ${_MY_PARAMS_SIGN_BIN}${_MY_PARAMS_POSTFIX})
+	set(VENEER_NAME ${_MY_PARAMS_VENEER_NAME}${_MY_PARAMS_POSTFIX}.o)
+
+	#Create linker target: add object library to executable
+	add_executable(${EXE_NAME} $<TARGET_OBJECTS:${PROJECT_OBJ_LIB}>)
+
+	#Set common linker flags
+	config_setting_shared_linker_flags(${EXE_NAME})
+
+	#Set individual linker flags per linker target/executable
+	foreach(flag ${_MY_PARAMS_LINK_DEFINES})
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "${flag}")
+	endforeach(flag)
+
+	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${NS_SCATTER_FILE_NAME}")
+
+	#Add the RTX library
+	if(NOT DEFINED RTX_LIB_PATH)
+		message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
+	endif()
+	target_link_libraries(${EXE_NAME} "${RTX_LIB_PATH}")
+
+	if(NOT DEFINED PLATFORM_LINK_INCLUDES)
+		message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
+	endif()
+	embedded_set_target_link_includes(TARGET ${EXE_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
+
+	#Generate binary file from axf
+	compiler_generate_binary_output(${EXE_NAME})
+
+	#Generate MCUBoot compatible payload
+	if (BL2)
+		mcuboot_create_boot_payload(S_BIN    ${S_BIN}
+									NS_BIN   ${EXE_NAME}
+									FULL_BIN ${FULL_NAME}
+									SIGN_BIN ${SIGN_NAME}
+									POSTFIX  ${_MY_PARAMS_POSTFIX})
+	endif()
+
+	if (NOT DEFINED TFM_PARTITION_TEST_CORE)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
+	elseif (TFM_PARTITION_TEST_CORE)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
+	endif()
+
+	if (NOT DEFINED TFM_PARTITION_TEST_SST)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
+	elseif (TFM_PARTITION_TEST_SST)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SST")
+	endif()
+
+	if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
+	elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
+	endif()
+
+	#Set BL2 specific settings.
+	if (BL2)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2")
+	endif()
+
+	#We depend on the non secure tests. See if the library target is available.
+	if(TARGET tfm_non_secure_tests)
+		#If yes, then use the library.
+		target_link_libraries(${EXE_NAME} tfm_non_secure_tests)
+		#Ensure library is built first.
+		add_dependencies(${EXE_NAME} tfm_non_secure_tests)
+	endif()
+
+	#Ensure secure_fw is built before our executable.
+	add_dependencies(${EXE_NAME} ${S_BIN})
+
+	#Add the veneers to the executable.
+	set(S_VENEER_FILE "${CMAKE_CURRENT_BINARY_DIR}/${VENEER_NAME}")
+	set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
+
+	#Collect executables to common location: build/install/outputs/
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.axf
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.bin
+			DESTINATION outputs/${TARGET_PLATFORM}/)
+
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.axf
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.bin
+			DESTINATION outputs/fvp/)
+endfunction()
+
+if (NOT TARGET_TFM_S_EXISTED)
+	set(S_VENEER_FILE_LOCATION "${CMAKE_CURRENT_BINARY_DIR}")
 	add_subdirectory(../secure_fw ${CMAKE_CURRENT_BINARY_DIR}/secure_fw)
 endif()
 
-#We depend on the non secure tests. See if the library target is available.
-if(TARGET tfm_non_secure_tests)
-	#If yes, then use the library.
-	target_link_libraries(${PROJECT_NAME} tfm_non_secure_tests)
-	#Ensure library is built first.
-	#add_dependencies(${PROJECT_NAME} tfm_non_secure_tests)
+if (LINK_TO_BOTH_MEMORY_REGION)
+	#Link to primary memory region
+	set_up_app_build(NS_TARGET     ${PROJECT_NAME}
+					 S_TARGET      tfm_s
+					 FULL_BIN      tfm_full
+					 SIGN_BIN      tfm_sign
+					 VENEER_NAME   s_veneers
+					 POSTFIX       _0)
+
+	#Link to secondary memory region(add extra linker flag)
+	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
+					 LINK_DEFINES  "LINK_TO_SECONDARY_PARTITION"
+					 S_TARGET      tfm_s
+					 FULL_BIN      tfm_full
+					 SIGN_BIN      tfm_sign
+					 VENEER_NAME   s_veneers
+					 POSTFIX       _1)
 else()
-	#If not, add the test source to the build.
-	#As of today since secufre_fw is built as a sub-project this code will never
-	#execute.
+	#Link to primary memory region only
+	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
+					 S_TARGET      tfm_s
+					 FULL_BIN      tfm_full
+					 SIGN_BIN      tfm_sign
+					 VENEER_NAME   s_veneers)
+endif()
+
+#If the tfm_non_secure_tests target is not available
+if(NOT TARGET tfm_non_secure_tests)
+	#Add the test source to the build.
+	#As of today since secure_fw is built as a sub-project this code will never execute.
 	option(ENABLE_INVERT_SERVICE_TESTS "" TRUE)
 	option(ENABLE_SECURE_STORAGE_SERVICE_TESTS "" TRUE)
 	include(../test/CMakeLists.inc)
-	target_sources(${PROJECT_NAME} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
+	target_sources(${PROJECT_OBJ_LIB} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
 endif()
 
-#Ensure secure_fw is built before our executable.
-add_dependencies(${PROJECT_NAME} tfm_s)
+#Finally let CMake system apply changes after the whole project is defined.
+if (TARGET ${PROJECT_NAME})
+	embedded_project_end(${PROJECT_NAME})
+endif()
 
-#Add the veneers to the executable.
-set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
+if (TARGET ${PROJECT_NAME}_0)
+	embedded_project_end(${PROJECT_NAME}_0)
+endif()
 
-#Finally let cmake system apply changes after the whole project is defined.
-embedded_project_end(${PROJECT_NAME})
+if (TARGET ${PROJECT_NAME}_1)
+	embedded_project_end(${PROJECT_NAME}_1)
+endif()
+
+embedded_project_end(${PROJECT_OBJ_LIB})

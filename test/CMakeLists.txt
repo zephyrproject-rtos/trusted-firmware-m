@@ -51,17 +51,27 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.inc)
 
 #Build the secure library
 add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S})
+
+#Set common compiler and linker flags
+config_setting_shared_compiler_flags(tfm_secure_tests)
+config_setting_shared_linker_flags(tfm_secure_tests)
+
 embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} APPEND)
 
 
 #Build the non-secure library
 set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
 add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
+
+#Set common compiler and linker flags
+config_setting_shared_compiler_flags(tfm_non_secure_tests)
+config_setting_shared_linker_flags(tfm_non_secure_tests)
+
 embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 __DOMAIN_NS=1 APPEND)
 #__DOMAIN_NS=1
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for tfm_storage." FORCE)
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for tfm_storage." FORCE)
 endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/integ_test.h

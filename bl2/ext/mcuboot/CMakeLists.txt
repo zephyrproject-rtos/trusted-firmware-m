@@ -90,10 +90,10 @@ set(MBEDTLS_TARGET_NAME "mbedtls_mcuboot_lib")
 include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 #Setting include directories
-embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)
-embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
 
 #Define linker file
 if(NOT DEFINED BL2_LINKER_CONFIG)
@@ -107,6 +107,10 @@ endif()
 embedded_set_target_link_includes(TARGET ${PROJECT_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
 add_executable(${PROJECT_NAME} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
+
+#Set common compiler and linker flags
+config_setting_shared_compiler_flags(${PROJECT_NAME})
+config_setting_shared_linker_flags(${PROJECT_NAME})
 
 #Add BL2 define to linker to resolve symbols in region_defs.h
 embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
@@ -125,7 +129,25 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 							MCUBOOT_VALIDATE_SLOT0
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 							MBEDTLS_CONFIG_FILE="config-boot.h"
-						)
+							MCUBOOT_TARGET_CONFIG="flash_layout.h")
+
+if (MCUBOOT_NO_SWAP)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_NO_SWAP)
+endif()
+
+#Set install location. Keep original value to avoid overriding command line settings.
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for MCUBoot." FORCE)
+endif()
+
+#Collect executables to common location: build/install/outputs/
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+		DESTINATION outputs/${TARGET_PLATFORM}/)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+		DESTINATION outputs/fvp/)
 
 #Finally let cmake system apply changes after the whole project is defined.
 embedded_project_end(${PROJECT_NAME})

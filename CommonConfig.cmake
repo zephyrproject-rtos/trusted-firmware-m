@@ -41,9 +41,13 @@ elseif(${COMPILER} STREQUAL "ARMCLANG")
 	include("Common/${ARMCLANG_MODULE}")
 
 	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -mcmse)
-	##Shared compiler and linker settings.
-	function(config_setting_shared_flags tgt)
+	##Shared compiler settings.
+	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
 		embedded_set_target_link_flags(TARGET ${tgt} FLAGS --strict --map --symbols --xref --entry=Reset_Handler --info=summarysizes,sizes,totals,unused,veneers)
 	endfunction()
 elseif(${COMPILER} STREQUAL "GNUARM")
@@ -55,8 +59,12 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 
 	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -mcmse)
 	##Shared compiler and linker settings.
-	function(config_setting_shared_flags tgt)
+	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
 		#--no-wchar-size-warning flag is added because TF-M sources are compiled
 		#with short wchars, however the standard library is compiled with normal
 		#wchar, and this generates linker time warnings. TF-M code does not use
@@ -69,7 +77,7 @@ endif()
 
 #Create a string from the compile flags list, so that it can be used later
 #in this file to set mbedtls and BL2 flags
-string(REPLACE ";" " " COMMON_COMPILE_FLAGS_STR "${COMMON_COMPILE_FLAGS}")
+list_to_string(COMMON_COMPILE_FLAGS_STR ${COMMON_COMPILE_FLAGS})
 
 #Settings which shall be set for all projects the same way based
 # on the variables above.
@@ -152,17 +160,17 @@ endif()
 
 if (BL2)
 	add_definitions(-DBL2)
+	if (MCUBOOT_NO_SWAP)
+		set(LINK_TO_BOTH_MEMORY_REGION ON)
+	endif()
+else()
+	if (MCUBOOT_NO_SWAP)
+		message (FATAL_ERROR "Bootloader build is turned off, not possible to specify bootloader behavior")
+	endif()
 endif()
 
-##Secure side
-config_setting_shared_flags(tfm_s)
-
-##Non secure side
-config_setting_shared_flags(tfm_ns)
-
-##TF-M storage
-config_setting_shared_flags(tfm_storage)
-set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+##Set mbedTLS compiler flags and variables for secure storage and audit log
+set(MBEDTLS_C_FLAGS_SST_LOG "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
@@ -190,13 +198,5 @@ if (NOT DEFINED MBEDTLS_DEBUG)
 	set (MBEDTLS_DEBUG ON)
 endif()
 
-##TF-M audit logging
-config_setting_shared_flags(tfm_audit)
-
-##Tests
-config_setting_shared_flags(tfm_secure_tests)
-config_setting_shared_flags(tfm_non_secure_tests)
-
-##BL2
-config_setting_shared_flags(mcuboot)
+##Set mbedTLS compiler flags for BL2 bootloader
 set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")

@@ -27,6 +27,9 @@ set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
 set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
 set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 
+#Set mbedTLS compiler flags
+set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SST_LOG})
+
 ###Get the definition of what files we need to build
 set (ENABLE_SECURE_STORAGE ON)
 include(CMakeLists.inc)
@@ -56,6 +59,11 @@ include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 # Specify what we build (for the secure storage service, build as a static library)
 add_library(tfm_storage STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
+
+#Set common compiler and linker flags
+config_setting_shared_compiler_flags(tfm_storage)
+config_setting_shared_linker_flags(tfm_storage)
+
 embedded_set_target_compile_defines(TARGET tfm_storage LANGUAGE C DEFINES __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
 #Add a dependency on the mbed_tls_lib_install target.
 add_dependencies(tfm_storage ${MBEDTLS_TARGET_NAME}_install)

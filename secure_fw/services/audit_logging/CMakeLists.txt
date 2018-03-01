@@ -27,6 +27,9 @@ set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
 set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
 set (MBEDTLS_TARGET_NAME "mbedtls_log_lib")
 
+#Set mbedTLS compiler flags
+set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SST_LOG})
+
 ###Get the definition of what files we need to build
 set (ENABLE_AUDIT_LOGGING ON)
 include(CMakeLists.inc)
@@ -61,5 +64,9 @@ embedded_set_target_compile_defines(TARGET tfm_audit LANGUAGE C DEFINES __ARM_FE
 add_dependencies(tfm_audit ${MBEDTLS_TARGET_NAME}_install)
 #Ask the compiler to merge the mbedtls and the audit logging libraries.
 compiler_merge_library(DEST tfm_audit LIBS "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
+
+#Set common compiler and linker flags
+config_setting_shared_compiler_flags(tfm_audit)
+config_setting_shared_linker_flags(tfm_audit)
 
 embedded_project_end(tfm_audit)
