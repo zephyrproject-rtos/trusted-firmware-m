@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ void nvic_interrupt_enable()
      * peripherals used by NS. That triggers a PPC0 exception as that
      * register is meant for NS privileged access only. Clear it here
      */
-    spctrl->secppcintclr |= CMSDK_APB_PPC0_INT_POS_MASK;
+    spctrl->secppcintclr = CMSDK_APB_PPC0_INT_POS_MASK;
 
     /* Enable PPC interrupts for APB PPC */
     spctrl->secppcinten |= CMSDK_APB_PPC0_INT_POS_MASK;
@@ -288,5 +288,5 @@ void ppc_clear_irq(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     /* Clear APC PPC EXP2 IRQ */
-    spctrl->secppcintclr |= CMSDK_APB_PPCEXP2_INT_POS_MASK;
+    spctrl->secppcintclr = CMSDK_APB_PPCEXP2_INT_POS_MASK;
 }
