@@ -295,7 +295,11 @@ struct nspctrl_def {
 /* End of ARM AHB PPCEXP0 peripherals definition */
 
 /* ARM AHB PPCEXP1 peripherals definition */
-/* The bits 31:0 are reserved */
+#define CMSDK_DMA0_PPC_POS  0U
+#define CMSDK_DMA1_PPC_POS  1U
+#define CMSDK_DMA2_PPC_POS  2U
+#define CMSDK_DMA3_PPC_POS  3U
+/* The bits 31:4 are reserved */
 /* End of ARM AHB PPCEXP1 peripherals definition */
 
 /* ARM AHB PPCEXP2 peripherals definition */
