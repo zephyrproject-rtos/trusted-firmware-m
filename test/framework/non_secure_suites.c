@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
     /* Non-secure SST test cases */
     {&register_testsuite_ns_sst_interface, 0, 0, 0},
+
+#ifdef SST_TEST_SERVICES
+    /* Non-secure SST referenced access testsuite */
+    {&register_testsuite_ns_sst_ref_access, 0, 0, 0},
+#endif
 
 #ifdef CORE_TEST_SERVICES
     /* Non-secure invert test cases */

@@ -137,6 +137,12 @@ elseif (CORE_TEST_SERVICES)
 	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DCORE_TEST_SERVICES\"")
 endif()
 
+if (NOT DEFINED SST_TEST_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined. ")
+elseif (SST_TEST_SERVICES)
+	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DSST_TEST_SERVICES\"")
+endif()
+
 #Set BL2 specific settings.
 if (NOT DEFINED BL2)
 	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")

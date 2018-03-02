@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -46,6 +46,13 @@ enum tfm_svc_num {
     SVC_TFM_CORE_TEST,
     SVC_TFM_CORE_TEST_MULTIPLE_CALLS,
 #endif /* CORE_TEST_SERVICES */
+
+#if defined(SST_TEST_SERVICES)
+    SVC_SST_TEST_SERVICE_SETUP,
+    SVC_SST_TEST_SERVICE_DUMMY_ENCRYPT,
+    SVC_SST_TEST_SERVICE_DUMMY_DECRYPT,
+    SVC_SST_TEST_SERVICE_CLEAN,
+#endif /* SST_TEST_SERVICES */
 
     /* add all the new entries above this line */
     SVC_TFM_MAX,

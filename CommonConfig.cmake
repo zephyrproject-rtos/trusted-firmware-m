@@ -49,6 +49,7 @@ endfunction()
 set (CORE_TEST_SERVICES OFF)
 set (CORE_TEST_POSITIVE OFF)
 set (CORE_TEST_INTERACTIVE OFF)
+set (SST_TEST_SERVICES OFF)
 
 if (REGRESSION)
 	set(SERVICES_TEST_ENABLED ON)
@@ -88,6 +89,7 @@ endif()
 if (SERVICE_TEST_NS)
 	add_definitions(-DSERVICES_TEST_NS)
 	set(TEST_FRAMEWORK_NS ON)
+	set(SST_TEST_SERVICES ON)
 endif()
 
 if(TEST_FRAMEWORK_S)
@@ -100,6 +102,10 @@ endif()
 
 if (CORE_TEST_SERVICES)
 	add_definitions(-DCORE_TEST_SERVICES)
+endif()
+
+if (SST_TEST_SERVICES)
+	add_definitions(-DSST_TEST_SERVICES)
 endif()
 
 if (BL2)

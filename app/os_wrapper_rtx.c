@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,7 @@ uint32_t os_wrapper_new_thread(const char* name, uint32_t stack_size,
     osThreadAttr_t task_attribs = {.tz_module = 1};
     osThreadId_t thread_id;
 
+    task_attribs.attr_bits = osThreadJoinable;
     task_attribs.stack_size = stack_size;
     task_attribs.name = name;
     task_attribs.priority = priority;
@@ -109,13 +110,19 @@ uint32_t os_wrapper_get_thread_priority(uint32_t id)
     return prio;
 }
 
-uint32_t os_wrapper_delete_thread(uint32_t id)
+uint32_t os_wrapper_join_thread(uint32_t id)
 {
-    /* Make sure the thread has ended at this point*/
-    (void)osThreadJoin((osThreadId_t) id);
+    osStatus_t status;
 
-    /* RTX handles thread deletion automatically. So, any
-     * action is required in this function to delete the thread. */
+    /* Wait for the thread to terminate */
+    status = osThreadJoin((osThreadId_t)id);
+    if (status != osOK) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    /* RTX handles thread deletion automatically. So, no action is required in
+     * this function to delete the thread.
+     */
 
     return 0;
 }

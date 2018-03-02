@@ -42,6 +42,18 @@ elseif(ENABLE_CORE_TESTS_2)
 		)
 endif()
 
+if (NOT DEFINED SST_TEST_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_SERVICES is undefined. ")
+elseif (SST_TEST_SERVICES)
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service.c"
+		"${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_veneers.c"
+		)
+
+	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_api.c"
+		"${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_svc.c"
+		)
+endif()
+
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 
@@ -62,4 +74,3 @@ elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
 else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
-

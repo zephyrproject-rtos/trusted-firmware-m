@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -64,7 +64,7 @@ struct sst_asset_info_t asset_perms[] = {
 struct sst_asset_perm_t asset_perms_modes[] = {
 {
     .app = SST_APP_ID_3,
-    .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
+    .perm = SST_PERM_REFERENCE,
 }, {
     .app = SST_APP_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
