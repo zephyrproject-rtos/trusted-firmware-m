@@ -76,9 +76,6 @@ void enable_fault_handlers(void)
                   | SCB_SHCSR_BUSFAULTENA_Msk
                   | SCB_SHCSR_MEMFAULTENA_Msk
                   | SCB_SHCSR_SECUREFAULTENA_Msk;
-
-    /* CFSR register setting to enable precise errors */
-    SCB->CFSR |= SCB_CFSR_PRECISERR_Msk;
 }
 
 /*------------------- NVIC interrupt target state to NS configuration ----------*/
