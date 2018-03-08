@@ -8,6 +8,7 @@
 /* This file contains the APIs exported by the SPM to tfm core */
 
 #include <stdio.h>
+#include <string.h>
 #include "spm_api.h"
 #include "spm_db.h"
 #include "tfm_api.h"
@@ -77,8 +78,9 @@ enum spm_err_t tfm_spm_db_init(void)
 {
     struct spm_partition_desc_t *part_ptr;
 
+    memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
+
     /* This function initialises partition db */
-    g_spm_partition_db.is_init = 1;
     g_spm_partition_db.running_partition_idx = SPM_INVALID_PARTITION_IDX;
     g_spm_partition_db.partition_count = 0;
 
@@ -111,6 +113,8 @@ enum spm_err_t tfm_spm_db_init(void)
 
     /* Add user-defined secure partitions */
     #include "user_partition_defines.inc"
+
+    g_spm_partition_db.is_init = 1;
 
     return SPM_ERR_OK;
 }

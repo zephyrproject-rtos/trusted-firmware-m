@@ -77,11 +77,6 @@ struct spm_partition_db_t {
     do {                                                   \
         data.partition_id    = partition##_ID;             \
         data.partition_flags = flags;                      \
-        data.periph_start    = 0U;                         \
-        data.periph_limit    = 0U;                         \
-        data.periph_ppc_bank = 0U;                         \
-        data.periph_ppc_loc  = 0U;                         \
-        data.partition_init  = 0U;                         \
     } while (0)
 #else
 #define PARTITION_INIT_STATIC_DATA(data, partition, flags)                     \
@@ -98,11 +93,6 @@ struct spm_partition_db_t {
         data.zi_limit        = PART_REGION_ADDR(partition, _DATA$$ZI$$Limit);  \
         data.stack_bottom    = PART_REGION_ADDR(partition, _STACK$$ZI$$Base);  \
         data.stack_top       = PART_REGION_ADDR(partition, _STACK$$ZI$$Limit); \
-        data.periph_start    = 0U;                                             \
-        data.periph_limit    = 0U;                                             \
-        data.periph_ppc_bank = 0U;                                             \
-        data.periph_ppc_loc  = 0U;                                             \
-        data.partition_init  = 0U;                                             \
     } while (0)
 #endif
 
@@ -110,21 +100,11 @@ struct spm_partition_db_t {
 #define PARTITION_INIT_RUNTIME_DATA(data, partition)            \
     do {                                                        \
         data.partition_state      = SPM_PARTITION_STATE_UNINIT; \
-        data.caller_partition_idx = 0U;                         \
-        data.orig_psp             = 0U;                         \
-        data.orig_psplim          = 0U;                         \
-        data.orig_lr              = 0U;                         \
-        data.share                = 0U;                         \
     } while (0)
 #else
 #define PARTITION_INIT_RUNTIME_DATA(data, partition)                \
     do {                                                            \
         data.partition_state      = SPM_PARTITION_STATE_UNINIT;     \
-        data.caller_partition_idx = 0U;                             \
-        data.orig_psp             = 0U;                             \
-        data.orig_psplim          = 0U;                             \
-        data.orig_lr              = 0U;                             \
-        data.share                = 0U;                             \
         data.stack_ptr            =                                 \
                 PART_REGION_ADDR(partition, _STACK$$ZI$$Limit);     \
     } while (0)
