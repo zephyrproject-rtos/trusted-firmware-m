@@ -106,7 +106,7 @@ embedded_set_target_linker_file(TARGET mcuboot PATH "${BL2_LINKER_CONFIG}")
 add_executable(${PROJECT_NAME} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
 
 #Add BL2 define to linker to resolve symbols in region_defs.h
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DBL2\"")
+embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
 
 #Link mbedcrypto library to project
 target_link_libraries(${PROJECT_NAME} "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,8 +24,8 @@ if (_CXX_COMPILER_NAME MATCHES "^.*armclang(\\.exe)?$")
 	set(CMAKE_CXX_COMPILER_ID "ARMCLANG" CACHE INTERNAL "C++ compiler ID" FORCE)
 	set(ARM_TOOLCHAIN_FILE "Compiler/ARMClang-CXX")
 elseif (_CXX_COMPILER_NAME MATCHES "^.*gcc(\\.exe)?$")
-	set(CMAKE_CXX_COMPILER_ID "GNU" CACHE INTERNAL "C++ compiler ID" FORCE)
-	set(ARM_TOOLCHAIN_FILE "Compiler/GNU-CXX")
+	set(CMAKE_CXX_COMPILER_ID "GNUARM" CACHE INTERNAL "C++ compiler ID" FORCE)
+	set(ARM_TOOLCHAIN_FILE "Compiler/GNUARM-CXX")
 elseif (_CXX_COMPILER_NAME MATCHES "^.*iccarm(\\.exe)?$")
 	set(CMAKE_CXX_COMPILER_ID "IAR" CACHE INTERNAL "C++ compiler ID" FORCE)
 	set(ARM_TOOLCHAIN_FILE "Compiler/IAR-CXX")

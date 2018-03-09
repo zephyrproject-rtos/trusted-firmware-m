@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -61,12 +61,44 @@ if("ASM" IN_LIST languages)
 	include(Compiler/ARMClang-ASM)
 endif()
 
-function(compiler_set_linkercmdfile TARGET FILE_PATH)
+function(compiler_set_linkercmdfile)
+	set( _OPTIONS_ARGS )							#Option (on/off) arguments.
+	set( _ONE_VALUE_ARGS TARGET PATH)				#Single option arguments.
+	set( _MULTI_VALUE_ARGS DEFINES INCLUDES)		#List arguments
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+
+	#Check passed parameters
+	if(NOT _MY_PARAMS_TARGET)
+		message(FATAL_ERROR "compiler_set_linkercmdfile: mandatory parameter 'TARGET' is missing.")
+	endif()
+	if (NOT TARGET ${_MY_PARAMS_TARGET})
+		message(FATAL_ERROR "compiler_set_linkercmdfile: value of parameter 'TARGET' is invalid.")
+	endif()
+
+	if(NOT _MY_PARAMS_PATH)
+		message(FATAL_ERROR "compiler_set_linkercmdfile: mandatory parameter 'PATH' is missing.")
+	endif()
+	set(_FILE_PATH ${_MY_PARAMS_PATH})
+
+	#Compose additional command line switches from macro definitions.
+	set(_FLAGS "")
+	if (_MY_PARAMS_DEFINES)
+		foreach(_DEFINE IN LISTS _MY_PARAMS_DEFINES)
+			string(APPEND _FLAGS " --predefine=\"-D${_DEFINE}\"")
+		endforeach()
+	endif()
+	#Compose additional command line switches from include paths.
+	if (_MY_PARAMS_INCLUDES)
+		foreach(_INCLUDE_P IN LISTS _MY_PARAMS_INCLUDES)
+			string(APPEND _FLAGS " -I ${_INCLUDE_P}")
+		endforeach()
+	endif()
+
 	#Note: the space before the option is important!
-	set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --scatter=${FILE_PATH}")
-	set_property(TARGET ${TARGET} APPEND PROPERTY LINK_DEPENDS ${FILE_PATH})
+	set_property(TARGET ${_MY_PARAMS_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${_FLAGS} --scatter=${_FILE_PATH}")
+	set_property(TARGET ${_MY_PARAMS_TARGET} APPEND PROPERTY LINK_DEPENDS ${_FILE_PATH})
 	#Tell cmake .map files shall be removed when project is cleaned (make clean)
-	get_filename_component(_TARGET_BASE_NAME ${TARGET} NAME_WE)
+	get_filename_component(_TARGET_BASE_NAME ${_MY_PARAMS_TARGET} NAME_WE)
 	get_directory_property(_ADDITIONAL_MAKE_CLEAN_FILES DIRECTORY "./" ADDITIONAL_MAKE_CLEAN_FILES)
 	set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_ADDITIONAL_MAKE_CLEAN_FILES} ${_TARGET_BASE_NAME}.map")
 endfunction()

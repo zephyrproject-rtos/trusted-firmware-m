@@ -31,18 +31,45 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
+if(NOT DEFINED COMPILER)
+	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
+elseif(${COMPILER} STREQUAL "ARMCLANG")
+	#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
+	#must be present with a matching version.
+	include("Common/FindArmClang")
+	include("Common/${ARMCLANG_MODULE}")
 
-#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
-#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
-#must be present with a matching version.
-include("Common/FindArmClang")
-include("Common/${ARMCLANG_MODULE}")
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -mcmse)
+	##Shared compiler and linker settings.
+	function(config_setting_shared_flags tgt)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS --strict --map --symbols --xref --entry=Reset_Handler --info=summarysizes,sizes,totals,unused,veneers)
+	endfunction()
+elseif(${COMPILER} STREQUAL "GNUARM")
+	#Use any GNUARM version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerGNUARMXY.cmake
+	#must be present with a matching version.
+	include("Common/FindGNUARM")
+	include("Common/${GNUARM_MODULE}")
 
-##Shared compiler and linker settings.
-function(config_setting_shared_flags tgt)
-	embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse -Wall -Werror)
-	embedded_set_target_link_flags(TARGET ${tgt} FLAGS --strict --map --symbols --xref --entry=Reset_Handler --info=summarysizes,sizes,totals,unused,veneers)
-endfunction()
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -mcmse)
+	##Shared compiler and linker settings.
+	function(config_setting_shared_flags tgt)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
+		#--no-wchar-size-warning flag is added because TF-M sources are compiled
+		#with short wchars, however the standard library is compiled with normal
+		#wchar, and this generates linker time warnings. TF-M code does not use
+		#wchar, so the warning can be suppressed.
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning)
+	endfunction()
+else()
+	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
+endif()
+
+#Create a string from the compile flags list, so that it can be used later
+#in this file to set mbedtls and BL2 flags
+string(REPLACE ";" " " COMMON_COMPILE_FLAGS_STR "${COMMON_COMPILE_FLAGS}")
 
 #Settings which shall be set for all projects the same way based
 # on the variables above.
@@ -128,7 +155,7 @@ config_setting_shared_flags(tfm_ns)
 
 ##TF-M storage
 config_setting_shared_flags(tfm_storage)
-set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse  -DMBEDTLS_CONFIG_FILE=\\\\\\\"mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+set(MBEDTLS_C_FLAGS "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 set (SST_ENCRYPTION ON)
 set (SST_RAM_FS ON)
@@ -142,4 +169,4 @@ config_setting_shared_flags(tfm_non_secure_tests)
 
 ##BL2
 config_setting_shared_flags(mcuboot)
-set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ -fshort-enums -mfpu=none -fshort-wchar -funsigned-char -mcmse  -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
+set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -47,9 +47,9 @@ macro(embedded_project_start)
 	endif()
 
 	set( _OPTIONS_ARGS )					#No option (on/off) arguments
-    set( _ONE_VALUE_ARGS CONFIG)	#Single option arguments (e.g. PROJ_NAME "bubu_project")
-    set( _MULTI_VALUE_ARGS )		#One list argument (e.g. LANGUAGES C ASM CXX)
-    cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+	set( _ONE_VALUE_ARGS CONFIG)	#Single option arguments (e.g. PROJ_NAME "bubu_project")
+	set( _MULTI_VALUE_ARGS )		#One list argument (e.g. LANGUAGES C ASM CXX)
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
 
 	#Cehck passed parameters
 	if(NOT _MY_PARAMS_CONFIG)
@@ -583,15 +583,15 @@ endfunction()
 # See: _embedded_apply_linker_cmd_file_setting()
 #
 #Examples:
-#  embedded_set_target_linker_file(my_app "foo/my_linker_cmd.sct")
+#  embedded_set_target_linker_file(TARGET my_app PATH "foo/my_linker_cmd.sct")
 #
 #INPUTS:
-#   TARGET  - (mandatory) - The target to apply settings to.
-#	PATH - (mandatory)	  - Path to linker script.
+#  TARGET  - (mandatory) - The target to apply settings to.
+#  PATH - (mandatory)    - Path to linker script.
 #
 #OUTPUTS
-#	Directory property EMBEDDED_LINKER_CMD_FILE_TTT is set, where TTT is the
-#	target name.
+#  Directory property EMBEDDED_LINKER_CMD_FILE_TTT is set, where TTT is the
+#  target name.
 #
 function(embedded_set_target_linker_file)
 	set( _OPTIONS_ARGS )				#Option (on/off) arguments (e.g. IGNORE_CASE)
@@ -610,29 +610,103 @@ function(embedded_set_target_linker_file)
 	set_property(GLOBAL PROPERTY EMBEDDED_LINKER_CMD_FILE_${_MY_PARAMS_TARGET} ${_MY_PARAMS_PATH})
 endfunction()
 
+#Set pre-processor defines for the linker command file.
+#
+# Store preprocessor defines for the linker command file of the specified target
+# in a global property.
+#
+# See: _embedded_apply_linker_cmd_file_setting()
+#
+#Examples:
+#  embedded_set_target_link_defines(my_app "BL2=1" "USE_TLS=1")
+#
+#INPUTS:
+#   TARGET  - (mandatory) - The target to apply settings to.
+#   DEFINES - (mandatory) - List of macro value definitions.
+#
+#OUTPUTS
+#   Directory property EMBEDDED_LINKER_DEFINES_TTT is set, where TTT is the
+#   target name.
+#
+function(embedded_set_target_link_defines)
+	set( _OPTIONS_ARGS )				#Option (on/off) arguments (e.g. IGNORE_CASE)
+	set( _ONE_VALUE_ARGS  TARGET DEFINES)	#Single option arguments (e.g. PATH "./foo/bar")
+	set( _MULTI_VALUE_ARGS )			#List arguments (e.g. LANGUAGES C ASM CXX)
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+
+	if (NOT DEFINED _MY_PARAMS_TARGET)
+		message(FATAL_ERROR "embedded_set_target_link_defines(): mandatory parameter 'TARGET' missing.")
+	endif()
+
+	if (NOT DEFINED _MY_PARAMS_DEFINES)
+		message(FATAL_ERROR "embedded_set_target_link_defines(): mandatory parameter 'DEFINES' missing.")
+	endif()
+
+	set_property(GLOBAL APPEND PROPERTY EMBEDDED_LINKER_DEFINES_${_MY_PARAMS_TARGET} ${_MY_PARAMS_DEFINES})
+endfunction()
+
+
+#Set pre-processor include paths for the linker command file.
+#
+# Store preprocessor include paths for the linker command file of the specified
+# target in a global property.
+#
+# See: _embedded_apply_linker_cmd_file_setting()
+#
+#Examples:
+#  embedded_set_target_link_includes(my_app "c:/foo" "../bar")
+#
+#INPUTS:
+#   TARGET  - (mandatory)  - The target to apply settings to.
+#   INCLUDES - (mandatory) - List of include paths.
+#
+#OUTPUTS
+#   Directory property EMBEDDED_LINKER_INCLUDES_TTT is set, where TTT is the
+#   target name.
+#
+function(embedded_set_target_link_includes)
+	set( _OPTIONS_ARGS )				#Option (on/off) arguments (e.g. IGNORE_CASE)
+	set( _ONE_VALUE_ARGS  TARGET INCLUDES)	#Single option arguments (e.g. PATH "./foo/bar")
+	set( _MULTI_VALUE_ARGS )			#List arguments (e.g. LANGUAGES C ASM CXX)
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+
+	if (NOT DEFINED _MY_PARAMS_TARGET)
+		message(FATAL_ERROR "embedded_set_target_link_includes(): mandatory parameter 'TARGET' missing.")
+	endif()
+
+	if (NOT DEFINED _MY_PARAMS_DEFINES)
+		message(FATAL_ERROR "embedded_set_target_link_includes(): mandatory parameter 'DEFINES' missing.")
+	endif()
+
+	set_property(GLOBAL APPEND PROPERTY EMBEDDED_LINKER_INCLUDES_${_MY_PARAMS_TARGET} ${_MY_PARAMS_DEFINES})
+endfunction()
+
+
 #Apply linker linker command file setting for the specified target.
 #
-# Path to linker command file stored in a global property is applied.
+# Path to linker command file, macro definitions and include paths stored in
+# global properties are applied.
 #
 # Note:
-#	- Directory property name must follow a specific scheme.
-#	- This is an internal function.
+#  - Directory property names must follow a specific scheme.
+#  - This is an internal function.
 #
-# See: embedded_set_target_linker_file()
+# See: embedded_set_target_linker_file(), embedded_set_target_link_includes()
+#      embedded_set_target_link_defines()
 #
 #Examples:
 #  _embedded_apply_linker_cmd_file_setting(my_app)
 #
 #INPUTS:
-#   TARGET  - (mandatory) 			- The target to apply settings to.
-#	Directory property - (optional) - Flags to apply.
+#   TARGET  - (mandatory) - The target to apply settings to.
+#   Directory properties
 #
 #OUTPUTS
 #    n/a
 #
 function(_embedded_apply_linker_cmd_file_setting TARGET)
 	#Check if the parameter is a target.
-  	if(NOT TARGET ${TARGET})
+	if(NOT TARGET ${TARGET})
 		message(FATAL_ERROR "_embedded_apply_linker_cmd_file_setting(): target '${TARGET}' is not defined.")
 	endif()
 	#Check if target is an executable.
@@ -648,6 +722,9 @@ function(_embedded_apply_linker_cmd_file_setting TARGET)
 	endif()
 	#Get the path to the linker command file.
 	get_property(_LINKER_CMD_FILE GLOBAL PROPERTY EMBEDDED_LINKER_CMD_FILE_${TARGET})
-	#Set the path
-	compiler_set_linkercmdfile(${TARGET} ${_LINKER_CMD_FILE})
+
+	#Get macro defines and include paths set for the target.
+	get_property(_LINKER_DEFINES GLOBAL PROPERTY EMBEDDED_LINKER_DEFINES_${TARGET})
+	get_property(_LINKER_INCLUDES GLOBAL PROPERTY EMBEDDED_LINKER_INCLUDES_${TARGET})
+	compiler_set_linkercmdfile(TARGET ${TARGET} PATH ${_LINKER_CMD_FILE} DEFINES ${_LINKER_DEFINES} INCLUDES ${_LINKER_INCLUDES})
 endfunction()

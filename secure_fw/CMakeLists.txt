@@ -76,36 +76,42 @@ embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE C DEFINES __
 if (REGRESSION OR CORE_TEST)
 	#The test service veneers may not be referenced in the secure binary so the
 	#veneer objects are explicitly loaded from the secure tests library.
-	target_link_libraries(${PROJECT_NAME} tfm_storage $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+	if(${COMPILER} STREQUAL "ARMCLANG")
+		target_link_libraries(${PROJECT_NAME} tfm_storage $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+	elseif(${COMPILER} STREQUAL "GNUARM")
+		target_link_libraries(${PROJECT_NAME} -Wl,--whole-archive tfm_secure_tests -Wl,--no-whole-archive tfm_storage)
+	else()
+		message(FATAL_ERROR "unknown compiler" )
+	endif()
 else()
 	target_link_libraries(${PROJECT_NAME} tfm_storage)
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS " --predefine=\"-DTFM_LVL=${TFM_LVL}\"")
+embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
 
 if (NOT DEFINED TFM_PARTITION_TEST_CORE)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
 elseif (TFM_PARTITION_TEST_CORE)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_CORE\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_TEST_SST)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
 elseif (TFM_PARTITION_TEST_SST)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_SST\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SST")
 endif()
 
 if (NOT DEFINED BL2)
 	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 elseif (BL2)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DBL2\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
 endif()
 
 if(CORE_TEST)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE C DEFINES TFM_CORE_DEBUG TFM_PARTITION_TEST_CORE APPEND)
 	set(SECURE_AXF_DIR_PREFIX "${CMAKE_BINARY_DIR}/unit_test/")
 	set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${SECURE_AXF_DIR_PREFIX})
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_CORE\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 endif()
 
 #Generate binary file from axf

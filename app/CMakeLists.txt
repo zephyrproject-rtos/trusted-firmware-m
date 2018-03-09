@@ -136,20 +136,20 @@ endif()
 if (NOT DEFINED TFM_PARTITION_TEST_CORE)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
 elseif (TFM_PARTITION_TEST_CORE)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_CORE\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_TEST_SST)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
 elseif (TFM_PARTITION_TEST_SST)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DTFM_PARTITION_TEST_SST\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SST")
 endif()
 
 #Set BL2 specific settings.
 if (NOT DEFINED BL2)
 	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 elseif (BL2)
-	set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " --predefine=\"-DBL2\"")
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
 endif()
 
 
