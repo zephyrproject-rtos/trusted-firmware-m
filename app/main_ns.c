@@ -93,7 +93,9 @@ static osThreadId_t thread_id;
 /**
  * \brief main() function
  */
+#ifndef __GNUC__
 __attribute__((noreturn))
+#endif
 int main(void)
 {
     (void)Driver_USART0.Initialize(NULL); /* Use UART0 as stdout */

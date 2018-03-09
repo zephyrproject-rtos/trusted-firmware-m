@@ -59,7 +59,7 @@ void jump_to_ns_code()
 
     /* Clears LSB of the function address to indicate the function-call
        will perform the switch from secure to non-secure */
-    nsfptr_t ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
+    nsfptr_t ns_entry = (nsfptr_t) (entry_ptr&(~0x1));
 
     /* All changes made to memory will be effective after this point */
     __DSB();

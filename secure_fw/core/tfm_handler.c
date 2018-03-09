@@ -68,9 +68,9 @@ void SecureFault_Handler(void)
         }
     } else {
         if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp = __arm_rsr("PSP_NS");
+            sp =  __TZ_get_PSP_NS();
         } else {
-            sp = __arm_rsr("MSP_NS");
+            sp = __TZ_get_MSP_NS();
         }
     }
 

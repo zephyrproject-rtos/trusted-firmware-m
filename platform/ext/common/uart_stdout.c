@@ -44,6 +44,15 @@ __attribute__ ((weak)) int fputc(int ch, FILE *f) {
     return ch;
 }
 
+int _write(int fd, char * str, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        uart_putc(str[i]);
+    }
+    return len;
+}
+
 #ifdef TARGET_MUSCA_A
 extern struct uart_pl011_dev_t UART0_DEV_S, UART0_DEV_NS;
 extern struct uart_pl011_dev_t UART1_DEV_S, UART1_DEV_NS;
