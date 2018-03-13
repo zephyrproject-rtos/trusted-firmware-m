@@ -25,6 +25,11 @@
         "name": "Secure Function list",
         "short_name": "tfm_sfid_list",
         "output": "secure_fw/services/tfm_sfid_list.inc"
+    },
+    {
+        "name": "AN521 secure ld file",
+        "short_name": "mps2_an521_s_ld",
+        "output": "platform/ext/target/mps2/an521/gcc/mps2_an521_s.ld"
     }
   ]
 }
