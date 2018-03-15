@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apace License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef TARGET_MUSCA_A
+#include "uart_pl011_drv.h"
+#else
 #include "arm_uart_drv.h"
+#endif
 #include "Driver_USART.h"
 
 #define ASSERT_HIGH(X)  assert(X == ARM_DRIVER_OK)
@@ -40,8 +44,13 @@ __attribute__ ((weak)) int fputc(int ch, FILE *f) {
     return ch;
 }
 
+#ifdef TARGET_MUSCA_A
+extern struct uart_pl011_dev_t UART0_DEV_S, UART0_DEV_NS;
+extern struct uart_pl011_dev_t UART1_DEV_S, UART1_DEV_NS;
+#else
 extern struct arm_uart_dev_t ARM_UART0_DEV_S, ARM_UART0_DEV_NS;
 extern struct arm_uart_dev_t ARM_UART1_DEV_S, ARM_UART1_DEV_NS;
+#endif
 
 /* Generic driver to be configured and used */
 ARM_DRIVER_USART *Driver_USART = NULL;
@@ -58,7 +67,11 @@ void uart_init(enum uart_channel uchan)
          * to use UART1 only from S side as it's a secure peripheral, but for
          * simplicity, leave the option to use UART0 and use a workaround
          */
+#ifdef TARGET_MUSCA_A
+        memcpy(&UART0_DEV_S, &UART0_DEV_NS, sizeof(struct uart_pl011_dev_t));
+#else
         memcpy(&ARM_UART0_DEV_S, &ARM_UART0_DEV_NS, sizeof(struct arm_uart_dev_t));
+#endif
         Driver_USART = &Driver_USART0;
         break;
     case UART1_CHANNEL:

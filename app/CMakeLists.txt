@@ -93,7 +93,7 @@ if (BL2)
 	find_package(PythonInterp 3)
 
 	if (NOT PYTHONINTERP_FOUND)
-		message(FATAL_ERROR "Failed to find Python3.x interpreter. Pyhton3 must be installed an available on the PATH.")
+		message(FATAL_ERROR "Failed to find Python3.x interpreter. Python3 must be installed and available on the PATH.")
 	endif()
 
 	set(MCUBOOT_DIR ${TFM_ROOT_DIR}/bl2/ext/mcuboot)
@@ -119,7 +119,7 @@ endif()
 							 --align 1
 							 -v 1.0
 							 -H 0x400
-							 --pad 0x100000
+							 --pad ${SIGN_BIN_SIZE}
 							 ${CMAKE_BINARY_DIR}/tfm_full.bin
 							 ${CMAKE_BINARY_DIR}/tfm_sign.bin
 				)

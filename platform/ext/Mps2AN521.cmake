@@ -17,6 +17,7 @@ set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an52
 set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_s.sct")
 set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_ns.sct")
 set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/mps2/an521/partition/flash_layout.h")
+set (SIGN_BIN_SIZE         0x100000)
 if (DEFINED CMSIS_5_DIR)
   # not all project defines CMSIS_5_DIR, only the ones that use it.
   set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")

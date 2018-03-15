@@ -5,22 +5,22 @@
 #
 #-------------------------------------------------------------------------------
 
-#This file gathers all MPS2/AN519 specific files in the application.
+#This file gathers all musca specific files in the application.
 
-#MPS2/AN519 has a Cortex M23 CPU.
-include("Common/CpuM23")
+#MUSCA-A has a Cortex M33 CPU.
+include("Common/CpuM33")
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 #Specify the location of platform specific build dependencies.
-set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_bl2.sct")
-set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_s.sct")
-set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_ns.sct")
-set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/mps2/an519/partition/flash_layout.h")
-set (SIGN_BIN_SIZE         0x100000)
+set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/musca_bl2.sct")
+set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/musca_s.sct")
+set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/musca_ns.sct")
+set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/musca_a/partition/flash_layout.h")
+set (SIGN_BIN_SIZE         0x30000)
 if (DEFINED CMSIS_5_DIR)
   # not all project defines CMSIS_5_DIR, only the ones that use it.
-  set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib")
+  set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
 endif()
 
 if (BL2)
@@ -28,24 +28,24 @@ if (BL2)
 endif()
 
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_core" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/retarget" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/native_drivers" ABSOLUTE)
-embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/partition" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Config" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Config" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Include" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Native_Driver" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/partition" ABSOLUTE)
 
 #Gather all source files we need.
 if (NOT DEFINED BUILD_CMSIS_CORE)
   message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif(BUILD_CMSIS_CORE)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/cmsis_core/system_cmsdk_mps2_an519.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Device/Source/system_cmsdk_musca.c")
 endif()
 
 if (NOT DEFINED BUILD_RETARGET)
   message(FATAL_ERROR "Configuration variable BUILD_RETARGET (true|false) is undefined!")
 elseif(BUILD_RETARGET)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/retarget/platform_retarget_dev.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Device/Source/platform_retarget_dev.c")
 endif()
 
 if (NOT DEFINED BUILD_UART_STDOUT)
@@ -60,27 +60,27 @@ endif()
 if (NOT DEFINED BUILD_NATIVE_DRIVERS)
   message(FATAL_ERROR "Configuration variable BUILD_NATIVE_DRIVERS (true|false) is undefined!")
 elseif(BUILD_NATIVE_DRIVERS)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/native_drivers/arm_uart_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/uart_pl011_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/arm_scc_drv.c")
 
-  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/native_drivers/mpc_sie200_drv.c"
-              "${PLATFORM_DIR}/target/mps2/an519/native_drivers/ppc_sse200_drv.c"
-              )
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/Native_Driver/mpc_sie200_drv.c"
+              "${PLATFORM_DIR}/target/musca_a/Native_Driver/ppc_sse200_drv.c")
 endif()
 
 if (NOT DEFINED BUILD_TIME)
   message(FATAL_ERROR "Configuration variable BUILD_TIME (true|false) is undefined!")
 elseif(BUILD_TIME)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/native_drivers/timer_cmsdk/timer_cmsdk.c")
-  embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/native_drivers/timer_cmsdk" ABSOLUTE)
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/timer_cmsdk.c")
+  embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Native_Driver" ABSOLUTE)
 endif()
 
 if (NOT DEFINED BUILD_STARTUP)
   message(FATAL_ERROR "Configuration variable BUILD_STARTUP (true|false) is undefined!")
 elseif(BUILD_STARTUP)
   if(CMAKE_C_COMPILER_ID STREQUAL "ARMCLANG")
-    list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/mps2/an519/armclang/startup_cmsdk_mps2_an519_s.s")
-    list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/mps2/an519/armclang/startup_cmsdk_mps2_an519_ns.s")
-    list(APPEND ALL_SRC_ASM_BL2 "${PLATFORM_DIR}/target/mps2/an519/armclang/startup_cmsdk_mps2_an519_bl2.s")
+    list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/startup_cmsdk_musca_s.s")
+    list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/startup_cmsdk_musca_ns.s")
+    list(APPEND ALL_SRC_ASM_BL2 "${PLATFORM_DIR}/target/musca_a/Device/Source/armclang/startup_cmsdk_musca_bl2.s")
   else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
   endif()
@@ -89,22 +89,22 @@ endif()
 if (NOT DEFINED BUILD_TARGET_CFG)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
 elseif(BUILD_TARGET_CFG)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/target_cfg.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/target_cfg.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/dummy_crypto_keys.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/dummy_crypto_keys.c")
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
   message(FATAL_ERROR "Configuration variable BUILD_CMSIS_DRIVERS (true|false) is undefined!")
 elseif(BUILD_CMSIS_DRIVERS)
-  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers/Driver_MPC.c"
-    "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers/Driver_PPC.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers/Driver_USART.c")
-  embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers" ABSOLUTE)
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Driver_MPC.c"
+    "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Driver_PPC.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Driver_USART.c")
+  embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
 

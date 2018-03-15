@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 ARM Limited
+ * Copyright (c) 2016-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #define ARM_MPC_ERR_NOT_ALIGNED   (ARM_DRIVER_ERROR_SPECIFIC - 3)  ///< Address is not aligned on the block size of this MPC */
 #define ARM_MPC_ERR_INVALID_RANGE (ARM_DRIVER_ERROR_SPECIFIC - 4)  ///< The given address range to configure is invalid
 #define ARM_MPC_ERR_RANGE_SEC_ATTR_NON_COMPATIBLE (ARM_DRIVER_ERROR_SPECIFIC - 4)  ///< The given range cannot be accessed with the wanted security attributes */
+#define ARM_MPC_ERR_UNSPECIFIED   (ARM_DRIVER_ERROR_SPECIFIC - 5)  ///< Unspecified error */
 
 /* Security attribute used in various place of the API */
 typedef enum _ARM_MPC_SEC_ATTR {
