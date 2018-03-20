@@ -22,7 +22,7 @@ Both need to be cloned manually in the current release.
 
 ```
 cd <TF-M base folder>
-git clone https://github.com/ARM-software/trusted-firmware-m.git
+git clone https://git.trustedfirmware.org/trusted-firmware-m.git
 git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.5.1
 git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
 cd trusted-firmware-m
@@ -35,6 +35,7 @@ make
 ### Concept of build config files
 The build configuration for TF-M is provided to the build system by two
 different components:
+
 * The way applications are built is specified by providing one of the
 `Config<APP_NAME>.cmake` files to the build system. This can be done by adding
 the `` -DPROJ_CONFIG=<absolute file path> `` i.e. on Linux:
@@ -94,8 +95,8 @@ cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -
 make install
 ```
 
-The [integration guide](user_guides/tfm_integration_guide.md)
-explains further details of creating a new NS app.
+The [integration guide](tfm_integration_guide.md)
+explains further details on how to integrate a new NS app with TF-M.
 
 --------------
 

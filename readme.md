@@ -88,13 +88,13 @@ PSA specifications are currently not available in the public domain.
 The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
 good understanding of the v8-M architecture is also necessary.
 A good place to get started with ARMv8-M is
-[develeper.arm.com](https://developer.arm.com/technologies/trustzone).
+[developer.arm.com](https://developer.arm.com/technologies/trustzone).
 
 
 ### Really getting started
 
 Trusted Firmware M source code is available on
-[github](https://github.com/ARM-software/trusted-firmware-m)
+[trustedfirmware.org](https://git.trustedfirmware.org/trusted-firmware-m.git/)
 
 To build & run TF-M
 - Follow the
@@ -132,4 +132,4 @@ For this early access release, feedback is requested via email to
 
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*

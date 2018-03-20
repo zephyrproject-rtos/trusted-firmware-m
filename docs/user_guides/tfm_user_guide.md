@@ -54,6 +54,7 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 ```
 #### Running example application and regression test with BL2 bootloader
 To test TF-M with bootloader, one must apply the following changes:
+
 * Add `mcuboot.axf` to symbol files in DS-5 in Debug Configuration menu.
 * Change the value of `cpu0.INITVTOR_S` parameter and the last two lines of the
 previous command for this:
