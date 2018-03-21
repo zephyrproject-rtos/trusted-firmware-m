@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -1297,7 +1297,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     uint16_t object_index;
     enum tfm_sst_err_t err;
     uint32_t cur_phys_block;
-    const uint8_t *prepared_buf;
+    const uint8_t *prepared_buf = sst_buf_plain_text;
     struct sst_assetmeta object_meta;
     struct sst_block_metadata block_meta;
 
@@ -1316,47 +1316,59 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
 
-#ifdef SST_ENCRYPTION
-    if (offset > 0) {
+    /* offset can not be bigger than the current asset's size to disallows gaps
+     * without content inside the asset.
+     */
+    if (offset > object_meta.cur_size) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+
+    if (object_meta.cur_size > 0) {
+        /* Copy the current asset's data into the sst_buf_plain_text buffer
+         * or sst_buf_encrypted if SST_ENCRYPTION is enabled.
+         */
         err = sst_block_object_read_raw(&object_meta);
         if (err != TFM_SST_ERR_SUCCESS) {
             return err;
         }
 
+#ifdef SST_ENCRYPTION
         err = sst_block_object_decrypt(&object_meta);
         if (err != TFM_SST_ERR_SUCCESS) {
-                return err;
+            return err;
         }
+#endif
     }
 
-    /* Copy new data in the sst_buf_plain_text to be encrypted */
+    /* sst_am_write has checked that offset + size value is not bigger than
+     * the asset's maximum size. So, it is not needed to check it at this
+     * point.
+     */
+    if ((offset + size) > object_meta.cur_size) {
+        /* Update the object metadata */
+        object_meta.cur_size = offset + size;
+    }
+
+    /* Copy new data in the sst_buf_plain_text */
     sst_utils_memcpy(sst_buf_plain_text + offset, data, size);
 
-    /* Update the object metadata */
-    object_meta.cur_size = offset + size;
-
+#ifdef SST_ENCRYPTION
+    /* Encrypt data in sst_buf_plain_text */
     err = sst_block_object_encrypt(&object_meta);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
-    /* Encryption succeeded, change the data buffer
-     * pointer to encrypted buffer. Also, in case
-     * of encryption being enabled, the whole object data need to
-     * reprogrammed, as opposed to incremental update otherwise.
+
+    /* Encryption succeeded, change the data buffer pointer to
+     * encrypted buffer.
      */
     prepared_buf = sst_buf_encrypted;
-    size = object_meta.cur_size;
-    offset = object_meta.data_index;
-#else
-    /* Update the object metadata */
-    object_meta.cur_size = offset + size;
-    offset = object_meta.data_index + offset;
-    prepared_buf = data;
 #endif
 
-    /* Copy the cotents into scratch data buffer */
+    /* Copy the content into scratch data buffer */
     err = sst_dblock_update_scratch(object_meta.lblock, &block_meta,
-                                    prepared_buf, offset, size);
+                                    prepared_buf, object_meta.data_index,
+                                    object_meta.cur_size);
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
