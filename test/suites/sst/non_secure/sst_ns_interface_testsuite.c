@@ -66,6 +66,7 @@ static void tfm_sst_test_1015(struct test_result_t *ret);
 static void tfm_sst_test_1016(struct test_result_t *ret);
 static void tfm_sst_test_1017(struct test_result_t *ret);
 static void tfm_sst_test_1018(struct test_result_t *ret);
+static void tfm_sst_test_1019(struct test_result_t *ret);
 
 static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -104,6 +105,8 @@ static struct test_t asset_veeners_tests[] = {
      "Write data to two assets alternately", {0} },
     {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
      "Write and read data from illegal locations", {0} },
+    {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
+     "Write data to the middle of an existing asset", {0} },
 };
 
 void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
@@ -1683,6 +1686,129 @@ static void tfm_sst_test_1018_task(void *arg)
     os_wrapper_semaphore_release(tfm_sst_test_sema);
 }
 
+/**
+ * \brief Tests write data to the middle of an existing asset
+ */
+static void tfm_sst_test_1019_task(void *arg)
+{
+    struct tfm_sst_attribs_t asset_attrs;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_buf_t io_data;
+    uint32_t hdl;
+    struct test_result_t *ret = &transient_result;
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t wrt_data_1[WRITE_BUF_SIZE] = "AAAA";
+    uint8_t wrt_data_2[2] = "B";
+
+    /* Creates asset */
+    err = tfm_sst_create(asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for Thread_C");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Gets asset's handle */
+    err = tfm_sst_get_handle(asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should return a valid asset handle");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Sets data structure */
+    io_data.data = wrt_data_1;
+    io_data.size = (WRITE_BUF_SIZE - 1);
+    io_data.offset = 0;
+
+    /* Write data in the asset */
+    err = tfm_sst_write(hdl, &io_data);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("First write should not fail");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Thread_C should read the attributes of this asset");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Checks attributes */
+    if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
+        TEST_FAIL("Current size should be equal to write size");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Sets data structure */
+    io_data.data = wrt_data_2;
+    io_data.size = 1;
+    io_data.offset = 1;
+
+    /* Write data in the asset */
+    err = tfm_sst_write(hdl, &io_data);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Second write should not fail");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Thread_C should read the attributes of this asset");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Checks that the asset's current size has not changed */
+    if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
+        TEST_FAIL("Current size should not have changed");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    io_data.data = (read_data + 3);
+    io_data.size = (WRITE_BUF_SIZE - 1);
+    io_data.offset = 0;
+
+    /* Calls read with a non-existing address location */
+    err = tfm_sst_read(hdl, &io_data);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Read should not fail");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Checks that the asset contains write_data_1 with the second character
+     * overwritten with write_data_2.
+     */
+    if (memcmp(read_data, "XXXABAAXXXX", READ_BUF_SIZE) != 0) {
+        TEST_FAIL("Read buffer is incorrect");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    /* Checks that offset can not be bigger than current asset's size */
+    io_data.data = wrt_data_2;
+    io_data.size = 1;
+    io_data.offset = (asset_attrs.size_current + 1);
+
+    err = tfm_sst_write(hdl, &io_data);
+    if (err != TFM_SST_ERR_PARAM_ERROR) {
+        TEST_FAIL("Write must fail if the offset is bigger than the current"
+                  " asset's size");
+        os_wrapper_semaphore_release(tfm_sst_test_sema);
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+    os_wrapper_semaphore_release(tfm_sst_test_sema);
+}
+
 static void tfm_sst_test_1001(struct test_result_t *ret)
 {
     tfm_sst_run_test("Thread_C", ret,
@@ -1856,4 +1982,10 @@ static void tfm_sst_test_1018(struct test_result_t *ret)
 {
     tfm_sst_run_test("Thread_B", ret,
                      tfm_sst_test_1018_task);
+}
+
+static void tfm_sst_test_1019(struct test_result_t *ret)
+{
+    tfm_sst_run_test("Thread_C", ret,
+                     tfm_sst_test_1019_task);
 }

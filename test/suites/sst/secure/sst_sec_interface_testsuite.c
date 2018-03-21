@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,6 +48,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret);
 static void tfm_sst_test_2011(struct test_result_t *ret);
 static void tfm_sst_test_2012(struct test_result_t *ret);
 static void tfm_sst_test_2013(struct test_result_t *ret);
+static void tfm_sst_test_2014(struct test_result_t *ret);
 
 static struct test_t write_tests[] = {
     {&tfm_sst_test_2001, "TFM_SST_TEST_2001",
@@ -76,6 +77,8 @@ static struct test_t write_tests[] = {
      "Write data to two assets alternately", {0} },
     {&tfm_sst_test_2013, "TFM_SST_TEST_2013",
      "Write and read data from illegal locations", {0} },
+    {&tfm_sst_test_2014, "TFM_SST_TEST_2014",
+     "Write data to the middle of an existing asset", {0} },
 };
 
 void register_testsuite_s_sst_sec_interface(struct test_suite_t *p_test_suite)
@@ -1304,6 +1307,119 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Writes data to the middle of an existing asset.
+ */
+static void tfm_sst_test_2014(struct test_result_t *ret)
+{
+    const uint32_t app_id = S_APP_ID;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_buf_t buf;
+    enum tfm_sst_err_t err;
+    uint32_t hdl;
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t write_data_1[WRITE_BUF_SIZE] = "AAAA";
+    uint8_t write_data_2[2] = "B";
+
+    if (prepare_test_ctx(ret) != 0) {
+        TEST_FAIL("Prepare test context should not fail");
+        return;
+    }
+
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail");
+        return;
+    }
+
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should not fail");
+        return;
+    }
+
+    buf.data = write_data_1;
+    buf.size = (WRITE_BUF_SIZE - 1);
+    buf.offset = 0;
+
+    /* Writes write_data_1 to the asset */
+    err = tfm_sst_veneer_write(app_id, hdl, &buf);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("First write should not fail");
+        return;
+    }
+
+    err = tfm_sst_veneer_get_attributes(app_id, hdl, &attribs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get attributes should not fail");
+        return;
+    }
+
+    /* Checks that the asset's current size is equal to the size of the write
+     * data.
+     */
+    if (attribs.size_current != WRITE_BUF_SIZE - 1) {
+        TEST_FAIL("Current size should be equal to write size");
+        return;
+    }
+
+    buf.data = write_data_2;
+    buf.size = 1;
+    buf.offset = 1;
+
+    /* Overwrites the second character in the asset with write_data_2 */
+    err = tfm_sst_veneer_write(app_id, hdl, &buf);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Second write should not fail");
+        return;
+    }
+
+    err = tfm_sst_veneer_get_attributes(app_id, hdl, &attribs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get attributes should not fail");
+        return;
+    }
+
+    /* Checks that the asset's current size has not changed */
+    if (attribs.size_current != (WRITE_BUF_SIZE - 1)) {
+        TEST_FAIL("Current size should not have changed");
+        return;
+    }
+
+    buf.data = (read_data + 3);
+    buf.size = (WRITE_BUF_SIZE - 1);
+    buf.offset = 0;
+
+    err = tfm_sst_veneer_read(app_id, hdl, &buf);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Read should not fail");
+        return;
+    }
+
+    /* Checks that the asset contains write_data_1 with the second character
+     * overwritten with write_data_2.
+     */
+    if (memcmp(read_data, "XXXABAAXXXX", READ_BUF_SIZE) != 0) {
+        TEST_FAIL("Read buffer is incorrect");
+        return;
+    }
+
+    /* Checks that offset can not be bigger than current asset's size */
+    buf.data = write_data_2;
+    buf.size = 1;
+    buf.offset = (attribs.size_current + 1);
+
+    err = tfm_sst_veneer_write(app_id, hdl, &buf);
+    if (err != TFM_SST_ERR_PARAM_ERROR) {
+        TEST_FAIL("Write must fail if the offset is bigger than the current"
+                  " asset's size");
         return;
     }
 
