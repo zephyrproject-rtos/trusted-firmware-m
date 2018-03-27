@@ -12,6 +12,57 @@
 #include "tfm_secure_api.h"
 
 /*!
+ * \def LOG_UART_REDIRECTION
+ *
+ * \brief If set to 1 by the build system,
+ *        UART redirection is enabled and built.
+ *        Keep it disabled by default.
+ */
+#ifndef LOG_UART_REDIRECTION
+#define LOG_UART_REDIRECTION (0U)
+#endif
+
+#if (LOG_UART_REDIRECTION == 1U)
+/* CMSIS Driver for UART */
+#include "Driver_USART.h"
+
+#ifndef LOG_UART_NAME
+/* Default secure UART name */
+#define LOG_UART_NAME Driver_USART1
+#endif
+extern ARM_DRIVER_USART LOG_UART_NAME;
+
+/*!
+ * \def LOG_UART_BAUD_RATE
+ *
+ * \brief The baud rate used when redirecting
+ *        the log entry on the secure UART.
+ *        Default value is 115200.
+ */
+#ifndef LOG_UART_BAUD_RATE
+#define LOG_UART_BAUD_RATE (115200)
+#endif
+
+/*!
+ * \var log_uart_init_success
+ *
+ * \brief This variable is 0 in case UART
+ *        init has failed during service
+ *        initialization, 1 otherwise
+ */
+static uint8_t log_uart_init_success = 0U;
+
+/*!
+ * \var hex_values
+ *
+ * \brief Array variable used to translate binary
+ *        to ASCII character representation for
+ *        UART redirection
+ */
+static const char hex_values[] = "0123456789ABCDEF";
+#endif
+
+/*!
  * \def LOG_FIXED_FIELD_SIZE
  *
  * \brief Size of the mandatory
@@ -304,6 +355,37 @@ static enum tfm_log_err log_memcpy(uint8_t *dest, uint8_t *src, uint32_t size)
 }
 
 /*!
+ * \brief Static function to stream an entry of the log
+ *        to a (secure) UART
+ *
+ * \details The entry of the log is streamed as a stream
+ *          of hex values, not parsed nor interpreted.
+ *
+ * \param[in] start_idx Byte index in the log from where
+ *                      to start streaming to UART
+ *
+ */
+static void log_uart_redirection(uint32_t start_idx)
+{
+#if (LOG_UART_REDIRECTION == 1U)
+    uint32_t size = *GET_SIZE_FIELD_POINTER(start_idx);
+    char end_of_line[] = {'\r', '\n'};
+    uint32_t idx = 0;
+    unsigned char read_byte;
+
+    if (log_uart_init_success == 1U) {
+        for (idx=0; idx<COMPUTE_LOG_ENTRY_SIZE(size); idx++) {
+            read_byte = log_buffer[(start_idx+idx) % LOG_SIZE];
+            (void)LOG_UART_NAME.Send(&hex_values[(read_byte >> 4) & 0xF],1);
+            (void)LOG_UART_NAME.Send(&hex_values[read_byte & 0xF], 1);
+            (void)LOG_UART_NAME.Send(" ", 1);
+        }
+        (void)LOG_UART_NAME.Send(&end_of_line, 2);
+    }
+#endif
+}
+
+/*!
  * \defgroup public Public functions
  *
  */
@@ -311,6 +393,24 @@ static enum tfm_log_err log_memcpy(uint8_t *dest, uint8_t *src, uint32_t size)
 /*!@{*/
 enum tfm_log_err log_core_init(void)
 {
+#if (LOG_UART_REDIRECTION == 1U)
+    int32_t ret = ARM_DRIVER_OK;
+
+    ret = LOG_UART_NAME.Initialize(NULL);
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_LOG_ERR_FAILURE;
+    }
+
+    ret = LOG_UART_NAME.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                                LOG_UART_BAUD_RATE);
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_LOG_ERR_FAILURE;
+    }
+
+    /* If we get to this point, UART init is successful */
+    log_uart_init_success = 1U;
+#endif
+
     /* Clear the log state variables */
     log_update_state(0,0,0,0);
 
@@ -459,6 +559,9 @@ enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
     /* TODO: At this point, we would need to update the stored copy in
      *       persistent storage. Need to define a strategy for this
      */
+
+    /* Stream to a secure UART if available for the platform and built */
+    log_uart_redirection(last_el_idx);
 
     return TFM_LOG_ERR_SUCCESS;
 }
