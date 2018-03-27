@@ -104,6 +104,8 @@ elseif(BUILD_STARTUP)
     list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/mps2/an521/gcc/startup_cmsdk_mps2_an521_s.S")
     list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/mps2/an521/gcc/startup_cmsdk_mps2_an521_ns.S")
     list(APPEND ALL_SRC_ASM_BL2 "${PLATFORM_DIR}/target/mps2/an521/gcc/startup_cmsdk_mps2_an521_bl2.S")
+    set_property(SOURCE "${ALL_SRC_ASM_S}" "${ALL_SRC_ASM_NS}" "${ALL_SRC_ASM_BL2}" APPEND
+      PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
   else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
   endif()
