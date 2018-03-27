@@ -152,11 +152,11 @@ Note: SST reliability tests take approximately three minutes to run on the MPS2.
 
 #### Example application
 
-1. Create a unified hex file comprising of both mcuboot and tfm_sign binary  
-   * Windows  
- `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`  
-   * Linux  
- `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`  
+1. Create a unified hex file comprising of both mcuboot and tfm_sign binary
+   * Windows
+ `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`
+   * Linux
+ `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`
 2. Plug in the Musca-A1 board in your computer. The board should appear as USB drive
 3. Drag and drop `tfm.hex` to the USB drive
 4. Reset the board to execute the TF-M example application

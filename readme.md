@@ -47,11 +47,10 @@ This release includes
 limited testing`.
 * BL2 bootloader for image authentication based on SHA256 and RSA-2048 digital
   signature.
-* Build system based on cmake and armclang.
+* Build system based on cmake, supporting armclang and GNU Arm.
 
 ### In progress
 
-* GCC support
 * Ongoing and incremental support for PSA features.
 	* Level 3 PSA isolation
 	* PSA Crypto API support

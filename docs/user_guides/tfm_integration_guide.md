@@ -18,9 +18,9 @@ The files related to the supported platforms are contained under the `platform`
 subfolder. The platform specific files are under `platform/ext/target`, which is
 organized by boards (e.g. `platform/ext/target/mps2`), while the folder
 `platform/ext/common` is used to store source and header files which are
-platform generic.  
+platform generic.
 More information about subsystems supported by the MPS2+ board can be found in:
-[MPS2+ homepage](https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2)  
+[MPS2+ homepage](https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2)
 More information about Musca-A1 test chip board can be found in:
 [Musca-A1 homepage](https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a1-test-chip-board)
 
