@@ -10,6 +10,7 @@
 #include "tfm_ss_core_test.h"
 #include "secure_fw/spm/spm_api.h"
 
+__tfm_secure_gateway_attributes__
 int32_t tfm_core_test_sfn_init_success(void)
 {
     TFM_CORE_SFN_REQUEST(TFM_SP_CORE_TEST_ID,
@@ -17,6 +18,7 @@ int32_t tfm_core_test_sfn_init_success(void)
                              0, 0, 0, 0);
 }
 
+__tfm_secure_gateway_attributes__
 int32_t tfm_core_test_sfn_direct_recursion(int32_t depth)
 {
     TFM_CORE_SFN_REQUEST(TFM_SP_CORE_TEST_ID,
@@ -24,6 +26,7 @@ int32_t tfm_core_test_sfn_direct_recursion(int32_t depth)
                              depth, 0, 0, 0);
 }
 
+__tfm_secure_gateway_attributes__
 int32_t tfm_core_test_sfn(int32_t a, int32_t b, int32_t c, int32_t d)
 {
     TFM_CORE_SFN_REQUEST(TFM_SP_CORE_TEST_ID, spm_core_test_sfn,

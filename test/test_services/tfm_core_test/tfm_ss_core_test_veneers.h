@@ -21,8 +21,7 @@ extern "C" {
  * \return Returns \ref CORE_TEST_ERRNO_SUCCESS on success, and
  *                 \ref CORE_TEST_ERRNO_SP_NOT_INITED on failure.
  */
-int32_t tfm_core_test_sfn_init_success(void)
-__attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
+int32_t tfm_core_test_sfn_init_success(void);
 
 /**
  * \brief Tests what happens when a service calls itself directly.
@@ -31,8 +30,7 @@ __attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
  *
  * \return Returns \ref CORE_TEST_ERRNO_SUCCESS on succes, error othervise.
  */
-int32_t tfm_core_test_sfn_direct_recursion(int32_t depth)
-__attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
+int32_t tfm_core_test_sfn_direct_recursion(int32_t depth);
 
 /**
  * \brief Entry point for multiple test cases to be executed on the secure side.
@@ -44,8 +42,7 @@ __attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
  *
  * \return Can return various error codes.
  */
-int32_t tfm_core_test_sfn(int32_t a, int32_t b, int32_t c, int32_t d)
-__attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
+int32_t tfm_core_test_sfn(int32_t a, int32_t b, int32_t c, int32_t d);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,9 +13,6 @@ extern "C" {
 #endif
 
 #include "tfm_sst_defs.h"
-
-#define __cmse_secure_gateway \
-        __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
 
 /**
  * \brief Gets handler for the given asset uuid. If an asset is deleted, the
@@ -32,9 +29,7 @@ extern "C" {
  */
 enum tfm_sst_err_t tfm_sst_veneer_get_handle(uint32_t app_id,
                                              uint16_t asset_uuid,
-                                             uint32_t *hdl)
-__cmse_secure_gateway;
-
+                                             uint32_t *hdl);
 /**
  * \brief Allocates space for the asset, referenced by asset handler,
  *        without setting any data in the asset.
@@ -47,8 +42,7 @@ __cmse_secure_gateway;
  *         TFM_SST_ERR_STORAGE_SYSTEM_FULL. If application id doesn't have the
  *         write rights, it returns TFM_SST_ERR_PERMS_NOT_ALLOWED.
  */
-enum tfm_sst_err_t tfm_sst_veneer_create(uint32_t app_id, uint16_t asset_uuid)
-__cmse_secure_gateway;
+enum tfm_sst_err_t tfm_sst_veneer_create(uint32_t app_id, uint16_t asset_uuid);
 
 /**
  * \brief Gets asset's attributes referenced by asset handler.
@@ -60,12 +54,10 @@ __cmse_secure_gateway;
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-extern enum tfm_sst_err_t tfm_sst_veneer_get_attributes(
+enum tfm_sst_err_t tfm_sst_veneer_get_attributes(
                                         uint32_t app_id,
                                         uint32_t asset_handle,
-                                        struct tfm_sst_attribs_t *attrib_struct)
-__cmse_secure_gateway;
-
+                                        struct tfm_sst_attribs_t *attrib_struct);
 /**
  * \brief Reads asset's data from asset referenced by asset handler.
  *
@@ -79,9 +71,7 @@ __cmse_secure_gateway;
  */
 enum tfm_sst_err_t tfm_sst_veneer_read(uint32_t app_id,
                                        uint32_t asset_handle,
-                                       struct tfm_sst_buf_t *data)
-__cmse_secure_gateway;
-
+                                       struct tfm_sst_buf_t *data);
 /**
  * \brief Writes data into an asset referenced by asset handler.
  *
@@ -95,9 +85,7 @@ __cmse_secure_gateway;
  */
 enum tfm_sst_err_t tfm_sst_veneer_write(uint32_t app_id,
                                         uint32_t asset_handle,
-                                        struct tfm_sst_buf_t *data)
-__cmse_secure_gateway;
-
+                                        struct tfm_sst_buf_t *data);
 /**
  * \brief Deletes the asset referenced by the asset handler.
  *
@@ -109,9 +97,7 @@ __cmse_secure_gateway;
  *         no longer exists. Otherwise, TFM_SST_ERR_SUCCESS.
  */
 enum tfm_sst_err_t tfm_sst_veneer_delete(uint32_t app_id,
-                                         uint32_t asset_handle)
-__cmse_secure_gateway;
-
+                                         uint32_t asset_handle);
 #ifdef __cplusplus
 }
 #endif

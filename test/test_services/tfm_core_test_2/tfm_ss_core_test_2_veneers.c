@@ -11,6 +11,7 @@
 #include "secure_fw/spm/spm_api.h"
 
 /* Add functions to the service*/
+__tfm_secure_gateway_attributes__
 int32_t tfm_core_test_2_veneer_slave_service(void)
 {
    TFM_CORE_SFN_REQUEST(TFM_SP_CORE_TEST_2_ID,
@@ -18,6 +19,7 @@ int32_t tfm_core_test_2_veneer_slave_service(void)
                             0, 0, 0, 0);
 }
 
+__tfm_secure_gateway_attributes__
 int32_t tfm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
                                    uint32_t *out_ptr, int32_t len)
 {

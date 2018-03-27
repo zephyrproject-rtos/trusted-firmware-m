@@ -11,6 +11,7 @@
 #include "secure_fw/core/tfm_secure_api.h"
 #include "secure_fw/spm/service_defs.h"
 
+__tfm_secure_gateway_attributes__
 enum tfm_sst_err_t sst_test_service_veneer_setup(void)
 {
     TFM_CORE_SFN_REQUEST(TFM_SP_SST_TEST_PARTITION_ID,
@@ -18,6 +19,7 @@ enum tfm_sst_err_t sst_test_service_veneer_setup(void)
                          0, 0, 0, 0);
 }
 
+__tfm_secure_gateway_attributes__
 enum tfm_sst_err_t sst_test_service_veneer_dummy_encrypt(uint32_t app_id,
                                                          uint16_t key_uuid,
                                                          uint8_t *buf,
@@ -28,6 +30,7 @@ enum tfm_sst_err_t sst_test_service_veneer_dummy_encrypt(uint32_t app_id,
                          app_id, key_uuid, buf, buf_size);
 }
 
+__tfm_secure_gateway_attributes__
 enum tfm_sst_err_t sst_test_service_veneer_dummy_decrypt(uint32_t app_id,
                                                          uint16_t key_uuid,
                                                          uint8_t *buf,
@@ -38,6 +41,7 @@ enum tfm_sst_err_t sst_test_service_veneer_dummy_decrypt(uint32_t app_id,
                          app_id, key_uuid, buf, buf_size);
 }
 
+__tfm_secure_gateway_attributes__
 enum tfm_sst_err_t sst_test_service_veneer_clean(void)
 {
     TFM_CORE_SFN_REQUEST(TFM_SP_SST_TEST_PARTITION_ID,

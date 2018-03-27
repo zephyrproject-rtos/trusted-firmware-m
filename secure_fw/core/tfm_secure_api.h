@@ -13,6 +13,14 @@
 #include "secure_utilities.h"
 #include "tfm_core.h"
 
+/*!
+ * \def __tfm_secure_gateway_attributes__
+ *
+ * \brief Attributes for secure gateway functions
+ */
+#define __tfm_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
+
 /* Currently only fully blocking NS while partitions are running is supported */
 #define TFM_API_DEPRIORITIZE
 

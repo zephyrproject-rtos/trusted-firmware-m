@@ -20,8 +20,7 @@ extern "C" {
  *
  * \return Returns \ref TFM_SUCCESS.
  */
-int32_t tfm_core_test_2_veneer_slave_service(void)
-__attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
+int32_t tfm_core_test_2_veneer_slave_service(void);
 
 /**
  * \brief Bitwise inverts the buffer received as input.
@@ -33,10 +32,10 @@ __attribute__((cmse_nonsecure_entry, noinline, section("SFN")));
  *
  * \return Returns \ref TFM_SUCCESS on success, TFM_PARTITION_BUSY otherwise.
  */
-__attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
-int32_t tfm_core_test_2_sfn_invert(
-        int32_t *res_ptr, uint32_t *in_ptr, uint32_t *out_ptr, int32_t len);
-
+int32_t tfm_core_test_2_sfn_invert(int32_t *res_ptr,
+                                   uint32_t *in_ptr,
+                                   uint32_t *out_ptr,
+                                   int32_t len);
 #ifdef __cplusplus
 }
 #endif
