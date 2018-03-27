@@ -14,14 +14,7 @@
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
 #include "tfm_ns_svc.h"
-#include "tfm_sst_svc_handler.h"
 #include "tfm_ns_lock.h"
-#ifdef TFM_PARTITION_TEST_CORE
-#include "svc_core_test_ns.h"
-#endif
-#ifdef TFM_PARTITION_TEST_SST
-#include "sst_test_service_svc.h"
-#endif
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/integ_test.h"
 #endif
@@ -41,30 +34,23 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
        void * const osRtxUserSVC[1+USER_SVC_COUNT] = {
   (void *)USER_SVC_COUNT,
 
-/* SERVICES_TEST_NS */
-  (void *)tfm_sst_svc_get_handle,
-  (void *)tfm_sst_svc_create,
-  (void *)tfm_sst_svc_get_attributes,
-  (void *)tfm_sst_svc_read,
-  (void *)tfm_sst_svc_write,
-  (void *)tfm_sst_svc_delete,
+#define X(SVC_ENUM, SVC_HANDLER) (void*)SVC_HANDLER,
+    /* SVC API for Services */
+    LIST_SVC_DISPATCHERS
 
 #if defined(CORE_TEST_INTERACTIVE)
-  (void *)svc_secure_decrement_ns_lock_1,
-  (void *)svc_secure_decrement_ns_lock_2,
+    LIST_SVC_CORE_TEST_INTERACTIVE
 #endif /* CORE_TEST_INTERACTIVE */
 
 #if defined(TFM_PARTITION_TEST_CORE)
-  (void *)svc_tfm_core_test,
-  (void *)svc_tfm_core_test_multiple_calls,
+    LIST_SVC_TFM_PARTITION_TEST_CORE
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #if defined(TFM_PARTITION_TEST_SST)
-  (void *)sst_test_service_svc_setup,
-  (void *)sst_test_service_svc_dummy_encrypt,
-  (void *)sst_test_service_svc_dummy_decrypt,
-  (void *)sst_test_service_svc_clean,
+    LIST_SVC_TFM_PARTITION_TEST_SST
 #endif /* TFM_PARTITION_TEST_SST */
+
+#undef X
 
 //(void *)user_function1,
 // ...

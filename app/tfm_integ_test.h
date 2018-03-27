@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,15 +25,6 @@ __asm("  .global __ARM_use_no_argv\n");
  *
  */
 #define UNUSED_VARIABLE(X) ((void)(X))
-
-/**
- * \brief Declarations for User defined SVC functions
- *        used in CORE_TEST_INTERACTIVE or
- *        CORE_TEST_POSITIVE
- *
- */
-void svc_secure_decrement_ns_lock_1(void);
-void svc_secure_decrement_ns_lock_2(void);
 
 #ifdef TEST_FRAMEWORK_NS
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,6 +27,18 @@ int32_t svc_tfm_core_test(void);
  * \brief SVC handler for calling a secure function multiple times.
  */
 int32_t svc_tfm_core_test_multiple_calls(void);
+
+/**
+ * \brief SVC handler used in CORE_TEST_INTERACTIVE, to test
+ *        requests to TF-M core from different NS threads.
+ */
+void svc_secure_decrement_ns_lock_1(void);
+
+/**
+ * \brief SVC handler used in CORE_TEST_INTERACTIVE, to test
+ *        requests to TF-M core from different NS threads.
+ */
+void svc_secure_decrement_ns_lock_2(void);
 
 #ifdef __cplusplus
 }
