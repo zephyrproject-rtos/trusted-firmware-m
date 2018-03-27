@@ -37,12 +37,16 @@ static void tfm_log_test_1001(struct test_result_t *ret)
     enum tfm_log_err err;
 
     uint8_t local_buffer[4];
-    uint32_t size, log_size;
+    uint32_t size;
+    struct tfm_log_info info;
 
     /* Retrieve 4 bytes at most */
     size = 4;
 
-    err = tfm_log_retrieve(size, &local_buffer[0], &log_size);
+    err = tfm_log_retrieve(size,
+                           TFM_LOG_READ_RECENT,
+                           &local_buffer[0],
+                           &info);
 
     if (err != TFM_LOG_ERR_SUCCESS) {
         TEST_FAIL("Log retrieval has returned an error");

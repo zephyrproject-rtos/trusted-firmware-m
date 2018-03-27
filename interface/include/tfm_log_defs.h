@@ -16,8 +16,27 @@ extern "C" {
 #include "tfm_api.h"
 #include "limits.h"
 
-/* The return value is shared with the TFM partition status value. The LOG return
- * codes shouldn't overlap with predefined TFM status values.
+/*!
+ * \def TFM_LOG_READ_RECENT
+ *
+ * \brief Special value used in the log retrieval API to indicate
+ *        that data should be read up to the most recent entry
+ */
+#define TFM_LOG_READ_RECENT (-1)
+
+/*!
+ * \struct tfm_log_info
+ *
+ * \brief Structure containing information related to the size in bytes
+ *        and number of items retrieved or available in the audit log
+ */
+struct tfm_log_info {
+    uint32_t size; /*!< Size in bytes of items retrieved or available */
+    uint32_t num_items; /*!< Number of items retrieved or available */
+};
+
+/* The return value is shared with the TFM partition status value. The LOG
+ * return codes shouldn't overlap with predefined TFM status values.
  */
 #define TFM_LOG_ERR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
 

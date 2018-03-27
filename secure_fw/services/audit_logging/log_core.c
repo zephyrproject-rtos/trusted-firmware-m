@@ -10,8 +10,9 @@
 #include "tfm_secure_api.h"
 
 enum tfm_log_err log_core_retrieve(uint32_t size,
+                                   int32_t start,
                                    uint8_t *buffer,
-                                   uint32_t *log_size)
+                                   struct tfm_log_info *info)
 {
     (*(uint32_t*)((void*)buffer)) = 0xDEADBEEF;
 
@@ -29,5 +30,17 @@ enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
         return TFM_LOG_ERR_FAILURE;
     }
 
+    return TFM_LOG_ERR_SUCCESS;
+}
+
+enum tfm_log_err log_core_get_info(struct tfm_log_info *info)
+{
+    return TFM_LOG_ERR_SUCCESS;
+}
+
+
+enum tfm_log_err log_core_delete_items(uint32_t num_items,
+                                       uint32_t *rem_items)
+{
     return TFM_LOG_ERR_SUCCESS;
 }
