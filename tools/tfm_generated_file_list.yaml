@@ -30,6 +30,11 @@
         "name": "AN521 secure ld file",
         "short_name": "mps2_an521_s_ld",
         "output": "platform/ext/target/mps2/an521/gcc/mps2_an521_s.ld"
+    },
+    {
+        "name": "AN519 secure ld file",
+        "short_name": "mps2_an519_s.ld",
+        "output": "platform/ext/target/mps2/an519/gcc/mps2_an519_s.ld"
     }
   ]
 }

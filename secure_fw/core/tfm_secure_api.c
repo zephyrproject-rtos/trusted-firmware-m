@@ -422,6 +422,7 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_sfn(void)
      * r12 is used as padding for 8-byte stack alignment
      */
     __ASM(
+    ".syntax unified\n"
     "PUSH   {lr}\n"
     "PUSH   {r4-r7}\n"
     "MOV    r4, r8\n"

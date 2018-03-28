@@ -92,7 +92,7 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
-#define S_DATA_SIZE     (TOTAL_RAM_SIZE/2)
+#define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* CMSE Veneers region */
@@ -105,8 +105,8 @@
 #define NS_CODE_SIZE    (IMAGE_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
-#define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)
+#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE / 2))
+#define NS_DATA_SIZE    (TOTAL_RAM_SIZE / 2)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */

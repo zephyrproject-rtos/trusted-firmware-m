@@ -121,6 +121,7 @@ __attribute__((naked)) void SVC_Handler(void)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM(
+    ".syntax unified\n"
     "MOVS    r0, #4\n"  /* Check store SP in thread mode to r0 */
     "MOV     r1, lr\n"
     "TST     r0, r1\n"
@@ -132,7 +133,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "sp_stored:\n"
     "PUSH    {r0, lr}\n"
     "MOV     r1, sp\n"
-    "adds    r1, r1, #4\n"
+    "ADDS    r1, r1, #4\n"
     "BL      SVCHandler_main\n"
     "POP     {r1, pc}\n");
 }
