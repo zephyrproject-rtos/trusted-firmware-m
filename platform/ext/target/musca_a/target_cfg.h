@@ -38,16 +38,6 @@ enum ppc_bank_e
 };
 
 /**
- * \brief Configures non-secure code.
- */
-void configure_ns_code(void);
-
-/**
- * \brief Jumps to non-secure code.
- */
-void jump_to_ns_code(void);
-
-/**
  * \brief Enables the fault handlers BusFault, UsageFault,
  *        MemManageFault and SecureFault.
  */

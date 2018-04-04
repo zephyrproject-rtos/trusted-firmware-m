@@ -43,10 +43,12 @@
 
 extern void tfm_secure_api_error_handler(void);
 
+typedef int32_t(*sfn_t)(int32_t, int32_t, int32_t, int32_t);
+
 struct tfm_sfn_req_s {
-    uint32_t ss_id;
-    int32_t (*sfn)(int32_t, int32_t, int32_t, int32_t);
-    uint32_t *args;
+    uint32_t sp_id;
+    sfn_t sfn;
+    int32_t *args;
     uint32_t exc_num;
     int32_t ns_caller : 1;
 };
@@ -91,10 +93,10 @@ __attribute__ ((always_inline)) __STATIC_INLINE
 int32_t tfm_core_partition_request(uint32_t id, void *fn,
             int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
 {
-    uint32_t args[4] = {arg1, arg2, arg3, arg4};
+    int32_t args[4] = {arg1, arg2, arg3, arg4};
     struct tfm_sfn_req_s desc, *desc_ptr = &desc;
 
-    desc.ss_id = id;
+    desc.sp_id = id;
     desc.sfn = fn;
     desc.args = args;
     desc.ns_caller = cmse_nonsecure_caller();

@@ -30,12 +30,13 @@
 Stack_Size      EQU     0x00002000
 MSP_STACK_SIZE  EQU     0x00000800
 
-                AREA    STACK, NOINIT, READWRITE, ALIGN=3
+                AREA    STACK, NOINIT, READWRITE, ALIGN=7
                 EXPORT  Stack_Mem
 Stack_Mem       SPACE   Stack_Size
 __initial_msp
-__initial_sp	EQU     __initial_msp - MSP_STACK_SIZE
-
+__initial_sp    EQU     __initial_msp - MSP_STACK_SIZE
+                EXPORT  Stack_top
+Stack_top       EQU     __initial_sp
 
 Heap_Size       EQU     0x00001000
 

@@ -6,7 +6,9 @@
  */
 
 #include <stdio.h>
+#include "region_defs.h"
 #include "tfm_core.h"
+#include "tfm_internal.h"
 #include "target_cfg.h"
 #include "uart_stdout.h"
 #include "secure_utilities.h"
@@ -86,6 +88,25 @@ void configure_debug_registers(void)
 #endif
 }
 
+void configure_ns_code(void)
+{
+    /* SCB_NS.VTOR points to the Non-secure vector table base address */
+    SCB_NS->VTOR = (NS_CODE_START);
+
+    /* Setups Main stack pointer of the non-secure code */
+    uint32_t ns_msp = *((uint32_t *)(NS_CODE_START));
+
+    __TZ_set_MSP_NS(ns_msp);
+
+    /* The entry contains address of the Reset_handler (CMSIS-CORE) function */
+    uint32_t entry_ptr = *((uint32_t *)(NS_CODE_START + 4));
+
+    /* Clears LSB of the function address to indicate the function-call
+     * will perform the switch from secure to non-secure
+     */
+    ns_entry = (nsfptr_t) (entry_ptr & (~0x1));
+}
+
 int32_t tfm_core_init(void)
 {
     /* Enables fault handlers */
@@ -130,19 +151,24 @@ int main(void)
 
     tfm_spm_db_init();
 #if TFM_LVL != 1
-    tfm_spm_mpu_init();
-#endif
-    if (tfm_spm_partition_init() != SPM_ERR_OK) {
-        /* Certain systems might refuse to boot altogether if partitions fail
-         * to initialize. This is a placeholder for such an error handler
-         */
+    if (tfm_spm_mpu_init() != SPM_ERR_OK) {
+        ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
+        while (1) {
+            ;
+        }
     }
-
+#endif
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
     extern uint32_t Stack_Mem[];
 
     __set_PSPLIM((uint32_t)Stack_Mem);
+
+    if (tfm_spm_partition_init() != SPM_ERR_OK) {
+        /* Certain systems might refuse to boot altogether if partitions fail
+         * to initialize. This is a placeholder for such an error handler
+         */
+    }
 
 #ifdef TEST_FRAMEWORK_S
     start_integ_test();
@@ -151,22 +177,6 @@ int main(void)
 #ifdef TFM_CORE_DEBUG
     /* Jumps to non-secure code */
     LOG_MSG("Jumping to non-secure code...");
-#endif
-
-#if TFM_LVL != 1
-    /* FixMe: partition MPU regions need to be overloaded for snippet of
-     * code jumping to NS to work in unprivileged thread mode
-     */
-#ifdef UNPRIV_JUMP_TO_NS
-    /* Initialization is done, set thread mode to unprivileged. */
-    CONTROL_Type ctrl;
-
-    ctrl.w = __get_CONTROL();
-    ctrl.b.nPRIV = 1;
-    __set_CONTROL(ctrl.w);
-    __DSB();
-    __ISB();
-#endif
 #endif
 
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is

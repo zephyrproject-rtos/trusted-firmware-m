@@ -184,26 +184,21 @@ SECTIONS
         __HeapLimit = .;
     } > RAM
 
-    .psp_stack :
+    .psp_stack ALIGN(8) : ALIGN(8)
     {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
         . += __psp_stack_size__;
     } > RAM
     __initial_sp = ADDR(.psp_stack) + SIZEOF(.psp_stack);
     Stack_Mem = ADDR(.psp_stack);
 
-    .msp_stack :
+    .msp_stack ALIGN(8) : ALIGN(8)
     {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
         . += __msp_stack_size__;
     } > RAM
     __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-    .TFM_SECURE_STACK :
+    .TFM_SECURE_STACK ALIGN(8) : ALIGN(8)
     {
-        . = ALIGN(8);
         KEEP(*(.TFM_SECURE_STACK*))
         . += 0x4000;
     } > RAM
@@ -211,10 +206,8 @@ SECTIONS
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 
-    .TFM_UNPRIV_SCRATCH :
+    .TFM_UNPRIV_SCRATCH ALIGN(32) : ALIGN(32)
     {
-        . = ALIGN(32);
-        KEEP(*(.TFM_UNPRIV_SCRATCH*))
         . += 0x400;
     } > RAM
 

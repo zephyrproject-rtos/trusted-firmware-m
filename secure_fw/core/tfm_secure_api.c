@@ -39,6 +39,7 @@ extern void tfm_core_partition_return_svc(void);
  * to SPE
  */
 static int32_t tfm_secure_lock;
+static int32_t tfm_secure_api_init = 1;
 
 static uint32_t *prepare_partition_ctx(
             struct tfm_sfn_req_s *desc_ptr, uint32_t *dst)
@@ -57,7 +58,7 @@ static uint32_t *prepare_partition_ctx(
 
     while (i > 0) {
         i--;
-        *(--dst) = desc_ptr->args[i];
+        *(--dst) = (uint32_t)desc_ptr->args[i];
     }
     return dst;
 }
@@ -72,7 +73,9 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
     uint32_t psp;
     uint32_t partition_psp, partition_psplim;
     uint32_t partition_state;
+    uint32_t partition_flags;
 
+    /* Check partition idx validity */
     if (caller_partition_idx == SPM_INVALID_PARTITION_IDX) {
         return TFM_SECURE_LOCK_FAILED;
     }
@@ -80,94 +83,112 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t lr)
     caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
 
     /* Check partition state consistency */
-    if (((caller_flags&SPM_PART_FLAG_SECURE) != 0) == (!desc_ptr->ns_caller)) {
-        partition_idx = get_partition_idx(desc_ptr->ss_id);
-        psp = __get_PSP();
-        curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
-        partition_state = curr_part_data->partition_state;
-
-        if (partition_state == SPM_PARTITION_STATE_RUNNING ||
-            partition_state == SPM_PARTITION_STATE_SUSPENDED ||
-            partition_state == SPM_PARTITION_STATE_BLOCKED) {
-            /* Recursion is not permitted! */
-            return TFM_ERROR_PARTITION_NON_REENTRANT;
-        } else if (partition_state != SPM_PARTITION_STATE_IDLE) {
-            /* The partition to be called is not in a proper state */
-            return TFM_SECURE_LOCK_FAILED;
-        }
-
-#if TFM_LVL == 1
-        /* Prepare switch to shared secure partition stack */
-        partition_psp =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
-        partition_psplim =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
-#else
-        if (caller_flags&SPM_PART_FLAG_SECURE) {
-            /* Store the caller PSP in case we are doing a partition to
-             * partition call
-             */
-            tfm_spm_partition_set_stack(caller_partition_idx, psp);
-        }
-        partition_psp = curr_part_data->stack_ptr;
-        partition_psplim = tfm_spm_partition_get_stack_bottom(partition_idx);
-#endif
-        /* Stack the context for the partition call */
-        tfm_spm_partition_set_orig_psp(partition_idx, psp);
-        tfm_spm_partition_set_orig_psplim(partition_idx, __get_PSPLIM());
-        tfm_spm_partition_set_orig_lr(partition_idx, lr);
-        tfm_spm_partition_set_caller_partition_id(partition_idx,
-                                                  caller_partition_idx);
-
-#if (TFM_LVL != 1) && (TFM_LVL != 2)
-        /* Dynamic partition partitioning is only done is TFM level 3 */
-        if (caller_flags&SPM_PART_FLAG_SECURE) {
-            /* In a partition to partition call, deconfigure the
-             * caller partition
-             */
-            tfm_spm_partition_sandbox_deconfig(caller_partition_idx);
-        }
-
-        /* Configure partition execution environment */
-        tfm_spm_partition_sandbox_config(partition_idx);
-#endif
-
-        /* Default share to scratch area in case of partition to partition calls
-         * this way partitions always get default access to input buffers
-         */
-        /* FixMe: return value/error handling TBD */
-        tfm_spm_partition_set_share(partition_idx, desc_ptr->ns_caller ?
-            TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH);
-
-#if TFM_LVL == 1
-        /* In level one, only switch context and return from exception if in
-         * handler mode
-         */
-        if (desc_ptr->exc_num != EXC_NUM_THREAD_MODE) {
-            /* Prepare the partition context, update stack ptr */
-            psp = (uint32_t)prepare_partition_ctx(
-                        desc_ptr, (uint32_t *)partition_psp);
-            __set_PSP(psp);
-            __set_PSPLIM(partition_psplim);
-        }
-#else
-        /* Prepare the partition context, update stack ptr */
-        psp = (uint32_t)prepare_partition_ctx(desc_ptr,
-                                              (uint32_t *)partition_psp);
-        __set_PSP(psp);
-        __set_PSPLIM(partition_psplim);
-#endif
-
-        tfm_spm_partition_set_state(caller_partition_idx,
-                                    SPM_PARTITION_STATE_BLOCKED);
-        tfm_spm_partition_set_state(partition_idx, SPM_PARTITION_STATE_RUNNING);
-        tfm_secure_lock++;
-
-        return TFM_SUCCESS;
-    } else {
-        /* Secure partition stacking limit exceeded */
+    if (((caller_flags&SPM_PART_FLAG_SECURE) != 0) != (!desc_ptr->ns_caller)) {
+        /* Partition state inconsistency detected */
         return TFM_SECURE_LOCK_FAILED;
     }
+
+    partition_idx = get_partition_idx(desc_ptr->sp_id);
+    psp = __get_PSP();
+
+    curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
+    partition_state = curr_part_data->partition_state;
+    partition_flags = tfm_spm_partition_get_flags(partition_idx);
+
+    if ((tfm_secure_api_init) &&
+        (tfm_spm_partition_get_partition_id(caller_partition_idx)
+            == TFM_SP_CORE_ID) &&
+        (partition_state == SPM_PARTITION_STATE_UNINIT)) {
+#if TFM_LVL != 1
+        /* Make thread mode unprivileged while untrusted partition init is
+         * executed
+         */
+        if ((partition_flags & SPM_PART_FLAG_TRUSTED) == 0) {
+            CONTROL_Type ctrl;
+
+            ctrl.w = __get_CONTROL();
+            ctrl.b.nPRIV = 1;
+            __set_CONTROL(ctrl.w);
+            __DSB();
+            __ISB();
+        }
+#endif
+    } else if (partition_state == SPM_PARTITION_STATE_RUNNING ||
+        partition_state == SPM_PARTITION_STATE_SUSPENDED ||
+        partition_state == SPM_PARTITION_STATE_BLOCKED) {
+        /* Recursion is not permitted! */
+        return TFM_ERROR_PARTITION_NON_REENTRANT;
+    } else if (partition_state != SPM_PARTITION_STATE_IDLE) {
+        /* The partition to be called is not in a proper state */
+        return TFM_SECURE_LOCK_FAILED;
+    }
+
+#if TFM_LVL == 1
+    /* Prepare switch to shared secure partition stack */
+    partition_psp =
+        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
+    partition_psplim =
+        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
+#else
+    if (caller_flags&SPM_PART_FLAG_SECURE) {
+        /* Store the caller PSP in case we are doing a partition to
+         * partition call
+         */
+        tfm_spm_partition_set_stack(caller_partition_idx, psp);
+    }
+    partition_psp = curr_part_data->stack_ptr;
+    partition_psplim = tfm_spm_partition_get_stack_bottom(partition_idx);
+#endif
+    /* Stack the context for the partition call */
+    tfm_spm_partition_set_orig_psp(partition_idx, psp);
+    tfm_spm_partition_set_orig_psplim(partition_idx, __get_PSPLIM());
+    tfm_spm_partition_set_orig_lr(partition_idx, lr);
+    tfm_spm_partition_set_caller_partition_idx(partition_idx,
+                                               caller_partition_idx);
+
+#if (TFM_LVL != 1) && (TFM_LVL != 2)
+    /* Dynamic partitioning is only done is TFM level 3 */
+    tfm_spm_partition_sandbox_deconfig(caller_partition_idx);
+
+    /* Configure partition execution environment */
+    if (tfm_spm_partition_sandbox_config(partition_idx) != SPM_ERR_OK) {
+        ERROR_MSG("Failed to configure sandbox for partition!");
+        tfm_secure_api_error_handler();
+    }
+#endif
+
+    /* Default share to scratch area in case of partition to partition calls
+     * this way partitions always get default access to input buffers
+     */
+    /* FixMe: return value/error handling TBD */
+    tfm_spm_partition_set_share(partition_idx, desc_ptr->ns_caller ?
+        TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH);
+
+#if TFM_LVL == 1
+    /* In level one, only switch context and return from exception if in
+     * handler mode
+     */
+    if ((desc_ptr->exc_num != EXC_NUM_THREAD_MODE) || (tfm_secure_api_init)) {
+        /* Prepare the partition context, update stack ptr */
+        psp = (uint32_t)prepare_partition_ctx(
+                    desc_ptr, (uint32_t *)partition_psp);
+        __set_PSP(psp);
+        __set_PSPLIM(partition_psplim);
+    }
+#else
+    /* Prepare the partition context, update stack ptr */
+    psp = (uint32_t)prepare_partition_ctx(desc_ptr,
+                                          (uint32_t *)partition_psp);
+    __set_PSP(psp);
+    __set_PSPLIM(partition_psplim);
+#endif
+
+    tfm_spm_partition_set_state(caller_partition_idx,
+                                SPM_PARTITION_STATE_BLOCKED);
+    tfm_spm_partition_set_state(partition_idx, SPM_PARTITION_STATE_RUNNING);
+    tfm_secure_lock++;
+
+    return TFM_SUCCESS;
 }
 
 static int32_t tfm_pop_lock(uint32_t *lr_ptr)
@@ -175,6 +196,7 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
     uint32_t current_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data;
+    uint32_t current_partition_flags;
     uint32_t return_partition_idx;
     uint32_t return_partition_flags;
 #if TFM_LVL != 1
@@ -193,26 +215,50 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
     }
 
     return_partition_flags = tfm_spm_partition_get_flags(return_partition_idx);
+    current_partition_flags = tfm_spm_partition_get_flags(
+            current_partition_idx);
 
     tfm_secure_lock--;
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
     /* Deconfigure completed partition environment */
     tfm_spm_partition_sandbox_deconfig(current_partition_idx);
-    if (return_partition_flags&SPM_PART_FLAG_SECURE) {
-        /* Configure the caller partition environment in case this was a
-         * partition to partition call
+    if (tfm_secure_api_init) {
+        /* Restore privilege for thread mode during TF-M init. This is only
+         * have to be done if the partition is not trusted.
          */
-        tfm_spm_partition_sandbox_config(return_partition_idx);
-        /* Restore share status */
-        tfm_spm_partition_set_share(return_partition_idx,
-           tfm_spm_partition_get_runtime_data(return_partition_idx)->share);
+        if ((current_partition_flags & SPM_PART_FLAG_TRUSTED) == 0) {
+            CONTROL_Type ctrl;
+
+            ctrl.w = __get_CONTROL();
+            ctrl.b.nPRIV = 0;
+            __set_CONTROL(ctrl.w);
+            __DSB();
+            __ISB();
+        }
+    } else {
+        /* Configure the caller partition environment in case this was a
+         * partition to partition call and returning to untrusted partition
+         */
+        if (tfm_spm_partition_sandbox_config(return_partition_idx)
+            != SPM_ERR_OK) {
+            ERROR_MSG("Failed to configure sandbox for partition!");
+            tfm_secure_api_error_handler();
+        }
+        if (return_partition_flags&SPM_PART_FLAG_SECURE) {
+            /* Restore share status */
+            tfm_spm_partition_set_share(
+                return_partition_idx,
+                tfm_spm_partition_get_runtime_data(
+                    return_partition_idx)->share);
+        }
     }
 #endif
 
 #if TFM_LVL == 1
-    if (!(return_partition_flags&SPM_PART_FLAG_SECURE)) {
+    if (!(return_partition_flags&SPM_PART_FLAG_SECURE) ||
+        (tfm_secure_api_init)) {
         /* In TFM level 1 context restore is only done when
-         * returning to NS
+         * returning to NS or after initialization
          */
         /* Restore caller PSP and LR ptr */
         __set_PSP(curr_part_data->orig_psp);
@@ -237,6 +283,8 @@ static int32_t tfm_pop_lock(uint32_t *lr_ptr)
 
     tfm_spm_partition_set_state(current_partition_idx,
                                 SPM_PARTITION_STATE_IDLE);
+    tfm_spm_partition_set_caller_partition_idx(current_partition_idx,
+                                SPM_INVALID_PARTITION_IDX);
     tfm_spm_partition_set_state(return_partition_idx,
                                 SPM_PARTITION_STATE_RUNNING);
 
@@ -254,7 +302,7 @@ void tfm_secure_api_error_handler(void)
 static int32_t tfm_check_sfn_req_integrity(struct tfm_sfn_req_s *desc_ptr)
 {
     if ((desc_ptr == NULL) ||
-        (desc_ptr->ss_id == 0) ||
+        (desc_ptr->sp_id == 0) ||
         (desc_ptr->sfn == NULL)) {
         /* invalid parameter */
         return TFM_ERROR_INVALID_PARAMETER;
@@ -403,13 +451,24 @@ __attribute__((naked)) static int32_t tfm_core_exc_return_to_sfn(void)
 
 extern void return_from_sfn(void);
 
+void tfm_secure_api_init_done(void)
+{
+    tfm_secure_api_init = 0;
+#if TFM_LVL != 1
+    if (tfm_spm_partition_sandbox_config(TFM_SP_NON_SECURE_ID) != SPM_ERR_OK) {
+        ERROR_MSG("Failed to configure sandbox for partition!");
+        tfm_secure_api_error_handler();
+    }
+#endif
+}
+
 static int32_t tfm_core_call_sfn(struct tfm_sfn_req_s *desc_ptr)
 {
 #if TFM_LVL == 1
-    if (desc_ptr->exc_num == EXC_NUM_THREAD_MODE) {
+    if ((desc_ptr->exc_num == EXC_NUM_THREAD_MODE) && (!tfm_secure_api_init)) {
         /* Secure partition to secure partition call in TFM level 1 */
         int32_t res;
-        uint32_t *args = desc_ptr->args;
+        int32_t *args = desc_ptr->args;
         int32_t retVal = desc_ptr->sfn(args[0], args[1], args[2], args[3]);
         /* return handler should restore original exc_return value... */
         res = tfm_pop_lock(NULL);

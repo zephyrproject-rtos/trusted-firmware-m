@@ -5,11 +5,33 @@
  *
  */
 
+#include <arm_cmse.h>
+
 #include "tfm_svc.h"
 #include "tfm_secure_api.h"
+#include "tfm_internal.h"
 
 uint8_t *tfm_scratch_area;
 int32_t tfm_scratch_area_size;
+nsfptr_t ns_entry;
+
+void jump_to_ns_code(void)
+{
+#if TFM_LVL != 1
+    /* Initialization is done, set thread mode to unprivileged. */
+    CONTROL_Type ctrl;
+
+    ctrl.w = __get_CONTROL();
+    ctrl.b.nPRIV = 1;
+    __set_CONTROL(ctrl.w);
+#endif
+    /* All changes made to memory will be effective after this point */
+    __DSB();
+    __ISB();
+
+    /* Calls the non-secure Reset_Handler to jump to the non-secure binary */
+    ns_entry();
+}
 
 __attribute__((naked)) void tfm_core_partition_return_svc(void)
 {

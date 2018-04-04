@@ -170,15 +170,15 @@ void tfm_spm_partition_set_stack(uint32_t partition_id, uint32_t stack_ptr);
 void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state);
 
 /**
- * \brief Set the caller partition Id for a given partition
+ * \brief Set the caller partition index for a given partition
  *
  * \param[in] partition_idx        Partition index
- * \param[in] caller_partition_id  The Id of the caller partition
+ * \param[in] caller_partition_idx The index of the caller partition
  *
- * \note This function doesn't check if any of the partition_ids is valid.
+ * \note This function doesn't check if any of the partition_idxs are valid.
  */
-void tfm_spm_partition_set_caller_partition_id(uint32_t partition_idx,
-                                           uint32_t caller_partition_id);
+void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
+                                                uint32_t caller_partition_idx);
 
 /**
  * \brief Set the original PSP value of a partition

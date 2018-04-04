@@ -9,7 +9,7 @@
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
-#include "secure_fw/spm/spm_api.h"
+#include "secure_fw/spm/spm_partition_defs.h"
 
 __tfm_secure_gateway_attributes__
 enum tfm_sst_err_t tfm_sst_veneer_get_handle(uint32_t app_id,

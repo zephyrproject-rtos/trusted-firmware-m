@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,6 @@ enum ppc_bank_e
     PPC_SP_APB_PPC_EXP2,
     PPC_SP_APB_PPC_EXP3,
 };
-
-/**
- * \brief Configures non-secure code.
- */
-void configure_ns_code(void);
-
-/**
- * \brief Jumps to non-secure code.
- */
-void jump_to_ns_code(void);
 
 /**
  * \brief Enables the fault handlers BusFault, UsageFault,

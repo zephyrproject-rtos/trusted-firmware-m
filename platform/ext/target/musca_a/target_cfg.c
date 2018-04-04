@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-#include <arm_cmse.h>
-
 #include "cmsis.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "platform_retarget_dev.h"
 #include "region_defs.h"
 #include "tfm_secure_api.h"
-
-/*
- * This function pointer is meant to only hold non-secure function pointers.
- * It will be turned into a non-secure one (LSB cleared) before being called
- * whatever happens anyway (unless cast to another function pointer type).
- * Registers will be cleared before branching so that no information leaks
- * from secure to non-secure world.
- */
-typedef void __attribute__((cmse_nonsecure_call)) (*nsfptr_t) (void);
 
 /* Allows software, via SAU, to define the code region as a NSC */
 #define NSCCFG_CODENSC  1
@@ -43,33 +32,6 @@ extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
-
-void configure_ns_code()
-{
-    /* SCB_NS.VTOR points to the Non-secure vector table base address */
-    SCB_NS->VTOR = (NS_CODE_START);
-
-    /* Setups Main stack pointer of the non-secure code */
-    uint32_t ns_msp = *((uint32_t*)(NS_CODE_START));
-    __TZ_set_MSP_NS(ns_msp);
-}
-
-void jump_to_ns_code()
-{
-    /* The entry contains address of the Reset_handler (CMSIS-CORE) function */
-    uint32_t entry_ptr = *((uint32_t*)(NS_CODE_START + 4));
-
-    /* Clears LSB of the function address to indicate the function-call
-       will perform the switch from secure to non-secure */
-    nsfptr_t ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
-
-    /* All changes made to memory will be effective after this point */
-    __DSB();
-    __ISB();
-
-    /* Calls the non-secure Reset_Handler to jump to the non-secure binary */
-    ns_entry();
-}
 
 void enable_fault_handlers(void)
 {
