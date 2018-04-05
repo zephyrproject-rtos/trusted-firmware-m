@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2016 ARM Limited
+; * Copyright (c) 2016-2018 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Stack_Size      EQU     0x00001000
+; NOTE: The stack size needs to be re-evaluated as soon as the new mechanism
+;       to run the secure tests, based on a test service, is introduced.
+Stack_Size      EQU     0x00002000
 MSP_STACK_SIZE  EQU     0x00000800
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
