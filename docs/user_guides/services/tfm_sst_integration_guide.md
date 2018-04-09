@@ -131,10 +131,20 @@ SST service code.
 service. It also defines the block size and number of blocks used by the SST
 service.
 
-`flash/sst_flash_memory_mapped.c` - Contains a RAM based very lightweight
-flash emulation, as the current reference platform does not have flash memory.
-This flash interface implementation **must** be replaced by either a flash
-driver or proxy for flash driver.
+`flash/sst_flash.c` - Contains the `sst_flash` implementation which sits on
+top of CMSIS flash interface implemented by the target.
+The CMSIS flash interface **must** be implemented for each target based on
+its flash controller.
+
+The block size (`SST_SECTOR_SIZE`) and number of blocks
+(`SST_NBR_OF_SECTORS`) used by the secure storage area, are defined in
+`flash_layout.h` located in `platform/ext/target/<TARGET_NAME>/partition`.
+Those values **must** be defined in that header file based on flash
+specifications and vendor specific considerations.
+It is also required to define the `SST_FLASH_AREA_ADDR` which defines the
+address of the first sector to be used as secure storage. The sectors reserved
+to be used as secure storage **must** be contiguous sectors starting at
+`SST_FLASH_AREA_ADDR`.
 
 ### Cryptographic Interface
 
