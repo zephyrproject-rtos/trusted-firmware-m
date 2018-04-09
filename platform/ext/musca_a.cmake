@@ -96,6 +96,7 @@ if (NOT DEFINED BUILD_TARGET_CFG)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
 elseif(BUILD_TARGET_CFG)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/target_cfg.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/spm_hal.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)

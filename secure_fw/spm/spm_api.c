@@ -10,12 +10,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "spm_api.h"
-#include "spm_db.h"
+#include "platform/include/tfm_spm_hal.h"
+#include "spm_db_setup.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "secure_fw/core/tfm_core.h"
+#include "platform_retarget.h"
+#include "target_cfg.h"
+#include "spm_partition_defs.h"
+
 
 struct spm_partition_db_t g_spm_partition_db = {0,};
 
@@ -41,7 +46,7 @@ typedef enum {
  * returned.
  */
 static void tfm_spm_partition_err_handler(
-    struct spm_partition_desc_t *partition,
+    struct tfm_spm_partition_desc_t *partition,
     sp_error_type_t err_type,
     int32_t err_code)
 {
@@ -77,7 +82,7 @@ uint32_t get_partition_idx(uint32_t partition_id)
 
 enum spm_err_t tfm_spm_db_init(void)
 {
-    struct spm_partition_desc_t *part_ptr;
+    struct tfm_spm_partition_desc_t *part_ptr;
 
     memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
 
@@ -256,7 +261,7 @@ static enum spm_err_t tfm_spm_set_share_region(
 
 enum spm_err_t tfm_spm_partition_init(void)
 {
-    struct spm_partition_desc_t *part;
+    struct tfm_spm_partition_desc_t *part;
     struct tfm_sfn_req_s desc, *desc_ptr = &desc;
     int32_t args[4] = {0};
     int32_t fail_cnt = 0;
@@ -265,9 +270,9 @@ enum spm_err_t tfm_spm_partition_init(void)
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
-        if (part->static_data.periph_start) {
-            ppc_configure_to_secure(part->static_data.periph_ppc_bank,
-                    part->static_data.periph_ppc_loc);
+        if (part->platform_data.periph_start) {
+            ppc_configure_to_secure(part->platform_data.periph_ppc_bank,
+                    part->platform_data.periph_ppc_loc);
         }
         if (part->static_data.partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
@@ -313,7 +318,7 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
      * SPM partition for that partition
      */
 
-    struct spm_partition_desc_t *part;
+    struct tfm_spm_partition_desc_t *part;
     struct mpu_armv8m_region_cfg_t region_cfg;
 
     if (!g_spm_partition_db.is_init) {
@@ -354,11 +359,11 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
         return SPM_ERR_INVALID_CONFIG;
     }
 
-    if (part->static_data.periph_start) {
+    if (part->platform_data.periph_start) {
         /* Peripheral */
         region_cfg.region_nr = PARTITION_REGION_PERIPH;
-        region_cfg.region_base = part->static_data.periph_start;
-        region_cfg.region_limit = part->static_data.periph_limit;
+        region_cfg.region_base = part->platform_data.periph_start;
+        region_cfg.region_limit = part->platform_data.periph_limit;
         region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
         region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
         region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
@@ -367,8 +372,8 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
             return SPM_ERR_INVALID_CONFIG;
         }
 
-        ppc_en_secure_unpriv(part->static_data.periph_ppc_bank,
-                             part->static_data.periph_ppc_loc);
+        ppc_en_secure_unpriv(part->platform_data.periph_ppc_bank,
+                             part->platform_data.periph_ppc_loc);
     }
 
     mpu_armv8m_enable(&dev_mpu_s, 1, 1);
@@ -382,14 +387,14 @@ enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx)
      * SPM partition for that partition
      */
 
-    struct spm_partition_desc_t *part;
+    struct tfm_spm_partition_desc_t *part;
 
     part = &g_spm_partition_db.partitions[partition_idx];
 
-    if (part->static_data.periph_start) {
+    if (part->platform_data.periph_start) {
         /* Peripheral */
-        ppc_clr_secure_unpriv(part->static_data.periph_ppc_bank,
-                              part->static_data.periph_ppc_loc);
+        ppc_clr_secure_unpriv(part->platform_data.periph_ppc_bank,
+                              part->platform_data.periph_ppc_loc);
     }
 
     mpu_armv8m_disable(&dev_mpu_s);
@@ -496,7 +501,7 @@ uint32_t tfm_spm_partition_get_running_partition_idx(void)
 
 void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
 {
-    struct spm_partition_desc_t *partition =
+    struct tfm_spm_partition_desc_t *partition =
             &(g_spm_partition_db.partitions[partition_idx]);
     partition->runtime_data.caller_partition_idx = SPM_INVALID_PARTITION_IDX;
     partition->runtime_data.orig_psp = 0;
