@@ -237,6 +237,7 @@ enum tfm_sst_err_t sst_am_prepare(void)
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
+
     err = sst_system_prepare();
 #ifdef SST_RAM_FS
     /* in case of RAM based system there wouldn't be
@@ -248,7 +249,7 @@ enum tfm_sst_err_t sst_am_prepare(void)
         /* attempt to initialise again */
         err = sst_system_prepare();
     }
-#endif
+#endif /* SST_RAM_FS */
 
     return err;
 }
@@ -380,6 +381,7 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid)
     }
 
     err = sst_object_create(asset_uuid, db_entry->max_size);
+
     return err;
 }
 
@@ -466,5 +468,6 @@ enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_handle)
     }
 
     err = sst_object_delete(asset_handle);
+
     return err;
 }

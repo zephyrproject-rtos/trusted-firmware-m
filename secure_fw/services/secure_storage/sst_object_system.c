@@ -7,8 +7,11 @@
 
 #include <string.h>
 
+#ifdef SST_ENCRYPTION
+#include "sst_encrypted_object.h"
+#endif
+#include "sst_object_defs.h"
 #include "sst_object_system.h"
-#include "assets/sst_asset_defs.h"
 #include "sst_core.h"
 #include "sst_utils.h"
 
@@ -17,6 +20,36 @@
 
 /* Set to 1 once sst_system_prepare has been called */
 static uint8_t sst_system_ready = SST_SYSTEM_NOT_READY;
+
+/* Gets the size of object written to the object system below */
+#define SST_OBJECT_SIZE(max_size) (SST_OBJECT_HEADER_SIZE + max_size)
+#define SST_OBJECT_START_POSITION  0
+
+#define SST_DEFAULT_EMPTY_BUFF_VAL 0
+
+static struct sst_object_t g_sst_object;
+
+/**
+ * \brief Initialize an object based on the input parameters.
+ *
+ * \param[in]  uuid  Object UUID
+ * \param[in]  size  Object size
+ * \param[out] obj   Object to
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+static void sst_object_init_object(uint16_t uuid,
+                                   uint32_t size,
+                                   struct sst_object_t *obj)
+{
+    /* Set all object data to 0 */
+    sst_utils_memset(obj, SST_DEFAULT_EMPTY_BUFF_VAL, SST_MAX_OBJECT_SIZE);
+
+    /* Set object header properties based on input parameters */
+    obj->header.uuid = uuid;
+    obj->header.version = 0;
+    obj->header.info.size_max = size;
+}
 
 enum tfm_sst_err_t sst_system_prepare(void)
 {
@@ -50,28 +83,93 @@ enum tfm_sst_err_t sst_object_read(uint32_t object_handle, uint8_t *data,
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
 
+#ifndef SST_ENABLE_PARTIAL_ASSET_RW
+    (void)offset;
+#endif
+
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
-        err = sst_core_object_read(object_handle, data, offset, size);
+
+#ifdef SST_ENCRYPTION
+        err = sst_encrypted_object_read(object_handle, &g_sst_object);
+#else
+        /* Read object header */
+        err = sst_core_object_read(object_handle,
+                                   (uint8_t *)&g_sst_object.header,
+                                   SST_OBJECT_START_POSITION,
+                                   SST_OBJECT_HEADER_SIZE);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Read object data if any */
+        if (g_sst_object.header.info.size_current > 0) {
+            err = sst_core_object_read(object_handle, g_sst_object.data,
+                                       SST_OBJECT_HEADER_SIZE,
+                                       g_sst_object.header.info.size_current);
+        }
+#endif
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Boundary check the incoming request */
+        err = sst_utils_check_contained_in(SST_OBJECT_START_POSITION,
+                                          g_sst_object.header.info.size_current,
+                                          offset, size);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Copy the decrypted object data to the output buffer */
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+        sst_utils_memcpy(data, g_sst_object.data + offset, size);
+#else
+        sst_utils_memcpy(data, g_sst_object.data, size);
+#endif
+
+
         sst_global_unlock();
     }
 
     return err;
 }
 
-enum tfm_sst_err_t sst_object_create(uint16_t uuid, uint32_t size)
+enum tfm_sst_err_t sst_object_create(uint16_t object_uuid,
+                                     uint32_t size)
 {
-    /* Check if it already exists */
-    uint32_t hdl = 0;
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    uint32_t hdl = 0;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
-        err = sst_core_object_handle(uuid, &hdl);
+        /* Check if it already exists */
+        err = sst_core_object_handle(object_uuid, &hdl);
         if (err == TFM_SST_ERR_ASSET_NOT_FOUND) {
-            /* Find free space */
-            err = sst_core_object_create(uuid, size);
+            /* Initialize object based on the input arguments */
+            sst_object_init_object(object_uuid, size, &g_sst_object);
 
+#ifdef SST_ENCRYPTION
+            err = sst_encrypted_object_create(&g_sst_object);
+#else
+            /* FixMe: This is an inefficient way to write the object header.
+             *        The create function should allow to write content
+             *        in the object.
+             */
+            err = sst_core_object_create(object_uuid, SST_OBJECT_SIZE(size));
+            if (err != TFM_SST_ERR_SUCCESS) {
+                return err;
+            }
+
+            err = sst_core_object_handle(object_uuid, &hdl);
+            if (err != TFM_SST_ERR_SUCCESS) {
+                return err;
+            }
+
+            err = sst_core_object_write(hdl, (uint8_t *)&g_sst_object,
+                                        SST_OBJECT_START_POSITION,
+                                        SST_OBJECT_HEADER_SIZE);
+#endif
         }
         sst_global_unlock();
     }
@@ -84,9 +182,72 @@ enum tfm_sst_err_t sst_object_write(uint32_t object_handle, const uint8_t *data,
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
 
+#ifndef SST_ENABLE_PARTIAL_ASSET_RW
+    (void)offset;
+#endif
+
+
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
-        err = sst_core_object_write(object_handle, data, offset, size);
+
+        /* Read the object from the object system */
+#ifdef SST_ENCRYPTION
+        err = sst_encrypted_object_read(object_handle, &g_sst_object);
+#else
+        /* Read object header */
+        err = sst_core_object_read(object_handle,
+                                   (uint8_t *)&g_sst_object.header,
+                                   SST_OBJECT_START_POSITION,
+                                   SST_OBJECT_HEADER_SIZE);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Read object data if any */
+        if (g_sst_object.header.info.size_current > 0) {
+            err = sst_core_object_read(object_handle, g_sst_object.data,
+                                       SST_OBJECT_HEADER_SIZE,
+                                       g_sst_object.header.info.size_current);
+        }
+#endif
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Offset must not be larger than the object's current size to
+         * prevent gaps being created in the object data.
+         */
+        if (offset > g_sst_object.header.info.size_current) {
+            return TFM_SST_ERR_PARAM_ERROR;
+        }
+
+
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+        /* Update the object data */
+        sst_utils_memcpy(g_sst_object.data + offset, data, size);
+
+        /* Update the current object size if necessary */
+        if ((offset + size) > g_sst_object.header.info.size_current) {
+            g_sst_object.header.info.size_current = offset + size;
+        }
+#else
+        /* Update the object data */
+        sst_utils_memcpy(g_sst_object.data, data, size);
+
+        /* Update the current object size if necessary */
+        if (size > g_sst_object.header.info.size_current) {
+            g_sst_object.header.info.size_current = size;
+        }
+#endif
+
+#ifdef SST_ENCRYPTION
+        err = sst_encrypted_object_write(object_handle, &g_sst_object);
+#else
+        err = sst_core_object_write(object_handle, (uint8_t *)&g_sst_object,
+                                    SST_OBJECT_START_POSITION,
+                                    SST_OBJECT_SIZE(
+                                        g_sst_object.header.info.size_current));
+#endif
         sst_global_unlock();
     }
 
@@ -97,29 +258,25 @@ enum tfm_sst_err_t sst_object_get_attributes(uint32_t object_handle,
                                            struct tfm_sst_attribs_t *attributes)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
-    struct sst_assetmeta tmp_metadata;
-    uint32_t object_index;
-    uint16_t uuid;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
-        /* Get the meta data index */
-        object_index = sst_utils_extract_index_from_handle(object_handle);
-        /* Read object metadata */
-        err = sst_meta_read_object_meta(object_index, &tmp_metadata);
-        if (err == 0) {
-            /* Check if index is still referring to same object */
-            uuid = sst_utils_extract_uuid_from_handle(object_handle);
-            if (uuid != tmp_metadata.unique_id) {
-                /* Likely the object has been deleted in another context
-                 * this handle isn't valid anymore.
-                 */
-                err = TFM_SST_ERR_INVALID_HANDLE;
-            } else {
-                attributes->size_max = tmp_metadata.max_size;
-                attributes->size_current = tmp_metadata.cur_size;
-            }
+
+        /* Read the object from the object system */
+#ifdef SST_ENCRYPTION
+        err = sst_encrypted_object_read(object_handle, &g_sst_object);
+#else
+        err = sst_core_object_read(object_handle, (uint8_t *)&g_sst_object,
+                                   SST_OBJECT_START_POSITION,
+                                   SST_OBJECT_HEADER_SIZE);
+#endif
+        if (err != TFM_SST_ERR_SUCCESS) {
+            return err;
         }
+
+        sst_utils_memcpy(attributes, &g_sst_object.header.info,
+                         sizeof(struct tfm_sst_attribs_t));
+
         sst_global_unlock();
     }
 

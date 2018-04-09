@@ -69,6 +69,7 @@
   "source_files": [
     "sst_core.c",
     "sst_utils.c",
+    "sst_encrypted_object.c",
     "sst_object_system.c",
     "sst_asset_management.c",
     "assets/sst_asset_defs.c",

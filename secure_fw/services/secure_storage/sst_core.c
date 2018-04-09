@@ -9,9 +9,8 @@
 
 #include <string.h>
 
-#include "assets/sst_asset_defs.h"
 #include "flash/sst_flash.h"
-
+#include "sst_object_defs.h"
 #include "sst_utils.h"
 
 #if ((SST_TOTAL_NUM_OF_BLOCKS < 2) || (SST_TOTAL_NUM_OF_BLOCKS == 3))
@@ -65,6 +64,7 @@
 
 #define SST_LOGICAL_DBLOCK0  0
 #define SST_DEFAULT_EMPTY_BUFF_VAL 0
+#define SST_OBJECT_START_POSITION  0
 
 #ifndef SST_FLASH_PROGRAM_UNIT
 #error "SST_FLASH_PROGRAM_UNIT must be defined in flash_layout.h"
@@ -76,41 +76,28 @@
 #error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4 bytes"
 #endif
 
-#if ((SST_MAX_ASSET_SIZE % SST_FLASH_PROGRAM_UNIT) != 0)
-/* SST_ALIGNED_MAX_ASSET_SIZE aligns the SST_MAX_ASSET_SIZE with the
+/* SST_ALIGNED_MAX_OBJECT_SIZE aligns the SST_MAX_OBJECT_SIZE with the
  * SST_FLASH_PROGRAM_UNIT
  */
-#define SST_ALIGNED_MAX_ASSET_SIZE \
-((SST_FLASH_PROGRAM_UNIT - (SST_MAX_ASSET_SIZE % SST_FLASH_PROGRAM_UNIT)) \
-  + SST_MAX_ASSET_SIZE)
-#else
-#define SST_ALIGNED_MAX_ASSET_SIZE SST_MAX_ASSET_SIZE
-#endif
-
-/*
- * SST data buffer is used for metadata autentication, plain text and
- * encrypted data.
- */
-#ifdef SST_ENCRYPTION
-static uint8_t sst_data_buf[SST_ALIGNED_MAX_ASSET_SIZE * 2];
-#else
-static uint8_t sst_data_buf[SST_ALIGNED_MAX_ASSET_SIZE];
-#endif
-
-static uint8_t *sst_buf_plain_text = sst_data_buf;
-#ifdef SST_ENCRYPTION
-/* Plain text is stored at the beginning of SST data buffer. Encrypted data is
- * located from the middle to the end of SST data buffer.
- */
-static uint8_t *sst_buf_encrypted = sst_data_buf + SST_ALIGNED_MAX_ASSET_SIZE;
-#endif
-
-static struct sst_asset_system_context sst_system_ctx;
+#define SST_ALIGNED_MAX_OBJECT_SIZE \
+((SST_FLASH_PROGRAM_UNIT - (SST_MAX_OBJECT_SIZE % SST_FLASH_PROGRAM_UNIT)) \
+  + SST_MAX_OBJECT_SIZE)
 
 #define SST_ALL_METADATA_SIZE \
 (sizeof(struct sst_metadata_block_header) + \
 (SST_NUM_ACTIVE_DBLOCKS * sizeof(struct sst_block_metadata)) + \
 (SST_NUM_ASSETS * sizeof(struct sst_assetmeta)))
+
+#ifndef SST_ENCRYPTION
+/* SST data buffer is used for metadata and object data. */
+static uint8_t sst_data_buf[SST_ALIGNED_MAX_OBJECT_SIZE];
+static uint8_t *sst_buf_plain_text = sst_data_buf;
+#else
+/* SST data buffer is used for metadata authentication */
+static uint8_t sst_data_buf[SST_ALL_METADATA_SIZE];
+#endif
+
+static struct sst_asset_system_context sst_system_ctx;
 
 #ifdef SST_ENCRYPTION
 /* Check at compilation time if metadata fits in sst_data_buf */
@@ -132,11 +119,12 @@ SST_UTILS_BOUND_CHECK(METADATA_NOT_FIT_IN_DATA_BUF,
  * However, the larger asset must have enough space in the SST area to be
  * created, at least, when the SST area is empty.
  */
-/* Check if the largest asset fits in the asset's data area */
+/* Checks at compile time if the largest asset fits in the asset's data area */
 SST_UTILS_BOUND_CHECK(LARGEST_ASSET_NOT_FIT_IN_DATA_BLOCK,
-                      SST_ALIGNED_MAX_ASSET_SIZE, SST_BLOCK_SIZE);
+                      SST_ALIGNED_MAX_OBJECT_SIZE, SST_BLOCK_SIZE);
+
 #if (SST_TOTAL_NUM_OF_BLOCKS == 2)
-SST_UTILS_BOUND_CHECK(ASSET_NOT_FIT_IN_DATA_AREA, SST_ALIGNED_MAX_ASSET_SIZE,
+SST_UTILS_BOUND_CHECK(ASSET_NOT_FIT_IN_DATA_AREA, SST_ALIGNED_MAX_OBJECT_SIZE,
                       (SST_BLOCK_SIZE - SST_ALL_METADATA_SIZE));
 #endif
 
@@ -423,7 +411,7 @@ static enum tfm_sst_err_t sst_meta_validate_object_meta(
      */
     if (sst_utils_validate_uuid(meta->unique_id) == TFM_SST_ERR_SUCCESS) {
         /* validate objects values if object is in use */
-        if (meta->max_size > SST_MAX_ASSET_SIZE) {
+        if (meta->max_size > SST_MAX_OBJECT_SIZE) {
             return TFM_SST_ERR_ASSET_NOT_FOUND;
         }
 
@@ -779,36 +767,31 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
 }
 
 /**
- * \brief Reads the object's content, might be encrypted
+ * \brief Reads the object's content
  *
- * \param[in] meta  Object's metadata
+ * \param[in]  meta    Object's metadata
+ * \param[in]  offset  Offset in the object
+ * \param[in]  size    Size to be read
+ * \param[out] buf     Buffer pointer to store the data
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-static enum tfm_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta)
+static enum tfm_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta,
+                                                    uint32_t offset,
+                                                    uint32_t size,
+                                                    uint8_t *buf)
 {
     enum tfm_sst_err_t err;
     uint32_t phys_block;
     uint32_t pos;
-    uint32_t size;
-    uint8_t *read_buf;
 
     phys_block = sst_dblock_lo_to_phy(meta->lblock);
     if (phys_block == SST_BLOCK_INVALID_ID) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
-    pos = meta->data_index;
-    size = meta->cur_size;
+    pos = (meta->data_index + offset);
 
-#ifdef SST_ENCRYPTION
-    read_buf = sst_buf_encrypted;
-#else
-    read_buf = sst_buf_plain_text;
-#endif
-    /* Pedantic: clear the buffer from any previous residue */
-    sst_utils_memset(read_buf, SST_DEFAULT_EMPTY_BUFF_VAL,
-                     SST_ALIGNED_MAX_ASSET_SIZE);
-    err = sst_flash_read(phys_block, read_buf, pos, size);
+    err = sst_flash_read(phys_block, buf, pos, size);
 
     return err;
 }
@@ -934,86 +917,7 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
 
     return err;
 }
-
-/**
- * \brief Decrypts/authenticates an object
- *
- * \param[in] meta  Metadata entry for the object
- *
- * \return Returns error code as specified in \ref tfm_sst_err_t
- */
-static enum tfm_sst_err_t sst_block_object_decrypt(
-                                               const struct sst_assetmeta *meta)
-{
-    enum tfm_sst_err_t err;
-
-    /* This function should be called after encrypted
-     * object is already read into sst_buf_plain_text buffer.
-     */
-    /* Get the app specific key */
-    err = sst_crypto_getkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = sst_crypto_setkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Pedantic: clear the decryption buffer */
-    sst_utils_memset(sst_buf_plain_text, SST_DEFAULT_EMPTY_BUFF_VAL,
-                     SST_ALIGNED_MAX_ASSET_SIZE);
-    err = sst_crypto_auth_and_decrypt(&meta->crypto, 0, 0,
-                                      sst_buf_encrypted, sst_buf_plain_text,
-                                      meta->cur_size);
-    return err;
-}
-
-/**
- * \brief Encrypts an object
- *
- * \param[in] meta  Metadata entry for the object
- *
- * \return Returns error code as specified in \ref tfm_sst_err_t
- */
-static enum tfm_sst_err_t sst_block_object_encrypt(struct sst_assetmeta *meta)
-{
-    enum tfm_sst_err_t err;
-
-    /* This function should be called after encrypted
-     * object is already read into sst_buf_raw buffer.
-     */
-    err = sst_crypto_getkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = sst_crypto_setkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = sst_crypto_encrypt_and_tag(&meta->crypto, 0, 0,
-                                     sst_buf_plain_text, sst_buf_encrypted,
-                                     meta->cur_size);
-    return err;
-}
 #endif
-
-/**
- * \brief Copies the object (or portion of) into caller's buffer
- *
- * \param[out] buf       Caller's buffer
- * \param[in] offset     Offset in the object
- * \param[in] size       Size to be read
- *
- */
-static void sst_block_copy_decrypted_object(uint8_t *buf, uint32_t offset,
-                                            uint32_t size)
-{
-    sst_utils_memcpy(buf, (sst_buf_plain_text+offset), size);
-}
 
 /**
  * \brief Checks the validity of the metadata block's swap count
@@ -1356,6 +1260,35 @@ enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
     return TFM_SST_ERR_SUCCESS;
 }
 
+enum tfm_sst_err_t sst_core_object_get_attributes(uint32_t asset_handle,
+                                           struct tfm_sst_attribs_t *attributes)
+{
+    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    struct sst_assetmeta tmp_metadata;
+    uint32_t object_index;
+    uint16_t uuid;
+
+    /* Get the meta data index */
+    object_index = sst_utils_extract_index_from_handle(asset_handle);
+    /* Read object metadata */
+    err = sst_meta_read_object_meta(object_index, &tmp_metadata);
+    if (err == 0) {
+        /* Check if index is still referring to same object */
+        uuid = sst_utils_extract_uuid_from_handle(asset_handle);
+        if (uuid != tmp_metadata.unique_id) {
+            /* Likely the object has been deleted in another context
+             * this handle isn't valid anymore.
+             */
+            err = TFM_SST_ERR_INVALID_HANDLE;
+        } else {
+            attributes->size_max = tmp_metadata.max_size;
+            attributes->size_current = tmp_metadata.cur_size;
+        }
+    }
+
+    return err;
+}
+
 enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
                                          const uint8_t *data, uint32_t offset,
                                          uint32_t size)
@@ -1363,7 +1296,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     uint16_t object_index;
     enum tfm_sst_err_t err;
     uint32_t cur_phys_block;
-    const uint8_t *prepared_buf = sst_buf_plain_text;
+    const uint8_t *prepared_buf;
     struct sst_assetmeta object_meta;
     struct sst_block_metadata block_meta;
     uint32_t align_flash_nbr_bytes;
@@ -1395,33 +1328,29 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     }
 #endif
 
+#ifndef SST_ENCRYPTION
+    prepared_buf = sst_buf_plain_text;
+
     /* Clean previous data in sst_buf_plain_text */
     sst_utils_memset(sst_buf_plain_text, SST_DEFAULT_EMPTY_BUFF_VAL,
-                     SST_ALIGNED_MAX_ASSET_SIZE);
-
+                     SST_ALIGNED_MAX_OBJECT_SIZE);
 
     if (object_meta.cur_size > 0) {
-        /* Copy the current asset's data into the sst_buf_plain_text buffer
-         * or sst_buf_encrypted if SST_ENCRYPTION is enabled.
-         */
-        err = sst_block_object_read_raw(&object_meta);
+        /* Copy the current asset's data into the sst_buf_plain_text buffer. */
+        err = sst_block_object_read_raw(&object_meta,
+                                        SST_OBJECT_START_POSITION,
+                                        object_meta.cur_size,
+                                        sst_buf_plain_text);
         if (err != TFM_SST_ERR_SUCCESS) {
             return err;
         }
-
-#ifdef SST_ENCRYPTION
-        err = sst_block_object_decrypt(&object_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return err;
-        }
-#endif
     }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     /* sst_am_write has checked that offset + size value is not bigger than
      * the asset's maximum size. So, it is not needed to check it at this
      * point.
      */
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     if ((offset + size) > object_meta.cur_size) {
         /* Update the object metadata */
         object_meta.cur_size = offset + size;
@@ -1437,23 +1366,17 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
 
     /* Copy new data in the sst_buf_plain_text */
     sst_utils_memcpy(sst_buf_plain_text, data, size);
-#endif
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
-#ifdef SST_ENCRYPTION
-    /* Encrypt data in sst_buf_plain_text */
-    err = sst_block_object_encrypt(&object_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
+#else
+    prepared_buf = data;
+    object_meta.cur_size = size;
 
-    /* Encryption succeeded, change the data buffer pointer to
-     * encrypted buffer.
-     */
-    prepared_buf = sst_buf_encrypted;
-#endif
+#endif /* SST_ENCRYPTION */
 
     align_flash_nbr_bytes = sst_get_aligned_flash_bytes(object_meta.cur_size);
 
+    /* Copy the content into scratch data buffer */
     err = sst_dblock_update_scratch(object_meta.lblock, &block_meta,
                                     prepared_buf, object_meta.data_index,
                                     align_flash_nbr_bytes);
@@ -1728,21 +1651,11 @@ enum tfm_sst_err_t sst_core_object_read(uint32_t asset_handle, uint8_t *data,
     }
 
     /* Read the object from flash */
-    err = sst_block_object_read_raw(&tmp_metadata);
+    err = sst_block_object_read_raw(&tmp_metadata, offset, size, data);
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
 
-#if SST_ENCRYPTION
-    /* Decrypt the object */
-    err = sst_block_object_decrypt(&tmp_metadata);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
-    }
-#endif
-
-    /* Copy the decrypted data to caller's buffer */
-    sst_block_copy_decrypted_object(data, offset, size);
     return TFM_SST_ERR_SUCCESS;
 }
 

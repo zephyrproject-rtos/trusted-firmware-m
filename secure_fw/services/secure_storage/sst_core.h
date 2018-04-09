@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -78,7 +78,6 @@ struct sst_assetmeta {
     uint16_t unique_id;   /*!< Unique ID of this asset, compiler generated
                            *   based on user defined user_defs.h
                            */
-    union sst_crypto_t crypto; /*!< Crypto metadata */
 };
 
 struct sst_asset_system_context {
@@ -116,6 +115,18 @@ enum tfm_sst_err_t sst_core_object_handle(uint16_t asset_uuid, uint32_t *hdl);
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size);
+
+/**
+ * \brief Gets the object attributes referenced by object handler.
+ *
+ * \param[in]  asset_handle  Handle of the object
+ * \param[out] attributes    Pointer to the attributes structure to store the
+ *                           attributes values
+ *
+ * \return Returns error code specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_core_object_get_attributes(uint32_t asset_handle,
+                                          struct tfm_sst_attribs_t *attributes);
 
 /**
  * \brief Writes data to an existing object

@@ -33,7 +33,6 @@ union sst_crypto_t {
     } ref;
 };
 
-
 /**
  * \brief Initializes the crypto engine.
  *
