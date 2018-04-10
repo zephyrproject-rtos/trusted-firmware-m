@@ -35,18 +35,4 @@ enum uart_channel {
  */
 void stdio_init(void);
 
-/**
- * \brief Puts a character in the UART.
- *
- * \param[in]  ch  Character to write.
- */
-void uart_putc(unsigned char ch);
-
-/**
- * \brief Gets a character from the UART.
- *
- * \return Character read from UART.
- */
-unsigned char uart_getc(void);
-
 #endif /* __UART_STDOUT_H__ */

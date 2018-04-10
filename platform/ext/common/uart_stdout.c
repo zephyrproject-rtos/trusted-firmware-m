@@ -32,22 +32,40 @@ extern ARM_DRIVER_USART TFM_DRIVER_STDIO;
  */
 FILE __stdout;
 
-/* Redirects printf to TFM_DRIVER_STDIO */
-__attribute__ ((weak)) int fputc(int ch, FILE *f) {
+static void uart_putc(unsigned char c)
+{
+    int32_t ret = ARM_DRIVER_OK;
+
+    ret = TFM_DRIVER_STDIO.Send(&c, 1);
+    ASSERT_HIGH(ret);
+}
+
+/* Redirects printf to TFM_DRIVER_STDIO in case of ARMCLANG*/
+#if defined(__ARMCC_VERSION)
+/* __ARMCC_VERSION is only defined starting from Arm compiler version 6 */
+int fputc(int ch, FILE *f)
+{
     /* Send byte to USART */
     uart_putc(ch);
 
     /* Return character written */
     return ch;
 }
-
-int _write(int fd, char * str, int len)
+#elif defined(__GNUC__)
+/* Redirects printf to TFM_DRIVER_STDIO in case of GNUARM */
+int _write(int fd, char *str, int len)
 {
-    for (int i = 0; i < len; i++) {
+    int i;
+
+    for (i = 0; i < len; i++) {
+        /* Send byte to USART */
         uart_putc(str[i]);
     }
+
+    /* Return the number of characters written */
     return len;
 }
+#endif
 
 void stdio_init(void)
 {
@@ -59,21 +77,3 @@ void stdio_init(void)
     ASSERT_HIGH(ret);
 }
 
-void uart_putc(unsigned char c)
-{
-    int32_t ret = ARM_DRIVER_OK;
-
-    ret = TFM_DRIVER_STDIO.Send(&c, 1);
-    ASSERT_HIGH(ret);
-}
-
-unsigned char uart_getc(void)
-{
-    unsigned char c = 0;
-    int32_t ret = ARM_DRIVER_OK;
-
-    ret = TFM_DRIVER_STDIO.Receive(&c, 1);
-    ASSERT_HIGH(ret);
-
-    return c;
-}
