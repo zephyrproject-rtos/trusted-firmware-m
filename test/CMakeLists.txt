@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -69,6 +69,7 @@ endif()
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/integ_test.h
 				${CMAKE_CURRENT_SOURCE_DIR}/suites/core/non_secure/svc_core_test_ns.h
 				${CMAKE_CURRENT_SOURCE_DIR}/suites/sst/non_secure/os_wrapper.h
+				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_sst_test_service/sst_test_service_svc.h
 		DESTINATION tfm/test/inc)
 
 install(TARGETS tfm_non_secure_tests
@@ -78,4 +79,3 @@ install(TARGETS tfm_non_secure_tests
 
 embedded_project_end(tfm_non_secure_tests)
 embedded_project_end(tfm_secure_tests)
-
