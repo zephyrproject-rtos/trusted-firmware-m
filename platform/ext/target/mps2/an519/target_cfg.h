@@ -17,6 +17,8 @@
 #ifndef __SSE200_TARGET_CFG_H__
 #define __SSE200_TARGET_CFG_H__
 
+#include "tfm_peripherals_def.h"
+
 /**
  * \brief Defines the word offsets of Slave Peripheral Protection Controller
  *        Registers
@@ -42,24 +44,15 @@ enum ppc_bank_e
 };
 
 /**
- * \brief BusFault, UsageFault, MemManageFault and SecureFault
- *        are not present on AN519 so the body of this function
- *        is empty
+ * Holds the data necessary to do isolation for a specific peripheral.
  */
-void enable_fault_handlers(void);
-
-/**
- * \brief Configures all external interrupts to target the
- *        NS state, apart for the ones associated to secure
- *        peripherals (plus MPC and PPC)
- */
-void nvic_interrupt_target_state_cfg();
-
-/**
- * \brief This function enable the interrupts associated
- *        to the secure peripherals (plus MPC and PPC)
- */
-void nvic_interrupt_enable();
+struct tfm_spm_partition_platform_data_t
+{
+    uint32_t periph_start;
+    uint32_t periph_limit;
+    uint16_t periph_ppc_bank;
+    uint16_t periph_ppc_loc;
+};
 
 /**
  * \brief Configures the Memory Protection Controller.

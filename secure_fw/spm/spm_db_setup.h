@@ -12,10 +12,10 @@
 #include "spm_db.h"
 
 /**
- * \brief Return the index of a partition.
+ * \brief Get the index of a partition.
  *
- * Returns the index of a partition in the partition db based on the partition
- * ID provided as a parameter.
+ * Gets the index of a partition in the partition db based on the partition ID
+ * provided as a parameter.
  *
  * \param[in] partition_id    The ID of the partition
  *
@@ -28,32 +28,20 @@ struct spm_partition_db_t {
     uint32_t is_init;
     uint32_t partition_count;
     uint32_t running_partition_idx;
-    struct tfm_spm_partition_desc_t partitions[SPM_MAX_PARTITIONS];
+    struct spm_partition_desc_t partitions[SPM_MAX_PARTITIONS];
 };
 
-/* Macros to pick linker symbols and allow to form the partition data base */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#if TFM_LVL == 1
-#define REGION_DECLARE(a, b, c)
-#else
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
-#define PART_REGION_ADDR(partition, region) \
-    (uint32_t)&REGION_NAME(Image$$, partition, region)
-#endif
-
-
-#if TFM_LVL == 1
 #define PARTITION_INIT_STATIC_DATA(data, partition, flags) \
     do {                                                   \
         data.partition_id    = partition##_ID;             \
         data.partition_flags = flags;                      \
     } while (0)
+
+#if TFM_LVL == 1
+#define PARTITION_INIT_MEMORY_DATA(data, partition)
 #else
-#define PARTITION_INIT_STATIC_DATA(data, partition, flags)                     \
+#define PARTITION_INIT_MEMORY_DATA(data, partition)                            \
     do {                                                                       \
-        data.partition_id    = partition##_ID;                                 \
-        data.partition_flags = flags;                                          \
         data.code_start      = PART_REGION_ADDR(partition, $$Base);            \
         data.code_limit      = PART_REGION_ADDR(partition, $$Limit);           \
         data.ro_start        = PART_REGION_ADDR(partition, $$RO$$Base);        \
@@ -66,6 +54,7 @@ struct spm_partition_db_t {
         data.stack_top       = PART_REGION_ADDR(partition, _STACK$$ZI$$Limit); \
     } while (0)
 #endif
+
 
 #if TFM_LVL == 1
 #define PARTITION_INIT_RUNTIME_DATA(data, partition)            \
@@ -93,7 +82,7 @@ struct spm_partition_db_t {
         REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Limit);                \
         REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Base);                \
         REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Limit);               \
-        struct tfm_spm_partition_desc_t *part_ptr;                           \
+        struct spm_partition_desc_t *part_ptr;                               \
         if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {      \
             return SPM_ERR_INVALID_CONFIG;                                   \
         }                                                                    \
@@ -101,6 +90,7 @@ struct spm_partition_db_t {
             g_spm_partition_db.partition_count]);                            \
         PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition, flags); \
         PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition);      \
+        PARTITION_INIT_MEMORY_DATA(part_ptr->memory_data, partition);        \
         ++g_spm_partition_db.partition_count;                                \
     } while (0)
 
@@ -108,20 +98,17 @@ struct spm_partition_db_t {
     do {                                                              \
         extern int32_t init_func(void);                               \
         uint32_t partition_idx = get_partition_idx(partition##_ID);   \
-        struct tfm_spm_partition_desc_t *part_ptr =                   \
+        struct spm_partition_desc_t *part_ptr =                       \
             &(g_spm_partition_db.partitions[partition_idx]);          \
         part_ptr->static_data.partition_init = init_func;             \
     } while (0)
 
-#define PARTITION_ADD_PERIPHERAL(partition, start, limit, bank, loc)   \
+#define PARTITION_ADD_PERIPHERAL(partition, peripheral)               \
     do {                                                               \
         uint32_t partition_idx = get_partition_idx(partition##_ID);    \
-        struct tfm_spm_partition_desc_t *part_ptr =                    \
+        struct spm_partition_desc_t *part_ptr =                        \
             &(g_spm_partition_db.partitions[partition_idx]);           \
-        part_ptr->platform_data.periph_start = start;                  \
-        part_ptr->platform_data.periph_limit = limit;                  \
-        part_ptr->platform_data.periph_ppc_bank = bank;                \
-        part_ptr->platform_data.periph_ppc_loc = loc;                  \
+        part_ptr->platform_data = peripheral;                          \
     } while (0)
 
 #endif /* __SPM_DB_SETUP_H__ */

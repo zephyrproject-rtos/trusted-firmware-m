@@ -10,8 +10,7 @@
 
 /*
  * FixMe:
- * This is a beta quality driver for MPU in v8M. To be finalized and integrated
- * into platform code
+ * This is a beta quality driver for MPU in v8M. To be finalized.
  */
 
 enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,

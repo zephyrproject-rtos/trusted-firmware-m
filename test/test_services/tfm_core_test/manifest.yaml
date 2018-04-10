@@ -16,10 +16,7 @@
   "heap_size": "0x0400",
   "mmio_regions": [
     {
-      "name": "GPIO",
-      "base": "MPS2_IO_FPGAIO_BASE_S",
-      "size": "0xFFF",
-      "ppc_config": "PPC_SP_APB_PPC_EXP2, CMSDK_FPGA_IO_PPC_POS",
+      "name": "TFM_PERIPHERAL_FPGA_IO",
       "permission": "READ-WRITE"
     }
   ],

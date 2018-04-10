@@ -9,7 +9,7 @@
 #include "region_defs.h"
 #include "tfm_core.h"
 #include "tfm_internal.h"
-#include "target_cfg.h"
+#include "platform/include/tfm_spm_hal.h"
 #include "uart_stdout.h"
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
@@ -20,6 +20,15 @@
  */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
+#endif
+
+#if defined ( __GNUC__ )
+/* The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
+ * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
+ * cannot be used in the code. As a workaround cmse_nsfptr_create is redefined
+ * here to use only standard language elements. */
+#undef cmse_nsfptr_create
+#define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
 #endif
 
 #ifndef TFM_LVL
@@ -100,7 +109,7 @@ void configure_ns_code(void)
     /* Clears LSB of the function address to indicate the function-call
      * will perform the switch from secure to non-secure
      */
-    ns_entry = (nsfptr_t) (entry_ptr & (~0x1));
+    ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
 }
 
 int32_t tfm_core_init(void)
@@ -120,10 +129,7 @@ int32_t tfm_core_init(void)
     printf("TFM level is: %d\r\n", TFM_LVL);
 #endif
 
-    /* Configures non-secure memory spaces in the target */
-    sau_and_idau_cfg();
-    mpc_init_cfg();
-    ppc_init_cfg();
+    tfm_spm_hal_init_isolation_hw();
     configure_ns_code();
 
     /* Configures all interrupts to retarget NS state, except for
@@ -146,14 +152,9 @@ int main(void)
     tfm_core_init();
 
     tfm_spm_db_init();
-#if TFM_LVL != 1
-    if (tfm_spm_mpu_init() != SPM_ERR_OK) {
-        ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
-        while (1) {
-            ;
-        }
-    }
-#endif
+
+    tfm_spm_hal_setup_isolation_hw();
+
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
     extern uint32_t Stack_Mem[];

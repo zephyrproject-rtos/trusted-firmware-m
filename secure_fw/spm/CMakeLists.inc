@@ -24,9 +24,7 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
-set (SS_SPM_C_SRC "${SS_SPM_DIR}/mpu_armv8m_drv.c"
-		"${SS_SPM_DIR}/spm_api.c"
-	)
+set (SS_SPM_C_SRC "${SS_SPM_DIR}/spm_api.c")
 
 
 #Append all our source files to global lists.

@@ -31,6 +31,20 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1 = {
+        UART1_BASE_S,
+        UART1_BASE_S + 0xFFF,
+        PPC_SP_APB_PPC_EXP1,
+        CMSDK_UART1_APB_PPC_POS
+};
+
+struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io = {
+        MPS2_IO_FPGAIO_BASE_S,
+        MPS2_IO_FPGAIO_BASE_S + 0xFFF,
+        PPC_SP_APB_PPC_EXP2,
+        CMSDK_FPGA_IO_PPC_POS
+};
+
 void enable_fault_handlers(void)
 {
     /* Fault handles enable registers are not present in a baseline

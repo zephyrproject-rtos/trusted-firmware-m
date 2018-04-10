@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,10 +12,12 @@
 
 #include "cmsis.h"
 
+#define PRIVILEGED_DEFAULT_ENABLE 1
+#define HARDFAULT_NMI_ENABLE      1
+
 struct mpu_armv8m_dev_t {
     const uint32_t base;
 };
-
 
 enum mpu_armv8m_error_t {
     MPU_ARMV8M_OK,

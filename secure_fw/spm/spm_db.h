@@ -18,18 +18,6 @@ typedef int32_t(*sp_init_function)(void);
 struct spm_partition_static_data_t {
     uint32_t partition_id;
     uint32_t partition_flags;
-#if TFM_LVL != 1
-    uint32_t code_start;
-    uint32_t code_limit;
-    uint32_t ro_start;
-    uint32_t ro_limit;
-    uint32_t rw_start;
-    uint32_t rw_limit;
-    uint32_t zi_start;
-    uint32_t zi_limit;
-    uint32_t stack_bottom;
-    uint32_t stack_top;
-#endif
     sp_init_function partition_init;
 };
 
@@ -37,10 +25,24 @@ struct spm_partition_static_data_t {
  * Holds the fields that define a partition for SPM. The fields are further
  * divided to structures, to keep the related fields close to each other.
  */
-struct tfm_spm_partition_desc_t {
+struct spm_partition_desc_t {
     struct spm_partition_static_data_t static_data;
     struct spm_partition_runtime_data_t runtime_data;
-    struct tfm_spm_partition_platform_data_t platform_data;
+    struct tfm_spm_partition_platform_data_t *platform_data;
+#if TFM_LVL != 1
+    struct tfm_spm_partition_memory_data_t memory_data;
+#endif
 };
+
+/* Macros to pick linker symbols and allow to form the partition data base */
+#define REGION(a, b, c) a##b##c
+#define REGION_NAME(a, b, c) REGION(a, b, c)
+#if TFM_LVL == 1
+#define REGION_DECLARE(a, b, c)
+#else
+#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+#define PART_REGION_ADDR(partition, region) \
+    (uint32_t)&REGION_NAME(Image$$, partition, region)
+#endif
 
 #endif /* __SPM_DB_H__ */

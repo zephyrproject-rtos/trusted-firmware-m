@@ -17,11 +17,8 @@
   "heap_size": "0x0400",
   "mmio_regions" : [
     {
-      "name": "UART1",
-      "base": "UART1_BASE_S",
-      "size": "0xFFF",
+      "name": "TFM_PERIPHERAL_UART1",
       "permission": "READ-WRITE",
-      "ppc_config": "PPC_SP_APB_PPC_EXP1, CMSDK_UART1_APB_PPC_POS",
       "conditional": "LOG_UART_REDIRECTION"
     }
   ],

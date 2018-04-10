@@ -233,13 +233,6 @@ enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
 enum spm_err_t tfm_spm_db_init(void);
 
 /**
- * \brief Apply default MPU configuration for execution
- *
- * \return Error code \ref spm_err_t
- */
-enum spm_err_t tfm_spm_mpu_init(void);
-
-/**
  * \brief Execute partition init function
  *
  * \return Error code \ref spm_err_t

@@ -24,10 +24,8 @@ PARTITION_ADD_INIT_FUNC(@@manifest.tfm_partition_name@@, @@manifest.tfm_init_sym
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
 #ifdef @@manifest.mmio_regions.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.base@@
-PARTITION_ADD_PERIPHERAL(@@manifest.tfm_partition_name@@, @@manifest.mmio_regions.base@@,
-    @@manifest.mmio_regions.base@@ + @@manifest.mmio_regions.size@@,
-    @@manifest.mmio_regions.ppc_config@@);
+@!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.name@@
+PARTITION_ADD_PERIPHERAL(@@manifest.tfm_partition_name@@, @@manifest.mmio_regions.name@@);
 @!GENERATOR_CONDITIONAL_END!@
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
 #endif /* @@manifest.mmio_regions.conditional@@ */

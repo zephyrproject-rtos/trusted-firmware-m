@@ -9,17 +9,12 @@
 #include <string.h>
 
 #include "cmsis.h"
-#include "Driver_MPC.h"
 #include "secure_utilities.h"
 #include "arm_acle.h"
-#include "target_cfg.h"
 #include "tfm_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"
 #include "tfm_api.h"
-
-/* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
 
 /* This SVC handler is called if veneer is running in thread mode */
 extern void tfm_core_partition_request_svc_handler(
@@ -108,39 +103,6 @@ void HardFault_Handler(void)
 #error "Unsupported ARM Architecture."
 #endif
 
-
-void MPC_Handler(void)
-{
-    /* Clear MPC interrupt flag and pending MPC IRQ */
-    Driver_SRAM1_MPC.ClearInterrupt();
-    NVIC_ClearPendingIRQ(MPC_IRQn);
-
-    /* Print fault message and block execution */
-    LOG_MSG("Oops... MPC fault!!!");
-    while (1) {
-        ;
-    }
-}
-
-void PPC_Handler(void)
-{
-    /*
-     * Due to an issue on the FVP, the PPC fault doesn't trigger a
-     * PPC IRQ which is handled by the PPC_handler.
-     * In the FVP execution, this code is not execute.
-     */
-
-  /* Clear PPC interrupt flag and pending PPC IRQ*/
-    ppc_clear_irq();
-    NVIC_ClearPendingIRQ(PPC_IRQn);
-
-    /* Print fault message*/
-    LOG_MSG("Oops... PPC fault!!!");
-    while (1) {
-        ;
-    }
-}
-
 #if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {
@@ -223,4 +185,11 @@ int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
     }
 
     return TFM_ERROR_GENERIC;
+}
+
+void tfm_access_violation_handler(void)
+{
+    while (1) {
+        ;
+    }
 }
