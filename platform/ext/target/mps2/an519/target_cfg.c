@@ -111,7 +111,7 @@ void nvic_interrupt_enable()
      * peripherals used by NS. That triggers a PPC0 exception as that
      * register is meant for NS privileged access only. Clear it here
      */
-    spctrl->secppcintclr |= CMSDK_APB_PPC0_INT_POS_MASK;
+    spctrl->secppcintclr = CMSDK_APB_PPC0_INT_POS_MASK;
 
     /* Enable PPC interrupts for APB PPC */
     spctrl->secppcinten |= CMSDK_APB_PPC0_INT_POS_MASK;
@@ -223,23 +223,20 @@ void ppc_init_cfg(void)
     spctrl->apbnsppcexp2 |= (1U << CMSDK_FPGA_SCC_PPC_POS);
     spctrl->apbnsppcexp2 |= (1U << CMSDK_FPGA_AUDIO_PPC_POS);
     spctrl->apbnsppcexp2 |= (1U << CMSDK_FPGA_IO_PPC_POS);
-    /* Grant non-secure access for AHB peripherals on PPC0 */
-    spctrl->ahbnsppc0 |= (1U << CMSDK_VGA_PPC_POS);
-    spctrl->ahbnsppc0 |= (1U << CMSDK_GPIO0_PPC_POS);
-    spctrl->ahbnsppc0 |= (1U << CMSDK_GPIO1_PPC_POS);
-    spctrl->ahbnsppc0 |= (1U << CMSDK_GPIO2_PPC_POS);
-    spctrl->ahbnsppc0 |= (1U << CMSDK_GPIO3_PPC_POS);
 
     /* Grant non-secure access to all peripherals on AHB EXP:
-     * The SSE-200 doesn't have any peripheral connected to
-     * the AHB expansions. But the SIE-200 has peripherals,
-     * in particular the Ethernet driver on EXP1. Make sure
-     * that all possible peripherals are enabled by default
+     * Make sure that all possible peripherals are enabled by default
      */
-    spctrl->ahbnsppcexp0 = 0xFFFFFFFF;
-    spctrl->ahbnsppcexp1 = 0xFFFFFFFF;
-    spctrl->ahbnsppcexp2 = 0xFFFFFFFF;
-    spctrl->ahbnsppcexp3 = 0xFFFFFFFF;
+    spctrl->ahbnsppcexp0 |= (1U << CMSDK_VGA_PPC_POS);
+    spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO0_PPC_POS);
+    spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO1_PPC_POS);
+    spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO2_PPC_POS);
+    spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO3_PPC_POS);
+
+    spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA0_PPC_POS);
+    spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA1_PPC_POS);
+    spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA2_PPC_POS);
+    spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA3_PPC_POS);
 
     /* in NS, grant un-privileged for UART0 */
     nspctrl->apbnspppcexp1 |= (1U << CMSDK_UART0_APB_PPC_POS);
@@ -283,5 +280,5 @@ void ppc_clear_irq(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     /* Clear APC PPC EXP2 IRQ */
-    spctrl->secppcintclr |= CMSDK_APB_PPCEXP2_INT_POS_MASK;
+    spctrl->secppcintclr = CMSDK_APB_PPCEXP2_INT_POS_MASK;
 }
