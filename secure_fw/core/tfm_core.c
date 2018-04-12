@@ -96,17 +96,11 @@ int32_t tfm_core_init(void)
 
     __enable_irq();
 
+    uart_init(UART0_CHANNEL);
+    LOG_MSG("Secure image initializing!");
+
 #ifdef TFM_CORE_DEBUG
-    /* Initializes UART0 to print messages. The STDOUT is redirected to UART0 */
-    uart_init(UART0_CHANNEL);
-
-    LOG_MSG("Secure image initializing!");
     printf("TFM level is: %d\r\n", TFM_LVL);
-#else
-    /* FixMe: redirect secure log entries to secure log */
-    uart_init(UART0_CHANNEL);
-
-    LOG_MSG("Secure image initializing!");
 #endif
 
     /* Configures non-secure memory spaces in the target */

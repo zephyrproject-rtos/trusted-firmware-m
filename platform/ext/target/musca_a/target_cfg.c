@@ -91,11 +91,6 @@ void nvic_interrupt_target_state_cfg()
     /* Make sure that MPC and PPC are targeted to S state */
     NVIC_ClearTargetState(MPC_IRQn);
     NVIC_ClearTargetState(PPC_IRQn);
-
-    /* UART1 is a secure peripheral, so its IRQs have to target S state */
-    NVIC_ClearTargetState(UARTRX1_IRQn);
-    NVIC_ClearTargetState(UARTTX1_IRQn);
-    NVIC_ClearTargetState(UART1_IRQn);
 }
 
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/

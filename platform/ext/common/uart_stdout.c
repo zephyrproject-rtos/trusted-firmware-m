@@ -71,19 +71,33 @@ void uart_init(enum uart_channel uchan)
     /* Add a configuration step for the UART channel to use, 0 or 1 */
     switch(uchan) {
     case UART0_CHANNEL:
-        /* UART0 is configured as a non-secure peripheral, so we wouldn't be
-         * able to access it using its secure alias. Ideally, we would want
-         * to use UART1 only from S side as it's a secure peripheral, but for
-         * simplicity, leave the option to use UART0 and use a workaround
+        /* UART0 is configured as a non-secure peripheral, so it cannot be
+         * accessed using its secure alias. Ideally the driver would
+         * be configured with the right properties, but for simplicity,
+         * use a workaround for now
          */
 #ifdef TARGET_MUSCA_A
         memcpy(&UART0_DEV_S, &UART0_DEV_NS, sizeof(struct uart_pl011_dev_t));
 #else
-        memcpy(&ARM_UART0_DEV_S, &ARM_UART0_DEV_NS, sizeof(struct arm_uart_dev_t));
+        memcpy(&ARM_UART0_DEV_S, &ARM_UART0_DEV_NS,
+                                                sizeof(struct arm_uart_dev_t));
 #endif
         Driver_USART = &Driver_USART0;
         break;
     case UART1_CHANNEL:
+#ifndef SECURE_UART1
+        /* If UART1 is configured as a non-secure peripheral, it cannot be
+         * accessed using its secure alias. Ideally the driver would
+         * be configured with the right properties, but for simplicity,
+         * use a workaround for now
+         */
+#ifdef TARGET_MUSCA_A
+        memcpy(&UART1_DEV_S, &UART1_DEV_NS, sizeof(struct uart_pl011_dev_t));
+#else
+        memcpy(&ARM_UART1_DEV_S, &ARM_UART1_DEV_NS,
+                                                sizeof(struct arm_uart_dev_t));
+#endif
+#endif
         Driver_USART = &Driver_USART1;
         break;
     default:

@@ -78,7 +78,7 @@ void enable_fault_handlers(void)
                   | SCB_SHCSR_SECUREFAULTENA_Msk;
 }
 
-/*------------------- NVIC interrupt target state to NS configuration ----------*/
+/*----------------- NVIC interrupt target state to NS configuration ----------*/
 void nvic_interrupt_target_state_cfg()
 {
     /* Target every interrupt to NS; unimplemented interrupts will be WI */
@@ -90,13 +90,15 @@ void nvic_interrupt_target_state_cfg()
     NVIC_ClearTargetState(MPC_IRQn);
     NVIC_ClearTargetState(PPC_IRQn);
 
+#ifdef SECURE_UART1
     /* UART1 is a secure peripheral, so its IRQs have to target S state */
     NVIC_ClearTargetState(UARTRX1_IRQn);
     NVIC_ClearTargetState(UARTTX1_IRQn);
     NVIC_ClearTargetState(UART1_IRQn);
+#endif
 }
 
-/*------------------- NVIC interrupt enabling for S peripherals ----------------*/
+/*----------------- NVIC interrupt enabling for S peripherals ----------------*/
 void nvic_interrupt_enable()
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
@@ -125,7 +127,7 @@ void nvic_interrupt_enable()
     NVIC_EnableIRQ(PPC_IRQn);
 }
 
-/*------------------- SAU/IDAU configuration functions -------------------------*/
+/*------------------- SAU/IDAU configuration functions -----------------------*/
 
 void sau_and_idau_cfg(void)
 {
@@ -152,13 +154,18 @@ void sau_and_idau_cfg(void)
     /* Only UART1 is configured as a secure peripheral */
     SAU->RNR  = TFM_NS_REGION_PERIPH_1;
     SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
+
+#ifdef SECURE_UART1
+    /* To statically configure a peripheral range as secure, close NS peripheral
+     * region before range, and open a new NS region after the reserved space.
+     */
     SAU->RLAR = ((UART1_BASE_NS-1) & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-    /* The UART1 range is considered as a (secure) gap */
-
     SAU->RNR  = TFM_NS_REGION_PERIPH_2;
     SAU->RBAR = (UART2_BASE_NS & SAU_RBAR_BADDR_Msk);
+#endif
+
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
@@ -213,7 +220,13 @@ void ppc_init_cfg(void)
     spctrl->apbnsppcexp1 |= (1U << CMSDK_SPI3_APB_PPC_POS);
     spctrl->apbnsppcexp1 |= (1U << CMSDK_SPI4_APB_PPC_POS);
     spctrl->apbnsppcexp1 |= (1U << CMSDK_UART0_APB_PPC_POS);
-    /* Do not do it for UART1 as it's a Secure peripheral */
+#ifdef SECURE_UART1
+    /* To statically configure a peripheral as secure, skip PPC NS peripheral
+     * configuration for the given device.
+     */
+#else
+    spctrl->apbnsppcexp1 |= (1U << CMSDK_UART1_APB_PPC_POS);
+#endif
     spctrl->apbnsppcexp1 |= (1U << CMSDK_UART2_APB_PPC_POS);
     spctrl->apbnsppcexp1 |= (1U << CMSDK_UART3_APB_PPC_POS);
     spctrl->apbnsppcexp1 |= (1U << CMSDK_UART4_APB_PPC_POS);

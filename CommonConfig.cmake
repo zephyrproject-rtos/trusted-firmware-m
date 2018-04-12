@@ -85,6 +85,9 @@ elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_A")
 	add_definitions(-DTARGET_MUSCA_A)
 endif()
 
+# Option to demonstrate usage of secure-only peripheral
+set (SECURE_UART1 OFF)
+
 if (REGRESSION)
 	set(SERVICES_TEST_ENABLED ON)
 else()
