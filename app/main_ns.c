@@ -17,10 +17,10 @@
 #include "tfm_sst_svc_handler.h"
 #include "tfm_ns_lock.h"
 #ifdef TFM_PARTITION_TEST_CORE
-#include "test/suites/core/non_secure/svc_core_test_ns.h"
+#include "svc_core_test_ns.h"
 #endif
 #ifdef TFM_PARTITION_TEST_SST
-#include "test/test_services/tfm_sst_test_service/sst_test_service_svc.h"
+#include "sst_test_service_svc.h"
 #endif
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/integ_test.h"

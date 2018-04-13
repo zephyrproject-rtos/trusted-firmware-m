@@ -21,6 +21,7 @@ embedded_project_fixup()
 set(APP_DIR ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
 set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
+set(TEST_INTERFACE_DIR ${TFM_ROOT_DIR}/test/interface)
 
 #Set variables
 get_filename_component(CMSIS_5_DIR ${TFM_ROOT_DIR}/../CMSIS_5 ABSOLUTE)
@@ -66,6 +67,7 @@ embedded_set_target_linker_file(TARGET tfm_ns PATH  "${NS_SCATTER_FILE_NAME}")
 
 #Set include directories.
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/common/sct ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TEST_INTERFACE_DIR}/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${INTERFACE_DIR}/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)

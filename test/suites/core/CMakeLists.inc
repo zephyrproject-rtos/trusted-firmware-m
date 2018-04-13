@@ -45,5 +45,6 @@ endif()
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/test/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 
