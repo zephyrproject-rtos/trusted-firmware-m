@@ -210,6 +210,30 @@ uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
     return g_spm_partition_db.partitions[partition_idx].memory_data.stack_top;
 }
 
+uint32_t tfm_spm_partition_get_zi_start(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].
+            memory_data.zi_start;
+}
+
+uint32_t tfm_spm_partition_get_zi_limit(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].
+            memory_data.zi_limit;
+}
+
+uint32_t tfm_spm_partition_get_rw_start(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].
+            memory_data.rw_start;
+}
+
+uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].
+            memory_data.rw_limit;
+}
+
 void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr)
 {
     g_spm_partition_db.partitions[partition_idx].
@@ -258,6 +282,13 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
 {
     g_spm_partition_db.partitions[partition_idx].runtime_data.
             caller_partition_idx = caller_partition_idx;
+}
+
+void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
+                                            int32_t caller_client_id)
+{
+    g_spm_partition_db.partitions[partition_idx].runtime_data.
+            caller_client_id = caller_client_id;
 }
 
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,

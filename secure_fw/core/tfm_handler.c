@@ -27,6 +27,9 @@ extern void
         tfm_core_validate_secure_caller_handler(const uint32_t svc_args[]);
 
 extern void
+        tfm_core_get_caller_client_id_handler(const uint32_t svc_args[]);
+
+extern void
         tfm_core_memory_permission_check_handler(const uint32_t svc_args[]);
 
 /* This SVC handler is called when a secure partition requests access to a
@@ -168,6 +171,9 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
         break;
     case TFM_SVC_VALIDATE_SECURE_CALLER:
         tfm_core_validate_secure_caller_handler(svc_args);
+        break;
+    case TFM_SVC_GET_CALLER_CLIENT_ID:
+        tfm_core_get_caller_client_id_handler(svc_args);
         break;
     case TFM_SVC_MEMORY_CHECK:
         tfm_core_memory_permission_check_handler(svc_args);

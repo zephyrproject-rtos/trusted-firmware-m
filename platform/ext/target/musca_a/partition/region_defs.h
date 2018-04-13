@@ -51,7 +51,7 @@
 #define IMAGE_CODE_SIZE \
             (FLASH_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x000000E0)
+#define CMSE_VENEER_REGION_SIZE     (0x00000100)
 
 /*
  * Since we enable/disable flash during s/ns code copy to code sram we cannot

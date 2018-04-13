@@ -42,6 +42,7 @@ enum spm_part_flag_mask_t {
 struct spm_partition_runtime_data_t {
     uint32_t partition_state;
     uint32_t caller_partition_idx;
+    int32_t caller_client_id;
     uint32_t share;
     uint32_t stack_ptr;
     uint32_t lr;
@@ -125,6 +126,52 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
 uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
 
 /**
+ * \brief Get the start of the zero-initialised region for a partition
+ *
+ * \param[in] partition_idx     Partition idx
+ *
+ * \return Start of the zero-initialised region
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_zi_start(uint32_t partition_idx);
+
+/**
+ * \brief Get the limit of the zero-initialised region for a partition
+ *
+ * \param[in] partition_idx     Partition idx
+ *
+ * \return Limit of the zero-initialised region
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note The address returned is not part of the region.
+ */
+uint32_t tfm_spm_partition_get_zi_limit(uint32_t partition_idx);
+
+/**
+ * \brief Get the start of the read-write region for a partition
+ *
+ * \param[in] partition_idx     Partition idx
+ *
+ * \return Start of the read-write region
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_rw_start(uint32_t partition_idx);
+
+/**
+ * \brief Get the limit of the read-write region for a partition
+ *
+ * \param[in] partition_idx     Partition idx
+ *
+ * \return Limit of the read-write region
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note The address returned is not part of the region.
+ */
+uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx);
+
+/**
  * \brief Get the current runtime data of a partition
  *
  * \param[in] partition_idx     Partition index
@@ -187,6 +234,17 @@ void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state);
  */
 void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
                                                 uint32_t caller_partition_idx);
+
+/**
+* \brief Set the caller client ID for a given partition
+*
+* \param[in] partition_idx        Partition index
+* \param[in] caller_client_id     The ID of the calling client
+*
+* \note This function doesn't check if any of the partition_idxs are valid.
+*/
+void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
+                                            int32_t caller_client_id);
 
 /**
  * \brief Set the buffer share region of the partition

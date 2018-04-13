@@ -36,6 +36,17 @@ int32_t tfm_core_test_2_sfn_invert(int32_t *res_ptr,
                                    uint32_t *in_ptr,
                                    uint32_t *out_ptr,
                                    int32_t len);
+
+/**
+ * \brief A minimal test secure function to be called from another partition.
+ *
+ * Checks the functionality of querying the client ID of the caller service.
+ *
+ * \return Returns \ref TFM_SUCCESS on success, \ref CORE_TEST_ERRNO_TEST_FAULT
+ *         othervise.
+ */
+int32_t tfm_core_test_2_check_caller_client_id(void);
+
 #ifdef __cplusplus
 }
 #endif

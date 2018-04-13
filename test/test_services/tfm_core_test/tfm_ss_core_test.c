@@ -13,10 +13,26 @@
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_veneers.h"
 #include "secure_fw/core/secure_utilities.h"
 #include "tfm_secure_api.h"
+#include "spm_partition_defs.h"
 
 #include "smm_mps2.h"
 
 static int32_t partition_init_done;
+
+#define INVALID_NS_CLIENT_ID  0x49abcdef
+#define EXPECTED_NS_CLIENT_ID (-1)
+
+/* Don't initialise caller_partition_id_zi and expect it to be linked in the
+ * zero-initialised data area
+ */
+static int32_t caller_client_id_zi;
+
+/* Initialise caller_partition_id_rw and expect it to be linked in the
+ * read-write data area
+ */
+static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
+
+static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 
 int32_t core_test_init(void)
 {
@@ -252,6 +268,49 @@ static int32_t test_ss_to_ss(void)
     }
 }
 
+static int32_t test_get_caller_client_id(void)
+{
+    /* Call to a special service that checks the caller service ID */
+    size_t i;
+    int32_t ret;
+    int32_t caller_client_id_stack = INVALID_NS_CLIENT_ID;
+
+    caller_client_id_zi = INVALID_NS_CLIENT_ID;
+
+    ret = tfm_core_test_2_check_caller_client_id();
+    if (ret != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
+    }
+
+    /* test with invalid output pointers */
+    for (i = 0; i < sizeof(invalid_addresses)/sizeof(invalid_addresses[0]); ++i)
+    {
+        ret = tfm_core_get_caller_client_id(invalid_addresses[i]);
+        if (ret != TFM_ERROR_INVALID_PARAMETER) {
+            return CORE_TEST_ERRNO_TEST_FAULT;
+        }
+    }
+
+    /* test with valid output pointers */
+    ret = tfm_core_get_caller_client_id(&caller_client_id_zi);
+    if (ret != TFM_SUCCESS || caller_client_id_zi != EXPECTED_NS_CLIENT_ID) {
+        return CORE_TEST_ERRNO_TEST_FAULT;
+    }
+
+    ret = tfm_core_get_caller_client_id(&caller_client_id_rw);
+    if (ret != TFM_SUCCESS || caller_client_id_rw != EXPECTED_NS_CLIENT_ID) {
+        return CORE_TEST_ERRNO_TEST_FAULT;
+    }
+
+    ret = tfm_core_get_caller_client_id(&caller_client_id_stack);
+    if (ret != TFM_SUCCESS ||
+            caller_client_id_stack != EXPECTED_NS_CLIENT_ID) {
+        return CORE_TEST_ERRNO_TEST_FAULT;
+    }
+
+    return TFM_SUCCESS;
+}
+
 #ifdef CORE_TEST_INTERACTIVE
 #define MPS2_USERPB0_BASE   (0x50302008)
 #define MPS2_USERPB0_MASK   (0x1)
@@ -315,6 +374,8 @@ int32_t spm_core_test_sfn(int32_t tc, int32_t arg1, int32_t arg2, int32_t arg3)
         return test_ss_to_ss_buffer((uint32_t *)arg1, (uint32_t *)arg2, arg3);
     case CORE_TEST_ID_PERIPHERAL_ACCESS:
         return test_peripheral_access();
+    case CORE_TEST_ID_GET_CALLER_CLIENT_ID:
+        return test_get_caller_client_id();
     case CORE_TEST_ID_BLOCK:
         return test_block(arg1, arg2, arg3);
     case CORE_TEST_ID_NS_THREAD:

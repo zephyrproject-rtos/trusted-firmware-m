@@ -31,6 +31,14 @@
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CORE_TEST_2_SFN_CHECK_CALLER_CLIENT_ID_SFID",
+      "signal": "TFM_CORE_TEST_2_SFN_CHECK_CALLER_CLIENT_ID",
+      "tfm_symbol": "spm_core_test_2_check_caller_client_id",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
     }
   ],
   "source_files": [

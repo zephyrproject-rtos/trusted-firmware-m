@@ -27,3 +27,11 @@ int32_t tfm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
                              spm_core_test_2_sfn_invert,
                              res_ptr, in_ptr, out_ptr, len);
 }
+
+__tfm_secure_gateway_attributes__
+int32_t tfm_core_test_2_check_caller_client_id(void)
+{
+   TFM_CORE_SFN_REQUEST(TFM_SP_CORE_TEST_2_ID,
+                            spm_core_test_2_check_caller_client_id,
+                            0, 0, 0, 0);
+}

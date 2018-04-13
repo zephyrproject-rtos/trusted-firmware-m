@@ -73,6 +73,8 @@ extern int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share);
 
 extern int32_t tfm_core_validate_secure_caller(void);
 
+extern int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id);
+
 extern int32_t tfm_core_memory_permission_check(
         void *ptr, uint32_t size, int32_t access);
 

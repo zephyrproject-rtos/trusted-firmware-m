@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "cmsis.h"
 #include "tfm_secure_api.h"
+#include "tfm_nspm.h"
 #include "secure_utilities.h"
 #include "uart_stdout.h"
 #include "secure_fw/spm/spm_api.h"
@@ -89,6 +90,8 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     uint32_t partition_state;
     uint32_t partition_flags;
     struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
+    uint32_t caller_partition_id;
+    int32_t client_id;
 
     /* Check partition idx validity */
     if (caller_partition_idx == SPM_INVALID_PARTITION_IDX) {
@@ -119,10 +122,11 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
     partition_state = curr_part_data->partition_state;
     partition_flags = tfm_spm_partition_get_flags(partition_idx);
+    caller_partition_id = tfm_spm_partition_get_partition_id(
+                                                          caller_partition_idx);
 
     if ((tfm_secure_api_initializing) &&
-        (tfm_spm_partition_get_partition_id(caller_partition_idx)
-            == TFM_SP_CORE_ID) &&
+        (caller_partition_id == TFM_SP_CORE_ID) &&
         (partition_state == SPM_PARTITION_STATE_UNINIT)) {
 #if TFM_LVL != 1
         /* Make thread mode unprivileged while untrusted partition init is
@@ -162,6 +166,18 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     tfm_spm_partition_set_caller_partition_idx(partition_idx,
                                                caller_partition_idx);
     tfm_spm_partition_store_context(caller_partition_idx, psp, excReturn);
+
+    if ((caller_flags&SPM_PART_FLAG_SECURE)) {
+        tfm_spm_partition_set_caller_client_id(partition_idx,
+                                               caller_partition_id);
+    } else {
+        client_id = tfm_nspm_get_current_client_id();
+        if (client_id >= 0)
+        {
+            return TFM_SECURE_LOCK_FAILED;
+        }
+        tfm_spm_partition_set_caller_client_id(partition_idx, client_id);
+    }
 
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
     /* Dynamic partitioning is only done is TFM level 3 */
@@ -460,6 +476,115 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
+}
+/**
+ * \brief Check whether a buffer is ok for writing to by the privileged API
+ *        function.
+ *
+ * This function checks whether the caller partition owns the buffer, can write
+ * to it, and the buffer has proper alignment.
+ *
+ * \param[in] partition_idx     Partition index
+ * \param[in] start_addr        The start address of the buffer
+ * \param[in] len               The length of the buffer
+ * \param[in] alignment         The expected alignment (in bits)
+ *
+ * \return 1 if the check passes, 0 otherwise.
+ *
+ * \note For a 0 long buffer the check fails.
+ */
+static int32_t check_buffer_access(uint32_t partition_idx,
+                                  void* start_addr, size_t len,
+                                  uint32_t alignment)
+{
+    uintptr_t start_addr_value = (uintptr_t)start_addr;
+    uintptr_t end_addr_value = (uintptr_t)start_addr + len;
+    uintptr_t alignment_mask;
+
+    alignment_mask = (((uintptr_t)1) << alignment) - 1;
+
+    /* Check that the pointer is aligned properly */
+    if (start_addr_value & alignment_mask) {
+        /* not aligned, return error */
+        return 0;
+    }
+
+    /* Protect against overflow (and zero len) */
+    if (end_addr_value <= start_addr_value)
+    {
+        return 0;
+    }
+
+#if TFM_LVL == 1
+    /* For privileged partition execution, all secure data memory and stack
+     * is accessible
+     */
+    if (start_addr_value >= S_DATA_START &&
+        end_addr_value <= (S_DATA_START + S_DATA_SIZE)) {
+        return 1;
+    }
+#else
+    /* For non-privileged execution the partition's data and stack is
+     * accessible
+     */
+    if (start_addr_value >=
+            tfm_spm_partition_get_stack_bottom(partition_idx) &&
+        end_addr_value <=
+            tfm_spm_partition_get_stack_top(partition_idx)) {
+        return 1;
+    }
+    if (start_addr_value >=
+           tfm_spm_partition_get_rw_start(partition_idx) &&
+        end_addr_value <=
+           tfm_spm_partition_get_rw_limit(partition_idx)) {
+        return 1;
+    }
+    if (start_addr_value >=
+           tfm_spm_partition_get_zi_start(partition_idx) &&
+        end_addr_value <=
+           tfm_spm_partition_get_zi_limit(partition_idx)) {
+        return 1;
+    }
+#endif
+    return 0;
+}
+
+void tfm_core_get_caller_client_id_handler(uint32_t *svc_args)
+{
+    uintptr_t result_ptr_value = svc_args[0];
+    uint32_t running_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
+    const uint32_t running_partition_flags =
+            tfm_spm_partition_get_flags(running_partition_idx);
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(running_partition_idx);
+    int res = 0;
+
+    if (!(running_partition_flags&SPM_PART_FLAG_SECURE))  {
+        /* This handler shouldn't be called from outside partition context.
+         * Partitions are only allowed to run while S domain is locked.
+         */
+        svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
+        return;
+    }
+
+    /* Make sure that the output pointer points to a memory area that is owned
+     * by the partition
+     */
+    res = check_buffer_access(running_partition_idx,
+                              (void*)result_ptr_value,
+                              sizeof(curr_part_data->caller_client_id),
+                              2);
+    if (!res) {
+        /* Not in accessible range, return error */
+        svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
+        return;
+    }
+
+    *((int32_t *)result_ptr_value) = curr_part_data->caller_client_id;
+
+    /* Store return value in r0 */
+    svc_args[0] = TFM_SUCCESS;
 }
 
 void tfm_core_memory_permission_check_handler(uint32_t *svc_args)

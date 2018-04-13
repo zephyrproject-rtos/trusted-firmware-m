@@ -17,17 +17,18 @@ extern "C" {
 #include "tfm_api.h"
 
 /* These definitions are used in symbols, only digits are permitted */
-#define CORE_TEST_ID_NS_THREAD          1001
-#define CORE_TEST_ID_CHECK_INIT         1003
-#define CORE_TEST_ID_RECURSION          1004
-#define CORE_TEST_ID_MEMORY_PERMISSIONS 1005
-#define CORE_TEST_ID_MPU_ACCESS         1006
-#define CORE_TEST_ID_BUFFER_CHECK       1007
-#define CORE_TEST_ID_SS_TO_SS           1008
-#define CORE_TEST_ID_SHARE_REDIRECTION  1009
-#define CORE_TEST_ID_SS_TO_SS_BUFFER    1010
-#define CORE_TEST_ID_PERIPHERAL_ACCESS  1012
-#define CORE_TEST_ID_BLOCK              2001
+#define CORE_TEST_ID_NS_THREAD            1001
+#define CORE_TEST_ID_CHECK_INIT           1003
+#define CORE_TEST_ID_RECURSION            1004
+#define CORE_TEST_ID_MEMORY_PERMISSIONS   1005
+#define CORE_TEST_ID_MPU_ACCESS           1006
+#define CORE_TEST_ID_BUFFER_CHECK         1007
+#define CORE_TEST_ID_SS_TO_SS             1008
+#define CORE_TEST_ID_SHARE_REDIRECTION    1009
+#define CORE_TEST_ID_SS_TO_SS_BUFFER      1010
+#define CORE_TEST_ID_PERIPHERAL_ACCESS    1012
+#define CORE_TEST_ID_GET_CALLER_CLIENT_ID 1013
+#define CORE_TEST_ID_BLOCK                2001
 
 /* Use lower 16 bits in return value for error code, upper 16 for line number
  * in test service
