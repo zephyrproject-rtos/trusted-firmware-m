@@ -119,7 +119,6 @@ embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
 target_link_libraries(${PROJECT_NAME} "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
 add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
 
-
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 

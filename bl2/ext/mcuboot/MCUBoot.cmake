@@ -29,6 +29,14 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "mcuboot_create_boot_payload(): mandatory parameter 'SIGN_BIN' missing.")
 	endif()
 
+	if (DEFINED _MY_PARAMS_POSTFIX)
+		if (${_MY_PARAMS_POSTFIX} STREQUAL "_0")
+			set(MY_POSTFIX "0")
+		else()
+			set(MY_POSTFIX "1")
+		endif()
+	endif()
+
 	#Find Python3.x interpreter
 	find_package(PythonInterp 3)
 	if (NOT PYTHONINTERP_FOUND)
@@ -54,9 +62,33 @@ function(mcuboot_create_boot_payload)
 						ARGS sign
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
-							 -v 1.0
+							 -v 1.2.3+4
 							 -H 0x400
 							 --pad ${SIGN_BIN_SIZE}
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin)
+
+	#Collect executables to common location: build/install/outputs/
+	set(TFM_FULL_NAME tfm_s_ns_concatenated)
+	set(TFM_SIGN_NAME tfm_s_ns_signed)
+
+	if (DEFINED MY_POSTFIX)
+		install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin
+				RENAME tfm_sig${MY_POSTFIX}.bin
+				DESTINATION outputs/${TARGET_PLATFORM}/)
+	else()
+		install(FILES ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin
+				DESTINATION outputs/${TARGET_PLATFORM}/)
+	endif()
+
+	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
+			DESTINATION  outputs/${TARGET_PLATFORM}/)
+
+	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
+			RENAME ${TFM_FULL_NAME}${_MY_PARAMS_POSTFIX}.bin
+			DESTINATION outputs/fvp/)
+
+	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin
+			RENAME ${TFM_SIGN_NAME}${_MY_PARAMS_POSTFIX}.bin
+			DESTINATION outputs/fvp/)
 endfunction()

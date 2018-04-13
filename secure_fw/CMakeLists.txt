@@ -184,15 +184,16 @@ function(set_up_secure_fw_build)
 		set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for secure_fw." FORCE)
 	endif()
 
+        #Export files needed to interface external applications at: <build_dir>/install/export/tfm/
 	install(DIRECTORY ${TFM_ROOT_DIR}/interface/include/
-			DESTINATION tfm/inc)
+			DESTINATION export/tfm/inc)
 
 	install(DIRECTORY ${TFM_ROOT_DIR}/interface/src/
-			DESTINATION tfm/src)
+			DESTINATION export/tfm/src)
 
-	install(FILES ${S_VENEER_FILE} DESTINATION tfm/veneers)
+	install(FILES ${S_VENEER_FILE} DESTINATION export/tfm/veneers)
 
-	#Collect executables to common location: build/install/outputs/
+	#Collect executables to common location: <build_dir>/install/outputs/
 	if (DEFINED SECURE_AXF_DIR_PREFIX)
 		set(MY_BINARY_DIR ${SECURE_AXF_DIR_PREFIX})
 	else()

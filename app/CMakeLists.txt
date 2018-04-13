@@ -234,7 +234,7 @@ if (LINK_TO_BOTH_MEMORY_REGION)
 					 FULL_BIN      tfm_full
 					 SIGN_BIN      tfm_sign
 					 VENEER_NAME   s_veneers
-					 POSTFIX       _0)
+					 POSTFIX       "_0")
 
 	#Link to secondary memory region(add extra linker flag)
 	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
@@ -243,7 +243,7 @@ if (LINK_TO_BOTH_MEMORY_REGION)
 					 FULL_BIN      tfm_full
 					 SIGN_BIN      tfm_sign
 					 VENEER_NAME   s_veneers
-					 POSTFIX       _1)
+					 POSTFIX       "_1")
 else()
 	#Link to primary memory region only
 	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
