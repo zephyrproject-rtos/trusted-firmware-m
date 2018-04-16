@@ -30,8 +30,8 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 --parameter fvp_mps2.telnetterminal0.quiet=0 \
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
---application cpu0=<build_dir>/app/tfm_ns.axf \
---application cpu0=<build_dir>/app/secure_fw/tfm_s.axf
+--application cpu0=<build_dir>/install/outputs/fvp/tfm_ns.axf \
+--application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf
 
 ```
 #### Regression tests
@@ -49,8 +49,8 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 --parameter fvp_mps2.telnetterminal0.quiet=0 \
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
---application cpu0=<build_dir>/app/tfm_ns.axf \
---application cpu0=<build_dir>/app/secure_fw/tfm_s.axf
+--application cpu0=<build_dir>/install/outputs/fvp/tfm_ns.axf \
+--application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf
 ```
 #### Running example application and regression test with BL2 bootloader
 To test TF-M with bootloader, one must apply the following changes:
@@ -62,8 +62,18 @@ previous command for this:
 ...
 --parameter cpu0.INITVTOR_S=0x10000000 \
 ...
---application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<build_dir>/tfm_sign.bin@0x10080000
+--application cpu0=<build_dir>/install/outputs/fvp/mcuboot.axf \
+--data cpu0=<build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10080000
+```
+
+#### Test software upgrade with BL2 bootloader
+BL2 bootloader is mandatory to test software update. Furthermore two TF-M blob
+must be built. Outputs of example application and regression test can be used to
+test it. Load output of example application to slot 0 (0x10080000) and output of
+regression test to slot 1 (0x10180000). Add the following line to the
+end of the previous chapter:
+```
+--data cpu0=<build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10180000
 ```
 
 ### To run the example code on SSE 200 FPGA on MPS2 board
@@ -80,7 +90,8 @@ The MPS2 board tested is HBI0263C referred also as MPS2+.
 
 #### Example application
 
-1. Copy `mcuboot.axf` and `tfm_sign.bin` files in `<MPS2 device name>/SOFTWARE/`
+1. Copy `mcuboot.axf` and `tfm_sign.bin` files from
+   `<build_dir>/install/outputs/AN521/` to `<MPS2 device name>/SOFTWARE/`
 2. Open `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
 3. Update the `AN521/images.txt` file as follows:
 ```
@@ -146,7 +157,7 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 
 ```
 
-Note: SST reliability tests take approximately three minutes to run on the MPS2.
+Note: SST reliability tests take a few minutes to run on the MPS2.
 
 ## Execute TF-M example and regression tests on Musca-A1 test chip board ##
 
@@ -177,8 +188,8 @@ Note: SST reliability tests take approximately three minutes to run on the MPS2.
 
 #### Regression tests
 
-After completing the procedure you should be able to see on the UART0
-(baud 115200 8n1) the following messages:
+After completing the procedure you should see the following messages on the
+UART0 (baud 115200 8n1):
 
 ```
 [INF] Starting bootloader

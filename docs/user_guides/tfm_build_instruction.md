@@ -18,7 +18,7 @@ option should be added:
 
 Both need to be cloned manually in the current release.
 
-### Build steps for the AN521 FPGA:
+### Build steps for the AN521 target platform:
 
 ```
 cd <TF-M base folder>
@@ -29,9 +29,8 @@ cd trusted-firmware-m
 mkdir cmake_build
 cd cmake_build
 cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG
-make
+cmake --build ./ -- install
 ```
-
 ### Concept of build config files
 The build configuration for TF-M is provided to the build system by three
 different components:
@@ -44,7 +43,7 @@ cmake command. (See examples below.)
 * The target platform can be specified by adding the
 `-DTARGET_PLATFORM=<target platform name>` option to the cmake command (See
   examples below.)
-* Platforms currently supported
+* Supported platforms:
   * Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
   `-DTARGET_PLATFORM=AN521`
   * Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
@@ -59,7 +58,7 @@ below.) The possible values are
 
 *Note* For all the applications we build the level 2 bootloader
 
-### Regression Tests for AN521
+### Regression Tests for the AN521 target platform
 The default option build doesn't include regression tests. Procedure for
 building the regression tests is below. Compiling for other target hardware
 is possible by selecting a different build config file.
@@ -74,7 +73,7 @@ cd trusted-firmware-m
 mkdir cmake_test
 cd cmake_test
 cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-make
+cmake --build ./ -- install
 ```
 
 *TF-M build regression tests on Windows*
@@ -85,30 +84,34 @@ cd trusted-firmware-m
 mkdir cmake_test
 cd cmake_test
 cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-make
+cmake --build ./ -- install
 ```
+
+## Location of build artefacts
+
+The build system defines an API which allow easy usage of build artefacts. The
+`install` build target copies all files which might be needed as a dependency by
+external tools or build systems to the `<build_dir>/install/outputs` directory,
+with the following directory hierarchy:
+```
+<build_dir>/install/outputs/fvp/
+<build_dir>/install/outputs/<target_platform>/
+```
+There is one folder for FVP testing, with more elaborate naming and there is an
+other for testing on target hardware platform (AN521, etc.), where naming
+convention is aligned with 8.3 format. The dependency tree of `install` build
+target ensures a proper update (i.e. build) of all output files before the
+actual installation step takes place. As such it is suggested to use this build
+target to build TF-M.
 
 ## Export dependency files for NS applications
 
-An NS application requires a number of files to run with TF-M. The build
-system can export these files using "install" target in to a single folder.
+An NS application requires a number of files to interface with TF-M. The build
+system exports these files as part of the `install` target and places them in to
+a single directory, `<build_dir>/install/export/tfm`. Further details on how to
+integrate a new NS app with TF-M are available in the
+[integration guide](tfm_integration_guide.md).
 
-*On Windows*
-
-```
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -m ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-make install
-```
-
-*On Linux*
-
-```
-cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-make install
-```
-
-The [integration guide](tfm_integration_guide.md)
-explains further details on how to integrate a new NS app with TF-M.
 
 --------------
 

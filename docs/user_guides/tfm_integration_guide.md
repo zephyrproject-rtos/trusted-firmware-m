@@ -61,13 +61,14 @@ configuration this may require configuring drivers to use appropriate address
 ranges.
 
 #### interface with TF-M
-The NS side is only allowed to call TF-M secure functions (veneers) from the
-NS Handler mode.
-For this reason, the API is a collection of SVC functions in the
-`install/tfm/inc` folder. For example, the SVC interface for the Secure STorage
-(SST) service is described in the file `tfm_sst_svc_handler.h` as a collection
-of SVC functions which have to be registered within the SVC handler
-mechanism, therefore OS needs to support user defined SVCs.
+The files needed for the interface with TF-M are exported at the
+`<build_dir>/install/export/tfm` path. The NS side is only allowed to call TF-M
+secure functions (veneers) from the NS Handler mode. For this reason, the API is
+a collection of SVC functions in the `<build_dir>/install/export/tfm/inc`
+directory. For example, the SVC interface for the Secure STorage (SST) service
+is described in the file `tfm_sst_svc_handler.h` as a collection of SVC
+functions which have to be registered within the SVC handler mechanism, i.e.
+`tfm_ns_svc.h`, therefore the OS needs to support user defined SVCs.
 If the OS does not support user defined SVCs, it needs to be extended in
 this way. Once the SVC interface functions are registered within the SVC
 handler mechanism, the services can be called from the non-secure world
@@ -85,17 +86,18 @@ to implement the SST ID manager based on their threat model.
 #### interface with non-secure world regression tests
 A non-secure application that wants to run the non-secure regression tests
 needs to call the `tfm_non_secure_client_run_tests()`. This function is
-exported into the header file `integ_test.h` inside the `install` folder
-structure in the test specific files, i.e. `install/tfm/test/inc`. The
-non-secure regression tests are precompiled and delivered as a static library
-which is available in `install/tfm/test/lib`, so that the non-secure
-application needs to link against the library to be able to invoke the
-`tfm_non_secure_client_run_tests()` function. The SST non-secure side
-regression tests rely on some OS functionality e.g. threads, mutexes etc.
-These functions comply with CMSIS RTOS2 standard and have been exported as
-thin wrappers defined in `os_wrapper.h` contained in `install/tfm/test/inc`.
-OS needs to provide the implementation of these wrappers to be able to run
-the tests.
+exported into the header file `integ_test.h` inside the `<build_dir>/install`
+folder structure in the test specific files, i.e.
+`<build_dir>/install/export/tfm/test/inc`. The non-secure regression tests are
+precompiled and delivered as a static library which is available in
+`<build_dir>/install/export/tfm/test/lib`, so that the non-secure application
+needs to link against the library to be able to invoke the
+`tfm_non_secure_client_run_tests()` function. The SST non-secure side regression
+tests rely on some OS functionality e.g. threads, mutexes etc. These functions
+comply with CMSIS RTOS2 standard and have been exported as thin wrappers defined
+in `os_wrapper.h` contained in `<build_dir>/install/export/tfm/test/inc`. OS
+needs to provide the implementation of these wrappers to be able to run the
+tests.
 
 --------------
 

@@ -34,7 +34,7 @@ concatenated and signed with RSA-2048 digital signature. Preparation of payload
 is done by Python scripts: `bl2/ext/mcuboot/scripts/`. At the end of a
 successful build signed TF-M payload can be found in:
 ```
-<build_dir>/tfm_sign.bin
+<build_dir>/install/outputs/fvp/tfm_sign.bin
 ```
 
 ## Integration with TF-M
@@ -127,8 +127,10 @@ bl2/ext/mcuboot/MCUBoot.cmake
 
 At build time automatically two binaries are generated:
 ```
-<build_dir>/tfm_sign_0.bin  : Image linked for slot 0 memory partition
-<build_dir>/tfm_sign_1.bin  : Image linked for slot 1 memory partition
+<build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin : Image linked for slot 0
+                                                        memory partition
+<build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for slot 1
+                                                        memory partition
 ```
 ## Testing firmware upgrade
 As downloading the new firmware image is out of scope for MCUBoot, the update
@@ -157,8 +159,8 @@ slot 1.
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<example_app_build_dir>/tfm_sign.bin@0x10080000 \
---data cpu0=<regresssion_test_build_dir>/tfm_sign.bin@0x10180000
+--data cpu0=<default_build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10080000 \
+--data cpu0=<regresssion_build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10180000
 ```
 
 #### Executing firmware upgrade on SSE 200 FPGA on MPS2 board
@@ -212,8 +214,8 @@ changes:
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
 --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
---data cpu0=<example_app_build_dir>/tfm_sign_0.bin@0x10080000 \
---data cpu0=<regresssion_test_build_dir>/tfm_sign_1.bin@0x10180000
+--data cpu0=<default_build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin@0x10080000 \
+--data cpu0=<regresssion_build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin@0x10180000
 ```
 
 ### Executing firmware upgrade on SSE 200 FPGA on MPS2 board
