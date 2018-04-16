@@ -1255,6 +1255,14 @@ enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
 
+    /* If the object is in logical block 0, then update the physical ID to the
+     * current scratch metadata block so that it is correct after the metadata
+     * blocks are swapped.
+     */
+    if (object_meta.lblock == SST_LOGICAL_DBLOCK0) {
+        block_meta.phys_id = sst_meta_cur_meta_scratch();
+    }
+
     err = sst_mblock_update_scratch_block_meta(object_meta.lblock,
                                                &block_meta);
     if (err != TFM_SST_ERR_SUCCESS) {
