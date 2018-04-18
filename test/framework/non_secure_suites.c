@@ -52,3 +52,9 @@ void start_integ_test(void)
     integ_test("Non-secure", test_suites,
                sizeof(test_suites)/sizeof(test_suites[0]));
 }
+
+/* Service stand-in for NS tests. To be called from a non-secure context */
+void tfm_non_secure_client_run_tests(void)
+{
+    start_integ_test();
+}

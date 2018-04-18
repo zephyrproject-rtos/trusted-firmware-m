@@ -68,6 +68,8 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/integ_test.h
 				${CMAKE_CURRENT_SOURCE_DIR}/interface/include/svc_core_test_ns.h
 				${CMAKE_CURRENT_SOURCE_DIR}/suites/sst/non_secure/os_wrapper.h
 				${CMAKE_CURRENT_SOURCE_DIR}/interface/include/sst_test_service_svc.h
+				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_sst_test_service/sst_test_service_svc.h
+				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service_svc.h
 		DESTINATION tfm/test/inc)
 
 install(TARGETS tfm_non_secure_tests

@@ -53,6 +53,15 @@
       "conditional": "TFM_PARTITION_TEST_SST",
       "version_major": 0,
       "version_minor": 1
+    },
+    {
+      "name": "TFM Secure Client Service",
+      "short_name": "TFM_Secure_Client",
+      "manifest": "test/test_services/tfm_secure_client_service/manifest.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
+      "version_major": 0,
+      "version_minor": 1
     }
   ]
 }

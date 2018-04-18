@@ -99,6 +99,20 @@ extern "C" {
     X(SVC_SST_TEST_SERVICE_CLEAN, sst_test_service_svc_clean)
 
 /**
+ * \def LIST_SVC_TFM_PARTITION_TEST_SECURE_SERVICES
+ *
+ * \brief This is an X macro which lists
+ *        the SVC interface available for
+ *        TEST_SECURE_SERVICES partition.
+ *        The enumerator and corresponding
+ *        SVC handler function need to be
+ *        registered.
+ *
+ */
+#define LIST_SVC_TFM_PARTITION_TEST_SECURE_SERVICES \
+    X(SVC_TFM_SECURE_CLIENT_RUN_TESTS, tfm_secure_client_service_svc_run_tests)
+
+/**
  * \brief Numbers associated to each SVC available
  *
  * \details Start from 1 as 0 is reserved by RTX
@@ -121,6 +135,10 @@ enum tfm_svc_num {
 #if defined(TFM_PARTITION_TEST_SST)
     LIST_SVC_TFM_PARTITION_TEST_SST
 #endif /* TFM_PARTITION_TEST_SST */
+
+#if defined(TFM_PARTITION_TEST_SECURE_SERVICES)
+    LIST_SVC_TFM_PARTITION_TEST_SECURE_SERVICES
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #undef X
 

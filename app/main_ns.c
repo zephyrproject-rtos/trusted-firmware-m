@@ -18,6 +18,10 @@
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/integ_test.h"
 #endif
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+#include \
+  "test/test_services/tfm_secure_client_service/tfm_secure_client_service_svc.h"
+#endif
 
 #include "Driver_USART.h"
 
@@ -49,6 +53,10 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
 #if defined(TFM_PARTITION_TEST_SST)
     LIST_SVC_TFM_PARTITION_TEST_SST
 #endif /* TFM_PARTITION_TEST_SST */
+
+#if defined(TFM_PARTITION_TEST_SECURE_SERVICES)
+    LIST_SVC_TFM_PARTITION_TEST_SECURE_SERVICES
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #undef X
 

@@ -14,10 +14,6 @@
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 
-#ifdef TEST_FRAMEWORK_S
-#include "test/framework/integ_test.h"
-#endif
-
 /*
  * Avoids the semihosting issue
  * FixMe: describe 'semihosting issue'
@@ -169,10 +165,6 @@ int main(void)
          * to initialize. This is a placeholder for such an error handler
          */
     }
-
-#ifdef TEST_FRAMEWORK_S
-    start_integ_test();
-#endif
 
 #ifdef TFM_CORE_DEBUG
     /* Jumps to non-secure code */

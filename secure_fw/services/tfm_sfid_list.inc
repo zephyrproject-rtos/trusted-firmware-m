@@ -45,4 +45,9 @@
     {sst_test_service_sfn_clean, TFM_SST_TEST_SFN_CLEAN_SFID},
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    /******** TFM_SP_SECURE_TEST_PARTITION ********/
+    {tfm_secure_client_service_sfn_run_tests, TFM_SECURE_CLIENT_SFN_RUN_TESTS_SFID},
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 #endif /* __TFM_SFID_LIST_INC__ */

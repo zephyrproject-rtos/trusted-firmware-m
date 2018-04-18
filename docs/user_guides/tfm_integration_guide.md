@@ -84,17 +84,18 @@ to implement the SST ID manager based on their threat model.
 
 #### interface with non-secure world regression tests
 A non-secure application that wants to run the non-secure regression tests
-needs to call the `start_integ_test()`. This function is exported into the
-header file `integ_test.h` inside the `install` folder structure in the test
-specific files, i.e. `install/tfm/test/inc`. The non-secure regression tests are
-precompiled and delivered as a static library which is available in
-`install/tfm/test/lib`, so that the non-secure application needs to link against
-the library to be able to invoke the `start_integ_test()` function.
-The SST non-secure side regression tests rely on some OS functionality
-e.g. threads, mutexes etc. These functions comply with CMSIS RTOS2 standard and
-have been exported as thin wrappers defined in `os_wrapper.h` contained in
-`install/tfm/test/inc`. OS needs to provide the implementation of these wrappers
-to be able to run the tests.
+needs to call the `tfm_non_secure_client_run_tests()`. This function is
+exported into the header file `integ_test.h` inside the `install` folder
+structure in the test specific files, i.e. `install/tfm/test/inc`. The
+non-secure regression tests are precompiled and delivered as a static library
+which is available in `install/tfm/test/lib`, so that the non-secure
+application needs to link against the library to be able to invoke the
+`tfm_non_secure_client_run_tests()` function. The SST non-secure side
+regression tests rely on some OS functionality e.g. threads, mutexes etc.
+These functions comply with CMSIS RTOS2 standard and have been exported as
+thin wrappers defined in `os_wrapper.h` contained in `install/tfm/test/inc`.
+OS needs to provide the implementation of these wrappers to be able to run
+the tests.
 
 --------------
 

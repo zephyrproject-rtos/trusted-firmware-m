@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,9 +13,16 @@ extern "C" {
 #endif
 
 /**
- * \brief Executes integration tests.
+ * \brief Executes integration tests. To be called from appropriate
+ *        secure/non-secure service client.
  */
 void start_integ_test(void);
+
+/**
+ * \brief Service stand-in shim for non secure tests. To be called from a
+ *        non-secure client.
+ */
+void tfm_non_secure_client_run_tests(void);
 
 #ifdef __cplusplus
 }

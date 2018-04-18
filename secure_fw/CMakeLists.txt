@@ -104,6 +104,12 @@ elseif (TFM_PARTITION_TEST_SST)
 	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SST")
 endif()
 
+if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
+elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
+endif()
+
 if (NOT DEFINED BL2)
 	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 elseif (BL2)

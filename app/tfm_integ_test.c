@@ -17,6 +17,11 @@
 #include "tfm_integ_test.h"
 #include "test/framework/integ_test.h"
 
+#ifdef TEST_FRAMEWORK_S
+#include \
+  "test/test_services/tfm_secure_client_service/tfm_secure_client_service_api.h"
+#endif
+
 #ifdef CORE_TEST_INTERACTIVE
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_veneers.h"
@@ -371,7 +376,7 @@ void execute_ns_interactive_tests(void)
 }
 #endif /* CORE_TEST_INTERACTIVE */
 
-#ifdef TEST_FRAMEWORK_NS
+#if defined(TEST_FRAMEWORK_NS) || defined(TEST_FRAMEWORK_S)
 /**
  * \brief Services test thread
  *
@@ -380,9 +385,20 @@ __attribute__((noreturn))
 void test_app(void *argument)
 {
     UNUSED_VARIABLE(argument);
-    start_integ_test();
+
+#ifdef TEST_FRAMEWORK_S
+    /* FIXME: The non-secure audit log test currently relies on the fact that
+     * the audit log secure test is run first. However the Non-secure tests
+     * represent simpler and more common test cases which would make more sense
+     * to be run first. Therefore if this dependency is removed the execution
+     * order of these test classes should be reversed. */
+    tfm_secure_client_run_tests();
+#endif
+#ifdef TEST_FRAMEWORK_NS
+    tfm_non_secure_client_run_tests();
+#endif
     /* End of test */
     for (;;) {
     }
 }
-#endif /* TEST_FRAMEWORK_NS */
+#endif /* TEST_FRAMEWORK_NS OR TEST_FRAMEWORK_S */
