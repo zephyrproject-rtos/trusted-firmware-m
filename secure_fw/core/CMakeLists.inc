@@ -39,6 +39,12 @@ set (SS_CORE_C_SRC
 		"${SS_CORE_DIR}/tfm_boot_data.c"
 	)
 
+if (NOT DEFINED TFM_PSA_API)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
+elseif (TFM_PSA_API)
+	list(APPEND SS_CORE_C_SRC "${SS_CORE_DIR}/tfm_psa_api_client.c")
+endif()
+
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C ${SS_CORE_C_SRC})
 unset(SS_CORE_C_SRC)

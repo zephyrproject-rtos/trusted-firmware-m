@@ -36,7 +36,7 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 /* This is the "Big Lock" on the secure side, to guarantee single entry
  * to SPE
  */
-static int32_t tfm_secure_lock;
+int32_t tfm_secure_lock;
 static int32_t tfm_secure_api_initializing = 1;
 
 static int32_t *prepare_partition_ctx(
