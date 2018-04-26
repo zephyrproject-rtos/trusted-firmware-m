@@ -35,6 +35,11 @@
         "name": "AN519 secure ld file",
         "short_name": "mps2_an519_s.ld",
         "output": "platform/ext/target/mps2/an519/gcc/mps2_an519_s.ld"
+    },
+    {
+        "name": "MUSCA secure ld file",
+        "short_name": "musca_s.ld",
+        "output": "platform/ext/target/musca_a/Device/Source/gcc/musca_s.ld"
     }
   ]
 }

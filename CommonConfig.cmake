@@ -57,7 +57,7 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 	include("Common/FindGNUARM")
 	include("Common/${GNUARM_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -mcmse)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -mcmse  --specs=nano.specs)
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
@@ -69,7 +69,7 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 		#with short wchars, however the standard library is compiled with normal
 		#wchar, and this generates linker time warnings. TF-M code does not use
 		#wchar, so the warning can be suppressed.
-		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning)
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning --specs=nano.specs)
 	endfunction()
 else()
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
@@ -195,7 +195,14 @@ if (NOT DEFINED ENABLE_SECURE_STORAGE)
 endif()
 
 if (NOT DEFINED MBEDTLS_DEBUG)
-	set (MBEDTLS_DEBUG ON)
+    if (${COMPILER} STREQUAL "GNUARM" AND ${TARGET_PLATFORM} STREQUAL "MUSCA_A" AND BL2)
+        #The size of the MCUboot binary compiled with GCC exceeds the size limit on
+        #Musca A. By turning off the mbed TLS debug build is a good way to go below
+        #that limit, while it is still possible to debug TFM/bootloader code.
+        set (MBEDTLS_DEBUG OFF)
+    else ()
+        set (MBEDTLS_DEBUG ON)
+    endif ()
 endif()
 
 ##Set mbedTLS compiler flags for BL2 bootloader
