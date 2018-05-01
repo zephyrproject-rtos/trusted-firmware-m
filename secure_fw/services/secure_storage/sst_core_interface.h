@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -46,6 +46,7 @@ enum tfm_sst_err_t sst_object_handle(uint16_t asset_uuid, uint32_t *hdl);
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_create(uint16_t asset_uuid, uint32_t size);
+
 /**
  * \brief Gets asset's data referenced by asset handle, and stores it
  *        in the data buffer.
@@ -59,6 +60,7 @@ enum tfm_sst_err_t sst_object_create(uint16_t asset_uuid, uint32_t size);
  */
 enum tfm_sst_err_t sst_object_read(uint32_t asset_handle, uint8_t *data,
                                    uint32_t offset, uint32_t size);
+
 /**
  * \brief Writes data into the asset referenced by asset uuid.
  *
@@ -71,6 +73,7 @@ enum tfm_sst_err_t sst_object_read(uint32_t asset_handle, uint8_t *data,
  */
 enum tfm_sst_err_t sst_object_write(uint32_t asset_handle, const uint8_t *data,
                                     uint32_t offset, uint32_t size);
+
 /**
  * \brief Deletes the asset referenced by asset handler.
  *

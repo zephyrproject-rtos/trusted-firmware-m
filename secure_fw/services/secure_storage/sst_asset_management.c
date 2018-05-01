@@ -403,8 +403,15 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_handle,
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
+#ifndef SST_ENABLE_PARTIAL_ASSET_RW
+    if (data->offset != 0) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+#endif
+
     err = sst_object_read(asset_handle, local_data.data,
                           local_data.offset, local_data.size);
+
     return err;
 }
 
@@ -432,10 +439,19 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_handle,
     err = sst_utils_check_contained_in(0, db_entry->max_size,
                                        local_data.offset, local_data.size);
 
-    if (err == TFM_SST_ERR_SUCCESS) {
-        err = sst_object_write(asset_handle, local_data.data,
-                               local_data.offset, local_data.size);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return err;
     }
+
+#ifndef SST_ENABLE_PARTIAL_ASSET_RW
+    if (data->offset != 0) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+#endif
+
+    err = sst_object_write(asset_handle, local_data.data,
+                           local_data.offset, local_data.size);
+
     return err;
 }
 

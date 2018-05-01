@@ -26,7 +26,6 @@ extern "C" {
                                     *   violation detected
                                     */
 
-
 struct sst_asset_perm_t {
     uint32_t app; /*!< Application ID */
     uint8_t perm; /*!< Permissions bitfield */

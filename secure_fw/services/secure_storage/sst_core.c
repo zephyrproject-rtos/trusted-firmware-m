@@ -1367,6 +1367,9 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     struct sst_assetmeta object_meta;
     struct sst_block_metadata block_meta;
     uint32_t align_flash_nbr_bytes;
+#ifndef SST_ENABLE_PARTIAL_ASSET_RW
+    (void)offset;
+#endif
 
     /* Get the meta data index */
     object_index = sst_utils_extract_index_from_handle(asset_handle);
@@ -1383,12 +1386,14 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     /* offset can not be bigger than the current asset's size to disallows gaps
      * without content inside the asset.
      */
     if (offset > object_meta.cur_size) {
         return TFM_SST_ERR_PARAM_ERROR;
     }
+#endif
 
     /* Clean previous data in sst_buf_plain_text */
     sst_utils_memset(sst_buf_plain_text, SST_DEFAULT_EMPTY_BUFF_VAL,
@@ -1416,6 +1421,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
      * the asset's maximum size. So, it is not needed to check it at this
      * point.
      */
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     if ((offset + size) > object_meta.cur_size) {
         /* Update the object metadata */
         object_meta.cur_size = offset + size;
@@ -1423,6 +1429,15 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
 
     /* Copy new data in the sst_buf_plain_text */
     sst_utils_memcpy(sst_buf_plain_text + offset, data, size);
+#else
+    if (size > object_meta.cur_size) {
+        /* Update the object metadata */
+        object_meta.cur_size = size;
+    }
+
+    /* Copy new data in the sst_buf_plain_text */
+    sst_utils_memcpy(sst_buf_plain_text, data, size);
+#endif
 
 #ifdef SST_ENCRYPTION
     /* Encrypt data in sst_buf_plain_text */
