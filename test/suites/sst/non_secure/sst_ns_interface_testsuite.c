@@ -19,7 +19,7 @@
 #define INVALID_ASSET_ID             0xFFFF
 #define INVALID_THREAD_NAME "Thread_INVALID"
 
-#define READ_BUF_SIZE                  12UL
+#define READ_BUF_SIZE                  14UL
 #define WRITE_BUF_SIZE                  5UL
 
 /* Memory bounds to check */
@@ -34,13 +34,18 @@
 #define WRITE_DATA_SHA224_2 "(ABCDEFGHIJKLMNOPQRSTUVWXYZ)"
 #define BUF_SIZE_SHA224     (SST_ASSET_MAX_SIZE_SHA224_HASH + 1)
 
+/* Define used for bounds checking type tests */
+#define BUFFER_SIZE_PLUS_ONE (BUFFER_SIZE + 1)
+
 /* Shared asset handles for multithreaded tests */
 static uint32_t tfm_sst_test_1007_handle;
 static uint32_t tfm_sst_test_1010_handle;
 static uint32_t tfm_sst_test_1014_handle;
 static uint32_t tfm_sst_test_1018_handle;
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static uint32_t tfm_sst_test_1024_asset_1_handle;
 static uint32_t tfm_sst_test_1024_asset_2_handle;
+#endif
 
 /* Define test suite for asset manager tests */
 /* List of tests */
@@ -65,14 +70,18 @@ static void tfm_sst_test_1018(struct test_result_t *ret);
 static void tfm_sst_test_1019(struct test_result_t *ret);
 static void tfm_sst_test_1020(struct test_result_t *ret);
 static void tfm_sst_test_1021(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1022(struct test_result_t *ret);
 static void tfm_sst_test_1023(struct test_result_t *ret);
 static void tfm_sst_test_1024(struct test_result_t *ret);
+#endif
 static void tfm_sst_test_1025(struct test_result_t *ret);
 static void tfm_sst_test_1026(struct test_result_t *ret);
 static void tfm_sst_test_1027(struct test_result_t *ret);
 static void tfm_sst_test_1028(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1029(struct test_result_t *ret);
+#endif
 
 static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -117,12 +126,14 @@ static struct test_t asset_veeners_tests[] = {
      "Write and partial reads", {0} },
     {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
      "Write more data than asset max size", {0} },
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
      "Append data to an asset", {0} },
     {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
      "Append data to an asset until EOF", {0} },
     {&tfm_sst_test_1024, "TFM_SST_TEST_1024",
      "Write data to two assets alternately", {0} },
+#endif
     {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
      "Access an illegal location: ROM", {0} },
     {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
@@ -131,8 +142,10 @@ static struct test_t asset_veeners_tests[] = {
      "Access an illegal location: non-existant memory", {0} },
     {&tfm_sst_test_1028, "TFM_SST_TEST_1028",
      "Access an illegal location: secure memory", {0} },
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_1029, "TFM_SST_TEST_1029",
      "Write data to the middle of an existing asset", {0} },
+#endif
 };
 
 void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
@@ -148,7 +161,7 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
 /**
  * \note List of relations between thread name, app ID and permissions
  *
- * Asset permissions: SST_ASSET_ID_X509_CERT_LARGE
+ * Asset permissions: SST_ASSET_ID_AES_KEY_192
  *
  *   THREAD NAME | APP_ID       | Permissions
  *   ------------|--------------------------------------
@@ -180,7 +193,7 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  */
 TFM_SST_NS_TEST(1001, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -226,7 +239,7 @@ TFM_SST_NS_TEST(1001, "Thread_C")
  */
 TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Calls create function with an invalid thread name */
@@ -247,7 +260,7 @@ TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
  */
 TFM_SST_NS_TEST(1003, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -374,7 +387,7 @@ static void tfm_sst_test_1004(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1005, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -416,7 +429,7 @@ TFM_SST_NS_TEST(1005, "Thread_C")
  */
 TFM_SST_NS_TEST(1006, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -450,7 +463,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
         return;
     }
 
-    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
+    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -555,7 +568,7 @@ static void tfm_sst_test_1007(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1008, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -598,7 +611,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
  */
 TFM_SST_NS_TEST(1009, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -668,7 +681,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
  */
 static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
@@ -747,7 +760,7 @@ static void tfm_sst_test_1010(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1011, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -801,11 +814,11 @@ TFM_SST_NS_TEST(1011, "Thread_C")
  */
 TFM_SST_NS_TEST(1012, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
+    uint8_t wrt_data[SST_ASSET_MAX_SIZE_AES_KEY_192] = {0};
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
@@ -823,8 +836,8 @@ TFM_SST_NS_TEST(1012, "Thread_C")
 
     /* Attempts to write beyond end of asset starting from a valid offset */
     io_data.data = wrt_data;
-    io_data.size = 2;
-    io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE - 1;
+    io_data.size = BUFFER_PLUS_PADDING_SIZE;
+    io_data.offset = 0;
 
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
@@ -834,7 +847,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
 
     /* Attempts to write to an offset beyond the end of the asset */
     io_data.size = 1;
-    io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE;
+    io_data.offset = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
@@ -859,12 +872,12 @@ TFM_SST_NS_TEST(1012, "Thread_C")
  */
 TFM_SST_NS_TEST(1013, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
@@ -893,28 +906,29 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     }
 
     /* Sets data structure for read*/
-    io_data.data = read_data+3;
+    io_data.data = read_data + HALF_PADDING_SIZE;
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
     /* Read data from the asset */
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Read should works correctly");
+        TEST_FAIL("Read should work correctly");
         return;
     }
 
-    if (memcmp(read_data, "XXX", 3) != 0) {
+    if (memcmp(read_data, "XXXX", HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
         return;
     }
 
-    if (memcmp((read_data+3), wrt_data, WRITE_BUF_SIZE) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE), wrt_data, WRITE_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
 
-    if (memcmp((read_data+8), "XXX", 3) != 0) {
+    if (memcmp((read_data+(HALF_PADDING_SIZE+WRITE_BUF_SIZE)), "XXXX",
+                HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
         return;
     }
@@ -942,7 +956,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
  */
 static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
@@ -967,7 +981,7 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1027,7 +1041,7 @@ static void tfm_sst_test_1014(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1015, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -1080,13 +1094,13 @@ TFM_SST_NS_TEST(1015, "Thread_C")
  */
 TFM_SST_NS_TEST(1016, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     struct tfm_sst_attribs_t asset_attrs;
     uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
     /* Creates asset to get a valid handle */
     err = tfm_sst_create(asset_uuid);
@@ -1129,8 +1143,8 @@ TFM_SST_NS_TEST(1016, "Thread_C")
 
     /* Attempts to read beyond the current size starting from a valid offset */
     io_data.data = read_data;
-    io_data.size = 2;
-    io_data.offset = asset_attrs.size_current - 1;
+    io_data.size = WRITE_BUF_SIZE + 1;
+    io_data.offset = 0;
 
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
@@ -1206,7 +1220,7 @@ TFM_SST_NS_TEST(1017, "Thread_B")
  */
 static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
@@ -1429,12 +1443,12 @@ static void tfm_sst_test_1019(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1020, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
     uint32_t i;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
     /* Creates asset to get a valid handle */
@@ -1459,20 +1473,25 @@ TFM_SST_NS_TEST(1020, "Thread_C")
     /* Writes data in the asset */
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
     /* Sets data structure for read*/
-    io_data.data = (read_data + 3);
+    io_data.data = (read_data + HALF_PADDING_SIZE);
     io_data.size = 1;
     io_data.offset = 0;
+
 
     for (i = 0; i < WRITE_BUF_SIZE; i++) {
         /* Read data from the asset */
         err = tfm_sst_read(hdl, &io_data);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
         if (err != TFM_SST_ERR_SUCCESS) {
-            TEST_FAIL("Read should works correctly");
+#else
+        if (io_data.offset != 0 && err != TFM_SST_ERR_PARAM_ERROR) {
+#endif
+            TEST_FAIL("Read did not behave correctly");
             return;
         }
 
@@ -1481,17 +1500,26 @@ TFM_SST_NS_TEST(1020, "Thread_C")
         io_data.offset++;
     }
 
-    if (memcmp(read_data, "XXX", 3) != 0) {
+
+    if (memcmp(read_data, "XXXX", HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
         return;
     }
 
-    if (memcmp((read_data + 3), wrt_data, WRITE_BUF_SIZE) != 0) {
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+    if (memcmp((read_data + HALF_PADDING_SIZE), wrt_data,
+                WRITE_BUF_SIZE) != 0) {
+#else
+    /* Read should fail if no partial asset rw except when offset 0 */
+    if (memcmp((read_data + HALF_PADDING_SIZE), "DXXXX",
+                WRITE_BUF_SIZE) != 0) {
+#endif
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
 
-    if (memcmp((read_data + 8), "XXX", 3) != 0) {
+    if (memcmp((read_data + (HALF_PADDING_SIZE + WRITE_BUF_SIZE)), "XXXX",
+                HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
         return;
     }
@@ -1508,7 +1536,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
 
 /**
  * \brief Tests write function against a write call where data size is
- *        bigger than the maximum assert size.
+ *        bigger than the maximum asset size.
  */
 TFM_SST_NS_TEST(1021, "Thread_B")
 {
@@ -1554,6 +1582,7 @@ TFM_SST_NS_TEST(1021, "Thread_B")
     ret->val = TEST_PASSED;
 }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 /**
  * \brief Tests write function against multiple writes.
  */
@@ -1563,7 +1592,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
     uint8_t wrt_data2[WRITE_BUF_SIZE+1] = "World";
 
@@ -1617,7 +1646,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
         return;
     }
 
-    if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "HelloWorldXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
@@ -1728,7 +1757,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
  */
 static void tfm_sst_test_1024_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Creates asset 1 to get a valid handle */
@@ -1858,7 +1887,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1873,7 +1902,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
         return;
     }
 
-    if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "HelloWorldXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
         return;
     }
@@ -1885,7 +1914,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
 {
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1899,7 +1928,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
         return;
     }
 
-    if (memcmp(read_data, "Hi12345XXXX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "Hi12345XXXXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
         return;
     }
@@ -1972,6 +2001,7 @@ static void tfm_sst_test_1024(struct test_result_t *ret)
 
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_9);
 }
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**
  * \brief Tests read from and write to an illegal location: ROM.
@@ -2221,17 +2251,18 @@ TFM_SST_NS_TEST(1028, "Thread_B")
     ret->val = TEST_PASSED;
 }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 /**
  * \brief Tests write data to the middle of an existing asset
  */
 TFM_SST_NS_TEST(1029, "Thread_C")
 {
     struct tfm_sst_attribs_t asset_attrs;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t wrt_data_2[2] = "B";
 
@@ -2297,7 +2328,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
         return;
     }
 
-    io_data.data = (read_data + 3);
+    io_data.data = (read_data + HALF_PADDING_SIZE);
     io_data.size = (WRITE_BUF_SIZE - 1);
     io_data.offset = 0;
 
@@ -2311,7 +2342,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     /* Checks that the asset contains write_data_1 with the second character
      * overwritten with write_data_2.
      */
-    if (memcmp(read_data, "XXXABAAXXXX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "XXXXABAAXXXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer is incorrect");
         return;
     }
@@ -2330,3 +2361,4 @@ TFM_SST_NS_TEST(1029, "Thread_C")
 
     ret->val = TEST_PASSED;
 }
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */

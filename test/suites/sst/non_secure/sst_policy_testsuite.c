@@ -29,7 +29,7 @@
 /**
  * \note List of relations between thread name, app ID and permissions.
  *
- * Asset permissions: SST_ASSET_ID_X509_CERT_LARGE
+ * Asset permissions: SST_ASSET_ID_AES_KEY_192
  *
  *   THREAD NAME | APP_ID       | Permissions
  *   ------------|--------------------------------------
@@ -63,10 +63,10 @@
 #define WRITE_DATA_C "CCCC"
 
 /* Original contents of the read buffer */
-#define READ_DATA "XXXXXXXXXXX"
+#define READ_DATA "XXXXXXXXXXXXX"
 
 /* Contents of the read buffer after reading back write_data */
-#define RESULT_DATA(write_data) ("XXX" write_data "\0XXX")
+#define RESULT_DATA(write_data) ("XXXX" write_data "\0XXXX")
 
 /* Sizes of the read and write buffers */
 #define WRITE_BUF_SIZE (sizeof(WRITE_DATA_A))
@@ -92,13 +92,13 @@ static void tfm_sst_test_4010(struct test_result_t *ret);
 
 static struct test_t policy_tests[] = {
     { &tfm_sst_test_4001, "TFM_SST_TEST_4001",
-      "Check policy for X509_CERT_LARGE from Thread_C", {0} },
+      "Check policy for AES_KEY_192 from Thread_C", {0} },
     { &tfm_sst_test_4002, "TFM_SST_TEST_4002",
-      "Check policy for X509_CERT_LARGE from Thread_A", {0} },
+      "Check policy for AES_KEY_192 from Thread_A", {0} },
     { &tfm_sst_test_4003, "TFM_SST_TEST_4003",
-      "Check policy for X509_CERT_LARGE from Thread_B", {0} },
+      "Check policy for AES_KEY_192 from Thread_B", {0} },
     { &tfm_sst_test_4004, "TFM_SST_TEST_4004",
-      "Delete X509_CERT_LARGE from Thread_C", {0} },
+      "Delete AES_KEY_192 from Thread_C", {0} },
     { &tfm_sst_test_4005, "TFM_SST_TEST_4005",
       "Check policy for SHA224_HASH from Thread_B", {0} },
     { &tfm_sst_test_4006, "TFM_SST_TEST_4006",
@@ -122,7 +122,7 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
 }
 
 /**
- * \brief Tests policy for SST_ASSET_ID_X509_CERT_LARGE with the following
+ * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
  *          THREAD NAME | APP_ID       | Permissions
  *          ------------|--------------|-----------------------
@@ -130,7 +130,7 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
  */
 TFM_SST_NS_TEST(4001, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t attribs;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
@@ -165,7 +165,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     }
 
     /* Sets the tfm_sst_buf_t structure */
-    buf.data = read_data + 3;
+    buf.data = read_data + HALF_PADDING_SIZE;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
@@ -195,7 +195,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
+    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -204,7 +204,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
 }
 
 /**
- * \brief Tests policy for SST_ASSET_ID_X509_CERT_LARGE with the following
+ * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
  *          THREAD NAME | APP_ID       | Permissions
  *          ------------|--------------|------------
@@ -212,7 +212,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
  */
 TFM_SST_NS_TEST(4002, "Thread_A")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t attribs;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
@@ -278,7 +278,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
+    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -294,7 +294,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
 }
 
 /**
- * \brief Tests policy for SST_ASSET_ID_X509_CERT_LARGE with the following
+ * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
  *          THREAD NAME | APP_ID       | Permissions
  *          ------------|--------------|----------------
@@ -302,7 +302,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
  */
 TFM_SST_NS_TEST(4003, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t attribs;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
@@ -338,7 +338,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     }
 
     /* Sets the tfm_sst_buf_t structure */
-    buf.data = read_data + 3;
+    buf.data = read_data + HALF_PADDING_SIZE;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
@@ -370,7 +370,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
+    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -386,7 +386,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
 }
 
 /**
- * \brief Tests delete policy for SST_ASSET_ID_X509_CERT_LARGE with the
+ * \brief Tests delete policy for SST_ASSET_ID_AES_KEY_192 with the
  *        following permissions:
  *          THREAD NAME | APP_ID       | Permissions
  *          ------------|--------------|-----------------------
@@ -397,7 +397,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
  */
 TFM_SST_NS_TEST(4004, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -463,7 +463,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     }
 
     /* Sets the tfm_sst_buf_t structure */
-    buf.data = read_data + 3;
+    buf.data = read_data + HALF_PADDING_SIZE;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
@@ -670,7 +670,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     }
 
     /* Sets the tfm_sst_buf_t structure */
-    buf.data = read_data + 3;
+    buf.data = read_data + HALF_PADDING_SIZE;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
@@ -763,7 +763,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     }
 
     /* Sets the tfm_sst_buf_t structure */
-    buf.data = read_data + 3;
+    buf.data = read_data + HALF_PADDING_SIZE;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 

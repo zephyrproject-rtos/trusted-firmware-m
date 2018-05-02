@@ -15,11 +15,6 @@ struct sst_asset_info_t asset_perms[] = {
     .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_128,
     .perms_modes_start_idx = 0,
 }, {
-    .asset_uuid = SST_ASSET_ID_AES_KEY_192,
-    .max_size = SST_ASSET_MAX_SIZE_AES_KEY_192,
-    .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_192,
-    .perms_modes_start_idx = 1,
-}, {
     .asset_uuid = SST_ASSET_ID_AES_KEY_256,
     .max_size = SST_ASSET_MAX_SIZE_AES_KEY_256,
     .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_256,
@@ -45,10 +40,15 @@ struct sst_asset_info_t asset_perms[] = {
     .perms_count = SST_ASSET_PERMS_COUNT_X509_CERT_SMALL,
     .perms_modes_start_idx = 6,
 }, {
-/* The following assets are used by the SST testsuite */
     .asset_uuid = SST_ASSET_ID_X509_CERT_LARGE,
     .max_size = SST_ASSET_MAX_SIZE_X509_CERT_LARGE,
     .perms_count = SST_ASSET_PERMS_COUNT_X509_CERT_LARGE,
+    .perms_modes_start_idx = 7,
+}, {
+/* The following assets are used by the SST testsuite */
+    .asset_uuid = SST_ASSET_ID_AES_KEY_192,
+    .max_size = SST_ASSET_MAX_SIZE_AES_KEY_192,
+    .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_192,
     .perms_modes_start_idx = 7,
 }, {
     .asset_uuid = SST_ASSET_ID_SHA224_HASH,

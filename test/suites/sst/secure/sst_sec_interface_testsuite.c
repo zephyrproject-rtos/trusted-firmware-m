@@ -19,7 +19,7 @@
 /* Test suite defines */
 #define INVALID_APP_ID         0xFFFFFFFF
 #define INVALID_ASSET_ID           0xFFFF
-#define READ_BUF_SIZE                12UL
+#define READ_BUF_SIZE                14UL
 #define WRITE_BUF_SIZE                5UL
 
 /* Memory bounds to check */
@@ -32,6 +32,9 @@
 #define WRITE_DATA_SHA224_1 "TEST_DATA_ONE_TWO_THREE_FOUR"
 #define WRITE_DATA_SHA224_2 "(ABCDEFGHIJKLMNOPQRSTUVWXYZ)"
 #define BUF_SIZE_SHA224     (SST_ASSET_MAX_SIZE_SHA224_HASH + 1)
+
+/* Define used for bounds checking type tests */
+#define BUFFER_SIZE_PLUS_ONE (BUFFER_SIZE + 1)
 
 /* Define test suite for asset manager tests */
 /* List of tests */
@@ -50,13 +53,17 @@ static void tfm_sst_test_2012(struct test_result_t *ret);
 static void tfm_sst_test_2013(struct test_result_t *ret);
 static void tfm_sst_test_2014(struct test_result_t *ret);
 static void tfm_sst_test_2015(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_2016(struct test_result_t *ret);
 static void tfm_sst_test_2017(struct test_result_t *ret);
 static void tfm_sst_test_2018(struct test_result_t *ret);
+#endif
 static void tfm_sst_test_2019(struct test_result_t *ret);
 static void tfm_sst_test_2020(struct test_result_t *ret);
 static void tfm_sst_test_2021(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_2022(struct test_result_t *ret);
+#endif
 
 static struct test_t write_tests[] = {
     {&tfm_sst_test_2001, "TFM_SST_TEST_2001",
@@ -89,20 +96,24 @@ static struct test_t write_tests[] = {
      "Write partial data in an asset and reload secure storage area", {0} },
     {&tfm_sst_test_2015, "TFM_SST_TEST_2015",
      "Write more data than asset max size", {0} },
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_2016, "TFM_SST_TEST_2016",
      "Append data to an asset", {0} },
     {&tfm_sst_test_2017, "TFM_SST_TEST_2017",
      "Append data to an asset until EOF", {0} },
     {&tfm_sst_test_2018, "TFM_SST_TEST_2018",
      "Write data to two assets alternately", {0} },
+#endif
     {&tfm_sst_test_2019, "TFM_SST_TEST_2019",
      "Access an illegal location: ROM", {0} },
     {&tfm_sst_test_2020, "TFM_SST_TEST_2020",
      "Access an illegal location: device memory", {0} },
     {&tfm_sst_test_2021, "TFM_SST_TEST_2021",
      "Access an illegal location: non-existant memory", {0} },
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_2022, "TFM_SST_TEST_2022",
      "Write data to the middle of an existing asset", {0} },
+#endif
 };
 
 void register_testsuite_s_sst_sec_interface(struct test_suite_t *p_test_suite)
@@ -122,7 +133,7 @@ void register_testsuite_s_sst_sec_interface(struct test_suite_t *p_test_suite)
 static void tfm_sst_test_2001(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Prepares test context */
@@ -172,7 +183,7 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
 static void tfm_sst_test_2002(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -229,7 +240,7 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
 static void tfm_sst_test_2003(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Prepares test context */
@@ -241,7 +252,7 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
     /* Calls get handle with invalid handle pointer */
     err = tfm_sst_veneer_get_handle(app_id, asset_uuid, NULL);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should fail as asset hanlder pointer is invalid");
+        TEST_FAIL("Get handle should fail as asset handler pointer is invalid");
         return;
     }
 
@@ -257,7 +268,7 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
 static void tfm_sst_test_2004(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -298,7 +309,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
         return;
     }
 
-    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_X509_CERT_LARGE) {
+    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -329,7 +340,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
 static void tfm_sst_test_2005(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -373,7 +384,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
 static void tfm_sst_test_2006(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t asset_attrs;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -408,7 +419,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
@@ -453,7 +464,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 static void tfm_sst_test_2007(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -507,11 +518,11 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 static void tfm_sst_test_2008(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
+    uint8_t wrt_data[BUFFER_PLUS_PADDING_SIZE] = {0};
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -535,8 +546,8 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 
     /* Attempts to write beyond end of asset starting from a valid offset */
     io_data.data = wrt_data;
-    io_data.size = 2;
-    io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE - 1;
+    io_data.size = BUFFER_SIZE_PLUS_ONE;
+    io_data.offset = 0;
 
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -546,7 +557,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 
     /* Attempts to write to an offset beyond the end of the asset */
     io_data.size = 1;
-    io_data.offset = SST_ASSET_MAX_SIZE_X509_CERT_LARGE;
+    io_data.offset = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -566,12 +577,12 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 static void tfm_sst_test_2009(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -601,33 +612,34 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
     /* Sets data structure for read*/
-    io_data.data = read_data+3;
+    io_data.data = read_data + HALF_PADDING_SIZE;
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
     /* Read data from the asset */
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Read should works correctly");
+        TEST_FAIL("Read should work correctly");
         return;
     }
 
-    if (memcmp(read_data, "XXX", 3) != 0) {
+    if (memcmp(read_data, "XXXX", HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
         return;
     }
 
-    if (memcmp((read_data+3), wrt_data, WRITE_BUF_SIZE) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE), wrt_data, WRITE_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
 
-    if (memcmp((read_data+8), "XXX", 3) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE+WRITE_BUF_SIZE), "XXXX",
+                HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
         return;
     }
@@ -659,7 +671,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 static void tfm_sst_test_2010(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -712,13 +724,12 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 static void tfm_sst_test_2011(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     struct tfm_sst_attribs_t asset_attrs;
     uint32_t hdl;
-    uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t data[BUFFER_SIZE_PLUS_ONE] = {0};
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -741,14 +752,14 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     }
 
     /* Sets data structure */
-    io_data.data = wrt_data;
-    io_data.size = WRITE_BUF_SIZE;
+    io_data.data = data;
+    io_data.size = SST_ASSET_MAX_SIZE_AES_KEY_192;
     io_data.offset = 0;
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
@@ -767,9 +778,9 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     }
 
     /* Attempts to read beyond the current size starting from a valid offset */
-    io_data.data = read_data;
-    io_data.size = 2;
-    io_data.offset = asset_attrs.size_current - 1;
+    io_data.data = data;
+    io_data.size = BUFFER_SIZE_PLUS_ONE;
+    io_data.offset = 0;
 
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -949,12 +960,12 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 static void tfm_sst_test_2013(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
     uint32_t i;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
     /* Prepares test context */
@@ -985,20 +996,24 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
-    /* Sets data structure for read*/
-    io_data.data = (read_data + 3);
+    /* Sets data structure for read */
+    io_data.data = read_data + HALF_PADDING_SIZE;
     io_data.size = 1;
     io_data.offset = 0;
 
-    for (i = 0; i < WRITE_BUF_SIZE; i++) {
+    for (i = 0; i < WRITE_BUF_SIZE ; i++) {
         /* Read data from the asset */
         err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
         if (err != TFM_SST_ERR_SUCCESS) {
-            TEST_FAIL("Read should works correctly");
+#else
+        if (io_data.offset != 0 && err != TFM_SST_ERR_PARAM_ERROR) {
+#endif
+            TEST_FAIL("Read did not behave correctly");
             return;
         }
 
@@ -1007,17 +1022,23 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
         io_data.offset++;
     }
 
-    if (memcmp(read_data, "XXX", 3) != 0) {
+    if (memcmp(read_data, "XXXX", HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal pre-data");
         return;
     }
 
-    if (memcmp((read_data + 3), wrt_data, WRITE_BUF_SIZE) != 0) {
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+    if (memcmp((read_data+HALF_PADDING_SIZE), wrt_data, WRITE_BUF_SIZE) != 0) {
+#else
+    /* Only the first read ("D") is from a valid offset (0) */
+    if (memcmp((read_data+HALF_PADDING_SIZE), "DXXXX", WRITE_BUF_SIZE) != 0) {
+#endif
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
 
-    if (memcmp((read_data + 8), "XXX", 3) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE+WRITE_BUF_SIZE), "XXXX",
+                HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
         return;
     }
@@ -1034,11 +1055,11 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 static void tfm_sst_test_2014(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
     /* Prepares test context */
@@ -1069,7 +1090,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should works correctly");
+        TEST_FAIL("Write should work correctly");
         return;
     }
 
@@ -1081,7 +1102,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
     }
 
     /* Sets data structure */
-    io_data.data = (read_data + 3);
+    io_data.data = read_data + HALF_PADDING_SIZE;
     io_data.size = WRITE_BUF_SIZE;
     io_data.offset = 0;
 
@@ -1092,17 +1113,18 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
         return;
     }
 
-    if (memcmp(read_data, "XXX", 3) != 0) {
+    if (memcmp(read_data, "XXXX", HALF_PADDING_SIZE)) {
         TEST_FAIL("Read buffer contains illegal pre-data");
         return;
     }
 
-    if (memcmp((read_data + 3), wrt_data, WRITE_BUF_SIZE) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE), wrt_data, WRITE_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
 
-    if (memcmp((read_data + 8), "XXX", 3) != 0) {
+    if (memcmp((read_data+HALF_PADDING_SIZE+WRITE_BUF_SIZE), "XXXX",
+                HALF_PADDING_SIZE) != 0) {
         TEST_FAIL("Read buffer contains illegal post-data");
         return;
     }
@@ -1158,6 +1180,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 /**
  * \brief Tests write function against multiple writes.
  */
@@ -1168,7 +1191,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
-    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
     uint8_t wrt_data2[WRITE_BUF_SIZE+1] = "World";
 
@@ -1231,7 +1254,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
     /* The X is used to check that the number of bytes read was exactly the
      * number requested
      */
-    if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "HelloWorldXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has read incorrect data");
         return;
     }
@@ -1294,7 +1317,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
     err = tfm_sst_veneer_write(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
-                  "write more bytes that the max size");
+                  "write more bytes than the max size");
         return;
     }
 
@@ -1338,13 +1361,13 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     const uint32_t app_id_1 = S_APP_ID;
     const uint32_t app_id_2 = S_APP_ID;
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     uint32_t hdl_1;
     uint32_t hdl_2;
     struct tfm_sst_buf_t io_data;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1] = "Hello";
     uint8_t wrt_data2[3] = "Hi";
     uint8_t wrt_data3[WRITE_BUF_SIZE+1] = "World";
@@ -1444,7 +1467,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
         return;
     }
 
-    if (memcmp(read_data, "HelloWorldX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "HelloWorldXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
         return;
     }
@@ -1464,13 +1487,14 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
         return;
     }
 
-    if (memcmp(read_data, "Hi12345XXXX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "Hi12345XXXXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer has incorrect data");
         return;
     }
 
     ret->val = TEST_PASSED;
 }
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**
  * \brief Tests read from and write to an illegal location: ROM.
@@ -1661,18 +1685,19 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 /**
  * \brief Writes data to the middle of an existing asset.
  */
 static void tfm_sst_test_2022(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_attribs_t attribs;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl;
-    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXX";
+    uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t write_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t write_data_2[2] = "B";
 
@@ -1741,7 +1766,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
         return;
     }
 
-    buf.data = (read_data + 3);
+    buf.data = (read_data + HALF_PADDING_SIZE);
     buf.size = (WRITE_BUF_SIZE - 1);
     buf.offset = 0;
 
@@ -1754,7 +1779,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     /* Checks that the asset contains write_data_1 with the second character
      * overwritten with write_data_2.
      */
-    if (memcmp(read_data, "XXXABAAXXXX", READ_BUF_SIZE) != 0) {
+    if (memcmp(read_data, "XXXXABAAXXXXX", READ_BUF_SIZE) != 0) {
         TEST_FAIL("Read buffer is incorrect");
         return;
     }
@@ -1773,3 +1798,4 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */

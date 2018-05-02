@@ -43,6 +43,11 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
 	endif()
 
+	if (SST_ENABLE_PARTIAL_ASSET_RW)
+		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
+		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
+	endif()
+
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/test/interface/include ABSOLUTE)

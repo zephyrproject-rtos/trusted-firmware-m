@@ -58,15 +58,16 @@ void register_testsuite_s_sst_reliability(struct test_suite_t *p_test_suite)
  *        -------------------------------------
  *        S_APP_ID | REFERENCE, READ, WRITE
  */
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
     uint32_t hdl;
     uint32_t app_id = S_APP_ID;
-    uint32_t asset_offset = 0;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct tfm_sst_buf_t data;
+    struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
+    uint32_t asset_offset = 0;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -89,28 +90,28 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     }
 
     /* Sets write and read sizes */
-    data.size = WRITE_BUF_SIZE-1;
+    io_data.size = WRITE_BUF_SIZE-1;
 
     for (itr = 0; itr < LOOP_ITERATIONS_001; itr++) {
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_001);
 
         do {
             /* Sets data structure */
-            data.data = wrt_data;
-            data.offset = asset_offset;
+            io_data.data = wrt_data;
+            io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, hdl, &data);
+            err = tfm_sst_veneer_write(app_id, hdl, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for application S_APP_ID");
                 return;
             }
 
             /* Updates data structure to point to the read buffer */
-            data.data = &read_data[3];
+            io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, hdl, &data);
+            err = tfm_sst_veneer_read(app_id, hdl, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Application S_APP_ID must get file handle");
                 return;
@@ -123,10 +124,10 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             }
 
             /* Reset read buffer data */
-            memset(data.data, 'X', data.size);
+            memset(io_data.data, 'X', io_data.size);
 
             /* Moves asset offsets to next position */
-            asset_offset += data.size;
+            asset_offset += io_data.size;
 
         } while (asset_offset < SST_ASSET_MAX_SIZE_X509_CERT_LARGE);
 
@@ -145,6 +146,96 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#else
+static void tfm_sst_test_3001(struct test_result_t *ret)
+{
+    uint32_t hdl;
+    uint32_t app_id = S_APP_ID;
+    struct tfm_sst_buf_t io_data;
+    enum tfm_sst_err_t err;
+    uint32_t itr;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    uint8_t data[BUFFER_PLUS_PADDING_SIZE] = {0};
+    uint32_t i;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        return;
+    }
+
+    /* Checks write permissions in create function */
+    err = tfm_sst_veneer_create(app_id, asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail for application S_APP_ID");
+        return;
+    }
+
+    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should not fail");
+        return;
+    }
+
+    /* Sets write and read sizes */
+    io_data.size = SST_ASSET_MAX_SIZE_AES_KEY_192;
+
+    for (itr = 0; itr < LOOP_ITERATIONS_001; itr++) {
+        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_001);
+
+        memset(data, 0, BUFFER_PLUS_PADDING_SIZE);
+        /* Sets data structure */
+        io_data.data = data;
+        io_data.offset = 0;
+
+        /* Checks write permissions in the write function */
+        err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Write should not fail for application S_APP_ID");
+            return;
+        }
+
+        memset(data, 'X', BUFFER_PLUS_PADDING_SIZE);
+        io_data.data = data + HALF_PADDING_SIZE;
+
+        /* Checks write permissions in the read function */
+        err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Application S_APP_ID must get file handle");
+            return;
+        }
+
+        /* Checks read data buffer content */
+        if (memcmp(data, "XXXX", HALF_PADDING_SIZE) != 0) {
+            TEST_FAIL("Read buffer contains illegal pre-data");
+            return;
+        }
+
+        for (i=HALF_PADDING_SIZE; i<(BUFFER_PLUS_HALF_PADDING_SIZE); i++) {
+            if (data[i] != 0) {
+                TEST_FAIL("Read buffer has read incorrect data");
+                return;
+            }
+        }
+
+        if (memcmp((data+BUFFER_PLUS_HALF_PADDING_SIZE), "XXXX",
+                    HALF_PADDING_SIZE) != 0) {
+            TEST_FAIL("Read buffer contains illegal post-data");
+            return;
+        }
+    }
+
+    TEST_LOG("\n");
+
+    /* Checks write permissions in delete function */
+    err = tfm_sst_veneer_delete(app_id, hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Delete should not fail for application S_APP_ID");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**
  * \brief Tests repetitive creates, reads, writes and deletes, with the follow
@@ -153,15 +244,16 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
  *        -------------------------------------
  *        S_APP_ID | REFERENCE, READ, WRITE
  */
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
     uint32_t hdl;
     uint32_t app_id = S_APP_ID;
-    uint32_t asset_offset = 0;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct tfm_sst_buf_t data;
+    struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
+    uint32_t asset_offset = 0;
+    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -171,7 +263,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
     }
 
     /* Sets write and read sizes */
-    data.size = WRITE_BUF_SIZE-1;
+    io_data.size = WRITE_BUF_SIZE-1;
 
     for (itr = 0; itr < LOOP_ITERATIONS_002; itr++) {
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
@@ -191,21 +283,21 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
 
         do {
             /* Sets data structure */
-            data.data = wrt_data;
-            data.offset = asset_offset;
+            io_data.data = wrt_data;
+            io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, hdl, &data);
+            err = tfm_sst_veneer_write(app_id, hdl, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for application S_APP_ID");
                 return;
             }
 
             /* Updates data structure to point to the read buffer */
-            data.data = &read_data[3];
+            io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, hdl, &data);
+            err = tfm_sst_veneer_read(app_id, hdl, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Application S_APP_ID must get file handle");
                 return;
@@ -219,12 +311,15 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             }
 
             /* Reset read buffer data */
-            memset(data.data, 'X', data.size);
+            memset(io_data.data, 'X', io_data.size);
 
             /* Moves asset offsets to next position */
-            asset_offset += data.size;
+            asset_offset += io_data.size;
 
         } while (asset_offset < SST_ASSET_MAX_SIZE_X509_CERT_LARGE);
+
+        /* Resets asset_offset */
+        asset_offset = 0;
 
         /* Checks write permissions in delete function */
         err = tfm_sst_veneer_delete(app_id, hdl);
@@ -232,12 +327,100 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             TEST_FAIL("Delete should not fail for application S_APP_ID");
             return;
         }
-
-        /* Resets asset_offset */
-        asset_offset = 0;
     }
 
     TEST_LOG("\n");
 
     ret->val = TEST_PASSED;
 }
+
+#else
+static void tfm_sst_test_3002(struct test_result_t *ret)
+{
+    uint32_t hdl;
+    uint32_t app_id = S_APP_ID;
+    struct tfm_sst_buf_t io_data;
+    enum tfm_sst_err_t err;
+    uint32_t itr;
+    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    uint8_t data[BUFFER_PLUS_PADDING_SIZE] = {0};
+    uint32_t i;
+
+    /* Prepares test context */
+    if (prepare_test_ctx(ret) != 0) {
+        return;
+    }
+
+    /* Sets write and read sizes */
+    io_data.size = SST_ASSET_MAX_SIZE_AES_KEY_192;
+
+    for (itr = 0; itr < LOOP_ITERATIONS_002; itr++) {
+        TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
+
+        /* Checks write permissions in create function */
+        err = tfm_sst_veneer_create(app_id, asset_uuid);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Create should not fail for application S_APP_ID");
+            return;
+        }
+
+        err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Get handle should not fail");
+            return;
+        }
+
+        memset(data, 0, BUFFER_PLUS_PADDING_SIZE);
+        /* Sets data structure */
+        io_data.data = data;
+        io_data.offset = 0;
+
+        /* Checks write permissions in the write function */
+        err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Write should not fail for application S_APP_ID");
+            return;
+        }
+
+        memset(data, 'X', BUFFER_PLUS_PADDING_SIZE);
+        io_data.data = data + HALF_PADDING_SIZE;
+
+        /* Checks write permissions in the read function */
+        err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Application S_APP_ID must get file handle");
+            return;
+        }
+
+        /* Checks read data buffer content */
+        if (memcmp(data, "XXXX", HALF_PADDING_SIZE) != 0) {
+            TEST_FAIL("Read buffer contains illegal pre-data");
+            return;
+        }
+
+        for (i=HALF_PADDING_SIZE; i<(BUFFER_PLUS_HALF_PADDING_SIZE); i++) {
+            if (data[i] != 0) {
+                TEST_FAIL("Read buffer has read incorrect data");
+                return;
+            }
+        }
+
+        if (memcmp((data+BUFFER_PLUS_HALF_PADDING_SIZE), "XXXX",
+                    HALF_PADDING_SIZE) != 0) {
+            TEST_FAIL("Read buffer contains illegal post-data");
+            return;
+        }
+
+        /* Checks write permissions in delete function */
+        err = tfm_sst_veneer_delete(app_id, hdl);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            TEST_FAIL("Delete should not fail for application S_APP_ID");
+            return;
+        }
+    }
+
+    TEST_LOG("\n");
+
+    ret->val = TEST_PASSED;
+}
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
