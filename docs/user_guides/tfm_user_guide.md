@@ -99,8 +99,6 @@ IMAGE1FILE: \Software\tfm_sign.bin ; TF-M example application binary blob
    port (baud 115200 8n1) the following messages:
 
 
-At the moment BL2 bootloader together with the TF-M examples application only
-shows following:
 ```
 [INF] Starting bootloader
 [INF] Image 0: magic=good, copy_done=0xff, image_ok=0xff
@@ -127,7 +125,7 @@ port (baud 115200 8n1) the following messages:
 [INF] Jumping to the first image slot
 [Sec Thread] Secure image initializing!
 
-#### Execute test suites for the Secure area ####
+#### Execute test suites for the secure storage service ####
 Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 
 > Executing 'TFM_SST_TEST_2001'
@@ -149,6 +147,67 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 ```
 
 Note: SST reliability tests take approximately three minutes to run on the MPS2.
+
+## Execute TF-M example and regression tests on Musca-A1 test chip board ##
+
+#### Example application
+
+1. Create a unified hex file comprising of both mcuboot and tfm_sign binary  
+   * Windows  
+ `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`  
+   * Linux  
+ `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`  
+2. Plug in the Musca-A1 board in your computer. The board should appear as USB drive
+3. Drag and drop `tfm.hex` to the USB drive
+4. Reset the board to execute the TF-M example application
+5. After completing the procedure you should be able to see on the UART0
+ (baud 115200 8n1) the following messages:
+
+```
+[INF] Starting bootloader
+[INF] Image 0: magic=good, copy_done=0xff, image_ok=0xff
+[INF] Scratch: magic=bad, copy_done=0x5, image_ok=0xd9
+[INF] Boot source: slot 0
+[INF] Swap type: none
+[INF] Bootloader chainload address offset: 0x10000
+[INF] Jumping to the first image slot
+[Sec Thread] Secure image initializing!
+```
+
+#### Regression tests
+
+After completing the procedure you should be able to see on the UART0
+(baud 115200 8n1) the following messages:
+
+```
+[INF] Starting bootloader
+[INF] Image 0: magic=good, copy_done=0xff, image_ok=0xff
+[INF] Scratch: magic=bad, copy_done=0x5, image_ok=0x9
+[INF] Boot source: slot 0
+[INF] Swap type: none
+[INF] Bootloader chainload address offset: 0x10000
+[INF] Jumping to the first image slot
+[Sec Thread] Secure image initializing!
+
+#### Execute test suites for the secure storage service ####
+Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
+> Executing 'TFM_SST_TEST_2001'
+  Description: 'Create interface'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2002'
+  Description: 'Get handle interface'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2003'
+  Description: 'Get handle with null handle pointer'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2004'
+  Description: 'Get attributes interface'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2005'
+  Description: 'Get attributes with null attributes struct pointer'
+....
+
+```
 
 ## Software upgrade and image validation with BL2 bootloader
 
@@ -253,11 +312,13 @@ difference, `Swap type: none` will be replaced with `Swap type: test`:
 [INF] Jumping to the first image slot
 [Sec Thread] Secure image initializing!
 
-#### Execute test suites for the Secure area ####
+#### Execute test suites for the secure storage service ####
 Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 ...
 ```
 This indicates that software upgrade happened.
+
+*Note* Software upgrade support for Musca-A1 board is not yet supported.
 
 --------------
 

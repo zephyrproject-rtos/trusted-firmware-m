@@ -20,6 +20,7 @@ on specific products and licenses as explained in
   - pycrypto
   - pyasn1
   - sudo apt-get install python3-crypto python3-pyasn1
+- SRecord v1.58 (for Musca-A1 test chip board)
 
 ### Setup a shell to enable ARM Compiler v6.7.1 and cmake after installation.
 
@@ -47,6 +48,7 @@ export PATH=<CMAKE_PATH>/bin:$PATH
   - pycryptodome (pip3 install --user pycryptodome)
   - pyasn1 (pip3 install --user pyasn1)
 - Python3 pip
+- SRecord v1.63 (for Musca-A1 test chip board)
 
 ### Setup Cygwin to enable ARM Compiler v6.7.1 and cmake after installation.
 

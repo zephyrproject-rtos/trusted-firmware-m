@@ -75,6 +75,7 @@ Current release has been tested on
 * Cortex M33 based SSE-200 system -
 	* [FPGA image loaded on MPS2 board.](https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2)
 	* [Fast model FVP_MPS2_AEMv8M.](https://developer.arm.com/products/system-design/fixed-virtual-platforms)
+	* [Musca-A1 test chip board.](https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a1-test-chip-board)
 * Cortex M23 based IoT Kit system -
 	* [FPGA image loaded on MPS2 board.](https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2)
 

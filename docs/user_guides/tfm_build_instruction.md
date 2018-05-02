@@ -44,6 +44,13 @@ cmake command. (See examples below.)
 * The target platform can be specified by adding the
 `-DTARGET_PLATFORM=<target platform name>` option to the cmake command (See
   examples below.)
+* Platforms currently supported
+  * Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)  
+  `-DTARGET_PLATFORM=AN521`
+  * Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)  
+    `-DTARGET_PLATFORM=AN519`
+  * Musca-A1 test chip board (Cortex-M33 SSE-200 subsystem)  
+    `-DTARGET_PLATFORM=MUSCA_A`
 
 *Note* For all the applications we build the level 2 bootloader
 
