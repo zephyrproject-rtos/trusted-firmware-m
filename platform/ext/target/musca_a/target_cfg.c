@@ -139,19 +139,6 @@ void sau_and_idau_cfg(void)
     SAU->RBAR = (NS_PARTITION_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_PARTITION_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
-/*
- * If __USE_BOTH_CODE_MEMORY is defined the code is copied from QSPI flash to
- * CODE SRAM before executing, SAU needs to be configured accordingly.
- * If __USE_BOTH_CODE_MEMORY is undefined then the code will be executed from
- * QSPI flash directly, no such configuration is needed for CODE SRAM
- */
-#ifdef __USE_BOTH_CODE_MEMORY
-    SAU->RNR  = TFM_NS_REGION_CODE_SRAM;
-    SAU->RBAR = (NS_CODE_SRAM_EXEC_BASE & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (NS_CODE_SRAM_EXEC_LIMIT & SAU_RLAR_LADDR_Msk) |
-                 SAU_RLAR_ENABLE_Msk;
-#endif
-
     SAU->RNR  = TFM_NS_REGION_DATA;
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
@@ -188,23 +175,6 @@ void mpc_init_cfg(void)
                                  NS_PARTITION_LIMIT,
                                  ARM_MPC_ATTR_NONSECURE);
 
-    Driver_SRAM1_MPC.Initialize();
-/*
- * If __USE_BOTH_CODE_MEMORY is defined the code is copied from QSPI flash to
- * CODE SRAM before executing, MPC needs to be configured accordingly.
- * If __USE_BOTH_CODE_MEMORY is undefined then the code will be executed from
- * QSPI flash directly
- */
-#ifdef __USE_BOTH_CODE_MEMORY
-    Driver_SRAM1_MPC.ConfigRegion(NS_CODE_SRAM_EXEC_BASE,
-                                  NS_CODE_SRAM_EXEC_LIMIT,
-                                  ARM_MPC_ATTR_NONSECURE);
-#else
-    Driver_SRAM1_MPC.ConfigRegion(NS_PARTITION_START,
-                                  NS_PARTITION_LIMIT,
-                                  ARM_MPC_ATTR_NONSECURE);
-#endif
-
     mpc_data_region0->Initialize();
     mpc_data_region0->ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
                                    MPC_ISRAM0_RANGE_LIMIT_S,
@@ -227,7 +197,6 @@ void mpc_init_cfg(void)
 
     /* Lock down the MPC configuration */
     Driver_QSPI_MPC.LockDown();
-    Driver_SRAM1_MPC.LockDown();
     mpc_data_region0->LockDown();
     mpc_data_region1->LockDown();
     mpc_data_region2->LockDown();

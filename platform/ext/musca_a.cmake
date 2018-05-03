@@ -111,6 +111,10 @@ endif()
 if (NOT DEFINED BUILD_FLASH)
   message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif(BUILD_FLASH)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/flash_memory_mapped.c")
-  embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Driver_Flash.c")
+  # As the SST area is going to be in RAM, it is required to set SST_RAM_FS to be sure the
+  # SST service knows that when it starts the SST area does not contain any valid block and
+  # it needs  to create an empty one.
+  set(SST_RAM_FS True)
+  embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
 endif()

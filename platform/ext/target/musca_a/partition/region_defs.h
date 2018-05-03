@@ -19,28 +19,12 @@
 
 #include "flash_layout.h"
 
-#define TOTAL_ROM_SIZE (0x00040000) /* 256KB */
+#define TOTAL_ROM_SIZE (0x00200000) /* 2 MB */
 #define TOTAL_RAM_SIZE (0x00020000) /* 128KB */
 
 /*
  * MPC granularity is 128 KB on Musca. Alignment
  * of partitions is defined in accordance with this constraint.
- */
-
-/*Flash partitions on Musca with BL2:
- * 0x0020_0000 BL2 - MCUBoot
- * 0x0021_0000 Flash_area_image_0:
- *    0x0021_0000 Secure     image primary
- *    0x0023_0000 Non-secure image primary
- * 0x0024_0000 Flash_area_image_1:
- *    0x0024_0000 Secure     image secondary
- *    0x0026_0000 Non-secure image secondary
- * 0x0027_0000 Scratch area
-
- *
- * Flash partitions on bare metal, if BL2 not defined:
- * 0x0020_0000 Secure     image
- * 0x0022_0000 Non-secure image
  */
 
 #define  S_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
@@ -50,8 +34,8 @@
 /*
  * Boot partition structure if MCUBoot is used:
  * 0x0_0000 Bootloader header
- * 0x0_0200 Image area
- * 0x7_0000 Trailer
+ * 0x0_0400 Image area
+ * 0x1_FC00 Trailer
  */
 /* IMAGE_CODE_SIZE is the space available for the software binary image.
  * It is less than the FLASH_PARTITION_SIZE because we reserve space
@@ -112,23 +96,14 @@
 #define NS_PARTITION_START \
             (NS_ROM_ALIAS(NS_IMAGE_PRIMARY_PARTITION_OFFSET))
 
+#define NS_PARTITION_LIMIT \
+            (NS_PARTITION_START + FLASH_PARTITION_SIZE  \
+             - FLASH_AREA_BL2_SIZE - 1)
+
 /* Code SRAM area */
 #define TOTAL_CODE_SRAM_SIZE     (TOTAL_ROM_SIZE)
 #define S_CODE_SRAM_ALIAS_BASE   (0x10000000)
 #define NS_CODE_SRAM_ALIAS_BASE  (0x00000000)
-
-#define BL2_CODE_SRAM_EXEC_BASE  (S_CODE_SRAM_ALIAS_BASE)
-#define S_CODE_SRAM_EXEC_BASE    (S_CODE_SRAM_ALIAS_BASE)
-#define S_CODE_SRAM_EXEC_LIMIT   (S_CODE_SRAM_EXEC_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE/2) - 1)
-#define NS_CODE_SRAM_EXEC_BASE   (NS_CODE_SRAM_ALIAS_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE/2))
-#define NS_CODE_SRAM_EXEC_LIMIT  (NS_CODE_SRAM_EXEC_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE/2) - 1)
-
-#define NS_PARTITION_LIMIT \
-            (NS_PARTITION_START + FLASH_PARTITION_SIZE  \
-             - FLASH_AREA_BL2_SIZE - 1)
 
 #define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
 #define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)

@@ -60,5 +60,11 @@
 #define MPC_QSPI_RANGE_LIMIT_NS       (0x00240000)
 #define MPC_QSPI_RANGE_BASE_S         (0x10200000)
 #define MPC_QSPI_RANGE_LIMIT_S        (0x10240000)
+#define FLASH0_BASE_S                 (MPC_QSPI_RANGE_BASE_S)
+#define FLASH0_BASE_NS                (MPC_QSPI_RANGE_BASE_NS)
+#define FLASH0_SIZE                   (0x00800000)  /* 8 MB */
+#define FLASH0_SECTOR_SIZE            (0x00001000)  /* 4 kB */
+#define FLASH0_PAGE_SIZE              (0x00001000)  /* 4 kB */
+#define FLASH0_PROGRAM_UNIT           (0x4)         /* Minimum write size */
 
 #endif  /* __ARM_LTD_MUSCA_RETARGET_H__ */
