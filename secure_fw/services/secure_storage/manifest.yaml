@@ -69,7 +69,7 @@
   "source_files": [
     "sst_core.c",
     "sst_utils.c",
-    "sst_core_interface.c",
+    "sst_object_system.c",
     "sst_asset_management.c",
     "assets/sst_asset_defs.c",
     "crypto/sst_crypto_interface.c",

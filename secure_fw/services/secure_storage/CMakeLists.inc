@@ -48,7 +48,7 @@ if (ENABLE_SECURE_STORAGE)
 	endif()
 
 	set (SECURE_STORAGE_C_SRC "${SECURE_STORAGE_DIR}/sst_core.c"
-		"${SECURE_STORAGE_DIR}/sst_core_interface.c"
+		"${SECURE_STORAGE_DIR}/sst_object_system.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
 		"${SECURE_STORAGE_DIR}/sst_utils.c"
 		"${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"
@@ -83,6 +83,7 @@ if (ENABLE_SECURE_STORAGE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/driver ABSOLUTE)
 
 	set(BUILD_CMSIS_CORE Off)
 	set(BUILD_RETARGET Off)

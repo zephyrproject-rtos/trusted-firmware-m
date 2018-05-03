@@ -13,7 +13,7 @@
 #include "test/suites/sst/secure/sst_tests.h"
 #include "test/suites/log/secure/log_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
-#include "secure_fw/services/secure_storage/sst_core_interface.h"
+#include "secure_fw/services/secure_storage/sst_object_system.h"
 
 static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_S
@@ -42,8 +42,8 @@ static void setup_integ_test(void)
 static void tear_down_integ_test(void)
 {
     /* Leave the SST area clean after execute the tests */
-    sst_object_wipe_all();
-    sst_object_prepare();
+    sst_system_wipe_all();
+    sst_system_prepare();
 }
 
 void start_integ_test(void)

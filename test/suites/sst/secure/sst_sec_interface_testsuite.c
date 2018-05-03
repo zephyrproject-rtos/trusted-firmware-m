@@ -12,7 +12,7 @@
 
 #include "test/framework/helpers.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
-#include "secure_fw/services/secure_storage/sst_core_interface.h"
+#include "secure_fw/services/secure_storage/sst_object_system.h"
 #include "tfm_sst_veneers.h"
 #include "s_test_helpers.h"
 
@@ -1095,7 +1095,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
     }
 
     /* Calls prepare again to simulate reinitialization */
-    err = sst_object_prepare();
+    err = sst_am_prepare();
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Saved system should have been preparable");
         return;

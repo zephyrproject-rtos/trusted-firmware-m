@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,15 +11,15 @@
 #include <string.h>
 
 #include "test/framework/test_framework.h"
-#include "secure_fw/services/secure_storage/sst_core_interface.h"
+#include "secure_fw/services/secure_storage/sst_object_system.h"
 
 uint32_t prepare_test_ctx(struct test_result_t *ret)
 {
     /* Wipes secure storage area */
-    sst_object_wipe_all();
+    sst_system_wipe_all();
 
     /* Prepares secure storage area before write */
-    if (sst_object_prepare() != TFM_SST_ERR_SUCCESS) {
+    if (sst_system_prepare() != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Wiped system should be preparable");
         return 1;
     }

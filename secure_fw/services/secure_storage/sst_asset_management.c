@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #include "assets/sst_asset_defs.h"
-#include "sst_core_interface.h"
+#include "sst_object_system.h"
 #include "sst_utils.h"
 #include "tfm_secure_api.h"
 #include "tfm_sst_defs.h"
@@ -237,16 +237,16 @@ enum tfm_sst_err_t sst_am_prepare(void)
     if (err != TFM_SST_ERR_SUCCESS) {
         return TFM_SST_ERR_SYSTEM_ERROR;
     }
-    err = sst_object_prepare();
+    err = sst_system_prepare();
 #ifdef SST_RAM_FS
     /* in case of RAM based system there wouldn't be
      * any content in the boot time. Call the wipe API
      * to create a storage structure.
      */
     if (err != TFM_SST_ERR_SUCCESS) {
-        sst_object_wipe_all();
+        sst_system_wipe_all();
         /* attempt to initialise again */
-        err = sst_object_prepare();
+        err = sst_system_prepare();
     }
 #endif
 
