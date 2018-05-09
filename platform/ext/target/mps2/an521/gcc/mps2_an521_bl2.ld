@@ -197,4 +197,6 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
+
+    PROVIDE( __stack = __initial_msp);
 }
