@@ -286,12 +286,13 @@ struct nspctrl_def {
 /* End of ARM AHB PPC0 peripherals definition */
 
 /* ARM AHB PPCEXP0 peripherals definition */
-#define CMSDK_VGA_PPC_POS    0U
-#define CMSDK_GPIO0_PPC_POS  1U
-#define CMSDK_GPIO1_PPC_POS  2U
-#define CMSDK_GPIO2_PPC_POS  3U
-#define CMSDK_GPIO3_PPC_POS  4U
-/* The bits 31:5 are reserved */
+#define CMSDK_VGA_PPC_POS       0U
+#define CMSDK_GPIO0_PPC_POS     1U
+#define CMSDK_GPIO1_PPC_POS     2U
+#define CMSDK_GPIO2_PPC_POS     3U
+#define CMSDK_GPIO3_PPC_POS     4U
+#define MPS2_ETHERNET_PPC_POS   5U
+/* The bits 31:6 are reserved */
 /* End of ARM AHB PPCEXP0 peripherals definition */
 
 /* ARM AHB PPCEXP1 peripherals definition */

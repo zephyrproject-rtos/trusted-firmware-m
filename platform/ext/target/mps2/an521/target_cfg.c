@@ -292,6 +292,7 @@ void ppc_init_cfg(void)
     spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO1_PPC_POS);
     spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO2_PPC_POS);
     spctrl->ahbnsppcexp0 |= (1U << CMSDK_GPIO3_PPC_POS);
+    spctrl->ahbnsppcexp0 |= (1U << MPS2_ETHERNET_PPC_POS);
 
     spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA0_PPC_POS);
     spctrl->ahbnsppcexp1 |= (1U << CMSDK_DMA1_PPC_POS);
