@@ -30,29 +30,32 @@ extern "C" {
  * +-------------+0
  * | TIMESTAMP   |
  * |             |
- * +-------------+4
- * | PARTITION ID|
- * |             |
  * +-------------+8
- * | SIZE        |
+ * | IV_COUNTER  |
  * |             |
  * +-------------+12
- * | FUNCTION ID |
+ * | PARTITION ID|
  * |             |
  * +-------------+16
+ * | SIZE        |
+ * |             |
+ * +-------------+20
+ * | FUNCTION ID |
+ * |             |
+ * +-------------+24
  * | ARG0-3      |
  * |             |
  * |             |
- * +-------------+32
+ * +-------------+40
  * | PAYLOAD     |
  * |             |
  * |             |
  * |             |
- * +-------------+12 + SIZE
+ * +-------------+20 + SIZE
  * | MAC         |
  * |             |
  * |             |
- * +-------------+12 + SIZE + MAC_SIZE
+ * +-------------+20 + SIZE + MAC_SIZE
  *
  * SIZE: at least 20 bytes
  *       known only at runtime. It's the
@@ -114,7 +117,8 @@ struct log_tlv_entry {
  * \brief Fixed size logging entry header
  */
 struct log_hdr {
-    uint32_t timestamp;
+    uint64_t timestamp;
+    uint32_t iv_counter;
     uint32_t partition_id;
     uint32_t size;
     uint32_t function_id;

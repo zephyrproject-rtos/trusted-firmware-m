@@ -69,13 +69,12 @@ static const char hex_values[] = "0123456789ABCDEF";
 /*!
  * \def LOG_FIXED_FIELD_SIZE
  *
- * \brief Size of the mandatory
- *        header fields that are before
- *        the info received from
- *        the client partition, i.e.
- *        [TIMESTAMP][PARTITION_ID][SIZE]
+ * \brief Size of the mandatory header fields that are before the info received
+ *        from the client partition, i.e.
+ *        [TIMESTAMP][IV_COUNTER][PARTITION_ID][SIZE]
  */
 #define LOG_FIXED_FIELD_SIZE (MEMBER_SIZE(struct log_hdr, timestamp) + \
+                              MEMBER_SIZE(struct log_hdr, iv_counter) + \
                               MEMBER_SIZE(struct log_hdr, partition_id) + \
                               MEMBER_SIZE(struct log_hdr, size))
 /*!
@@ -83,7 +82,7 @@ static const char hex_values[] = "0123456789ABCDEF";
  *
  * \brief Size of the allocated space for the log, in bytes
  *
- * \note Must be 4 bytes aligned
+ * \note Must be a multiple of 8 bytes.
  */
 #define LOG_SIZE (1024)
 
@@ -111,7 +110,7 @@ static uint8_t log_buffer[LOG_SIZE] = {0};
  * \brief Scratch buffers needed to hold plain text (and encrypted, if
  *        available) log items to be added
  */
-static uint32_t scratch_buffer[(LOG_SIZE)/4] = {0};
+static uint64_t scratch_buffer[(LOG_SIZE)/8] = {0};
 
 /*!
  * \struct log_vars
@@ -148,7 +147,7 @@ static struct log_vars log_state = {0};
  *       timestamping and will be removed later when the final timestamping
  *       mechanism is in place
  */
-static uint32_t global_timestamp = 0;
+static uint64_t global_timestamp = 0;
 
 /*!
  * \def DUMMY_PARTITION_ID
@@ -360,7 +359,7 @@ static enum tfm_log_err log_memcpy(uint8_t *dest,
  * \param[in]  line   Pointer to the line to be added
  *
  */
-static enum tfm_log_err log_format_buffer(uint32_t *buffer,
+static enum tfm_log_err log_format_buffer(uint64_t *buffer,
                                           const struct tfm_log_line *line)
 {
     struct log_hdr *hdr = NULL;
@@ -371,12 +370,13 @@ static enum tfm_log_err log_format_buffer(uint32_t *buffer,
     size = line->size;
 
     /* Format the scratch buffer with the complete log item */
-    hdr = (struct log_hdr *) &buffer[0];
+    hdr = (struct log_hdr *) buffer;
 
-    /* FIXME: Timestamping and partition ID retrieval through secure function
-     *        to function calls and TFM API - not available yet
+    /* FIXME: Timestamping/IV counter and partition ID retrieval through
+     *        secure function to function calls and TFM API - not available yet.
      */
     hdr->timestamp = global_timestamp++;
+    hdr->iv_counter = 0;
     hdr->partition_id = DUMMY_PARTITION_ID;
 
     /* Copy the log line into the scratch buffer */

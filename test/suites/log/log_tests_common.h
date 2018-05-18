@@ -45,21 +45,21 @@ extern "C" {
  *        More details can be found observing \ref tfm_log_line
  *        \ref tfm_log_tlr and \ref tfm_log_hdr
  */
-#define STANDARD_LOG_ENTRY_SIZE (36)
+#define STANDARD_LOG_ENTRY_SIZE (44)
 
 /*!
  * \def INITIAL_LOGGING_REQUESTS
  *
  * \brief Number of initial consecutive logging requests to perform
  */
-#define INITIAL_LOGGING_REQUESTS (28)
+#define INITIAL_LOGGING_REQUESTS (23)
 
 /*!
  * \def INITIAL_LOGGING_SIZE
  *
  * \brief Size of the initial consecutive logging requests
  */
-#define INITIAL_LOGGING_SIZE (1008)
+#define INITIAL_LOGGING_SIZE (1012)
 
 /*!
  * \def FINAL_LOGGING_REQUESTS
@@ -79,7 +79,7 @@ extern "C" {
  * \note This defines the state of the log when secure interface tests are
  *       terminated
  */
-#define FINAL_LOGGING_SIZE (72)
+#define FINAL_LOGGING_SIZE (88)
 
 /*!
  * \def SECOND_ELEMENT_EXPECTED_CONTENT
@@ -108,7 +108,7 @@ extern "C" {
  * \note This takes into account additional fields that are concatenated to the
  *       log line in the header and trailer
  */
-#define MAX_LOG_LINE_SIZE (1008)
+#define MAX_LOG_LINE_SIZE (1000)
 
 /*!
  * \def INITIAL_LOG_SIZE
