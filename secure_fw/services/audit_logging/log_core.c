@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stddef.h>
 #include "log_core.h"
 #include "tfm_log_defs.h"
 #include "tfm_secure_api.h"
@@ -14,9 +15,8 @@
 /*!
  * \def LOG_UART_REDIRECTION
  *
- * \brief If set to 1 by the build system,
- *        UART redirection is enabled and built.
- *        Keep it disabled by default.
+ * \brief If set to 1 by the build system, UART redirection is enabled. Keep it
+ *        disabled by default.
  */
 #ifndef LOG_UART_REDIRECTION
 #define LOG_UART_REDIRECTION (0U)
@@ -35,8 +35,7 @@ extern ARM_DRIVER_USART LOG_UART_NAME;
 /*!
  * \def LOG_UART_BAUD_RATE
  *
- * \brief The baud rate used when redirecting
- *        the log entry on the secure UART.
+ * \brief The baud rate used when redirecting the log entry on the secure UART.
  *        Default value is 115200.
  */
 #ifndef LOG_UART_BAUD_RATE
@@ -46,21 +45,26 @@ extern ARM_DRIVER_USART LOG_UART_NAME;
 /*!
  * \var log_uart_init_success
  *
- * \brief This variable is 0 in case UART
- *        init has failed during service
- *        initialization, 1 otherwise
+ * \brief This variable is 0 in case UART init has failed during service
+ *        initialization, 1 otherwise.
  */
 static uint8_t log_uart_init_success = 0U;
 
 /*!
  * \var hex_values
  *
- * \brief Array variable used to translate binary
- *        to ASCII character representation for
- *        UART redirection
+ * \brief Array variable used to translate binary to ASCII character
+ *        representation for UART redirection
  */
 static const char hex_values[] = "0123456789ABCDEF";
 #endif
+
+/*!
+ * \def MEMBER_SIZE
+ *
+ * \brief Standard macro to get size of elements in a struct
+ */
+#define MEMBER_SIZE(type,member) sizeof(((type *)0)->member)
 
 /*!
  * \def LOG_FIXED_FIELD_SIZE
@@ -71,13 +75,13 @@ static const char hex_values[] = "0123456789ABCDEF";
  *        the client partition, i.e.
  *        [TIMESTAMP][PARTITION_ID][SIZE]
  */
-#define LOG_FIXED_FIELD_SIZE (12)
-
+#define LOG_FIXED_FIELD_SIZE (MEMBER_SIZE(struct log_hdr, timestamp) + \
+                              MEMBER_SIZE(struct log_hdr, partition_id) + \
+                              MEMBER_SIZE(struct log_hdr, size))
 /*!
  * \def LOG_SIZE
  *
- * \brief Size of the allocated space for
- *        the log, in bytes
+ * \brief Size of the allocated space for the log, in bytes
  *
  * \note Must be 4 bytes aligned
  */
@@ -94,21 +98,26 @@ static const char hex_values[] = "0123456789ABCDEF";
 /*!
  * \var log_buffer
  *
- * \brief The private buffer containing the
- *        the log in memory
+ * \brief The private buffer containing the the log in memory
  *
- * \note Aligned to 4 bytes to keep the wrapping
- *       on a 4-byte aligned boundary
+ * \note Aligned to 4 bytes to keep the wrapping on a 4-byte aligned boundary
  */
 __attribute__ ((aligned(4)))
 static uint8_t log_buffer[LOG_SIZE] = {0};
 
 /*!
+ * \var scratch_buffer
+ *
+ * \brief Scratch buffers needed to hold plain text (and encrypted, if
+ *        available) log items to be added
+ */
+static uint32_t scratch_buffer[(LOG_SIZE)/4] = {0};
+
+/*!
  * \struct log_vars
  *
- * \brief Contains the state
- *        variables associated to the current
- *        state of the audit log
+ * \brief Contains the state variables associated to the current state of the
+ *        audit log
  */
 struct log_vars {
     uint32_t first_el_idx; /*!< Index in the log of the first element
@@ -132,113 +141,83 @@ static struct log_vars log_state = {0};
 /*!
  * \var global_timestamp
  *
- * \brief Used to have a progressive number
- *        attached to each log entry, will be
- *        replaced with a proper timestamping
- *        request to TF-M when available
+ * \brief Used to have a progressive number attached to each log entry, will be
+ *        replaced with a proper timestamping request to TF-M when available
  *
- * \note This is out of the log_state because
- *       this is just used to mock up a timestamping
- *       and will be removed later when the final
- *       timestamping mechanism is in place
+ * \note This is out of the log_state because this is just used to mock up a
+ *       timestamping and will be removed later when the final timestamping
+ *       mechanism is in place
  */
 static uint32_t global_timestamp = 0;
 
 /*!
  * \def DUMMY_PARTITION_ID
  *
- * \brief Set to 1234, this will be changed when
- *        the TFM unpriviliged API to return the
- *        partition ID of the caller will be ready
+ * \brief Set to 1234, this will be changed when the TFM unpriviliged API to
+ *        return the partition ID of the caller will be ready
  */
 #define DUMMY_PARTITION_ID (1234)
 
 /*!
- * \brief Static inline function to return
- *        log buffer ptr from index
+ * \brief Static inline function to get the log buffer ptr from index
+ *
+ * \param[in] idx Byte index to be converted to pointer in the log buffer
+ *
+ * \return Pointer at the beginning of the log item in the log buffer
  */
 __attribute__ ((always_inline)) __STATIC_INLINE
-struct log_hdr *GET_LOG_POINTER(uint32_t idx)
+struct log_hdr *GET_LOG_POINTER(const uint32_t idx)
 {
     return (struct log_hdr *)( &log_buffer[idx] );
 }
 
 /*!
- * \brief Static inline function to return the
- *        pointer to the TIMESTAMP field.
+ * \brief Static inline function to get the pointer to the SIZE field
+ *
+ * \param[in] idx Byte index to which retrieve the corresponding size pointer
+ *
+ * \return Pointer to the size field in the log item header
  */
 __attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t *GET_TIMESTAMP_FIELD_POINTER(uint32_t idx)
+uint32_t *GET_SIZE_FIELD_POINTER(const uint32_t idx)
 {
-    return (uint32_t *) GET_LOG_POINTER( idx );
+    return (uint32_t *) GET_LOG_POINTER( (idx+offsetof(struct log_hdr, size))
+                                         % LOG_SIZE );
 }
 
 /*!
- * \brief Static inline function to return the
- *        pointer to the PARTITION_ID field.
+ * \brief Static inline function to compute the full log entry size starting
+ *        from the value of the size field
+ *
+ * \param[in] size Size of the log line from which derive the size of the whole
+ *                 log item
+ *
+ * \return Full log item size
  */
 __attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t *GET_PARTITION_ID_FIELD_POINTER(uint32_t idx)
-{
-    return (uint32_t *) GET_LOG_POINTER( (idx+4) % LOG_SIZE );
-}
-
-/*!
- * \brief Static inline function to return the
- *        pointer to the SIZE field.
- */
-__attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t *GET_SIZE_FIELD_POINTER(uint32_t idx)
-{
-    return (uint32_t *) GET_LOG_POINTER( (idx+8) % LOG_SIZE );
-}
-
-/*!
- * \brief Static inline function to return
- *        the index to base of the first byte
- *        available in the log
- */
-__attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t GET_NEXT_LOG_INDEX(uint32_t idx)
-{
-    return (uint32_t) ( (idx +
-                         (LOG_FIXED_FIELD_SIZE
-                          + *GET_SIZE_FIELD_POINTER(idx)
-                          + LOG_MAC_SIZE
-                         )
-                        ) % LOG_SIZE );
-}
-
-/*!
- * \brief Static inline function to return the
- *        pointer to the TRAILER field.
- */
-__attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t *GET_TRAILER_FIELD_POINTER(uint32_t idx)
-{
-    return (uint32_t *) GET_LOG_POINTER( (idx +
-                                          (LOG_FIXED_FIELD_SIZE
-                                           + *GET_SIZE_FIELD_POINTER(idx)
-                                          )
-                                         ) % LOG_SIZE );
-}
-
-/*!
- * \brief Static inline function to compute the
- *        full log entry size starting from the
- *        value of the size field
- */
-__attribute__ ((always_inline)) __STATIC_INLINE
-uint32_t COMPUTE_LOG_ENTRY_SIZE(uint32_t size)
+uint32_t COMPUTE_LOG_ENTRY_SIZE(const uint32_t size)
 {
     return (LOG_FIXED_FIELD_SIZE + size + LOG_MAC_SIZE);
 }
 
 /*!
- * \brief Static function to update the
- *        state variables of the log
- *        after the addition of a new
- *        log line of a given size
+ * \brief Static inline function to get the index to the base of the log buffer
+ *        for the next item with respect to the current item
+ *
+ * \param[in] idx Byte index of the current item in the log
+ *
+ * \return Index of the next item in the log
+ */
+__attribute__ ((always_inline)) __STATIC_INLINE
+uint32_t GET_NEXT_LOG_INDEX(const uint32_t idx)
+{
+    return (uint32_t) ( (idx + COMPUTE_LOG_ENTRY_SIZE(
+                                   *GET_SIZE_FIELD_POINTER(idx)) ) % LOG_SIZE );
+}
+
+/*!
+ * \brief Static function to update the state variables of the log after the
+ *        addition of a new log line of a given size
  *
  * \param[in] first_el_idx First element index
  * \param[in] last_el_idx  Last element index
@@ -246,10 +225,10 @@ uint32_t COMPUTE_LOG_ENTRY_SIZE(uint32_t size)
  * \param[in] num_items    Number of elements stored
  *
  */
-static void log_update_state(uint32_t first_el_idx,
-                             uint32_t last_el_idx,
-                             uint32_t stored_size,
-                             uint32_t num_items)
+static void log_update_state(const uint32_t first_el_idx,
+                             const uint32_t last_el_idx,
+                             const uint32_t stored_size,
+                             const uint32_t num_items)
 {
     /* Update the indexes */
     log_state.first_el_idx = first_el_idx;
@@ -263,18 +242,16 @@ static void log_update_state(uint32_t first_el_idx,
 }
 
 /*!
- * \brief Static function to identify the begin and
- *        end position for a new write into the log.
- *        It will replace items based on "older entries
- *        first" policy in case not enough space is
- *        available in the log
+ * \brief Static function to identify the begin and end position for a new write
+ *        into the log. It will replace items based on "older entries first"
+ *        policy in case not enough space is available in the log
  *
  * \param[in]  size  Size of the line we need to fit
  * \param[out] begin Pointer to the index to begin
  * \param[out] end   Pointer to the index to end
  *
  */
-static void log_replace_item(uint32_t size,
+static void log_replace_item(const uint32_t size,
                              uint32_t *begin,
                              uint32_t *end)
 {
@@ -324,21 +301,22 @@ static void log_replace_item(uint32_t size,
 }
 
 /*!
- * \brief Static function to perform memory copying
- *        into the log buffer. It takes into account
- *        circular wrapping.
+ * \brief Static function to perform memory copying into the log buffer. It
+ *        takes into account circular wrapping on the log buffer size.
  *
  * \param[in] dest Pointer to the destination buffer
  * \param[in] src  Pointer to the source buffer
  * \param[in] size Size in bytes to be copied
  *
  */
-static enum tfm_log_err log_memcpy(uint8_t *dest, uint8_t *src, uint32_t size)
+static enum tfm_log_err log_buffer_copy(uint8_t *dest,
+                                        const uint8_t *src,
+                                        const uint32_t size)
 {
     uint32_t idx = 0;
     uint32_t dest_idx = (uint32_t)dest - (uint32_t)&log_buffer[0];
 
-    if ((dest_idx >= LOG_SIZE) || (size >= LOG_SIZE)) {
+    if ((dest_idx >= LOG_SIZE) || (size > LOG_SIZE)) {
         return TFM_LOG_ERR_FAILURE;
     }
 
@@ -355,23 +333,85 @@ static enum tfm_log_err log_memcpy(uint8_t *dest, uint8_t *src, uint32_t size)
 }
 
 /*!
- * \brief Static function to stream an entry of the log
- *        to a (secure) UART
+ * \brief Static function to emulate memcpy
  *
- * \details The entry of the log is streamed as a stream
- *          of hex values, not parsed nor interpreted.
- *
- * \param[in] start_idx Byte index in the log from where
- *                      to start streaming to UART
+ * \param[out] dest Pointer to the destination buffer
+ * \param[in]  src  Pointer to the source buffer
+ * \param[in]  size Size in bytes to be copied
  *
  */
-static void log_uart_redirection(uint32_t start_idx)
+static enum tfm_log_err log_memcpy(uint8_t *dest,
+                                   const uint8_t *src,
+                                   const uint32_t size)
+{
+    uint32_t idx = 0;
+
+    for (idx = 0; idx < size; idx++) {
+        dest[idx] = src[idx];
+    }
+
+    return TFM_LOG_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to format a log entry before the addition to the log
+ *
+ * \param[out] buffer Pointer to the buffer to format
+ * \param[in]  line   Pointer to the line to be added
+ *
+ */
+static enum tfm_log_err log_format_buffer(uint32_t *buffer,
+                                          const struct tfm_log_line *line)
+{
+    struct log_hdr *hdr = NULL;
+    struct log_tlr *tlr = NULL;
+    uint32_t size, idx;
+
+    /* Get the size from the log line */
+    size = line->size;
+
+    /* Format the scratch buffer with the complete log item */
+    hdr = (struct log_hdr *) &buffer[0];
+
+    /* FIXME: Timestamping and partition ID retrieval through secure function
+     *        to function calls and TFM API - not available yet
+     */
+    hdr->timestamp = global_timestamp++;
+    hdr->partition_id = DUMMY_PARTITION_ID;
+
+    /* Copy the log line into the scratch buffer */
+    log_memcpy( (uint8_t *) &(hdr->size),
+                (const uint8_t *) line,
+                size+4 );
+
+    /* FIXME: The MAC here is just a dummy value for prototyping. It will be
+     *        filled by a call to the crypto interface directly when available.
+     */
+    tlr = (struct log_tlr *) ((uint8_t *)hdr + LOG_FIXED_FIELD_SIZE + size);
+    for (idx=0; idx<LOG_MAC_SIZE; idx++) {
+        tlr->mac[idx] = idx;
+    }
+
+    return TFM_LOG_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to stream an entry of the log to a (secure) UART
+ *
+ * \details The entry of the log is streamed as a stream of hex values,
+ *          not parsed nor interpreted.
+ *
+ * \param[in] start_idx Byte index in the log from where to start streaming
+ *            to UART
+ *
+ */
+static void log_uart_redirection(const uint32_t start_idx)
 {
 #if (LOG_UART_REDIRECTION == 1U)
     uint32_t size = *GET_SIZE_FIELD_POINTER(start_idx);
-    char end_of_line[] = {'\r', '\n'};
+    uint8_t end_of_line[] = {'\r', '\n'};
     uint32_t idx = 0;
-    unsigned char read_byte;
+    uint8_t read_byte;
 
     if (log_uart_init_success == 1U) {
         for (idx=0; idx<COMPUTE_LOG_ENTRY_SIZE(size); idx++) {
@@ -417,7 +457,7 @@ enum tfm_log_err log_core_init(void)
     return TFM_LOG_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_delete_items(uint32_t num_items,
+enum tfm_log_err log_core_delete_items(const uint32_t num_items,
                                        uint32_t *rem_items)
 {
     uint32_t first_el_idx = 0, idx = 0;
@@ -467,14 +507,11 @@ enum tfm_log_err log_core_get_info(struct tfm_log_info *info)
     return TFM_LOG_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
+enum tfm_log_err log_core_add_line(const struct tfm_log_line *line)
 {
-    struct log_tlr *tlr = NULL;
     struct tfm_log_info info;
 
-    uint32_t idx = 0;
     uint32_t start_pos = 0, stop_pos = 0;
-    uint32_t log_line_start_pos = 0;
     uint32_t first_el_idx = 0, last_el_idx = 0, size = 0;
     uint32_t num_items = 0, stored_size = 0;
 
@@ -513,16 +550,18 @@ enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
         /* The log is not empty, need to decide the candidate position
          * and invalidate older entries in case there is not enough space
          */
-        log_replace_item(size, &start_pos, &stop_pos);
+        log_replace_item(COMPUTE_LOG_ENTRY_SIZE(size), &start_pos, &stop_pos);
     }
 
-    /* Set the index where the log line will be copied */
-    log_line_start_pos = (start_pos + (LOG_FIXED_FIELD_SIZE-4)) % LOG_SIZE;
+    /* Format the scratch buffer with the complete log item */
+    log_format_buffer(&scratch_buffer[0], line);
+
+    /* TODO: At this point, encryption should be called if supported */
 
     /* Do the copy of the log line to be added in the log */
-    log_memcpy( (uint8_t *) &log_buffer[log_line_start_pos],
-                (uint8_t *) line,
-                size+4 );
+    log_buffer_copy( (uint8_t *) &log_buffer[start_pos],
+                     (const uint8_t *) &scratch_buffer[0],
+                     COMPUTE_LOG_ENTRY_SIZE(size) );
 
     /* Retrieve current log state */
     first_el_idx = log_state.first_el_idx;
@@ -539,23 +578,6 @@ enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
     /* Update the log state */
     log_update_state(first_el_idx, last_el_idx, stored_size, num_items);
 
-    /* FIXME: Timestamping and partition ID retrieval through secure
-     *        function to function calls and TFM API - not available yet
-     */
-    *(GET_TIMESTAMP_FIELD_POINTER(last_el_idx)) = global_timestamp++;
-    *(GET_PARTITION_ID_FIELD_POINTER(last_el_idx)) = DUMMY_PARTITION_ID;
-
-    /* Get a pointer to the trailer structure */
-    tlr = (struct log_tlr *) GET_TRAILER_FIELD_POINTER(last_el_idx);
-
-    /* FIXME: The MAC here is just a dummy value for prototyping
-     *        it will be filled by a call to the crypto interface
-     *        when available.
-     */
-    for (idx=0; idx<LOG_MAC_SIZE; idx++) {
-        tlr->mac[idx] = idx;
-    }
-
     /* TODO: At this point, we would need to update the stored copy in
      *       persistent storage. Need to define a strategy for this
      */
@@ -566,8 +588,8 @@ enum tfm_log_err log_core_add_line(struct tfm_log_line *line)
     return TFM_LOG_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_retrieve(uint32_t size,
-                                   int32_t start,
+enum tfm_log_err log_core_retrieve(const uint32_t size,
+                                   const int32_t start,
                                    uint8_t *buffer,
                                    struct tfm_log_info *info)
 {

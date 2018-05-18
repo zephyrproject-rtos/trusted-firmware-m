@@ -9,28 +9,9 @@
 #include "tfm_log_api.h"
 #include "log_ns_tests.h"
 #include "tfm_api.h"
+#include "secure_fw/services/audit_logging/log_core.h"
 
-/*!
- * \def STR(a)
- *
- * \brief A standard stringify macro
- */
-#define STR(a) _STR(a)
-#define _STR(a) #a
-
-/*!
- * \def INITIAL_LOG_SIZE
- *
- * \brief Initial state of the log size in bytes
- */
-#define INITIAL_LOG_SIZE (72)
-
-/*!
- * \def INITIAL_LOG_ITEMS
- *
- * \brief Initial state of the log number of items
- */
-#define INITIAL_LOG_ITEMS (2)
+#include "../log_tests_common.h"
 
 /*!
  * \def EMPTY_RETRIEVED_LOG_SIZE
@@ -52,7 +33,7 @@
  * \brief Log size when the retrieved buffer has 1 item
  *        of standard size (no payload)
  */
-#define SINGLE_RETRIEVED_LOG_SIZE (36)
+#define SINGLE_RETRIEVED_LOG_SIZE (STANDARD_LOG_ENTRY_SIZE)
 
 /*!
  * \def SINGLE_RETRIEVED_LOG_ITEMS
@@ -67,16 +48,6 @@
  * \brief Index of the second item in the log
  */
 #define SECOND_ELEMENT_START_INDEX (1)
-
-/*!
- * \def SECOND_ELEMENT_EXPECTED_CONTENT
- *
- * \brief Content of the log line in the second log item.
- *        In particular this is the value of the first
- *        argument which has been stored in the last
- *        addition from the secure test suite.
- */
-#define SECOND_ELEMENT_EXPECTED_CONTENT (1 + 31*10)
 
 /* List of tests */
 static void tfm_log_test_1001(struct test_result_t *ret);
@@ -113,7 +84,7 @@ static void tfm_log_test_1001(struct test_result_t *ret)
 {
     enum tfm_log_err err;
 
-    uint8_t local_buffer[INITIAL_LOG_SIZE];
+    uint8_t local_buffer[LOCAL_BUFFER_SIZE];
     uint32_t size, rem_items;
 
     struct tfm_log_info info;
@@ -136,8 +107,8 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    /* Log contains 2 items and 72 bytes. Retrieve into a 72-byte buffer
-     * which is able to retrieve the full contents of the log
+    /* Log contains 2 items. Retrieve into buffer which is able to contain the
+     * the full contents of the log
      */
     size = INITIAL_LOG_SIZE;
 
@@ -189,9 +160,7 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    /* Retrieve into a 70-byte buffer: only the last
-     * log entry (36-bytes) fits and is retrieved
-     */
+    /* Retrieve into a 70-byte buffer: only last entry fits and is retrieved */
     size = 70;
 
     err = tfm_log_retrieve(size,
@@ -214,10 +183,10 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    /* Retrieve into a 36-byte buffer, but start from the
-     * second element that is stored in the log
+    /* Retrieve into a buffer which can hold a single element, but start from
+     * the second element that is stored in the log
      */
-    size = 36;
+    size = STANDARD_LOG_ENTRY_SIZE;
 
     err = tfm_log_retrieve(size,
                            SECOND_ELEMENT_START_INDEX,
@@ -242,7 +211,8 @@ static void tfm_log_test_1001(struct test_result_t *ret)
     /* Inspect the contents of the retrieved buffer, i.e. check the
      * retrieved log line contents
      */
-    retrieved_buffer = (struct tfm_log_line *) &local_buffer[8];
+    retrieved_buffer = (struct tfm_log_line *)
+                           &local_buffer[offsetof(struct log_hdr, size)];
 
     if (retrieved_buffer->arg[0] != SECOND_ELEMENT_EXPECTED_CONTENT) {
         TEST_FAIL("Unexpected argument in the first entry");
@@ -261,9 +231,8 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    /* Try to delete two elements in the log. As the log has just
-     * one element, check that the number of deleted items is as
-     * expected, i.e. less than requested
+    /* Try to delete two elements in the log. The log has just one element, so
+     * check that the number of deleted items is less than requested
      */
     err = tfm_log_delete_items(2, &rem_items);
     if (err != TFM_LOG_ERR_SUCCESS) {

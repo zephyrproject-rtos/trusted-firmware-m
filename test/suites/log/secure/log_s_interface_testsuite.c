@@ -10,55 +10,9 @@
 #include "log_s_tests.h"
 #include "tfm_api.h"
 #include "tfm_log_veneers.h"
+#include "secure_fw/services/audit_logging/log_core.h"
 
-/*!
- * \def STR(a)
- *
- * \brief A standard stringify macro
- */
-#define STR(a) _STR(a)
-#define _STR(a) #a
-
-/*!
- * \def STANDARD_LOG_ENTRY_SIZE
- *
- * \brief A log item with no payload (standard size) has
- *        a size of 36 bytes. More details can be found
- *        observing \ref tfm_log_line
- *        \ref tfm_log_tlr and \ref tfm_log_hdr
- */
-#define STANDARD_LOG_ENTRY_SIZE (36)
-
-/*!
- * \def LOCAL_BUFFER_SIZE
- *
- * \brief Size in bytes of the local buffer. Size accomodates
- *        two standard size (no payload) log items
- */
-#define LOCAL_BUFFER_SIZE (72)
-
-/*!
- * \def LOCAL_BUFFER_ITEMS
- *
- * \brief Number of items which can be held within a buffer of
- *        size LOCAL_BUFFER_SIZE
- */
-#define LOCAL_BUFFER_ITEMS (2)
-
-/*!
- * \def INITIAL_LOGGING_REQUESTS
- *
- * \brief Number of initial consecutive logging requests to
- *        perform
- */
-#define INITIAL_LOGGING_REQUESTS (28)
-
-/*!
- * \def INITIAL_LOGGING_SIZE
- *
- * \brief Size of the initial consecutive logging requests
- */
-#define INITIAL_LOGGING_SIZE (1008)
+#include "../log_tests_common.h"
 
 /*!
  * \def TEST_FUNCTION_ID
@@ -82,14 +36,6 @@
  * \brief Index of the first element in the log
  */
 #define FIRST_RETRIEVAL_LOG_INDEX (0)
-
-/*!
- * \def MAX_LOG_LINE_SIZE
- *
- * \brief The maximum possible size to fill a 1024 bytes
- *        log
- */
-#define MAX_LOG_LINE_SIZE (1008)
 
 /* List of tests */
 static void tfm_log_test_1001(struct test_result_t *ret);
@@ -132,7 +78,7 @@ static void tfm_log_test_1001(struct test_result_t *ret)
     struct tfm_log_info info;
     struct tfm_log_line *retrieved_buffer;
 
-    /* Fill the log with 28 lines, each line is 36 bytes
+    /* Fill the log with 25 lines, each line is 40 bytes
      * we end up filling the log without wrapping
      */
     for (idx=0; idx<INITIAL_LOGGING_REQUESTS; idx++) {
@@ -179,8 +125,8 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    if (info.size != LOCAL_BUFFER_SIZE) {
-        TEST_FAIL("Expected log size is " STR(LOCAL_BUFFER_SIZE));
+    if (info.size != (2*STANDARD_LOG_ENTRY_SIZE)) {
+        TEST_FAIL("Expected log size is " STR((2*STANDARD_LOG_ENTRY_SIZE)));
         return;
     }
 
@@ -191,7 +137,7 @@ static void tfm_log_test_1001(struct test_result_t *ret)
 
     /* Inspect the content of the second log line retrieved */
     retrieved_buffer = (struct tfm_log_line *)
-                           &local_buffer[8+STANDARD_LOG_ENTRY_SIZE];
+        &local_buffer[offsetof(struct log_hdr,size)+STANDARD_LOG_ENTRY_SIZE];
 
     if (retrieved_buffer->arg[0] != (0x1 + (BASE_RETRIEVAL_LOG_INDEX+1)*10)) {
         TEST_FAIL("Unexpected argument in the index 7 entry");
@@ -210,10 +156,11 @@ static void tfm_log_test_1001(struct test_result_t *ret)
     }
 
     /* Inspect the first line retrieved in the local buffer */
-    retrieved_buffer = (struct tfm_log_line *) &local_buffer[8];
+    retrieved_buffer = (struct tfm_log_line *)
+                           &local_buffer[offsetof(struct log_hdr,size)];
 
-    if (info.size != LOCAL_BUFFER_SIZE) {
-        TEST_FAIL("Expected log size is " STR(LOCAL_BUFFER_SIZE));
+    if (info.size != (2*STANDARD_LOG_ENTRY_SIZE)) {
+        TEST_FAIL("Expected log size is " STR((2*STANDARD_LOG_ENTRY_SIZE)));
         return;
     }
 
@@ -296,6 +243,27 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
+    /* Get the log size */
+    err = tfm_log_veneer_get_info(&info);
+    if (err != TFM_LOG_ERR_SUCCESS) {
+        TEST_FAIL("Getting log info has returned error");
+        return;
+    }
+
+    /* Check that the log state is the same, the item addition just performed
+     * is resulted into the removal of the oldest entry, so log size and number
+     * of log items is still the same as before
+     */
+    if (info.size != INITIAL_LOGGING_SIZE) {
+        TEST_FAIL("Expected log size is " STR(INITIAL_LOGGING_SIZE));
+        return;
+    }
+
+    if (info.num_items != INITIAL_LOGGING_REQUESTS) {
+        TEST_FAIL("Expected log items are " STR(INITIAL_LOGGING_REQUESTS));
+        return;
+    }
+
     /* Retrieve the last two items */
     err = tfm_log_veneer_retrieve(LOCAL_BUFFER_SIZE,
                                   TFM_LOG_READ_RECENT,
@@ -307,8 +275,8 @@ static void tfm_log_test_1001(struct test_result_t *ret)
         return;
     }
 
-    if (info.size != LOCAL_BUFFER_SIZE) {
-        TEST_FAIL("Expected log size is " STR(LOCAL_BUFFER_SIZE));
+    if (info.size != (2*STANDARD_LOG_ENTRY_SIZE)) {
+        TEST_FAIL("Expected log size is " STR((2*STANDARD_LOG_ENTRY_SIZE)));
         return;
     }
 
@@ -324,7 +292,7 @@ static void tfm_log_test_1001(struct test_result_t *ret)
 
     /* Inspect the second line retrieved in the local buffer */
     retrieved_buffer = (struct tfm_log_line *)
-                           &local_buffer[8+STANDARD_LOG_ENTRY_SIZE];
+        &local_buffer[offsetof(struct log_hdr,size)+STANDARD_LOG_ENTRY_SIZE];
 
     if (retrieved_buffer->arg[0] != (0x1 + INITIAL_LOGGING_REQUESTS*10)) {
         TEST_FAIL("Unexpected argument in the last entry");
@@ -343,6 +311,24 @@ static void tfm_log_test_1001(struct test_result_t *ret)
     err = tfm_log_veneer_add_line(line);
     if (err != TFM_LOG_ERR_SUCCESS) {
         TEST_FAIL("Log line addition has returned an error");
+        return;
+    }
+
+    /* Get the log size */
+    err = tfm_log_veneer_get_info(&info);
+    if (err != TFM_LOG_ERR_SUCCESS) {
+        TEST_FAIL("Getting log info has returned error");
+        return;
+    }
+
+    /* Check that the log state has one element with maximum size */
+    if (info.size != MAX_LOG_SIZE) {
+        TEST_FAIL("Expected log size is " STR(MAX_LOG_SIZE));
+        return;
+    }
+
+    if (info.num_items != 1) {
+        TEST_FAIL("Expected log items are 1");
         return;
     }
 
@@ -385,6 +371,27 @@ static void tfm_log_test_1001(struct test_result_t *ret)
             TEST_FAIL("Log line addition has returned an error");
             return;
         }
+    }
+
+    /* Get the log size */
+    err = tfm_log_veneer_get_info(&info);
+    if (err != TFM_LOG_ERR_SUCCESS) {
+        TEST_FAIL("Getting log info has returned error");
+        return;
+    }
+
+    /* As the log was full, the addition of the last two log lines results
+     * in the resetting of the log completely. The log will contain only
+     * the last two items we have just added.
+     */
+    if (info.size != FINAL_LOGGING_SIZE) {
+        TEST_FAIL("Expected log size is " STR(FINAL_LOGGING_SIZE));
+        return;
+    }
+
+    if (info.num_items != FINAL_LOGGING_REQUESTS) {
+        TEST_FAIL("Expected log items are " STR(FINAL_LOGGING_REQUESTS));
+        return;
     }
 
     ret->val = TEST_PASSED;

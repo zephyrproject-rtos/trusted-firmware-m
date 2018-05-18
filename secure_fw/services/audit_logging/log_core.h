@@ -52,7 +52,7 @@ extern "C" {
  * | MAC         |
  * |             |
  * |             |
- * +-------------+12 + SIZE + MAC_SIZE - 1
+ * +-------------+12 + SIZE + MAC_SIZE
  *
  * SIZE: at least 20 bytes
  *       known only at runtime. It's the
@@ -167,8 +167,8 @@ struct log_tlr {
  * \note If start is equal to TFM_ALG_READ_RECENT, the function will
  *       retrieve the most recent elements that fit the provided size
  */
-enum tfm_log_err log_core_retrieve(uint32_t size,
-                                   int32_t start,
+enum tfm_log_err log_core_retrieve(const uint32_t size,
+                                   const int32_t start,
                                    uint8_t *buffer,
                                    struct tfm_log_info *info);
 /*!
@@ -191,7 +191,7 @@ enum tfm_log_err log_core_init(void);
  *         otherwise error as specified in \ref tfm_log_err
  *
  */
-enum tfm_log_err log_core_add_line(struct tfm_log_line *line);
+enum tfm_log_err log_core_add_line(const struct tfm_log_line *line);
 
 /*!
  * \brief Gets the log information
@@ -218,7 +218,7 @@ enum tfm_log_err log_core_get_info(struct tfm_log_info *info);
  * \return Returns TFM_LOG_ERR_SUCCESS if removal has been completed,
  *         otherwise error as specified in \ref tfm_log_err
  */
-enum tfm_log_err log_core_delete_items(uint32_t num_items,
+enum tfm_log_err log_core_delete_items(const uint32_t num_items,
                                        uint32_t *rem_items);
 
 #ifdef __cplusplus
