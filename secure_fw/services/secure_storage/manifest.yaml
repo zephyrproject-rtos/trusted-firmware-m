@@ -1,0 +1,81 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "SST",
+  "type": "TRUSTED",
+  "tfm_partition_name": "TFM_SP_STORAGE",
+  "tfm_trusted": true,
+  "priority": "NORMAL",
+  "id": "0x00000100",
+  "entry_point": "main",
+  "stack_size": "0x2000",
+  "heap_size": "0x0400",
+  "tfm_init_symbol": "sst_am_prepare",
+  "secure_functions": [
+    {
+      "sfid": "SST_AM_GET_HANDLE_SFID",
+      "signal": "SST_AM_GET_HANDLE",
+      "tfm_symbol": "sst_am_get_handle",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_CREATE_SFID",
+      "signal": "SST_AM_CREATE",
+      "tfm_symbol": "sst_am_create",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_GET_ATTRIBUTES_SFID",
+      "signal": "SST_AM_GET_ATTRIBUTES",
+      "tfm_symbol": "sst_am_get_attributes",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_READ_SFID",
+      "signal": "SST_AM_READ",
+      "tfm_symbol": "sst_am_read",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_WRITE_SFID",
+      "signal": "SST_AM_WRITE",
+      "tfm_symbol": "sst_am_write",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_DELETE_SFID",
+      "signal": "SST_AM_DELETE",
+      "tfm_symbol": "sst_am_delete",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    }
+  ],
+  "source_files": [
+    "sst_core.c",
+    "sst_utils.c",
+    "sst_core_interface.c",
+    "sst_asset_management.c",
+    "assets/sst_asset_defs.c",
+    "crypto/sst_crypto_interface.c",
+    "flash/sst_flash.c"
+  ],
+  "tfm_linker_pattern": [
+      "*tfm_storage*"
+  ]
+}
