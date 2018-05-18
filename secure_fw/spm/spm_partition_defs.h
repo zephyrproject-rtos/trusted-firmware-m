@@ -17,6 +17,8 @@
 #define INVALID_PARTITION_ID (~0U)
 
 /* ***** partition ID-s internal to the TFM ***** */
+#define TFM_INTERNAL_PARTITIONS (2)
+
 /* From the SPM point of view the non secure processing environment is handled
  * as a special secure partition. This simplifies the context switch
  * operations.
@@ -27,18 +29,12 @@
  */
 #define TFM_SP_CORE_ID (1)
 
-#ifdef TFM_PARTITION_TEST_CORE
-#define TFM_SP_CORE_TEST_ID (2)
-#define TFM_SP_CORE_TEST_2_ID (3)
-#endif /* TFM_PARTITION_TEST_CORE */
+#include "secure_fw/services/tfm_partition_defs.inc"
 
-/* Give SST test service next ID after core test services */
-#ifdef TFM_PARTITION_TEST_SST
-#define TFM_SP_SST_TEST_PARTITION_ID (4)
-#endif /* TFM_PARTITION_TEST_SST */
-
-/* ***** Normal partition ID-s ***** */
-#define TFM_SP_STORAGE_ID (TFM_SP_BASE)
-#define TFM_SP_AUDIT_LOG_ID (TFM_SP_BASE + 1)
+/* This limit is only used to define the size of the database reserved for
+ * partitions. There's no requirement that it match the number of partitions
+ * that get registered in a specific build
+ */
+#define SPM_MAX_PARTITIONS (TFM_MAX_USER_PARTITIONS + TFM_INTERNAL_PARTITIONS)
 
 #endif /* __SPM_PARTITION_DEFS_H__ */
