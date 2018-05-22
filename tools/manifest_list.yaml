@@ -1,0 +1,58 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "TF-M secure partition manifests",
+  "type": "manifest_list",
+  "version_major": 0,
+  "version_minor": 1,
+  "manifest_list": [
+    {
+      "name": "Secure Storage Service",
+      "short_name": "SST",
+      "manifest": "../secure_fw/services/secure_storage/manifest.yaml",
+      "tfm_extensions": true,
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
+      "name": "TFM Audit Log Service",
+      "short_name": "TFM_Audit_Log",
+      "manifest": "../secure_fw/services/audit_logging/manifest.yaml",
+      "tfm_extensions": true,
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
+      "name": "TFM Core Test Service",
+      "short_name": "TFM_Core_Test",
+      "manifest": "../test/test_services/tfm_core_test/manifest.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PARTITION_TEST_CORE",
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
+      "name": "TFM Core Test Service 2",
+      "short_name": "TFM_Core_Test_2",
+      "manifest": "../test/test_services/tfm_core_test_2/manifest.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PARTITION_TEST_CORE",
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
+      "name": "TFM SST Test Service",
+      "short_name": "TFM_SST_Test",
+      "manifest": "../test/test_services/tfm_sst_test_service/manifest.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PARTITION_TEST_SST",
+      "version_major": 0,
+      "version_minor": 1
+    }
+  ]
+}

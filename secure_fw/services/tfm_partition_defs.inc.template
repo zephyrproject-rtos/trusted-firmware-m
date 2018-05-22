@@ -1,0 +1,25 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+@!GENERATOR_DONOTEDIT_WARNING!@
+
+#ifndef __TFM_PARTITION_DEFS_INC__
+#define __TFM_PARTITION_DEFS_INC__
+
+@!GENERATOR_BLOCK_START!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#ifdef @@attr.conditional@@
+@!GENERATOR_CONDITIONAL_END!@
+#define @@manifest.tfm_partition_name@@_ID (TFM_SP_BASE + @!GENERATOR_ITERATION_COUNTER!@)
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#endif /* @@attr.conditional@@ */
+@!GENERATOR_CONDITIONAL_END!@
+
+@!GENERATOR_BLOCK_END!@
+#define TFM_MAX_USER_PARTITIONS (@!GENERATOR_ITERATION_COUNTER!@)
+
+#endif /* __TFM_PARTITION_DEFS_INC__ */
