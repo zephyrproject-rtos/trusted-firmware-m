@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,7 +31,6 @@ set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 set (ENABLE_SECURE_STORAGE ON)
 include(CMakeLists.inc)
 
-
 ###Configure how we build our target
 if(DEFINED CORE_TEST)
 	set (TFM_LVL 3)
@@ -46,9 +45,13 @@ else()
 	set(MBEDTLS_BUILD_TYPE "Release")
 endif()
 
+#Set preinclude header options for mbedtls
+set(MBEDTLS_PREINCLUDE_PREFIX __tfm_storage__)
+set(MBEDTLS_PREINCLUDE_HEADER ${SECURE_STORAGE_DIR}/crypto/mbedtls_global_symbols.h)
+
 #Build mbedtls as external project.
 #This ensures mbedtls is built with exactly defined settings.
-#mbedtls will be used from is't install location
+#mbedtls will be used from its install location
 include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 # Specify what we build (for the secure storage service, build as a static library)

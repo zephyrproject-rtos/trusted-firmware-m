@@ -75,7 +75,7 @@ if (ENABLE_SECURE_STORAGE)
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR} ABSOLUTE)
+	embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)

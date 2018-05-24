@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,6 +31,14 @@ endif()
 
 if(NOT DEFINED MBEDTLS_TARGET_NAME)
 	message(FATAL_ERROR "Please set MBEDTLS_TARGET_NAME before including this file.")
+endif()
+
+#Based on preinclude input variables, decide if preinclude flags need to be appended
+if((NOT DEFINED MBEDTLS_PREINCLUDE_PREFIX) OR (NOT DEFINED MBEDTLS_PREINCLUDE_HEADER))
+	message(STATUS "Building mbedTLS without pre-included headers and global symbols prefixing.")
+else()
+	set(MBEDTLS_PREINCLUDE_C_FLAGS " -DLIB_PREFIX_NAME=${MBEDTLS_PREINCLUDE_PREFIX} -include ${MBEDTLS_PREINCLUDE_HEADER}")
+	string(APPEND MBEDTLS_C_FLAGS ${MBEDTLS_PREINCLUDE_C_FLAGS})
 endif()
 
 string(APPEND MBEDTLS_C_FLAGS ${CMAKE_C_FLAGS})

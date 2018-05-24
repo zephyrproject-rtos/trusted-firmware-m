@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,9 +7,14 @@
 
 #include "sst_crypto_interface.h"
 #include "secure_fw/services/secure_storage/sst_utils.h"
+
+/* pre include mbedTLS headers */
+#define LIB_PREFIX_NAME __tfm_storage__
+#include "mbedtls_global_symbols.h"
+
 #define MBEDTLS_CONFIG_FILE "mbedtls_config.h"
-#include "include/mbedtls/gcm.h"
-#include "include/mbedtls/memory_buffer_alloc.h"
+#include "mbedtls/gcm.h"
+#include "mbedtls/memory_buffer_alloc.h"
 #include "platform/include/plat_crypto_keys.h"
 
 /* FIXME: most of this implementation will be replaced by crypto service API
