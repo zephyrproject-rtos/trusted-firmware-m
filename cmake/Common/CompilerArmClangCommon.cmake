@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,11 +19,6 @@ function(check_armclang_input_vars MY_VERSION)
 	#Check armclang version.
 	if (NOT "${_MY_MAJOR_MINOR}" VERSION_EQUAL "${_ARMCLANG_MAJOR_MINOR}")
 		message(FATAL_ERROR "ARMClang version (ARMCLANG_VER=${ARMCLANG_VER}) does not match ${MY_VERSION}")
-	endif()
-
-	#Emit warning if needed environment variables are not set.
-	if(NOT DEFINED ENV{ARM_TOOL_VARIANT} OR NOT DEFINED ENV{ARM_PRODUCT_PATH})
-		message(WARNING "ARM_TOOL_VARIANT or ARM_PRODUCT_PATH environment variables are not set!")
 	endif()
 
 	if (NOT DEFINED ARM_CPU_ARCHITECTURE AND NOT DEFINED ARM_CPU_TYPE)
