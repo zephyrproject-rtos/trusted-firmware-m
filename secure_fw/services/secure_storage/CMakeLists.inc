@@ -98,4 +98,6 @@ if (ENABLE_SECURE_STORAGE)
 		include(${PLATFORM_CMAKE_FILE})
 	endif()
 
+else()
+	message(FATAL_ERROR "Build system currently doesn't support selectively disabling of a service.")
 endif()

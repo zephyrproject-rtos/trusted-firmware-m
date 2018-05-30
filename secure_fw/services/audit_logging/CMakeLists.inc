@@ -49,4 +49,6 @@ if (ENABLE_AUDIT_LOGGING)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
 
+else()
+	message(FATAL_ERROR "Build system currently doesn't support selectively disabling of a service.")
 endif()
