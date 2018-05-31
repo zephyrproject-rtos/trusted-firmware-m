@@ -1,0 +1,30 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "TF-M generated file list",
+  "type": "generated_file_list",
+  "version_major": 0,
+  "version_minor": 1,
+  "file_list": [
+    {
+      "name": "Secure Partition ID definitions",
+      "short_name": "tfm_partition_defs",
+      "output": "secure_fw/services/tfm_partition_defs.inc"
+    },
+    {
+        "name": "Secure Partition declarations",
+        "short_name": "tfm_partition_list",
+        "output": "secure_fw/services/tfm_partition_list.inc"
+    },
+    {
+        "name": "Secure Function list",
+        "short_name": "tfm_sfid_list",
+        "output": "secure_fw/services/tfm_sfid_list.inc"
+    }
+  ]
+}

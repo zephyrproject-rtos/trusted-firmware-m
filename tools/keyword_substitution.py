@@ -32,9 +32,7 @@ def log_print(level, *args, **kwargs):
     if kwargs.get("verbosity"):
         VERBOSITY = kwargs["verbosity"]
     if level.value <= VERBOSITY.value:
-        string = ''
-        for arg in args:
-            string += str(arg) + ' '
+        string = ' '.join(map(str, args))
         print string
 
 def leaftype(x):
@@ -138,5 +136,5 @@ def keyword_substitute(db, line, missing_keys):
     for outline in outlist:
         outstring += ''.join(outline) + "\n"
     log_print(Verbosity.info, "generator returns with:")
-    log_print(Verbosity.info, outstring, "<<")
+    log_print(Verbosity.info, outstring + "<<")
     return outlist
