@@ -22,6 +22,7 @@
 
 #include "flash_map/flash_map.h"
 #include "bootutil/image.h"
+#include "flash_layout.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,7 +85,6 @@ struct boot_swap_state {
 };
 
 #define BOOT_STATUS_STATE_COUNT 3
-#define BOOT_STATUS_MAX_ENTRIES 256
 
 #define BOOT_STATUS_SOURCE_NONE    0
 #define BOOT_STATUS_SOURCE_SCRATCH 1
@@ -100,9 +100,6 @@ extern const uint32_t BOOT_MAGIC_SZ;
 
 /** Number of image slots in flash; currently limited to two. */
 #define BOOT_NUM_SLOTS              2
-
-/** Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS        256
 
 /**
  * Compatibility shim for flash sector type.

@@ -80,6 +80,13 @@
                                          FLASH_AREA_IMAGE_1_SIZE)
 #define FLASH_AREA_IMAGE_SCRATCH_SIZE   (FLASH_AREA_IMAGE_SIZE)
 
+/* Maximum number of status entries supported by the bootloader. */
+#define BOOT_STATUS_MAX_ENTRIES         (FLASH_AREA_IMAGE_SIZE / \
+                                         FLASH_AREA_IMAGE_SCRATCH_SIZE)
+
+/** Maximum number of image sectors supported by the bootloader. */
+#define BOOT_MAX_IMG_SECTORS            (FLASH_AREA_IMAGE_SIZE / \
+                                         FLASH_AREA_IMAGE_SECTOR_SIZE)
 /*
  * Note: Though the SST_FLASH_AREA_ADDR is pointing to offset in flash, but
  * the actual contents of SST is stored in Code SRAM. See Driver_Flash.c for

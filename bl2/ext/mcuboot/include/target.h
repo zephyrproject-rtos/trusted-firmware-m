@@ -49,4 +49,12 @@
 #error "BL2 supports CMSIS flash interface and device name must be specified"
 #endif
 
+#ifndef BOOT_STATUS_MAX_ENTRIES
+#error "BOOT_STATUS_MAX_ENTRIES must be defined by the target"
+#endif
+
+#ifndef BOOT_MAX_IMG_SECTORS
+#error "BOOT_MAX_IMG_SECTORS must be defined by the target"
+#endif
+
 #endif

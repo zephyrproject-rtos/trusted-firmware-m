@@ -72,6 +72,14 @@
 #define FLASH_AREA_IMAGE_SCRATCH_OFFSET (0x280000)
 #define FLASH_AREA_IMAGE_SCRATCH_SIZE   (2 * FLASH_PARTITION_SIZE)
 
+/* Maximum number of status entries supported by the bootloader. */
+#define BOOT_STATUS_MAX_ENTRIES         ((2 * FLASH_PARTITION_SIZE) / \
+                                         FLASH_AREA_IMAGE_SCRATCH_SIZE)
+
+/** Maximum number of image sectors supported by the bootloader. */
+#define BOOT_MAX_IMG_SECTORS            ((2 * FLASH_PARTITION_SIZE) / \
+                                         FLASH_AREA_IMAGE_SECTOR_SIZE)
+
 #define FLASH_SST_AREA_OFFSET           (0x380000)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
