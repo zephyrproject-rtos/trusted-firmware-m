@@ -24,6 +24,7 @@ VERBOSITY = Verbosity.info
 
 REkeychain = "@@\w+[\.\w+]*@@"
 REfirstkeyword = "@@\w+\.?"
+emptychain = "@@@@"
 
 MISSING_KEYS_ACTION = 'halt'
 
@@ -43,7 +44,7 @@ def substitute(templist, chains, db, depth):
     depth += 1
     log_print(Verbosity.info, "substitute(",templist, chains, db, depth,")")
     if isinstance(db, type([])):
-        # db node is list
+        # db is list
         outlist = []
         for instance in db:
             log_print(Verbosity.info, "Going deeper at", depth, "for db list instance", instance)
@@ -51,8 +52,21 @@ def substitute(templist, chains, db, depth):
         log_print(Verbosity.info, "substitute", depth, "returning from list with", outlist)
         return outlist
 
-    # db node is dict/leaf
     transientlist = list(templist)
+    if leaftype(db):
+        # db is leaf
+        for chain in chains:
+            if templist[chain] == emptychain:
+                transientlist[chain] = str(db)
+            else:
+                print "keychain not empty but db is"
+                transientlist[chain] = str(db) + templist[chain]
+                continue
+        chains = []
+        log_print(Verbosity.info, "substitute", depth, "returning from leaf with", transientlist)
+        return transientlist
+
+    # db is dict
     # find chain groups with same key
     chaingroups = {"chains": [], "keys": []}
     for chain in chains:
@@ -78,7 +92,7 @@ def substitute(templist, chains, db, depth):
         log_print(Verbosity.info, "key lookup in", db, "for", key)
         if key in db.keys():
             if leaftype(db[key]):
-                # db node is leaf
+                # db entry value is leaf
                 for chain in chaingroups["chains"][groupidx]:
                     transientlist[chain] = str(db[key])
                 chaingroups["chains"][groupidx] = []

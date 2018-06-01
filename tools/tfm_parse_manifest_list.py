@@ -49,6 +49,7 @@ def main():
         file_list_yaml = yaml.load(file_list_yaml_file)
         file_list = file_list_yaml["file_list"]
     generate_from_template_file(db, file_list)
+    print "Generation of files done"
 
 if __name__ == "__main__":
     main()
