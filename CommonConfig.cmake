@@ -13,6 +13,12 @@ elseif(NOT DEFINED BL2)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: BL2 not defined, Include this file from a Config*.cmake")
 endif()
 
+if(NOT DEFINED COMPILER)
+	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
+elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM"))
+	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
+endif()
+
 set(BUILD_CMSIS_CORE Off)
 set(BUILD_RETARGET Off)
 set(BUILD_NATIVE_DRIVERS Off)
@@ -31,9 +37,7 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
-if(NOT DEFINED COMPILER)
-	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
-elseif(${COMPILER} STREQUAL "ARMCLANG")
+if(${COMPILER} STREQUAL "ARMCLANG")
 	#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
 	#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
 	#must be present with a matching version.
@@ -71,8 +75,6 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 		#wchar, so the warning can be suppressed.
 		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning --specs=nano.specs)
 	endfunction()
-else()
-	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
 #Create a string from the compile flags list, so that it can be used later
