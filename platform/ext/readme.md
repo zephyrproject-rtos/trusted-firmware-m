@@ -18,7 +18,7 @@ CMSIS_5 project.
 ### common
 
 This folder contains stdout redirection to UART, a temporary memory mapped
-flash implementation for the bootloader and mbedtls_config.h for all
+flash implementation for the bootloader and tfm_mbedtls_config.h for all
 the targets.
 
 ### drivers

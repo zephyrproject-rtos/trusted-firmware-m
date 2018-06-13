@@ -12,7 +12,7 @@
 #define LIB_PREFIX_NAME __tfm_storage__
 #include "mbedtls_global_symbols.h"
 
-#define MBEDTLS_CONFIG_FILE "mbedtls_config.h"
+#define MBEDTLS_CONFIG_FILE "tfm_mbedtls_config.h"
 #include "mbedtls/gcm.h"
 #include "mbedtls/memory_buffer_alloc.h"
 #include "platform/include/plat_crypto_keys.h"
