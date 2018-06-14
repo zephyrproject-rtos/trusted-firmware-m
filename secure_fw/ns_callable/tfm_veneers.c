@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+/*********** WARNING: This is an auto-generated file. Do not edit! ***********/
+
+#include "tfm_secure_api.h"
+#include "tfm_api.h"
+#include "secure_fw/spm/spm_partition_defs.h"
+
+/******** TFM_SP_STORAGE ********/
+int32_t sst_am_create(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_get_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_get_attributes(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_set_attributes(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_read(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_write(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_am_delete(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+
+/******** TFM_SP_AUDIT_LOG ********/
+int32_t audit_core_retrieve_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t audit_core_add_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t audit_core_get_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t audit_core_get_record_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t audit_core_delete_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+
+/******** TFM_SP_CRYPTO ********/
+int32_t tfm_crypto_import_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_destroy_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_get_key_information(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_export_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_encrypt_set_iv(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_encrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_decrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_cipher_update_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_cipher_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_cipher_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_hash_start(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_hash_update(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_hash_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_hash_verify(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t tfm_crypto_hash_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+
+/******** TFM_SP_PLATFORM ********/
+int32_t platform_sp_system_reset(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+
+/******** TFM_SP_INITIAL_ATTESTATION ********/
+int32_t initial_attest_get_token(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+
+#ifdef TFM_PARTITION_TEST_CORE
+/******** TFM_SP_CORE_TEST ********/
+int32_t spm_core_test_sfn(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t spm_core_test_sfn_init_success(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t spm_core_test_sfn_direct_recursion(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+/******** TFM_SP_CORE_TEST_2 ********/
+int32_t spm_core_test_2_slave_service(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t spm_core_test_2_sfn_invert(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t spm_core_test_2_check_caller_client_id(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SST
+/******** TFM_SP_SST_TEST_PARTITION ********/
+int32_t sst_test_service_sfn_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_test_service_sfn_dummy_encrypt(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_test_service_sfn_dummy_decrypt(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t sst_test_service_sfn_clean(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+/******** TFM_SP_SECURE_TEST_PARTITION ********/
+int32_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+
+#define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
+    __tfm_secure_gateway_attributes__ \
+    int32_t tfm_##sfn_name##_veneer(struct psa_invec *in_vec, \
+                                    size_t in_len, \
+                                    struct psa_outvec *out_vec, \
+                                    size_t out_len) \
+    { \
+        TFM_CORE_SFN_REQUEST(partition_name##_ID, \
+                             sfn_name, \
+                             in_vec, in_len, out_vec, out_len); \
+    }
+
+/******** TFM_SP_STORAGE ********/
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_create)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_get_info)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_get_attributes)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_set_attributes)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_read)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_write)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_delete)
+
+/******** TFM_SP_AUDIT_LOG ********/
+TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_retrieve_record)
+TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_add_record)
+TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_info)
+TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_record_info)
+TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_delete_record)
+
+/******** TFM_SP_CRYPTO ********/
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_encrypt_set_iv)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_encrypt_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_decrypt_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_update_wrapper)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_abort)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_finish)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_start)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_update)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_finish)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_verify)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_abort)
+
+/******** TFM_SP_PLATFORM ********/
+TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
+
+/******** TFM_SP_INITIAL_ATTESTATION ********/
+TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token)
+
+#ifdef TFM_PARTITION_TEST_CORE
+/******** TFM_SP_CORE_TEST ********/
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST, spm_core_test_sfn)
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST, spm_core_test_sfn_init_success)
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST, spm_core_test_sfn_direct_recursion)
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+/******** TFM_SP_CORE_TEST_2 ********/
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_slave_service)
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_sfn_invert)
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_check_caller_client_id)
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SST
+/******** TFM_SP_SST_TEST_PARTITION ********/
+TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_setup)
+TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_dummy_encrypt)
+TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_dummy_decrypt)
+TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_clean)
+#endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+/******** TFM_SP_SECURE_TEST_PARTITION ********/
+TFM_VENEER_FUNCTION(TFM_SP_SECURE_TEST_PARTITION, tfm_secure_client_service_sfn_run_tests)
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+

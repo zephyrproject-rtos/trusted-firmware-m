@@ -80,7 +80,11 @@
 #define IMAGE_CODE_SIZE \
             (FLASH_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x000001C0)
+/* FIXME: veneer region size is increased temporarily while both legacy veneers
+ * and their iovec-based equivalents co-exist for secure partitions. To be
+ * adjusted as legacy veneers are eliminated
+ */
+#define CMSE_VENEER_REGION_SIZE     (0x00000380)
 
 /* Use QSPI Flash memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10000000)

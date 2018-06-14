@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+@!GENERATOR_DONOTEDIT_WARNING!@
+
+#include "tfm_secure_api.h"
+#include "tfm_api.h"
+#include "secure_fw/spm/spm_partition_defs.h"
+
+@!GENERATOR_BLOCK_START!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#ifdef @@attr.conditional@@
+@!GENERATOR_CONDITIONAL_END!@
+/******** @@manifest.tfm_partition_name@@ ********/
+int32_t @@manifest.secure_functions.tfm_symbol@@(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#endif /* @@attr.conditional@@ */
+@!GENERATOR_CONDITIONAL_END!@
+
+@!GENERATOR_BLOCK_END!@
+
+#define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
+    __tfm_secure_gateway_attributes__ \
+    int32_t tfm_##sfn_name##_veneer(struct psa_invec *in_vec, \
+                                    size_t in_len, \
+                                    struct psa_outvec *out_vec, \
+                                    size_t out_len) \
+    { \
+        TFM_CORE_SFN_REQUEST(partition_name##_ID, \
+                             sfn_name, \
+                             in_vec, in_len, out_vec, out_len); \
+    }
+
+@!GENERATOR_BLOCK_START!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#ifdef @@attr.conditional@@
+@!GENERATOR_CONDITIONAL_END!@
+/******** @@manifest.tfm_partition_name@@ ********/
+TFM_VENEER_FUNCTION(@@manifest.tfm_partition_name@@, @@manifest.secure_functions.tfm_symbol@@)
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#endif /* @@attr.conditional@@ */
+@!GENERATOR_CONDITIONAL_END!@
+
+@!GENERATOR_BLOCK_END!@

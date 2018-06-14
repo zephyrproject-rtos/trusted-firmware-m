@@ -1,0 +1,34 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+@!GENERATOR_DONOTEDIT_WARNING!@
+
+#ifndef __TFM_VENEERS_H__
+#define __TFM_VENEERS_H__
+
+#include "tfm_api.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@!GENERATOR_BLOCK_START!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#ifdef @@attr.conditional@@
+@!GENERATOR_CONDITIONAL_END!@
+/******** @@manifest.tfm_partition_name@@ ********/
+int32_t tfm_@@manifest.secure_functions.tfm_symbol@@_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#endif /* @@attr.conditional@@ */
+@!GENERATOR_CONDITIONAL_END!@
+
+@!GENERATOR_BLOCK_END!@
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __TFM_VENEERS_H__ */

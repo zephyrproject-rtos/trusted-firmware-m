@@ -14,6 +14,8 @@ extern "C" {
 
 #include <stdint.h>
 
+#include "psa_client.h"
+
 #define TFM_INVALID_CLIENT_ID 0
 
 /**

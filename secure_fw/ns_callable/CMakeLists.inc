@@ -23,7 +23,8 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
-set (SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_sst_veneers.c"
+set (SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_veneers.c"
+                          "${CMAKE_CURRENT_LIST_DIR}/tfm_sst_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_audit_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_crypto_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c"
@@ -37,5 +38,3 @@ unset(SS_NS_CALLABLE_C_SRC)
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
-
-

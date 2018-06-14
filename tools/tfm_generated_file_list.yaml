@@ -45,6 +45,16 @@
         "name": "MUSCA-B1 secure ld file",
         "short_name": "musca_s.ld",
         "output": "platform/ext/target/musca_b1/Device/Source/gcc/musca_s.ld"
+    },
+    {
+        "name": "Secure Veneers C file",
+        "short_name": "tfm_veneers_c",
+        "output": "secure_fw/ns_callable/tfm_veneers.c"
+    },
+    {
+        "name": "Secure Veneers H file",
+        "short_name": "tfm_veneers_h",
+        "output": "interface/include/tfm_veneers.h"
     }
   ]
 }
