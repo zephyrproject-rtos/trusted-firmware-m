@@ -430,7 +430,7 @@ TFM_SST_NS_TEST(1005, "Thread_C")
 TFM_SST_NS_TEST(1006, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -451,27 +451,27 @@ TFM_SST_NS_TEST(1006, "Thread_C")
     /* Calls get_attributes with valid application ID, asset handle and
      * attributes struct pointer
      */
-    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the attributes of this asset");
+        TEST_FAIL("Thread_C should read the information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current != 0) {
+    if (asset_info.size_current != 0) {
         TEST_FAIL("Asset current size should be 0 as it is only created");
         return;
     }
 
-    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
 
     /* Calls get_attributes with invalid asset handle */
-    err = tfm_sst_get_attributes(0, &asset_attrs);
+    err = tfm_sst_get_info(0, &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get attributes function should fail for an invalid "
+        TEST_FAIL("Get info function should fail for an invalid "
                   "asset handle");
         return;
     }
@@ -514,12 +514,12 @@ static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
  */
 static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
 {
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_get_attributes(tfm_sst_test_1007_handle, &asset_attrs);
+    err = tfm_sst_get_info(tfm_sst_test_1007_handle, &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get attributes should not succeed with invalid thread name");
+        TEST_FAIL("Get info should not succeed with invalid thread name");
         return;
     }
 
@@ -587,9 +587,9 @@ TFM_SST_NS_TEST(1008, "Thread_C")
     }
 
     /* Calls get_attributes with a null struct attributes pointer */
-    err = tfm_sst_get_attributes(hdl, NULL);
+    err = tfm_sst_get_info(hdl, NULL);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get attributes function should fail for a null "
+        TEST_FAIL("Get info function should fail for a null "
                   "struct attributes pointer");
         return;
     }
@@ -612,7 +612,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
 TFM_SST_NS_TEST(1009, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -647,14 +647,14 @@ TFM_SST_NS_TEST(1009, "Thread_C")
     /* Calls get_attributes with valid application ID, asset handle and
      * attributes struct pointer
      */
-    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the attributes of this asset");
+        TEST_FAIL("Thread_C should read the information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Asset current size should be size of the write data");
         return;
     }
@@ -1097,7 +1097,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
@@ -1129,14 +1129,14 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     }
 
     /* Gets current asset attributes */
-    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the attributes of this asset");
+        TEST_FAIL("Thread_C should read the information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current == 0) {
+    if (asset_info.size_current == 0) {
         TEST_FAIL("Asset current size should be bigger than 0");
         return;
     }
@@ -1154,7 +1154,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
 
     /* Attempts to read from an offset beyond the current size of the asset */
     io_data.size = 1;
-    io_data.offset = asset_attrs.size_current;
+    io_data.offset = asset_info.size_current;
 
     err = tfm_sst_read(hdl, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
@@ -2257,7 +2257,7 @@ TFM_SST_NS_TEST(1028, "Thread_B")
  */
 TFM_SST_NS_TEST(1029, "Thread_C")
 {
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
@@ -2292,14 +2292,14 @@ TFM_SST_NS_TEST(1029, "Thread_C")
         return;
     }
 
-    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the attributes of this asset");
+        TEST_FAIL("Thread_C should read the information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
+    if (asset_info.size_current != (WRITE_BUF_SIZE - 1)) {
         TEST_FAIL("Current size should be equal to write size");
         return;
     }
@@ -2316,14 +2316,14 @@ TFM_SST_NS_TEST(1029, "Thread_C")
         return;
     }
 
-    err = tfm_sst_get_attributes(hdl, &asset_attrs);
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the attributes of this asset");
+        TEST_FAIL("Thread_C should read the information of this asset");
         return;
     }
 
     /* Checks that the asset's current size has not changed */
-    if (asset_attrs.size_current != (WRITE_BUF_SIZE - 1)) {
+    if (asset_info.size_current != (WRITE_BUF_SIZE - 1)) {
         TEST_FAIL("Current size should not have changed");
         return;
     }
@@ -2350,7 +2350,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     /* Checks that offset can not be bigger than current asset's size */
     io_data.data = wrt_data_2;
     io_data.size = 1;
-    io_data.offset = (asset_attrs.size_current + 1);
+    io_data.offset = (asset_info.size_current + 1);
 
     err = tfm_sst_write(hdl, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {

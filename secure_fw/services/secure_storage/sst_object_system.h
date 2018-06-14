@@ -46,7 +46,8 @@ enum tfm_sst_err_t sst_object_handle(uint16_t object_uuid, uint32_t *hdl);
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_create(uint16_t object_uuid, uint32_t size);
+enum tfm_sst_err_t sst_object_create(uint16_t object_uuid,
+                                     uint32_t size);
 
 /**
  * \brief Gets object's data referenced by object handle, and stores it
@@ -83,16 +84,16 @@ enum tfm_sst_err_t sst_object_write(uint32_t object_handle, const uint8_t *data,
 enum tfm_sst_err_t sst_object_delete(uint32_t object_handle);
 
 /**
- * \brief Gets the object attributes referenced by object handler.
+ * \brief Gets the object information referenced by object handler.
  *
  * \param[in]  object_handle  Object handler
- * \param[out] attributes     Pointer to the attributes structure to store the
- *                            attributes values
+ * \param[out] info           Pointer to store the object's information
+ *                            \ref struct tfm_sst_asset_info_t
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_get_attributes(uint32_t object_handle,
-                                          struct tfm_sst_attribs_t *attributes);
+enum tfm_sst_err_t sst_object_get_info(uint32_t object_handle,
+                                      struct tfm_sst_asset_info_t *info);
 
 /**
  * \brief Wipes secure storage system and all object data.

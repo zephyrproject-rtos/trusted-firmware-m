@@ -8,7 +8,7 @@
 #include "sst_asset_defs.h"
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 
-struct sst_asset_info_t asset_perms[] = {
+struct sst_asset_policy_t asset_perms[] = {
 {
     .asset_uuid = SST_ASSET_ID_AES_KEY_128,
     .max_size = SST_ASSET_MAX_SIZE_AES_KEY_128,

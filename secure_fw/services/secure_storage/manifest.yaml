@@ -34,9 +34,9 @@
       "minor_policy": "strict"
     },
     {
-      "sfid": "SST_AM_GET_ATTRIBUTES_SFID",
-      "signal": "SST_AM_GET_ATTRIBUTES",
-      "tfm_symbol": "sst_am_get_attributes",
+      "sfid": "SST_AM_GET_INFO_SFID",
+      "signal": "SST_AM_GET_INFO",
+      "tfm_symbol": "sst_am_get_info",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"

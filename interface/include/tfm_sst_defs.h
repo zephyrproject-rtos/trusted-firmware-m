@@ -52,17 +52,31 @@ enum tfm_sst_err_t {
     TFM_SST_ERR_FORCE_INT_SIZE = INT_MAX
 };
 
-struct tfm_sst_attribs_t {
-    uint32_t size_current; /*!< The current size of the asset */
-    uint32_t size_max;     /*!< The maximum size of the asset in bytes */
+/*!
+ * \struct tfm_sst_asset_info_t
+ *
+ * \brief Structure to store the asset information concerning the content
+ *        information.
+ *
+ */
+struct tfm_sst_asset_info_t {
+    uint32_t size_current; /*!< The current size of the asset data */
+    uint32_t size_max;     /*!< The maximum size of the asset data in bytes */
 };
 
-/* Structure to store data information to read/write from/to asset */
+/*!
+ * \struct tfm_sst_buf_t
+ *
+ * \brief Structure to store data information to read/write from/to asset.
+ *
+ */
 struct tfm_sst_buf_t {
-    uint8_t* data;   /*!< Address of input/output data */
+    uint8_t *data;   /*!< Address of input/output data */
     uint32_t size;   /*!< Size of input/output data */
     uint32_t offset; /*!< Offset within asset */
 };
+
+#define TFM_SST_ASSET_INFO_SIZE sizeof(struct tfm_sst_asset_info_t)
 
 #ifdef __cplusplus
 }

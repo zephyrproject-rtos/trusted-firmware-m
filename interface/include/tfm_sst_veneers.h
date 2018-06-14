@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,19 +45,19 @@ enum tfm_sst_err_t tfm_sst_veneer_get_handle(uint32_t app_id,
 enum tfm_sst_err_t tfm_sst_veneer_create(uint32_t app_id, uint16_t asset_uuid);
 
 /**
- * \brief Gets asset's attributes referenced by asset handler.
- *        Uses cached metadata to return the size and write offset of an asset.
+ * \brief Gets asset's information referenced by asset handler.
  *
- * \param[in]  app_id         Application ID
- * \param[in]  asset_handle   Asset handler
- * \param[out] attrib_struct  Pointer to asset attribute struct
+ * \param[in]  app_id        Application ID
+ * \param[in]  asset_handle  Asset handler
+ * \param[out] info          Pointer to store the asset's information
+ *                           \ref tfm_sst_asset_info_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t tfm_sst_veneer_get_attributes(
-                                        uint32_t app_id,
-                                        uint32_t asset_handle,
-                                        struct tfm_sst_attribs_t *attrib_struct);
+enum tfm_sst_err_t tfm_sst_veneer_get_info(uint32_t app_id,
+                                           uint32_t asset_handle,
+                                           struct tfm_sst_asset_info_t *info);
+
 /**
  * \brief Reads asset's data from asset referenced by asset handler.
  *

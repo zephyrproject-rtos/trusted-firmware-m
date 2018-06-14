@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,12 +26,12 @@ enum tfm_sst_err_t tfm_sst_create(uint16_t asset_uuid)
                                     0);
 }
 
-enum tfm_sst_err_t tfm_sst_get_attributes(uint32_t asset_handle,
-                                        struct tfm_sst_attribs_t* attrib_struct)
+enum tfm_sst_err_t tfm_sst_get_info(uint32_t asset_handle,
+                                    struct tfm_sst_asset_info_t *info)
 {
-    return tfm_ns_lock_svc_dispatch(SVC_TFM_SST_GET_ATTRIBUTES,
-                                    (uint32_t)asset_handle,
-                                    (uint32_t)attrib_struct,
+    return tfm_ns_lock_svc_dispatch(SVC_TFM_SST_GET_INFO,
+                                    asset_handle,
+                                    (uint32_t)info,
                                     0,
                                     0);
 }

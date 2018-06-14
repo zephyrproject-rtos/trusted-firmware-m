@@ -92,7 +92,8 @@ static enum tfm_sst_err_t sst_object_auth_decrypt(uint32_t cur_size,
     }
 
     sst_utils_memcpy(obj->data, sst_plaintext_buf,
-                     cur_size);
+                     obj->header.info.size_current);
+
     return TFM_SST_ERR_SUCCESS;
 }
 
@@ -179,17 +180,17 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
                                                     struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
-    struct tfm_sst_attribs_t attribs;
+    struct sst_core_obj_info_t obj_info;
     uint32_t plaintext_size;
 
     /* Get the current size of the encrypted object in the object system */
-    err = sst_core_object_get_attributes(object_handle, &attribs);
+    err = sst_core_object_get_info(object_handle, &obj_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Get the current plaintext size of the object data */
-    plaintext_size = SST_PLAINTEXT_SIZE(attribs.size_current);
+    plaintext_size = SST_PLAINTEXT_SIZE(obj_info.size_current);
 
     /* Clear the object buffer of any previous data */
     sst_utils_memset(obj, SST_CRYPTO_CLEAR_BUF_VALUE, SST_MAX_OBJECT_SIZE);
@@ -197,7 +198,7 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
     /* Read the encrypted object from the object system */
     err = sst_core_object_read(object_handle, (uint8_t *)obj,
                                SST_OBJECT_START_POSITION,
-                               attribs.size_current);
+                               obj_info.size_current);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }

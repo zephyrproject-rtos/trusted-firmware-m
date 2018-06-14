@@ -254,8 +254,8 @@ enum tfm_sst_err_t sst_object_write(uint32_t object_handle, const uint8_t *data,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_get_attributes(uint32_t object_handle,
-                                           struct tfm_sst_attribs_t *attributes)
+enum tfm_sst_err_t sst_object_get_info(uint32_t object_handle,
+                                       struct tfm_sst_asset_info_t *info)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
 
@@ -274,8 +274,8 @@ enum tfm_sst_err_t sst_object_get_attributes(uint32_t object_handle,
             return err;
         }
 
-        sst_utils_memcpy(attributes, &g_sst_object.header.info,
-                         sizeof(struct tfm_sst_attribs_t));
+        sst_utils_memcpy(info, &g_sst_object.header.info,
+                         TFM_SST_ASSET_INFO_SIZE);
 
         sst_global_unlock();
     }

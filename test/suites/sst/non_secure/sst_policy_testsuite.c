@@ -131,7 +131,7 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
 TFM_SST_NS_TEST(4001, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -182,20 +182,20 @@ TFM_SST_NS_TEST(4001, "Thread_C")
         return;
     }
 
-    /* The get attributes function requires any permission other than NONE */
-    err = tfm_sst_get_attributes(hdl, &attribs);
+    /* The get information function requires any permission other than NONE */
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail for Thread_C");
+        TEST_FAIL("Get information should not fail for Thread_C");
         return;
     }
 
     /* Checks attributes are correct */
-    if (attribs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Current size of the asset is incorrect");
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -213,7 +213,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
 TFM_SST_NS_TEST(4002, "Thread_A")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -265,20 +265,20 @@ TFM_SST_NS_TEST(4002, "Thread_A")
         return;
     }
 
-    /* Get attributes should succeed as Thread_A has at least one permission */
-    err = tfm_sst_get_attributes(hdl, &attribs);
+    /* Get information should succeed as Thread_A has at least one permission */
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail for Thread_A");
+        TEST_FAIL("Get information should not fail for Thread_A");
         return;
     }
 
     /* Checks attributes are correct */
-    if (attribs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Current size of the asset is incorrect");
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -303,7 +303,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
 TFM_SST_NS_TEST(4003, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -357,20 +357,20 @@ TFM_SST_NS_TEST(4003, "Thread_B")
         return;
     }
 
-    /* Get attributes should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_attributes(hdl, &attribs);
+    /* Get information should succeed as Thread_B has at least one permission */
+    err = tfm_sst_get_info(hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail for Thread_B");
+        TEST_FAIL("Get information should not fail for Thread_B");
         return;
     }
 
     /* Checks attributes are correct */
-    if (attribs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Current size of the asset is incorrect");
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -427,7 +427,7 @@ TFM_SST_NS_TEST(4004, "Thread_C")
 TFM_SST_NS_TEST(4005, "Thread_B")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_B;
@@ -480,20 +480,20 @@ TFM_SST_NS_TEST(4005, "Thread_B")
         return;
     }
 
-    /* Get attributes should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_attributes(shared_handle, &attribs);
+    /* Get information should succeed as Thread_B has at least one permission */
+    err = tfm_sst_get_info(shared_handle, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail for Thread_B");
+        TEST_FAIL("Get information should not fail for Thread_B");
         return;
     }
 
     /* Checks attributes are correct */
-    if (attribs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Current size of the asset is incorrect");
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_SHA224_HASH) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_SHA224_HASH) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -511,7 +511,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
 TFM_SST_NS_TEST(4006, "Thread_A")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    struct tfm_sst_attribs_t attribs = { 0 };
+    struct tfm_sst_asset_info_t asset_info = { 0 };
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl = 0;
@@ -572,20 +572,20 @@ TFM_SST_NS_TEST(4006, "Thread_A")
         return;
     }
 
-    /* Get attributes should fail as Thread_A has no permissions */
-    err = tfm_sst_get_attributes(shared_handle, &attribs);
+    /* Get information should fail as Thread_A has no permissions */
+    err = tfm_sst_get_info(shared_handle, &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get attributes should not succeed for Thread_A");
+        TEST_FAIL("Get information should not succeed for Thread_A");
         return;
     }
 
     /* Checks attributes have not been changed by the call to get attributes */
-    if (attribs.size_current != 0) {
+    if (asset_info.size_current != 0) {
         TEST_FAIL("Current size of the asset should not have changed");
         return;
     }
 
-    if (attribs.size_max != 0) {
+    if (asset_info.size_max != 0) {
         TEST_FAIL("Max size of the asset should not have changed");
         return;
     }
@@ -634,7 +634,7 @@ TFM_SST_NS_TEST(4007, "Thread_B")
 TFM_SST_NS_TEST(4008, "Thread_C")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_C;
@@ -687,20 +687,20 @@ TFM_SST_NS_TEST(4008, "Thread_C")
         return;
     }
 
-    /* Get attributes should succeed as Thread_C has at least one permission */
-    err = tfm_sst_get_attributes(shared_handle, &attribs);
+    /* Get information should succeed as Thread_C has at least one permission */
+    err = tfm_sst_get_info(shared_handle, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail for Thread_C");
+        TEST_FAIL("Get information should not fail for Thread_C");
         return;
     }
 
     /* Checks attributes are correct */
-    if (attribs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Current size of the asset is incorrect");
         return;
     }
 
-    if (attribs.size_max != SST_ASSET_MAX_SIZE_SHA384_HASH) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_SHA384_HASH) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
@@ -719,7 +719,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
 TFM_SST_NS_TEST(4009, "Thread_A")
 {
     const uint16_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
-    struct tfm_sst_attribs_t attribs = { 0 };
+    struct tfm_sst_asset_info_t asset_info = { 0 };
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl = 0;
@@ -780,20 +780,20 @@ TFM_SST_NS_TEST(4009, "Thread_A")
         return;
     }
 
-    /* Get attributes should fail as Thread_A has no permissions */
-    err = tfm_sst_get_attributes(shared_handle, &attribs);
+    /* Get information should fail as Thread_A has no permissions */
+    err = tfm_sst_get_info(shared_handle, &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get attributes should not succeed for Thread_A");
+        TEST_FAIL("Get information should not succeed for Thread_A");
         return;
     }
 
     /* Checks attributes have not been changed by the call to get attributes */
-    if (attribs.size_current != 0) {
+    if (asset_info.size_current != 0) {
         TEST_FAIL("Current size of the asset should not have changed");
         return;
     }
 
-    if (attribs.size_max != 0) {
+    if (asset_info.size_max != 0) {
         TEST_FAIL("Max size of the asset should not have changed");
         return;
     }

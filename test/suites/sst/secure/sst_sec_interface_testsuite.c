@@ -73,9 +73,9 @@ static struct test_t write_tests[] = {
     {&tfm_sst_test_2003, "TFM_SST_TEST_2003",
      "Get handle with null handle pointer", {0} },
     {&tfm_sst_test_2004, "TFM_SST_TEST_2004",
-     "Get attributes interface", {0} },
+     "Get information interface", {0} },
     {&tfm_sst_test_2005, "TFM_SST_TEST_2005",
-     "Get attributes with null attributes struct pointer", {0} },
+     "Get information with null attributes struct pointer", {0} },
     {&tfm_sst_test_2006, "TFM_SST_TEST_2006",
      "Write interface", {0} },
     {&tfm_sst_test_2007, "TFM_SST_TEST_2007",
@@ -269,7 +269,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
     uint32_t hdl;
 
@@ -296,36 +296,36 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     /* Calls get_attributes with valid application ID, asset handle and
      * attributes struct pointer
      */
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, &asset_attrs);
+    err = tfm_sst_veneer_get_info(app_id, hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
-                  "attributes of this file");
+                  "information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current != 0) {
+    if (asset_info.size_current != 0) {
         TEST_FAIL("Asset current size should be 0 as it is only created");
         return;
     }
 
-    if (asset_attrs.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
+    if (asset_info.size_max != SST_ASSET_MAX_SIZE_AES_KEY_192) {
         TEST_FAIL("Max size of the asset is incorrect");
         return;
     }
 
     /* Calls get_attributes with invalid application ID */
-    err = tfm_sst_veneer_get_attributes(INVALID_APP_ID, hdl, &asset_attrs);
+    err = tfm_sst_veneer_get_info(INVALID_APP_ID, hdl, &asset_info);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes function should fail for an invalid "
+        TEST_FAIL("Get information function should fail for an invalid "
                   "application ID");
         return;
     }
 
     /* Calls get_attributes with invalid asset handle */
-    err = tfm_sst_veneer_get_attributes(app_id, 0, &asset_attrs);
+    err = tfm_sst_veneer_get_info(app_id, 0, &asset_info);
     if (err == TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes function should fail for an invalid "
+        TEST_FAIL("Get information function should fail for an invalid "
                   "asset handle");
         return;
     }
@@ -365,10 +365,10 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
     }
 
     /* Calls get_attributes with invalid struct attributes pointer */
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, NULL);
+    err = tfm_sst_veneer_get_info(app_id, hdl, NULL);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get attributes function should fail for an invalid "
-                  "struct attributes pointer");
+        TEST_FAIL("Get information function should fail for an invalid "
+                  "struct info pointer");
         return;
     }
 
@@ -385,7 +385,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t hdl;
@@ -426,15 +426,15 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     /* Calls get_attributes with valid application ID, asset handle and
      * attributes struct pointer
      */
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, &asset_attrs);
+    err = tfm_sst_veneer_get_info(app_id, hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
-                  "attributes of this file");
+                  "information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current != WRITE_BUF_SIZE) {
+    if (asset_info.size_current != WRITE_BUF_SIZE) {
         TEST_FAIL("Asset current size should be size of the write data");
         return;
     }
@@ -727,7 +727,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    struct tfm_sst_attribs_t asset_attrs;
+    struct tfm_sst_asset_info_t asset_info;
     uint32_t hdl;
     uint8_t data[BUFFER_SIZE_PLUS_ONE] = {0};
 
@@ -764,15 +764,15 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     }
 
     /* Gets current asset attributes */
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, &asset_attrs);
+    err = tfm_sst_veneer_get_info(app_id, hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
-                  "attributes of this file");
+                  "information of this asset");
         return;
     }
 
     /* Checks attributes */
-    if (asset_attrs.size_current == 0) {
+    if (asset_info.size_current == 0) {
         TEST_FAIL("Asset current size should be bigger than 0");
         return;
     }
@@ -790,7 +790,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 
     /* Attempts to read from an offset beyond the current size of the asset */
     io_data.size = 1;
-    io_data.offset = asset_attrs.size_current;
+    io_data.offset = asset_info.size_current;
 
     err = tfm_sst_veneer_read(app_id, hdl, &io_data);
     if (err == TFM_SST_ERR_SUCCESS) {
@@ -1693,7 +1693,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_attribs_t attribs;
+    struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
     uint32_t hdl;
@@ -1729,16 +1729,16 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
         return;
     }
 
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, &attribs);
+    err = tfm_sst_veneer_get_info(app_id, hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail");
+        TEST_FAIL("Get information should not fail");
         return;
     }
 
     /* Checks that the asset's current size is equal to the size of the write
      * data.
      */
-    if (attribs.size_current != WRITE_BUF_SIZE - 1) {
+    if (asset_info.size_current != WRITE_BUF_SIZE - 1) {
         TEST_FAIL("Current size should be equal to write size");
         return;
     }
@@ -1754,14 +1754,14 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
         return;
     }
 
-    err = tfm_sst_veneer_get_attributes(app_id, hdl, &attribs);
+    err = tfm_sst_veneer_get_info(app_id, hdl, &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get attributes should not fail");
+        TEST_FAIL("Get information should not fail");
         return;
     }
 
     /* Checks that the asset's current size has not changed */
-    if (attribs.size_current != (WRITE_BUF_SIZE - 1)) {
+    if (asset_info.size_current != (WRITE_BUF_SIZE - 1)) {
         TEST_FAIL("Current size should not have changed");
         return;
     }
@@ -1787,7 +1787,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     /* Checks that offset can not be bigger than current asset's size */
     buf.data = write_data_2;
     buf.size = 1;
-    buf.offset = (attribs.size_current + 1);
+    buf.offset = (asset_info.size_current + 1);
 
     err = tfm_sst_veneer_write(app_id, hdl, &buf);
     if (err != TFM_SST_ERR_PARAM_ERROR) {

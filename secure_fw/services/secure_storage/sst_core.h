@@ -89,6 +89,15 @@ struct sst_asset_system_context {
     uint8_t  sst_key[SST_KEY_LEN_BYTES]; /*!< Secure storage system key */
 };
 
+/* Structure to store the core object information concerning the content
+ * information.
+ */
+struct sst_core_obj_info_t {
+    uint32_t size_current; /*!< The current size of the flash object data */
+    uint32_t size_max;     /*!< The maximum size of the flash object data in
+                            *   bytes.
+                            */
+};
 
 /**
  * \brief Converts an asset uuid into an assethandle, looking up the index in
@@ -117,16 +126,16 @@ enum tfm_sst_err_t sst_core_object_handle(uint16_t asset_uuid, uint32_t *hdl);
 enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size);
 
 /**
- * \brief Gets the object attributes referenced by object handler.
+ * \brief Gets the object information referenced by object handler.
  *
  * \param[in]  asset_handle  Handle of the object
- * \param[out] attributes    Pointer to the attributes structure to store the
- *                           attributes values
+ * \param[out] info          Pointer to the information structure to store the
+ *                           object information values \ref sst_core_obj_info_t
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_get_attributes(uint32_t asset_handle,
-                                          struct tfm_sst_attribs_t *attributes);
+enum tfm_sst_err_t sst_core_object_get_info(uint32_t asset_handle,
+                                            struct sst_core_obj_info_t *info);
 
 /**
  * \brief Writes data to an existing object

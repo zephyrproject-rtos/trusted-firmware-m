@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,16 +40,16 @@ enum tfm_sst_err_t tfm_sst_svc_get_handle(uint16_t asset_uuid,
 enum tfm_sst_err_t tfm_sst_svc_create(uint16_t asset_uuid);
 
 /**
- * \brief SVC funtion to get asset's attributes referenced by asset handler.
- *        Uses cached metadata to return the size and write offset of an asset.
+ * \brief SVC funtion to get asset's information referenced by asset handler.
  *
  * \param[in]  asset_handle   Asset handler
- * \param[out] attrib_struct  Pointer to store asset's attribute
+ * \param[out] info           Pointer to store the asset's information
+ *                            \ref tfm_sst_asset_info_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t tfm_sst_svc_get_attributes(uint32_t asset_handle,
-                                       struct tfm_sst_attribs_t* attrib_struct);
+enum tfm_sst_err_t tfm_sst_svc_get_info(uint32_t asset_handle,
+                                       struct tfm_sst_asset_info_t *info);
 
 /**
  * \brief SVC funtion to read asset's data from asset referenced by asset

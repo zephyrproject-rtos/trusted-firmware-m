@@ -25,9 +25,9 @@ struct sst_obj_header_t {
     /* Metadata attached as a header to encrypted object data before storage */
     union sst_crypto_t crypto; /*!< Crypto metadata */
 #endif
-    uint32_t uuid;                 /*!< Asset ID */
-    uint32_t version;              /*!< Asset version */
-    struct tfm_sst_attribs_t info; /*!< Asset information */
+    uint32_t uuid;                     /*!< Asset ID */
+    uint32_t version;                  /*!< Asset version */
+    struct tfm_sst_asset_info_t  info; /*!< Asset information */
 };
 
 /* The object to be written to the file system below. Made up of the

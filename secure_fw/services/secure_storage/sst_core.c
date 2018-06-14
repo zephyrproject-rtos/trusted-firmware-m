@@ -1260,8 +1260,8 @@ enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
     return TFM_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_core_object_get_attributes(uint32_t asset_handle,
-                                           struct tfm_sst_attribs_t *attributes)
+enum tfm_sst_err_t sst_core_object_get_info(uint32_t asset_handle,
+                                            struct sst_core_obj_info_t *info)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
     struct sst_assetmeta tmp_metadata;
@@ -1281,8 +1281,8 @@ enum tfm_sst_err_t sst_core_object_get_attributes(uint32_t asset_handle,
              */
             err = TFM_SST_ERR_INVALID_HANDLE;
         } else {
-            attributes->size_max = tmp_metadata.max_size;
-            attributes->size_current = tmp_metadata.cur_size;
+            info->size_max = tmp_metadata.max_size;
+            info->size_current = tmp_metadata.cur_size;
         }
     }
 
