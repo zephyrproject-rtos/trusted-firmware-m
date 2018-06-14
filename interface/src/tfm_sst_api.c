@@ -36,6 +36,27 @@ enum tfm_sst_err_t tfm_sst_get_info(uint32_t asset_handle,
                                     0);
 }
 
+enum tfm_sst_err_t tfm_sst_get_attributes(uint32_t asset_handle,
+                                          struct tfm_sst_asset_attrs_t *attrs)
+{
+    return tfm_ns_lock_svc_dispatch(SVC_TFM_SST_GET_ATTRIBUTES,
+                                    asset_handle,
+                                    (uint32_t)attrs,
+                                    0,
+                                    0);
+}
+
+enum tfm_sst_err_t tfm_sst_set_attributes(
+                                      uint32_t asset_handle,
+                                      const struct tfm_sst_asset_attrs_t *attrs)
+{
+    return tfm_ns_lock_svc_dispatch(SVC_TFM_SST_SET_ATTRIBUTES,
+                                    asset_handle,
+                                    (uint32_t)attrs,
+                                    0,
+                                    0);
+}
+
 enum tfm_sst_err_t tfm_sst_read(uint32_t asset_handle, struct tfm_sst_buf_t* data)
 {
     return tfm_ns_lock_svc_dispatch(SVC_TFM_SST_READ,

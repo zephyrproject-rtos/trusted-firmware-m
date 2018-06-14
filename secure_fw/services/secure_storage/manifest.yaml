@@ -42,6 +42,22 @@
       "minor_policy": "strict"
     },
     {
+      "sfid": "SST_AM_GET_ATTRIBUTES_SFID",
+      "signal": "SST_AM_GET_ATTRIBUTES",
+      "tfm_symbol": "sst_am_get_attributes",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "SST_AM_SET_ATTRIBUTES_SFID",
+      "signal": "SST_AM_SET_ATTRIBUTES",
+      "tfm_symbol": "sst_am_set_attributes",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
       "sfid": "SST_AM_READ_SFID",
       "signal": "SST_AM_READ",
       "tfm_symbol": "sst_am_read",

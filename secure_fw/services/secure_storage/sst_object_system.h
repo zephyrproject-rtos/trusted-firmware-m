@@ -42,11 +42,13 @@ enum tfm_sst_err_t sst_object_handle(uint16_t object_uuid, uint32_t *hdl);
  * \brief Creates a new object with given uuid.
  *
  * \param[in] object_uuid  Object UUID
+ * \param[in] type         Object type
  * \param[in] size         Object size
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_create(uint16_t object_uuid,
+                                     uint32_t type,
                                      uint32_t size);
 
 /**
@@ -94,6 +96,31 @@ enum tfm_sst_err_t sst_object_delete(uint32_t object_handle);
  */
 enum tfm_sst_err_t sst_object_get_info(uint32_t object_handle,
                                       struct tfm_sst_asset_info_t *info);
+
+/**
+ * \brief Gets the object attributes referenced by object handler.
+ *
+ * \param[in]  object_handle  Object handler
+ * \param[out] attrs         Pointer to store the object's attributes
+ *                           \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_object_get_attributes(
+                                           uint32_t object_handle,
+                                           struct tfm_sst_asset_attrs_t *attrs);
+/**
+ * \brief Sets the specific object attributes referenced by object handler.
+ *
+ * \param[in] object_handle  Object handler
+ * \param[in] attrs          Pointer to new the object's attributes
+ *                           \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_object_set_attributes(
+                                     uint32_t object_handle,
+                                     const struct tfm_sst_asset_attrs_t *attrs);
 
 /**
  * \brief Wipes secure storage system and all object data.

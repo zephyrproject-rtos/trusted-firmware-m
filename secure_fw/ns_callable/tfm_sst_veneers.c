@@ -37,6 +37,26 @@ enum tfm_sst_err_t tfm_sst_veneer_get_info(uint32_t app_id,
 }
 
 __tfm_secure_gateway_attributes__
+enum tfm_sst_err_t tfm_sst_veneer_get_attributes(
+                                            uint32_t app_id,
+                                            uint32_t asset_handle,
+                                            struct tfm_sst_asset_attrs_t *attrs)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_get_attributes,
+                         app_id, asset_handle, attrs, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_sst_err_t tfm_sst_veneer_set_attributes(
+                                      uint32_t app_id,
+                                      uint32_t asset_handle,
+                                      const struct tfm_sst_asset_attrs_t *attrs)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_STORAGE_ID, sst_am_set_attributes,
+                         app_id, asset_handle, attrs, 0);
+}
+
+__tfm_secure_gateway_attributes__
 enum tfm_sst_err_t tfm_sst_veneer_read(uint32_t app_id, uint32_t asset_handle,
                                        struct tfm_sst_buf_t *data)
 {

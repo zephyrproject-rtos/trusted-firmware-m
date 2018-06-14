@@ -363,11 +363,84 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
     if (err == TFM_SST_ERR_SUCCESS) {
         /* Use tmp_info to not leak information in case the previous function
          * returns and error. It avoids to leak information in case of error.
-         * So, copy the tmp_info content into the info only if that tmp_info
+         * So, copy the tmp_info content into the attrs only if that tmp_info
          * data is valid.
          */
         sst_utils_memcpy(info, &tmp_info, TFM_SST_ASSET_INFO_SIZE);
     }
+
+    return err;
+}
+
+enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
+                                         uint32_t asset_handle,
+                                         struct tfm_sst_asset_attrs_t *attrs)
+{
+    uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
+    enum tfm_sst_err_t bound_check;
+    struct sst_asset_policy_t *db_entry;
+    enum tfm_sst_err_t err;
+    struct tfm_sst_asset_attrs_t tmp_attrs;
+
+    bound_check = sst_utils_memory_bound_check(attrs,
+                                               TFM_SST_ASSET_ATTR_SIZE,
+                                               app_id, TFM_MEMORY_ACCESS_RW);
+    if (bound_check != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+
+    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
+    if (db_entry == NULL) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
+
+    err = sst_object_get_attributes(asset_handle, &tmp_attrs);
+    if (err == TFM_SST_ERR_SUCCESS) {
+        /* Use tmp_attrs to not leak information incase the previous function
+         * returns and error. It avoids to leak information in case of error.
+         * So, copy the tmp_attrs content into the attrs only if that tmp_attrs
+         * data is valid.
+         */
+        sst_utils_memcpy(attrs, &tmp_attrs, TFM_SST_ASSET_ATTR_SIZE);
+    }
+
+    return err;
+}
+
+enum tfm_sst_err_t sst_am_set_attributes(
+                                      uint32_t app_id,
+                                      uint32_t asset_handle,
+                                      const struct tfm_sst_asset_attrs_t *attrs)
+{
+    uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
+    enum tfm_sst_err_t bound_check;
+    struct sst_asset_policy_t *db_entry;
+    enum tfm_sst_err_t err;
+
+    bound_check = sst_utils_memory_bound_check((uint8_t *)attrs,
+                                               TFM_SST_ASSET_ATTR_SIZE,
+                                               app_id, TFM_MEMORY_ACCESS_RO);
+    if (bound_check != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+
+    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
+    if (db_entry == NULL) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
+
+    /* FIXME: Validity attributes are not supported in the current service
+     *        implementation. It is mandatory to set start and end subattributes
+     *        to 0.
+     */
+    if (attrs->validity.start != 0 || attrs->validity.end != 0) {
+        return TFM_SST_ERR_PARAM_ERROR;
+    }
+
+    /* FIXME: Check which bit attributes have been changed and check if those
+     *        can be modified or not.
+     */
+    err = sst_object_set_attributes(asset_handle, attrs);
 
     return err;
 }
@@ -382,7 +455,7 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid)
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_create(asset_uuid, db_entry->max_size);
+    err = sst_object_create(asset_uuid, db_entry->type, db_entry->max_size);
 
     return err;
 }

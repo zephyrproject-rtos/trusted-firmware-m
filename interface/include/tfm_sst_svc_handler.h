@@ -52,6 +52,34 @@ enum tfm_sst_err_t tfm_sst_svc_get_info(uint32_t asset_handle,
                                        struct tfm_sst_asset_info_t *info);
 
 /**
+ * \brief SVC funtion to get asset's attributes referenced by asset
+ *        handler.
+ *
+ * \param[in]  asset_handle  Asset handler
+ * \param[out] attrs         Pointer to store the asset's attributes
+ *                           \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t tfm_sst_svc_get_attributes(
+                                           uint32_t asset_handle,
+                                           struct tfm_sst_asset_attrs_t *attrs);
+
+/**
+ * \brief SVC funtion to set asset's attributes referenced by asset
+ *        handler.
+ *
+ * \param[in] asset_handle  Asset handler
+ * \param[in] attrs         Pointer to new the asset's attributes
+ *                           \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t tfm_sst_svc_set_attributes(
+                                     uint32_t asset_handle,
+                                     const struct tfm_sst_asset_attrs_t *attrs);
+
+/**
  * \brief SVC funtion to read asset's data from asset referenced by asset
  *        handler.
  *

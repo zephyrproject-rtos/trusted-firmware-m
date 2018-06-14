@@ -14,6 +14,8 @@
     {sst_am_get_handle, SST_AM_GET_HANDLE_SFID},
     {sst_am_create, SST_AM_CREATE_SFID},
     {sst_am_get_info, SST_AM_GET_INFO_SFID},
+    {sst_am_get_attributes, SST_AM_GET_ATTRIBUTES_SFID},
+    {sst_am_set_attributes, SST_AM_SET_ATTRIBUTES_SFID},
     {sst_am_read, SST_AM_READ_SFID},
     {sst_am_write, SST_AM_WRITE_SFID},
     {sst_am_delete, SST_AM_DELETE_SFID},

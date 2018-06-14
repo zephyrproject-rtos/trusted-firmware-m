@@ -82,6 +82,7 @@ static void tfm_sst_test_1028(struct test_result_t *ret);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1029(struct test_result_t *ret);
 #endif
+static void tfm_sst_test_1030(struct test_result_t *ret);
 
 static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -146,6 +147,8 @@ static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1029, "TFM_SST_TEST_1029",
      "Write data to the middle of an existing asset", {0} },
 #endif
+    {&tfm_sst_test_1030, "TFM_SST_TEST_1030",
+     "Basic test to verify set and get attributes functionality", {0} },
 };
 
 void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
@@ -2362,3 +2365,55 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     ret->val = TEST_PASSED;
 }
 #endif /* SST_ENABLE_PARTIAL_ASSET_RW */
+
+/**
+ * \brief Basic test to verify set and get attributes functionality.
+ */
+TFM_SST_NS_TEST(1030, "Thread_B")
+{
+    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    struct tfm_sst_asset_attrs_t wrt_attrs;
+    struct tfm_sst_asset_attrs_t read_attrs = {
+        .attrs = 0,
+        .validity.start = 0,
+        .validity.end = 0 };
+    enum tfm_sst_err_t err;
+    uint32_t hdl;
+
+    err = tfm_sst_create(asset_uuid);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Create should not fail");
+        return;
+    }
+
+    err = tfm_sst_get_handle(asset_uuid, &hdl);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get handle should not fail");
+        return;
+    }
+
+    wrt_attrs.attrs = (TFM_SST_ASSET_ATTR_ENCRYPT | TFM_SST_ASSET_ATTR_DECRYPT |
+                       TFM_SST_ASSET_ATTR_SIGN | TFM_SST_ASSET_ATTR_VERIFY);
+    wrt_attrs.validity.start = 0;
+    wrt_attrs.validity.end   = 0;
+
+    err = tfm_sst_set_attributes(hdl, &wrt_attrs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Set attributes should not fail");
+        return;
+    }
+
+    err = tfm_sst_get_attributes(hdl, &read_attrs);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        TEST_FAIL("Get attributes should not fail");
+        return;
+    }
+
+    /* Compare asset attributes */
+    if (memcmp(&wrt_attrs, &read_attrs, TFM_SST_ASSET_ATTR_SIZE) != 0) {
+        TEST_FAIL("Attributes are differents");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}

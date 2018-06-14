@@ -44,6 +44,8 @@ extern "C" {
     X(SVC_TFM_SST_GET_HANDLE, tfm_sst_svc_get_handle) \
     X(SVC_TFM_SST_CREATE, tfm_sst_svc_create) \
     X(SVC_TFM_SST_GET_INFO, tfm_sst_svc_get_info) \
+    X(SVC_TFM_SST_GET_ATTRIBUTES, tfm_sst_svc_get_attributes) \
+    X(SVC_TFM_SST_SET_ATTRIBUTES, tfm_sst_svc_set_attributes) \
     X(SVC_TFM_SST_READ, tfm_sst_svc_read) \
     X(SVC_TFM_SST_WRITE, tfm_sst_svc_write) \
     X(SVC_TFM_SST_DELETE, tfm_sst_svc_delete) \

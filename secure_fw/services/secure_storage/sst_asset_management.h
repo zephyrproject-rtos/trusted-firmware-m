@@ -32,6 +32,7 @@ struct sst_asset_perm_t {
 };
 
 struct sst_asset_policy_t {
+    uint32_t type;         /*!< Asset type */
     uint16_t asset_uuid;   /*!< Asset's unique ID */
     uint16_t perms_count;  /*!< Number of permissions owned by this asset */
     uint16_t max_size;     /*!< Policy maximum size fo this asset */
@@ -83,6 +84,35 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid);
 enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
                                    uint32_t asset_handle,
                                    struct tfm_sst_asset_info_t *info);
+
+/**
+ * \brief Gets the asset's attributes referenced by asset handle.
+ *
+ * \param[in]  app_id        Application ID
+ * \param[in]  asset_handle  Asset handle
+ * \param[out] attrs         Pointer to store the asset's attributes
+ *                           \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
+                                         uint32_t asset_handle,
+                                         struct tfm_sst_asset_attrs_t *attrs);
+
+/**
+ * \brief Sets the asset's attributes referenced by asset handle.
+ *
+ * \param[in] app_id        Application ID
+ * \param[in] asset_handle  Asset handle
+ * \param[in] attrs         Pointer to new the asset's attributes
+ *                          \ref tfm_sst_asset_attrs_t
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_am_set_attributes(
+                                     uint32_t app_id,
+                                     uint32_t asset_handle,
+                                     const struct tfm_sst_asset_attrs_t *attrs);
 
 /**
  * \brief Reads asset's data referenced by asset handle.

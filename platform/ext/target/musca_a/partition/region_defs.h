@@ -53,7 +53,7 @@
 #define IMAGE_CODE_SIZE \
             (FLASH_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x000000A0)
+#define CMSE_VENEER_REGION_SIZE     (0x000000C0)
 
 /* Use QSPI Flash memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10200000)

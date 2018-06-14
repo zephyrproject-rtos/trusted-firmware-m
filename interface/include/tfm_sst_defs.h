@@ -15,6 +15,8 @@ extern "C" {
 #include <inttypes.h>
 #include <limits.h>
 #include "tfm_api.h"
+#include "tfm_sst_asset_defs.h"
+#include "tfm_sst_asset_macros.h"
 
 /* FIXME: the secure APP ID should not be share with the non-secure code
  *        as it is revealing information about secure code implementation.
@@ -53,18 +55,6 @@ enum tfm_sst_err_t {
 };
 
 /*!
- * \struct tfm_sst_asset_info_t
- *
- * \brief Structure to store the asset information concerning the content
- *        information.
- *
- */
-struct tfm_sst_asset_info_t {
-    uint32_t size_current; /*!< The current size of the asset data */
-    uint32_t size_max;     /*!< The maximum size of the asset data in bytes */
-};
-
-/*!
  * \struct tfm_sst_buf_t
  *
  * \brief Structure to store data information to read/write from/to asset.
@@ -75,8 +65,6 @@ struct tfm_sst_buf_t {
     uint32_t size;   /*!< Size of input/output data */
     uint32_t offset; /*!< Offset within asset */
 };
-
-#define TFM_SST_ASSET_INFO_SIZE sizeof(struct tfm_sst_asset_info_t)
 
 #ifdef __cplusplus
 }

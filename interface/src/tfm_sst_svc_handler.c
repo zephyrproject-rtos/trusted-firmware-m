@@ -40,6 +40,28 @@ enum tfm_sst_err_t tfm_sst_svc_get_info(uint32_t asset_handle,
     return tfm_sst_veneer_get_info(app_id, asset_handle, info);
 }
 
+enum tfm_sst_err_t tfm_sst_svc_get_attributes(
+                                            uint32_t asset_handle,
+                                            struct tfm_sst_asset_attrs_t *attrs)
+{
+    uint32_t app_id;
+
+    app_id = tfm_sst_get_cur_id();
+
+    return tfm_sst_veneer_get_attributes(app_id, asset_handle, attrs);
+}
+
+enum tfm_sst_err_t tfm_sst_svc_set_attributes(
+                                      uint32_t asset_handle,
+                                      const struct tfm_sst_asset_attrs_t *attrs)
+{
+    uint32_t app_id;
+
+    app_id = tfm_sst_get_cur_id();
+
+    return tfm_sst_veneer_set_attributes(app_id, asset_handle, attrs);
+}
+
 enum tfm_sst_err_t tfm_sst_svc_read(uint32_t asset_handle,
                                     struct tfm_sst_buf_t* data)
 {
