@@ -14,6 +14,10 @@
 #include "test/framework/helpers.h"
 #include "tfm_sst_api.h"
 
+/* Define default asset's token */
+#define ASSET_TOKEN      NULL
+#define ASSET_TOKEN_SIZE 0
+
 /* The tests in this test suite cover access to an asset when the application
  * has:
  *  - REFERENCE/READ/WRITE permissions,
@@ -133,7 +137,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* The create function requires WRITE permission */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
@@ -145,7 +149,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     buf.offset = 0;
 
     /* The write function requires WRITE permission */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_C");
         return;
@@ -157,7 +161,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     buf.offset = 0;
 
     /* The read function requires READ permission */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_C");
         return;
@@ -170,7 +174,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     }
 
     /* The get information function requires any permission other than NONE */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_C");
@@ -208,7 +212,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should fail as Thread_A does not have WRITE permission */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should not succeed for Thread_A");
         return;
@@ -221,7 +225,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     buf.offset = 1;
 
     /* Write should fail as Thread_A does not have WRITE permission */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -233,7 +237,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A does not have READ permission */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -246,7 +250,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     }
 
     /* Get information should succeed as Thread_A has at least one permission */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_A");
@@ -265,7 +269,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     }
 
     /* Delete should fail as Thread_A does not have WRITE permission */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -291,7 +295,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should fail as Thread_B does not have WRITE permission */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should not succeed for Thread_B");
         return;
@@ -304,7 +308,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     buf.offset = 2;
 
     /* Write should fail as Thread_B does not have WRITE permission */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_B");
         return;
@@ -316,7 +320,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     buf.offset = 0;
 
     /* Read should succeed as Thread_B has READ permission */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -331,7 +335,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     }
 
     /* Get attributes should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_B");
@@ -350,7 +354,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     }
 
     /* Delete should fail as Thread_B does not have WRITE permission */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_B");
         return;
@@ -374,8 +378,7 @@ TFM_SST_NS_TEST(4004, "Thread_C")
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    /* The delete function requires WRITE permission */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_C");
         return;
@@ -401,7 +404,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should succeed as Thread_B has WRITE permission */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
         return;
@@ -413,7 +416,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     buf.offset = 0;
 
     /* Write should succeed as Thread_B has WRITE permission */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_B");
         return;
@@ -425,7 +428,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     buf.offset = 0;
 
     /* Read should succeed as Thread_B has READ permission */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -438,7 +441,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     }
 
     /* Get information should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_B");
@@ -476,7 +479,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should fail as Thread_A has no permissions */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should not succeed for Thread_A");
         return;
@@ -492,7 +495,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
      * permissions even if it has a valid asset ID. So the write should fail as
      * Thread_A has no permissions.
      */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -504,7 +507,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A has no permissions */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -517,7 +520,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     }
 
     /* Get information should fail as Thread_A has no permissions */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get information should not succeed for Thread_A");
@@ -536,7 +539,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     }
 
     /* Delete should fail as Thread_A has no permissions */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -561,7 +564,7 @@ TFM_SST_NS_TEST(4007, "Thread_B")
     enum tfm_sst_err_t err;
 
     /* Delete should succeed as Thread_B has WRITE permission */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_B");
         return;
@@ -587,7 +590,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should succeed as Thread_C has WRITE permission */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
@@ -599,7 +602,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     buf.offset = 0;
 
     /* Write should succeed as Thread_C has WRITE permission */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_C");
         return;
@@ -611,7 +614,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     buf.offset = 0;
 
     /* Read should fail as Thread_C does not have READ permission */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_C");
         return;
@@ -624,7 +627,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     }
 
     /* Get information should succeed as Thread_C has at least one permission */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_C");
@@ -663,7 +666,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
     /* Create should fail as Thread_A has no permissions */
-    err = tfm_sst_create(asset_uuid);
+    err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should not succeed for Thread_A");
         return;
@@ -679,7 +682,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
      * permissions even if it has a valid asset ID. So the write should fail as
      * Thread_A has no permissions.
      */
-    err = tfm_sst_write(asset_uuid, &buf);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -691,7 +694,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A has no permissions */
-    err = tfm_sst_read(asset_uuid, &buf);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -704,7 +707,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     }
 
     /* Get information should fail as Thread_A has no permissions */
-    err = tfm_sst_get_info(asset_uuid,
+    err = tfm_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get information should not succeed for Thread_A");
@@ -723,7 +726,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     }
 
     /* Delete should fail as Thread_A has no permissions */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -748,7 +751,7 @@ TFM_SST_NS_TEST(4010, "Thread_C")
     enum tfm_sst_err_t err;
 
     /* Delete should succeed as Thread_C has WRITE permission */
-    err = tfm_sst_delete(asset_uuid);
+    err = tfm_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_C");
         return;

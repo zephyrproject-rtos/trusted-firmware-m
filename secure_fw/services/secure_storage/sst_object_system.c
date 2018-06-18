@@ -66,10 +66,16 @@ enum tfm_sst_err_t sst_system_prepare(void)
     return err;
 }
 
-enum tfm_sst_err_t sst_object_read(uint32_t uuid, uint8_t *data,
-                                   uint32_t offset, uint32_t size)
+enum tfm_sst_err_t sst_object_read(uint32_t uuid,
+                                   const struct tfm_sst_token_t *s_token,
+                                   uint8_t *data, uint32_t offset,
+                                   uint32_t size)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
 
 #ifndef SST_ENABLE_PARTIAL_ASSET_RW
     (void)offset;
@@ -79,11 +85,10 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid, uint8_t *data,
         sst_global_lock();
 
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(uuid, &g_sst_object);
+        err = sst_encrypted_object_read(uuid, s_token, &g_sst_object);
 #else
         /* Read object header */
-        err = sst_core_object_read(uuid,
-                                   (uint8_t *)&g_sst_object.header,
+        err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object.header,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
         if (err != TFM_SST_ERR_SUCCESS) {
@@ -116,7 +121,6 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid, uint8_t *data,
         sst_utils_memcpy(data, g_sst_object.data, size);
 #endif
 
-
         sst_global_unlock();
     }
 
@@ -124,9 +128,14 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid, uint8_t *data,
 }
 
 enum tfm_sst_err_t sst_object_create(uint32_t uuid,
+                                     const struct tfm_sst_token_t *s_token,
                                      uint32_t type, uint32_t size)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
@@ -137,20 +146,18 @@ enum tfm_sst_err_t sst_object_create(uint32_t uuid,
             sst_object_init_object(uuid, type, size, &g_sst_object);
 
 #ifdef SST_ENCRYPTION
-            err = sst_encrypted_object_create(uuid, &g_sst_object);
+            err = sst_encrypted_object_create(uuid, s_token, &g_sst_object);
 #else
             /* FixMe: This is an inefficient way to write the object header.
              *        The create function should allow to write content
              *        in the object.
              */
-            err = sst_core_object_create(uuid,
-                                         SST_OBJECT_SIZE(size));
+            err = sst_core_object_create(uuid, SST_OBJECT_SIZE(size));
             if (err != TFM_SST_ERR_SUCCESS) {
                 return err;
             }
 
-            err = sst_core_object_write(uuid,
-                                        (uint8_t *)&g_sst_object,
+            err = sst_core_object_write(uuid, (uint8_t *)&g_sst_object,
                                         SST_OBJECT_START_POSITION,
                                         SST_OBJECT_HEADER_SIZE);
 #endif
@@ -162,26 +169,29 @@ enum tfm_sst_err_t sst_object_create(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_object_write(uint32_t uuid,
+                                    const struct tfm_sst_token_t *s_token,
                                     const uint8_t *data, uint32_t offset,
                                     uint32_t size)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
 
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
+
 #ifndef SST_ENABLE_PARTIAL_ASSET_RW
     (void)offset;
 #endif
-
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Read the object from the object system */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(uuid, &g_sst_object);
+        err = sst_encrypted_object_read(uuid, s_token, &g_sst_object);
 #else
         /* Read object header */
-        err = sst_core_object_read(uuid,
-                                   (uint8_t *)&g_sst_object.header,
+        err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object.header,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
         if (err != TFM_SST_ERR_SUCCESS) {
@@ -226,7 +236,7 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
 #endif
 
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_write(uuid, &g_sst_object);
+        err = sst_encrypted_object_write(uuid, s_token, &g_sst_object);
 #else
         err = sst_core_object_write(uuid, (uint8_t *)&g_sst_object,
                                     SST_OBJECT_START_POSITION,
@@ -240,16 +250,21 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
+                                       const struct tfm_sst_token_t *s_token,
                                        struct tfm_sst_asset_info_t *info)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Read the object from the object system */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(uuid, &g_sst_object);
+        err = sst_encrypted_object_read(uuid, s_token, &g_sst_object);
 #else
         err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object,
                                    SST_OBJECT_START_POSITION,
@@ -269,16 +284,21 @@ enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
-                                        struct tfm_sst_asset_attrs_t *attrs)
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct tfm_sst_asset_attrs_t *attrs)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Read the object from the object system */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(uuid, &g_sst_object);
+        err = sst_encrypted_object_read(uuid, s_token, &g_sst_object);
 #else
         err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object,
                                    SST_OBJECT_START_POSITION,
@@ -298,16 +318,21 @@ enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
+                                      const struct tfm_sst_token_t *s_token,
                                       const struct tfm_sst_asset_attrs_t *attrs)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+
+#ifndef SST_ENCRYPTION
+    (void)s_token;
+#endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Read the object from the object system */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(uuid, &g_sst_object);
+        err = sst_encrypted_object_read(uuid, s_token, &g_sst_object);
 #else
         err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object,
                                    SST_OBJECT_START_POSITION,
@@ -322,7 +347,7 @@ enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
                          attrs, TFM_SST_ASSET_ATTR_SIZE);
 
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_write(uuid, &g_sst_object);
+        err = sst_encrypted_object_write(uuid, s_token, &g_sst_object);
 #else
         err = sst_core_object_write(uuid, (uint8_t *)&g_sst_object,
                                    SST_OBJECT_START_POSITION,
@@ -335,11 +360,13 @@ enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_delete(uint32_t uuid)
+enum tfm_sst_err_t sst_object_delete(uint32_t uuid,
+                                     const struct tfm_sst_token_t *s_token)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
 
     /* FIXME: Authenticate object data to validate token before delete it. */
+    (void)s_token;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();

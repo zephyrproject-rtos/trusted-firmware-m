@@ -36,19 +36,20 @@ enum tfm_sst_err_t sst_test_service_sfn_setup(void)
     enum tfm_sst_err_t err;
     uint32_t app_id = S_APP_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
+    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
 
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE] = SST_TEST_SERVICE_KEY;
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
 
     /* Create the key asset using our secure app ID */
-    err = tfm_sst_veneer_create(app_id, key_uuid);
+    err = tfm_sst_veneer_create(app_id, key_uuid, &s_token);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Write the key to the asset using our secure app ID */
-    err = tfm_sst_veneer_write(app_id, key_uuid, &key_buf);
+    err = tfm_sst_veneer_write(app_id, key_uuid, &s_token, &key_buf);
 
     return err;
 }
@@ -61,10 +62,11 @@ enum tfm_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
     enum tfm_sst_err_t err;
     uint32_t i;
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE];
+    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
     /* Read the key from the asset using the non-secure caller's app ID */
-    err = tfm_sst_veneer_read(app_id, key_uuid, &key_buf);
+    err = tfm_sst_veneer_read(app_id, key_uuid, &s_token, &key_buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -99,9 +101,10 @@ enum tfm_sst_err_t sst_test_service_sfn_clean(void)
     enum tfm_sst_err_t err;
     uint32_t app_id = S_APP_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
+    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
 
     /* Delete the key asset using our secure app ID */
-    err = tfm_sst_veneer_delete(app_id, key_uuid);
+    err = tfm_sst_veneer_delete(app_id, key_uuid, &s_token);
 
     return err;
 }

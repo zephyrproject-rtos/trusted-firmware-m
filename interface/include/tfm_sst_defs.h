@@ -54,6 +54,24 @@ enum tfm_sst_err_t {
 };
 
 /*!
+ * \struct tfm_sst_token_t
+ *
+ * \brief Structure to store the asset's token.
+ *
+ */
+struct tfm_sst_token_t {
+    const uint8_t  *token;  /*!< Pointer to the asset's token to be used to
+                             *   generate the asset key to encrypt and decrypt
+                             *   the asset data. This is an optional parameter
+                             *   that has to be NULL in case the token is not
+                             *   provied.
+                             */
+    uint32_t token_size;    /*!< Token size. In case the token is not provided
+                             *   the token size has to be 0.
+                             */
+};
+
+/*!
  * \struct tfm_sst_buf_t
  *
  * \brief Structure to store data information to read/write from/to asset.

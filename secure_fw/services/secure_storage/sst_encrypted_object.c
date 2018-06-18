@@ -136,9 +136,15 @@ static enum tfm_sst_err_t sst_object_auth_encrypt(uint32_t cur_size,
 }
 
 enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
-                                               struct sst_object_t *obj)
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
+
+    /* FIXME: The token structure needs to be used when the key derivation
+     *        mechanism is in place to generate the specific object key.
+     */
+    (void)s_token;
 
     /* Create an object in the object system */
     err = sst_core_object_create(uuid,
@@ -165,17 +171,24 @@ enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
  * \brief Reads and decrypts data from the object referenced by the object
  *        UUID into the sst_plaintext_buf buffer.
  *
- * \param[in]  uuid  Object UUID
- * \param[out] obj   Pointer to the object structure to fill in
+ * \param[in]  uuid     Object UUID
+ * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[out] obj      Pointer to the object structure to fill in
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
-                                                    struct sst_object_t *obj)
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
     struct sst_core_obj_info_t obj_info;
     uint32_t plaintext_size;
+
+    /* FIXME: The token structure needs to be used when the key derivation
+     *        mechanism is in place to generate the specific object key.
+     */
+    (void)s_token;
 
     /* Get the current size of the encrypted object in the object system */
     err = sst_core_object_get_info(uuid, &obj_info);
@@ -207,11 +220,12 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
-                                             struct sst_object_t *obj)
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
 
-    err = sst_read_encrypted_object(uuid, obj);
+    err = sst_read_encrypted_object(uuid, s_token, obj);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -220,9 +234,15 @@ enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
 }
 
 enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
-                                              struct sst_object_t *obj)
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
+
+    /* FIXME: The token structure needs to be used when the key derivation
+     *        mechanism is in place to generate the specific object key.
+     */
+    (void)s_token;
 
     /* Encrypt the object data */
     err = sst_object_auth_encrypt(obj->header.info.size_current, obj);

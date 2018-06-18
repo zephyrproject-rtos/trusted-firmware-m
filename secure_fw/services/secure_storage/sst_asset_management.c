@@ -268,8 +268,8 @@ static enum tfm_sst_err_t validate_copy_validate_iovec(
     return bound_check;
 }
 
-enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
-                                   uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
+                                   const struct tfm_sst_token_t *s_token,
                                    struct tfm_sst_asset_info_t *info)
 {
     enum tfm_sst_err_t bound_check;
@@ -290,7 +290,7 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_get_info(asset_uuid, &tmp_info);
+    err = sst_object_get_info(asset_uuid, s_token, &tmp_info);
     if (err == TFM_SST_ERR_SUCCESS) {
         /* Use tmp_info to not leak information in case the previous function
          * returns and error. It avoids to leak information in case of error.
@@ -303,8 +303,8 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
-                                         uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
+                                         const struct tfm_sst_token_t *s_token,
                                          struct tfm_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
@@ -325,7 +325,7 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_get_attributes(asset_uuid, &tmp_attrs);
+    err = sst_object_get_attributes(asset_uuid, s_token, &tmp_attrs);
     if (err == TFM_SST_ERR_SUCCESS) {
         /* Use tmp_attrs to not leak information incase the previous function
          * returns and error. It avoids to leak information in case of error.
@@ -338,8 +338,8 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
-                                      uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
+                                      const struct tfm_sst_token_t *s_token,
                                       const struct tfm_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
@@ -370,12 +370,13 @@ enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
     /* FIXME: Check which bit attributes have been changed and check if those
      *        can be modified or not.
      */
-    err = sst_object_set_attributes(asset_uuid, attrs);
+    err = sst_object_set_attributes(asset_uuid, s_token, attrs);
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid)
+enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
+                                 const struct tfm_sst_token_t *s_token)
 {
     enum tfm_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
@@ -385,12 +386,14 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid)
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_create(asset_uuid, db_entry->type, db_entry->max_size);
+    err = sst_object_create(asset_uuid, s_token, db_entry->type,
+                            db_entry->max_size);
 
     return err;
 }
 
 enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
+                               const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
@@ -416,13 +419,14 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
     }
 #endif
 
-    err = sst_object_read(asset_uuid, local_data.data,
+    err = sst_object_read(asset_uuid, s_token, local_data.data,
                           local_data.offset, local_data.size);
 
     return err;
 }
 
 enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
+                                const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
@@ -456,13 +460,14 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
     }
 #endif
 
-    err = sst_object_write(asset_uuid, local_data.data,
+    err = sst_object_write(asset_uuid, s_token, local_data.data,
                            local_data.offset, local_data.size);
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid)
+enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid,
+                                 const struct tfm_sst_token_t *s_token)
 {
     enum tfm_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
@@ -472,7 +477,7 @@ enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid)
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_delete(asset_uuid);
+    err = sst_object_delete(asset_uuid, s_token);
 
     return err;
 }

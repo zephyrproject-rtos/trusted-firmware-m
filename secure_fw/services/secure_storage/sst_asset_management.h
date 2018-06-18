@@ -51,25 +51,27 @@ enum tfm_sst_err_t sst_am_prepare(void);
  *        without setting any data in the asset.
  *
  * \param[in] app_id      Application ID
+ * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] asset_uuid  Asset UUID
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_create(uint32_t app_id,
-                                 uint32_t asset_uuid);
+enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
+                                 const struct tfm_sst_token_t *s_token);
 
 /**
  * \brief Gets the asset's info referenced by asset UUID.
  *
  * \param[in]  app_id      Application ID
  * \param[in]  asset_uuid  Asset UUID
+ * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] info        Pointer to store the asset's information
  *                         \ref tfm_sst_asset_info_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
-                                   uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
+                                   const struct tfm_sst_token_t *s_token,
                                    struct tfm_sst_asset_info_t *info);
 
 /**
@@ -77,13 +79,14 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
  *
  * \param[in]  app_id      Application ID
  * \param[in]  asset_uuid  Asset UUID
+ * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] attrs       Pointer to store the asset's attributes
  *                         \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
-                                         uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
+                                         const struct tfm_sst_token_t *s_token,
                                          struct tfm_sst_asset_attrs_t *attrs);
 
 /**
@@ -91,13 +94,14 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
  *
  * \param[in] app_id      Application ID
  * \param[in] asset_uuid  Asset UUID
+ * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] attrs       Pointer to new the asset's attributes
  *                        \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
-                                         uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
+                                     const struct tfm_sst_token_t *s_token,
                                      const struct tfm_sst_asset_attrs_t *attrs);
 
 /**
@@ -105,13 +109,14 @@ enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
  *
  * \param[in]  app_id      Application ID
  * \param[in]  asset_uuid  Asset UUID
+ * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] data        Pointer to data vector \ref tfm_sst_buf_t to store
  *                         data, size and offset
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_read(uint32_t app_id,
-                               uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
+                               const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data);
 
 /**
@@ -119,13 +124,14 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id,
  *
  * \param[in] app_id      Application ID
  * \param[in] asset_uuid  Asset UUID
+ * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] data        Pointer to data vector \ref tfm_sst_buf_t which
  *                        contains the data to write
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_write(uint32_t app_id,
-                                uint32_t asset_uuid,
+enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
+                                const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data);
 
 /**
@@ -133,10 +139,12 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id,
  *
  * \param[in] app_id      Application ID
  * \param[in] asset_uuid  Asset UUID
+ * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid);
+enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid,
+                                 const struct tfm_sst_token_t *s_token);
 
 #ifdef __cplusplus
 }

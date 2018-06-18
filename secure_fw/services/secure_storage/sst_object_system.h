@@ -27,84 +27,98 @@ enum tfm_sst_err_t sst_system_prepare(void);
 /**
  * \brief Creates a new object with given object UUID.
  *
- * \param[in] uuid  Object UUID
- * \param[in] type  Object type
- * \param[in] size  Object size
+ * \param[in] uuid     Object UUID
+ * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[in] type     Object type
+ * \param[in] size     Object size
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_create(uint32_t uuid,
+                                     const struct tfm_sst_token_t *s_token,
                                      uint32_t type, uint32_t size);
 
 /**
  * \brief Gets object's data referenced by object UUID, and stores it
  *        in the data buffer.
  *
- * \param[in]  uuid    Object UUID
- * \param[out] data    Data buffer to store the object data
- * \param[in]  offset  Offset from where the read is going to start
- * \param[in]  size    Data buffer size
+ * \param[in]  uuid     Object UUID
+ * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[out] data     Data buffer to store the object data
+ * \param[in]  offset   Offset from where the read is going to start
+ * \param[in]  size     Data buffer size
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_read(uint32_t uuid,
+                                   const struct tfm_sst_token_t *s_token,
                                    uint8_t *data, uint32_t offset,
                                    uint32_t size);
 /**
  * \brief Writes data into the object referenced by object UUID.
  *
- * \param[in] uuid    Object UUID
- * \param[in] data    Data buffer to write into object object
- * \param[in] offset  Offset from where the write is going to start
- * \param[in] size    Data buffer size
+ * \param[in] uuid     Object UUID
+ * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[in] data     Data buffer to write into object object
+ * \param[in] offset   Offset from where the write is going to start
+ * \param[in] size     Data buffer size
  *
  * \return Returns number of bytes read or a relevant error \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_write(uint32_t uuid,
+                                   const struct tfm_sst_token_t *s_token,
                                     const uint8_t *data, uint32_t offset,
                                     uint32_t size);
 /**
  * \brief Deletes the object referenced by object UUID.
  *
  * \param[in] uuid  Object UUID
+ * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_delete(uint32_t uuid);
+enum tfm_sst_err_t sst_object_delete(uint32_t uuid,
+                                     const struct tfm_sst_token_t *s_token);
 
 /**
  * \brief Gets the object information referenced by object UUID.
  *
- * \param[in]  uuid  Object UUID
- * \param[out] info  Pointer to store the object's information
- *                   \ref struct tfm_sst_asset_info_t
+ * \param[in]  uuid     Object UUID
+ * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[out] info     Pointer to store the object's information
+ *                      \ref struct tfm_sst_asset_info_t
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
+                                       const struct tfm_sst_token_t *s_token,
                                        struct tfm_sst_asset_info_t *info);
 
 /**
  * \brief Gets the object attributes referenced by object UUID.
  *
- * \param[in]  uuid   Object UUID
- * \param[out] attrs  Pointer to store the object's attributes
- *                    \ref tfm_sst_asset_attrs_t
+ * \param[in]  uuid     Object UUID
+ * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[out] attrs    Pointer to store the object's attributes
+ *                      \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
-                                           struct tfm_sst_asset_attrs_t *attrs);
+                                          const struct tfm_sst_token_t *s_token,
+                                          struct tfm_sst_asset_attrs_t *attrs);
 /**
  * \brief Sets the specific object attributes referenced by object UUID.
  *
- * \param[in] uuid   Object UUID \ref tfm_sst_asset_id_t
- * \param[in] attrs  Pointer to new the object's attributes
- *                   \ref tfm_sst_asset_attrs_t
+ * \param[in] uuid     Object UUID \ref tfm_sst_token_t
+ * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
+ * \param[in] attrs    Pointer to new the object's attributes
+ *                     \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
+                                     const struct tfm_sst_token_t *s_token,
                                      const struct tfm_sst_asset_attrs_t *attrs);
 
 /**
