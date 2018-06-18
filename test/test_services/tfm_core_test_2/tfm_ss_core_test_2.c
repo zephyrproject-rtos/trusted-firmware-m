@@ -35,8 +35,13 @@ int32_t core_test_2_init(void)
     return TFM_SUCCESS;
 }
 
-int32_t spm_core_test_2_slave_service(void)
+int32_t spm_core_test_2_slave_service(struct psa_invec *in_vec, size_t in_len,
+                                     struct psa_outvec *out_vec, size_t out_len)
 {
+    if ((in_len != 0) || (out_len != 0)) {
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+
     return TFM_SUCCESS;
 }
 
@@ -80,11 +85,30 @@ int32_t spm_core_test_2_check_caller_client_id(void)
 /* Invert function */
 #define SFN_INVERT_MAX_LEN 128
 
-int32_t spm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
-                                   uint32_t *out_ptr, int32_t len)
+int32_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
+                                   struct psa_outvec *out_vec, size_t out_len)
 {
     int32_t i;
     static uint32_t invert_buffer[SFN_INVERT_MAX_LEN];
+    int32_t len;
+    uint32_t *in_ptr;
+    uint32_t *out_ptr;
+    int32_t *res_ptr;
+
+    if (in_len != 1 || out_len != 2) {
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+
+    if ((out_vec[0].len < in_vec[0].len) || (in_vec[0].len%4 != 0) ||
+        (out_vec[1].len < sizeof(int32_t))) {
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+
+    len = in_vec[0].len / 4;
+
+    in_ptr = (uint32_t *)in_vec[0].base;
+    out_ptr = (uint32_t *)out_vec[0].base;
+    res_ptr = (int32_t *)out_vec[1].base;
 
     if (tfm_core_memory_permission_check(res_ptr, sizeof(int32_t),
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {

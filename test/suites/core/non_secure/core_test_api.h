@@ -16,6 +16,17 @@ extern "C" {
 #endif
 
 /**
+ * \brief This structure is to pass iovec arguments to the tfm_core_test_call
+ *        function.
+ */
+struct tfm_core_test_call_args_t {
+    struct psa_invec *in_vec;   /*!< Array of psa_invec objects */
+    size_t in_len;              /*!< Number psa_invec objects in in_vec */
+    struct psa_outvec *out_vec; /*!< Array of psa_outvec objects */
+    size_t out_len;             /*!< Number psa_outvec objects in out_vec */
+};
+
+/**
  * \brief Calls the secure function provided in \ref fn_ptr
  *
  * \param[in] fn_ptr  Secure function to be called.
@@ -23,7 +34,8 @@ extern "C" {
  *
  * \return Returns value depending on fn_ptr.
  */
-int32_t tfm_core_test_call(void *fn_ptr, int32_t args[]);
+int32_t tfm_core_test_call(void *fn_ptr,
+                                        struct tfm_core_test_call_args_t *args);
 
 #ifdef __cplusplus
 }

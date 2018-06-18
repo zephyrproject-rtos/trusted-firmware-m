@@ -7,8 +7,7 @@
 
 #include "core_ns_tests.h"
 #include "tfm_api.h"
-#include "test/test_services/tfm_core_test/tfm_ss_core_test_veneers.h"
-#include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_veneers.h"
+#include "tfm_veneers.h"
 #include "test/suites/core/non_secure/core_test_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 
@@ -79,12 +78,13 @@ void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
                   core_tests, list_size, p_test_suite);
 }
 
-/* Args that may or may not be used for service calls */
-int32_t args[] = {0};
-
 static void tfm_core_test_ns_thread(struct test_result_t *ret)
 {
-    int32_t err = tfm_core_test_sfn(CORE_TEST_ID_NS_THREAD, 0, 0, 0);
+    int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_NS_THREAD;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+
+    err = tfm_spm_core_test_sfn_veneer(in_vec, 1, NULL, 0);
 
     if (err != TFM_SUCCESS) {
         TEST_FAIL("Secure function call from thread mode should be successful");
@@ -96,9 +96,12 @@ static void tfm_core_test_ns_thread(struct test_result_t *ret)
 
 static void tfm_core_test_peripheral_access(struct test_result_t *ret)
 {
-    args[0] = CORE_TEST_ID_PERIPHERAL_ACCESS;
+    int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_PERIPHERAL_ACCESS;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
-    int32_t err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
@@ -125,8 +128,9 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret)
 static void tfm_core_test_check_init(struct test_result_t *ret)
 {
     int32_t err;
+    struct tfm_core_test_call_args_t args = {NULL, 0, NULL, 0};
 
-    err = tfm_core_test_call(tfm_core_test_sfn_init_success, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_init_success_veneer, &args);
 
     if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
@@ -165,15 +169,17 @@ static char *error_to_string(const char *desc, int32_t err)
 static void tfm_core_test_mpu_access(struct test_result_t *ret)
 {
     int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_MPU_ACCESS;
+    uint32_t data[4] = {0};
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
+                          {data, sizeof(data)},
+                          {(void *)((int32_t)tfm_core_test_mpu_access &
+                                                                      (~(0x3))),
+                           sizeof(uint32_t)} };
+    psa_outvec outvec[] = { {data, sizeof(data)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
 
-    int32_t args[] = {
-        CORE_TEST_ID_MPU_ACCESS,
-        (int32_t)args,
-        /* Make sure the pointer in code segment is word-aligned */
-        (int32_t)tfm_core_test_mpu_access & (~(0x3)),
-        (int32_t)args};
-
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("TFM Core returned error.");
@@ -193,15 +199,17 @@ static void tfm_core_test_mpu_access(struct test_result_t *ret)
 static void tfm_core_test_permissions(struct test_result_t *ret)
 {
     int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_MEMORY_PERMISSIONS;
+    uint32_t data[4] = {0};
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
+                          {data, sizeof(data)},
+                          {(void *)((int32_t)tfm_core_test_mpu_access &
+                                                                      (~(0x3))),
+                           sizeof(uint32_t)} };
+    psa_outvec outvec[] = { {data, sizeof(data)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
 
-    int32_t args[] = {
-        CORE_TEST_ID_MEMORY_PERMISSIONS,
-        (int32_t)args,
-        /* Make sure the pointer in code segment is word-aligned */
-        (int32_t)tfm_core_test_mpu_access & (~(0x3)),
-        (int32_t)args};
-
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("TFM Core returned error.");
@@ -225,10 +233,12 @@ static void tfm_core_test_buffer_check(struct test_result_t *ret)
     uint32_t inbuf[] = {1, 2, 3, 4, 0xAAAFFF, 0xFFFFFFFF};
     uint32_t outbuf[16] = {0};
     int32_t result;
-    int32_t args[] = {(int32_t)&result, (int32_t)inbuf,
-                  (int32_t)outbuf, (int32_t)sizeof(inbuf) >> 2};
+    psa_invec in_vec[] = { {inbuf, sizeof(inbuf)} };
+    psa_outvec outvec[] = { {outbuf, sizeof(outbuf)},
+                           {&result, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, outvec, 2};
 
-    res = tfm_core_test_call(tfm_core_test_2_sfn_invert, args);
+    res = tfm_core_test_call(tfm_spm_core_test_2_sfn_invert_veneer, &args);
     if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
@@ -258,8 +268,11 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
 {
     int32_t err;
 
-    args[0] = CORE_TEST_ID_SS_TO_SS;
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    int32_t test_case_id = CORE_TEST_ID_SS_TO_SS;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
+
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("Call to secure service should be successful.");
@@ -277,9 +290,11 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
 static void tfm_core_test_share_change(struct test_result_t *ret)
 {
     int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_SHARE_REDIRECTION;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
-    args[0] = CORE_TEST_ID_SHARE_REDIRECTION;
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("TFM Core returned error.");
@@ -300,10 +315,15 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
 
     uint32_t inbuf[] = {1, 2, 3, 4, 0xAAAFFF, 0xFFFFFFFF};
     uint32_t outbuf[16] = {0};
-    int32_t args[] = {CORE_TEST_ID_SS_TO_SS_BUFFER, (int32_t)inbuf,
-                  (int32_t)outbuf, (int32_t)sizeof(inbuf) >> 2};
+    int32_t len = (int32_t)sizeof(inbuf) >> 2;
+    int32_t test_case_id = CORE_TEST_ID_SS_TO_SS_BUFFER;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
+                          {inbuf, sizeof(inbuf)},
+                          {&len, sizeof(int32_t)} };
+    psa_outvec outvec[] = { {outbuf, sizeof(outbuf)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
 
-    res = tfm_core_test_call(tfm_core_test_sfn, args);
+    res = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
     if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
@@ -342,9 +362,11 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 {
     int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_GET_CALLER_CLIENT_ID;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
-    args[0] = CORE_TEST_ID_GET_CALLER_CLIENT_ID;
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("Call to secure service should be successful.");
@@ -362,9 +384,11 @@ static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 static void tfm_core_test_spm_request(struct test_result_t *ret)
 {
     int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_SPM_REQUEST;
+    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
+    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
-    args[0] = CORE_TEST_ID_SPM_REQUEST;
-    err = tfm_core_test_call(tfm_core_test_sfn, args);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
     if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
         TEST_FAIL("Call to secure service should be successful.");

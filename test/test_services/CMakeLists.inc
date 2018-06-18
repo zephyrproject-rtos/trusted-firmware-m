@@ -29,17 +29,13 @@ endif()
 if (NOT DEFINED ENABLE_CORE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_CORE_TESTS is undefined. ")
 elseif(ENABLE_CORE_TESTS)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test/tfm_ss_core_test.c"
-		"${CORE_TEST_DIR}/tfm_core_test/tfm_ss_core_test_veneers.c"
-		)
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test/tfm_ss_core_test.c")
 endif()
 
 if (NOT DEFINED ENABLE_CORE_TESTS_2)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_CORE_TESTS_2 is undefined. ")
 elseif(ENABLE_CORE_TESTS_2)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test_2/tfm_ss_core_test_2_veneers.c"
-		"${CORE_TEST_DIR}/tfm_core_test_2/tfm_ss_core_test_2.c"
-		)
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test_2/tfm_ss_core_test_2.c")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_TEST_SST)
