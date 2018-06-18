@@ -47,21 +47,7 @@ struct sst_asset_policy_t {
 enum tfm_sst_err_t sst_am_prepare(void);
 
 /**
- * \brief Gets handle for the given asset uuid. If an asset is deleted, the
- *        linked asset handle reference is no longer valid and will give
- *        TFM_SST_ERR_ASSET_REF_INVALID if used.
- *
- * \param[in]  app_id      Application ID
- * \param[in]  asset_uuid  Asset UUID
- * \param[out] hdl         Handle to be returned
- *
- * \return Returns error code as specified in \ref tfm_sst_err_t
- */
-enum tfm_sst_err_t sst_am_get_handle(uint32_t app_id, uint16_t asset_uuid,
-                                     uint32_t *hdl);
-
-/**
- * \brief Allocates space for the asset, referenced by asset handle,
+ * \brief Allocates space for the asset, referenced by asset UUID,
  *        without setting any data in the asset.
  *
  * \param[in] app_id      Application ID
@@ -69,86 +55,88 @@ enum tfm_sst_err_t sst_am_get_handle(uint32_t app_id, uint16_t asset_uuid,
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid);
+enum tfm_sst_err_t sst_am_create(uint32_t app_id,
+                                 uint32_t asset_uuid);
 
 /**
- * \brief Gets the asset's info referenced by asset handle.
+ * \brief Gets the asset's info referenced by asset UUID.
  *
- * \param[in]  app_id        Application ID
- * \param[in]  asset_handle  Asset handle
- * \param[out] info          Pointer to store the asset's information
- *                           \ref tfm_sst_asset_info_t
+ * \param[in]  app_id      Application ID
+ * \param[in]  asset_uuid  Asset UUID
+ * \param[out] info        Pointer to store the asset's information
+ *                         \ref tfm_sst_asset_info_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
-                                   uint32_t asset_handle,
+                                   uint32_t asset_uuid,
                                    struct tfm_sst_asset_info_t *info);
 
 /**
- * \brief Gets the asset's attributes referenced by asset handle.
+ * \brief Gets the asset's attributes referenced by asset UUID.
  *
- * \param[in]  app_id        Application ID
- * \param[in]  asset_handle  Asset handle
- * \param[out] attrs         Pointer to store the asset's attributes
- *                           \ref tfm_sst_asset_attrs_t
+ * \param[in]  app_id      Application ID
+ * \param[in]  asset_uuid  Asset UUID
+ * \param[out] attrs       Pointer to store the asset's attributes
+ *                         \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
-                                         uint32_t asset_handle,
+                                         uint32_t asset_uuid,
                                          struct tfm_sst_asset_attrs_t *attrs);
 
 /**
- * \brief Sets the asset's attributes referenced by asset handle.
+ * \brief Sets the asset's attributes referenced by asset UUID.
  *
- * \param[in] app_id        Application ID
- * \param[in] asset_handle  Asset handle
- * \param[in] attrs         Pointer to new the asset's attributes
- *                          \ref tfm_sst_asset_attrs_t
+ * \param[in] app_id      Application ID
+ * \param[in] asset_uuid  Asset UUID
+ * \param[in] attrs       Pointer to new the asset's attributes
+ *                        \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_set_attributes(
-                                     uint32_t app_id,
-                                     uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
+                                         uint32_t asset_uuid,
                                      const struct tfm_sst_asset_attrs_t *attrs);
 
 /**
- * \brief Reads asset's data referenced by asset handle.
+ * \brief Reads asset's data referenced by asset UUID.
  *
- * \param[in]  app_id        Application ID
- * \param[in]  asset_handle  Asset handle
- * \param[out] data          Pointer to data vector \ref tfm_sst_buf_t to store
- *                           data, size and offset
+ * \param[in]  app_id      Application ID
+ * \param[in]  asset_uuid  Asset UUID
+ * \param[out] data        Pointer to data vector \ref tfm_sst_buf_t to store
+ *                         data, size and offset
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_read(uint32_t app_id,
+                               uint32_t asset_uuid,
                                struct tfm_sst_buf_t *data);
 
 /**
- * \brief Writes data into an asset referenced by asset handle.
+ * \brief Writes data into an asset referenced by asset UUID.
  *
- * \param[in] app_id         Application ID
- * \param[in] asset_handle   Asset handle
- * \param[in] data           Pointer to data vector \ref tfm_sst_buf_t which
- *                           contains the data to write
+ * \param[in] app_id      Application ID
+ * \param[in] asset_uuid  Asset UUID
+ * \param[in] data        Pointer to data vector \ref tfm_sst_buf_t which
+ *                        contains the data to write
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_write(uint32_t app_id,
+                                uint32_t asset_uuid,
                                 const struct tfm_sst_buf_t *data);
 
 /**
- * \brief Deletes the asset referenced by the asset handle.
+ * \brief Deletes the asset referenced by the asset UUID.
  *
- * \param[in] app_id        Application ID
- * \param[in] asset_handle  Asset handle
+ * \param[in] app_id      Application ID
+ * \param[in] asset_uuid  Asset UUID
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_handle);
+enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid);
 
 #ifdef __cplusplus
 }

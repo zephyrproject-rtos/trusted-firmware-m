@@ -19,7 +19,8 @@ extern "C" {
 /**
  * \brief Creates a new encrypted object.
  *
- * \param[in/out] obj Pointer to the object structure to be created.
+ * \param[in]     uuid  Object UUID
+ * \param[in/out] obj   Pointer to the object structure to be created.
  *
  * Note: The function will use obj to store the encrypted data before write it
  *       into the flash to reduce the memory requirements and the number of
@@ -28,24 +29,25 @@ extern "C" {
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_create(struct sst_object_t *obj);
+enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
+                                               struct sst_object_t *obj);
 
 /**
- * \brief Reads object referenced by the object handle
+ * \brief Reads object referenced by the object UUID
  *
- * \param[in]  object_handle Object handle
- * \param[out] obj           Pointer to the object structure to fill in
+ * \param[in]  uuid  Object UUID
+ * \param[out] obj   Pointer to the object structure to fill in
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_read(uint32_t object_handle,
+enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
                                              struct sst_object_t *obj);
 
 /**
- * \brief Writes object referenced by the object handle.
+ * \brief Writes object referenced by the object UUID.
  *
- * \param[in]     object_handle Object handle
- * \param[in/out] obj           Pointer to the object structure to write.
+ * \param[in]     uuid  Object UUID
+ * \param[in/out] obj   Pointer to the object structure to write.
  *
  * Note: The function will use obj to store the encrypted data before write it
  *       into the flash to reduce the memory requirements and the number of
@@ -54,7 +56,7 @@ enum tfm_sst_err_t sst_encrypted_object_read(uint32_t object_handle,
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_write(uint32_t object_handle,
+enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
                                               struct sst_object_t *obj);
 
 #ifdef __cplusplus

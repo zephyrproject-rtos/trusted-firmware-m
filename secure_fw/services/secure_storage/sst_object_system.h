@@ -25,101 +25,86 @@ extern "C" {
 enum tfm_sst_err_t sst_system_prepare(void);
 
 /**
- * \brief Gets handler for the given object uuid. If an object is deleted, the
- *        linked object handle reference is no longer valid and will give
- *        TFM_SST_ERR_ASSET_REF_INVALID if used.
+ * \brief Creates a new object with given object UUID.
  *
- * \param[in]  object_uuid  Object UUID
- * \param[out] hdl          Handle if successful
- *
- * \return Returns object handle. If object is not found, it returns
- *         TFM_SST_ERR_ASSET_NOT_FOUND. If SST area is not prepared, it returns
- *         TFM_SST_ERR_ASSET_NOT_PREPARED.
- */
-enum tfm_sst_err_t sst_object_handle(uint16_t object_uuid, uint32_t *hdl);
-
-/**
- * \brief Creates a new object with given uuid.
- *
- * \param[in] object_uuid  Object UUID
- * \param[in] type         Object type
- * \param[in] size         Object size
+ * \param[in] uuid  Object UUID
+ * \param[in] type  Object type
+ * \param[in] size  Object size
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_create(uint16_t object_uuid,
-                                     uint32_t type,
-                                     uint32_t size);
+enum tfm_sst_err_t sst_object_create(uint32_t uuid,
+                                     uint32_t type, uint32_t size);
 
 /**
- * \brief Gets object's data referenced by object handle, and stores it
+ * \brief Gets object's data referenced by object UUID, and stores it
  *        in the data buffer.
  *
- * \param[in]  object_handle  Object handler
- * \param[out] data           Data buffer to store the object data
- * \param[in]  offset         Offset from where the read is going to start
- * \param[in]  size           Data buffer size
+ * \param[in]  uuid    Object UUID
+ * \param[out] data    Data buffer to store the object data
+ * \param[in]  offset  Offset from where the read is going to start
+ * \param[in]  size    Data buffer size
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_read(uint32_t object_handle, uint8_t *data,
-                                   uint32_t offset, uint32_t size);
+enum tfm_sst_err_t sst_object_read(uint32_t uuid,
+                                   uint8_t *data, uint32_t offset,
+                                   uint32_t size);
 /**
- * \brief Writes data into the object referenced by object uuid.
+ * \brief Writes data into the object referenced by object UUID.
  *
- * \param[in] object_handl  Object handle
- * \param[in] data          Data buffer to write into object object
- * \param[in] offset        Offset from where the write is going to start
- * \param[in] size          Data buffer size
+ * \param[in] uuid    Object UUID
+ * \param[in] data    Data buffer to write into object object
+ * \param[in] offset  Offset from where the write is going to start
+ * \param[in] size    Data buffer size
  *
  * \return Returns number of bytes read or a relevant error \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_write(uint32_t object_handle, const uint8_t *data,
-                                    uint32_t offset, uint32_t size);
+enum tfm_sst_err_t sst_object_write(uint32_t uuid,
+                                    const uint8_t *data, uint32_t offset,
+                                    uint32_t size);
 /**
- * \brief Deletes the object referenced by object handler.
+ * \brief Deletes the object referenced by object UUID.
  *
- * \param[in] object_handle  Object handler
+ * \param[in] uuid  Object UUID
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_delete(uint32_t object_handle);
+enum tfm_sst_err_t sst_object_delete(uint32_t uuid);
 
 /**
- * \brief Gets the object information referenced by object handler.
+ * \brief Gets the object information referenced by object UUID.
  *
- * \param[in]  object_handle  Object handler
- * \param[out] info           Pointer to store the object's information
- *                            \ref struct tfm_sst_asset_info_t
+ * \param[in]  uuid  Object UUID
+ * \param[out] info  Pointer to store the object's information
+ *                   \ref struct tfm_sst_asset_info_t
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_get_info(uint32_t object_handle,
-                                      struct tfm_sst_asset_info_t *info);
+enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
+                                       struct tfm_sst_asset_info_t *info);
 
 /**
- * \brief Gets the object attributes referenced by object handler.
+ * \brief Gets the object attributes referenced by object UUID.
  *
- * \param[in]  object_handle  Object handler
- * \param[out] attrs         Pointer to store the object's attributes
- *                           \ref tfm_sst_asset_attrs_t
+ * \param[in]  uuid   Object UUID
+ * \param[out] attrs  Pointer to store the object's attributes
+ *                    \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_get_attributes(
-                                           uint32_t object_handle,
+enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
                                            struct tfm_sst_asset_attrs_t *attrs);
 /**
- * \brief Sets the specific object attributes referenced by object handler.
+ * \brief Sets the specific object attributes referenced by object UUID.
  *
- * \param[in] object_handle  Object handler
- * \param[in] attrs          Pointer to new the object's attributes
- *                           \ref tfm_sst_asset_attrs_t
+ * \param[in] uuid   Object UUID \ref tfm_sst_asset_id_t
+ * \param[in] attrs  Pointer to new the object's attributes
+ *                   \ref tfm_sst_asset_attrs_t
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_object_set_attributes(
-                                     uint32_t object_handle,
+enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
                                      const struct tfm_sst_asset_attrs_t *attrs);
 
 /**

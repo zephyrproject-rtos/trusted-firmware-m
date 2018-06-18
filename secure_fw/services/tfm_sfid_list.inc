@@ -11,7 +11,6 @@
 #define __TFM_SFID_LIST_INC__
 
     /******** TFM_SP_STORAGE ********/
-    {sst_am_get_handle, SST_AM_GET_HANDLE_SFID},
     {sst_am_create, SST_AM_CREATE_SFID},
     {sst_am_get_info, SST_AM_GET_INFO_SFID},
     {sst_am_get_attributes, SST_AM_GET_ATTRIBUTES_SFID},

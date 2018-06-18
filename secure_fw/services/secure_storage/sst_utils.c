@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include "tfm_secure_api.h"
 #include "tfm_sst_defs.h"
-#include "sst_core.h"
 #include "assets/sst_asset_defs.h"
 #include "sst_utils.h"
 
@@ -85,42 +84,10 @@ enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
     return err;
 }
 
-/* FIXME: the asset handle is currently composed of
- * uuid and index into object metadata.
- * This allows for state-less operation in the sst
- * implementation as no context needs to be maintained.
- * However, this leaks details of flash layout and where
- * the object is physically stored and can be a potential
- * attack vector.
- * Potential solutions could be-
- * Allocate the handle in RAM and use the pointer
- * as the handle.
- *
- * OR
- *
- * Encrypt the handle so that it is not interpretable
- * by the caller
- */
-uint32_t sst_utils_compose_handle(uint16_t asset_uuid, uint16_t meta_idx)
-{
-    return ((((uint32_t) asset_uuid) << 16) | meta_idx);
-}
-
-uint16_t sst_utils_extract_uuid_from_handle(uint32_t asset_handle)
-{
-    return ((asset_handle >> 16) & 0xFFFF);
-}
-
-uint16_t sst_utils_extract_index_from_handle(uint32_t asset_handle)
-{
-    return (asset_handle & 0xFFFF);
-}
-
 uint32_t sst_utils_validate_secure_caller(void)
 {
     return tfm_core_validate_secure_caller();
 }
-
 
 /**
  * \brief Validates asset's ID
@@ -129,7 +96,7 @@ uint32_t sst_utils_validate_secure_caller(void)
  *
  * \return Returns 1 if the asset ID is valid, otherwise 0.
  */
-enum tfm_sst_err_t sst_utils_validate_uuid(uint16_t unique_id)
+enum tfm_sst_err_t sst_utils_validate_uuid(uint32_t unique_id)
 {
     if (unique_id == SST_INVALID_UUID) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;

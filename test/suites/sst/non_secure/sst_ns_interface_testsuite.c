@@ -37,16 +37,6 @@
 /* Define used for bounds checking type tests */
 #define BUFFER_SIZE_PLUS_ONE (BUFFER_SIZE + 1)
 
-/* Shared asset handles for multithreaded tests */
-static uint32_t tfm_sst_test_1007_handle;
-static uint32_t tfm_sst_test_1010_handle;
-static uint32_t tfm_sst_test_1014_handle;
-static uint32_t tfm_sst_test_1018_handle;
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
-static uint32_t tfm_sst_test_1024_asset_1_handle;
-static uint32_t tfm_sst_test_1024_asset_2_handle;
-#endif
-
 /* Define test suite for asset manager tests */
 /* List of tests */
 static void tfm_sst_test_1001(struct test_result_t *ret);
@@ -90,11 +80,11 @@ static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1002, "TFM_SST_TEST_1002",
      "Create with invalid thread name", {0} },
     {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
-     "Get handle interface", {0} },
+     "Get handle interface (DEPRECATED)", {0} },
     {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
-     "Get handle with invalid thread name", {0} },
+     "Get handle with invalid thread name (DEPRECATED)", {0} },
     {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
-     "Get handle with null handle pointer", {0} },
+     "Get handle with null handle pointer (DEPRECATED)", {0} },
     {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
      "Get attributes interface",  {0} },
     {&tfm_sst_test_1007, "TFM_SST_TEST_1007",
@@ -196,20 +186,13 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  */
 TFM_SST_NS_TEST(1001, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
     /* Checks write permissions in create function */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -228,7 +211,7 @@ TFM_SST_NS_TEST(1001, "Thread_C")
     }
 
     /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -242,7 +225,7 @@ TFM_SST_NS_TEST(1001, "Thread_C")
  */
 TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Calls create function with an invalid thread name */
@@ -260,201 +243,60 @@ TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
  * - Valid asset ID and not created asset
  * - Valid asset ID and created asset
  * - Invalid asset ID
+ *
+ * \note This test is deprecated and will be removed in next iterations.
  */
 TFM_SST_NS_TEST(1003, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
-    uint32_t hdl;
-
-    /* Calls get handle before create the asset */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get handle should fail as the asset is not created");
-        return;
-    }
-
-    /* Creates asset to get a valid handle */
-    err = tfm_sst_create(asset_uuid);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Calls get handle with a valid asset ID and the asset created */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Calls get handle with invalid asset ID */
-    err = tfm_sst_get_handle(INVALID_ASSET_ID, &hdl);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get handle should fail as asset ID is invalid");
-        return;
-    }
-
-    /* Deletes asset to clean up the SST area for the next test */
-    err = tfm_sst_delete(hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Creates asset with an authorised app ID.
- */
-static void tfm_sst_test_1004_task_1(struct test_result_t *ret)
-{
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
-
-    err = tfm_sst_create(asset_uuid);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Calls get handle function with an invalid thread name.
- */
-static void tfm_sst_test_1004_task_2(struct test_result_t *ret)
-{
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
-    uint32_t hdl;
-
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get handle should not succeed with an invalid thread name");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Deletes asset to clean up the SST area for the next test.
- */
-static void tfm_sst_test_1004_task_3(struct test_result_t *ret)
-{
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
-    uint32_t hdl;
-
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
-        return;
-    }
-
-    err = tfm_sst_delete(hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail");
-        return;
-    }
-
+    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
     ret->val = TEST_PASSED;
 }
 
 /**
  * \brief Tests get handle function with an invalid thread name.
+ *
+ * \note This test is deprecated and will be removed in next iterations.
  */
-static void tfm_sst_test_1004(struct test_result_t *ret)
+TFM_SST_NS_TEST(1004, "Thread_C")
 {
-    /* Creates asset with an authorised app ID */
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1004_task_1);
-    if (ret->val != TEST_PASSED) {
-        return;
-    }
-
-    /* Calls get handle function with an invalid thread name */
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1004_task_2);
-    if (ret->val != TEST_PASSED) {
-        return;
-    }
-
-    /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1004_task_3);
+    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
+    ret->val = TEST_PASSED;
 }
 
 /**
  * \brief Tests get handle function with a null handle pointer.
+ *
+ * \note This test is deprecated and will be removed in next iterations.
  */
 TFM_SST_NS_TEST(1005, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
-    uint32_t hdl;
-
-    /* Creates asset to get a valid handle */
-    err = tfm_sst_create(asset_uuid);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Calls get handle with a valid asset ID and the asset created */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Calls get handle with null handle pointer */
-    err = tfm_sst_get_handle(asset_uuid, NULL);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get handle should fail as handle pointer is null");
-        return;
-    }
-
-    /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("The delete action should work correctly");
-        return;
-    }
-
+    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
     ret->val = TEST_PASSED;
 }
 
 /**
  * \brief Tests get attributes function against:
- * - Valid application ID, asset handle and attributes struct pointer
- * - Invalid asset handle
+ * - Valid application ID and attributes struct pointer
+ * - Invalid application ID
  */
 TFM_SST_NS_TEST(1006, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
     }
 
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Calls get_attributes with valid application ID, asset handle and
+    /* Calls get information with valid application ID and
      * attributes struct pointer
      */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the information of this asset");
         return;
@@ -471,16 +313,16 @@ TFM_SST_NS_TEST(1006, "Thread_C")
         return;
     }
 
-    /* Calls get_attributes with invalid asset handle */
-    err = tfm_sst_get_info(0, &asset_info);
+    /* Calls get_attributes with invalid asset ID */
+    err = tfm_sst_get_info(INVALID_ASSET_ID, &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get info function should fail for an invalid "
-                  "asset handle");
+        TEST_FAIL("Get information function should fail for an invalid "
+                  "asset ID");
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -490,22 +332,16 @@ TFM_SST_NS_TEST(1006, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID to get a valid handle.
+ * \brief Creates asset with an authorised app ID.
  */
 static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &tfm_sst_test_1007_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
         return;
     }
 
@@ -517,10 +353,12 @@ static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
  */
 static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_get_info(tfm_sst_test_1007_handle, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get info should not succeed with invalid thread name");
         return;
@@ -534,9 +372,10 @@ static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
  */
 static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_delete(tfm_sst_test_1007_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -550,7 +389,7 @@ static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1007(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID to get a valid handle */
+    /* Creates asset with an authorised app ID */
     tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1007_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -571,26 +410,18 @@ static void tfm_sst_test_1007(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1008, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
     }
 
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Calls get_attributes with a null struct attributes pointer */
-    err = tfm_sst_get_info(hdl, NULL);
+    /* Calls get information with a null struct info pointer */
+    err = tfm_sst_get_info(asset_uuid, NULL);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get info function should fail for a null "
                   "struct attributes pointer");
@@ -598,7 +429,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
     }
 
     /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -609,29 +440,21 @@ TFM_SST_NS_TEST(1008, "Thread_C")
 
 /**
  * \brief Tests write function against:
- * - Valid application ID, asset handle and data pointer
- * - Invalid asset handle
+ * - Valid application ID and data pointer
+ * - Invalid application ID
  */
 TFM_SST_NS_TEST(1009, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -641,16 +464,17 @@ TFM_SST_NS_TEST(1009, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
     }
 
-    /* Calls get_attributes with valid application ID, asset handle and
+    /* Calls get information with valid application ID and
      * attributes struct pointer
      */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the information of this asset");
         return;
@@ -662,15 +486,16 @@ TFM_SST_NS_TEST(1009, "Thread_C")
         return;
     }
 
-    /* Calls write function with invalid asset handle */
-    err = tfm_sst_write(0, &io_data);
+    /* Calls write function with invalid application ID */
+    err = tfm_sst_write(INVALID_ASSET_ID,
+                        &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Invalid asset handle should not write in the asset");
+        TEST_FAIL("Invalid asset ID should not write in the asset");
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -680,22 +505,16 @@ TFM_SST_NS_TEST(1009, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID to get a valid handle.
+ * \brief Creates asset with an authorised app ID.
  */
 static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &tfm_sst_test_1010_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
         return;
     }
 
@@ -707,10 +526,11 @@ static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
  */
 static void tfm_sst_test_1010_task_2(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
-    err = tfm_sst_write(tfm_sst_test_1010_handle, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed with an invalid thread name");
         return;
@@ -724,9 +544,10 @@ static void tfm_sst_test_1010_task_2(struct test_result_t *ret)
  */
 static void tfm_sst_test_1010_task_3(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_delete(tfm_sst_test_1010_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -740,7 +561,7 @@ static void tfm_sst_test_1010_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1010(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID to get a valid handle */
+    /* Creates asset with an authorised app ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1010_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -763,27 +584,19 @@ static void tfm_sst_test_1010(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1011, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
     }
 
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
     /* Calls write function with tfm_sst_buf_t pointer set to NULL */
-    err = tfm_sst_write(hdl, NULL);
+    err = tfm_sst_write(asset_uuid, NULL);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail with tfm_sst_buf_t pointer set to NULL");
         return;
@@ -795,14 +608,14 @@ TFM_SST_NS_TEST(1011, "Thread_C")
     io_data.offset = 0;
 
     /* Calls write function with data pointer set to NULL */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail with data pointer set to NULL");
         return;
     }
 
     /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -817,23 +630,15 @@ TFM_SST_NS_TEST(1011, "Thread_C")
  */
 TFM_SST_NS_TEST(1012, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t wrt_data[SST_ASSET_MAX_SIZE_AES_KEY_192] = {0};
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -842,7 +647,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
     io_data.size = BUFFER_PLUS_PADDING_SIZE;
     io_data.offset = 0;
 
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Writing beyond end of asset should not succeed");
         return;
@@ -852,14 +657,14 @@ TFM_SST_NS_TEST(1012, "Thread_C")
     io_data.size = 1;
     io_data.offset = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write to an offset beyond end of asset should not succeed");
         return;
     }
 
     /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -870,29 +675,21 @@ TFM_SST_NS_TEST(1012, "Thread_C")
 
 /**
  * \brief Tests read function against:
- * - Valid application ID, asset handle and data pointer
- * - Invalid asset handle
+ * - Valid application ID and data pointer
+ * - Invalid asset ID
  */
 TFM_SST_NS_TEST(1013, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -902,7 +699,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -914,7 +711,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     io_data.offset = 0;
 
     /* Read data from the asset */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should work correctly");
         return;
@@ -936,16 +733,17 @@ TFM_SST_NS_TEST(1013, "Thread_C")
         return;
     }
 
-    /* Calls read with invalid asset handle */
-    err = tfm_sst_read(0, &io_data);
+    /* Calls read with invalid asset ID */
+    err = tfm_sst_read(INVALID_ASSET_ID,
+                       &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
-                  "asset handle");
+                  "asset ID");
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -955,22 +753,16 @@ TFM_SST_NS_TEST(1013, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID to get a valid handle.
+ * \brief Creates asset with an authorised app ID.
  */
 static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &tfm_sst_test_1014_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
         return;
     }
 
@@ -982,6 +774,7 @@ static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
  */
 static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
@@ -991,7 +784,7 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
     io_data.size = 1;
     io_data.offset = 0;
 
-    err = tfm_sst_read(tfm_sst_test_1014_handle, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed with an invalid thread name");
         return;
@@ -1005,9 +798,10 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
  */
 static void tfm_sst_test_1014_task_3(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_delete(tfm_sst_test_1014_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -1021,7 +815,7 @@ static void tfm_sst_test_1014_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1014(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID to get a valid handle */
+    /* Creates asset with an authorised app ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1014_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -1044,27 +838,19 @@ static void tfm_sst_test_1014(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1015, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
         return;
     }
 
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
     /* Calls read with null tfm_sst_buf_t pointer */
-    err = tfm_sst_read(hdl, NULL);
+    err = tfm_sst_read(asset_uuid, NULL);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read with tfm_sst_buf_t pointer set to NULL should fail");
         return;
@@ -1075,14 +861,14 @@ TFM_SST_NS_TEST(1015, "Thread_C")
     io_data.offset = 0;
 
     /* Calls read with null read data pointer */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read with read data pointer set to NULL should fail");
         return;
     }
 
     /* Calls delete asset to clean up SST area for next test */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1097,25 +883,17 @@ TFM_SST_NS_TEST(1015, "Thread_C")
  */
 TFM_SST_NS_TEST(1016, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     struct tfm_sst_asset_info_t asset_info;
-    uint32_t hdl;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1125,14 +903,15 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
     }
 
-    /* Gets current asset attributes */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    /* Gets current asset information */
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the information of this asset");
         return;
@@ -1149,7 +928,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.size = WRITE_BUF_SIZE + 1;
     io_data.offset = 0;
 
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Read beyond current size should not succeed");
         return;
@@ -1159,7 +938,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.size = 1;
     io_data.offset = asset_info.size_current;
 
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Read from an offset beyond current size should not succeed");
         return;
@@ -1170,48 +949,40 @@ TFM_SST_NS_TEST(1016, "Thread_C")
 
 /**
  * \brief Tests delete function with:
- * - Valid application ID and asset handle
- * - Invalid asset handle
+ * - Valid application ID
+ * - Invalid asset ID
  */
 TFM_SST_NS_TEST(1017, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
-    /* Creates assset 1 to get a valid handle */
+    /* Creates assset 1 */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
         return;
     }
 
-    /* Gets asset handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should not fail as thread has"
                   " write permissions");
         return;
     }
 
-    /* Calls delete with a deleted asset handle */
-    err = tfm_sst_delete(hdl);
+    /* Calls delete with a deleted asset ID */
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("The delete action should fail as handle is not valid");
+        TEST_FAIL("The delete action should fail as asset was deleted");
         return;
     }
 
-    /* Calls delete asset with invalid asset handle */
-    err = tfm_sst_delete(0);
+    /* Calls delete asset with invalid asset ID */
+    err = tfm_sst_delete(INVALID_ASSET_ID);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("The delete action should fail handle is not valid");
+        TEST_FAIL("The delete action should fail as asset ID is not valid");
         return;
     }
 
@@ -1219,22 +990,16 @@ TFM_SST_NS_TEST(1017, "Thread_B")
 }
 
 /**
- * \brief Creates asset with an authorised app ID to get a valid handle.
+ * \brief Creates asset with an authorised app ID.
  */
 static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &tfm_sst_test_1018_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
         return;
     }
 
@@ -1246,9 +1011,10 @@ static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
  */
 static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_delete(tfm_sst_test_1018_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed with an invalid thread name");
         return;
@@ -1262,9 +1028,10 @@ static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
  */
 static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    err = tfm_sst_delete(tfm_sst_test_1018_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -1278,7 +1045,7 @@ static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1018(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID to get a valid handle */
+    /* Creates asset with an authorised app ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1018_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -1303,7 +1070,7 @@ static void tfm_sst_test_1018(struct test_result_t *ret)
  */
 static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum tfm_sst_err_t err;
 
     /* Creates asset 2 first to locate it at the beginning of the data block */
@@ -1318,23 +1085,15 @@ static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
 
 static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
-    uint32_t hdl_1;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
 
-    /* Creates asset 1 handle */
+    /* Creates asset 1 */
     err = tfm_sst_create(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset 1 handle */
-    err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1344,7 +1103,7 @@ static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Writes data into asset 1 */
-    err = tfm_sst_write(hdl_1, &io_data);
+    err = tfm_sst_write(asset_uuid_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_B");
         return;
@@ -1355,20 +1114,13 @@ static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
 
 static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum tfm_sst_err_t err;
-    uint32_t hdl_2;
-
-    err = tfm_sst_get_handle(asset_uuid_2, &hdl_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
 
     /* Deletes asset 2. After the delete call, asset 1 should be at the
      * beginning of the block.
      */
-    err = tfm_sst_delete(hdl_2);
+    err = tfm_sst_delete(asset_uuid_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1379,18 +1131,11 @@ static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
 
 static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    uint32_t hdl_1;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
-
-    err = tfm_sst_get_handle(asset_uuid_1, &hdl_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
 
     /* Sets data structure */
     io_data.data = read_data;
@@ -1400,7 +1145,7 @@ static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
     /* If the compact worked as expected, the test should be able to read back
      * the data from asset 1 correctly.
      */
-    err = tfm_sst_read(hdl_1, &io_data);
+    err = tfm_sst_read(asset_uuid_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -1412,7 +1157,7 @@ static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl_1);
+    err = tfm_sst_delete(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1446,25 +1191,17 @@ static void tfm_sst_test_1019(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1020, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint32_t i;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1474,7 +1211,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -1488,7 +1225,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
 
     for (i = 0; i < WRITE_BUF_SIZE; i++) {
         /* Read data from the asset */
-        err = tfm_sst_read(hdl, &io_data);
+        err = tfm_sst_read(asset_uuid, &io_data);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
         if (err != TFM_SST_ERR_SUCCESS) {
 #else
@@ -1528,7 +1265,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1543,23 +1280,15 @@ TFM_SST_NS_TEST(1020, "Thread_C")
  */
 TFM_SST_NS_TEST(1021, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t wrt_data[BUF_SIZE_SHA224] = {0};
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1569,14 +1298,14 @@ TFM_SST_NS_TEST(1021, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Should have failed asset write of too large");
         return;
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1591,25 +1320,17 @@ TFM_SST_NS_TEST(1021, "Thread_B")
  */
 TFM_SST_NS_TEST(1022, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
     uint8_t wrt_data2[WRITE_BUF_SIZE+1] = "World";
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1619,7 +1340,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
@@ -1631,7 +1352,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data 2 in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 failed");
         return;
@@ -1643,7 +1364,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = 0;
 
     /* Reads back the data */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1655,7 +1376,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1669,25 +1390,17 @@ TFM_SST_NS_TEST(1022, "Thread_B")
  */
 TFM_SST_NS_TEST(1023, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
     uint8_t wrt_data2[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_2;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1697,7 +1410,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
@@ -1709,7 +1422,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
                   "write more bytes that the max size");
@@ -1722,7 +1435,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 3 failed");
         return;
@@ -1734,7 +1447,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = 0;
 
     /* Read back the data */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1746,7 +1459,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1760,20 +1473,13 @@ TFM_SST_NS_TEST(1023, "Thread_B")
  */
 static void tfm_sst_test_1024_task_1(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
-    /* Creates asset 1 to get a valid handle */
+    /* Creates asset 1 */
     err = tfm_sst_create(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Gets asset's handle 1 */
-    err = tfm_sst_get_handle(asset_uuid_1, &tfm_sst_test_1024_asset_1_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1782,20 +1488,13 @@ static void tfm_sst_test_1024_task_1(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_2(struct test_result_t *ret)
 {
-    const uint16_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
 
-    /* Creates asset 2 to get a valid handle */
+    /* Creates asset 2 */
     err = tfm_sst_create(asset_uuid_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle 2*/
-    err = tfm_sst_get_handle(asset_uuid_2, &tfm_sst_test_1024_asset_2_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
         return;
     }
 
@@ -1804,6 +1503,7 @@ static void tfm_sst_test_1024_task_2(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
@@ -1814,7 +1514,7 @@ static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Writes data in asset 1 */
-    err = tfm_sst_write(tfm_sst_test_1024_asset_1_handle, &io_data);
+    err = tfm_sst_write(asset_uuid_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
         return;
@@ -1825,6 +1525,7 @@ static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data2[3] = "Hi";
@@ -1835,7 +1536,7 @@ static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
     io_data.size = 2;
     io_data.offset = 0;
 
-    err = tfm_sst_write(tfm_sst_test_1024_asset_2_handle, &io_data);
+    err = tfm_sst_write(asset_uuid_2, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
         return;
@@ -1846,6 +1547,7 @@ static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data3[WRITE_BUF_SIZE+1] = "World";
@@ -1856,7 +1558,7 @@ static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data 3 in asset 1 */
-    err = tfm_sst_write(tfm_sst_test_1024_asset_1_handle, &io_data);
+    err = tfm_sst_write(asset_uuid_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
         return;
@@ -1867,6 +1569,7 @@ static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data4[WRITE_BUF_SIZE+1] = "12345";
@@ -1877,7 +1580,7 @@ static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
     io_data.offset = 2;
 
     /* Writes data 4 in asset 2 */
-    err = tfm_sst_write(tfm_sst_test_1024_asset_2_handle, &io_data);
+    err = tfm_sst_write(asset_uuid_2, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
         return;
@@ -1888,6 +1591,7 @@ static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
@@ -1899,7 +1603,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Read back the asset 1 */
-    err = tfm_sst_read(tfm_sst_test_1024_asset_1_handle, &io_data);
+    err = tfm_sst_read(asset_uuid_1, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_C");
         return;
@@ -1915,6 +1619,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
@@ -1925,7 +1630,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Read back the asset 1 */
-    err = tfm_sst_read(tfm_sst_test_1024_asset_2_handle, &io_data);
+    err = tfm_sst_read(asset_uuid_2, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1937,7 +1642,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
     }
 
     /* Calls delete asset */
-    err = tfm_sst_delete(tfm_sst_test_1024_asset_2_handle);
+    err = tfm_sst_delete(asset_uuid_2);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -1948,10 +1653,11 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
 
 static void tfm_sst_test_1024_task_9(struct test_result_t *ret)
 {
+    const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
 
     /* Calls delete asset 1 */
-    err = tfm_sst_delete(tfm_sst_test_1024_asset_1_handle);
+    err = tfm_sst_delete(asset_uuid_1);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
@@ -2011,31 +1717,14 @@ static void tfm_sst_test_1024(struct test_result_t *ret)
  */
 TFM_SST_NS_TEST(1025, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Gets asset's handle with a ROM address location to store asset's
-     * handle
-     */
-    err = tfm_sst_get_handle(asset_uuid, (uint32_t *)ROM_ADDR_LOCATION);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get handle should fail for an illegal location");
         return;
     }
 
@@ -2045,21 +1734,21 @@ TFM_SST_NS_TEST(1025, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a ROM address location */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a ROM address location */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
 
     /* Deletes asset to clean up the SST area */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -2073,31 +1762,14 @@ TFM_SST_NS_TEST(1025, "Thread_B")
  */
 TFM_SST_NS_TEST(1026, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Gets asset's handle with a devices address location to store asset's
-     * handle
-     */
-    err = tfm_sst_get_handle(asset_uuid, (uint32_t *)DEV_ADDR_LOCATION);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get handle should fail for an illegal location");
         return;
     }
 
@@ -2107,21 +1779,21 @@ TFM_SST_NS_TEST(1026, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a device address location */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a device address location */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
 
     /* Deletes asset to clean up the SST area */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -2135,31 +1807,14 @@ TFM_SST_NS_TEST(1026, "Thread_B")
  */
 TFM_SST_NS_TEST(1027, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Gets asset's handle with a non existing address location to store asset's
-     * handle
-     */
-    err = tfm_sst_get_handle(asset_uuid, (uint32_t *)NON_EXIST_ADDR_LOCATION);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get handle should fail for an illegal location");
         return;
     }
 
@@ -2169,21 +1824,21 @@ TFM_SST_NS_TEST(1027, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a non-existing address location */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a non-existing address location */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
 
     /* Deletes asset to clean up the SST area */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -2197,31 +1852,14 @@ TFM_SST_NS_TEST(1027, "Thread_B")
  */
 TFM_SST_NS_TEST(1028, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
 
-    /* Creates asset to get a valid handle */
+    /* Creates asset */
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_B");
-        return;
-    }
-
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
-    /* Gets asset's handle with a secure address location to store asset's
-     * handle
-     */
-    err = tfm_sst_get_handle(asset_uuid, (uint32_t *)SECURE_ADDR_LOCATION);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
-        TEST_FAIL("Get handle should fail for an illegal location");
         return;
     }
 
@@ -2231,21 +1869,21 @@ TFM_SST_NS_TEST(1028, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a secure address location */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a secure address location */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
 
     /* Deletes asset to clean up the SST area */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
         return;
@@ -2261,10 +1899,9 @@ TFM_SST_NS_TEST(1028, "Thread_B")
 TFM_SST_NS_TEST(1029, "Thread_C")
 {
     struct tfm_sst_asset_info_t asset_info;
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    uint32_t hdl;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t wrt_data_2[2] = "B";
@@ -2276,26 +1913,20 @@ TFM_SST_NS_TEST(1029, "Thread_C")
         return;
     }
 
-    /* Gets asset's handle */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should return a valid asset handle");
-        return;
-    }
-
     /* Sets data structure */
     io_data.data = wrt_data_1;
     io_data.size = (WRITE_BUF_SIZE - 1);
     io_data.offset = 0;
 
     /* Write data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("First write should not fail");
         return;
     }
 
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the information of this asset");
         return;
@@ -2313,13 +1944,14 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.offset = 1;
 
     /* Write data in the asset */
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Second write should not fail");
         return;
     }
 
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Thread_C should read the information of this asset");
         return;
@@ -2336,7 +1968,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.offset = 0;
 
     /* Calls read with a non-existing address location */
-    err = tfm_sst_read(hdl, &io_data);
+    err = tfm_sst_read(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
@@ -2355,7 +1987,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.size = 1;
     io_data.offset = (asset_info.size_current + 1);
 
-    err = tfm_sst_write(hdl, &io_data);
+    err = tfm_sst_write(asset_uuid, &io_data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write must fail if the offset is bigger than the current"
                   " asset's size");
@@ -2371,24 +2003,17 @@ TFM_SST_NS_TEST(1029, "Thread_C")
  */
 TFM_SST_NS_TEST(1030, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_asset_attrs_t wrt_attrs;
     struct tfm_sst_asset_attrs_t read_attrs = {
         .attrs = 0,
         .validity.start = 0,
         .validity.end = 0 };
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
     err = tfm_sst_create(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
-        return;
-    }
-
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
         return;
     }
 
@@ -2397,13 +2022,15 @@ TFM_SST_NS_TEST(1030, "Thread_B")
     wrt_attrs.validity.start = 0;
     wrt_attrs.validity.end   = 0;
 
-    err = tfm_sst_set_attributes(hdl, &wrt_attrs);
+    err = tfm_sst_set_attributes(asset_uuid,
+                                 &wrt_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Set attributes should not fail");
         return;
     }
 
-    err = tfm_sst_get_attributes(hdl, &read_attrs);
+    err = tfm_sst_get_attributes(asset_uuid,
+                                 &read_attrs);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get attributes should not fail");
         return;

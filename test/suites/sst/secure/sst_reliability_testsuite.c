@@ -61,13 +61,12 @@ void register_testsuite_s_sst_reliability(struct test_suite_t *p_test_suite)
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    uint32_t hdl;
     uint32_t app_id = S_APP_ID;
+    uint32_t asset_offset = 0;
+    const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    uint32_t asset_offset = 0;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -83,12 +82,6 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         return;
     }
 
-    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
-        return;
-    }
-
     /* Sets write and read sizes */
     io_data.size = WRITE_BUF_SIZE-1;
 
@@ -101,7 +94,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+            err = tfm_sst_veneer_write(app_id, asset_uuid, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for application S_APP_ID");
                 return;
@@ -111,7 +104,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+            err = tfm_sst_veneer_read(app_id, asset_uuid, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Application S_APP_ID must get file handle");
                 return;
@@ -138,7 +131,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(app_id, hdl);
+    err = tfm_sst_veneer_delete(app_id, asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for application S_APP_ID");
         return;
@@ -149,12 +142,11 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    uint32_t hdl;
     uint32_t app_id = S_APP_ID;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     uint8_t data[BUFFER_PLUS_PADDING_SIZE] = {0};
     uint32_t i;
 
@@ -170,12 +162,6 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         return;
     }
 
-    err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail");
-        return;
-    }
-
     /* Sets write and read sizes */
     io_data.size = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
@@ -188,7 +174,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+        err = tfm_sst_veneer_write(app_id, asset_uuid, &io_data);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Write should not fail for application S_APP_ID");
             return;
@@ -198,7 +184,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+        err = tfm_sst_veneer_read(app_id, asset_uuid, &io_data);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Application S_APP_ID must get file handle");
             return;
@@ -227,7 +213,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(app_id, hdl);
+    err = tfm_sst_veneer_delete(app_id, asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for application S_APP_ID");
         return;
@@ -247,13 +233,12 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    uint32_t hdl;
     uint32_t app_id = S_APP_ID;
+    uint32_t asset_offset = 0;
+    const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    uint32_t asset_offset = 0;
-    const uint16_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -275,19 +260,13 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             return;
         }
 
-        err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            TEST_FAIL("Get handle should not fail");
-            return;
-        }
-
         do {
             /* Sets data structure */
             io_data.data = wrt_data;
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+            err = tfm_sst_veneer_write(app_id, asset_uuid, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for application S_APP_ID");
                 return;
@@ -297,7 +276,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+            err = tfm_sst_veneer_read(app_id, asset_uuid, &io_data);
             if (err != TFM_SST_ERR_SUCCESS) {
                 TEST_FAIL("Application S_APP_ID must get file handle");
                 return;
@@ -322,7 +301,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         asset_offset = 0;
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(app_id, hdl);
+        err = tfm_sst_veneer_delete(app_id, asset_uuid);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Delete should not fail for application S_APP_ID");
             return;
@@ -337,12 +316,11 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    uint32_t hdl;
     uint32_t app_id = S_APP_ID;
     struct tfm_sst_buf_t io_data;
     enum tfm_sst_err_t err;
     uint32_t itr;
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     uint8_t data[BUFFER_PLUS_PADDING_SIZE] = {0};
     uint32_t i;
 
@@ -364,19 +342,13 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             return;
         }
 
-        err = tfm_sst_veneer_get_handle(app_id, asset_uuid, &hdl);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            TEST_FAIL("Get handle should not fail");
-            return;
-        }
-
         memset(data, 0, BUFFER_PLUS_PADDING_SIZE);
         /* Sets data structure */
         io_data.data = data;
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(app_id, hdl, &io_data);
+        err = tfm_sst_veneer_write(app_id, asset_uuid, &io_data);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Write should not fail for application S_APP_ID");
             return;
@@ -386,7 +358,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(app_id, hdl, &io_data);
+        err = tfm_sst_veneer_read(app_id, asset_uuid, &io_data);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Application S_APP_ID must get file handle");
             return;
@@ -412,7 +384,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         }
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(app_id, hdl);
+        err = tfm_sst_veneer_delete(app_id, asset_uuid);
         if (err != TFM_SST_ERR_SUCCESS) {
             TEST_FAIL("Delete should not fail for application S_APP_ID");
             return;

@@ -35,7 +35,7 @@ enum tfm_sst_err_t sst_test_service_veneer_setup(void);
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_test_service_veneer_dummy_encrypt(uint32_t app_id,
-                                                         uint16_t key_uuid,
+                                                         uint32_t key_uuid,
                                                          uint8_t *buf,
                                                          uint32_t buf_size);
 /**
@@ -50,7 +50,7 @@ enum tfm_sst_err_t sst_test_service_veneer_dummy_encrypt(uint32_t app_id,
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t sst_test_service_veneer_dummy_decrypt(uint32_t app_id,
-                                                         uint16_t key_uuid,
+                                                         uint32_t key_uuid,
                                                          uint8_t *buf,
                                                          uint32_t buf_size);
 /**

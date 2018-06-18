@@ -1168,7 +1168,16 @@ static enum tfm_sst_err_t sst_meta_reserve_object(
     return TFM_SST_ERR_STORAGE_SYSTEM_FULL;
 }
 
-enum tfm_sst_err_t sst_core_object_handle(uint16_t asset_uuid, uint32_t *handle)
+/**
+ * \brief Gets object index in the object system.
+ *
+ * \param[in]  obj_uuid  ID of the object
+ * \param[out] obj_idx   Index of the object in the object system
+ *
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ */
+static enum tfm_sst_err_t sst_core_get_object_idx(uint32_t obj_uuid,
+                                                  uint32_t *obj_idx)
 {
     uint32_t i;
     enum tfm_sst_err_t err;
@@ -1182,9 +1191,9 @@ enum tfm_sst_err_t sst_core_object_handle(uint16_t asset_uuid, uint32_t *handle)
         }
 
         /* Unique_id with value 0x00 means end of asset meta section */
-        if (tmp_metadata.unique_id == asset_uuid) {
+        if (tmp_metadata.unique_id == obj_uuid) {
             /* Found */
-            *handle = sst_utils_compose_handle(asset_uuid, i);
+            *obj_idx = i;
             return TFM_SST_ERR_SUCCESS;
         }
 
@@ -1193,7 +1202,20 @@ enum tfm_sst_err_t sst_core_object_handle(uint16_t asset_uuid, uint32_t *handle)
     return TFM_SST_ERR_ASSET_NOT_FOUND;
 }
 
-enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
+enum tfm_sst_err_t sst_core_object_exist(uint32_t obj_uuid)
+{
+    uint32_t idx;
+    enum tfm_sst_err_t err;
+
+    err = sst_core_get_object_idx(obj_uuid, &idx);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
+
+    return TFM_SST_ERR_SUCCESS;
+}
+
+enum tfm_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
 {
     uint16_t object_index;
     enum tfm_sst_err_t err;
@@ -1208,7 +1230,7 @@ enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
         return TFM_SST_ERR_STORAGE_SYSTEM_FULL;
     }
 
-    object_meta.unique_id = uuid;
+    object_meta.unique_id = object_uuid;
     object_meta.cur_size = 0;
     object_meta.max_size = size;
 
@@ -1260,26 +1282,25 @@ enum tfm_sst_err_t sst_core_object_create(uint16_t uuid, uint32_t size)
     return TFM_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_core_object_get_info(uint32_t asset_handle,
+enum tfm_sst_err_t sst_core_object_get_info(uint32_t object_uuid,
                                             struct sst_core_obj_info_t *info)
 {
     enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
     struct sst_assetmeta tmp_metadata;
     uint32_t object_index;
-    uint16_t uuid;
 
     /* Get the meta data index */
-    object_index = sst_utils_extract_index_from_handle(asset_handle);
+    err = sst_core_get_object_idx(object_uuid, &object_index);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
+
     /* Read object metadata */
     err = sst_meta_read_object_meta(object_index, &tmp_metadata);
     if (err == 0) {
         /* Check if index is still referring to same object */
-        uuid = sst_utils_extract_uuid_from_handle(asset_handle);
-        if (uuid != tmp_metadata.unique_id) {
-            /* Likely the object has been deleted in another context
-             * this handle isn't valid anymore.
-             */
-            err = TFM_SST_ERR_INVALID_HANDLE;
+        if (object_uuid != tmp_metadata.unique_id) {
+            err = TFM_SST_ERR_ASSET_NOT_FOUND;
         } else {
             info->size_max = tmp_metadata.max_size;
             info->size_current = tmp_metadata.cur_size;
@@ -1289,11 +1310,11 @@ enum tfm_sst_err_t sst_core_object_get_info(uint32_t asset_handle,
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
+enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
                                          const uint8_t *data, uint32_t offset,
                                          uint32_t size)
 {
-    uint16_t object_index;
+    uint32_t object_index;
     enum tfm_sst_err_t err;
     uint32_t cur_phys_block;
     const uint8_t *prepared_buf;
@@ -1304,8 +1325,11 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t asset_handle,
     (void)offset;
 #endif
 
-    /* Get the meta data index */
-    object_index = sst_utils_extract_index_from_handle(asset_handle);
+    /* Get the object index */
+    err = sst_core_get_object_idx(object_uuid, &object_index);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
 
     /* Read object metadata */
     err = sst_meta_read_object_meta(object_index, &object_meta);
@@ -1524,20 +1548,23 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_delete(uint32_t asset_handle)
+enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
 {
     uint32_t del_obj_data_index;
     uint32_t del_obj_lblock;
-    uint16_t del_obj_index;
-    uint16_t del_obj_max_size;
+    uint32_t del_obj_index;
+    uint32_t del_obj_max_size;
     enum tfm_sst_err_t err;
     uint32_t src_offset = SST_BLOCK_SIZE;
     uint32_t nbr_bytes_to_move = 0;
-    uint16_t obj_idx;
+    uint32_t obj_idx;
     struct sst_assetmeta object_meta;
 
-    /* Get the meta data index */
-    del_obj_index = sst_utils_extract_index_from_handle(asset_handle);
+    /* Get the object index */
+    err = sst_core_get_object_idx(object_uuid, &del_obj_index);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
 
     err = sst_meta_read_object_meta(del_obj_index, &object_meta);
     if (err != TFM_SST_ERR_SUCCESS) {
@@ -1617,16 +1644,19 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t asset_handle)
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_read(uint32_t asset_handle, uint8_t *data,
+enum tfm_sst_err_t sst_core_object_read(uint32_t object_uuid, uint8_t *data,
                                         uint32_t offset, uint32_t size)
 {
     uint32_t object_index;
     enum tfm_sst_err_t err;
-    uint16_t uuid;
     struct sst_assetmeta tmp_metadata;
 
-    /* Get the meta data index */
-    object_index = sst_utils_extract_index_from_handle(asset_handle);
+    /* Get the object index */
+    err = sst_core_get_object_idx(object_uuid, &object_index);
+    if (err != TFM_SST_ERR_SUCCESS) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    }
+
     /* Read object metadata */
     err = sst_meta_read_object_meta(object_index, &tmp_metadata);
 
@@ -1635,19 +1665,15 @@ enum tfm_sst_err_t sst_core_object_read(uint32_t asset_handle, uint8_t *data,
     }
 
     /* Check if index is still referring to same asset */
-    uuid = sst_utils_extract_uuid_from_handle(asset_handle);
-    if (uuid != tmp_metadata.unique_id) {
-        /* Likely the asset has been deleted in another context
-         * this handle isn't valid anymore.
-         */
-        return TFM_SST_ERR_INVALID_HANDLE;
+    if (object_uuid != tmp_metadata.unique_id) {
+        return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Boundary check the incoming request */
     err = sst_utils_check_contained_in(0, tmp_metadata.cur_size,
                                        offset, size);
     if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_PARAM_ERROR;
+        return TFM_SST_ERR_PARAM_ERROR;
     }
 
     /* Read the object from flash */

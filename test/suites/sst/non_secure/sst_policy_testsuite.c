@@ -72,11 +72,6 @@
 #define WRITE_BUF_SIZE (sizeof(WRITE_DATA_A))
 #define READ_BUF_SIZE  (sizeof(READ_DATA))
 
-/* Asset handle to be shared between threads. Used to test policy in the case
- * where an unauthorised thread has gained access to a valid handle.
- */
-static uint32_t shared_handle;
-
 /* Define test suite for SST policy tests */
 /* List of tests */
 static void tfm_sst_test_4001(struct test_result_t *ret);
@@ -130,11 +125,10 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
  */
 TFM_SST_NS_TEST(4001, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_C;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -145,20 +139,13 @@ TFM_SST_NS_TEST(4001, "Thread_C")
         return;
     }
 
-    /* The get handle function requires any permission other than NONE */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_C");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
     /* The write function requires WRITE permission */
-    err = tfm_sst_write(hdl, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_C");
         return;
@@ -170,7 +157,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     buf.offset = 0;
 
     /* The read function requires READ permission */
-    err = tfm_sst_read(hdl, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_C");
         return;
@@ -183,7 +170,8 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     }
 
     /* The get information function requires any permission other than NONE */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_C");
         return;
@@ -212,11 +200,10 @@ TFM_SST_NS_TEST(4001, "Thread_C")
  */
 TFM_SST_NS_TEST(4002, "Thread_A")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -227,13 +214,6 @@ TFM_SST_NS_TEST(4002, "Thread_A")
         return;
     }
 
-    /* Get handle should succeed as Thread_A has at least one permission */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_A");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
@@ -241,7 +221,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     buf.offset = 1;
 
     /* Write should fail as Thread_A does not have WRITE permission */
-    err = tfm_sst_write(hdl, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -253,7 +233,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A does not have READ permission */
-    err = tfm_sst_read(hdl, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -266,7 +246,8 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     }
 
     /* Get information should succeed as Thread_A has at least one permission */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_A");
         return;
@@ -284,7 +265,7 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     }
 
     /* Delete should fail as Thread_A does not have WRITE permission */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -302,11 +283,10 @@ TFM_SST_NS_TEST(4002, "Thread_A")
  */
 TFM_SST_NS_TEST(4003, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_B;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -317,13 +297,6 @@ TFM_SST_NS_TEST(4003, "Thread_B")
         return;
     }
 
-    /* Get handle should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_B");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
@@ -331,7 +304,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     buf.offset = 2;
 
     /* Write should fail as Thread_B does not have WRITE permission */
-    err = tfm_sst_write(hdl, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_B");
         return;
@@ -343,7 +316,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     buf.offset = 0;
 
     /* Read should succeed as Thread_B has READ permission */
-    err = tfm_sst_read(hdl, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -357,8 +330,9 @@ TFM_SST_NS_TEST(4003, "Thread_B")
         return;
     }
 
-    /* Get information should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_info(hdl, &asset_info);
+    /* Get attributes should succeed as Thread_B has at least one permission */
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_B");
         return;
@@ -376,7 +350,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
     }
 
     /* Delete should fail as Thread_B does not have WRITE permission */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_B");
         return;
@@ -397,18 +371,11 @@ TFM_SST_NS_TEST(4003, "Thread_B")
  */
 TFM_SST_NS_TEST(4004, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    uint32_t hdl;
-
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_C");
-        return;
-    }
 
     /* The delete function requires WRITE permission */
-    err = tfm_sst_delete(hdl);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_C");
         return;
@@ -426,7 +393,7 @@ TFM_SST_NS_TEST(4004, "Thread_C")
  */
 TFM_SST_NS_TEST(4005, "Thread_B")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
@@ -440,23 +407,13 @@ TFM_SST_NS_TEST(4005, "Thread_B")
         return;
     }
 
-    /* Get handle should succeed as Thread_B has at least one permission. Writes
-     * the handle into shared_handle so that the next test has access to a valid
-     * handle that it does not have the right to get or use.
-     */
-    err = tfm_sst_get_handle(asset_uuid, &shared_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_B");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
     /* Write should succeed as Thread_B has WRITE permission */
-    err = tfm_sst_write(shared_handle, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_B");
         return;
@@ -468,7 +425,7 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     buf.offset = 0;
 
     /* Read should succeed as Thread_B has READ permission */
-    err = tfm_sst_read(shared_handle, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -481,7 +438,8 @@ TFM_SST_NS_TEST(4005, "Thread_B")
     }
 
     /* Get information should succeed as Thread_B has at least one permission */
-    err = tfm_sst_get_info(shared_handle, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_B");
         return;
@@ -510,11 +468,10 @@ TFM_SST_NS_TEST(4005, "Thread_B")
  */
 TFM_SST_NS_TEST(4006, "Thread_A")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct tfm_sst_asset_info_t asset_info = { 0 };
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
-    uint32_t hdl = 0;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -525,30 +482,17 @@ TFM_SST_NS_TEST(4006, "Thread_A")
         return;
     }
 
-    /* Get handle should fail as Thread_A has no permissions */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get handle should not succeed for Thread_A");
-        return;
-    }
-
-    /* Checks handle has not been changed by the call to get handle */
-    if (hdl != 0) {
-        TEST_FAIL("Handle should not have changed");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* The write function uses a valid handle, obtained by the previous test, to
-     * check that Thread_A cannot perform the write without the proper access
-     * permissions even if it has a valid handle. So the write should fail as
+    /* The write function uses a valid asset ID, obtained by the previous test,
+     * to check that Thread_A cannot perform the write without the proper access
+     * permissions even if it has a valid asset ID. So the write should fail as
      * Thread_A has no permissions.
      */
-    err = tfm_sst_write(shared_handle, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -560,7 +504,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A has no permissions */
-    err = tfm_sst_read(shared_handle, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -573,7 +517,8 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     }
 
     /* Get information should fail as Thread_A has no permissions */
-    err = tfm_sst_get_info(shared_handle, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get information should not succeed for Thread_A");
         return;
@@ -591,7 +536,7 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     }
 
     /* Delete should fail as Thread_A has no permissions */
-    err = tfm_sst_delete(shared_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -612,10 +557,11 @@ TFM_SST_NS_TEST(4006, "Thread_A")
  */
 TFM_SST_NS_TEST(4007, "Thread_B")
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
 
     /* Delete should succeed as Thread_B has WRITE permission */
-    err = tfm_sst_delete(shared_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_B");
         return;
@@ -633,7 +579,7 @@ TFM_SST_NS_TEST(4007, "Thread_B")
  */
 TFM_SST_NS_TEST(4008, "Thread_C")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     struct tfm_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
@@ -647,23 +593,13 @@ TFM_SST_NS_TEST(4008, "Thread_C")
         return;
     }
 
-    /* Get handle should succeed as Thread_C has at least one permission. Writes
-     * the handle into shared_handle so that the next test has access to a valid
-     * handle that it does not have the right to get or use.
-     */
-    err = tfm_sst_get_handle(asset_uuid, &shared_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get handle should not fail for Thread_C");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
     /* Write should succeed as Thread_C has WRITE permission */
-    err = tfm_sst_write(shared_handle, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_C");
         return;
@@ -675,7 +611,7 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     buf.offset = 0;
 
     /* Read should fail as Thread_C does not have READ permission */
-    err = tfm_sst_read(shared_handle, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_C");
         return;
@@ -688,7 +624,8 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     }
 
     /* Get information should succeed as Thread_C has at least one permission */
-    err = tfm_sst_get_info(shared_handle, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail for Thread_C");
         return;
@@ -718,11 +655,10 @@ TFM_SST_NS_TEST(4008, "Thread_C")
  */
 TFM_SST_NS_TEST(4009, "Thread_A")
 {
-    const uint16_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     struct tfm_sst_asset_info_t asset_info = { 0 };
     struct tfm_sst_buf_t buf;
     enum tfm_sst_err_t err;
-    uint32_t hdl = 0;
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
@@ -733,30 +669,17 @@ TFM_SST_NS_TEST(4009, "Thread_A")
         return;
     }
 
-    /* Get handle should fail as Thread_A has no permissions */
-    err = tfm_sst_get_handle(asset_uuid, &hdl);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get handle should not succeed for Thread_A");
-        return;
-    }
-
-    /* Checks handle has not been changed by the call to get handle */
-    if (hdl != 0) {
-        TEST_FAIL("Handle should not have changed");
-        return;
-    }
-
     /* Sets the tfm_sst_buf_t structure */
     buf.data = write_data;
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* The write function uses a valid handle, obtained by the previous test, to
-     * check that Thread_A cannot perform the write without the proper access
-     * permissions even if it has a valid handle. So the write should fail as
+    /* The write function uses a valid asset ID, obtained by the previous test,
+     * to check that Thread_A cannot perform the write without the proper access
+     * permissions even if it has a valid asset ID. So the write should fail as
      * Thread_A has no permissions.
      */
-    err = tfm_sst_write(shared_handle, &buf);
+    err = tfm_sst_write(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed for Thread_A");
         return;
@@ -768,7 +691,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     buf.offset = 0;
 
     /* Read should fail as Thread_A has no permissions */
-    err = tfm_sst_read(shared_handle, &buf);
+    err = tfm_sst_read(asset_uuid, &buf);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed for Thread_A");
         return;
@@ -781,7 +704,8 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     }
 
     /* Get information should fail as Thread_A has no permissions */
-    err = tfm_sst_get_info(shared_handle, &asset_info);
+    err = tfm_sst_get_info(asset_uuid,
+                           &asset_info);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get information should not succeed for Thread_A");
         return;
@@ -799,7 +723,7 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     }
 
     /* Delete should fail as Thread_A has no permissions */
-    err = tfm_sst_delete(shared_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Delete should not succeed for Thread_A");
         return;
@@ -820,10 +744,11 @@ TFM_SST_NS_TEST(4009, "Thread_A")
  */
 TFM_SST_NS_TEST(4010, "Thread_C")
 {
+    const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     enum tfm_sst_err_t err;
 
     /* Delete should succeed as Thread_C has WRITE permission */
-    err = tfm_sst_delete(shared_handle);
+    err = tfm_sst_delete(asset_uuid);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for Thread_C");
         return;

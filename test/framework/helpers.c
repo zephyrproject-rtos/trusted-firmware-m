@@ -20,8 +20,6 @@ const char *sst_err_to_str(enum tfm_sst_err_t err)
         return "TFM_SST_ERR_ASSET_NOT_FOUND";
     case TFM_SST_ERR_PARAM_ERROR:
         return "TFM_SST_ERR_PARAM_ERROR";
-    case TFM_SST_ERR_INVALID_HANDLE:
-        return "TFM_SST_ERR_INVALID_HANDLE";
     case TFM_SST_ERR_STORAGE_SYSTEM_FULL:
         return "TFM_SST_ERR_STORAGE_SYSTEM_FULL";
     case TFM_SST_ERR_SYSTEM_ERROR:

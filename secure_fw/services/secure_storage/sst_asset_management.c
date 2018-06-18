@@ -55,7 +55,7 @@ static struct sst_asset_perm_t *sst_am_lookup_app_perms(
  *
  * \return Returns the pointer for entry for specified asset
  */
-static struct sst_asset_policy_t *sst_am_lookup_db_entry(uint16_t uuid)
+static struct sst_asset_policy_t *sst_am_lookup_db_entry(uint32_t uuid)
 {
     uint32_t i;
 
@@ -139,7 +139,7 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
  * \return Returns the entry pointer for specified asset
  */
 static struct sst_asset_policy_t *sst_am_get_db_entry(uint32_t app_id,
-                                                      uint16_t uuid,
+                                                      uint32_t uuid,
                                                       uint8_t request_type)
 {
     struct sst_asset_perm_t   *perm_entry;
@@ -180,27 +180,6 @@ static struct sst_asset_policy_t *sst_am_get_db_entry(uint32_t app_id,
         return db_entry;
     }
     return NULL;
-}
-
-/**
- * \brief Validates if the requested access is allowed
- *
- * \param[in] app_id        Caller's application ID
- * \param[in] asset_handle  Handle passed on by caller
- * \param[in] request_type  Type of requested access
- *
- * \return Returns the pointer for entry for specified asset
- */
-static struct sst_asset_policy_t *sst_am_get_db_entry_by_hdl(
-                                                          uint32_t app_id,
-                                                          uint32_t asset_handle,
-                                                          uint8_t request_type)
-{
-    uint16_t uuid;
-
-    uuid = sst_utils_extract_uuid_from_handle(asset_handle);
-
-    return sst_am_get_db_entry(app_id, uuid, request_type);
 }
 
 /**
@@ -289,56 +268,8 @@ static enum tfm_sst_err_t validate_copy_validate_iovec(
     return bound_check;
 }
 
-enum tfm_sst_err_t sst_am_get_handle(uint32_t app_id, uint16_t asset_uuid,
-                                     uint32_t *hdl)
-{
-    struct sst_asset_policy_t *db_entry;
-    uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
-    enum tfm_sst_err_t err;
-    /* Lower layers trust the incoming request, use a local pointer */
-    uint32_t temp_hdl;
-
-    /* Check if application has access to the asset */
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
-    if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
-    }
-
-    /* Check handle pointer value */
-    err = sst_utils_memory_bound_check(hdl, sizeof(uint32_t),
-                                       app_id, TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_PARAM_ERROR;
-    }
-
-    /* FIXME: the handle is composed of UUID and metadata table index,
-     * which means leaking info about where a certain object may be stored.
-     * While this is okay in the current implementation as the metadata
-     * block layout is quite fixed. However, in later designs if
-     * different partitions are used for storing for different security groups
-     * (e.g. chip manufacture data, device manufacture data, user data), the
-     * threat model may require not leaking any info about where an object
-     * may be stored.
-     * In such a scenario the handle can
-     * be encrypted before passing on to the caller.
-     * Other option could be to allocate a handle in RAM and provide a pointer
-     * to caller as handle. However, the design attemts to avoid
-     * maintaining any kind of transient state for robustness.
-     */
-    err = sst_object_handle(asset_uuid, &temp_hdl);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
-    }
-
-    /* memcpy instead of direct *hdl = temp_hdl.
-     * ensures malicious entities can't trigger a misaligned access fault.
-     */
-    sst_utils_memcpy(hdl, &temp_hdl, sizeof(uint32_t));
-    return TFM_SST_ERR_SUCCESS;
-}
-
 enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
-                                   uint32_t asset_handle,
+                                   uint32_t asset_uuid,
                                    struct tfm_sst_asset_info_t *info)
 {
     enum tfm_sst_err_t bound_check;
@@ -354,12 +285,12 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
         return TFM_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_get_info(asset_handle, &tmp_info);
+    err = sst_object_get_info(asset_uuid, &tmp_info);
     if (err == TFM_SST_ERR_SUCCESS) {
         /* Use tmp_info to not leak information in case the previous function
          * returns and error. It avoids to leak information in case of error.
@@ -373,7 +304,7 @@ enum tfm_sst_err_t sst_am_get_info(uint32_t app_id,
 }
 
 enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
-                                         uint32_t asset_handle,
+                                         uint32_t asset_uuid,
                                          struct tfm_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
@@ -389,12 +320,12 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
         return TFM_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_get_attributes(asset_handle, &tmp_attrs);
+    err = sst_object_get_attributes(asset_uuid, &tmp_attrs);
     if (err == TFM_SST_ERR_SUCCESS) {
         /* Use tmp_attrs to not leak information incase the previous function
          * returns and error. It avoids to leak information in case of error.
@@ -407,9 +338,8 @@ enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_set_attributes(
-                                      uint32_t app_id,
-                                      uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id,
+                                      uint32_t asset_uuid,
                                       const struct tfm_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
@@ -424,7 +354,7 @@ enum tfm_sst_err_t sst_am_set_attributes(
         return TFM_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, all_perms);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -440,12 +370,12 @@ enum tfm_sst_err_t sst_am_set_attributes(
     /* FIXME: Check which bit attributes have been changed and check if those
      *        can be modified or not.
      */
-    err = sst_object_set_attributes(asset_handle, attrs);
+    err = sst_object_set_attributes(asset_uuid, attrs);
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid)
+enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid)
 {
     enum tfm_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
@@ -460,7 +390,7 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint16_t asset_uuid)
     return err;
 }
 
-enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
                                struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
@@ -468,7 +398,7 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_handle,
     struct sst_asset_policy_t *db_entry;
 
     /* Check application ID permissions */
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, SST_PERM_READ);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_READ);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -486,13 +416,13 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_handle,
     }
 #endif
 
-    err = sst_object_read(asset_handle, local_data.data,
+    err = sst_object_read(asset_uuid, local_data.data,
                           local_data.offset, local_data.size);
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_handle,
+enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
                                 const struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
@@ -500,7 +430,7 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_handle,
     struct sst_asset_policy_t *db_entry;
 
     /* Check application ID permissions */
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, SST_PERM_WRITE);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -526,23 +456,23 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_handle,
     }
 #endif
 
-    err = sst_object_write(asset_handle, local_data.data,
+    err = sst_object_write(asset_uuid, local_data.data,
                            local_data.offset, local_data.size);
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_handle)
+enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid)
 {
     enum tfm_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
-    db_entry = sst_am_get_db_entry_by_hdl(app_id, asset_handle, SST_PERM_WRITE);
+    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
         return TFM_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    err = sst_object_delete(asset_handle);
+    err = sst_object_delete(asset_uuid);
 
     return err;
 }

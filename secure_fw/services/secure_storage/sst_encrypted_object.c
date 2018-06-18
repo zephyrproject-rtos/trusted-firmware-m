@@ -135,20 +135,14 @@ static enum tfm_sst_err_t sst_object_auth_encrypt(uint32_t cur_size,
     return TFM_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_create(struct sst_object_t *obj)
+enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
+                                               struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
-    uint32_t hdl;
 
     /* Create an object in the object system */
-    err = sst_core_object_create(obj->header.uuid,
+    err = sst_core_object_create(uuid,
                                  SST_ENCRYPTED_SIZE(obj->header.info.size_max));
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Get the handle of the object in the object system */
-    err = sst_core_object_handle(obj->header.uuid, &hdl);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -160,7 +154,7 @@ enum tfm_sst_err_t sst_encrypted_object_create(struct sst_object_t *obj)
     }
 
     /* Write the encrypted object to the object system */
-    err = sst_core_object_write(hdl, (uint8_t *)obj,
+    err = sst_core_object_write(uuid, (uint8_t *)obj,
                                 SST_OBJECT_START_POSITION,
                                 SST_ENCRYPTED_SIZE(SST_EMPTY_OBJECT_SIZE));
 
@@ -169,14 +163,14 @@ enum tfm_sst_err_t sst_encrypted_object_create(struct sst_object_t *obj)
 
 /**
  * \brief Reads and decrypts data from the object referenced by the object
- *        handle into the sst_plaintext_buf buffer.
+ *        UUID into the sst_plaintext_buf buffer.
  *
- * \param[in]  object_handle  Object handle
- * \param[out] obj            Pointer to the object structure to fill in
+ * \param[in]  uuid  Object UUID
+ * \param[out] obj   Pointer to the object structure to fill in
  *
  * \return Returns error code specified in \ref tfm_sst_err_t
  */
-static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
+static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
                                                     struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
@@ -184,7 +178,7 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
     uint32_t plaintext_size;
 
     /* Get the current size of the encrypted object in the object system */
-    err = sst_core_object_get_info(object_handle, &obj_info);
+    err = sst_core_object_get_info(uuid, &obj_info);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -196,7 +190,7 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
     sst_utils_memset(obj, SST_CRYPTO_CLEAR_BUF_VALUE, SST_MAX_OBJECT_SIZE);
 
     /* Read the encrypted object from the object system */
-    err = sst_core_object_read(object_handle, (uint8_t *)obj,
+    err = sst_core_object_read(uuid, (uint8_t *)obj,
                                SST_OBJECT_START_POSITION,
                                obj_info.size_current);
     if (err != TFM_SST_ERR_SUCCESS) {
@@ -212,12 +206,12 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t object_handle,
     return TFM_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_read(uint32_t object_handle,
+enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
                                              struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
 
-    err = sst_read_encrypted_object(object_handle, obj);
+    err = sst_read_encrypted_object(uuid, obj);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -225,7 +219,7 @@ enum tfm_sst_err_t sst_encrypted_object_read(uint32_t object_handle,
     return TFM_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_write(uint32_t object_handle,
+enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
                                               struct sst_object_t *obj)
 {
     enum tfm_sst_err_t err;
@@ -237,7 +231,7 @@ enum tfm_sst_err_t sst_encrypted_object_write(uint32_t object_handle,
     }
 
     /* Write encrypted object to the object system */
-    err = sst_core_object_write(object_handle, (uint8_t *)obj,
+    err = sst_core_object_write(uuid, (uint8_t *)obj,
                                 SST_OBJECT_START_POSITION,
                                 SST_ENCRYPTED_SIZE(
                                                 obj->header.info.size_current));

@@ -47,7 +47,6 @@ enum tfm_sst_err_t {
     TFM_SST_ERR_ASSET_NOT_PREPARED = TFM_SST_ERR_OFFSET,
     TFM_SST_ERR_ASSET_NOT_FOUND,
     TFM_SST_ERR_PARAM_ERROR,
-    TFM_SST_ERR_INVALID_HANDLE,
     TFM_SST_ERR_STORAGE_SYSTEM_FULL,
     TFM_SST_ERR_SYSTEM_ERROR,
     /* Following entry is only to ensure the error code of int size */

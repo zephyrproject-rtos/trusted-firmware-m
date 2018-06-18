@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define SST_INVALID_UUID      0
+#define SST_INVALID_UUID  0
 
 /*
  * \brief Macro to check, at compilation time, if data fits in data buffer
@@ -111,34 +111,6 @@ void sst_utils_memcpy(void *dest, const void *src, uint32_t size);
 void sst_utils_memset(void *dest, const uint8_t pattern, uint32_t size);
 
 /**
- * \brief Composes an asset handle value by combining a asset_uuid and meta_idx.
- *
- * \param[in] asset_uuid  Asset UUID
- * \param[in] meta_idx    Metadata index
- *
- * \return Returns asset handler
- */
-uint32_t sst_utils_compose_handle(uint16_t asset_uuid, uint16_t meta_idx);
-
-/**
- * \brief Extracts the uuid component of the provided assethandle.
- *
- * \param[in] asset_handle  Asset handler
- *
- * \return Returns asset UUID
- */
-uint16_t sst_utils_extract_uuid_from_handle(uint32_t asset_handle);
-
-/**
- * \brief Extracts the meta_idx component of the provided assethandle.
- *
- * \param[in] asset_handle  Asset handler
- *
- * \return Returns metadata index
- */
-uint16_t sst_utils_extract_index_from_handle(uint32_t asset_handle);
-
-/**
  * \brief Checks if the sst function caller is located in the secure or
  *        non-secure space.
  *
@@ -154,7 +126,7 @@ uint32_t sst_utils_validate_secure_caller(void);
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum tfm_sst_err_t sst_utils_validate_uuid(uint16_t unique_id);
+enum tfm_sst_err_t sst_utils_validate_uuid(uint32_t unique_id);
 
 #ifdef __cplusplus
 }

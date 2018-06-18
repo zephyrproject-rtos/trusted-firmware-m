@@ -41,7 +41,6 @@ extern "C" {
  *
  */
 #define LIST_SVC_DISPATCHERS \
-    X(SVC_TFM_SST_GET_HANDLE, tfm_sst_svc_get_handle) \
     X(SVC_TFM_SST_CREATE, tfm_sst_svc_create) \
     X(SVC_TFM_SST_GET_INFO, tfm_sst_svc_get_info) \
     X(SVC_TFM_SST_GET_ATTRIBUTES, tfm_sst_svc_get_attributes) \

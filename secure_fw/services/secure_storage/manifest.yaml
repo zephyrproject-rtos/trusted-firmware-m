@@ -18,14 +18,6 @@
   "tfm_init_symbol": "sst_am_prepare",
   "secure_functions": [
     {
-      "sfid": "SST_AM_GET_HANDLE_SFID",
-      "signal": "SST_AM_GET_HANDLE",
-      "tfm_symbol": "sst_am_get_handle",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
       "sfid": "SST_AM_CREATE_SFID",
       "signal": "SST_AM_CREATE",
       "tfm_symbol": "sst_am_create",

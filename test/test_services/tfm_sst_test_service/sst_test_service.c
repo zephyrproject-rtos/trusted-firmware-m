@@ -16,6 +16,10 @@
                                0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD, 0xF0, 0x0D, }
 #define SST_TEST_SERVICE_KEY_SIZE SST_ASSET_MAX_SIZE_AES_KEY_128
 
+/* Define default asset's token */
+#define ASSET_TOKEN      NULL
+#define ASSET_TOKEN_SIZE 0
+
 /**
  * \brief Service initialisation function. No special initialisation is
  *        required.
@@ -31,10 +35,11 @@ enum tfm_sst_err_t sst_test_service_sfn_setup(void)
 {
     enum tfm_sst_err_t err;
     uint32_t app_id = S_APP_ID;
-    uint32_t key_handle;
-    uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
+    const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
+
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE] = SST_TEST_SERVICE_KEY;
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
+
 
     /* Create the key asset using our secure app ID */
     err = tfm_sst_veneer_create(app_id, key_uuid);
@@ -42,37 +47,24 @@ enum tfm_sst_err_t sst_test_service_sfn_setup(void)
         return err;
     }
 
-    /* Get the handle of the key asset using our secure app ID */
-    err = tfm_sst_veneer_get_handle(app_id, key_uuid, &key_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
     /* Write the key to the asset using our secure app ID */
-    err = tfm_sst_veneer_write(app_id, key_handle, &key_buf);
+    err = tfm_sst_veneer_write(app_id, key_uuid, &key_buf);
 
     return err;
 }
 
 enum tfm_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
-                                                      uint16_t key_uuid,
+                                                      uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
     enum tfm_sst_err_t err;
     uint32_t i;
-    uint32_t key_handle;
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE];
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
-    /* Get the handle of the key asset using the non-secure caller's app ID */
-    err = tfm_sst_veneer_get_handle(app_id, key_uuid, &key_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
-
     /* Read the key from the asset using the non-secure caller's app ID */
-    err = tfm_sst_veneer_read(app_id, key_handle, &key_buf);
+    err = tfm_sst_veneer_read(app_id, key_uuid, &key_buf);
     if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
@@ -93,7 +85,7 @@ enum tfm_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
 }
 
 enum tfm_sst_err_t sst_test_service_sfn_dummy_decrypt(uint32_t app_id,
-                                                      uint16_t key_uuid,
+                                                      uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
@@ -106,17 +98,10 @@ enum tfm_sst_err_t sst_test_service_sfn_clean(void)
 {
     enum tfm_sst_err_t err;
     uint32_t app_id = S_APP_ID;
-    uint32_t key_handle;
-    uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
-
-    /* Get the handle of the key asset using our secure app ID */
-    err = tfm_sst_veneer_get_handle(app_id, key_uuid, &key_handle);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return err;
-    }
+    const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
 
     /* Delete the key asset using our secure app ID */
-    err = tfm_sst_veneer_delete(app_id, key_handle);
+    err = tfm_sst_veneer_delete(app_id, key_uuid);
 
     return err;
 }
