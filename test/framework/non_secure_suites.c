@@ -16,6 +16,7 @@
 #include "test/suites/attestation/non_secure/attestation_ns_tests.h"
 #include "test/suites/invert/non_secure/invert_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
+#include "test/suites/ipc/non_secure/ipc_ns_tests.h"
 
 static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
@@ -73,6 +74,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef CORE_TEST_INTERACTIVE
     /* Non-secure interactive test cases */
     {&register_testsuite_ns_core_interactive, 0, 0, 0},
+#endif
+
+#ifdef CORE_TEST_IPC
+    /* Non-secure IPC test cases */
+    {&register_testsuite_ns_ipc_interface, 0, 0, 0},
 #endif
 };
 
