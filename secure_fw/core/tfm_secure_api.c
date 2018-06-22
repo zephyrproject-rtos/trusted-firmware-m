@@ -67,6 +67,30 @@ static int32_t *prepare_partition_ctx(
     return dst;
 }
 
+static int32_t *prepare_partition_iovec_ctx(
+                             struct tfm_exc_stack_t *svc_ctx,
+                             struct tfm_sfn_req_s *desc_ptr,
+                             struct iovec_args_t *iovec_args,
+                             int32_t *dst)
+{
+    /* XPSR  = as was when called, but make sure it's thread mode */
+    *(--dst) = svc_ctx->XPSR & 0xFFFFFE00;
+    /* ReturnAddress = resume veneer in new context */
+    *(--dst) = svc_ctx->RetAddr;
+    /* LR = sfn address */
+    *(--dst) = (int32_t)desc_ptr->sfn;
+    /* R12 = don't care */
+    *(--dst) = 0;
+
+    /* R0-R3 = sfn arguments */
+    *(--dst) = iovec_args->out_len;
+    *(--dst) = (uint32_t)iovec_args->out_vec;
+    *(--dst) = iovec_args->in_len;
+    *(--dst) = (uint32_t)iovec_args->in_vec;
+
+    return dst;
+}
+
 static void restore_caller_ctx(
             struct tfm_exc_stack_t *svc_ctx,
             struct tfm_exc_stack_t *target_ctx)
@@ -282,6 +306,39 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
     return TFM_SUCCESS;
 }
 
+static void tfm_copy_iovec_parameters(struct iovec_args_t *target,
+                               const struct iovec_args_t *source)
+{
+    int i;
+
+    target->in_len = source->in_len;
+    for (i = 0; i < source->in_len; ++i) {
+        target->in_vec[i].base = source->in_vec[i].base;
+        target->in_vec[i].len = source->in_vec[i].len;
+    }
+    target->out_len = source->out_len;
+    for (i = 0; i < source->out_len; ++i) {
+        target->out_vec[i].base = source->out_vec[i].base;
+        target->out_vec[i].len = source->out_vec[i].len;
+    }
+}
+
+static void tfm_clear_iovec_parameters(struct iovec_args_t *args)
+{
+    int i;
+
+    args->in_len = 0;
+    for (i = 0; i < PSA_MAX_IOVEC; ++i) {
+        args->in_vec[i].base = NULL;
+        args->in_vec[i].len = 0;
+    }
+    args->out_len = 0;
+    for (i = 0; i < PSA_MAX_IOVEC; ++i) {
+        args->out_vec[i].base = NULL;
+        args->out_vec[i].len = 0;
+    }
+}
+
 static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
                                                              uint32_t excReturn)
 {
@@ -296,6 +353,7 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
     struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
     uint32_t caller_partition_id;
     int32_t client_id;
+    struct iovec_args_t *iovec_args;
 
     caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
 
@@ -351,8 +409,13 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
 
 #if TFM_LVL == 1
     /* Prepare switch to shared secure partition stack */
+    /* In case the call is coming from the non-secure world, we save the iovecs
+     * on the stop of the stack. So the memory area, that can actually be used
+     * as stack by the partitions starts at a lower address
+     */
     partition_psp =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
+        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+        sizeof(struct iovec_args_t);
     partition_psplim =
         (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 #else
@@ -399,16 +462,55 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
      * handler mode
      */
     if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing)) {
+        if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+            /* Save the iovecs on the common stack. The vectors had been sanity
+             * checked already, and since then the interrupts have been kept
+             * disabled. So we can be sure that the vectors haven't been
+             * tampered with since the check.
+             */
+            iovec_args = (struct iovec_args_t *)
+                    (&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+                     sizeof(struct iovec_args_t));
+            tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
+            tfm_copy_iovec_parameters(iovec_args,
+                                      &(curr_part_data->iovec_args));
+        }
+
         /* Prepare the partition context, update stack ptr */
-        psp = (uint32_t)prepare_partition_ctx(
-                    svc_ctx, desc_ptr, (int32_t *)partition_psp);
+        if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+            psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
+                                                        iovec_args,
+                                                     (int32_t *)partition_psp);
+        } else {
+            psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
+                                                  (int32_t *)partition_psp);
+        }
         __set_PSP(psp);
         __set_PSPLIM(partition_psplim);
     }
 #else
+    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+        /* Save the iovecs on the stack of the partition. The vectors had been
+         * sanity checked already, and since then the interrupts have been kept
+         * disabled. So we can be sure that the vectors haven't been tampered
+         * with since the check.
+         */
+        iovec_args =
+        (struct iovec_args_t *)(tfm_spm_partition_get_stack_top(partition_idx) -
+        sizeof(struct iovec_args_t));
+        tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
+        tfm_copy_iovec_parameters(iovec_args, &(curr_part_data->iovec_args));
+    }
+
     /* Prepare the partition context, update stack ptr */
-    psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
-                                          (int32_t *)partition_psp);
+    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+        psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
+                                                    iovec_args,
+                                                    (int32_t *)partition_psp);
+    } else {
+        psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
+                                              (int32_t *)partition_psp);
+    }
     __set_PSP(psp);
     __set_PSPLIM(partition_psplim);
 #endif
@@ -430,7 +532,9 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
     uint32_t return_partition_idx;
     uint32_t return_partition_flags;
     uint32_t psp = __get_PSP();
+    int i;
     struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
+    struct iovec_args_t *iovec_args;
 
     if (current_partition_idx == SPM_INVALID_PARTITION_IDX) {
         return TFM_SECURE_UNLOCK_FAILED;
@@ -510,6 +614,18 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
         uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
        __set_PSPLIM(psp_stack_bottom);
 
+        /* FIXME: The condition should be removed once all the secure service
+         *        calls are done via the iovec veneers */
+        if (curr_part_data->orig_outvec != NULL) {
+            iovec_args = (struct iovec_args_t *)
+                         (&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+                         sizeof(struct iovec_args_t));
+
+            for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
+                curr_part_data->orig_outvec[i].len = iovec_args->out_vec[i].len;
+            }
+            tfm_clear_iovec_parameters(iovec_args);
+        }
     }
 #else
     /* Restore caller context */
@@ -521,6 +637,19 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
     /* Clear the context entry before returning */
     tfm_spm_partition_set_stack(
                 current_partition_idx, psp + sizeof(struct tfm_exc_stack_t));
+
+    /* FIXME: The condition should be removed once all the secure service
+     *        calls are done via the iovec veneers */
+    if (curr_part_data->orig_outvec != NULL) {
+        iovec_args = (struct iovec_args_t *)
+                     (tfm_spm_partition_get_stack_top(current_partition_idx) -
+                     sizeof(struct iovec_args_t));
+
+        for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
+            curr_part_data->orig_outvec[i].len = iovec_args->out_vec[i].len;
+        }
+        tfm_clear_iovec_parameters(iovec_args);
+    }
 #endif
 
     tfm_spm_partition_cleanup_context(current_partition_idx);

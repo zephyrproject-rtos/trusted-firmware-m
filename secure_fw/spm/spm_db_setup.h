@@ -65,8 +65,13 @@ struct spm_partition_db_t {
 #define PARTITION_INIT_RUNTIME_DATA(data, partition)                \
     do {                                                            \
         data.partition_state      = SPM_PARTITION_STATE_UNINIT;     \
+        /* The top of the stack is reserved for the iovec        */ \
+        /* parameters of the service called. That's why in       */ \
+        /* data.stack_ptr we extract sizeof(struct iovec_args_t) */ \
+        /* from the limit.                                       */ \
         data.stack_ptr            =                                 \
-                PART_REGION_ADDR(partition, _STACK$$ZI$$Limit);     \
+                PART_REGION_ADDR(partition, _STACK$$ZI$$Limit -     \
+                                  sizeof(struct iovec_args_t));     \
     } while (0)
 #endif
 
