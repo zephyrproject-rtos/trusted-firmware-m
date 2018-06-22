@@ -1636,6 +1636,21 @@ enum psa_sst_err_t sst_core_object_delete(uint32_t object_uuid)
         return err;
     }
 
+    /* The objects' data in the logical block 0 is stored in same physical block
+     * where the metadata is stored. A change in the metadata requires a
+     * swap of physical blocks. So, the objects' data stored in the current
+     * metadata block needs to be copied in the scratch block, if the data
+     * of the object processed is not located in the logical block 0. When an
+     * object's data is located in the logical block 0, that copy has been done
+     * while processing the object's data.
+     */
+    if (del_obj_lblock != SST_LOGICAL_DBLOCK0) {
+        err = sst_mblock_migrate_data_to_scratch();
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
+        }
+    }
+
     /* Update the metablock header, swap scratch and active blocks,
      * erase scratch blocks.
      */
