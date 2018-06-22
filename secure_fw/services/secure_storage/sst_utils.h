@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 #define SST_INVALID_UUID  0
+#define SST_DEFAULT_EMPTY_BUFF_VAL 0
 
 /*
  * \brief Macro to check, at compilation time, if data fits in data buffer

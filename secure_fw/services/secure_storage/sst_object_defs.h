@@ -16,19 +16,16 @@
 #include "crypto/sst_crypto_interface.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct sst_obj_header_t {
 #ifdef SST_ENCRYPTION
     /* Metadata attached as a header to encrypted object data before storage */
-    union sst_crypto_t crypto; /*!< Crypto metadata */
+    union sst_crypto_t crypto;         /*!< Crypto metadata */
+#else
+    uint32_t version;                  /*!< Object version */
+    uint32_t fid;                      /*!< File ID */
 #endif
-    uint32_t uuid;                     /*!< Asset ID */
-    uint32_t version;                  /*!< Asset version */
-    struct psa_sst_asset_info_t  info; /*!< Asset information */
-    struct psa_sst_asset_attrs_t attr; /*!< Asset attributes */
+    struct psa_sst_asset_info_t  info; /*!< Object information */
+    struct psa_sst_asset_attrs_t attr; /*!< Object attributes */
 };
 
 /* The object to be written to the file system below. Made up of the
@@ -43,8 +40,13 @@ struct sst_object_t {
 #define SST_OBJECT_HEADER_SIZE    sizeof(struct sst_obj_header_t)
 #define SST_MAX_OBJECT_SIZE       sizeof(struct sst_object_t)
 
-#ifdef __cplusplus
-}
-#endif
+/*!
+ * \def SST_MAX_NUM_OBJECTS
+ *
+ * \brief Specifies the maximum number of objects in the system, which is the
+ *        number of defined assets, the object table and 2 temporary objects to
+ *        store the temporary object table and temporary updated object.
+ */
+#define SST_MAX_NUM_OBJECTS (SST_NUM_ASSETS + 3)
 
 #endif /* __SST_OBJECT_DEFS_H__ */

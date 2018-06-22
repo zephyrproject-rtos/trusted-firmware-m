@@ -63,7 +63,6 @@
 #define SST_NUM_ACTIVE_DBLOCKS (SST_NUM_DEDICATED_DBLOCKS + 1)
 
 #define SST_LOGICAL_DBLOCK0  0
-#define SST_DEFAULT_EMPTY_BUFF_VAL 0
 #define SST_OBJECT_START_POSITION  0
 
 #ifndef SST_FLASH_PROGRAM_UNIT
@@ -86,7 +85,7 @@
 #define SST_ALL_METADATA_SIZE \
 (sizeof(struct sst_metadata_block_header) + \
 (SST_NUM_ACTIVE_DBLOCKS * sizeof(struct sst_block_metadata)) + \
-(SST_NUM_ASSETS * sizeof(struct sst_assetmeta)))
+(SST_MAX_NUM_OBJECTS * sizeof(struct sst_assetmeta)))
 
 #ifndef SST_ENCRYPTION
 /* SST data buffer is used for metadata and object data. */
@@ -344,7 +343,8 @@ static enum psa_sst_err_t sst_meta_validate_block_meta(
         /* for metadata + data block, data index must start after the
          * metadata area.
          */
-        valid_data_start_value = sst_meta_object_meta_offset(SST_NUM_ASSETS);
+        valid_data_start_value =
+                               sst_meta_object_meta_offset(SST_MAX_NUM_OBJECTS);
     }
 
     if (block_meta->data_start != valid_data_start_value) {
@@ -425,7 +425,7 @@ static enum psa_sst_err_t sst_meta_validate_object_meta(
         if (meta->lblock == SST_LOGICAL_DBLOCK0) {
             /* in block 0, data index must be located after the metadata */
             if (meta->data_index <
-                sst_meta_object_meta_offset(SST_NUM_ASSETS)) {
+                sst_meta_object_meta_offset(SST_MAX_NUM_OBJECTS)) {
                 return PSA_SST_ERR_ASSET_NOT_FOUND;
             }
         }
@@ -477,7 +477,7 @@ static uint16_t sst_get_free_object_index(void)
     enum psa_sst_err_t err;
     struct sst_assetmeta tmp_metadata;
 
-    for (i = 0; i < SST_NUM_ASSETS; i++) {
+    for (i = 0; i < SST_MAX_NUM_OBJECTS; i++) {
         err = sst_meta_read_object_meta(i, &tmp_metadata);
         if (err == PSA_SST_ERR_SUCCESS) {
             /* Check if this entry is free by checking if unique_id values is an
@@ -685,7 +685,7 @@ static enum psa_sst_err_t sst_mblock_copy_remaining_object_meta(
     /* Get end of object meta position which is the position after the last
      * byte of object meta.
      */
-    end = sst_meta_object_meta_offset(SST_NUM_ASSETS);
+    end = sst_meta_object_meta_offset(SST_MAX_NUM_OBJECTS);
     if (end > pos) {
         err = sst_flash_block_to_block_move(scratch_block, pos, meta_block,
                                             pos, (end - pos));
@@ -695,7 +695,7 @@ static enum psa_sst_err_t sst_mblock_copy_remaining_object_meta(
 }
 
 /**
- * \brief Copies rest of the block metadata, except for the one pointed by index
+ * \brief Copies rest of the block metadata
  *
  * \param[in] lblock  Logical block number to skip
  *
@@ -740,10 +740,10 @@ static enum psa_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
         /* Copy the rest of metadata blocks between logical block 0 and
          * the logical block provided in the function.
          */
-        size = ((lblock-1)*sizeof(struct sst_block_metadata));
-        if (size > 0) {
-            pos = sizeof(struct sst_metadata_block_header);
-            pos += sizeof(struct sst_block_metadata);
+        if (lblock > 1) {
+            pos = sst_meta_object_meta_offset(SST_LOGICAL_DBLOCK0 + 1);
+
+            size = sst_meta_object_meta_offset(lblock) - pos;
 
             /* Copy rest of the block data from previous block */
             /* Data before updated content */
@@ -755,7 +755,7 @@ static enum psa_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
         }
     }
 
-    /* Data after updated content */
+    /* Move meta blocks data after updated content */
     pos = sst_meta_block_meta_offset(lblock+1);
 
     size = sst_meta_object_meta_offset(0) - pos;
@@ -1183,7 +1183,7 @@ static enum psa_sst_err_t sst_core_get_object_idx(uint32_t obj_uuid,
     enum psa_sst_err_t err;
     struct sst_assetmeta tmp_metadata;
 
-    for (i = 0; i < SST_NUM_ASSETS; i++) {
+    for (i = 0; i < SST_MAX_NUM_OBJECTS; i++) {
         err = sst_meta_read_object_meta(i, &tmp_metadata);
         /* Read from flash failed */
         if (err != PSA_SST_ERR_SUCCESS) {
@@ -1590,7 +1590,7 @@ enum psa_sst_err_t sst_core_object_delete(uint32_t object_uuid)
     sst_mblock_update_scratch_object_meta(del_obj_index, &object_meta);
 
     /* Read all object metadata */
-    for (obj_idx = 0; obj_idx < SST_NUM_ASSETS; obj_idx++) {
+    for (obj_idx = 0; obj_idx < SST_MAX_NUM_OBJECTS; obj_idx++) {
         if (obj_idx == del_obj_index) {
             /* Skip deleted object */
             continue;
@@ -1899,7 +1899,7 @@ enum psa_sst_err_t sst_core_wipe_all(void)
     /* Initialize object metadata table */
     sst_utils_memset(&object_metadata, SST_DEFAULT_EMPTY_BUFF_VAL,
                      sizeof(struct sst_assetmeta));
-    for (i = 0; i < SST_NUM_ASSETS; i++) {
+    for (i = 0; i < SST_MAX_NUM_OBJECTS; i++) {
         /* In the beginning phys id is same as logical id */
         /* Update object's metadata to reflect new attributes */
         err = sst_mblock_update_scratch_object_meta(i, &object_metadata);

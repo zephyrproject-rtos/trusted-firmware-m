@@ -51,6 +51,7 @@ if (ENABLE_SECURE_STORAGE)
 		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 		"${SECURE_STORAGE_DIR}/sst_core.c"
 		"${SECURE_STORAGE_DIR}/sst_object_system.c"
+		"${SECURE_STORAGE_DIR}/sst_object_table.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
 		"${SECURE_STORAGE_DIR}/sst_utils.c"
 		"${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"

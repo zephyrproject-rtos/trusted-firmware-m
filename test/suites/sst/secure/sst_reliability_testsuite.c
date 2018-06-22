@@ -107,11 +107,11 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             /* Updates data structure to point to the read buffer */
             io_data.data = &read_data[3];
 
-            /* Checks write permissions in the read function */
+            /* Checks read permissions in the read function */
             err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                                io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Client S_CLIENT_ID must get file handle");
+                TEST_FAIL("Read should not fail for client S_CLIENT_ID");
                 return;
             }
 
@@ -188,11 +188,11 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         memset(data, 'X', BUFFER_PLUS_PADDING_SIZE);
         io_data.data = data + HALF_PADDING_SIZE;
 
-        /* Checks write permissions in the read function */
+        /* Checks read permissions in the read function */
         err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Client S_CLIENT_ID must get file handle");
+            TEST_FAIL("Read should not fail for client S_CLIENT_ID");
             return;
         }
 
@@ -281,11 +281,11 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             /* Updates data structure to point to the read buffer */
             io_data.data = &read_data[3];
 
-            /* Checks write permissions in the read function */
+            /* Checks read permissions in the read function */
             err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                                io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Client S_CLIENT_ID must get file handle");
+                TEST_FAIL("Read should not fail for client S_CLIENT_ID");
                 return;
             }
 
@@ -364,11 +364,11 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         memset(data, 'X', BUFFER_PLUS_PADDING_SIZE);
         io_data.data = data + HALF_PADDING_SIZE;
 
-        /* Checks write permissions in the read function */
+        /* Checks read permissions in the read function */
         err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Client S_CLIENT_ID must get file handle");
+            TEST_FAIL("Read should not fail for client S_CLIENT_ID");
             return;
         }
 

@@ -122,6 +122,11 @@ service.
 `sst_object_system.c` - Contains the object system implementation to manage
 all objects in SST area.
 
+`sst_object_table.c` - Contains the object system table implementation which
+complements the object system to manage all object in the SST area.
+The object table has an entry for each object stored in the object system
+and keeps track of its version.
+
 `sst_encrypted_object.c` - Contains an implementation to manipulate
 encrypted objects in the SST object system.
 
