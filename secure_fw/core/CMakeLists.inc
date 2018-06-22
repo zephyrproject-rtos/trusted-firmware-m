@@ -42,7 +42,9 @@ set (SS_CORE_C_SRC
 if (NOT DEFINED TFM_PSA_API)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
 elseif (TFM_PSA_API)
-	list(APPEND SS_CORE_C_SRC "${SS_CORE_DIR}/tfm_psa_api_client.c")
+	list(APPEND SS_CORE_C_SRC "${SS_CORE_DIR}/tfm_psa_api_client.c"
+				"${SS_CORE_DIR}/tfm_thread.c"
+				)
 endif()
 
 #Append all our source files to global lists.
@@ -75,4 +77,3 @@ elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
 else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
-
