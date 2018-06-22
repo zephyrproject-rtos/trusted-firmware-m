@@ -26,6 +26,10 @@
         CONCAT(LIB_PREFIX_NAME, mbedtls_aes_crypt_ctr)
 #define mbedtls_aes_crypt_ecb \
         CONCAT(LIB_PREFIX_NAME, mbedtls_aes_crypt_ecb)
+#define mbedtls_aes_decrypt \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_aes_decrypt)
+#define mbedtls_aes_encrypt \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_aes_encrypt)
 #define mbedtls_aes_free \
         CONCAT(LIB_PREFIX_NAME, mbedtls_aes_free)
 #define mbedtls_aes_init \
@@ -704,6 +708,10 @@
         CONCAT(LIB_PREFIX_NAME, mbedtls_pk_write_pubkey_pem)
 #define mbedtls_platform_set_calloc_free \
         CONCAT(LIB_PREFIX_NAME, mbedtls_platform_set_calloc_free)
+#define mbedtls_platform_setup \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_platform_setup)
+#define mbedtls_platform_teardown \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_platform_teardown)
 #define mbedtls_ripemd160 \
         CONCAT(LIB_PREFIX_NAME, mbedtls_ripemd160)
 #define mbedtls_ripemd160_clone \

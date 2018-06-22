@@ -23,7 +23,7 @@ Both need to be cloned manually in the current release.
 ```
 cd <TF-M base folder>
 git clone https://git.trustedfirmware.org/trusted-firmware-m.git
-git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.5.1
+git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.6.1
 git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
 cd trusted-firmware-m
 mkdir cmake_build
