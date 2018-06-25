@@ -123,18 +123,3 @@ int32_t tfm_thread_init()
 
     return 0;
 }
-
-/* Test thread -- MOVE TO SP ! */
-static void *test_thread(void *param)
-{
-    int local_a = 0;
-
-    while (1) {
-        printf("%d times running !\n", local_a++);
-        tfm_thread_schedule();
-    }
-
-    return NULL;
-}
-
-REGISTER_TFM_THREAD(test_thread, (void *)0x1, 1024);
