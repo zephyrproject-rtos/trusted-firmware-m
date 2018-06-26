@@ -44,6 +44,8 @@ if (NOT DEFINED TFM_PSA_API)
 elseif (TFM_PSA_API)
 	list(APPEND SS_CORE_C_SRC "${SS_CORE_DIR}/tfm_psa_api_client.c"
 				"${SS_CORE_DIR}/tfm_thread.c"
+				"${SS_CORE_DIR}/tfm_queue.c"
+				"${SS_CORE_DIR}/psa_api.c"
 				)
 endif()
 

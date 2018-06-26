@@ -15,6 +15,12 @@
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
+#ifdef TFM_PSA_API
+#include "psa_client.h"
+#include "psa_service.h"
+#include "tfm_thread.h"
+#include "tfm_queue.h"
+#endif
 
 /*
  * Avoids the semihosting issue
@@ -168,6 +174,11 @@ int main(void)
 #ifdef TFM_CORE_DEBUG
     /* Jumps to non-secure code */
     LOG_MSG("Jumping to non-secure code...");
+#endif
+
+#ifdef TFM_PSA_API
+    tfm_queue_init();
+    tfm_thread_init();
 #endif
 
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is
