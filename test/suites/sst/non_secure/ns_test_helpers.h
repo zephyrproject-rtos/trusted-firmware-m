@@ -17,6 +17,17 @@ extern "C" {
 #define CONCAT_(x, y) x ## y
 #define CONCAT(x, y) CONCAT_(x, y)
 
+/*!
+ * \struct sst_test_buf_t
+ *
+ * \brief Structure to store test data information to read/write from/to asset.
+ *
+ */
+struct sst_test_buf_t {
+    uint8_t *data;   /*!< Address of input/output data */
+    uint32_t size;   /*!< Size of input/output data */
+    uint32_t offset; /*!< Offset within asset */
+};
 
 /**
  * Several tests use a buffer to read back data from an asset. This buffer is
@@ -36,7 +47,6 @@ extern "C" {
 
 #define BUFFER_PLUS_PADDING_SIZE (BUFFER_SIZE + PADDING_SIZE)
 #define BUFFER_PLUS_HALF_PADDING_SIZE (BUFFER_SIZE + HALF_PADDING_SIZE)
-
 
 /**
  * \brief Expands to the prototype of a test function.

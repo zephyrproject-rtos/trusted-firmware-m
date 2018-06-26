@@ -114,15 +114,18 @@ enum tfm_sst_err_t tfm_sst_set_attributes(
  * \param[in]  token_size  Must be set to 0, reserved for future use.
  *                         Token size. In case the token is not provided
  *                         the token size has to be 0.
- * \param[out] data        Pointer to data vector \ref tfm_sst_buf_t to store
- *                         data, size and offset
+ * \param[in]  size        Size of the data to read
+ * \param[in]  offset      Offset within asset to start to read
+ * \param[out] data        Pointer to data vector to store data
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t tfm_sst_read(uint32_t asset_uuid,
                                 const uint8_t* token,
                                 uint32_t token_size,
-                                struct tfm_sst_buf_t* data);
+                                uint32_t size,
+                                uint32_t offset,
+                                uint8_t *data);
 
 /**
  * \brief Writes data into an asset referenced by asset UUID.
@@ -136,15 +139,19 @@ enum tfm_sst_err_t tfm_sst_read(uint32_t asset_uuid,
  * \param[in] token_size  Must be set to 0, reserved for future use.
  *                        Token size. In case the token is not provided
  *                        the token size has to be 0.
- * \param[in] data        Pointer to data vector \ref tfm_sst_buf_t which
- *                        contains the data to write
+ * \param[in] size        Size of the data to start to write
+ * \param[in] offset      Offset within asset to write the data
+ * \param[in] data        Pointer to data vector which contains the data to
+ *                        write
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 enum tfm_sst_err_t tfm_sst_write(uint32_t asset_uuid,
                                  const uint8_t* token,
                                  uint32_t token_size,
-                                 struct tfm_sst_buf_t* data);
+                                 uint32_t size,
+                                 uint32_t offset,
+                                 const uint8_t *data);
 
 /**
  * \brief Deletes the asset referenced by the asset UUID.

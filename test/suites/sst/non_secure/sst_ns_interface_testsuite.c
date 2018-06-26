@@ -320,7 +320,6 @@ TFM_SST_NS_TEST(1006, "Thread_C")
     /* Calls get_attributes with invalid asset ID */
     err = tfm_sst_get_info(INVALID_ASSET_ID, ASSET_TOKEN,
                            ASSET_TOKEN_SIZE, &asset_info);
-
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Get information function should fail for an invalid "
                   "asset ID");
@@ -454,7 +453,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct tfm_sst_asset_info_t asset_info;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
     /* Creates asset */
@@ -470,7 +469,8 @@ TFM_SST_NS_TEST(1009, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -494,7 +494,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
 
     /* Calls write function with invalid application ID */
     err = tfm_sst_write(INVALID_ASSET_ID, ASSET_TOKEN, ASSET_TOKEN_SIZE,
-                        &io_data);
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Invalid asset ID should not write in the asset");
         return;
@@ -534,9 +534,10 @@ static void tfm_sst_test_1010_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data = {0};
 
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should not succeed with an invalid thread name");
         return;
@@ -585,26 +586,18 @@ static void tfm_sst_test_1010(struct test_result_t *ret)
 
 /**
  * \brief Tests read function with:
- * - Null tfm_sst_buf_t pointer
  * - Null write data pointer
  */
 TFM_SST_NS_TEST(1011, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for Thread_C");
-        return;
-    }
-
-    /* Calls write function with tfm_sst_buf_t pointer set to NULL */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, NULL);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Write should fail with tfm_sst_buf_t pointer set to NULL");
         return;
     }
 
@@ -614,7 +607,8 @@ TFM_SST_NS_TEST(1011, "Thread_C")
     io_data.offset = 0;
 
     /* Calls write function with data pointer set to NULL */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail with data pointer set to NULL");
         return;
@@ -638,7 +632,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data[SST_ASSET_MAX_SIZE_AES_KEY_192] = {0};
 
     /* Creates asset */
@@ -653,7 +647,8 @@ TFM_SST_NS_TEST(1012, "Thread_C")
     io_data.size = BUFFER_PLUS_PADDING_SIZE;
     io_data.offset = 0;
 
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Writing beyond end of asset should not succeed");
         return;
@@ -663,7 +658,8 @@ TFM_SST_NS_TEST(1012, "Thread_C")
     io_data.size = 1;
     io_data.offset = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write to an offset beyond end of asset should not succeed");
         return;
@@ -688,7 +684,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
@@ -705,7 +701,8 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -717,7 +714,8 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     io_data.offset = 0;
 
     /* Read data from the asset */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should work correctly");
         return;
@@ -741,7 +739,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
 
     /* Calls read with invalid asset ID */
     err = tfm_sst_read(INVALID_ASSET_ID, ASSET_TOKEN, ASSET_TOKEN_SIZE,
-                       &io_data);
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
                   "asset ID");
@@ -782,7 +780,7 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
@@ -790,7 +788,8 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
     io_data.size = 1;
     io_data.offset = 0;
 
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should not succeed with an invalid thread name");
         return;
@@ -839,14 +838,13 @@ static void tfm_sst_test_1014(struct test_result_t *ret)
 
 /**
  * \brief Tests read function with:
- * - Null tfm_sst_buf_t pointer
  * - Null read data pointer
  */
 TFM_SST_NS_TEST(1015, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
@@ -855,19 +853,13 @@ TFM_SST_NS_TEST(1015, "Thread_C")
         return;
     }
 
-    /* Calls read with null tfm_sst_buf_t pointer */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, NULL);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read with tfm_sst_buf_t pointer set to NULL should fail");
-        return;
-    }
-
     io_data.data = NULL;
     io_data.size = 1;
     io_data.offset = 0;
 
     /* Calls read with null read data pointer */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read with read data pointer set to NULL should fail");
         return;
@@ -891,7 +883,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     struct tfm_sst_asset_info_t asset_info;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
@@ -909,7 +901,8 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -934,7 +927,8 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.size = WRITE_BUF_SIZE + 1;
     io_data.offset = 0;
 
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Read beyond current size should not succeed");
         return;
@@ -944,7 +938,8 @@ TFM_SST_NS_TEST(1016, "Thread_C")
     io_data.size = 1;
     io_data.offset = asset_info.size_current;
 
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Read from an offset beyond current size should not succeed");
         return;
@@ -1092,7 +1087,7 @@ static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
 static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     enum tfm_sst_err_t err;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
 
@@ -1109,7 +1104,8 @@ static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Writes data into asset 1 */
-    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should not fail for Thread_B");
         return;
@@ -1139,7 +1135,7 @@ static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
 
@@ -1151,7 +1147,8 @@ static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
     /* If the compact worked as expected, the test should be able to read back
      * the data from asset 1 correctly.
      */
-    err = tfm_sst_read(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_B");
         return;
@@ -1199,7 +1196,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint32_t i;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
@@ -1217,7 +1214,8 @@ TFM_SST_NS_TEST(1020, "Thread_C")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write should work correctly");
         return;
@@ -1231,7 +1229,8 @@ TFM_SST_NS_TEST(1020, "Thread_C")
 
     for (i = 0; i < WRITE_BUF_SIZE; i++) {
         /* Read data from the asset */
-        err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+        err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                           io_data.size, io_data.offset, io_data.data);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
         if (err != TFM_SST_ERR_SUCCESS) {
 #else
@@ -1288,7 +1287,7 @@ TFM_SST_NS_TEST(1021, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data[BUF_SIZE_SHA224] = {0};
 
     /* Creates asset */
@@ -1304,7 +1303,8 @@ TFM_SST_NS_TEST(1021, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Should have failed asset write of too large");
         return;
@@ -1328,7 +1328,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
     uint8_t wrt_data2[WRITE_BUF_SIZE+1] = "World";
@@ -1346,7 +1346,8 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
@@ -1358,7 +1359,8 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data 2 in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 failed");
         return;
@@ -1370,7 +1372,8 @@ TFM_SST_NS_TEST(1022, "Thread_B")
     io_data.offset = 0;
 
     /* Reads back the data */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1398,7 +1401,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
     uint8_t wrt_data2[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_2;
@@ -1416,7 +1419,8 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = 0;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
@@ -1428,7 +1432,8 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
                   "write more bytes that the max size");
@@ -1441,7 +1446,8 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 3 failed");
         return;
@@ -1453,7 +1459,8 @@ TFM_SST_NS_TEST(1023, "Thread_B")
     io_data.offset = 0;
 
     /* Read back the data */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1511,7 +1518,7 @@ static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
 
     /* Sets data structure */
@@ -1520,7 +1527,8 @@ static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Writes data in asset 1 */
-    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
         return;
@@ -1533,7 +1541,7 @@ static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data2[3] = "Hi";
 
     /* Writes data 2 in asset 2 */
@@ -1542,7 +1550,8 @@ static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
     io_data.size = 2;
     io_data.offset = 0;
 
-    err = tfm_sst_write(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
         return;
@@ -1555,7 +1564,7 @@ static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data3[WRITE_BUF_SIZE+1] = "World";
 
     /* Sets data structure */
@@ -1564,7 +1573,8 @@ static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
     io_data.offset = WRITE_BUF_SIZE;
 
     /* Writes data 3 in asset 1 */
-    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_C");
         return;
@@ -1577,7 +1587,7 @@ static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t wrt_data4[WRITE_BUF_SIZE+1] = "12345";
 
     /* Sets data structure */
@@ -1586,7 +1596,8 @@ static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
     io_data.offset = 2;
 
     /* Writes data 4 in asset 2 */
-    err = tfm_sst_write(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for Thread_B");
         return;
@@ -1599,7 +1610,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
@@ -1609,7 +1620,8 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Read back the asset 1 */
-    err = tfm_sst_read(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail for Thread_C");
         return;
@@ -1627,7 +1639,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
 
     /* Sets data structure */
@@ -1636,7 +1648,8 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
     io_data.offset = 0;
 
     /* Read back the asset 1 */
-    err = tfm_sst_read(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
@@ -1725,7 +1738,7 @@ TFM_SST_NS_TEST(1025, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
@@ -1740,14 +1753,16 @@ TFM_SST_NS_TEST(1025, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a ROM address location */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a ROM address location */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
@@ -1770,7 +1785,7 @@ TFM_SST_NS_TEST(1026, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
@@ -1785,14 +1800,16 @@ TFM_SST_NS_TEST(1026, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a device address location */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a device address location */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
@@ -1815,7 +1832,7 @@ TFM_SST_NS_TEST(1027, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
@@ -1830,14 +1847,16 @@ TFM_SST_NS_TEST(1027, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a non-existing address location */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a non-existing address location */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
@@ -1860,7 +1879,7 @@ TFM_SST_NS_TEST(1028, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
 
     /* Creates asset */
     err = tfm_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
@@ -1875,14 +1894,16 @@ TFM_SST_NS_TEST(1028, "Thread_B")
     io_data.offset = 0;
 
     /* Calls write with a secure address location */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a secure address location */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
@@ -1907,7 +1928,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     struct tfm_sst_asset_info_t asset_info;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum tfm_sst_err_t err;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t wrt_data_2[2] = "B";
@@ -1925,7 +1946,8 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.offset = 0;
 
     /* Write data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("First write should not fail");
         return;
@@ -1950,7 +1972,8 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.offset = 1;
 
     /* Write data in the asset */
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Second write should not fail");
         return;
@@ -1974,7 +1997,8 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.offset = 0;
 
     /* Calls read with a non-existing address location */
-    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                       io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
@@ -1993,7 +2017,8 @@ TFM_SST_NS_TEST(1029, "Thread_C")
     io_data.size = 1;
     io_data.offset = (asset_info.size_current + 1);
 
-    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE, &io_data);
+    err = tfm_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        io_data.size, io_data.offset, io_data.data);
     if (err != TFM_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write must fail if the offset is bigger than the current"
                   " asset's size");
