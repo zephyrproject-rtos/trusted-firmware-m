@@ -137,7 +137,7 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -147,28 +147,28 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
 
     /* Checks write permissions in create function */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Attempts to create the asset a second time */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Should not fail to create an already-created asset");
         return;
     }
 
     /* Calls create with invalid asset ID */
     err = tfm_sst_veneer_create(app_id, INVALID_ASSET_ID, &test_token);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should fail for invalid ASSET ID");
         return;
     }
 
     /* Calls create with invalid application ID */
     err = tfm_sst_veneer_create(INVALID_APP_ID, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Create should fail for invalid application ID");
         return;
     }
@@ -212,8 +212,8 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_asset_info_t asset_info;
-    enum tfm_sst_err_t err;
+    struct psa_sst_asset_info_t asset_info;
+    enum psa_sst_err_t err;
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -223,7 +223,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -232,7 +232,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
      * attributes struct pointer
      */
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, &asset_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
                   "information of this asset");
         return;
@@ -252,7 +252,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     /* Calls get_attributes with invalid application ID */
     err = tfm_sst_veneer_get_info(INVALID_APP_ID, asset_uuid, &test_token,
                                   &asset_info);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information function should fail for an invalid "
                   "application ID");
         return;
@@ -261,7 +261,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     /* Calls get information with invalid asset ID */
     err = tfm_sst_veneer_get_info(app_id, INVALID_ASSET_ID, &test_token,
                                   &asset_info);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Get attributes function should fail for an invalid "
                   "asset ID");
         return;
@@ -278,7 +278,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* Prepares test context */
     if (prepare_test_ctx(ret) != 0) {
@@ -288,14 +288,14 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Calls get information with invalid struct attributes pointer */
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, NULL);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
+    if (err != PSA_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Get information function should fail for an invalid "
                   "struct info pointer");
         return;
@@ -314,8 +314,8 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_asset_info_t asset_info;
-    enum tfm_sst_err_t err;
+    struct psa_sst_asset_info_t asset_info;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
 
@@ -327,7 +327,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -339,8 +339,8 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
@@ -348,7 +348,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
      * attributes struct pointer
      */
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, &asset_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
                   "information of this asset");
         return;
@@ -363,14 +363,14 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     /* Calls write function with invalid application ID */
     err = tfm_sst_veneer_write(INVALID_APP_ID, asset_uuid, &test_token,
                                &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Invalid application ID should not write in the file");
         return;
     }
 
     /* Calls write function with invalid asset ID */
     err = tfm_sst_veneer_write(app_id, INVALID_ASSET_ID, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Invalid asset ID should not write in the file");
         return;
     }
@@ -387,7 +387,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
     /* Prepares test context */
@@ -398,14 +398,14 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Calls write function with tfm_sst_buf_t pointer set to NULL */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, NULL);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail with tfm_sst_buf_t pointer set to NULL");
         return;
     }
@@ -417,7 +417,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 
     /* Calls write function with data pointer set to NULL */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail with data pointer set to NULL");
         return;
     }
@@ -433,7 +433,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[BUFFER_PLUS_PADDING_SIZE] = {0};
 
@@ -445,7 +445,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -456,7 +456,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
     io_data.offset = 0;
 
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Writing beyond end of asset should not succeed");
         return;
     }
@@ -466,7 +466,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
     io_data.offset = SST_ASSET_MAX_SIZE_AES_KEY_192;
 
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write to an offset beyond end of asset should not succeed");
         return;
     }
@@ -484,7 +484,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
@@ -497,7 +497,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -509,8 +509,8 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
@@ -521,8 +521,8 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Read data from the asset */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Read should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Read should works correctly");
         return;
     }
 
@@ -545,7 +545,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     /* Calls read with invalid application ID */
     err = tfm_sst_veneer_read(INVALID_APP_ID, asset_uuid, &test_token,
                               &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
                   "application ID");
         return;
@@ -553,7 +553,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Calls read with invalid asset ID */
     err = tfm_sst_veneer_read(app_id, INVALID_ASSET_ID, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail when read is called with an invalid "
                   "asset ID");
         return;
@@ -571,7 +571,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
     /* Prepares test context */
@@ -582,14 +582,14 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Calls read with invalid tfm_sst_buf_t pointer */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, NULL);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read with tfm_sst_buf_t pointer set to NULL should fail");
         return;
     }
@@ -600,7 +600,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
 
     /* Calls read with invalid data pointer */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read with read data pointer set to NULL should fail");
         return;
     }
@@ -616,9 +616,9 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
-    struct tfm_sst_asset_info_t asset_info;
+    struct psa_sst_asset_info_t asset_info;
     uint8_t data[BUFFER_SIZE_PLUS_ONE] = {0};
 
     /* Prepares test context */
@@ -629,7 +629,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -641,14 +641,14 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
     /* Gets current asset information */
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, &asset_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Application S_APP_ID should be able to read the "
                   "information of this asset");
         return;
@@ -666,7 +666,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     io_data.offset = 0;
 
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Read beyond current size should not succeed");
         return;
     }
@@ -676,7 +676,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
     io_data.offset = asset_info.size_current;
 
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Read from an offset beyond current size should not succeed");
         return;
     }
@@ -699,7 +699,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     const uint32_t asset_uuid_1 =  SST_ASSET_ID_SHA224_HASH;
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     struct tfm_sst_buf_t io_data;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
 
@@ -711,14 +711,14 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Creates assset */
     err = tfm_sst_veneer_create(app_id_1, asset_uuid_1, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Calls delete asset with invalid application ID */
     err = tfm_sst_veneer_delete(INVALID_APP_ID, asset_uuid_1, &test_token);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("The delete action should fail if an invalid application "
                   "ID is provided");
         return;
@@ -726,21 +726,21 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Calls delete asset */
     err = tfm_sst_veneer_delete(app_id_1, asset_uuid_1, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
     }
 
     /* Calls delete with a deleted asset ID */
     err = tfm_sst_veneer_delete(app_id_1, asset_uuid_1, &test_token);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("The delete action should fail as ID is not valid");
         return;
     }
 
     /* Calls delete asset with invalid asset ID */
     err = tfm_sst_veneer_delete(app_id_1, INVALID_ASSET_ID, &test_token);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("The delete action should fail if an invalid asset ID "
                   "is provided");
         return;
@@ -757,7 +757,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
      * data block
      */
     err = tfm_sst_veneer_create(app_id_2, asset_uuid_2, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -765,7 +765,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     /* Creates asset 1 to locate it after the asset 2 in the data block */
     err = tfm_sst_veneer_create(app_id_1, SST_ASSET_ID_SHA224_HASH,
                                 &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -777,7 +777,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Writes data in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, asset_uuid_1, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
         return;
     }
@@ -786,7 +786,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
      * at the beginning of the block.
      */
     err = tfm_sst_veneer_delete(app_id_2, asset_uuid_2, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("The delete action should work correctly");
         return;
     }
@@ -802,7 +802,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Read back the asset 1 */
     err = tfm_sst_veneer_read(app_id_1, asset_uuid_1, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -822,7 +822,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint32_t i;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
@@ -836,7 +836,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -848,8 +848,8 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
@@ -862,9 +862,9 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
         /* Read data from the asset */
         err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
 #else
-        if (io_data.offset != 0 && err != TFM_SST_ERR_PARAM_ERROR) {
+        if (io_data.offset != 0 && err != PSA_SST_ERR_PARAM_ERROR) {
 #endif
             TEST_FAIL("Read did not behave correctly");
             return;
@@ -909,7 +909,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE] = "DATA";
@@ -922,7 +922,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -934,14 +934,14 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should work correctly");
+    if (err != PSA_SST_ERR_SUCCESS) {
+        TEST_FAIL("Write should works correctly");
         return;
     }
 
     /* Calls prepare again to simulate reinitialization */
     err = sst_am_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Saved system should have been preparable");
         return;
     }
@@ -953,7 +953,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
 
     /* Reads back the data after the prepare */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -985,7 +985,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t wrt_data[BUF_SIZE_SHA224] = {0};
 
@@ -997,7 +997,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1009,7 +1009,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
 
     /* Writes data in the asset when data size is bigger than asset size */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Should have failed asset write of too large");
         return;
     }
@@ -1025,7 +1025,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE]  = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1]  = "Hello";
@@ -1039,7 +1039,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1051,7 +1051,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
     }
@@ -1063,7 +1063,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 
     /* Writes data 2 in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 failed");
         return;
     }
@@ -1075,7 +1075,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 
     /* Read back the data */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -1098,7 +1098,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[BUF_SIZE_SHA224] = READ_DATA_SHA224;
     uint8_t wrt_data[BUF_SIZE_SHA224] = WRITE_DATA_SHA224_1;
@@ -1112,7 +1112,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1124,7 +1124,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 1 failed");
         return;
     }
@@ -1136,7 +1136,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 2 should have failed as this write tries to "
                   "write more bytes than the max size");
         return;
@@ -1149,7 +1149,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 
     /* Writes data in the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data 3 failed");
         return;
     }
@@ -1161,7 +1161,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 
     /* Read back the data */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -1184,7 +1184,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
     const uint32_t app_id_2 = S_APP_ID;
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t wrt_data[WRITE_BUF_SIZE+1] = "Hello";
@@ -1200,14 +1200,14 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Creates asset 1 */
     err = tfm_sst_veneer_create(app_id_1, asset_uuid_1, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
 
     /* Creates asset 2 */
     err = tfm_sst_veneer_create(app_id_2, asset_uuid_2, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1219,7 +1219,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Writes data in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, asset_uuid_1, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
         return;
     }
@@ -1231,7 +1231,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Writes data 2 in asset 2 */
     err = tfm_sst_veneer_write(app_id_2, asset_uuid_2, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
         return;
     }
@@ -1243,7 +1243,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Writes data 3 in asset 1 */
     err = tfm_sst_veneer_write(app_id_1, asset_uuid_1, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
         return;
     }
@@ -1255,7 +1255,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Writes data 4 in asset 2 */
     err = tfm_sst_veneer_write(app_id_2, asset_uuid_2, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Write data should work for application S_APP_ID");
         return;
     }
@@ -1267,7 +1267,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Read back the asset 1 */
     err = tfm_sst_veneer_read(app_id_1, asset_uuid_1, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -1287,7 +1287,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Read back the asset 2 */
     err = tfm_sst_veneer_read(app_id_2, asset_uuid_2, &test_token, &io_data);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Incorrect number of bytes read back");
         return;
     }
@@ -1308,7 +1308,7 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
 {
     uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
     /* Prepares test context */
@@ -1319,7 +1319,7 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1331,14 +1331,14 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
 
     /* Calls write with a ROM address location */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a ROM address location */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
@@ -1353,7 +1353,7 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
 {
     uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
     /* Prepares test context */
@@ -1364,7 +1364,7 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1376,14 +1376,14 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
 
     /* Calls write with a device address location */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a device address location */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
@@ -1398,7 +1398,7 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
 {
     uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct tfm_sst_buf_t io_data;
 
     /* Prepares test context */
@@ -1409,7 +1409,7 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
 
     /* Creates asset */
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for application S_APP_ID");
         return;
     }
@@ -1421,14 +1421,14 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
 
     /* Calls write with a non-existing address location */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Write should fail for an illegal location");
         return;
     }
 
     /* Calls read with a non-existing address location */
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
-    if (err != TFM_SST_ERR_ASSET_NOT_FOUND) {
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         TEST_FAIL("Read should fail for an illegal location");
         return;
     }
@@ -1444,9 +1444,9 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 {
     const uint32_t app_id = S_APP_ID;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    struct tfm_sst_asset_info_t asset_info;
+    struct psa_sst_asset_info_t asset_info;
     struct tfm_sst_buf_t buf;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint8_t read_data[READ_BUF_SIZE] = "XXXXXXXXXXXXX";
     uint8_t write_data_1[WRITE_BUF_SIZE] = "AAAA";
     uint8_t write_data_2[2] = "B";
@@ -1457,7 +1457,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     }
 
     err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail");
         return;
     }
@@ -1468,13 +1468,13 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 
     /* Writes write_data_1 to the asset */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &buf);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("First write should not fail");
         return;
     }
 
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, &asset_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail");
         return;
     }
@@ -1493,13 +1493,13 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 
     /* Overwrites the second character in the asset with write_data_2 */
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &buf);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Second write should not fail");
         return;
     }
 
     err = tfm_sst_veneer_get_info(app_id, asset_uuid, &test_token, &asset_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Get information should not fail");
         return;
     }
@@ -1515,7 +1515,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     buf.offset = 0;
 
     err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &buf);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -1534,7 +1534,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     buf.offset = (asset_info.size_current + 1);
 
     err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &buf);
-    if (err != TFM_SST_ERR_PARAM_ERROR) {
+    if (err != PSA_SST_ERR_PARAM_ERROR) {
         TEST_FAIL("Write must fail if the offset is bigger than the current"
                   " asset's size");
         return;

@@ -29,7 +29,7 @@ static uint8_t sst_crypto_iv_buf[SST_IV_LEN_BYTES];
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[SST_MBEDTLS_MEM_BUF_LEN];
 
-enum tfm_sst_err_t sst_crypto_init(void)
+enum psa_sst_err_t sst_crypto_init(void)
 {
     mbedtls_gcm_free(&sst_crypto_gcm_ctx);
 
@@ -44,10 +44,10 @@ enum tfm_sst_err_t sst_crypto_init(void)
      * are void. When integrated with crypto engine or service
      * a return value may be required.
      */
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
+enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
 {
     /* FIXME: if key diversification is desired, the appid
      * can be used to derive a key from the HUK derived key.
@@ -59,10 +59,10 @@ enum tfm_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
      */
     plat_get_crypto_huk(key, key_len);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
+enum psa_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
 {
     return mbedtls_gcm_setkey(&sst_crypto_gcm_ctx, MBEDTLS_CIPHER_ID_AES,
                               key, key_len*8);
@@ -116,7 +116,7 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
 
 }
 
-enum tfm_sst_err_t sst_crypto_encrypt_and_tag(
+enum psa_sst_err_t sst_crypto_encrypt_and_tag(
                                             union sst_crypto_t *crypto,
                                             const uint8_t *add, size_t add_len,
                                             const uint8_t *in, uint8_t *out,
@@ -128,7 +128,7 @@ enum tfm_sst_err_t sst_crypto_encrypt_and_tag(
                                      crypto->ref.tag);
 }
 
-enum tfm_sst_err_t sst_crypto_auth_and_decrypt(
+enum psa_sst_err_t sst_crypto_auth_and_decrypt(
                                              const union sst_crypto_t *crypto,
                                              const uint8_t *add, size_t add_len,
                                              const uint8_t *in, uint8_t *out,
@@ -140,17 +140,17 @@ enum tfm_sst_err_t sst_crypto_auth_and_decrypt(
                                     in, out);
 }
 
-enum tfm_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
+enum psa_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
                                                 const uint8_t *add,
                                                 uint32_t add_len)
 {
-    enum tfm_sst_err_t ret;
+    enum psa_sst_err_t ret;
 
     ret = sst_crypto_encrypt_and_tag(crypto, add, add_len, 0, 0, 0);
     return ret;
 }
 
-enum tfm_sst_err_t sst_crypto_authenticate(
+enum psa_sst_err_t sst_crypto_authenticate(
                                          const union sst_crypto_t *crypto,
                                          const uint8_t *add, uint32_t add_len)
 {

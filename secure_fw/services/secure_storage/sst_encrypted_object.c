@@ -38,18 +38,18 @@ static uint8_t sst_plaintext_buf[SST_MAX_OBJECT_DATA_SIZE];
  * \brief Gets the encryption key and sets it as the key to be used for
  *        cryptographic operations.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_object_set_encryption_key(void)
+static enum psa_sst_err_t sst_object_set_encryption_key(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* Key used for authenticated encryption and decryption */
     static uint8_t sst_encryption_key[SST_KEY_LEN_BYTES];
 
     /* Get the encryption key */
     err = sst_crypto_getkey(sst_encryption_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -66,15 +66,15 @@ static enum tfm_sst_err_t sst_object_set_encryption_key(void)
  * \param[in]  cur_size  Size of the object data
  * \param[out] obj       Pointer to the object structure to fill in
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_object_auth_decrypt(uint32_t cur_size,
+static enum psa_sst_err_t sst_object_auth_decrypt(uint32_t cur_size,
                                                   struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_object_set_encryption_key();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -87,14 +87,14 @@ static enum tfm_sst_err_t sst_object_auth_decrypt(uint32_t cur_size,
                                       obj->data,
                                       sst_plaintext_buf,
                                       cur_size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     sst_utils_memcpy(obj->data, sst_plaintext_buf,
                      obj->header.info.size_current);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
 /**
@@ -104,15 +104,15 @@ static enum tfm_sst_err_t sst_object_auth_decrypt(uint32_t cur_size,
  * \param[in]  cur_size  Size of the object data
  * \param[out] obj       Pointer to the object structure to fill in
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_object_auth_encrypt(uint32_t cur_size,
+static enum psa_sst_err_t sst_object_auth_encrypt(uint32_t cur_size,
                                                   struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_object_set_encryption_key();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -126,20 +126,20 @@ static enum tfm_sst_err_t sst_object_auth_encrypt(uint32_t cur_size,
                                      obj->data,
                                      sst_plaintext_buf,
                                      cur_size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     sst_utils_memcpy(obj->data, sst_plaintext_buf, cur_size);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_create(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* FIXME: The token structure needs to be used when the key derivation
      *        mechanism is in place to generate the specific object key.
@@ -149,13 +149,13 @@ enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
     /* Create an object in the object system */
     err = sst_core_object_create(uuid,
                                  SST_ENCRYPTED_SIZE(obj->header.info.size_max));
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Authenticate the header, with no data to encrypt */
     err = sst_object_auth_encrypt(SST_EMPTY_OBJECT_SIZE, obj);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -175,13 +175,13 @@ enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
  * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] obj      Pointer to the object structure to fill in
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
+static enum psa_sst_err_t sst_read_encrypted_object(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_core_obj_info_t obj_info;
     uint32_t plaintext_size;
 
@@ -192,7 +192,7 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
 
     /* Get the current size of the encrypted object in the object system */
     err = sst_core_object_get_info(uuid, &obj_info);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -206,38 +206,38 @@ static enum tfm_sst_err_t sst_read_encrypted_object(uint32_t uuid,
     err = sst_core_object_read(uuid, (uint8_t *)obj,
                                SST_OBJECT_START_POSITION,
                                obj_info.size_current);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Decrypt the object data */
     err = sst_object_auth_decrypt(plaintext_size, obj);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_read(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_read_encrypted_object(uuid, s_token, obj);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_write(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* FIXME: The token structure needs to be used when the key derivation
      *        mechanism is in place to generate the specific object key.
@@ -246,7 +246,7 @@ enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
 
     /* Encrypt the object data */
     err = sst_object_auth_encrypt(obj->header.info.size_current, obj);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 

@@ -40,45 +40,45 @@ __STATIC_INLINE uint32_t get_phys_address(uint32_t block_id, uint32_t offset)
     return (SST_FLASH_AREA_ADDR + (block_id * SST_BLOCK_SIZE) + offset);
 }
 
-static enum tfm_sst_err_t flash_read(uint32_t flash_addr, uint8_t *buff,
+static enum psa_sst_err_t flash_read(uint32_t flash_addr, uint8_t *buff,
                                      uint32_t size)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.ReadData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_write(uint32_t flash_addr, const uint8_t *buff,
+static enum psa_sst_err_t flash_write(uint32_t flash_addr, const uint8_t *buff,
                                       uint32_t size)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.ProgramData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_erase(uint32_t flash_addr)
+static enum psa_sst_err_t flash_erase(uint32_t flash_addr)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.EraseSector(flash_addr);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
+enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
                                   uint32_t offset, uint32_t size)
 {
     uint32_t flash_addr;
@@ -91,7 +91,7 @@ enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
     return flash_read(flash_addr, buff, size);
 }
 
-enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
+enum psa_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
                                    uint32_t offset, uint32_t size)
 {
     uint32_t flash_addr;
@@ -104,14 +104,14 @@ enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
     return flash_write(flash_addr, buff, size);
 }
 
-enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
+enum psa_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
                                                  uint32_t dst_offset,
                                                  uint32_t src_block,
                                                  uint32_t src_offset,
                                                  uint32_t size)
 {
     static uint8_t dst_block_data_copy[SST_BLOCK_SIZE];
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t dst_flash_addr;
     uint32_t src_flash_addr;
 
@@ -124,7 +124,7 @@ enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
      * destination content.
      */
     err = flash_read(src_flash_addr, dst_block_data_copy, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -139,7 +139,7 @@ enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
     return err;
 }
 
-enum tfm_sst_err_t sst_flash_erase_block(uint32_t block_id)
+enum psa_sst_err_t sst_flash_erase_block(uint32_t block_id)
 {
     uint32_t flash_addr;
 

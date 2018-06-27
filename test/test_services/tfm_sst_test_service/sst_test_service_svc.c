@@ -10,12 +10,12 @@
 #include "sst_test_service_veneers.h"
 #include "tfm_id_mngr.h"
 
-enum tfm_sst_err_t sst_test_service_svc_setup(void)
+enum psa_sst_err_t sst_test_service_svc_setup(void)
 {
     return sst_test_service_veneer_setup();
 }
 
-enum tfm_sst_err_t sst_test_service_svc_dummy_encrypt(uint32_t key_uuid,
+enum psa_sst_err_t sst_test_service_svc_dummy_encrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
@@ -27,7 +27,7 @@ enum tfm_sst_err_t sst_test_service_svc_dummy_encrypt(uint32_t key_uuid,
                                                  buf_size);
 }
 
-enum tfm_sst_err_t sst_test_service_svc_dummy_decrypt(uint32_t key_uuid,
+enum psa_sst_err_t sst_test_service_svc_dummy_decrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
@@ -39,7 +39,7 @@ enum tfm_sst_err_t sst_test_service_svc_dummy_decrypt(uint32_t key_uuid,
                                                  buf_size);
 }
 
-enum tfm_sst_err_t sst_test_service_svc_clean(void)
+enum psa_sst_err_t sst_test_service_svc_clean(void)
 {
     return sst_test_service_veneer_clean();
 }

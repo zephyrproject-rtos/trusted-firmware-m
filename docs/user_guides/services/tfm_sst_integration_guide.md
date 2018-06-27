@@ -93,22 +93,24 @@ and is divided as follows:
  - Cryptographic interfaces
  - Assets definitions
 
-The TF-M public interfaces for SST service are located in `interface/include`
+The PSA interfaces for SST service are located in `interface/include`
 
 
-### TF-M public interfaces
+### Platform Security Architecture (PSA) interfaces version 0.1
 
-The SST service exposes the following public interfaces:
+The SST service exposes the following PSA interfaces:
 
- - `enum tfm_sst_err_t tfm_sst_create(uint16_t asset_uuid)`
- - `enum tfm_sst_err_t tfm_sst_get_handle(uint16_t asset_uuid, uint32_t* hdl)`
- - `enum tfm_sst_err_t tfm_sst_get_attributes(uint32_t asset_handle, struct tfm_sst_attribs_t* attrib_struct)`
- - `enum tfm_sst_err_t tfm_sst_read(uint32_t asset_handle, struct tfm_sst_buf_t* data)`
- - `enum tfm_sst_err_t tfm_sst_write(uint32_t asset_handle, struct tfm_sst_buf_t* data)`
- - `enum tfm_sst_err_t tfm_sst_delete(uint32_t asset_handle)`
+ - `enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size)`
+ - `enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, struct psa_sst_asset_info_t *info)`
+ - `enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, struct psa_sst_asset_attrs_t *attrs)`
+ - `enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, const struct psa_sst_asset_attrs_t *attrs)`
+ - `enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, uint32_t size, uint32_t offset, uint8_t *data)`
+ - `enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, uint32_t size, uint32_t offset, const uint8_t *data)`
+ - `enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size)`
 
-Those interfaces and the TF-M SST service types are defined and documented
-in `interface/include/tfm_sst_api.h` and `interface/include/tfm_sst_defs.h`
+These PSA interfaces and types are defined and documented
+in `interface/include/psa_sst_api.h`, `interface/include/psa_sst_asset_defs.h`
+and `interface/include/psa_sst_asset_macros.h`
 
 ### Core Files
 
@@ -116,9 +118,11 @@ in `interface/include/tfm_sst_api.h` and `interface/include/tfm_sst_defs.h`
 power failure safe operations and required cryptographic operations for SST
 service.
 
-`sst_core_interface.c` - Contains skeleton implementation for access
-serialization, and it is a placeholder for future context management related
-enhancements.
+`sst_object_system.c` - Contains the object system implementation to manage
+all objects in SST area.
+
+`sst_encrypted_object.c` - Contains an implementation to manipulate
+encrypted objects in the SST object system.
 
 `sst_asset_management.c` - Contains asset's access policy management code.
 
@@ -265,9 +269,10 @@ The `struct sst_asset_info_t asset_perms[]` and `struct sst_asset_perm_t
 asset_perms_modes[]` vectors **must** be named as they are in
 `sst_asset_defs.c`.
 
-The asset information structure (`struct sst_asset_info_t`) contains the
+The asset information structure (`struct sst_asset_policy_t`) contains the
 following items:
 
+ - `type` - PSA asset type
  - `asset_uuid` - Asset unique ID.
  - `max_size` - Asset maximum size.
  - `perms_count` - Number of applications specified in `asset_perms_modes`
@@ -281,13 +286,15 @@ The `struct sst_asset_info_t` definition can be found in
 
 An example of `asset_perms` definition can be found below:
 ```
-struct sst_asset_info_t asset_perms[] = {
+struct sst_asset_policy_t asset_perms[] = {
 {
+    .type = PSA_SST_ASSET_KEY_AES,
     .asset_uuid = SST_ASSET_ID_AES_KEY_128,
     .max_size = SST_ASSET_MAX_SIZE_AES_KEY_128,
     .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_128,
     .perms_modes_start_idx = 0,
 }, {
+    .type = PSA_SST_ASSET_KEY_AES,
     .asset_uuid = SST_ASSET_ID_AES_KEY_192,
     .max_size = SST_ASSET_MAX_SIZE_AES_KEY_192,
     .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_192,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,23 +9,23 @@
 
 #include <stdio.h>
 
-const char *sst_err_to_str(enum tfm_sst_err_t err)
+const char *sst_err_to_str(enum psa_sst_err_t err)
 {
     switch (err) {
-    case TFM_SST_ERR_SUCCESS:
-        return "TFM_SST_ERR_SUCCESS";
-    case TFM_SST_ERR_ASSET_NOT_PREPARED:
-        return "TFM_SST_ERR_ASSET_NOT_PREPARED";
-    case TFM_SST_ERR_ASSET_NOT_FOUND:
-        return "TFM_SST_ERR_ASSET_NOT_FOUND";
-    case TFM_SST_ERR_PARAM_ERROR:
-        return "TFM_SST_ERR_PARAM_ERROR";
-    case TFM_SST_ERR_STORAGE_SYSTEM_FULL:
-        return "TFM_SST_ERR_STORAGE_SYSTEM_FULL";
-    case TFM_SST_ERR_SYSTEM_ERROR:
-        return "TFM_SST_ERR_SYSTEM_ERROR";
-    case TFM_SST_ERR_FORCE_INT_SIZE:
-        return "TFM_SST_ERR_FORCE_INT_SIZE";
+    case PSA_SST_ERR_SUCCESS:
+        return "PSA_SST_ERR_SUCCESS";
+    case PSA_SST_ERR_ASSET_NOT_PREPARED:
+        return "PSA_SST_ERR_ASSET_NOT_PREPARED";
+    case PSA_SST_ERR_ASSET_NOT_FOUND:
+        return "PSA_SST_ERR_ASSET_NOT_FOUND";
+    case PSA_SST_ERR_PARAM_ERROR:
+        return "PSA_SST_ERR_PARAM_ERROR";
+    case PSA_SST_ERR_STORAGE_SYSTEM_FULL:
+        return "PSA_SST_ERR_STORAGE_SYSTEM_FULL";
+    case PSA_SST_ERR_SYSTEM_ERROR:
+        return "PSA_SST_ERR_SYSTEM_ERROR";
+    case PSA_SST_ERR_FORCE_INT_SIZE:
+        return "PSA_SST_ERR_FORCE_INT_SIZE";
     /* default:  The default is not defined intentionally to force the
      *           compiler to check that all the enumeration values are
      *           covered in the switch.

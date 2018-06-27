@@ -14,44 +14,7 @@ extern "C" {
 
 #include <inttypes.h>
 #include <limits.h>
-#include "tfm_api.h"
-#include "tfm_sst_asset_defs.h"
-#include "tfm_sst_asset_macros.h"
-
-/* FIXME: the secure APP ID should not be share with the non-secure code
- *        as it is revealing information about secure code implementation.
- */
-#define S_APP_ID 0xF0000000
-
-/* FIXME:
- * Very descriptive error codes can leak implementation
- * information to caller and may allow exploitation
- * of implementation weaknesses by malicious actors.
- * Potential approaches-
- * a. Just return generic error for any kind of failure
- *
- * OR
- *
- * b. Non-secure callers get the generic failure, the
- *    secure side callers get a bit more detailed error
- *    codes.
- */
-
-/* The return value is shared with the TFM service status value. The SST return
- * codes shouldn't overlap with predefined TFM status values.
- */
-#define TFM_SST_ERR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
-
-enum tfm_sst_err_t {
-    TFM_SST_ERR_SUCCESS = 0,
-    TFM_SST_ERR_ASSET_NOT_PREPARED = TFM_SST_ERR_OFFSET,
-    TFM_SST_ERR_ASSET_NOT_FOUND,
-    TFM_SST_ERR_PARAM_ERROR,
-    TFM_SST_ERR_STORAGE_SYSTEM_FULL,
-    TFM_SST_ERR_SYSTEM_ERROR,
-    /* Following entry is only to ensure the error code of int size */
-    TFM_SST_ERR_FORCE_INT_SIZE = INT_MAX
-};
+#include "psa_sst_api.h"
 
 /*!
  * \struct tfm_sst_token_t

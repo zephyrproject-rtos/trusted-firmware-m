@@ -37,7 +37,7 @@ static struct sst_object_t g_sst_object;
  * \param[in]  size  Object size
  * \param[out] obj   Object to
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
 static void sst_object_init_object(uint32_t uuid, uint32_t type, uint32_t size,
                                    struct sst_object_t *obj)
@@ -52,13 +52,13 @@ static void sst_object_init_object(uint32_t uuid, uint32_t type, uint32_t size,
     obj->header.info.type = type;
 }
 
-enum tfm_sst_err_t sst_system_prepare(void)
+enum psa_sst_err_t sst_system_prepare(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     sst_global_lock();
     err = sst_core_prepare();
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         sst_system_ready = SST_SYSTEM_READY;
     }
     sst_global_unlock();
@@ -66,12 +66,12 @@ enum tfm_sst_err_t sst_system_prepare(void)
     return err;
 }
 
-enum tfm_sst_err_t sst_object_read(uint32_t uuid,
+enum psa_sst_err_t sst_object_read(uint32_t uuid,
                                    const struct tfm_sst_token_t *s_token,
                                    uint8_t *data, uint32_t offset,
                                    uint32_t size)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -91,7 +91,7 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid,
         err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object.header,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -102,7 +102,7 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid,
                                        g_sst_object.header.info.size_current);
         }
 #endif
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -110,7 +110,7 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid,
         err = sst_utils_check_contained_in(SST_OBJECT_START_POSITION,
                                           g_sst_object.header.info.size_current,
                                           offset, size);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -127,11 +127,11 @@ enum tfm_sst_err_t sst_object_read(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_create(uint32_t uuid,
+enum psa_sst_err_t sst_object_create(uint32_t uuid,
                                      const struct tfm_sst_token_t *s_token,
                                      uint32_t type, uint32_t size)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -141,7 +141,7 @@ enum tfm_sst_err_t sst_object_create(uint32_t uuid,
         sst_global_lock();
         /* Check if it already exists */
         err = sst_core_object_exist(uuid);
-        if (err == TFM_SST_ERR_ASSET_NOT_FOUND) {
+        if (err == PSA_SST_ERR_ASSET_NOT_FOUND) {
             /* Initialize object based on the input arguments */
             sst_object_init_object(uuid, type, size, &g_sst_object);
 
@@ -153,7 +153,7 @@ enum tfm_sst_err_t sst_object_create(uint32_t uuid,
              *        in the object.
              */
             err = sst_core_object_create(uuid, SST_OBJECT_SIZE(size));
-            if (err != TFM_SST_ERR_SUCCESS) {
+            if (err != PSA_SST_ERR_SUCCESS) {
                 return err;
             }
 
@@ -168,12 +168,12 @@ enum tfm_sst_err_t sst_object_create(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_write(uint32_t uuid,
+enum psa_sst_err_t sst_object_write(uint32_t uuid,
                                     const struct tfm_sst_token_t *s_token,
                                     const uint8_t *data, uint32_t offset,
                                     uint32_t size)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -194,7 +194,7 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
         err = sst_core_object_read(uuid, (uint8_t *)&g_sst_object.header,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -205,7 +205,7 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
                                        g_sst_object.header.info.size_current);
         }
 #endif
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -213,7 +213,7 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
          * prevent gaps being created in the object data.
          */
         if (offset > g_sst_object.header.info.size_current) {
-            return TFM_SST_ERR_PARAM_ERROR;
+            return PSA_SST_ERR_PARAM_ERROR;
         }
 
 
@@ -249,11 +249,11 @@ enum tfm_sst_err_t sst_object_write(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
+enum psa_sst_err_t sst_object_get_info(uint32_t uuid,
                                        const struct tfm_sst_token_t *s_token,
-                                       struct tfm_sst_asset_info_t *info)
+                                       struct psa_sst_asset_info_t *info)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -270,12 +270,12 @@ enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
 #endif
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
         sst_utils_memcpy(info, &g_sst_object.header.info,
-                         TFM_SST_ASSET_INFO_SIZE);
+                         PSA_SST_ASSET_INFO_SIZE);
 
         sst_global_unlock();
     }
@@ -283,11 +283,11 @@ enum tfm_sst_err_t sst_object_get_info(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
+enum psa_sst_err_t sst_object_get_attributes(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
-                                          struct tfm_sst_asset_attrs_t *attrs)
+                                          struct psa_sst_asset_attrs_t *attrs)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -304,12 +304,12 @@ enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
 #endif
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
         sst_utils_memcpy(attrs, &g_sst_object.header.attr,
-                         TFM_SST_ASSET_ATTR_SIZE);
+                         PSA_SST_ASSET_ATTR_SIZE);
 
         sst_global_unlock();
     }
@@ -317,11 +317,11 @@ enum tfm_sst_err_t sst_object_get_attributes(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
+enum psa_sst_err_t sst_object_set_attributes(uint32_t uuid,
                                       const struct tfm_sst_token_t *s_token,
-                                      const struct tfm_sst_asset_attrs_t *attrs)
+                                      const struct psa_sst_asset_attrs_t *attrs)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
 #ifndef SST_ENCRYPTION
     (void)s_token;
@@ -338,13 +338,13 @@ enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
                                    SST_OBJECT_START_POSITION,
                                    SST_OBJECT_HEADER_SIZE);
 #endif
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
         /* Set new attributes */
         sst_utils_memcpy(&g_sst_object.header.attr,
-                         attrs, TFM_SST_ASSET_ATTR_SIZE);
+                         attrs, PSA_SST_ASSET_ATTR_SIZE);
 
 #ifdef SST_ENCRYPTION
         err = sst_encrypted_object_write(uuid, s_token, &g_sst_object);
@@ -360,10 +360,10 @@ enum tfm_sst_err_t sst_object_set_attributes(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_delete(uint32_t uuid,
+enum psa_sst_err_t sst_object_delete(uint32_t uuid,
                                      const struct tfm_sst_token_t *s_token)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
 
     /* FIXME: Authenticate object data to validate token before delete it. */
     (void)s_token;
@@ -377,9 +377,9 @@ enum tfm_sst_err_t sst_object_delete(uint32_t uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_system_wipe_all(void)
+enum psa_sst_err_t sst_system_wipe_all(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     /* This function may get called as a corrective action
      * if a system level security violation is detected.
      * This could be asynchronous to normal system operation

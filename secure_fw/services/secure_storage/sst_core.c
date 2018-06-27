@@ -315,17 +315,17 @@ static uint8_t sst_meta_latest_meta_block(
  *
  * \param[in] block_meta  Pointer to block meta structure
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_validate_block_meta(
+static enum psa_sst_err_t sst_meta_validate_block_meta(
                                     const struct sst_block_metadata *block_meta)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     /* for data blocks data start at position 0 */
     uint32_t valid_data_start_value = 0;
 
     if (block_meta->phys_id >= SST_TOTAL_NUM_OF_BLOCKS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* boundary check: block data start + free size can not be bigger
@@ -334,8 +334,8 @@ static enum tfm_sst_err_t sst_meta_validate_block_meta(
     err = sst_utils_check_contained_in(0, SST_BLOCK_SIZE,
                                        block_meta->data_start,
                                        block_meta->free_size);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     if (block_meta->phys_id == SST_METADATA_BLOCK0 ||
@@ -348,10 +348,10 @@ static enum tfm_sst_err_t sst_meta_validate_block_meta(
     }
 
     if (block_meta->data_start != valid_data_start_value) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 #endif
 
@@ -361,12 +361,12 @@ static enum tfm_sst_err_t sst_meta_validate_block_meta(
  * \param[in] lblock        Logical block number
  * \param[out] block_meta   Pointer to block meta structure
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_read_block_metadata(uint32_t lblock,
+static enum psa_sst_err_t sst_meta_read_block_metadata(uint32_t lblock,
                                           struct sst_block_metadata *block_meta)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t pos;
     uint32_t metablock;
 
@@ -376,7 +376,7 @@ static enum tfm_sst_err_t sst_meta_read_block_metadata(uint32_t lblock,
                          pos, sizeof(struct sst_block_metadata));
 
 #ifdef SST_VALIDATE_METADATA_FROM_FLASH
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         err = sst_meta_validate_block_meta(block_meta);
     }
 #endif
@@ -392,41 +392,41 @@ static enum tfm_sst_err_t sst_meta_read_block_metadata(uint32_t lblock,
  *
  * \param[in] meta  Pointer to object meta structure
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_validate_object_meta(
+static enum psa_sst_err_t sst_meta_validate_object_meta(
                                                const struct sst_assetmeta *meta)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SUCCESS;
+    enum psa_sst_err_t err = PSA_SST_ERR_SUCCESS;
 
     /* logical block ID can not be bigger or equal than number of
      * active blocks.
      */
     if (meta->lblock >= SST_NUM_ACTIVE_DBLOCKS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* meta->unique_id can be 0 if the object is not in use. If it is in
      * use, check the metadata.
      */
-    if (sst_utils_validate_uuid(meta->unique_id) == TFM_SST_ERR_SUCCESS) {
+    if (sst_utils_validate_uuid(meta->unique_id) == PSA_SST_ERR_SUCCESS) {
         /* validate objects values if object is in use */
         if (meta->max_size > SST_MAX_OBJECT_SIZE) {
-            return TFM_SST_ERR_ASSET_NOT_FOUND;
+            return PSA_SST_ERR_ASSET_NOT_FOUND;
         }
 
         /* the current object's data size must be smaller or equal than
          * object's data max size.
          */
         if (meta->cur_size > meta->max_size) {
-            return TFM_SST_ERR_ASSET_NOT_FOUND;
+            return PSA_SST_ERR_ASSET_NOT_FOUND;
         }
 
         if (meta->lblock == SST_LOGICAL_DBLOCK0) {
             /* in block 0, data index must be located after the metadata */
             if (meta->data_index <
                 sst_meta_object_meta_offset(SST_NUM_ASSETS)) {
-                return TFM_SST_ERR_ASSET_NOT_FOUND;
+                return PSA_SST_ERR_ASSET_NOT_FOUND;
             }
         }
 
@@ -445,12 +445,12 @@ static enum tfm_sst_err_t sst_meta_validate_object_meta(
  * \param[in]  object_index  Object's index
  * \param[out] meta          Pointer to object meta structure
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
+enum psa_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
                                            struct sst_assetmeta *meta)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t offset;
 
     offset = sst_meta_object_meta_offset(object_index);
@@ -458,7 +458,7 @@ enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
                          (uint8_t *)meta, offset, sizeof(struct sst_assetmeta));
 
 #ifdef SST_VALIDATE_METADATA_FROM_FLASH
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         err = sst_meta_validate_object_meta(meta);
     }
 #endif
@@ -474,17 +474,17 @@ enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
 static uint16_t sst_get_free_object_index(void)
 {
     uint16_t i;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_assetmeta tmp_metadata;
 
     for (i = 0; i < SST_NUM_ASSETS; i++) {
         err = sst_meta_read_object_meta(i, &tmp_metadata);
-        if (err == TFM_SST_ERR_SUCCESS) {
+        if (err == PSA_SST_ERR_SUCCESS) {
             /* Check if this entry is free by checking if unique_id values is an
              * invalid UUID.
              */
             if (sst_utils_validate_uuid(tmp_metadata.unique_id) !=
-                                                          TFM_SST_ERR_SUCCESS) {
+                                                          PSA_SST_ERR_SUCCESS) {
                 /* Found */
                 return i;
             }
@@ -506,10 +506,10 @@ static uint16_t sst_get_free_object_index(void)
 static uint32_t sst_dblock_lo_to_phy(uint32_t lblock)
 {
     struct sst_block_metadata block_meta;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_meta_read_block_metadata(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return SST_BLOCK_INVALID_ID;
     }
 
@@ -526,9 +526,9 @@ static uint32_t sst_dblock_lo_to_phy(uint32_t lblock)
  * \param[in] offset             Offset in the block
  * \param[in] size               Size of the incoming data
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
+static enum psa_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
                                     const struct sst_block_metadata *block_meta,
                                     const uint8_t *data,
                                     uint32_t offset,
@@ -536,12 +536,12 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
 {
     uint32_t scratch_block;
     uint32_t end_data;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     scratch_block = sst_meta_cur_data_scratch(cur_logical_block);
 
     err = sst_flash_write(scratch_block, data, offset, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -553,7 +553,7 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
                                             block_meta->phys_id,
                                             block_meta->data_start,
                                             (offset - block_meta->data_start));
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
     }
@@ -574,14 +574,14 @@ static enum tfm_sst_err_t sst_dblock_update_scratch(uint32_t cur_logical_block,
  * \param[in] object_index  Object's index in the metadata table
  * \param[in] obj_meta      Metadata pointer
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_mblock_update_scratch_object_meta(
+static enum psa_sst_err_t sst_mblock_update_scratch_object_meta(
                                                  uint32_t object_index,
                                                  struct sst_assetmeta *obj_meta)
 {
     uint32_t scratch_block;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t pos;
 
     scratch_block = sst_meta_cur_meta_scratch();
@@ -595,9 +595,9 @@ static enum tfm_sst_err_t sst_mblock_update_scratch_object_meta(
 /**
  * \brief Erases data and meta scratch blocks
  */
-static enum tfm_sst_err_t sst_meta_erase_scratch_blocks(void)
+static enum psa_sst_err_t sst_meta_erase_scratch_blocks(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t scratch_datablock;
     uint32_t scratch_metablock;
 
@@ -608,7 +608,7 @@ static enum tfm_sst_err_t sst_meta_erase_scratch_blocks(void)
      * metadata scratch block is erased before data block.
      */
     err = sst_flash_erase_block(scratch_metablock);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -632,13 +632,13 @@ static enum tfm_sst_err_t sst_meta_erase_scratch_blocks(void)
  * \param[in] lblock      Logical block number
  * \param[in] block_meta  Pointer to block's metadata
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_mblock_update_scratch_block_meta(uint32_t lblock,
+static enum psa_sst_err_t sst_mblock_update_scratch_block_meta(uint32_t lblock,
                                           struct sst_block_metadata *block_meta)
 {
     uint32_t meta_block;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t pos;
 
     meta_block = sst_meta_cur_meta_scratch();
@@ -655,14 +655,14 @@ static enum tfm_sst_err_t sst_mblock_update_scratch_block_meta(uint32_t lblock,
  *
  * \param[in] idx  Object index to skip
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_mblock_copy_remaining_object_meta(
+static enum psa_sst_err_t sst_mblock_copy_remaining_object_meta(
                                                           uint32_t object_index)
 {
     uint32_t scratch_block;
     uint32_t meta_block;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t end;
     uint32_t pos;
 
@@ -675,7 +675,7 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_object_meta(
     err = sst_flash_block_to_block_move(scratch_block, pos, meta_block, pos,
                                         (object_index *
                                          sizeof(struct sst_assetmeta)));
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -699,12 +699,12 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_object_meta(
  *
  * \param[in] lblock  Logical block number to skip
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
+static enum psa_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
 {
     struct sst_block_metadata block_meta;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t meta_block;
     uint32_t pos;
     uint32_t scratch_block;
@@ -723,8 +723,8 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
          * data.
          */
         err = sst_meta_read_block_metadata(SST_LOGICAL_DBLOCK0, &block_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
 
         /* Update physical ID for logical block 0 to match with the
@@ -733,8 +733,8 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
         block_meta.phys_id = scratch_block;
         err = sst_mblock_update_scratch_block_meta(SST_LOGICAL_DBLOCK0,
                                                    &block_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
 
         /* Copy the rest of metadata blocks between logical block 0 and
@@ -749,7 +749,7 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
             /* Data before updated content */
             err = sst_flash_block_to_block_move(scratch_block, pos, meta_block,
                                                 pos, size);
-            if (err != TFM_SST_ERR_SUCCESS) {
+            if (err != PSA_SST_ERR_SUCCESS) {
                 return err;
             }
         }
@@ -774,20 +774,20 @@ static enum tfm_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
  * \param[in]  size    Size to be read
  * \param[out] buf     Buffer pointer to store the data
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta,
+static enum psa_sst_err_t sst_block_object_read_raw(struct sst_assetmeta *meta,
                                                     uint32_t offset,
                                                     uint32_t size,
                                                     uint8_t *buf)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t phys_block;
     uint32_t pos;
 
     phys_block = sst_dblock_lo_to_phy(meta->lblock);
     if (phys_block == SST_BLOCK_INVALID_ID) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
     pos = (meta->data_index + offset);
 
@@ -818,11 +818,11 @@ static uint32_t authenticated_meta_data_size(void)
  *
  * \param[in] block_id  ID of the current metadata block to authenticate
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
+static enum psa_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t size;
     uint8_t *addr;
     union sst_crypto_t *crypto = &sst_system_ctx.meta_block_header.crypto;
@@ -839,7 +839,7 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
 
     /* Commit metadata header to flash, except for the non-authenticated part */
     err = sst_flash_write(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -850,22 +850,22 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
      * FIXME: no need to read back metadata header we just wrote.
      */
     err = sst_flash_read(block_id, addr, SST_AUTH_METADATA_OFFSET, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_crypto_getkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_crypto_setkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_crypto_generate_auth_tag(crypto, addr, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -882,10 +882,10 @@ static enum tfm_sst_err_t sst_meta_auth_and_update(uint32_t block_id)
  *
  * \return Return offset value in metadata block
  */
-enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
+enum psa_sst_err_t sst_mblock_authenticate(uint32_t block)
 {
     struct sst_metadata_block_header *metablock_header;
-    enum tfm_sst_err_t err = 0;
+    enum psa_sst_err_t err = 0;
     const uint8_t *addr;
     uint32_t addr_len;
 
@@ -894,7 +894,7 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
     /* Read block table and lookups (all metadata and header) */
     err = sst_flash_read(block, (uint8_t *)metablock_header, 0,
                          SST_ALL_METADATA_SIZE);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -903,12 +903,12 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
     addr_len = authenticated_meta_data_size();
 
     err = sst_crypto_getkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_crypto_setkey(sst_system_ctx.sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -924,11 +924,11 @@ enum tfm_sst_err_t sst_mblock_authenticate(uint32_t block)
  *
  * \param[in] swap_count  Swap count to validate
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_validate_swap_count(uint8_t swap_count)
+static enum psa_sst_err_t sst_meta_validate_swap_count(uint8_t swap_count)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SUCCESS;
+    enum psa_sst_err_t err = PSA_SST_ERR_SUCCESS;
 
     /* When a flash block is erased, the default value
      * is usually 0xFF (i.e. all 1s). Since the swap count
@@ -943,7 +943,7 @@ static enum tfm_sst_err_t sst_meta_validate_swap_count(uint8_t swap_count)
      * back to previous metablock instead.
      */
     if (swap_count == SST_FLASH_DEFAULT_VAL) {
-        err = TFM_SST_ERR_SYSTEM_ERROR;
+        err = PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     return err;
@@ -954,17 +954,17 @@ static enum tfm_sst_err_t sst_meta_validate_swap_count(uint8_t swap_count)
  *
  * \param[in] swap_count  Swap count to validate
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_validate_fs_version(uint8_t fs_version)
+static enum psa_sst_err_t sst_meta_validate_fs_version(uint8_t fs_version)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SUCCESS;
+    enum psa_sst_err_t err = PSA_SST_ERR_SUCCESS;
 
     /* Looks for exact version number.
      * FIXME: backward compatibility could be considered in future revisions.
      */
     if (fs_version != SST_SUPPORTED_VERSION) {
-        err = TFM_SST_ERR_SYSTEM_ERROR;
+        err = PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     return err;
@@ -977,15 +977,15 @@ static enum tfm_sst_err_t sst_meta_validate_fs_version(uint8_t fs_version)
  *
  * \param[in] meta  Pointer to metadata block header
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_validate_header_meta(
+static enum psa_sst_err_t sst_meta_validate_header_meta(
                                          struct sst_metadata_block_header *meta)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_meta_validate_fs_version(meta->fs_version);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         err = sst_meta_validate_swap_count(meta->active_swap_count);
     }
 
@@ -995,11 +995,11 @@ static enum tfm_sst_err_t sst_meta_validate_header_meta(
 /**
  * \brief Writes the scratch metadata's header
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_write_scratch_meta_header(void)
+static enum psa_sst_err_t sst_meta_write_scratch_meta_header(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t scratch_metablock;
 #ifndef SST_ENCRYPTION
     size_t swap_count_offset;
@@ -1012,7 +1012,7 @@ static enum tfm_sst_err_t sst_meta_write_scratch_meta_header(void)
 
     err = sst_meta_validate_swap_count(
                         sst_system_ctx.meta_block_header.active_swap_count);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         /* Reset the swap count to 0 */
         sst_system_ctx.meta_block_header.active_swap_count = 0;
     }
@@ -1030,7 +1030,7 @@ static enum tfm_sst_err_t sst_meta_write_scratch_meta_header(void)
     err = sst_flash_write(scratch_metablock,
                           (uint8_t *)(&sst_system_ctx.meta_block_header),
                           0, swap_count_offset);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1048,16 +1048,16 @@ static enum tfm_sst_err_t sst_meta_write_scratch_meta_header(void)
 /**
  * \brief Reads the active metadata block header into sst_system_ctx
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_read_meta_header(void)
+static enum psa_sst_err_t sst_meta_read_meta_header(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_flash_read(sst_system_ctx.active_metablock,
                          (uint8_t *)&sst_system_ctx.meta_block_header, 0,
                          sizeof(struct sst_metadata_block_header));
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1076,12 +1076,12 @@ static enum tfm_sst_err_t sst_meta_read_meta_header(void)
  *       medadata block needs to be copied in the scratch block, unless
  *       the data of the object processed is located in the logical block 0.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_mblock_migrate_data_to_scratch(void)
+static enum psa_sst_err_t sst_mblock_migrate_data_to_scratch(void)
 {
     struct sst_block_metadata block_meta;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t current_metablock;
     uint32_t scratch_metablock;
     uint32_t data_size;
@@ -1090,7 +1090,7 @@ static enum tfm_sst_err_t sst_mblock_migrate_data_to_scratch(void)
     current_metablock = sst_meta_cur_meta_active();
 
     err = sst_meta_read_block_metadata(SST_LOGICAL_DBLOCK0, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1113,13 +1113,13 @@ static enum tfm_sst_err_t sst_mblock_migrate_data_to_scratch(void)
  *
  * \return Returns offset value in metadata block
  */
-static enum tfm_sst_err_t sst_meta_update_finalize(void)
+static enum psa_sst_err_t sst_meta_update_finalize(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* Commit the metadata block header to flash */
     err = sst_meta_write_scratch_meta_header();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
     /* Update the running context */
@@ -1137,35 +1137,35 @@ static enum tfm_sst_err_t sst_meta_update_finalize(void)
  * \param[out] block_meta   Block metadata entry
  * \param[in]  size         Size of the object for which space is reserve
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_meta_reserve_object(
+static enum psa_sst_err_t sst_meta_reserve_object(
                                          struct sst_assetmeta *object_meta,
                                          struct sst_block_metadata *block_meta,
                                          uint32_t size)
 {
     uint32_t i;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t size_in_flash;
 
     size_in_flash = sst_get_aligned_flash_bytes(size);
 
     for (i = 0; i < SST_NUM_ACTIVE_DBLOCKS; i++) {
         err = sst_meta_read_block_metadata(i, block_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
         if (block_meta->free_size >= size_in_flash) {
             object_meta->lblock = i;
             object_meta->data_index = SST_BLOCK_SIZE - block_meta->free_size;
             block_meta->free_size -= size_in_flash;
             object_meta->max_size = size;
-            return TFM_SST_ERR_SUCCESS;
+            return PSA_SST_ERR_SUCCESS;
         }
     }
 
     /* No block has large enough space to fit the requested object */
-    return TFM_SST_ERR_STORAGE_SYSTEM_FULL;
+    return PSA_SST_ERR_STORAGE_SYSTEM_FULL;
 }
 
 /**
@@ -1174,60 +1174,60 @@ static enum tfm_sst_err_t sst_meta_reserve_object(
  * \param[in]  obj_uuid  ID of the object
  * \param[out] obj_idx   Index of the object in the object system
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_core_get_object_idx(uint32_t obj_uuid,
+static enum psa_sst_err_t sst_core_get_object_idx(uint32_t obj_uuid,
                                                   uint32_t *obj_idx)
 {
     uint32_t i;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_assetmeta tmp_metadata;
 
     for (i = 0; i < SST_NUM_ASSETS; i++) {
         err = sst_meta_read_object_meta(i, &tmp_metadata);
         /* Read from flash failed */
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
 
         /* Unique_id with value 0x00 means end of asset meta section */
         if (tmp_metadata.unique_id == obj_uuid) {
             /* Found */
             *obj_idx = i;
-            return TFM_SST_ERR_SUCCESS;
+            return PSA_SST_ERR_SUCCESS;
         }
 
     }
 
-    return TFM_SST_ERR_ASSET_NOT_FOUND;
+    return PSA_SST_ERR_ASSET_NOT_FOUND;
 }
 
-enum tfm_sst_err_t sst_core_object_exist(uint32_t obj_uuid)
+enum psa_sst_err_t sst_core_object_exist(uint32_t obj_uuid)
 {
     uint32_t idx;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_core_get_object_idx(obj_uuid, &idx);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
+enum psa_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
 {
     uint16_t object_index;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_assetmeta object_meta;
     struct sst_block_metadata block_meta;
 
     err = sst_meta_reserve_object(&object_meta, &block_meta, size);
 
     object_index = sst_get_free_object_index();
-    if ((err != TFM_SST_ERR_SUCCESS) ||
+    if ((err != PSA_SST_ERR_SUCCESS) ||
        (object_index == SST_METADATA_INVALID_INDEX)) {
-        return TFM_SST_ERR_STORAGE_SYSTEM_FULL;
+        return PSA_SST_ERR_STORAGE_SYSTEM_FULL;
     }
 
     object_meta.unique_id = object_uuid;
@@ -1235,8 +1235,8 @@ enum tfm_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
     object_meta.max_size = size;
 
     err = sst_mblock_update_scratch_object_meta(object_index, &object_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* If the object is in logical block 0, then update the physical ID to the
@@ -1249,18 +1249,18 @@ enum tfm_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
 
     err = sst_mblock_update_scratch_block_meta(object_meta.lblock,
                                                &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     err = sst_mblock_copy_remaining_object_meta(object_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     err = sst_mblock_copy_remaining_block_meta(object_meta.lblock);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* The objects' data in the logical block 0 is stored in same physical block
@@ -1269,30 +1269,30 @@ enum tfm_sst_err_t sst_core_object_create(uint32_t object_uuid, uint32_t size)
      * metadata block needs to be copied in the scratch block.
      */
     err = sst_mblock_migrate_data_to_scratch();
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Write metadata header, swap metadata blocks and erase scratch blocks */
     err = sst_meta_update_finalize();
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_core_object_get_info(uint32_t object_uuid,
+enum psa_sst_err_t sst_core_object_get_info(uint32_t object_uuid,
                                             struct sst_core_obj_info_t *info)
 {
-    enum tfm_sst_err_t err = TFM_SST_ERR_SYSTEM_ERROR;
+    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
     struct sst_assetmeta tmp_metadata;
     uint32_t object_index;
 
     /* Get the meta data index */
     err = sst_core_get_object_idx(object_uuid, &object_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Read object metadata */
@@ -1300,7 +1300,7 @@ enum tfm_sst_err_t sst_core_object_get_info(uint32_t object_uuid,
     if (err == 0) {
         /* Check if index is still referring to same object */
         if (object_uuid != tmp_metadata.unique_id) {
-            err = TFM_SST_ERR_ASSET_NOT_FOUND;
+            err = PSA_SST_ERR_ASSET_NOT_FOUND;
         } else {
             info->size_max = tmp_metadata.max_size;
             info->size_current = tmp_metadata.cur_size;
@@ -1310,12 +1310,12 @@ enum tfm_sst_err_t sst_core_object_get_info(uint32_t object_uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
+enum psa_sst_err_t sst_core_object_write(uint32_t object_uuid,
                                          const uint8_t *data, uint32_t offset,
                                          uint32_t size)
 {
     uint32_t object_index;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t cur_phys_block;
     const uint8_t *prepared_buf;
     struct sst_assetmeta object_meta;
@@ -1327,20 +1327,20 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
 
     /* Get the object index */
     err = sst_core_get_object_idx(object_uuid, &object_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Read object metadata */
     err = sst_meta_read_object_meta(object_index, &object_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Update block metadata */
     err = sst_meta_read_block_metadata(object_meta.lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
@@ -1348,7 +1348,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
      * without content inside the asset.
      */
     if (offset > object_meta.cur_size) {
-        return TFM_SST_ERR_PARAM_ERROR;
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 #endif
 
@@ -1365,7 +1365,7 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
                                         SST_OBJECT_START_POSITION,
                                         object_meta.cur_size,
                                         sst_buf_plain_text);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
     }
@@ -1404,8 +1404,8 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
     err = sst_dblock_update_scratch(object_meta.lblock, &block_meta,
                                     prepared_buf, object_meta.data_index,
                                     align_flash_nbr_bytes);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     cur_phys_block = block_meta.phys_id;
@@ -1416,26 +1416,26 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
 
     /* Update block metadata in scratch metadata block */
     err = sst_mblock_update_scratch_block_meta(object_meta.lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Update object's metadata to reflect new attributes */
     err = sst_mblock_update_scratch_object_meta(object_index, &object_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Copy rest of the block metadata entries */
     err = sst_mblock_copy_remaining_block_meta(object_meta.lblock);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Copy rest of the object metadata entries */
     err = sst_mblock_copy_remaining_object_meta(object_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* The objects' data in the logical block 0 is stored in same physical block
@@ -1448,8 +1448,8 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
      */
     if (object_meta.lblock != SST_LOGICAL_DBLOCK0) {
         err = sst_mblock_migrate_data_to_scratch();
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
     }
 
@@ -1472,19 +1472,19 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t object_uuid,
  *                        data position to store the data to be realocated
  * \param[in] size        Number of bytes to be realocated
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
+static enum psa_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
                                        uint32_t src_offset, uint32_t dst_offset,
                                        uint32_t size)
 {
     struct sst_block_metadata block_meta;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t scratch_dblock_id = 0;
 
     /* Read current block meta */
     err = sst_meta_read_block_metadata(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1502,8 +1502,8 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
         err = sst_flash_block_to_block_move(scratch_dblock_id, dst_offset,
                                             block_meta.phys_id, src_offset,
                                             size);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
     }
 
@@ -1516,8 +1516,8 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
                                             block_meta.phys_id,
                                             block_meta.data_start,
                                             (dst_offset-block_meta.data_start));
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
     }
 
@@ -1532,7 +1532,7 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
 
     /* Update block metadata in scratch metadata block */
     err = sst_mblock_update_scratch_block_meta(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         /* Swap back the data block as there was an issue in the process */
         sst_meta_set_data_scratch(scratch_dblock_id, lblock);
         return err;
@@ -1540,7 +1540,7 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
 
     /* Copy rest of the block metadata entries */
     err = sst_mblock_copy_remaining_block_meta(lblock);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         /* Swap back the data block as there was an issue in the process */
         sst_meta_set_data_scratch(scratch_dblock_id, lblock);
     }
@@ -1548,13 +1548,13 @@ static enum tfm_sst_err_t sst_compact_dblock(uint32_t lblock, uint32_t obj_size,
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
+enum psa_sst_err_t sst_core_object_delete(uint32_t object_uuid)
 {
     uint32_t del_obj_data_index;
     uint32_t del_obj_lblock;
     uint32_t del_obj_index;
     uint32_t del_obj_max_size;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t src_offset = SST_BLOCK_SIZE;
     uint32_t nbr_bytes_to_move = 0;
     uint32_t obj_idx;
@@ -1562,17 +1562,17 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
 
     /* Get the object index */
     err = sst_core_get_object_idx(object_uuid, &del_obj_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     err = sst_meta_read_object_meta(del_obj_index, &object_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    if (sst_utils_validate_uuid(object_meta.unique_id) != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (sst_utils_validate_uuid(object_meta.unique_id) != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Save logical block, data_index and max_size to be used later on */
@@ -1598,7 +1598,7 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
 
         /* Read object meta for the given object index */
         err = sst_meta_read_object_meta(obj_idx, &object_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
@@ -1632,7 +1632,7 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
     /* Compact data block */
     err = sst_compact_dblock(del_obj_lblock, del_obj_max_size, src_offset,
                              del_obj_data_index, nbr_bytes_to_move);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1644,58 +1644,58 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t object_uuid)
     return err;
 }
 
-enum tfm_sst_err_t sst_core_object_read(uint32_t object_uuid, uint8_t *data,
+enum psa_sst_err_t sst_core_object_read(uint32_t object_uuid, uint8_t *data,
                                         uint32_t offset, uint32_t size)
 {
     uint32_t object_index;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_assetmeta tmp_metadata;
 
     /* Get the object index */
     err = sst_core_get_object_idx(object_uuid, &object_index);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Read object metadata */
     err = sst_meta_read_object_meta(object_index, &tmp_metadata);
 
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Check if index is still referring to same asset */
     if (object_uuid != tmp_metadata.unique_id) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Boundary check the incoming request */
     err = sst_utils_check_contained_in(0, tmp_metadata.cur_size,
                                        offset, size);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_PARAM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 
     /* Read the object from flash */
     err = sst_block_object_read_raw(&tmp_metadata, offset, size, data);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
 /**
  * \brief Validates and find the valid-active metablock
  *
- * \return Returns value as specified in \ref tfm_sst_err_t
+ * \return Returns value as specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t sst_init_get_active_metablock(void)
+static enum psa_sst_err_t sst_init_get_active_metablock(void)
 {
     struct sst_metadata_block_header meta0;
     struct sst_metadata_block_header meta1;
     uint32_t cur_meta_block;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 #if SST_ENCRYPTION
     uint32_t i;
 #endif
@@ -1707,14 +1707,14 @@ static enum tfm_sst_err_t sst_init_get_active_metablock(void)
     /* Read the header of both the metdata blocks */
     err = sst_flash_read(SST_METADATA_BLOCK0, (uint8_t *)&meta0,
                          0, sizeof(struct sst_metadata_block_header));
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     err = sst_flash_read(SST_METADATA_BLOCK1, (uint8_t *) &meta1,
                          0, sizeof(struct sst_metadata_block_header));
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* If there are two potential active metadata blocks,
@@ -1722,12 +1722,12 @@ static enum tfm_sst_err_t sst_init_get_active_metablock(void)
      * update operation to complete. Need to find out the valid
      * metadata block now.
      */
-    if (sst_meta_validate_header_meta(&meta0) == TFM_SST_ERR_SUCCESS) {
+    if (sst_meta_validate_header_meta(&meta0) == PSA_SST_ERR_SUCCESS) {
         num_valid_meta_blocks++;
         cur_meta_block = SST_METADATA_BLOCK0;
     }
 
-    if (sst_meta_validate_header_meta(&meta1) == TFM_SST_ERR_SUCCESS) {
+    if (sst_meta_validate_header_meta(&meta1) == PSA_SST_ERR_SUCCESS) {
         num_valid_meta_blocks++;
         cur_meta_block = SST_METADATA_BLOCK1;
     }
@@ -1739,7 +1739,7 @@ static enum tfm_sst_err_t sst_init_get_active_metablock(void)
     if (num_valid_meta_blocks > 1) {
         cur_meta_block = sst_meta_latest_meta_block(&meta0, &meta1);
     } else if (num_valid_meta_blocks == 0) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
 #if SST_ENCRYPTION
@@ -1749,45 +1749,45 @@ static enum tfm_sst_err_t sst_init_get_active_metablock(void)
      */
     for (i = 0; i < num_valid_meta_blocks; i++) {
         err = sst_mblock_authenticate(cur_meta_block);
-        if (err == TFM_SST_ERR_SUCCESS) {
+        if (err == PSA_SST_ERR_SUCCESS) {
              /* Valid metablock found, stop here */
-            err = TFM_SST_ERR_SUCCESS;
+            err = PSA_SST_ERR_SUCCESS;
             break;
         } else {
             /* Primary candidate for valid metadata content failed
              * authentication. Try other one.
              */
-            err = TFM_SST_ERR_SYSTEM_ERROR;
+            err = PSA_SST_ERR_SYSTEM_ERROR;
             cur_meta_block = SST_OTHER_META_BLOCK(cur_meta_block);
         }
     }
 
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 #endif
     sst_system_ctx.active_metablock = cur_meta_block;
     sst_system_ctx.scratch_metablock = SST_OTHER_META_BLOCK(cur_meta_block);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_core_prepare(void)
+enum psa_sst_err_t sst_core_prepare(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
 #if SST_ENCRYPTION
     sst_crypto_init();
 #endif
 
     err = sst_init_get_active_metablock();
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     err = sst_meta_read_meta_header();
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
 #if SST_ENCRYPTION
@@ -1801,10 +1801,10 @@ enum tfm_sst_err_t sst_core_prepare(void)
     return err;
 }
 
-enum tfm_sst_err_t sst_core_wipe_all(void)
+enum psa_sst_err_t sst_core_wipe_all(void)
 {
     uint32_t i;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint32_t metablock_to_erase_first = SST_METADATA_BLOCK0;
     struct sst_block_metadata block_meta;
     struct sst_assetmeta object_metadata;
@@ -1817,17 +1817,17 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
      * ensure that the active metadata block is erased last to prevent rollback
      * in the case of a power failure between the two erases.
      */
-    if (sst_init_get_active_metablock() == TFM_SST_ERR_SUCCESS) {
+    if (sst_init_get_active_metablock() == PSA_SST_ERR_SUCCESS) {
         metablock_to_erase_first = sst_system_ctx.scratch_metablock;
     }
 
     err = sst_flash_erase_block(metablock_to_erase_first);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_flash_erase_block(SST_OTHER_META_BLOCK(metablock_to_erase_first));
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -1863,15 +1863,15 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
     /* If an error is detected while erasing the flash, then return a
      * system error to abort core wipe process.
      */
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     for (i = 0; i < SST_NUM_DEDICATED_DBLOCKS; i++) {
         block_meta.phys_id = i + SST_INIT_DBLOCK_START;
         err = sst_mblock_update_scratch_block_meta(i + 1, &block_meta);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
     }
 
@@ -1882,19 +1882,19 @@ enum tfm_sst_err_t sst_core_wipe_all(void)
         /* In the beginning phys id is same as logical id */
         /* Update object's metadata to reflect new attributes */
         err = sst_mblock_update_scratch_object_meta(i, &object_metadata);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_SYSTEM_ERROR;
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return PSA_SST_ERR_SYSTEM_ERROR;
         }
     }
 
     /* FIXME: erase all the blocks first */
     err = sst_meta_write_scratch_meta_header();
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Swap active and scratch metablocks */
     sst_meta_swap_metablocks();
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }

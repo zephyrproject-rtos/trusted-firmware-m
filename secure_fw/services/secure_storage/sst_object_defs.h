@@ -10,8 +10,7 @@
 
 #include <stdint.h>
 #include "assets/sst_asset_defs.h"
-#include "tfm_sst_defs.h"
-#include "tfm_sst_asset_defs.h"
+#include "psa_sst_asset_defs.h"
 
 #ifdef SST_ENCRYPTION
 #include "crypto/sst_crypto_interface.h"
@@ -28,8 +27,8 @@ struct sst_obj_header_t {
 #endif
     uint32_t uuid;                     /*!< Asset ID */
     uint32_t version;                  /*!< Asset version */
-    struct tfm_sst_asset_info_t  info; /*!< Asset information */
-    struct tfm_sst_asset_attrs_t attr; /*!< Asset attributes */
+    struct psa_sst_asset_info_t  info; /*!< Asset information */
+    struct psa_sst_asset_attrs_t attr; /*!< Asset attributes */
 };
 
 /* The object to be written to the file system below. Made up of the

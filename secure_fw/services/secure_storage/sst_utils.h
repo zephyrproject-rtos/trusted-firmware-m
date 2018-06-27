@@ -50,9 +50,9 @@ void sst_global_unlock(void);
  * \param[in] app_id  Application ID
  * \param[in] access  Access type to be permormed on the given address
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_utils_memory_bound_check(void *addr,
+enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
                                                 uint32_t size,
                                                 uint32_t app_id,
                                                 uint32_t access);
@@ -65,9 +65,9 @@ enum tfm_sst_err_t sst_utils_memory_bound_check(void *addr,
  * \param[in] size    Size of the incoming buffer
  * \param[in] app_id  App_id for the incoming buffer
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
+enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
                                                   uint8_t *dest,
                                                   uint32_t size,
                                                   uint32_t app_id);
@@ -80,9 +80,9 @@ enum tfm_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
  * \param[in] subset_start    Start of subset region
  * \param[in] subset_size     Size of the subset region
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
+enum psa_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
                                                 uint32_t superset_size,
                                                 uint32_t subset_start,
                                                 uint32_t subset_size);
@@ -124,9 +124,9 @@ uint32_t sst_utils_validate_secure_caller(void);
  *
  * \param[in] unique_id  Asset's ID
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_utils_validate_uuid(uint32_t unique_id);
+enum psa_sst_err_t sst_utils_validate_uuid(uint32_t unique_id);
 
 #ifdef __cplusplus
 }

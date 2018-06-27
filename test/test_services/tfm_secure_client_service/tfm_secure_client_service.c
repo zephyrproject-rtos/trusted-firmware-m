@@ -12,11 +12,11 @@
  * \brief Service initialisation function. No special initialisation is
  *        required.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t tfm_secure_client_service_init(void)
+enum psa_sst_err_t tfm_secure_client_service_init(void)
 {
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
 int32_t tfm_secure_client_service_sfn_run_tests(void)

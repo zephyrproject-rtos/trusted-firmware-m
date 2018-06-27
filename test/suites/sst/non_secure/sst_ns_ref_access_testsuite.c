@@ -61,10 +61,10 @@ void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite)
  */
 TFM_SST_NS_TEST(5001, "Thread_D")
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_test_service_setup();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Failed to setup the SST test service");
         return;
     }
@@ -77,12 +77,12 @@ TFM_SST_NS_TEST(5001, "Thread_D")
  */
 TFM_SST_NS_TEST(5002, "Thread_D")
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
     uint8_t buf[BUF_SIZE] = DATA;
 
     err = sst_test_service_dummy_encrypt(key_uuid, buf, BUF_SIZE);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Encryption should be successful for Thread_D");
         return;
     }
@@ -93,7 +93,7 @@ TFM_SST_NS_TEST(5002, "Thread_D")
     }
 
     err = sst_test_service_dummy_decrypt(key_uuid, buf, BUF_SIZE);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Decryption should be successful for Thread_D");
         return;
     }
@@ -112,18 +112,18 @@ TFM_SST_NS_TEST(5002, "Thread_D")
  */
 TFM_SST_NS_TEST(5003, "Thread_C")
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
     uint8_t buf[BUF_SIZE] = DATA;
 
     err = sst_test_service_dummy_encrypt(key_uuid, buf, BUF_SIZE);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Encryption should not be successful for Thread_C");
         return;
     }
 
     err = sst_test_service_dummy_decrypt(key_uuid, buf, BUF_SIZE);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Decryption should not be successful for Thread_C");
         return;
     }
@@ -136,10 +136,10 @@ TFM_SST_NS_TEST(5003, "Thread_C")
  */
 TFM_SST_NS_TEST(5004, "Thread_D")
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     err = sst_test_service_clean();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Cleaning of the SST referenced access service failed");
         return;
     }

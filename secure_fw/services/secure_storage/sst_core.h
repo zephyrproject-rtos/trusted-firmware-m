@@ -102,20 +102,20 @@ struct sst_core_obj_info_t {
 /**
  * \brief Prepares the core. Authenticates/validates the metadata.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_prepare(void);
+enum psa_sst_err_t sst_core_prepare(void);
 
 /**
  * \brief Checks if an object exists.
  *
  * \param[in]  obj_uuid  Unique identifier for the object
  *
- * \return Returns TFM_SST_ERR_SUCCESS if object exist.  If object does not
- *         exist, it returns TFM_SST_ERR_ASSET_NOT_FOUND. If SST area is not
- *         prepared, it returns TFM_SST_ERR_ASSET_NOT_PREPARED.
+ * \return Returns PSA_SST_ERR_SUCCESS if object exist.  If object does not
+ *         exist, it returns PSA_SST_ERR_ASSET_NOT_FOUND. If SST area is not
+ *         prepared, it returns PSA_SST_ERR_ASSET_NOT_PREPARED.
  */
-enum tfm_sst_err_t sst_core_object_exist(uint32_t obj_uuid);
+enum psa_sst_err_t sst_core_object_exist(uint32_t obj_uuid);
 
 /**
  * \brief Creates an object in the storage area.
@@ -123,9 +123,9 @@ enum tfm_sst_err_t sst_core_object_exist(uint32_t obj_uuid);
  * \param[in] obj_uuid  Unique identifier for the object
  * \param[in] size      Size of the object to be created
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_create(uint32_t obj_uuid, uint32_t size);
+enum psa_sst_err_t sst_core_object_create(uint32_t obj_uuid, uint32_t size);
 
 /**
  * \brief Gets the object information referenced by object UUID.
@@ -134,9 +134,9 @@ enum tfm_sst_err_t sst_core_object_create(uint32_t obj_uuid, uint32_t size);
  * \param[out] info      Pointer to the information structure to store the
  *                       object information values \ref sst_core_obj_info_t
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_get_info(uint32_t obj_uuid,
+enum psa_sst_err_t sst_core_object_get_info(uint32_t obj_uuid,
                                             struct sst_core_obj_info_t *info);
 
 /**
@@ -147,9 +147,9 @@ enum tfm_sst_err_t sst_core_object_get_info(uint32_t obj_uuid,
  * \param[in] offset    Offset in the object
  * \param[in] size      Size of the incoming buffer
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_write(uint32_t obj_uuid,
+enum psa_sst_err_t sst_core_object_write(uint32_t obj_uuid,
                                          const uint8_t *data,
                                          uint32_t offset, uint32_t size);
 
@@ -161,9 +161,9 @@ enum tfm_sst_err_t sst_core_object_write(uint32_t obj_uuid,
  * \param[in]  offset    Offset in the object
  * \param[in]  size      Size to be read
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_read(uint32_t obj_uuid, uint8_t *data,
+enum psa_sst_err_t sst_core_object_read(uint32_t obj_uuid, uint8_t *data,
                                         uint32_t offset, uint32_t size);
 
 /**
@@ -171,9 +171,9 @@ enum tfm_sst_err_t sst_core_object_read(uint32_t obj_uuid, uint8_t *data,
  *
  * \param[in] obj_uuid  Unique identifier of the object
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_core_object_delete(uint32_t obj_uuid);
+enum psa_sst_err_t sst_core_object_delete(uint32_t obj_uuid);
 
 /**
  * \brief Reads metadata associated with an object.
@@ -181,9 +181,9 @@ enum tfm_sst_err_t sst_core_object_delete(uint32_t obj_uuid);
  * \param[in]  object_index Index of the ojbect to be read
  * \param[out] meta         Pointer to meta buffer to read values
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
+enum psa_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
                                              struct sst_assetmeta *meta);
 
 /**
@@ -191,7 +191,7 @@ enum tfm_sst_err_t sst_meta_read_object_meta(uint32_t object_index,
  *
  * \return Returns error code as specified in \ref sst_errno_t
  */
-enum tfm_sst_err_t sst_core_wipe_all(void);
+enum psa_sst_err_t sst_core_wipe_all(void);
 
 #ifdef __cplusplus
 }

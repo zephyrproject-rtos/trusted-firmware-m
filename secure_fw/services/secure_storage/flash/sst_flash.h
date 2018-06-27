@@ -51,10 +51,10 @@ extern "C" {
  *       the range of address, based on blockid + offset + size, are always
  *       valid in the memory.
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
- *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
+ * \return Returns PSA_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns PSA_SST_ERR_SYSTEM_ERROR.
  */
-enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
+enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
                                   uint32_t offset, uint32_t size);
 
 /**
@@ -69,10 +69,10 @@ enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
  *       the range of address, based on blockid + offset + size, are always
  *       valid in the memory.
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
- *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
+ * \return Returns PSA_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns PSA_SST_ERR_SYSTEM_ERROR.
  */
-enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
+enum psa_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
                                    uint32_t offset, uint32_t size);
 
 /**
@@ -92,10 +92,10 @@ enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
  *       It also considers that the destination block is already erased and
  *       ready to be written.
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
- *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
+ * \return Returns PSA_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns PSA_SST_ERR_SYSTEM_ERROR.
  */
-enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
+enum psa_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
                                                  uint32_t dst_offset,
                                                  uint32_t src_block,
                                                  uint32_t src_offset,
@@ -108,10 +108,10 @@ enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
  *
  * \note This function considers all input values valids.
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the function is executed correctly.
- *         Otherwise, it returns TFM_SST_ERR_SYSTEM_ERROR.
+ * \return Returns PSA_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns PSA_SST_ERR_SYSTEM_ERROR.
  */
-enum tfm_sst_err_t sst_flash_erase_block(uint32_t block_id);
+enum psa_sst_err_t sst_flash_erase_block(uint32_t block_id);
 
 #ifdef __cplusplus
 }

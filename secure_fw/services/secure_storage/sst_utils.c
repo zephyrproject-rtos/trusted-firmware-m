@@ -23,12 +23,12 @@ void sst_global_unlock(void)
     return;
 }
 
-enum tfm_sst_err_t sst_utils_memory_bound_check(void *addr,
+enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
                                                 uint32_t size,
                                                 uint32_t app_id,
                                                 uint32_t access)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     /* FIXME:
      * The only check that may be required is whether the caller app
@@ -41,24 +41,24 @@ enum tfm_sst_err_t sst_utils_memory_bound_check(void *addr,
     return err;
 }
 
-enum tfm_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
+enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
                                                   uint8_t *dest,
                                                   uint32_t size,
                                                   uint32_t app_id)
 {
-    enum tfm_sst_err_t bound_check;
+    enum psa_sst_err_t bound_check;
 
     /* src is passed on from untrusted domain, verify boundry */
     bound_check = sst_utils_memory_bound_check(src, size, app_id,
                                                TFM_MEMORY_ACCESS_RO);
-    if (bound_check == TFM_SST_ERR_SUCCESS) {
+    if (bound_check == PSA_SST_ERR_SUCCESS) {
         sst_utils_memcpy(dest, src, size);
     }
 
     return bound_check;
 }
 
-enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
+enum psa_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
                                                 uint32_t superset_size,
                                                 uint32_t subset_start,
                                                 uint32_t subset_size)
@@ -74,12 +74,12 @@ enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
     uint64_t tmp_superset_size = superset_size;
     uint64_t tmp_subset_start = subset_start;
     uint64_t tmp_subset_size = subset_size;
-    enum tfm_sst_err_t err = TFM_SST_ERR_SUCCESS;
+    enum psa_sst_err_t err = PSA_SST_ERR_SUCCESS;
 
     if ((tmp_subset_start < tmp_superset_start) ||
         ((tmp_subset_start + tmp_subset_size) >
          (tmp_superset_start + tmp_superset_size))) {
-        err = TFM_SST_ERR_PARAM_ERROR;
+        err = PSA_SST_ERR_PARAM_ERROR;
     }
     return err;
 }
@@ -96,13 +96,13 @@ uint32_t sst_utils_validate_secure_caller(void)
  *
  * \return Returns 1 if the asset ID is valid, otherwise 0.
  */
-enum tfm_sst_err_t sst_utils_validate_uuid(uint32_t unique_id)
+enum psa_sst_err_t sst_utils_validate_uuid(uint32_t unique_id)
 {
     if (unique_id == SST_INVALID_UUID) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
 /* FIXME: following functions are not optimized and will eventually to be

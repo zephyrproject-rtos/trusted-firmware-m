@@ -28,9 +28,9 @@ extern "C" {
  *       internal copies. So, this object will contain the encrypted object
  *       stored in the flash.
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_create(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj);
 
@@ -41,9 +41,9 @@ enum tfm_sst_err_t sst_encrypted_object_create(uint32_t uuid,
  * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] obj      Pointer to the object structure to fill in
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_read(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj);
 
@@ -59,9 +59,9 @@ enum tfm_sst_err_t sst_encrypted_object_read(uint32_t uuid,
  *       internal copies. So, this object will contain the encrypted object
  *       stored in the flash.
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_sst_err_t
  */
-enum tfm_sst_err_t sst_encrypted_object_write(uint32_t uuid,
+enum psa_sst_err_t sst_encrypted_object_write(uint32_t uuid,
                                           const struct tfm_sst_token_t *s_token,
                                           struct sst_object_t *obj);
 

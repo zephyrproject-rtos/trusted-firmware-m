@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,13 +29,13 @@ enum serial_color_t {
 };
 
 /**
- * \brief Translates tfm_sst_err_t into a string.
+ * \brief Translates psa_sst_err_t into a string.
  *
- * \param[in] err  tfm_sst_err_t error value.
+ * \param[in] err  psa_sst_err_t error value.
  *
- * \return tfm_sst_err_t as string.
+ * \return psa_sst_err_t as string.
  */
-const char *sst_err_to_str(enum tfm_sst_err_t err);
+const char *sst_err_to_str(enum psa_sst_err_t err);
 
 /**
  * \brief Translates asset permissions into a string.

@@ -79,7 +79,7 @@ static struct sst_asset_policy_t *sst_am_lookup_db_entry(uint32_t uuid)
  */
 static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     uint16_t access;
 
     /* FIXME: based on level 1 tfm isolation, any entity on the secure side
@@ -100,7 +100,7 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
      */
     err = sst_utils_validate_secure_caller();
 
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         if (app_id != S_APP_ID) {
             if (request_type & SST_PERM_READ) {
                 access = SST_PERM_REFERENCE;
@@ -186,9 +186,9 @@ static struct sst_asset_policy_t *sst_am_get_db_entry(uint32_t app_id,
  * \brief Validates the policy database's integrity
  *        Stub function.
  *
- * \return Returns value specified in \ref tfm_sst_err_t
+ * \return Returns value specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t validate_policy_db(void)
+static enum psa_sst_err_t validate_policy_db(void)
 {
     /* Currently the policy database is inbuilt
      * in the code. It's sanity is assumed to be correct.
@@ -196,12 +196,12 @@ static enum tfm_sst_err_t validate_policy_db(void)
      * stored differently, it may require sanity check
      * as well.
      */
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_SST_ERR_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_am_prepare(void)
+enum psa_sst_err_t sst_am_prepare(void)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     /* FIXME: outcome of this function should determine
      * state machine of asset manager. If this
      * step fails other APIs shouldn't entertain
@@ -214,8 +214,8 @@ enum tfm_sst_err_t sst_am_prepare(void)
     err = validate_policy_db();
 
     /* Initialize underlying storage system */
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_SYSTEM_ERROR;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     err = sst_system_prepare();
@@ -224,7 +224,7 @@ enum tfm_sst_err_t sst_am_prepare(void)
      * any content in the boot time. Call the wipe API
      * to create a storage structure.
      */
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         sst_system_wipe_all();
         /* attempt to initialise again */
         err = sst_system_prepare();
@@ -243,9 +243,9 @@ enum tfm_sst_err_t sst_am_prepare(void)
  * \param[in] access  Access type to be permormed on the given dest->data
  *                    address
  *
- * \return Returns value specified in \ref tfm_sst_err_t
+ * \return Returns value specified in \ref psa_sst_err_t
  */
-static enum tfm_sst_err_t validate_copy_validate_iovec(
+static enum psa_sst_err_t validate_copy_validate_iovec(
                                                 const struct tfm_sst_buf_t *src,
                                                 struct tfm_sst_buf_t *dest,
                                                 uint32_t app_id,
@@ -256,11 +256,11 @@ static enum tfm_sst_err_t validate_copy_validate_iovec(
      * First validate the pointer for iovec itself, then copy
      * the iovec, then validate the local copy of iovec.
      */
-    enum tfm_sst_err_t bound_check;
+    enum psa_sst_err_t bound_check;
 
     bound_check = sst_utils_bound_check_and_copy((uint8_t *) src,
                       (uint8_t *) dest, sizeof(struct tfm_sst_buf_t), app_id);
-    if (bound_check == TFM_SST_ERR_SUCCESS) {
+    if (bound_check == PSA_SST_ERR_SUCCESS) {
         bound_check = sst_utils_memory_bound_check(dest->data, dest->size,
                                                    app_id, access);
     }
@@ -268,95 +268,95 @@ static enum tfm_sst_err_t validate_copy_validate_iovec(
     return bound_check;
 }
 
-enum tfm_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
                                    const struct tfm_sst_token_t *s_token,
-                                   struct tfm_sst_asset_info_t *info)
+                                   struct psa_sst_asset_info_t *info)
 {
-    enum tfm_sst_err_t bound_check;
+    enum psa_sst_err_t bound_check;
     struct sst_asset_policy_t *db_entry;
-    struct tfm_sst_asset_info_t tmp_info;
-    enum tfm_sst_err_t err;
+    struct psa_sst_asset_info_t tmp_info;
+    enum psa_sst_err_t err;
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
 
     bound_check = sst_utils_memory_bound_check(info,
-                                               TFM_SST_ASSET_INFO_SIZE,
+                                               PSA_SST_ASSET_INFO_SIZE,
                                                app_id, TFM_MEMORY_ACCESS_RW);
-    if (bound_check != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_PARAM_ERROR;
+    if (bound_check != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     err = sst_object_get_info(asset_uuid, s_token, &tmp_info);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         /* Use tmp_info to not leak information in case the previous function
          * returns and error. It avoids to leak information in case of error.
          * So, copy the tmp_info content into the attrs only if that tmp_info
          * data is valid.
          */
-        sst_utils_memcpy(info, &tmp_info, TFM_SST_ASSET_INFO_SIZE);
+        sst_utils_memcpy(info, &tmp_info, PSA_SST_ASSET_INFO_SIZE);
     }
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
                                          const struct tfm_sst_token_t *s_token,
-                                         struct tfm_sst_asset_attrs_t *attrs)
+                                         struct psa_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
-    enum tfm_sst_err_t bound_check;
+    enum psa_sst_err_t bound_check;
     struct sst_asset_policy_t *db_entry;
-    enum tfm_sst_err_t err;
-    struct tfm_sst_asset_attrs_t tmp_attrs;
+    enum psa_sst_err_t err;
+    struct psa_sst_asset_attrs_t tmp_attrs;
 
     bound_check = sst_utils_memory_bound_check(attrs,
-                                               TFM_SST_ASSET_ATTR_SIZE,
+                                               PSA_SST_ASSET_ATTR_SIZE,
                                                app_id, TFM_MEMORY_ACCESS_RW);
-    if (bound_check != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_PARAM_ERROR;
+    if (bound_check != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     err = sst_object_get_attributes(asset_uuid, s_token, &tmp_attrs);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_SST_ERR_SUCCESS) {
         /* Use tmp_attrs to not leak information incase the previous function
          * returns and error. It avoids to leak information in case of error.
          * So, copy the tmp_attrs content into the attrs only if that tmp_attrs
          * data is valid.
          */
-        sst_utils_memcpy(attrs, &tmp_attrs, TFM_SST_ASSET_ATTR_SIZE);
+        sst_utils_memcpy(attrs, &tmp_attrs, PSA_SST_ASSET_ATTR_SIZE);
     }
 
     return err;
 }
 
-enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
                                       const struct tfm_sst_token_t *s_token,
-                                      const struct tfm_sst_asset_attrs_t *attrs)
+                                      const struct psa_sst_asset_attrs_t *attrs)
 {
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
-    enum tfm_sst_err_t bound_check;
+    enum psa_sst_err_t bound_check;
     struct sst_asset_policy_t *db_entry;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
 
     bound_check = sst_utils_memory_bound_check((uint8_t *)attrs,
-                                               TFM_SST_ASSET_ATTR_SIZE,
+                                               PSA_SST_ASSET_ATTR_SIZE,
                                                app_id, TFM_MEMORY_ACCESS_RO);
-    if (bound_check != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_PARAM_ERROR;
+    if (bound_check != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* FIXME: Validity attributes are not supported in the current service
@@ -364,7 +364,7 @@ enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
      *        to 0.
      */
     if (attrs->validity.start != 0 || attrs->validity.end != 0) {
-        return TFM_SST_ERR_PARAM_ERROR;
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 
     /* FIXME: Check which bit attributes have been changed and check if those
@@ -375,15 +375,15 @@ enum tfm_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     err = sst_object_create(asset_uuid, s_token, db_entry->type,
@@ -392,30 +392,30 @@ enum tfm_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
                                const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
     /* Check application ID permissions */
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_READ);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Make a local copy of the iovec data structure */
     err = validate_copy_validate_iovec(data, &local_data,
                                        app_id, TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
 #ifndef SST_ENABLE_PARTIAL_ASSET_RW
     if (data->offset != 0) {
-        return TFM_SST_ERR_PARAM_ERROR;
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 #endif
 
@@ -425,38 +425,38 @@ enum tfm_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
                                 const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
     /* Check application ID permissions */
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Make a local copy of the iovec data structure */
     err = validate_copy_validate_iovec(data, &local_data,
                                        app_id, TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+    if (err != PSA_SST_ERR_SUCCESS) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Boundary check the incoming request */
     err = sst_utils_check_contained_in(0, db_entry->max_size,
                                        local_data.offset, local_data.size);
 
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
 #ifndef SST_ENABLE_PARTIAL_ASSET_RW
     if (data->offset != 0) {
-        return TFM_SST_ERR_PARAM_ERROR;
+        return PSA_SST_ERR_PARAM_ERROR;
     }
 #endif
 
@@ -466,15 +466,15 @@ enum tfm_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum tfm_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
-    enum tfm_sst_err_t err;
+    enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
     db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
-        return TFM_SST_ERR_ASSET_NOT_FOUND;
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     err = sst_object_delete(asset_uuid, s_token);
