@@ -90,7 +90,7 @@ function(compiler_set_linkercmdfile)
 	#Compose additional command line switches from include paths.
 	if (_MY_PARAMS_INCLUDES)
 		foreach(_INCLUDE_P IN LISTS _MY_PARAMS_INCLUDES)
-			string(APPEND _FLAGS " -I ${_INCLUDE_P}")
+			string(APPEND _FLAGS " --predefine=\"-I${_INCLUDE_P}\"")
 		endforeach()
 	endif()
 
