@@ -5,9 +5,14 @@
  *
  */
 
+#include <stdio.h>
+#include "psa_client.h"
+#include "psa_service.h"
+#include "tfm_thread.h"
 #include "secure_utilities.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
+#include "tfm_queue.h"
 
 /* FixMe: check if this is really needed */
 extern int32_t tfm_secure_lock;
@@ -52,10 +57,10 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
     /* perform sanity check */
     /* FixMe: pattern should follow guides on tfm core veneer return values */
     if(tfm_psa_veneer_sanity_check() != TFM_SUCCESS) {
-        return TFM_ERROR_GENERIC;
+        return PSA_VERSION_NONE;
     }
     /* return version number registered in manifest for given SID */
-    return TFM_SUCCESS;
+    return PSA_VERSION_NONE;
 }
 
 __tfm_secure_gateway_attributes__
@@ -66,7 +71,18 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
      * In case of library model, this function always returns a valid handle.
      * In thread model, it needs to perform the procedures outlined in PSA IPC
      */
-    return TFM_SUCCESS;
+    uint32_t version = minor_version;
+    uint32_t ret;
+    psa_invec in_vecs = {&version, sizeof(version)};
+
+    /* FixMe: just use '1' as sid for example */
+    ret = tfm_queue_put_msg(1, PSA_IPC_CONNECT, &in_vecs, 1, NULL, 0);
+    if (ret != TFM_QUEUE_SUCCESS)
+        return TFM_ERROR_GENERIC;
+    tfm_thread_schedule();
+
+    /* FixMe: just return a fix handle*/
+    return 1;
 }
 
 __tfm_secure_gateway_attributes__
@@ -78,6 +94,13 @@ psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
     /* In case of library model, call the function referenced by the handle
      * In thread model, it needs to perform the procedures outlined in PSA IPC
      */
+    uint32_t ret;
+    ret = tfm_queue_put_msg(1, PSA_IPC_CALL, (psa_invec *)in_vecs->base,
+                            in_vecs->len, (psa_outvec *)out_vecs->base,
+                            out_vecs->len);
+    if (ret != TFM_QUEUE_SUCCESS)
+        return TFM_ERROR_GENERIC;
+    tfm_thread_schedule();
     return TFM_SUCCESS;
 }
 
@@ -86,5 +109,10 @@ psa_error_t tfm_psa_close_veneer(psa_handle_t handle)
 {
     /* perform sanity check */
     /* Close connection referenced by handle */
+    uint32_t ret;
+    ret = tfm_queue_put_msg(1, PSA_IPC_DISCONNECT, NULL, 0, NULL, 0);
+    if (ret != TFM_QUEUE_SUCCESS)
+        return TFM_ERROR_GENERIC;
+    tfm_thread_schedule();
     return TFM_SUCCESS;
 }
