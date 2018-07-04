@@ -199,6 +199,12 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2")
 	endif()
 
+	if (NOT DEFINED TFM_PSA_API)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
+	elseif (TFM_PSA_API)
+		embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PSA_API")
+	endif()
+
 	if(CORE_TEST)
 		set(SECURE_AXF_DIR_PREFIX "${CMAKE_BINARY_DIR}/unit_test/")
 		set_target_properties(${EXE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${SECURE_AXF_DIR_PREFIX})

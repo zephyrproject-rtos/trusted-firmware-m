@@ -65,7 +65,8 @@ endif()
 if (NOT DEFINED CORE_TEST_IPC)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_IPC is undefined. ")
 elseif (CORE_TEST_IPC)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_ipc_test/ipc_test_service.c"
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_ipc_service/ipc_service_test.c"
+		"${CORE_TEST_DIR}/tfm_ipc_client/ipc_client_test.c"
 		)
 endif()
 
