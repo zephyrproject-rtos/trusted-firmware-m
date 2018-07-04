@@ -50,7 +50,9 @@
   "source_files": [
     "./tfm_ss_core_test.c"
   ],
-  "tfm_linker_pattern": [
-    "*tfm_ss_core_test.*"
-  ]
+  "tfm_linker_pattern": {
+    "object_list": [
+      "*tfm_ss_core_test.*"
+    ]
+  }
 }

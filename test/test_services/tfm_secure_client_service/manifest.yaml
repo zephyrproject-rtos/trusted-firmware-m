@@ -29,7 +29,9 @@
   "source_files": [
     "tfm_secure_client_service.c"
   ],
-  "tfm_linker_pattern": [
-    "*tfm_secure_client_service.*"
-  ]
+  "tfm_linker_pattern": {
+    "object_list": [
+      "*tfm_secure_client_service.*"
+    ]
+  }
 }

@@ -84,7 +84,9 @@
     "crypto/sst_crypto_interface.c",
     "flash/sst_flash.c"
   ],
-  "tfm_linker_pattern": [
+  "tfm_linker_pattern": {
+    "library_list": [
       "*tfm_storage*"
-  ]
+    ]
+  }
 }

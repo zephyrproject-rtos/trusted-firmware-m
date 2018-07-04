@@ -53,7 +53,9 @@
   "source_files": [
     "sst_test_service.c"
   ],
-  "tfm_linker_pattern": [
-    "*sst_test_service.*"
-  ]
+  "tfm_linker_pattern": {
+    "object_list": [
+      "*sst_test_service.*"
+    ]
+  }
 }

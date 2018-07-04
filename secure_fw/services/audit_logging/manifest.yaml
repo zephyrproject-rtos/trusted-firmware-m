@@ -60,7 +60,9 @@
   "source_files": [
     "log_core.c"
   ],
-  "tfm_linker_pattern": [
+  "tfm_linker_pattern": {
+    "library_list": [
       "*tfm_audit*"
-  ]
+    ]
+  }
 }
