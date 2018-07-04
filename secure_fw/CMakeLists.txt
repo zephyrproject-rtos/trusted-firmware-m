@@ -54,7 +54,12 @@ endif()
 if(NOT DEFINED S_SCATTER_FILE_NAME)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: S_SCATTER_FILE_NAME not defined, Include this file from a Config*.cmake")
 endif()
-embedded_set_target_linker_file(TARGET tfm_s PATH "${S_SCATTER_FILE_NAME}")
+embedded_set_target_linker_file(TARGET ${PROJECT_NAME} PATH "${S_SCATTER_FILE_NAME}")
+
+if(NOT DEFINED PLATFORM_LINK_INCLUDES)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
+endif()
+embedded_set_target_link_includes(TARGET ${PROJECT_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 

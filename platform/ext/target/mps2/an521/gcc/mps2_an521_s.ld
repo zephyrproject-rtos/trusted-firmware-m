@@ -20,7 +20,7 @@
 /* Linker script to configure memory regions. */
 /* This file will be run trough the pre-processor. */
 
-#include "../partition/region_defs.h"
+#include "region_defs.h"
 
 MEMORY
 {

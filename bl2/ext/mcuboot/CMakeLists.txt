@@ -99,7 +99,12 @@ embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND
 if(NOT DEFINED BL2_LINKER_CONFIG)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: BL2_LINKER_CONFIG is not defined.")
 endif()
-embedded_set_target_linker_file(TARGET mcuboot PATH "${BL2_LINKER_CONFIG}")
+embedded_set_target_linker_file(TARGET ${PROJECT_NAME} PATH "${BL2_LINKER_CONFIG}")
+
+if(NOT DEFINED PLATFORM_LINK_INCLUDES)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
+endif()
+embedded_set_target_link_includes(TARGET ${PROJECT_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
 add_executable(${PROJECT_NAME} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
 

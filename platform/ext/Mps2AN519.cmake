@@ -13,11 +13,12 @@ include("Common/CpuM23")
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 #Specify the location of platform specific build dependencies.
-set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_bl2.sct")
-set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_s.sct")
-set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_ns.sct")
-set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/mps2/an519/partition/flash_layout.h")
-set (SIGN_BIN_SIZE         0x100000)
+set (BL2_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_bl2.sct")
+set (S_SCATTER_FILE_NAME    "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_s.sct")
+set (NS_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an519/armclang/mps2_an519_ns.sct")
+set (FLASH_LAYOUT           "${PLATFORM_DIR}/target/mps2/an519/partition/flash_layout.h")
+set (PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/mps2/an519/partition/")
+set (SIGN_BIN_SIZE          0x100000)
 if (DEFINED CMSIS_5_DIR)
   # not all project defines CMSIS_5_DIR, only the ones that use it.
   set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib")
