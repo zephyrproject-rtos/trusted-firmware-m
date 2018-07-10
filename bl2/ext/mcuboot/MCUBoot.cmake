@@ -49,7 +49,6 @@ function(mcuboot_create_boot_payload)
 
 	add_custom_command(TARGET ${_MY_PARAMS_NS_BIN}
 						POST_BUILD
-
 						#Create concatenated binary image from the two binary file
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
 						ARGS -l ${FLASH_LAYOUT}
@@ -62,7 +61,7 @@ function(mcuboot_create_boot_payload)
 						ARGS sign
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
-							 -v 1.2.3+4
+							 -v ${IMAGE_VERSION}
 							 -H 0x400
 							 --pad ${SIGN_BIN_SIZE}
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin

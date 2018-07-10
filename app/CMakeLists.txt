@@ -235,7 +235,7 @@ if (LINK_TO_BOTH_MEMORY_REGION)
 					 POSTFIX       "_0")
 
 	#Link to secondary memory region(add extra linker flag)
-	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
+	set_up_app_build(NS_TARGET     ${PROJECT_NAME}
 					 LINK_DEFINES  "LINK_TO_SECONDARY_PARTITION"
 					 S_TARGET      tfm_s
 					 FULL_BIN      tfm_full
@@ -244,7 +244,7 @@ if (LINK_TO_BOTH_MEMORY_REGION)
 					 POSTFIX       "_1")
 else()
 	#Link to primary memory region only
-	set_up_app_build(NS_TARGET      ${PROJECT_NAME}
+	set_up_app_build(NS_TARGET     ${PROJECT_NAME}
 					 S_TARGET      tfm_s
 					 FULL_BIN      tfm_full
 					 SIGN_BIN      tfm_sign

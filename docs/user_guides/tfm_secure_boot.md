@@ -120,10 +120,30 @@ Compile time switches:
   - **True:** Activate non-swapping firmware upgrade operation.
   - **False:** Original firmware upgrade operation with image swapping.
 
-Image version number can be specified in:
+### Image versioning
+An image version number is written to its header by one of the python scripts,
+and this number is used by the bootloader when the non-swapping mode is
+enabled.
+
+The version number of the image can manually be passed in through the command
+line in the cmake configuration step:
 ```
-bl2/ext/mcuboot/MCUBoot.cmake
+cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DIMAGE_VERSION=1.2.3+4 ../
 ```
+Alternatively, the version number can be less specific (e.g 1, 1.2, or 1.2.3),
+where the missing numbers are automatically set to zero. The image version
+number argument is optional, and if it is left out, then the version numbers of
+the image(s) being built in the same directory will automatically change. In
+this case, the last component (the build number) automatically increments from
+the previous one: 0.0.0+1 -> 0.0.0+2, for as many times as the build is re-ran,
+**until a number is explicitly provided**. If automatic versioning is in place
+and then an image version number is provided for the first time, the new number
+will take precedence and be used instead. All subsequent image versions are
+then set to the last number that has been specified, and the build number would
+stop incrementing. Any new version numbers that are provided will overwrite
+the previous one: 0.0.0+1 -> 0.0.0+2. Note: To re-apply automatic image
+versioning, please start a clean build without specifying the image version
+number at all
 
 At build time automatically two binaries are generated:
 ```

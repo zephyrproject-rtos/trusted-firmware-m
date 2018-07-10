@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 #
 # Copyright 2017 Linaro Limited
+# Copyright (c) 2018, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +15,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import argparse
 from imgtool import keys
 from imgtool import image
 from imgtool import version
 import sys
+
+# Returns the last version number if present, or None if not
+def get_last_version(path):
+    if (os.path.isfile(path) == False): # Version file not present
+        return None
+    else: # Version file is present, check it has a valid number inside it
+        with open(path, "r") as oldFile:
+            fileContents = oldFile.read()
+            if version.version_re.match(fileContents): # number is valid
+                return version.decode_version(fileContents)
+            else:
+                return None
+
+def next_version_number(args, defaultVersion, path):
+    newVersion = None
+    if (version.compare(args.version, defaultVersion) == 0): # Default version
+        lastVersion = get_last_version(path)
+        if (lastVersion is not None):
+            newVersion = version.increment_build_num(lastVersion)
+        else:
+            newVersion = version.increment_build_num(defaultVersion)
+    else: # Version number has been explicitly provided (not using the default)
+        newVersion = args.version
+    versionString = "{a}.{b}.{c}+{d}".format(
+                    a=str(newVersion.major),
+                    b=str(newVersion.minor),
+                    c=str(newVersion.revision),
+                    d=str(newVersion.build)
+    )
+    with open(path, "w") as newFile:
+        newFile.write(versionString)
+    print("**[INFO]** Image version number set to " + versionString)
+    return newVersion
 
 def gen_rsa2048(args):
     keys.RSA2048.generate().export_private(args.key)
@@ -43,7 +78,10 @@ def do_getpub(args):
 def do_sign(args):
     if args.rsa_pkcs1_15:
         keys.sign_rsa_pss = False
-    img = image.Image.load(args.infile, version=args.version,
+    img = image.Image.load(args.infile,
+            version=next_version_number(args,
+                                        version.decode_version("0"),
+                                        "lastVerNum.txt"),
             header_size=args.header_size,
             included_header=args.included_header,
             pad=args.pad)
@@ -80,7 +118,7 @@ def args():
     keygenp = subs.add_parser('keygen', help='Generate pub/private keypair')
     keygenp.add_argument('-k', '--key', metavar='filename', required=True)
     keygenp.add_argument('-t', '--type', metavar='type',
-            choices=keygens.keys(), required=True)
+                         choices=keygens.keys(), required=True)
 
     getpub = subs.add_parser('getpub', help='Get public key from keypair')
     getpub.add_argument('-k', '--key', metavar='filename', required=True)
@@ -89,14 +127,16 @@ def args():
     sign = subs.add_parser('sign', help='Sign an image with a private key')
     sign.add_argument('-k', '--key', metavar='filename')
     sign.add_argument("--align", type=alignment_value, required=True)
-    sign.add_argument("-v", "--version", type=version.decode_version, required=True)
+    sign.add_argument("-v", "--version", type=version.decode_version,
+                      default="0.0.0+0")
     sign.add_argument("-H", "--header-size", type=intparse, required=True)
     sign.add_argument("--included-header", default=False, action='store_true',
-            help='Image has gap for header')
+                      help='Image has gap for header')
     sign.add_argument("--pad", type=intparse,
-            help='Pad image to this many bytes, adding trailer magic')
-    sign.add_argument("--rsa-pkcs1-15", help='Use old PKCS#1 v1.5 signature algorithm',
-            default=False, action='store_true')
+                      help='Pad image to this many bytes, adding trailer magic')
+    sign.add_argument("--rsa-pkcs1-15",
+                      help='Use old PKCS#1 v1.5 signature algorithm',
+                      default=False, action='store_true')
     sign.add_argument("infile")
     sign.add_argument("outfile")
 

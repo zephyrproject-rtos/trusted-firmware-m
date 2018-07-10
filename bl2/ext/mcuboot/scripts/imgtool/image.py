@@ -79,8 +79,8 @@ class Image():
         obj.check()
         return obj
 
-    def __init__(self, version=None, header_size=IMAGE_HEADER_SIZE, pad=0):
-        self.version = version or versmod.decode_version("0")
+    def __init__(self, version, header_size=IMAGE_HEADER_SIZE, pad=0):
+        self.version = version
         self.header_size = header_size or IMAGE_HEADER_SIZE
         self.pad = pad
 
