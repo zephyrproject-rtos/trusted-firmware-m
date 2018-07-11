@@ -48,10 +48,10 @@ extern "C" {
 #define SST_ASSET_PERMS_COUNT_SHA224_HASH 1
 #define SST_ASSET_PERMS_COUNT_SHA384_HASH 1
 
-#define SST_APP_ID_0 9
-#define SST_APP_ID_1 10
-#define SST_APP_ID_2 11
-#define SST_APP_ID_3 12
+#define SST_CLIENT_ID_0 -9
+#define SST_CLIENT_ID_1 -10
+#define SST_CLIENT_ID_2 -11
+#define SST_CLIENT_ID_3 -12
 
 /* Maximum number of assets that can be stored in the cache */
 #define SST_NUM_ASSETS 10

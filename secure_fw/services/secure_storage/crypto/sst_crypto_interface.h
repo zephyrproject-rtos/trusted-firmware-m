@@ -41,7 +41,7 @@ union sst_crypto_t {
 enum psa_sst_err_t sst_crypto_init(void);
 
 /**
- * \brief Gets a key for specific app id
+ * \brief Gets a key for specific client id
  *
  * \param[out] key      Cryptographic key
  * \param[in]  key_len  Key len

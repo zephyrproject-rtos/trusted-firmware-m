@@ -18,7 +18,7 @@
 #include <string.h>
 #include "cmsis_os2.h"
 
-#define INVALID_APP_ID  0
+#define INVALID_CLIENT_ID  0
 
 /* FIXME: following two functions are meant to be internally
  * available to RTX. The header file containing prototype of
@@ -31,18 +31,18 @@
 extern osThreadId_t svcRtxThreadGetId(void);
 extern const char *svcRtxThreadGetName(osThreadId_t thread_id);
 
-/* Translation table pair between OS threads and SST app IDs */
-struct thread_sst_appid_pair {
-    const char* t_name;  /*!< Task/Thread name */
-    uint32_t    app_id;  /*!< Application ID used in assets definition */
+/* Translation table pair between OS threads and SST client IDs */
+struct thread_sst_clientid_pair {
+    const char* t_name;     /*!< Task/Thread name */
+    int32_t     client_id;  /*!< Client ID used in assets definition */
 };
 
-static struct thread_sst_appid_pair sst_ns_policy_table[] =
+static struct thread_sst_clientid_pair sst_ns_policy_table[] =
 {
-    {"Thread_A", 9},
-    {"Thread_B", 10},
-    {"Thread_C", 11},
-    {"Thread_D", 12},
+    {"Thread_A", -9},
+    {"Thread_B", -10},
+    {"Thread_C", -11},
+    {"Thread_D", -12},
 };
 
 static const char* get_active_task_name(void)
@@ -54,7 +54,7 @@ static const char* get_active_task_name(void)
     return thread_name;
 }
 
-uint32_t tfm_sst_get_cur_id(void)
+int32_t tfm_sst_get_cur_id(void)
 {
     uint32_t i;
     static uint32_t sst_table_size = (sizeof(sst_ns_policy_table) /
@@ -65,9 +65,9 @@ uint32_t tfm_sst_get_cur_id(void)
 
     for (i = 0; i < sst_table_size; i++) {
         if (strcmp(sst_ns_policy_table[i].t_name, p_thread_name) == 0) {
-                return sst_ns_policy_table[i].app_id;
+                return sst_ns_policy_table[i].client_id;
         }
     }
 
-    return INVALID_APP_ID;
+    return INVALID_CLIENT_ID;
 }

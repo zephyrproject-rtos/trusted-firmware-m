@@ -49,10 +49,10 @@ enum psa_sst_err_t sst_crypto_init(void)
 
 enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
 {
-    /* FIXME: if key diversification is desired, the appid
+    /* FIXME: if key diversification is desired, the client ID
      * can be used to derive a key from the HUK derived key.
      * However, this is tricky for shared resources which can
-     * be accessed by multiple clients (i.e. multiple appID)
+     * be accessed by multiple clients (i.e. multiple client ID)
      *
      * To be fixed in later revisions. Currently, just use the
      * same HUK (derived) key for all the crypto operations.

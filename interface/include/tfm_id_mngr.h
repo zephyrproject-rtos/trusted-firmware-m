@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,11 +15,11 @@ extern "C" {
 #include <stdint.h>
 
 /**
- * \brief Gets SST current application ID
+ * \brief Gets SST current client ID
  *
- * \return Returns the SST current application ID
+ * \return Returns the SST current client ID
  */
-uint32_t tfm_sst_get_cur_id(void);
+int32_t tfm_sst_get_cur_id(void);
 
 #ifdef __cplusplus
 }

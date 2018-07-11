@@ -18,7 +18,7 @@
 #define ASSET_TOKEN      NULL
 #define ASSET_TOKEN_SIZE 0
 
-/* The tests in this test suite cover access to an asset when the application
+/* The tests in this test suite cover access to an asset when the clients
  * has:
  *  - REFERENCE/READ/WRITE permissions,
  *  - REFERENCE/READ permissions,
@@ -31,31 +31,31 @@
  */
 
 /**
- * \note List of relations between thread name, app ID and permissions.
+ * \note List of relations between thread name, client ID and permissions.
  *
  * Asset permissions: SST_ASSET_ID_AES_KEY_192
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------------
- *     Thread_A  | SST_APP_ID_0 | REFERENCE
- *     Thread_B  | SST_APP_ID_1 | REFERENCE, READ
- *     Thread_C  | SST_APP_ID_2 | REFERENCE, READ, WRITE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|-----------------
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE
+ *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
  *
  * Asset permissions: SST_ASSET_ID_SHA224_HASH
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------------
- *     Thread_A  | SST_APP_ID_0 | NONE
- *     Thread_B  | SST_APP_ID_1 | REFERENCE, READ, WRITE
- *     Thread_C  | SST_APP_ID_2 | NONE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|-----------------
+ *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | NONE
  *
  * Asset permissions: SST_ASSET_ID_SHA384_HASH
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------
- *     Thread_A  | SST_APP_ID_0 | NONE
- *     Thread_B  | SST_APP_ID_1 | NONE
- *     Thread_C  | SST_APP_ID_2 | REFERENCE, WRITE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|-----------
+ *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_B  | SST_CLIENT_ID_1 | NONE
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, WRITE
  */
 
 /* Test suite defines */
@@ -123,9 +123,9 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
 /**
  * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------------
- *          Thread_C    | SST_APP_ID_2 | REFERENCE, READ, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------------
+ *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
  */
 TFM_SST_NS_TEST(4001, "Thread_C")
 {
@@ -200,9 +200,9 @@ TFM_SST_NS_TEST(4001, "Thread_C")
 /**
  * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|------------
- *          Thread_A    | SST_APP_ID_0 | REFERENCE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|------------
+ *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE
  */
 TFM_SST_NS_TEST(4002, "Thread_A")
 {
@@ -285,9 +285,9 @@ TFM_SST_NS_TEST(4002, "Thread_A")
 /**
  * \brief Tests policy for SST_ASSET_ID_AES_KEY_192 with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|----------------
- *          Thread_B    | SST_APP_ID_1 | REFERENCE, READ
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|----------------
+ *          Thread_B    | SST_CLIENT_ID_1 | REFERENCE, READ
  */
 TFM_SST_NS_TEST(4003, "Thread_B")
 {
@@ -372,9 +372,9 @@ TFM_SST_NS_TEST(4003, "Thread_B")
 /**
  * \brief Tests delete policy for SST_ASSET_ID_AES_KEY_192 with the
  *        following permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------------
- *          Thread_C    | SST_APP_ID_2 | REFERENCE, READ, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------------
+ *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
  *
  * This test is performed last so that the asset still exists during the
  * preceeding test cases.
@@ -396,9 +396,9 @@ TFM_SST_NS_TEST(4004, "Thread_C")
 /**
  * \brief Tests policy for SST_ASSET_ID_SHA224_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------------
- *          Thread_B    | SST_APP_ID_1 | REFERENCE, READ, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------------
+ *          Thread_B    | SST_CLIENT_ID_1 | REFERENCE, READ, WRITE
  */
 TFM_SST_NS_TEST(4005, "Thread_B")
 {
@@ -473,9 +473,9 @@ TFM_SST_NS_TEST(4005, "Thread_B")
 /**
  * \brief Tests policy for SST_ASSET_ID_SHA224_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|------------
- *          Thread_A    | SST_APP_ID_0 | NONE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|------------
+ *          Thread_A    | SST_CLIENT_ID_0 | NONE
  */
 TFM_SST_NS_TEST(4006, "Thread_A")
 {
@@ -561,9 +561,9 @@ TFM_SST_NS_TEST(4006, "Thread_A")
 /**
  * \brief Tests delete policy for SST_ASSET_ID_SHA224_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------------
- *          Thread_B    | SST_APP_ID_1 | REFERENCE, READ, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------------
+ *          Thread_B    | SST_CLIENT_ID_1 | REFERENCE, READ, WRITE
  *
  * This test is performed last so that the asset still exists during the
  * preceeding test cases.
@@ -586,9 +586,9 @@ TFM_SST_NS_TEST(4007, "Thread_B")
 /**
  * \brief Tests policy for SST_ASSET_ID_SHA384_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------
- *          Thread_C    | SST_APP_ID_2 | REFERENCE, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------
+ *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, WRITE
  */
 TFM_SST_NS_TEST(4008, "Thread_C")
 {
@@ -664,9 +664,9 @@ TFM_SST_NS_TEST(4008, "Thread_C")
 /**
  * \brief Tests policy for SST_ASSET_ID_SHA384_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|------------
- *          Thread_A    | SST_APP_ID_0 | NONE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|------------
+ *          Thread_A    | SST_CLIENT_ID_0 | NONE
  */
 TFM_SST_NS_TEST(4009, "Thread_A")
 {
@@ -752,9 +752,9 @@ TFM_SST_NS_TEST(4009, "Thread_A")
 /**
  * \brief Tests delete policy for SST_ASSET_ID_SHA384_HASH with the following
  *        permissions:
- *          THREAD NAME | APP_ID       | Permissions
- *          ------------|--------------|-----------------
- *          Thread_C    | SST_APP_ID_2 | REFERENCE, WRITE
+ *          THREAD NAME | CLIENT_ID       | Permissions
+ *          ------------|-----------------|-----------------
+ *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, WRITE
  *
  * This test is performed last so that the asset still exists during the
  * preceeding test cases.

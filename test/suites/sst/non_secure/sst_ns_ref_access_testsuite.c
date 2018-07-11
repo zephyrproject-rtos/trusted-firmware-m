@@ -45,14 +45,14 @@ void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite)
 }
 
 /**
- * \note List of relations between thread name, app ID and permissions
+ * \note List of relations between thread name, client ID and permissions
  *
  * Asset permissions: SST_ASSET_ID_AES_KEY_128
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------------
- *     Thread_C  | SST_APP_ID_2 | NONE
- *     Thread_D  | SST_APP_ID_3 | REFERENCE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|--------------------
+ *     Thread_C  | SST_CLIENT_ID_2 | NONE
+ *     Thread_D  | SST_CLIENT_ID_3 | REFERENCE
  *
  */
 

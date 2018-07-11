@@ -19,11 +19,11 @@ enum psa_sst_err_t sst_test_service_svc_dummy_encrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
-    uint32_t app_id;
+    int32_t client_id;
 
-    app_id = tfm_sst_get_cur_id();
+    client_id = tfm_sst_get_cur_id();
 
-    return sst_test_service_veneer_dummy_encrypt(app_id, key_uuid, buf,
+    return sst_test_service_veneer_dummy_encrypt(client_id, key_uuid, buf,
                                                  buf_size);
 }
 
@@ -31,11 +31,11 @@ enum psa_sst_err_t sst_test_service_svc_dummy_decrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
-    uint32_t app_id;
+    int32_t client_id;
 
-    app_id = tfm_sst_get_cur_id();
+    client_id = tfm_sst_get_cur_id();
 
-    return sst_test_service_veneer_dummy_decrypt(app_id, key_uuid, buf,
+    return sst_test_service_veneer_dummy_decrypt(client_id, key_uuid, buf,
                                                  buf_size);
 }
 

@@ -24,23 +24,23 @@ extern struct sst_asset_policy_t asset_perms[];
 extern struct sst_asset_perm_t asset_perms_modes[];
 
 /**
- * \brief Looks up for policy entry for give app and uuid
+ * \brief Looks up for policy entry for give client and uuid
  *
  * \param[in] db_entry  Asset specific entry
- * \param[in] app_id    Identify of the application calling the service
+ * \param[in] client_id Identify of the client calling the service
  *
  * \return Returns the perms entry on successful lookup
  */
-static struct sst_asset_perm_t *sst_am_lookup_app_perms(
+static struct sst_asset_perm_t *sst_am_lookup_client_perms(
                                       const struct sst_asset_policy_t *db_entry,
-                                      uint32_t app_id)
+                                      int32_t client_id)
 {
     struct sst_asset_perm_t *perm_entry;
     uint32_t i;
 
     for (i = 0; i < db_entry->perms_count; i++) {
         perm_entry = &asset_perms_modes[db_entry->perms_modes_start_idx+i];
-        if (perm_entry->app == app_id) {
+        if (perm_entry->client_id == client_id) {
             return perm_entry;
         }
     }
@@ -72,20 +72,21 @@ static struct sst_asset_policy_t *sst_am_lookup_db_entry(uint32_t uuid)
 /**
  * \brief Checks the compile time policy for secure/non-secure separation
  *
- * \param[in] app_id        caller's application ID
+ * \param[in] client_id     Client ID
  * \param[in] request_type  requested action to perform
  *
  * \return Returns the sanitized request_type
  */
-static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
+static uint16_t sst_am_check_s_ns_policy(int32_t client_id,
+                                         uint16_t request_type)
 {
     enum psa_sst_err_t err;
     uint16_t access;
 
     /* FIXME: based on level 1 tfm isolation, any entity on the secure side
-     * can have full access if it uses secure app ID to make the call.
-     * When the secure caller passes on the app_id of non-secure entity,
-     * the code only allows read by reference. I.e. if the app_id
+     * can have full access if it uses secure client ID to make the call.
+     * When the secure caller passes on the client_id of non-secure entity,
+     * the code only allows read by reference. I.e. if the client_id
      * has the reference permission, the secure caller will be allowed
      * to read the entry. This needs a revisit when for higher level
      * of isolation.
@@ -96,12 +97,12 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
      * store it, and make references for encryption/decryption and later on
      * delete it.
      * For now it is for the other secure service to create/delete/write
-     * resources with the secure app ID.
+     * resources with the secure client ID.
      */
     err = sst_utils_validate_secure_caller();
 
     if (err == PSA_SST_ERR_SUCCESS) {
-        if (app_id != S_APP_ID) {
+        if (client_id != S_CLIENT_ID) {
             if (request_type & SST_PERM_READ) {
                 access = SST_PERM_REFERENCE;
             } else {
@@ -115,7 +116,7 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
              */
             access = SST_PERM_BYPASS;
         }
-    } else if (app_id == S_APP_ID) {
+    } else if (client_id == S_CLIENT_ID) {
         /* non secure caller spoofing as secure caller */
         access = SST_PERM_FORBIDDEN;
     } else {
@@ -125,10 +126,10 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
 }
 
 /**
- * \brief Gets asset's permissions if the application is allowed
+ * \brief Gets asset's permissions if the client is allowed
  *        based on the request_type
  *
- * \param[in] app_id        Caller's application ID
+ * \param[in] client_id     Client ID
  * \param[in] uuid          Asset's unique identifier
  * \param[in] request_type  Type of requested access
  *
@@ -138,14 +139,14 @@ static uint16_t sst_am_check_s_ns_policy(uint32_t app_id, uint16_t request_type)
  *
  * \return Returns the entry pointer for specified asset
  */
-static struct sst_asset_policy_t *sst_am_get_db_entry(uint32_t app_id,
+static struct sst_asset_policy_t *sst_am_get_db_entry(int32_t client_id,
                                                       uint32_t uuid,
                                                       uint8_t request_type)
 {
     struct sst_asset_perm_t   *perm_entry;
     struct sst_asset_policy_t *db_entry;
 
-    request_type = sst_am_check_s_ns_policy(app_id, request_type);
+    request_type = sst_am_check_s_ns_policy(client_id, request_type);
 
     /* security access violation */
     if (request_type == SST_PERM_FORBIDDEN) {
@@ -167,8 +168,8 @@ static struct sst_asset_policy_t *sst_am_get_db_entry(uint32_t app_id,
          return db_entry;
      }
 
-    /* Find the app ID entry in the database */
-    perm_entry = sst_am_lookup_app_perms(db_entry, app_id);
+    /* Find the client ID entry in the database */
+    perm_entry = sst_am_lookup_client_perms(db_entry, client_id);
     if (perm_entry == NULL) {
         return NULL;
     }
@@ -237,18 +238,18 @@ enum psa_sst_err_t sst_am_prepare(void)
 /**
  * \brief Validate incoming iovec structure
  *
- * \param[in] src     Incoming iovec for the read/write request
- * \param[in] dest    Pointer to local copy of the iovec
- * \param[in] app_id  Application ID of the caller
- * \param[in] access  Access type to be permormed on the given dest->data
- *                    address
+ * \param[in] src        Incoming iovec for the read/write request
+ * \param[in] dest       Pointer to local copy of the iovec
+ * \param[in] client_id  Client ID of the caller
+ * \param[in] access     Access type to be permormed on the given dest->data
+ *                       address
  *
  * \return Returns value specified in \ref psa_sst_err_t
  */
 static enum psa_sst_err_t validate_copy_validate_iovec(
                                                 const struct tfm_sst_buf_t *src,
                                                 struct tfm_sst_buf_t *dest,
-                                                uint32_t app_id,
+                                                int32_t client_id,
                                                 uint32_t access)
 {
     /* iovec struct needs to be used as veneers do not allow
@@ -259,16 +260,18 @@ static enum psa_sst_err_t validate_copy_validate_iovec(
     enum psa_sst_err_t bound_check;
 
     bound_check = sst_utils_bound_check_and_copy((uint8_t *) src,
-                      (uint8_t *) dest, sizeof(struct tfm_sst_buf_t), app_id);
+                                                 (uint8_t *) dest,
+                                                 sizeof(struct tfm_sst_buf_t),
+                                                 client_id);
     if (bound_check == PSA_SST_ERR_SUCCESS) {
         bound_check = sst_utils_memory_bound_check(dest->data, dest->size,
-                                                   app_id, access);
+                                                   client_id, access);
     }
 
     return bound_check;
 }
 
-enum psa_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_info(int32_t client_id, uint32_t asset_uuid,
                                    const struct tfm_sst_token_t *s_token,
                                    struct psa_sst_asset_info_t *info)
 {
@@ -278,14 +281,14 @@ enum psa_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
     enum psa_sst_err_t err;
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
 
-    bound_check = sst_utils_memory_bound_check(info,
-                                               PSA_SST_ASSET_INFO_SIZE,
-                                               app_id, TFM_MEMORY_ACCESS_RW);
+    bound_check = sst_utils_memory_bound_check(info, PSA_SST_ASSET_INFO_SIZE,
+                                               client_id,
+                                               TFM_MEMORY_ACCESS_RW);
     if (bound_check != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -303,7 +306,8 @@ enum psa_sst_err_t sst_am_get_info(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
+                                         uint32_t asset_uuid,
                                          const struct tfm_sst_token_t *s_token,
                                          struct psa_sst_asset_attrs_t *attrs)
 {
@@ -313,14 +317,14 @@ enum psa_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
     enum psa_sst_err_t err;
     struct psa_sst_asset_attrs_t tmp_attrs;
 
-    bound_check = sst_utils_memory_bound_check(attrs,
-                                               PSA_SST_ASSET_ATTR_SIZE,
-                                               app_id, TFM_MEMORY_ACCESS_RW);
+    bound_check = sst_utils_memory_bound_check(attrs, PSA_SST_ASSET_ATTR_SIZE,
+                                               client_id,
+                                               TFM_MEMORY_ACCESS_RW);
     if (bound_check != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -338,7 +342,8 @@ enum psa_sst_err_t sst_am_get_attributes(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
+                                      uint32_t asset_uuid,
                                       const struct tfm_sst_token_t *s_token,
                                       const struct psa_sst_asset_attrs_t *attrs)
 {
@@ -349,12 +354,13 @@ enum psa_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
 
     bound_check = sst_utils_memory_bound_check((uint8_t *)attrs,
                                                PSA_SST_ASSET_ATTR_SIZE,
-                                               app_id, TFM_MEMORY_ACCESS_RO);
+                                               client_id,
+                                               TFM_MEMORY_ACCESS_RO);
     if (bound_check != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_PARAM_ERROR;
     }
 
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, all_perms);
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, all_perms);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -375,13 +381,13 @@ enum psa_sst_err_t sst_am_set_attributes(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_create(int32_t client_id, uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -392,7 +398,7 @@ enum psa_sst_err_t sst_am_create(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
                                const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data)
 {
@@ -400,15 +406,15 @@ enum psa_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
-    /* Check application ID permissions */
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_READ);
+    /* Check client ID permissions */
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_READ);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Make a local copy of the iovec data structure */
     err = validate_copy_validate_iovec(data, &local_data,
-                                       app_id, TFM_MEMORY_ACCESS_RW);
+                                       client_id, TFM_MEMORY_ACCESS_RW);
     if (err != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -425,7 +431,7 @@ enum psa_sst_err_t sst_am_read(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_write(int32_t client_id, uint32_t asset_uuid,
                                 const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data)
 {
@@ -433,15 +439,15 @@ enum psa_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
-    /* Check application ID permissions */
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
+    /* Check client ID permissions */
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Make a local copy of the iovec data structure */
     err = validate_copy_validate_iovec(data, &local_data,
-                                       app_id, TFM_MEMORY_ACCESS_RO);
+                                       client_id, TFM_MEMORY_ACCESS_RO);
     if (err != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
@@ -466,13 +472,13 @@ enum psa_sst_err_t sst_am_write(uint32_t app_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_delete(uint32_t app_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_delete(int32_t client_id, uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
 
-    db_entry = sst_am_get_db_entry(app_id, asset_uuid, SST_PERM_WRITE);
+    db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }

@@ -57,14 +57,14 @@ void register_testsuite_s_sst_reliability(struct test_suite_t *p_test_suite)
 
 /**
  * \brief Tests repetitive writes in an asset with the follow permissions:
- *        APP_ID       | Permissions
- *        -------------------------------------
- *        S_APP_ID | REFERENCE, READ, WRITE
+ *        CLIENT_ID   | Permissions
+ *        ------------|------------------------
+ *        S_CLIENT_ID | REFERENCE, READ, WRITE
  */
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     uint32_t asset_offset = 0;
     const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_buf_t io_data;
@@ -79,9 +79,9 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     }
 
     /* Checks write permissions in create function */
-    err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
+    err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for application S_APP_ID");
+        TEST_FAIL("Create should not fail for client S_CLIENT_ID");
         return;
     }
 
@@ -97,10 +97,10 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token,
+            err = tfm_sst_veneer_write(client_id, asset_uuid, &test_token,
                                        &io_data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Write should not fail for application S_APP_ID");
+                TEST_FAIL("Write should not fail for client S_CLIENT_ID");
                 return;
             }
 
@@ -108,10 +108,10 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token,
+            err = tfm_sst_veneer_read(client_id, asset_uuid, &test_token,
                                       &io_data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Application S_APP_ID must get file handle");
+                TEST_FAIL("Client S_CLIENT_ID must get file handle");
                 return;
             }
 
@@ -136,9 +136,9 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(app_id, asset_uuid, &test_token);
+    err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail for application S_APP_ID");
+        TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
         return;
     }
 
@@ -147,7 +147,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     struct tfm_sst_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
@@ -161,9 +161,9 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     }
 
     /* Checks write permissions in create function */
-    err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
+    err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for application S_APP_ID");
+        TEST_FAIL("Create should not fail for client S_CLIENT_ID");
         return;
     }
 
@@ -179,9 +179,10 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
+        err = tfm_sst_veneer_write(client_id, asset_uuid,
+                                   &test_token, &io_data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Write should not fail for application S_APP_ID");
+            TEST_FAIL("Write should not fail for client S_CLIENT_ID");
             return;
         }
 
@@ -189,9 +190,10 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
+        err = tfm_sst_veneer_read(client_id, asset_uuid,
+                                  &test_token, &io_data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Application S_APP_ID must get file handle");
+            TEST_FAIL("Client S_CLIENT_ID must get file handle");
             return;
         }
 
@@ -218,9 +220,9 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(app_id, asset_uuid, &test_token);
+    err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail for application S_APP_ID");
+        TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
         return;
     }
 
@@ -231,14 +233,14 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 /**
  * \brief Tests repetitive creates, reads, writes and deletes, with the follow
  *        permissions:
- *        APP_ID       | Permissions
- *        -------------------------------------
- *        S_APP_ID | REFERENCE, READ, WRITE
+ *        CLIENT_ID   | Permissions
+ *        ------------|------------------------
+ *        S_CLIENT_ID | REFERENCE, READ, WRITE
  */
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     uint32_t asset_offset = 0;
     const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
     struct tfm_sst_buf_t io_data;
@@ -259,9 +261,9 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
 
         /* Checks write permissions in create function */
-        err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
+        err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Create should not fail for application S_APP_ID");
+            TEST_FAIL("Create should not fail for client S_CLIENT_ID");
             return;
         }
 
@@ -271,10 +273,10 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token,
+            err = tfm_sst_veneer_write(client_id, asset_uuid, &test_token,
                                        &io_data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Write should not fail for application S_APP_ID");
+                TEST_FAIL("Write should not fail for client S_CLIENT_ID");
                 return;
             }
 
@@ -282,10 +284,10 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token,
+            err = tfm_sst_veneer_read(client_id, asset_uuid, &test_token,
                                       &io_data);
             if (err != PSA_SST_ERR_SUCCESS) {
-                TEST_FAIL("Application S_APP_ID must get file handle");
+                TEST_FAIL("Client S_CLIENT_ID must get file handle");
                 return;
             }
 
@@ -308,9 +310,9 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         asset_offset = 0;
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(app_id, asset_uuid, &test_token);
+        err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Delete should not fail for application S_APP_ID");
+            TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
             return;
         }
     }
@@ -323,7 +325,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     struct tfm_sst_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
@@ -343,9 +345,9 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
 
         /* Checks write permissions in create function */
-        err = tfm_sst_veneer_create(app_id, asset_uuid, &test_token);
+        err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Create should not fail for application S_APP_ID");
+            TEST_FAIL("Create should not fail for client S_CLIENT_ID");
             return;
         }
 
@@ -355,9 +357,10 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(app_id, asset_uuid, &test_token, &io_data);
+        err = tfm_sst_veneer_write(client_id, asset_uuid,
+                                   &test_token, &io_data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Write should not fail for application S_APP_ID");
+            TEST_FAIL("Write should not fail for client S_CLIENT_ID");
             return;
         }
 
@@ -365,9 +368,10 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(app_id, asset_uuid, &test_token, &io_data);
+        err = tfm_sst_veneer_read(client_id, asset_uuid,
+                                  &test_token, &io_data);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Application S_APP_ID must get file handle");
+            TEST_FAIL("Client S_CLIENT_ID must get file handle");
             return;
         }
 
@@ -391,9 +395,9 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         }
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(app_id, asset_uuid, &test_token);
+        err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
         if (err != PSA_SST_ERR_SUCCESS) {
-            TEST_FAIL("Delete should not fail for application S_APP_ID");
+            TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
             return;
         }
     }

@@ -35,7 +35,7 @@ enum psa_sst_err_t sst_test_service_init(void)
 enum psa_sst_err_t sst_test_service_sfn_setup(void)
 {
     enum psa_sst_err_t err;
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
     struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
 
@@ -43,19 +43,19 @@ enum psa_sst_err_t sst_test_service_sfn_setup(void)
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
 
-    /* Create the key asset using our secure app ID */
-    err = tfm_sst_veneer_create(app_id, key_uuid, &s_token);
+    /* Create the key asset using our secure client ID */
+    err = tfm_sst_veneer_create(client_id, key_uuid, &s_token);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    /* Write the key to the asset using our secure app ID */
-    err = tfm_sst_veneer_write(app_id, key_uuid, &s_token, &key_buf);
+    /* Write the key to the asset using our secure client ID */
+    err = tfm_sst_veneer_write(client_id, key_uuid, &s_token, &key_buf);
 
     return err;
 }
 
-enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
+enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(int32_t client_id,
                                                       uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
@@ -66,14 +66,14 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
     struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
     struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
-    /* Read the key from the asset using the non-secure caller's app ID */
-    err = tfm_sst_veneer_read(app_id, key_uuid, &s_token, &key_buf);
+    /* Read the key from the asset using the non-secure caller's client ID */
+    err = tfm_sst_veneer_read(client_id, key_uuid, &s_token, &key_buf);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    /* Check the buffer is valid memory for the application that supplied it */
-    err = sst_utils_memory_bound_check(buf, buf_size, app_id,
+    /* Check the buffer is valid memory for the client that supplied it */
+    err = sst_utils_memory_bound_check(buf, buf_size, client_id,
                                        TFM_MEMORY_ACCESS_RW);
     if (err != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_PARAM_ERROR;
@@ -87,25 +87,26 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
     return PSA_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(uint32_t app_id,
+enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(int32_t client_id,
                                                       uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
     /* In the current implementation encrypt and decrypt are the same operation
      */
-    return sst_test_service_sfn_dummy_encrypt(app_id, key_uuid, buf, buf_size);
+    return sst_test_service_sfn_dummy_encrypt(client_id, key_uuid,
+                                              buf, buf_size);
 }
 
 enum psa_sst_err_t sst_test_service_sfn_clean(void)
 {
     enum psa_sst_err_t err;
-    uint32_t app_id = S_APP_ID;
+    int32_t client_id = S_CLIENT_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
     struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
 
-    /* Delete the key asset using our secure app ID */
-    err = tfm_sst_veneer_delete(app_id, key_uuid, &s_token);
+    /* Delete the key asset using our secure client ID */
+    err = tfm_sst_veneer_delete(client_id, key_uuid, &s_token);
 
     return err;
 }

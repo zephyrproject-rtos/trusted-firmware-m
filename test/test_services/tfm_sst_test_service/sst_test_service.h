@@ -27,14 +27,14 @@ enum psa_sst_err_t sst_test_service_sfn_setup(void);
  * \brief Performs a dummy encryption on the supplied buffer, using the key
  *        stored in the asset with the given UUID.
  *
- * \param[in]     app_id    Application ID
- * \param[in]     key_uuid  UUID of asset containing key
- * \param[in,out] buf       Plaintext buffer
- * \param[in]     buf_size  Size of buf
+ * \param[in]     client_id  Client ID which calls the service
+ * \param[in]     key_uuid   UUID of asset containing key
+ * \param[in,out] buf        Plaintext buffer
+ * \param[in]     buf_size   Size of buf
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
+enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(int32_t client_id,
                                                       uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size);
@@ -43,14 +43,14 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t app_id,
  * \brief Performs a dummy decryption on the supplied buffer, using the key
  *        stored in the asset with the given UUID.
  *
- * \param[in]     app_id    Application ID
- * \param[in]     key_uuid  UUID of asset containing key
- * \param[in,out] buf       Ciphertext buffer
- * \param[in]     buf_size  Size of buf
+ * \param[in]     client_id  Client ID which calls the service
+ * \param[in]     key_uuid   UUID of asset containing key
+ * \param[in,out] buf        Ciphertext buffer
+ * \param[in]     buf_size   Size of buf
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(uint32_t app_id,
+enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(int32_t client_id,
                                                       uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size);

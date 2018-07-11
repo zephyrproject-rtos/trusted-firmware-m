@@ -74,40 +74,40 @@ struct sst_asset_policy_t asset_perms[] = {
 
 struct sst_asset_perm_t asset_perms_modes[] = {
 {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_3,
+    .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
 /* The following asset permissions are used by the SST testsuite */
-    .app = SST_APP_ID_0,
+    .client_id = SST_CLIENT_ID_0,
     .perm = SST_PERM_REFERENCE,
 }, {
-    .app = SST_APP_ID_1,
+    .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ,
 }, {
-    .app = SST_APP_ID_2,
+    .client_id = SST_CLIENT_ID_2,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_1,
+    .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .app = SST_APP_ID_2,
+    .client_id = SST_CLIENT_ID_2,
     .perm = SST_PERM_REFERENCE | SST_PERM_WRITE,
 }, };

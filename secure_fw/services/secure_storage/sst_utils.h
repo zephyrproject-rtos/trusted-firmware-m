@@ -43,34 +43,34 @@ void sst_global_unlock(void);
 
 /**
  * \brief Checks if the provided memory region is a valid address for
- *        the given application ID to read/write
+ *        the given client ID to read/write
  *
- * \param[in] addr    Address to the memory region to validate
- * \param[in] size    Memory region size in bytes
- * \param[in] app_id  Application ID
- * \param[in] access  Access type to be permormed on the given address
+ * \param[in] addr       Address to the memory region to validate
+ * \param[in] size       Memory region size in bytes
+ * \param[in] client_id  Client ID
+ * \param[in] access     Access type to be permormed on the given address
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
 enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
                                                 uint32_t size,
-                                                uint32_t app_id,
+                                                uint32_t client_id,
                                                 uint32_t access);
 
 /**
  * \brief Checks bound, authenticate and copy
  *
- * \param[in] src     Source buffer
- * \param[in] dest    Destination buffer
- * \param[in] size    Size of the incoming buffer
- * \param[in] app_id  App_id for the incoming buffer
+ * \param[in] src        Source buffer
+ * \param[in] dest       Destination buffer
+ * \param[in] size       Size of the incoming buffer
+ * \param[in] client_id  Client ID for the incoming buffer
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
 enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
                                                   uint8_t *dest,
                                                   uint32_t size,
-                                                  uint32_t app_id);
+                                                  uint32_t client_id);
 
 /**
  * \brief Checks if a given memory region is contained within another region

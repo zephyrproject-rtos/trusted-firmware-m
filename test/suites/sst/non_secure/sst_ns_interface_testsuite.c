@@ -156,36 +156,36 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
 }
 
 /**
- * \note List of relations between thread name, app ID and permissions
+ * \note List of relations between thread name, client ID and permissions
  *
  * Asset permissions: SST_ASSET_ID_AES_KEY_192
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------------
- *     Thread_A  | SST_APP_ID_0 | REFERENCE
- *     Thread_B  | SST_APP_ID_1 | REFERENCE, READ
- *     Thread_C  | SST_APP_ID_2 | REFERENCE, READ, WRITE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|--------------------
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE
+ *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
  *
  * Asset permissions: SST_ASSET_ID_SHA224_HASH
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------------
- *     Thread_A  | SST_APP_ID_0 | NONE
- *     Thread_B  | SST_APP_ID_1 | REFERENCE, READ, WRITE
- *     Thread_C  | SST_APP_ID_2 | NONE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|--------------------
+ *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | NONE
  *
  * Asset permissions: SST_ASSET_ID_SHA384_HASH
  *
- *   THREAD NAME | APP_ID       | Permissions
- *   ------------|--------------------------------
- *     Thread_A  | SST_APP_ID_0 | NONE
- *     Thread_B  | SST_APP_ID_1 | NONE
- *     Thread_C  | SST_APP_ID_2 | REFERENCE, WRITE
+ *   THREAD NAME | CLIENT_ID       | Permissions
+ *   ------------|-----------------|--------------
+ *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_B  | SST_CLIENT_ID_1 | NONE
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, WRITE
  */
 
 /**
  * \brief Tests create function against:
- * - Valid application ID and asset ID
+ * - Valid client ID and asset ID
  * - Invalid asset ID
  */
 TFM_SST_NS_TEST(1001, "Thread_C")
@@ -280,8 +280,8 @@ TFM_SST_NS_TEST(1005, "Thread_C")
 
 /**
  * \brief Tests get attributes function against:
- * - Valid application ID and attributes struct pointer
- * - Invalid application ID
+ * - Valid client ID and attributes struct pointer
+ * - Invalid client ID
  */
 TFM_SST_NS_TEST(1006, "Thread_C")
 {
@@ -296,7 +296,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
         return;
     }
 
-    /* Calls get information with valid application ID and
+    /* Calls get information with valid client ID and
      * attributes struct pointer
      */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
@@ -337,7 +337,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID.
+ * \brief Creates asset with an authorised client ID.
  */
 static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
 {
@@ -394,7 +394,7 @@ static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1007(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID */
+    /* Creates asset with an authorised client ID */
     tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1007_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -445,8 +445,8 @@ TFM_SST_NS_TEST(1008, "Thread_C")
 
 /**
  * \brief Tests write function against:
- * - Valid application ID and data pointer
- * - Invalid application ID
+ * - Valid client ID and data pointer
+ * - Invalid client ID
  */
 TFM_SST_NS_TEST(1009, "Thread_C")
 {
@@ -476,7 +476,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
         return;
     }
 
-    /* Calls get information with valid application ID and
+    /* Calls get information with valid client ID and
      * attributes struct pointer
      */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
@@ -492,7 +492,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
         return;
     }
 
-    /* Calls write function with invalid application ID */
+    /* Calls write function with invalid client ID */
     err = psa_sst_write(INVALID_ASSET_ID, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         io_data.size, io_data.offset, io_data.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
@@ -511,7 +511,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID.
+ * \brief Creates asset with an authorised client ID.
  */
 static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
 {
@@ -568,7 +568,7 @@ static void tfm_sst_test_1010_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1010(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID */
+    /* Creates asset with an authorised client ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1010_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -677,7 +677,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
 
 /**
  * \brief Tests read function against:
- * - Valid application ID and data pointer
+ * - Valid client ID and data pointer
  * - Invalid asset ID
  */
 TFM_SST_NS_TEST(1013, "Thread_C")
@@ -757,7 +757,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
 }
 
 /**
- * \brief Creates asset with an authorised app ID.
+ * \brief Creates asset with an authorised client ID.
  */
 static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
 {
@@ -820,7 +820,7 @@ static void tfm_sst_test_1014_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1014(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID */
+    /* Creates asset with an authorised client ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1014_task_1);
     if (ret->val != TEST_PASSED) {
         return;
@@ -950,7 +950,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
 
 /**
  * \brief Tests delete function with:
- * - Valid application ID
+ * - Valid client ID
  * - Invalid asset ID
  */
 TFM_SST_NS_TEST(1017, "Thread_B")
@@ -991,7 +991,7 @@ TFM_SST_NS_TEST(1017, "Thread_B")
 }
 
 /**
- * \brief Creates asset with an authorised app ID.
+ * \brief Creates asset with an authorised client ID.
  */
 static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 {
@@ -1046,7 +1046,7 @@ static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
  */
 static void tfm_sst_test_1018(struct test_result_t *ret)
 {
-    /* Creates asset with an authorised app ID */
+    /* Creates asset with an authorised client ID */
     tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1018_task_1);
     if (ret->val != TEST_PASSED) {
         return;

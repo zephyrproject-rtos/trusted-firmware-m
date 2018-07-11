@@ -25,17 +25,17 @@ void sst_global_unlock(void)
 
 enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
                                                 uint32_t size,
-                                                uint32_t app_id,
+                                                uint32_t client_id,
                                                 uint32_t access)
 {
     enum psa_sst_err_t err;
 
     /* FIXME:
-     * The only check that may be required is whether the caller app
+     * The only check that may be required is whether the caller client
      * has permission to read/write to the memory area specified
      * by addr and size.
      */
-    (void) app_id;
+    (void) client_id;
     err = tfm_core_memory_permission_check(addr, size, access);
 
     return err;
@@ -44,12 +44,12 @@ enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
 enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
                                                   uint8_t *dest,
                                                   uint32_t size,
-                                                  uint32_t app_id)
+                                                  uint32_t client_id)
 {
     enum psa_sst_err_t bound_check;
 
     /* src is passed on from untrusted domain, verify boundry */
-    bound_check = sst_utils_memory_bound_check(src, size, app_id,
+    bound_check = sst_utils_memory_bound_check(src, size, client_id,
                                                TFM_MEMORY_ACCESS_RO);
     if (bound_check == PSA_SST_ERR_SUCCESS) {
         sst_utils_memcpy(dest, src, size);

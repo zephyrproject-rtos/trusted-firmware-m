@@ -209,24 +209,23 @@ requirements by implementing those files with the proper content.
 #### Policy Database Definition
 
 `sst_asset_defs.h` **must** define the list of asset IDs, maximum size of each
-asset, the number of applications allowed to access to each asset, the number of
-assets defined, the size of the largest asset and the list of applications
-IDs.
+asset, the number of clients allowed to access to each asset, the number of
+assets defined, the size of the largest asset and the list of clients IDs.
 
 The naming convention for those definition is as follows:
 
  - `SST_ASSET_ID_<ASSET NAME>` - To define an asset ID.
  - `SST_ASSET_MAX_SIZE_<ASSET NAME>` - To define the maximum size of the asset.
- - `SST_ASSET_PERMS_COUNT_<ASSET NAME>` - To define the number of applications
+ - `SST_ASSET_PERMS_COUNT_<ASSET NAME>` - To define the number of clients
    defined in the `asset_perms_modes` vector to have access to this object in a
    direct or referenced way.
  - `SST_MAX_ASSET_SIZE` - To define the size of the largest asset defined in
    the file.
  - `SST_NUM_ASSETS` - To define the number of assets defined in the file.
- - `SST_APP_ID_<APP NAME>` - To define an application ID.
+ - `SST_CLIENT_ID_<APP NAME>` - To define a client ID.
 
 The asset ID **must** not be lower than 2 and **must** be unique in the
-definition. The application ID must be unique in the definition as well.
+definition. The client ID must be unique in the definition as well.
 
 The `SST_ASSET_ID_NO_ASSET` and `SST_ASSET_ID_DELETED_ASSET` defines **must**
 remain as they are defined in `sst_asset_defs.h`.
@@ -246,8 +245,8 @@ An example of `sst_asset_defs.h` definition is:
 #define SST_ASSET_PERMS_COUNT_AES_KEY_128 1
 #define SST_ASSET_PERMS_COUNT_AES_KEY_192 1
 
-#define SST_APP_ID_1 10
-#define SST_APP_ID_2 11
+#define SST_CLIENT_ID_1 10
+#define SST_CLIENT_ID_2 11
 
 /* Maximum number of assets that can be stored in the cache */
 #define SST_NUM_ASSETS 2
@@ -260,9 +259,9 @@ To define a new policy table, it is required to define an asset information
 vector (`asset_perms`) and an asset permissions mode vector
 (`asset_perms_modes`), in `sst_asset_defs.c`. The asset information vector
 defines the assets' properties, while the asset permissions mode vector defines
-the assets' access permissions for each application. By default, if an
-application ID is not defined for an specific asset in the `asset_perms_modes`,
-the asset is not accessible for that application in any direct or referenced
+the assets' access permissions for each client. By default, if an
+client ID is not defined for an specific asset in the `asset_perms_modes`,
+the asset is not accessible for that client in any direct or referenced
 way.
 
 The `struct sst_asset_info_t asset_perms[]` and `struct sst_asset_perm_t
@@ -275,7 +274,7 @@ following items:
  - `type` - PSA asset type
  - `asset_uuid` - Asset unique ID.
  - `max_size` - Asset maximum size.
- - `perms_count` - Number of applications specified in `asset_perms_modes`
+ - `perms_count` - Number of clients specified in `asset_perms_modes`
    vector which have access rights for this asset in a direct or referenced
    way.
  - `perms_modes_start_idx` - First index in the `asset_perms_modes` vectors
@@ -305,22 +304,22 @@ struct sst_asset_policy_t asset_perms[] = {
 The asset permission structure (`struct sst_asset_perm_t`) is defined as
 follows:
 
- - `app` - Application ID.
+ - `client_id` - Client ID.
  - `perm` - Access permissions types, as a bitfield, allowed for this
-   application.
+   client.
 
 The available access permission types are:
 
- - `SST_PERM_REFERENCE` - The application can request to a service, which may
+ - `SST_PERM_REFERENCE` - The client can request to a service, which may
    have read and/or write access to the asset, to manipulate the asset's
    content in its behalfs.
- - `SST_PERM_READ` - The application can read the asset's content.
- - `SST_PERM_WRITE` - The application can create, write and delete the asset.
+ - `SST_PERM_READ` - The client can read the asset's content.
+ - `SST_PERM_WRITE` - The client can create, write and delete the asset.
 
-It is **mandatory** to define the application's permissions for each asset in
-order. It means, add the application's permissions for the first asset. Then,
-the application's permissions for the second asset, etc.
-By design, the policy manager manages the application's permissions for each
+It is **mandatory** to define the client's permissions for each asset in
+order. It means, add the client's permissions for the first asset. Then,
+the client's permissions for the second asset, etc.
+By design, the policy manager manages the client's permissions for each
 asset using the `.perms_modes_start_idx` and `.perms_count` asset's properties.
 
 The `struct sst_asset_perm_t` definition can be found in
@@ -330,10 +329,10 @@ An example of `asset_perms_modes` definition can be found below:
 ```
 struct sst_asset_perm_t asset_perms_modes[] = {
 {
-    .app = SST_APP_ID_1,
+    .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ,
 }, {
-    .app = SST_APP_ID_2,
+    .client = SST_CLIENT_ID_2,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }};
 ```
