@@ -43,6 +43,7 @@ LR_CODE S_CODE_START {
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
         tfm_unpriv_api.o (+RO)
+        tfm_sst_secure_api.o (+RO)
         dummy_crypto_keys.o (+RO)
         platform_retarget_dev.o (+RO)
         *(SFN)
@@ -85,6 +86,7 @@ LR_CODE S_CODE_START {
 
     TFM_UNPRIV_RO_DATA +0 ALIGN 32 {
         tfm_unpriv_api.o (+RW +ZI)
+        tfm_sst_secure_api.o (+RW +ZI)
         dummy_crypto_keys.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
     }

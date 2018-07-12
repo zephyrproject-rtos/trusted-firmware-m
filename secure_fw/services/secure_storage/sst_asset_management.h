@@ -20,6 +20,25 @@ extern "C" {
  */
 #define S_CLIENT_ID 0x00000001
 
+/* Invalid client ID (CID) */
+#define SST_INVALID_CLIENT_ID   0x00000000
+
+/* Non-Secure Processing Environment (NSPE) client ID mask */
+#define SST_NSPE_CLIENT_ID_MASK 0x80000000
+
+/**
+ * \def SST_IS_CID_NSPE_CID
+ *
+ * \brief Checks if the client ID is from a non-secure client ID.
+ *
+ * \param[in] cid  Client ID to check
+ *
+ * \return Returns 1 if the pid is a non-secure client ID. Otherwise,
+ *         it returns 0.
+ */
+#define SST_IS_CID_NSPE_CID(cid)  ((cid & SST_NSPE_CLIENT_ID_MASK) != 0)
+
+
 #define SST_PERM_BYPASS     (1<<3) /*!< Permission check bypassed. Used when
                                     *   secure a secure entity calls as itself
                                     *   (and not on behalf of another NS client)
@@ -116,7 +135,10 @@ enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
 /**
  * \brief Reads asset's data referenced by asset UUID.
  *
- * \param[in]  client_id   Client ID which calls the service
+ * \param[in]  client_id   Client ID which calls the service.
+ *                         In case, the caller is a secure partition, this
+ *                         parameter can be a non-secure client ID if the
+ *                         read is in behalf of that non-secure client ID.
  * \param[in]  asset_uuid  Asset UUID
  * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] data        Pointer to data vector \ref tfm_sst_buf_t to store

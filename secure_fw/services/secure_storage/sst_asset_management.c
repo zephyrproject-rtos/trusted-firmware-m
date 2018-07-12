@@ -103,7 +103,7 @@ static uint16_t sst_am_check_s_ns_policy(int32_t client_id,
 
     if (err == PSA_SST_ERR_SUCCESS) {
         if (client_id != S_CLIENT_ID) {
-            if (request_type & SST_PERM_READ) {
+            if (request_type & SST_PERM_REFERENCE) {
                 access = SST_PERM_REFERENCE;
             } else {
                 /* Other permissions can not be delegated */
@@ -402,19 +402,47 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
                                const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data)
 {
-    struct tfm_sst_buf_t local_data;
-    enum psa_sst_err_t err;
+    uint32_t caller_id;
     struct sst_asset_policy_t *db_entry;
+    enum psa_sst_err_t err;
+    struct tfm_sst_buf_t local_data;
+
+    /* FIXME: For the moment, the secure callers can not be identified and
+     *        all the secure requests have the same client ID
+     *        (S_CLIENT_ID).
+     */
+    if (sst_utils_validate_secure_caller() == PSA_SST_ERR_SUCCESS) {
+        caller_id = S_CLIENT_ID;
+        if (client_id != S_CLIENT_ID) {
+            /* Reference read access requested, check if the client has
+             * reference permission, otherwise reject the request.
+             */
+            db_entry = sst_am_get_db_entry(client_id, asset_uuid,
+                                           SST_PERM_REFERENCE);
+            if (db_entry == NULL) {
+                return PSA_SST_ERR_ASSET_NOT_FOUND;
+            }
+        }
+    } else {
+          /* In a request from NSPE client, client_id is the caller ID and
+           * can not be a secure client ID.
+           */
+          if (SST_IS_CID_NSPE_CID(client_id) == 0) {
+                return PSA_SST_ERR_ASSET_NOT_FOUND;
+          }
+
+          caller_id = client_id;
+    }
 
     /* Check client ID permissions */
-    db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_READ);
+    db_entry = sst_am_get_db_entry(caller_id, asset_uuid, SST_PERM_READ);
     if (db_entry == NULL) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 
     /* Make a local copy of the iovec data structure */
     err = validate_copy_validate_iovec(data, &local_data,
-                                       client_id, TFM_MEMORY_ACCESS_RW);
+                                       caller_id, TFM_MEMORY_ACCESS_RW);
     if (err != PSA_SST_ERR_SUCCESS) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }

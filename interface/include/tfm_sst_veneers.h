@@ -83,7 +83,11 @@ enum psa_sst_err_t tfm_sst_veneer_set_attributes(int32_t client_id,
 /**
  * \brief Reads asset's data from asset referenced by asset UUID.
  *
- * \param[in]     client_id   Client ID which calls the service
+
+ * \param[in]     client_id   Client ID which calls the service.
+ *                            In case, the caller is a secure partition, this
+ *                            parameter can be a non-secure or secure client ID
+ *                            if the read is in behalf of that client.
  * \param[in]     asset_uuid  Asset UUID
  * \param[in]     s_token     Pointer to the asset's token
  *                            \ref tfm_sst_token_t

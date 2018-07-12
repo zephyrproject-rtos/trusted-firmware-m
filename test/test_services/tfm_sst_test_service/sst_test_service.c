@@ -11,7 +11,7 @@
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 #include "secure_fw/services/secure_storage/sst_utils.h"
-#include "tfm_sst_veneers.h"
+#include "psa_sst_api.h"
 
 #define SST_TEST_SERVICE_KEY { 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, \
                                0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xAD, 0xF0, 0x0D, }
@@ -35,22 +35,19 @@ enum psa_sst_err_t sst_test_service_init(void)
 enum psa_sst_err_t sst_test_service_sfn_setup(void)
 {
     enum psa_sst_err_t err;
-    int32_t client_id = S_CLIENT_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
-    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
-
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE] = SST_TEST_SERVICE_KEY;
-    struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
 
-    /* Create the key asset using our secure client ID */
-    err = tfm_sst_veneer_create(client_id, key_uuid, &s_token);
+    /* Create the key asset using our secure app ID */
+    err = psa_sst_create(key_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    /* Write the key to the asset using our secure client ID */
-    err = tfm_sst_veneer_write(client_id, key_uuid, &s_token, &key_buf);
+    /* Write the key to the asset using our secure app ID */
+    err = psa_sst_write(key_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                        SST_TEST_SERVICE_KEY_SIZE, 0, key_data);
 
     return err;
 }
@@ -63,11 +60,11 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(int32_t client_id,
     enum psa_sst_err_t err;
     uint32_t i;
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE];
-    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
-    struct tfm_sst_buf_t key_buf = { key_data, SST_TEST_SERVICE_KEY_SIZE, 0 };
 
     /* Read the key from the asset using the non-secure caller's client ID */
-    err = tfm_sst_veneer_read(client_id, key_uuid, &s_token, &key_buf);
+    err = psa_sst_reference_read(client_id, key_uuid, ASSET_TOKEN,
+                                 ASSET_TOKEN_SIZE, SST_TEST_SERVICE_KEY_SIZE,
+                                 0, key_data);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
@@ -101,12 +98,10 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(int32_t client_id,
 enum psa_sst_err_t sst_test_service_sfn_clean(void)
 {
     enum psa_sst_err_t err;
-    int32_t client_id = S_CLIENT_ID;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
-    struct tfm_sst_token_t s_token = {.token = NULL, .token_size = 0};
 
-    /* Delete the key asset using our secure client ID */
-    err = tfm_sst_veneer_delete(client_id, key_uuid, &s_token);
+    /* Delete the key asset using our secure app ID */
+    err = psa_sst_delete(key_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
 
     return err;
 }

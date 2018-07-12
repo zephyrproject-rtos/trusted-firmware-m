@@ -13,7 +13,7 @@
 #include "test/framework/helpers.h"
 #include "tfm_sst_defs.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
-#include "tfm_sst_veneers.h"
+#include "psa_sst_api.h"
 #include "s_test_helpers.h"
 
 /* Test suite defines */
@@ -32,7 +32,8 @@
 #define RESULT_DATA         ("###" WRITE_DATA "###")
 
 /* Define default asset's token */
-static struct tfm_sst_token_t test_token = { .token = NULL, .token_size = 0};
+#define ASSET_TOKEN      NULL
+#define ASSET_TOKEN_SIZE 0
 
 /* Define test suite for SST reliability tests */
 /* List of tests */
@@ -64,10 +65,9 @@ void register_testsuite_s_sst_reliability(struct test_suite_t *p_test_suite)
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    int32_t client_id = S_CLIENT_ID;
     uint32_t asset_offset = 0;
     const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
@@ -79,7 +79,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     }
 
     /* Checks write permissions in create function */
-    err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
+    err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for client S_CLIENT_ID");
         return;
@@ -97,8 +97,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(client_id, asset_uuid, &test_token,
-                                       &io_data);
+            err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                                io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for client S_CLIENT_ID");
                 return;
@@ -108,8 +108,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(client_id, asset_uuid, &test_token,
-                                      &io_data);
+            err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                               io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
                 TEST_FAIL("Client S_CLIENT_ID must get file handle");
                 return;
@@ -136,7 +136,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
+    err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
         return;
@@ -147,8 +147,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3001(struct test_result_t *ret)
 {
-    int32_t client_id = S_CLIENT_ID;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
@@ -161,7 +160,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     }
 
     /* Checks write permissions in create function */
-    err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
+    err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Create should not fail for client S_CLIENT_ID");
         return;
@@ -179,8 +178,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(client_id, asset_uuid,
-                                   &test_token, &io_data);
+        err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                            io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Write should not fail for client S_CLIENT_ID");
             return;
@@ -190,8 +189,8 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(client_id, asset_uuid,
-                                  &test_token, &io_data);
+        err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                           io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Client S_CLIENT_ID must get file handle");
             return;
@@ -220,7 +219,7 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
     TEST_LOG("\n");
 
     /* Checks write permissions in delete function */
-    err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
+    err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
         return;
@@ -240,10 +239,9 @@ static void tfm_sst_test_3001(struct test_result_t *ret)
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    int32_t client_id = S_CLIENT_ID;
     uint32_t asset_offset = 0;
     const uint32_t asset_uuid = SST_ASSET_ID_X509_CERT_LARGE;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
     uint8_t wrt_data[WRITE_BUF_SIZE] = WRITE_DATA;
@@ -261,7 +259,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
 
         /* Checks write permissions in create function */
-        err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
+        err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Create should not fail for client S_CLIENT_ID");
             return;
@@ -273,8 +271,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             io_data.offset = asset_offset;
 
             /* Checks write permissions in the write function */
-            err = tfm_sst_veneer_write(client_id, asset_uuid, &test_token,
-                                       &io_data);
+            err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                                io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
                 TEST_FAIL("Write should not fail for client S_CLIENT_ID");
                 return;
@@ -284,8 +282,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
             io_data.data = &read_data[3];
 
             /* Checks write permissions in the read function */
-            err = tfm_sst_veneer_read(client_id, asset_uuid, &test_token,
-                                      &io_data);
+            err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                               io_data.size, io_data.offset, io_data.data);
             if (err != PSA_SST_ERR_SUCCESS) {
                 TEST_FAIL("Client S_CLIENT_ID must get file handle");
                 return;
@@ -310,7 +308,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         asset_offset = 0;
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
+        err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
             return;
@@ -325,8 +323,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
 #else
 static void tfm_sst_test_3002(struct test_result_t *ret)
 {
-    int32_t client_id = S_CLIENT_ID;
-    struct tfm_sst_buf_t io_data;
+    struct sst_test_buf_t io_data;
     enum psa_sst_err_t err;
     uint32_t itr;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
@@ -345,7 +342,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         TEST_LOG("  > Iteration %d of %d\r", itr + 1, LOOP_ITERATIONS_002);
 
         /* Checks write permissions in create function */
-        err = tfm_sst_veneer_create(client_id, asset_uuid, &test_token);
+        err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Create should not fail for client S_CLIENT_ID");
             return;
@@ -357,8 +354,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         io_data.offset = 0;
 
         /* Checks write permissions in the write function */
-        err = tfm_sst_veneer_write(client_id, asset_uuid,
-                                   &test_token, &io_data);
+        err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                            io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Write should not fail for client S_CLIENT_ID");
             return;
@@ -368,8 +365,8 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         io_data.data = data + HALF_PADDING_SIZE;
 
         /* Checks write permissions in the read function */
-        err = tfm_sst_veneer_read(client_id, asset_uuid,
-                                  &test_token, &io_data);
+        err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
+                           io_data.size, io_data.offset, io_data.data);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Client S_CLIENT_ID must get file handle");
             return;
@@ -395,7 +392,7 @@ static void tfm_sst_test_3002(struct test_result_t *ret)
         }
 
         /* Checks write permissions in delete function */
-        err = tfm_sst_veneer_delete(client_id, asset_uuid, &test_token);
+        err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
         if (err != PSA_SST_ERR_SUCCESS) {
             TEST_FAIL("Delete should not fail for client S_CLIENT_ID");
             return;

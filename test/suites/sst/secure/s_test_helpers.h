@@ -14,6 +14,18 @@ extern "C" {
 
 #include "test/framework/test_framework.h"
 
+/*!
+ * \struct sst_test_buf_t
+ *
+ * \brief Structure to store test data information to read/write from/to asset.
+ *
+ */
+struct sst_test_buf_t {
+    uint8_t *data;   /*!< Address of input/output data */
+    uint32_t size;   /*!< Size of input/output data */
+    uint32_t offset; /*!< Offset within asset */
+};
+
 /**
  * Several tests use a buffer to read back data from an asset. This buffer is
  * larger than the size of the asset data by PADDING_SIZE bytes. This allows
