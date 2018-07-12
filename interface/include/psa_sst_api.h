@@ -27,7 +27,7 @@ extern "C" {
  * PSA SST API version
  */
 #define PSA_SST_API_VERSION_MAJOR 0
-#define PSA_SST_API_VERSION_MINOR 1
+#define PSA_SST_API_VERSION_MINOR 2
 
 /* The return value is shared with the TF-M partition status value.
  * The SST return codes shouldn't overlap with predefined TFM status values.
@@ -163,6 +163,37 @@ enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
                                 uint32_t size,
                                 uint32_t offset,
                                 uint8_t *data);
+
+/**
+ * \brief Reads asset's data on behalf of the given client ID if the
+ *        client has reference permissions.
+ *        This function is only accessible for secure partition with specific
+ *        permissions. Hence, It must not be accessible from the Non-secure
+ *        Processing Environment (NSPE).
+ *
+ * \param[in]  client_id   Client ID which is referenced in the read
+ * \param[in]  asset_uuid  Asset UUID
+ * \param[in]  token       Must be set to NULL, reserved for future use.
+ *                         Pointer to the asset token to be used to generate
+ *                         the asset key to encrypt and decrypt the asset
+ *                         data. This is an optional parameter that has to
+ *                         be NULL in case the token is not provied.
+ * \param[in]  token_size  Must be set to 0, reserved for future use.
+ *                         Token size. In case the token is not provided
+ *                         the token size has to be 0.
+ * \param[in]  size        Size of the data to read
+ * \param[in]  offset      Offset within asset to start to read
+ * \param[out] data        Pointer to data vector to store data
+ *
+ * \return Returns error code as specified in \ref psa_sst_err_t
+ */
+enum psa_sst_err_t psa_sst_reference_read(int32_t  client_id,
+                                          uint32_t asset_uuid,
+                                          const uint8_t* token,
+                                          uint32_t token_size,
+                                          uint32_t size,
+                                          uint32_t offset,
+                                          uint8_t *data);
 
 /**
  * \brief Writes data into an asset referenced by asset UUID.

@@ -96,7 +96,7 @@ and is divided as follows:
 The PSA interfaces for SST service are located in `interface/include`
 
 
-### Platform Security Architecture (PSA) interfaces version 0.1
+### Platform Security Architecture (PSA) interfaces version 0.2
 
 The SST service exposes the following PSA interfaces:
 
@@ -105,6 +105,7 @@ The SST service exposes the following PSA interfaces:
  - `enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, struct psa_sst_asset_attrs_t *attrs)`
  - `enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, const struct psa_sst_asset_attrs_t *attrs)`
  - `enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, uint32_t size, uint32_t offset, uint8_t *data)`
+ - `enum psa_sst_err_t psa_sst_reference_read(int32_t  client_id, uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, uint32_t size, uint32_t offset, uint8_t *data);`
  - `enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size, uint32_t size, uint32_t offset, const uint8_t *data)`
  - `enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid, const uint8_t* token, uint32_t token_size)`
 
