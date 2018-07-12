@@ -8,7 +8,7 @@
 #include "tfm_sst_defs.h"
 #include "tfm_ns_lock.h"
 
-enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t* token,
+enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token,
                                   uint32_t token_size)
 {
     struct tfm_sst_token_t s_token;
@@ -25,7 +25,7 @@ enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t* token,
 }
 
 enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
-                                    const uint8_t* token,
+                                    const uint8_t *token,
                                     uint32_t token_size,
                                     struct psa_sst_asset_info_t *info)
 {
@@ -43,7 +43,7 @@ enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
 }
 
 enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
-                                          const uint8_t* token,
+                                          const uint8_t *token,
                                           uint32_t token_size,
                                           struct psa_sst_asset_attrs_t *attrs)
 {
@@ -61,7 +61,7 @@ enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
 }
 
 enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
-                                      const uint8_t* token,
+                                      const uint8_t *token,
                                       uint32_t token_size,
                                       const struct psa_sst_asset_attrs_t *attrs)
 {
@@ -79,7 +79,7 @@ enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
 }
 
 enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
-                                const uint8_t* token,
+                                const uint8_t *token,
                                 uint32_t token_size,
                                 uint32_t size,
                                 uint32_t offset,
@@ -105,7 +105,7 @@ enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
 }
 
 enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
-                                 const uint8_t* token,
+                                 const uint8_t *token,
                                  uint32_t token_size,
                                  uint32_t size,
                                  uint32_t offset,
@@ -131,7 +131,7 @@ enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
 }
 
 enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid,
-                                  const uint8_t* token,
+                                  const uint8_t *token,
                                   uint32_t token_size)
 {
     struct tfm_sst_token_t s_token;
