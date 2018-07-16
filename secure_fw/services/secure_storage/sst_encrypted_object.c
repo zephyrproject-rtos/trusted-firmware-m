@@ -8,8 +8,8 @@
 #include "sst_encrypted_object.h"
 
 #include "crypto/sst_crypto_interface.h"
+#include "sst_flash_fs.h"
 #include "sst_object_defs.h"
-#include "sst_core.h"
 #include "sst_utils.h"
 
 /* Gets the size of data to encrypt */
@@ -152,7 +152,7 @@ enum psa_sst_err_t sst_encrypted_object_read(uint32_t fid,
                                           struct sst_object_t *obj)
 {
     enum psa_sst_err_t err;
-    struct sst_core_obj_info_t obj_info;
+    struct sst_file_info_t file_info;
     uint32_t decrypt_size;
 
     /* FIXME: The token structure needs to be used when the key derivation
@@ -161,21 +161,21 @@ enum psa_sst_err_t sst_encrypted_object_read(uint32_t fid,
     (void)s_token;
 
     /* Get the current size of the encrypted object */
-    err = sst_core_object_get_info(fid, &obj_info);
+    err = sst_flash_fs_file_get_info(fid, &file_info);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Read the encrypted object from the the persistent area */
-    err = sst_core_object_read(fid, obj->header.crypto.ref.iv,
-                               SST_OBJECT_START_POSITION,
-                               obj_info.size_current);
+    err = sst_flash_fs_file_read(fid, file_info.size_current,
+                                 SST_OBJECT_START_POSITION,
+                                 obj->header.crypto.ref.iv);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
     /* Get the decrypt size */
-    decrypt_size = obj_info.size_current - sizeof(obj->header.crypto.ref.iv);
+    decrypt_size = file_info.size_current - sizeof(obj->header.crypto.ref.iv);
 
     /* Decrypt the object data */
     err = sst_object_auth_decrypt(fid, decrypt_size, obj);
@@ -202,7 +202,7 @@ enum psa_sst_err_t sst_encrypted_object_write(uint32_t fid,
                sizeof(obj->header.crypto.ref.iv);
 
     /* Create an object in the object system */
-    err = sst_core_object_create(fid, wrt_size);
+    err = sst_flash_fs_file_create(fid, wrt_size, SST_EMPTY_OBJECT_SIZE, NULL);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
@@ -220,8 +220,8 @@ enum psa_sst_err_t sst_encrypted_object_write(uint32_t fid,
     /* Write the encrypted object to the persistent area. The tag values is not
      * copied as it is stored in the object table.
      */
-    err = sst_core_object_write(fid, obj->header.crypto.ref.iv,
-                                SST_OBJECT_START_POSITION, wrt_size);
+    err = sst_flash_fs_file_write(fid, wrt_size, SST_OBJECT_START_POSITION,
+                                  obj->header.crypto.ref.iv);
 
     return err;
 }

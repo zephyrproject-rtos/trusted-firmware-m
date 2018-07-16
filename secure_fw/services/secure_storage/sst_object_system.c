@@ -11,10 +11,10 @@
 #ifdef SST_ENCRYPTION
 #include "sst_encrypted_object.h"
 #endif
+#include "sst_flash_fs.h"
 #include "sst_object_defs.h"
 #include "sst_object_system.h"
 #include "sst_object_table.h"
-#include "sst_core.h"
 #include "sst_utils.h"
 
 #define SST_SYSTEM_READY     1
@@ -75,7 +75,7 @@ static enum psa_sst_err_t sst_remove_old_data(uint32_t old_fid)
     }
 
     /* Delete old file from the persistent area */
-    err = sst_core_object_delete(old_fid);
+    err = sst_flash_fs_file_delete(old_fid);
 
     return err;
 }
@@ -99,10 +99,9 @@ static enum psa_sst_err_t sst_read_object(enum read_type_t type)
     enum psa_sst_err_t err;
 
     /* Read object header */
-    err = sst_core_object_read(g_obj_tbl_info.fid,
-                               (uint8_t *)&g_sst_object.header,
-                               SST_OBJECT_START_POSITION,
-                               SST_OBJECT_HEADER_SIZE);
+    err = sst_flash_fs_file_read(g_obj_tbl_info.fid, SST_OBJECT_HEADER_SIZE,
+                                 SST_OBJECT_START_POSITION,
+                                 (uint8_t *)&g_sst_object.header);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
@@ -118,10 +117,10 @@ static enum psa_sst_err_t sst_read_object(enum read_type_t type)
     if (type == READ_ALL_OBJECT) {
         /* Read object data if any */
         if (g_sst_object.header.info.size_current > 0) {
-            err = sst_core_object_read(g_obj_tbl_info.fid, g_sst_object.data,
-                                       SST_OBJECT_HEADER_SIZE,
-                                       g_sst_object.header.info.size_current);
-
+            err = sst_flash_fs_file_read(g_obj_tbl_info.fid,
+                                         g_sst_object.header.info.size_current,
+                                         SST_OBJECT_HEADER_SIZE,
+                                         g_sst_object.data);
             if (err != PSA_SST_ERR_SUCCESS) {
                 return err;
             }
@@ -142,17 +141,7 @@ static enum psa_sst_err_t sst_read_object(enum read_type_t type)
 static enum psa_sst_err_t sst_write_object(uint32_t wrt_size)
 {
     enum psa_sst_err_t err;
-    uint32_t max_size = g_sst_object.header.info.size_max;
-
-    /* FixMe: This is an inefficient way to write an object.
-     *        The create function should allow to write content
-     *        in the object.
-     */
-    err = sst_core_object_create(g_obj_tbl_info.fid,
-                                 SST_OBJECT_SIZE(max_size));
-    if (err != PSA_SST_ERR_SUCCESS) {
-        return err;
-    }
+    uint32_t max_size = SST_OBJECT_SIZE(g_sst_object.header.info.size_max);
 
     /* Add object identification and increase object version */
     g_sst_object.header.fid = g_obj_tbl_info.fid;
@@ -161,11 +150,8 @@ static enum psa_sst_err_t sst_write_object(uint32_t wrt_size)
     /* Save object version to be stored in the object table */
     g_obj_tbl_info.version = g_sst_object.header.version;
 
-    /* Write object in the persistent area*/
-    err = sst_core_object_write(g_obj_tbl_info.fid,
-                                (uint8_t *)&g_sst_object,
-                                SST_OBJECT_START_POSITION,
-                                wrt_size);
+    err = sst_flash_fs_file_create(g_obj_tbl_info.fid, max_size, wrt_size,
+                                   (const uint8_t *)&g_sst_object);
     return err;
 }
 
@@ -177,7 +163,7 @@ enum psa_sst_err_t sst_system_prepare(void)
 
     sst_global_lock();
 
-    err = sst_core_prepare();
+    err = sst_flash_fs_prepare();
     if (err != PSA_SST_ERR_SUCCESS) {
         goto release_sst_lock_and_return;
     }
@@ -422,7 +408,7 @@ enum psa_sst_err_t sst_object_write(uint32_t uuid,
             /* Remove new object as object table is not persistent
              * and propagate object table manipulation error.
              */
-            (void)sst_core_object_delete(g_obj_tbl_info.fid);
+            (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
 
             goto release_sst_lock_and_return;
         }
@@ -599,7 +585,7 @@ enum psa_sst_err_t sst_object_set_attributes(uint32_t uuid,
             /* Remove new object as object table is not persistent
              * and propagate object table manipulation error.
              */
-            (void)sst_core_object_delete(g_obj_tbl_info.fid);
+            (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
 
             goto release_sst_lock_and_return;
         }
@@ -664,12 +650,12 @@ enum psa_sst_err_t sst_system_wipe_all(void)
      * this function doesn't block on the lock and directly
      * moves to erasing the flash instead.
      */
-    err = sst_core_wipe_all();
+    err = sst_flash_fs_wipe_all();
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    err = sst_core_prepare();
+    err = sst_flash_fs_prepare();
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }

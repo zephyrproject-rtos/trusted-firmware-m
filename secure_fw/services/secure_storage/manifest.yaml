@@ -80,6 +80,7 @@
     "sst_encrypted_object.c",
     "sst_object_system.c",
     "sst_asset_management.c",
+    "sst_flash_fs.c",
     "assets/sst_asset_defs.c",
     "crypto/sst_crypto_interface.c",
     "flash/sst_flash.c"
