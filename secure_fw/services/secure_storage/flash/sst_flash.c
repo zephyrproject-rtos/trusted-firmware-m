@@ -25,7 +25,7 @@
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 #define BLOCK_START_OFFSET  0
-
+#define MAX_BLOCK_DATA_COPY 256
 /*
  * \brief Gets physical address of the given block ID.
  *
@@ -122,33 +122,47 @@ enum psa_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
                                                  uint32_t src_offset,
                                                  uint32_t size)
 {
-    static uint8_t dst_block_data_copy[SST_BLOCK_SIZE];
     enum psa_sst_err_t err;
+    uint8_t dst_block_data_copy[MAX_BLOCK_DATA_COPY];
     uint32_t dst_flash_addr;
     uint32_t src_flash_addr;
+    uint32_t nbr_bytes_moved = 0;
+    uint32_t bytes_to_move;
 
-    /* Gets flash address location defined by block ID and offset
-     * parameters.
-     */
+    /* Gets flash addresses defined by block ID and offset parameters */
     src_flash_addr = get_phys_address(src_block, src_offset);
-
-    /* Reads data from source block and store it in the in-memory copy of
-     * destination content.
-     */
-    err = flash_read(src_flash_addr, dst_block_data_copy, size);
-    if (err != PSA_SST_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Gets flash address location defined by block ID and offset
-     * parameters.
-     */
     dst_flash_addr = get_phys_address(dst_block, dst_offset);
 
-    /* Writes in flash the in-memory block content after modification */
-    err = flash_write(dst_flash_addr, dst_block_data_copy, size);
+    while (nbr_bytes_moved <  size) {
+        /* Calculates the number of bytes to move */
+        bytes_to_move = (size - nbr_bytes_moved);
+        if (bytes_to_move > MAX_BLOCK_DATA_COPY) {
+           bytes_to_move = MAX_BLOCK_DATA_COPY;
+        }
 
-    return err;
+        /* Reads data from source block and store it in the in-memory copy of
+         * destination content.
+         */
+        err = flash_read(src_flash_addr, dst_block_data_copy, bytes_to_move);
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Writes in flash the in-memory block content after modification */
+        err = flash_write(dst_flash_addr, dst_block_data_copy, bytes_to_move);
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Updates number of bytes moved */
+        nbr_bytes_moved += bytes_to_move;
+
+        /* Updates pointers to the source and destination flash regions */
+        src_flash_addr += bytes_to_move;
+        dst_flash_addr += bytes_to_move;
+    };
+
+    return PSA_SST_ERR_SUCCESS;
 }
 
 enum psa_sst_err_t sst_flash_erase_block(uint32_t block_id)
