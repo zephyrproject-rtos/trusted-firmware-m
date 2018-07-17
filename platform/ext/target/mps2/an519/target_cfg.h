@@ -44,7 +44,22 @@ enum ppc_bank_e
 };
 
 /**
- * Holds the data necessary to do isolation for a specific peripheral.
+ * \brief Store the addresses of memory regions
+ */
+struct memory_region_limits {
+    uint32_t non_secure_code_start;
+    uint32_t non_secure_partition_base;
+    uint32_t non_secure_partition_limit;
+    uint32_t veneer_base;
+    uint32_t veneer_limit;
+#ifdef BL2
+    uint32_t secondary_partition_base;
+    uint32_t secondary_partition_limit;
+#endif /* BL2 */
+};
+
+/**
+ * \brief Holds the data necessary to do isolation for a specific peripheral.
  */
 struct tfm_spm_partition_platform_data_t
 {

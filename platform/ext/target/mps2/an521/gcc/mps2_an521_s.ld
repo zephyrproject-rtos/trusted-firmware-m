@@ -82,8 +82,11 @@ SECTIONS
         . = ALIGN(4);
         *(.gnu.sgstubs*)
     } > VENEERS
-    Image$$ER_CODE_CMSE_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Image$$ER_CODE_CMSE_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
+    Load$$LR$$LR_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Load$$LR$$LR_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
+
+    Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
+    Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
 
     .ARM.extab :
     {

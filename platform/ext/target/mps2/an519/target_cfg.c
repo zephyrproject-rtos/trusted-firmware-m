@@ -21,6 +21,48 @@
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 
+/* Macros to pick linker symbols */
+#define REGION(a, b, c) a##b##c
+#define REGION_NAME(a, b, c) REGION(a, b, c)
+#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+
+/* The section names come from the scatter file */
+REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
+REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
+REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+#ifdef BL2
+REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
+#endif /* BL2 */
+
+const struct memory_region_limits memory_regions = {
+    .non_secure_code_start =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
+        BL2_HEADER_SIZE,
+
+    .non_secure_partition_base =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base),
+
+    .non_secure_partition_limit =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
+        NS_PARTITION_SIZE - 1,
+
+    .veneer_base =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
+
+    .veneer_limit =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+
+#ifdef BL2
+    .secondary_partition_base =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
+
+    .secondary_partition_limit =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
+        SECONDARY_PARTITION_SIZE - 1,
+#endif /* BL2 */
+};
+
+
 /* Allows software, via SAU, to define the code region as a NSC */
 #define NSCCFG_CODENSC  1
 
@@ -110,8 +152,12 @@ void sau_and_idau_cfg(void)
 
     /* Configures SAU regions to be non-secure */
     SAU->RNR  = TFM_NS_REGION_CODE;
-    SAU->RBAR = (NS_PARTITION_START & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (NS_PARTITION_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+    SAU->RBAR = (memory_regions.non_secure_partition_base
+                & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.non_secure_partition_limit
+                & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
 
     SAU->RNR  = TFM_NS_REGION_DATA;
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
@@ -119,8 +165,8 @@ void sau_and_idau_cfg(void)
 
     /* Configures veneers region to be non-secure callable */
     SAU->RNR  = TFM_NS_REGION_VENEER;
-    SAU->RBAR = (CMSE_VENEER_REGION_START & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (CMSE_VENEER_REGION_LIMIT & SAU_RLAR_LADDR_Msk)
+    SAU->RBAR = (memory_regions.veneer_base  & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk
                 | SAU_RLAR_NSC_Msk;
 
@@ -143,7 +189,15 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-    /* Allows SAU to define the code region as a NSC  */
+#ifdef BL2
+    /* Secondary image partition */
+    SAU->RNR  = TFM_NS_SECONDARY_IMAGE_REGION;
+    SAU->RBAR = (memory_regions.secondary_partition_base  & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+#endif /* BL2 */
+
+    /* Allows SAU to define the code region as a NSC */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     spctrl->nsccfg |= NSCCFG_CODENSC;
 }
@@ -153,9 +207,16 @@ void sau_and_idau_cfg(void)
 void mpc_init_cfg(void)
 {
     Driver_SRAM1_MPC.Initialize();
-    Driver_SRAM1_MPC.ConfigRegion(NS_PARTITION_START,
-                                  NS_PARTITION_LIMIT,
+    Driver_SRAM1_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+                                  memory_regions.non_secure_partition_limit,
                                   ARM_MPC_ATTR_NONSECURE);
+
+#ifdef BL2
+    /* Secondary image region */
+    Driver_SRAM1_MPC.ConfigRegion(memory_regions.secondary_partition_base,
+                                  memory_regions.secondary_partition_limit,
+                                  ARM_MPC_ATTR_NONSECURE);
+#endif /* BL2 */
 
     Driver_SRAM2_MPC.Initialize();
     Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
@@ -166,7 +227,8 @@ void mpc_init_cfg(void)
     Driver_SRAM2_MPC.LockDown();
 
     /* Add barriers to assure the MPC configuration is done before continue
-     * the execution. */
+     * the execution.
+     */
     __DSB();
     __ISB();
 }
@@ -179,7 +241,8 @@ void ppc_init_cfg(void)
     struct nspctrl_def* nspctrl = CMSDK_NSPCTRL;
 
     /* Grant non-secure access to peripherals in the PPC0
-     * (timer0 and 1, dualtimer, watchdog, mhu 0 and 1) */
+     * (timer0 and 1, dualtimer, watchdog, mhu 0 and 1)
+     */
     spctrl->apbnsppc0 |= (1U << CMSDK_TIMER0_APB_PPC_POS);
     spctrl->apbnsppc0 |= (1U << CMSDK_TIMER1_APB_PPC_POS);
     spctrl->apbnsppc0 |= (1U << CMSDK_DTIMER_APB_PPC_POS);
@@ -235,7 +298,8 @@ void ppc_init_cfg(void)
     nspctrl->apbnspppcexp2 |= (1U << CMSDK_FPGA_IO_PPC_POS);
 
     /* Configure the response to a security violation as a
-     * bus error instead of RAZ/WI */
+     * bus error instead of RAZ/WI
+     */
     spctrl->secrespcfg |= 1U;
 }
 
@@ -268,6 +332,6 @@ void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 void ppc_clear_irq(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    /* Clear APC PPC EXP2 IRQ */
+    /* Clear APB PPC EXP2 IRQ */
     spctrl->secppcintclr = CMSDK_APB_PPCEXP2_INT_POS_MASK;
 }

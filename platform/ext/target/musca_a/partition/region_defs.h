@@ -27,7 +27,15 @@
  * of partitions is defined in accordance with this constraint.
  */
 
-#define  S_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
+#ifndef LINK_TO_SECONDARY_PARTITION
+#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_0_OFFSET)
+#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_1_OFFSET)
+#else
+#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_1_OFFSET)
+#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
+#endif /* !LINK_TO_SECONDARY_PARTITION */
+
+
 #define NS_IMAGE_PRIMARY_PARTITION_OFFSET (S_IMAGE_PRIMARY_PARTITION_OFFSET + \
                                            FLASH_PARTITION_SIZE)
 
@@ -71,7 +79,7 @@
 
 /* Secure regions */
 #define  S_IMAGE_PRIMARY_AREA_OFFSET \
-            (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
+             (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 #define S_CODE_START    (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE     (IMAGE_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
@@ -82,8 +90,6 @@
 
 /* CMSE Veneers region */
 #define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
-#define CMSE_VENEER_REGION_LIMIT  (CMSE_VENEER_REGION_START + \
-                                   CMSE_VENEER_REGION_SIZE - 1)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
@@ -92,22 +98,37 @@
 #define NS_CODE_SIZE    (IMAGE_CODE_SIZE - FLASH_AREA_BL2_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* NS partition information is used for MPC configuration */
+#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
+#define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)
+#define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
+
+/* NS partition information is used for MPC and SAU configuration */
 #define NS_PARTITION_START \
             (NS_ROM_ALIAS(NS_IMAGE_PRIMARY_PARTITION_OFFSET))
 
-#define NS_PARTITION_LIMIT \
-            (NS_PARTITION_START + FLASH_PARTITION_SIZE  \
-             - FLASH_AREA_BL2_SIZE - 1)
+#define NS_PARTITION_SIZE (FLASH_PARTITION_SIZE / 2)
+
+/* Secondary partition for new images in case of firmware upgrade */
+#define SECONDARY_PARTITION_START \
+            (NS_ROM_ALIAS(S_IMAGE_SECONDARY_PARTITION_OFFSET))
+
+#define SECONDARY_PARTITION_SIZE (FLASH_PARTITION_SIZE)
 
 /* Code SRAM area */
 #define TOTAL_CODE_SRAM_SIZE     (TOTAL_ROM_SIZE)
 #define S_CODE_SRAM_ALIAS_BASE   (0x10000000)
 #define NS_CODE_SRAM_ALIAS_BASE  (0x00000000)
 
-#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
-#define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)
-#define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE -1)
+#define BL2_CODE_SRAM_EXEC_BASE  (S_CODE_SRAM_ALIAS_BASE)
+#define S_CODE_SRAM_EXEC_BASE    (S_CODE_SRAM_ALIAS_BASE)
+#define S_CODE_SRAM_EXEC_LIMIT   (S_CODE_SRAM_EXEC_BASE + \
+                                 (TOTAL_CODE_SRAM_SIZE/2) - 1)
+#define NS_CODE_SRAM_EXEC_BASE   (NS_CODE_SRAM_ALIAS_BASE + \
+                                 (TOTAL_CODE_SRAM_SIZE/2))
+#define NS_CODE_SRAM_EXEC_LIMIT  (NS_CODE_SRAM_EXEC_BASE + \
+                                 (TOTAL_CODE_SRAM_SIZE/2) - 1)
+
+
 
 #ifdef BL2
 /* Bootloader regions */

@@ -28,12 +28,22 @@
  */
 
 #ifdef BL2
-#define  S_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
+#ifndef LINK_TO_SECONDARY_PARTITION
+#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_0_OFFSET)
+#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_1_OFFSET)
+#else
+#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_1_OFFSET)
+#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
+#endif /* !LINK_TO_SECONDARY_PARTITION */
 #else
 #define  S_IMAGE_PRIMARY_PARTITION_OFFSET (0x0)
 #endif /* BL2 */
 
+#ifndef LINK_TO_SECONDARY_PARTITION
 #define NS_IMAGE_PRIMARY_PARTITION_OFFSET (0x100000)
+#else
+#define NS_IMAGE_PRIMARY_PARTITION_OFFSET (0x200000)
+#endif /* !LINK_TO_SECONDARY_PARTITION */
 
 /*
  * Boot partition structure if MCUBoot is used:
@@ -43,7 +53,8 @@
  */
 /* IMAGE_CODE_SIZE is the space available for the software binary image.
  * It is less than the FLASH_PARTITION_SIZE because we reserve space
- * for the image header and trailer introduced by the bootloader. */
+ * for the image header and trailer introduced by the bootloader.
+ */
 #ifdef BL2
 #define BL2_HEADER_SIZE      (0x400)
 #define BL2_TRAILER_SIZE     (0x10000)
@@ -75,7 +86,7 @@
 
 /* Secure regions */
 #define  S_IMAGE_PRIMARY_AREA_OFFSET \
-            (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
+             (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 #define S_CODE_START    (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE     (IMAGE_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
@@ -86,32 +97,29 @@
 
 /* CMSE Veneers region */
 #define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
-#define CMSE_VENEER_REGION_LIMIT  (CMSE_VENEER_REGION_START + \
-                                   CMSE_VENEER_REGION_SIZE - 1)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
-                        (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
+            (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 #define NS_CODE_START   (NS_ROM_ALIAS(NS_IMAGE_PRIMARY_AREA_OFFSET))
 #define NS_CODE_SIZE    (IMAGE_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* NS partition information is used for MPC configuration */
+#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
+#define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)
+#define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
+
+/* NS partition information is used for MPC and SAU configuration */
 #define NS_PARTITION_START \
             (NS_ROM_ALIAS(NS_IMAGE_PRIMARY_PARTITION_OFFSET))
 
-#ifdef BL2
-/* Cover: non-secure primary + secure secondary + non-secure secondary area */
-#define NS_PARTITION_LIMIT \
-            (NS_PARTITION_START + 3 * FLASH_PARTITION_SIZE - 1)
-#else
-#define NS_PARTITION_LIMIT \
-            (NS_PARTITION_START + FLASH_PARTITION_SIZE - 1)
-#endif /* BL2 */
+#define NS_PARTITION_SIZE (FLASH_PARTITION_SIZE)
 
-#define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE/2))
-#define NS_DATA_SIZE    (TOTAL_RAM_SIZE/2)
-#define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE -1)
+/* Secondary partition for new images in case of firmware upgrade */
+#define SECONDARY_PARTITION_START \
+            (NS_ROM_ALIAS(S_IMAGE_SECONDARY_PARTITION_OFFSET))
+
+#define SECONDARY_PARTITION_SIZE (2 * FLASH_PARTITION_SIZE)
 
 #ifdef BL2
 /* Bootloader regions */

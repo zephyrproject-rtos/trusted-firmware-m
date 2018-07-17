@@ -92,8 +92,7 @@ function(compiler_set_linkercmdfile)
 	#Create additional target if linker script needs to be pre-processed.
 	if (_MY_PARAMS_DEFINES OR _MY_PARAMS_INCLUDES)
 		#Name of pre-processed linker script file.
-		get_filename_component(FINAL_LD_FILE_NAME ${_MY_PARAMS_PATH} NAME)
-		set(FINAL_LD_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${FINAL_LD_FILE_NAME}.i")
+		set(FINAL_LD_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${_MY_PARAMS_TARGET}.ld.i")
 		#Name of the target doing the pre-processing
 		set(LD_PP_TARGET_NAME "${_MY_PARAMS_TARGET}_ldpp")
 		#The target definition.

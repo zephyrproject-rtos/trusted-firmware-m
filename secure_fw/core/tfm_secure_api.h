@@ -67,6 +67,7 @@ enum tfm_ns_region_e {
     TFM_NS_REGION_VENEER,
     TFM_NS_REGION_PERIPH_1,
     TFM_NS_REGION_PERIPH_2,
+    TFM_NS_SECONDARY_IMAGE_REGION,
 };
 
 enum tfm_memory_access_e {

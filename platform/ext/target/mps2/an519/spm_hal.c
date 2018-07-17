@@ -19,6 +19,9 @@
 /* Import MPC driver */
 extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
 
+/* Get address of memory regions to configure MPU */
+extern const struct memory_region_limits memory_regions;
+
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 void tfm_spm_hal_init_isolation_hw(void)
@@ -64,8 +67,8 @@ static enum spm_err_t tfm_spm_mpu_init(void)
 
     /* Veneer region */
     region_cfg.region_nr = MPU_REGION_VENEERS;
-    region_cfg.region_base = CMSE_VENEER_REGION_START;
-    region_cfg.region_limit = CMSE_VENEER_REGION_LIMIT;
+    region_cfg.region_base = memory_regions.veneer_base;
+    region_cfg.region_limit = memory_regions.veneer_limit;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
@@ -235,8 +238,8 @@ enum spm_err_t tfm_spm_hal_set_share_region(
             res = SPM_ERR_OK;
             break;
         case TFM_BUFFER_SHARE_NS_CODE:
-            region_cfg.region_base = NS_CODE_START;
-            region_cfg.region_limit = NS_CODE_LIMIT;
+            region_cfg.region_base = memory_regions.non_secure_partition_base;
+            region_cfg.region_limit = memory_regions.non_secure_partition_limit;
             /* Only allow read access to NS code region and keep
              * exec.never attribute
              */
@@ -303,3 +306,17 @@ void PPC_Handler(void)
     tfm_access_violation_handler();
 }
 
+uint32_t tfm_spm_hal_get_ns_VTOR(void)
+{
+    return memory_regions.non_secure_code_start;
+}
+
+uint32_t tfm_spm_hal_get_ns_MSP(void)
+{
+    return *((uint32_t *)memory_regions.non_secure_code_start);
+}
+
+uint32_t tfm_spm_hal_get_ns_entry_point(void)
+{
+    return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
+}

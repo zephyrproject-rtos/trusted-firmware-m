@@ -107,6 +107,28 @@ void nvic_interrupt_target_state_cfg(void);
  */
 void nvic_interrupt_enable(void);
 
+/**
+ * \brief Get the VTOR value of non-secure image
+ *
+ * \return Returns the address where the vector table of the non-secure image
+ *         is located
+ */
+uint32_t tfm_spm_hal_get_ns_VTOR(void);
+
+/**
+ * \brief Get the initial address of non-secure image main stack
+ *
+ * \return Returns the initial non-secure MSP
+ */
+uint32_t tfm_spm_hal_get_ns_MSP(void);
+
+/**
+ * \brief Get the entry point of the non-secure image
+ *
+ * \return Returns the address of the non-secure image entry point
+ */
+uint32_t tfm_spm_hal_get_ns_entry_point(void);
+
 
 #if TFM_LVL != 1
 /**
