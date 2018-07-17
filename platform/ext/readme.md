@@ -26,6 +26,18 @@ the targets.
 This folder contains the headers with CMSIS compliant driver definitions that
 that TF-M project expects a target to provide.
 
+#### target_cfg.h
+
+This file is expected to define the following macros respectively.
+
+ - `TFM_DRIVER_STDIO`
+   This macro should expand to a structure of type `ARM_DRIVER_USART`.
+   TFM redirects its standard input and output to this instance of USART.
+ - `NS_DRIVER_STDIO`
+   This macro should expand to a structure of type `ARM_DRIVER_USART`.
+   Non-Secure application redirects its standard input and output to this
+   instance of USART.
+
 ### target
 
 This folder contains the files for individual target.

@@ -19,23 +19,20 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef TARGET_MUSCA_A
-#include "uart_pl011_drv.h"
-#else
-#include "arm_uart_drv.h"
-#endif
 #include "Driver_USART.h"
+#include "target_cfg.h"
 
 #define ASSERT_HIGH(X)  assert(X == ARM_DRIVER_OK)
 
 /* Imports USART driver */
-extern ARM_DRIVER_USART Driver_USART0;
-extern ARM_DRIVER_USART Driver_USART1;
+extern ARM_DRIVER_USART TFM_DRIVER_STDIO;
 
-/* Struct FILE is implemented in stdio.h. Used to redirect printf to UART */
+/* Struct FILE is implemented in stdio.h. Used to redirect printf to
+ * TFM_DRIVER_STDIO
+ */
 FILE __stdout;
 
-/* Redirects printf to UART */
+/* Redirects printf to TFM_DRIVER_STDIO */
 __attribute__ ((weak)) int fputc(int ch, FILE *f) {
     /* Send byte to USART */
     uart_putc(ch);
@@ -46,69 +43,19 @@ __attribute__ ((weak)) int fputc(int ch, FILE *f) {
 
 int _write(int fd, char * str, int len)
 {
-    for (int i = 0; i < len; i++)
-    {
+    for (int i = 0; i < len; i++) {
         uart_putc(str[i]);
     }
     return len;
 }
 
-#ifdef TARGET_MUSCA_A
-extern struct uart_pl011_dev_t UART0_DEV_S, UART0_DEV_NS;
-extern struct uart_pl011_dev_t UART1_DEV_S, UART1_DEV_NS;
-#else
-extern struct arm_uart_dev_t ARM_UART0_DEV_S, ARM_UART0_DEV_NS;
-extern struct arm_uart_dev_t ARM_UART1_DEV_S, ARM_UART1_DEV_NS;
-#endif
-
-/* Generic driver to be configured and used */
-ARM_DRIVER_USART *Driver_USART = NULL;
-
-void uart_init(enum uart_channel uchan)
+void stdio_init(void)
 {
     int32_t ret = ARM_DRIVER_OK;
-
-    /* Add a configuration step for the UART channel to use, 0 or 1 */
-    switch(uchan) {
-    case UART0_CHANNEL:
-        /* UART0 is configured as a non-secure peripheral, so it cannot be
-         * accessed using its secure alias. Ideally the driver would
-         * be configured with the right properties, but for simplicity,
-         * use a workaround for now
-         */
-#ifdef TARGET_MUSCA_A
-        memcpy(&UART0_DEV_S, &UART0_DEV_NS, sizeof(struct uart_pl011_dev_t));
-#else
-        memcpy(&ARM_UART0_DEV_S, &ARM_UART0_DEV_NS,
-                                                sizeof(struct arm_uart_dev_t));
-#endif
-        Driver_USART = &Driver_USART0;
-        break;
-    case UART1_CHANNEL:
-#ifndef SECURE_UART1
-        /* If UART1 is configured as a non-secure peripheral, it cannot be
-         * accessed using its secure alias. Ideally the driver would
-         * be configured with the right properties, but for simplicity,
-         * use a workaround for now
-         */
-#ifdef TARGET_MUSCA_A
-        memcpy(&UART1_DEV_S, &UART1_DEV_NS, sizeof(struct uart_pl011_dev_t));
-#else
-        memcpy(&ARM_UART1_DEV_S, &ARM_UART1_DEV_NS,
-                                                sizeof(struct arm_uart_dev_t));
-#endif
-#endif
-        Driver_USART = &Driver_USART1;
-        break;
-    default:
-        ret = ARM_DRIVER_ERROR;
-    }
+    ret = TFM_DRIVER_STDIO.Initialize(NULL);
     ASSERT_HIGH(ret);
 
-    ret = Driver_USART->Initialize(NULL);
-    ASSERT_HIGH(ret);
-
-    ret = Driver_USART->Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
+    ret = TFM_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
     ASSERT_HIGH(ret);
 }
 
@@ -116,7 +63,7 @@ void uart_putc(unsigned char c)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    ret = Driver_USART->Send(&c, 1);
+    ret = TFM_DRIVER_STDIO.Send(&c, 1);
     ASSERT_HIGH(ret);
 }
 
@@ -125,7 +72,7 @@ unsigned char uart_getc(void)
     unsigned char c = 0;
     int32_t ret = ARM_DRIVER_OK;
 
-    ret = Driver_USART->Receive(&c, 1);
+    ret = TFM_DRIVER_STDIO.Receive(&c, 1);
     ASSERT_HIGH(ret);
 
     return c;

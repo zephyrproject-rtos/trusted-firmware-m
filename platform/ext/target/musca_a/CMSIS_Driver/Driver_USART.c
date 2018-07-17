@@ -19,7 +19,7 @@
 #include "Driver_USART.h"
 
 #include "cmsis.h"
-#include "platform_retarget_dev.h"
+#include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 
 #ifndef ARG_UNUSED
@@ -214,11 +214,7 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
 #if (RTE_USART0)
 /* USART0 Driver wrapper functions */
 static UARTx_Resources USART0_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &UART0_DEV_NS,
-#else
-    .dev = &UART0_DEV_S,
-#endif
+    .dev = &UART0_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,
@@ -228,13 +224,8 @@ static int32_t ARM_USART0_Initialize(ARM_USART_SignalEvent_t cb_event)
 {
     USART0_DEV.cb_event = cb_event;
 
-#if (__DOMAIN_NS == 1)
-    arm_scc_set_alt_func(&ARM_SCC_DEV_NS, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
-    arm_scc_set_alt_func(&ARM_SCC_DEV_NS, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
-#else
-    arm_scc_set_alt_func(&ARM_SCC_DEV_S, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
-    arm_scc_set_alt_func(&ARM_SCC_DEV_S, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
-#endif
+    arm_scc_set_alt_func(&ARM_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
+    arm_scc_set_alt_func(&ARM_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
 
     return ARM_USARTx_Initialize(&USART0_DEV);
 }
@@ -324,11 +315,7 @@ ARM_DRIVER_USART Driver_USART0 = {
 #if (RTE_USART1)
 /* USART1 Driver wrapper functions */
 static UARTx_Resources USART1_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &UART1_DEV_NS,
-#else
-    .dev = &UART1_DEV_S,
-#endif
+    .dev = &UART1_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,

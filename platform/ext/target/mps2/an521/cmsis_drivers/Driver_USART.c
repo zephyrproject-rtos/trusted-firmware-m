@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,7 +19,7 @@
 #include "Driver_USART.h"
 
 #include "cmsis.h"
-#include "platform_retarget_dev.h"
+#include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 
 #ifndef ARG_UNUSED
@@ -211,11 +211,7 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
 #if (RTE_USART0)
 /* USART0 Driver wrapper functions */
 static UARTx_Resources USART0_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &ARM_UART0_DEV_NS,
-#else
-    .dev = &ARM_UART0_DEV_S,
-#endif
+    .dev = &UART0_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,
@@ -313,11 +309,7 @@ ARM_DRIVER_USART Driver_USART0 = {
 #if (RTE_USART1)
 /* USART1 Driver wrapper functions */
 static UARTx_Resources USART1_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &ARM_UART1_DEV_NS,
-#else
-    .dev = &ARM_UART1_DEV_S,
-#endif
+    .dev = &UART1_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,
@@ -415,11 +407,7 @@ ARM_DRIVER_USART Driver_USART1 = {
 #if (RTE_USART2)
 /* USART2 Driver wrapper functions */
 static UARTx_Resources USART2_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &ARM_UART2_DEV_NS,
-#else
-    .dev = &ARM_UART2_DEV_S,
-#endif
+    .dev = &UART2_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,
@@ -517,11 +505,7 @@ ARM_DRIVER_USART Driver_USART2 = {
 #if (RTE_USART3)
 /* USART3 Driver wrapper functions */
 static UARTx_Resources USART3_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &ARM_UART3_DEV_NS,
-#else
-    .dev = &ARM_UART3_DEV_S,
-#endif
+    .dev = &UART3_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,
@@ -619,11 +603,7 @@ ARM_DRIVER_USART Driver_USART3 = {
 #if (RTE_USART4)
 /* USART4 Driver wrapper functions */
 static UARTx_Resources USART4_DEV = {
-#if (__DOMAIN_NS == 1)
-    .dev = &ARM_UART4_DEV_NS,
-#else
-    .dev = &ARM_UART4_DEV_S,
-#endif
+    .dev = &UART4_DEV,
     .tx_nbr_bytes = 0,
     .rx_nbr_bytes = 0,
     .cb_event = NULL,

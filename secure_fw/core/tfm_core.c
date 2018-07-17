@@ -122,7 +122,7 @@ int32_t tfm_core_init(void)
 
     __enable_irq();
 
-    uart_init(UART0_CHANNEL);
+    stdio_init();
     LOG_MSG("Secure image initializing!");
 
 #ifdef TFM_CORE_DEBUG

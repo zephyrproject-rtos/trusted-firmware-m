@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,10 @@ enum uart_channel {
 };
 
 /**
- * \brief Initializes the UART.
+ * \brief Initializes the STDIO.
  *
- * \param[in] uchan UART channel
- *                  to use, 0 or 1.
  */
-void uart_init(enum uart_channel uchan);
+void stdio_init(void);
 
 /**
  * \brief Puts a character in the UART.

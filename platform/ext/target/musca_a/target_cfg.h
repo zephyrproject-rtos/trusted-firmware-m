@@ -17,7 +17,12 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
+#include "platform/ext/common/uart_stdout.h"
 #include "tfm_peripherals_def.h"
+#include "uart_pl011_drv.h"
+
+#define TFM_DRIVER_STDIO    Driver_USART1
+#define NS_DRIVER_STDIO     Driver_USART1
 
 enum ppc_bank_e
 {

@@ -80,7 +80,7 @@ int main(void)
     struct boot_rsp rsp;
     int rc;
 
-    uart_init(UART0_CHANNEL);
+    stdio_init();
 
     BOOT_LOG_INF("Starting bootloader");
 

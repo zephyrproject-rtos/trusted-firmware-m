@@ -17,7 +17,12 @@
 #ifndef __SSE200_TARGET_CFG_H__
 #define __SSE200_TARGET_CFG_H__
 
+#include "arm_uart_drv.h"
+#include "platform/ext/common/uart_stdout.h"
 #include "tfm_peripherals_def.h"
+
+#define TFM_DRIVER_STDIO    Driver_USART0
+#define NS_DRIVER_STDIO     Driver_USART0
 
 /**
  * \brief Defines the word offsets of Slave Peripheral Protection Controller
