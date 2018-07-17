@@ -35,12 +35,15 @@ int32_t core_test_2_init(void)
     return TFM_SUCCESS;
 }
 
-int32_t spm_core_test_2_slave_service(struct psa_invec *in_vec, size_t in_len,
-                                     struct psa_outvec *out_vec, size_t out_len)
+int32_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
+                                      size_t in_len,
+                                      struct psa_outvec *out_vec,
+                                      size_t out_len)
 {
-    if ((in_len != 0) || (out_len != 0)) {
-        return TFM_ERROR_INVALID_PARAMETER;
-    }
+    /* This function doesn't do any sanity check on the input parameters, nor
+     * makes any expectation of them, always returns successfully.
+     * This is to test the parameter sanitization mechanisms implemented in SPM.
+     */
 
     return TFM_SUCCESS;
 }

@@ -29,6 +29,7 @@ extern "C" {
 #define CORE_TEST_ID_PERIPHERAL_ACCESS    1012
 #define CORE_TEST_ID_GET_CALLER_CLIENT_ID 1013
 #define CORE_TEST_ID_SPM_REQUEST          1014
+#define CORE_TEST_ID_IOVEC_SANITIZATION   1015
 #define CORE_TEST_ID_BLOCK                2001
 
 /* Use lower 16 bits in return value for error code, upper 16 for line number

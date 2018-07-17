@@ -34,6 +34,7 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
 static void tfm_core_test_spm_request(struct test_result_t *ret);
+static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -66,6 +67,9 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_GET_CALLER_CLIENT_ID,
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SPM_REQUEST,
     tfm_core_test_spm_request,
     "Test SPM request function"),
+CORE_TEST_DESCRIPTION(CORE_TEST_ID_IOVEC_SANITIZATION,
+    tfm_core_test_iovec_sanitization,
+    "Test service parameter sanitization"),
 };
 
 void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
@@ -119,6 +123,142 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret)
         TEST_FAIL("Unexpected return value received.");
         return;
     }
+}
+static void empty_iovecs(psa_invec invec[], psa_outvec outvec[])
+{
+    int i = 0;
+
+    for (i = 0; i < PSA_MAX_IOVEC; ++i) {
+        invec[i].len = 0;
+        invec[i].base = NULL;
+        outvec[i].len = 0;
+        outvec[i].base = NULL;
+    }
+}
+
+static void full_iovecs(psa_invec invec[], psa_outvec outvec[])
+{
+    int i = 0;
+
+    for (i = 0; i < PSA_MAX_IOVEC; ++i) {
+        invec[i].len = PSA_MAX_IOVEC*sizeof(psa_invec);
+        invec[i].base = invec;
+        outvec[i].len = PSA_MAX_IOVEC*sizeof(psa_outvec);
+        outvec[i].base = outvec;
+    }
+}
+
+static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
+{
+    int32_t err;
+    psa_invec in_vec[PSA_MAX_IOVEC] = {
+                                   {NULL, 0}, {NULL, 0}, {NULL, 0}, {NULL, 0} };
+    psa_outvec out_vec[PSA_MAX_IOVEC] = {
+                                   {NULL, 0}, {NULL, 0}, {NULL, 0}, {NULL, 0} };
+    struct tfm_core_test_call_args_t args = {NULL, 0, NULL, 0};
+
+    /* Check a few valid cases */
+
+    /* Execute a call with valid iovecs (empty) */
+    empty_iovecs(in_vec, out_vec);
+    args.in_vec = NULL;
+    args.in_len = 0;
+    args.out_vec = NULL;
+    args.out_len = 0;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("iovec sanitization failed on empty vectors.");
+        return;
+    }
+
+    /* Execute a call with valid iovecs (full) */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = PSA_MAX_IOVEC - args.in_len;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("iovec sanitization failed on full vectors.");
+        return;
+    }
+
+    /* Execute a call with valid iovecs (different number of vectors) */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = 1;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL(
+                 "iovec sanitization failed on valid, partially full vectors.");
+        return;
+    }
+
+    /* Check some further valid cases to be sure that checks happen only iovecs
+     * that specified valid by the parameters
+     */
+
+    /* Execute a call with base = 0 in single vector in outvec that is out of
+     * range
+     */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = 1;
+    out_vec[1].base = NULL;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("content of an outvec out of range should not be checked");
+        return;
+    }
+
+    /* Execute a call with len = 0 in single vector in invec that is out of
+     * range
+     */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = 1;
+    in_vec[2].len = 0;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("content of an outvec out of range should not be checked");
+        return;
+    }
+
+    /* Execute a call with len = 0 in single vector in invec */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = 2;
+    in_vec[1].len = 0;
+    in_vec[1].base = NULL;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("If the len of an invec is 0, the base should be ignored");
+        return;
+    }
+
+    /* Execute a call with len = 0 in single vector in outvec */
+    full_iovecs(in_vec, out_vec);
+    args.in_vec = in_vec;
+    args.in_len = 2;
+    args.out_vec = out_vec;
+    args.out_len = 2;
+    out_vec[1].len = 0;
+    out_vec[1].base = NULL;
+    err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("If the len of an outvec is 0, the base should be ignored");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
 }
 
 /*
@@ -402,4 +542,3 @@ static void tfm_core_test_spm_request(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
-
