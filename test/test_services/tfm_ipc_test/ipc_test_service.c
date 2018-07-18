@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "psa_client.h"
 #include "psa_service.h"
-#include "secure_fw/core/tfm_thread.h"
+#include "secure_fw/core/ipc/tfm_thread.h"
 #include "secure_fw/core/secure_utilities.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"

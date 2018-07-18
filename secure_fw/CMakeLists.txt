@@ -30,6 +30,10 @@ endif()
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
 include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
+# Involve IPC sources only PSA APIs are there
+if(TFM_PSA_API)
+	include(${SECURE_FW_DIR}/core/ipc/CMakeLists.inc)
+endif()
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
