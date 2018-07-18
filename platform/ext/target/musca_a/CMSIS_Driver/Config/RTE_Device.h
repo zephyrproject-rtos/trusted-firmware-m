@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@
 #define   RTE_ISRAM3_MPC                  1
 // </e> MPC (Memory Protection Controller) [Driver_SRAM3_MPC]
 
-// <e> MPC (Memory Protection Controller) [Driver_SRAM1_MPC]
-// <i> Configuration settings for Driver_SRAM1_MPC in component ::Drivers:MPC
-#define   RTE_CODE_SRAM1_MPC              1
-// </e> MPC (Memory Protection Controller) [Driver_SRAM1_MPC]
+// <e> MPC (Memory Protection Controller) [Driver_CODE_SRAM_MPC]
+// <i> Configuration settings for Driver_CODE_SRAM_MPC in component ::Drivers:MPC
+#define   RTE_CODE_SRAM_MPC               1
+// </e> MPC (Memory Protection Controller) [Driver_CODE_SRAM_MPC]
 
 // <e> MPC (Memory Protection Controller) [Driver_QSPI_MPC]
 // <i> Configuration settings for Driver_QSPI_MPC in component ::Drivers:MPC

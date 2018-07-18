@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,44 +28,16 @@
 #include "system_cmsdk_musca.h"
 
 /* ======= Peripheral configuration structure definitions ======= */
-/* ARM SCC driver structures */
-#ifdef ARM_SCC_S
-static const struct arm_scc_dev_cfg_t ARM_SCC_DEV_CFG_S = {
+/* MUSCA A1 SCC driver structures */
+#ifdef MUSCA_A1_SCC_S
+static const struct musca_a1_scc_dev_cfg_t MUSCA_A1_SCC_DEV_CFG_S = {
     .base = MUSCA_SCC_S_BASE};
-struct arm_scc_dev_t ARM_SCC_DEV_S = {&(ARM_SCC_DEV_CFG_S)};
+struct musca_a1_scc_dev_t MUSCA_A1_SCC_DEV_S = {&(MUSCA_A1_SCC_DEV_CFG_S)};
 #endif
-#ifdef ARM_SCC_NS
-static const struct arm_scc_dev_cfg_t ARM_SCC_DEV_CFG_NS = {
+#ifdef MUSCA_A1_SCC_NS
+static const struct musca_a1_scc_dev_cfg_t MUSCA_A1_SCC_DEV_CFG_NS = {
     .base = MUSCA_SCC_NS_BASE};
-struct arm_scc_dev_t ARM_SCC_DEV_NS = {&(ARM_SCC_DEV_CFG_NS)};
-#endif
-
-/* ARM GPIO driver structures */
-#ifdef ARM_GPIO0_S
-#ifndef ARM_SCC_S
-#error "SCC is needed for GPIO"
-#endif
-static const struct arm_gpio_dev_cfg_t ARM_GPIO0_DEV_CFG_S = {
-    .base = MUSCA_GPIO_S_BASE,
-    .scc_dev = (uint32_t)&ARM_SCC_DEV_S};
-static struct arm_gpio_dev_data_t ARM_GPIO0_DEV_DATA_S = {
-    .state = ARM_GPIO_UNINITIALIZED,
-    .port_mask = DEFAULT_PORT_MASK};
-struct arm_gpio_dev_t ARM_GPIO0_DEV_S = {&(ARM_GPIO0_DEV_CFG_S),
-                                         &(ARM_GPIO0_DEV_DATA_S)};
-#endif
-#ifdef ARM_GPIO0_NS
-#ifndef ARM_SCC_NS
-#error "SCC is needed for GPIO"
-#endif
-static const struct arm_gpio_dev_cfg_t ARM_GPIO0_DEV_CFG_NS = {
-    .base = MUSCA_GPIO_NS_BASE,
-    .scc_dev = (uint32_t)&ARM_SCC_DEV_NS};
-static struct arm_gpio_dev_data_t ARM_GPIO0_DEV_DATA_NS = {
-    .state = ARM_GPIO_UNINITIALIZED,
-    .port_mask = DEFAULT_PORT_MASK};
-struct arm_gpio_dev_t ARM_GPIO0_DEV_NS = {&(ARM_GPIO0_DEV_CFG_NS),
-                                          &(ARM_GPIO0_DEV_DATA_NS)};
+struct musca_a1_scc_dev_t MUSCA_A1_SCC_DEV_NS = {&(MUSCA_A1_SCC_DEV_CFG_NS)};
 #endif
 
 /* ARM PPC SSE 200 driver structures */
@@ -276,30 +248,30 @@ struct mpc_sie200_dev_t MPC_ISRAM3_DEV_S = {
     &(MPC_ISRAM3_DEV_DATA_S)};
 #endif
 
-#ifdef MPC_CODE_SRAM1_NS
-static const struct mpc_sie200_dev_cfg_t MPC_CODE_SRAM1_DEV_CFG_NS = {
+#ifdef MPC_CODE_SRAM_NS
+static const struct mpc_sie200_dev_cfg_t MPC_CODE_SRAM_DEV_CFG_NS = {
     .base = MUSCA_CODE_SRAM_MPC_NS_BASE};
-static struct mpc_sie200_dev_data_t MPC_CODE_SRAM1_DEV_DATA_NS = {
+static struct mpc_sie200_dev_data_t MPC_CODE_SRAM_DEV_DATA_NS = {
     .range_list = 0,
     .nbr_of_ranges = 0,
     .state = 0,
     .reserved = 0};
-struct mpc_sie200_dev_t MPC_CODE_SRAM1_DEV_NS = {
-    &(MPC_CODE_SRAM1_DEV_CFG_NS),
-    &(MPC_CODE_SRAM1_DEV_DATA_NS)};
+struct mpc_sie200_dev_t MPC_CODE_SRAM_DEV_NS = {
+    &(MPC_CODE_SRAM_DEV_CFG_NS),
+    &(MPC_CODE_SRAM_DEV_DATA_NS)};
 #endif
 
-#ifdef MPC_CODE_SRAM1_S
-static const struct mpc_sie200_dev_cfg_t MPC_CODE_SRAM1_DEV_CFG_S = {
+#ifdef MPC_CODE_SRAM_S
+static const struct mpc_sie200_dev_cfg_t MPC_CODE_SRAM_DEV_CFG_S = {
     .base = MUSCA_CODE_SRAM_MPC_S_BASE};
-static struct mpc_sie200_dev_data_t MPC_CODE_SRAM1_DEV_DATA_S = {
+static struct mpc_sie200_dev_data_t MPC_CODE_SRAM_DEV_DATA_S = {
     .range_list = 0,
     .nbr_of_ranges = 0,
     .state = 0,
     .reserved = 0};
-struct mpc_sie200_dev_t MPC_CODE_SRAM1_DEV_S = {
-    &(MPC_CODE_SRAM1_DEV_CFG_S),
-    &(MPC_CODE_SRAM1_DEV_DATA_S)};
+struct mpc_sie200_dev_t MPC_CODE_SRAM_DEV_S = {
+    &(MPC_CODE_SRAM_DEV_CFG_S),
+    &(MPC_CODE_SRAM_DEV_DATA_S)};
 #endif
 
 #ifdef MPC_QSPI_S
@@ -330,96 +302,95 @@ struct mpc_sie200_dev_t MPC_QSPI_DEV_NS = {
 
 /* CMSDK Timers driver structures */
 #ifdef CMSDK_TIMER0_S
-static const struct cmsdk_timer_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S = {
+static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S = {
     .base = MUSCA_CMSDK_TIMER0_S_BASE};
-static struct cmsdk_timer_dev_data_t CMSDK_TIMER0_DEV_DATA_S = {
+static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_S = {
     .is_initialized = 0};
-struct cmsdk_timer_dev_t CMSDK_TIMER0_DEV_S = {&(CMSDK_TIMER0_DEV_CFG_S),
+struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_S = {&(CMSDK_TIMER0_DEV_CFG_S),
                                                &(CMSDK_TIMER0_DEV_DATA_S)};
 #endif
 #ifdef CMSDK_TIMER0_NS
-static const struct cmsdk_timer_dev_cfg_t CMSDK_TIMER0_DEV_CFG_NS = {
+static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_NS = {
     .base = MUSCA_CMSDK_TIMER0_NS_BASE};
-static struct cmsdk_timer_dev_data_t CMSDK_TIMER0_DEV_DATA_NS = {
+static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_NS = {
     .is_initialized = 0};
-struct cmsdk_timer_dev_t CMSDK_TIMER0_DEV_NS = {&(CMSDK_TIMER0_DEV_CFG_NS),
+struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_NS = {&(CMSDK_TIMER0_DEV_CFG_NS),
                                                 &(CMSDK_TIMER0_DEV_DATA_NS)};
 #endif
 
 #ifdef CMSDK_TIMER1_S
-static const struct cmsdk_timer_dev_cfg_t CMSDK_TIMER1_DEV_CFG_S = {
+static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER1_DEV_CFG_S = {
     .base = MUSCA_CMSDK_TIMER1_S_BASE};
-static struct cmsdk_timer_dev_data_t CMSDK_TIMER1_DEV_DATA_S = {
+static struct timer_cmsdk_dev_data_t CMSDK_TIMER1_DEV_DATA_S = {
     .is_initialized = 0};
-struct cmsdk_timer_dev_t CMSDK_TIMER1_DEV_S = {&(CMSDK_TIMER1_DEV_CFG_S),
+struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_S = {&(CMSDK_TIMER1_DEV_CFG_S),
                                                &(CMSDK_TIMER1_DEV_DATA_S)};
 #endif
 #ifdef CMSDK_TIMER1_NS
-static const struct cmsdk_timer_dev_cfg_t CMSDK_TIMER1_DEV_CFG_NS = {
+static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER1_DEV_CFG_NS = {
     .base = MUSCA_CMSDK_TIMER1_NS_BASE};
-static struct cmsdk_timer_dev_data_t CMSDK_TIMER1_DEV_DATA_NS = {
+static struct timer_cmsdk_dev_data_t CMSDK_TIMER1_DEV_DATA_NS = {
     .is_initialized = 0};
-struct cmsdk_timer_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
+struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
                                                 &(CMSDK_TIMER1_DEV_DATA_NS)};
 #endif
 
-/* ARM UART PL011 driver structures */
 #ifdef UART0_PL011_S
-static const struct uart_pl011_dev_cfg_t UART0_DEV_CFG_S = {
+static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
     .base = MUSCA_UART0_S_BASE,
     .def_baudrate = 115200,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_DEV_DATA_S = {
+static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
     .state = 0,
     .uart_clk = 0,
     .baudrate = 0};
-struct uart_pl011_dev_t UART0_DEV_S = {&(UART0_DEV_CFG_S),
-                                               &(UART0_DEV_DATA_S)};
+struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
+                                               &(UART0_PL011_DEV_DATA_S)};
 #endif
 
 #ifdef UART0_PL011_NS
-static const struct uart_pl011_dev_cfg_t UART0_DEV_CFG_NS = {
+static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
     .base = MUSCA_UART0_NS_BASE,
     .def_baudrate = 115200,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_DEV_DATA_NS = {
+static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
     .state = 0,
     .uart_clk = 0,
     .baudrate = 0};
-struct uart_pl011_dev_t UART0_DEV_NS = {&(UART0_DEV_CFG_NS),
-                                                &(UART0_DEV_DATA_NS)};
+struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
+                                                &(UART0_PL011_DEV_DATA_NS)};
 #endif
 
 #ifdef UART1_PL011_S
-static const struct uart_pl011_dev_cfg_t UART1_DEV_CFG_S = {
+static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_S = {
     .base = MUSCA_UART1_S_BASE,
     .def_baudrate = 115200,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART1_DEV_DATA_S = {
+static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_S = {
     .state = 0,
     .uart_clk = 0,
     .baudrate = 0};
-struct uart_pl011_dev_t UART1_DEV_S = {&(UART1_DEV_CFG_S),
-                                               &(UART1_DEV_DATA_S)};
+struct uart_pl011_dev_t UART1_PL011_DEV_S = {&(UART1_PL011_DEV_CFG_S),
+                                               &(UART1_PL011_DEV_DATA_S)};
 #endif
 
 #ifdef UART1_PL011_NS
-static const struct uart_pl011_dev_cfg_t UART1_DEV_CFG_NS = {
+static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_NS = {
     .base = MUSCA_UART1_NS_BASE,
     .def_baudrate = 115200,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART1_DEV_DATA_NS = {
+static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_NS = {
     .state = 0,
     .uart_clk = 0,
     .baudrate = 0};
-struct uart_pl011_dev_t UART1_DEV_NS = {&(UART1_DEV_CFG_NS),
-                                                &(UART1_DEV_DATA_NS)};
+struct uart_pl011_dev_t UART1_PL011_DEV_NS = {&(UART1_PL011_DEV_CFG_NS),
+                                                &(UART1_PL011_DEV_DATA_NS)};
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@
 #define __ARM_LTD_MUSCA_RETARGET_H__
 
 #include "platform_regs.h"           /* Platform registers */
-#include "platform_retarget_pins.h"  /* Platform pin names */
 #include "system_cmsdk_musca.h"
 
 
@@ -50,10 +49,10 @@
 #define MPC_ISRAM3_RANGE_LIMIT_S   0x3001FFFF
 
 /* Code SRAM memory */
-#define MPC_CODE_SRAM1_RANGE_BASE_NS  (0x00000000)
-#define MPC_CODE_SRAM1_RANGE_LIMIT_NS (0x00200000)
-#define MPC_CODE_SRAM1_RANGE_BASE_S   (0x10000000)
-#define MPC_CODE_SRAM1_RANGE_LIMIT_S  (0x10200000)
+#define MPC_CODE_SRAM_RANGE_BASE_NS  (0x00000000)
+#define MPC_CODE_SRAM_RANGE_LIMIT_NS (0x00200000)
+#define MPC_CODE_SRAM_RANGE_BASE_S   (0x10000000)
+#define MPC_CODE_SRAM_RANGE_LIMIT_S  (0x10200000)
 
 /* QSPI Flash memory */
 #define MPC_QSPI_RANGE_BASE_NS        (0x00200000)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2016-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "Driver_PPC.h"
 
 #include "cmsis.h"
-#include "platform_retarget_dev.h"
+#include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 
 /* Driver version */
@@ -38,7 +38,7 @@ static ARM_DRIVER_VERSION ARM_PPC_GetVersion(void)
 /* AHB PPC0 Driver wrapper functions */
 static int32_t AHB_PPC0_Initialize(void)
 {
-    ppc_sse200_init(&AHB_PPC0_DEV_S, AHB_PPC0);
+    ppc_sse200_init(&AHB_PPC0_DEV, AHB_PPC0);
 
     return ARM_DRIVER_OK;
 }
@@ -54,7 +54,7 @@ static int32_t AHB_PPC0_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&AHB_PPC0_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&AHB_PPC0_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
     if( ret != PPC_SSE200_ERR_NONE) {
@@ -66,19 +66,19 @@ static int32_t AHB_PPC0_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 
 static uint32_t AHB_PPC0_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&AHB_PPC0_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&AHB_PPC0_DEV, periph);
 }
 
 static uint32_t AHB_PPC0_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&AHB_PPC0_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&AHB_PPC0_DEV, periph);
 }
 
 static int32_t AHB_PPC0_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&AHB_PPC0_DEV_S);
+    ret = ppc_sse200_irq_enable(&AHB_PPC0_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -89,17 +89,17 @@ static int32_t AHB_PPC0_EnableInterrupt(void)
 
 static void AHB_PPC0_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&AHB_PPC0_DEV_S);
+    ppc_sse200_irq_disable(&AHB_PPC0_DEV);
 }
 
 static void AHB_PPC0_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&AHB_PPC0_DEV_S);
+    ppc_sse200_clear_irq(&AHB_PPC0_DEV);
 }
 
 static uint32_t AHB_PPC0_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&AHB_PPC0_DEV_S);
+    return ppc_sse200_irq_state(&AHB_PPC0_DEV);
 }
 
 /* AHB PPC0 Driver CMSIS access structure */
@@ -122,7 +122,7 @@ ARM_DRIVER_PPC Driver_AHB_PPC0 = {
 /* AHB PPCEXP0 Driver wrapper functions */
 static int32_t AHB_PPCEXP0_Initialize(void)
 {
-    ppc_sse200_init(&AHB_PPCEXP0_DEV_S, AHB_PPC_EXP0);
+    ppc_sse200_init(&AHB_PPCEXP0_DEV, AHB_PPC_EXP0);
 
     return ARM_DRIVER_OK;
 }
@@ -139,7 +139,7 @@ static int32_t AHB_PPCEXP0_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP0_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP0_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -152,19 +152,19 @@ static int32_t AHB_PPCEXP0_ConfigPeriph(uint8_t periph,
 
 static uint32_t AHB_PPCEXP0_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&AHB_PPCEXP0_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&AHB_PPCEXP0_DEV, periph);
 }
 
 static uint32_t AHB_PPCEXP0_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP0_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP0_DEV, periph);
 }
 
 static int32_t AHB_PPCEXP0_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&AHB_PPCEXP0_DEV_S);
+    ret = ppc_sse200_irq_enable(&AHB_PPCEXP0_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -175,17 +175,17 @@ static int32_t AHB_PPCEXP0_EnableInterrupt(void)
 
 static void AHB_PPCEXP0_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&AHB_PPCEXP0_DEV_S);
+    ppc_sse200_irq_disable(&AHB_PPCEXP0_DEV);
 }
 
 static void AHB_PPCEXP0_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&AHB_PPCEXP0_DEV_S);
+    ppc_sse200_clear_irq(&AHB_PPCEXP0_DEV);
 }
 
 static uint32_t AHB_PPCEXP0_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&AHB_PPCEXP0_DEV_S);
+    return ppc_sse200_irq_state(&AHB_PPCEXP0_DEV);
 }
 
 /* AHB PPCEXP0 Driver CMSIS access structure */
@@ -208,7 +208,7 @@ ARM_DRIVER_PPC Driver_AHB_PPCEXP0 = {
 /* AHB PPCEXP1 Driver wrapper functions */
 static int32_t AHB_PPCEXP1_Initialize(void)
 {
-    ppc_sse200_init(&AHB_PPCEXP1_DEV_S, AHB_PPC_EXP1);
+    ppc_sse200_init(&AHB_PPCEXP1_DEV, AHB_PPC_EXP1);
 
     return ARM_DRIVER_OK;
 }
@@ -225,7 +225,7 @@ static int32_t AHB_PPCEXP1_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP1_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP1_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -238,19 +238,19 @@ static int32_t AHB_PPCEXP1_ConfigPeriph(uint8_t periph,
 
 static uint32_t AHB_PPCEXP1_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&AHB_PPCEXP1_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&AHB_PPCEXP1_DEV, periph);
 }
 
 static uint32_t AHB_PPCEXP1_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP1_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP1_DEV, periph);
 }
 
 static int32_t AHB_PPCEXP1_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&AHB_PPCEXP1_DEV_S);
+    ret = ppc_sse200_irq_enable(&AHB_PPCEXP1_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -261,17 +261,17 @@ static int32_t AHB_PPCEXP1_EnableInterrupt(void)
 
 static void AHB_PPCEXP1_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&AHB_PPCEXP1_DEV_S);
+    ppc_sse200_irq_disable(&AHB_PPCEXP1_DEV);
 }
 
 static void AHB_PPCEXP1_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&AHB_PPCEXP1_DEV_S);
+    ppc_sse200_clear_irq(&AHB_PPCEXP1_DEV);
 }
 
 static uint32_t AHB_PPCEXP1_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&AHB_PPCEXP1_DEV_S);
+    return ppc_sse200_irq_state(&AHB_PPCEXP1_DEV);
 }
 
 /* AHB PPCEXP1 Driver CMSIS access structure */
@@ -294,7 +294,7 @@ ARM_DRIVER_PPC Driver_AHB_PPCEXP1 = {
 /* AHB PPCEXP2 Driver wrapper functions */
 static int32_t AHB_PPCEXP2_Initialize(void)
 {
-    ppc_sse200_init(&AHB_PPCEXP2_DEV_S, AHB_PPC_EXP2);
+    ppc_sse200_init(&AHB_PPCEXP2_DEV, AHB_PPC_EXP2);
 
     return ARM_DRIVER_OK;
 }
@@ -311,7 +311,7 @@ static int32_t AHB_PPCEXP2_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP2_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP2_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -324,19 +324,19 @@ static int32_t AHB_PPCEXP2_ConfigPeriph(uint8_t periph,
 
 static uint32_t AHB_PPCEXP2_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&AHB_PPCEXP2_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&AHB_PPCEXP2_DEV, periph);
 }
 
 static uint32_t AHB_PPCEXP2_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP2_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP2_DEV, periph);
 }
 
 static int32_t AHB_PPCEXP2_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&AHB_PPCEXP2_DEV_S);
+    ret = ppc_sse200_irq_enable(&AHB_PPCEXP2_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -347,17 +347,17 @@ static int32_t AHB_PPCEXP2_EnableInterrupt(void)
 
 static void AHB_PPCEXP2_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&AHB_PPCEXP2_DEV_S);
+    ppc_sse200_irq_disable(&AHB_PPCEXP2_DEV);
 }
 
 static void AHB_PPCEXP2_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&AHB_PPCEXP2_DEV_S);
+    ppc_sse200_clear_irq(&AHB_PPCEXP2_DEV);
 }
 
 static uint32_t AHB_PPCEXP2_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&AHB_PPCEXP2_DEV_S);
+    return ppc_sse200_irq_state(&AHB_PPCEXP2_DEV);
 }
 
 /* AHB PPCEXP2 Driver CMSIS access structure */
@@ -380,7 +380,7 @@ ARM_DRIVER_PPC Driver_AHB_PPCEXP2 = {
 /* AHB PPCEXP3 Driver wrapper functions */
 static int32_t AHB_PPCEXP3_Initialize(void)
 {
-    ppc_sse200_init(&AHB_PPCEXP3_DEV_S, AHB_PPC_EXP3);
+    ppc_sse200_init(&AHB_PPCEXP3_DEV, AHB_PPC_EXP3);
 
     return ARM_DRIVER_OK;
 }
@@ -397,7 +397,7 @@ static int32_t AHB_PPCEXP3_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP3_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&AHB_PPCEXP3_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -410,19 +410,19 @@ static int32_t AHB_PPCEXP3_ConfigPeriph(uint8_t periph,
 
 static uint32_t AHB_PPCEXP3_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&AHB_PPCEXP3_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&AHB_PPCEXP3_DEV, periph);
 }
 
 static uint32_t AHB_PPCEXP3_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP3_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&AHB_PPCEXP3_DEV, periph);
 }
 
 static int32_t AHB_PPCEXP3_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&AHB_PPCEXP3_DEV_S);
+    ret = ppc_sse200_irq_enable(&AHB_PPCEXP3_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -433,17 +433,17 @@ static int32_t AHB_PPCEXP3_EnableInterrupt(void)
 
 static void AHB_PPCEXP3_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&AHB_PPCEXP3_DEV_S);
+    ppc_sse200_irq_disable(&AHB_PPCEXP3_DEV);
 }
 
 static void AHB_PPCEXP3_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&AHB_PPCEXP3_DEV_S);
+    ppc_sse200_clear_irq(&AHB_PPCEXP3_DEV);
 }
 
 static uint32_t AHB_PPCEXP3_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&AHB_PPCEXP3_DEV_S);
+    return ppc_sse200_irq_state(&AHB_PPCEXP3_DEV);
 }
 
 /* AHB PPCEXP3 Driver CMSIS access structure */
@@ -466,7 +466,7 @@ ARM_DRIVER_PPC Driver_AHB_PPCEXP3 = {
 /* APB PPC0 Driver wrapper functions */
 static int32_t APB_PPC0_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPC0_DEV_S, APB_PPC0);
+    ppc_sse200_init(&APB_PPC0_DEV, APB_PPC0);
 
     return ARM_DRIVER_OK;
 }
@@ -482,7 +482,7 @@ static int32_t APB_PPC0_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPC0_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPC0_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
     if( ret != PPC_SSE200_ERR_NONE) {
@@ -494,19 +494,19 @@ static int32_t APB_PPC0_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 
 static uint32_t APB_PPC0_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPC0_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPC0_DEV, periph);
 }
 
 static uint32_t APB_PPC0_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPC0_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPC0_DEV, periph);
 }
 
 static int32_t APB_PPC0_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPC0_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPC0_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -517,17 +517,17 @@ static int32_t APB_PPC0_EnableInterrupt(void)
 
 static void APB_PPC0_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPC0_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPC0_DEV);
 }
 
 static void APB_PPC0_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPC0_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPC0_DEV);
 }
 
 static uint32_t APB_PPC0_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPC0_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPC0_DEV);
 }
 
 /* APB PPC0 Driver CMSIS access structure */
@@ -550,7 +550,7 @@ ARM_DRIVER_PPC Driver_APB_PPC0 = {
 /* APB PPC1 Driver wrapper functions */
 static int32_t APB_PPC1_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPC1_DEV_S, APB_PPC1);
+    ppc_sse200_init(&APB_PPC1_DEV, APB_PPC1);
 
     return ARM_DRIVER_OK;
 }
@@ -566,7 +566,7 @@ static int32_t APB_PPC1_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPC1_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPC1_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
     if( ret != PPC_SSE200_ERR_NONE) {
@@ -578,18 +578,18 @@ static int32_t APB_PPC1_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr,
 
 static uint32_t APB_PPC1_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPC1_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPC1_DEV, periph);
 }
 
 static uint32_t APB_PPC1_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPC1_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPC1_DEV, periph);
 }
 static int32_t APB_PPC1_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPC1_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPC1_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -600,17 +600,17 @@ static int32_t APB_PPC1_EnableInterrupt(void)
 
 static void APB_PPC1_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPC1_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPC1_DEV);
 }
 
 static void APB_PPC1_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPC1_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPC1_DEV);
 }
 
 static uint32_t APB_PPC1_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPC1_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPC1_DEV);
 }
 
 /* APB PPC1 Driver CMSIS access structure */
@@ -633,7 +633,7 @@ ARM_DRIVER_PPC Driver_APB_PPC1 = {
 /* APB PPCEXP0 Driver wrapper functions */
 static int32_t APB_PPCEXP0_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPCEXP0_DEV_S, APB_PPC_EXP0);
+    ppc_sse200_init(&APB_PPCEXP0_DEV, APB_PPC_EXP0);
 
     return ARM_DRIVER_OK;
 }
@@ -650,7 +650,7 @@ static int32_t APB_PPCEXP0_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPCEXP0_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPCEXP0_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
     if( ret != PPC_SSE200_ERR_NONE) {
@@ -662,19 +662,19 @@ static int32_t APB_PPCEXP0_ConfigPeriph(uint8_t periph,
 
 static uint32_t APB_PPCEXP0_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPCEXP0_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPCEXP0_DEV, periph);
 }
 
 static uint32_t APB_PPCEXP0_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP0_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP0_DEV, periph);
 }
 
 static int32_t APB_PPCEXP0_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPCEXP0_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPCEXP0_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -685,17 +685,17 @@ static int32_t APB_PPCEXP0_EnableInterrupt(void)
 
 static void APB_PPCEXP0_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPCEXP0_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPCEXP0_DEV);
 }
 
 static void APB_PPCEXP0_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPCEXP0_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPCEXP0_DEV);
 }
 
 static uint32_t APB_PPCEXP0_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPCEXP0_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPCEXP0_DEV);
 }
 
 /* APB PPCEXP0 Driver CMSIS access structure */
@@ -718,7 +718,7 @@ ARM_DRIVER_PPC Driver_APB_PPCEXP0 = {
 /* APB PPCEXP1 Driver wrapper functions */
 static int32_t APB_PPCEXP1_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPCEXP1_DEV_S, APB_PPC_EXP1);
+    ppc_sse200_init(&APB_PPCEXP1_DEV, APB_PPC_EXP1);
 
     return ARM_DRIVER_OK;
 }
@@ -735,7 +735,7 @@ static int32_t APB_PPCEXP1_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPCEXP1_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPCEXP1_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
     if( ret != PPC_SSE200_ERR_NONE) {
@@ -747,19 +747,19 @@ static int32_t APB_PPCEXP1_ConfigPeriph(uint8_t periph,
 
 static uint32_t APB_PPCEXP1_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPCEXP1_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPCEXP1_DEV, periph);
 }
 
 static uint32_t APB_PPCEXP1_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP1_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP1_DEV, periph);
 }
 
 static int32_t APB_PPCEXP1_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPCEXP1_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPCEXP1_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -770,17 +770,17 @@ static int32_t APB_PPCEXP1_EnableInterrupt(void)
 
 static void APB_PPCEXP1_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPCEXP1_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPCEXP1_DEV);
 }
 
 static void APB_PPCEXP1_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPCEXP1_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPCEXP1_DEV);
 }
 
 static uint32_t APB_PPCEXP1_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPCEXP1_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPCEXP1_DEV);
 }
 
 /* APB PPCEXP1 Driver CMSIS access structure */
@@ -803,7 +803,7 @@ ARM_DRIVER_PPC Driver_APB_PPCEXP1 = {
 /* APB PPCEXP2 Driver wrapper functions */
 static int32_t APB_PPCEXP2_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPCEXP2_DEV_S, APB_PPC_EXP2);
+    ppc_sse200_init(&APB_PPCEXP2_DEV, APB_PPC_EXP2);
 
     return ARM_DRIVER_OK;
 }
@@ -820,7 +820,7 @@ static int32_t APB_PPCEXP2_ConfigPeriph(uint8_t periph,
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPCEXP2_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPCEXP2_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -829,19 +829,19 @@ static int32_t APB_PPCEXP2_ConfigPeriph(uint8_t periph,
 
 static uint32_t APB_PPCEXP2_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPCEXP2_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPCEXP2_DEV, periph);
 }
 
 static uint32_t APB_PPCEXP2_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP2_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP2_DEV, periph);
 }
 
 static int32_t APB_PPCEXP2_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPCEXP2_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPCEXP2_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -852,17 +852,17 @@ static int32_t APB_PPCEXP2_EnableInterrupt(void)
 
 static void APB_PPCEXP2_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPCEXP2_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPCEXP2_DEV);
 }
 
 static void APB_PPCEXP2_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPCEXP2_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPCEXP2_DEV);
 }
 
 static uint32_t APB_PPCEXP2_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPCEXP2_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPCEXP2_DEV);
 }
 
 /* APB PPCEXP2 Driver CMSIS access structure */
@@ -885,7 +885,7 @@ ARM_DRIVER_PPC Driver_APB_PPCEXP2 = {
 /* APB PPCEXP3 Driver wrapper functions */
 static int32_t APB_PPCEXP3_Initialize(void)
 {
-    ppc_sse200_init(&APB_PPCEXP3_DEV_S, APB_PPC_EXP3);
+    ppc_sse200_init(&APB_PPCEXP3_DEV, APB_PPC_EXP3);
 
     return ARM_DRIVER_OK;
 }
@@ -901,7 +901,7 @@ static int32_t APB_PPCEXP3_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_config_peripheral(&APB_PPCEXP3_DEV_S, periph,
+    ret = ppc_sse200_config_peripheral(&APB_PPCEXP3_DEV, periph,
                                        (enum ppc_sse200_sec_attr_t)sec_attr,
                                        (enum ppc_sse200_priv_attr_t)priv_attr);
 
@@ -914,19 +914,19 @@ static int32_t APB_PPCEXP3_ConfigPeriph(uint8_t periph, ARM_PPC_SecAttr sec_attr
 
 static uint32_t APB_PPCEXP3_IsPeriphSecure(uint8_t periph)
 {
-    return ppc_sse200_is_periph_secure(&APB_PPCEXP3_DEV_S, periph);
+    return ppc_sse200_is_periph_secure(&APB_PPCEXP3_DEV, periph);
 }
 
 static uint32_t APB_PPCEXP3_IsPeriphPrivOnly(uint8_t periph)
 {
-    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP3_DEV_S, periph);
+    return ppc_sse200_is_periph_priv_only(&APB_PPCEXP3_DEV, periph);
 }
 
 static int32_t APB_PPCEXP3_EnableInterrupt(void)
 {
     enum ppc_sse200_error_t ret;
 
-    ret = ppc_sse200_irq_enable(&APB_PPCEXP3_DEV_S);
+    ret = ppc_sse200_irq_enable(&APB_PPCEXP3_DEV);
 
     if( ret != PPC_SSE200_ERR_NONE) {
         return ARM_DRIVER_ERROR;
@@ -937,17 +937,17 @@ static int32_t APB_PPCEXP3_EnableInterrupt(void)
 
 static void APB_PPCEXP3_DisableInterrupt(void)
 {
-    ppc_sse200_irq_disable(&APB_PPCEXP3_DEV_S);
+    ppc_sse200_irq_disable(&APB_PPCEXP3_DEV);
 }
 
 static void APB_PPCEXP3_ClearInterrupt(void)
 {
-    ppc_sse200_clear_irq(&APB_PPCEXP3_DEV_S);
+    ppc_sse200_clear_irq(&APB_PPCEXP3_DEV);
 }
 
 static uint32_t APB_PPCEXP3_InterruptState(void)
 {
-    return ppc_sse200_irq_state(&APB_PPCEXP3_DEV_S);
+    return ppc_sse200_irq_state(&APB_PPCEXP3_DEV);
 }
 
 /* APB PPCEXP3 Driver CMSIS access structure */

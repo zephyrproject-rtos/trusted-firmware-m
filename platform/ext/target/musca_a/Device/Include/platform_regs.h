@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ struct sysinfo_t {
     volatile uint32_t cidr2;            /* (R/ ) Component ID 2 */
     volatile uint32_t cidr3;            /* (R/ ) Component ID 3 */
 };
+
+/* Secure System Control (SYSCTRL) Alias */
+#define CMSDK_SYSCTRL_BASE_S    MUSCA_SYSTEM_CTRL_S_BASE
 
 /* sysctrl memory mapped register access structure */
 struct sysctrl_t {
@@ -206,6 +209,18 @@ struct spctrl_def {
     volatile uint32_t cid3;                   /* (R/W) Component ID 3 */
 };
 
+/* Secure PPC interrupt position mask */
+#define CMSDK_APB_PPC0_INT_POS_MASK     (1UL << 0)
+#define CMSDK_APB_PPC1_INT_POS_MASK     (1UL << 1)
+#define CMSDK_APB_PPCEXP0_INT_POS_MASK  (1UL << 4)
+#define CMSDK_APB_PPCEXP1_INT_POS_MASK  (1UL << 5)
+#define CMSDK_APB_PPCEXP2_INT_POS_MASK  (1UL << 6)
+#define CMSDK_APB_PPCEXP3_INT_POS_MASK  (1UL << 7)
+#define CMSDK_AHB_PPCEXP0_INT_POS_MASK  (1UL << 20)
+#define CMSDK_AHB_PPCEXP1_INT_POS_MASK  (1UL << 21)
+#define CMSDK_AHB_PPCEXP2_INT_POS_MASK  (1UL << 22)
+#define CMSDK_AHB_PPCEXP3_INT_POS_MASK  (1UL << 23)
+
 /* Non-Secure Privilege Control */
 #define CMSDK_NSPCTRL  ((struct nspctrl_def*)MUSCA_NSPCTRL_NS_BASE)
 
@@ -250,5 +265,41 @@ struct nspctrl_def {
     volatile uint32_t cidr1;                   /* (R/W) Component ID 2 */
     volatile uint32_t cidr3;                   /* (R/W) Component ID 3 */
 };
+
+/* ARM APB PPC0 peripherals definition */
+#define CMSDK_TIMER0_APB_PPC_POS  0U
+#define CMSDK_TIMER1_APB_PPC_POS  1U
+#define CMSDK_DTIMER_APB_PPC_POS  2U
+#define CMSDK_MHU0_APB_PPC_POS    3U
+#define CMSDK_MHU1_APB_PPC_POS    4U
+/* The bits 31:5 are reserved */
+/* End ARM APB PPC0 peripherals definition */
+
+/* ARM APB PPC1 peripherals definition */
+#define CMSDK_S32K_TIMER_PPC_POS 0U
+/* The bits 31:1 are reserved */
+/* End ARM APB PPC1 peripherals definition */
+
+/* ARM AHB PPC0 peripherals definition */
+/* The bits 31:0 are reserved */
+/* End of ARM AHB PPC0 peripherals definition */
+
+/* ARM AHB PPCEXP0 peripherals definition */
+#define MUSCA_PERIPHS_AHB_PPC_POS  0U
+/* The bits 31:1 are reserved */
+/* End of ARM AHB PPCEXP0 peripherals definition */
+
+/* ARM AHB PPCEXP1 peripherals definition */
+/* The bits 31:0 are reserved */
+/* End of ARM AHB PPCEXP1 peripherals definition */
+
+/* ARM AHB PPCEXP2 peripherals definition */
+/* The bits 31:0 are reserved */
+/* End of ARM AHB PPCEXP2 peripherals definition */
+
+/* ARM AHB PPCEXP3 peripherals definition */
+/* The bits 31:0 are reserved */
+
+/* End of ARM AHB PPCEXP3 peripherals definition */
 
 #endif /* __ARM_LTD_MUSCA_REGS_H__ */

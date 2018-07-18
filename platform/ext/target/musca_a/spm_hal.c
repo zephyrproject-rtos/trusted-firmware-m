@@ -17,7 +17,7 @@
 #include "secure_utilities.h"
 
 /* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
+extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -277,8 +277,8 @@ void tfm_spm_hal_setup_isolation_hw(void)
 void MPC_Handler(void)
 {
     /* Clear MPC interrupt flag and pending MPC IRQ */
-    Driver_SRAM1_MPC.ClearInterrupt();
-    NVIC_ClearPendingIRQ(MPC_IRQn);
+    Driver_CODE_SRAM_MPC.ClearInterrupt();
+    NVIC_ClearPendingIRQ(S_MPC_COMBINED_IRQn);
 
     /* Print fault message and block execution */
     LOG_MSG("Oops... MPC fault!!!");
@@ -297,7 +297,7 @@ void PPC_Handler(void)
 
     /* Clear PPC interrupt flag and pending PPC IRQ */
     ppc_clear_irq();
-    NVIC_ClearPendingIRQ(PPC_IRQn);
+    NVIC_ClearPendingIRQ(S_PPC_COMBINED_IRQn);
 
     /* Print fault message*/
     LOG_MSG("Oops... PPC fault!!!");

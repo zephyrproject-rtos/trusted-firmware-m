@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,25 @@
 
 /**
  * \file device_cfg.h
- * \brief
- * This is the default device configuration file with all peripherals
- * defined and configured to be use via the non-secure base address.
- * This file is an example of how to define your own configuration file
- * with the peripherals required for your application.
+ * \brief Configuration file native driver re-targeting
+ *
+ * \details This file can be used to add native driver specific macro
+ *          definitions to select which peripherals are available in the build.
+ *
+ * This is a default device configuration file with all peripherals enabled.
  */
 
 /* ARM SCC */
-#define ARM_SCC_S
-#define ARM_SCC_NS
-
-/* ARM GPIO */
-#define ARM_GPIO0_S
-#define ARM_GPIO0_NS
+#define MUSCA_A1_SCC_S
+#define MUSCA_A1_SCC_NS
 
 /* ARM Memory Protection Controller (MPC) SIE 200 */
 #define MPC_ISRAM0_S
 #define MPC_ISRAM1_S
 #define MPC_ISRAM2_S
 #define MPC_ISRAM3_S
-#define MPC_CODE_SRAM1_S
-#define MPC_CODE_SRAM1_NS
+#define MPC_CODE_SRAM_S
+#define MPC_CODE_SRAM_NS
 #define MPC_QSPI_S
 #define MPC_QSPI_NS
 
@@ -50,6 +47,7 @@
 #define AHB_PPCEXP1_S
 #define AHB_PPCEXP2_S
 #define AHB_PPCEXP3_S
+
 #define APB_PPC0_S
 #define APB_PPC1_S
 #define APB_PPCEXP0_S

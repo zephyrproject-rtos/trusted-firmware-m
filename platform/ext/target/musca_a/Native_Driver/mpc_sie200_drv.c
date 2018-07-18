@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,8 +177,8 @@ static enum mpc_sie200_intern_error_t get_lut_masks(
      * Get a normalized address that is an offset from the beginning
      * of the lowest range controlled by the MPC
      */
-    norm_base  = (base - base_range->base);
-    norm_limit = (limit - base_range->base);
+    norm_base  = (base - base_range->base) + base_range->range_offset;
+    norm_limit = (limit - base_range->base) + base_range->range_offset;
 
     /*
      * Calculate block index and to which 32 bits word it belongs
@@ -293,12 +293,6 @@ enum mpc_sie200_error_t mpc_sie200_config_region(struct mpc_sie200_dev_t* dev,
 
     if(!(dev->data->state & MPC_SIE200_INITIALIZED)) {
         return MPC_SIE200_NOT_INIT;
-    }
-
-    /* Sanity check to make sure the given range is within this MPCs range */
-    if ((dev->data->range_list[attr]->base > base) ||
-                    (dev->data->range_list[attr]->limit < limit) ) {
-        return MPC_SIE200_ERR_NOT_IN_RANGE;
     }
 
     /* Get the bitmasks used to select the bits in the LUT */

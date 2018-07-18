@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ARM_SCC_DRV_H__
-#define __ARM_SCC_DRV_H__
+#ifndef __MUSCA_A1_SCC_DRV_H__
+#define __MUSCA_A1_SCC_DRV_H__
 
 #include <stdint.h>
 #include <stddef.h>
@@ -54,39 +54,56 @@ enum pinmode_select_t {
     PINMODE_PULL_UP
 };
 
-/* ARM SCC device configuration structure */
-struct arm_scc_dev_cfg_t {
+/* MUSCA SCC device configuration structure */
+struct musca_a1_scc_dev_cfg_t {
     const uint32_t base;  /*!< SCC base address */
 };
 
-/* ARM SCC device structure */
-struct arm_scc_dev_t {
-    const struct arm_scc_dev_cfg_t* const cfg;  /*!< SCC configuration */
+/* MUSCA SCC device structure */
+struct musca_a1_scc_dev_t {
+    const struct musca_a1_scc_dev_cfg_t* const cfg;  /*!< SCC configuration */
 };
 
 /**
  * \brief Sets selected alternate functions for selected pins
  *
- * \param[in] dev        SCC device pointer \ref arm_scc_dev_t
+ * \param[in] dev        SCC device pointer \ref musca_a1_scc_dev_t
  * \param[in] altfunc    Alternate function to set \ref gpio_altfunc_t
  * \param[in] pin_mask   Pin mask for the alternate functions
  *
- * \note This function doesn't check if scc_base is NULL.
+ * \note This function doesn't check if scc dev is NULL.
  * \note If no alternate function is selected then the function won't do anything
  */
-void arm_scc_set_alt_func(struct arm_scc_dev_t* dev,
+void musca_a1_scc_set_alt_func(struct musca_a1_scc_dev_t* dev,
                           enum gpio_altfunc_t altfunc, uint32_t pin_mask);
 
 /**
  * \brief Sets pinmode for the given pins
  *
- * \param[in] dev        SCC device pointer \ref arm_scc_dev_t
+ * \param[in] dev        SCC device pointer \ref musca_a1_scc_dev_t
  * \param[in] pin_mask   Pin mask for the alternate functions
  * \param[in] mode       Pin mode to set \ref pinmode_select_t
  *
- * \note This function doesn't check if scc_base is NULL.
+ * \note This function doesn't check if scc dev is NULL.
  */
-void arm_scc_set_pinmode(struct arm_scc_dev_t* dev, uint32_t pin_mask,
+void musca_a1_scc_set_pinmode(struct musca_a1_scc_dev_t* dev, uint32_t pin_mask,
                          enum pinmode_select_t mode);
 
-#endif /* __ARM_SCC_DRV_H__ */
+/**
+ * \brief Sets default input values for the selected pins
+ *
+ * \param[in] dev               SCC device pointer \ref musca_a1_scc_dev_t
+ * \param[in] altfunc           The selected alternate function that is set the
+ *                              specified default in value \ref gpio_altfunc_t
+ * \param[in] default_in_mask   Pin mask for selecting pins
+ * \param[in] default_in_value  Pin values for the selected pins
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ * \note If no alternate function is selected, the function won't do anything
+ */
+void musca_a1_scc_set_default_in(struct musca_a1_scc_dev_t* dev,
+                            enum gpio_altfunc_t altfunc,
+                            uint32_t default_in_mask,
+                            uint32_t default_in_value);
+
+#endif /* __MUSCA_A1_SCC_DRV_H__ */

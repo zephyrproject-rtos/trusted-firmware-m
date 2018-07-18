@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,10 @@ enum ppc_sse200_name_t {
     AHB_PPC_EXP3,  /*!< Expansion 3 AHB PPC */
     APB_PPC0,      /*!< APB PPC0 */
     APB_PPC1,      /*!< APB PPC1 */
-    APB_PPC_EXP0,  /*!< Expansion 0 AHB PPC */
-    APB_PPC_EXP1,  /*!< Expansion 1 AHB PPC */
-    APB_PPC_EXP2,  /*!< Expansion 2 AHB PPC */
-    APB_PPC_EXP3   /*!< Expansion 3 AHB PPC */
+    APB_PPC_EXP0,  /*!< Expansion 0 APB PPC */
+    APB_PPC_EXP1,  /*!< Expansion 1 APB PPC */
+    APB_PPC_EXP2,  /*!< Expansion 2 APB PPC */
+    APB_PPC_EXP3   /*!< Expansion 3 APB PPC */
 };
 
 /**

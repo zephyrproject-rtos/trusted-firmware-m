@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,34 @@
 #ifndef __CMSIS_DRIVER_CONFIG_H__
 #define __CMSIS_DRIVER_CONFIG_H__
 
+#include "device_cfg.h"
 #include "platform_retarget_dev.h"
+#include "platform_retarget_pins.h"
 #include "RTE_Device.h"
 #include "target_cfg.h"
 
-#ifdef RTE_USART0
-#define UART0_DEV           UART0_DEV_NS
-#define ARM_SCC_DEV         ARM_SCC_DEV_NS /* only UART0 requires SCC */
-#endif
+#define UART0_DEV           UART0_PL011_DEV_NS
+#define UART1_DEV           UART1_PL011_DEV_NS
 
-#ifdef RTE_USART1
-#define UART1_DEV           UART1_DEV_NS
-#endif
+#define MPC_ISRAM0_DEV      MPC_ISRAM0_DEV_S
+#define MPC_ISRAM1_DEV      MPC_ISRAM1_DEV_S
+#define MPC_ISRAM2_DEV      MPC_ISRAM2_DEV_S
+#define MPC_ISRAM3_DEV      MPC_ISRAM3_DEV_S
+#define MPC_CODE_SRAM_DEV   MPC_CODE_SRAM_DEV_S
+#define MPC_QSPI_DEV        MPC_QSPI_DEV_S
+
+#define AHB_PPC0_DEV        AHB_PPC0_DEV_S
+#define AHB_PPCEXP0_DEV     AHB_PPCEXP0_DEV_S
+#define AHB_PPCEXP1_DEV     AHB_PPCEXP1_DEV_S
+#define AHB_PPCEXP2_DEV     AHB_PPCEXP2_DEV_S
+#define AHB_PPCEXP3_DEV     AHB_PPCEXP3_DEV_S
+#define APB_PPC0_DEV        APB_PPC0_DEV_S
+#define APB_PPC1_DEV        APB_PPC1_DEV_S
+#define APB_PPCEXP0_DEV     APB_PPCEXP0_DEV_S
+#define APB_PPCEXP1_DEV     APB_PPCEXP1_DEV_S
+#define APB_PPCEXP2_DEV     APB_PPCEXP2_DEV_S
+#define APB_PPCEXP3_DEV     APB_PPCEXP3_DEV_S
+
+#define MUSCA_A1_SCC_DEV    MUSCA_A1_SCC_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

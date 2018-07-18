@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -224,8 +224,8 @@ static int32_t ARM_USART0_Initialize(ARM_USART_SignalEvent_t cb_event)
 {
     USART0_DEV.cb_event = cb_event;
 
-    arm_scc_set_alt_func(&ARM_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
-    arm_scc_set_alt_func(&ARM_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
+    musca_a1_scc_set_alt_func(&MUSCA_A1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
+    musca_a1_scc_set_alt_func(&MUSCA_A1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
 
     return ARM_USARTx_Initialize(&USART0_DEV);
 }

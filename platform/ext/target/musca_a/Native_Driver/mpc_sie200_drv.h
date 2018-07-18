@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,11 @@ enum mpc_sie200_sec_resp_t {
 /* Description of a memory range controlled by the MPC */
 struct mpc_sie200_memory_range_t {
     const uint32_t base;   /*!< Base address (included in the range) */
-    const uint32_t limit;  /*!< Limit address (excluded in the range) */
+    const uint32_t limit;  /*!< Limit address (included in the range) */
+    const uint32_t range_offset; /*!< Offset of current range area to the 0
+                                      point of the whole area (the sum of the
+                                      sizes of the previous memory ranges
+                                      covered by the same MPC) */
     const enum mpc_sie200_sec_attr_t attr; /*!< Optional security attribute
                                                 needed to be matched when
                                                 accessing this range.

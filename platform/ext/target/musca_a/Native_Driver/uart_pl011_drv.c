@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "uart_pl011_drv.h"
 
 #include <stddef.h>
-#include <cmsis.h>
+#include "cmsis_compiler.h"
 
 #define FREQ_IRLPBAUD16_MIN             (1420000u)     /* 1.42 MHz */
 #define FREQ_IRLPBAUD16_MAX             (2120000u)     /* 2.12 MHz */

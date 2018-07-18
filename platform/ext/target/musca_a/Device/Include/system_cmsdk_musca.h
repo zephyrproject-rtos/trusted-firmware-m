@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ typedef enum IRQn
   MHU0_IRQn                 = 6,                 /*   Message Handling Unit 0 Interrupt                                        */
   MHU1_IRQn                 = 7,                 /*   Message Handling Unit 1 Interrupt                                        */
   CRYPTOCELL_IRQn           = 8,                 /*   CryptoCell-312 Interrupt                                                 */
-  MPC_IRQn                  = 9,                 /*   Secure Combined MPC Interrupt                                            */
-  PPC_IRQn                  = 10,                /*   Secure Combined PPC Interrupt                                            */
+  S_MPC_COMBINED_IRQn       = 9,                 /*   Secure Combined MPC Interrupt                                            */
+  S_PPC_COMBINED_IRQn       = 10,                /*   Secure Combined PPC Interrupt                                            */
   S_MSC_COMBINED_IRQn       = 11,                /*   Secure Combined MSC Interrupt                                            */
   S_BRIDGE_ERR_IRQn         = 12,                /*   Secure Bridge Error Combined Interrupt                                   */
   I_CACHE_INV_ERR_IRQn      = 13,                /*   Instruction Cache Invalidation Interrupt                                 */
@@ -84,14 +84,14 @@ typedef enum IRQn
   I2S_IRQn                  = 36,                /*   I2S Interrupt                                                            */
   SPI_IRQn                  = 37,                /*   SPI Interrupt                                                            */
   QSPI_IRQn                 = 38,                /*   QSPI Interrupt                                                           */
-  UARTRX0_IRQn              = 39,                /*   UART0 receive FIFO interrupt                                             */
-  UARTTX0_IRQn              = 40,                /*   UART0 transmit FIFO interrupt                                            */
+  UART0_Rx_IRQn             = 39,                /*   UART0 receive FIFO interrupt                                             */
+  UART0_Tx_IRQn             = 40,                /*   UART0 transmit FIFO interrupt                                            */
   UART0_RxTimeout_IRQn      = 41,                /*   UART0 receive timeout interrupt                                          */
   UART0_ModemStatus_IRQn    = 42,                /*   UART0 modem status interrupt                                             */
   UART0_Error_IRQn          = 43,                /*   UART0 error interrupt                                                    */
   UART0_IRQn                = 44,                /*   UART0 interrupt                                                          */
-  UARTRX1_IRQn              = 45,                /*   UART1 receive FIFO interrupt                                             */
-  UARTTX1_IRQn              = 46,                /*   UART1 transmit FIFO interrupt                                            */
+  UART1_Rx_IRQn             = 45,                /*   UART1 receive FIFO interrupt                                             */
+  UART1_Tx_IRQn             = 46,                /*   UART1 transmit FIFO interrupt                                            */
   UART1_RxTimeout_IRQn      = 47,                /*   UART1 receive timeout interrupt                                          */
   UART1_ModemStatus_IRQn    = 48,                /*   UART1 modem status interrupt                                             */
   UART1_Error_IRQn          = 49,                /*   UART1 error interrupt                                                    */
@@ -277,95 +277,6 @@ typedef enum IRQn
 #define MUSCA_CODE_SRAM_MPC_S_BASE    (0x50130000UL)                              /*!< (Secure Code SRAM MPC     ) Base Address */
 #define MUSCA_DEFAULT_SLAVE_S_BASE    (0x70000000UL)                              /*!< (Secure Unused AHB        ) Base Address */
 
-#define CMSDK_SYSCTRL_BASE_S          MUSCA_SYSTEM_CTRL_S_BASE                    /*!< Secure System Control Alias */
-
-/* PPC interrupt position mask */
-#define CMSDK_APB_PPC0_INT_POS_MASK     (1UL << 0)
-#define CMSDK_APB_PPC1_INT_POS_MASK     (1UL << 1)
-#define CMSDK_APB_PPCEXP0_INT_POS_MASK  (1UL << 4)
-#define CMSDK_APB_PPCEXP1_INT_POS_MASK  (1UL << 5)
-#define CMSDK_APB_PPCEXP2_INT_POS_MASK  (1UL << 6)
-#define CMSDK_APB_PPCEXP3_INT_POS_MASK  (1UL << 7)
-#define CMSDK_AHB_PPC0_INT_POS_MASK     (1UL << 16)
-#define CMSDK_AHB_PPCEXP0_INT_POS_MASK  (1UL << 20)
-#define CMSDK_AHB_PPCEXP1_INT_POS_MASK  (1UL << 21)
-#define CMSDK_AHB_PPCEXP2_INT_POS_MASK  (1UL << 22)
-#define CMSDK_AHB_PPCEXP3_INT_POS_MASK  (1UL << 23)
-
-/* Non-Secure Access slave PPCs register addresses */
-#define CMSDK_SPCTRL_AHB_NS_PPC0     (MUSCA_SPCTRL_S_BASE + 0x050)
-#define CMSDK_SPCTRL_AHB_NS_PPCEXP0  (MUSCA_SPCTRL_S_BASE + 0x060)
-#define CMSDK_SPCTRL_AHB_NS_PPCEXP1  (MUSCA_SPCTRL_S_BASE + 0x064)
-#define CMSDK_SPCTRL_AHB_NS_PPCEXP2  (MUSCA_SPCTRL_S_BASE + 0x068)
-#define CMSDK_SPCTRL_AHB_NS_PPCEXP3  (MUSCA_SPCTRL_S_BASE + 0x06C)
-#define CMSDK_SPCTRL_APB_NS_PPC0     (MUSCA_SPCTRL_S_BASE + 0x070)
-#define CMSDK_SPCTRL_APB_NS_PPC1     (MUSCA_SPCTRL_S_BASE + 0x074)
-#define CMSDK_SPCTRL_APB_NS_PPCEXP0  (MUSCA_SPCTRL_S_BASE + 0x080)
-#define CMSDK_SPCTRL_APB_NS_PPCEXP1  (MUSCA_SPCTRL_S_BASE + 0x084)
-#define CMSDK_SPCTRL_APB_NS_PPCEXP2  (MUSCA_SPCTRL_S_BASE + 0x088)
-#define CMSDK_SPCTRL_APB_NS_PPCEXP3  (MUSCA_SPCTRL_S_BASE + 0x08C)
-
-/* Secure Unprivileged (SP) Access slave PPCs register addresses */
-#define CMSDK_SPCTRL_AHB_PPC0_SP     (MUSCA_SPCTRL_S_BASE + 0x090)
-#define CMSDK_SPCTRL_AHB_PPCEXP0_SP  (MUSCA_SPCTRL_S_BASE + 0x0A0)
-#define CMSDK_SPCTRL_AHB_PPCEXP1_SP  (MUSCA_SPCTRL_S_BASE + 0x0A4)
-#define CMSDK_SPCTRL_AHB_PPCEXP2_SP  (MUSCA_SPCTRL_S_BASE + 0x0A8)
-#define CMSDK_SPCTRL_AHB_PPCEXP3_SP  (MUSCA_SPCTRL_S_BASE + 0x0AC)
-#define CMSDK_SPCTRL_APB_PPC0_SP     (MUSCA_SPCTRL_S_BASE + 0x0B0)
-#define CMSDK_SPCTRL_APB_PPC1_SP     (MUSCA_SPCTRL_S_BASE + 0x0B4)
-#define CMSDK_SPCTRL_APB_PPCEXP0_SP  (MUSCA_SPCTRL_S_BASE + 0x0C0)
-#define CMSDK_SPCTRL_APB_PPCEXP1_SP  (MUSCA_SPCTRL_S_BASE + 0x0C4)
-#define CMSDK_SPCTRL_APB_PPCEXP2_SP  (MUSCA_SPCTRL_S_BASE + 0x0C8)
-#define CMSDK_SPCTRL_APB_PPCEXP3_SP  (MUSCA_SPCTRL_S_BASE + 0x0CC)
-
-/* Non-Secure Unprivileged Access (NSP) Access slave PPCs register addresses */
-#define CMSDK_NSPCTRL_AHB_PPC0_NSP     (MUSCA_NSPCTRL_NS_BASE + 0x090)
-#define CMSDK_NSPCTRL_AHB_PPCEXP0_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0A0)
-#define CMSDK_NSPCTRL_AHB_PPCEXP1_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0A4)
-#define CMSDK_NSPCTRL_AHB_PPCEXP2_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0A8)
-#define CMSDK_NSPCTRL_AHB_PPCEXP3_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0AC)
-#define CMSDK_NSPCTRL_APB_PPC0_NSP     (MUSCA_NSPCTRL_NS_BASE + 0x0B0)
-#define CMSDK_NSPCTRL_APB_PPC1_NSP     (MUSCA_NSPCTRL_NS_BASE + 0x0B4)
-#define CMSDK_NSPCTRL_APB_PPCEXP0_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0C0)
-#define CMSDK_NSPCTRL_APB_PPCEXP1_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0C4)
-#define CMSDK_NSPCTRL_APB_PPCEXP2_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0C8)
-#define CMSDK_NSPCTRL_APB_PPCEXP3_NSP  (MUSCA_NSPCTRL_NS_BASE + 0x0CC)
-
-/* ARM APB PPC0 peripherals definition */
-#define CMSDK_TIMER0_APB_PPC_POS  0U
-#define CMSDK_TIMER1_APB_PPC_POS  1U
-#define CMSDK_DTIMER_APB_PPC_POS  2U
-#define CMSDK_MHU0_APB_PPC_POS    3U
-#define CMSDK_MHU1_APB_PPC_POS    4U
-/* The bits 31:5 are reserved */
-/* End ARM APB PPC0 peripherals definition */
-
-/* ARM APB PPC1 peripherals definition */
-#define CMSDK_S32K_TIMER_PPC_POS 0U
-/* The bits 31:1 are reserved */
-/* End ARM APB PPC1 peripherals definition */
-
-/* ARM AHB PPC0 peripherals definition */
-/* The bits 31:0 are reserved */
-/* End of ARM AHB PPC0 peripherals definition */
-
-/* ARM AHB PPCEXP0 peripherals definition */
-#define MUSCA_PERIPHS_AHB_PPC_POS  0U
-/* The bits 31:1 are reserved */
-/* End of ARM AHB PPCEXP0 peripherals definition */
-
-/* ARM AHB PPCEXP1 peripherals definition */
-/* The bits 31:0 are reserved */
-/* End of ARM AHB PPCEXP1 peripherals definition */
-
-/* ARM AHB PPCEXP2 peripherals definition */
-/* The bits 31:0 are reserved */
-/* End of ARM AHB PPCEXP2 peripherals definition */
-
-/* ARM AHB PPCEXP3 peripherals definition */
-/* The bits 31:0 are reserved */
-
-/* End of ARM AHB PPCEXP3 peripherals definition */
 
 /* Peripheral memory map */
 

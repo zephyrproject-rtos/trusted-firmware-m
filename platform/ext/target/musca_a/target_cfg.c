@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ const struct memory_region_limits memory_regions = {
 #define NSCCFG_CODENSC  1
 
 /* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_QSPI_MPC;
+extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC, Driver_QSPI_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC, Driver_ISRAM1_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 
@@ -92,8 +92,8 @@ void nvic_interrupt_target_state_cfg()
     }
 
     /* Make sure that MPC and PPC are targeted to S state */
-    NVIC_ClearTargetState(MPC_IRQn);
-    NVIC_ClearTargetState(PPC_IRQn);
+    NVIC_ClearTargetState(S_MPC_COMBINED_IRQn);
+    NVIC_ClearTargetState(S_PPC_COMBINED_IRQn);
 }
 
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/
@@ -103,8 +103,8 @@ void nvic_interrupt_enable()
 
     /* MPC interrupt enabling */
     Driver_QSPI_MPC.EnableInterrupt();
-    Driver_SRAM1_MPC.EnableInterrupt();
-    NVIC_EnableIRQ(MPC_IRQn);
+    Driver_CODE_SRAM_MPC.EnableInterrupt();
+    NVIC_EnableIRQ(S_MPC_COMBINED_IRQn);
 
     /* PPC interrupt enabling */
     /* Clear pending PPC interrupts */
@@ -122,7 +122,7 @@ void nvic_interrupt_enable()
     spctrl->secppcinten |= CMSDK_APB_PPCEXP1_INT_POS_MASK;
     spctrl->secppcinten |= CMSDK_APB_PPCEXP2_INT_POS_MASK;
     spctrl->secppcinten |= CMSDK_APB_PPCEXP3_INT_POS_MASK;
-    NVIC_EnableIRQ(PPC_IRQn);
+    NVIC_EnableIRQ(S_PPC_COMBINED_IRQn);
 }
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/
