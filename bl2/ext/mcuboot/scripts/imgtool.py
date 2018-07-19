@@ -16,11 +16,29 @@
 # limitations under the License.
 
 import os
+import re
 import argparse
 from imgtool import keys
 from imgtool import image
 from imgtool import version
 import sys
+
+def find_load_address(args):
+    load_address_re = re.compile(r"^#define\sIMAGE_LOAD_ADDRESS\s+(0x[0-9a-fA-F]+)")
+    scriptsDir = os.path.dirname(os.path.abspath(__file__))
+    configFile = os.path.join(scriptsDir, args.layout)
+    ramLoadAddress = None
+    with open(configFile, 'r') as flash_layout_file:
+        for line in flash_layout_file:
+            m = load_address_re.match(line)
+            if m is not None:
+                ramLoadAddress = int(m.group(1), 0)
+                print("**[INFO]** Writing load address from the macro in "
+                      "flash_layout.h to the image header.. "
+                       + hex(ramLoadAddress)
+                       + " (dec. " + str(ramLoadAddress) + ")")
+                break
+    return ramLoadAddress
 
 # Returns the last version number if present, or None if not
 def get_last_version(path):
@@ -86,7 +104,7 @@ def do_sign(args):
             included_header=args.included_header,
             pad=args.pad)
     key = keys.load(args.key) if args.key else None
-    img.sign(key)
+    img.sign(key, find_load_address(args))
 
     if args.pad:
         img.pad_to(args.pad, args.align)
@@ -125,6 +143,8 @@ def args():
     getpub.add_argument('-l', '--lang', metavar='lang', default='c')
 
     sign = subs.add_parser('sign', help='Sign an image with a private key')
+    sign.add_argument('--layout', required=True,
+                      help='Location of the memory layout file')
     sign.add_argument('-k', '--key', metavar='filename')
     sign.add_argument("--align", type=alignment_value, required=True)
     sign.add_argument("-v", "--version", type=version.decode_version,

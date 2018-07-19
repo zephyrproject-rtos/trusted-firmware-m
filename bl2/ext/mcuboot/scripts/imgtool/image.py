@@ -1,4 +1,5 @@
 # Copyright 2017 Linaro Limited
+# Copyright (c) 2018, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,8 +27,8 @@ IMAGE_HEADER_SIZE = 32
 # Image header flags.
 IMAGE_F = {
         'PIC':                   0x0000001,
-        'NON_BOOTABLE':          0x0000010, }
-
+        'NON_BOOTABLE':          0x0000010,
+        'RAM_LOAD':              0x0000020, }
 TLV_VALUES = {
         'KEYHASH': 0x01,
         'SHA256' : 0x10,
@@ -102,8 +103,8 @@ class Image():
             if any(v != 0 for v in self.payload[0:self.header_size]):
                 raise Exception("Padding requested, but image does not start with zeros")
 
-    def sign(self, key):
-        self.add_header(key)
+    def sign(self, key, ramLoadAddress):
+        self.add_header(key, ramLoadAddress)
 
         tlv = TLV()
 
@@ -125,13 +126,17 @@ class Image():
 
         self.payload += tlv.get()
 
-    def add_header(self, key):
+    def add_header(self, key, ramLoadAddress):
         """Install the image header.
 
         The key is needed to know the type of signature, and
         approximate the size of the signature."""
 
         flags = 0
+        if ramLoadAddress is not None:
+            # add the load address flag to the header to indicate that an SRAM
+            # load address macro has been defined
+            flags |= IMAGE_F["RAM_LOAD"]
 
         fmt = ('<' +
             # type ImageHdr struct {
@@ -147,7 +152,7 @@ class Image():
         assert struct.calcsize(fmt) == IMAGE_HEADER_SIZE
         header = struct.pack(fmt,
                 IMAGE_MAGIC,
-                0, # LoadAddr
+                0 if (ramLoadAddress is None) else ramLoadAddress, # LoadAddr
                 self.header_size,
                 0, # Pad1
                 len(self.payload) - self.header_size, # ImageSz

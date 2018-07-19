@@ -59,6 +59,7 @@ function(mcuboot_create_boot_payload)
 						#Sign concatenated binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
 						ARGS sign
+							 --layout ${FLASH_LAYOUT}
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
 							 -v ${IMAGE_VERSION}
@@ -81,7 +82,7 @@ function(mcuboot_create_boot_payload)
 	endif()
 
 	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
-			DESTINATION  outputs/${TARGET_PLATFORM}/)
+			DESTINATION outputs/${TARGET_PLATFORM}/)
 
 	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 			RENAME ${TFM_FULL_NAME}${_MY_PARAMS_POSTFIX}.bin
