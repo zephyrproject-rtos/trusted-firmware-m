@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "assets/sst_asset_defs.h"
 #include "psa_sst_asset_defs.h"
+#include "sst_utils.h"
 
 #ifdef SST_ENCRYPTION
 #include "crypto/sst_crypto_interface.h"
@@ -28,15 +29,18 @@ struct sst_obj_header_t {
     struct psa_sst_asset_attrs_t attr; /*!< Object attributes */
 };
 
+
+#define SST_MAX_OBJECT_DATA_SIZE  GET_ALIGNED_FLASH_BYTES(SST_MAX_ASSET_SIZE)
+
 /* The object to be written to the file system below. Made up of the
  * object header and the object data.
  */
 struct sst_object_t {
-    struct sst_obj_header_t header;   /*!< Object header */
-    uint8_t data[SST_MAX_ASSET_SIZE]; /*!< Object data */
+    struct sst_obj_header_t header;         /*!< Object header */
+    uint8_t data[SST_MAX_OBJECT_DATA_SIZE]; /*!< Object data */
 };
 
-#define SST_MAX_OBJECT_DATA_SIZE  SST_MAX_ASSET_SIZE
+
 #define SST_OBJECT_HEADER_SIZE    sizeof(struct sst_obj_header_t)
 #define SST_MAX_OBJECT_SIZE       sizeof(struct sst_object_t)
 

@@ -10,18 +10,26 @@
 
 #include <stdint.h>
 
+#include "flash_layout.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define SST_INVALID_UUID  0
+#define SST_INVALID_FID  0
 #define SST_DEFAULT_EMPTY_BUFF_VAL 0
 
-/*
+/* FIXME: Support other flash program units.*/
+#if ((SST_FLASH_PROGRAM_UNIT != 1) && (SST_FLASH_PROGRAM_UNIT != 2) \
+      && (SST_FLASH_PROGRAM_UNIT != 4))
+#error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4 bytes"
+#endif
+
+/**
  * \brief Macro to check, at compilation time, if data fits in data buffer
  *
  * \param[in] err_msg        Error message which will be displayed in first
- *                           instance if the error is tiggered
+ *                           instance if the error is triggered
  * \param[in] data_size      Data size to check if it fits
  * \param[in] data_buf_size  Size of the data buffer
  *
@@ -31,6 +39,17 @@ extern "C" {
  */
 #define SST_UTILS_BOUND_CHECK(err_msg, data_size, data_buf_size) \
 typedef char err_msg[(data_size <= data_buf_size) - 1]
+
+/**
+ * \brief Macro to get the number of bytes aligned with the
+ *        SST_FLASH_PROGRAM_UNIT.
+ *
+ * \param[in] nbr_bytes  Number of bytes
+ *
+ * \return Return number of bytes aligned with SST_FLASH_PROGRAM_UNIT
+ */
+#define GET_ALIGNED_FLASH_BYTES(nbr_bytes) \
+ ((nbr_bytes + (SST_FLASH_PROGRAM_UNIT - 1)) & ~((SST_FLASH_PROGRAM_UNIT - 1)))
 
 /**
  * \brief Acquires sst system lock. This lock is used for serializing accesses
@@ -121,13 +140,13 @@ void sst_utils_memset(void *dest, const uint8_t pattern, uint32_t size);
 uint32_t sst_utils_validate_secure_caller(void);
 
 /**
- * \brief Validates asset's ID
+ * \brief Validates file ID
  *
- * \param[in] unique_id  Asset's ID
+ * \param[in] fid  File ID
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_utils_validate_uuid(uint32_t unique_id);
+enum psa_sst_err_t sst_utils_validate_fid(uint32_t fid);
 
 #ifdef __cplusplus
 }

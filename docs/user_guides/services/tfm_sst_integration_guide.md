@@ -89,6 +89,7 @@ Secure storage service code is located in `secure_fw/services/secure_storage/`
 and is divided as follows:
 
  - Core files
+ - Flash filesystem interfaces
  - Flash interfaces
  - Cryptographic interfaces
  - Assets definitions
@@ -115,10 +116,6 @@ and `interface/include/psa_sst_asset_macros.h`
 
 ### Core Files
 
-`sst_core.c` - This file implements the core logic for secure storge system,
-power failure safe operations and required cryptographic operations for SST
-service.
-
 `sst_object_system.c` - Contains the object system implementation to manage
 all objects in SST area.
 
@@ -134,6 +131,25 @@ encrypted objects in the SST object system.
 
 `sst_utils.c` - Contains common and basic functionalities used accross the
 SST service code.
+
+### Flash Filesystem Interface
+`flash_fs/sst_flash_fs.h` - Abstracts the flash filesystem operations for
+the secure storage service. The purpose of this abstraction is to have the
+ability to plug-in other filesystems or filesystem proxys (supplicant).
+
+`flash_fs/sst_flash_fs.c` - Contains the `sst_flash_fs` implementation for
+the required interfaces.
+
+`flash_fs/sst_flash_fs_mbloc.c` - Contains the metadata block manipulation
+functions required to implement the `sst_flash_fs` interfaces in
+`flash_fs/sst_flash_fs.c`.
+
+`flash_fs/sst_flash_fs_mbloc.c` - Contains the data block manipulation
+functions required to implement the `sst_flash_fs` interfaces in
+`flash_fs/sst_flash_fs.c`.
+
+The system integrator **may** replace this implementation with its own
+flash filesystem implementation or filesystem proxy (supplicant).
 
 ### Flash Interface
 

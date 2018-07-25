@@ -54,13 +54,14 @@ if (ENABLE_SECURE_STORAGE)
 	set (SECURE_STORAGE_C_SRC
 		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
-		"${SECURE_STORAGE_DIR}/sst_core.c"
-		"${SECURE_STORAGE_DIR}/sst_flash_fs.c"
 		"${SECURE_STORAGE_DIR}/sst_object_system.c"
 		"${SECURE_STORAGE_DIR}/sst_object_table.c"
 		"${SECURE_STORAGE_DIR}/sst_utils.c"
 		"${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"
-		"${SECURE_STORAGE_DIR}/flash/sst_flash.c")
+		"${SECURE_STORAGE_DIR}/flash/sst_flash.c"
+		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
+		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
+		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c")
 
 	if (SST_ENCRYPTION)
 		list(APPEND SECURE_STORAGE_C_SRC

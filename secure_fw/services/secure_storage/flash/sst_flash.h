@@ -32,6 +32,14 @@ extern "C" {
 #define SST_TOTAL_NUM_OF_BLOCKS SST_NBR_OF_SECTORS
 #endif
 
+#ifndef SST_FLASH_PROGRAM_UNIT
+#error "SST_FLASH_PROGRAM_UNIT must be defined in flash_layout.h"
+#endif
+
+#if (SST_FLASH_PROGRAM_UNIT < 1)
+#error "SST_FLASH_PROGRAM_UNIT must be bigger than 0"
+#endif
+
 /* Default value of flash when erased */
 #define SST_FLASH_DEFAULT_VAL 0xFF
 /* A single host specific sst_flash_xxx.c should be included during compile */
@@ -48,7 +56,7 @@ extern "C" {
 enum psa_sst_err_t sst_flash_init(void);
 
 /**
- * \brief Reads block data from the position specifed by block ID and offset.
+ * \brief Reads block data from the position specified by block ID and offset.
  *
  * \param[in]  block_id  Block ID
  * \param[out] buff      Buffer pointer to store the data read
@@ -66,7 +74,7 @@ enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
                                   uint32_t offset, uint32_t size);
 
 /**
- * \brief Writes block data to the position specifed by block ID and offset.
+ * \brief Writes block data to the position specified by block ID and offset.
  *
  * \param[in] block_id  Block ID
  * \param[in] buff      Buffer pointer to the write data

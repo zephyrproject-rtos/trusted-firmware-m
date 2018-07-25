@@ -48,7 +48,7 @@ enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
 {
     enum psa_sst_err_t bound_check;
 
-    /* src is passed on from untrusted domain, verify boundry */
+    /* src is passed on from untrusted domain, verify boundary */
     bound_check = sst_utils_memory_bound_check(src, size, client_id,
                                                TFM_MEMORY_ACCESS_RO);
     if (bound_check == PSA_SST_ERR_SUCCESS) {
@@ -89,16 +89,9 @@ uint32_t sst_utils_validate_secure_caller(void)
     return tfm_core_validate_secure_caller();
 }
 
-/**
- * \brief Validates asset's ID
- *
- * \param[in] unique_id  Asset's ID
- *
- * \return Returns 1 if the asset ID is valid, otherwise 0.
- */
-enum psa_sst_err_t sst_utils_validate_uuid(uint32_t unique_id)
+enum psa_sst_err_t sst_utils_validate_fid(uint32_t fid)
 {
-    if (unique_id == SST_INVALID_UUID) {
+    if (fid == SST_INVALID_FID) {
         return PSA_SST_ERR_ASSET_NOT_FOUND;
     }
 

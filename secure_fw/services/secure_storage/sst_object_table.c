@@ -11,7 +11,7 @@
 #include "cmsis_compiler.h"
 #include "crypto/sst_crypto_interface.h"
 #include "flash/sst_flash.h"
-#include "sst_flash_fs.h"
+#include "flash_fs/sst_flash_fs.h"
 #include "sst_utils.h"
 
 /*!
@@ -516,7 +516,7 @@ static uint32_t sst_table_free_idx(void)
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
     for (idx = 0; idx < SST_OBJ_TABLE_ENTRIES; idx++) {
-        if (p_table->obj_db[idx].uuid == SST_INVALID_UUID) {
+        if (p_table->obj_db[idx].uuid == SST_ASSET_ID_NO_ASSET) {
             break;
         }
     }
@@ -534,7 +534,7 @@ static void sst_table_delete_entry(uint32_t idx)
 {
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
-    p_table->obj_db[idx].uuid = SST_INVALID_UUID;
+    p_table->obj_db[idx].uuid = SST_ASSET_ID_NO_ASSET;
 
 #ifdef SST_ENCRYPTION
     sst_utils_memset(p_table->obj_db[idx].tag, SST_DEFAULT_EMPTY_BUFF_VAL,
@@ -600,6 +600,10 @@ enum psa_sst_err_t sst_object_table_init(uint8_t *obj_data)
     if (err != PSA_SST_ERR_SUCCESS && err != PSA_SST_ERR_ASSET_NOT_FOUND) {
         return err;
     }
+
+#ifdef SST_ENCRYPTION
+    sst_crypto_set_iv(&sst_obj_table_ctx.obj_table.crypto);
+#endif
 
     return PSA_SST_ERR_SUCCESS;
 }

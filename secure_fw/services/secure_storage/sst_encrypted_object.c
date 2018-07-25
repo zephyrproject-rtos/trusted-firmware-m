@@ -8,7 +8,7 @@
 #include "sst_encrypted_object.h"
 
 #include "crypto/sst_crypto_interface.h"
-#include "sst_flash_fs.h"
+#include "flash_fs/sst_flash_fs.h"
 #include "sst_object_defs.h"
 #include "sst_utils.h"
 
@@ -22,7 +22,8 @@
 
 /* Buffer to store the maximum encrypted object */
 /* FIXME: Do partial encrypt/decrypt to reduce the size of internal buffer */
-#define SST_MAX_ENCRYPTED_OBJ_SIZE  SST_ENCRYPT_SIZE(SST_MAX_OBJECT_DATA_SIZE)
+#define SST_MAX_ENCRYPTED_OBJ_SIZE GET_ALIGNED_FLASH_BYTES( \
+                                     SST_ENCRYPT_SIZE(SST_MAX_OBJECT_DATA_SIZE))
 
 static uint8_t sst_crypto_buf[SST_MAX_ENCRYPTED_OBJ_SIZE];
 
@@ -175,7 +176,8 @@ enum psa_sst_err_t sst_encrypted_object_read(uint32_t fid,
     }
 
     /* Get the decrypt size */
-    decrypt_size = file_info.size_current - sizeof(obj->header.crypto.ref.iv);
+    decrypt_size = file_info.size_current -
+                     GET_ALIGNED_FLASH_BYTES(sizeof(obj->header.crypto.ref.iv));
 
     /* Decrypt the object data */
     err = sst_object_auth_decrypt(fid, decrypt_size, obj);
@@ -201,13 +203,16 @@ enum psa_sst_err_t sst_encrypted_object_write(uint32_t fid,
     wrt_size = SST_ENCRYPT_SIZE(obj->header.info.size_max) +
                sizeof(obj->header.crypto.ref.iv);
 
+    wrt_size = GET_ALIGNED_FLASH_BYTES(wrt_size);
+
     /* Create an object in the object system */
     err = sst_flash_fs_file_create(fid, wrt_size, SST_EMPTY_OBJECT_SIZE, NULL);
     if (err != PSA_SST_ERR_SUCCESS) {
         return err;
     }
 
-    wrt_size = SST_ENCRYPT_SIZE(obj->header.info.size_current);
+    wrt_size = GET_ALIGNED_FLASH_BYTES(
+                               SST_ENCRYPT_SIZE(obj->header.info.size_current));
 
     /* Authenticate and encrypt the object */
     err = sst_object_auth_encrypt(fid, wrt_size, obj);
@@ -216,6 +221,8 @@ enum psa_sst_err_t sst_encrypted_object_write(uint32_t fid,
     }
 
     wrt_size += sizeof(obj->header.crypto.ref.iv);
+
+    wrt_size = GET_ALIGNED_FLASH_BYTES(wrt_size);
 
     /* Write the encrypted object to the persistent area. The tag values is not
      * copied as it is stored in the object table.

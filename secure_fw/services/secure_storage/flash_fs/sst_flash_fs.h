@@ -71,7 +71,9 @@ enum psa_sst_err_t sst_flash_fs_file_exist(uint32_t fid);
  *                       This parameter is set to NULL when the file is empty
  *                       after the creation.
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns PSA_SST_ERR_SUCCESS if the file has been created correctly.
+ *         If fid is in used, it returns PSA_SST_ERR_PARAM_ERROR.
+ *         Otherwise, it returns error code as specified in \ref psa_sst_err_t.
  */
 enum psa_sst_err_t sst_flash_fs_file_create(uint32_t fid,
                                             uint32_t max_size,

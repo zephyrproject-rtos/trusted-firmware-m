@@ -8,10 +8,10 @@
 #include <string.h>
 
 #include "cmsis_compiler.h"
+#include "flash_fs/sst_flash_fs.h"
 #ifdef SST_ENCRYPTION
 #include "sst_encrypted_object.h"
 #endif
-#include "sst_flash_fs.h"
 #include "sst_object_defs.h"
 #include "sst_object_system.h"
 #include "sst_object_table.h"
@@ -150,7 +150,9 @@ static enum psa_sst_err_t sst_write_object(uint32_t wrt_size)
     /* Save object version to be stored in the object table */
     g_obj_tbl_info.version = g_sst_object.header.version;
 
-    err = sst_flash_fs_file_create(g_obj_tbl_info.fid, max_size, wrt_size,
+    err = sst_flash_fs_file_create(g_obj_tbl_info.fid,
+                                   GET_ALIGNED_FLASH_BYTES(max_size),
+                                   GET_ALIGNED_FLASH_BYTES(wrt_size),
                                    (const uint8_t *)&g_sst_object);
     return err;
 }
