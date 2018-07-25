@@ -85,9 +85,9 @@ int32_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t, stru
                                     struct psa_outvec *out_vec, \
                                     size_t out_len) \
     { \
-        TFM_CORE_SFN_REQUEST(partition_name##_ID, \
-                             sfn_name, \
-                             in_vec, in_len, out_vec, out_len); \
+        TFM_CORE_IOVEC_SFN_REQUEST(partition_name##_ID, \
+                                   sfn_name, \
+                                   in_vec, in_len, out_vec, out_len); \
     }
 
 /******** TFM_SP_STORAGE ********/

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <arm_cmse.h>
 #include "cmsis.h"
 #include "tfm_secure_api.h"
 #include "tfm_nspm.h"
@@ -23,12 +24,15 @@
 #error TFM_LVL is not defined!
 #endif
 
-#if TFM_LVL == 1
 /* Macros to pick linker symbols and allow references to sections */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
+REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
+
+#if TFM_LVL == 1
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 #endif
@@ -74,6 +78,208 @@ static void restore_caller_ctx(
     target_ctx->R0 = svc_ctx->R0;
 
     return;
+}
+
+/**
+ * \brief Check whether a memory range is inside a memory region.
+ *
+ * \param[in] p             The start address of the range to check
+ * \param[in] s             The size of the range to check
+ * \param[in] region_start  The start address of the region, which should
+ *                          contain the range
+ * \param[in] region_len    The size of the region, which should contain the
+ *                          range
+ *
+ * \return 1 if the region contains the range, 0 otherwise.
+ */
+static int32_t check_address_range(const void *p, size_t s,
+                                   uintptr_t region_start, uint32_t region_len)
+{
+    int32_t range_in_region = 0;
+
+    /* Check for overflow in the range parameters */
+    if ((uintptr_t)p > UINTPTR_MAX-s) {
+        return 0;
+    }
+
+    /* We trust the region parameters, and don't check for overflow */
+
+    /* Calculate the result */
+    range_in_region = ((uintptr_t)p >= region_start) &&
+                      ((uintptr_t)p+s <= region_start+region_len);
+
+    return range_in_region;
+}
+
+/**
+ * \brief Check whether the current partition has access to a memory range
+ *
+ * This function assumes, that the current MPU configuration is set for the
+ * partition to be checked. The flags should contain information of the
+ * execution mode of the partition code (priv/unpriv), and access type
+ * (read/write) as specified in "ARMv8-M Security Extensions: Requirements on
+ * Development Tools" chapter "Address range check intrinsic"
+ *
+ * \param[in] p      The start address of the range to check
+ * \param[in] s      The size of the range to check
+ * \param[in] flags  The flags to pass to the cmse_check_address_range func
+ *
+ * \return 1 if the partition has access to the memory range, 0 otherwise.
+ */
+static int32_t has_access_to_region(const void *p, size_t s, uint32_t flags)
+{
+    int32_t range_access_allowed_by_mpu;
+
+    uint32_t scratch_base =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
+    uint32_t scratch_limit =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
+
+    /* Use the TT instruction to check access to the partition's regions*/
+    range_access_allowed_by_mpu =
+                          cmse_check_address_range((void *)p, s, flags) != NULL;
+
+    if (range_access_allowed_by_mpu) {
+        return 1;
+    }
+
+    /* If the check for the current MPU settings fails, check for the share
+     * region, only if the partition is secure
+     */
+    if ((flags & CMSE_NONSECURE) == 0) {
+        if (check_address_range(p, s, scratch_base,
+                                scratch_limit+1-scratch_base)) {
+            return 1;
+        }
+    }
+
+    /* If all else fails, check whether the region is in the non-secure
+     * memory
+     */
+    return
+      check_address_range(p, s, NS_CODE_START, NS_CODE_LIMIT+1-NS_CODE_START) ||
+      check_address_range(p, s, NS_DATA_START, NS_DATA_LIMIT+1-NS_DATA_START);
+}
+
+/**
+ * \brief Check whether the current partition has read access to a memory range
+ *
+ * This function assumes, that the current MPU configuration is set for the
+ * partition to be checked.
+ *
+ * \param[in] p          The start address of the range to check
+ * \param[in] s          The size of the range to check
+ * \param[in] ns_caller  Whether the current partition is a non-secure one
+ *
+ * \return 1 if the partition has access to the memory range, 0 otherwise.
+ */
+static int32_t has_read_access_to_region(const void *p, size_t s,
+                                         int32_t ns_caller)
+{
+    uint32_t flags = CMSE_MPU_UNPRIV|CMSE_MPU_READ;
+
+    if (ns_caller) {
+        flags |= CMSE_NONSECURE;
+    }
+
+    return has_access_to_region(p, s, flags);
+}
+
+/**
+ * \brief Check whether the current partition has write access to a memory range
+ *
+ * This function assumes, that the current MPU configuration is set for the
+ * partition to be checked.
+ *
+ * \param[in] p          The start address of the range to check
+ * \param[in] s          The size of the range to check
+ * \param[in] ns_caller  Whether the current partition is a non-secure one
+ *
+ * \return 1 if the partition has access to the memory range, 0 otherwise.
+ */
+static int32_t has_write_access_to_region(void *p, size_t s, int32_t ns_caller)
+{
+    uint32_t flags = CMSE_MPU_UNPRIV|CMSE_MPU_READWRITE;
+
+    if (ns_caller) {
+        flags |= CMSE_NONSECURE;
+    }
+
+    return has_access_to_region(p, s, flags);
+}
+
+/** \brief Check whether the iovec parameters are valid, and the memory ranges
+ *         are in the posession of the calling partition
+ *
+ * \param[in] desc_ptr  The secure function request descriptor
+ *
+ * \return Return /ref TFM_SUCCESS if the iovec parameters are valid, error code
+ *         otherwise as in /ref tfm_status_e
+ */
+static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
+{
+    struct psa_invec *in_vec = (psa_invec *)desc_ptr->args[0];
+    size_t in_len = desc_ptr->args[1];
+    struct psa_outvec *out_vec = (psa_outvec *)desc_ptr->args[2];
+    size_t out_len = desc_ptr->args[3];
+
+    uint32_t i;
+
+    /* The number of vectors are within range. Extra checks to avoid overflow */
+    if ((in_len > PSA_MAX_IOVEC) || (out_len > PSA_MAX_IOVEC) ||
+        (in_len + out_len > PSA_MAX_IOVEC)) {
+        return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+    }
+
+    /* Check whether the caller partition has at write access to the iovec
+     * structures themselves. Use the TT instruction for this.
+     */
+    if (in_len > 0) {
+        if ((in_vec == NULL) ||
+            (has_write_access_to_region(in_vec, sizeof(psa_invec)*in_len,
+                                      desc_ptr->ns_caller) != 1)) {
+            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+        }
+    } else {
+        if (in_vec != NULL) {
+            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+        }
+    }
+    if (out_len > 0) {
+        if ((out_vec == NULL) ||
+            (has_write_access_to_region(out_vec, sizeof(psa_outvec)*out_len,
+                                      desc_ptr->ns_caller) != 1)) {
+            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+        }
+    } else {
+        if (out_vec != NULL) {
+            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+        }
+    }
+
+    /* Check whether the caller partition has access to the data inside the
+     * iovecs
+     */
+    for (i = 0; i < in_len; ++i) {
+        if (in_vec[i].len > 0) {
+            if ((in_vec[i].base == NULL) ||
+                (has_read_access_to_region(in_vec[i].base, in_vec[i].len,
+                                          desc_ptr->ns_caller) != 1)) {
+                return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            }
+        }
+    }
+    for (i = 0; i < out_len; ++i) {
+        if (out_vec[i].len > 0) {
+            if ((out_vec[i].base == NULL) ||
+                (has_write_access_to_region(out_vec[i].base, out_vec[i].len,
+                                           desc_ptr->ns_caller) != 1)) {
+                return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            }
+        }
+    }
+
+    return TFM_SUCCESS;
 }
 
 static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
@@ -400,7 +606,17 @@ int32_t tfm_core_sfn_request_handler(
     }
 
     __disable_irq();
+
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
+
+    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+        res = tfm_core_check_sfn_parameters(desc_ptr);
+        if (res != TFM_SUCCESS) {
+            /* The sanity check of iovecs failed. */
+            __enable_irq();
+            return TFM_ERROR_STATUS(res);
+        }
+    }
 
     res = tfm_core_check_sfn_req_rules(desc_ptr);
     if (res != TFM_SUCCESS) {
@@ -431,6 +647,14 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     int32_t res;
     int32_t *args;
     int32_t retVal;
+
+    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+        res = tfm_core_check_sfn_parameters(desc_ptr);
+        if (res != TFM_SUCCESS) {
+            /* The sanity check of iovecs failed. */
+            return res;
+        }
+    }
 
     /* No excReturn value is needed as no exception handling is used */
     res = tfm_core_sfn_request_handler(desc_ptr, 0);
@@ -689,6 +913,8 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 uint32_t tfm_core_partition_request_svc_handler(
         struct tfm_exc_stack_t *svc_ctx, uint32_t excReturn)
 {
+    struct tfm_sfn_req_s *desc_ptr;
+
     if (!(excReturn & EXC_RETURN_STACK_PROCESS)) {
         /* Service request SVC called with MSP active.
          * Either invalid configuration for Thread mode or SVC called
@@ -699,7 +925,7 @@ uint32_t tfm_core_partition_request_svc_handler(
         tfm_secure_api_error_handler();
     }
 
-    struct tfm_sfn_req_s *desc_ptr = (struct tfm_sfn_req_s *)svc_ctx->R0;
+    desc_ptr = (struct tfm_sfn_req_s *)svc_ctx->R0;
 
     if (tfm_core_sfn_request_handler(desc_ptr, excReturn) != TFM_SUCCESS) {
         tfm_secure_api_error_handler();

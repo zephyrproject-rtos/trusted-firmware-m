@@ -36,6 +36,9 @@ extern "C" {
  */
 #define TFM_CLIENT_ID_IS_NS(client_id) ((client_id)<0)
 
+/* Maximum number of input and output vectors */
+#define PSA_MAX_IOVEC    (4)
+
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
 /* Note:

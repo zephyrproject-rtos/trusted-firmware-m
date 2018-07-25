@@ -29,6 +29,9 @@
 #define TFM_ERROR_STATUS(status) (TFM_PARTITION_BUSY)
 #endif
 
+#define TFM_SFN_API_LEGACY 0
+#define TFM_SFN_API_IOVEC 1
+
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
 #endif
@@ -42,6 +45,7 @@ struct tfm_sfn_req_s {
     sfn_t sfn;
     int32_t *args;
     uint32_t caller_part_idx;
+    int32_t iovec_api;
     int32_t ns_caller : 1;
 };
 
@@ -83,12 +87,16 @@ int32_t tfm_core_sfn_request(struct tfm_sfn_req_s *desc_ptr);
 
 int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
 
+#define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
+        return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \
+                (int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d)
+
 #define TFM_CORE_SFN_REQUEST(id, fn, a, b, c, d) \
-        return tfm_core_partition_request(id, fn, (int32_t)a, (int32_t)b, \
-            (int32_t)c, (int32_t)d)
+        return tfm_core_partition_request(id, fn, TFM_SFN_API_LEGACY, \
+                (int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d)
 
 __attribute__ ((always_inline)) __STATIC_INLINE
-int32_t tfm_core_partition_request(uint32_t id, void *fn,
+int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
             int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
 {
     int32_t args[4] = {arg1, arg2, arg3, arg4};
@@ -98,6 +106,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
     desc.sfn = fn;
     desc.args = args;
     desc.ns_caller = cmse_nonsecure_caller();
+    desc.iovec_api = iovec_api;
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* FixMe: Error severity TBD */
         return TFM_ERROR_GENERIC;
