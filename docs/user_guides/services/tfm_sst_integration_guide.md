@@ -384,9 +384,15 @@ The list of SST services flags are:
    storage service.
  - `SST_ENCRYPTION`: this flag allows to enable/disable encryption option to
    encrypt the secure storage data.
- - `SST_RAM_FS`: this flag allows to compile in/out the current flash interface
-   based on a memory map. This is useful to test SST service without reducing
-   the flash lifetime.
+ - `SST_CREATE_FLASH_LAYOUT`: this flag indicates that it is required to
+   create a SST flash layout. If this flag is set, SST service will generate an
+   empty and valid SST flash layout to store assets. It will erase all data
+   located in the assigned SST memory area before generating the SST layout.
+   This flag is required to be set if the SST memory area is located in a
+   non-persistent memory.
+   This flag can be set if the SST memory area is located in a persistent
+   memory without a valid SST flash layout in it. That is the case when
+   it is the first time in the device life that the SST service is executed.
  - `SST_VALIDATE_METADATA_FROM_FLASH`: this flag allows to enable/disable the
    validation mechanism to check the metadata store in flash every time the
    flash data is read from flash. This validation is required if the flash is

@@ -220,17 +220,28 @@ enum psa_sst_err_t sst_am_prepare(void)
     }
 
     err = sst_system_prepare();
-#ifdef SST_RAM_FS
-    /* in case of RAM based system there wouldn't be
-     * any content in the boot time. Call the wipe API
-     * to create a storage structure.
+#ifdef SST_CREATE_FLASH_LAYOUT
+    /* If SST_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+     * create a SST flash layout. SST service will generate an empty and valid
+     * SST flash layout to store assets. It will erase all data located in the
+     * assigned SST memory area before generating the SST layout.
+     * This flag is required to be set if the SST memory area is located in a
+     * non-persistent memory.
+     * This flag can be set if the SST memory area is located in a persistent
+     * memory without a previous valid SST flash layout in it. That is the case
+     * when it is the first time in the device life that the SST service is
+     * executed.
      */
     if (err != PSA_SST_ERR_SUCCESS) {
+        /* Remove all data in the SST memory area and creates a valid SST flash
+         * layout in that area.
+         */
         sst_system_wipe_all();
-        /* attempt to initialise again */
+
+        /* Attempt to initialise again */
         err = sst_system_prepare();
     }
-#endif /* SST_RAM_FS */
+#endif /* SST_CREATE_FLASH_LAYOUT */
 
     return err;
 }
