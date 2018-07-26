@@ -184,6 +184,7 @@ set(MBEDTLS_C_FLAGS_SST_LOG "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPIL
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
+#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.md
 if (NOT DEFINED ENABLE_SECURE_STORAGE)
 	set (ENABLE_SECURE_STORAGE ON)
 

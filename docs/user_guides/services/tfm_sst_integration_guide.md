@@ -399,6 +399,9 @@ The list of SST services flags are:
    not hardware protected against malicious writes. In case the flash is
    protected against malicious writes (i.e embedded flash, etc), this validation
    can be disabled in order to reduce the validation overhead.
+ - `SST_ENABLE_PARTIAL_ASSET_RW`: this flag allows to enable/disable the
+   partial asset RW manipulation at compile time. The partial asset
+   manipulation is allowed by default.
 
 --------------
 

@@ -47,6 +47,10 @@ if (ENABLE_SECURE_STORAGE)
 		message(FATAL_ERROR "Incomplete build configuration: SST_VALIDATE_METADATA_FROM_FLASH is undefined. ")
 	endif()
 
+	if (NOT DEFINED SST_ENABLE_PARTIAL_ASSET_RW)
+		message(FATAL_ERROR "Incomplete build configuration: SST_ENABLE_PARTIAL_ASSET_RW is undefined. ")
+	endif()
+
 	set (SECURE_STORAGE_C_SRC
 		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
@@ -82,6 +86,13 @@ if (ENABLE_SECURE_STORAGE)
 	#Append all our source files to global lists.
 	list(APPEND ALL_SRC_C ${SECURE_STORAGE_C_SRC})
 	unset(SECURE_STORAGE_C_SRC)
+
+	#Inform the user about SST service features selected based on the SST service cmake flags
+	message("The SST service compile configuration is as follows:")
+	message("- SST_ENCRYPTION: " ${SST_ENCRYPTION})
+	message("- SST_VALIDATE_METADATA_FROM_FLASH: " ${SST_VALIDATE_METADATA_FROM_FLASH})
+	message("- SST_CREATE_FLASH_LAYOUT: " ${SST_CREATE_FLASH_LAYOUT})
+	message("- SST_ENABLE_PARTIAL_ASSET_RW: " ${SST_ENABLE_PARTIAL_ASSET_RW})
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
