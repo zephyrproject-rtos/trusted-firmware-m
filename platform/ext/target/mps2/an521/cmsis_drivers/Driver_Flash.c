@@ -27,7 +27,8 @@
 #endif
 
 /* Driver version */
-#define ARM_FLASH_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
+#define ARM_FLASH_DRV_VERSION      ARM_DRIVER_VERSION_MAJOR_MINOR(1, 1)
+#define ARM_FLASH_DRV_ERASE_VALUE  0xFF
 
 /*
  * ARM FLASH device structure
@@ -94,6 +95,21 @@ static int32_t is_sector_aligned(struct arm_flash_dev_t *flash_dev,
     return rc;
 }
 
+static int32_t is_flash_ready_to_write(const uint8_t *start_addr, uint32_t cnt)
+{
+    int32_t rc = 0;
+    uint32_t i;
+
+    for (i = 0; i < cnt; i++) {
+        if(start_addr[i] != ARM_FLASH_DRV_ERASE_VALUE) {
+            rc = -1;
+            break;
+        }
+    }
+
+    return rc;
+}
+
 #if (RTE_FLASH0)
 static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
     .sector_info  = NULL,                  /* Uniform sector layout */
@@ -101,7 +117,7 @@ static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
     .sector_size  = FLASH0_SECTOR_SIZE,
     .page_size    = FLASH0_PAGE_SIZE,
     .program_unit = FLASH0_PROGRAM_UNIT,
-    .erased_value = 0xFF};
+    .erased_value = ARM_FLASH_DRV_ERASE_VALUE};
 
 static struct arm_flash_dev_t ARM_FLASH0_DEV = {
 #if (__DOMAIN_NS == 1)
@@ -171,7 +187,8 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     return ARM_DRIVER_OK;
 }
 
-static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t cnt)
+static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
+                                     uint32_t cnt)
 {
     uint32_t start_addr = FLASH0_DEV->memory_base + addr;
     int32_t rc = 0;
@@ -182,6 +199,12 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
     rc |= is_write_aligned(FLASH0_DEV, cnt);
     if (rc != 0) {
         return ARM_DRIVER_ERROR_PARAMETER;
+    }
+
+    /* Check if the flash area to write the data was erased previously */
+    rc = is_flash_ready_to_write((const uint8_t*)start_addr, cnt);
+    if (rc != 0) {
+        return ARM_DRIVER_ERROR;
     }
 
     /* Flash interface just emulated over SRAM, use memcpy */
