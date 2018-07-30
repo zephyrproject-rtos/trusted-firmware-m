@@ -18,7 +18,6 @@ extern "C" {
 
 /* These definitions are used in symbols, only digits are permitted */
 #define CORE_TEST_ID_NS_THREAD          1001
-#define CORE_TEST_ID_NS_SVC             1002
 #define CORE_TEST_ID_CHECK_INIT         1003
 #define CORE_TEST_ID_RECURSION          1004
 #define CORE_TEST_ID_MEMORY_PERMISSIONS 1005
@@ -27,7 +26,6 @@ extern "C" {
 #define CORE_TEST_ID_SS_TO_SS           1008
 #define CORE_TEST_ID_SHARE_REDIRECTION  1009
 #define CORE_TEST_ID_SS_TO_SS_BUFFER    1010
-#define CORE_TEST_ID_TWO_SFN_ONE_SVC    1011
 #define CORE_TEST_ID_PERIPHERAL_ACCESS  1012
 #define CORE_TEST_ID_BLOCK              2001
 

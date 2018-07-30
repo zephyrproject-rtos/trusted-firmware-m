@@ -19,6 +19,9 @@ typedef void __attribute__((cmse_nonsecure_call)) (*nsfptr_t) (void);
 
 extern nsfptr_t ns_entry;
 
+/**
+ * \brief Signal that secure partition initialisation is finished
+ */
 void tfm_secure_api_init_done(void);
 
 /**

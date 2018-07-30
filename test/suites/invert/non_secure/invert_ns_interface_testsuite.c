@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -56,7 +56,7 @@ static void tfm_invert_test_1001(struct test_result_t *ret)
     int32_t args[] = {(int32_t)&res, (int32_t)in_ptr,
                       (int32_t)out_ptr, (int32_t)len};
 
-    err = tfm_core_test_svc(tfm_core_test_2_sfn_invert, args);
+    err = tfm_core_test_call(tfm_core_test_2_sfn_invert, args);
 
     if (err != TFM_SUCCESS) {
         TEST_FAIL("Call to secure service should be successful");
@@ -93,7 +93,7 @@ static void tfm_invert_test_1002(struct test_result_t *ret)
     int32_t args[] = {(int32_t)&res, (int32_t)in_ptr,
                                      (int32_t)out_ptr, (int32_t)len};
 
-    err = tfm_core_test_svc(tfm_core_test_2_sfn_invert, args);
+    err = tfm_core_test_call(tfm_core_test_2_sfn_invert, args);
 
     if (err == TFM_SUCCESS) {
         TEST_FAIL("Call to secure service should not be successful");

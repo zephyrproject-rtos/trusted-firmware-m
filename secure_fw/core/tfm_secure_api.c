@@ -38,7 +38,7 @@ extern void tfm_core_partition_return_svc(void);
  * to SPE
  */
 static int32_t tfm_secure_lock;
-static int32_t tfm_secure_api_init = 1;
+static int32_t tfm_secure_api_initializing = 1;
 
 static int32_t *prepare_partition_ctx(
             struct tfm_exc_stack_t *svc_ctx,
@@ -109,7 +109,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     partition_state = curr_part_data->partition_state;
     partition_flags = tfm_spm_partition_get_flags(partition_idx);
 
-    if ((tfm_secure_api_init) &&
+    if ((tfm_secure_api_initializing) &&
         (tfm_spm_partition_get_partition_id(caller_partition_idx)
             == TFM_SP_CORE_ID) &&
         (partition_state == SPM_PARTITION_STATE_UNINIT)) {
@@ -174,7 +174,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     /* In level one, only switch context and return from exception if in
      * handler mode
      */
-    if ((desc_ptr->ns_caller) || (tfm_secure_api_init)) {
+    if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing)) {
         /* Prepare the partition context, update stack ptr */
         psp = (uint32_t)prepare_partition_ctx(
                     svc_ctx, desc_ptr, (int32_t *)partition_psp);
@@ -229,7 +229,7 @@ static int32_t tfm_pop_lock(uint32_t *excReturn)
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
     /* Deconfigure completed partition environment */
     tfm_spm_partition_sandbox_deconfig(current_partition_idx);
-    if (tfm_secure_api_init) {
+    if (tfm_secure_api_initializing) {
         /* Restore privilege for thread mode during TF-M init. This is only
          * have to be done if the partition is not trusted.
          */
@@ -263,7 +263,7 @@ static int32_t tfm_pop_lock(uint32_t *excReturn)
 
 #if TFM_LVL == 1
     if (!(return_partition_flags & SPM_PART_FLAG_SECURE) ||
-        (tfm_secure_api_init)) {
+        (tfm_secure_api_initializing)) {
         /* In TFM level 1 context restore is only done when
          * returning to NS or after initialization
          */
@@ -342,7 +342,7 @@ static int32_t tfm_core_check_sfn_req_rules(
 
 void tfm_secure_api_init_done(void)
 {
-    tfm_secure_api_init = 0;
+    tfm_secure_api_initializing = 0;
 #if TFM_LVL != 1
     if (tfm_spm_partition_sandbox_config(TFM_SP_NON_SECURE_ID) != SPM_ERR_OK) {
         ERROR_MSG("Failed to configure sandbox for partition!");

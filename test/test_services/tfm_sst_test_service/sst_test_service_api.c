@@ -6,37 +6,39 @@
  */
 
 #include "sst_test_service_api.h"
+#include "sst_test_service_veneers.h"
+#include "tfm_id_mngr.h"
 
-#include "tfm_ns_svc.h"
-
-__attribute__ ((naked))
 enum psa_sst_err_t sst_test_service_setup(void)
 {
-    SVC(SVC_SST_TEST_SERVICE_SETUP);
-    __ASM("BX LR");
+    return sst_test_service_veneer_setup();
 }
 
-__attribute__ ((naked))
 enum psa_sst_err_t sst_test_service_dummy_encrypt(uint32_t key_uuid,
                                                   uint8_t *buf,
                                                   uint32_t buf_size)
 {
-    SVC(SVC_SST_TEST_SERVICE_DUMMY_ENCRYPT);
-    __ASM("BX LR");
+    int32_t client_id;
+
+    client_id = tfm_sst_get_cur_id();
+
+    return sst_test_service_veneer_dummy_encrypt(client_id, key_uuid, buf,
+                                                 buf_size);
 }
 
-__attribute__ ((naked))
 enum psa_sst_err_t sst_test_service_dummy_decrypt(uint32_t key_uuid,
                                                   uint8_t *buf,
                                                   uint32_t buf_size)
 {
-    SVC(SVC_SST_TEST_SERVICE_DUMMY_DECRYPT);
-    __ASM("BX LR");
+    int32_t client_id;
+
+    client_id = tfm_sst_get_cur_id();
+
+    return sst_test_service_veneer_dummy_decrypt(client_id, key_uuid, buf,
+                                                 buf_size);
 }
 
-__attribute__ ((naked))
 enum psa_sst_err_t sst_test_service_clean(void)
 {
-    SVC(SVC_SST_TEST_SERVICE_CLEAN);
-    __ASM("BX LR");
+    return sst_test_service_veneer_clean();
 }

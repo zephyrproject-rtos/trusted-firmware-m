@@ -25,7 +25,6 @@
 #ifdef CORE_TEST_INTERACTIVE
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_veneers.h"
-#include "tfm_ns_svc.h"
 
 #define TRY_SFN(fn, ...) \
     do { \
@@ -55,19 +54,19 @@
         } \
     } while(0)
 /**
- * \brief SVC_SECURE_DECREMENT_NS_LOCK_1
+ * \brief secure_decrement_ns_lock_1
  *
  */
-void svc_secure_decrement_ns_lock_1(void)
+void secure_decrement_ns_lock_1(void)
 {
     TRY_SFN(tfm_core_test_sfn, CORE_TEST_ID_BLOCK, 0x1, 0x1, 0x1);
 }
 
 /**
- * \brief SVC_SECURE_DECREMENT_NS_LOCK_2
+ * \brief secure_decrement_ns_lock_2
  *
  */
-void svc_secure_decrement_ns_lock_2(void)
+void secure_decrement_ns_lock_2(void)
 {
     TRY_SFN(tfm_core_test_sfn, CORE_TEST_ID_BLOCK, 0x2, 0x2, 0x2);
 }
@@ -130,24 +129,6 @@ static const osMutexAttr_t mattr_ns_lock = {
 };
 
 /**
- * \brief SVC dispatcher
- */
-__attribute__((always_inline)) __STATIC_INLINE
-void svc_dispatch(enum tfm_svc_num svc_num)
-{
-    switch (svc_num) {
-    case SVC_SECURE_DECREMENT_NS_LOCK_1:
-        SVC(SVC_SECURE_DECREMENT_NS_LOCK_1);
-        break;
-    case SVC_SECURE_DECREMENT_NS_LOCK_2:
-        SVC(SVC_SECURE_DECREMENT_NS_LOCK_2);
-        break;
-    default:
-        break;
-    }
-}
-
-/**
  * \brief TFM NS lock options
  *
  * \details Options used while acquiring the NS lock
@@ -161,12 +142,11 @@ struct tfm_ns_lock_options
 /**
  * \brief tfm_service_request
  *
- * \details This function is used to request a TFM
- *          service in handler mode, using SVC.
- *          Optionally uses the NS lock and specifies
- *          a timeout for obtaining the NS lock
+ * \details This function is used to request a TFM service in thread mode.
+ *          Optionally uses the NS lock and specifies a timeout for obtaining
+ *          the NS lock.
  */
-static void tfm_service_request(enum tfm_svc_num svc_num,
+static void tfm_service_request(void(*fn)(void),
                                 struct tfm_ns_lock_options *ns_lock_options_p)
 {
     osStatus_t result;
@@ -192,7 +172,7 @@ static void tfm_service_request(enum tfm_svc_num svc_num,
             if (!strcmp(osThreadGetName(osThreadGetId()),"seq_task")) {
                 osDelay(100U);
             }
-            svc_dispatch(svc_num);
+            fn();
             LOG_MSG_THREAD("NS Lock: releasing...");
             osMutexRelease(mutex_id);
         } else {
@@ -206,7 +186,7 @@ static void tfm_service_request(enum tfm_svc_num svc_num,
             result = osMutexAcquire(mutex_id,ns_lock_options_p->timeout);
             if (result == osOK) {
                 LOG_MSG_THREAD("NS Lock: acquired");
-                svc_dispatch(svc_num);
+                fn();
                 LOG_MSG_THREAD("NS Lock: releasing...");
                 osMutexRelease(mutex_id);
             } else if (result == osErrorTimeout) {
@@ -223,7 +203,7 @@ static void tfm_service_request(enum tfm_svc_num svc_num,
         if (!strcmp(osThreadGetName(osThreadGetId()),"pri_task")) {
             osDelay(100U);
         }
-        svc_dispatch(svc_num);
+        fn();
     }
 }
 
@@ -273,7 +253,7 @@ static void pri_task(void *argument)
     osDelay(100U);
 
     /* After wake up, try to get hold of the NS lock */
-    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_2,
+    tfm_service_request(secure_decrement_ns_lock_2,
                             (struct tfm_ns_lock_options *)argument);
 
     osThreadExit();
@@ -323,7 +303,7 @@ static void seq_task(void *argument)
     }
 
     /* Try to acquire the NS lock */
-    tfm_service_request(SVC_SECURE_DECREMENT_NS_LOCK_1, &ns_lock_opt);
+    tfm_service_request(secure_decrement_ns_lock_1, &ns_lock_opt);
 
     if (test_type == TEST_TYPE_1) {
         LOG_MSG("Scenario 1 - test finished\n");
