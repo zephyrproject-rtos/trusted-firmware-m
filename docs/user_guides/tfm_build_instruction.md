@@ -56,7 +56,8 @@ below.) The possible values are
     - ARMCLANG
     - GNUARM
 
-*Note* For all the applications we build the level 2 bootloader
+*Note* Follow [secure boot](./tfm_secure_boot.md) to build the binaries with or
+without BL2 bootloader.
 
 ### Regression Tests for the AN521 target platform
 The default option build doesn't include regression tests. Procedure for

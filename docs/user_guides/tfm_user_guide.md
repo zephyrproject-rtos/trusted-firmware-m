@@ -3,6 +3,8 @@ How to compile and run TF-M and example test application for CoreLink SSE-200
 subsystem on the MPS2 board and on the Fast Model(FVP).
 
 Follow [build instruction](./tfm_build_instruction.md) to build the binaries.
+Follow [secure boot](./tfm_secure_boot.md) to build the binaries with or without
+BL2 bootloader.
 
 ## Execute TF-M example and regression tests on MPS2 boards and FVP ##
 The BL2 bootloader and TF-M example application and tests run correctly on
@@ -15,13 +17,13 @@ Using FVP_MPS2_AEMv8M provided by DS-5 v5.27.1.
 *FVP reference guide can be found
 [here](https://developer.arm.com/docs/100966/latest)*
 
-#### Example application
+#### Example application and regression tests without BL2 bootloader
 Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 ```
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
 --parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080400 \
+--parameter cpu0.INITVTOR_S=0x10000000 \
 --parameter cpu0.semihosting-enable=0 \
 --parameter fvp_mps2.DISABLE_GATING=0 \
 --parameter fvp_mps2.telnetterminal0.start_telnet=1 \
@@ -30,38 +32,17 @@ Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
 --parameter fvp_mps2.telnetterminal0.quiet=0 \
 --parameter fvp_mps2.telnetterminal1.quiet=1 \
 --parameter fvp_mps2.telnetterminal2.quiet=1 \
---application cpu0=<build_dir>/install/outputs/fvp/tfm_ns.axf \
---application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf
+--application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf \
+--data cpu0=<build_dir>/install/outputs/fvp/tfm_ns.bin@0x00100000
 
 ```
-#### Regression tests
-Add `tfm_s.axf` and `tfm_ns.axf` to symbol files in Debug Configuration menu.
-```
-<DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M \
---parameter fvp_mps2.platform_type=2 \
---parameter cpu0.baseline=0 \
---parameter cpu0.INITVTOR_S=0x10080400 \
---parameter cpu0.semihosting-enable=0 \
---parameter fvp_mps2.DISABLE_GATING=0 \
---parameter fvp_mps2.telnetterminal0.start_telnet=1 \
---parameter fvp_mps2.telnetterminal1.start_telnet=0 \
---parameter fvp_mps2.telnetterminal2.start_telnet=0 \
---parameter fvp_mps2.telnetterminal0.quiet=0 \
---parameter fvp_mps2.telnetterminal1.quiet=1 \
---parameter fvp_mps2.telnetterminal2.quiet=1 \
---application cpu0=<build_dir>/install/outputs/fvp/tfm_ns.axf \
---application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf
-```
-#### Running example application and regression test with BL2 bootloader
+
+#### Example application and regression tests with BL2 bootloader
 To test TF-M with bootloader, one must apply the following changes:
 
 * Add `mcuboot.axf` to symbol files in DS-5 in Debug Configuration menu.
-* Change the value of `cpu0.INITVTOR_S` parameter and the last two lines of the
-previous command for this:
+* Replace the last two lines of the previous command with this:
 ```
-...
---parameter cpu0.INITVTOR_S=0x10000000 \
-...
 --application cpu0=<build_dir>/install/outputs/fvp/mcuboot.axf \
 --data cpu0=<build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10080000
 ```
@@ -90,7 +71,7 @@ The MPS2 board tested is HBI0263C referred also as MPS2+.
 
 #### Example application
 
-1. Copy `mcuboot.axf` and `tfm_sign.bin` files from
+1. Copy `mcuboot.bin` and `tfm_sign.bin` files from
    `<build_dir>/install/outputs/AN521/` to `<MPS2 device name>/SOFTWARE/`
 2. Open `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
 3. Update the `AN521/images.txt` file as follows:
@@ -98,8 +79,8 @@ The MPS2 board tested is HBI0263C referred also as MPS2+.
 TITLE: Versatile Express Images Configuration File
 [IMAGES]
 TOTALIMAGES: 2                     ;Number of Images (Max: 32)
-IMAGE0ADDRESS: 0x00000000
-IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+IMAGE0ADDRESS: 0x10000000
+IMAGE0FILE: \Software\mcuboot.bin  ; BL2 bootloader
 IMAGE1ADDRESS: 0x10080000
 IMAGE1FILE: \Software\tfm_sign.bin ; TF-M example application binary blob
 ```
@@ -143,10 +124,12 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
   Description: 'Create interface'
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2002'
-  Description: 'Get handle interface'
+  Description: 'Get handle interface (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2003'
-  Description: 'Get attributes interface'
+  Description: 'Get handle with null handle pointer (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2004'
   Description: 'Write interface'
@@ -158,6 +141,60 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 ```
 
 Note: SST reliability tests take a few minutes to run on the MPS2.
+
+#### Example application without BL2 bootloader
+1. Copy `tfm_s.bin` and `tfm_ns.bin` files from
+   `<build_dir>/install/outputs/AN521/` to `<MPS2 device name>/SOFTWARE/`
+2. Open `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
+3. Update the `AN521/images.txt` file as follows:
+```
+TITLE: Versatile Express Images Configuration File
+[IMAGES]
+TOTALIMAGES: 2                   ;Number of Images (Max: 32)
+IMAGE0ADDRESS: 0x10000000
+IMAGE0FILE: \Software\tfm_s.bin  ; Secure code
+IMAGE1ADDRESS: 0x00100000
+IMAGE1FILE: \Software\tfm_ns.bin ; Non-secure code
+```
+4. Close `<MPS2 device name>/MB/HBI0263C/AN521/images.txt`
+5. Unmount/eject the `<MPS2 device name>` unit
+6. Reset the board to execute the TF-M example application
+7. After completing the procedure you should be able to visualize on the serial
+   port (baud 115200 8n1) the following messages:
+
+```
+[Sec Thread] Secure image initializing!
+```
+
+#### Regression tests without BL2 bootloader
+After completing the procedure you should be able to visualize on the serial
+port (baud 115200 8n1) the following messages:
+
+```
+[Sec Thread] Secure image initializing!
+
+#### Execute test suites for the secure storage service ####
+Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
+
+> Executing 'TFM_SST_TEST_2001'
+  Description: 'Create interface'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2002'
+  Description: 'Get handle interface (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2003'
+  Description: 'Get handle with null handle pointer (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2004'
+  Description: 'Write interface'
+  TEST PASSED!
+> Executing 'TFM_SST_TEST_2005'
+  Description: 'Read interface'
+....
+
+```
 
 ## Execute TF-M example and regression tests on Musca-A1 test chip board ##
 
@@ -207,10 +244,12 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
   Description: 'Create interface'
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2002'
-  Description: 'Get handle interface'
+  Description: 'Get handle interface (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2003'
-  Description: 'Get handle with null handle pointer'
+  Description: 'Get handle with null handle pointer (DEPRECATED)'
+This test is DEPRECATED and the test execution was SKIPPED
   TEST PASSED!
 > Executing 'TFM_SST_TEST_2004'
   Description: 'Get attributes interface'
