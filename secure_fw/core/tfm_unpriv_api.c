@@ -33,19 +33,78 @@ void jump_to_ns_code(void)
     ns_entry();
 }
 
-__attribute__((naked)) void tfm_core_partition_return_svc(void)
+#if defined(__ARM_ARCH_8M_MAIN__)
+__attribute__((naked)) int32_t tfm_core_sfn_request(
+                                                 struct tfm_sfn_req_s *desc_ptr)
 {
-    SVC(TFM_SVC_SFN_RETURN);
+    __ASM(
+          "PUSH   {r4-r12, lr}\n"
+          "SVC    %[SVC_REQ]\n"
+          "MOV    r4, #0\n"
+          "MOV    r5, #0\n"
+          "MOV    r6, #0\n"
+          "MOV    r7, #0\n"
+          "MOV    r8, #0\n"
+          "MOV    r9, #0\n"
+          "MOV    r10, #0\n"
+          "MOV    r11, #0\n"
+          "BLX    lr\n"
+          "SVC    %[SVC_RET]\n"
+          "POP    {r4-r12, pc}\n"
+          : : [SVC_REQ] "I" (TFM_SVC_SFN_REQUEST)
+            , [SVC_RET] "I" (TFM_SVC_SFN_RETURN)
+          : "r0");
 }
+#elif defined(__ARM_ARCH_8M_BASE__)
+__attribute__((naked)) int32_t tfm_core_sfn_request(
+                                                 struct tfm_sfn_req_s *desc_ptr)
+{
+    __ASM(
+          ".syntax unified\n"
+          "PUSH   {lr}\n"
+          "PUSH   {r4-r7}\n"
+          "MOV    r4, r8\n"
+          "MOV    r5, r9\n"
+          "MOV    r6, r10\n"
+          "MOV    r7, r11\n"
+          "PUSH   {r4-r7}\n"
+          "MOV    r4, r12\n"
+          "PUSH   {r4}\n"
+          "SVC    %[SVC_REQ]\n"
+          "MOVS   r4, #0\n"
+          "MOV    r5, r4\n"
+          "MOV    r6, r4\n"
+          "MOV    r7, r4\n"
+          "MOV    r8, r4\n"
+          "MOV    r9, r4\n"
+          "MOV    r10, r4\n"
+          "MOV    r11, r4\n"
+          "BLX    lr\n"
+          "SVC    %[SVC_RET]\n"
+          "POP    {r4}\n"
+          "MOV    r12, r4\n"
+          "POP    {r4-r7}\n"
+          "MOV    r8, r4\n"
+          "MOV    r9, r5\n"
+          "MOV    r10, r6\n"
+          "MOV    r11, r7\n"
+          "POP    {r4-r7}\n"
+          "POP    {pc}\n"
+          : : [SVC_REQ] "I" (TFM_SVC_SFN_REQUEST)
+            , [SVC_RET] "I" (TFM_SVC_SFN_RETURN)
+          : "r0");
+}
+#else
+#error "Unsupported ARM Architecture."
+#endif
 
 __attribute__((naked))
 int32_t tfm_core_memory_permission_check(
             void *ptr, uint32_t len, int32_t access)
 {
     __ASM(
-        "PUSH   {r7, lr}\n"
-        "SVC %0\n"
-        "POP    {r7, pc}\n"
+        "SVC    %0\n"
+        "BX     lr\n"
         : : "I" (TFM_SVC_MEMORY_CHECK));
 }
 
@@ -53,9 +112,8 @@ __attribute__((naked))
 int32_t tfm_core_validate_secure_caller(void)
 {
     __ASM(
-        "PUSH   {r7, lr}\n"
-        "SVC %0\n"
-        "POP    {r7, pc}\n"
+        "SVC    %0\n"
+        "BX     lr\n"
         : : "I" (TFM_SVC_VALIDATE_SECURE_CALLER));
 }
 
@@ -63,8 +121,7 @@ __attribute__((naked))
 int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share)
 {
     __ASM(
-        "PUSH   {r7, lr}\n"
-        "SVC %0\n"
-        "POP    {r7, pc}\n"
+        "SVC    %0\n"
+        "BX     lr\n"
         : : "I" (TFM_SVC_SET_SHARE_AREA));
 }

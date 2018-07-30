@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,6 +23,17 @@
 #define EXC_NUM_SVCALL          (11)
 #define EXC_NUM_PENDSV          (14)
 #define EXC_NUM_SYSTICK         (15)
+
+struct tfm_exc_stack_t {
+    uint32_t R0;
+    uint32_t R1;
+    uint32_t R2;
+    uint32_t R3;
+    uint32_t R12;
+    uint32_t LR;
+    uint32_t RetAddr;
+    uint32_t XPSR;
+};
 
 #ifdef TFM_CORE_DEBUG
 #define LOG_MSG_HDLR(MSG) printf("[Sec Handler] %s\r\n", MSG)

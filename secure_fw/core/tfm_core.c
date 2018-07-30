@@ -9,6 +9,7 @@
 #include "region_defs.h"
 #include "tfm_core.h"
 #include "tfm_internal.h"
+#include "tfm_api.h"
 #include "platform/include/tfm_spm_hal.h"
 #include "uart_stdout.h"
 #include "secure_utilities.h"
@@ -147,6 +148,24 @@ int32_t tfm_core_init(void)
     return 0;
 }
 
+static int32_t tfm_core_set_secure_exception_priorities(void)
+{
+    uint32_t VECTKEY;
+    SCB_Type *scb = SCB;
+    uint32_t AIRCR;
+
+    /* Set PRIS flag is AIRCR */
+    AIRCR = scb->AIRCR;
+    VECTKEY = (~AIRCR & SCB_AIRCR_VECTKEYSTAT_Msk);
+    scb->AIRCR = SCB_AIRCR_PRIS_Msk |
+                 VECTKEY |
+                 (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
+
+    /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
+
+    return TFM_SUCCESS;
+}
+
 int main(void)
 {
     tfm_core_init();
@@ -178,6 +197,11 @@ int main(void)
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
     tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
                               SPM_PARTITION_STATE_RUNNING);
+
+    /* Prioritise secure exceptions to avoid NS being able to pre-empt secure
+     * SVC or SecureFault
+     */
+    tfm_core_set_secure_exception_priorities();
 
     jump_to_ns_code();
 }

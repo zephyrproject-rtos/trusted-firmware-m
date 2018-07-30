@@ -92,8 +92,7 @@ enum test_type {
     TEST_TYPE_6      /*!< Like TEST_TYPE_2, but the high priority task has now a
                           timeout to acquire the NS lock. The timeout will
                           expire only if TFM Core is built with the
-                          de-prioritization disabled (i.e. TFM_API_SVCCLEAR
-                          defined) */
+                          de-prioritization disabled */
 };
 
 static const osThreadAttr_t tattr_seq = {

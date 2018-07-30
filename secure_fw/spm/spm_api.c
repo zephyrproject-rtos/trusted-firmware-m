@@ -128,7 +128,7 @@ enum spm_err_t tfm_spm_db_init(void)
 enum spm_err_t tfm_spm_partition_init(void)
 {
     struct spm_partition_desc_t *part;
-    struct tfm_sfn_req_s desc, *desc_ptr = &desc;
+    struct tfm_sfn_req_s desc;
     int32_t args[4] = {0};
     int32_t fail_cnt = 0;
     uint32_t idx;
@@ -142,24 +142,18 @@ enum spm_err_t tfm_spm_partition_init(void)
             tfm_spm_partition_set_caller_partition_idx(idx,
                                                      SPM_INVALID_PARTITION_IDX);
         } else {
-            int32_t ret;
+            int32_t res;
 
             desc.args = args;
             desc.exc_num = EXC_NUM_THREAD_MODE;
             desc.ns_caller = 0;
             desc.sfn = (sfn_t)part->static_data.partition_init;
             desc.sp_id = part->static_data.partition_id;
-            __ASM("MOV r0, %1\n"
-                  "SVC %2\n"
-                  "MOV %0, r0\n"
-                  : "=r" (ret)
-                  : "r" (desc_ptr), "I" (TFM_SVC_SFN_REQUEST)
-                  : "r0");
-
-            if (ret == TFM_SUCCESS) {
+            res = tfm_core_sfn_request(&desc);
+            if (res == TFM_SUCCESS) {
                 tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             } else {
-                tfm_spm_partition_err_handler(part, TFM_INIT_FAILURE, ret);
+                tfm_spm_partition_err_handler(part, TFM_INIT_FAILURE, res);
                 fail_cnt++;
             }
         }
@@ -221,6 +215,15 @@ void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr)
 }
 #endif
 
+void tfm_spm_partition_store_context(uint32_t partition_idx,
+        uint32_t stack_ptr, uint32_t lr)
+{
+    g_spm_partition_db.partitions[partition_idx].
+            runtime_data.stack_ptr = stack_ptr;
+    g_spm_partition_db.partitions[partition_idx].
+            runtime_data.lr = lr;
+}
+
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data.
@@ -255,25 +258,6 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
             caller_partition_idx = caller_partition_idx;
 }
 
-void tfm_spm_partition_set_orig_psp(uint32_t partition_idx,
-                                    uint32_t orig_psp)
-{
-    g_spm_partition_db.partitions[partition_idx].runtime_data.orig_psp =
-            orig_psp;
-}
-
-void tfm_spm_partition_set_orig_psplim(uint32_t partition_idx,
-                                       uint32_t orig_psplim)
-{
-    g_spm_partition_db.partitions[partition_idx].runtime_data.orig_psplim =
-            orig_psplim;
-}
-
-void tfm_spm_partition_set_orig_lr(uint32_t partition_idx, uint32_t orig_lr)
-{
-    g_spm_partition_db.partitions[partition_idx].runtime_data.orig_lr = orig_lr;
-}
-
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share)
 {
@@ -300,8 +284,5 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
     struct spm_partition_desc_t *partition =
             &(g_spm_partition_db.partitions[partition_idx]);
     partition->runtime_data.caller_partition_idx = SPM_INVALID_PARTITION_IDX;
-    partition->runtime_data.orig_psp = 0;
-    partition->runtime_data.orig_psplim = 0;
-    partition->runtime_data.orig_lr = 0;
     partition->runtime_data.share = 0;
 }
