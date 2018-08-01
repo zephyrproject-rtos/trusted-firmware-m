@@ -1,0 +1,217 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include <stdio.h>
+#include "secure_utilities.h"
+
+#ifndef TFM_MAX_NS_THREAD_COUNT
+#define TFM_MAX_NS_THREAD_COUNT 8
+#endif
+#define INVALID_CLIENT_ID 0
+
+typedef uint32_t TZ_ModuleId_t;
+typedef uint32_t TZ_MemoryId_t;
+
+static struct ns_client_list_t {
+    int32_t ns_client_id;
+    int32_t next_free_index;
+} NsClientIdList[TFM_MAX_NS_THREAD_COUNT];
+
+static int32_t next_ns_client_id = -1;
+static int32_t free_index = 0U;
+static int32_t active_ns_client = INVALID_CLIENT_ID;
+
+void tfm_nspm_configure_clients(void)
+{
+    int32_t i;
+
+    /* Default to one NS client */
+    free_index = 1;
+    NsClientIdList[0].ns_client_id = next_ns_client_id--;
+    for (i = 1; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
+        NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
+    }
+}
+
+/* TF-M implementation of the CMSIS TZ RTOS thread context management API */
+
+/// Initialize secure context memory system
+/// \return execution status (1: success, 0: error)
+/* This veneer is TF-M internal, not a secure service */
+__attribute__((cmse_nonsecure_entry))
+uint32_t TZ_InitContextSystem_S(void)
+{
+    int32_t i;
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return 0U;
+    }
+
+    /* NS RTOS supports TZ context management, override defaults */
+    LOG_MSG("NS RTOS initialized TZ RTOS context management");
+    for (i = 0; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
+        NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
+        NsClientIdList[i].next_free_index = i + 1;
+    }
+
+    /* Terminate list */
+    NsClientIdList[i - 1].next_free_index = -1;
+    free_index = 0;
+    /* Success */
+    return 1U;
+}
+
+
+/// Allocate context memory for calling secure software modules in TrustZone
+/// \param[in]  module   identifies software modules called from non-secure mode
+/// \return value != 0 id TrustZone memory slot identifier
+/// \return value 0    no memory available or internal error
+/* This veneer is TF-M internal, not a secure service */
+__attribute__((cmse_nonsecure_entry))
+TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
+{
+    TZ_MemoryId_t tz_id;
+    (void) module; /* Currently unused */
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return 0U;
+    }
+
+    if (free_index < 0) {
+        /* No more free slots */
+        return 0U;
+    }
+
+    /* TZ_MemoryId_t must be a positive integer */
+    tz_id = free_index + 1;
+    NsClientIdList[free_index].ns_client_id = next_ns_client_id--;
+    printf("TZ_AllocModuleContext_S called, returning id %d\r\n",
+        NsClientIdList[free_index].ns_client_id);
+    free_index = NsClientIdList[free_index].next_free_index;
+
+    return tz_id;
+}
+
+
+/// Free context memory that was previously allocated with \ref TZ_AllocModuleContext_S
+/// \param[in]  id  TrustZone memory slot identifier
+/// \return execution status (1: success, 0: error)
+/* This veneer is TF-M internal, not a secure service */
+__attribute__((cmse_nonsecure_entry))
+uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
+{
+    uint32_t index;
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return 0U;
+    }
+
+    if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
+        /* Invalid TZ_MemoryId_t */
+        return 0U;
+    }
+
+    index = id - 1;
+
+    if (NsClientIdList[index].ns_client_id == INVALID_CLIENT_ID) {
+        /* Non-existent client */
+        return 0U;
+    }
+
+    printf("TZ_FreeModuleContext_S called for id %d\r\n",
+        NsClientIdList[index].ns_client_id);
+    if (active_ns_client == NsClientIdList[index].ns_client_id) {
+        printf("Freeing active NS client, NS inactive\r\n");
+        active_ns_client = INVALID_CLIENT_ID;
+    }
+    NsClientIdList[index].ns_client_id = INVALID_CLIENT_ID;
+    NsClientIdList[index].next_free_index = free_index;
+
+    free_index = index;
+
+    return 1U;    // Success
+}
+
+
+/// Load secure context (called on RTOS thread context switch)
+/// \param[in]  id  TrustZone memory slot identifier
+/// \return execution status (1: success, 0: error)
+/* This veneer is TF-M internal, not a secure service */
+__attribute__((cmse_nonsecure_entry))
+uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
+{
+    uint32_t index;
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return 0U;
+    }
+
+    LOG_MSG("TZ_LoadContext_S called");
+    if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
+        /* Invalid TZ_MemoryId_t */
+        return 0U;
+    }
+
+    index = id - 1;
+
+    if (NsClientIdList[index].ns_client_id == INVALID_CLIENT_ID) {
+        /* Non-existent client */
+        return 0U;
+    }
+
+    active_ns_client = NsClientIdList[index].ns_client_id;
+    printf("TZ_LoadContext_S called for id %d\r\n",
+        NsClientIdList[index].ns_client_id);
+
+    return 1U;    // Success
+}
+
+
+/// Store secure context (called on RTOS thread context switch)
+/// \param[in]  id  TrustZone memory slot identifier
+/// \return execution status (1: success, 0: error)
+/* This veneer is TF-M internal, not a secure service */
+__attribute__((cmse_nonsecure_entry))
+uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
+{
+    uint32_t index;
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return 0U;
+    }
+
+    LOG_MSG("TZ_StoreContext_S called");
+    /* id corresponds to context being swapped out on NS side */
+    if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
+        /* Invalid TZ_MemoryId_t */
+        return 0U;
+    }
+
+    index = id - 1;
+
+    if (NsClientIdList[index].ns_client_id == INVALID_CLIENT_ID) {
+        /* Non-existent client */
+        return 0U;
+    }
+
+    if (active_ns_client != NsClientIdList[index].ns_client_id) {
+        printf("TZ_StoreContext_S called for id %d, active id: %d\r\n",
+            NsClientIdList[index].ns_client_id, active_ns_client);
+        return 0U;
+    }
+
+    printf("TZ_StoreContext_S called for id %d\r\n",
+        NsClientIdList[index].ns_client_id);
+    active_ns_client = INVALID_CLIENT_ID;
+
+    return 1U;    // Success
+}

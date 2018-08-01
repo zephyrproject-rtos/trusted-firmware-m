@@ -34,6 +34,7 @@ set (SS_CORE_C_SRC "${SS_CORE_DIR}/tfm_core.c"
 		"${SS_CORE_DIR}/tfm_handler.c"
 		"${SS_CORE_DIR}/tfm_secure_api.c"
 		"${SS_CORE_DIR}/tfm_unpriv_api.c"
+		"${SS_CORE_DIR}/tfm_nspm.c"
 	)
 
 #Append all our source files to global lists.

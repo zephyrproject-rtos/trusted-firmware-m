@@ -66,6 +66,9 @@ uint32_t get_partition_idx(uint32_t partition_id)
     return SPM_INVALID_PARTITION_IDX;
 }
 
+/* FixMe: this should be in a header */
+extern void tfm_nspm_configure_clients(void);
+
 enum spm_err_t tfm_spm_db_init(void)
 {
     struct spm_partition_desc_t *part_ptr;
@@ -103,6 +106,7 @@ enum spm_err_t tfm_spm_db_init(void)
 #endif
 
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
+    tfm_nspm_configure_clients();
     ++g_spm_partition_db.partition_count;
 
     /* For the TF-M core environment itself */

@@ -41,7 +41,6 @@ endif ()
 set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
-	"${APP_DIR}/ext/tz_context.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_rtx.c"
 	"${INTERFACE_DIR}/src/tfm_sst_api.c"
