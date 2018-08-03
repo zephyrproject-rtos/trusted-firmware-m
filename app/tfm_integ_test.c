@@ -13,6 +13,7 @@
 #include "cmsis.h"
 #include "tfm_api.h"
 #include "cmsis_os2.h"
+#include "tfm_nspm_api.h"
 
 #include "tfm_integ_test.h"
 #include "test/framework/test_framework_integ_test.h"
@@ -218,6 +219,8 @@ static void mid_task(void *argument)
     osThreadState_t thread_pri_state;
     uint32_t idx;
 
+    tfm_nspm_register_client_id();
+
     thread_id_pri = *((osThreadId_t *)argument);
 
     /* go to sleep */
@@ -249,6 +252,8 @@ static void mid_task(void *argument)
 __attribute__((noreturn))
 static void pri_task(void *argument)
 {
+    tfm_nspm_register_client_id();
+
     /* go to sleep */
     osDelay(100U);
 
@@ -274,6 +279,8 @@ static void seq_task(void *argument)
                                   {.use_ns_lock=true, .timeout=osWaitForever};
     struct tfm_ns_lock_options ns_lock_opt_pri =
                                   {.use_ns_lock=true, .timeout=osWaitForever};
+
+    tfm_nspm_register_client_id();
 
     test_type = *((enum test_type *)argument);
 

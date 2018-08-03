@@ -13,6 +13,7 @@
 #include "tfm_api.h"
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
+#include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/test_framework_integ_test.h"
@@ -23,6 +24,29 @@
 
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
+
+/**
+ * \brief Modified table template for user defined SVC functions
+ *
+ * \details RTX has a weak definition of osRtxUserSVC, which
+ *          is overridden here
+ */
+extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
+       void * const osRtxUserSVC[1+USER_SVC_COUNT] = {
+  (void *)USER_SVC_COUNT,
+
+#define X(SVC_ENUM, SVC_HANDLER) (void*)SVC_HANDLER,
+
+    /* SVC API for Services */
+    LIST_SVC_NSPM
+
+#undef X
+
+/*
+ * (void *)user_function1,
+ *  ...
+ */
+};
 
 /* Struct FILE is implemented in stdio.h. Used to redirect printf to
  * NS_DRIVER_STDIO

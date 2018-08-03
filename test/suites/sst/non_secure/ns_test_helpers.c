@@ -9,6 +9,8 @@
 
 #include "os_wrapper.h"
 
+#include "tfm_nspm_api.h"
+
 #define SST_TEST_TASK_STACK_SIZE 2048
 
 struct test_task_t {
@@ -27,6 +29,8 @@ static uint32_t test_semaphore;
 static void test_task_runner(void *arg)
 {
     struct test_task_t *test = arg;
+
+    tfm_nspm_register_client_id();
 
     /* Call the test function */
     test->func(test->ret);
