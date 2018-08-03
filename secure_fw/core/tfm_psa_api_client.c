@@ -18,16 +18,9 @@
 extern int32_t tfm_secure_lock;
 
 __attribute__ ((always_inline)) __STATIC_INLINE
-int32_t tfm_psa_veneer_sanity_check(void)
+int32_t tfm_psa_veneer_sanity_check(struct tfm_sfn_req_s *desc_ptr)
 {
-    int32_t ns_caller = cmse_nonsecure_caller();
-    uint32_t exc_num = __get_active_exc_num();
-
-    if (exc_num != EXC_NUM_SVCALL) {
-        return TFM_ERROR_INVALID_EXC_MODE;
-    }
-
-    if (ns_caller) {
+    if (desc_ptr->ns_caller) {
         if (tfm_secure_lock != 0) {
             /* Secure domain is already locked!
              * FixMe: Decide if this is a fault or permitted in case of PSA
@@ -46,25 +39,56 @@ int32_t tfm_psa_veneer_sanity_check(void)
 
 /* Veneer implementation */
 
+#define TFM_CORE_NS_IPC_REQUEST_VENEER(fn, a, b, c, d) \
+            return tfm_core_ns_ipc_request(fn, (int32_t)a, (int32_t)b, \
+                (int32_t)c, (int32_t)d)
+
+__attribute__ ((always_inline)) __STATIC_INLINE
+int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
+                                int32_t arg3, int32_t arg4)
+{
+    int32_t args[4] = {arg1, arg2, arg3, arg4};
+    struct tfm_sfn_req_s desc, *desc_ptr = &desc;
+    int32_t res;
+
+    desc.sfn = fn;
+    desc.args = args;
+    desc.ns_caller = cmse_nonsecure_caller();
+
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE)
+    {
+        /* FIXME: Proper error handling to be implemented */
+        return TFM_ERROR_INVALID_EXC_MODE;
+    } else {
+        __ASM("MOV r0, %1\n"
+              "SVC %2\n"
+              "MOV %0, r0\n"
+              : "=r" (res)
+              : "r" (desc_ptr), "I" (TFM_SVC_IPC_REQUEST)
+              : "r0");
+        return res;
+    }
+}
+
 /* FixMe: these functions need to have different attributes compared to those
  * legacy veneers which may be called by secure partitions.
  * They won't call legacy SFN but instead will be handlers for TF-M
  */
 
-__tfm_secure_gateway_attributes__
-uint32_t tfm_psa_version_veneer(uint32_t sid)
+uint32_t tfm_psa_version_handler(uint32_t sid)
 {
     /* perform sanity check */
-    /* FixMe: pattern should follow guides on tfm core veneer return values */
-    if(tfm_psa_veneer_sanity_check() != TFM_SUCCESS) {
-        return PSA_VERSION_NONE;
-    }
     /* return version number registered in manifest for given SID */
     return PSA_VERSION_NONE;
 }
 
 __tfm_secure_gateway_attributes__
-psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
+uint32_t tfm_psa_version_veneer(uint32_t sid)
+{
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_version_handler, sid, 0, 0, 0);
+}
+
+psa_handle_t tfm_psa_connect_handler(uint32_t sid, uint32_t minor_version)
 {
     /* perform sanity check */
     /* decide whether a connection can be established to a given SID.
@@ -86,7 +110,13 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
 }
 
 __tfm_secure_gateway_attributes__
-psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
+{
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_connect_handler, sid, minor_version,
+                                   0, 0);
+}
+
+psa_error_t tfm_psa_call_handler(psa_handle_t handle,
                     const psa_invec *in_vecs,
                     const psa_invec *out_vecs)
 {
@@ -105,7 +135,15 @@ psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
 }
 
 __tfm_secure_gateway_attributes__
-psa_error_t tfm_psa_close_veneer(psa_handle_t handle)
+psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
+                    const psa_invec *in_vecs,
+                    const psa_invec *out_vecs)
+{
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_call_handler, handle, in_vecs,
+                                   out_vecs, 0);
+}
+
+psa_error_t tfm_psa_close_handler(psa_handle_t handle)
 {
     /* perform sanity check */
     /* Close connection referenced by handle */
@@ -115,4 +153,32 @@ psa_error_t tfm_psa_close_veneer(psa_handle_t handle)
         return TFM_ERROR_GENERIC;
     tfm_thread_schedule();
     return TFM_SUCCESS;
+}
+
+__tfm_secure_gateway_attributes__
+psa_error_t tfm_psa_close_veneer(psa_handle_t handle)
+{
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_close_handler, handle, 0, 0, 0);
+}
+
+void tfm_psa_ipc_request_handler(uint32_t svc_ctx[])
+{
+    uint32_t *r0_ptr = svc_ctx;
+
+    /* The only argument to the SVC call is stored in the stacked r0 */
+    struct tfm_sfn_req_s *desc_ptr = (struct tfm_sfn_req_s *) *r0_ptr;
+
+    if(tfm_psa_veneer_sanity_check(desc_ptr) != TFM_SUCCESS) {
+        /* FixMe: consider error handling - this may be critical error */
+        *r0_ptr = TFM_ERROR_INVALID_PARAMETER;
+        return;
+    }
+
+    /* Store SVC return value in stacked r0 */
+    *r0_ptr = desc_ptr->sfn(desc_ptr->args[0],
+                            desc_ptr->args[1],
+                            desc_ptr->args[2],
+                            desc_ptr->args[3]);
+
+    return;
 }

@@ -21,6 +21,9 @@
  * buffer area
  */
 extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
+#ifdef TFM_PSA_API
+extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
+#endif
 
 struct tfm_fault_context_s {
     uint32_t R0;
@@ -171,6 +174,11 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
     case TFM_SVC_SET_SHARE_AREA:
         tfm_core_set_buffer_area_handler(svc_args);
         break;
+#ifdef TFM_PSA_API
+    case TFM_SVC_IPC_REQUEST:
+        tfm_psa_ipc_request_handler(svc_args);
+        break;
+#endif
     case TFM_SVC_PRINT:
         printf("\e[1;34m[Sec Thread] %s\e[0m\r\n", (char *)svc_args[0]);
         break;

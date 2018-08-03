@@ -35,6 +35,10 @@ psa_error_t psa_call(psa_handle_t handle,
                      const psa_outvec *out_vec,
                      size_t out_len)
 {
+    /* FixMe: sanity check can be added to offload some NS thread checks from
+     * TFM secure API
+     */
+
     /* Due to v8M restrictions, TF-M NS API needs to add another layer of
      * serialization in order for NS to pass arguments to S
      */
