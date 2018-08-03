@@ -7,11 +7,17 @@
 
 #include <stdio.h>
 #include "secure_utilities.h"
+#include "tfm_api.h"
 
 #ifndef TFM_MAX_NS_THREAD_COUNT
 #define TFM_MAX_NS_THREAD_COUNT 8
 #endif
 #define INVALID_CLIENT_ID 0
+
+#define CLIENT_ID_RANGE_START ((int32_t)-1)
+
+#define INVALID_NS_CLIENT_IDX (-1)
+#define DEFAULT_NS_CLIENT_IDX   0
 
 typedef uint32_t TZ_ModuleId_t;
 typedef uint32_t TZ_MemoryId_t;
@@ -21,9 +27,19 @@ static struct ns_client_list_t {
     int32_t next_free_index;
 } NsClientIdList[TFM_MAX_NS_THREAD_COUNT];
 
-static int32_t next_ns_client_id = -1;
 static int32_t free_index = 0U;
-static int32_t active_ns_client = INVALID_CLIENT_ID;
+static int32_t active_ns_client_idx = INVALID_NS_CLIENT_IDX;
+
+static int get_next_ns_client_id()
+{
+    static int32_t next_ns_client_id = CLIENT_ID_RANGE_START;
+
+    if (next_ns_client_id > 0)
+    {
+        next_ns_client_id = CLIENT_ID_RANGE_START;
+    }
+    return next_ns_client_id--;
+}
 
 void tfm_nspm_configure_clients(void)
 {
@@ -31,9 +47,20 @@ void tfm_nspm_configure_clients(void)
 
     /* Default to one NS client */
     free_index = 1;
-    NsClientIdList[0].ns_client_id = next_ns_client_id--;
+    NsClientIdList[0].ns_client_id = get_next_ns_client_id();
     for (i = 1; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
         NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
+    }
+    active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
+}
+
+int32_t tfm_nspm_get_current_client_id()
+{
+    if (active_ns_client_idx == INVALID_NS_CLIENT_IDX)
+    {
+        return 0;
+    } else {
+        return NsClientIdList[active_ns_client_idx].ns_client_id;
     }
 }
 
@@ -53,15 +80,16 @@ uint32_t TZ_InitContextSystem_S(void)
     }
 
     /* NS RTOS supports TZ context management, override defaults */
+#ifdef PRINT_NSPM_DEBUG
     LOG_MSG("NS RTOS initialized TZ RTOS context management");
-    for (i = 0; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
+#endif /* PRINT_NSPM_DEBUG */
+    for (i = 1; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
         NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
         NsClientIdList[i].next_free_index = i + 1;
     }
 
     /* Terminate list */
-    NsClientIdList[i - 1].next_free_index = -1;
-    free_index = 0;
+    NsClientIdList[i - 1].next_free_index = INVALID_NS_CLIENT_IDX;
     /* Success */
     return 1U;
 }
@@ -90,9 +118,11 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 
     /* TZ_MemoryId_t must be a positive integer */
     tz_id = free_index + 1;
-    NsClientIdList[free_index].ns_client_id = next_ns_client_id--;
+    NsClientIdList[free_index].ns_client_id = get_next_ns_client_id();
+#ifdef PRINT_NSPM_DEBUG
     printf("TZ_AllocModuleContext_S called, returning id %d\r\n",
         NsClientIdList[free_index].ns_client_id);
+#endif /* PRINT_NSPM_DEBUG */
     free_index = NsClientIdList[free_index].next_free_index;
 
     return tz_id;
@@ -125,11 +155,15 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
+#ifdef PRINT_NSPM_DEBUG
     printf("TZ_FreeModuleContext_S called for id %d\r\n",
         NsClientIdList[index].ns_client_id);
-    if (active_ns_client == NsClientIdList[index].ns_client_id) {
+#endif /* PRINT_NSPM_DEBUG */
+    if (active_ns_client_idx == index) {
+#ifdef PRINT_NSPM_DEBUG
         printf("Freeing active NS client, NS inactive\r\n");
-        active_ns_client = INVALID_CLIENT_ID;
+#endif /* PRINT_NSPM_DEBUG */
+        active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
     }
     NsClientIdList[index].ns_client_id = INVALID_CLIENT_ID;
     NsClientIdList[index].next_free_index = free_index;
@@ -154,7 +188,9 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
+#ifdef PRINT_NSPM_DEBUG
     LOG_MSG("TZ_LoadContext_S called");
+#endif /* PRINT_NSPM_DEBUG */
     if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
         /* Invalid TZ_MemoryId_t */
         return 0U;
@@ -167,9 +203,11 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
-    active_ns_client = NsClientIdList[index].ns_client_id;
+    active_ns_client_idx = index;
+#ifdef PRINT_NSPM_DEBUG
     printf("TZ_LoadContext_S called for id %d\r\n",
         NsClientIdList[index].ns_client_id);
+#endif /* PRINT_NSPM_DEBUG */
 
     return 1U;    // Success
 }
@@ -189,7 +227,9 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
+#ifdef PRINT_NSPM_DEBUG
     LOG_MSG("TZ_StoreContext_S called");
+#endif /* PRINT_NSPM_DEBUG */
     /* id corresponds to context being swapped out on NS side */
     if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
         /* Invalid TZ_MemoryId_t */
@@ -203,15 +243,54 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
-    if (active_ns_client != NsClientIdList[index].ns_client_id) {
+    if (active_ns_client_idx != index) {
+#ifdef PRINT_NSPM_DEBUG
         printf("TZ_StoreContext_S called for id %d, active id: %d\r\n",
-            NsClientIdList[index].ns_client_id, active_ns_client);
+            NsClientIdList[index].ns_client_id,
+            NsClientIdList[active_ns_client_idx].ns_client_id);
+#endif /* PRINT_NSPM_DEBUG */
         return 0U;
     }
 
+#ifdef PRINT_NSPM_DEBUG
     printf("TZ_StoreContext_S called for id %d\r\n",
         NsClientIdList[index].ns_client_id);
-    active_ns_client = INVALID_CLIENT_ID;
+#endif /* PRINT_NSPM_DEBUG */
+    active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
 
     return 1U;    // Success
+}
+
+__attribute__((cmse_nonsecure_entry))
+enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
+{
+    int current_client_id;
+
+    if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
+        /* This veneer should only be called by NS RTOS in handler mode */
+        return TFM_ERROR_NS_THREAD_MODE_CALL;
+    }
+
+    if (ns_client_id >= 0) {
+        /* The client ID is invalid */
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+
+    if (active_ns_client_idx < 0) {
+        /* No client is active */
+        return TFM_ERROR_GENERIC;
+    }
+
+    current_client_id = NsClientIdList[active_ns_client_idx].ns_client_id;
+    if (current_client_id >= 0 ) {
+        /* The client ID is invalid */
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+
+    NsClientIdList[active_ns_client_idx].ns_client_id = ns_client_id;
+#ifdef PRINT_NSPM_DEBUG
+    printf("tfm_register_client_id called with id %d\r\n", ns_client_id);
+#endif /* PRINT_NSPM_DEBUG */
+
+    return TFM_SUCCESS;
 }

@@ -14,6 +14,7 @@
 #include "spm_db_setup.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
+#include "tfm_nspm.h"
 #include "secure_fw/core/tfm_core.h"
 #include "platform_retarget.h"
 #include "tfm_peripherals_def.h"
@@ -65,9 +66,6 @@ uint32_t get_partition_idx(uint32_t partition_id)
     }
     return SPM_INVALID_PARTITION_IDX;
 }
-
-/* FixMe: this should be in a header */
-extern void tfm_nspm_configure_clients(void);
 
 enum spm_err_t tfm_spm_db_init(void)
 {

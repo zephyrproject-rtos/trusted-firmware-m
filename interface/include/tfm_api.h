@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
 /* Note:
@@ -39,7 +41,17 @@ enum tfm_status_e
 
 //==================== Secure function declarations ==========================//
 
-/* Placeholder for secure function declarations defined by TF-M in the future */
+/**
+ * \brief Assign client ID to the current TZ context
+ *
+ * \param[in]  ns_client_id  The client ID to be assigned to the current
+ *                           context
+ * \return TFM_SUCCESS if the client ID assigned successfully, an error code
+ *         according to \ref tfm_status_e in case of error.
+ *
+ * \note This function have to be called from handler mode.
+ */
+enum tfm_status_e tfm_register_client_id (int32_t ns_client_id);
 
 //================ End Secure function declarations ==========================//
 
