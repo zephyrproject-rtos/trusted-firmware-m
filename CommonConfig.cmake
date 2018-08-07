@@ -80,7 +80,8 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 		#with short wchars, however the standard library is compiled with normal
 		#wchar, and this generates linker time warnings. TF-M code does not use
 		#wchar, so the warning can be suppressed.
-		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning --specs=nano.specs)
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Xlinker -check-sections -Xlinker -fatal-warnings --entry=Reset_Handler -Wl,--no-wchar-size-warning --specs=nano.specs
+						-Wl,--print-memory-usage)
 	endfunction()
 endif()
 
