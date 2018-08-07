@@ -46,7 +46,6 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${INTERFACE_DIR}/src/tfm_sst_api.c"
 	"${INTERFACE_DIR}/src/tfm_audit_api.c"
 	"${INTERFACE_DIR}/src/tfm_nspm_svc_handler.c"
-	"${INTERFACE_DIR}/src/tfm_id_mngr_dummy.c"
 	"${INTERFACE_DIR}/src/tfm_nspm_api.c"
 	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
 	)

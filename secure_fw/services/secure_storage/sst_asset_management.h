@@ -15,29 +15,10 @@
 extern "C" {
 #endif
 
-/* FIXME: the secure client ID should not be share with the non-secure code
- *        as it is revealing information about secure code implementation.
+/* This define uses the TF-M invalid client ID to specify a direct client read,
+ * as that it can not be used to identify a client.
  */
-#define S_CLIENT_ID 0x00000001
-
-/* Invalid client ID (CID) */
-#define SST_INVALID_CLIENT_ID   0x00000000
-
-/* Non-Secure Processing Environment (NSPE) client ID mask */
-#define SST_NSPE_CLIENT_ID_MASK 0x80000000
-
-/**
- * \def SST_IS_CID_NSPE_CID
- *
- * \brief Checks if the client ID is from a non-secure client ID.
- *
- * \param[in] cid  Client ID to check
- *
- * \return Returns 1 if the pid is a non-secure client ID. Otherwise,
- *         it returns 0.
- */
-#define SST_IS_CID_NSPE_CID(cid)  ((cid & SST_NSPE_CLIENT_ID_MASK) != 0)
-
+#define SST_DIRECT_CLIENT_READ  TFM_INVALID_CLIENT_ID
 
 #define SST_PERM_BYPASS     (1<<3) /*!< Permission check bypassed. Used when
                                     *   secure a secure entity calls as itself
@@ -74,20 +55,17 @@ enum psa_sst_err_t sst_am_prepare(void);
  * \brief Allocates space for the asset, referenced by asset UUID,
  *        without setting any data in the asset.
  *
- * \param[in] client_id   Client ID which calls the service
  * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] asset_uuid  Asset UUID
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_create(int32_t client_id,
-                                 uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_create(uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token);
 
 /**
  * \brief Gets the asset's info referenced by asset UUID.
  *
- * \param[in]  client_id   Client ID which calls the service
  * \param[in]  asset_uuid  Asset UUID
  * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] info        Pointer to store the asset's information
@@ -95,15 +73,13 @@ enum psa_sst_err_t sst_am_create(int32_t client_id,
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_get_info(int32_t client_id,
-                                   uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_info(uint32_t asset_uuid,
                                    const struct tfm_sst_token_t *s_token,
                                    struct psa_sst_asset_info_t *info);
 
 /**
  * \brief Gets the asset's attributes referenced by asset UUID.
  *
- * \param[in]  client_id   Client ID which calls the service
  * \param[in]  asset_uuid  Asset UUID
  * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] attrs       Pointer to store the asset's attributes
@@ -111,15 +87,13 @@ enum psa_sst_err_t sst_am_get_info(int32_t client_id,
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
-                                         uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_attributes(uint32_t asset_uuid,
                                          const struct tfm_sst_token_t *s_token,
                                          struct psa_sst_asset_attrs_t *attrs);
 
 /**
  * \brief Sets the asset's attributes referenced by asset UUID.
  *
- * \param[in] client_id   Client ID which calls the service
  * \param[in] asset_uuid  Asset UUID
  * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] attrs       Pointer to new the asset's attributes
@@ -127,18 +101,17 @@ enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
-                                     uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_set_attributes(uint32_t asset_uuid,
                                      const struct tfm_sst_token_t *s_token,
                                      const struct psa_sst_asset_attrs_t *attrs);
 
 /**
  * \brief Reads asset's data referenced by asset UUID.
  *
- * \param[in]  client_id   Client ID which calls the service.
- *                         In case, the caller is a secure partition, this
- *                         parameter can be a non-secure client ID if the
- *                         read is in behalf of that non-secure client ID.
+ * \param[in]  client_id   In case, the caller is a secure partition, this
+ *                         parameter can be a non-secure or secure client ID if
+ *                         the read is in behalf of that client.
+ *                         Otherwise, it must be 0.
  * \param[in]  asset_uuid  Asset UUID
  * \param[in]  s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[out] data        Pointer to data vector \ref tfm_sst_buf_t to store
@@ -153,7 +126,6 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
 /**
  * \brief Writes data into an asset referenced by asset UUID.
  *
- * \param[in] client_id   Client ID which calls the service
  * \param[in] asset_uuid  Asset UUID
  * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  * \param[in] data        Pointer to data vector \ref tfm_sst_buf_t which
@@ -161,20 +133,19 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_write(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_write(uint32_t asset_uuid,
                                 const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data);
 
 /**
  * \brief Deletes the asset referenced by the asset UUID.
  *
- * \param[in] client_id   Client ID which calls the service
  * \param[in] asset_uuid  Asset UUID
  * \param[in] s_token     Pointer to the asset's token \ref tfm_sst_token_t
  *
  * \return Returns error code as specified in \ref psa_sst_err_t
  */
-enum psa_sst_err_t sst_am_delete(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_delete(uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token);
 
 #ifdef __cplusplus

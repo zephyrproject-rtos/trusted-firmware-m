@@ -7,6 +7,7 @@
 
 #include "psa_sst_api.h"
 #include "tfm_sst_veneers.h"
+#include "tfm_secure_api.h"
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 
 __attribute__(( section("SFN")))
@@ -19,11 +20,7 @@ enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token,
     s_token.token = token;
     s_token.token_size = token_size;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_create(S_CLIENT_ID, asset_uuid, &s_token);
+    return tfm_sst_veneer_create(asset_uuid, &s_token);
 
 }
 
@@ -39,12 +36,7 @@ enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
     s_token.token = token;
     s_token.token_size = token_size;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_get_info(S_CLIENT_ID, asset_uuid,
-                                   &s_token, info);
+    return tfm_sst_veneer_get_info(asset_uuid, &s_token, info);
 }
 
 __attribute__(( section("SFN")))
@@ -59,12 +51,7 @@ enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
     s_token.token = token;
     s_token.token_size = token_size;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_get_attributes(S_CLIENT_ID, asset_uuid,
-                                         &s_token, attrs);
+    return tfm_sst_veneer_get_attributes(asset_uuid, &s_token, attrs);
 }
 
 __attribute__(( section("SFN")))
@@ -79,12 +66,7 @@ enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
     s_token.token = token;
     s_token.token_size = token_size;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_set_attributes(S_CLIENT_ID, asset_uuid,
-                                         &s_token, attrs);
+    return tfm_sst_veneer_set_attributes(asset_uuid, &s_token, attrs);
 }
 
 __attribute__(( section("SFN")))
@@ -107,7 +89,10 @@ enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
     s_data.offset = offset;
     s_data.data = data;
 
-    return tfm_sst_veneer_read(S_CLIENT_ID, asset_uuid, &s_token, &s_data);
+    return tfm_sst_veneer_read(SST_DIRECT_CLIENT_READ,
+                               asset_uuid,
+                               &s_token,
+                               &s_data);
 }
 
 __attribute__(( section("SFN")))
@@ -154,11 +139,7 @@ enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
     s_data.offset = offset;
     s_data.data = (uint8_t *)data;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_write(S_CLIENT_ID, asset_uuid, &s_token, &s_data);
+    return tfm_sst_veneer_write(asset_uuid, &s_token, &s_data);
 }
 
 __attribute__(( section("SFN")))
@@ -172,9 +153,5 @@ enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid,
     s_token.token = token;
     s_token.token_size = token_size;
 
-   /* FIXME: Currently, TF-M framework does not provide any mechanism to
-    *        identify the secure partition. So, the same partition ID
-    *        (S_CLIENT_ID) is used for all the calls.
-    */
-    return tfm_sst_veneer_delete(S_CLIENT_ID, asset_uuid, &s_token);
+    return tfm_sst_veneer_delete(asset_uuid, &s_token);
 }

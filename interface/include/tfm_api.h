@@ -14,6 +14,26 @@ extern "C" {
 
 #include <stdint.h>
 
+#define TFM_INVALID_CLIENT_ID 0
+
+/**
+ * \brief Checks if the provided client ID is a secure client ID.
+ *
+ * \param[in] client_id Client ID to check
+ *
+ * \return Returns 1 if the client Id is secure. Otherwise, returns 0.
+ */
+#define TFM_CLIENT_ID_IS_S(client_id)  ((client_id)>0)
+
+/**
+ * \brief Checks if the provided client ID is a non-secure client ID.
+ *
+ * \param[in] client_id Client ID to check
+ *
+ * \return Returns 1 if the client Id is non-secure. Otherwise, returns 0.
+ */
+#define TFM_CLIENT_ID_IS_NS(client_id) ((client_id)<0)
+
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
 /* Note:

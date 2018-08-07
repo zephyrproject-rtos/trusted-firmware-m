@@ -67,15 +67,11 @@ secure functions (veneers) from the NS Thread mode. For this reason, the API is
 a collection of functions in the `<build_dir>/install/export/tfm/inc`
 directory. For example, the interface for the Secure STorage (SST) service
 is described in the file `psa_sst_api.h` as a collection of
-functions that call service veneer functions. The services can be called from the
-non-secure world applications (running in Thread mode) using the wrapper API
-which is described in `psa_sst_api.h`. This API is a wrapper for the secure
-veneers, and returns the return value from the service to the caller.
-The secure storage service also needs the NS side to provide an implementation
-for the function `tfm_sst_get_cur_id()` which is used to retrieve the numerical
-ID associated to the running thread. A primitive implementation is
-provided in `tfm_sst_id_mngr_dummy.c`. It is system integrators responsibility
-to implement the SST ID manager based on their threat model.
+functions that call service veneer functions. This API is a wrapper for the
+secure veneers, and returns the return value from the service to the caller.
+The secure storage service uses a numerical ID, to identify the clients that use
+the service. For details see
+[ns client identification documentation](tfm_ns_client_identification.md).
 
 #### interface with non-secure world regression tests
 A non-secure application that wants to run the non-secure regression tests
@@ -92,6 +88,9 @@ comply with CMSIS RTOS2 standard and have been exported as thin wrappers defined
 in `os_wrapper.h` contained in `<build_dir>/install/export/tfm/test/inc`. OS
 needs to provide the implementation of these wrappers to be able to run the
 tests.
+
+#### NS client Identification
+See [ns client identification documentation](tfm_ns_client_identification.md).
 
 --------------
 

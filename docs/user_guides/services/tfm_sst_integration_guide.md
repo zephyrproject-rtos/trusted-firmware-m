@@ -366,19 +366,17 @@ struct sst_asset_perm_t asset_perms_modes[] = {
 }};
 ```
 
-### Non-Secure Identity Manager
+### Client Identification
 
-The SST service requires, from the non-secure side, a mechanism to retrieve
-a numerical ID associated to the running application/thread which performs
-the call to the SST service. That identifier is the one used to validate the
-access permissions against the requested asset.
-For API specification, please check:
-`interface/include/tfm_id_mngr.h`
+TF-M core tracks the current client IDs running in the secure or non-secure
+processing environment. It provides a dedicated API to retrieve the client ID
+which performs the service request.
 
-A stub implementation is provided in `interface/src/tfm_id_mngr_dummy.c`
+[ns client identification documentation](../tfm_ns_client_identification.md)
+provides further details on how client identification works.
 
-The system integrators **must** implement the non-secure ID manager based on
-their application/threat model.
+SST service uses that TF-M core API to retrieve the client ID and validate the
+access permission against the requested asset.
 
 The [integration guide](../tfm_integration_guide.md) provides further
 details of non-secure implementation requirements for TF-M.

@@ -102,7 +102,7 @@ static uint16_t sst_am_check_s_ns_policy(int32_t client_id,
     err = sst_utils_validate_secure_caller();
 
     if (err == PSA_SST_ERR_SUCCESS) {
-        if (client_id != S_CLIENT_ID) {
+        if (TFM_CLIENT_ID_IS_S(client_id) == 0) {
             if (request_type & SST_PERM_REFERENCE) {
                 access = SST_PERM_REFERENCE;
             } else {
@@ -116,7 +116,7 @@ static uint16_t sst_am_check_s_ns_policy(int32_t client_id,
              */
             access = SST_PERM_BYPASS;
         }
-    } else if (client_id == S_CLIENT_ID) {
+    } else if (TFM_CLIENT_ID_IS_S(client_id) == 1) {
         /* non secure caller spoofing as secure caller */
         access = SST_PERM_FORBIDDEN;
     } else {
@@ -282,7 +282,7 @@ static enum psa_sst_err_t validate_copy_validate_iovec(
     return bound_check;
 }
 
-enum psa_sst_err_t sst_am_get_info(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_info(uint32_t asset_uuid,
                                    const struct tfm_sst_token_t *s_token,
                                    struct psa_sst_asset_info_t *info)
 {
@@ -291,6 +291,11 @@ enum psa_sst_err_t sst_am_get_info(int32_t client_id, uint32_t asset_uuid,
     struct psa_sst_asset_info_t tmp_info;
     enum psa_sst_err_t err;
     uint8_t all_perms = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     bound_check = sst_utils_memory_bound_check(info, PSA_SST_ASSET_INFO_SIZE,
                                                client_id,
@@ -317,8 +322,7 @@ enum psa_sst_err_t sst_am_get_info(int32_t client_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
-                                         uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_get_attributes(uint32_t asset_uuid,
                                          const struct tfm_sst_token_t *s_token,
                                          struct psa_sst_asset_attrs_t *attrs)
 {
@@ -327,6 +331,11 @@ enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
     struct sst_asset_policy_t *db_entry;
     enum psa_sst_err_t err;
     struct psa_sst_asset_attrs_t tmp_attrs;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     bound_check = sst_utils_memory_bound_check(attrs, PSA_SST_ASSET_ATTR_SIZE,
                                                client_id,
@@ -353,8 +362,7 @@ enum psa_sst_err_t sst_am_get_attributes(int32_t client_id,
     return err;
 }
 
-enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
-                                      uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_set_attributes(uint32_t asset_uuid,
                                       const struct tfm_sst_token_t *s_token,
                                       const struct psa_sst_asset_attrs_t *attrs)
 {
@@ -362,6 +370,11 @@ enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
     enum psa_sst_err_t bound_check;
     struct sst_asset_policy_t *db_entry;
     enum psa_sst_err_t err;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     bound_check = sst_utils_memory_bound_check((uint8_t *)attrs,
                                                PSA_SST_ASSET_ATTR_SIZE,
@@ -392,11 +405,16 @@ enum psa_sst_err_t sst_am_set_attributes(int32_t client_id,
     return err;
 }
 
-enum psa_sst_err_t sst_am_create(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_create(uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {
@@ -413,18 +431,15 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
                                const struct tfm_sst_token_t *s_token,
                                struct tfm_sst_buf_t *data)
 {
-    uint32_t caller_id;
+    int32_t caller_id;
     struct sst_asset_policy_t *db_entry;
     enum psa_sst_err_t err;
     struct tfm_sst_buf_t local_data;
 
-    /* FIXME: For the moment, the secure callers can not be identified and
-     *        all the secure requests have the same client ID
-     *        (S_CLIENT_ID).
-     */
-    if (sst_utils_validate_secure_caller() == PSA_SST_ERR_SUCCESS) {
-        caller_id = S_CLIENT_ID;
-        if (client_id != S_CLIENT_ID) {
+    /* Check if it is a read by reference request */
+    if (client_id != SST_DIRECT_CLIENT_READ) {
+        /* Only secure partitions can request it */
+        if (sst_utils_validate_secure_caller() == PSA_SST_ERR_SUCCESS) {
             /* Reference read access requested, check if the client has
              * reference permission, otherwise reject the request.
              */
@@ -433,16 +448,16 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
             if (db_entry == NULL) {
                 return PSA_SST_ERR_ASSET_NOT_FOUND;
             }
+        } else {
+            /* A non-secure caller is not allowed to specify any client ID to
+             * request a read by reference.
+             */
+            return PSA_SST_ERR_ASSET_NOT_FOUND;
         }
-    } else {
-          /* In a request from NSPE client, client_id is the caller ID and
-           * can not be a secure client ID.
-           */
-          if (SST_IS_CID_NSPE_CID(client_id) == 0) {
-                return PSA_SST_ERR_ASSET_NOT_FOUND;
-          }
+    }
 
-          caller_id = client_id;
+    if (tfm_core_get_caller_client_id(&caller_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
     }
 
     /* Check client ID permissions */
@@ -470,13 +485,18 @@ enum psa_sst_err_t sst_am_read(int32_t client_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_write(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_write(uint32_t asset_uuid,
                                 const struct tfm_sst_token_t *s_token,
                                 const struct tfm_sst_buf_t *data)
 {
     struct tfm_sst_buf_t local_data;
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     /* Check client ID permissions */
     db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
@@ -511,11 +531,16 @@ enum psa_sst_err_t sst_am_write(int32_t client_id, uint32_t asset_uuid,
     return err;
 }
 
-enum psa_sst_err_t sst_am_delete(int32_t client_id, uint32_t asset_uuid,
+enum psa_sst_err_t sst_am_delete(uint32_t asset_uuid,
                                  const struct tfm_sst_token_t *s_token)
 {
     enum psa_sst_err_t err;
     struct sst_asset_policy_t *db_entry;
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     db_entry = sst_am_get_db_entry(client_id, asset_uuid, SST_PERM_WRITE);
     if (db_entry == NULL) {

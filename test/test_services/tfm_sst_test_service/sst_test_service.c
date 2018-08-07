@@ -52,14 +52,18 @@ enum psa_sst_err_t sst_test_service_sfn_setup(void)
     return err;
 }
 
-enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(int32_t client_id,
-                                                      uint32_t key_uuid,
+enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
     enum psa_sst_err_t err;
     uint32_t i;
     uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE];
+    int32_t client_id;
+
+    if (tfm_core_get_caller_client_id(&client_id) != TFM_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     /* Read the key from the asset using the non-secure caller's client ID */
     err = psa_sst_reference_read(client_id, key_uuid, ASSET_TOKEN,
@@ -84,15 +88,14 @@ enum psa_sst_err_t sst_test_service_sfn_dummy_encrypt(int32_t client_id,
     return PSA_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(int32_t client_id,
-                                                      uint32_t key_uuid,
+enum psa_sst_err_t sst_test_service_sfn_dummy_decrypt(uint32_t key_uuid,
                                                       uint8_t *buf,
                                                       uint32_t buf_size)
 {
-    /* In the current implementation encrypt and decrypt are the same operation
+    /* In the current implementation encrypt and decrypt are the same
+     * operation.
      */
-    return sst_test_service_sfn_dummy_encrypt(client_id, key_uuid,
-                                              buf, buf_size);
+    return sst_test_service_sfn_dummy_encrypt(key_uuid, buf, buf_size);
 }
 
 enum psa_sst_err_t sst_test_service_sfn_clean(void)
