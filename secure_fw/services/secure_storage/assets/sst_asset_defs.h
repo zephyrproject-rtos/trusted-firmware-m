@@ -12,8 +12,10 @@
 extern "C" {
 #endif
 
+/* SST service reserved IDs */
 #define SST_ASSET_ID_NO_ASSET 0
-#define SST_ASSET_ID_DELETED_ASSET 1
+/* End SST service reserved IDs */
+
 /**********************************/
 #define SST_ASSET_ID_AES_KEY_128 3
 #define SST_ASSET_ID_AES_KEY_192 4

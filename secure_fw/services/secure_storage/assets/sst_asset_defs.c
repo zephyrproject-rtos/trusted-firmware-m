@@ -8,7 +8,7 @@
 #include "sst_asset_defs.h"
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 
-struct sst_asset_policy_t asset_perms[] = {
+const struct sst_asset_policy_t asset_perms[] = {
 {
     .type = PSA_SST_ASSET_KEY_AES,
     .asset_uuid = SST_ASSET_ID_AES_KEY_128,
@@ -72,7 +72,7 @@ struct sst_asset_policy_t asset_perms[] = {
     .perms_modes_start_idx = 11,
 }, };
 
-struct sst_asset_perm_t asset_perms_modes[] = {
+const struct sst_asset_perm_t asset_perms_modes[] = {
 {
     .client_id = SST_CLIENT_ID_3,
     .perm = SST_PERM_REFERENCE,
