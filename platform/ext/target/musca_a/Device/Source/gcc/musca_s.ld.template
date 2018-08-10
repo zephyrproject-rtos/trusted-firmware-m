@@ -135,6 +135,8 @@ SECTIONS
         *tfm_unpriv_api.o(.rodata*)
         *dummy_crypto_keys.o(.text*)
         *dummy_crypto_keys.o(.rodata*)
+	*dummy_nv_counters.o(.text*)
+	*dummy_nv_counters.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
         *(SFN)
@@ -233,6 +235,7 @@ SECTIONS
     {
         */tfm_unpriv_api.o(.data*)
         */dummy_crypto_keys.o(.data*)
+        */dummy_nv_counters.o(.data*)
         */platform_retarget_dev.o(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
@@ -244,9 +247,11 @@ SECTIONS
         */tfm_unpriv_api.o(.bss*)
         */platform_retarget_dev.o(.bss*)
         */dummy_crypto_keys.o(.bss*)
+        */dummy_nv_counters.o(.bss*)
         */tfm_unpriv_api.o(COMMON)
         */platform_retarget_dev.o(COMMON)
         */dummy_crypto_keys.o(COMMON)
+        */dummy_nv_counters.o(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);

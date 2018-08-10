@@ -25,8 +25,9 @@
  * 0x0032_0000 Flash_area_image_1(1 MB)
  *    0x0032_0000 Secure     image secondary
  *    0x003A_0000 Non-secure image secondary
- * 0x0042_0000 Secure Storage Area (0.02 MB)
- * 0x0042_5000 Unused
+ * 0x0042_0000 Secure Storage Area(0.02 MB)
+ * 0x0042_5000 NV counters area(16 Bytes)
+ * 0x0042_5010 Unused
  */
 
 /* Code SRAM layout on Musca (with BL2, which is mandatory) after the newest
@@ -89,6 +90,10 @@
                                          FLASH_AREA_IMAGE_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
+                                         FLASH_SST_AREA_SIZE)
+#define FLASH_NV_COUNTERS_AREA_SIZE     (0x10)     /* 16 Bytes */
+
 /* Offset and size definition in flash area, used by assemble.py */
 #define SECURE_IMAGE_OFFSET             0x0
 #define SECURE_IMAGE_MAX_SIZE           0x80000
@@ -125,5 +130,11 @@
 #define SST_NBR_OF_SECTORS  (FLASH_SST_AREA_SIZE / SST_SECTOR_SIZE)
 /* Specifies the smallest flash programmable unit in bytes */
 #define SST_FLASH_PROGRAM_UNIT  0x1
+
+/* NV Counters definitions */
+#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
+#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
+#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
+#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 
 #endif /* __FLASH_LAYOUT_H__ */
