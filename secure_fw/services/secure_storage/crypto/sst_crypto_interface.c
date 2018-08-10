@@ -49,6 +49,8 @@ enum psa_sst_err_t sst_crypto_init(void)
 
 enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
 {
+    enum tfm_plat_err_t err;
+
     /* FIXME: if key diversification is desired, the client ID
      * can be used to derive a key from the HUK derived key.
      * However, this is tricky for shared resources which can
@@ -57,7 +59,10 @@ enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
      * To be fixed in later revisions. Currently, just use the
      * same HUK (derived) key for all the crypto operations.
      */
-    tfm_plat_get_crypto_huk(key, key_len);
+    err = tfm_plat_get_crypto_huk(key, key_len);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
 
     return PSA_SST_ERR_SUCCESS;
 }

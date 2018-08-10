@@ -15,11 +15,11 @@
 #include <stdint.h>
 #include <limits.h>
 
-enum tfm_plat_errno_t {
-    TFM_PLAT_ERRNO_SUCCESS = 0,
-    TFM_PLAT_ERRNO_SYSTEM_ERR,
+enum tfm_plat_err_t {
+    TFM_PLAT_ERR_SUCCESS = 0,
+    TFM_PLAT_ERR_SYSTEM_ERR,
     /* Following entry is only to ensure the error code of int size */
-    TFM_PLAT_ERRNO_FORCE_INT_SIZE = INT_MAX
+    TFM_PLAT_ERR_FORCE_INT_SIZE = INT_MAX
 };
 
 #endif /* __TFM_PLAT_DEFS_H__ */

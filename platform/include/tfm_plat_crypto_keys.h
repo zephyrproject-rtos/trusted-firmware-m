@@ -27,7 +27,7 @@ extern "C" {
  *
  * \return Returns error code specified in \ref tfm_plat_errno_t
  */
-enum tfm_plat_errno_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
+enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
 
 #ifdef __cplusplus
 }
