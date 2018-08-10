@@ -64,8 +64,15 @@ enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
 
 enum psa_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
 {
-    return mbedtls_gcm_setkey(&sst_crypto_gcm_ctx, MBEDTLS_CIPHER_ID_AES,
-                              key, key_len*8);
+    int32_t err;
+
+    err = mbedtls_gcm_setkey(&sst_crypto_gcm_ctx, MBEDTLS_CIPHER_ID_AES,
+                             key, key_len*8);
+    if (err != 0) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
+
+    return PSA_SST_ERR_SUCCESS;
 }
 
 void sst_crypto_set_iv(const union sst_crypto_t *crypto)
@@ -122,10 +129,17 @@ enum psa_sst_err_t sst_crypto_encrypt_and_tag(
                                             const uint8_t *in, uint8_t *out,
                                             size_t len)
 {
-    return mbedtls_gcm_crypt_and_tag(&sst_crypto_gcm_ctx, MBEDTLS_GCM_ENCRYPT,
-                                     len, crypto->ref.iv, SST_IV_LEN_BYTES, add,
-                                     add_len, in, out, SST_TAG_LEN_BYTES,
-                                     crypto->ref.tag);
+    int32_t err;
+
+    err = mbedtls_gcm_crypt_and_tag(&sst_crypto_gcm_ctx, MBEDTLS_GCM_ENCRYPT,
+                                    len, crypto->ref.iv, SST_IV_LEN_BYTES, add,
+                                    add_len, in, out, SST_TAG_LEN_BYTES,
+                                    crypto->ref.tag);
+    if (err != 0) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
+
+    return PSA_SST_ERR_SUCCESS;
 }
 
 enum psa_sst_err_t sst_crypto_auth_and_decrypt(
@@ -134,10 +148,17 @@ enum psa_sst_err_t sst_crypto_auth_and_decrypt(
                                              const uint8_t *in, uint8_t *out,
                                              size_t len)
 {
-    return mbedtls_gcm_auth_decrypt(&sst_crypto_gcm_ctx, len, crypto->ref.iv,
-                                    SST_IV_LEN_BYTES, add, add_len,
-                                    crypto->ref.tag, SST_TAG_LEN_BYTES,
-                                    in, out);
+    int32_t err;
+
+    err = mbedtls_gcm_auth_decrypt(&sst_crypto_gcm_ctx, len, crypto->ref.iv,
+                                   SST_IV_LEN_BYTES, add, add_len,
+                                   crypto->ref.tag, SST_TAG_LEN_BYTES,
+                                   in, out);
+    if (err != 0) {
+        return PSA_SST_ERR_ASSET_NOT_FOUND;
+    }
+
+    return PSA_SST_ERR_SUCCESS;
 }
 
 enum psa_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
