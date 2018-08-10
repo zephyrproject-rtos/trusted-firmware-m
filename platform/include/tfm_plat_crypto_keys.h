@@ -1,22 +1,23 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __PLAT_CRYPTO_KEYS__
-#define __PLAT_CRYPTO_KEYS__
+#ifndef __TFM_PLAT_CRYPTO_KEYS_H__
+#define __TFM_PLAT_CRYPTO_KEYS_H__
 /**
  * \note The interfaces defined in this file must be implemented for each
  *       SoC.
  */
+
+#include <stdint.h>
+#include "tfm_plat_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
-#include "plat_defs.h"
 
 /**
  * \brief Gets hardware unique key for encryption
@@ -26,10 +27,10 @@ extern "C" {
  *
  * \return Returns error code specified in \ref tfm_plat_errno_t
  */
-enum tfm_plat_errno_t plat_get_crypto_huk(uint8_t* key, uint32_t size);
+enum tfm_plat_errno_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __PLAT_CRYPTO_KEYS__ */
+#endif /* __TFM_PLAT_CRYPTO_KEYS_H__ */

@@ -15,7 +15,7 @@
 #define MBEDTLS_CONFIG_FILE "tfm_mbedtls_config.h"
 #include "mbedtls/gcm.h"
 #include "mbedtls/memory_buffer_alloc.h"
-#include "platform/include/plat_crypto_keys.h"
+#include "platform/include/tfm_plat_crypto_keys.h"
 
 /* FIXME: most of this implementation will be replaced by crypto service API
  *        calls
@@ -57,7 +57,7 @@ enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
      * To be fixed in later revisions. Currently, just use the
      * same HUK (derived) key for all the crypto operations.
      */
-    plat_get_crypto_huk(key, key_len);
+    tfm_plat_get_crypto_huk(key, key_len);
 
     return PSA_SST_ERR_SUCCESS;
 }
