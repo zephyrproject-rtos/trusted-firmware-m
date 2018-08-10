@@ -36,7 +36,12 @@ set(BUILD_RETARGET On)
 set(BUILD_NATIVE_DRIVERS On)
 set(BUILD_STARTUP On)
 set(BUILD_TARGET_CFG On)
+# FIXME: The following TARGET flags are platform dependent.
+#        It is required to add a mechanism to expose the
+#        target capabilities and, based on them, set the
+#        flags properly.
 set(BUILD_TARGET_HARDWARE_KEYS On)
+set(BUILD_TARGET_NV_COUNTERS On)
 set(BUILD_CMSIS_DRIVERS On)
 set(BUILD_TIME Off)
 set(BUILD_UART_STDOUT On)
@@ -63,7 +68,15 @@ add_library(${PROJECT_OBJ_LIB} OBJECT ${ALL_SRC_C} ${ALL_SRC_C_S} ${ALL_SRC_ASM_
 #Set common compiler flags
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
-if (CORE_TEST)
+if(NOT DEFINED TARGET_NV_COUNTERS_ENABLE)
+	set(TARGET_NV_COUNTERS_ENABLE OFF)
+endif()
+
+if(TARGET_NV_COUNTERS_ENABLE)
+	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_NVCOUNTERS_ENABLE APPEND)
+endif()
+
+if(CORE_TEST)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_CORE_DEBUG TFM_PARTITION_TEST_CORE APPEND)
 endif()
 

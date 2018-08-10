@@ -116,6 +116,16 @@ The SST service requires the following definitions:
 
 **Note**: The sectors must be consecutive.
 
+## Expose target support for HW components
+
+Services may require HW components to be supported by the target
+to enable some features (e.g. SST service with rollback protection, etc).
+The following definitions need to be set in the <TARGET_NAME>.cmake file if the
+target has the following HW components:
+
+ - `TARGET_NV_COUNTERS_ENABLE`
+   Specifies that the target has non-volatile (NV) counters.
+
 --------------
 
 *Copyright (c) 2017-2018, Arm Limited. All rights reserved.*
