@@ -36,7 +36,7 @@ __psp_stack_size__ = 0x00001000;
 __msp_stack_size__ = 0x00000800;
 
 /* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
+GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
 
 ENTRY(Reset_Handler)
 
@@ -246,11 +246,21 @@ SECTIONS
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION : ALIGN(32)
     {
+        *libc_nano*:*(.text*)
+        *libc_nano*:*(.rodata*)
         *tfm_secure_client_service.*(.text*)
         *test_framework*(.text*)
+        *uart_stdout.*(.text*)
+        *Driver_USART.*(.text*)
+        *arm_uart_drv.*(.text*)
+        *uart_pl011_drv.*(.text*)
         *secure_suites.*(.text*)
         *tfm_secure_client_service.*(.rodata*)
         *test_framework*(.rodata*)
+        *uart_stdout.*(.rodata*)
+        *Driver_USART.*(.rodata*)
+        *arm_uart_drv.*(.rodata*)
+        *uart_pl011_drv.*(.rodata*)
         *secure_suites.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
@@ -481,8 +491,13 @@ SECTIONS
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
+        *libc_nano*:*(.data*)
         *tfm_secure_client_service.*(.data*)
         *test_framework*(.data*)
+        *uart_stdout.*(.data*)
+        *Driver_USART.*(.data*)
+        *arm_uart_drv.*(.data*)
+        *uart_pl011_drv.*(.data*)
         *secure_suites.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
@@ -491,11 +506,21 @@ SECTIONS
 
     .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
     {
+        *libc_nano*:*(.bss*)
+        *libc_nano*:*(COMMON)
         *tfm_secure_client_service.*(.bss*)
         *test_framework*(.bss*)
+        *uart_stdout.*(.bss*)
+        *Driver_USART.*(.bss*)
+        *arm_uart_drv.*(.bss*)
+        *uart_pl011_drv.*(.bss*)
         *secure_suites.*(.bss*)
         *tfm_secure_client_service.*(COMMON)
         *test_framework*(COMMON)
+        *uart_stdout.*(COMMON)
+        *Driver_USART.*(COMMON)
+        *arm_uart_drv.*(COMMON)
+        *uart_pl011_drv.*(COMMON)
         *secure_suites.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
@@ -511,6 +536,18 @@ SECTIONS
 
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 #endif /* TFM_LVL == 1 */
+
+    .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+
+        . = ALIGN(32);
+    } > RAM AT> FLASH
 
     .TFM_DATA :
     {
@@ -566,16 +603,6 @@ SECTIONS
         . += __msp_stack_size__;
     } > RAM AT> FLASH
     __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-    .heap : ALIGN(8)
-    {
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> FLASH
 
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a

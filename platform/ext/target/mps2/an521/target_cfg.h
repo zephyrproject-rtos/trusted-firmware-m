@@ -17,9 +17,9 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
-#include "arm_uart_drv.h"
 #include "platform/ext/common/uart_stdout.h"
 #include "tfm_peripherals_def.h"
+#include "arm_uart_drv.h"
 
 #define TFM_DRIVER_STDIO    Driver_USART0
 #define NS_DRIVER_STDIO     Driver_USART0
@@ -30,6 +30,7 @@
  */
 enum ppc_bank_e
 {
+    PPC_SP_DO_NOT_CONFIGURE = -1,
     PPC_SP_AHB_PPC0 = 0,
     PPC_SP_RES0,
     PPC_SP_RES1,
@@ -70,8 +71,8 @@ struct tfm_spm_partition_platform_data_t
 {
     uint32_t periph_start;
     uint32_t periph_limit;
-    uint16_t periph_ppc_bank;
-    uint16_t periph_ppc_loc;
+    int16_t periph_ppc_bank;
+    int16_t periph_ppc_loc;
 };
 
 /**

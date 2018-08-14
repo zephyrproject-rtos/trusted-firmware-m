@@ -15,6 +15,12 @@
   "entry_point": "main",
   "stack_size": "0x2000",
   "heap_size": "0x0400",
+  "mmio_regions": [
+    {
+      "name": "TFM_PERIPHERAL_STD_UART",
+      "permission": "READ-WRITE"
+    }
+  ],
   "tfm_init_symbol": "tfm_secure_client_service_init",
   "secure_functions": [
     {
@@ -29,11 +35,21 @@
   "source_files": [
     "tfm_secure_client_service.c"
   ],
+# Currently there is no platform dependent section of the manifest file,
+# therefore all platform dependent files must be listed here which can be used
+# on any supported platform.
   "tfm_linker_pattern": {
     "object_list": [
       "*tfm_secure_client_service.*",
       "*test_framework*",
+      "*uart_stdout.*",
+      "*Driver_USART.*",
+      "*arm_uart_drv.*",   # MPS2-AN521, MPS2-AN519
+      "*uart_pl011_drv.*", # Musca-A1
       "*secure_suites.*",
+    ],
+    "library_list": [
+      "*libc_nano*"
     ]
   }
 }

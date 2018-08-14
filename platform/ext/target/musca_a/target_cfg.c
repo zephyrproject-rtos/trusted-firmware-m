@@ -63,6 +63,13 @@ extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+        MUSCA_UART1_NS_BASE,
+        MUSCA_UART1_NS_BASE + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
 void enable_fault_handlers(void)
 {
     /* Enables BUS, MEM, USG and Secure faults */

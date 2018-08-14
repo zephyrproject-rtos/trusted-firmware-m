@@ -36,8 +36,10 @@ void tfm_spm_hal_configure_default_isolation(
         const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     if (platform_data) {
-        ppc_configure_to_secure(platform_data->periph_ppc_bank,
-                                platform_data->periph_ppc_loc);
+        if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+            ppc_configure_to_secure(platform_data->periph_ppc_bank,
+                                    platform_data->periph_ppc_loc);
+        }
     }
 }
 

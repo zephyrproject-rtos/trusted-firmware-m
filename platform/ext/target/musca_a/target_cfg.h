@@ -24,8 +24,13 @@
 #define TFM_DRIVER_STDIO    Driver_USART1
 #define NS_DRIVER_STDIO     Driver_USART1
 
+/**
+ * \brief Defines the word offsets of Slave Peripheral Protection Controller
+ *        Registers
+ */
 enum ppc_bank_e
 {
+    PPC_SP_DO_NOT_CONFIGURE = -1,
     PPC_SP_AHB_PPC0 = 0,
     PPC_SP_RES0,
     PPC_SP_RES1,
@@ -62,8 +67,8 @@ struct tfm_spm_partition_platform_data_t
 {
     uint32_t periph_start;
     uint32_t periph_limit;
-    uint16_t periph_ppc_bank;
-    uint16_t periph_ppc_loc;
+    int16_t periph_ppc_bank;
+    int16_t periph_ppc_loc;
 };
 
 /**

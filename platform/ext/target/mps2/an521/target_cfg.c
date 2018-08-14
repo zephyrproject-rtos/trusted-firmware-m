@@ -72,6 +72,13 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+        UART0_BASE_NS,
+        UART0_BASE_NS + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
 struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1 = {
         UART1_BASE_S,
         UART1_BASE_S + 0xFFF,
@@ -234,7 +241,7 @@ void mpc_init_cfg(void)
     __ISB();
 }
 
-/*------------------- PPC configuration functions -------------------------*/
+/*---------------------- PPC configuration functions -------------------------*/
 
 void ppc_init_cfg(void)
 {

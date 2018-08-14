@@ -35,12 +35,11 @@ void integ_test(const char *suite_type,
         printf("Test suite '%s' has ", test_suites[i].name);
         if (test_suites[i].val == TEST_PASSED) {
             printf_set_color(GREEN);
-            printf(" PASSED");
+            printf(" PASSED\r\n");
         } else {
             printf_set_color(RED);
-            printf(" FAILED");
+            printf(" FAILED\r\n");
         }
-        printf("\r\n");
     }
 
     printf_set_color(YELLOW);
