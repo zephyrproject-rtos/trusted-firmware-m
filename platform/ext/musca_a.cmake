@@ -137,6 +137,9 @@ elseif(BUILD_TARGET_NV_COUNTERS)
   #       API ONLY if the target has non-volatile counters.
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/dummy_nv_counters.c")
   set(TARGET_NV_COUNTERS_ENABLE ON)
+  # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
+  # rollback protection code as the target supports nv counters.
+  set (SST_ROLLBACK_PROTECTION ON)
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)

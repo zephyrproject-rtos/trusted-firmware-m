@@ -64,12 +64,6 @@ data block/sector.
 inherent failures of storage mediums (e.g. bad blocks in a NAND based device)
 is not supported by the current design.
 
-**Rollback Protection** - In the current design, the rollback protection is not
-supported. If the storage medium is not hardware protected against malicious
-writes then it is possible to replace the current contents with older version.
-However, such attack would be limited to a single device since a HUK based
-encryption policy is used.
-
 **Key Diversification** - In a more robust design, each asset would be encrypted
 through a different key.
 
@@ -92,6 +86,7 @@ and is divided as follows:
  - Flash filesystem interfaces
  - Flash interfaces
  - Cryptographic interfaces
+ - Non-volatile (NV) counters interfaces
  - Assets definitions
 
 The PSA interfaces for SST service are located in `interface/include`
@@ -181,6 +176,18 @@ the secure storage service.
 cryptographic operations using mbed TLS library. The system integrator **may**
 replace this implementation with calls to another service, crypto library or
 hardware crypto unit.
+
+### Non-volatile (NV) Counters Interface
+
+`nv_counters/sst_nv_counters.h` - Abstracts SST non-volatile counters
+operations. This API detaches the use of NV counters from the TF-M NV counters
+implementation, provided by the platform, and provides a mechanism to compile
+in a different API implementation for test purposes. A SST test suite **may**
+provide its own custom implementation to be able to test different SST service
+use cases.
+
+`nv_counters/sst_nv_counters.c` - Implements the SST NV counters interfaces
+based on TF-M NV counters implementation provided by the platform.
 
 ### Asset Definition
 
@@ -418,6 +425,9 @@ The list of SST services flags are:
  - `SST_ENABLE_PARTIAL_ASSET_RW`: this flag allows to enable/disable the
    partial asset RW manipulation at compile time. The partial asset
    manipulation is allowed by default.
+ - `SST_ROLLBACK_PROTECTION`: this flag allows to enable/disable rollback
+   protection in secure storage service. This flag takes effect only if the
+   target has non-volatile counters and `SST_ENCRYPTION` flag is on.
 
 --------------
 

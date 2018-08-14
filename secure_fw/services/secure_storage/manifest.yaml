@@ -85,6 +85,7 @@
     "flash_fs/sst_flash_fs.c",
     "flash_fs/sst_flash_dblock.c",
     "flash_fs/sst_flash_mbock.c",
+    "nv_counters/sst_nv_counters.c",
   ],
   "tfm_linker_pattern": {
     "library_list": [

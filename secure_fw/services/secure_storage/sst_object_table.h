@@ -70,7 +70,7 @@ enum psa_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid);
 
 /**
  * \brief Sets object's internal information in the object table and
- *        stores it persitently.
+ *        stores it persistently.
  *
  * \param[in] uuid          Object UUID
  * \param[in] obj_tbl_info  Pointer to the location to store object table
