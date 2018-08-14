@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,8 +24,8 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
-set (TEST_FRAMEWORK_C_SRC "${TEST_FRAMEWORK_DIR}/helpers.c"
-		"${TEST_FRAMEWORK_DIR}/integ_test_helper.c"
+set (TEST_FRAMEWORK_C_SRC "${TEST_FRAMEWORK_DIR}/test_framework_helpers.c"
+		"${TEST_FRAMEWORK_DIR}/test_framework_integ_test_helper.c"
 		"${TEST_FRAMEWORK_DIR}/test_framework.c"
 	)
 

@@ -74,7 +74,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for tfm_storage." FORCE)
 endif()
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/integ_test.h
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
 				${CMAKE_CURRENT_SOURCE_DIR}/suites/sst/non_secure/os_wrapper.h
 				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_sst_test_service/sst_test_service.h
 				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service.h

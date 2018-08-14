@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "helpers.h"
+#include "test_framework_helpers.h"
 
 #ifdef __cplusplus
 extern "C" {

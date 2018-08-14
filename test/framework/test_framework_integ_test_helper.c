@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "test_framework.h"
-#include "integ_test_helper.h"
+#include "test_framework_integ_test_helper.h"
 
 void integ_test(const char *suite_type,
                 struct test_suite_t test_suites[],

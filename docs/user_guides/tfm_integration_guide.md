@@ -80,8 +80,8 @@ to implement the SST ID manager based on their threat model.
 #### interface with non-secure world regression tests
 A non-secure application that wants to run the non-secure regression tests
 needs to call the `tfm_non_secure_client_run_tests()`. This function is
-exported into the header file `integ_test.h` inside the `<build_dir>/install`
-folder structure in the test specific files, i.e.
+exported into the header file `test_framework_integ_test.h` inside the
+`<build_dir>/install` folder structure in the test specific files, i.e.
 `<build_dir>/install/export/tfm/test/inc`. The non-secure regression tests are
 precompiled and delivered as a static library which is available in
 `<build_dir>/install/export/tfm/test/lib`, so that the non-secure application

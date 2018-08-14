@@ -31,7 +31,9 @@
   ],
   "tfm_linker_pattern": {
     "object_list": [
-      "*tfm_secure_client_service.*"
+      "*tfm_secure_client_service.*",
+      "*test_framework*",
+      "*secure_suites.*",
     ]
   }
 }

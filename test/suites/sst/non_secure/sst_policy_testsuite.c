@@ -11,7 +11,7 @@
 
 #include "ns_test_helpers.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
-#include "test/framework/helpers.h"
+#include "test/framework/test_framework_helpers.h"
 #include "psa_sst_api.h"
 
 /* Define default asset's token */

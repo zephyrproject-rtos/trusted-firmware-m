@@ -15,7 +15,7 @@
 #include "tfm_integ_test.h"
 #include "tfm_ns_lock.h"
 #ifdef TEST_FRAMEWORK_NS
-#include "test/framework/integ_test.h"
+#include "test/framework/test_framework_integ_test.h"
 #endif
 
 #include "target_cfg.h"

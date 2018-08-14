@@ -5,8 +5,8 @@
  *
  */
 
-#include "integ_test.h"
-#include "integ_test_helper.h"
+#include "test_framework_integ_test.h"
+#include "test_framework_integ_test_helper.h"
 #include "test_framework.h"
 
 /* Service specific includes */
@@ -28,7 +28,7 @@ static struct test_suite_t test_suites[] = {
     /* Secure invert test cases */
     /* Note: since this is sample code, only run if test services are enabled */
     {&register_testsuite_s_invert_interface, 0, 0, 0},
-#endif
+#endif /* TFM_PARTITION_TEST_CORE*/
 #endif /* SERVICES_TEST_S */
 };
 

@@ -15,7 +15,7 @@
 #include "cmsis_os2.h"
 
 #include "tfm_integ_test.h"
-#include "test/framework/integ_test.h"
+#include "test/framework/test_framework_integ_test.h"
 
 #ifdef TEST_FRAMEWORK_S
 #include \

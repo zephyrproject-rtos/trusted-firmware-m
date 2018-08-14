@@ -74,6 +74,15 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    TFM_SP_SECURE_TEST_PARTITION +0 ALIGN 32 {
+        *tfm_secure_client_service.* (+RO)
+        *test_framework* (+RO)
+        *secure_suites.* (+RO)
+
+    }
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
     ER_TFM_DATA S_DATA_START S_DATA_SIZE {
         .ANY (+RW +ZI)
     }
@@ -126,6 +135,17 @@ LR_CODE S_CODE_START {
     TFM_SP_SST_TEST_PARTITION_STACK +0 ALIGN 128 EMPTY 0x2000 {
     }
 #endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    TFM_SP_SECURE_TEST_PARTITION_DATA +0 ALIGN 32 {
+        *tfm_secure_client_service.* (+RW +ZI)
+        *test_framework* (+RW +ZI)
+        *secure_suites.* (+RW +ZI)
+    }
+
+    TFM_SP_SECURE_TEST_PARTITION_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #endif /* TFM_LVL == 1 */
 

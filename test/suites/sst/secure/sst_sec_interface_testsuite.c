@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "test/framework/helpers.h"
+#include "test/framework/test_framework_helpers.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
 #include "secure_fw/services/secure_storage/sst_object_system.h"
 #include "psa_sst_api.h"

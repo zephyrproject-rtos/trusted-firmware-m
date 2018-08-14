@@ -5,7 +5,7 @@
  *
  */
 
-#include "test/framework/helpers.h"
+#include "test/framework/test_framework_helpers.h"
 #include "psa_audit_api.h"
 #include "audit_s_tests.h"
 #include "tfm_api.h"

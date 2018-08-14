@@ -5,8 +5,8 @@
  *
  */
 
-#include "integ_test.h"
-#include "integ_test_helper.h"
+#include "test_framework_integ_test.h"
+#include "test_framework_integ_test_helper.h"
 #include "test_framework.h"
 
 /* Service specific includes */

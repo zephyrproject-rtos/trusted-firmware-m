@@ -11,7 +11,7 @@
 
 #include "ns_test_helpers.h"
 #include "secure_fw/services/secure_storage/assets/sst_asset_defs.h"
-#include "test/framework/helpers.h"
+#include "test/framework/test_framework_helpers.h"
 #include "test/test_services/tfm_sst_test_service/sst_test_service_api.h"
 
 #define DATA "TEST_DATA_ONE_TWO_THREE_FOUR_FIVE"

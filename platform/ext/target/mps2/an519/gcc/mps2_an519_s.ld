@@ -247,7 +247,11 @@ SECTIONS
     .TFM_SP_SECURE_TEST_PARTITION : ALIGN(32)
     {
         *tfm_secure_client_service.*(.text*)
+        *test_framework*(.text*)
+        *secure_suites.*(.text*)
         *tfm_secure_client_service.*(.rodata*)
+        *test_framework*(.rodata*)
+        *secure_suites.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION$$RO$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION);
@@ -478,6 +482,8 @@ SECTIONS
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
         *tfm_secure_client_service.*(.data*)
+        *test_framework*(.data*)
+        *secure_suites.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$RW$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_DATA);
@@ -486,7 +492,11 @@ SECTIONS
     .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
     {
         *tfm_secure_client_service.*(.bss*)
+        *test_framework*(.bss*)
+        *secure_suites.*(.bss*)
         *tfm_secure_client_service.*(COMMON)
+        *test_framework*(COMMON)
+        *secure_suites.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS);

@@ -6,7 +6,7 @@
  */
 
 #include "tfm_secure_client_service.h"
-#include "test/framework/integ_test.h"
+#include "test/framework/test_framework_integ_test.h"
 
 /**
  * \brief Service initialisation function. No special initialisation is
