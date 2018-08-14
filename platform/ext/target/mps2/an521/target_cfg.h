@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __SSE200_TARGET_CFG_H__
-#define __SSE200_TARGET_CFG_H__
+#ifndef __TARGET_CFG_H__
+#define __TARGET_CFG_H__
 
 #include "arm_uart_drv.h"
 #include "platform/ext/common/uart_stdout.h"
@@ -115,4 +115,4 @@ void ppc_clear_irq(void);
 void sau_and_idau_cfg(void);
 
 
-#endif /* __SSE200_TARGET_CFG_H__ */
+#endif /* __TARGET_CFG_H__ */

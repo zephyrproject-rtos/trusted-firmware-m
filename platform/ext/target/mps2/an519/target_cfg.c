@@ -62,7 +62,6 @@ const struct memory_region_limits memory_regions = {
 #endif /* BL2 */
 };
 
-
 /* Allows software, via SAU, to define the code region as a NSC */
 #define NSCCFG_CODENSC  1
 
@@ -305,7 +304,7 @@ void ppc_init_cfg(void)
 
 void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
 {
-    /* Clear NS flag for peripheral to prevent NS access */
+    /* Setting NS flag for peripheral to enable NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] |= (1U << pos);
 }
