@@ -129,7 +129,8 @@ are supported by which platforms:
 |    -     |             -            |   Swap <sup>3</sup>   |  No-swap <sup>4</sup> | RAM loading <sup>5</sup> |
 |  AN521   |            Yes           |          Yes          |          Yes          |            No            |
 |  AN519   |            Yes           |          Yes          |          Yes          |            No            |
-| Musca A1 |            No            |          No           |          No           |            Yes           |
+| Musca-A1 |            No            |          No           |          No           |            Yes           |
+| Musca-B1 |            Yes           |          Yes          |          Yes          |            No            |
 
 (1) To disable BL2, please turn off the `BL2` compiler switch in the
 top-level configuration files or in the command line
@@ -297,6 +298,14 @@ IMAGE2ADDRESS: 0x10180000
 IMAGE2FILE: \Software\tfm_sig1.bin ; TF-M regression test binary blob
 ```
 
+#### Executing firmware upgrade on Musca-B1 board
+After two images have been built, they can be concatenated to create the
+combined image using `srec_cat`:
+
+- Linux: `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x0 tfm_sign_0.bin -Binary -offset 0x20000 tfm_sign_1.bin -Binary -offset 0x120000 -o tfm.hex -Intel`
+
+- Windows: `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x0 tfm_sign_0.bin -Binary -offset 0x20000 tfm_sign_1.bin -Binary -offset 0x120000 -o tfm.hex -Intel`
+
 The following message will be shown in case of successful firmware upgrade,
 notice that image with higher version number (`version=1.2.3.5`) is executed:
 ```
@@ -313,7 +322,7 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 ...
 ```
 
-#### Executing firmware upgrade on Musca-A1 board
+### RAM loading firmware upgrade
 To enable RAM loading, please set `MCUBOOT_RAM_LOADING` to True (either in the
 configuration file or through the command line), and then specify a destination
 load address in RAM where the image can be copied to and executed from. The
@@ -321,8 +330,9 @@ load address in RAM where the image can be copied to and executed from. The
 for example with Musca A1, its `flash_layout.h` file in the `platform`
 folder should include `#define IMAGE_LOAD_ADDRESS #0x10020000`
 
+#### Executing firmware upgrade on Musca-A1 board
 After two images have been built, they can be concatenated to create the
-combined image using srec_cat.exe
+combined image using `srec_cat`:
 
 ```
 Windows:

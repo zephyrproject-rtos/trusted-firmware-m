@@ -12,9 +12,9 @@
   "version_minor": 1,
   "file_list": [
     {
-      "name": "Secure Partition ID definitions",
-      "short_name": "tfm_partition_defs",
-      "output": "secure_fw/services/tfm_partition_defs.inc"
+        "name": "Secure Partition ID definitions",
+        "short_name": "tfm_partition_defs",
+        "output": "secure_fw/services/tfm_partition_defs.inc"
     },
     {
         "name": "Secure Partition declarations",
@@ -37,9 +37,14 @@
         "output": "platform/ext/target/mps2/an519/gcc/mps2_an519_s.ld"
     },
     {
-        "name": "MUSCA secure ld file",
+        "name": "MUSCA-A secure ld file",
         "short_name": "musca_s.ld",
         "output": "platform/ext/target/musca_a/Device/Source/gcc/musca_s.ld"
+    },
+    {
+        "name": "MUSCA-B1 secure ld file",
+        "short_name": "musca_s.ld",
+        "output": "platform/ext/target/musca_b1/Device/Source/gcc/musca_s.ld"
     }
   ]
 }

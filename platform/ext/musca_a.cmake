@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-#This file gathers all musca specific files in the application.
+#This file gathers all Musca-A specific files in the application.
 
 #MUSCA-A has a Cortex M33 CPU.
 include("Common/CpuM33")

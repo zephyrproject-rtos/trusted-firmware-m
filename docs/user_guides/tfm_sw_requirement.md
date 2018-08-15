@@ -30,7 +30,7 @@ on specific products and licenses as explained in
   - pyasn1
   - yaml
   - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml
-- SRecord v1.58 (for Musca-A1 test chip board)
+- SRecord v1.58 (for Musca test chip boards)
 
 ### Setup a shell to enable compiler toolchain and cmake after installation.
 
@@ -63,7 +63,7 @@ export PATH=<GNU_ARM_PATH>/bin:$PATH
   - pyasn1 (pip3 install --user pyasn1)
   - pyyaml (pip3 install --user pyyaml)
 - Python3 pip
-- SRecord v1.63 (for Musca-A1 test chip board)
+- SRecord v1.63 (for Musca test chip boards)
 
 ### Setup Cygwin to enable a compiler toolchain and cmake after installation.
 

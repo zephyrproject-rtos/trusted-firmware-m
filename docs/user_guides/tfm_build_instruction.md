@@ -50,6 +50,8 @@ cmake command. (See examples below.)
     `-DTARGET_PLATFORM=AN519`
   * Musca-A1 test chip board (Cortex-M33 SSE-200 subsystem)
     `-DTARGET_PLATFORM=MUSCA_A`
+  * Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
+    `-DTARGET_PLATFORM=MUSCA_B1`
 * The compiler toolchain to be used for the build must be specified by adding
 the `-DCOMPILER=<compiler name>` option to the cmake command (See examples
 below.) The possible values are

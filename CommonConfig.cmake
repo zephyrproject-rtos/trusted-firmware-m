@@ -41,7 +41,7 @@ else()
 endif()
 
 if (NOT DEFINED IMAGE_VERSION)
-    set(IMAGE_VERSION 0.0.0+0)
+	set(IMAGE_VERSION 0.0.0+0)
 endif()
 
 if(${COMPILER} STREQUAL "ARMCLANG")
@@ -104,8 +104,6 @@ set (TEST_FRAMEWORK_NS OFF)
 
 if(${TARGET_PLATFORM} STREQUAL "AN521" OR ${TARGET_PLATFORM} STREQUAL "AN519")
 	set (REFERENCE_PLATFORM ON)
-elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_A")
-	add_definitions(-DTARGET_MUSCA_A)
 endif()
 
 # Option to demonstrate usage of secure-only peripheral
@@ -228,14 +226,14 @@ if (NOT DEFINED ENABLE_SECURE_STORAGE)
 endif()
 
 if (NOT DEFINED MBEDTLS_DEBUG)
-    if (${COMPILER} STREQUAL "GNUARM" AND ${TARGET_PLATFORM} STREQUAL "MUSCA_A" AND BL2)
-        #The size of the MCUboot binary compiled with GCC exceeds the size limit on
-        #Musca A. By turning off the mbed TLS debug build is a good way to go below
-        #that limit, while it is still possible to debug TFM/bootloader code.
-        set (MBEDTLS_DEBUG OFF)
-    else ()
-        set (MBEDTLS_DEBUG ON)
-    endif ()
+	if (${COMPILER} STREQUAL "GNUARM" AND ${TARGET_PLATFORM} MATCHES "MUSCA_A|MUSCA_B1" AND BL2)
+		#The size of the MCUboot binary compiled with GCC exceeds the size limit on
+		#Musca-A/B1. By turning off the mbed TLS debug build is a good way to go below
+		#that limit, while it is still possible to debug TFM/bootloader code.
+		set (MBEDTLS_DEBUG OFF)
+	else ()
+		set (MBEDTLS_DEBUG ON)
+	endif ()
 endif()
 
 ##Set mbedTLS compiler flags for BL2 bootloader
