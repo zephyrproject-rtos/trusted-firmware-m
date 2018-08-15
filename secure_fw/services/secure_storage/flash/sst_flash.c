@@ -26,6 +26,13 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 #define BLOCK_START_OFFSET  0
 #define MAX_BLOCK_DATA_COPY 256
+
+#ifdef SST_RAM_FS
+#define BLOCK_DATA_SIZE (SST_BLOCK_SIZE * SST_TOTAL_NUM_OF_BLOCKS)
+
+static uint8_t block_data[BLOCK_DATA_SIZE] = {0};
+#endif
+
 /*
  * \brief Gets physical address of the given block ID.
  *
@@ -40,8 +47,59 @@ __STATIC_INLINE uint32_t get_phys_address(uint32_t block_id, uint32_t offset)
     return (SST_FLASH_AREA_ADDR + (block_id * SST_BLOCK_SIZE) + offset);
 }
 
-static enum psa_sst_err_t flash_read(uint32_t flash_addr, uint8_t *buff,
-                                     uint32_t size)
+#ifdef SST_RAM_FS
+static enum psa_sst_err_t flash_init(void)
+{
+    /* Nothing needs to be done in case of Flash emulated in RAM */
+
+    return PSA_SST_ERR_SUCCESS;
+}
+
+static enum psa_sst_err_t flash_read(uint32_t flash_addr, uint32_t size,
+                                     uint8_t *buff)
+{
+    uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
+
+    sst_utils_memcpy(buff, &block_data[idx], size);
+
+    return PSA_SST_ERR_SUCCESS;
+}
+
+static enum psa_sst_err_t flash_write(uint32_t flash_addr, uint32_t size,
+                                      const uint8_t *buff)
+{
+    uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
+
+    sst_utils_memcpy(&block_data[idx], buff, size);
+
+    return PSA_SST_ERR_SUCCESS;
+}
+
+static enum psa_sst_err_t flash_erase(uint32_t flash_addr)
+{
+    uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
+
+    sst_utils_memset(&block_data[idx],
+                     SST_FLASH_DEFAULT_VAL,
+                     SST_BLOCK_SIZE);
+
+    return PSA_SST_ERR_SUCCESS;
+}
+#else
+static enum psa_sst_err_t flash_init(void)
+{
+    int32_t err;
+
+    err = FLASH_DEV_NAME.Initialize(NULL);
+    if(err != ARM_DRIVER_OK) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
+
+    return PSA_SST_ERR_SUCCESS;
+}
+
+static enum psa_sst_err_t flash_read(uint32_t flash_addr, uint32_t size,
+                                     uint8_t *buff)
 {
     int32_t err;
 
@@ -53,8 +111,8 @@ static enum psa_sst_err_t flash_read(uint32_t flash_addr, uint8_t *buff,
     return PSA_SST_ERR_SUCCESS;
 }
 
-static enum psa_sst_err_t flash_write(uint32_t flash_addr, const uint8_t *buff,
-                                      uint32_t size)
+static enum psa_sst_err_t flash_write(uint32_t flash_addr, uint32_t size,
+                                      const uint8_t *buff)
 {
     int32_t err;
 
@@ -77,17 +135,11 @@ static enum psa_sst_err_t flash_erase(uint32_t flash_addr)
 
     return PSA_SST_ERR_SUCCESS;
 }
+#endif /* SST_RAM_FS */
 
 enum psa_sst_err_t sst_flash_init(void)
 {
-    int32_t err;
-
-    err = FLASH_DEV_NAME.Initialize(NULL);
-    if(err != ARM_DRIVER_OK) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
-    }
-
-    return PSA_SST_ERR_SUCCESS;
+    return flash_init();
 }
 
 enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
@@ -100,7 +152,7 @@ enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
      */
     flash_addr = get_phys_address(block_id, offset);
 
-    return flash_read(flash_addr, buff, size);
+    return flash_read(flash_addr, size, buff);
 }
 
 enum psa_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
@@ -113,7 +165,7 @@ enum psa_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
      */
     flash_addr = get_phys_address(block_id, offset);
 
-    return flash_write(flash_addr, buff, size);
+    return flash_write(flash_addr, size, buff);
 }
 
 enum psa_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
@@ -143,13 +195,13 @@ enum psa_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
         /* Reads data from source block and store it in the in-memory copy of
          * destination content.
          */
-        err = flash_read(src_flash_addr, dst_block_data_copy, bytes_to_move);
+        err = flash_read(src_flash_addr, bytes_to_move, dst_block_data_copy);
         if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }
 
         /* Writes in flash the in-memory block content after modification */
-        err = flash_write(dst_flash_addr, dst_block_data_copy, bytes_to_move);
+        err = flash_write(dst_flash_addr, bytes_to_move, dst_block_data_copy);
         if (err != PSA_SST_ERR_SUCCESS) {
             return err;
         }

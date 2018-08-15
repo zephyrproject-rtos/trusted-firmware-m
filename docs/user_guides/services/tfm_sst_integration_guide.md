@@ -28,7 +28,7 @@ hardware/software attacks.
 **Access Authentication** - Mechanism to establish requester's identity (a
 non-secure entity, secure entity, or a remote server).
 
-**Access Granularity** - Accces permissions to create, write, read, delete and
+**Access Granularity** - Access permissions to create, write, read, delete and
 reference an asset. Certain assets may be required to not be directly accessed
 by an authorized client. It that case, the authorized client should be able to
 reference the asset via another secure service.
@@ -124,7 +124,7 @@ encrypted objects in the SST object system.
 
 `sst_asset_management.c` - Contains asset's access policy management code.
 
-`sst_utils.c` - Contains common and basic functionalities used accross the
+`sst_utils.c` - Contains common and basic functionalities used across the
 SST service code.
 
 ### Flash Filesystem Interface
@@ -173,7 +173,7 @@ to be used as secure storage **must** be contiguous sectors starting at
 the secure storage service.
 
 `crypto/sst_crypto_interface.c` - Currently, it implements the SST service
-cryptographic operations using mbed TLS library. The system integrator **may**
+cryptographic operations using Mbed TLS library. The system integrator **may**
 replace this implementation with calls to another service, crypto library or
 hardware crypto unit.
 
@@ -388,12 +388,12 @@ details of non-secure implementation requirements for TF-M.
 The reference encryption policy is built on AES-GCM, and it **may** be replaced
 by a vendor specific implementation.
 The SST service abstracts all the cryptographic requirements and specifies the
-required cryptografic interface in
+required cryptographic interface in
 `secure_fw/services/secure_storage/crypto/sst_crypto_interface.h`
 
 Currently, the SST service cryptographic operations are implemented in
 `secure_fw/services/secure_storage/crypto/sst_crypto_interface.c`, using
-mbed TLS library.
+Mbed TLS library.
 
 ### SST Service Features Flags
 
@@ -428,6 +428,11 @@ The list of SST services flags are:
  - `SST_ROLLBACK_PROTECTION`: this flag allows to enable/disable rollback
    protection in secure storage service. This flag takes effect only if the
    target has non-volatile counters and `SST_ENCRYPTION` flag is on.
+ - `SST_RAM_FS`: this flag allows to enable/disable the use of RAM instead
+   of the flash to store the FS in secure storage service. This flag is set
+   by default in the regression tests, if it is not defined by the platform.
+   The SST regression tests reduce the life of the flash memory as they
+   write/erase multiple times in the memory.
 
 --------------
 

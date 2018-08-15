@@ -125,6 +125,13 @@ void register_testsuite_s_sst_sec_interface(struct test_suite_t *p_test_suite)
 
     set_testsuite("SST secure interface tests (TFM_SST_TEST_2XXX)",
                   write_tests, list_size, p_test_suite);
+
+#ifdef SST_SHOW_FLASH_WARNING
+    TEST_LOG("\r\n**WARNING** The SST regression tests reduce the life of the "
+             "flash memory as they write/erase multiple times the memory. \r\n"
+             "Please, set the SST_RAM_FS flag to use RAM instead of flash."
+             "\r\n\r\n");
+#endif
 }
 
 /**

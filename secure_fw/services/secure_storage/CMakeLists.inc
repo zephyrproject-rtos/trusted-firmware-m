@@ -55,6 +55,10 @@ if (ENABLE_SECURE_STORAGE)
 		message(FATAL_ERROR "Incomplete build configuration: SST_ENABLE_PARTIAL_ASSET_RW is undefined. ")
 	endif()
 
+	if (NOT DEFINED SST_RAM_FS)
+		message(FATAL_ERROR "Incomplete build configuration: SST_RAM_FS is undefined. ")
+	endif()
+
 	set (SECURE_STORAGE_C_SRC
 		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
@@ -98,6 +102,10 @@ if (ENABLE_SECURE_STORAGE)
 		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
 	endif()
 
+	if (SST_RAM_FS)
+		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
+	endif()
+
 	#Append all our source files to global lists.
 	list(APPEND ALL_SRC_C ${SECURE_STORAGE_C_SRC})
 	unset(SECURE_STORAGE_C_SRC)
@@ -113,6 +121,7 @@ if (ENABLE_SECURE_STORAGE)
 	message("- SST_VALIDATE_METADATA_FROM_FLASH: " ${SST_VALIDATE_METADATA_FROM_FLASH})
 	message("- SST_CREATE_FLASH_LAYOUT: " ${SST_CREATE_FLASH_LAYOUT})
 	message("- SST_ENABLE_PARTIAL_ASSET_RW: " ${SST_ENABLE_PARTIAL_ASSET_RW})
+	message("- SST_RAM_FS: " ${SST_RAM_FS})
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
