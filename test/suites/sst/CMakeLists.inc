@@ -31,6 +31,10 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 			"${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c"
 			"${SECURE_STORAGE_TEST_DIR}/secure/sst_reliability_testsuite.c"
 		)
+	if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
+		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_rollback_protection_testsuite.c"
+					"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
+	endif()
 
 	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
 			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c"

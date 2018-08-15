@@ -29,6 +29,10 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
 
+#if defined(SST_ROLLBACK_PROTECTION) && defined(SST_ENCRYPTION)
+    {&register_testsuite_s_rollback_protection, 0, 0, 0},
+#endif
+
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
 

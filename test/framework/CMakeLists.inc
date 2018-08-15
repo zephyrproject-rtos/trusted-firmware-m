@@ -40,6 +40,11 @@ list(APPEND ALL_SRC_C ${TEST_FRAMEWORK_C_SRC})
 list(APPEND ALL_SRC_C_S ${TEST_FRAMEWORK_C_SRC_S})
 list(APPEND ALL_SRC_C_NS ${TEST_FRAMEWORK_C_SRC_NS})
 
+#Add compile definitions
+if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
+        set_property(SOURCE ${TEST_FRAMEWORK_C_SRC_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_ROLLBACK_PROTECTION)
+endif()
+
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
