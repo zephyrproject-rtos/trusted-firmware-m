@@ -104,6 +104,9 @@ endif()
 # Option to demonstrate usage of secure-only peripheral
 set (SECURE_UART1 OFF)
 
+# TF-M isolation level: 1..3, default is 1
+set (TFM_LVL 1)
+
 if (REGRESSION)
 	set(SERVICES_TEST_ENABLED ON)
 else()
@@ -121,6 +124,7 @@ endif()
 if (CORE_TEST)
 	set(CORE_TEST_POSITIVE ON)
 	set(CORE_TEST_INTERACTIVE OFF)
+	set(TFM_LVL 3)
 endif()
 
 if (CORE_TEST_INTERACTIVE)

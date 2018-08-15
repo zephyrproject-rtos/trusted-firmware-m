@@ -34,11 +34,8 @@ set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SST_LOG})
 set (ENABLE_AUDIT_LOGGING ON)
 include(CMakeLists.inc)
 
-###Configure how we build our target
-if(DEFINED CORE_TEST)
-	set (TFM_LVL 3)
-else()
-	set (TFM_LVL 1)
+if (NOT DEFINED TFM_LVL)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
 endif()
 
 #Set build type for mbedtls libraries

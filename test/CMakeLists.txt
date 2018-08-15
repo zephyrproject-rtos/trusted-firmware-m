@@ -25,14 +25,16 @@ if (NOT DEFINED SERVICES_TEST_ENABLED)
 	message(FATAL_ERROR "Incomplete build configuration: SERVICES_TEST_ENABLED is undefined. ")
 endif()
 
-if (NOT DEFINED CORE_TEST)
-	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
+if (NOT DEFINED CORE_TEST_INTERACTIVE)
+	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_INTERACTIVE is undefined. ")
 endif()
 
-if(CORE_TEST)
-	set (TFM_LVL 3)
-else()
-	set (TFM_LVL 1)
+if (NOT DEFINED CORE_TEST_POSITIVE)
+	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_POSITIVE is undefined. ")
+endif()
+
+if (NOT DEFINED TFM_LVL)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
 endif()
 
 #Configure our options as needed.
@@ -83,7 +85,6 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
 install(TARGETS tfm_non_secure_tests
 		DESTINATION export/tfm/test/lib
 		PUBLIC_HEADER DESTINATION export/tfm/test/inc)
-
 
 embedded_project_end(tfm_non_secure_tests)
 embedded_project_end(tfm_secure_tests)

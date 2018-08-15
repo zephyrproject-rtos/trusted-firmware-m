@@ -23,10 +23,8 @@ set(TFM_ROOT_DIR  "${SECURE_FW_DIR}/..")
 set(TEST_DIR      "${TFM_ROOT_DIR}/test")
 set(INTERFACE_DIR "${TFM_ROOT_DIR}/interface")
 
-if(CORE_TEST)
-	set(TFM_LVL 3)
-else()
-	set(TFM_LVL 1)
+if (NOT DEFINED TFM_LVL)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
 endif()
 
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
