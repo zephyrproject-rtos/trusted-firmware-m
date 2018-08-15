@@ -24,23 +24,14 @@ endif()
 ##These variables select how the projects are built. Each project will set
 #various project specific settings (e.g. what files to build, macro
 #definitions) based on these.
-set (REGRESSION False)
+set (REGRESSION True)
 set (CORE_TEST False)
 
 # TF-M isolation level: 1..3
-set (TFM_LVL 1)
+set (TFM_LVL 3)
 
 #BL2 bootloader(MCUBoot) related settings
-if(NOT DEFINED BL2)
-	set(BL2 True)
-endif()
-
-if(NOT DEFINED MCUBOOT_NO_SWAP)
-	set(MCUBOOT_NO_SWAP False)
-endif()
-
-if(NOT DEFINED MCUBOOT_RAM_LOADING)
-	set(MCUBOOT_RAM_LOADING False)
-endif()
+set (BL2 True)
+set (MCUBOOT_NO_SWAP False)
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")

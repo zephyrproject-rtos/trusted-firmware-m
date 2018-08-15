@@ -27,6 +27,9 @@ endif()
 set (REGRESSION True)
 set (CORE_TEST False)
 
+# TF-M isolation level: 1..3
+set (TFM_LVL 1)
+
 #BL2 bootloader(MCUBoot) related settings
 if(NOT DEFINED BL2)
 	set(BL2 True)

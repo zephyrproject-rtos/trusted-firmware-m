@@ -16,7 +16,15 @@
 #include "secure_fw/services/secure_storage/sst_object_system.h"
 
 static struct test_suite_t test_suites[] = {
+#if TFM_LVL == 3
 #ifdef SERVICES_TEST_S
+    /* List test cases which compliant with level 3 isolation */
+#endif /* SERVICES_TEST_S */
+
+#else /* TFM_LVL == 3 */
+
+#ifdef SERVICES_TEST_S
+    /* List test cases which compliant with level 1 isolation */
     /* Secure SST test cases */
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
@@ -30,6 +38,7 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_invert_interface, 0, 0, 0},
 #endif /* TFM_PARTITION_TEST_CORE*/
 #endif /* SERVICES_TEST_S */
+#endif /* TFM_LVL == 3 */
 };
 
 static void setup_integ_test(void)
@@ -39,12 +48,14 @@ static void setup_integ_test(void)
      */
 }
 
+#if TFM_LVL == 1
 static void tear_down_integ_test(void)
 {
     /* Leave the SST area clean after execute the tests */
     sst_system_wipe_all();
     sst_system_prepare();
 }
+#endif /* TFM_LVL == 1 */
 
 void start_integ_test(void)
 {
@@ -52,5 +63,7 @@ void start_integ_test(void)
     integ_test("Secure",
                test_suites,
                sizeof(test_suites)/sizeof(test_suites[0]));
+#if TFM_LVL == 1
     tear_down_integ_test();
+#endif /* TFM_LVL == 1 */
 }

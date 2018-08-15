@@ -11,6 +11,8 @@ elseif(NOT DEFINED CORE_TEST)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: CORE_TEST not defined, Include this file from a Config*.cmake")
 elseif(NOT DEFINED BL2)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: BL2 not defined, Include this file from a Config*.cmake")
+elseif(NOT DEFINED TFM_LVL)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_LVL not defined, Include this file from a Config*.cmake")
 endif()
 
 if(NOT DEFINED COMPILER)
@@ -94,6 +96,7 @@ set (TFM_PARTITION_TEST_SST OFF)
 set (TEST_FRAMEWORK_S OFF)
 set (REFERENCE_PLATFORM OFF)
 set (TFM_PARTITION_TEST_SECURE_SERVICES OFF)
+set (SERVICES_TEST_ENABLED OFF)
 
 if(${TARGET_PLATFORM} STREQUAL "AN521" OR ${TARGET_PLATFORM} STREQUAL "AN519")
 	set (REFERENCE_PLATFORM ON)
@@ -104,13 +107,8 @@ endif()
 # Option to demonstrate usage of secure-only peripheral
 set (SECURE_UART1 OFF)
 
-# TF-M isolation level: 1..3, default is 1
-set (TFM_LVL 1)
-
 if (REGRESSION)
 	set(SERVICES_TEST_ENABLED ON)
-else()
-	set(SERVICES_TEST_ENABLED OFF)
 endif()
 
 if (SERVICES_TEST_ENABLED)
@@ -124,7 +122,6 @@ endif()
 if (CORE_TEST)
 	set(CORE_TEST_POSITIVE ON)
 	set(CORE_TEST_INTERACTIVE OFF)
-	set(TFM_LVL 3)
 endif()
 
 if (CORE_TEST_INTERACTIVE)
@@ -144,12 +141,12 @@ if (SERVICE_TEST_S)
 	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
 	set(TEST_FRAMEWORK_S ON)
 	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
+	set(TFM_PARTITION_TEST_SST ON)
 endif()
 
 if (SERVICE_TEST_NS)
 	add_definitions(-DSERVICES_TEST_NS)
 	set(TEST_FRAMEWORK_NS ON)
-	set(TFM_PARTITION_TEST_SST ON)
 endif()
 
 if (TEST_FRAMEWORK_S)

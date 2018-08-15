@@ -16,7 +16,21 @@
 #include "test/suites/core/non_secure/core_ns_tests.h"
 
 static struct test_suite_t test_suites[] = {
+#if TFM_LVL == 3
 #ifdef SERVICES_TEST_NS
+    /* List test cases which compliant with level 3 isolation */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    /* Non-secure invert test cases */
+    /* Note: since this is sample code, only run if test services are enabled */
+    {&register_testsuite_ns_invert_interface, 0, 0, 0},
+#endif
+#endif /* SERVICES_TEST_NS */
+
+#else /* TFM_LVL == 3 */
+
+#ifdef SERVICES_TEST_NS
+    /* List test cases which compliant with level 1 isolation */
     /* Non-secure SST test cases */
     {&register_testsuite_ns_sst_interface, 0, 0, 0},
     {&register_testsuite_ns_sst_policy, 0, 0, 0},
@@ -34,7 +48,8 @@ static struct test_suite_t test_suites[] = {
     /* Note: since this is sample code, only run if test services are enabled */
     {&register_testsuite_ns_invert_interface, 0, 0, 0},
 #endif
-#endif
+#endif /* SERVICES_TEST_NS */
+#endif /* TFM_LVL == 3 */
 
 #ifdef CORE_TEST_POSITIVE
     /* Non-secure core test cases */

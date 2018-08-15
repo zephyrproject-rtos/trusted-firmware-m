@@ -36,7 +36,7 @@ enum psa_sst_err_t sst_test_service_sfn_setup(void)
 {
     enum psa_sst_err_t err;
     const uint32_t key_uuid = SST_ASSET_ID_AES_KEY_128;
-    uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE] = SST_TEST_SERVICE_KEY;
+    static uint8_t key_data[SST_TEST_SERVICE_KEY_SIZE] = SST_TEST_SERVICE_KEY;
 
 
     /* Create the key asset using our secure app ID */
