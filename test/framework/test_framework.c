@@ -26,8 +26,7 @@ static void test_failed(const struct test_result_t *ret)
         }
     }
 
-    printf("  TEST FAILED!");
-    printf("\r\n");
+    printf("  TEST FAILED!\r\n");
 }
 
 static void print_error(const char *err_msg)

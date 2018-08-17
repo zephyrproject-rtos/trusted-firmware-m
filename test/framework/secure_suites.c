@@ -12,6 +12,7 @@
 /* Service specific includes */
 #include "test/suites/sst/secure/sst_tests.h"
 #include "test/suites/audit/secure/audit_s_tests.h"
+#include "test/suites/attestation/secure/attestation_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
 #include "test/suites/crypto/secure/crypto_s_tests.h"
 
@@ -21,6 +22,8 @@ static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
 #ifdef SERVICES_TEST_S
     /* List test cases which compliant with level 3 isolation */
+    /* Secure initial attestation service test cases */
+    {&register_testsuite_s_attestation_interface, 0, 0, 0},
 #endif /* SERVICES_TEST_S */
 
 #else /* TFM_LVL == 3 */
@@ -40,6 +43,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Crypto test cases */
     {&register_testsuite_s_crypto_interface, 0, 0, 0},
+
+    /* Secure initial attestation service test cases */
+    {&register_testsuite_s_attestation_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */

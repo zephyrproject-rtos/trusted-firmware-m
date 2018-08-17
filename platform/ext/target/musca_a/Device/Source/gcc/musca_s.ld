@@ -321,6 +321,7 @@ SECTIONS
         *arm_uart_drv.*(.text*)
         *uart_pl011_drv.*(.text*)
         *secure_suites.*(.text*)
+        *attestation_s_interface_testsuite.*(.text*)
         *tfm_secure_client_service.*(.rodata*)
         *test_framework*(.rodata*)
         *uart_stdout.*(.rodata*)
@@ -328,6 +329,7 @@ SECTIONS
         *arm_uart_drv.*(.rodata*)
         *uart_pl011_drv.*(.rodata*)
         *secure_suites.*(.rodata*)
+        *attestation_s_interface_testsuite.*(.rodata*)
         *(TFM_SP_SECURE_TEST_PARTITION_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
@@ -674,6 +676,7 @@ SECTIONS
         *arm_uart_drv.*(.data*)
         *uart_pl011_drv.*(.data*)
         *secure_suites.*(.data*)
+        *attestation_s_interface_testsuite.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$RW$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_DATA);
@@ -688,6 +691,7 @@ SECTIONS
         *arm_uart_drv.*(.bss*)
         *uart_pl011_drv.*(.bss*)
         *secure_suites.*(.bss*)
+        *attestation_s_interface_testsuite.*(.bss*)
         *tfm_secure_client_service.*(COMMON)
         *test_framework*(COMMON)
         *uart_stdout.*(COMMON)
@@ -695,6 +699,7 @@ SECTIONS
         *arm_uart_drv.*(COMMON)
         *uart_pl011_drv.*(COMMON)
         *secure_suites.*(COMMON)
+        *attestation_s_interface_testsuite.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS);
