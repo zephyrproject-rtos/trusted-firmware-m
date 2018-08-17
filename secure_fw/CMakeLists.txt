@@ -136,6 +136,7 @@ function(set_up_secure_fw_build)
 	add_dependencies(${EXE_NAME} tfm_audit)
 	add_dependencies(${EXE_NAME} tfm_platform)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
+	add_dependencies(${EXE_NAME} tfm_attest)
 
 	#Set macro definitions for the project.
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} DAUTH_CHIP_DEFAULT APPEND)
@@ -144,14 +145,14 @@ function(set_up_secure_fw_build)
 		#The test service veneers may not be referenced in the secure binary so the
 		#veneer objects are explicitly loaded from the secure tests library.
 		if(${COMPILER} STREQUAL "ARMCLANG")
-			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
 		elseif(${COMPILER} STREQUAL "GNUARM")
-			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit tfm_platform)
+			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 		else()
 			message(FATAL_ERROR "unknown compiler" )
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform)
+		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 	endif()
 
 
@@ -260,6 +261,9 @@ add_subdirectory(${SECURE_FW_DIR}/services/audit_logging)
 
 #Add the platform service library target
 add_subdirectory(${SECURE_FW_DIR}/services/platform)
+
+#Add the initial attestation service library target
+add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
 
 if (LINK_TO_BOTH_MEMORY_REGION)
 	#Link to primary memory region

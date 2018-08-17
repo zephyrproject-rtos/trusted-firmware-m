@@ -44,6 +44,14 @@
       "version_minor": 1
     },
     {
+      "name": "TFM Initial Attestation Service",
+      "short_name": "TFM_Init_Attest",
+      "manifest": "secure_fw/services/initial_attestation/manifest.yaml",
+      "tfm_extensions": true,
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
       "name": "TFM Core Test Service",
       "short_name": "TFM_Core_Test",
       "manifest": "test/test_services/tfm_core_test/manifest.yaml",

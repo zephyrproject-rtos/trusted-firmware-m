@@ -26,7 +26,8 @@ endif()
 set (SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_sst_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_audit_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_crypto_veneers.c"
-                          "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c")
+                          "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c"
+                          "${CMAKE_CURRENT_LIST_DIR}/tfm_initial_attestation_veneers.c")
 
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C ${SS_NS_CALLABLE_C_SRC})

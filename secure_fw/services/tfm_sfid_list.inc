@@ -49,6 +49,9 @@
     /******** TFM_SP_PLATFORM ********/
     {platform_sp_system_reset, TFM_SP_PLATFORM_SYSTEM_RESET_SFID},
 
+    /******** TFM_SP_INITIAL_ATTESTATION ********/
+    {attest_get_token, TFM_ATTEST_GET_TOKEN_SFID},
+
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
     {spm_core_test_sfn, TFM_CORE_TEST_SFN_SFID},
