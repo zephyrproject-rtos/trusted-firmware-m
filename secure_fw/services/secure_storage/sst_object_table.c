@@ -288,14 +288,14 @@ __STATIC_INLINE psa_ps_status_t sst_object_table_fs_write_table(
 static psa_ps_status_t sst_object_table_set_crypto_key(void)
 {
     psa_ps_status_t err;
-    uint8_t sst_key[SST_KEY_LEN_BYTES];   /*!< Secure storage system key */
+    static uint8_t sst_key[SST_KEY_LEN_BYTES]; /*!< Secure storage system key */
 
-    err = sst_crypto_getkey(sst_key, SST_KEY_LEN_BYTES);
+    err = sst_crypto_getkey(SST_KEY_LEN_BYTES, sst_key);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
-    err = sst_crypto_setkey(sst_key, SST_KEY_LEN_BYTES);
+    err = sst_crypto_setkey(SST_KEY_LEN_BYTES, sst_key);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }

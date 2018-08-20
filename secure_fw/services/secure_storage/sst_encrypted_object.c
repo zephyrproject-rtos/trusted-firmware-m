@@ -7,6 +7,8 @@
 
 #include "sst_encrypted_object.h"
 
+#include <stddef.h>
+
 #include "crypto/sst_crypto_interface.h"
 #include "flash_fs/sst_flash_fs.h"
 #include "sst_object_defs.h"
@@ -41,13 +43,13 @@ static psa_ps_status_t sst_object_set_encryption_key(void)
     static uint8_t sst_encryption_key[SST_KEY_LEN_BYTES];
 
     /* Get the encryption key */
-    err = sst_crypto_getkey(sst_encryption_key, SST_KEY_LEN_BYTES);
+    err = sst_crypto_getkey(SST_KEY_LEN_BYTES, sst_encryption_key);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     /* Set the key to be used for crypto operations */
-    err = sst_crypto_setkey(sst_encryption_key, SST_KEY_LEN_BYTES);
+    err = sst_crypto_setkey(SST_KEY_LEN_BYTES, sst_encryption_key);
 
     return err;
 }
@@ -86,8 +88,8 @@ static psa_ps_status_t sst_object_auth_decrypt(uint32_t fid,
                                       (const uint8_t *)&fid,
                                       sizeof(fid),
                                       p_obj_data,
-                                      sst_crypto_buf,
-                                      cur_size);
+                                      cur_size,
+                                      sst_crypto_buf);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -137,8 +139,8 @@ static psa_ps_status_t sst_object_auth_encrypt(uint32_t fid,
                                      (const uint8_t *)&fid,
                                      sizeof(fid),
                                      p_obj_data,
-                                     sst_crypto_buf,
-                                     cur_size);
+                                     cur_size,
+                                     sst_crypto_buf);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }

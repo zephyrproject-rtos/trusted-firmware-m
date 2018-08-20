@@ -47,7 +47,7 @@ psa_ps_status_t sst_crypto_init(void)
     return PSA_PS_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_getkey(uint8_t *key, size_t key_len)
+psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key)
 {
     enum tfm_plat_err_t err;
 
@@ -67,7 +67,7 @@ psa_ps_status_t sst_crypto_getkey(uint8_t *key, size_t key_len)
     return PSA_PS_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
+psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key)
 {
     int32_t err;
 
@@ -125,13 +125,14 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
     sst_utils_memcpy((sst_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
     /* Update the caller buffer */
     sst_utils_memcpy(crypto->ref.iv, sst_crypto_iv_buf, SST_IV_LEN_BYTES);
-
 }
 
 psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
-                                           const uint8_t *add, size_t add_len,
-                                           const uint8_t *in, uint8_t *out,
-                                           size_t len)
+                                           const uint8_t *add,
+                                           uint32_t add_len,
+                                           const uint8_t *in,
+                                           uint32_t len,
+                                           uint8_t *out)
 {
     int32_t err;
 
@@ -147,9 +148,11 @@ psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
 }
 
 psa_ps_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
-                                            const uint8_t *add, size_t add_len,
-                                            const uint8_t *in, uint8_t *out,
-                                            size_t len)
+                                            const uint8_t *add,
+                                            uint32_t add_len,
+                                            const uint8_t *in,
+                                            uint32_t len,
+                                            uint8_t *out)
 {
     int32_t err;
 
@@ -175,7 +178,8 @@ psa_ps_status_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
 }
 
 psa_ps_status_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
-                                        const uint8_t *add, uint32_t add_len)
+                                        const uint8_t *add,
+                                        uint32_t add_len)
 {
     uint32_t ret;
 

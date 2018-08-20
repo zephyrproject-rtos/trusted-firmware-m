@@ -12,7 +12,6 @@
 extern "C" {
 #endif
 
-#include <stddef.h>
 #include <stdint.h>
 #include "psa_protected_storage.h"
 
@@ -43,22 +42,22 @@ psa_ps_status_t sst_crypto_init(void);
 /**
  * \brief Gets a key for specific client id
  *
- * \param[out] key      Cryptographic key
  * \param[in]  key_len  Key len
+ * \param[out] key      Cryptographic key
  *
  * \return Returns values as described in \ref psa_ps_status_t
  */
-psa_ps_status_t sst_crypto_getkey(uint8_t *key, size_t key_len);
+psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key);
 
 /**
  * \brief Sets key for crypto operations
  *
- * \param[in] key      Cryptographic key
  * \param[in] key_len  Key len
+ * \param[in] key      Cryptographic key
  *
  * \return Returns values as described in \ref psa_ps_status_t
  */
-psa_ps_status_t sst_crypto_setkey(const uint8_t *key, size_t key_len);
+psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key);
 
 /**
  * \brief Encrypts and tag the given plain text data.
@@ -67,17 +66,17 @@ psa_ps_status_t sst_crypto_setkey(const uint8_t *key, size_t key_len);
  * \param[in]     add      Starting address of the associated data
  * \param[in]     add_len  Length of the associated data
  * \param[in]     in       Pointer to the input data
- * \param[out]    out      Buffer pointer to store the encrypted data
  * \param[in]     len      Input and output buffer lengths
+ * \param[out]    out      Buffer pointer to store the encrypted data
  *
  * \return Returns values as described in \ref psa_ps_status_t
  */
 psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
                                            const uint8_t *add,
-                                           size_t add_len,
+                                           uint32_t add_len,
                                            const uint8_t *in,
-                                           uint8_t *out,
-                                           size_t len);
+                                           uint32_t len,
+                                           uint8_t *out);
 
 /**
  * \brief Decrypts and checks the given encrypted data.
@@ -86,17 +85,17 @@ psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
  * \param[in]  add      Starting address of the associated data
  * \param[in]  add_len  Length of the associated data
  * \param[in]  in       Pointer to the input data
- * \param[out] out      Buffer pointer to store the encrypted data
  * \param[in]  len      Input and output buffer lengths
+ * \param[out] out      Buffer pointer to store the encrypted data
  *
  * \return Returns values as described in \ref psa_ps_status_t
  */
 psa_ps_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
                                             const uint8_t *add,
-                                            size_t add_len,
+                                            uint32_t add_len,
                                             const uint8_t *in,
-                                            uint8_t *out,
-                                            size_t len);
+                                            uint32_t len,
+                                            uint8_t *out);
 
 /**
  * \brief Generates authentication MAC value for give data
