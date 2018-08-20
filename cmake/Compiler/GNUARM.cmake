@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -37,6 +37,8 @@ macro(__compiler_gnuarm lang)
     set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
     set(CMAKE_STATIC_LIBRARY_PREFIX_${lang} "")
     set(CMAKE_STATIC_LIBRARY_SUFFIX_${lang} ".a")
+
+    set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")
 
     set(CMAKE_${lang}_LINK_EXECUTABLE      "<CMAKE_LINKER> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES> -o <TARGET> -Xlinker -Map=<TARGET_BASE>.map")
     set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_AR> rsc <TARGET> <LINK_FLAGS> <OBJECTS>")
