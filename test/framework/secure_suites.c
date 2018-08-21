@@ -11,7 +11,7 @@
 
 /* Service specific includes */
 #include "test/suites/sst/secure/sst_tests.h"
-#include "test/suites/log/secure/log_s_tests.h"
+#include "test/suites/audit/secure/audit_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
 #include "secure_fw/services/secure_storage/sst_object_system.h"
 
@@ -21,8 +21,8 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
 
-    /* Secure LOG test cases */
-    {&register_testsuite_s_log_interface, 0, 0, 0},
+    /* Secure Audit Logging test cases */
+    {&register_testsuite_s_audit_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */

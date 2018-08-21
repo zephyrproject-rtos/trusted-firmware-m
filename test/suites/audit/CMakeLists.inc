@@ -27,8 +27,8 @@ endif()
 if (NOT DEFINED ENABLE_AUDIT_LOGGING_SERVICE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_AUDIT_LOGGING_SERVICE_TESTS is undefined. ")
 elseif(ENABLE_AUDIT_LOGGING_SERVICE_TESTS)
-	list(APPEND ALL_SRC_C_S "${AUDIT_LOGGING_TEST_DIR}/secure/log_s_interface_testsuite.c")
-	list(APPEND ALL_SRC_C_NS "${AUDIT_LOGGING_TEST_DIR}/non_secure/log_ns_interface_testsuite.c")
+	list(APPEND ALL_SRC_C_S "${AUDIT_LOGGING_TEST_DIR}/secure/audit_s_interface_testsuite.c")
+	list(APPEND ALL_SRC_C_NS "${AUDIT_LOGGING_TEST_DIR}/non_secure/audit_ns_interface_testsuite.c")
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)

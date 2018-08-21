@@ -19,46 +19,55 @@
     {
       "name": "TFM_PERIPHERAL_UART1",
       "permission": "READ-WRITE",
-      "conditional": "LOG_UART_REDIRECTION"
+      "conditional": "AUDIT_UART_REDIRECTION"
     }
   ],
-  "tfm_init_symbol": "log_core_init",
+  "tfm_init_symbol": "audit_core_init",
   "secure_functions": [
     {
-      "sfid": "TFM_LOG_RETRIEVE_SFID",
-      "signal": "TFM_LOG_RETRIEVE",
-      "tfm_symbol": "log_core_retrieve",
+      "sfid": "TFM_AUDIT_RETRIEVE_RECORD_SFID",
+      "signal": "TFM_AUDIT_RETRIEVE_RECORD",
+      "tfm_symbol": "audit_core_retrieve_record",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_LOG_ADD_LINE_SFID",
-      "signal": "TFM_LOG_ADD_LINE",
-      "tfm_symbol": "log_core_add_line",
+      "sfid": "TFM_AUDIT_ADD_RECORD_SFID",
+      "signal": "TFM_AUDIT_ADD_RECORD",
+      "tfm_symbol": "audit_core_add_record",
       "non_secure_clients": false,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_LOG_GET_INFO_SFID",
-      "signal": "TFM_LOG_GET_INFO",
-      "tfm_symbol": "log_core_get_info",
+      "sfid": "TFM_AUDIT_GET_INFO_SFID",
+      "signal": "TFM_AUDIT_GET_INFO",
+      "tfm_symbol": "audit_core_get_info",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_LOG_DELETE_ITEMS_SFID",
-      "signal": "TFM_LOG_DELETE_ITEMS",
-      "tfm_symbol": "log_core_delete_items",
+      "sfid": "TFM_AUDIT_GET_RECORD_INFO_SFID",
+      "signal": "TFM_AUDIT_GET_RECORD_INFO",
+      "tfm_symbol": "audit_core_get_record_info",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_AUDIT_DELETE_RECORD_SFID",
+      "signal": "TFM_AUDIT_DELETE_RECORD",
+      "tfm_symbol": "audit_core_delete_record",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     }
   ],
   "source_files": [
-    "log_core.c"
+    "audit_core.c",
+    "audit_wrappers.c"
   ],
   "tfm_linker_pattern": {
     "library_list": [

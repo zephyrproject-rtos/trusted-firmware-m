@@ -8,21 +8,21 @@
 #include <stdint.h>
 #include <string.h>
 #include <stddef.h>
-#include "log_core.h"
-#include "tfm_log_defs.h"
+#include "audit_core.h"
+#include "psa_audit_defs.h"
 #include "tfm_secure_api.h"
 
 /*!
- * \def LOG_UART_REDIRECTION
+ * \def AUDIT_UART_REDIRECTION
  *
  * \brief If set to 1 by the build system, UART redirection is enabled. Keep it
  *        disabled by default.
  */
-#ifndef LOG_UART_REDIRECTION
-#define LOG_UART_REDIRECTION (0U)
+#ifndef AUDIT_UART_REDIRECTION
+#define AUDIT_UART_REDIRECTION (0U)
 #endif
 
-#if (LOG_UART_REDIRECTION == 1U)
+#if (AUDIT_UART_REDIRECTION == 1U)
 /* CMSIS Driver for UART */
 #include "Driver_USART.h"
 
@@ -123,7 +123,7 @@ struct log_vars {
                                 in chronological order */
     uint32_t last_el_idx;  /*!< Index in the log of the last element
                                 in chronological order */
-    uint32_t num_items;    /*!< Indicates the number of items
+    uint32_t num_records;  /*!< Indicates the number of records
                                 currently stored in the log. It has to be
                                 zero after a reset, i.e. log is empty */
     uint32_t stored_size;  /*!< Indicates the total size of the items
@@ -216,27 +216,27 @@ uint32_t GET_NEXT_LOG_INDEX(const uint32_t idx)
 
 /*!
  * \brief Static function to update the state variables of the log after the
- *        addition of a new log line of a given size
+ *        addition of a new log record of a given size
  *
  * \param[in] first_el_idx First element index
  * \param[in] last_el_idx  Last element index
  * \param[in] stored_size  New value of the stored size
- * \param[in] num_items    Number of elements stored
+ * \param[in] num_records  Number of elements stored
  *
  */
-static void log_update_state(const uint32_t first_el_idx,
-                             const uint32_t last_el_idx,
-                             const uint32_t stored_size,
-                             const uint32_t num_items)
+static void audit_update_state(const uint32_t first_el_idx,
+                               const uint32_t last_el_idx,
+                               const uint32_t stored_size,
+                               const uint32_t num_records)
 {
     /* Update the indexes */
     log_state.first_el_idx = first_el_idx;
     log_state.last_el_idx = last_el_idx;
 
-    /* Update the items*/
-    log_state.num_items = num_items;
+    /* Update the number of records stored */
+    log_state.num_records = num_records;
 
-    /* Update the size of the stored items */
+    /* Update the size of the stored records */
     log_state.stored_size = stored_size;
 }
 
@@ -245,14 +245,14 @@ static void log_update_state(const uint32_t first_el_idx,
  *        into the log. It will replace items based on "older entries first"
  *        policy in case not enough space is available in the log
  *
- * \param[in]  size  Size of the line we need to fit
+ * \param[in]  size  Size of the record we need to fit
  * \param[out] begin Pointer to the index to begin
  * \param[out] end   Pointer to the index to end
  *
  */
-static void log_replace_item(const uint32_t size,
-                             uint32_t *begin,
-                             uint32_t *end)
+static void audit_replace_record(const uint32_t size,
+                                 uint32_t *begin,
+                                 uint32_t *end)
 {
     uint32_t first_el_idx = 0, last_el_idx = 0;
     uint32_t num_items = 0, stored_size = 0;
@@ -261,7 +261,7 @@ static void log_replace_item(const uint32_t size,
     /* Retrieve the current state variables of the log */
     first_el_idx = log_state.first_el_idx;
     last_el_idx = log_state.last_el_idx;
-    num_items = log_state.num_items;
+    num_items = log_state.num_records;
     stored_size = log_state.stored_size;
 
     /* If there is not enough size, remove older entries */
@@ -296,27 +296,27 @@ static void log_replace_item(const uint32_t size,
     *end = stop_pos;
 
     /* Update the state with the new values of variables */
-    log_update_state(first_el_idx, last_el_idx, stored_size, num_items);
+    audit_update_state(first_el_idx, last_el_idx, stored_size, num_items);
 }
 
 /*!
  * \brief Static function to perform memory copying into the log buffer. It
  *        takes into account circular wrapping on the log buffer size.
  *
- * \param[in] dest Pointer to the destination buffer
- * \param[in] src  Pointer to the source buffer
- * \param[in] size Size in bytes to be copied
+ * \param[in]  src  Pointer to the source buffer
+ * \param[in]  size Size in bytes to be copied
+ * \param[out] dest Pointer to the destination buffer
  *
  */
-static enum tfm_log_err log_buffer_copy(uint8_t *dest,
-                                        const uint8_t *src,
-                                        const uint32_t size)
+static enum psa_audit_err audit_buffer_copy(const uint8_t *src,
+                                            const uint32_t size,
+                                            uint8_t *dest)
 {
     uint32_t idx = 0;
     uint32_t dest_idx = (uint32_t)dest - (uint32_t)&log_buffer[0];
 
     if ((dest_idx >= LOG_SIZE) || (size > LOG_SIZE)) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
     /* TODO: This can be an optimized copy using uint32_t
@@ -328,20 +328,20 @@ static enum tfm_log_err log_buffer_copy(uint8_t *dest,
         log_buffer[(dest_idx + idx) % LOG_SIZE] = src[idx];
     }
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
 /*!
  * \brief Static function to emulate memcpy
  *
- * \param[out] dest Pointer to the destination buffer
  * \param[in]  src  Pointer to the source buffer
  * \param[in]  size Size in bytes to be copied
+ * \param[out] dest Pointer to the destination buffer
  *
  */
-static enum tfm_log_err log_memcpy(uint8_t *dest,
-                                   const uint8_t *src,
-                                   const uint32_t size)
+static enum psa_audit_err audit_memcpy(const uint8_t *src,
+                                       const uint32_t size,
+                                       uint8_t *dest)
 {
     uint32_t idx = 0;
 
@@ -349,25 +349,26 @@ static enum tfm_log_err log_memcpy(uint8_t *dest,
         dest[idx] = src[idx];
     }
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
 /*!
  * \brief Static function to format a log entry before the addition to the log
  *
+ * \param[in]  record Pointer to the record to be added
  * \param[out] buffer Pointer to the buffer to format
- * \param[in]  line   Pointer to the line to be added
  *
  */
-static enum tfm_log_err log_format_buffer(uint64_t *buffer,
-                                          const struct tfm_log_line *line)
+static enum psa_audit_err audit_format_buffer(
+                                          const struct psa_audit_record *record,
+                                          uint64_t *buffer)
 {
     struct log_hdr *hdr = NULL;
     struct log_tlr *tlr = NULL;
     uint32_t size, idx;
 
-    /* Get the size from the log line */
-    size = line->size;
+    /* Get the size from the record */
+    size = record->size;
 
     /* Format the scratch buffer with the complete log item */
     hdr = (struct log_hdr *) buffer;
@@ -379,10 +380,10 @@ static enum tfm_log_err log_format_buffer(uint64_t *buffer,
     hdr->iv_counter = 0;
     hdr->partition_id = DUMMY_PARTITION_ID;
 
-    /* Copy the log line into the scratch buffer */
-    log_memcpy( (uint8_t *) &(hdr->size),
-                (const uint8_t *) line,
-                size+4 );
+    /* Copy the record into the scratch buffer */
+    audit_memcpy( (const uint8_t *) record,
+                  size+4,
+                  (uint8_t *) &(hdr->size) );
 
     /* FIXME: The MAC here is just a dummy value for prototyping. It will be
      *        filled by a call to the crypto interface directly when available.
@@ -392,7 +393,7 @@ static enum tfm_log_err log_format_buffer(uint64_t *buffer,
         tlr->mac[idx] = idx;
     }
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
 /*!
@@ -405,9 +406,9 @@ static enum tfm_log_err log_format_buffer(uint64_t *buffer,
  *            to UART
  *
  */
-static void log_uart_redirection(const uint32_t start_idx)
+static void audit_uart_redirection(const uint32_t start_idx)
 {
-#if (LOG_UART_REDIRECTION == 1U)
+#if (AUDIT_UART_REDIRECTION == 1U)
     uint32_t size = *GET_SIZE_FIELD_POINTER(start_idx);
     uint8_t end_of_line[] = {'\r', '\n'};
     uint32_t idx = 0;
@@ -431,20 +432,20 @@ static void log_uart_redirection(const uint32_t start_idx)
  */
 
 /*!@{*/
-enum tfm_log_err log_core_init(void)
+enum psa_audit_err audit_core_init(void)
 {
-#if (LOG_UART_REDIRECTION == 1U)
+#if (AUDIT_UART_REDIRECTION == 1U)
     int32_t ret = ARM_DRIVER_OK;
 
     ret = LOG_UART_NAME.Initialize(NULL);
     if (ret != ARM_DRIVER_OK) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
     ret = LOG_UART_NAME.Control(ARM_USART_MODE_ASYNCHRONOUS,
                                 LOG_UART_BAUD_RATE);
     if (ret != ARM_DRIVER_OK) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
     /* If we get to this point, UART init is successful */
@@ -452,93 +453,130 @@ enum tfm_log_err log_core_init(void)
 #endif
 
     /* Clear the log state variables */
-    log_update_state(0,0,0,0);
+    audit_update_state(0,0,0,0);
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_delete_items(const uint32_t num_items,
-                                       uint32_t *rem_items)
+enum psa_audit_err audit_core_delete_record(const uint32_t record_index,
+                                            const uint8_t *token,
+                                            const uint32_t token_size)
 {
-    uint32_t first_el_idx = 0, idx = 0;
+    uint32_t first_el_idx, size_removed;
 
-    if (rem_items == NULL) {
-        return TFM_LOG_ERR_FAILURE;
+    /* FixMe: Currently only the removal of the oldest entry, i.e.
+     *        record_index 0, is supported. This has to be extended
+     *        to support removal of random records
+     */
+    if (record_index > 0) {
+        return PSA_AUDIT_ERR_NOT_SUPPORTED;
     }
 
-    /* This means to delete all items in the log */
-    if (num_items >= log_state.num_items) {
+    /* FixMe: Currently token and token_size parameters are not evaluated
+     *        to check if the removal of the desired record_index is
+     *        authorised
+     */
+    if ((token != NULL) || (token_size != 0)) {
+        return PSA_AUDIT_ERR_NOT_SUPPORTED;
+    }
 
-        /* Update the number of removed items (all of them) */
-        *rem_items = log_state.num_items;
+    /* Check that the record index to be removed is contained in the log */
+    if (record_index >= log_state.num_records) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
+
+    /* If the log contains just one element, reset the state and return */
+    if (log_state.num_records == 1) {
 
         /* Clear the log state variables */
-        log_update_state(0,0,0,0);
+        audit_update_state(0,0,0,0);
 
-        return TFM_LOG_ERR_SUCCESS;
+        return PSA_AUDIT_ERR_SUCCESS;
     }
 
-    /* Get the index of the first element */
+    /* Get the index to the element to be removed */
     first_el_idx = log_state.first_el_idx;
 
-    /* Removing items means discarding items at the head */
-    for (idx = 0; idx < num_items; idx++) {
-        first_el_idx = GET_NEXT_LOG_INDEX(first_el_idx);
+    /* Get the size of the element that is being removed */
+    size_removed = COMPUTE_LOG_ENTRY_SIZE(
+                                         *GET_SIZE_FIELD_POINTER(first_el_idx));
+
+    /* Remove the oldest entry, it means moving the first element to the
+     * next log index */
+    first_el_idx = GET_NEXT_LOG_INDEX(first_el_idx);
+
+    /* Update the state with the new head and decrease the number of records
+     * currently stored and the new size of the stored records */
+    log_state.first_el_idx = first_el_idx;
+    log_state.num_records--;
+    log_state.stored_size -= size_removed;
+
+    return PSA_AUDIT_ERR_SUCCESS;
+}
+
+enum psa_audit_err audit_core_get_info(uint32_t *num_records,
+                                       uint32_t *size)
+{
+    /* Return the number of records that are currently stored */
+    *num_records = log_state.num_records;
+
+    /* Return the size of the records currently stored */
+    *size = log_state.stored_size;
+
+    return PSA_AUDIT_ERR_SUCCESS;
+}
+
+enum psa_audit_err audit_core_get_record_info(const uint32_t record_index,
+                                              uint32_t *size)
+{
+    uint32_t start_idx, idx;
+
+    if (record_index >= log_state.num_records) {
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
-    /* Update the state with the new head and number of items */
-    log_state.first_el_idx = first_el_idx;
-    log_state.num_items -= num_items;
+    /* First element to read from the log */
+    start_idx = log_state.first_el_idx;
 
-    /* Update the number of removed items */
-    *rem_items = num_items;
+    /* Move the start_idx index to the desired element */
+    for (idx=0; idx<record_index; idx++) {
+        start_idx = GET_NEXT_LOG_INDEX(start_idx);
+    }
 
-    return TFM_LOG_ERR_SUCCESS;
+    /* Get the size of the requested record */
+    *size = COMPUTE_LOG_ENTRY_SIZE(*GET_SIZE_FIELD_POINTER(start_idx));
+
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_get_info(struct tfm_log_info *info)
+enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
 {
-    /* Return the size of the items currently stored */
-    info->size = log_state.stored_size;
-
-    /* Return the number of items that are currently stored */
-    info->num_items = log_state.num_items;
-
-    return TFM_LOG_ERR_SUCCESS;
-}
-
-enum tfm_log_err log_core_add_line(const struct tfm_log_line *line)
-{
-    struct tfm_log_info info;
-
     uint32_t start_pos = 0, stop_pos = 0;
     uint32_t first_el_idx = 0, last_el_idx = 0, size = 0;
     uint32_t num_items = 0, stored_size = 0;
 
     /* Check that the request comes from the secure world */
     if (tfm_core_validate_secure_caller() != TFM_SUCCESS) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
-    /* Read the size from the input line */
-    size = line->size;
+    /* Read the size from the input record */
+    size = record->size;
 
     /* Check that size is a 4-byte multiple as expected */
     if (size % 4) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
     /* Check that the entry to be added is not greater than the
      * maximum space available
      */
     if (size > (LOG_SIZE - (LOG_FIXED_FIELD_SIZE+LOG_MAC_SIZE))) {
-        return TFM_LOG_ERR_FAILURE;
+        return PSA_AUDIT_ERR_FAILURE;
     }
 
     /* Get the size in bytes and num of elements present in the log */
-    log_core_get_info(&info);
-    num_items = info.num_items;
-    stored_size = info.size;
+    audit_core_get_info(&num_items, &stored_size);
 
     if (num_items == 0) {
 
@@ -550,22 +588,24 @@ enum tfm_log_err log_core_add_line(const struct tfm_log_line *line)
         /* The log is not empty, need to decide the candidate position
          * and invalidate older entries in case there is not enough space
          */
-        log_replace_item(COMPUTE_LOG_ENTRY_SIZE(size), &start_pos, &stop_pos);
+        audit_replace_record(COMPUTE_LOG_ENTRY_SIZE(size),
+                             &start_pos,
+                             &stop_pos);
     }
 
     /* Format the scratch buffer with the complete log item */
-    log_format_buffer(&scratch_buffer[0], line);
+    audit_format_buffer(record, &scratch_buffer[0]);
 
     /* TODO: At this point, encryption should be called if supported */
 
-    /* Do the copy of the log line to be added in the log */
-    log_buffer_copy( (uint8_t *) &log_buffer[start_pos],
-                     (const uint8_t *) &scratch_buffer[0],
-                     COMPUTE_LOG_ENTRY_SIZE(size) );
+    /* Do the copy of the log item to be added in the log */
+    audit_buffer_copy( (const uint8_t *) &scratch_buffer[0],
+                       COMPUTE_LOG_ENTRY_SIZE(size),
+                       (uint8_t *) &log_buffer[start_pos] );
 
     /* Retrieve current log state */
     first_el_idx = log_state.first_el_idx;
-    num_items = log_state.num_items;
+    num_items = log_state.num_records;
     stored_size = log_state.stored_size;
 
     /* The last element is the one we just added */
@@ -576,144 +616,68 @@ enum tfm_log_err log_core_add_line(const struct tfm_log_line *line)
     stored_size += COMPUTE_LOG_ENTRY_SIZE(size);
 
     /* Update the log state */
-    log_update_state(first_el_idx, last_el_idx, stored_size, num_items);
+    audit_update_state(first_el_idx, last_el_idx, stored_size, num_items);
 
     /* TODO: At this point, we would need to update the stored copy in
      *       persistent storage. Need to define a strategy for this
      */
 
     /* Stream to a secure UART if available for the platform and built */
-    log_uart_redirection(last_el_idx);
+    audit_uart_redirection(last_el_idx);
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 
-enum tfm_log_err log_core_retrieve(const uint32_t size,
-                                   const int32_t start,
-                                   uint8_t *buffer,
-                                   struct tfm_log_info *info)
+enum psa_audit_err audit_core_retrieve_record(const uint32_t record_index,
+                                             const uint32_t buffer_size,
+                                             const uint8_t *token,
+                                             const uint32_t token_size,
+                                             uint8_t *buffer,
+                                             uint32_t *record_size)
+
 {
-    uint32_t stored_size = 0, retrieved_log_size = 0;
-    uint32_t index_first_empty_el = 0;
-    uint32_t idx, start_idx = 0, num_items = 0;
+    uint32_t idx, start_idx, record_size_tmp;
 
-    struct tfm_log_info info_stored;
+    enum psa_audit_err err;
 
-    /* size must be a non-zero value */
-    if (size == 0) {
-        info->size = 0;
-        info->num_items = 0;
-        return TFM_LOG_ERR_FAILURE;
+    /* FixMe: Currently token and token_size parameters are not evaluated
+     *        to be used as a challenge for encryption as encryption support
+     *        is still not yet available
+     */
+    if ((token != NULL) || (token_size != 0)) {
+        return PSA_AUDIT_ERR_NOT_SUPPORTED;
     }
 
-    /* Get the size in bytes and num of elements present in the log */
-    log_core_get_info(&info_stored);
-    num_items = info_stored.num_items;
-    stored_size = info_stored.size;
+    /* Get the size of the record we want to retrieve */
+    err = audit_core_get_record_info(record_index, &record_size_tmp);
 
-    /* Log is empty, but still a valid scenario */
-    if (num_items == 0) {
-        info->size = 0;
-        info->num_items = 0;
-        return TFM_LOG_ERR_SUCCESS;
+    /* Propagate the error to the caller in case of failure */
+    if (err != PSA_AUDIT_ERR_SUCCESS) {
+        return err;
     }
 
-    /* Compute the size in bytes to be retrieved */
-    retrieved_log_size = MIN(size, stored_size);
+    /* buffer_size must be enough to hold the requested record */
+    if (buffer_size < record_size_tmp) {
+        *record_size = 0;
+        return PSA_AUDIT_ERR_FAILURE;
+    }
 
     /* First element to read from the log */
     start_idx = log_state.first_el_idx;
 
-    if (start == TFM_LOG_READ_RECENT) {
-
-        /* Get the index of the first empty location */
-        index_first_empty_el = GET_NEXT_LOG_INDEX(log_state.last_el_idx);
-
-        /* If the stored log size is bigger than what we are able to retrieve,
-         * just return the latest entries that fit into the available space
-         */
-        while (retrieved_log_size < stored_size) {
-
-            start_idx = GET_NEXT_LOG_INDEX(start_idx);
-
-            /* Decrement the number of items that we will return */
-            num_items--;
-
-            stored_size = (index_first_empty_el >= start_idx) ?
-                          (index_first_empty_el - start_idx) :
-                          (LOG_SIZE - start_idx) + index_first_empty_el;
-
-            if (stored_size < retrieved_log_size) {
-                /* The retrieved log size now will be the new stored log size */
-                retrieved_log_size = stored_size;
-            }
-        }
-
-        /* size available is not enough even to retrieve a single log entry */
-        if (stored_size == 0) {
-            info->size = 0;
-            info->num_items = 0;
-            return TFM_LOG_ERR_SUCCESS;
-        }
-
-    } else if (start < num_items) {
-
-        /* Move the start_idx index to the desired element */
-        for (idx=0; idx<start; idx++) {
-            start_idx = GET_NEXT_LOG_INDEX(start_idx);
-        }
-
-        /* Initialize to the size of the first element to retrieve */
-        stored_size = COMPUTE_LOG_ENTRY_SIZE(
-                          *GET_SIZE_FIELD_POINTER(start_idx) );
-
-        /* size available is not enough even to retrieve a single log entry */
-        if (stored_size > retrieved_log_size) {
-            info->size = 0;
-            info->num_items = 0;
-            return TFM_LOG_ERR_SUCCESS;
-        }
-
-        /* Initialize the value of num_items */
-        num_items = 1;
-
-        /* Compute the total size to retrieve */
-        idx = GET_NEXT_LOG_INDEX(start_idx);
-        while ((stored_size + COMPUTE_LOG_ENTRY_SIZE(
-                    *GET_SIZE_FIELD_POINTER(idx) )) <= retrieved_log_size) {
-
-            /* Update stored_size */
-            stored_size += COMPUTE_LOG_ENTRY_SIZE(
-                               *GET_SIZE_FIELD_POINTER(idx) );
-
-            /* Increment the number of items that we will return */
-            num_items++;
-
-            /* Move to the next item to check */
-            idx = GET_NEXT_LOG_INDEX(idx);
-        }
-
-        /* The retrieved log size now will be the new stored log size */
-        retrieved_log_size = stored_size;
-
-    } else {
-
-        /* The index value is wrong */
-        info->size = 0;
-        info->num_items = 0;
-        return TFM_LOG_ERR_FAILURE;
+    /* Move the start_idx index to the desired element */
+    for (idx=0; idx<record_index; idx++) {
+        start_idx = GET_NEXT_LOG_INDEX(start_idx);
     }
 
     /* Do the copy */
-    for (idx=0; idx<retrieved_log_size; idx++) {
+    for (idx=0; idx<record_size_tmp; idx++) {
         buffer[idx] = log_buffer[(start_idx + idx) % LOG_SIZE];
     }
 
     /* Update the retrieved size */
-    info->size = retrieved_log_size;
-    /* Update the number of items returned */
-    info->num_items = num_items;
+    *record_size = record_size_tmp;
 
-    return TFM_LOG_ERR_SUCCESS;
+    return PSA_AUDIT_ERR_SUCCESS;
 }
 /*!@}*/
