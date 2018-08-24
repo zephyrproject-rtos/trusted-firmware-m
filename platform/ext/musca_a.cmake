@@ -80,6 +80,7 @@ if (NOT DEFINED BUILD_NATIVE_DRIVERS)
 elseif(BUILD_NATIVE_DRIVERS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/uart_pl011_drv.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/musca_a1_scc_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/qspi_ip6514e_drv.c")
 
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/Native_Driver/mpc_sie200_drv.c"
               "${PLATFORM_DIR}/target/musca_a/Native_Driver/ppc_sse200_drv.c")

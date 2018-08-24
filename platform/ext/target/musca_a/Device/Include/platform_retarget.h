@@ -66,4 +66,6 @@
 #define FLASH0_PAGE_SIZE              (0x00001000)  /* 4 kB */
 #define FLASH0_PROGRAM_UNIT           (0x4)         /* Minimum write size */
 
+#define QSPI_CONTROLLER_ADDRESS       (0x5010A000)
+
 #endif  /* __ARM_LTD_MUSCA_RETARGET_H__ */

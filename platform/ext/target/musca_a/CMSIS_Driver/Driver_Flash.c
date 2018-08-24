@@ -24,6 +24,9 @@
 #include "flash_layout.h"
 #include "region_defs.h"
 
+#include <assert.h>
+#include "qspi_ip6514e_drv.h"
+
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)
 #endif
@@ -207,10 +210,22 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     if(addr >= SST_FLASH_AREA_ADDR &&
        addr <= SST_FLASH_AREA_ADDR + FLASH_SST_AREA_SIZE) {
         start_addr = S_CODE_SRAM_ALIAS_BASE + addr;
+        memcpy(data, (void *)start_addr, cnt);
+    } else {
+        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
+        uint32_t window_base = start_addr - window_off;
+        /* Might need to handle this case */
+        assert ((window_off + cnt) <= SPI_FLASH_ACCESS_LENGTH);
+        qspi_remap_base(window_base - mem_base);
+        if (cnt % 4 != 0) { /* Some read sizes are smaller than 4 bytes */
+            memcpy(data, (void *)(mem_base + window_off), cnt);
+        } else {
+            /* Need to use memcpy4 instead of memcpy as it's possible that
+             * this method is being used to copy image from Flash to SRAM */
+            memcpy4(data, (void *)(mem_base + window_off), cnt);
+        }
     }
 
-    /* Flash interface just emulated over SRAM, use memcpy */
-    memcpy(data, (void *)start_addr, cnt);
     return ARM_DRIVER_OK;
 }
 
@@ -241,8 +256,14 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
         }
     } else {
         /* Flash interface just emulated over SRAM, use memcpy */
-        memcpy((void *)start_addr, data, cnt);
+        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
+        uint32_t window_base = start_addr - window_off;
+        /* Might need to handle this case */
+        assert ((window_off + cnt) <= SPI_FLASH_ACCESS_LENGTH);
+        qspi_remap_base(window_base - mem_base);
+        memcpy((void *)(mem_base + window_off), data, cnt);
     }
+
     return ARM_DRIVER_OK;
 }
 
@@ -269,13 +290,18 @@ static int32_t ARM_Flash_EraseSector(uint32_t addr)
         if (rc != ARM_DRIVER_OK) {
             return ARM_DRIVER_ERROR_PARAMETER;
         }
-
     } else {
-        /* Flash interface just emulated over SRAM, use memset */
-        memset((void *)mem_base + addr,
+        uint32_t start_addr = S_CODE_SRAM_ALIAS_BASE + addr;
+        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
+        uint32_t window_base = start_addr - window_off;
+        assert ((window_off + FLASH0_DEV->data->sector_size)
+                <= SPI_FLASH_ACCESS_LENGTH);
+        qspi_remap_base(window_base - mem_base);
+        memset((void *)(mem_base + window_off),
                FLASH0_DEV->data->erased_value,
                FLASH0_DEV->data->sector_size);
     }
+
     return ARM_DRIVER_OK;
 }
 
