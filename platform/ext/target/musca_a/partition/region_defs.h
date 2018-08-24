@@ -22,19 +22,15 @@
 #define TOTAL_ROM_SIZE (0x00200000) /* 2 MB */
 #define TOTAL_RAM_SIZE (0x00020000) /* 128KB */
 
+#define S_RAM_ALIAS_BASE  (0x30000000)
+#define NS_RAM_ALIAS_BASE (0x20000000)
+
 /*
  * MPC granularity is 128 KB on Musca. Alignment
  * of partitions is defined in accordance with this constraint.
  */
-
-#ifndef LINK_TO_SECONDARY_PARTITION
-#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_0_OFFSET)
-#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_1_OFFSET)
-#else
-#define  S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_1_OFFSET)
-#define  S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_0_OFFSET)
-#endif /* !LINK_TO_SECONDARY_PARTITION */
-
+#define S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_0_OFFSET)
+#define S_IMAGE_SECONDARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_0_OFFSET)
 
 #define NS_IMAGE_PRIMARY_PARTITION_OFFSET (S_IMAGE_PRIMARY_PARTITION_OFFSET + \
                                            FLASH_PARTITION_SIZE)
@@ -79,8 +75,8 @@
 #define NS_RAM_ALIAS_BASE (0x20000000)
 
 /* Alias definitions for secure and non-secure areas*/
-#define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + x)
-#define NS_ROM_ALIAS(x) (NS_ROM_ALIAS_BASE + x)
+#define S_ROM_ALIAS(x)  (S_SRAM_ALIAS_BASE + x)
+#define NS_ROM_ALIAS(x) (NS_SRAM_ALIAS_BASE + x)
 
 #define S_RAM_ALIAS(x)  (S_RAM_ALIAS_BASE + x)
 #define NS_RAM_ALIAS(x) (NS_RAM_ALIAS_BASE + x)
@@ -136,11 +132,9 @@
 #define NS_CODE_SRAM_EXEC_LIMIT  (NS_CODE_SRAM_EXEC_BASE + \
                                  (TOTAL_CODE_SRAM_SIZE / 2) - 1)
 
-
-
 #ifdef BL2
 /* Bootloader regions */
-#define BL2_CODE_START    (S_ROM_ALIAS(FLASH_AREA_BL2_OFFSET))
+#define BL2_CODE_START    (S_QSPI_ALIAS_BASE)
 #define BL2_CODE_SIZE     (FLASH_AREA_BL2_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 

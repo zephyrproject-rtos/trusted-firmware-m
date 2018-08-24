@@ -179,16 +179,10 @@ void mpc_init_cfg(void)
     ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
     ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
 
-    Driver_QSPI_MPC.Initialize();
-    Driver_QSPI_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+    Driver_CODE_SRAM_MPC.Initialize();
+    Driver_CODE_SRAM_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                  memory_regions.non_secure_partition_limit,
                                  ARM_MPC_ATTR_NONSECURE);
-#ifdef BL2
-    /* Secondary image region */
-    Driver_QSPI_MPC.ConfigRegion(memory_regions.secondary_partition_base,
-                                 memory_regions.secondary_partition_limit,
-                                 ARM_MPC_ATTR_NONSECURE);
-#endif /* BL2 */
 
     mpc_data_region0->Initialize();
     mpc_data_region0->ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
@@ -211,7 +205,7 @@ void mpc_init_cfg(void)
                                    ARM_MPC_ATTR_NONSECURE);
 
     /* Lock down the MPC configuration */
-    Driver_QSPI_MPC.LockDown();
+    Driver_CODE_SRAM_MPC.LockDown();
     mpc_data_region0->LockDown();
     mpc_data_region1->LockDown();
     mpc_data_region2->LockDown();

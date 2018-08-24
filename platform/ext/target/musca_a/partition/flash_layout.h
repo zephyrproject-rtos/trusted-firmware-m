@@ -103,8 +103,19 @@
 #define NON_SECURE_IMAGE_OFFSET         0x20000
 #define NON_SECURE_IMAGE_MAX_SIZE       0x20000
 
+#define S_QSPI_ALIAS_BASE               (0x10200000)
+#define NS_QSPI_ALIAS_BASE              (0x00200000)
+
 #define S_SRAM_ALIAS_BASE               (0x10000000)
 #define NS_SRAM_ALIAS_BASE              (0x00000000)
+
+/* Address that tells the bootloader where in SRAM to copy the image from flash
+ * E.g. Lowest address =  S_SRAM_ALIAS_BASE
+ *                        + FLASH_AREA_BL2_SIZE
+ *                        = 0x10000000 + 0x10000 = 0x10010000
+ * Please make sure the value is in the form of hex. here
+ */
+#define IMAGE_LOAD_ADDRESS            0x10010000
 
 /* Flash device name used by BL2 and SST
  * Name is defined in flash driver file: Driver_Flash.c
