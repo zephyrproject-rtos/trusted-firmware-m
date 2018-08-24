@@ -63,6 +63,14 @@
 
 #define CMSE_VENEER_REGION_SIZE     (0x000000C0)
 
+/*
+ * Since we enable/disable flash during s/ns code copy to code sram we cannot
+ * access bl2 code from flash, hence we need to copy the bl2 code to code sram
+ */
+#define BL2_CODE_SRAM_ALIAS_BASE (S_SRAM_ALIAS_BASE)
+#define BL2_CODE_SRAM_ALIAS(x) (BL2_CODE_SRAM_ALIAS_BASE + x)
+#define BL2_CODE_SRAM_BASE  (BL2_CODE_SRAM_ALIAS(FLASH_AREA_BL2_OFFSET))
+
 /* Use QSPI Flash memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10200000)
 #define NS_ROM_ALIAS_BASE (0x00200000)

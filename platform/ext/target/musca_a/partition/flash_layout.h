@@ -103,6 +103,9 @@
 #define NON_SECURE_IMAGE_OFFSET         0x20000
 #define NON_SECURE_IMAGE_MAX_SIZE       0x20000
 
+#define S_SRAM_ALIAS_BASE               (0x10000000)
+#define NS_SRAM_ALIAS_BASE              (0x00000000)
+
 /* Flash device name used by BL2 and SST
  * Name is defined in flash driver file: Driver_Flash.c
  */

@@ -19,9 +19,15 @@
 #include "region_defs.h"
 
 LR_CODE BL2_CODE_START {
-    ER_CODE BL2_CODE_START BL2_CODE_SIZE {
-        *.o (RESET +First)
-        .ANY (+RO)
+    ER_CODE BL2_CODE_START {
+        startup_cmsdk_musca_bl2.o (RESET +First)
+        startup_cmsdk_musca_bl2.o (+RO)
+        system_cmsdk_musca.o (+RO)             ; SystemInit
+        *(InRoot$$Sections)                    ; ARM library sections
+    }
+
+    ER_CODE_SRAM BL2_CODE_SRAM_BASE {
+        .ANY (+RO) ; app code that gets copied from Flash to SRAM
     }
 
     ER_DATA BL2_DATA_START BL2_DATA_SIZE {
