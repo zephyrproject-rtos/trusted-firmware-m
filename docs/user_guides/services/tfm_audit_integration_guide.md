@@ -28,88 +28,88 @@ based storage of the log, permanent storage is not supported yet.
 
 ## Code structure
 
-Audit logging service code is located in `secure_fw/services/audit_logging/` and
-is divided as follows:
-
- - Core files
-
-The TF-M public interfaces for Audit logging service are located in
+The PSA interfaces for the Audit logging service are located in
 `interface/include`.
+The TF-M Audit logging service source files are located in
+`secure_fw/services/audit_logging`.
 
-### TF-M public interfaces
+### PSA interfaces
 
-The Audit logging service exposes the following public interfaces:
+The TF-M Audit logging service exposes the following PSA interfaces:
 
- - `enum tfm_log_err tfm_log_retrieve(uint32_t size, int32_t start, uint8_t *buffer, struct tfm_log_info *info)`
- - `enum tfm_log_err tfm_log_get_info(struct tfm_log_info *info)`
- - `enum tfm_log_err tfm_log_delete_items(uint32_t num_items, uint32_t *rem_items)`
+ - `enum psa_audit_err psa_audit_retrieve_record(const uint32_t record_index,
+   const uint32_t buffer_size, const uint8_t *token, const uint32_t token_size,
+   uint8_t *buffer, uint32_t *record_size);`
+ - `enum psa_audit_err psa_audit_get_info(uint32_t *num_records, uint32_t
+   *size);`
+ - `enum psa_audit_err psa_audit_get_record_info(const uint32_t record_index,
+   uint32_t *size);`
+ - `enum psa_audit_err psa_audit_delete_record(const uint32_t record_index,
+   const uint8_t *token, const uint32_t token_size);`
 
-### TF-M secure-only interface
+The TF-M Audit logging service exposes an additional PSA interface which can
+only be called from secure services:
 
-In addition to the public interface of the previous section, the Audit logging
-service exposes the following secure-only interface:
+ - `enum psa_audit_err psa_audit_add_record(const struct psa_audit_record
+   *record);`
 
- - `enum tfm_log_err tfm_log_veneer_add_line(struct tfm_log_line *line)`
+### Service source files
 
-### Core files
-
- `log_core.c` - This file implements the core logic for the audit logging
- service, which includes the log management, item replacement, log retrieval and
- log item addition.
+ - `audit_core.c` : This file implements core functionalities such as log
+ management, record addition and deletion and extraction of record information;
+ - `audit_wrappers.c` :  This file implements TF-M compatible wrappers in
+ case they are needed by the functions exported by the core.
 
 ## Audit logging service integration guide
 
- In this section, a brief description of each field of a log entry is given,
- with an example on how to perform a logging request from a requesting service.
- The secure service that requests the addition of an item to the log, has to
- provide the the following data type as defined in
-`interface\include\tfm_log_defs.h`:
+In this section, a brief description of each field of a log record is given,
+with an example on how to perform a logging request from a secure service.
+The secure service that requests the addition of a record to the log has to
+provide data as described by the `psa_audit_record` type, defined in
+`interface\include\psa_audit_defs.h`:
 
- ```
- /*!
- * \struct tfm_log_line
+```
+/*!
+ * \struct psa_audit_record
  *
- * \brief The part of the log line which has to be
- *        provided by the secure service that wants
- *        to add information to the log
+ * \brief This structure contains the record that is added to the audit log
+ *        by the requesting secure service
  */
-struct tfm_log_line {
-    uint32_t size;        /*!< Size in bytes of the three following fields */
-    uint32_t function_id; /*!< ID of the function requested */
-    uint32_t arg[4];      /*!< [r0,r1,r2,r3] arguments to the function */
-    uint8_t  payload[];   /*!< Flexible array member for payload */
+struct psa_audit_record {
+    uint32_t size;      /*!< Size in bytes of the id and payload fields */
+    uint32_t id;        /*!< ID of the record */
+    uint8_t  payload[]; /*!< Flexible array member for payload */
 };
 ```
 
 Each field is described as follows:
 
-- `size` - This is the size, in bytes, of the `function_id`, `arg[4]` and
-`payload[]` fields that follow. Given that the `payload[]` field is optional,
-in the current implementation the minimum value to be provided in `size` is 20
-bytes.
-- `function_id` - This field is meant to be used to store an ID of the function
-that is performing the logging request.
-- `arg[4]` - This array is meant to be used to store the content of the
-register arguments passed to the function performing the logging request.
+- `size` - This is the size, in bytes, of the `id` and `payload[]` fields that
+follow. Given that the `payload[]` field is optional, in the current
+implementation the minimum value to be provided in `size` is 4 bytes;
+- `id` - This field is meant to be used to store an ID of the log record from
+the requesting service;
 - `payload[]` - The payload is an optional content which can be made of one or
 more Type-Length-Value entries as described by the following type:
 
  ```
  /*!
-  * \struct log_tlv_entry
+  * \struct audit_tlv_entry
   *
   * \brief TLV entry structure with a flexible
   *        array member
   */
- struct log_tlv_entry {
-     enum log_tlv_type type;
+ struct audit_tlv_entry {
+     enum audit_tlv_type type;
      uint32_t length;
      uint8_t value[];
  };
  ```
-The possible TLV types described by `enum log_tlv_type` can be extended as
-needed by system integrators modifying `log_core.h` as needed to guarantee the
-desired flexibility.
+
+The possible TLV types described by `enum audit_tlv_type` can be extended by
+system integrators modifying `audit_core.h` as needed.
+A logging request is performed by a secure service which calls the Secure-only
+API function `psa_audit_add_record()`.
 
  --------------
 
