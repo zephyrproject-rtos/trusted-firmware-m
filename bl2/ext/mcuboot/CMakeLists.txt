@@ -134,6 +134,10 @@ if (MCUBOOT_NO_SWAP)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_NO_SWAP)
 endif()
 
+if (MCUBOOT_RAM_LOADING)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_RAM_LOADING)
+endif()
+
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for MCUBoot." FORCE)

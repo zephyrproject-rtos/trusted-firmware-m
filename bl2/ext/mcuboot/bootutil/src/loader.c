@@ -44,7 +44,7 @@
 
 static struct boot_loader_state boot_data;
 
-#ifndef MCUBOOT_NO_SWAP
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
 struct boot_status_table {
     /**
      * For each field, a value of 0 means "any".
@@ -136,7 +136,7 @@ static const struct boot_status_table boot_status_tables[] = {
                   "bad"),                                           \
                  (state)->copy_done,                                \
                  (state)->image_ok)
-#endif /* !MCUBOOT_NO_SWAP */
+#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING */
 
 
 static int
@@ -361,7 +361,46 @@ boot_erase_last_sector_by_id(int flash_area_id)
 }
 #endif /* !MCUBOOT_OVERWRITE_ONLY */
 
-#ifndef MCUBOOT_NO_SWAP
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_OVERWRITE_ONLY)
+/*
+ * Compute the total size of the given image.  Includes the size of
+ * the TLVs.
+ */
+static int
+boot_read_image_size(int slot, struct image_header *hdr, uint32_t *size)
+{
+    const struct flash_area *fap = NULL;
+    struct image_tlv_info info;
+    int area_id;
+    int rc;
+
+    area_id = flash_area_id_from_image_slot(slot);
+    rc = flash_area_open(area_id, &fap);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    rc = flash_area_read(fap, hdr->ih_hdr_size + hdr->ih_img_size,
+                         &info, sizeof(info));
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
+        rc = BOOT_EBADIMAGE;
+        goto done;
+    }
+    *size = hdr->ih_hdr_size + hdr->ih_img_size + info.it_tlv_tot;
+    rc = 0;
+
+done:
+    flash_area_close(fap);
+    return rc;
+}
+#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_OVERWRITE_ONLY */
+
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
 /**
  * Determines where in flash the most recent boot status is stored. The boot
  * status is necessary for completing a swap that was interrupted by a boot
@@ -433,45 +472,6 @@ boot_previous_swap_type(void)
 
     return BOOT_SWAP_TYPE_FAIL;
 }
-
-/*
- * Compute the total size of the given image.  Includes the size of
- * the TLVs.
- */
-#ifndef MCUBOOT_OVERWRITE_ONLY
-static int
-boot_read_image_size(int slot, struct image_header *hdr, uint32_t *size)
-{
-    const struct flash_area *fap = NULL;
-    struct image_tlv_info info;
-    int area_id;
-    int rc;
-
-    area_id = flash_area_id_from_image_slot(slot);
-    rc = flash_area_open(area_id, &fap);
-    if (rc != 0) {
-        rc = BOOT_EFLASH;
-        goto done;
-    }
-
-    rc = flash_area_read(fap, hdr->ih_hdr_size + hdr->ih_img_size,
-                         &info, sizeof(info));
-    if (rc != 0) {
-        rc = BOOT_EFLASH;
-        goto done;
-    }
-    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        rc = BOOT_EBADIMAGE;
-        goto done;
-    }
-    *size = hdr->ih_hdr_size + hdr->ih_img_size + info.it_tlv_tot;
-    rc = 0;
-
-done:
-    flash_area_close(fap);
-    return rc;
-}
-#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 static int
 boot_slots_compatible(void)
@@ -1370,7 +1370,7 @@ boot_go(struct boot_rsp *rsp)
     return rc;
 }
 
-#else /* MCUBOOT_NO_SWAP */
+#else /* MCUBOOT_NO_SWAP || MCUBOOT_RAM_LOADING */
 
 #define BOOT_LOG_IMAGE_INFO(area, hdr, state)                           \
     BOOT_LOG_INF("Image %"PRIu32": version=%"PRIu8".%"PRIu8".%"PRIu16"" \
@@ -1396,12 +1396,20 @@ struct image_slot_version {
  *
  * @param hdr  Pointer to an image header structure
  *
- * @return     Version number casted to unit64_t
+ * @return     Version number casted to uint64_t
  */
 static uint64_t
 boot_get_version_number(struct image_header *hdr)
 {
-    return *((uint64_t *)(&hdr->ih_ver));
+    uint64_t version = 0;
+    version |= (uint64_t)hdr->ih_ver.iv_major << (IMAGE_VER_MINOR_LENGTH
+                                                + IMAGE_VER_REVISION_LENGTH
+                                                + IMAGE_VER_BUILD_NUM_LENGTH);
+    version |= (uint64_t)hdr->ih_ver.iv_minor << (IMAGE_VER_REVISION_LENGTH
+                                                + IMAGE_VER_BUILD_NUM_LENGTH);
+    version |= (uint64_t)hdr->ih_ver.iv_revision << IMAGE_VER_BUILD_NUM_LENGTH;
+    version |= hdr->ih_ver.iv_build_num;
+    return version;
 }
 
 /**
@@ -1486,7 +1494,7 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
             }
             BOOT_LOG_IMAGE_INFO(slot, hdr, &slot_state);
         } else {
-            BOOT_LOG_INF("Image  %"PRIu32": No valid image", slot);
+            BOOT_LOG_INF("Image %"PRIu32": No valid image", slot);
         }
     }
 
@@ -1503,6 +1511,73 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
 
     return image_cnt;
 }
+
+#ifdef MCUBOOT_RAM_LOADING
+/**
+ * Copies an image from a slot in the flash to an SRAM address, where the load
+ * address has already been inserted into the image header by this point and is
+ * extracted from it within this method. The copying is done sector-by-sector.
+ *
+ * @param slot            The flash slot of the image to be copied to SRAM.
+ *
+ * @param hdr             Pointer to the image header structure of the image
+ *                        that needs to be copid to SRAM
+ *
+ * @return                0 on success; nonzero on failure.
+ */
+static int
+boot_copy_image_to_sram(int slot, struct image_header *hdr)
+{
+    int rc;
+    uint32_t sect_sz;
+    uint32_t sect = 0;
+    uint32_t bytes_copied = 0;
+    const struct flash_area *fap_src = NULL;
+    uint32_t dst = (uint32_t) hdr->ih_load_addr;
+    uint32_t img_sz;
+
+    if (dst % 4 != 0) {
+        BOOT_LOG_INF("Cannot copy the image to the SRAM address 0x%"PRIx32" "
+        "- the load address must be aligned with 4 bytes due to SRAM "
+        "restrictions", dst);
+        return BOOT_EBADARGS;
+    }
+
+    rc = flash_area_open(flash_area_id_from_image_slot(slot), &fap_src);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    rc = boot_read_image_size(slot, hdr, &img_sz);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    while (bytes_copied < img_sz) {
+        sect_sz = boot_img_sector_size(&boot_data, slot, sect);
+        /*
+         * Direct copy from where the image sector resides in flash to its new
+         * location in SRAM
+         */
+        rc = flash_area_read(fap_src,
+                             bytes_copied,
+                             (void *)(dst + bytes_copied),
+                             sect_sz);
+        if (rc != 0) {
+            BOOT_LOG_INF("Error whilst copying image from Flash to SRAM");
+            break;
+        } else {
+            bytes_copied += sect_sz;
+        }
+        sect++;
+    }
+
+    if (fap_src) {
+        flash_area_close(fap_src);
+    }
+    return rc;
+}
+#endif /* MCUBOOT_RAM_LOADING */
 
 /**
  * Prepares the booting process. This function choose the newer image in flash
@@ -1521,6 +1596,7 @@ boot_go(struct boot_rsp *rsp)
     int fa_id;
     uint32_t boot_sequence[BOOT_NUM_SLOTS];
     uint32_t img_cnt;
+    struct image_header *newest_image_header;
 
     static boot_sector_t slot0_sectors[BOOT_MAX_IMG_SECTORS];
     static boot_sector_t slot1_sectors[BOOT_MAX_IMG_SECTORS];
@@ -1563,10 +1639,48 @@ boot_go(struct boot_rsp *rsp)
             goto out;
         }
 
-        BOOT_LOG_INF("Booting image from slot %d", slot);
-        rsp->br_flash_dev_id = boot_img_fa_device_id(&boot_data, slot);
+        /* The slot variable now refers to the newest image's slot in flash */
+        newest_image_header = boot_img_hdr(&boot_data, slot);
+
+        #ifdef MCUBOOT_RAM_LOADING
+        if (newest_image_header->ih_flags & IMAGE_F_RAM_LOAD) {
+            /* Copy image to the load address from where it
+             * currently resides in flash */
+            rc = boot_copy_image_to_sram(slot, newest_image_header);
+            if (rc != 0) {
+                rc = BOOT_EBADIMAGE;
+                BOOT_LOG_INF("Could not copy image from slot 0x%"PRIx32" in "
+                             "the Flash to load address 0x%"PRIx32" in SRAM, "
+                             "aborting..",
+                             slot,
+                             newest_image_header->ih_load_addr);
+                goto out;
+            } else {
+                BOOT_LOG_INF("Image has been copied from slot %d in flash to "
+                             "SRAM address 0x%"PRIx32"",
+                             slot,
+                             newest_image_header->ih_load_addr);
+            }
+
+            /* Validate the image hash in SRAM after the copy was successful */
+            rc = bootutil_check_hash_after_loading(newest_image_header);
+            if (rc != 0) {
+                rc = BOOT_EBADIMAGE;
+                BOOT_LOG_INF("Cannot validate the hash of the image that was "
+                             "copied to SRAM, aborting..");
+                goto out;
+            }
+
+            BOOT_LOG_INF("Booting image from SRAM at address 0x%"PRIx32"",
+                         newest_image_header->ih_load_addr);
+        } else {
+            BOOT_LOG_INF("Booting image from slot %d", slot);
+        }
+        #endif /* MCUBOOT_RAM_LOADING */
+
+        rsp->br_hdr = newest_image_header;
         rsp->br_image_off = boot_img_slot_off(&boot_data, slot);
-        rsp->br_hdr = boot_img_hdr(&boot_data, slot);
+        rsp->br_flash_dev_id = boot_img_fa_device_id(&boot_data, slot);
     } else {
         /* No candidate image available */
         rc = BOOT_EBADIMAGE;
@@ -1578,4 +1692,4 @@ out:
    }
    return rc;
 }
-#endif /* MCUBOOT_NO_SWAP */
+#endif /* MCUBOOT_NO_SWAP || MCUBOOT_RAM_LOADING */

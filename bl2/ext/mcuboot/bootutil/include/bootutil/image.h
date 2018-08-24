@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/*
+ * Original code taken from mcuboot project at:
+ * https://github.com/runtimeco/mcuboot
+ * Modifications are Copyright (c) 2018 Arm Limited.
+ */
+
 #ifndef H_IMAGE_
 #define H_IMAGE_
 
@@ -61,6 +67,11 @@ struct flash_area;
 #define IMAGE_TLV_SHA256            0x10   /* SHA256 of image hdr and body */
 #define IMAGE_TLV_RSA2048_PSS       0x20   /* RSA2048 of hash output */
 
+#define IMAGE_VER_MAJOR_LENGTH      8
+#define IMAGE_VER_MINOR_LENGTH      8
+#define IMAGE_VER_REVISION_LENGTH   16
+#define IMAGE_VER_BUILD_NUM_LENGTH  32
+
 struct image_version {
     uint8_t iv_major;
     uint8_t iv_minor;
@@ -100,6 +111,10 @@ int bootutil_img_validate(struct image_header *hdr,
                           const struct flash_area *fap,
                           uint8_t *tmp_buf, uint32_t tmp_buf_sz,
                           uint8_t *seed, int seed_len, uint8_t *out_hash);
+
+#ifdef MCUBOOT_RAM_LOADING
+int bootutil_check_hash_after_loading(struct image_header *hdr);
+#endif
 
 #ifdef __cplusplus
 }

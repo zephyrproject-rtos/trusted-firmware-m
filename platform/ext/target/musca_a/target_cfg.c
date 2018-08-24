@@ -30,9 +30,7 @@
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-#ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* BL2 */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -51,15 +49,6 @@ const struct memory_region_limits memory_regions = {
 
     .veneer_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-
-#ifdef BL2
-    .secondary_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
-
-    .secondary_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
-        SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
 };
 
 /* Allows software, via SAU, to define the code region as a NSC */
@@ -157,13 +146,9 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-#ifdef BL2
-    /* Secondary image partition */
-    SAU->RNR  = TFM_NS_SECONDARY_IMAGE_REGION;
-    SAU->RBAR = (memory_regions.secondary_partition_base  & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
-                | SAU_RLAR_ENABLE_Msk;
-#endif /* BL2 */
+    /* FIXME: Secondary image partition info comes from BL2. Configure SAU
+     * based on those limits.
+     */
 
     /* Allows SAU to define the code region as a NSC */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;

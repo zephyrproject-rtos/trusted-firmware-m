@@ -146,3 +146,17 @@ elseif(BUILD_FLASH)
   set(SST_RAM_FS True)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
 endif()
+
+if (NOT BL2)
+	message(STATUS "WARNING: BL2 is mandatory on target \"${TARGET_PLATFORM}\" Your choice was override.")
+	set(BL2 True)
+endif()
+
+if (NOT MCUBOOT_RAM_LOADING)
+	message(STATUS "WARNING: MCUBOOT_RAM_LOADING is mandatory on target \"${TARGET_PLATFORM}\" Your choice was override.")
+	set(MCUBOOT_RAM_LOADING True)
+endif()
+
+if (MCUBOOT_NO_SWAP)
+	message (FATAL_ERROR "MCUBOOT_NO_SWAP configuration is not supported on " ${TARGET_PLATFORM})
+endif()

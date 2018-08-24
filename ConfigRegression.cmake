@@ -28,7 +28,16 @@ set (REGRESSION True)
 set (CORE_TEST False)
 
 #BL2 bootloader(MCUBoot) related settings
-set (BL2 True)
-set (MCUBOOT_NO_SWAP False)
+if(NOT DEFINED BL2)
+	set(BL2 True)
+endif()
+
+if(NOT DEFINED MCUBOOT_NO_SWAP)
+	set(MCUBOOT_NO_SWAP False)
+endif()
+
+if(NOT DEFINED MCUBOOT_RAM_LOADING)
+	set(MCUBOOT_RAM_LOADING False)
+endif()
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")

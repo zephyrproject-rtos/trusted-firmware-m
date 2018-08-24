@@ -148,3 +148,7 @@ elseif(BUILD_FLASH)
   set(SST_RAM_FS True)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers" ABSOLUTE)
 endif()
+
+if (MCUBOOT_RAM_LOADING)
+	message (FATAL_ERROR "MCUBOOT_RAM_LOADING is not supported on " ${TARGET_PLATFORM})
+endif()

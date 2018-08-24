@@ -16,7 +16,7 @@ elseif(${TARGET_PLATFORM} STREQUAL "AN521")
 elseif(${TARGET_PLATFORM} STREQUAL "AN519")
 	set (PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/Mps2AN519.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_A")
-        set(PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/musca_a.cmake")
+	set(PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/musca_a.cmake")
 else()
 	message(FATAL_ERROR "ERROR: Target \"${TARGET_PLATFORM}\" is not supported.")
 endif()
@@ -28,7 +28,16 @@ set (REGRESSION False)
 set (CORE_TEST False)
 
 #BL2 bootloader(MCUBoot) related settings
-set (BL2 True)
-set (MCUBOOT_NO_SWAP False)
+if(NOT DEFINED BL2)
+	set(BL2 True)
+endif()
+
+if(NOT DEFINED MCUBOOT_NO_SWAP)
+	set(MCUBOOT_NO_SWAP False)
+endif()
+
+if(NOT DEFINED MCUBOOT_RAM_LOADING)
+	set(MCUBOOT_RAM_LOADING False)
+endif()
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")

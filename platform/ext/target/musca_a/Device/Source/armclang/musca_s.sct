@@ -150,16 +150,3 @@ LR_NS_PARTITION NS_PARTITION_START {
     ER_NS_PARTITION NS_PARTITION_START EMPTY NS_PARTITION_SIZE {
     }
 }
-
-#ifdef BL2
-LR_SECONDARY_PARTITION SECONDARY_PARTITION_START {
-    /* Reserved place for new image in case of firmware upgrade.
-     * No code will be placed here, just address of this region is used in the
-     * secure code to configure certain HW components.
-     */
-    ER_SECONDARY_PARTITION SECONDARY_PARTITION_START \
-        EMPTY SECONDARY_PARTITION_SIZE {
-    }
-}
-#endif /* BL2 */
-

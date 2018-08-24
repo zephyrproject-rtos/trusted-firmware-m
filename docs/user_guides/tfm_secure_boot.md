@@ -99,6 +99,54 @@ also supported. Image verification is done the same way in both operational
 modes. If new image fails during authentication then MCUBoot erases the memory
 slot and starts the other image, after successful authentication.
 
+At build time automatically two binaries are generated:
+```
+<build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin : Image linked for slot 0
+                                                        memory partition
+<build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for slot 1
+                                                        memory partition
+```
+
+### RAM Loading firmware upgrade
+Musca A1 supports an image upgrade mode that is separate to both the swapping
+and non-swapping modes. This is the `RAM loading` mode (please refer to the
+table below). Like the non-swapping mode, this selects the newest image by
+reading the image version numbers in the image headers, but instead of
+executing it in place, the newest image is copied to RAM for execution. The
+load address, the location in RAM where the image is copied to, is stored
+in the image header.
+
+### Summary of different modes for image upgrade
+
+Different implementations of the image upgrade operation (whether through
+swapping, non-swapping, or loading into RAM and executing from there)
+are supported by the platforms. The table below shows which of these modes
+are supported by which platforms:
+
+|    -     | Without BL2 <sup>1</sup> | With BL2 <sup>2</sup> | With BL2 <sup>2</sup> |   With BL2 <sup>2</sup>  |
+|:--------:|:------------------------:|:---------------------:|:---------------------:|:------------------------:|
+|    -     |            XIP           |          XIP          |          XIP          |         Not XIP          |
+|    -     |             -            |   Swap <sup>3</sup>   |  No-swap <sup>4</sup> | RAM loading <sup>5</sup> |
+|  AN521   |            Yes           |          Yes          |          Yes          |            No            |
+|  AN519   |            Yes           |          Yes          |          Yes          |            No            |
+| Musca A1 |            No            |          No           |          No           |            Yes           |
+
+(1) To disable BL2, please turn off the `BL2` compiler switch in the
+top-level configuration files or in the command line
+
+(2) BL2 is enabled by default
+
+(3) The image executes in-place (XIP) and is in swapping mode for image update
+by default
+
+(4) To enable XIP No-swap, set the configuration variable `MCUBOOT_NO_SWAP` to
+`True` in the top-level configuration files, or include the `MCUBOOT_NO_SWAP`
+macro in the command line
+
+(5) To enable RAM loading, set the configuration variable `MCUBOOT_RAM_LOADING`
+to `True` in the top-level configuration files, or include the
+`MCUBOOT_RAM_LOADING` macro in the command line
+
 ## Build time configuration
 MCUBoot related compile time switches can be set in the high level build
 configuration files:
@@ -118,6 +166,11 @@ Compile time switches:
   using any of the further compile time switches are invalid.
 - MCUBOOT\_NO\_SWAP (default: False):
   - **True:** Activate non-swapping firmware upgrade operation.
+  - **False:** Original firmware upgrade operation with image swapping.
+- MCUBOOT\_RAM\_LOADING (default: False):
+  - **True:** Activate RAM loading firmware upgrade operation, where latest
+  image is copied to RAM and runs from there instead of being executed
+  in-place.
   - **False:** Original firmware upgrade operation with image swapping.
 
 ### Image versioning
@@ -143,15 +196,8 @@ then set to the last number that has been specified, and the build number would
 stop incrementing. Any new version numbers that are provided will overwrite
 the previous one: 0.0.0+1 -> 0.0.0+2. Note: To re-apply automatic image
 versioning, please start a clean build without specifying the image version
-number at all
+number at all.
 
-At build time automatically two binaries are generated:
-```
-<build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin : Image linked for slot 0
-                                                        memory partition
-<build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for slot 1
-                                                        memory partition
-```
 ## Testing firmware upgrade
 As downloading the new firmware image is out of scope for MCUBoot, the update
 process is started from a state where the original and the new image are already
@@ -219,7 +265,7 @@ changes:
 - Set MCUBOOT\_NO\_SWAP compile time switch to true before build.
 - Increase the image version number between the two build run.
 
-### Executing firmware upgrade on FVP\_MPS2\_AEMv8M
+#### Executing firmware upgrade on FVP\_MPS2\_AEMv8M
 ```
 <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
 --parameter fvp_mps2.platform_type=2 \
@@ -238,7 +284,7 @@ changes:
 --data cpu0=<regresssion_build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin@0x10180000
 ```
 
-### Executing firmware upgrade on SSE 200 FPGA on MPS2 board
+#### Executing firmware upgrade on SSE 200 FPGA on MPS2 board
 ```
 TITLE: Versatile Express Images Configuration File
 [IMAGES]
@@ -267,7 +313,42 @@ Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
 ...
 ```
 
-*Note* Firmware upgrade support for Musca-A1 board is not yet supported.
+#### Executing firmware upgrade on Musca-A1 board
+To enable RAM loading, please set `MCUBOOT_RAM_LOADING` to True (either in the
+configuration file or through the command line), and then specify a destination
+load address in RAM where the image can be copied to and executed from. The
+`IMAGE_LOAD_ADDRESS` macro must be specified in the target dependent files,
+for example with Musca A1, its `flash_layout.h` file in the `platform`
+folder should include `#define IMAGE_LOAD_ADDRESS #0x10020000`
+
+After two images have been built, they can be concatenated to create the
+combined image using srec_cat.exe
+
+```
+Windows:
+srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000
+tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset
+0x320000 -o tfm.hex -Intel
+
+Linux:
+srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin
+-Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset
+0x320000 -o tfm.hex -Intel
+```
+
+The following message will be shown in case of successful firmware upgrade when,
+RAM loading is enabled, notice that image with higher version number
+(`version=0.0.0.2`) is executed:
+
+```
+[INF] Image 0: version=0.0.0.1, magic= good, image_ok=0xff
+[INF] Image 1: version=0.0.0.2, magic= good, image_ok=0xff
+[INF] Image has been copied from slot 1 in flash to SRAM address 0x10020000
+[INF] Booting image from SRAM at address 0x10020000
+[INF] Bootloader chainload address offset: 0x20000
+[INF] Jumping to the first image slot
+[Sec Thread] Secure image initializing!
+```
 
 --------------
 

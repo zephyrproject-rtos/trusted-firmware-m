@@ -64,9 +64,19 @@ static void do_boot(struct boot_rsp *rsp)
     rc = flash_device_base(rsp->br_flash_dev_id, &flash_base);
     assert(rc == 0);
 
-    vt = (struct arm_vector_table *)(flash_base +
-                                     rsp->br_image_off +
-                                     rsp->br_hdr->ih_hdr_size);
+    if (rsp->br_hdr->ih_flags & IMAGE_F_RAM_LOAD) {
+       /* The image has been copied to SRAM, find the vector table
+        * at the load address instead of image's address in flash
+        */
+        vt = (struct arm_vector_table *)(rsp->br_hdr->ih_load_addr +
+                                         rsp->br_hdr->ih_hdr_size);
+    } else {
+        /* Using the flash address as not executing in SRAM */
+        vt = (struct arm_vector_table *)(flash_base +
+                                         rsp->br_image_off +
+                                         rsp->br_hdr->ih_hdr_size);
+    }
+
     __disable_irq();
     __set_MSP(vt->msp);
     __DSB();
