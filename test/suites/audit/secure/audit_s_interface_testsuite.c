@@ -9,7 +9,7 @@
 #include "psa_audit_api.h"
 #include "audit_s_tests.h"
 #include "tfm_api.h"
-#include "tfm_audit_veneers.h"
+#include "psa_audit_api.h"
 #include "audit_wrappers.h"
 #include "secure_fw/services/audit_logging/audit_core.h"
 
@@ -70,8 +70,6 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     uint32_t num_records, stored_size, record_size;
     struct psa_audit_record *retrieved_buffer;
 
-    struct audit_core_retrieve_output retrieve_output_s;
-
     /* Fill the log with 36 records, each record is 28 bytes
      * we end up filling the log without wrapping
      */
@@ -80,7 +78,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
         record->id = DUMMY_TEST_RECORD_ID_BASE + idx;
 
         /* The record doesn't contain any payload */
-        err = tfm_audit_veneer_add_record(record);
+        err = psa_audit_add_record(record);
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Record addition has returned an error");
             return;
@@ -88,7 +86,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     }
 
     /* Get the log size */
-    err = tfm_audit_veneer_get_info(&num_records, &stored_size);
+    err = psa_audit_get_info(&num_records, &stored_size);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Getting log info has returned error");
         return;
@@ -106,18 +104,15 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
 
     /* Retrieve two log records starting from a given index */
     for (idx=BASE_RETRIEVAL_LOG_INDEX; idx<BASE_RETRIEVAL_LOG_INDEX+2; idx++) {
-
-        struct audit_core_retrieve_input retrieve_input_s =
-                                             {.record_index = idx,
-                                              .buffer_size = LOCAL_BUFFER_SIZE,
-                                              .token = NULL,
-                                              .token_size = 0};
-        retrieve_output_s.buffer =
+        uint8_t *p_buf =
           &local_buffer[(idx-BASE_RETRIEVAL_LOG_INDEX)*STANDARD_LOG_ENTRY_SIZE];
-        retrieve_output_s.record_size = &record_size;
 
-        err = tfm_audit_veneer_retrieve_record(&retrieve_input_s,
-                                               &retrieve_output_s);
+        err = psa_audit_retrieve_record(idx,
+                                        LOCAL_BUFFER_SIZE,
+                                        NULL,
+                                        0,
+                                        p_buf,
+                                        &record_size);
 
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Retrieve indexes 6 or 7 has returned an error");
@@ -142,18 +137,15 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
 
     /* Retrieve the last two log records */
     for (idx=num_records-2; idx<num_records; idx++) {
-
-        struct audit_core_retrieve_input retrieve_input_s =
-                                             {.record_index = idx,
-                                              .buffer_size = LOCAL_BUFFER_SIZE,
-                                              .token = NULL,
-                                              .token_size = 0};
-        retrieve_output_s.buffer =
+        uint8_t *p_buf =
             &local_buffer[(idx-(num_records-2))*STANDARD_LOG_ENTRY_SIZE];
-        retrieve_output_s.record_size = &record_size;
 
-        err = tfm_audit_veneer_retrieve_record(&retrieve_input_s,
-                                               &retrieve_output_s);
+        err = psa_audit_retrieve_record(idx,
+                                        LOCAL_BUFFER_SIZE,
+                                        NULL,
+                                        0,
+                                        p_buf,
+                                        &record_size);
 
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Retrieve of last two log records has returned error");
@@ -177,17 +169,12 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     }
 
     /* Retrieve the first log item */
-    struct audit_core_retrieve_input retrieve_input_s_first =
-                                         {.record_index = 0,
-                                          .buffer_size = LOCAL_BUFFER_SIZE,
-                                          .token = NULL,
-                                          .token_size = 0};
-
-    retrieve_output_s.buffer = &local_buffer[0];
-    retrieve_output_s.record_size = &record_size;
-
-    err = tfm_audit_veneer_retrieve_record(&retrieve_input_s_first,
-                                           &retrieve_output_s);
+    err = psa_audit_retrieve_record(0,
+                                    LOCAL_BUFFER_SIZE,
+                                    NULL,
+                                    0,
+                                    &local_buffer[0],
+                                    &record_size);
 
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Retrieve of the first log entry has returned error");
@@ -204,18 +191,12 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
         return;
     }
 
-    /* Retrieve the last log item */
-    struct audit_core_retrieve_input retrieve_input_s_last =
-                                         {.record_index = num_records-1,
-                                          .buffer_size = LOCAL_BUFFER_SIZE,
-                                          .token = NULL,
-                                          .token_size = 0};
-
-    retrieve_output_s.buffer = &local_buffer[0];
-    retrieve_output_s.record_size = &record_size;
-
-    err = tfm_audit_veneer_retrieve_record(&retrieve_input_s_last,
-                                           &retrieve_output_s);
+    err = psa_audit_retrieve_record(num_records - 1,
+                                    LOCAL_BUFFER_SIZE,
+                                    NULL,
+                                    0,
+                                    &local_buffer[0],
+                                    &record_size);
 
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Retrieve of last two log entries has returned error");
@@ -239,14 +220,14 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     record->id = DUMMY_TEST_RECORD_ID_BASE + INITIAL_LOGGING_REQUESTS;
 
     /* The addition of this new log item will wrap the log ending */
-    err = tfm_audit_veneer_add_record(record);
+    err = psa_audit_add_record(record);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Record addition has returned an error");
         return;
     }
 
     /* Get the log size */
-    err = tfm_audit_veneer_get_info(&num_records, &stored_size);
+    err = psa_audit_get_info(&num_records, &stored_size);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Getting log info has returned error");
         return;
@@ -268,20 +249,16 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
 
     /* Retrieve the last two log records */
     for (idx=num_records-2; idx<num_records; idx++) {
-
-        struct audit_core_retrieve_input retrieve_input_s =
-                                             {.record_index = idx,
-                                              .buffer_size = LOCAL_BUFFER_SIZE,
-                                              .token = NULL,
-                                              .token_size = 0};
-
-        retrieve_output_s.buffer =
+        uint8_t *p_buf =
             &local_buffer[(idx-(num_records-2))*STANDARD_LOG_ENTRY_SIZE];
-        retrieve_output_s.record_size = &record_size;
 
         /* Retrieve the last two items */
-        err = tfm_audit_veneer_retrieve_record(&retrieve_input_s,
-                                               &retrieve_output_s);
+        err = psa_audit_retrieve_record(idx,
+                                        LOCAL_BUFFER_SIZE,
+                                        NULL,
+                                        0,
+                                        p_buf,
+                                        &record_size);
 
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Retrieve of last two log records has returned error");
@@ -316,14 +293,14 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     record->id = DUMMY_TEST_RECORD_ID_BASE + INITIAL_LOGGING_REQUESTS + 1;
 
     /* The record has maximum possible payload for log size of 1024 */
-    err = tfm_audit_veneer_add_record(record);
+    err = psa_audit_add_record(record);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Record addition has returned an error");
         return;
     }
 
     /* Get the log size */
-    err = tfm_audit_veneer_get_info(&num_records, &stored_size);
+    err = psa_audit_get_info(&num_records, &stored_size);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Getting log info has returned error");
         return;
@@ -344,17 +321,12 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
      * As there is just one big record filling the whole space, nothing
      * will be returned and the API will fail
      */
-    struct audit_core_retrieve_input retrieve_input_s_max =
-                                         {.record_index = 0,
-                                          .buffer_size = LOCAL_BUFFER_SIZE,
-                                          .token = NULL,
-                                          .token_size = 0};
-
-    retrieve_output_s.buffer = &local_buffer[0];
-    retrieve_output_s.record_size = &record_size;
-
-    err = tfm_audit_veneer_retrieve_record(&retrieve_input_s_max,
-                                           &retrieve_output_s);
+    err = psa_audit_retrieve_record(0,
+                                    LOCAL_BUFFER_SIZE,
+                                    NULL,
+                                    0,
+                                    &local_buffer[0],
+                                    &record_size);
 
     if (err != PSA_AUDIT_ERR_FAILURE) {
         TEST_FAIL("Retrieve of index 0 should fail as it's too big");
@@ -373,7 +345,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
                      INITIAL_LOGGING_REQUESTS + 2 + idx;
 
         /* The record doesn't contain any payload */
-        err = tfm_audit_veneer_add_record(record);
+        err = psa_audit_add_record(record);
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Record addition has returned an error");
             return;
@@ -381,7 +353,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     }
 
     /* Get the log size */
-    err = tfm_audit_veneer_get_info(&num_records, &stored_size);
+    err = psa_audit_get_info(&num_records, &stored_size);
     if (err != PSA_AUDIT_ERR_SUCCESS) {
         TEST_FAIL("Getting log info has returned error");
         return;
@@ -403,7 +375,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
 
     /* Check the length of each record individually */
     for (idx=0; idx<num_records; idx++) {
-        err = tfm_audit_veneer_get_record_info(idx, &stored_size);
+        err = psa_audit_get_record_info(idx, &stored_size);
         if (err != PSA_AUDIT_ERR_SUCCESS) {
             TEST_FAIL("Getting record size individually has returned error");
             return;
@@ -416,7 +388,7 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
     }
 
     /* Check that if requesting length of a record which is not there fails */
-    err = tfm_audit_veneer_get_record_info(num_records, &stored_size);
+    err = psa_audit_get_record_info(num_records, &stored_size);
     if (err != PSA_AUDIT_ERR_FAILURE) {
         TEST_FAIL("Getting record size for non-existent record has not failed");
         return;
