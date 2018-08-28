@@ -1,160 +1,129 @@
 /*
- * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2018 Arm Limited
  *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the License); you may
- * not use this file except in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an AS IS BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-#include <string.h>
-#include <stdint.h>
 #include "Driver_Flash.h"
-#include "platform_retarget.h"
+
+#include <stdbool.h>
+#include "cmsis.h"
+#include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 #include "flash_layout.h"
-#include "region_defs.h"
 
-#include <assert.h>
-#include "qspi_ip6514e_drv.h"
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)
 #endif
 
 /* Driver version */
-#define ARM_FLASH_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
+#define ARM_FLASH_DRV_VERSION   ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
 
-/* FIXME: The following utility functions should be moved to a common place. */
-static int32_t memcpy4(void * to, const void * from, size_t size)
-{
-    /* make sure that the parameters are aligned to 4 */
-    if (((uint32_t)to & 0x03u) || ((uint32_t)from & 0x03u) || (size & 0x03u)) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
-
-    for (int i = 0; i < size/4; ++i)
-    {
-        ((uint32_t*)to)[i] = ((uint32_t*)from)[i];
-    }
-
-    return ARM_DRIVER_OK;
-}
-
-static int32_t memset4(void * addr, int pattern, size_t count)
-{
-    uint32_t pattern32;
-
-    /* make sure that the parameters are aligned to 4 */
-    if (((uint32_t)addr & 0x03u) || (count & 0x03u)) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
-
-    pattern32 = (uint32_t)pattern |
-                (uint32_t)pattern << 8 |
-                (uint32_t)pattern << 16 |
-                (uint32_t)pattern << 24;
-
-    for (int i = 0; i < count/4; ++i)
-    {
-        ((uint32_t*)addr)[i] = pattern32;
-    }
-
-    return ARM_DRIVER_OK;
-}
-
-/*
- * ARM FLASH device structure
- */
-struct arm_flash_dev_t {
-    const uint32_t memory_base;   /*!< FLASH memory base address */
-    ARM_FLASH_INFO *data;         /*!< FLASH data */
-};
-
-/* Flash Status */
-static ARM_FLASH_STATUS FlashStatus = {0, 0, 0};
-
-/* Driver Version */
 static const ARM_DRIVER_VERSION DriverVersion = {
-    ARM_FLASH_API_VERSION,
+    ARM_FLASH_API_VERSION,  /* Defined in the CMSIS Flash Driver header file */
     ARM_FLASH_DRV_VERSION
 };
 
+/**
+ * \brief Flash driver capability macro definitions \ref ARM_FLASH_CAPABILITIES
+ */
+/* Flash Ready event generation capability values */
+#define EVENT_READY_NOT_AVAILABLE   (0u)
+#define EVENT_READY_AVAILABLE       (1u)
+/* Data access size values */
+#define DATA_WIDTH_8BIT             (0u)
+#define DATA_WIDTH_16BIT            (1u)
+#define DATA_WIDTH_32BIT            (2u)
+/* Chip erase capability values */
+#define CHIP_ERASE_NOT_SUPPORTED    (0u)
+#define CHIP_ERASE_SUPPORTED        (1u)
+
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
-    0, /* event_ready */
-    2, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
-    1  /* erase_chip */
+    EVENT_READY_NOT_AVAILABLE,
+    DATA_WIDTH_32BIT,
+    CHIP_ERASE_SUPPORTED
 };
 
-static int32_t is_range_valid(struct arm_flash_dev_t *flash_dev,
-                              uint32_t offset)
+/**
+ * \brief Flash status macro definitions \ref ARM_FLASH_STATUS
+ */
+/* Busy status values of the Flash driver  */
+#define DRIVER_STATUS_IDLE      (0u)
+#define DRIVER_STATUS_BUSY      (1u)
+/* Error status values of the Flash driver */
+#define DRIVER_STATUS_NO_ERROR  (0u)
+#define DRIVER_STATUS_ERROR     (1u)
+
+/**
+ * \brief Arm Flash device structure.
+ */
+struct arm_flash_dev_t {
+    struct mt25ql_dev_t* dev;   /*!< FLASH memory device structure */
+    ARM_FLASH_INFO *data;       /*!< FLASH memory device data */
+};
+
+/**
+ * \brief      Check if the Flash memory boundaries are not violated.
+ * \param[in]  flash_dev  Flash device structure \ref arm_flash_dev_t
+ * \param[in]  offset     Highest Flash memory address which would be accessed.
+ * \return     Returns true if Flash memory boundaries are not violated, false
+ *             otherwise.
+ */
+static bool is_range_valid(struct arm_flash_dev_t *flash_dev,
+                           uint32_t offset)
 {
     uint32_t flash_limit = 0;
-    int32_t rc = 0;
 
-    flash_limit = (flash_dev->data->sector_count * flash_dev->data->sector_size)
-                   - 1;
+    /* Calculating the highest address of the Flash memory address range */
+    flash_limit = FLASH_TOTAL_SIZE - 1;
 
-    if (offset > flash_limit) {
-        rc = -1;
-    }
-    return rc;
+    return (offset > flash_limit) ? (false) : (true) ;
 }
 
-static int32_t is_write_aligned(struct arm_flash_dev_t *flash_dev,
-                                uint32_t param)
+/**
+ * \brief        Check if the parameter is aligned to program_unit.
+ * \param[in]    flash_dev  Flash device structure \ref arm_flash_dev_t
+ * \param[in]    param      Any number that can be checked against the
+ *                          program_unit, e.g. Flash memory address or
+ *                          data length in bytes.
+ * \return       Returns true if param is aligned to program_unit, false
+ *               otherwise.
+ */
+static bool is_write_aligned(struct arm_flash_dev_t *flash_dev,
+                             uint32_t param)
 {
-    int32_t rc = 0;
-
-    if ((param % flash_dev->data->program_unit) != 0) {
-        rc = -1;
-    }
-    return rc;
-}
-
-static int32_t is_sector_aligned(struct arm_flash_dev_t *flash_dev,
-                                 uint32_t offset)
-{
-    int32_t rc = 0;
-
-    if ((offset % flash_dev->data->sector_size) != 0) {
-        rc = -1;
-    }
-    return rc;
+    return ((param % flash_dev->data->program_unit) != 0) ? (false) : (true);
 }
 
 #if (RTE_FLASH0)
 static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
-    .sector_info  = NULL,                  /* Uniform sector layout */
-    .sector_count = FLASH0_SIZE / FLASH0_SECTOR_SIZE,
-    .sector_size  = FLASH0_SECTOR_SIZE,
-    .page_size    = FLASH0_PAGE_SIZE,
-    .program_unit = FLASH0_PROGRAM_UNIT,
-    .erased_value = 0xFF};
+    .sector_info    = NULL,     /* Uniform sector layout */
+    .sector_count   = FLASH_TOTAL_SIZE / SUBSECTOR_4KB,
+    .sector_size    = SUBSECTOR_4KB,
+    .page_size      = FLASH_PAGE_SIZE,
+    .program_unit   = 1u,       /* Minimum write size in bytes */
+    .erased_value   = 0xFF
+};
 
 static struct arm_flash_dev_t ARM_FLASH0_DEV = {
-#if (__DOMAIN_NS == 1)
-    .memory_base = FLASH0_BASE_NS,
-#else
-    .memory_base = FLASH0_BASE_S,
-#endif /* __DOMAIN_NS == 1 */
-    .data        = &(ARM_FLASH0_DEV_DATA)};
+    .dev    = &FLASH0_DEV,
+    .data   = &(ARM_FLASH0_DEV_DATA)
+};
 
-struct arm_flash_dev_t *FLASH0_DEV = &ARM_FLASH0_DEV;
-
-/*
- * Functions
- */
+/* Flash Status */
+static ARM_FLASH_STATUS ARM_FLASH0_STATUS = {0, 0, 0};
 
 static ARM_DRIVER_VERSION ARM_Flash_GetVersion(void)
 {
@@ -168,100 +137,98 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
+
     ARG_UNUSED(cb_event);
-    /* Nothing to be done */
+
+    qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
+
+    /* Configure QSPI Flash controller and memory for optimal use */
+    err = mt25ql_cfg_optimal(ARM_FLASH0_DEV.dev);
+
+    if(err != MT25QL_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     return ARM_DRIVER_OK;
 }
 
 static int32_t ARM_Flash_Uninitialize(void)
 {
-    /* Nothing to be done */
+    qspi_ip6514e_disable(ARM_FLASH0_DEV.dev->controller);
+
     return ARM_DRIVER_OK;
 }
 
 static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
 {
-    switch (state) {
+    switch(state) {
     case ARM_POWER_FULL:
         /* Nothing to be done */
         return ARM_DRIVER_OK;
-        break;
-
     case ARM_POWER_OFF:
     case ARM_POWER_LOW:
-    default:
         return ARM_DRIVER_ERROR_UNSUPPORTED;
+    default:
+        return ARM_DRIVER_ERROR_PARAMETER;
     }
 }
 
 static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
-    volatile uint32_t mem_base = FLASH0_DEV->memory_base;
-    uint32_t start_addr = mem_base + addr;
-    int32_t rc = 0;
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
+    bool is_valid = true;
 
-    /* Check flash memory boundaries */
-    rc = is_range_valid(FLASH0_DEV, addr + cnt);
-    if (rc != 0) {
+    ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
+
+    /* Check Flash memory boundaries */
+    is_valid = is_range_valid(&ARM_FLASH0_DEV, addr + cnt);
+    if(is_valid != true) {
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    /* Redirecting SST storage to code sram */
-    if(addr >= SST_FLASH_AREA_ADDR &&
-       addr <= SST_FLASH_AREA_ADDR + FLASH_SST_AREA_SIZE) {
-        start_addr = S_CODE_SRAM_ALIAS_BASE + addr;
-        memcpy(data, (void *)start_addr, cnt);
-    } else {
-        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
-        uint32_t window_base = start_addr - window_off;
-        /* Might need to handle this case */
-        assert ((window_off + cnt) <= SPI_FLASH_ACCESS_LENGTH);
-        qspi_remap_base(window_base - mem_base);
-        if (cnt % 4 != 0) { /* Some read sizes are smaller than 4 bytes */
-            memcpy(data, (void *)(mem_base + window_off), cnt);
-        } else {
-            /* Need to use memcpy4 instead of memcpy as it's possible that
-             * this method is being used to copy image from Flash to SRAM */
-            memcpy4(data, (void *)(mem_base + window_off), cnt);
-        }
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_BUSY;
+
+    err = mt25ql_command_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
+
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
+
+    if(err != MT25QL_ERR_NONE) {
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
+        return ARM_DRIVER_ERROR;
     }
 
     return ARM_DRIVER_OK;
 }
 
-static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t cnt)
+static int32_t ARM_Flash_ProgramData(uint32_t addr,
+                                     const void *data, uint32_t cnt)
 {
-    volatile uint32_t mem_base = FLASH0_DEV->memory_base;
-    uint32_t start_addr = mem_base + addr;
-    int32_t rc = 0;
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
 
-    /* Check flash memory boundaries and alignment with minimal write size */
-    rc  = is_range_valid(FLASH0_DEV, addr + cnt);
-    rc |= is_write_aligned(FLASH0_DEV, addr);
-    rc |= is_write_aligned(FLASH0_DEV, cnt);
-    if (rc != 0) {
+    ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
+
+    /* Check Flash memory boundaries and alignment with minimum write size
+     * (program_unit), data size also needs to be a multiple of program_unit.
+     */
+    if(!(is_range_valid(&ARM_FLASH0_DEV, addr + cnt) &&
+         is_write_aligned(&ARM_FLASH0_DEV, addr)     &&
+         is_write_aligned(&ARM_FLASH0_DEV, cnt)      )) {
+
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    /* Redirecting SST storage to code sram */
-    if(addr >= SST_FLASH_AREA_ADDR &&
-       addr <= SST_FLASH_AREA_ADDR + FLASH_SST_AREA_SIZE) {
-        start_addr = S_CODE_SRAM_ALIAS_BASE + addr;
-        /* Flash interface emulated over CODE SRAM. Writing it on 4 aligned
-         * addresses is necessary, so use a special memcpy function.
-         */
-        rc = memcpy4((void *)start_addr, data, cnt);
-        if (rc != ARM_DRIVER_OK) {
-            return ARM_DRIVER_ERROR_PARAMETER;
-        }
-    } else {
-        /* Flash interface just emulated over SRAM, use memcpy */
-        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
-        uint32_t window_base = start_addr - window_off;
-        /* Might need to handle this case */
-        assert ((window_off + cnt) <= SPI_FLASH_ACCESS_LENGTH);
-        qspi_remap_base(window_base - mem_base);
-        memcpy((void *)(mem_base + window_off), data, cnt);
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_BUSY;
+
+    err = mt25ql_command_write(ARM_FLASH0_DEV.dev, addr, data, cnt);
+
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
+
+    if(err != MT25QL_ERR_NONE) {
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
+        return ARM_DRIVER_ERROR;
     }
 
     return ARM_DRIVER_OK;
@@ -269,37 +236,28 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)
 {
-    volatile uint32_t mem_base = FLASH0_DEV->memory_base;
-    uint32_t rc = 0;
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
 
-    rc  = is_range_valid(FLASH0_DEV, addr);
-    rc |= is_sector_aligned(FLASH0_DEV, addr);
-    if (rc != 0) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
+    ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_BUSY;
 
-    /* Redirecting SST storage to code sram */
-    if(addr >= SST_FLASH_AREA_ADDR &&
-       addr <= SST_FLASH_AREA_ADDR + FLASH_SST_AREA_SIZE) {
-        /* Flash interface emulated over CODE SRAM. Writing it on 4 aligned
-         * addresses is necessary, so use a special memset function.
-         */
-        rc = memset4((void *)(S_CODE_SRAM_ALIAS_BASE + addr),
-                   FLASH0_DEV->data->erased_value,
-                   FLASH0_DEV->data->sector_size);
-        if (rc != ARM_DRIVER_OK) {
+    /* The erase function checks whether the address is aligned with
+     * the sector or subsector and checks the Flash memory boundaries.
+     */
+    err = mt25ql_erase(ARM_FLASH0_DEV.dev,
+                       addr, ARM_FLASH0_DEV.data->sector_size);
+
+    ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
+
+    if(err != MT25QL_ERR_NONE) {
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
+
+        if((err == MT25QL_ERR_ADDR_NOT_ALIGNED) ||
+           (err == MT25QL_ERR_ADDR_TOO_BIG)     ||
+           (err == MT25QL_ERR_WRONG_ARGUMENT)    ) {
             return ARM_DRIVER_ERROR_PARAMETER;
         }
-    } else {
-        uint32_t start_addr = S_CODE_SRAM_ALIAS_BASE + addr;
-        uint32_t window_off = start_addr % SPI_FLASH_ACCESS_LENGTH;
-        uint32_t window_base = start_addr - window_off;
-        assert ((window_off + FLASH0_DEV->data->sector_size)
-                <= SPI_FLASH_ACCESS_LENGTH);
-        qspi_remap_base(window_base - mem_base);
-        memset((void *)(mem_base + window_off),
-               FLASH0_DEV->data->erased_value,
-               FLASH0_DEV->data->sector_size);
+        return ARM_DRIVER_ERROR;
     }
 
     return ARM_DRIVER_OK;
@@ -307,45 +265,46 @@ static int32_t ARM_Flash_EraseSector(uint32_t addr)
 
 static int32_t ARM_Flash_EraseChip(void)
 {
-    uint32_t i;
-    uint32_t addr = FLASH0_DEV->memory_base;
-    int32_t rc = ARM_DRIVER_ERROR_UNSUPPORTED;
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
 
-    /* Check driver capability erase_chip bit */
-    if (DriverCapabilities.erase_chip == 1) {
-        for (i = 0; i < FLASH0_DEV->data->sector_count; i++) {
-            /* Redirecting SST storage to code sram */
-            if(addr >= SST_FLASH_AREA_ADDR &&
-               addr <= SST_FLASH_AREA_ADDR + FLASH_SST_AREA_SIZE) {
-                rc = memset4((void *)addr - FLASH0_DEV->memory_base
-                               + S_CODE_SRAM_ALIAS_BASE,
-                        FLASH0_DEV->data->erased_value,
-                        FLASH0_DEV->data->sector_size);
-                if (rc != ARM_DRIVER_OK) {
-                    return ARM_DRIVER_ERROR_PARAMETER;
-                }
+    if(DriverCapabilities.erase_chip == 1) {
 
-            } else {
-                /* Flash interface just emulated over SRAM, use memset */
-                memset((void *)addr,
-                       FLASH0_DEV->data->erased_value,
-                       FLASH0_DEV->data->sector_size);
+        ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
+        ARM_FLASH0_STATUS.busy = DRIVER_STATUS_BUSY;
+
+        /* The erase function checks whether the address is aligned with
+         * the sector or subsector and checks the Flash memory boundaries.
+         */
+        err = mt25ql_erase(ARM_FLASH0_DEV.dev, 0, MT25QL_ERASE_ALL_FLASH);
+
+        ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
+
+        if(err != MT25QL_ERR_NONE) {
+            ARM_FLASH0_STATUS.error = DRIVER_STATUS_ERROR;
+
+            if((err == MT25QL_ERR_ADDR_NOT_ALIGNED) ||
+               (err == MT25QL_ERR_ADDR_TOO_BIG)     ||
+               (err == MT25QL_ERR_WRONG_ARGUMENT)    ) {
+                return ARM_DRIVER_ERROR_PARAMETER;
             }
-            addr += FLASH0_DEV->data->sector_size;
-            rc = ARM_DRIVER_OK;
+            return ARM_DRIVER_ERROR;
         }
+
+        return ARM_DRIVER_OK;
+
+    } else {
+        return ARM_DRIVER_ERROR_UNSUPPORTED;
     }
-    return rc;
 }
 
 static ARM_FLASH_STATUS ARM_Flash_GetStatus(void)
 {
-    return FlashStatus;
+    return ARM_FLASH0_STATUS;
 }
 
 static ARM_FLASH_INFO * ARM_Flash_GetInfo(void)
 {
-    return FLASH0_DEV->data;
+    return ARM_FLASH0_DEV.data;
 }
 
 ARM_DRIVER_FLASH Driver_FLASH0 = {

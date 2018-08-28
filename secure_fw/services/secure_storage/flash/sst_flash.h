@@ -40,6 +40,14 @@ extern "C" {
 #define SST_BLOCK_INVALID_ID 0xFFFFFFFF
 
 /**
+ * \brief  Initialize the Flash Interface.
+ *
+ * \return Returns PSA_SST_ERR_SUCCESS if the function is executed correctly.
+ *         Otherwise, it returns PSA_SST_ERR_SYSTEM_ERROR.
+ */
+enum psa_sst_err_t sst_flash_init(void);
+
+/**
  * \brief Reads block data from the position specifed by block ID and offset.
  *
  * \param[in]  block_id  Block ID

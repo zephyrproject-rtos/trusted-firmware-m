@@ -111,6 +111,17 @@ extern struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_S;
 extern struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS;
 #endif
 
+/* QSPI Flash Controller driver structures */
+#ifdef QSPI_IP6514E_S
+#include "qspi_ip6514e_drv.h"
+extern struct qspi_ip6514e_dev_t QSPI_DEV_S;
+#endif
+
+#ifdef QSPI_IP6514E_NS
+#include "qspi_ip6514e_drv.h"
+extern struct qspi_ip6514e_dev_t QSPI_DEV_NS;
+#endif
+
 /* ARM PPC driver structures */
 #ifdef AHB_PPC0_S
 #include "ppc_sse200_drv.h"
@@ -165,6 +176,18 @@ extern struct ppc_sse200_dev_t APB_PPCEXP2_DEV_S;
 #ifdef APB_PPCEXP3_S
 #include "ppc_sse200_drv.h"
 extern struct ppc_sse200_dev_t APB_PPCEXP3_DEV_S;
+#endif
+
+/* ======= External peripheral configuration structure declarations ======= */
+
+/* MT25QL Flash memory library structures */
+#if (defined(MT25QL_S) && defined(QSPI_IP6514E_S))
+#include "Libraries/mt25ql_flash_lib.h"
+extern struct mt25ql_dev_t MT25QL_DEV_S;
+#endif
+#if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
+#include "Libraries/mt25ql_flash_lib.h"
+extern struct mt25ql_dev_t MT25QL_DEV_NS;
 #endif
 
 #endif  /* __ARM_LTD_MUSCA_A1_RETARGET_DEV_H__ */

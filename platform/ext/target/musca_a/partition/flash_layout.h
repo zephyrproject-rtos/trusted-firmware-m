@@ -51,10 +51,9 @@
  */
 #define FLASH_PARTITION_SIZE            (0x80000) /* 512KB */
 
-/* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)     /* 4 kB */
-/* Same as FLASH0_SIZE */
-#define FLASH_TOTAL_SIZE                (0x00800000) /* 8 MB */
+/* Sector size of the flash hardware */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4KB */
+#define FLASH_TOTAL_SIZE                (0x800000) /* 8MB */
 
 /* Flash layout info for BL2 bootloader */
 #define FLASH_BASE_ADDRESS              (0x10200000) /* same as FLASH0_BASE_S */
@@ -85,11 +84,7 @@
 /** Maximum number of image sectors supported by the bootloader. */
 #define BOOT_MAX_IMG_SECTORS            ((2 * FLASH_PARTITION_SIZE) / \
                                          FLASH_AREA_IMAGE_SECTOR_SIZE)
-/*
- * Note: Though the SST_FLASH_AREA_ADDR is pointing to offset in flash, but
- * the actual contents of SST is stored in Code SRAM. See Driver_Flash.c for
- * more details.
- */
+
 #define FLASH_SST_AREA_OFFSET           (FLASH_AREA_IMAGE_SCRATCH_OFFSET + \
                                          FLASH_AREA_IMAGE_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
@@ -129,6 +124,6 @@
 /* The sectors must be in consecutive memory location */
 #define SST_NBR_OF_SECTORS  (FLASH_SST_AREA_SIZE / SST_SECTOR_SIZE)
 /* Specifies the smallest flash programmable unit in bytes */
-#define SST_FLASH_PROGRAM_UNIT  0x4
+#define SST_FLASH_PROGRAM_UNIT  0x1
 
 #endif /* __FLASH_LAYOUT_H__ */

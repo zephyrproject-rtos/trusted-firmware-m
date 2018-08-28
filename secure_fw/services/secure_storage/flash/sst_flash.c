@@ -78,6 +78,18 @@ static enum psa_sst_err_t flash_erase(uint32_t flash_addr)
     return PSA_SST_ERR_SUCCESS;
 }
 
+enum psa_sst_err_t sst_flash_init(void)
+{
+    int32_t err;
+
+    err = FLASH_DEV_NAME.Initialize(NULL);
+    if(err != ARM_DRIVER_OK) {
+        return PSA_SST_ERR_SYSTEM_ERROR;
+    }
+
+    return PSA_SST_ERR_SUCCESS;
+}
+
 enum psa_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
                                   uint32_t offset, uint32_t size)
 {

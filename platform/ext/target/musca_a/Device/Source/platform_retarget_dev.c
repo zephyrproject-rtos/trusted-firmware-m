@@ -335,6 +335,7 @@ struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
                                                 &(CMSDK_TIMER1_DEV_DATA_NS)};
 #endif
 
+/* ARM UART PL011 driver structures */
 #ifdef UART0_PL011_S
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
     .base = MUSCA_UART0_S_BASE,
@@ -393,4 +394,72 @@ static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_NS = {
     .baudrate = 0};
 struct uart_pl011_dev_t UART1_PL011_DEV_NS = {&(UART1_PL011_DEV_CFG_NS),
                                                 &(UART1_PL011_DEV_DATA_NS)};
+#endif
+
+/* QSPI IP6514E driver structures */
+#ifdef QSPI_IP6514E_S
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_S = {
+    .base = MUSCA_QSPI_REG_S_BASE,
+    /*
+     * On Musca-A1, only the 18 first address bits are used for any AHB
+     * address in a request coming to the QSPI Flash controller.
+     * It means that direct accesses are limited to the first 256 KiB of the
+     * Flash memory (if the Remap register is not used) and that the Indirect
+     * Trigger zone needs to be inside the first 256 KiB as well.
+     */
+    .addr_mask = (1U << 18) - 1, /* 256 KiB minus 1 byte */
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_S = {
+    &QSPI_DEV_CFG_S
+};
+#endif
+
+#ifdef QSPI_IP6514E_NS
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_NS = {
+    .base = MUSCA_QSPI_REG_NS_BASE,
+    /*
+     * On Musca-A1, only the 18 first address bits are used for any AHB
+     * address in a request coming to the QSPI Flash controller.
+     * It means that direct accesses are limited to the first 256 KiB of the
+     * Flash memory (if the Remap register is not used) and that the Indirect
+     * Trigger zone needs to be inside the first 256 KiB as well.
+     */
+    .addr_mask = (1U << 18) - 1, /* 256 KiB minus 1 byte */
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_NS = {
+    &QSPI_DEV_CFG_NS
+};
+#endif
+
+/* ======= External peripheral configuration structure definitions ======= */
+
+/* MT25QL Flash memory library structures */
+#if (defined(MT25QL_S) && defined(QSPI_IP6514E_S))
+struct mt25ql_dev_t MT25QL_DEV_S = {
+    .controller = &QSPI_DEV_S,
+    .direct_access_start_addr = MUSCA_QSPI_FLASH_S_BASE,
+    .baud_rate_div = 4U,
+    /*
+     * 8 MiB flash memory are advertised in the Arm Musca-A Test Chip and Board
+     * Technical Reference Manual. The MT25QL Flash device may however contain
+     * more.
+     */
+    .size = 0x00800000U, /* 8 MiB */
+    .func_state = MT25QL_FUNC_STATE_DEFAULT,
+};
+#endif
+
+#if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
+struct mt25ql_dev_t MT25QL_DEV_NS = {
+    .controller = &QSPI_DEV_NS,
+    .direct_access_start_addr = MUSCA_QSPI_FLASH_NS_BASE,
+    .baud_rate_div = 4U,
+    /*
+     * 8 MiB flash memory are advertised in the Arm Musca-A Test Chip and Board
+     * Technical Reference Manual. The MT25QL Flash device may however contain
+     * more.
+     */
+    .size = 0x00800000U, /* 8 MiB */
+    .func_state = MT25QL_FUNC_STATE_DEFAULT,
+};
 #endif

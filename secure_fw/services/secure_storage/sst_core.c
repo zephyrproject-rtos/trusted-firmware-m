@@ -1776,6 +1776,12 @@ enum psa_sst_err_t sst_core_prepare(void)
 {
     enum psa_sst_err_t err;
 
+    /* Initialize Flash Interface */
+    err = sst_flash_init();
+    if(err != PSA_SST_ERR_SUCCESS) {
+        return err;
+    }
+
 #if SST_ENCRYPTION
     sst_crypto_init();
 #endif

@@ -101,6 +101,7 @@ int main(void)
 
     /* Initialize Flash driver */
     FLASH_DEV_NAME.Initialize(NULL);
+
     rc = boot_go(&rsp);
     if (rc != 0) {
         BOOT_LOG_ERR("Unable to find bootable image");

@@ -26,6 +26,8 @@
 #define UART0_DEV           UART0_PL011_DEV_NS
 #define UART1_DEV           UART1_PL011_DEV_NS
 
+#define FLASH0_DEV          MT25QL_DEV_NS
+
 #define MPC_ISRAM0_DEV      MPC_ISRAM0_DEV_S
 #define MPC_ISRAM1_DEV      MPC_ISRAM1_DEV_S
 #define MPC_ISRAM2_DEV      MPC_ISRAM2_DEV_S

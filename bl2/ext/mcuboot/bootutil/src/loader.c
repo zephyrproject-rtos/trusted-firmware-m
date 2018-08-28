@@ -280,7 +280,11 @@ boot_validate_slot(int slot)
 
     if ((hdr->ih_magic != IMAGE_MAGIC || boot_image_check(hdr, fap) != 0)) {
         if (slot != 0) {
-            flash_area_erase(fap, 0, fap->fa_size);
+            rc = flash_area_erase(fap, 0, fap->fa_size);
+            if(rc != 0) {
+                flash_area_close(fap);
+                return BOOT_EFLASH;
+            }
             /* Image in slot 1 is invalid. Erase the image and
              * continue booting from slot 0.
              */

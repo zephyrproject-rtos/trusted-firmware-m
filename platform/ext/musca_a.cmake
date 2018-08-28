@@ -47,6 +47,7 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Config"
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Include" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Native_Driver" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/partition" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Libraries" ABSOLUTE)
 
 #Gather all source files we need.
 if (NOT DEFINED BUILD_CMSIS_CORE)
@@ -84,6 +85,8 @@ elseif(BUILD_NATIVE_DRIVERS)
 
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/Native_Driver/mpc_sie200_drv.c"
               "${PLATFORM_DIR}/target/musca_a/Native_Driver/ppc_sse200_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/qspi_ip6514e_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Libraries/mt25ql_flash_lib.c")
 endif()
 
 if (NOT DEFINED BUILD_TIME)
@@ -145,6 +148,7 @@ elseif(BUILD_FLASH)
   # it needs  to create an empty one.
   set(SST_RAM_FS True)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
+  embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
 
 if (NOT BL2)

@@ -67,4 +67,12 @@
 #define CMSDK_TIMER1_S
 #define CMSDK_TIMER1_NS
 
+/* Cadence QSPI Flash Controller */
+#define QSPI_IP6514E_S
+#define QSPI_IP6514E_NS
+
+/* MT25QL Flash memory library */
+#define MT25QL_S
+#define MT25QL_NS
+
 #endif  /* __ARM_LTD_DEVICE_CFG_H__ */
