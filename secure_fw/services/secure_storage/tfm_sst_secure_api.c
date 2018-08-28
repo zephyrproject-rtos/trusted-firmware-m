@@ -9,6 +9,7 @@
 #include "tfm_sst_veneers.h"
 #include "secure_fw/services/secure_storage/sst_asset_management.h"
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token,
                                   uint32_t token_size)
 {
@@ -26,6 +27,7 @@ enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token,
 
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
                                     const uint8_t *token,
                                     uint32_t token_size,
@@ -45,6 +47,7 @@ enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
                                    &s_token, info);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
                                           const uint8_t *token,
                                           uint32_t token_size,
@@ -64,6 +67,7 @@ enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
                                          &s_token, attrs);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
                                       const uint8_t *token,
                                       uint32_t token_size,
@@ -83,6 +87,7 @@ enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
                                          &s_token, attrs);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
                                 const uint8_t *token,
                                 uint32_t token_size,
@@ -105,6 +110,7 @@ enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
     return tfm_sst_veneer_read(S_CLIENT_ID, asset_uuid, &s_token, &s_data);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_reference_read(int32_t  client_id,
                                           uint32_t asset_uuid,
                                           const uint8_t *token,
@@ -128,6 +134,7 @@ enum psa_sst_err_t psa_sst_reference_read(int32_t  client_id,
     return tfm_sst_veneer_read(client_id, asset_uuid, &s_token, &s_data);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
                                  const uint8_t *token,
                                  uint32_t token_size,
@@ -154,6 +161,7 @@ enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
     return tfm_sst_veneer_write(S_CLIENT_ID, asset_uuid, &s_token, &s_data);
 }
 
+__attribute__(( section("SFN")))
 enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid,
                                   const uint8_t *token,
                                   uint32_t token_size)

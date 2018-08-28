@@ -47,7 +47,8 @@ if (ENABLE_SECURE_STORAGE)
 		message(FATAL_ERROR "Incomplete build configuration: SST_VALIDATE_METADATA_FROM_FLASH is undefined. ")
 	endif()
 
-	set (SECURE_STORAGE_C_SRC "${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
+	set (SECURE_STORAGE_C_SRC
+		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 		"${SECURE_STORAGE_DIR}/sst_core.c"
 		"${SECURE_STORAGE_DIR}/sst_object_system.c"
 		"${SECURE_STORAGE_DIR}/sst_asset_management.c"

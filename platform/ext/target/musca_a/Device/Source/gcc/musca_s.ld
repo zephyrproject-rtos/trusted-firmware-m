@@ -168,8 +168,6 @@ SECTIONS
     {
         *tfm_unpriv_api.o(.text*)
         *tfm_unpriv_api.o(.rodata*)
-        *tfm_sst_secure_api.o(.text*)
-        *tfm_sst_secure_api.o(.rodata*)
         *dummy_crypto_keys.o(.text*)
         *dummy_crypto_keys.o(.rodata*)
         *platform_retarget_dev.o(.text*)
