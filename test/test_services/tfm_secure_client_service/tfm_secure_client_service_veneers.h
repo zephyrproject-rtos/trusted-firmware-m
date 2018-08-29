@@ -9,7 +9,6 @@
 #define __TFM_SECURE_CLIENT_SERVICE_VENEERS_H__
 
 #include <stdint.h>
-#include "secure_fw/core/tfm_secure_api.h"
 
 #ifdef __cplusplus
 extern "C" {
