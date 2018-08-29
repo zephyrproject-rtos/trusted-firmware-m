@@ -39,6 +39,14 @@
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CORE_TEST_2_SFN_GET_EVERY_SECOND_BYTE",
+      "signal": "TFM_CORE_TEST_2_SFN_GET_EVERY_SECOND_BYTE",
+      "tfm_symbol": "spm_core_test_2_get_every_second_byte",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
     }
   ],
   "source_files": [

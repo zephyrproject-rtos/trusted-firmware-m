@@ -67,6 +67,7 @@ int32_t tfm_spm_core_test_sfn_direct_recursion_veneer(struct psa_invec *in_vec, 
 int32_t tfm_spm_core_test_2_slave_service_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 int32_t tfm_spm_core_test_2_sfn_invert_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 int32_t tfm_spm_core_test_2_check_caller_client_id_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+int32_t tfm_spm_core_test_2_get_every_second_byte_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SST

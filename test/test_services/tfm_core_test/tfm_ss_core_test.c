@@ -276,6 +276,79 @@ int32_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr, int32_t len)
     return TFM_SUCCESS;
 }
 
+static int32_t test_outvec_write(void)
+{
+    int32_t err;
+    int i;
+    uint8_t *scratch_ptr = (uint8_t *)tfm_scratch_area;
+    psa_invec in_vec [2];
+    psa_outvec out_vec [2];
+    uint8_t *in_buf_0;
+    uint8_t *in_buf_1;
+    uint8_t *out_buf_0;
+    uint8_t *out_buf_1;
+
+    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
+    }
+
+    in_buf_0 = scratch_ptr;
+    for (i = 0; i < 5; ++i, ++scratch_ptr)
+    {
+        *scratch_ptr = i;
+    }
+    in_vec[0].base = in_buf_0;
+    in_vec[0].len = scratch_ptr - in_buf_0;
+
+    in_buf_1 = scratch_ptr;
+    *(scratch_ptr++) = 1;
+    *(scratch_ptr++) = 1;
+    for (i = 2; i < 11; ++i, ++scratch_ptr)
+    {
+        *scratch_ptr = *(scratch_ptr-1) + *(scratch_ptr-2);
+    }
+    in_vec[1].base = in_buf_1;
+    in_vec[1].len = scratch_ptr - in_buf_1;
+
+    out_buf_0 = scratch_ptr;
+    scratch_ptr += in_vec[0].len;
+    out_vec[0].base = out_buf_0;
+    out_vec[0].len = scratch_ptr - out_buf_0;
+
+    out_buf_1 = scratch_ptr;
+    scratch_ptr += in_vec[1].len;
+    out_vec[1].base = out_buf_0;
+    out_vec[1].len = scratch_ptr - out_buf_0;
+
+    err = tfm_spm_core_test_2_get_every_second_byte_veneer(in_vec, 2,
+                                                           out_vec, 2);
+
+    if (err != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_TEST_FAULT;
+    }
+
+    if (out_vec[0].len != in_vec[0].len/2 ||
+        out_vec[1].len != in_vec[1].len/2) {
+        return CORE_TEST_ERRNO_TEST_FAULT;
+    }
+    for (i = 1; i < sizeof(in_buf_0); i += 2) {
+        if (((uint8_t *)out_vec[0].base)[i/2] != in_buf_0[i]) {
+            return CORE_TEST_ERRNO_TEST_FAULT;
+        }
+    }
+    for (i = 1; i < sizeof(in_buf_1); i += 2) {
+        if (((uint8_t *)out_vec[1].base)[i/2] != in_buf_1[i]) {
+            return CORE_TEST_ERRNO_TEST_FAULT;
+        }
+    }
+
+    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_DEFAULT) != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
+    }
+
+    return TFM_SUCCESS;
+}
+
 static int32_t test_ss_to_ss(void)
 {
     /* Call to a different service, should be successful */
@@ -444,6 +517,8 @@ int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
         arg1 = (int32_t)in_vec[1].base;
         arg2 = (int32_t)out_vec[0].base;
         return test_ss_to_ss_buffer((uint32_t *)arg1, (uint32_t *)arg2, arg3);
+    case CORE_TEST_ID_OUTVEC_WRITE:
+        return test_outvec_write();
     case CORE_TEST_ID_PERIPHERAL_ACCESS:
         return test_peripheral_access();
     case CORE_TEST_ID_GET_CALLER_CLIENT_ID:

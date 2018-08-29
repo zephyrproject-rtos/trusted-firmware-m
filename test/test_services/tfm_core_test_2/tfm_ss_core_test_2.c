@@ -85,6 +85,27 @@ int32_t spm_core_test_2_check_caller_client_id(void)
     return TFM_SUCCESS;
 }
 
+int32_t spm_core_test_2_get_every_second_byte(
+                                     struct psa_invec *in_vec, size_t in_len,
+                                     struct psa_outvec *out_vec, size_t out_len)
+{
+    int i, j;
+
+    if (in_len != out_len) {
+        return TFM_ERROR_INVALID_PARAMETER;
+    }
+    for (i = 0; i < in_len; ++i) {
+        if (in_vec[i].len/2 > out_vec[i].len) {
+            return TFM_ERROR_INVALID_PARAMETER;
+        }
+        for (j = 1; j < in_vec[i].len; j += 2) {
+            ((uint8_t *)out_vec[i].base)[j/2] = ((uint8_t *)in_vec[i].base)[j];
+        }
+        out_vec[i].len = in_vec[i].len/2;
+    }
+    return TFM_SUCCESS;
+}
+
 /* Invert function */
 #define SFN_INVERT_MAX_LEN 128
 

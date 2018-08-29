@@ -62,6 +62,7 @@ int32_t spm_core_test_sfn_direct_recursion(struct psa_invec *, size_t, struct ps
 int32_t spm_core_test_2_slave_service(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 int32_t spm_core_test_2_sfn_invert(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 int32_t spm_core_test_2_check_caller_client_id(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+int32_t spm_core_test_2_get_every_second_byte(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SST
@@ -141,6 +142,7 @@ TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST, spm_core_test_sfn_direct_recursion)
 TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_slave_service)
 TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_sfn_invert)
 TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_check_caller_client_id)
+TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_get_every_second_byte)
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SST

@@ -35,6 +35,7 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
 static void tfm_core_test_spm_request(struct test_result_t *ret);
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
+static void tfm_core_test_outvec_write(struct test_result_t *ret);
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -70,6 +71,9 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_SPM_REQUEST,
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_IOVEC_SANITIZATION,
     tfm_core_test_iovec_sanitization,
     "Test service parameter sanitization"),
+CORE_TEST_DESCRIPTION(CORE_TEST_ID_OUTVEC_WRITE,
+    tfm_core_test_outvec_write,
+    "Test outvec write"),
 };
 
 void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
@@ -260,6 +264,63 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+
+static void tfm_core_test_outvec_write(struct test_result_t *ret)
+{
+    int32_t err;
+    int32_t test_case_id = CORE_TEST_ID_OUTVEC_WRITE;
+    int i;
+    uint8_t in_buf_0[] = {0, 1, 2, 3, 4};
+    uint8_t in_buf_1[] = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89};
+    uint8_t out_buf_0[sizeof(in_buf_0)];
+    uint8_t out_buf_1[sizeof(in_buf_1)];
+
+    psa_invec in_vec[PSA_MAX_IOVEC] = { {in_buf_0, sizeof(in_buf_0)},
+                                        {in_buf_1, sizeof(in_buf_1)} };
+    psa_outvec out_vec[PSA_MAX_IOVEC] = { {out_buf_0, sizeof(out_buf_0) },
+                                        {out_buf_1, sizeof(out_buf_1)} };
+    struct tfm_core_test_call_args_t args1 = {in_vec, 2, out_vec, 2};
+    struct tfm_core_test_call_args_t args2 = {in_vec, 1, NULL, 0};
+
+    err = tfm_core_test_call(tfm_spm_core_test_2_get_every_second_byte_veneer,
+                                                                        &args1);
+
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("call to secure function should be successful");
+        return;
+    }
+
+    if (out_vec[0].len != sizeof(in_buf_0)/2 ||
+        out_vec[1].len != sizeof(in_buf_1)/2) {
+        TEST_FAIL("Number of elements in outvec is not set properly");
+        return;
+    }
+    for (i = 1; i < sizeof(in_buf_0); i += 2) {
+        if (((uint8_t *)out_vec[0].base)[i/2] != in_buf_0[i]) {
+            TEST_FAIL("result is not correct");
+            return;
+        }
+    }
+    for (i = 1; i < sizeof(in_buf_1); i += 2) {
+        if (((uint8_t *)out_vec[1].base)[i/2] != in_buf_1[i]) {
+            TEST_FAIL("result is not correct");
+            return;
+        }
+    }
+
+    /* do the same test on the secure side */
+    in_vec[0].base = &test_case_id;
+    in_vec[0].len = sizeof(int32_t);
+    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args2);
+
+    if (err != TFM_SUCCESS) {
+        TEST_FAIL("Failed to execute secure side test");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
 
 /*
  * \brief Tests whether the initialisation of the service was successful.
