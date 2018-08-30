@@ -42,13 +42,9 @@ enum spm_part_flag_mask_t {
 struct spm_partition_runtime_data_t {
     uint32_t partition_state;
     uint32_t caller_partition_idx;
-    uint32_t orig_psp;
-    uint32_t orig_psplim;
-    uint32_t orig_lr;
     uint32_t share;
-#if TFM_LVL != 1
     uint32_t stack_ptr;
-#endif
+    uint32_t lr;
 };
 
 
@@ -159,6 +155,18 @@ uint32_t tfm_spm_partition_get_running_partition_idx(void);
 void tfm_spm_partition_set_stack(uint32_t partition_id, uint32_t stack_ptr);
 
 /**
+ * \brief Save stack pointer and link register for partition in database
+ *
+ * \param[in] partition_idx  Partition index
+ * \param[in] stack_ptr      Stack pointer to be stored
+ * \param[in] lr             Link register to be stored
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+void tfm_spm_partition_store_context(uint32_t partition_idx,
+        uint32_t stack_ptr, uint32_t lr);
+
+/**
  * \brief Set the current state of a partition
  *
  * \param[in] partition_idx  Partition index
@@ -179,37 +187,6 @@ void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state);
  */
 void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
                                                 uint32_t caller_partition_idx);
-
-/**
- * \brief Set the original PSP value of a partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] orig_psp       The PSP value to set
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-void tfm_spm_partition_set_orig_psp(uint32_t partition_idx, uint32_t orig_psp);
-
-/**
- * \brief Set the original PSP limit value of a partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] orig_psplim    The PSP limit value to set
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-void tfm_spm_partition_set_orig_psplim(uint32_t partition_idx,
-                                       uint32_t orig_psplim);
-
-/**
- * \brief Set the original link register value of a partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] orig_lr        The link register value to set
- *
- * \note This function doesn't check if partition_id is valid.
- */
-void tfm_spm_partition_set_orig_lr(uint32_t partition_idx, uint32_t orig_lr);
 
 /**
  * \brief Set the buffer share region of the partition

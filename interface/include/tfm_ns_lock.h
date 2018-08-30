@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,18 +12,19 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "tfm_ns_svc.h"
+
+typedef int32_t (*veneer_fn) (uint32_t arg0, uint32_t arg1,
+                      uint32_t arg2, uint32_t arg3);
 
 /**
  * \brief NS world, NS lock based dispatcher
  *
- * \details To be called from the SVC wrapper API interface
+ * \details To be called from the wrapper API interface
  */
-uint32_t tfm_ns_lock_svc_dispatch(enum tfm_svc_num svc_num,
-                                  uint32_t arg0,
-                                  uint32_t arg1,
-                                  uint32_t arg2,
-                                  uint32_t arg3);
+
+uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
+                              uint32_t arg0, uint32_t arg1,
+                              uint32_t arg2, uint32_t arg3);
 
 /**
  * \brief NS world, Init NS lock

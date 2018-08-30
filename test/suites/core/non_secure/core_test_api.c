@@ -6,17 +6,10 @@
  */
 
 #include "core_test_api.h"
-#include "tfm_ns_svc.h"
+#include "test/test_services/tfm_core_test/core_test_defs.h"
 
-__attribute__ ((naked)) int32_t tfm_core_test_svc(void *fn_ptr, int32_t args[])
+int32_t tfm_core_test_call(void *fn_ptr, int32_t args[])
 {
-    SVC(SVC_TFM_CORE_TEST);
-    __ASM("BX LR");
-}
-
-__attribute__ ((naked)) int32_t tfm_core_test_multiple_calls_svc(void *fn_ptr,
-                                                                 int32_t args[])
-{
-    SVC(SVC_TFM_CORE_TEST_MULTIPLE_CALLS);
-    __ASM("BX LR");
+    int32_t (*fn_ptr_to_call)(int32_t, int32_t, int32_t, int32_t) = fn_ptr;
+    return fn_ptr_to_call(args[0], args[1], args[2], args[3]);
 }

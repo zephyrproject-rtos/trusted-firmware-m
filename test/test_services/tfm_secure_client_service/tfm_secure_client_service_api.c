@@ -6,11 +6,11 @@
  */
 
 #include "tfm_secure_client_service_api.h"
-#include "tfm_ns_svc.h"
+#include "tfm_secure_client_service_veneers.h"
 
-__attribute__ ((naked))
+
 int32_t tfm_secure_client_run_tests(void)
 {
-    SVC(SVC_TFM_SECURE_CLIENT_RUN_TESTS);
-    __ASM("BX LR");
+    tfm_secure_client_service_veneer_run_tests();
+    return 0;
 }

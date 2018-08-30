@@ -13,14 +13,9 @@
 #include "tfm_api.h"
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
-#include "tfm_ns_svc.h"
 #include "tfm_ns_lock.h"
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/integ_test.h"
-#endif
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-#include \
-  "test/test_services/tfm_secure_client_service/tfm_secure_client_service_svc.h"
 #endif
 
 #include "target_cfg.h"
@@ -28,42 +23,6 @@
 
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
-
-/**
- * \brief Modified table template for user defined SVC functions
- *
- * \details RTX has a weak definition of osRtxUserSVC, which
- *          is overridden here
- */
-extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
-       void * const osRtxUserSVC[1+USER_SVC_COUNT] = {
-  (void *)USER_SVC_COUNT,
-
-#define X(SVC_ENUM, SVC_HANDLER) (void*)SVC_HANDLER,
-    /* SVC API for Services */
-    LIST_SVC_DISPATCHERS
-
-#if defined(CORE_TEST_INTERACTIVE)
-    LIST_SVC_CORE_TEST_INTERACTIVE
-#endif /* CORE_TEST_INTERACTIVE */
-
-#if defined(TFM_PARTITION_TEST_CORE)
-    LIST_SVC_TFM_PARTITION_TEST_CORE
-#endif /* TFM_PARTITION_TEST_CORE */
-
-#if defined(TFM_PARTITION_TEST_SST)
-    LIST_SVC_TFM_PARTITION_TEST_SST
-#endif /* TFM_PARTITION_TEST_SST */
-
-#if defined(TFM_PARTITION_TEST_SECURE_SERVICES)
-    LIST_SVC_TFM_PARTITION_TEST_SECURE_SERVICES
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#undef X
-
-//(void *)user_function1,
-// ...
-};
 
 /* Struct FILE is implemented in stdio.h. Used to redirect printf to
  * NS_DRIVER_STDIO

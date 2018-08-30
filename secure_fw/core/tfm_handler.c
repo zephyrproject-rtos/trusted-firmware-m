@@ -17,16 +17,16 @@
 #include "tfm_api.h"
 
 /* This SVC handler is called if veneer is running in thread mode */
-extern void tfm_core_partition_request_svc_handler(
-        uint32_t *svc_args, uint32_t *lr_ptr);
+extern uint32_t tfm_core_partition_request_svc_handler(
+        uint32_t *svc_args, uint32_t lr);
 
 /* This SVC handler is called when sfn returns */
-extern int32_t tfm_core_partition_return_handler(uint32_t *lr_ptr);
+extern uint32_t tfm_core_partition_return_handler(uint32_t lr);
 
-extern int32_t
+extern void
         tfm_core_validate_secure_caller_handler(const uint32_t svc_args[]);
 
-extern int32_t
+extern void
         tfm_core_memory_permission_check_handler(const uint32_t svc_args[]);
 
 /* This SVC handler is called when a secure partition requests access to a
@@ -108,14 +108,13 @@ __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM(
     "TST     lr, #4\n"  /* Check store SP in thread mode to r0 */
-    "ITE     EQ\n"
-    "MRSEQ   r0, MSP\n"
-    "MRSNE   r0, PSP\n"
-    "PUSH    {r0, lr}\n"
-    "MOV     r1, sp\n"
-    "ADD     r1, r1, #4\n"
+    "IT      EQ\n"
+    "BXEQ    lr\n"
+    "MRS     r0, PSP\n"
+    "MOV     r1, lr\n"
     "BL      SVCHandler_main\n"
-    "POP     {r1, pc}\n");
+    "BX      r0\n"
+    );
 }
 #elif defined(__ARM_ARCH_8M_BASE__)
 __attribute__((naked)) void SVC_Handler(void)
@@ -129,20 +128,18 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, PSP\n"  /* Coming from thread mode */
     "B sp_stored\n"
     "handler:\n"
-    "MRS     r0, MSP\n"  /* Coming from handler mode */
+    "BX      lr\n"  /* Coming from handler mode */
     "sp_stored:\n"
-    "PUSH    {r0, lr}\n"
-    "MOV     r1, sp\n"
-    "ADDS    r1, r1, #4\n"
+    "MOV     r1, lr\n"
     "BL      SVCHandler_main\n"
-    "POP     {r1, pc}\n");
+    "BX      r0\n"
+    );
 }
 #else
 #error "Unsupported ARM Architecture."
 #endif
 
-
-int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
+uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
 {
     uint8_t svc_number;
     /*
@@ -150,7 +147,7 @@ int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
      * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
      * First argument (r0) is svc_args[0]
      */
-    if (*lr_ptr & EXC_RETURN_SECURE_STACK) {
+    if (lr & EXC_RETURN_SECURE_STACK) {
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */
@@ -160,32 +157,33 @@ int32_t SVCHandler_main(uint32_t *svc_args, uint32_t *lr_ptr)
          * NS cannot directly trigger S SVC so this should not happen
          * FixMe: check for security implications
          */
-        return TFM_ERROR_GENERIC;
+        return lr;
     }
     switch (svc_number) {
     case TFM_SVC_SFN_REQUEST:
-        tfm_core_partition_request_svc_handler(svc_args, lr_ptr);
-        return TFM_SUCCESS;
+        lr = tfm_core_partition_request_svc_handler(svc_args, lr);
+        break;
     case TFM_SVC_SFN_RETURN:
-        return tfm_core_partition_return_handler(lr_ptr);
+        lr = tfm_core_partition_return_handler(lr);
+        break;
     case TFM_SVC_VALIDATE_SECURE_CALLER:
         tfm_core_validate_secure_caller_handler(svc_args);
-        return TFM_SUCCESS;
+        break;
     case TFM_SVC_MEMORY_CHECK:
         tfm_core_memory_permission_check_handler(svc_args);
-        return TFM_SUCCESS;
+        break;
     case TFM_SVC_SET_SHARE_AREA:
         tfm_core_set_buffer_area_handler(svc_args);
-        return TFM_SUCCESS;
+        break;
     case TFM_SVC_PRINT:
         printf("\e[1;34m[Sec Thread] %s\e[0m\r\n", (char *)svc_args[0]);
-        return TFM_SUCCESS;
+        break;
     default:
         LOG_MSG("Unknown SVC number requested!");
         break;
     }
 
-    return TFM_ERROR_GENERIC;
+    return lr;
 }
 
 void tfm_access_violation_handler(void)

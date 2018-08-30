@@ -63,20 +63,14 @@ ranges.
 #### interface with TF-M
 The files needed for the interface with TF-M are exported at the
 `<build_dir>/install/export/tfm` path. The NS side is only allowed to call TF-M
-secure functions (veneers) from the NS Handler mode. For this reason, the API is
-a collection of SVC functions in the `<build_dir>/install/export/tfm/inc`
-directory. For example, the SVC interface for the Secure STorage (SST) service
-is described in the file `tfm_sst_svc_handler.h` as a collection of SVC
-functions which have to be registered within the SVC handler mechanism, i.e.
-`tfm_ns_svc.h`, therefore the OS needs to support user defined SVCs.
-If the OS does not support user defined SVCs, it needs to be extended in
-this way. Once the SVC interface functions are registered within the SVC
-handler mechanism, the services can be called from the non-secure world
-applications (running in Thread mode) using a wrapper API which is described in
-`tfm_sst_api.h`. This API is a wrapper for the SVC interface, its purpose is
-to request Handler mode through the SVC instructions encoded with the
-corresponding SVC number previously registered with the SVC handler and to
-handle the return value from the service to the caller.
+secure functions (veneers) from the NS Thread mode. For this reason, the API is
+a collection of functions in the `<build_dir>/install/export/tfm/inc`
+directory. For example, the interface for the Secure STorage (SST) service
+is described in the file `psa_sst_api.h` as a collection of
+functions that call service veneer functions. The services can be called from the
+non-secure world applications (running in Thread mode) using the wrapper API
+which is described in `psa_sst_api.h`. This API is a wrapper for the secure
+veneers, and returns the return value from the service to the caller.
 The secure storage service also needs the NS side to provide an implementation
 for the function `tfm_sst_get_cur_id()` which is used to retrieve the numerical
 ID associated to the running thread. A primitive implementation is

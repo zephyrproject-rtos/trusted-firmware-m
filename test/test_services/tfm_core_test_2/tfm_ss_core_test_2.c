@@ -36,13 +36,13 @@ int32_t spm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
 
     if (tfm_core_memory_permission_check(res_ptr, sizeof(int32_t),
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {
-        return TFM_PARTITION_BUSY;
+        return CORE_TEST_ERRNO_INVALID_BUFFER;;
     }
 
     *res_ptr = -1;
 
     if (len > SFN_INVERT_MAX_LEN) {
-        return TFM_PARTITION_BUSY;
+        return CORE_TEST_ERRNO_INVALID_BUFFER;;
     }
 
     /* Check requires byte-based size */
@@ -50,7 +50,7 @@ int32_t spm_core_test_2_sfn_invert(int32_t *res_ptr, uint32_t *in_ptr,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
         (tfm_core_memory_permission_check(out_ptr, len << 2,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
-        return TFM_PARTITION_BUSY;
+        return CORE_TEST_ERRNO_INVALID_BUFFER;;
     }
 
     for (i = 0; i < len; i++) {

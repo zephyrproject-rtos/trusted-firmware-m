@@ -318,8 +318,6 @@ int32_t spm_core_test_sfn(int32_t tc, int32_t arg1, int32_t arg2, int32_t arg3)
     case CORE_TEST_ID_BLOCK:
         return test_block(arg1, arg2, arg3);
     case CORE_TEST_ID_NS_THREAD:
-    case CORE_TEST_ID_NS_SVC:
-    case CORE_TEST_ID_TWO_SFN_ONE_SVC:
         /* dummy service call is enough */
         return CORE_TEST_ERRNO_SUCCESS;
     default:
