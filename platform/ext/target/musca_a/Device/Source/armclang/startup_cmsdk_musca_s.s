@@ -26,9 +26,7 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-; NOTE: The stack size needs to be re-evaluated as soon as the new mechanism
-;       to run the secure tests, based on a test service, is introduced.
-Stack_Size      EQU     0x00002000
+Stack_Size      EQU     0x00001000
 MSP_STACK_SIZE  EQU     0x00000800
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=7

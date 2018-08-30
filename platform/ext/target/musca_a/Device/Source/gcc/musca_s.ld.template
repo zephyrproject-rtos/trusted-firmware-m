@@ -32,7 +32,7 @@ MEMORY
 }
 
 __heap_size__  = 0x00001000;
-__psp_stack_size__ = 0x00001000;
+__psp_stack_size__ = 0x00000800;
 __msp_stack_size__ = 0x00000800;
 
 /* Library configurations */
