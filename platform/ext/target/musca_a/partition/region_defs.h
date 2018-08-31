@@ -45,14 +45,8 @@
  * It is less than the FLASH_PARTITION_SIZE because we reserve space
  * for the image header and trailer introduced by the bootloader.
  */
-#ifdef BL2
 #define BL2_HEADER_SIZE      (0x400)
 #define BL2_TRAILER_SIZE     (0x400)
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x800)
-#endif /* BL2 */
 
 #define IMAGE_CODE_SIZE \
             (FLASH_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
@@ -132,7 +126,6 @@
 #define NS_CODE_SRAM_EXEC_LIMIT  (NS_CODE_SRAM_EXEC_BASE + \
                                  (TOTAL_CODE_SRAM_SIZE / 2) - 1)
 
-#ifdef BL2
 /* Bootloader regions */
 #define BL2_CODE_START    (S_QSPI_ALIAS_BASE)
 #define BL2_CODE_SIZE     (FLASH_AREA_BL2_SIZE)
@@ -141,7 +134,6 @@
 #define BL2_DATA_START    (S_RAM_ALIAS(0x0))
 #define BL2_DATA_SIZE     (TOTAL_RAM_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
-#endif /* BL2 */
 
 #endif /* __REGION_DEFS_H__ */
 

@@ -202,9 +202,9 @@ This test is DEPRECATED and the test execution was SKIPPED
 
 1. Create a unified hex file comprising of both mcuboot and tfm_sign binary
    * Windows
-   `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`
+   `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel`
    * Linux
-   `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x210000 -o tfm.hex -Intel`
+   `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel`
 2. Plug in the Musca-A1 board in your computer. The board should appear as USB
    drive
 3. Drag and drop `tfm.hex` to the USB drive
@@ -218,7 +218,7 @@ This test is DEPRECATED and the test execution was SKIPPED
 [INF] Scratch: magic=bad, copy_done=0x5, image_ok=0xd9
 [INF] Boot source: slot 0
 [INF] Swap type: none
-[INF] Bootloader chainload address offset: 0x10000
+[INF] Bootloader chainload address offset: 0x20000
 [INF] Jumping to the first image slot
 [Sec Thread] Secure image initializing!
 ```
@@ -234,7 +234,7 @@ UART0 (baud 115200 8n1):
 [INF] Scratch: magic=bad, copy_done=0x5, image_ok=0x9
 [INF] Boot source: slot 0
 [INF] Swap type: none
-[INF] Bootloader chainload address offset: 0x10000
+[INF] Bootloader chainload address offset: 0x20000
 [INF] Jumping to the first image slot
 [Sec Thread] Secure image initializing!
 
