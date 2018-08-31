@@ -1,0 +1,138 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "CRYPTO",
+  "type": "TRUSTED",
+  "tfm_partition_name": "TFM_SP_CRYPTO",
+  "tfm_trusted": true,
+  "priority": "NORMAL",
+  "id": "0x00000102",
+  "entry_point": "main",
+  "stack_size": "0x2000",
+  "heap_size": "0x0400",
+  "tfm_init_symbol": "tfm_crypto_init",
+  "secure_functions": [
+    {
+      "sfid": "TFM_CRYPTO_ALLOC_OPERATION_SFID",
+      "signal": "TFM_CRYPTO_ALLOC_OPERATION",
+      "tfm_symbol": "tfm_crypto_alloc_operation",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_CHECK_OPERATION_SFID",
+      "signal": "TFM_CRYPTO_CHECK_OPERATION",
+      "tfm_symbol": "tfm_crypto_check_operation",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_RELEASE_OPERATION_SFID",
+      "signal": "TFM_CRYPTO_RELEASE_OPERATION",
+      "tfm_symbol": "tfm_crypto_release_operation",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_IMPORT_KEY_SFID",
+      "signal": "TFM_CRYPTO_IMPORT_KEY",
+      "tfm_symbol": "tfm_crypto_import_key",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_DESTROY_KEY_SFID",
+      "signal": "TFM_CRYPTO_DESTROY_KEY",
+      "tfm_symbol": "tfm_crypto_destroy_key",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_GET_KEY_INFORMATION_SFID",
+      "signal": "TFM_CRYPTO_GET_KEY_INFORMATION",
+      "tfm_symbol": "tfm_crypto_get_key_information",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_EXPORT_KEY_SFID",
+      "signal": "TFM_CRYPTO_EXPORT_KEY",
+      "tfm_symbol": "tfm_crypto_export_key",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_ENCRYPT_SET_IV_SFID",
+      "signal": "TFM_CRYPTO_ENCRYPT_SET_IV",
+      "tfm_symbol": "tfm_crypto_encrypt_set_iv",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_ENCRYPT_SETUP_SFID",
+      "signal": "TFM_CRYPTO_ENCRYPT_SETUP",
+      "tfm_symbol": "tfm_crypto_encrypt_setup",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_DECRYPT_SETUP_SFID",
+      "signal": "TFM_CRYPTO_DECRYPT_SETUP",
+      "tfm_symbol": "tfm_crypto_decrypt_setup",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_CIPHER_UPDATE_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_UPDATE",
+      "tfm_symbol": "tfm_crypto_cipher_update_wrapper",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_CIPHER_ABORT_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_ABORT",
+      "tfm_symbol": "tfm_crypto_cipher_abort",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_CIPHER_FINISH_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_FINISH",
+      "tfm_symbol": "tfm_crypto_cipher_finish",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    }
+  ],
+  "source_files": [
+    "crypto_alloc.c",
+    "crypto_cipher.c",
+    "crypto_key.c",
+    "crypto_init.c",
+    "crypto_wrappers.c",
+    "crypto_utils.c",
+  ],
+  "tfm_linker_pattern": [
+    "library_list": [
+      "*tfm_crypto*"
+    ]
+  ]
+}

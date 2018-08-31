@@ -118,8 +118,10 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "${flag}")
 	endforeach(flag)
 
+
 	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${S_SCATTER_FILE_NAME}")
 
+	add_dependencies(${EXE_NAME} tfm_crypto)
 	add_dependencies(${EXE_NAME} tfm_storage)
 	add_dependencies(${EXE_NAME} tfm_audit)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
@@ -131,15 +133,16 @@ function(set_up_secure_fw_build)
 		#The test service veneers may not be referenced in the secure binary so the
 		#veneer objects are explicitly loaded from the secure tests library.
 		if(${COMPILER} STREQUAL "ARMCLANG")
-			target_link_libraries(${EXE_NAME} tfm_storage tfm_audit $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
 		elseif(${COMPILER} STREQUAL "GNUARM")
-			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_storage tfm_audit)
+			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit)
 		else()
 			message(FATAL_ERROR "unknown compiler" )
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_storage tfm_audit)
+		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit)
 	endif()
+
 
 	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
 
@@ -222,6 +225,9 @@ endfunction()
 
 #Adds the test directory
 add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test)
+
+#Add the crypto library target
+add_subdirectory(${SECURE_FW_DIR}/services/crypto)
 
 #Add the secure storage library target
 add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)

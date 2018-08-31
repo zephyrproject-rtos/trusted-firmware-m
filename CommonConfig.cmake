@@ -186,8 +186,8 @@ else()
 	endif()
 endif()
 
-##Set mbedTLS compiler flags and variables for secure storage and audit log
-set(MBEDTLS_C_FLAGS_SST_LOG "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+##Set mbedTLS compiler flags and variables for secure storage, audit log and crypto
+set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake

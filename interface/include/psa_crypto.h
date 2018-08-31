@@ -13,13 +13,19 @@
 #ifndef PSA_CRYPTO_H
 #define PSA_CRYPTO_H
 
+/* The psa_crypto_platform.h header provides fundamental definitions used by
+ * this header, which are specific to the platform being used.
+ */
+#include "psa_crypto_platform.h"
+
 #include <stddef.h>
 
 #ifdef __DOXYGEN_ONLY__
 /* This __DOXYGEN_ONLY__ block contains mock definitions for things that
  * must be defined in the psa_crypto_platform.h header. These mock definitions
  * are present in this file as a convenience to generate pretty-printed
- * documentation that includes those definitions. */
+ * documentation that includes those definitions.
+ */
 
 /** \defgroup platform Implementation-specific definitions
  * @{
@@ -84,7 +90,8 @@ typedef int32_t psa_status_t;
  * Implementations should return this error code when an enumeration
  * parameter such as a key type, algorithm, etc. is not recognized.
  * If a combination of parameters is recognized and identified as
- * not valid, return #PSA_ERROR_INVALID_ARGUMENT instead. */
+ * not valid, return #PSA_ERROR_INVALID_ARGUMENT instead.
+ */
 #define PSA_ERROR_NOT_SUPPORTED         ((psa_status_t)1)
 
 /** The requested action is denied by a policy.
@@ -97,7 +104,8 @@ typedef int32_t psa_status_t;
  * forbidden operation, and another subset of the parameters are
  * not valid or not supported, it is unspecified whether the function
  * returns #PSA_ERROR_NOT_PERMITTED, #PSA_ERROR_NOT_SUPPORTED or
- * #PSA_ERROR_INVALID_ARGUMENT. */
+ * #PSA_ERROR_INVALID_ARGUMENT.
+ */
 #define PSA_ERROR_NOT_PERMITTED         ((psa_status_t)2)
 
 /** An output buffer is too small.
@@ -109,7 +117,8 @@ typedef int32_t psa_status_t;
  * in cases when performing the operation with a larger output
  * buffer would succeed. However implementations may return this
  * error if a function has invalid or unsupported parameters in addition
- * to the parameters that determine the necessary output buffer size. */
+ * to the parameters that determine the necessary output buffer size.
+ */
 #define PSA_ERROR_BUFFER_TOO_SMALL      ((psa_status_t)3)
 
 /** A slot is occupied, but must be empty to carry out the
@@ -117,7 +126,8 @@ typedef int32_t psa_status_t;
  *
  * If the slot number is invalid (i.e. the requested action could
  * not be performed even after erasing the slot's content),
- * implementations shall return #PSA_ERROR_INVALID_ARGUMENT instead. */
+ * implementations shall return #PSA_ERROR_INVALID_ARGUMENT instead.
+ */
 #define PSA_ERROR_OCCUPIED_SLOT         ((psa_status_t)4)
 
 /** A slot is empty, but must be occupied to carry out the
@@ -125,7 +135,8 @@ typedef int32_t psa_status_t;
  *
  * If the slot number is invalid (i.e. the requested action could
  * not be performed even after creating appropriate content in the slot),
- * implementations shall return #PSA_ERROR_INVALID_ARGUMENT instead. */
+ * implementations shall return #PSA_ERROR_INVALID_ARGUMENT instead.
+ */
 #define PSA_ERROR_EMPTY_SLOT            ((psa_status_t)5)
 
 /** The requested action cannot be performed in the current state.
@@ -137,7 +148,8 @@ typedef int32_t psa_status_t;
  * Implementations shall not return this error code to indicate
  * that a key slot is occupied when it needs to be free or vice versa,
  * but shall return #PSA_ERROR_OCCUPIED_SLOT or #PSA_ERROR_EMPTY_SLOT
- * as applicable. */
+ * as applicable.
+ */
 #define PSA_ERROR_BAD_STATE             ((psa_status_t)6)
 
 /** The parameters passed to the function are invalid.
@@ -148,13 +160,15 @@ typedef int32_t psa_status_t;
  * Implementations shall not return this error code to indicate
  * that a key slot is occupied when it needs to be free or vice versa,
  * but shall return #PSA_ERROR_OCCUPIED_SLOT or #PSA_ERROR_EMPTY_SLOT
- * as applicable. */
+ * as applicable.
+ */
 #define PSA_ERROR_INVALID_ARGUMENT      ((psa_status_t)7)
 
 /** There is not enough runtime memory.
  *
  * If the action is carried out across multiple security realms, this
- * error can refer to available memory in any of the security realms. */
+ * error can refer to available memory in any of the security realms.
+ */
 #define PSA_ERROR_INSUFFICIENT_MEMORY   ((psa_status_t)8)
 
 /** There is not enough persistent storage.
@@ -163,7 +177,8 @@ typedef int32_t psa_status_t;
  * there is insufficient storage space on the host media. In addition,
  * many functions that do not otherwise access storage may return this
  * error code if the implementation requires a mandatory log entry for
- * the requested action and the log storage space is full. */
+ * the requested action and the log storage space is full.
+ */
 #define PSA_ERROR_INSUFFICIENT_STORAGE  ((psa_status_t)9)
 
 /** There was a communication failure inside the implementation.
@@ -205,13 +220,15 @@ typedef int32_t psa_status_t;
  * Implementations should only use this error code to report a
  * permanent storage corruption. However application writers should
  * keep in mind that transient errors while reading the storage may be
- * reported using this error code. */
+ * reported using this error code.
+ */
 #define PSA_ERROR_STORAGE_FAILURE       ((psa_status_t)11)
 
 /** A hardware failure was detected.
  *
  * A hardware failure may be transient or permanent depending on the
- * cause. */
+ * cause.
+ */
 #define PSA_ERROR_HARDWARE_FAILURE      ((psa_status_t)12)
 
 /** A tampering attempt was detected.
@@ -242,7 +259,8 @@ typedef int32_t psa_status_t;
  *
  * This error indicates an attack against the application. Implementations
  * shall not return this error code as a consequence of the behavior of
- * the application itself. */
+ * the application itself.
+ */
 #define PSA_ERROR_TAMPERING_DETECTED    ((psa_status_t)13)
 
 /** There is not enough entropy to generate random data needed
@@ -261,7 +279,8 @@ typedef int32_t psa_status_t;
  * entropy during initialization and subsequently use a cryptographically
  * secure pseudorandom generator (PRNG). However implementations may return
  * this error at any time if a policy requires the PRNG to be reseeded
- * during normal operation. */
+ * during normal operation.
+ */
 #define PSA_ERROR_INSUFFICIENT_ENTROPY  ((psa_status_t)14)
 
 /** The signature, MAC or hash is incorrect.
@@ -271,7 +290,8 @@ typedef int32_t psa_status_t;
  * was determined to be incorrect.
  *
  * If the value to verify has an invalid size, implementations may return
- * either #PSA_ERROR_INVALID_ARGUMENT or #PSA_ERROR_INVALID_SIGNATURE. */
+ * either #PSA_ERROR_INVALID_ARGUMENT or #PSA_ERROR_INVALID_SIGNATURE.
+ */
 #define PSA_ERROR_INVALID_SIGNATURE     ((psa_status_t)15)
 
 /** The decrypted padding is incorrect.
@@ -287,14 +307,16 @@ typedef int32_t psa_status_t;
  * Implementations should strive to make valid and invalid padding
  * as close as possible to indistinguishable to an external observer.
  * In particular, the timing of a decryption operation should not
- * depend on the validity of the padding. */
+ * depend on the validity of the padding.
+ */
 #define PSA_ERROR_INVALID_PADDING       ((psa_status_t)16)
 
 /** An error occurred that does not correspond to any defined
  * failure cause.
  *
  * Implementations may use this error code if none of the other standard
- * error codes are applicable. */
+ * error codes are applicable.
+ */
 #define PSA_ERROR_UNKNOWN_ERROR         ((psa_status_t)17)
 
 /**
@@ -324,8 +346,7 @@ psa_status_t psa_crypto_init(void);
  * @{
  */
 
-/** \brief Encoding of a key type.
- */
+/** \brief Encoding of a key type. */
 typedef uint32_t psa_key_type_t;
 
 /** An invalid key type value.
@@ -347,7 +368,8 @@ typedef uint32_t psa_key_type_t;
 /** Raw data.
  *
  * A "key" of this type cannot be used for any cryptographic operation.
- * Applications may use this type to store arbitrary data in the keystore. */
+ * Applications may use this type to store arbitrary data in the keystore.
+ */
 #define PSA_KEY_TYPE_RAW_DATA                   ((psa_key_type_t)0x02000000)
 #define PSA_KEY_TYPE_CATEGORY_SYMMETRIC         ((psa_key_type_t)0x04000000)
 #define PSA_KEY_TYPE_CATEGORY_ASYMMETRIC        ((psa_key_type_t)0x06000000)
@@ -360,7 +382,8 @@ typedef uint32_t psa_key_type_t;
  *
  * HMAC keys should generally have the same size as the underlying hash.
  * This size can be calculated with `PSA_HASH_SIZE(alg)` where
- * `alg` is the HMAC algorithm or the underlying hash algorithm. */
+ * `alg` is the HMAC algorithm or the underlying hash algorithm.
+ */
 #define PSA_KEY_TYPE_HMAC                       ((psa_key_type_t)0x02000001)
 /** Key for an cipher, AEAD or MAC algorithm based on the AES block cipher.
  *
@@ -379,12 +402,14 @@ typedef uint32_t psa_key_type_t;
  */
 #define PSA_KEY_TYPE_DES                        ((psa_key_type_t)0x04000002)
 /** Key for an cipher, AEAD or MAC algorithm based on the
- * Camellia block cipher. */
+ * Camellia block cipher.
+ */
 #define PSA_KEY_TYPE_CAMELLIA                   ((psa_key_type_t)0x04000003)
 /** Key for the RC4 stream cipher.
  *
  * Note that RC4 is weak and deprecated and should only be used in
- * legacy protocols. */
+ * legacy protocols.
+ */
 #define PSA_KEY_TYPE_ARC4                       ((psa_key_type_t)0x04000004)
 
 /** RSA public key. */
@@ -415,7 +440,8 @@ typedef uint32_t psa_key_type_t;
     (((type) & (PSA_KEY_TYPE_CATEGORY_MASK | PSA_KEY_TYPE_PAIR_FLAG)) == \
       PSA_KEY_TYPE_CATEGORY_ASYMMETRIC)
 /** Whether a key type is a key pair containing a private part and a public
- * part. */
+ * part.
+ */
 #define PSA_KEY_TYPE_IS_KEYPAIR(type)                                   \
     (((type) & (PSA_KEY_TYPE_CATEGORY_MASK | PSA_KEY_TYPE_PAIR_FLAG)) == \
      (PSA_KEY_TYPE_CATEGORY_ASYMMETRIC | PSA_KEY_TYPE_PAIR_FLAG))
@@ -433,7 +459,7 @@ typedef uint32_t psa_key_type_t;
     ((PSA_KEY_TYPE_PUBLIC_KEY_OF_KEYPAIR(type) &                        \
       ~PSA_KEY_TYPE_ECC_CURVE_MASK) == PSA_KEY_TYPE_ECC_PUBLIC_KEY_BASE)
 
-/** The type of PSA elliptic curve identifiers. */
+/** \brief The type of PSA elliptic curve identifiers. */
 typedef uint16_t psa_ecc_curve_t;
 /** Extract the curve from an elliptic curve key type. */
 #define PSA_KEY_TYPE_GET_CURVE(type)                             \
@@ -444,8 +470,10 @@ typedef uint16_t psa_ecc_curve_t;
 /* The encoding of curve identifiers is currently aligned with the
  * TLS Supported Groups Registry (formerly known as the
  * TLS EC Named Curve Registry)
- * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
- * The values are defined by RFC 4492, RFC 7027 and RFC 7919. */
+ * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
+ * #tls-parameters-8
+ * The values are defined by RFC 4492, RFC 7027 and RFC 7919.
+ */
 #define PSA_ECC_CURVE_SECT163K1         ((psa_ecc_curve_t) 0x0001)
 #define PSA_ECC_CURVE_SECT163R1         ((psa_ecc_curve_t) 0x0002)
 #define PSA_ECC_CURVE_SECT163R2         ((psa_ecc_curve_t) 0x0003)
@@ -860,15 +888,17 @@ typedef uint32_t psa_key_usage_t;
  */
 #define PSA_KEY_USAGE_VERIFY                    ((psa_key_usage_t)0x00000800)
 
-/** The type of the key policy data structure.
+/** \brief The type of the key policy data structure.
  *
- * This is an implementation-defined \c struct. Applications should not
- * make any assumptions about the content of this structure except
- * as directed by the documentation of a specific implementation. */
-typedef struct psa_key_policy_s psa_key_policy_t;
+ * This is an implementation-defined type. Applications should not
+ * make any assumptions about this type except
+ * as directed by the documentation of a specific implementation.
+ */
+typedef uint32_t psa_key_policy_t;
 
 /** \brief Initialize a key policy structure to a default that forbids all
- * usage of the key. */
+ * usage of the key.
+ */
 void psa_key_policy_init(psa_key_policy_t *policy);
 
 /** \brief Set the standard fields of a policy structure.
@@ -897,8 +927,7 @@ psa_algorithm_t psa_key_policy_get_algorithm(psa_key_policy_t *policy);
 psa_status_t psa_set_key_policy(psa_key_slot_t key,
                                 const psa_key_policy_t *policy);
 
-/** \brief Get the usage policy for a key slot.
- */
+/** \brief Get the usage policy for a key slot. */
 psa_status_t psa_get_key_policy(psa_key_slot_t key,
                                 psa_key_policy_t *policy);
 
@@ -908,8 +937,7 @@ psa_status_t psa_get_key_policy(psa_key_slot_t key,
  * @{
  */
 
-/** Encoding of key lifetimes.
- */
+/** \brief Encoding of key lifetimes. */
 typedef uint32_t psa_key_lifetime_t;
 
 /** A volatile key slot retains its content as long as the application is
@@ -978,12 +1006,13 @@ psa_status_t psa_set_key_lifetime(psa_key_slot_t key,
  * @{
  */
 
-/** The type of the state data structure for multipart hash operations.
+/** \brief The type of the state data structure for multipart hash operations.
  *
- * This is an implementation-defined \c struct. Applications should not
- * make any assumptions about the content of this structure except
- * as directed by the documentation of a specific implementation. */
-typedef struct psa_hash_operation_s psa_hash_operation_t;
+ * This is an implementation-defined type. Applications should not
+ * make any assumptions about this type except
+ * as directed by the documentation of a specific implementation.
+ */
+typedef uint32_t psa_hash_operation_t;
 
 /** The size of the output of psa_hash_finish(), in bytes.
  *
@@ -1185,12 +1214,13 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation);
  * @{
  */
 
-/** The type of the state data structure for multipart MAC operations.
+/** \brief The type of the state data structure for multipart MAC operations.
  *
- * This is an implementation-defined \c struct. Applications should not
- * make any assumptions about the content of this structure except
- * as directed by the documentation of a specific implementation. */
-typedef struct psa_mac_operation_s psa_mac_operation_t;
+ * This is an implementation-defined type. Applications should not
+ * make any assumptions about this type except
+ * as directed by the documentation of a specific implementation.
+ */
+typedef uint32_t psa_mac_operation_t;
 
 /** The size of the output of psa_mac_finish(), in bytes.
  *
@@ -1275,12 +1305,13 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation);
  * @{
  */
 
-/** The type of the state data structure for multipart cipher operations.
+/** \brief The type of the state data structure for multipart cipher operations.
  *
- * This is an implementation-defined \c struct. Applications should not
- * make any assumptions about the content of this structure except
- * as directed by the documentation of a specific implementation. */
-typedef struct psa_cipher_operation_s psa_cipher_operation_t;
+ * This is an implementation-defined type. Applications should not
+ * make any assumptions about this type except
+ * as directed by the documentation of a specific implementation.
+ */
+typedef uint32_t psa_cipher_operation_t;
 
 /** Set the key for a multipart symmetric encryption operation.
  *
@@ -1926,5 +1957,10 @@ psa_status_t psa_generate_key(psa_key_slot_t key,
 #ifdef __cplusplus
 }
 #endif
+
+/* The file "psa_crypto_extra.h" contains vendor-specific definitions. This
+ * can include vendor-defined algorithms, extra functions, etc.
+ */
+#include "psa_crypto_extra.h"
 
 #endif /* PSA_CRYPTO_H */

@@ -28,7 +28,7 @@ set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
 set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 
 #Set mbedTLS compiler flags
-set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SST_LOG})
+set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SERVICES})
 
 ###Get the definition of what files we need to build
 set (ENABLE_SECURE_STORAGE ON)

@@ -58,6 +58,10 @@ LR_CODE S_CODE_START {
         *tfm_audit* (+RO)
     }
 
+    TFM_SP_CRYPTO +0 ALIGN 32 {
+        *tfm_crypto* (+RO)
+    }
+
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST +0 ALIGN 32 {
         *tfm_ss_core_test.* (+RO)
@@ -112,6 +116,14 @@ LR_CODE S_CODE_START {
 
     TFM_SP_AUDIT_LOG_STACK +0 ALIGN 128 EMPTY 0x1000 {
     }
+
+    TFM_SP_CRYPTO_DATA +0 ALIGN 32 {
+        *tfm_crypto* (+RW +ZI)
+    }
+
+    TFM_SP_CRYPTO_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+
 
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_DATA +0 ALIGN 32 {

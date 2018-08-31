@@ -26,6 +26,21 @@
     {audit_core_get_record_info, TFM_AUDIT_GET_RECORD_INFO_SFID},
     {audit_core_delete_record, TFM_AUDIT_DELETE_RECORD_SFID},
 
+    /******** TFM_SP_CRYPTO ********/
+    {tfm_crypto_alloc_operation, TFM_CRYPTO_ALLOC_OPERATION_SFID},
+    {tfm_crypto_check_operation, TFM_CRYPTO_CHECK_OPERATION_SFID},
+    {tfm_crypto_release_operation, TFM_CRYPTO_RELEASE_OPERATION_SFID},
+    {tfm_crypto_import_key, TFM_CRYPTO_IMPORT_KEY_SFID},
+    {tfm_crypto_destroy_key, TFM_CRYPTO_DESTROY_KEY_SFID},
+    {tfm_crypto_get_key_information, TFM_CRYPTO_GET_KEY_INFORMATION_SFID},
+    {tfm_crypto_export_key, TFM_CRYPTO_EXPORT_KEY_SFID},
+    {tfm_crypto_encrypt_set_iv, TFM_CRYPTO_ENCRYPT_SET_IV_SFID},
+    {tfm_crypto_encrypt_setup, TFM_CRYPTO_ENCRYPT_SETUP_SFID},
+    {tfm_crypto_decrypt_setup, TFM_CRYPTO_DECRYPT_SETUP_SFID},
+    {tfm_crypto_cipher_update_wrapper, TFM_CRYPTO_CIPHER_UPDATE_SFID},
+    {tfm_crypto_cipher_abort, TFM_CRYPTO_CIPHER_ABORT_SFID},
+    {tfm_crypto_cipher_finish, TFM_CRYPTO_CIPHER_FINISH_SFID},
+
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
     {spm_core_test_sfn, TFM_CORE_TEST_SFN_SFID},
