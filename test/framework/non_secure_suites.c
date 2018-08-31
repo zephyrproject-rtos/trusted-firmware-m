@@ -12,6 +12,7 @@
 /* Service specific includes */
 #include "test/suites/sst/non_secure/sst_ns_tests.h"
 #include "test/suites/audit/non_secure/audit_ns_tests.h"
+#include "test/suites/crypto/non_secure/crypto_ns_tests.h"
 #include "test/suites/invert/non_secure/invert_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
 
@@ -46,6 +47,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
+
+    /* Non-secure Crypto test cases */
+    {&register_testsuite_ns_crypto_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */

@@ -13,6 +13,8 @@
 #include "test/suites/sst/secure/sst_tests.h"
 #include "test/suites/audit/secure/audit_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
+#include "test/suites/crypto/secure/crypto_s_tests.h"
+
 #include "secure_fw/services/secure_storage/sst_object_system.h"
 
 static struct test_suite_t test_suites[] = {
@@ -35,6 +37,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
+
+    /* Crypto test cases */
+    {&register_testsuite_s_crypto_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */
