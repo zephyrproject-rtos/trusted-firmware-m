@@ -103,6 +103,17 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
         return TFM_SECURE_LOCK_FAILED;
     }
 
+    if((caller_flags & SPM_PART_FLAG_SECURE) == 0) {
+        /* Disable NS exception handling while secure service is running.
+         * FixMe:
+         * This restriction is applied to limit the number of possible attack
+         * vectors.
+         * To be removed when pre-emption and context management issues have
+         * been analysed and resolved.
+         */
+        TFM_NS_EXC_DISABLE();
+    }
+
     partition_idx = get_partition_idx(desc_ptr->sp_id);
 
     curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
@@ -226,6 +237,16 @@ static int32_t tfm_pop_lock(uint32_t *excReturn)
             current_partition_idx);
 
     tfm_secure_lock--;
+
+    if((return_partition_flags & SPM_PART_FLAG_SECURE) == 0) {
+        /* Re-enable NS exceptions when secure service returns to NS client.
+         * FixMe:
+         * To be removed when pre-emption and context management issues have
+         * been analysed and resolved.
+         */
+        TFM_NS_EXC_ENABLE();
+    }
+
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
     /* Deconfigure completed partition environment */
     tfm_spm_partition_sandbox_deconfig(current_partition_idx);
