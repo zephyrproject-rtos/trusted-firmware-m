@@ -35,7 +35,8 @@ if (ENABLE_AUDIT_LOGGING)
 		message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 	endif()
 
-	set (AUDIT_LOGGING_C_SRC "${AUDIT_LOGGING_DIR}/log_core.c")
+	set (AUDIT_LOGGING_C_SRC "${AUDIT_LOGGING_DIR}/audit_core.c"
+                                 "${AUDIT_LOGGING_DIR}/audit_wrappers.c")
 
 	#Append all our source files to global lists.
 	list(APPEND ALL_SRC_C ${AUDIT_LOGGING_C_SRC})

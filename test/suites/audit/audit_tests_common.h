@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __LOG_TESTS_COMMON_H__
-#define __LOG_TESTS_COMMON_H__
+#ifndef __AUDIT_TESTS_COMMON_H__
+#define __AUDIT_TESTS_COMMON_H__
 
 #include <stddef.h>
 
@@ -28,7 +28,7 @@ extern "C" {
  * \brief Size in bytes of the local buffer. Size accomodates two standard size
  *        (no payload) log items, at maximum
  */
-#define LOCAL_BUFFER_SIZE (100)
+#define LOCAL_BUFFER_SIZE (80)
 
 /*!
  * \def LOCAL_BUFFER_ITEMS
@@ -42,24 +42,24 @@ extern "C" {
  * \def STANDARD_LOG_ENTRY_SIZE
  *
  * \brief A log item with no payload (standard size) has the following size.
- *        More details can be found observing \ref tfm_log_line
+ *        More details can be found observing \ref psa_audit_record
  *        \ref tfm_log_tlr and \ref tfm_log_hdr
  */
-#define STANDARD_LOG_ENTRY_SIZE (44)
+#define STANDARD_LOG_ENTRY_SIZE (28)
 
 /*!
  * \def INITIAL_LOGGING_REQUESTS
  *
  * \brief Number of initial consecutive logging requests to perform
  */
-#define INITIAL_LOGGING_REQUESTS (23)
+#define INITIAL_LOGGING_REQUESTS (36)
 
 /*!
  * \def INITIAL_LOGGING_SIZE
  *
  * \brief Size of the initial consecutive logging requests
  */
-#define INITIAL_LOGGING_SIZE (1012)
+#define INITIAL_LOGGING_SIZE (1008)
 
 /*!
  * \def FINAL_LOGGING_REQUESTS
@@ -79,17 +79,24 @@ extern "C" {
  * \note This defines the state of the log when secure interface tests are
  *       terminated
  */
-#define FINAL_LOGGING_SIZE (88)
+#define FINAL_LOGGING_SIZE (56)
+
+/*!
+ * \def DUMMY_TEST_ID_BASE
+ *
+ * \brief The log record is initialized with a dummy ID which uses this value as
+ *        base value
+ */
+#define DUMMY_TEST_RECORD_ID_BASE (0xABCD0000)
 
 /*!
  * \def SECOND_ELEMENT_EXPECTED_CONTENT
  *
- * \brief Content of the log line in the second log item in the final request.
- *        In particular this is the value of the first argument which has been
- *        stored in the last addition from the secure test suite
+ * \brief Content of the log record in the second log item in the final request
+ *
  */
-#define SECOND_ELEMENT_EXPECTED_CONTENT ( 1 + \
-                      (INITIAL_LOGGING_REQUESTS+1+FINAL_LOGGING_REQUESTS)*10 )
+#define SECOND_ELEMENT_EXPECTED_CONTENT ( (DUMMY_TEST_RECORD_ID_BASE) + \
+                      (INITIAL_LOGGING_REQUESTS+1+FINAL_LOGGING_REQUESTS) )
 /*!
  * \def MAX_LOG_SIZE
  *
@@ -101,14 +108,14 @@ extern "C" {
 #define MAX_LOG_SIZE (1024)
 
 /*!
- * \def MAX_LOG_LINE_SIZE
+ * \def MAX_LOG_RECORD_SIZE
  *
  * \brief The maximum possible log line size to fill a MAX_LOG_SIZE bytes log
  *
  * \note This takes into account additional fields that are concatenated to the
- *       log line in the header and trailer
+ *       record in the header and trailer
  */
-#define MAX_LOG_LINE_SIZE (1000)
+#define MAX_LOG_RECORD_SIZE (1000)
 
 /*!
  * \def INITIAL_LOG_SIZE
@@ -120,16 +127,16 @@ extern "C" {
 #define INITIAL_LOG_SIZE (FINAL_LOGGING_SIZE)
 
 /*!
- * \def INITIAL_LOG_ITEMS
+ * \def INITIAL_LOG_RECORDS
  *
- * \brief Initial state of the log number of items
+ * \brief Initial state of the log number of records
  *
  * \note This defines the state of the log when non-secure interface tests start
  */
-#define INITIAL_LOG_ITEMS (FINAL_LOGGING_REQUESTS)
+#define INITIAL_LOG_RECORDS (FINAL_LOGGING_REQUESTS)
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LOG_TESTS_COMMON_H__ */
+#endif /* __AUDIT_TESTS_COMMON_H__ */
