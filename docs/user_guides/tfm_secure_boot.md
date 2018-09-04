@@ -94,10 +94,10 @@ aware, which slot hosts the active firmware and which acts as a staging area and
 it is responsible for downloading the proper firmware image. At boot time
 MCUBoot inspects the version number in the image header and passes execution to
 the newer firmware version. New image must be marked for upgrade which is
-automatically done by Python scripts at compile time. Revert functionality is
-also supported. Image verification is done the same way in both operational
-modes. If new image fails during authentication then MCUBoot erases the memory
-slot and starts the other image, after successful authentication.
+automatically done by Python scripts at compile time. Image verification is done
+the same way in both operational modes. If new image fails during authentication
+then MCUBoot erases the memory slot and starts the other image, after successful
+authentication.
 
 At build time automatically two binaries are generated:
 ```

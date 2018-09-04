@@ -300,71 +300,6 @@ boot_validate_slot(int slot)
     return 0;
 }
 
-/**
- * Erases a region of flash.
- *
- * @param flash_area_idx        The ID of the flash area containing the region
- *                                  to erase.
- * @param off                   The offset within the flash area to start the
- *                                  erase.
- * @param sz                    The number of bytes to erase.
- *
- * @return                      0 on success; nonzero on failure.
- */
-static int
-boot_erase_sector(int flash_area_id, uint32_t off, uint32_t sz)
-{
-    const struct flash_area *fap = NULL;
-    int rc;
-
-    rc = flash_area_open(flash_area_id, &fap);
-    if (rc != 0) {
-        rc = BOOT_EFLASH;
-        goto done;
-    }
-
-    rc = flash_area_erase(fap, off, sz);
-    if (rc != 0) {
-        rc = BOOT_EFLASH;
-        goto done;
-    }
-
-    rc = 0;
-
-done:
-    flash_area_close(fap);
-    return rc;
-}
-
-#ifndef MCUBOOT_OVERWRITE_ONLY
-static int
-boot_erase_last_sector_by_id(int flash_area_id)
-{
-    uint8_t slot;
-    uint32_t last_sector;
-    int rc;
-
-    switch (flash_area_id) {
-    case FLASH_AREA_IMAGE_0:
-        slot = 0;
-        break;
-    case FLASH_AREA_IMAGE_1:
-        slot = 1;
-        break;
-    default:
-        return BOOT_EFLASH;
-    }
-
-    last_sector = boot_img_num_sectors(&boot_data, slot) - 1;
-    rc = boot_erase_sector(flash_area_id,
-            boot_img_sector_off(&boot_data, slot, last_sector),
-            boot_img_sector_size(&boot_data, slot, last_sector));
-    assert(rc == 0);
-
-    return rc;
-}
-#endif /* !MCUBOOT_OVERWRITE_ONLY */
-
 #if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_OVERWRITE_ONLY)
 /*
  * Compute the total size of the given image.  Includes the size of
@@ -727,6 +662,42 @@ boot_copy_sz(int last_sector_idx, int *out_first_sector_idx)
 #endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 /**
+ * Erases a region of flash.
+ *
+ * @param flash_area_idx        The ID of the flash area containing the region
+ *                                  to erase.
+ * @param off                   The offset within the flash area to start the
+ *                                  erase.
+ * @param sz                    The number of bytes to erase.
+ *
+ * @return                      0 on success; nonzero on failure.
+ */
+static int
+boot_erase_sector(int flash_area_id, uint32_t off, uint32_t sz)
+{
+    const struct flash_area *fap = NULL;
+    int rc;
+
+    rc = flash_area_open(flash_area_id, &fap);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    rc = flash_area_erase(fap, off, sz);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    rc = 0;
+
+done:
+    flash_area_close(fap);
+    return rc;
+}
+
+/**
  * Copies the contents of one flash region to another.  You must erase the
  * destination region prior to calling this function.
  *
@@ -831,7 +802,34 @@ boot_status_init_by_id(int flash_area_id, const struct boot_status *bs)
 
     return 0;
 }
-#endif
+
+static int
+boot_erase_last_sector_by_id(int flash_area_id)
+{
+    uint8_t slot;
+    uint32_t last_sector;
+    int rc;
+
+    switch (flash_area_id) {
+    case FLASH_AREA_IMAGE_0:
+        slot = 0;
+        break;
+    case FLASH_AREA_IMAGE_1:
+        slot = 1;
+        break;
+    default:
+        return BOOT_EFLASH;
+    }
+
+    last_sector = boot_img_num_sectors(&boot_data, slot) - 1;
+    rc = boot_erase_sector(flash_area_id,
+            boot_img_sector_off(&boot_data, slot, last_sector),
+            boot_img_sector_size(&boot_data, slot, last_sector));
+    assert(rc == 0);
+
+    return rc;
+}
+#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 /**
  * Swaps the contents of two flash regions within the two image slots.
@@ -1488,14 +1486,6 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
                 image_cnt++;
             }
 
-            if (slot_state.magic    == BOOT_MAGIC_GOOD &&
-                slot_state.image_ok == 0xFF) {
-                /* Delete trailer in test mode in order to avoid booting it
-                 * again without confirmation by runtime in case of subsequent
-                 * boot.
-                 */
-                boot_erase_last_sector_by_id(fa_id);
-            }
             BOOT_LOG_IMAGE_INFO(slot, hdr, &slot_state);
         } else {
             BOOT_LOG_INF("Image %"PRIu32": No valid image", slot);
