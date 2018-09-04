@@ -26,9 +26,9 @@ struct tfm_msg_queue_item {
 
 void tfm_queue_init(void);
 uint32_t tfm_queue_get_msg_signal(void);
-psa_error_t tfm_queue_put_msg(psa_signal_t signal, uint32_t type,
-                              psa_invec *invec, size_t in_len,
-                              psa_outvec *outvec, size_t out_len);
+psa_status_t tfm_queue_put_msg(psa_signal_t signal, uint32_t type,
+                               psa_invec *invec, size_t in_len,
+                               psa_outvec *outvec, size_t out_len);
 void tfm_queue_get_msg_body(psa_msg_t *msg);
 void *memcpy_m(void *dst, const void *src, uint32_t size);
 

@@ -45,9 +45,9 @@ uint32_t tfm_queue_get_msg_signal(void)
     return q_used->signal;
 }
 
-psa_error_t tfm_queue_put_msg(psa_signal_t signal, uint32_t type,
-                            psa_invec *invec, size_t in_len,
-                            psa_outvec *outvec, size_t out_len)
+psa_status_t tfm_queue_put_msg(psa_signal_t signal, uint32_t type,
+                               psa_invec *invec, size_t in_len,
+                               psa_outvec *outvec, size_t out_len)
 {
     uint32_t i;
 

@@ -114,16 +114,16 @@ static void tfm_ipc_test_1004(struct test_result_t *ret)
     struct psa_outvec outvecs[2] = {{str3, sizeof(str3)/sizeof(char)},
                                     {str4, sizeof(str4)/sizeof(char)}};
     psa_handle_t handle;
-    psa_error_t err;
+    psa_status_t status;
     uint32_t min_version;
 
     min_version = psa_version(IPC_TEST_SERVICE1_SID);
     TEST_LOG("TFM service support minor version is %d.\r\n", min_version);
     handle = psa_connect(IPC_TEST_SERVICE1_SID, IPC_TEST_SERVICE1_MIN_VER);
-    err = psa_call(handle, invecs, 2, outvecs, 2);
-    if (err >= 0) {
+    status = psa_call(handle, invecs, 2, outvecs, 2);
+    if (status >= 0) {
         TEST_LOG("psa_call is successful!\r\n");
-    } else if (err == PSA_DROP_CONNECTION) {
+    } else if (status == PSA_DROP_CONNECTION) {
         TEST_FAIL("The connection has been dropped by the RoT Service!\r\n");
         return;
     } else {

@@ -75,6 +75,12 @@ int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
  * They won't call legacy SFN but instead will be handlers for TF-M
  */
 
+__tfm_secure_gateway_attributes__
+uint32_t tfm_psa_framework_version_veneer(void)
+{
+    return PSA_FRAMEWORK_VERSION;
+}
+
 uint32_t tfm_psa_version_handler(uint32_t sid)
 {
     /* perform sanity check */
@@ -116,9 +122,9 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
                                    0, 0);
 }
 
-psa_error_t tfm_psa_call_handler(psa_handle_t handle,
-                    const psa_invec *in_vecs,
-                    const psa_invec *out_vecs)
+psa_status_t tfm_psa_call_handler(psa_handle_t handle,
+                                  const psa_invec *in_vecs,
+                                  const psa_invec *out_vecs)
 {
     /* perform sanity check */
     /* In case of library model, call the function referenced by the handle
@@ -135,15 +141,15 @@ psa_error_t tfm_psa_call_handler(psa_handle_t handle,
 }
 
 __tfm_secure_gateway_attributes__
-psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
-                    const psa_invec *in_vecs,
-                    const psa_invec *out_vecs)
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+                                 const psa_invec *in_vecs,
+                                 const psa_invec *out_vecs)
 {
     TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_call_handler, handle, in_vecs,
                                    out_vecs, 0);
 }
 
-psa_error_t tfm_psa_close_handler(psa_handle_t handle)
+psa_status_t tfm_psa_close_handler(psa_handle_t handle)
 {
     /* perform sanity check */
     /* Close connection referenced by handle */
@@ -156,7 +162,7 @@ psa_error_t tfm_psa_close_handler(psa_handle_t handle)
 }
 
 __tfm_secure_gateway_attributes__
-psa_error_t tfm_psa_close_veneer(psa_handle_t handle)
+psa_status_t tfm_psa_close_veneer(psa_handle_t handle)
 {
     TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_close_handler, handle, 0, 0, 0);
 }

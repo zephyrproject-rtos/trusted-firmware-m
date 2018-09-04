@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,7 +15,7 @@
 /* Service APIs */
 
 /* FixMe: Initial prototype. */
-uint32_t psa_wait_any(uint32_t timeout)
+psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)
 {
     uint32_t msg_signals = 0;
 
@@ -31,14 +31,15 @@ uint32_t psa_wait_any(uint32_t timeout)
     return msg_signals;
 }
 
-void psa_get(psa_signal_t signal, psa_msg_t *msg)
+psa_status_t psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
     if (msg) {
         tfm_queue_get_msg_body(msg);
     }
+    return PSA_SUCCESS;
 }
 
-void psa_end(psa_handle_t msg_handle, psa_error_t retval)
+void psa_reply(psa_handle_t msg_handle, psa_status_t status)
 {
     struct tfm_msg_queue_item *q_msg = (struct tfm_msg_queue_item *)msg_handle;
 

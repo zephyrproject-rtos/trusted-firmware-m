@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@
 
 static int inuse = 0;
 
-static int ipc_service_connect(psa_msg_t *msg)
+static psa_status_t ipc_service_connect(psa_msg_t *msg)
 {
     uint32_t minor_version;
 
@@ -35,10 +35,10 @@ static int ipc_service_connect(psa_msg_t *msg)
     if (minor_version == 0) {
         return PSA_CONNECTION_REFUSED;
     }
-    return PSA_CONNECTION_ACCEPTED;
+    return PSA_SUCCESS;
 }
 
-static psa_error_t ipc_service_call(psa_msg_t *msg)
+static psa_status_t ipc_service_call(psa_msg_t *msg)
 {
     int i;
     uint8_t rec_buf[IPC_SERVICE_BUFFER_LEN];
@@ -62,10 +62,10 @@ static void *ipc_test_partition_main(void *param)
 {
     uint32_t signals = 0;
     psa_msg_t msg;
-    int r;
+    psa_status_t r;
 
     while (1) {
-        signals = psa_wait_any(PSA_BLOCK);
+        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
 
         printf("ipc get signals 0x%x\r\n", signals);
 
@@ -79,15 +79,15 @@ static void *ipc_test_partition_main(void *param)
                     inuse = 1;
                     r = ipc_service_connect(&msg);
                 }
-                psa_end(msg.handle, r);
+                psa_reply(msg.handle, r);
                 break;
             case PSA_IPC_CALL:
-                psa_end(msg.handle, ipc_service_call(&msg));
+                psa_reply(msg.handle, ipc_service_call(&msg));
                 break;
             case PSA_IPC_DISCONNECT:
                 assert (inuse == 1);
                 inuse = 0;
-                psa_end(msg.handle, PSA_SUCCESS);
+                psa_reply(msg.handle, PSA_SUCCESS);
                 break;
             default:
                 /* cannot get here? [broken SPM]. TODO*/

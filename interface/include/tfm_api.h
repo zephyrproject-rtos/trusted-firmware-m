@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -75,6 +75,13 @@ enum tfm_status_e
 enum tfm_status_e tfm_register_client_id (int32_t ns_client_id);
 
 /**
+ * \brief Retrieve the version of the PSA Framework API that is implemented
+ *
+ * \return The version of the PSA Framework
+ */
+uint32_t tfm_psa_framework_version_veneer(void);
+
+/**
  * \brief Return version of secure function provided by secure binary
  *
  * \param[in]  sid          ID of secure service
@@ -100,20 +107,20 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version);
  * \param[in]  in_vecs  invec containing pointer/count of input vectors
  * \param[in]  out_vecs invec containing pointer/count of output vectors
  *
- * \return Returns \ref psa_error_t error code
+ * \return Returns \ref psa_status_t status code
  */
-psa_error_t tfm_psa_call_veneer(psa_handle_t handle,
-                    const psa_invec *in_vecs,
-                    const psa_invec *out_vecs);
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+                                 const psa_invec *in_vecs,
+                                 const psa_invec *out_vecs);
 
 /**
  * \brief Close connection to secure function referenced by a connection handle
  *
  * \param[in]  handle   Handle to connection
  *
- * \return Returns \ref psa_error_t error code
+ * \return Returns \ref psa_status_t status code
  */
-psa_error_t tfm_psa_close_veneer(psa_handle_t handle);
+psa_status_t tfm_psa_close_veneer(psa_handle_t handle);
 
 //================ End Secure function declarations ==========================//
 
