@@ -38,6 +38,7 @@ if (ENABLE_CRYPTO)
   set (CRYPTO_C_SRC "${CRYPTO_DIR}/crypto_init.c"
                     "${CRYPTO_DIR}/crypto_alloc.c"
                     "${CRYPTO_DIR}/crypto_cipher.c"
+                    "${CRYPTO_DIR}/crypto_hash.c"
                     "${CRYPTO_DIR}/crypto_key.c"
                     "${CRYPTO_DIR}/crypto_wrappers.c"
                     "${CRYPTO_DIR}/crypto_utils.c"

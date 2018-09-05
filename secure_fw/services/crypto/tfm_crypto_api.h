@@ -221,12 +221,70 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
 /**
  * \brief Aborts a cipher operation, clears the operation context provided
  *
- * \param[in]  operation     Cipher operation context
+ * \param[in] operation Cipher operation context
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_cipher_abort(
                                              psa_cipher_operation_t *operation);
+/**
+ * \brief Starts a hash operation with the provided algorithm
+ *
+ * \param[in] operation Hash operation context
+ * \param[in] alg       Algorithm chosen as hash
+ *
+ * \return Returns values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_hash_start(psa_hash_operation_t *operation,
+                                            psa_algorithm_t alg);
+/**
+ * \brief Adds a new input chunk to the data for which the final hash value
+ *        will be computed
+ *
+ * \param[in] operation    Hash operation context
+ * \param[in] input        Buffer containing the input data
+ * \param[in] input_length Size of the provided input data
+ *
+ * \return Returns values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
+                                             const uint8_t *input,
+                                             size_t input_length);
+/**
+ * \brief Finalises a hash context operation producing the final hash value
+ *
+ * \param[in]  operation   Hash operation context
+ * \param[out] hash        Buffer containing hash data
+ * \param[in]  hash_size   Size of the hash buffer
+ * \param[out] hash_length Size of the produced hash
+ *
+ * \return Returns values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
+                                             uint8_t *hash,
+                                             size_t hash_size,
+                                             size_t *hash_length);
+/**
+ * \brief Finalises a hash context operation, verifying that the final hash
+ *        value matches the one provided as input
+ *
+ * \param[in] operation   Hash operation context
+ * \param[in] hash        Buffer containing the provided hash value
+ * \param[in] hash_length Size of the provided hash value
+ *
+ * \return Returns values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
+                                             const uint8_t *hash,
+                                             size_t hash_length);
+/**
+ * \brief Aborts a hash operation, clears the operation context provided
+ *
+ * \param[in] operation Hash operation context
+ *
+ * \return Returns values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation);
 
 #ifdef __cplusplus
 }

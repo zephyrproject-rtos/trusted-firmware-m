@@ -120,7 +120,47 @@
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
-    }
+    },
+    {
+      "sfid": "TFM_CRYPTO_HASH_START_SFID",
+      "signal": "TFM_CRYPTO_HASH_START",
+      "tfm_symbol": "tfm_crypto_hash_start",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_HASH_UPDATE_SFID",
+      "signal": "TFM_CRYPTO_HASH_UPDATE",
+      "tfm_symbol": "tfm_crypto_hash_update",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_HASH_FINISH_SFID",
+      "signal": "TFM_CRYPTO_HASH_FINISH",
+      "tfm_symbol": "tfm_crypto_hash_finish",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_HASH_VERIFY_SFID",
+      "signal": "TFM_CRYPTO_HASH_VERIFY",
+      "tfm_symbol": "tfm_crypto_hash_verify",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_HASH_ABORT_SFID",
+      "signal": "TFM_CRYPTO_HASH_ABORT",
+      "tfm_symbol": "tfm_crypto_hash_abort",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
   ],
   "source_files": [
     "crypto_alloc.c",
@@ -129,6 +169,7 @@
     "crypto_init.c",
     "crypto_wrappers.c",
     "crypto_utils.c",
+    "crypto_hash.c",
   ],
   "tfm_linker_pattern": [
     "library_list": [

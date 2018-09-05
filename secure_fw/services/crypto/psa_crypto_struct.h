@@ -49,26 +49,8 @@ struct psa_hash_operation_s
     union
     {
         uint32_t dummy; /* Make the union non-empty in any case */
-#if defined(MBEDTLS_MD2_C)
-        mbedtls_md2_context md2;
-#endif
-#if defined(MBEDTLS_MD4_C)
-        mbedtls_md4_context md4;
-#endif
-#if defined(MBEDTLS_MD5_C)
-        mbedtls_md5_context md5;
-#endif
-#if defined(MBEDTLS_RIPEMD160_C)
-        mbedtls_ripemd160_context ripemd160;
-#endif
-#if defined(MBEDTLS_SHA1_C)
-        mbedtls_sha1_context sha1;
-#endif
-#if defined(MBEDTLS_SHA256_C)
-        mbedtls_sha256_context sha256;
-#endif
-#if defined(MBEDTLS_SHA512_C)
-        mbedtls_sha512_context sha512;
+#if defined(MBEDTLS_MD_C)
+        mbedtls_md_context_t md;
 #endif
     } ctx;
 };

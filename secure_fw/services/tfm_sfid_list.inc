@@ -40,6 +40,11 @@
     {tfm_crypto_cipher_update_wrapper, TFM_CRYPTO_CIPHER_UPDATE_SFID},
     {tfm_crypto_cipher_abort, TFM_CRYPTO_CIPHER_ABORT_SFID},
     {tfm_crypto_cipher_finish, TFM_CRYPTO_CIPHER_FINISH_SFID},
+    {tfm_crypto_hash_start, TFM_CRYPTO_HASH_START_SFID},
+    {tfm_crypto_hash_update, TFM_CRYPTO_HASH_UPDATE_SFID},
+    {tfm_crypto_hash_finish, TFM_CRYPTO_HASH_FINISH_SFID},
+    {tfm_crypto_hash_verify, TFM_CRYPTO_HASH_VERIFY_SFID},
+    {tfm_crypto_hash_abort, TFM_CRYPTO_HASH_ABORT_SFID},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/

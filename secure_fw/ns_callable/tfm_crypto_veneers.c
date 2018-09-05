@@ -111,3 +111,51 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_finish(
     TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_cipher_finish,
                          operation, output, output_size, output_length);
 }
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_start(
+                                                psa_hash_operation_t *operation,
+                                                psa_algorithm_t alg)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_start,
+                         operation, alg, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_update(
+                                                psa_hash_operation_t *operation,
+                                                const uint8_t *input,
+                                                size_t input_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_update,
+                         operation, input, input_length, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_finish(
+                                                psa_hash_operation_t *operation,
+                                                uint8_t *hash,
+                                                size_t hash_size,
+                                                size_t *hash_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_finish,
+                         operation, hash, hash_size, hash_length);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_verify(
+                                                psa_hash_operation_t *operation,
+                                                const uint8_t *hash,
+                                                size_t hash_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_verify,
+                         operation, hash, hash_length, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_abort(
+                                                psa_hash_operation_t *operation)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_abort,
+                         operation, 0, 0, 0);
+}

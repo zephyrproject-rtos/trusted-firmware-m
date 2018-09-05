@@ -188,3 +188,76 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
 
     return TFM_CRYPTO_PSA_RETURN(err);
 }
+
+psa_status_t psa_hash_start(psa_hash_operation_t *operation,
+                            psa_algorithm_t alg)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_start,
+                               (uint32_t)operation,
+                               (uint32_t)alg,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_PSA_RETURN(err);
+}
+
+psa_status_t psa_hash_update(psa_hash_operation_t *operation,
+                             const uint8_t *input,
+                             size_t input_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_update,
+                               (uint32_t)operation,
+                               (uint32_t)input,
+                               (uint32_t)input_length,
+                               0);
+
+    return TFM_CRYPTO_PSA_RETURN(err);
+}
+
+psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
+                             uint8_t *hash,
+                             size_t hash_size,
+                             size_t *hash_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_finish,
+                               (uint32_t)operation,
+                               (uint32_t)hash,
+                               (uint32_t)hash_size,
+                               (uint32_t)hash_length);
+
+    return TFM_CRYPTO_PSA_RETURN(err);
+}
+
+psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
+                             const uint8_t *hash,
+                             size_t hash_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_verify,
+                               (uint32_t)operation,
+                               (uint32_t)hash,
+                               (uint32_t)hash_length,
+                               0);
+
+    return TFM_CRYPTO_PSA_RETURN(err);
+}
+
+psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_abort,
+                               (uint32_t)operation,
+                               0,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_PSA_RETURN(err);
+}
