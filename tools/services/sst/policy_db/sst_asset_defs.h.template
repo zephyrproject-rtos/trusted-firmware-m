@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+${auto_gen_notice}
+
+#ifndef __SST_ASSET_DEFS_H__
+#define __SST_ASSET_DEFS_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* SST service reserved IDs */
+#define SST_ASSET_ID_NO_ASSET 0
+/* End SST service reserved IDs */
+
+/* Asset IDs */
+${asset_ids}
+
+/* Asset sizes */
+${asset_sizes}
+
+/* Client IDs which have access rights in one or more assets */
+${client_ids}
+
+/* Number of assets that can be stored in SST area */
+#define SST_NUM_ASSETS ${number_of_assets}
+
+/* Largest defined asset size */
+#define SST_MAX_ASSET_SIZE ${max_asset_size}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __SST_ASSET_DEFS_H__ */

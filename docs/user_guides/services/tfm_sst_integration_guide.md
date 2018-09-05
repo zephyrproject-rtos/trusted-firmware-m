@@ -237,65 +237,56 @@ requirements by implementing those files with the proper content.
 
 #### Policy Database Definition
 
-`sst_asset_defs.h` **must** define the list of asset IDs, maximum size of each
-asset, the number of clients allowed to access to each asset, the number of
-assets defined, the size of the largest asset and the list of clients IDs.
+`sst_asset_defs.h` defines the list of asset IDs, maximum size of each asset,
+the client IDs allowed to access one or more assets, the number of assets
+defined and the size of the largest asset.
 
 The naming convention for those definition is as follows:
 
  - `SST_ASSET_ID_<ASSET NAME>` - To define an asset ID.
  - `SST_ASSET_MAX_SIZE_<ASSET NAME>` - To define the maximum size of the asset.
- - `SST_ASSET_PERMS_COUNT_<ASSET NAME>` - To define the number of clients
-   defined in the `asset_perms_modes` vector to have access to this object in a
-   direct or referenced way.
  - `SST_MAX_ASSET_SIZE` - To define the size of the largest asset defined in
    the file.
  - `SST_NUM_ASSETS` - To define the number of assets defined in the file.
- - `SST_CLIENT_ID_<APP NAME>` - To define a client ID.
+ - `SST_CLIENT_ID_<N>` - To define a client ID number N which is allowed to
+   access one or more assets.
 
-The asset ID **must** not be lower than 2 and **must** be unique in the
-definition. The client ID must be unique in the definition as well.
-
-The `SST_ASSET_ID_NO_ASSET` and `SST_ASSET_ID_DELETED_ASSET` defines **must**
-remain as they are defined in `sst_asset_defs.h`.
+The asset IDs and client IDs are unique in the definitions.
 
 An example of `sst_asset_defs.h` definition is:
 ```
 ...
+/* SST service reserved IDs */
 #define SST_ASSET_ID_NO_ASSET 0
-#define SST_ASSET_ID_DELETED_ASSET 1
-/**********************************/
-#define SST_ASSET_ID_AES_KEY_128 2
-#define SST_ASSET_ID_AES_KEY_192 3
+/* End SST service reserved IDs */
 
+/* Asset IDs */
+#define SST_ASSET_ID_AES_KEY_128 1
+#define SST_ASSET_ID_AES_KEY_192 2
+
+/* Asset sizes */
 #define SST_ASSET_MAX_SIZE_AES_KEY_128 16
 #define SST_ASSET_MAX_SIZE_AES_KEY_192 24
 
-#define SST_ASSET_PERMS_COUNT_AES_KEY_128 1
-#define SST_ASSET_PERMS_COUNT_AES_KEY_192 1
+/* Client IDs which have access rights in one or more assets */
+#define SST_CLIENT_ID_1 1
+#define SST_CLIENT_ID_2 2
 
-#define SST_CLIENT_ID_1 10
-#define SST_CLIENT_ID_2 11
-
-/* Maximum number of assets that can be stored in the cache */
+/* Number of assets that can be stored in SST area */
 #define SST_NUM_ASSETS 2
+
 /* Largest defined asset size */
 #define SST_MAX_ASSET_SIZE 24
 ...
 ```
 
-To define a new policy table, it is required to define an asset information
-vector (`asset_perms`) and an asset permissions mode vector
-(`asset_perms_modes`), in `sst_asset_defs.c`. The asset information vector
-defines the assets' properties, while the asset permissions mode vector defines
-the assets' access permissions for each client. By default, if an
-client ID is not defined for an specific asset in the `asset_perms_modes`,
-the asset is not accessible for that client in any direct or referenced
-way.
-
-The `struct sst_asset_info_t asset_perms[]` and `struct sst_asset_perm_t
-asset_perms_modes[]` vectors **must** be named as they are in
-`sst_asset_defs.c`.
+The policy table is composed by the asset information vector (`asset_perms`)
+and the asset permissions mode vector (`asset_perms_modes`), in
+`sst_asset_defs.c`. The asset information vector defines the properties of
+all assets, while the asset permissions mode vector defines the access
+permissions to those assets for each client. By default, if a client ID is
+not defined for an specific asset in the `asset_perms_modes`, the asset is
+not accessible for that client in any direct or referenced way.
 
 The asset information structure (`struct sst_asset_policy_t`) contains the
 following items:
@@ -313,8 +304,9 @@ The `struct sst_asset_info_t` definition can be found in
 `secure_fw/services/secure_storage/sst_asset_management.h`
 
 An example of `asset_perms` definition can be found below:
+
 ```
-struct sst_asset_policy_t asset_perms[] = {
+const struct sst_asset_policy_t asset_perms[] = {
 {
     .type = PSA_SST_ASSET_KEY_AES,
     .asset_uuid = SST_ASSET_ID_AES_KEY_128,
@@ -333,40 +325,109 @@ struct sst_asset_policy_t asset_perms[] = {
 The asset permission structure (`struct sst_asset_perm_t`) is defined as
 follows:
 
- - `client_id` - Client ID.
- - `perm` - Access permissions types, as a bitfield, allowed for this
+ - `client_id` - Client ID. ID for secure partitions is always bigger
+   than 0. Non-secure clients use ID lower than 0. ID cannot be 0.
+ - `perm` - Access permissions types, as a bit-field, allowed for this
    client.
 
 The available access permission types are:
 
- - `SST_PERM_REFERENCE` - The client can request to a service, which may
-   have read and/or write access to the asset, to manipulate the asset's
-   content in its behalfs.
- - `SST_PERM_READ` - The client can read the asset's content.
+ - `SST_PERM_REFERENCE` - The client can request to a service to
+   manipulate the asset content in its behalf.
+ - `SST_PERM_READ` - The client can read the asset content.
  - `SST_PERM_WRITE` - The client can create, write and delete the asset.
 
-It is **mandatory** to define the client's permissions for each asset in
-order. It means, add the client's permissions for the first asset. Then,
-the client's permissions for the second asset, etc.
-By design, the policy manager manages the client's permissions for each
-asset using the `.perms_modes_start_idx` and `.perms_count` asset's properties.
+The client permissions are defined in order for each asset. It means,
+the first entries in the vector define the access permissions for all
+the clients which have access to the first asset in `asset_perms`.
+Then, the access permissions for the clients which have access to the
+second asset, etc.
+The policy manager retrieves the client permissions for each asset by
+reading the proper entry in `asset_perms_modes` vector, based on
+`.perms_modes_start_idx` and `.perms_count` asset properties in
+`asset_perms`.
 
 The `struct sst_asset_perm_t` definition can be found in
 `secure_fw/services/secure_storage/sst_asset_management.h`
 
 An example of `asset_perms_modes` definition can be found below:
+
 ```
-struct sst_asset_perm_t asset_perms_modes[] = {
+const struct sst_asset_perm_t asset_perms_modes[] = {
 {
     .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ,
 }, {
-    .client = SST_CLIENT_ID_2,
+    .client_id = SST_CLIENT_ID_2,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
-}};
+} };
 ```
 
-### Client Identification
+#### Generate a new policy database
+
+The Python script `gen_policy_db.py` can be used to generate a new policy
+DB based on the policy DB description in YAML format. The script is
+available in `tools/services/sst/policy_db`. This Python script generates
+automatically the `sst_asset_defs.h` and `sst_asset_defs.c` files which will be
+used in the SST service build process to compile in the policy DB.
+
+To define a policy for an asset, the asset definition must contain the
+following fields in the YAML file:
+
+ - `type` - PSA asset type define name defined as a string.
+ - `name` - Asset name defined as a string.
+ - `uuid` - Asset unique ID defined as an integer.
+ - `max_size` - Asset maximum size defined as an integer.
+ - `client_perms` - List of client IDs which have access to this asset.
+ - `client_id` - Client ID defined as an integer.
+ - `perms` - List of access permissions types allowed for this client. Each
+   permission defined as a string.
+
+The available access permission strings are:
+
+ - `REFERENCE` - The client can request to a service to
+   manipulate the asset content in its behalf.
+ - `READ`  - The client can read the asset content.
+ - `WRITE` - The client can create, write and delete the asset.
+
+An example of asset definition in YAML format can be found below:
+
+```
+...
+{
+  "type": "PSA_SST_ASSET_KEY_HMAC",
+  "name": "AES_KEY_128",
+  "uuid": 1,
+  "max_size": 16,
+  "client_perms": [
+    {
+      "client_id": 1,
+      "perms":  ["REFERENCE","READ"]
+    }, {
+      "client_id": 2,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},
+...
+```
+
+The following command can be executed to generate the new policy DB files based
+on a new YAML file description with `gen_policy_db.py`.
+```
+python gen_policy_db.py -i new_policy_db.yaml
+```
+
+Detailed information about how to use `gen_policy_db.py` can be found by
+executing the script with -h parameter.
+```
+python gen_policy_db.py -h
+```
+
+The current policy DB is defined in `tfm_sst_policy_db_definition.yaml`
+located in `tools/services/sst/policy_db` folder.
+
+### Non-Secure Identity Manager
 
 TF-M core tracks the current client IDs running in the secure or non-secure
 processing environment. It provides a dedicated API to retrieve the client ID

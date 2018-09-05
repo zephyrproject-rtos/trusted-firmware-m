@@ -28,7 +28,8 @@ on specific products and licenses as explained in
 - Python3, with the following libraries:
   - pycrypto
   - pyasn1
-  - sudo apt-get install python3-crypto python3-pyasn1
+  - yaml
+  - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml
 - SRecord v1.58 (for Musca-A1 test chip board)
 
 ### Setup a shell to enable compiler toolchain and cmake after installation.
@@ -60,6 +61,7 @@ export PATH=<GNU_ARM_PATH>/bin:$PATH
 - Python3(native Windows version), with the following libraries:
   - pycryptodome (pip3 install --user pycryptodome)
   - pyasn1 (pip3 install --user pyasn1)
+  - pyyaml (pip3 install --user pyyaml)
 - Python3 pip
 - SRecord v1.63 (for Musca-A1 test chip board)
 
@@ -103,4 +105,4 @@ export PATH=/cygdrive/c/<CMAKE_PATH>/bin:$PATH
 ~~~
 --------------
 
-*Copyright (c) 2017, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*

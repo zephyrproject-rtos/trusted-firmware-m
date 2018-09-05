@@ -1,0 +1,132 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+[
+{
+  "type": "PSA_SST_ASSET_KEY_AES",
+  "name": "AES_KEY_128",
+  "uuid": 1,
+  "max_size": 16,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_AES",
+  "name": "AES_KEY_192",
+  "uuid": 2,
+  "max_size": 24,
+  "client_perms": [
+    {
+      "client_id": -3,
+      "perms":  ["REFERENCE"]
+    }, {
+      "client_id": -2,
+      "perms":  ["REFERENCE","READ"]
+    }, {
+      "client_id": -1,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_AES",
+  "name": "AES_KEY_256",
+  "uuid": 3,
+  "max_size": 32,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_RSA_PUBLIC",
+  "name": "RSA_KEY_1024",
+  "uuid": 4,
+  "max_size": 128,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_RSA_PUBLIC",
+  "name": "RSA_KEY_2048",
+  "uuid": 5,
+  "max_size": 256,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_RSA_PRIVATE",
+  "name": "RSA_KEY_4096",
+  "uuid": 6,
+  "max_size": 512,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_CERT_X_509",
+  "name": "X509_CERT_SMALL",
+  "uuid": 7,
+  "max_size": 512,
+  "client_perms": [
+    {
+      "client_id": -4,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_CERT_X_509",
+  "name": "X509_CERT_LARGE",
+  "uuid": 8,
+  "max_size": 2048,
+  "client_perms": [
+    {
+      "client_id": -3,
+      "perms":  ["REFERENCE"]
+    }, {
+      "client_id": -2,
+      "perms":  ["REFERENCE","READ"]
+    }, {
+      "client_id": -1,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_HMAC",
+  "name": "SHA224_HASH",
+  "uuid": 9,
+  "max_size": 28,
+  "client_perms": [
+    {
+      "client_id": -2,
+      "perms":  ["REFERENCE","READ","WRITE"]
+    }
+  ]
+},{
+  "type": "PSA_SST_ASSET_KEY_HMAC",
+  "name": "SHA384_HASH",
+  "uuid": 10,
+  "max_size": 48,
+  "client_perms": [
+    {
+      "client_id": -1,
+      "perms":  ["REFERENCE","WRITE"]
+    }
+  ]
+}
+]

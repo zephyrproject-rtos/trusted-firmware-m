@@ -1,0 +1,17 @@
+/*
+ * Copyright (c) 2018, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+${auto_gen_notice}
+
+#include "sst_asset_defs.h"
+#include "secure_fw/services/secure_storage/sst_asset_management.h"
+
+const struct sst_asset_policy_t asset_perms[] = {
+${asset_defs} };
+
+const struct sst_asset_perm_t asset_perms_modes[] = {
+${asset_perms} };
