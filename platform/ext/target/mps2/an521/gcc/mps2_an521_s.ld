@@ -617,8 +617,10 @@ SECTIONS
     Load$$LR$$LR_VENEER$$Base = ADDR(.gnu.sgstubs);
     Load$$LR$$LR_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
 
+#ifdef BL2
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
     Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
+#endif /* BL2 */
 
     PROVIDE(__stack = __initial_sp);
     PROVIDE(Stack_top = __initial_sp);
