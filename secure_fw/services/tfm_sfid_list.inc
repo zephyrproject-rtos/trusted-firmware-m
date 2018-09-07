@@ -20,10 +20,11 @@
     {sst_am_delete, SST_AM_DELETE_SFID},
 
     /******** TFM_SP_AUDIT_LOG ********/
-    {log_core_retrieve, TFM_LOG_RETRIEVE_SFID},
-    {log_core_add_line, TFM_LOG_ADD_LINE_SFID},
-    {log_core_get_info, TFM_LOG_GET_INFO_SFID},
-    {log_core_delete_items, TFM_LOG_DELETE_ITEMS_SFID},
+    {audit_core_retrieve_record, TFM_AUDIT_RETRIEVE_RECORD_SFID},
+    {audit_core_add_record, TFM_AUDIT_ADD_RECORD_SFID},
+    {audit_core_get_info, TFM_AUDIT_GET_INFO_SFID},
+    {audit_core_get_record_info, TFM_AUDIT_GET_RECORD_INFO_SFID},
+    {audit_core_delete_record, TFM_AUDIT_DELETE_RECORD_SFID},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
