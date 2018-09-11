@@ -147,7 +147,6 @@ enum spm_err_t tfm_spm_partition_init(void)
             int32_t res;
 
             desc.args = args;
-            desc.exc_num = EXC_NUM_THREAD_MODE;
             desc.ns_caller = 0;
             desc.sfn = (sfn_t)part->static_data.partition_init;
             desc.sp_id = part->static_data.partition_id;

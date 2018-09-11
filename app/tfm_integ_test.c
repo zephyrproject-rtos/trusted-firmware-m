@@ -34,20 +34,9 @@
             case TFM_SUCCESS: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") successful!");\
                 break; \
-            case TFM_PARTITION_PENDED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") pended!"); \
-                break; \
-            case TFM_ERROR_PARTITION_ALREADY_PENDED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
-                                                            "already pended!");\
-                break; \
             case TFM_ERROR_SECURE_DOMAIN_LOCKED: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
                                                            "S domain locked!");\
-                break; \
-            case TFM_ERROR_NS_THREAD_MODE_CALL: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
-                                                            "NS thread mode!");\
                 break; \
             default: \
                 LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \

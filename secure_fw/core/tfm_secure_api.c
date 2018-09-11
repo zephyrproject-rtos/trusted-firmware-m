@@ -33,8 +33,6 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 #endif
 
-extern void tfm_core_partition_return_svc(void);
-
 /* This is the "Big Lock" on the secure side, to guarantee single entry
  * to SPE
  */
@@ -78,10 +76,10 @@ static void restore_caller_ctx(
     return;
 }
 
-static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
+static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
+                                                             uint32_t excReturn)
 {
-    uint32_t caller_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
+    uint32_t caller_partition_idx = desc_ptr->caller_part_idx;
     const struct spm_partition_runtime_data_t *curr_part_data;
     uint32_t caller_flags;
     register uint32_t partition_idx;
@@ -92,11 +90,6 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
     uint32_t caller_partition_id;
     int32_t client_id;
-
-    /* Check partition idx validity */
-    if (caller_partition_idx == SPM_INVALID_PARTITION_IDX) {
-        return TFM_SECURE_LOCK_FAILED;
-    }
 
     caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
 
@@ -125,9 +118,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     caller_partition_id = tfm_spm_partition_get_partition_id(
                                                           caller_partition_idx);
 
-    if ((tfm_secure_api_initializing) &&
-        (caller_partition_id == TFM_SP_CORE_ID) &&
-        (partition_state == SPM_PARTITION_STATE_UNINIT)) {
+    if (tfm_secure_api_initializing) {
 #if TFM_LVL != 1
         /* Make thread mode unprivileged while untrusted partition init is
          * executed
@@ -224,7 +215,7 @@ static int32_t tfm_push_lock(struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
     return TFM_SUCCESS;
 }
 
-static int32_t tfm_pop_lock(uint32_t *excReturn)
+static int32_t tfm_return_from_partition(uint32_t *excReturn)
 {
     uint32_t current_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
@@ -328,8 +319,6 @@ static int32_t tfm_pop_lock(uint32_t *excReturn)
 
     tfm_spm_partition_set_state(current_partition_idx,
                                 SPM_PARTITION_STATE_IDLE);
-    tfm_spm_partition_set_caller_partition_idx(current_partition_idx,
-                                SPM_INVALID_PARTITION_IDX);
     tfm_spm_partition_set_state(return_partition_idx,
                                 SPM_PARTITION_STATE_RUNNING);
 
@@ -358,11 +347,9 @@ static int32_t tfm_check_sfn_req_integrity(struct tfm_sfn_req_s *desc_ptr)
 static int32_t tfm_core_check_sfn_req_rules(
         struct tfm_sfn_req_s *desc_ptr)
 {
-    if (desc_ptr->exc_num != EXC_NUM_THREAD_MODE) {
-        /* Veneer should not be called from handler mode!
-         * FixMe: this is potential attack, trigger fault handling
-         */
-        return TFM_ERROR_INVALID_EXC_MODE;
+    /* Check partition idx validity */
+    if (desc_ptr->caller_part_idx == SPM_INVALID_PARTITION_IDX) {
+        return TFM_ERROR_NO_ACTIVE_PARTITION;
     }
 
     if ((desc_ptr->ns_caller) && (tfm_secure_lock != 0)) {
@@ -372,6 +359,17 @@ static int32_t tfm_core_check_sfn_req_rules(
          * Take appropriate action!
          */
         return TFM_ERROR_SECURE_DOMAIN_LOCKED;
+    }
+
+    if (tfm_secure_api_initializing) {
+        int32_t id =
+            tfm_spm_partition_get_partition_id(desc_ptr->caller_part_idx);
+
+        if ((id != TFM_SP_CORE_ID) || (tfm_secure_lock != 0)) {
+            /* Invalid request during system initialization */
+            ERROR_MSG("Invalid service request during initialization!");
+            return TFM_ERROR_NOT_INITIALIZED;
+        }
     }
 
     return TFM_SUCCESS;
@@ -395,20 +393,28 @@ int32_t tfm_core_sfn_request_handler(
 
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {
+        ERROR_MSG("Invalid service request!");
         return TFM_ERROR_STATUS(res);
     }
 
     __disable_irq();
+    desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
+
     res = tfm_core_check_sfn_req_rules(desc_ptr);
     if (res != TFM_SUCCESS) {
+        /* FixMe: error compartmentalization TBD */
+        tfm_spm_partition_set_state(
+            desc_ptr->caller_part_idx, SPM_PARTITION_STATE_CLOSED);
         __enable_irq();
+        ERROR_MSG("Unauthorized service request!");
         return TFM_ERROR_STATUS(res);
     }
 
-    res = tfm_push_lock(desc_ptr, excReturn);
+    res = tfm_start_partition(desc_ptr, excReturn);
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
         __enable_irq();
+        ERROR_MSG("Failed to process service request!");
         return TFM_ERROR_STATUS(res);
     }
 
@@ -423,11 +429,12 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     int32_t res;
     int32_t *args;
     int32_t retVal;
+
     /* No excReturn value is needed as no exception handling is used */
     res = tfm_core_sfn_request_handler(desc_ptr, 0);
 
     if (res != TFM_SUCCESS) {
-        return res;
+        tfm_secure_api_error_handler();
     }
 
     /* Secure partition to secure partition call in TFM level 1 */
@@ -435,7 +442,7 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     retVal = desc_ptr->sfn(args[0], args[1], args[2], args[3]);
 
     /* return handler should restore original exc_return value... */
-    res = tfm_pop_lock(NULL);
+    res = tfm_return_from_partition(NULL);
     if (res == TFM_SUCCESS) {
         /* If unlock successful, pass SS return value to caller */
         res = retVal;
@@ -695,39 +702,21 @@ uint32_t tfm_core_partition_request_svc_handler(
         struct tfm_exc_stack_t *svc_ctx, uint32_t excReturn)
 {
     if (!(excReturn & EXC_RETURN_STACK_PROCESS)) {
-        /* Partition request SVC called with MSP active.
+        /* Service request SVC called with MSP active.
          * Either invalid configuration for Thread mode or SVC called
          * from Handler mode, which is not supported.
          * FixMe: error severity TBD
          */
-        ERROR_MSG("Partition request SVC called with MSP active!");
+        ERROR_MSG("Service request SVC called with MSP active!");
         tfm_secure_api_error_handler();
     }
 
     struct tfm_sfn_req_s *desc_ptr = (struct tfm_sfn_req_s *)svc_ctx->R0;
 
-    int32_t res = tfm_check_sfn_req_integrity(desc_ptr);
-
-    if (res != TFM_SUCCESS) {
-        /* The descriptor is incorrectly filled
-         * FixMe: error severity TBD
-         */
-        svc_ctx->LR = (int32_t)tfm_secure_api_error_handler;
-        return excReturn;
+    if (tfm_core_sfn_request_handler(desc_ptr, excReturn) != TFM_SUCCESS) {
+        tfm_secure_api_error_handler();
     }
 
-    if (desc_ptr->exc_num != EXC_NUM_THREAD_MODE) {
-        /* The descriptor is incorrectly filled for SVC handler
-         * FixMe: error severity TBD
-         */
-        svc_ctx->LR = (int32_t)tfm_secure_api_error_handler;
-        return excReturn;
-    } else {
-        if (tfm_core_sfn_request_handler(desc_ptr, excReturn) != TFM_SUCCESS) {
-            svc_ctx->LR = (int32_t)tfm_secure_api_error_handler;
-            return excReturn;
-        }
-    }
     return EXC_RETURN_SECURE_FUNCTION;
 }
 
@@ -737,23 +726,14 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
     int32_t res;
 
     if (!(lr & EXC_RETURN_STACK_PROCESS)) {
-        /* Partition request SVC called with MSP active.
-         * Either invalid configuration for Thread mode or SVC called
-         * from Handler mode, which is not supported.
-         * FixMe: error severity TBD
-         */
-        ERROR_MSG("Partition request SVC called with MSP active!");
-        tfm_secure_api_error_handler();
-    }
-
-    /* Store return value from secure partition */
-    if (!(lr & EXC_RETURN_STACK_PROCESS)) {
         /* Partition return SVC called with MSP active.
          * This should not happen!
          */
         ERROR_MSG("Partition return SVC called with MSP active!");
         tfm_secure_api_error_handler();
     }
+
+    /* Store return value from secure partition */
     int32_t retVal = *(int32_t *)__get_PSP();
 
     if ((retVal > TFM_SUCCESS) &&
@@ -769,7 +749,7 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
         tfm_secure_api_error_handler();
     }
 
-    res = tfm_pop_lock(&lr);
+    res = tfm_return_from_partition(&lr);
     if (res != TFM_SUCCESS) {
         /* Unlock errors indicate ctx database corruption or unknown anomalies
          * Halt execution

@@ -30,9 +30,7 @@
 #endif
 
 #ifndef TFM_LVL
-#ifndef __DOMAIN_NS
 #error TFM_LVL is not defined!
-#endif
 #endif
 
 extern void tfm_secure_api_error_handler(void);
@@ -43,7 +41,7 @@ struct tfm_sfn_req_s {
     uint32_t sp_id;
     sfn_t sfn;
     int32_t *args;
-    uint32_t exc_num;
+    uint32_t caller_part_idx;
     int32_t ns_caller : 1;
 };
 
@@ -97,8 +95,8 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
     desc.sfn = fn;
     desc.args = args;
     desc.ns_caller = cmse_nonsecure_caller();
-    desc.exc_num = __get_active_exc_num();
-    if (desc.exc_num != EXC_NUM_THREAD_MODE) {
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
+        /* FixMe: Error severity TBD */
         return TFM_ERROR_GENERIC;
     } else {
 #if TFM_LVL == 1
