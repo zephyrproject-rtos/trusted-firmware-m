@@ -22,8 +22,8 @@ struct _ctx {
     uint32_t sp_limit;
 };
 
-#define SP_POS          0x28
-#define SP_LIMIT_POS    0x2c
+#define SP_POS          0x24
+#define SP_LIMIT_POS    0x28
 
 /* thread types */
 #define TFM_THRD_CREATED    0
