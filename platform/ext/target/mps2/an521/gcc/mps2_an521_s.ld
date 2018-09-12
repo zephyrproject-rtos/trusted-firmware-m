@@ -330,7 +330,6 @@ SECTIONS
     .TFM_UNPRIV_RO_DATA :
     {
         */tfm_unpriv_api.o(.data*)
-        */tfm_sst_secure_api.o(.data*)
         */dummy_crypto_keys.o(.data*)
         */platform_retarget_dev.o(.data*)
         . = ALIGN(32);
@@ -341,11 +340,9 @@ SECTIONS
     .TFM_UNPRIV_RO_BSS : ALIGN(32)
     {
         */tfm_unpriv_api.o(.bss*)
-        */tfm_sst_secure_api.o(.bss*)
         */platform_retarget_dev.o(.bss*)
         */dummy_crypto_keys.o(.bss*)
         */tfm_unpriv_api.o(COMMON)
-        */tfm_sst_secure_api.o(COMMON)
         */platform_retarget_dev.o(COMMON)
         */dummy_crypto_keys.o(COMMON)
         . = ALIGN(32);
