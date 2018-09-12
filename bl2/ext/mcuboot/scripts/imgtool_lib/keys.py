@@ -1,5 +1,5 @@
 # Copyright 2017 Linaro Limited
-# Copyright (c) 2017, Arm Limited.
+# Copyright (c) 2017-2018, Arm Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 Cryptographic key management for imgtool.
 """
 
+from __future__ import print_function
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS

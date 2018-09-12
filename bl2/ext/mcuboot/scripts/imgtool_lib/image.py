@@ -43,7 +43,7 @@ trailer_sizes = {
     for write_size in [1, 2, 4, 8]
 }
 
-boot_magic = bytes([
+boot_magic = bytearray([
     0x77, 0xc2, 0x95, 0xf3,
     0x60, 0xd2, 0xef, 0x7f,
     0x35, 0x52, 0x50, 0x0f,
@@ -100,7 +100,7 @@ class Image():
         # If there is a header requested, make sure that the image
         # starts with all zeros.
         if self.header_size > 0:
-            if any(v != 0 for v in self.payload[0:self.header_size]):
+            if any(v != 0 and v != b'\000' for v in self.payload[0:self.header_size]):
                 raise Exception("Padding requested, but image does not start with zeros")
 
     def sign(self, key, ramLoadAddress):

@@ -15,12 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
 import os
 import re
 import argparse
-from imgtool import keys
-from imgtool import image
-from imgtool import version
+from imgtool_lib import keys
+from imgtool_lib import image
+from imgtool_lib import version
 import sys
 
 def find_load_address(args):

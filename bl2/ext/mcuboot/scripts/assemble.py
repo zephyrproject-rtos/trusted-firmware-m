@@ -67,6 +67,7 @@ class Assembly():
 
     def add_image(self, source, partition):
         with open(self.output, 'ab') as ofd:
+            ofd.seek(0, os.SEEK_END)
             pos = ofd.tell()
             if pos > self.offsets[partition]:
                 raise Exception("Partitions not in order, unsupported")
