@@ -137,18 +137,9 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
-    enum mt25ql_error_t err = MT25QL_ERR_NONE;
-
     ARG_UNUSED(cb_event);
 
     qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
-
-    /* Configure QSPI Flash controller and memory for optimal use */
-    err = mt25ql_cfg_optimal(ARM_FLASH0_DEV.dev);
-
-    if(err != MT25QL_ERR_NONE) {
-        return ARM_DRIVER_ERROR;
-    }
 
     return ARM_DRIVER_OK;
 }
