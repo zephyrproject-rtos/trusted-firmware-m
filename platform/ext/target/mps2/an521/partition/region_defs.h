@@ -22,6 +22,18 @@
 #define TOTAL_ROM_SIZE FLASH_TOTAL_SIZE
 #define TOTAL_RAM_SIZE (0x00200000)     /* 2 MB */
 
+#define BL2_HEAP_SIZE           0x0001000
+#define BL2_MSP_STACK_SIZE      0x0001000
+
+#define S_HEAP_SIZE             0x0001000
+#define S_MSP_STACK_SIZE_INIT   0x0000400
+#define S_MSP_STACK_SIZE        0x0000800
+#define S_PSP_STACK_SIZE        0x0000800
+
+#define NS_HEAP_SIZE            0x0001000
+#define NS_MSP_STACK_SIZE       0x0000400
+#define NS_PSP_STACK_SIZE       0x0000C00
+
 /*
  * MPC granularity is 128 KB on AN521 Castor MPS2 FPGA image. Alignment
  * of partitions is defined in accordance with this constraint.
@@ -72,10 +84,6 @@
 /* Use SRAM1 memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10000000)
 #define NS_ROM_ALIAS_BASE (0x00000000)
-
-/* FIXME: Use SRAM2 memory to store RW data */
-#define S_RAM_ALIAS_BASE  (0x38000000)
-#define NS_RAM_ALIAS_BASE (0x28000000)
 
 /* Alias definitions for secure and non-secure areas*/
 #define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + x)

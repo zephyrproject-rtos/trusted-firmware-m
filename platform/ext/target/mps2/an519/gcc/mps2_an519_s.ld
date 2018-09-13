@@ -31,9 +31,9 @@ MEMORY
   VENEERS (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 }
 
-__heap_size__  = 0x00001000;
-__psp_stack_size__ = 0x00001000;
-__msp_stack_size__ = 0x00000800;
+__heap_size__  = S_HEAP_SIZE;
+__psp_stack_size__ = S_PSP_STACK_SIZE;
+__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
@@ -355,6 +355,28 @@ SECTIONS
 
         KEEP(*(.eh_frame*))
     } > FLASH
+
+    /* shared_data and msp_stack are overlapping on purpose when
+     * msp_stack is extended until the beginning of RAM, when shared_date
+     * was read out by partitions
+     */
+    .tfm_bl2_shared_data : ALIGN(32)
+    {
+        . += BOOT_TFM_SHARED_DATA_SIZE;
+    } > RAM AT> FLASH
+
+    .msp_stack : ALIGN(32)
+    {
+        . += __msp_init_stack_size__;
+    } > RAM AT> FLASH
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
+    .psp_stack : ALIGN(32)
+    {
+        . += __psp_stack_size__;
+    } > RAM AT> FLASH
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
 #if TFM_LVL == 1
 
@@ -683,19 +705,6 @@ SECTIONS
     Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
-    .psp_stack : ALIGN(128)
-    {
-        . += __psp_stack_size__;
-    } > RAM AT> FLASH
-    __initial_sp = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-    Stack_Mem = ADDR(.psp_stack);
-
-    .msp_stack : ALIGN(128)
-    {
-        . += __msp_stack_size__;
-    } > RAM AT> FLASH
-    __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a
      * separate 32 bytes aligned region so that the SAU can programmed to just set
@@ -714,6 +723,5 @@ SECTIONS
     Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
 #endif /* BL2 */
 
-    PROVIDE(__stack = __initial_sp);
-    PROVIDE(Stack_top = __initial_sp);
+    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }

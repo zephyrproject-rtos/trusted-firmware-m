@@ -28,9 +28,8 @@ MEMORY
   RAM   (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
 }
 
-__heap_size__  = 0x00010000;
-__psp_stack_size__ = 0x00000800;
-__msp_stack_size__ = 0x00000800;
+__heap_size__  = BL2_HEAP_SIZE;
+__msp_stack_size__ = BL2_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a)
@@ -85,7 +84,7 @@ SECTIONS
 
     /* To copy multiple ROM to RAM sections,
      * define etext2/data2_start/data2_end and
-     * define __STARTUP_COPY_MULTIPLE in startup_cmsdk_mps2_sse_200.S */
+     * define __STARTUP_COPY_MULTIPLE in startup_cmsdk_mps2_an521_bl2.S */
     .copy.table :
     {
         . = ALIGN(4);
@@ -101,7 +100,7 @@ SECTIONS
 
     /* To clear multiple BSS sections,
      * uncomment .zero.table section and,
-     * define __STARTUP_CLEAR_BSS_MULTIPLE in startup_ARMCMx.S */
+     * define __STARTUP_CLEAR_BSS_MULTIPLE in startup_cmsdk_mps2_an521_bl2.S */
     .zero.table :
     {
         . = ALIGN(4);
@@ -114,6 +113,13 @@ SECTIONS
     } > FLASH
 
     __etext = .;
+
+    .tfm_bl2_shared_data : ALIGN(32)
+    {
+        . += BOOT_TFM_SHARED_DATA_SIZE;
+    } > RAM
+    Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
+    Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
     .data : AT (__etext)
     {
@@ -161,35 +167,14 @@ SECTIONS
 
     bss_size = __bss_end__ - __bss_start__;
 
-    .heap (COPY):
+    .msp_stack : ALIGN(32)
     {
-        __HeapBase = .;
-        __end__ = .;
-        end = __end__;
-        KEEP(*(.heap*))
-        __HeapLimit = .;
-    } > RAM
-
-    .psp_stack :
-    {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
-        . += __psp_stack_size__;
-    } > RAM
-    __initial_sp = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-    Stack_Mem = ADDR(.psp_stack);
-
-    .msp_stack :
-    {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
         . += __msp_stack_size__;
     } > RAM
-    __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-    .heap :
+    .heap : ALIGN(8)
     {
-        . = ALIGN(8);
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
@@ -198,5 +183,5 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 
-    PROVIDE( __stack = __initial_msp);
+    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }

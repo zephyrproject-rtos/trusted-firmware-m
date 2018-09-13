@@ -300,8 +300,10 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
             (struct tfm_exc_stack_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
-        extern uint32_t Stack_Mem[];
-        __set_PSPLIM((uint32_t)Stack_Mem);
+        extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
+        uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
+       __set_PSPLIM(psp_stack_bottom);
+
     }
 #else
     /* Restore caller context */

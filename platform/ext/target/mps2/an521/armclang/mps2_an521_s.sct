@@ -28,7 +28,22 @@ LR_CODE S_CODE_START {
 
 #if TFM_LVL == 1
 
-    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+    /* Shared area between BL2 and runtime to exchange data */
+    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    }
+
+    /* MSP */
+    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    }
+
+    /* PSP */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    }
+
+    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
+    }
+
+    ER_TFM_DATA +0 S_DATA_SIZE {
         .ANY (+RW +ZI)
     }
 
@@ -101,7 +116,22 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+    /* Shared area between BL2 and runtime to exchange data */
+    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    }
+
+    /* MSP */
+    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    }
+
+    /* PSP */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    }
+
+    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
+    }
+
+    ER_TFM_DATA +0 S_DATA_SIZE {
         .ANY (+RW +ZI)
     }
 

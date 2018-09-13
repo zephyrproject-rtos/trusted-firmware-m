@@ -199,9 +199,10 @@ int main(void)
 
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
-    extern uint32_t Stack_Mem[];
+    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
+    uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
 
-    __set_PSPLIM((uint32_t)Stack_Mem);
+    __set_PSPLIM(psp_stack_bottom);
 
     if (tfm_spm_partition_init() != SPM_ERR_OK) {
         /* Certain systems might refuse to boot altogether if partitions fail

@@ -83,8 +83,10 @@ enum spm_err_t tfm_spm_db_init(void)
 
     /* For the non secure Execution environment */
 #if TFM_LVL != 1
-    extern uint32_t Stack_Mem[];
-    extern uint32_t Stack_top[];
+    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
+    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
+    uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
+    uint32_t psp_stack_top    = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Limit;
 #endif
     if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {
         return SPM_ERR_INVALID_CONFIG;
@@ -95,12 +97,12 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags = 0;
 
 #if TFM_LVL != 1
-    part_ptr->memory_data.stack_bottom = (uint32_t)Stack_Mem;
-    part_ptr->memory_data.stack_top = (uint32_t)Stack_top;
+    part_ptr->memory_data.stack_bottom = psp_stack_bottom;
+    part_ptr->memory_data.stack_top    = psp_stack_top;
     /* Since RW, ZI and stack are configured as one MPU region, configure
-     * RW start address to Stack_Mem to get RW access to stack
+     * RW start address to psp_stack_bottom to get RW access to stack
      */
-    part_ptr->memory_data.rw_start = (uint32_t)Stack_Mem;
+    part_ptr->memory_data.rw_start     = psp_stack_bottom;
 #endif
 
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;

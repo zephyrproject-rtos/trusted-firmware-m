@@ -28,9 +28,9 @@ MEMORY
   RAM   (rwx) : ORIGIN = NS_DATA_START, LENGTH = NS_DATA_SIZE
 }
 
-__heap_size__  = 0x00001000;
-__psp_stack_size__ = 0x00000C00;
-__msp_stack_size__ = 0x00000400;
+__heap_size__  = NS_HEAP_SIZE;
+__psp_stack_size__ = NS_PSP_STACK_SIZE;
+__msp_stack_size__ = NS_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a)
@@ -161,35 +161,21 @@ SECTIONS
 
     bss_size = __bss_end__ - __bss_start__;
 
-    .heap (COPY):
+    .msp_stack : ALIGN(32)
     {
-        __HeapBase = .;
-        __end__ = .;
-        end = __end__;
-        KEEP(*(.heap*))
-        __HeapLimit = .;
-    } > RAM
-
-    .psp_stack :
-    {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
-        . += __psp_stack_size__;
-    } > RAM
-    __initial_sp = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-    Stack_Mem = ADDR(.psp_stack);
-
-    .msp_stack :
-    {
-        . = ALIGN(8);
-        KEEP(*(.psp_stack*))
         . += __msp_stack_size__;
     } > RAM
-    __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-    .heap :
+    .psp_stack : ALIGN(32)
     {
-        . = ALIGN(8);
+        . += __psp_stack_size__;
+    } > RAM
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+
+    .heap : ALIGN(8)
+    {
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
@@ -198,5 +184,5 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 
-    PROVIDE(__stack = __initial_sp);
+    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }

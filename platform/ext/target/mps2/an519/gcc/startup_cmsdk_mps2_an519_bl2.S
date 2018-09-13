@@ -24,7 +24,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    __initial_msp                  /* Top of Stack */
+    .long    Image$$ARM_LIB_STACK$$ZI$$Limit   /* Top of Stack */
 
     /* Core interrupts */
     .long    Reset_Handler                  /* Reset Handler */
@@ -306,9 +306,6 @@ Reset_Handler:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
     bl    SystemInit
-
-    ldr     r0, =__initial_sp
-    msr     psp, r0
 
 #ifndef __START
 #define __START _start

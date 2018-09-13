@@ -24,7 +24,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    __initial_msp         /* Top of Stack */
+    .long    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit   /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
     .long    NMI_Handler           /* NMI Handler */
     .long    HardFault_Handler     /* Hard Fault Handler */
@@ -252,7 +252,7 @@ Reset_Handler:
     orr     r0, r0, #1     /* Select switch to unprivilage mode */
     orr     r0, r0, #2     /* Select switch to PSP */
     msr     control, r0
-    ldr     r0, =__initial_sp
+    ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
     msr     psp, r0
 
 #ifndef __START

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2016 ARM Limited
+; * Copyright (c) 2016-2018 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -25,22 +25,7 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Stack_Size      EQU     0x00001000
-MSP_STACK_SIZE  EQU     0x00000400
-
-                AREA    STACK, NOINIT, READWRITE, ALIGN=3
-Stack_Mem       SPACE   Stack_Size
-__initial_msp
-
-__initial_sp	EQU     __initial_msp - MSP_STACK_SIZE
-
-
-Heap_Size       EQU     0x00001000
-
-                AREA    HEAP, NOINIT, READWRITE, ALIGN=3
-__heap_base
-Heap_Mem        SPACE   Heap_Size
-__heap_limit
+                IMPORT |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|
 
 ; Vector Table Mapped to Address 0 at Reset
 
@@ -49,7 +34,7 @@ __heap_limit
                 EXPORT  __Vectors_End
                 EXPORT  __Vectors_Size
 
-__Vectors       DCD     __initial_msp             ; Top of Stack
+__Vectors       DCD     |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|  ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     NMI_Handler               ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler
@@ -178,7 +163,7 @@ Reset_Handler   PROC
                 IMPORT  __main
                 MRS     R0, control    ; Get control value
                 ORR     R0, R0, #1     ; Select switch to unprivilage mode
-                ORR     R0, R0, #2     ; Select switch to PSP, which will be set by __user_initial_stackheap
+                ORR     R0, R0, #2     ; Select switch to PSP
                 MSR     control, R0
                 LDR     R0, =__main
                 BX      R0
@@ -380,34 +365,6 @@ GPIO1_7_Handler           ; 95
 
                 ENDP
 
-
                 ALIGN
-
-
-; User Initial Stack & Heap
-
-                IF      :DEF:__MICROLIB
-
-                EXPORT  __initial_sp
-                EXPORT  __heap_base
-                EXPORT  __heap_limit
-
-                ELSE
-
-                IMPORT  __use_two_region_memory
-                EXPORT  __user_initial_stackheap
-
-__user_initial_stackheap PROC
-                LDR     R0, =  Heap_Mem
-                LDR     R1, = __initial_sp
-                LDR     R2, = (Heap_Mem +  Heap_Size)
-                LDR     R3, = Stack_Mem
-                BX      LR
-                ENDP
-
-                ALIGN
-
-                ENDIF
-
 
                 END

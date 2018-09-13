@@ -137,4 +137,15 @@
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
 #define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 
+/* FIXME: Use SRAM2 memory to store RW data */
+#define S_RAM_ALIAS_BASE  (0x30000000)
+#define NS_RAM_ALIAS_BASE (0x20000000)
+
+/* Shared data area between bootloader and runtime firmware.
+ * Shared data area is allocated at the beginning of the RAM, it is overlapping
+ * with TF-M Secure code's MSP stack
+ */
+#define BOOT_TFM_SHARED_DATA_BASE S_RAM_ALIAS_BASE
+#define BOOT_TFM_SHARED_DATA_SIZE 0x400
+
 #endif /* __FLASH_LAYOUT_H__ */

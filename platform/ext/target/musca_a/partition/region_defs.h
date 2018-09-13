@@ -22,6 +22,18 @@
 #define TOTAL_ROM_SIZE (0x00200000) /* 2 MB */
 #define TOTAL_RAM_SIZE (0x00020000) /* 128KB */
 
+#define BL2_HEAP_SIZE           0x0001000
+#define BL2_MSP_STACK_SIZE      0x0001000
+
+#define S_HEAP_SIZE             0x0001000
+#define S_MSP_STACK_SIZE_INIT   0x0000400
+#define S_MSP_STACK_SIZE        0x0000800
+#define S_PSP_STACK_SIZE        0x0000800
+
+#define NS_HEAP_SIZE            0x0001000
+#define NS_MSP_STACK_SIZE       0x0000400
+#define NS_PSP_STACK_SIZE       0x0000C00
+
 /*
  * MPC granularity is 128 KB on Musca. Alignment
  * of partitions is defined in accordance with this constraint.
