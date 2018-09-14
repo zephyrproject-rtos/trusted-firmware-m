@@ -54,67 +54,61 @@ static void tfm_sst_test_2010(struct test_result_t *ret);
 static void tfm_sst_test_2011(struct test_result_t *ret);
 static void tfm_sst_test_2012(struct test_result_t *ret);
 static void tfm_sst_test_2013(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_2014(struct test_result_t *ret);
 static void tfm_sst_test_2015(struct test_result_t *ret);
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_2016(struct test_result_t *ret);
+#endif
 static void tfm_sst_test_2017(struct test_result_t *ret);
 static void tfm_sst_test_2018(struct test_result_t *ret);
-#endif
 static void tfm_sst_test_2019(struct test_result_t *ret);
-static void tfm_sst_test_2020(struct test_result_t *ret);
-static void tfm_sst_test_2021(struct test_result_t *ret);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-static void tfm_sst_test_2022(struct test_result_t *ret);
+static void tfm_sst_test_2020(struct test_result_t *ret);
 #endif
 
 static struct test_t write_tests[] = {
     {&tfm_sst_test_2001, "TFM_SST_TEST_2001",
      "Create interface", {0} },
     {&tfm_sst_test_2002, "TFM_SST_TEST_2002",
-     "Get handle interface (DEPRECATED)", {0} },
-    {&tfm_sst_test_2003, "TFM_SST_TEST_2003",
-     "Get handle with null handle pointer (DEPRECATED)", {0} },
-    {&tfm_sst_test_2004, "TFM_SST_TEST_2004",
      "Get information interface", {0} },
-    {&tfm_sst_test_2005, "TFM_SST_TEST_2005",
+    {&tfm_sst_test_2003, "TFM_SST_TEST_2003",
      "Get information with null attributes struct pointer", {0} },
-    {&tfm_sst_test_2006, "TFM_SST_TEST_2006",
+    {&tfm_sst_test_2004, "TFM_SST_TEST_2004",
      "Write interface", {0} },
-    {&tfm_sst_test_2007, "TFM_SST_TEST_2007",
+    {&tfm_sst_test_2005, "TFM_SST_TEST_2005",
      "Write with null buffer pointers", {0} },
-    {&tfm_sst_test_2008, "TFM_SST_TEST_2008",
+    {&tfm_sst_test_2006, "TFM_SST_TEST_2006",
      "Write beyond end of asset", {0} },
-    {&tfm_sst_test_2009, "TFM_SST_TEST_2009",
+    {&tfm_sst_test_2007, "TFM_SST_TEST_2007",
      "Read interface", {0} },
-    {&tfm_sst_test_2010, "TFM_SST_TEST_2010",
+    {&tfm_sst_test_2008, "TFM_SST_TEST_2008",
      "Read with null buffer pointers", {0} },
-    {&tfm_sst_test_2011, "TFM_SST_TEST_2011",
+    {&tfm_sst_test_2009, "TFM_SST_TEST_2009",
      "Read beyond current size of asset", {0} },
-    {&tfm_sst_test_2012, "TFM_SST_TEST_2012",
+    {&tfm_sst_test_2010, "TFM_SST_TEST_2010",
      "Delete interface", {0} },
-    {&tfm_sst_test_2013, "TFM_SST_TEST_2013",
+    {&tfm_sst_test_2011, "TFM_SST_TEST_2011",
      "Write and partial reads", {0} },
-    {&tfm_sst_test_2014, "TFM_SST_TEST_2014",
+    {&tfm_sst_test_2012, "TFM_SST_TEST_2012",
      "Write partial data in an asset and reload secure storage area", {0} },
-    {&tfm_sst_test_2015, "TFM_SST_TEST_2015",
+    {&tfm_sst_test_2013, "TFM_SST_TEST_2013",
      "Write more data than asset max size", {0} },
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-    {&tfm_sst_test_2016, "TFM_SST_TEST_2016",
+    {&tfm_sst_test_2014, "TFM_SST_TEST_2014",
      "Append data to an asset", {0} },
-    {&tfm_sst_test_2017, "TFM_SST_TEST_2017",
+    {&tfm_sst_test_2015, "TFM_SST_TEST_2015",
      "Append data to an asset until EOF", {0} },
-    {&tfm_sst_test_2018, "TFM_SST_TEST_2018",
+    {&tfm_sst_test_2016, "TFM_SST_TEST_2016",
      "Write data to two assets alternately", {0} },
 #endif
-    {&tfm_sst_test_2019, "TFM_SST_TEST_2019",
+    {&tfm_sst_test_2017, "TFM_SST_TEST_2017",
      "Access an illegal location: ROM", {0} },
-    {&tfm_sst_test_2020, "TFM_SST_TEST_2020",
+    {&tfm_sst_test_2018, "TFM_SST_TEST_2018",
      "Access an illegal location: device memory", {0} },
-    {&tfm_sst_test_2021, "TFM_SST_TEST_2021",
+    {&tfm_sst_test_2019, "TFM_SST_TEST_2019",
      "Access an illegal location: non-existant memory", {0} },
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-    {&tfm_sst_test_2022, "TFM_SST_TEST_2022",
+    {&tfm_sst_test_2020, "TFM_SST_TEST_2020",
      "Write data to the middle of an existing asset", {0} },
 #endif
 };
@@ -186,39 +180,13 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
 }
 
 /**
- * \brief Tests get handle function against:
- * - Valid asset ID and not created file
- * - Valid asset ID and created file
- * - Invalid client ID
- * - Invalid asset ID
- *
- * \note This test is deprecated and will be removed in next iterations.
- */
-static void tfm_sst_test_2002(struct test_result_t *ret)
-{
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Tests the get handle function with an invalid handle pointer.
- *
- * \note This test is deprecated and will be removed in next iterations.
- */
-static void tfm_sst_test_2003(struct test_result_t *ret)
-{
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
-}
-
-/**
  * \brief Tests get attributes function against:
  * - Valid client ID and attributes struct pointer
  * - Invalid client ID
  * - Invalid asset ID
  * - Invalid client ID
  */
-static void tfm_sst_test_2004(struct test_result_t *ret)
+static void tfm_sst_test_2002(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -287,7 +255,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
  * \brief Tests get attributes function with an invalid attributes struct
  *        pointer.
  */
-static void tfm_sst_test_2005(struct test_result_t *ret)
+static void tfm_sst_test_2003(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -322,7 +290,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
  * - Invalid asset ID
  * - Invalid client ID
  */
-static void tfm_sst_test_2006(struct test_result_t *ret)
+static void tfm_sst_test_2004(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -399,7 +367,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
  * \brief Tests write function with:
  * - Null write buffer pointer
  */
-static void tfm_sst_test_2007(struct test_result_t *ret)
+static void tfm_sst_test_2005(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -438,7 +406,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
  * \brief Tests write function with offset + write data size larger than max
  *        asset size.
  */
-static void tfm_sst_test_2008(struct test_result_t *ret)
+static void tfm_sst_test_2006(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -490,7 +458,7 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
  * - Invalid asset ID
  * - Invalid client ID
  */
-static void tfm_sst_test_2009(struct test_result_t *ret)
+static void tfm_sst_test_2007(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -581,7 +549,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
  * \brief Tests read function with:
  * - Null read buffer pointer
  */
-static void tfm_sst_test_2010(struct test_result_t *ret)
+static void tfm_sst_test_2008(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -619,7 +587,7 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
  * \brief Tests read function with offset + read data size larger than current
  *        asset size.
  */
-static void tfm_sst_test_2011(struct test_result_t *ret)
+static void tfm_sst_test_2009(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -702,7 +670,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
  * - Remove first asset in the data block and check if
  *   next asset's data is compacted correctly.
  */
-static void tfm_sst_test_2012(struct test_result_t *ret)
+static void tfm_sst_test_2010(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 =  SST_ASSET_ID_SHA224_HASH;
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
@@ -831,7 +799,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 /**
  * \brief Tests write and partial reads.
  */
-static void tfm_sst_test_2013(struct test_result_t *ret)
+static void tfm_sst_test_2011(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -919,7 +887,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
  *        The expected behaviour is to read back the data wrote
  *        before the seconds perpare call.
  */
-static void tfm_sst_test_2014(struct test_result_t *ret)
+static void tfm_sst_test_2012(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -996,7 +964,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum assert size.
  */
-static void tfm_sst_test_2015(struct test_result_t *ret)
+static void tfm_sst_test_2013(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1036,7 +1004,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes.
  */
-static void tfm_sst_test_2016(struct test_result_t *ret)
+static void tfm_sst_test_2014(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1111,7 +1079,7 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-static void tfm_sst_test_2017(struct test_result_t *ret)
+static void tfm_sst_test_2015(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1197,7 +1165,7 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
 /**
  * \brief Tests writing data to two assets alternately before read-back.
  */
-static void tfm_sst_test_2018(struct test_result_t *ret)
+static void tfm_sst_test_2016(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
@@ -1327,7 +1295,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 /**
  * \brief Tests read from and write to an illegal location: ROM.
  */
-static void tfm_sst_test_2019(struct test_result_t *ret)
+static void tfm_sst_test_2017(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1373,7 +1341,7 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
 /**
  * \brief Tests read from and write to an illegal location: device memory.
  */
-static void tfm_sst_test_2020(struct test_result_t *ret)
+static void tfm_sst_test_2018(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1419,7 +1387,7 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
 /**
  * \brief Tests read from and write to an illegal location: non-existant memory.
  */
-static void tfm_sst_test_2021(struct test_result_t *ret)
+static void tfm_sst_test_2019(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1466,7 +1434,7 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
 /**
  * \brief Writes data to the middle of an existing asset.
  */
-static void tfm_sst_test_2022(struct test_result_t *ret)
+static void tfm_sst_test_2020(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;

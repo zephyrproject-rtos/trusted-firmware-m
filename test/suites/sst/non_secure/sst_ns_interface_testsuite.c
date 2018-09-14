@@ -61,22 +61,19 @@ static void tfm_sst_test_1015(struct test_result_t *ret);
 static void tfm_sst_test_1016(struct test_result_t *ret);
 static void tfm_sst_test_1017(struct test_result_t *ret);
 static void tfm_sst_test_1018(struct test_result_t *ret);
+#ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1019(struct test_result_t *ret);
 static void tfm_sst_test_1020(struct test_result_t *ret);
 static void tfm_sst_test_1021(struct test_result_t *ret);
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+#endif
 static void tfm_sst_test_1022(struct test_result_t *ret);
 static void tfm_sst_test_1023(struct test_result_t *ret);
 static void tfm_sst_test_1024(struct test_result_t *ret);
-#endif
 static void tfm_sst_test_1025(struct test_result_t *ret);
-static void tfm_sst_test_1026(struct test_result_t *ret);
-static void tfm_sst_test_1027(struct test_result_t *ret);
-static void tfm_sst_test_1028(struct test_result_t *ret);
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-static void tfm_sst_test_1029(struct test_result_t *ret);
+static void tfm_sst_test_1026(struct test_result_t *ret);
 #endif
-static void tfm_sst_test_1030(struct test_result_t *ret);
+static void tfm_sst_test_1027(struct test_result_t *ret);
 
 static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -84,64 +81,58 @@ static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1002, "TFM_SST_TEST_1002",
      "Create with invalid thread name", {0} },
     {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
-     "Get handle interface (DEPRECATED)", {0} },
-    {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
-     "Get handle with invalid thread name (DEPRECATED)", {0} },
-    {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
-     "Get handle with null handle pointer (DEPRECATED)", {0} },
-    {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
      "Get attributes interface",  {0} },
-    {&tfm_sst_test_1007, "TFM_SST_TEST_1007",
+    {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
      "Get attributes with invalid thread name", {0} },
-    {&tfm_sst_test_1008, "TFM_SST_TEST_1008",
+    {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
      "Get attributes with null attributes struct pointer", {0} },
-    {&tfm_sst_test_1009, "TFM_SST_TEST_1009",
+    {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
      "Write interface", {0} },
-    {&tfm_sst_test_1010, "TFM_SST_TEST_1010",
+    {&tfm_sst_test_1007, "TFM_SST_TEST_1007",
      "Write with invalid thread name", {0} },
-    {&tfm_sst_test_1011, "TFM_SST_TEST_1011",
+    {&tfm_sst_test_1008, "TFM_SST_TEST_1008",
      "Write with null buffer pointers", {0} },
-    {&tfm_sst_test_1012, "TFM_SST_TEST_1012",
+    {&tfm_sst_test_1009, "TFM_SST_TEST_1009",
      "Write beyond end of asset", {0} },
-    {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
+    {&tfm_sst_test_1010, "TFM_SST_TEST_1010",
      "Read interface", {0} },
-    {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
+    {&tfm_sst_test_1011, "TFM_SST_TEST_1011",
      "Read with invalid thread name", {0} },
-    {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
+    {&tfm_sst_test_1012, "TFM_SST_TEST_1012",
      "Read with null buffer pointers", {0} },
-    {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
+    {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
      "Read beyond current size of asset", {0} },
-    {&tfm_sst_test_1017, "TFM_SST_TEST_1017",
+    {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
      "Delete interface", {0} },
-    {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
+    {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
      "Delete with invalid thread name", {0} },
-    {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
+    {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
      "Delete with block compaction", {0} },
-    {&tfm_sst_test_1020, "TFM_SST_TEST_1020",
+    {&tfm_sst_test_1017, "TFM_SST_TEST_1017",
      "Write and partial reads", {0} },
-    {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
+    {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
      "Write more data than asset max size", {0} },
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-    {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
+    {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
      "Append data to an asset", {0} },
-    {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
+    {&tfm_sst_test_1020, "TFM_SST_TEST_1020",
      "Append data to an asset until EOF", {0} },
-    {&tfm_sst_test_1024, "TFM_SST_TEST_1024",
+    {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
      "Write data to two assets alternately", {0} },
 #endif
-    {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
+    {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
      "Access an illegal location: ROM", {0} },
-    {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
+    {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
      "Access an illegal location: device memory", {0} },
-    {&tfm_sst_test_1027, "TFM_SST_TEST_1027",
+    {&tfm_sst_test_1024, "TFM_SST_TEST_1024",
      "Access an illegal location: non-existant memory", {0} },
-    {&tfm_sst_test_1028, "TFM_SST_TEST_1028",
+    {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
      "Access an illegal location: secure memory", {0} },
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
-    {&tfm_sst_test_1029, "TFM_SST_TEST_1029",
+    {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
      "Write data to the middle of an existing asset", {0} },
 #endif
-    {&tfm_sst_test_1030, "TFM_SST_TEST_1030",
+    {&tfm_sst_test_1027, "TFM_SST_TEST_1027",
      "Basic test to verify set and get attributes functionality", {0} },
 };
 
@@ -250,47 +241,11 @@ TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
 }
 
 /**
- * \brief Tests get handle function against:
- * - Valid asset ID and not created asset
- * - Valid asset ID and created asset
- * - Invalid asset ID
- *
- * \note This test is deprecated and will be removed in next iterations.
- */
-TFM_SST_NS_TEST(1003, "Thread_C")
-{
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Tests get handle function with an invalid thread name.
- *
- * \note This test is deprecated and will be removed in next iterations.
- */
-TFM_SST_NS_TEST(1004, "Thread_C")
-{
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Tests get handle function with a null handle pointer.
- *
- * \note This test is deprecated and will be removed in next iterations.
- */
-TFM_SST_NS_TEST(1005, "Thread_C")
-{
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
-}
-
-/**
  * \brief Tests get attributes function against:
  * - Valid client ID and attributes struct pointer
  * - Invalid client ID
  */
-TFM_SST_NS_TEST(1006, "Thread_C")
+TFM_SST_NS_TEST(1003, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -346,7 +301,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
 /**
  * \brief Creates asset with an authorised client ID.
  */
-static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1004_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -363,7 +318,7 @@ static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
 /**
  * \brief Calls get attributes function with an invalid thread name.
  */
-static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1004_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct psa_sst_asset_info_t asset_info;
@@ -382,7 +337,7 @@ static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
 /**
  * \brief Deletes asset to clean up the SST area for the next test.
  */
-static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1004_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -399,28 +354,28 @@ static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
 /**
  * \brief Tests get attributes function with an invalid thread name.
  */
-static void tfm_sst_test_1007(struct test_result_t *ret)
+static void tfm_sst_test_1004(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1007_task_1);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1004_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Calls get attributes function with an invalid thread name */
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1007_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1004_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1007_task_3);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1004_task_3);
 }
 
 /**
  * \brief Tests get attributes function with a null attributes struct pointer.
  */
-TFM_SST_NS_TEST(1008, "Thread_C")
+TFM_SST_NS_TEST(1005, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -455,7 +410,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
  * - Valid client ID and data pointer
  * - Invalid client ID
  */
-TFM_SST_NS_TEST(1009, "Thread_C")
+TFM_SST_NS_TEST(1006, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -520,7 +475,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
 /**
  * \brief Creates asset with an authorised client ID.
  */
-static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1007_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -537,7 +492,7 @@ static void tfm_sst_test_1010_task_1(struct test_result_t *ret)
 /**
  * \brief Calls write function with an invalid thread name.
  */
-static void tfm_sst_test_1010_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1007_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -556,7 +511,7 @@ static void tfm_sst_test_1010_task_2(struct test_result_t *ret)
 /**
  * \brief Deletes asset to clean up the SST area for the next test.
  */
-static void tfm_sst_test_1010_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -573,29 +528,29 @@ static void tfm_sst_test_1010_task_3(struct test_result_t *ret)
 /**
  * \brief Tests write function with an invalid thread name.
  */
-static void tfm_sst_test_1010(struct test_result_t *ret)
+static void tfm_sst_test_1007(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1010_task_1);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1007_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Calls write function with an invalid thread name */
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1010_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1007_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1010_task_3);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1007_task_3);
 }
 
 /**
  * \brief Tests read function with:
  * - Null write data pointer
  */
-TFM_SST_NS_TEST(1011, "Thread_C")
+TFM_SST_NS_TEST(1008, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -635,7 +590,7 @@ TFM_SST_NS_TEST(1011, "Thread_C")
  * \brief Tests write function with offset + write data size larger than max
  *        asset size.
  */
-TFM_SST_NS_TEST(1012, "Thread_C")
+TFM_SST_NS_TEST(1009, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -687,7 +642,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
  * - Valid client ID and data pointer
  * - Invalid asset ID
  */
-TFM_SST_NS_TEST(1013, "Thread_C")
+TFM_SST_NS_TEST(1010, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -766,7 +721,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
 /**
  * \brief Creates asset with an authorised client ID.
  */
-static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1011_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -783,7 +738,7 @@ static void tfm_sst_test_1014_task_1(struct test_result_t *ret)
 /**
  * \brief Calls read function with an invalid thread name.
  */
-static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1011_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -808,7 +763,7 @@ static void tfm_sst_test_1014_task_2(struct test_result_t *ret)
 /**
  * \brief Deletes asset to clean up the SST area for the next test.
  */
-static void tfm_sst_test_1014_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1011_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -825,29 +780,29 @@ static void tfm_sst_test_1014_task_3(struct test_result_t *ret)
 /**
  * \brief Tests read function with an invalid thread name.
  */
-static void tfm_sst_test_1014(struct test_result_t *ret)
+static void tfm_sst_test_1011(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1014_task_1);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1011_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Calls read function with an invalid thread name */
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1014_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1011_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1014_task_3);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1011_task_3);
 }
 
 /**
  * \brief Tests read function with:
  * - Null read data pointer
  */
-TFM_SST_NS_TEST(1015, "Thread_C")
+TFM_SST_NS_TEST(1012, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -886,7 +841,7 @@ TFM_SST_NS_TEST(1015, "Thread_C")
  * \brief Tests read function with offset + read data size larger than current
  *        asset size.
  */
-TFM_SST_NS_TEST(1016, "Thread_C")
+TFM_SST_NS_TEST(1013, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -960,7 +915,7 @@ TFM_SST_NS_TEST(1016, "Thread_C")
  * - Valid client ID
  * - Invalid asset ID
  */
-TFM_SST_NS_TEST(1017, "Thread_B")
+TFM_SST_NS_TEST(1014, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1000,7 +955,7 @@ TFM_SST_NS_TEST(1017, "Thread_B")
 /**
  * \brief Creates asset with an authorised client ID.
  */
-static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1015_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1017,7 +972,7 @@ static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 /**
  * \brief Calls delete function with an invalid thread name.
  */
-static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1015_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1034,7 +989,7 @@ static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
 /**
  * \brief Deletes asset to clean up the SST area for the next test.
  */
-static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1015_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1051,22 +1006,22 @@ static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
 /**
  * \brief Tests delete function with an invalid thread name.
  */
-static void tfm_sst_test_1018(struct test_result_t *ret)
+static void tfm_sst_test_1015(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1018_task_1);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1015_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Calls delete function with an invalid thread name */
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1018_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1015_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1018_task_3);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1015_task_3);
 }
 
 /**
@@ -1076,7 +1031,7 @@ static void tfm_sst_test_1018(struct test_result_t *ret)
  *        1 and remove asset 2. If delete works correctly, when the code
  *        reads back the asset 1 data, the data must be correct.
  */
-static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum psa_sst_err_t err;
@@ -1091,7 +1046,7 @@ static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     struct sst_test_buf_t io_data;
@@ -1121,7 +1076,7 @@ static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA384_HASH;
     enum psa_sst_err_t err;
@@ -1138,7 +1093,7 @@ static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_4(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1176,30 +1131,30 @@ static void tfm_sst_test_1019_task_4(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1019(struct test_result_t *ret)
+static void tfm_sst_test_1016(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1019_task_1);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1016_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1019_task_2);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1016_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1019_task_3);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1016_task_3);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1019_task_4);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1016_task_4);
 }
 
 /**
  * \brief Tests write and partial reads.
  */
-TFM_SST_NS_TEST(1020, "Thread_C")
+TFM_SST_NS_TEST(1017, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1290,7 +1245,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum asset size.
  */
-TFM_SST_NS_TEST(1021, "Thread_B")
+TFM_SST_NS_TEST(1018, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1331,7 +1286,7 @@ TFM_SST_NS_TEST(1021, "Thread_B")
 /**
  * \brief Tests write function against multiple writes.
  */
-TFM_SST_NS_TEST(1022, "Thread_B")
+TFM_SST_NS_TEST(1019, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1404,7 +1359,7 @@ TFM_SST_NS_TEST(1022, "Thread_B")
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-TFM_SST_NS_TEST(1023, "Thread_B")
+TFM_SST_NS_TEST(1020, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1491,7 +1446,7 @@ TFM_SST_NS_TEST(1023, "Thread_B")
 /**
  * \brief Tests writing data to two assets alternately before read-back.
  */
-static void tfm_sst_test_1024_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_1(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1506,7 +1461,7 @@ static void tfm_sst_test_1024_task_1(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_2(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1521,7 +1476,7 @@ static void tfm_sst_test_1024_task_2(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_3(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1544,7 +1499,7 @@ static void tfm_sst_test_1024_task_3(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_4(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1567,7 +1522,7 @@ static void tfm_sst_test_1024_task_4(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_5(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1590,7 +1545,7 @@ static void tfm_sst_test_1024_task_5(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_6(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1613,7 +1568,7 @@ static void tfm_sst_test_1024_task_6(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_7(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1642,7 +1597,7 @@ static void tfm_sst_test_1024_task_7(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_8(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_2 = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1677,7 +1632,7 @@ static void tfm_sst_test_1024_task_8(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024_task_9(struct test_result_t *ret)
+static void tfm_sst_test_1021_task_9(struct test_result_t *ret)
 {
     const uint32_t asset_uuid_1 = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1692,56 +1647,56 @@ static void tfm_sst_test_1024_task_9(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_sst_test_1024(struct test_result_t *ret)
+static void tfm_sst_test_1021(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_1);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1024_task_2);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1021_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_3);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_3);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1024_task_4);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1021_task_4);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_5);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_5);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1024_task_6);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1021_task_6);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_7);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_7);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1024_task_8);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1021_task_8);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1024_task_9);
+    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_9);
 }
 #endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**
  * \brief Tests read from and write to an illegal location: ROM.
  */
-TFM_SST_NS_TEST(1025, "Thread_B")
+TFM_SST_NS_TEST(1022, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1788,7 +1743,7 @@ TFM_SST_NS_TEST(1025, "Thread_B")
 /**
  * \brief Tests read from and write to an illegal location: device memory.
  */
-TFM_SST_NS_TEST(1026, "Thread_B")
+TFM_SST_NS_TEST(1023, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1835,7 +1790,7 @@ TFM_SST_NS_TEST(1026, "Thread_B")
 /**
  * \brief Tests read from and write to an illegal location: non-existant memory.
  */
-TFM_SST_NS_TEST(1027, "Thread_B")
+TFM_SST_NS_TEST(1024, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1882,7 +1837,7 @@ TFM_SST_NS_TEST(1027, "Thread_B")
 /**
  * \brief Tests read from and write to an illegal location: secure memory.
  */
-TFM_SST_NS_TEST(1028, "Thread_B")
+TFM_SST_NS_TEST(1025, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     enum psa_sst_err_t err;
@@ -1930,7 +1885,7 @@ TFM_SST_NS_TEST(1028, "Thread_B")
 /**
  * \brief Tests write data to the middle of an existing asset
  */
-TFM_SST_NS_TEST(1029, "Thread_C")
+TFM_SST_NS_TEST(1026, "Thread_C")
 {
     struct psa_sst_asset_info_t asset_info;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
@@ -2039,7 +1994,7 @@ TFM_SST_NS_TEST(1029, "Thread_C")
 /**
  * \brief Basic test to verify set and get attributes functionality.
  */
-TFM_SST_NS_TEST(1030, "Thread_B")
+TFM_SST_NS_TEST(1027, "Thread_B")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct psa_sst_asset_attrs_t wrt_attrs;
