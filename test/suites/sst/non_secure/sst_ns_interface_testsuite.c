@@ -164,9 +164,9 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  *
  *   THREAD NAME | CLIENT_ID       | Permissions
  *   ------------|-----------------|--------------------
- *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE, READ, WRITE
  *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ
- *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE
  *
  * Asset permissions: SST_ASSET_ID_SHA224_HASH
  *
@@ -180,9 +180,9 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  *
  *   THREAD NAME | CLIENT_ID       | Permissions
  *   ------------|-----------------|--------------
- *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE, WRITE
  *     Thread_B  | SST_CLIENT_ID_1 | NONE
- *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | NONE
  */
 
 /**
@@ -190,7 +190,7 @@ void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite)
  * - Valid client ID and asset ID
  * - Invalid asset ID
  */
-TFM_SST_NS_TEST(1001, "Thread_C")
+TFM_SST_NS_TEST(1001, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -198,7 +198,7 @@ TFM_SST_NS_TEST(1001, "Thread_C")
     /* Checks write permissions in create function */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -249,7 +249,7 @@ TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
  * - Valid client ID and attributes struct pointer
  * - Invalid client ID
  */
-TFM_SST_NS_TEST(1003, "Thread_C")
+TFM_SST_NS_TEST(1003, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -258,7 +258,7 @@ TFM_SST_NS_TEST(1003, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -268,7 +268,7 @@ TFM_SST_NS_TEST(1003, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the information of this asset");
+        TEST_FAIL("Thread_A should read the information of this asset");
         return;
     }
 
@@ -361,7 +361,7 @@ static void tfm_sst_test_1004_task_3(struct test_result_t *ret)
 static void tfm_sst_test_1004(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1004_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1004_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -373,13 +373,13 @@ static void tfm_sst_test_1004(struct test_result_t *ret)
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1004_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1004_task_3);
 }
 
 /**
  * \brief Tests get attributes function with a null attributes struct pointer.
  */
-TFM_SST_NS_TEST(1005, "Thread_C")
+TFM_SST_NS_TEST(1005, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -387,7 +387,7 @@ TFM_SST_NS_TEST(1005, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -414,7 +414,7 @@ TFM_SST_NS_TEST(1005, "Thread_C")
  * - Valid client ID and data pointer
  * - Invalid client ID
  */
-TFM_SST_NS_TEST(1006, "Thread_C")
+TFM_SST_NS_TEST(1006, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -425,7 +425,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -448,7 +448,7 @@ TFM_SST_NS_TEST(1006, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the information of this asset");
+        TEST_FAIL("Thread_A should read the information of this asset");
         return;
     }
 
@@ -535,7 +535,7 @@ static void tfm_sst_test_1007_task_3(struct test_result_t *ret)
 static void tfm_sst_test_1007(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1007_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1007_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -547,14 +547,14 @@ static void tfm_sst_test_1007(struct test_result_t *ret)
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1007_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1007_task_3);
 }
 
 /**
  * \brief Tests read function with:
  * - Null write data pointer
  */
-TFM_SST_NS_TEST(1008, "Thread_C")
+TFM_SST_NS_TEST(1008, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -563,7 +563,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -594,7 +594,7 @@ TFM_SST_NS_TEST(1008, "Thread_C")
  * \brief Tests write function with offset + write data size larger than max
  *        asset size.
  */
-TFM_SST_NS_TEST(1009, "Thread_C")
+TFM_SST_NS_TEST(1009, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -604,7 +604,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -646,7 +646,7 @@ TFM_SST_NS_TEST(1009, "Thread_C")
  * - Valid client ID and data pointer
  * - Invalid asset ID
  */
-TFM_SST_NS_TEST(1010, "Thread_C")
+TFM_SST_NS_TEST(1010, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -657,7 +657,7 @@ TFM_SST_NS_TEST(1010, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -787,7 +787,7 @@ static void tfm_sst_test_1011_task_3(struct test_result_t *ret)
 static void tfm_sst_test_1011(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1011_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1011_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -799,14 +799,14 @@ static void tfm_sst_test_1011(struct test_result_t *ret)
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1011_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1011_task_3);
 }
 
 /**
  * \brief Tests read function with:
  * - Null read data pointer
  */
-TFM_SST_NS_TEST(1012, "Thread_C")
+TFM_SST_NS_TEST(1012, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -815,7 +815,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -845,7 +845,7 @@ TFM_SST_NS_TEST(1012, "Thread_C")
  * \brief Tests read function with offset + read data size larger than current
  *        asset size.
  */
-TFM_SST_NS_TEST(1013, "Thread_C")
+TFM_SST_NS_TEST(1013, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -857,7 +857,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -878,7 +878,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the information of this asset");
+        TEST_FAIL("Thread_A should read the information of this asset");
         return;
     }
 
@@ -919,7 +919,7 @@ TFM_SST_NS_TEST(1013, "Thread_C")
  * - Valid client ID
  * - Invalid asset ID
  */
-TFM_SST_NS_TEST(1014, "Thread_C")
+TFM_SST_NS_TEST(1014, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -927,7 +927,7 @@ TFM_SST_NS_TEST(1014, "Thread_C")
     /* Creates assset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1013,7 +1013,7 @@ static void tfm_sst_test_1015_task_3(struct test_result_t *ret)
 static void tfm_sst_test_1015(struct test_result_t *ret)
 {
     /* Creates asset with an authorised client ID */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1015_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1015_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1025,7 +1025,7 @@ static void tfm_sst_test_1015(struct test_result_t *ret)
     }
 
     /* Deletes asset to clean up the SST area for the next test */
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1015_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1015_task_3);
 }
 
 /**
@@ -1043,7 +1043,7 @@ static void tfm_sst_test_1016_task_1(struct test_result_t *ret)
     /* Creates asset 2 first to locate it at the beginning of the data block */
     err = psa_sst_create(asset_uuid_2, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1137,7 +1137,7 @@ static void tfm_sst_test_1016_task_4(struct test_result_t *ret)
 
 static void tfm_sst_test_1016(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1016_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1016_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1147,7 +1147,7 @@ static void tfm_sst_test_1016(struct test_result_t *ret)
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1016_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1016_task_3);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1158,7 +1158,7 @@ static void tfm_sst_test_1016(struct test_result_t *ret)
 /**
  * \brief Tests write and partial reads.
  */
-TFM_SST_NS_TEST(1017, "Thread_C")
+TFM_SST_NS_TEST(1017, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1170,7 +1170,7 @@ TFM_SST_NS_TEST(1017, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1249,7 +1249,7 @@ TFM_SST_NS_TEST(1017, "Thread_C")
  * \brief Tests write function against a write call where data size is
  *        bigger than the maximum asset size.
  */
-TFM_SST_NS_TEST(1018, "Thread_C")
+TFM_SST_NS_TEST(1018, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1290,7 +1290,7 @@ TFM_SST_NS_TEST(1018, "Thread_C")
 /**
  * \brief Tests write function against multiple writes.
  */
-TFM_SST_NS_TEST(1019, "Thread_C")
+TFM_SST_NS_TEST(1019, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1302,7 +1302,7 @@ TFM_SST_NS_TEST(1019, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1363,7 +1363,7 @@ TFM_SST_NS_TEST(1019, "Thread_C")
 /**
  * \brief Tests write function against multiple writes until the end of asset.
  */
-TFM_SST_NS_TEST(1020, "Thread_C")
+TFM_SST_NS_TEST(1020, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1375,7 +1375,7 @@ TFM_SST_NS_TEST(1020, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1458,7 +1458,7 @@ static void tfm_sst_test_1021_task_1(struct test_result_t *ret)
     /* Creates asset 1 */
     err = psa_sst_create(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1496,7 +1496,7 @@ static void tfm_sst_test_1021_task_3(struct test_result_t *ret)
     err = psa_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         io_data.size, io_data.offset, io_data.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write data should work for Thread_C");
+        TEST_FAIL("Write data should work for Thread_A");
         return;
     }
 
@@ -1542,7 +1542,7 @@ static void tfm_sst_test_1021_task_5(struct test_result_t *ret)
     err = psa_sst_write(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         io_data.size, io_data.offset, io_data.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write data should work for Thread_C");
+        TEST_FAIL("Write data should work for Thread_A");
         return;
     }
 
@@ -1589,7 +1589,7 @@ static void tfm_sst_test_1021_task_7(struct test_result_t *ret)
     err = psa_sst_read(asset_uuid_1, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        io_data.size, io_data.offset, io_data.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Read should not fail for Thread_C");
+        TEST_FAIL("Read should not fail for Thread_A");
         return;
     }
 
@@ -1653,7 +1653,7 @@ static void tfm_sst_test_1021_task_9(struct test_result_t *ret)
 
 static void tfm_sst_test_1021(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1663,7 +1663,7 @@ static void tfm_sst_test_1021(struct test_result_t *ret)
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_3);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1673,7 +1673,7 @@ static void tfm_sst_test_1021(struct test_result_t *ret)
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_5);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_5);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1683,7 +1683,7 @@ static void tfm_sst_test_1021(struct test_result_t *ret)
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_7);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_7);
     if (ret->val != TEST_PASSED) {
         return;
     }
@@ -1693,14 +1693,14 @@ static void tfm_sst_test_1021(struct test_result_t *ret)
         return;
     }
 
-    tfm_sst_run_test("Thread_C", ret, tfm_sst_test_1021_task_9);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_9);
 }
 #endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**
  * \brief Tests read from and write to an illegal location: ROM.
  */
-TFM_SST_NS_TEST(1022, "Thread_C")
+TFM_SST_NS_TEST(1022, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1709,7 +1709,7 @@ TFM_SST_NS_TEST(1022, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1747,7 +1747,7 @@ TFM_SST_NS_TEST(1022, "Thread_C")
 /**
  * \brief Tests read from and write to an illegal location: device memory.
  */
-TFM_SST_NS_TEST(1023, "Thread_C")
+TFM_SST_NS_TEST(1023, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1756,7 +1756,7 @@ TFM_SST_NS_TEST(1023, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1794,7 +1794,7 @@ TFM_SST_NS_TEST(1023, "Thread_C")
 /**
  * \brief Tests read from and write to an illegal location: non-existant memory.
  */
-TFM_SST_NS_TEST(1024, "Thread_C")
+TFM_SST_NS_TEST(1024, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1803,7 +1803,7 @@ TFM_SST_NS_TEST(1024, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1841,7 +1841,7 @@ TFM_SST_NS_TEST(1024, "Thread_C")
 /**
  * \brief Tests read from and write to an illegal location: secure memory.
  */
-TFM_SST_NS_TEST(1025, "Thread_C")
+TFM_SST_NS_TEST(1025, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
@@ -1850,7 +1850,7 @@ TFM_SST_NS_TEST(1025, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1889,7 +1889,7 @@ TFM_SST_NS_TEST(1025, "Thread_C")
 /**
  * \brief Tests write data to the middle of an existing asset
  */
-TFM_SST_NS_TEST(1026, "Thread_C")
+TFM_SST_NS_TEST(1026, "Thread_A")
 {
     struct psa_sst_asset_info_t asset_info;
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
@@ -1902,7 +1902,7 @@ TFM_SST_NS_TEST(1026, "Thread_C")
     /* Creates asset */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -1922,7 +1922,7 @@ TFM_SST_NS_TEST(1026, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the information of this asset");
+        TEST_FAIL("Thread_A should read the information of this asset");
         return;
     }
 
@@ -1948,7 +1948,7 @@ TFM_SST_NS_TEST(1026, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Thread_C should read the information of this asset");
+        TEST_FAIL("Thread_A should read the information of this asset");
         return;
     }
 
@@ -1998,7 +1998,7 @@ TFM_SST_NS_TEST(1026, "Thread_C")
 /**
  * \brief Basic test to verify set and get attributes functionality.
  */
-TFM_SST_NS_TEST(1027, "Thread_C")
+TFM_SST_NS_TEST(1027, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_attrs_t wrt_attrs;

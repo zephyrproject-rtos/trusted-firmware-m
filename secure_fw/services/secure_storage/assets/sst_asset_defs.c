@@ -96,18 +96,18 @@ const struct sst_asset_perm_t asset_perms_modes[] = {
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
 /* The following asset permissions are used by the SST testsuite */
-    .client_id = SST_CLIENT_ID_0,
+    .client_id = SST_CLIENT_ID_2,
     .perm = SST_PERM_REFERENCE,
 }, {
     .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ,
 }, {
-    .client_id = SST_CLIENT_ID_2,
+    .client_id = SST_CLIENT_ID_0,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
     .client_id = SST_CLIENT_ID_1,
     .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
 }, {
-    .client_id = SST_CLIENT_ID_2,
+    .client_id = SST_CLIENT_ID_0,
     .perm = SST_PERM_REFERENCE | SST_PERM_WRITE,
 }, };

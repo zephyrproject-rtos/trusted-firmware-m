@@ -51,7 +51,7 @@ void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite)
  *
  *   THREAD NAME | CLIENT_ID       | Permissions
  *   ------------|-----------------|--------------------
- *     Thread_C  | SST_CLIENT_ID_2 | NONE
+ *     Thread_A  | SST_CLIENT_ID_0 | NONE
  *     Thread_D  | SST_CLIENT_ID_3 | REFERENCE
  *
  */
@@ -110,7 +110,7 @@ TFM_SST_NS_TEST(5002, "Thread_D")
 /**
  * \brief Test SST referenced access with incorrect permissions
  */
-TFM_SST_NS_TEST(5003, "Thread_C")
+TFM_SST_NS_TEST(5003, "Thread_A")
 {
     enum psa_sst_err_t err;
     uint16_t key_uuid = SST_ASSET_ID_AES_KEY_128;
@@ -118,13 +118,13 @@ TFM_SST_NS_TEST(5003, "Thread_C")
 
     err = sst_test_service_dummy_encrypt(key_uuid, buf, BUF_SIZE);
     if (err == PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Encryption should not be successful for Thread_C");
+        TEST_FAIL("Encryption should not be successful for Thread_A");
         return;
     }
 
     err = sst_test_service_dummy_decrypt(key_uuid, buf, BUF_SIZE);
     if (err == PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Decryption should not be successful for Thread_C");
+        TEST_FAIL("Decryption should not be successful for Thread_A");
         return;
     }
 

@@ -37,9 +37,9 @@
  *
  *   THREAD NAME | CLIENT_ID       | Permissions
  *   ------------|-----------------|-----------------
- *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE, READ, WRITE
  *     Thread_B  | SST_CLIENT_ID_1 | REFERENCE, READ
- *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE
  *
  * Asset permissions: SST_ASSET_ID_SHA224_HASH
  *
@@ -53,9 +53,9 @@
  *
  *   THREAD NAME | CLIENT_ID       | Permissions
  *   ------------|-----------------|-----------
- *     Thread_A  | SST_CLIENT_ID_0 | NONE
+ *     Thread_A  | SST_CLIENT_ID_0 | REFERENCE, WRITE
  *     Thread_B  | SST_CLIENT_ID_1 | NONE
- *     Thread_C  | SST_CLIENT_ID_2 | REFERENCE, WRITE
+ *     Thread_C  | SST_CLIENT_ID_2 | NONE
  */
 
 /* Test suite defines */
@@ -91,25 +91,25 @@ static void tfm_sst_test_4010(struct test_result_t *ret);
 
 static struct test_t policy_tests[] = {
     { &tfm_sst_test_4001, "TFM_SST_TEST_4001",
-      "Check policy for AES_KEY_192 from Thread_C", {0} },
-    { &tfm_sst_test_4002, "TFM_SST_TEST_4002",
       "Check policy for AES_KEY_192 from Thread_A", {0} },
+    { &tfm_sst_test_4002, "TFM_SST_TEST_4002",
+      "Check policy for AES_KEY_192 from Thread_C", {0} },
     { &tfm_sst_test_4003, "TFM_SST_TEST_4003",
       "Check policy for AES_KEY_192 from Thread_B", {0} },
     { &tfm_sst_test_4004, "TFM_SST_TEST_4004",
-      "Delete AES_KEY_192 from Thread_C", {0} },
+      "Delete AES_KEY_192 from Thread_A", {0} },
     { &tfm_sst_test_4005, "TFM_SST_TEST_4005",
       "Check policy for SHA224_HASH from Thread_B", {0} },
     { &tfm_sst_test_4006, "TFM_SST_TEST_4006",
-      "Check policy for SHA224_HASH from Thread_A",  {0} },
+      "Check policy for SHA224_HASH from Thread_C",  {0} },
     { &tfm_sst_test_4007, "TFM_SST_TEST_4007",
       "Delete SHA224_HASH from Thread_B", {0} },
     { &tfm_sst_test_4008, "TFM_SST_TEST_4008",
-      "Check policy for SHA384_HASH from Thread_C", {0} },
-    { &tfm_sst_test_4009, "TFM_SST_TEST_4009",
       "Check policy for SHA384_HASH from Thread_A", {0} },
+    { &tfm_sst_test_4009, "TFM_SST_TEST_4009",
+      "Check policy for SHA384_HASH from Thread_C", {0} },
     { &tfm_sst_test_4010, "TFM_SST_TEST_4010",
-      "Delete SHA384_HASH from Thread_C", {0} },
+      "Delete SHA384_HASH from Thread_A", {0} },
 };
 
 void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
@@ -125,9 +125,9 @@ void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite)
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|-----------------------
- *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
+ *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE, READ, WRITE
  */
-TFM_SST_NS_TEST(4001, "Thread_C")
+TFM_SST_NS_TEST(4001, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -139,7 +139,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     /* The create function requires WRITE permission */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -152,7 +152,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should not fail for Thread_C");
+        TEST_FAIL("Write should not fail for Thread_A");
         return;
     }
 
@@ -165,7 +165,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Read should not fail for Thread_C");
+        TEST_FAIL("Read should not fail for Thread_A");
         return;
     }
 
@@ -179,7 +179,7 @@ TFM_SST_NS_TEST(4001, "Thread_C")
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get information should not fail for Thread_C");
+        TEST_FAIL("Get information should not fail for Thread_A");
         return;
     }
 
@@ -202,9 +202,9 @@ TFM_SST_NS_TEST(4001, "Thread_C")
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|------------
- *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE
+ *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE
  */
-TFM_SST_NS_TEST(4002, "Thread_A")
+TFM_SST_NS_TEST(4002, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -213,10 +213,10 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
-    /* Create should fail as Thread_A does not have WRITE permission */
+    /* Create should fail as Thread_C does not have WRITE permission */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Create should not succeed for Thread_A");
+        TEST_FAIL("Create should not succeed for Thread_C");
         return;
     }
 
@@ -226,11 +226,11 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     /* Increases offset so that current size will change if write succeeds */
     buf.offset = 1;
 
-    /* Write should fail as Thread_A does not have WRITE permission */
+    /* Write should fail as Thread_C does not have WRITE permission */
     err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Write should not succeed for Thread_A");
+        TEST_FAIL("Write should not succeed for Thread_C");
         return;
     }
 
@@ -239,11 +239,11 @@ TFM_SST_NS_TEST(4002, "Thread_A")
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* Read should fail as Thread_A does not have READ permission */
+    /* Read should fail as Thread_C does not have READ permission */
     err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read should not succeed for Thread_A");
+        TEST_FAIL("Read should not succeed for Thread_C");
         return;
     }
 
@@ -253,11 +253,11 @@ TFM_SST_NS_TEST(4002, "Thread_A")
         return;
     }
 
-    /* Get information should succeed as Thread_A has at least one permission */
+    /* Get information should succeed as Thread_C has at least one permission */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get information should not fail for Thread_A");
+        TEST_FAIL("Get information should not fail for Thread_C");
         return;
     }
 
@@ -272,10 +272,10 @@ TFM_SST_NS_TEST(4002, "Thread_A")
         return;
     }
 
-    /* Delete should fail as Thread_A does not have WRITE permission */
+    /* Delete should fail as Thread_C does not have WRITE permission */
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Delete should not succeed for Thread_A");
+        TEST_FAIL("Delete should not succeed for Thread_C");
         return;
     }
 
@@ -332,7 +332,7 @@ TFM_SST_NS_TEST(4003, "Thread_B")
         return;
     }
 
-    /* Checks correct data was read-back. It should still be Thread_C's data as
+    /* Checks correct data was read-back. It should still be Thread_A's data as
      * Thread_B does not have write permission.
      */
     if (memcmp(read_data, RESULT_DATA(WRITE_DATA_C), READ_BUF_SIZE) != 0) {
@@ -374,19 +374,19 @@ TFM_SST_NS_TEST(4003, "Thread_B")
  *        following permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|-----------------------
- *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, READ, WRITE
+ *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE, READ, WRITE
  *
  * This test is performed last so that the asset still exists during the
  * preceeding test cases.
  */
-TFM_SST_NS_TEST(4004, "Thread_C")
+TFM_SST_NS_TEST(4004, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     enum psa_sst_err_t err;
 
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail for Thread_C");
+        TEST_FAIL("Delete should not fail for Thread_A");
         return;
     }
 
@@ -475,9 +475,9 @@ TFM_SST_NS_TEST(4005, "Thread_B")
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|------------
- *          Thread_A    | SST_CLIENT_ID_0 | NONE
+ *          Thread_C    | SST_CLIENT_ID_2 | NONE
  */
-TFM_SST_NS_TEST(4006, "Thread_A")
+TFM_SST_NS_TEST(4006, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA224_HASH;
     struct psa_sst_asset_info_t asset_info = { 0 };
@@ -486,10 +486,10 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
-    /* Create should fail as Thread_A has no permissions */
+    /* Create should fail as Thread_C has no permissions */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Create should not succeed for Thread_A");
+        TEST_FAIL("Create should not succeed for Thread_C");
         return;
     }
 
@@ -499,14 +499,14 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     buf.offset = 0;
 
     /* The write function uses a valid asset ID, obtained by the previous test,
-     * to check that Thread_A cannot perform the write without the proper access
+     * to check that Thread_C cannot perform the write without the proper access
      * permissions even if it has a valid asset ID. So the write should fail as
-     * Thread_A has no permissions.
+     * Thread_C has no permissions.
      */
     err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Write should not succeed for Thread_A");
+        TEST_FAIL("Write should not succeed for Thread_C");
         return;
     }
 
@@ -515,11 +515,11 @@ TFM_SST_NS_TEST(4006, "Thread_A")
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* Read should fail as Thread_A has no permissions */
+    /* Read should fail as Thread_C has no permissions */
     err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read should not succeed for Thread_A");
+        TEST_FAIL("Read should not succeed for Thread_C");
         return;
     }
 
@@ -529,11 +529,11 @@ TFM_SST_NS_TEST(4006, "Thread_A")
         return;
     }
 
-    /* Get information should fail as Thread_A has no permissions */
+    /* Get information should fail as Thread_C has no permissions */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get information should not succeed for Thread_A");
+        TEST_FAIL("Get information should not succeed for Thread_C");
         return;
     }
 
@@ -548,10 +548,10 @@ TFM_SST_NS_TEST(4006, "Thread_A")
         return;
     }
 
-    /* Delete should fail as Thread_A has no permissions */
+    /* Delete should fail as Thread_C has no permissions */
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Delete should not succeed for Thread_A");
+        TEST_FAIL("Delete should not succeed for Thread_C");
         return;
     }
 
@@ -588,9 +588,9 @@ TFM_SST_NS_TEST(4007, "Thread_B")
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|-----------------
- *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, WRITE
+ *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE, WRITE
  */
-TFM_SST_NS_TEST(4008, "Thread_C")
+TFM_SST_NS_TEST(4008, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     struct psa_sst_asset_info_t asset_info;
@@ -599,10 +599,10 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_C;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
-    /* Create should succeed as Thread_C has WRITE permission */
+    /* Create should succeed as Thread_A has WRITE permission */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Create should not fail for Thread_C");
+        TEST_FAIL("Create should not fail for Thread_A");
         return;
     }
 
@@ -611,11 +611,11 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* Write should succeed as Thread_C has WRITE permission */
+    /* Write should succeed as Thread_A has WRITE permission */
     err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Write should not fail for Thread_C");
+        TEST_FAIL("Write should not fail for Thread_A");
         return;
     }
 
@@ -624,11 +624,11 @@ TFM_SST_NS_TEST(4008, "Thread_C")
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* Read should fail as Thread_C does not have READ permission */
+    /* Read should fail as Thread_A does not have READ permission */
     err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read should not succeed for Thread_C");
+        TEST_FAIL("Read should not succeed for Thread_A");
         return;
     }
 
@@ -638,11 +638,11 @@ TFM_SST_NS_TEST(4008, "Thread_C")
         return;
     }
 
-    /* Get information should succeed as Thread_C has at least one permission */
+    /* Get information should succeed as Thread_A has at least one permission */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Get information should not fail for Thread_C");
+        TEST_FAIL("Get information should not fail for Thread_A");
         return;
     }
 
@@ -666,9 +666,9 @@ TFM_SST_NS_TEST(4008, "Thread_C")
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|------------
- *          Thread_A    | SST_CLIENT_ID_0 | NONE
+ *          Thread_C    | SST_CLIENT_ID_2 | NONE
  */
-TFM_SST_NS_TEST(4009, "Thread_A")
+TFM_SST_NS_TEST(4009, "Thread_C")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     struct psa_sst_asset_info_t asset_info = { 0 };
@@ -677,10 +677,10 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     uint8_t write_data[WRITE_BUF_SIZE] = WRITE_DATA_A;
     uint8_t read_data[READ_BUF_SIZE] = READ_DATA;
 
-    /* Create should fail as Thread_A has no permissions */
+    /* Create should fail as Thread_C has no permissions */
     err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Create should not succeed for Thread_A");
+        TEST_FAIL("Create should not succeed for Thread_C");
         return;
     }
 
@@ -690,14 +690,14 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     buf.offset = 0;
 
     /* The write function uses a valid asset ID, obtained by the previous test,
-     * to check that Thread_A cannot perform the write without the proper access
+     * to check that Thread_C cannot perform the write without the proper access
      * permissions even if it has a valid asset ID. So the write should fail as
-     * Thread_A has no permissions.
+     * Thread_C has no permissions.
      */
     err = psa_sst_write(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                         buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Write should not succeed for Thread_A");
+        TEST_FAIL("Write should not succeed for Thread_C");
         return;
     }
 
@@ -706,11 +706,11 @@ TFM_SST_NS_TEST(4009, "Thread_A")
     buf.size = WRITE_BUF_SIZE;
     buf.offset = 0;
 
-    /* Read should fail as Thread_A has no permissions */
+    /* Read should fail as Thread_C has no permissions */
     err = psa_sst_read(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                        buf.size, buf.offset, buf.data);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Read should not succeed for Thread_A");
+        TEST_FAIL("Read should not succeed for Thread_C");
         return;
     }
 
@@ -720,11 +720,11 @@ TFM_SST_NS_TEST(4009, "Thread_A")
         return;
     }
 
-    /* Get information should fail as Thread_A has no permissions */
+    /* Get information should fail as Thread_C has no permissions */
     err = psa_sst_get_info(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE,
                            &asset_info);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Get information should not succeed for Thread_A");
+        TEST_FAIL("Get information should not succeed for Thread_C");
         return;
     }
 
@@ -739,10 +739,10 @@ TFM_SST_NS_TEST(4009, "Thread_A")
         return;
     }
 
-    /* Delete should fail as Thread_A has no permissions */
+    /* Delete should fail as Thread_C has no permissions */
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Delete should not succeed for Thread_A");
+        TEST_FAIL("Delete should not succeed for Thread_C");
         return;
     }
 
@@ -754,20 +754,20 @@ TFM_SST_NS_TEST(4009, "Thread_A")
  *        permissions:
  *          THREAD NAME | CLIENT_ID       | Permissions
  *          ------------|-----------------|-----------------
- *          Thread_C    | SST_CLIENT_ID_2 | REFERENCE, WRITE
+ *          Thread_A    | SST_CLIENT_ID_0 | REFERENCE, WRITE
  *
  * This test is performed last so that the asset still exists during the
  * preceeding test cases.
  */
-TFM_SST_NS_TEST(4010, "Thread_C")
+TFM_SST_NS_TEST(4010, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_SHA384_HASH;
     enum psa_sst_err_t err;
 
-    /* Delete should succeed as Thread_C has WRITE permission */
+    /* Delete should succeed as Thread_A has WRITE permission */
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
-        TEST_FAIL("Delete should not fail for Thread_C");
+        TEST_FAIL("Delete should not fail for Thread_A");
         return;
     }
 
