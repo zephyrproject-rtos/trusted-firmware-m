@@ -30,13 +30,13 @@ struct thread_sst_clientid_pair {
 
 static struct thread_sst_clientid_pair sst_ns_policy_table[] =
 {
-    {"Thread_A", -9},
-    {"Thread_B", -10},
-    {"Thread_C", -11},
-    {"Thread_D", -12},
-    {"seq_task", -13},
-    {"mid_task", -14},
-    {"pri_task", -15},
+    {"Thread_A", -1},
+    {"Thread_B", -2},
+    {"Thread_C", -3},
+    {"Thread_D", -4},
+    {"seq_task", -5},
+    {"mid_task", -6},
+    {"pri_task", -7},
 };
 
 static const char* get_active_task_name(void)
