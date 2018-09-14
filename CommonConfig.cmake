@@ -166,6 +166,12 @@ if (TFM_PARTITION_TEST_SST)
 	add_definitions(-DTFM_PARTITION_TEST_SST)
 endif()
 
+# This flag indicates if the non-secure OS is capable of identify the non-secure clients
+# which call the secure services
+if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+	set (TFM_NS_CLIENT_IDENTIFICATION ON)
+endif()
+
 if (BL2)
 	add_definitions(-DBL2)
 	if (MCUBOOT_NO_SWAP)

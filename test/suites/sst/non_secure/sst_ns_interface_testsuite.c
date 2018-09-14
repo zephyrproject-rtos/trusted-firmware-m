@@ -49,45 +49,67 @@
 /* List of tests */
 static void tfm_sst_test_1001(struct test_result_t *ret);
 static void tfm_sst_test_1002(struct test_result_t *ret);
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1003(struct test_result_t *ret);
 static void tfm_sst_test_1004(struct test_result_t *ret);
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
 static void tfm_sst_test_1005(struct test_result_t *ret);
 static void tfm_sst_test_1006(struct test_result_t *ret);
 static void tfm_sst_test_1007(struct test_result_t *ret);
 static void tfm_sst_test_1008(struct test_result_t *ret);
 static void tfm_sst_test_1009(struct test_result_t *ret);
 static void tfm_sst_test_1010(struct test_result_t *ret);
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1011(struct test_result_t *ret);
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
 static void tfm_sst_test_1012(struct test_result_t *ret);
 static void tfm_sst_test_1013(struct test_result_t *ret);
 static void tfm_sst_test_1014(struct test_result_t *ret);
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1015(struct test_result_t *ret);
 static void tfm_sst_test_1016(struct test_result_t *ret);
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
 static void tfm_sst_test_1017(struct test_result_t *ret);
 static void tfm_sst_test_1018(struct test_result_t *ret);
+
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1019(struct test_result_t *ret);
 static void tfm_sst_test_1020(struct test_result_t *ret);
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1021(struct test_result_t *ret);
-#endif
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
+
 static void tfm_sst_test_1022(struct test_result_t *ret);
 static void tfm_sst_test_1023(struct test_result_t *ret);
 static void tfm_sst_test_1024(struct test_result_t *ret);
 static void tfm_sst_test_1025(struct test_result_t *ret);
+
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
 static void tfm_sst_test_1026(struct test_result_t *ret);
-#endif
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
+
 static void tfm_sst_test_1027(struct test_result_t *ret);
 
 static struct test_t asset_veeners_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
      "Create interface", {0} },
     {&tfm_sst_test_1002, "TFM_SST_TEST_1002",
-     "Create with invalid thread name", {0} },
-    {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
      "Get attributes interface",  {0} },
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
+    {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
+     "Create with invalid thread name", {0} },
     {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
      "Get attributes with invalid thread name", {0} },
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
     {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
      "Get attributes with null attributes struct pointer", {0} },
     {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
@@ -100,30 +122,42 @@ static struct test_t asset_veeners_tests[] = {
      "Write beyond end of asset", {0} },
     {&tfm_sst_test_1010, "TFM_SST_TEST_1010",
      "Read interface", {0} },
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     {&tfm_sst_test_1011, "TFM_SST_TEST_1011",
      "Read with invalid thread name", {0} },
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
     {&tfm_sst_test_1012, "TFM_SST_TEST_1012",
      "Read with null buffer pointers", {0} },
     {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
      "Read beyond current size of asset", {0} },
     {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
      "Delete interface", {0} },
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
      "Delete with invalid thread name", {0} },
     {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
      "Delete with block compaction", {0} },
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
     {&tfm_sst_test_1017, "TFM_SST_TEST_1017",
      "Write and partial reads", {0} },
     {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
      "Write more data than asset max size", {0} },
+
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
      "Append data to an asset", {0} },
     {&tfm_sst_test_1020, "TFM_SST_TEST_1020",
      "Append data to an asset until EOF", {0} },
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
      "Write data to two assets alternately", {0} },
-#endif
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
+
     {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
      "Access an illegal location: ROM", {0} },
     {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
@@ -132,10 +166,12 @@ static struct test_t asset_veeners_tests[] = {
      "Access an illegal location: non-existant memory", {0} },
     {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
      "Access an illegal location: secure memory", {0} },
+
 #ifdef SST_ENABLE_PARTIAL_ASSET_RW
     {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
      "Write data to the middle of an existing asset", {0} },
-#endif
+#endif /* SST_ENABLE_PARTIAL_ASSET_RW */
+
     {&tfm_sst_test_1027, "TFM_SST_TEST_1027",
      "Basic test to verify set and get attributes functionality", {0} },
 };
@@ -227,29 +263,11 @@ TFM_SST_NS_TEST(1001, "Thread_A")
 }
 
 /**
- * \brief Tests create function with an invalid thread name.
- */
-TFM_SST_NS_TEST(1002, INVALID_THREAD_NAME)
-{
-    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
-    enum psa_sst_err_t err;
-
-    /* Calls create function with an invalid thread name */
-    err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
-    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
-        TEST_FAIL("Create should not succeed with an invalid thread name");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-
-/**
  * \brief Tests get attributes function against:
  * - Valid client ID and attributes struct pointer
  * - Invalid client ID
  */
-TFM_SST_NS_TEST(1003, "Thread_A")
+TFM_SST_NS_TEST(1002, "Thread_A")
 {
     const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
     struct psa_sst_asset_info_t asset_info;
@@ -296,6 +314,25 @@ TFM_SST_NS_TEST(1003, "Thread_A")
     err = psa_sst_delete(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
     if (err != PSA_SST_ERR_SUCCESS) {
         TEST_FAIL("Delete should not fail");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
+/**
+ * \brief Tests create function with an invalid thread name.
+ */
+TFM_SST_NS_TEST(1003, INVALID_THREAD_NAME)
+{
+    const uint32_t asset_uuid = SST_ASSET_ID_AES_KEY_192;
+    enum psa_sst_err_t err;
+
+    /* Calls create function with an invalid thread name */
+    err = psa_sst_create(asset_uuid, ASSET_TOKEN, ASSET_TOKEN_SIZE);
+    if (err != PSA_SST_ERR_ASSET_NOT_FOUND) {
+        TEST_FAIL("Create should not succeed with an invalid thread name");
         return;
     }
 
@@ -375,6 +412,7 @@ static void tfm_sst_test_1004(struct test_result_t *ret)
     /* Deletes asset to clean up the SST area for the next test */
     tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1004_task_3);
 }
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
 /**
  * \brief Tests get attributes function with a null attributes struct pointer.
@@ -722,6 +760,7 @@ TFM_SST_NS_TEST(1010, "Thread_A")
     ret->val = TEST_PASSED;
 }
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 /**
  * \brief Creates asset with an authorised client ID.
  */
@@ -801,6 +840,7 @@ static void tfm_sst_test_1011(struct test_result_t *ret)
     /* Deletes asset to clean up the SST area for the next test */
     tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1011_task_3);
 }
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
 /**
  * \brief Tests read function with:
@@ -956,6 +996,7 @@ TFM_SST_NS_TEST(1014, "Thread_A")
     ret->val = TEST_PASSED;
 }
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 /**
  * \brief Creates asset with an authorised client ID.
  */
@@ -1154,6 +1195,8 @@ static void tfm_sst_test_1016(struct test_result_t *ret)
 
     tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1016_task_4);
 }
+
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
 /**
  * \brief Tests write and partial reads.
@@ -1447,6 +1490,7 @@ TFM_SST_NS_TEST(1020, "Thread_A")
     ret->val = TEST_PASSED;
 }
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 /**
  * \brief Tests writing data to two assets alternately before read-back.
  */
@@ -1695,6 +1739,7 @@ static void tfm_sst_test_1021(struct test_result_t *ret)
 
     tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_9);
 }
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 #endif /* SST_ENABLE_PARTIAL_ASSET_RW */
 
 /**

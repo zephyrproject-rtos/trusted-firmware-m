@@ -36,14 +36,21 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 					"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
 	endif()
 
-	list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
+	list(APPEND ALL_SRC_C_NS
+			"${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
 			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c"
-			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_policy_testsuite.c"
-		)
+	)
+
+	if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
+	elseif (TFM_NS_CLIENT_IDENTIFICATION)
+		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_policy_testsuite.c")
+		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS TFM_NS_CLIENT_IDENTIFICATION)
+	endif()
 
 	if (NOT DEFINED TFM_PARTITION_TEST_SST)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
-	elseif (TFM_PARTITION_TEST_SST)
+	elseif (TFM_PARTITION_TEST_SST AND TFM_NS_CLIENT_IDENTIFICATION)
 		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
 	endif()
 
