@@ -38,6 +38,8 @@
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "bootutil_priv.h"
+#include "bl2/include/tfm_boot_status.h"
+#include "bl2/include/boot_record.h"
 
 #define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
@@ -249,12 +251,12 @@ boot_read_sectors(void)
  * Validate image hash/signature in a slot.
  */
 static int
-boot_image_check(struct image_header *hdr, const struct flash_area *fap)
+boot_image_check(struct image_header *hdr, const struct flash_area *fap, uint8_t *out_hash)
 {
     static uint8_t tmpbuf[BOOT_TMPBUF_SZ];
 
     if (bootutil_img_validate(hdr, fap, tmpbuf, BOOT_TMPBUF_SZ,
-                              NULL, 0, NULL)) {
+                              NULL, 0, out_hash)) {
         return BOOT_EBADIMAGE;
     }
     return 0;
@@ -265,6 +267,7 @@ boot_validate_slot(int slot)
 {
     const struct flash_area *fap;
     struct image_header *hdr;
+    uint8_t hash[32];
     int rc;
 
     hdr = boot_img_hdr(&boot_data, slot);
@@ -278,7 +281,8 @@ boot_validate_slot(int slot)
         return BOOT_EFLASH;
     }
 
-    if ((hdr->ih_magic != IMAGE_MAGIC || boot_image_check(hdr, fap) != 0)) {
+    if ((hdr->ih_magic != IMAGE_MAGIC ||
+        boot_image_check(hdr, fap, hash) != 0)) {
         if (slot != 0) {
             rc = flash_area_erase(fap, 0, fap->fa_size);
             if(rc != 0) {
@@ -292,6 +296,13 @@ boot_validate_slot(int slot)
         BOOT_LOG_ERR("Authentication failed! Image in slot %d is not valid.",
                      slot);
         return -1;
+    } else {
+        if (0 != boot_add_data_to_shared_area(TLV_MAJOR_IAS,
+                                              TLV_MINOR_IAS_S_NS_SHA256,
+                                              sizeof(hash),
+                                              hash)) {
+            BOOT_LOG_ERR("Failed to add data to shared area");
+        }
     }
 
     flash_area_close(fap);

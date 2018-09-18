@@ -27,6 +27,7 @@
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "flash_map/flash_map.h"
+#include "bl2/include/boot_record.h"
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)

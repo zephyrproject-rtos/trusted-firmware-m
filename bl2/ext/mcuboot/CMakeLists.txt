@@ -58,7 +58,8 @@ else()
 endif()
 
 #Append all our source files to global lists.
-list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
+list(APPEND ALL_SRC_C
+		"${MCUBOOT_DIR}/bl2_main.c"
 		"${MCUBOOT_DIR}/flash_map.c"
 		"${MCUBOOT_DIR}/keys.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
@@ -66,6 +67,7 @@ list(APPEND ALL_SRC_C "${MCUBOOT_DIR}/bl2_main.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_rsa.c"
 		"${MCUBOOT_DIR}/bootutil/src/caps.c"
+		"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
 	)
 
 #Define location of mbedtls source, build, and installation directory.
@@ -92,6 +94,7 @@ include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 #Setting include directories
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
