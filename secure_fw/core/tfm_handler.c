@@ -172,6 +172,9 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
     case TFM_SVC_PRINT:
         printf("\e[1;34m[Sec Thread] %s\e[0m\r\n", (char *)svc_args[0]);
         break;
+    case TFM_SVC_GET_BOOT_DATA:
+        tfm_core_get_boot_data_handler(svc_args);
+        break;
     default:
         LOG_MSG("Unknown SVC number requested!");
         break;

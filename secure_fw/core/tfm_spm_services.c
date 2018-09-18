@@ -153,3 +153,12 @@ int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share)
         "BX     lr\n"
         : : "I" (TFM_SVC_SET_SHARE_AREA));
 }
+
+__attribute__((naked))
+int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr, uint32_t len)
+{
+    __ASM(
+        "SVC    %0\n"
+        "BX     lr\n"
+        : : "I" (TFM_SVC_GET_BOOT_DATA));
+}

@@ -486,25 +486,11 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
     svc_args[0] = res;
 }
-/**
- * \brief Check whether a buffer is ok for writing to by the privileged API
- *        function.
- *
- * This function checks whether the caller partition owns the buffer, can write
- * to it, and the buffer has proper alignment.
- *
- * \param[in] partition_idx     Partition index
- * \param[in] start_addr        The start address of the buffer
- * \param[in] len               The length of the buffer
- * \param[in] alignment         The expected alignment (in bits)
- *
- * \return 1 if the check passes, 0 otherwise.
- *
- * \note For a 0 long buffer the check fails.
- */
-static int32_t check_buffer_access(uint32_t partition_idx,
-                                  void* start_addr, size_t len,
-                                  uint32_t alignment)
+
+int32_t tfm_core_check_buffer_access(uint32_t  partition_idx,
+                                     void     *start_addr,
+                                     size_t    len,
+                                     uint32_t  alignment)
 {
     uintptr_t start_addr_value = (uintptr_t)start_addr;
     uintptr_t end_addr_value = (uintptr_t)start_addr + len;
@@ -580,10 +566,10 @@ void tfm_core_get_caller_client_id_handler(uint32_t *svc_args)
     /* Make sure that the output pointer points to a memory area that is owned
      * by the partition
      */
-    res = check_buffer_access(running_partition_idx,
-                              (void*)result_ptr_value,
-                              sizeof(curr_part_data->caller_client_id),
-                              2);
+    res = tfm_core_check_buffer_access(running_partition_idx,
+                                       (void *)result_ptr_value,
+                                       sizeof(curr_part_data->caller_client_id),
+                                       2);
     if (!res) {
         /* Not in accessible range, return error */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;

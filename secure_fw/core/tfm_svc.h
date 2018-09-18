@@ -19,6 +19,7 @@ typedef enum {
     TFM_SVC_SET_SHARE_AREA,
     TFM_SVC_SPM_REQUEST,
     TFM_SVC_PRINT,
+    TFM_SVC_GET_BOOT_DATA,
 } tfm_svc_number_t;
 
 #define SVC(code) __ASM("svc %0" : : "I" (code))

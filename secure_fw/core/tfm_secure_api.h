@@ -76,6 +76,9 @@ extern int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id);
 extern int32_t tfm_core_memory_permission_check(
         void *ptr, uint32_t size, int32_t access);
 
+extern int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr,
+                                      uint32_t len);
+
 int32_t tfm_core_sfn_request(struct tfm_sfn_req_s *desc_ptr);
 
 int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);

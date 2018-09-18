@@ -36,6 +36,7 @@ set (SS_CORE_C_SRC
 		"${SS_CORE_DIR}/tfm_secure_api.c"
 		"${SS_CORE_DIR}/tfm_spm_services.c"
 		"${SS_CORE_DIR}/tfm_nspm.c"
+		"${SS_CORE_DIR}/tfm_boot_data.c"
 	)
 
 #Append all our source files to global lists.
