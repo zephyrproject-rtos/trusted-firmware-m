@@ -219,7 +219,9 @@ static void mid_task(void *argument)
     osThreadState_t thread_pri_state;
     uint32_t idx;
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     tfm_nspm_register_client_id();
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     thread_id_pri = *((osThreadId_t *)argument);
 
@@ -252,7 +254,9 @@ static void mid_task(void *argument)
 __attribute__((noreturn))
 static void pri_task(void *argument)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     tfm_nspm_register_client_id();
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     /* go to sleep */
     osDelay(100U);
@@ -280,7 +284,9 @@ static void seq_task(void *argument)
     struct tfm_ns_lock_options ns_lock_opt_pri =
                                   {.use_ns_lock=true, .timeout=osWaitForever};
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     tfm_nspm_register_client_id();
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     test_type = *((enum test_type *)argument);
 

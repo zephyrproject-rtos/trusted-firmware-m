@@ -30,7 +30,9 @@ static void test_task_runner(void *arg)
 {
     struct test_task_t *test = arg;
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     tfm_nspm_register_client_id();
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     /* Call the test function */
     test->func(test->ret);

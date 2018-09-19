@@ -101,6 +101,12 @@ elseif(CORE_TEST)
 	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE CORE_TEST)
 endif()
 
+if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
+elseif (TFM_NS_CLIENT_IDENTIFICATION)
+	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE TFM_NS_CLIENT_IDENTIFICATION)
+endif()
+
 # For the non-swapping BL2 configuration two executables need to be built.
 # One can be executed from flash partition slot_0 and other from slot_1.
 # Only the linking phase is different. This function captures common settings
