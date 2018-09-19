@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -160,14 +160,20 @@ endif()
 
 if (CORE_TEST_IPC)
 	add_definitions(-DCORE_TEST_IPC)
+	set(TEST_FRAMEWORK_S ON)
+	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
+	set(TEST_FRAMEWORK_NS ON)
 endif()
 
 if (SERVICE_TEST_S)
 	add_definitions(-DSERVICES_TEST_S)
-	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
 	set(TEST_FRAMEWORK_S ON)
 	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
 	set(TFM_PARTITION_TEST_SST ON)
+endif()
+
+if (TFM_PARTITION_TEST_SECURE_SERVICES)
+	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
 endif()
 
 if (SERVICE_TEST_NS)

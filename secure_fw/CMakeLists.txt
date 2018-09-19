@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -145,7 +145,7 @@ function(set_up_secure_fw_build)
 	#Set macro definitions for the project.
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} DAUTH_CHIP_DEFAULT APPEND)
 
-	if (REGRESSION OR CORE_TEST)
+	if (REGRESSION OR CORE_TEST OR CORE_IPC)
 		#The test service veneers may not be referenced in the secure binary so the
 		#veneer objects are explicitly loaded from the secure tests library.
 		if(${COMPILER} STREQUAL "ARMCLANG")

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,7 +26,7 @@ endif()
 ##These variables select how the projects are built. Each project will set
 #various project specific settings (e.g. what files to build, macro
 #definitions) based on these.
-set (REGRESSION True)
+set (REGRESSION False)
 set (CORE_TEST False)
 set (CORE_IPC True)
 
