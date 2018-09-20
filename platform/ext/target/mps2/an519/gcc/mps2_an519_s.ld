@@ -182,8 +182,8 @@ SECTIONS
     {
         *libc_nano*:*(.text*)
         *libc_nano*:*(.rodata*)
-        *tfm_unpriv_api.o(.text*)
-        *tfm_unpriv_api.o(.rodata*)
+        *tfm_spm_services.o(.text*)
+        *tfm_spm_services.o(.rodata*)
         *dummy_crypto_keys.o(.text*)
         *dummy_crypto_keys.o(.rodata*)
         *dummy_nv_counters.o(.text*)
@@ -406,7 +406,7 @@ SECTIONS
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA :
     {
-        */tfm_unpriv_api.o(.data*)
+        */tfm_spm_services.o(.data*)
         */dummy_crypto_keys.o(.data*)
         */dummy_nv_counters.o(.data*)
         */platform_retarget_dev.o(.data*)
@@ -417,11 +417,11 @@ SECTIONS
 
     .TFM_UNPRIV_RO_BSS : ALIGN(32)
     {
-        */tfm_unpriv_api.o(.bss*)
+        */tfm_spm_services.o(.bss*)
         */platform_retarget_dev.o(.bss*)
         */dummy_crypto_keys.o(.bss*)
         */dummy_nv_counters.o(.bss*)
-        */tfm_unpriv_api.o(COMMON)
+        */tfm_spm_services.o(COMMON)
         */platform_retarget_dev.o(COMMON)
         */dummy_crypto_keys.o(COMMON)
         */dummy_nv_counters.o(COMMON)
