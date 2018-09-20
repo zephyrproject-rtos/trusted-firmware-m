@@ -47,9 +47,6 @@
       "*arm_uart_drv.*",   # MPS2-AN521, MPS2-AN519
       "*uart_pl011_drv.*", # Musca-A1, Musca-B1
       "*secure_suites.*",
-    ],
-    "library_list": [
-      "*libc_nano*"
     ]
   }
 }

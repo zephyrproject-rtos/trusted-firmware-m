@@ -180,6 +180,8 @@ SECTIONS
 
     .TFM_UNPRIV_CODE : ALIGN(32)
     {
+        *libc_nano*:*(.text*)
+        *libc_nano*:*(.rodata*)
         *tfm_unpriv_api.o(.text*)
         *tfm_unpriv_api.o(.rodata*)
         *dummy_crypto_keys.o(.text*)
@@ -289,8 +291,6 @@ SECTIONS
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION : ALIGN(32)
     {
-        *libc_nano*:*(.text*)
-        *libc_nano*:*(.rodata*)
         *tfm_secure_client_service.*(.text*)
         *test_framework*(.text*)
         *uart_stdout.*(.text*)
@@ -394,6 +394,15 @@ SECTIONS
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
+    .heap : ALIGN(8)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+    } > RAM AT> FLASH
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA :
     {
@@ -605,7 +614,6 @@ SECTIONS
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
-        *libc_nano*:*(.data*)
         *tfm_secure_client_service.*(.data*)
         *test_framework*(.data*)
         *uart_stdout.*(.data*)
@@ -620,8 +628,6 @@ SECTIONS
 
     .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
     {
-        *libc_nano*:*(.bss*)
-        *libc_nano*:*(COMMON)
         *tfm_secure_client_service.*(.bss*)
         *test_framework*(.bss*)
         *uart_stdout.*(.bss*)
@@ -649,10 +655,26 @@ SECTIONS
     Image$$TFM_SP_SECURE_TEST_PARTITION_STACK$$ZI$$Limit = ADDR(.TFM_SP_SECURE_TEST_PARTITION_STACK) + SIZEOF(.TFM_SP_SECURE_TEST_PARTITION_STACK);
 
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-#endif /* TFM_LVL == 1 */
 
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
+        *libc_nano*:*(.data*)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+
+    .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
+    {
+        /* FixMe:
+         * Test framework use printf to print out test result. Implementation of
+         * printf in GCC libc use static data and heap as well. To be able to
+         * execute test suites with TFM_LVL=3 this workaround is needed to
+         * allocate libc static data and heap within the data section of secure
+         * test partition. This can be removed if test service will be executed
+         * in privileged mode.
+         */
+        *libc_nano*:*(.bss*)
+        *libc_nano*:*(COMMON)
+
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
@@ -662,6 +684,7 @@ SECTIONS
 
         . = ALIGN(32);
     } > RAM AT> FLASH
+#endif /* TFM_LVL == 1 */
 
     .TFM_DATA :
     {
