@@ -218,7 +218,7 @@ SECTIONS
 
     .TFM_SECURE_STACK : ALIGN(128)
     {
-        . += 0x4000;
+        . += 0x2000;
     } > RAM AT> FLASH
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
