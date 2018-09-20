@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,11 +28,12 @@ if (NOT DEFINED TFM_LVL)
 endif()
 
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
-include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
-# Involve IPC sources only PSA APIs are there
+#Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
 if(TFM_PSA_API)
 	include(${SECURE_FW_DIR}/core/ipc/CMakeLists.inc)
+else()
+	include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 endif()
 
 set(BUILD_CMSIS_CORE On)

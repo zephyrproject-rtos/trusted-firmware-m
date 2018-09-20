@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include "psa_client.h"
 #include "psa_service.h"
-#include "secure_fw/core/ipc/tfm_thread.h"
 #include "secure_fw/core/secure_utilities.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"
@@ -58,7 +57,7 @@ static psa_status_t ipc_service_call(psa_msg_t *msg)
 }
 
 /* Test thread */
-static void *ipc_test_partition_main(void *param)
+void *ipc_test_partition_main(void *param)
 {
     uint32_t signals = 0;
     psa_msg_t msg;
@@ -98,5 +97,3 @@ static void *ipc_test_partition_main(void *param)
 
     return NULL;
 }
-
-REGISTER_TFM_THREAD(ipc_test_partition_main, (void *)0x1, 1024);
