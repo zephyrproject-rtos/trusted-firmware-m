@@ -23,6 +23,7 @@ The hardware platforms currently supported are:
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
 - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
+- CoreLink SSE-200 Subsystem for MPS3 (AN524)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
@@ -38,6 +39,9 @@ More information about the Musca-A test chip board can be found in:
 
 More information about the Musca-B1 test chip board can be found in:
 `Musca-B1 homepage <https://www.arm.com/products/development-tools/development-boards/musca-b1-iot>`__
+
+More information about subsystems supported by the MPS3 board can be found in:
+`MPS3 homepage <https://www.arm.com/products/development-tools/development-boards/mps3>`__
 
 Generic drivers and startup/scatter files
 =========================================

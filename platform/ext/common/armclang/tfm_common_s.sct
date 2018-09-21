@@ -86,6 +86,7 @@ LR_CODE S_CODE_START {
         *Driver_USART.* (+RO)
         *arm_uart_drv.* (+RO)
         *uart_pl011_drv.* (+RO)
+        *uart_cmsdk_drv* (+RO)
         *secure_suites.* (+RO)
         *attestation_s_interface_testsuite.* (+RO)
         *(TFM_SP_SECURE_TEST_PARTITION_ATTR_FN)
@@ -252,6 +253,7 @@ LR_CODE S_CODE_START {
         *Driver_USART.* (+RW +ZI)
         *arm_uart_drv.* (+RW +ZI)
         *uart_pl011_drv.* (+RW +ZI)
+        *uart_cmsdk_drv* (+RW +ZI)
         *secure_suites.* (+RW +ZI)
         *attestation_s_interface_testsuite.* (+RW +ZI)
     }

@@ -33,6 +33,8 @@ line arguments:
             ``-DTARGET_PLATFORM=MUSCA_A``
           - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
             ``-DTARGET_PLATFORM=MUSCA_B1``
+          - Cortex-M33 SSE-200 subsystem for MPS3 (AN524)
+            ``-DTARGET_PLATFORM=AN524``
 
    * - -DCOMPILER=<compiler name>
      - Specifies the compiler toolchain

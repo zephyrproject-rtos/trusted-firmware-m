@@ -175,6 +175,8 @@ modes are supported by which platforms:
 +----------+-----------------+---------------+----------+-------------+-----------------+
 | Musca-B1 | Yes             | No            | No       | Yes         | No              |
 +----------+-----------------+---------------+----------+-------------+-----------------+
+| AN524    | Yes             | No            | No       | Yes         | No              |
++----------+-----------------+---------------+----------+-------------+-----------------+
 
 .. [1] To disable BL2, please turn off the ``BL2`` compiler switch in the
     top-level configuration file or in the command line
@@ -449,6 +451,26 @@ notice that image with higher version number (``version=1.2.3.5``) is executed:
     #### Execute test suites for the Secure area ####
     Running Test Suite PSA protected storage S interface tests (TFM_SST_TEST_2XXX)...
     ...
+
+Executing firmware upgrade on CoreLink SSE-200 Subsystem for MPS3 (AN524)
+-------------------------------------------------------------------------
+
+::
+
+    TITLE: Arm MPS3 FPGA prototyping board Images Configuration File
+
+    [IMAGES]
+    TOTALIMAGES: 3                     ;Number of Images (Max: 32)
+
+    IMAGE0UPDATE: AUTO                 ;Image Update:NONE/AUTO/FORCE
+    IMAGE0ADDRESS: 0x00000000
+    IMAGE0FILE: \SOFTWARE\mcuboot.bin  ;BL2 bootloader
+    IMAGE1UPDATE: AUTO
+    IMAGE1ADDRESS: 0x00040000
+    IMAGE1FILE: \SOFTWARE\tfm_sig0.bin ;TF-M example application binary blob
+    IMAGE2UPDATE: AUTO
+    IMAGE2ADDRESS: 0x000C0000
+    IMAGE2FILE: \SOFTWARE\tfm_sig1.bin ;TF-M regression test binary blob
 
 RAM loading firmware upgrade
 ============================

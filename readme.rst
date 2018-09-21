@@ -94,6 +94,8 @@ Current release has been tested on:
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
         - `Musca-B1 test chip board.
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`__
+        - `FPGA image loaded on MPS3 board.
+          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`__
 
     - Cortex M23 based IoT Kit system:
 
