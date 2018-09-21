@@ -20,4 +20,8 @@ void tfm_panic(void);
                 }                                                   \
             } while (0)
 
+/* Get container structure start address from member */
+#define TFM_GET_CONTAINER_PTR(ptr, type, member) \
+    (type *)((unsigned long)(ptr) - offsetof(type, member))
+
 #endif
