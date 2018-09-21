@@ -12,6 +12,7 @@
 #include "psa_service.h"
 #include "tfm_svc.h"
 #include "tfm_svcalls.h"
+#include "tfm_thread.h"
 
 /************************* SVC handler for PSA Client APIs *******************/
 
@@ -221,6 +222,9 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx)
 {
     switch (svc_num) {
+    case TFM_SVC_SCHEDULE:
+        tfm_thrd_activate_schedule();
+        break;
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();
     case TFM_SVC_PSA_VERSION:

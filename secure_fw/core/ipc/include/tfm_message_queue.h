@@ -12,6 +12,7 @@
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
+    struct tfm_spm_service_t *service; /* RoT service pointer           */
     psa_handle_t handle;            /* Connected Service handle         */
     struct tfm_event_ctx ack_mtx;   /* Event for ack reponse            */
     psa_msg_t msg;                  /* PSA message body                 */
