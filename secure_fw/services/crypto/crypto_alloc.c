@@ -21,12 +21,6 @@
  */
 #define TFM_CRYPTO_CONC_OPER_NUM (8)
 
-/**
- * \brief This value is used to mark an handle as invalid.
- *
- */
-#define INVALID_HANDLE (0xFFFFFFFF)
-
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
     enum tfm_crypto_operation_type type; /*!< Type of the operation */
@@ -93,7 +87,7 @@ enum tfm_crypto_err_t tfm_crypto_operation_alloc(
             return TFM_CRYPTO_ERR_PSA_SUCCESS;
         }
     }
-    *handle = INVALID_HANDLE;
+    *handle = TFM_CRYPTO_INVALID_HANDLE;
 
     return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
 }
@@ -107,7 +101,7 @@ enum tfm_crypto_err_t tfm_crypto_operation_release(uint32_t *handle)
         memset_operation_context(i);
         operation[i].in_use = TFM_CRYPTO_NOT_IN_USE;
         operation[i].type = TFM_CRYPTO_OPERATION_NONE;
-        *handle = INVALID_HANDLE;
+        *handle = TFM_CRYPTO_INVALID_HANDLE;
         return TFM_CRYPTO_ERR_PSA_SUCCESS;
     }
 

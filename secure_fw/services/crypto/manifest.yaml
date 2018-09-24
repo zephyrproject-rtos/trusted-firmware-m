@@ -137,6 +137,54 @@
       "minor_version": 1,
       "minor_policy": "strict"
     },
+    {
+      "sfid": "TFM_CRYPTO_MAC_SIGN_SETUP_SFID",
+      "signal": "TFM_CRYPTO_MAC_SIGN_SETUP",
+      "tfm_symbol": "tfm_crypto_mac_sign_setup",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_MAC_VERIFY_SETUP_SFID",
+      "signal": "TFM_CRYPTO_MAC_VERIFY_SETUP",
+      "tfm_symbol": "tfm_crypto_mac_verify_setup",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_MAC_UPDATE_SFID",
+      "signal": "TFM_CRYPTO_MAC_UPDATE",
+      "tfm_symbol": "tfm_crypto_mac_update",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_MAC_SIGN_FINISH_SFID",
+      "signal": "TFM_CRYPTO_MAC_SIGN_FINISH",
+      "tfm_symbol": "tfm_crypto_mac_sign_finish",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_MAC_VERIFY_FINISH_SFID",
+      "signal": "TFM_CRYPTO_MAC_VERIFY_FINISH",
+      "tfm_symbol": "tfm_crypto_mac_verify_finish",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_MAC_ABORT_SFID",
+      "signal": "TFM_CRYPTO_MAC_ABORT",
+      "tfm_symbol": "tfm_crypto_mac_abort",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
   ],
   "source_files": [
     "crypto_alloc.c",
@@ -147,6 +195,7 @@
     "crypto_utils.c",
     "crypto_hash.c",
     "crypto_engine.c",
+    "crypto_mac.c"
   ],
   "tfm_linker_pattern": [
     "library_list": [

@@ -324,6 +324,87 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
  */
 enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation);
 
+/**
+ * \brief Start a MAC operation with the provided algorithm (for signing)
+ *
+ * \note A successful call to this function initialises a MAC operation
+ *       context which will be referred using the operation parameter
+ *
+ * \param[out] operation MAC operation context
+ * \param[in]  key       Key slot to bind to the MAC context
+ * \param[in]  alg       Algorithm chosen as MAC
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_sign_setup(psa_mac_operation_t *operation,
+                                                psa_key_slot_t key,
+                                                psa_algorithm_t alg);
+/**
+ * \brief Start a MAC operation with the provided algorithm (for verifying)
+ *
+ * \note A successful call to this function initialises a MAC operation
+ *       context which will be referred using the operation parameter
+ *
+ * \param[out] operation MAC operation context
+ * \param[in]  key       Key slot to bind to the MAC context
+ * \param[in]  alg       Algorithm chosen as MAC
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_verify_setup(
+                                                psa_mac_operation_t *operation,
+                                                psa_key_slot_t key,
+                                                psa_algorithm_t alg);
+/**
+ * \brief Adds a new input chunk to the data for which the final MAC value
+ *        will be computed
+ *
+ * \param[in] operation    MAC operation context
+ * \param[in] input        Buffer containing the input data
+ * \param[in] input_length Size of the provided input data
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_update(psa_mac_operation_t *operation,
+                                            const uint8_t *input,
+                                            size_t input_length);
+/**
+ * \brief Finalise a MAC context operation producing the final MAC value
+ *
+ * \param[in/out] operation  Mac operation context
+ * \param[out]    mac        Buffer containing MAC data
+ * \param[in]     mac_size   Size of the mac buffer
+ * \param[out]    mac_length Size of the produced mac
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_sign_finish(psa_mac_operation_t *operation,
+                                                 uint8_t *mac,
+                                                 size_t mac_size,
+                                                 size_t *mac_length);
+/**
+ * \brief Finalise a MAC context operation, verifying that the final MAC value
+ *        matches the one provided as input
+ *
+ * \param[in/out] operation  MAC operation context
+ * \param[in]     mac        Buffer containing the provided MAC value
+ * \param[in]     mac_length Size of the provided MAC value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
+                                                 psa_mac_operation_t *operation,
+                                                 const uint8_t *mac,
+                                                 size_t mac_length);
+/**
+ * \brief Abort a MAC operation, clear the operation context provided
+ *
+ * \param[in/out] operation MAC operation context
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_mac_abort(psa_mac_operation_t *operation);
+
 #ifdef __cplusplus
 }
 #endif

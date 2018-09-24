@@ -50,7 +50,9 @@ refer to the comments in the `psa_crypto.h` header itself.
  - `crypto_engine.c` : This file implements the layer which the other modules
  use to interact with the cryptography primitives available (in SW or HW).
  The current implementation provides only SW primitives based on Mbed TLS
- functions.
+ functions;
+ - `crypto_mac.c` : This file implements functionalities related to the
+ MAC (Message Authentication Code) module.
 
 ## Crypto service integration guide
 

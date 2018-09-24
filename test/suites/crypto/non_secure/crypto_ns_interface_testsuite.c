@@ -10,6 +10,7 @@
 #include "psa_crypto.h"
 
 #define BIT_SIZE_TEST_KEY (128)
+#define BIT_SIZE_TEST_LONG_KEY (256)
 #define BYTE_SIZE_TEST_KEY (BIT_SIZE_TEST_KEY/8)
 #define BYTE_SIZE_CHUNK (16)
 #define ENC_DEC_BUFFER_SIZE (32)
@@ -29,6 +30,12 @@ static void tfm_crypto_test_6007(struct test_result_t *ret);
 static void tfm_crypto_test_6008(struct test_result_t *ret);
 static void tfm_crypto_test_6009(struct test_result_t *ret);
 static void tfm_crypto_test_6010(struct test_result_t *ret);
+static void tfm_crypto_test_6011(struct test_result_t *ret);
+static void tfm_crypto_test_6012(struct test_result_t *ret);
+static void tfm_crypto_test_6013(struct test_result_t *ret);
+static void tfm_crypto_test_6014(struct test_result_t *ret);
+static void tfm_crypto_test_6015(struct test_result_t *ret);
+static void tfm_crypto_test_6016(struct test_result_t *ret);
 
 static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -51,6 +58,18 @@ static struct test_t crypto_veneers_tests[] = {
      "Non Secure Hash (MD-5) interface", {0} },
     {&tfm_crypto_test_6010, "TFM_CRYPTO_TEST_6010",
      "Non Secure Hash (RIPEMD-160) interface", {0} },
+    {&tfm_crypto_test_6011, "TFM_CRYPTO_TEST_6011",
+     "Non Secure HMAC (SHA-1) interface", {0} },
+    {&tfm_crypto_test_6012, "TFM_CRYPTO_TEST_6012",
+     "Non Secure HMAC (SHA-256) interface", {0} },
+    {&tfm_crypto_test_6013, "TFM_CRYPTO_TEST_6013",
+     "Non Secure HMAC (SHA-384) interface", {0} },
+    {&tfm_crypto_test_6014, "TFM_CRYPTO_TEST_6014",
+     "Non Secure HMAC (SHA-512) interface", {0} },
+    {&tfm_crypto_test_6015, "TFM_CRYPTO_TEST_6015",
+     "Non Secure HMAC (MD-5) interface", {0} },
+    {&tfm_crypto_test_6016, "TFM_CRYPTO_TEST_6016",
+     "Non Secure HMAC with long key (SHA-1) interface", {0} },
 };
 
 void register_testsuite_ns_crypto_interface(struct test_suite_t *p_test_suite)
@@ -487,4 +506,178 @@ static void tfm_crypto_test_6009(struct test_result_t *ret)
 static void tfm_crypto_test_6010(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_RIPEMD160, ret);
+}
+
+static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
+    {0x0d, 0xa6, 0x9d, 0x02, 0x43, 0x17, 0x3e, 0x7e, /*!< SHA-1 */
+     0xe7, 0x3b, 0xc6, 0xa9, 0x51, 0x06, 0x8a, 0xea,
+     0x12, 0xb0, 0xa7, 0x1d},
+    {0xc1, 0x9f, 0x19, 0xac, 0x05, 0x65, 0x5f, 0x02, /*!< SHA-224 */
+     0x1b, 0x64, 0x32, 0xd9, 0xb1, 0x49, 0xba, 0x75,
+     0x05, 0x60, 0x52, 0x4e, 0x78, 0xfa, 0x61, 0xc9,
+     0x37, 0x5d, 0x7f, 0x58},
+    {0x94, 0x37, 0xbe, 0xb5, 0x7f, 0x7c, 0x5c, 0xb0, /*!< SHA-256 */
+     0x0a, 0x92, 0x4d, 0xd3, 0xba, 0x7e, 0xb1, 0x1a,
+     0xdb, 0xa2, 0x25, 0xb2, 0x82, 0x8e, 0xdf, 0xbb,
+     0x61, 0xbf, 0x91, 0x1d, 0x28, 0x23, 0x4a, 0x04},
+    {0x94, 0x21, 0x9b, 0xc3, 0xd5, 0xed, 0xe6, 0xee,  /*!< SHA-384 */
+     0x42, 0x10, 0x5a, 0x58, 0xa4, 0x4d, 0x67, 0x87,
+     0x16, 0xa2, 0xa7, 0x6c, 0x2e, 0xc5, 0x85, 0xb7,
+     0x6a, 0x4c, 0x90, 0xb2, 0x73, 0xee, 0x58, 0x3c,
+     0x59, 0x16, 0x67, 0xf3, 0x6f, 0x30, 0x99, 0x1c,
+     0x2a, 0xf7, 0xb1, 0x5f, 0x45, 0x83, 0xf5, 0x9f},
+    {0x8f, 0x76, 0xef, 0x12, 0x0b, 0x92, 0xc2, 0x06, /*!< SHA-512 */
+     0xce, 0x01, 0x18, 0x75, 0x84, 0x96, 0xd9, 0x6f,
+     0x23, 0x88, 0xd4, 0xf8, 0xcf, 0x79, 0xf8, 0xcf,
+     0x27, 0x12, 0x9f, 0xa6, 0x7e, 0x87, 0x9a, 0x68,
+     0xee, 0xe2, 0xe7, 0x1d, 0x4b, 0xf2, 0x87, 0xc0,
+     0x05, 0x6a, 0xbd, 0x7f, 0x9d, 0xff, 0xaa, 0xf3,
+     0x9a, 0x1c, 0xb7, 0xb7, 0xbd, 0x03, 0x61, 0xa3,
+     0xa9, 0x6a, 0x5d, 0xb2, 0x81, 0xe1, 0x6f, 0x1f},
+    {0x26, 0xfb, 0x68, 0xd2, 0x28, 0x17, 0xc2, 0x9c, /*!< MD-5 */
+     0xbe, 0xed, 0x95, 0x16, 0x82, 0xb0, 0xd8, 0x99},
+    {0x5c, 0xd9, 0x49, 0xc8, 0x66, 0x7a, 0xfa, 0x79, /*!< RIPEMD-160 */
+     0xa8, 0x88, 0x2e, 0x53, 0xf4, 0xee, 0xc0, 0x2d,
+     0x1e, 0xf0, 0x80, 0x25},
+    {0x0c, 0x8c, 0x8c, 0x16, 0x49, 0x92, 0x76, 0xf1, /*!< MD-2 */
+     0xc4, 0xcc, 0xdc, 0x9f, 0x7c, 0xb2, 0xeb, 0x87},
+    {0x44, 0xdf, 0x1b, 0x97, 0xe9, 0xe8, 0xd3, 0xb0, /*!< MD-4 */
+     0xe8, 0x8d, 0xad, 0xdb, 0x86, 0xab, 0xa6, 0xc6},
+};
+
+static const uint8_t long_key_hmac_val[PSA_HASH_SIZE(PSA_ALG_SHA_1)] = {
+    0xb5, 0x06, 0x7b, 0x9a, 0xb9, 0xe7, 0x47, 0x3c, /*!< SHA-1 */
+    0x2d, 0x44, 0x46, 0x1f, 0x4a, 0xbd, 0x22, 0x53,
+    0x9c, 0x05, 0x34, 0x34
+};
+
+static void psa_mac_test(const psa_algorithm_t alg,
+                         uint8_t use_long_key,
+                         struct test_result_t *ret)
+{
+    const char *msg[] = {"This is my test message, ",
+                         "please generate a hmac for this."};
+    const size_t msg_size[] = {25, 32}; /* Length in bytes of msg[0], msg[1] */
+    const uint32_t msg_num = sizeof(msg)/sizeof(msg[0]);
+    uint32_t idx;
+
+    const psa_key_slot_t slot = 0;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    const uint8_t long_data[] = "THIS IS MY UNCOMMONLY LONG KEY1";
+    psa_key_type_t type = PSA_KEY_TYPE_NONE;
+    size_t bits = 0;
+    size_t bit_size_test_key = 0;
+    psa_status_t status;
+    psa_mac_operation_t handle;
+
+    ret->val = TEST_PASSED;
+
+    /* Import key on slot 0 */
+    if (use_long_key == 1) {
+        status = psa_import_key(slot,
+                                PSA_KEY_TYPE_HMAC,
+                                long_data,
+                                sizeof(long_data));
+    } else {
+        status = psa_import_key(slot, PSA_KEY_TYPE_HMAC, data, sizeof(data));
+    }
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        return;
+    }
+
+    status = psa_get_key_information(slot, &type, &bits);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error getting key metadata");
+        goto destroy_key_mac;
+    }
+
+    if (use_long_key == 1) {
+        bit_size_test_key = BIT_SIZE_TEST_LONG_KEY;
+    } else {
+        bit_size_test_key = BIT_SIZE_TEST_KEY;
+    }
+
+    if (bits != bit_size_test_key) {
+        TEST_FAIL("The number of key bits is different from expected");
+        goto destroy_key_mac;
+    }
+
+    if (type != PSA_KEY_TYPE_HMAC) {
+        TEST_FAIL("The type of the key is different from expected");
+        goto destroy_key_mac;
+    }
+
+    /* Setup the mac object for hmac */
+    status = psa_mac_verify_setup(&handle, slot, alg);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error setting up mac operation object");
+        goto destroy_key_mac;
+    }
+
+    /* Update object with all the chunks of message */
+    for (idx=0; idx<msg_num; idx++) {
+        status = psa_mac_update(&handle,
+                                (const uint8_t *)msg[idx],
+                                msg_size[idx]);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error during mac operation");
+            goto destroy_key_mac;
+        }
+    }
+
+    /* Cycle until idx points to the correct index in the algorithm table */
+    for (idx=0; hash_alg[idx] != PSA_ALG_HMAC_HASH(alg); idx++);
+
+    /* Finalise and verify the mac value */
+    if (use_long_key == 1) {
+        status = psa_mac_verify_finish(&handle,
+                                       &(long_key_hmac_val[0]),
+                                       PSA_HASH_SIZE(PSA_ALG_HMAC_HASH(alg)));
+    } else {
+        status = psa_mac_verify_finish(&handle,
+                                       &(hmac_val[idx][0]),
+                                       PSA_HASH_SIZE(PSA_ALG_HMAC_HASH(alg)));
+    }
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error during finalising the mac operation");
+        goto destroy_key_mac;
+    }
+
+destroy_key_mac:
+    /* Destroy the key */
+    status = psa_destroy_key(slot);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying the key");
+    }
+}
+
+static void tfm_crypto_test_6011(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
+}
+
+static void tfm_crypto_test_6012(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_256), 0, ret);
+}
+
+static void tfm_crypto_test_6013(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_384), 0, ret);
+}
+
+static void tfm_crypto_test_6014(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_512), 0, ret);
+}
+
+static void tfm_crypto_test_6015(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_MD5), 0, ret);
+}
+
+static void tfm_crypto_test_6016(struct test_result_t *ret)
+{
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
 }

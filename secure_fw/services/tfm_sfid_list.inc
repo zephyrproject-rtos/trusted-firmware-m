@@ -42,6 +42,12 @@
     {tfm_crypto_hash_finish, TFM_CRYPTO_HASH_FINISH_SFID},
     {tfm_crypto_hash_verify, TFM_CRYPTO_HASH_VERIFY_SFID},
     {tfm_crypto_hash_abort, TFM_CRYPTO_HASH_ABORT_SFID},
+    {tfm_crypto_mac_sign_setup, TFM_CRYPTO_MAC_SIGN_SETUP_SFID},
+    {tfm_crypto_mac_verify_setup, TFM_CRYPTO_MAC_VERIFY_SETUP_SFID},
+    {tfm_crypto_mac_update, TFM_CRYPTO_MAC_UPDATE_SFID},
+    {tfm_crypto_mac_sign_finish, TFM_CRYPTO_MAC_SIGN_FINISH_SFID},
+    {tfm_crypto_mac_verify_finish, TFM_CRYPTO_MAC_VERIFY_FINISH_SFID},
+    {tfm_crypto_mac_abort, TFM_CRYPTO_MAC_ABORT_SFID},
 
     /******** TFM_SP_PLATFORM ********/
     {platform_sp_system_reset, TFM_SP_PLATFORM_SYSTEM_RESET_SFID},

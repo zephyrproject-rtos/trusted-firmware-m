@@ -159,3 +159,62 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_abort(
     TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_abort,
                          operation, 0, 0, 0);
 }
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_sign_setup(
+                                                 psa_mac_operation_t *operation,
+                                                 psa_key_slot_t key,
+                                                 psa_algorithm_t alg)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_sign_setup,
+                         operation, key, alg, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_verify_setup(
+                                                 psa_mac_operation_t *operation,
+                                                 psa_key_slot_t key,
+                                                 psa_algorithm_t alg)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_verify_setup,
+                         operation, key, alg, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_update(
+                                                 psa_mac_operation_t *operation,
+                                                 const uint8_t *input,
+                                                 size_t input_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_update,
+                         operation, input, input_length, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_sign_finish(
+                                                 psa_mac_operation_t *operation,
+                                                 uint8_t *mac,
+                                                 size_t mac_size,
+                                                 size_t *mac_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_sign_finish,
+                         operation, mac, mac_size, mac_length);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_verify_finish(
+                                                 psa_mac_operation_t *operation,
+                                                 const uint8_t *mac,
+                                                 size_t mac_length)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_verify_finish,
+                         operation, mac, mac_length, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_mac_abort(
+                                                 psa_mac_operation_t *operation)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_abort,
+                         operation, 0, 0, 0);
+}

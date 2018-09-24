@@ -263,3 +263,92 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 
     return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
+
+psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
+                                psa_key_slot_t key,
+                                psa_algorithm_t alg)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_sign_setup,
+                               (uint32_t)operation,
+                               (uint32_t)key,
+                               (uint32_t)alg,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
+                                  psa_key_slot_t key,
+                                  psa_algorithm_t alg)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_verify_setup,
+                               (uint32_t)operation,
+                               (uint32_t)key,
+                               (uint32_t)alg,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_mac_update(psa_mac_operation_t *operation,
+                            const uint8_t *input,
+                            size_t input_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_update,
+                               (uint32_t)operation,
+                               (uint32_t)input,
+                               (uint32_t)input_length,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
+                                 uint8_t *mac,
+                                 size_t mac_size,
+                                 size_t *mac_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_sign_finish,
+                               (uint32_t)operation,
+                               (uint32_t)mac,
+                               (uint32_t)mac_size,
+                               (uint32_t)mac_length);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
+                                   const uint8_t *mac,
+                                   size_t mac_length)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_verify_finish,
+                               (uint32_t)operation,
+                               (uint32_t)mac,
+                               (uint32_t)mac_length,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_abort,
+                               (uint32_t)operation,
+                               0,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}

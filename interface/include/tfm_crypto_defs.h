@@ -25,7 +25,13 @@ extern "C" {
  * \brief This defines the maximum supported key length in bytes
  *
  */
-#define TFM_CRYPTO_MAX_KEY_LENGTH (16)
+#define TFM_CRYPTO_MAX_KEY_LENGTH (32)
+
+/**
+ * \brief This value is used to mark an handle as invalid.
+ *
+ */
+#define TFM_CRYPTO_INVALID_HANDLE (0xFFFFFFFF)
 
 /**
  * \brief Define miscellaneous literal constants that are used in the module

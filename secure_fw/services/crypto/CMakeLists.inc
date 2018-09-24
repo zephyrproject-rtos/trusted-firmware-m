@@ -45,6 +45,7 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_alloc.c"
                     "${CRYPTO_DIR}/crypto_cipher.c"
                     "${CRYPTO_DIR}/crypto_hash.c"
+                    "${CRYPTO_DIR}/crypto_mac.c"
                     "${CRYPTO_DIR}/crypto_key.c"
                     "${CRYPTO_DIR}/crypto_wrappers.c"
                     "${CRYPTO_DIR}/crypto_utils.c"
