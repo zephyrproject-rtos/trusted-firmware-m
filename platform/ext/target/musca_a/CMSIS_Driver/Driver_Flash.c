@@ -59,7 +59,7 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
 /**
  * \brief Flash status macro definitions \ref ARM_FLASH_STATUS
  */
-/* Busy status values of the Flash driver  */
+/* Busy status values of the Flash driver */
 #define DRIVER_STATUS_IDLE      (0u)
 #define DRIVER_STATUS_BUSY      (1u)
 /* Error status values of the Flash driver */
@@ -137,16 +137,31 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
+
     ARG_UNUSED(cb_event);
 
     qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
+
+    /* Configure QSPI Flash controller to operate in single SPI mode and
+     * to use fast Flash commands */
+    err = mt25ql_config_mode(ARM_FLASH0_DEV.dev, MT25QL_FUNC_STATE_FAST);
+    if(err != MT25QL_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
 
 static int32_t ARM_Flash_Uninitialize(void)
 {
-    qspi_ip6514e_disable(ARM_FLASH0_DEV.dev->controller);
+    enum mt25ql_error_t err = MT25QL_ERR_NONE;
+
+    /* Restores the QSPI Flash controller and MT25QL to default state */
+    err = mt25ql_restore_default_state(ARM_FLASH0_DEV.dev);
+    if(err != MT25QL_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }

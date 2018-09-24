@@ -50,6 +50,7 @@
  * to handle those commands.
  */
 #define QUAD_OUTPUT_FAST_READ_CMD           0x6BU
+#define FAST_READ_CMD                       0x0BU
 #define READ_CMD                            0x03U
 #define QUAD_INPUT_FAST_PROGRAM_CMD         0x32U
 #define PAGE_PROGRAM_CMD                    0x02U
@@ -72,10 +73,11 @@
  * 8 is the minimal number of dummy clock cycles needed to reach the maximal
  * frequency of the Quad Output Fast Read Command.
  */
-#define OPTIMAL_READ_DUMMY_CYCLES  8U
-#define CMD_READ_DUMMY_CYCLES      0U
-#define OPTIMAL_WRITE_DUMMY_CYCLES 0U
-#define CMD_WRITE_DUMMY_CYCLES     0U
+#define QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES    8U
+#define FAST_READ_DUMMY_CYCLES                8U
+#define DEFAULT_READ_DUMMY_CYCLES             0U
+#define QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES  0U
+#define PAGE_PROGRAM_DUMMY_CYCLES             0U
 
 /* Only up to 8 bytes can be read or written using the Flash commands. */
 #define CMD_DATA_MAX_SIZE 8U
@@ -137,21 +139,23 @@ static void send_write_enable(struct mt25ql_dev_t* dev)
 }
 
 /**
- * \brief Activate the QSPI mode on the flash device and on the controller.
+ * \brief Set SPI mode on the flash device and on the controller.
  *
- * \param[in] dev     Pointer to MT25QL device structure \ref mt25ql_dev_t
+ * \param[in] dev       Pointer to MT25QL device structure \ref mt25ql_dev_t
+ * \param[in] spi_mode  SPI mode to be set on flash device and controller
+ *                      \ref qspi_ip6514e_spi_mode_t
  *
  * \return Return error code as specified in \ref mt25ql_error_t
  */
-static enum mt25ql_error_t activate_qspi_mode(struct mt25ql_dev_t* dev)
+static enum mt25ql_error_t set_spi_mode(struct mt25ql_dev_t* dev,
+                                        enum qspi_ip6514e_spi_mode_t spi_mode)
 {
     uint8_t enhanced_volatile_cfg_reg = 0;
     enum qspi_ip6514e_error_t controller_error;
 
-    /*
-     * Read the Enhanced Volatile Configuration Register, modify it to activate
-     * QSPI mode then write back the modified value to the register. This will
-     * activate QSPI mode on the flash side.
+    /* Read the Enhanced Volatile Configuration Register, modify it according
+     * to the requested SPI mode then write back the modified value to the
+     * register. This will activate the SPI mode on the flash side.
      */
     controller_error = qspi_ip6514e_send_read_cmd(
                                              dev->controller,
@@ -166,12 +170,31 @@ static enum mt25ql_error_t activate_qspi_mode(struct mt25ql_dev_t* dev)
         return (enum mt25ql_error_t)controller_error;
     }
 
-    /*
-     * Disable the Dual-SPI mode and activate QSPI mode.
-     * Clearing the bit enables the mode, setting it disables it.
-     */
-    SET_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_DSPI_POS);
-    CLR_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_QSPI_POS);
+    switch(spi_mode) {
+    case QSPI_IP6514E_SPI_MODE:
+        /* Disable the Dual- and Quad-SPI modes.
+         * Clearing the bit enables the mode, setting it disables it.
+         */
+        SET_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_DSPI_POS);
+        SET_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_QSPI_POS);
+        break;
+    case QSPI_IP6514E_DSPI_MODE:
+        /* Disable the Quad-SPI mode and activate DSPI mode.
+         * Clearing the bit enables the mode, setting it disables it.
+         */
+        CLR_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_DSPI_POS);
+        SET_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_QSPI_POS);
+        break;
+    case QSPI_IP6514E_QSPI_MODE:
+        /* Disable the Dual-SPI mode and activate QSPI mode.
+         * Clearing the bit enables the mode, setting it disables it.
+         */
+        SET_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_DSPI_POS);
+        CLR_BIT(enhanced_volatile_cfg_reg, ENHANCED_VOLATILE_CFG_REG_QSPI_POS);
+        break;
+    default:
+        return MT25QL_ERR_WRONG_ARGUMENT;
+    }
 
     send_write_enable(dev);
 
@@ -188,11 +211,11 @@ static enum mt25ql_error_t activate_qspi_mode(struct mt25ql_dev_t* dev)
         return (enum mt25ql_error_t)controller_error;
     }
 
-    /* Activate the QSPI mode on the controller side as well */
+    /* Activate the requested SPI mode on the controller side as well. */
     controller_error = qspi_ip6514e_set_spi_mode(dev->controller,
-                                                 QSPI_IP6514E_QSPI_MODE,
-                                                 QSPI_IP6514E_QSPI_MODE,
-                                                 QSPI_IP6514E_QSPI_MODE);
+                                                 spi_mode,
+                                                 spi_mode,
+                                                 spi_mode);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
     }
@@ -369,35 +392,60 @@ static enum mt25ql_error_t send_boundary_cross_write_cmd(
     return MT25QL_ERR_NONE;
 }
 
-enum mt25ql_error_t mt25ql_cfg_optimal(struct mt25ql_dev_t* dev)
+enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
+                                       enum mt25ql_functional_state_t config)
 {
+    enum qspi_ip6514e_spi_mode_t spi_mode;
     enum qspi_ip6514e_error_t controller_error;
     enum mt25ql_error_t library_error;
+    uint8_t opcode_read;
+    uint8_t opcode_write;
+    uint32_t dummy_cycles_read;
+    uint32_t dummy_cycles_write;
 
-    /*
-     * Assuming that the Flash memory starts in single SPI protocol and as the
-     * QSPI Flash controller also resets in single SPI mode, this function will
-     * first change the Flash memory mode to QSPI and then change the controller
-     * to QSPI.
-     * It will fail if the two sides do not have the same mode when this
-     * function is called.
+    switch(config) {
+    case MT25QL_FUNC_STATE_DEFAULT:
+        spi_mode            = QSPI_IP6514E_SPI_MODE;
+        opcode_read         = READ_CMD;
+        dummy_cycles_read   = DEFAULT_READ_DUMMY_CYCLES;
+        opcode_write        = PAGE_PROGRAM_CMD;
+        dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
+        break;
+    case MT25QL_FUNC_STATE_FAST:
+        spi_mode            = QSPI_IP6514E_SPI_MODE;
+        opcode_read         = FAST_READ_CMD;
+        dummy_cycles_read   = FAST_READ_DUMMY_CYCLES;
+        opcode_write        = PAGE_PROGRAM_CMD;
+        dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
+        break;
+    case MT25QL_FUNC_STATE_QUAD_FAST:
+        spi_mode            = QSPI_IP6514E_QSPI_MODE;
+        opcode_read         = QUAD_OUTPUT_FAST_READ_CMD;
+        dummy_cycles_read   = QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES;
+        opcode_write        = QUAD_INPUT_FAST_PROGRAM_CMD;
+        dummy_cycles_write  = QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES;
+        break;
+    default:
+        return MT25QL_ERR_WRONG_ARGUMENT;
+    }
+
+    /* This function will first set the Flash memory SPI mode and then set
+     * the controller's SPI mode. It will fail if the two sides do not have
+     * the same mode when this function is called.
      */
-    library_error = activate_qspi_mode(dev);
+    library_error = set_spi_mode(dev, spi_mode);
     if (library_error != MT25QL_ERR_NONE) {
         return library_error;
     }
 
-    /* Change to the optimal number of dummy cycles for read commands. */
-    library_error = change_dummy_cycles(dev, OPTIMAL_READ_DUMMY_CYCLES);
+    /* Set the number of dummy cycles for read commands. */
+    library_error = change_dummy_cycles(dev, dummy_cycles_read);
     if (library_error != MT25QL_ERR_NONE) {
         return library_error;
     }
 
     /* The rest of the configuration needs the controller to be disabled */
-    if (!qspi_ip6514e_is_idle(dev->controller)) {
-        return (enum mt25ql_error_t)QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
-
+    while(!qspi_ip6514e_is_idle(dev->controller));
     qspi_ip6514e_disable(dev->controller);
 
     /* Set the baud rate divisor as configured in the device structure. */
@@ -409,16 +457,16 @@ enum mt25ql_error_t mt25ql_cfg_optimal(struct mt25ql_dev_t* dev)
 
     /* Set opcode and dummy cycles needed for read commands. */
     controller_error = qspi_ip6514e_cfg_reads(dev->controller,
-                                              QUAD_OUTPUT_FAST_READ_CMD,
-                                              OPTIMAL_READ_DUMMY_CYCLES);
+                                              opcode_read,
+                                              dummy_cycles_read);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
     }
 
     /* Set opcode and dummy cycles needed for write commands. */
     controller_error = qspi_ip6514e_cfg_writes(dev->controller,
-                                               QUAD_INPUT_FAST_PROGRAM_CMD,
-                                               OPTIMAL_WRITE_DUMMY_CYCLES);
+                                               opcode_write,
+                                               dummy_cycles_write);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
     }
@@ -438,7 +486,41 @@ enum mt25ql_error_t mt25ql_cfg_optimal(struct mt25ql_dev_t* dev)
 
     qspi_ip6514e_enable(dev->controller);
 
-    dev->func_state = MT25QL_FUNC_STATE_OPTIMAL;
+    dev->func_state = config;
+
+    return MT25QL_ERR_NONE;
+}
+
+enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev)
+{
+    enum mt25ql_error_t library_error;
+
+    /*
+     * This function will first change the Flash memory mode to single SPI and
+     * then change the controller to single SPI. It will fail if the two sides
+     * do not have the same mode when this function is called.
+     */
+    library_error = set_spi_mode(dev, QSPI_IP6514E_SPI_MODE);
+    if (library_error != MT25QL_ERR_NONE) {
+        return library_error;
+    }
+
+    /* Set the default number of dummy cycles for read commands. */
+    library_error = change_dummy_cycles(dev, DEFAULT_READ_DUMMY_CYCLES);
+    if (library_error != MT25QL_ERR_NONE) {
+        return library_error;
+    }
+
+    /* The rest of the configuration needs the controller to be disabled */
+    while(!qspi_ip6514e_is_idle(dev->controller));
+    qspi_ip6514e_disable(dev->controller);
+
+    /* Restore the default value of the QSPI controller registers. */
+    qspi_ip6514e_reset_regs(dev->controller);
+
+    qspi_ip6514e_enable(dev->controller);
+
+    dev->func_state = MT25QL_FUNC_STATE_DEFAULT;
 
     return MT25QL_ERR_NONE;
 }
@@ -619,12 +701,20 @@ enum mt25ql_error_t mt25ql_command_read(struct mt25ql_dev_t* dev,
     uint8_t opcode;
     uint32_t dummy_cycles;
 
-    if(dev->func_state == MT25QL_FUNC_STATE_OPTIMAL) {
+    switch (dev->func_state) {
+    case MT25QL_FUNC_STATE_QUAD_FAST:
         opcode = QUAD_OUTPUT_FAST_READ_CMD;
-        dummy_cycles = OPTIMAL_READ_DUMMY_CYCLES;
-    } else {
+        dummy_cycles = QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES;
+        break;
+    case MT25QL_FUNC_STATE_FAST:
+        opcode = FAST_READ_CMD;
+        dummy_cycles = FAST_READ_DUMMY_CYCLES;
+        break;
+    case MT25QL_FUNC_STATE_DEFAULT:
+    default:
         opcode = READ_CMD;
-        dummy_cycles = CMD_READ_DUMMY_CYCLES;
+        dummy_cycles = DEFAULT_READ_DUMMY_CYCLES;
+        break;
     }
 
     for (uint32_t cmd_index = 0; cmd_index < cmd_number; cmd_index++) {
@@ -675,12 +765,17 @@ enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
     uint8_t opcode;
     uint32_t dummy_cycles;
 
-    if(dev->func_state == MT25QL_FUNC_STATE_OPTIMAL) {
+    switch (dev->func_state) {
+    case MT25QL_FUNC_STATE_QUAD_FAST:
         opcode = QUAD_INPUT_FAST_PROGRAM_CMD;
-        dummy_cycles = OPTIMAL_WRITE_DUMMY_CYCLES;
-    } else {
+        dummy_cycles = QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES;
+        break;
+    case MT25QL_FUNC_STATE_FAST:
+    case MT25QL_FUNC_STATE_DEFAULT:
+    default:
         opcode = PAGE_PROGRAM_CMD;
-        dummy_cycles = CMD_WRITE_DUMMY_CYCLES;
+        dummy_cycles = PAGE_PROGRAM_DUMMY_CYCLES;
+        break;
     }
 
     for (uint32_t cmd_index = 0; cmd_index < cmd_number; cmd_index++) {
@@ -788,36 +883,36 @@ enum mt25ql_error_t mt25ql_erase(struct mt25ql_dev_t* dev,
     send_write_enable(dev);
 
     switch (erase_type) {
-        case MT25QL_ERASE_ALL_FLASH:
-            if (addr != 0) {
-                return MT25QL_ERR_ADDR_NOT_ALIGNED;
-            }
-            erase_cmd = BULK_ERASE_CMD;
-            addr_bytes = ARG_NOT_USED;
-            break;
-        case MT25QL_ERASE_SECTOR_64K:
-            erase_cmd = SECTOR_ERASE_CMD;
-            addr_bytes = ADDR_BYTES;
-            if ((addr % SECTOR_64KB) != 0) {
-                return MT25QL_ERR_ADDR_NOT_ALIGNED;
-            }
-            break;
-        case MT25QL_ERASE_SUBSECTOR_32K:
-            erase_cmd = SUBSECTOR_ERASE_32KB_CMD;
-            addr_bytes = ADDR_BYTES;
-            if ((addr % SUBSECTOR_32KB) != 0) {
-                return MT25QL_ERR_ADDR_NOT_ALIGNED;
-            }
-            break;
-        case MT25QL_ERASE_SUBSECTOR_4K:
-            erase_cmd = SUBSECTOR_ERASE_4KB_CMD;
-            addr_bytes = ADDR_BYTES;
-            if ((addr % SUBSECTOR_4KB) != 0) {
-                return MT25QL_ERR_ADDR_NOT_ALIGNED;
-            }
-            break;
-        default:
-            return MT25QL_ERR_WRONG_ARGUMENT;
+    case MT25QL_ERASE_ALL_FLASH:
+        if (addr != 0) {
+            return MT25QL_ERR_ADDR_NOT_ALIGNED;
+        }
+        erase_cmd = BULK_ERASE_CMD;
+        addr_bytes = ARG_NOT_USED;
+        break;
+    case MT25QL_ERASE_SECTOR_64K:
+        erase_cmd = SECTOR_ERASE_CMD;
+        addr_bytes = ADDR_BYTES;
+        if ((addr % SECTOR_64KB) != 0) {
+            return MT25QL_ERR_ADDR_NOT_ALIGNED;
+        }
+        break;
+    case MT25QL_ERASE_SUBSECTOR_32K:
+        erase_cmd = SUBSECTOR_ERASE_32KB_CMD;
+        addr_bytes = ADDR_BYTES;
+        if ((addr % SUBSECTOR_32KB) != 0) {
+            return MT25QL_ERR_ADDR_NOT_ALIGNED;
+        }
+        break;
+    case MT25QL_ERASE_SUBSECTOR_4K:
+        erase_cmd = SUBSECTOR_ERASE_4KB_CMD;
+        addr_bytes = ADDR_BYTES;
+        if ((addr % SUBSECTOR_4KB) != 0) {
+            return MT25QL_ERR_ADDR_NOT_ALIGNED;
+        }
+        break;
+    default:
+        return MT25QL_ERR_WRONG_ARGUMENT;
     }
 
     if (addr >= dev->size) {

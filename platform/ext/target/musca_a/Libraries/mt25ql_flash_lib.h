@@ -41,7 +41,6 @@ enum mt25ql_error_t {
     MT25QL_ERR_NONE               = QSPI_IP6514E_ERR_NONE,
     MT25QL_ERR_WRONG_ARGUMENT     = QSPI_IP6514E_ERR_WRONG_ARGUMENT,
     MT25QL_ERR_CTRL_NOT_DISABLED  = QSPI_IP6514E_ERR_CONTROLLER_NOT_DISABLED,
-    MT25QL_ERR_CTRL_NOT_IDLE      = QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE,
     MT25QL_ERR_READ_IN_PROGRESS   = QSPI_IP6514E_ERR_READ_IN_PROGRESS,
     MT25QL_ERR_WRITE_IN_PROGRESS  = QSPI_IP6514E_ERR_WRITE_IN_PROGRESS,
     MT25QL_ERR_ADDR_NOT_ALIGNED,
@@ -56,8 +55,20 @@ enum mt25ql_erase_t {
 };
 
 enum mt25ql_functional_state_t {
-    MT25QL_FUNC_STATE_DEFAULT   = 0u,
-    MT25QL_FUNC_STATE_OPTIMAL   = 1u,
+    MT25QL_FUNC_STATE_DEFAULT   = 0U,
+        /*!< The QSPI Flash controller and memory is in default state,
+         *   in the same state as after reset.
+         */
+    MT25QL_FUNC_STATE_FAST      = 1U,
+        /*!< The QSPI Flash controller and memory is configured to operate in
+         *   single SPI mode and fast Flash commands could be used for read and
+         *   program operations.
+         */
+    MT25QL_FUNC_STATE_QUAD_FAST = 2U,
+        /*!< The QSPI Flash controller and memory is configured to operate in
+         *   Quad SPI mode and fast Flash commands could be used for read and
+         *   program operations.
+         */
 };
 
 struct mt25ql_dev_t {
@@ -83,24 +94,41 @@ struct mt25ql_dev_t {
 };
 
 /**
- * \brief Configure the QSPI Flash controller and MT25QL for optimal use.
+ * \brief Change configuration of the QSPI Flash controller and MT25QL memory
+ *
+ *        Changes the configuration of the QSPI Flash controller and MT25QL
+ *        Flash memory to operate in the specified SPI mode and to use the
+ *        appropriate Flash commands for read and program operations.
+ *        It also sets:
+ *          + The number of dummy cycles for each operation
+ *          + The bytes per page constant to 256 (MT25QL Flash specific)
+ *          + The number of address bytes to 3
+ *
+ * \param[in] dev       Pointer to MT25QL device structure \ref mt25ql_dev_t
+ * \param[in] config    Operational configuration to be set on flash controller
+ *                      and device \ref mt25ql_functional_state_t
+ *
+ * \return Return error code as specified in \ref mt25ql_error_t
+ *
+ * \note This function assumes that the Flash memory device and the QSPI Flash
+ *       controller operates with the same SPI protocol. This function will fail
+ *       if the Flash device is in a different configuration.
+ */
+enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
+                                       enum mt25ql_functional_state_t config);
+
+/**
+ * \brief Restore the QSPI Flash controller and MT25QL to default state.
  *
  * \param[in] dev     Pointer to MT25QL device structure \ref mt25ql_dev_t
  *
  * \return Return error code as specified in \ref mt25ql_error_t
  *
- * \note This function assumes that the Flash memory device currently operates
- *       with single line SPI protocol with Double Data Rate protocol disabled.
- *       This function will not work and cause harm if the Flash device is in
- *       another configuration.
- * \note The configuration used is the following:
- *         * QSPI mode (4 lines for instruction, address and data)
- *         * Read command is Quad Output Fast Read with 8 dummy cycles
- *         * Write command is Quad Input Fast Program with 0 dummy cycles
- *         * Bytes per page set to 256
- *         * Number of address bytes set to 3
+ * \note This function assumes that the Flash memory device and the QSPI Flash
+ *       controller operates with the same SPI protocol. This function will fail
+ *       if the Flash device is in a different configuration.
  */
-enum mt25ql_error_t mt25ql_cfg_optimal(struct mt25ql_dev_t* dev);
+enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev);
 
 /**
  * \brief Read bytes from the flash memory (direct access)

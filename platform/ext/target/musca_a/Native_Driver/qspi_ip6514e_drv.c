@@ -125,6 +125,16 @@ struct _qspi_ip6514e_reg_map_t {
 #define FLASH_CMD_CTRL_READ_ENABLE_POS    23U
 #define FLASH_CMD_CTRL_OPCODE_POS         24U
 
+/** Default register values of the QSPI Flash controller */
+#define QSPI_CFG_REG_RESET_VALUE              (0x80780081U)
+#define DEVICE_READ_INSTR_REG_RESET_VALUE     (0x00000003U)
+#define DEVICE_WRITE_INSTR_REG_RESET_VALUE    (0x00000002U)
+#define DEVICE_SIZE_CFG_REG_RESET_VALUE       (0x00101002U)
+#define REMAP_ADDR_REG_RESET_VALUE            (0x00000000U)
+#define FLASH_CMD_CONTROL_REG_RESET_VALUE     (0x00000000U)
+#define FLASH_CMD_ADDRESS_REG_RESET_VALUE     (0x00000000U)
+#define FLASH_CMD_WRITE_DATA_REG_RESET_VALUE  (0x00000000U)
+
 /**
  * \brief Change specific bits in a 32 bits word.
  *
@@ -203,9 +213,11 @@ static enum qspi_ip6514e_error_t qspi_ip6514e_cfg_reads_writes(
                                                   &(reg_map->device_write_inst);
     uint32_t device_read_write_inst_reg_copy = *device_read_write_inst_reg;
 
-    if (!qspi_ip6514e_is_idle(dev)) {
-        return QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
+    /*
+     * Wait for the Serial Interface and QSPI pipeline to be IDLE when
+     * all low level synchronization has been done.
+     */
+    while(!qspi_ip6514e_is_idle(dev));
 
     if (dummy_cycles > DEVICE_READ_WRITE_INST_DUMMY_CYCLES_MAX) {
         return QSPI_IP6514E_ERR_WRONG_ARGUMENT;
@@ -287,9 +299,11 @@ enum qspi_ip6514e_error_t qspi_ip6514e_set_baud_rate_div(
     struct _qspi_ip6514e_reg_map_t *reg_map =
                                (struct _qspi_ip6514e_reg_map_t *)dev->cfg->base;
 
-    if (!qspi_ip6514e_is_idle(dev)) {
-        return QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
+    /*
+     * Wait for the Serial Interface and QSPI pipeline to be IDLE when
+     * all low level synchronization has been done.
+     */
+    while(!qspi_ip6514e_is_idle(dev));
 
     /* div should be an even number. */
     if (((div & 1U) == 1) ||
@@ -326,9 +340,11 @@ enum qspi_ip6514e_error_t qspi_ip6514e_set_spi_mode(
     uint32_t device_read_inst_cpy = reg_map->device_read_inst;
     uint32_t device_write_inst_cpy = reg_map->device_write_inst;
 
-    if (!qspi_ip6514e_is_idle(dev)) {
-        return QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
+    /*
+     * Wait for the Serial Interface and QSPI pipeline to be IDLE when
+     * all low level synchronization has been done.
+     */
+    while(!qspi_ip6514e_is_idle(dev));
 
     /*
      * First check that the instruction mode is not SPI. If that is the case,
@@ -406,9 +422,11 @@ enum qspi_ip6514e_error_t qspi_ip6514e_cfg_page_size(
     struct _qspi_ip6514e_reg_map_t *reg_map =
                                (struct _qspi_ip6514e_reg_map_t *)dev->cfg->base;
 
-    if (!qspi_ip6514e_is_idle(dev)) {
-        return QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
+    /*
+     * Wait for the Serial Interface and QSPI pipeline to be IDLE when
+     * all low level synchronization has been done.
+     */
+    while(!qspi_ip6514e_is_idle(dev));
 
     if (page_size > DEVICE_SIZE_PAGE_BYTES_MAX) {
         return QSPI_IP6514E_ERR_WRONG_ARGUMENT;
@@ -429,9 +447,11 @@ enum qspi_ip6514e_error_t qspi_ip6514e_cfg_addr_bytes(
     struct _qspi_ip6514e_reg_map_t *reg_map =
                                (struct _qspi_ip6514e_reg_map_t *)dev->cfg->base;
 
-    if (!qspi_ip6514e_is_idle(dev)) {
-        return QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE;
-    }
+    /*
+     * Wait for the Serial Interface and QSPI pipeline to be IDLE when
+     * all low level synchronization has been done.
+     */
+    while(!qspi_ip6514e_is_idle(dev));
 
     if (bytes_number < DEVICE_SIZE_ADDR_BYTES_MIN ||
         bytes_number > DEVICE_SIZE_ADDR_BYTES_MAX) {
@@ -482,6 +502,39 @@ void qspi_ip6514e_disable_remap(struct qspi_ip6514e_dev_t* dev)
     if (is_enabled) {
         qspi_ip6514e_enable(dev);
     }
+}
+
+void qspi_ip6514e_reset_regs(struct qspi_ip6514e_dev_t* dev)
+{
+    struct _qspi_ip6514e_reg_map_t *reg_map =
+                               (struct _qspi_ip6514e_reg_map_t *)dev->cfg->base;
+
+    /* Restore the default value of the QSPI Configuration register. */
+    reg_map->qspi_cfg = QSPI_CFG_REG_RESET_VALUE;
+
+    /* Restore the default value of the Device R/W Instruction registers. */
+    reg_map->device_read_inst = DEVICE_READ_INSTR_REG_RESET_VALUE;
+    reg_map->device_write_inst = DEVICE_WRITE_INSTR_REG_RESET_VALUE;
+
+    /* Restore the default value of the Device Size Configuration register. */
+    reg_map->device_size = DEVICE_SIZE_CFG_REG_RESET_VALUE;
+
+    /* Restore the default value of the Remap Address register. */
+    reg_map->remap_addr = REMAP_ADDR_REG_RESET_VALUE;
+
+    /* Restore the default value of the Flash Command Control register. */
+    reg_map->flash_cmd_ctrl = FLASH_CMD_CONTROL_REG_RESET_VALUE;
+    /* Restore the default value of the Flash Command Address register. */
+    reg_map->flash_cmd_addr = FLASH_CMD_ADDRESS_REG_RESET_VALUE;
+
+    /* Restore the default value of the Flash Command Write Data registers. */
+    reg_map->flash_cmd_write_data_lower = FLASH_CMD_WRITE_DATA_REG_RESET_VALUE;
+    reg_map->flash_cmd_write_data_upper = FLASH_CMD_WRITE_DATA_REG_RESET_VALUE;
+
+    /*
+     * This function does not affect the Flash Command Read Data registers
+     * which are completely Read-Only.
+     */
 }
 
 enum qspi_ip6514e_error_t qspi_ip6514e_send_cmd(struct qspi_ip6514e_dev_t* dev,

@@ -59,7 +59,6 @@ enum qspi_ip6514e_error_t {
     QSPI_IP6514E_ERR_NONE,
     QSPI_IP6514E_ERR_WRONG_ARGUMENT,
     QSPI_IP6514E_ERR_CONTROLLER_NOT_DISABLED,
-    QSPI_IP6514E_ERR_CONTROLLER_NOT_IDLE,
     QSPI_IP6514E_ERR_READ_IN_PROGRESS,
     QSPI_IP6514E_ERR_WRITE_IN_PROGRESS,
     /* Any new error should be added to the enumeration type error of
@@ -261,6 +260,15 @@ void qspi_ip6514e_remap_addr(struct qspi_ip6514e_dev_t* dev, uint32_t offset);
  * \note This function will only affect direct reads/writes.
  */
 void qspi_ip6514e_disable_remap(struct qspi_ip6514e_dev_t* dev);
+
+/**
+ * \brief Restore the default value of the QSPI controller registers.
+ *
+ * \param[in] dev    QSPI IP6514E device struct \ref qspi_ip6514e_dev_t
+ *
+ * \note The QSPI controller should be disabled before calling this function.
+ */
+void qspi_ip6514e_reset_regs(struct qspi_ip6514e_dev_t* dev);
 
 /**
  * \brief Send a command to the flash memory device using the Software Triggered

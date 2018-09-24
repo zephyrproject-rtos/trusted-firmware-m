@@ -77,6 +77,11 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
+    rc = FLASH_DEV_NAME.Uninitialize();
+    if(rc != ARM_DRIVER_OK) {
+        BOOT_LOG_ERR("Error while uninitializing Flash Interface");
+    }
+
     stdio_uninit();
 
     __disable_irq();
@@ -101,8 +106,12 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
-    /* Initialize Flash driver */
-    FLASH_DEV_NAME.Initialize(NULL);
+    rc = FLASH_DEV_NAME.Initialize(NULL);
+    if(rc != ARM_DRIVER_OK) {
+        BOOT_LOG_ERR("Error while initializing Flash Interface");
+        while (1)
+            ;
+    }
 
     rc = boot_go(&rsp);
     if (rc != 0) {
