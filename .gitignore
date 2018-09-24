@@ -3,14 +3,11 @@
 # Eclipse projects
 *.project
 *.cproject
+.pydevproject
 .settings/
 
 # Garbage files
 build*/
-objects/
-bin/
-test/*.a
-secure_fw/services/secure_storage/*.o
-secure_fw/services/secure_storage/*.a
 *.orig
 **/__pycache__
+*.pyc

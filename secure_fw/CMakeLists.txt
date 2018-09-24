@@ -13,6 +13,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
+#Include functionality to enable building the documentation.
+include("Common/BuildDoxygenDoc")
+
 #Start an embedded project.
 embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
 project(tfm_s LANGUAGES ASM C)

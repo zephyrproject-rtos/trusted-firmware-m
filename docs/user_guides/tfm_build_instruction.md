@@ -138,6 +138,26 @@ cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigPsaApiTest.cmake` -
 cmake --build ./ -- install
 ```
 
+## Building the Reference Manual
+Please ensure the dependencies for building the firmware and the documentation
+are installed as explained in the [software requirements](tfm_sw_requirement.md).
+
+*Note* For building the documentation all tools needed to build the firmware
+must be available.
+
+~~~
+cd <TF-M base folder>
+mkdir cmake_doc
+cd cmake_doc
+cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG
+cmake --build ./ -- install_doc
+~~~
+
+The documentation files will be available under the directory:
+~~~
+<cmake_doc>/install/doc/reference_manual
+~~~
+
 --------------
 
 *Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
