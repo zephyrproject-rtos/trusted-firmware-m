@@ -88,6 +88,14 @@ static int32_t ARM_USARTx_Initialize(UARTx_Resources* uart_dev)
     return ARM_DRIVER_OK;
 }
 
+static int32_t ARM_USARTx_Uninitialize(UARTx_Resources* uart_dev)
+{
+    /* Disables and uninitializes generic UART driver */
+    uart_pl011_uninit(uart_dev->dev);
+
+    return ARM_DRIVER_OK;
+}
+
 static int32_t ARM_USARTx_PowerControl(UARTx_Resources* uart_dev,
                                        ARM_POWER_STATE state)
 {
@@ -100,9 +108,8 @@ static int32_t ARM_USARTx_PowerControl(UARTx_Resources* uart_dev,
     case ARM_POWER_FULL:
         /* Nothing to be done */
         return ARM_DRIVER_OK;
-    /* default:  The default is not defined intentionally to force the
-     *           compiler to check that all the enumeration values are
-     *           covered in the switch.*/
+    default:
+        return ARM_DRIVER_ERROR_PARAMETER;
     }
 }
 
@@ -232,8 +239,7 @@ static int32_t ARM_USART0_Initialize(ARM_USART_SignalEvent_t cb_event)
 
 static int32_t ARM_USART0_Uninitialize(void)
 {
-    /* Nothing to be done */
-    return ARM_DRIVER_OK;
+    return ARM_USARTx_Uninitialize(&USART0_DEV);
 }
 
 static int32_t ARM_USART0_PowerControl(ARM_POWER_STATE state)
@@ -330,8 +336,7 @@ static int32_t ARM_USART1_Initialize(ARM_USART_SignalEvent_t cb_event)
 
 static int32_t ARM_USART1_Uninitialize(void)
 {
-    /* Nothing to be done */
-    return ARM_DRIVER_OK;
+    return ARM_USARTx_Uninitialize(&USART1_DEV);
 }
 
 static int32_t ARM_USART1_PowerControl(ARM_POWER_STATE state)

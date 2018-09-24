@@ -152,6 +152,19 @@ struct _uart_pl011_reg_map_t {
 #define UART_PL011_UARTDMACR_TX_MASK (                  \
             0x1u<<UART_PL011_UARTDMACR_TXEN_OFF)
 
+/* Default register values of UART PL011 */
+#define UART_PL011_DATA_REG_RESET_VALUE     (0x0u)
+#define UART_PL011_ECR_REG_CLEAR_VALUE      (0xFFu)
+#define UART_PL011_ILPR_REG_RESET_VALUE     (0x0u)
+#define UART_PL011_IBRD_REG_RESET_VALUE     (0x0u)
+#define UART_PL011_FBRD_REG_RESET_VALUE     (0x0u)
+#define UART_PL011_LCR_H_REG_RESET_VALUE    (0x0u)
+#define UART_PL011_CR_REG_RESET_VALUE       (0x0300u)
+#define UART_PL011_IFLS_REG_RESET_VALUE     (0x12u)
+#define UART_PL011_IMSC_REG_RESET_VALUE     (0x0u)
+#define UART_PL011_ICR_REG_CLEAR_VALUE      (0x7FFu)
+#define UART_PL011_DMACR_REG_RESET_VALUE    (0x0u)
+
 static void _uart_pl011_enable(struct _uart_pl011_reg_map_t* p_uart)
 {
     p_uart->uartcr |=  UART_PL011_UARTCR_EN_MASK;
@@ -180,6 +193,11 @@ static void _uart_pl011_disable_fifo(struct _uart_pl011_reg_map_t* p_uart)
 static bool _uart_pl011_is_fifo_enabled(struct _uart_pl011_reg_map_t* p_uart)
 {
     return (bool)(p_uart->uartlcr_h & UART_PL011_UARTLCR_H_FEN_MASK);
+}
+
+static bool _uart_pl011_is_busy(struct _uart_pl011_reg_map_t* p_uart)
+{
+    return (bool)(p_uart->uartfr & UART_PL011_UARTFR_BUSYBIT);
 }
 
 static enum uart_pl011_error_t _uart_pl011_set_baudrate(
@@ -318,6 +336,27 @@ static void _uart_pl011_clear_lcr_h_bit(struct _uart_pl011_reg_map_t* p_uart,
     }
 }
 
+static void _uart_pl011_reset_regs(struct _uart_pl011_reg_map_t* p_uart)
+{
+    /* Restore the default value of UART registers, the registers which
+     * are not listed below are Read-Only */
+
+    /* Will disable the UART */
+    p_uart->uartcr      = UART_PL011_CR_REG_RESET_VALUE;
+    p_uart->uartdr      = UART_PL011_DATA_REG_RESET_VALUE;
+    /* Clear all the errors */
+    p_uart->uartecr     = UART_PL011_ECR_REG_CLEAR_VALUE;
+    p_uart->uartilpr    = UART_PL011_ILPR_REG_RESET_VALUE;
+    p_uart->uartibrd    = UART_PL011_IBRD_REG_RESET_VALUE;
+    p_uart->uartfbrd    = UART_PL011_FBRD_REG_RESET_VALUE;
+    p_uart->uartlcr_h   = UART_PL011_LCR_H_REG_RESET_VALUE;
+    p_uart->uartifls    = UART_PL011_IFLS_REG_RESET_VALUE;
+    p_uart->uartimsc    = UART_PL011_IMSC_REG_RESET_VALUE;
+    /* Clear all the interrupts */
+    p_uart->uarticr     = UART_PL011_ICR_REG_CLEAR_VALUE;
+    p_uart->uartdmacr   = UART_PL011_DMACR_REG_RESET_VALUE;
+}
+
 enum uart_pl011_error_t uart_pl011_init(struct uart_pl011_dev_t* dev,
                     uint32_t uart_clk)
 {
@@ -364,7 +403,10 @@ void uart_pl011_uninit(struct uart_pl011_dev_t* dev)
     struct _uart_pl011_reg_map_t* p_uart =
         (struct _uart_pl011_reg_map_t*)dev->cfg->base;
 
-    _uart_pl011_disable(p_uart);
+    while(_uart_pl011_is_busy(p_uart));
+
+    /* Disable and restore the default configuration of the peripheral */
+    _uart_pl011_reset_regs(p_uart);
 
     dev->data->state = UART_PL011_UNINITIALIZED;
 

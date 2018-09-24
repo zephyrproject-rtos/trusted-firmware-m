@@ -77,6 +77,8 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
+    stdio_uninit();
+
     __disable_irq();
     __set_MSP(vt->msp);
     __DSB();

@@ -35,4 +35,9 @@ enum uart_channel {
  */
 void stdio_init(void);
 
+/**
+ * \brief Uninitializes the STDIO.
+ */
+void stdio_uninit(void);
+
 #endif /* __UART_STDOUT_H__ */

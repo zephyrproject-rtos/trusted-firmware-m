@@ -77,3 +77,10 @@ void stdio_init(void)
     ASSERT_HIGH(ret);
 }
 
+void stdio_uninit(void)
+{
+    int32_t ret = ARM_DRIVER_OK;
+    ret = TFM_DRIVER_STDIO.Uninitialize();
+    ASSERT_HIGH(ret);
+}
+
