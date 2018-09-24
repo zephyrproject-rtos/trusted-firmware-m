@@ -354,7 +354,7 @@ SECTIONS
 
 #endif /* TFM_LVL == 1 */
 
-    .ER_TFM_CODE :
+    .ER_TFM_CODE : ALIGN(4)
     {
         *(.text*)
 
@@ -429,7 +429,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM AT> FLASH
 #else /* TFM_LVL == 1 */
-    .TFM_UNPRIV_RO_DATA :
+    .TFM_UNPRIV_RO_DATA : ALIGN(32)
     {
         */tfm_spm_services.o(.data*)
         */dummy_crypto_keys.o(.data*)
@@ -744,7 +744,7 @@ SECTIONS
     } > RAM AT> FLASH
 #endif /* TFM_LVL == 1 */
 
-    .TFM_DATA :
+    .TFM_DATA : ALIGN(4)
     {
         *(.data*)
 
