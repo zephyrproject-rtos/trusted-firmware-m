@@ -161,6 +161,7 @@ Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK]
                 IMPORT  SystemInit
                 IMPORT  __main
+                CPSID   i              ; Disable IRQs
                 LDR     R0, =SystemInit
                 BLX     R0
                 MRS     R0, control    ; Get control value

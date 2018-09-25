@@ -305,6 +305,7 @@ Reset_Handler:
 .L_loop3_done:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
+    cpsid   i              /* Disable IRQs */
     bl    SystemInit
 
     mrs     r0, control    /* Get control value */

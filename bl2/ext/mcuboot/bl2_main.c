@@ -84,7 +84,6 @@ static void do_boot(struct boot_rsp *rsp)
 
     stdio_uninit();
 
-    __disable_irq();
     __set_MSP(vt->msp);
     __DSB();
     __ISB();
