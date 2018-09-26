@@ -12,6 +12,7 @@
 #define IPC_ERROR_BAD_PARAMETERS        (INT32_MIN)
 #define IPC_ERROR_SHORT_BUFFER          (INT32_MIN + 1)
 #define IPC_ERROR_VERSION               (INT32_MIN + 2)
+#define IPC_ERROR_MEMORY_CHECK          (INT32_MIN + 3)
 #define IPC_ERROR_GENERIC               (INT32_MIN + 0x1F)
 
 #endif

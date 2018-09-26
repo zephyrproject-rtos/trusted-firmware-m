@@ -273,6 +273,19 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
                                      uint32_t minor_version);
 
+/**
+ * \brief                   Check the memory reference is valid.
+ *
+ * \param[in] buffer        Pointer of memory reference
+ * \param[in] len           Length of memory reference in bytes
+ * \param[in] ns_caller     From non-secure caller
+ *
+ * \retval IPC_SUCCESS      Success
+ * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
+ * \retval IPC_ERROR_MEMORY_CHECK Check failed
+ */
+int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller);
+
 /* This function should be called before schedule function */
 void tfm_spm_init(void);
 

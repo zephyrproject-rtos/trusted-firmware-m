@@ -5,6 +5,7 @@
  *
  */
 #include <inttypes.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@
 #include "tfm_spm.h"
 #include "tfm_spm_signal_defs.h"
 #include "tfm_thread.h"
+#include "region_defs.h"
 #include "tfm_nspm.h"
 
 /*
@@ -453,6 +455,86 @@ static uint32_t tfm_spm_partition_get_priority_ext(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data.
                     partition_priority;
+}
+
+/* Macros to pick linker symbols and allow references to sections in all level*/
+#define REGION_DECLARE_EXT(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+
+REGION_DECLARE_EXT(Image$$, ER_TFM_DATA, $$Base);
+REGION_DECLARE_EXT(Image$$, ER_TFM_DATA, $$Limit);
+REGION_DECLARE_EXT(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
+REGION_DECLARE_EXT(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
+REGION_DECLARE_EXT(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
+REGION_DECLARE_EXT(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
+
+/*
+ * \brief                         Check the memory whether in the given range.
+ *
+ * \param[in] buffer              Pointer of memory reference
+ * \param[in] len                 Length of memory reference in bytes
+ * \param[in] base                The base address
+ * \param[in] limit               The limit address, the first byte of next
+ *                                area memory
+ *
+ * \retval IPC_SUCCESS            Success
+ * \retval IPC_ERROR_MEMORY_CHECK Check failed
+ */
+static int32_t memory_check_range(const void *buffer, size_t len,
+                                  uintptr_t base, uintptr_t limit)
+{
+    if (((uintptr_t)buffer >= base) &&
+        ((uintptr_t)((uint8_t *)buffer + len - 1) < limit)) {
+        return IPC_SUCCESS;
+    }
+    return IPC_ERROR_MEMORY_CHECK;
+}
+
+/* FixMe: This is only valid for TFM LVL 1 now */
+int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller)
+{
+    uintptr_t base, limit;
+
+    /* If len is zero, this indicates an empty buffer and base is ignored */
+    if (len == 0) {
+        return IPC_SUCCESS;
+    }
+
+    if (!buffer) {
+        return IPC_ERROR_BAD_PARAMETERS;
+    }
+
+    if ((uintptr_t)buffer > (UINTPTR_MAX - len)) {
+        return IPC_ERROR_MEMORY_CHECK;
+    }
+
+    if (ns_caller) {
+        base = (uintptr_t)NS_DATA_START;
+        limit = (uintptr_t)(NS_DATA_START + NS_DATA_SIZE);
+        if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
+            return IPC_SUCCESS;
+        }
+    } else {
+        base = (uintptr_t)&REGION_NAME(Image$$, ER_TFM_DATA, $$Base);
+        limit = (uintptr_t)&REGION_NAME(Image$$, ER_TFM_DATA, $$Limit);
+        if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
+            return IPC_SUCCESS;
+        }
+
+        base = (uintptr_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
+        limit = (uintptr_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
+        if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
+            return IPC_SUCCESS;
+        }
+
+        base = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
+        limit = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH,
+                                        $$ZI$$Limit);
+        if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
+            return IPC_SUCCESS;
+        }
+    }
+
+    return IPC_ERROR_MEMORY_CHECK;
 }
 
 /********************** SPM functions for thread mode ************************/
