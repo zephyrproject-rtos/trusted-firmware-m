@@ -73,11 +73,11 @@ recent" GNU make version shall work.
 CMake generators other than "Unix Makefiles" may work, but are not officially
 supported.
 
-# Example setups
+## Example setups
 This section lists dependencies and some exact and tested steps to set-up a
 TF-M-m build environment under various OSes.
 
-## Ubuntu
+### Ubuntu
 - DS-5 v5.27.1.
 - Git tools v2.10.0
 - CMake (see the "Supported CMake versions" chapter)
@@ -90,7 +90,7 @@ TF-M-m build environment under various OSes.
   - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml python3-jinja2
 - SRecord v1.58 (for Musca test chip boards)
 
-### Setup a shell to enable compiler toolchain and CMake after installation.
+#### Setup a shell to enable compiler toolchain and CMake after installation.
 
 To import Arm Compiler v6.7.1 in your bash shell console:
 
@@ -113,7 +113,7 @@ To import GNU Arm in your bash shell console:
 export PATH=<GNU_ARM_PATH>/bin:$PATH
 ~~~
 
-## Windows + Cygwin
+### Windows + Cygwin
 - uVision v5.24.1 or DS-5 v5.27.1 (DS-5 Ultimate Edition) which provides the
   Arm Compiler v6.7.1 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
@@ -129,7 +129,7 @@ export PATH=<GNU_ARM_PATH>/bin:$PATH
 - Python3 pip
 - [SRecord v1.63](https://sourceforge.net/projects/srecord/) (for Musca test chip boards)
 
-### Setup Cygwin to enable a compiler toolchain and CMake after installation.
+#### Setup Cygwin to enable a compiler toolchain and CMake after installation.
 
 If applicable, import Arm Compiler v6.7.1 in your shell console. To make this
 change permanent, add the command line into ~/.bashrc
@@ -179,7 +179,17 @@ To import CMake in your bash shell console:
 export PATH=/cygdrive/c/<CMAKE_PATH>/bin:$PATH
 ~~~
 
-## To compile the TF-M Reference Manual
+### Building documentation
+The build system is prepared to support generation of two documents. The
+Reference Manual which is Doxygen based, and the User Guide which is Sphinx
+based.
+Both document can be generated in HTML and PDF format.
+
+*Note* support for document generation in the build environment is not
+mandatory. Missing document generation tools will not block building the TF-M
+firmware.
+
+#### To compile the TF-M Reference Manual
 The following additional tools are needed:
 - Doxygen v1.8.0 or later
 - Graphviz dot v2.38.0 or later
@@ -190,20 +200,16 @@ For PDF generation the following tools are needed in addition to the above list:
 - LaTeX
 - PdfLaTeX
 
-*Note* support for document generation in the build environment is not
-mandatory. Missing document generation tools will not block building the TF-M
-firmware.
+##### Set-up the needed tools
 
-###Set-up the needed tools
-
-#### Linux
+###### Linux
 - sudo apt-get install -y doxygen graphviz default-jre
 - mkdir ~/plantuml; curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
 
 For PDF generation:
 - sudo apt-get install -y doxygen-latex
 
-#### Windows
+###### Windows
 - [Doxygen 1.8.8](https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download)
 - [Graphviz 2.38](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
 - The Java runtime is part of the DS5 installation or can be
@@ -217,14 +223,71 @@ For PDF generation:
 installing missing LaTeX components. Please allow the MikTeX package manager to
 set-up these.
 
-### Configure the shell
+###### Configure the shell
 
-#### Linux
+####### Linux
 ~~~
 export PLANTUML_JAR_PATH="~/plantuml/plantuml.jar"
 ~~~
 
-#### Windows + Cygwin
+####### Windows + Cygwin
+Assumptions for the settings below:
+- plantuml.jar is available at c:\plantuml\plantuml.jar
+- doxygen, dot, and MikTeX binaries are available on the PATH.
+
+~~~
+export PLANTUML_JAR_PATH="c:/plantuml/plantuml.jar"
+export PATH=$PATH:/cygdrive/c/<DS-5 path>/sw/java/bin
+~~~
+
+#### To compile the TF-M User Guide
+The following additional tools are needed:
+- Python3 and the following modules:
+    - Sphinx v1.7.9
+    - m2r v0.2.0
+- Graphviz dot v2.38.0 or later
+- PlantUML v1.2018.11 or later
+- Java runtime environment 1.8 or later (for running PlantUML)
+
+For PDF generation the following tools are needed in addition to the above list:
+- LaTeX
+- PdfLaTeX
+
+##### Set-up the needed tools
+
+###### Linux
+- sudo apt-get install -y python3 graphviz default-jre
+- pip --user install m2r Sphinx sphinx-rtd-theme
+- mkdir ~/plantuml; curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
+
+For PDF generation:
+- sudo apt-get install -y doxygen-latex
+
+###### Windows
+- Python3 [(native Windows version)](https://www.python.org/downloads/)
+- pip --user install m2r Sphinx sphinx-rtd-theme
+- [Graphviz 2.38](https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi)
+- The Java runtime is part of the DS5 installation or can be
+  [downloaded from here](https://www.java.com/en/download/)
+- [PlantUML](http://sourceforge.net/projects/plantuml/files/plantuml.jar/download)
+
+For PDF generation:
+- [MikTeX](https://miktex.org/download)
+
+*Note* When building the documentation the first time, MikTeX might prompt for
+installing missing LaTeX components. Please allow the MikTeX package manager to
+set-up these.
+
+##### Configure the shell
+
+###### Linux
+
+~~~
+export PLANTUML_JAR_PATH="~/plantuml/plantuml.jar"
+~~~
+
+###### Windows + Cygwin
+
 Assumptions for the settings below:
 - plantuml.jar is available at c:\plantuml\plantuml.jar
 - doxygen, dot, and MikTeX binaries are available on the PATH.

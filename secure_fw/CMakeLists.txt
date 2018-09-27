@@ -15,6 +15,7 @@ include("Common/BuildSys")
 
 #Include functionality to enable building the documentation.
 include("Common/BuildDoxygenDoc")
+include("Common/BuildSphinxDoc")
 
 #Start an embedded project.
 embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
