@@ -49,8 +49,6 @@ void register_testsuite_ns_ipc_interface(struct test_suite_t *p_test_suite)
  */
 static void tfm_ipc_test_1001(struct test_result_t *ret)
 {
-/* FixMe: uncomment this when psa_framework is implemented. */
-#if 0
     uint32_t version;
 
     version = psa_framework_version();
@@ -60,8 +58,6 @@ static void tfm_ipc_test_1001(struct test_result_t *ret)
         TEST_FAIL("The version of the PSA Framework API is not valid!\r\n");
         return;
     }
-#endif
-    TEST_FAIL("psa_framework is not implemented now!\r\n");
 }
 
 /**

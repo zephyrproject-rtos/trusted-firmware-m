@@ -5,12 +5,14 @@
  *
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include "psa_client.h"
 #include "psa_service.h"
 #include "secure_utilities.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
+#include "tfm_svcalls.h"
 
 /* FixMe: check if this is really needed */
 extern int32_t tfm_secure_lock;
@@ -76,48 +78,21 @@ int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
 __tfm_secure_gateway_attributes__
 uint32_t tfm_psa_framework_version_veneer(void)
 {
-    return PSA_FRAMEWORK_VERSION;
-}
-
-uint32_t tfm_psa_version_handler(uint32_t sid)
-{
-    /* perform sanity check */
-    /* return version number registered in manifest for given SID */
-    return PSA_VERSION_NONE;
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_framework_version, 0, 0,
+                                   0, 0);
 }
 
 __tfm_secure_gateway_attributes__
 uint32_t tfm_psa_version_veneer(uint32_t sid)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_version_handler, sid, 0, 0, 0);
-}
-
-psa_handle_t tfm_psa_connect_handler(uint32_t sid, uint32_t minor_version)
-{
-    /* perform sanity check */
-    /* decide whether a connection can be established to a given SID.
-     * In case of library model, this function always returns a valid handle.
-     * In thread model, it needs to perform the procedures outlined in PSA IPC
-     */
-     return PSA_SUCCESS;
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_version, sid, 0, 0, 0);
 }
 
 __tfm_secure_gateway_attributes__
 psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_connect_handler, sid, minor_version,
-                                   0, 0);
-}
-
-psa_status_t tfm_psa_call_handler(psa_handle_t handle,
-                                  const psa_invec *in_vecs,
-                                  const psa_invec *out_vecs)
-{
-    /* perform sanity check */
-    /* In case of library model, call the function referenced by the handle
-     * In thread model, it needs to perform the procedures outlined in PSA IPC
-     */
-    return PSA_SUCCESS;
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_connect, sid,
+                                   minor_version, 0, 0);
 }
 
 __tfm_secure_gateway_attributes__
@@ -125,21 +100,14 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
                                  const psa_invec *in_vecs,
                                  const psa_invec *out_vecs)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_call_handler, handle, in_vecs,
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_call, handle, in_vecs,
                                    out_vecs, 0);
-}
-
-psa_status_t tfm_psa_close_handler(psa_handle_t handle)
-{
-    /* perform sanity check */
-    /* Close connection referenced by handle */
-    return PSA_SUCCESS;
 }
 
 __tfm_secure_gateway_attributes__
 psa_status_t tfm_psa_close_veneer(psa_handle_t handle)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_psa_close_handler, handle, 0, 0, 0);
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_close, handle, 0, 0, 0);
 }
 
 void tfm_psa_ipc_request_handler(uint32_t svc_ctx[])
@@ -156,10 +124,10 @@ void tfm_psa_ipc_request_handler(uint32_t svc_ctx[])
     }
 
     /* Store SVC return value in stacked r0 */
-    *r0_ptr = desc_ptr->sfn(desc_ptr->args[0],
-                            desc_ptr->args[1],
-                            desc_ptr->args[2],
-                            desc_ptr->args[3]);
+    *r0_ptr = desc_ptr->sfn((int32_t)desc_ptr->args,
+                            desc_ptr->ns_caller,
+                            0,
+                            0);
 
     return;
 }
