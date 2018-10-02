@@ -22,8 +22,6 @@
 #include "tfm_memory_utils.h"
 #include "spm_api.h"
 
-#define PSA_TIMEOUT_MASK        PSA_BLOCK
-
 /************************* SVC handler for PSA Client APIs *******************/
 
 uint32_t tfm_svcall_psa_framework_version(void)

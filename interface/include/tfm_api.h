@@ -38,6 +38,9 @@ extern "C" {
 /* Maximum number of input and output vectors */
 #define PSA_MAX_IOVEC    (4)
 
+/* The mask used for timeout values */
+#define PSA_TIMEOUT_MASK        PSA_BLOCK
+
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
 /* For secure functions using prorietary signatures

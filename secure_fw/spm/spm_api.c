@@ -27,6 +27,24 @@ typedef enum {
     TFM_INIT_FAILURE,
 } sp_error_type_t;
 
+/* The size of this struct must be multiple of 4 bytes as it is stacked to an
+ * uint32_t[] array
+ */
+struct interrupted_ctx_stack_frame_t {
+#if TFM_LVL != 1
+    uint32_t stack_ptr;
+#endif
+    uint32_t partition_state;
+};
+
+/* The size of this struct must be multiple of 4 bytes as it is stacked to an
+ * uint32_t[] array
+ */
+struct handler_ctx_stack_frame_t {
+    uint32_t partition_state;
+    uint32_t caller_partition_idx;
+};
+
 /*
  * This function is called when a secure partition causes an error.
  * In case of an error in the error handling, a non-zero value have to be
@@ -88,6 +106,10 @@ enum spm_err_t tfm_spm_db_init(void)
 {
     struct spm_partition_desc_t *part_ptr;
     enum spm_err_t err;
+    static uint32_t ns_interrupt_ctx_stack[
+           sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
+    static uint32_t tfm_core_interrupt_ctx_stack[
+           sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
 
     (void)tfm_memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
 
@@ -131,6 +153,7 @@ enum spm_err_t tfm_spm_db_init(void)
 #endif
 
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
+    part_ptr->runtime_data.ctx_stack_ptr = ns_interrupt_ctx_stack;
     tfm_nspm_configure_clients();
     ++g_spm_partition_db.partition_count;
 
@@ -144,6 +167,7 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags =
                     SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
+    part_ptr->runtime_data.ctx_stack_ptr = tfm_core_interrupt_ctx_stack;
     ++g_spm_partition_db.partition_count;
 
     err = add_user_defined_partitions();
@@ -199,6 +223,77 @@ enum spm_err_t tfm_spm_partition_init(void)
         return SPM_ERR_PARTITION_NOT_AVAILABLE;
     }
 }
+
+void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)
+{
+    struct spm_partition_runtime_data_t *runtime_data =
+            &g_spm_partition_db.partitions[partition_idx].runtime_data;
+    struct interrupted_ctx_stack_frame_t *stack_frame =
+            (struct interrupted_ctx_stack_frame_t *)
+            runtime_data->ctx_stack_ptr;
+
+    stack_frame->partition_state = runtime_data->partition_state;
+#if TFM_LVL != 1
+    stack_frame->stack_ptr = runtime_data->stack_ptr;
+#endif
+    runtime_data->ctx_stack_ptr +=
+            sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
+
+}
+
+void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
+{
+    struct spm_partition_runtime_data_t *runtime_data =
+            &g_spm_partition_db.partitions[partition_idx].runtime_data;
+    struct interrupted_ctx_stack_frame_t *stack_frame;
+
+    runtime_data->ctx_stack_ptr -=
+            sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
+    stack_frame = (struct interrupted_ctx_stack_frame_t *)
+                   runtime_data->ctx_stack_ptr;
+    tfm_spm_partition_set_state(partition_idx, stack_frame->partition_state);
+    stack_frame->partition_state = 0;
+#if TFM_LVL != 1
+    tfm_spm_partition_set_stack(partition_idx, stack_frame->stack_ptr);
+    stack_frame->stack_ptr = 0;
+#endif
+}
+
+void tfm_spm_partition_push_handler_ctx(uint32_t partition_idx)
+{
+    struct spm_partition_runtime_data_t *runtime_data =
+            &g_spm_partition_db.partitions[partition_idx].runtime_data;
+    struct handler_ctx_stack_frame_t *stack_frame =
+            (struct handler_ctx_stack_frame_t *)
+            runtime_data->ctx_stack_ptr;
+
+    stack_frame->partition_state = runtime_data->partition_state;
+    stack_frame->caller_partition_idx = runtime_data->caller_partition_idx;
+
+    runtime_data->ctx_stack_ptr +=
+            sizeof(struct handler_ctx_stack_frame_t) / sizeof(uint32_t);
+}
+
+void tfm_spm_partition_pop_handler_ctx(uint32_t partition_idx)
+{
+    struct spm_partition_runtime_data_t *runtime_data =
+            &g_spm_partition_db.partitions[partition_idx].runtime_data;
+    struct handler_ctx_stack_frame_t *stack_frame;
+
+    runtime_data->ctx_stack_ptr -=
+            sizeof(struct handler_ctx_stack_frame_t) / sizeof(uint32_t);
+
+    stack_frame = (struct handler_ctx_stack_frame_t *)
+                  runtime_data->ctx_stack_ptr;
+
+    tfm_spm_partition_set_state(partition_idx, stack_frame->partition_state);
+    stack_frame->partition_state = 0;
+    tfm_spm_partition_set_caller_partition_idx(
+                              partition_idx, stack_frame->caller_partition_idx);
+    stack_frame->caller_partition_idx = 0;
+
+}
+
 #endif /* !defined(TFM_PSA_API) */
 
 #if (TFM_LVL != 1) || defined(TFM_PSA_API)
@@ -306,7 +401,8 @@ void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state)
 {
     g_spm_partition_db.partitions[partition_idx].runtime_data.partition_state =
             state;
-    if (state == SPM_PARTITION_STATE_RUNNING) {
+    if (state == SPM_PARTITION_STATE_RUNNING ||
+        state == SPM_PARTITION_STATE_HANDLING_IRQ) {
         g_spm_partition_db.running_partition_idx = partition_idx;
     }
 }
@@ -316,6 +412,13 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
 {
     g_spm_partition_db.partitions[partition_idx].runtime_data.
             caller_partition_idx = caller_partition_idx;
+}
+
+void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
+                                       uint32_t signal_mask)
+{
+    g_spm_partition_db.partitions[partition_idx].runtime_data.
+            signal_mask = signal_mask;
 }
 
 void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,

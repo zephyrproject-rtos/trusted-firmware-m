@@ -29,6 +29,7 @@ Welcome to TF-M's documentation!
     docs/user_guides/tfm_integration_guide
     docs/user_guides/tfm_ns_client_identification
     docs/user_guides/tfm_secure_boot
+    docs/user_guides/tfm_secure_irq_handling
 
 .. toctree::
     :maxdepth: 2

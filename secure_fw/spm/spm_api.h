@@ -32,6 +32,7 @@ enum spm_part_state_t {
     SPM_PARTITION_STATE_UNINIT = 0,
     SPM_PARTITION_STATE_IDLE,
     SPM_PARTITION_STATE_RUNNING,
+    SPM_PARTITION_STATE_HANDLING_IRQ,
     SPM_PARTITION_STATE_SUSPENDED,
     SPM_PARTITION_STATE_BLOCKED,
     SPM_PARTITION_STATE_CLOSED
@@ -74,6 +75,16 @@ struct spm_partition_runtime_data_t {
                                       */
     struct iovec_args_t iovec_args;
     psa_outvec *orig_outvec;
+    uint32_t *ctx_stack_ptr;
+    /*
+     * FIXME: There is a 'signal_mask' defined in the structure
+     * 'tfm_spm_ipc_partition_t'. It should be eliminated, and the IPC
+     * implementation should use the 'signal_mask' define in this structure.
+     * However currently the content of 'spm_partition_runtime_data_t' structure
+     * is not maintained by the IPC implementation. This is to be fixed with the
+     * effort of restructuring common code among library and IPC model.
+     */
+    uint32_t signal_mask;
 };
 
 
@@ -215,6 +226,46 @@ uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
 
 #ifndef TFM_PSA_API
 /**
+ * \brief Save interrupted partition context on ctx stack
+ *
+ * \param[in] partition_idx  Partition index
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note This function doesn't whether the ctx stack overflows.
+ */
+void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx);
+
+/**
+ * \brief Restores interrupted partition context on ctx stack
+ *
+ * \param[in] partition_idx  Partition index
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note This function doesn't whether the ctx stack underflows.
+ */
+void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx);
+
+/**
+ * \brief Save handler partition context on ctx stack
+ *
+ * \param[in] partition_idx  Partition index
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note This function doesn't whether the ctx stack overflows.
+ */
+void tfm_spm_partition_push_handler_ctx(uint32_t partition_idx);
+
+/**
+ * \brief Restores handler partition context on ctx stack
+ *
+ * \param[in] partition_idx  Partition index
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note This function doesn't whether the ctx stack underflows.
+ */
+void tfm_spm_partition_pop_handler_ctx(uint32_t partition_idx);
+
+/**
  * \brief Get the current runtime data of a partition
  *
  * \param[in] partition_idx     Partition index
@@ -329,6 +380,17 @@ enum spm_err_t tfm_spm_partition_init(void);
  * \note This function doesn't check if partition_idx is valid.
  */
 void tfm_spm_partition_cleanup_context(uint32_t partition_idx);
+
+/**
+ * \brief Set the signal mask for a given partition
+ *
+ * \param[in] partition_idx        Partition index
+ * \param[in] signal_mask          The signal mask to be set for the partition
+ *
+ * \note This function doesn't check if any of the partition_idxs are valid.
+ */
+void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
+                                       uint32_t signal_mask);
 #endif /* !defined(TFM_PSA_API) */
 
 /**

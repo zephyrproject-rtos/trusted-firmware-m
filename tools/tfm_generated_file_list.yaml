@@ -45,6 +45,11 @@
         "name": "Secure Veneers H file",
         "short_name": "tfm_veneers_h",
         "output": "interface/include/tfm_veneers.h"
-    }
+    },
+    {
+        "name": "Secure IRQ handlers",
+        "short_name": "tfm_secure_irq_handlers",
+        "output": "secure_fw/core/tfm_secure_irq_handlers.inc"
+    },
   ]
 }

@@ -16,6 +16,8 @@
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
+#include "tfm_irq_signal_defs.h"
+#include "tfm_irq_list.h"
 #ifdef TFM_PSA_API
 #include "psa_client.h"
 #include "psa_service.h"
@@ -82,6 +84,8 @@ void configure_ns_code(void)
 
 int32_t tfm_core_init(void)
 {
+    size_t i;
+
     /* Enables fault handlers */
     enable_fault_handlers();
 
@@ -110,6 +114,15 @@ int32_t tfm_core_init(void)
      * secure peripherals
      */
     nvic_interrupt_target_state_cfg();
+
+    for (i = 0; i < tfm_core_irq_signals_count; ++i) {
+        tfm_spm_hal_set_secure_irq_priority(
+                                          tfm_core_irq_signals[i].irq_line,
+                                          tfm_core_irq_signals[i].irq_priority);
+        tfm_spm_hal_set_irq_target_state(tfm_core_irq_signals[i].irq_line,
+                                         TFM_IRQ_TARGET_STATE_SECURE);
+    }
+
     /* Enable secure peripherals interrupts */
     nvic_interrupt_enable();
 

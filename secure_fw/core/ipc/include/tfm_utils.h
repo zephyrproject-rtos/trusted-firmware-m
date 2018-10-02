@@ -26,6 +26,4 @@ void tfm_panic(void);
 #define TFM_GET_CONTAINER_PTR(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
 
-int32_t tfm_bitcount(uint32_t n);
-
 #endif

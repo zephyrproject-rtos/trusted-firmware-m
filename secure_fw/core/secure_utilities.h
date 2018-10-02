@@ -56,4 +56,6 @@ struct tfm_exc_stack_t {
 #define ERROR_MSG(MSG) printf("[Sec Error] %s\r\n", MSG)
 #endif
 
+int32_t tfm_bitcount(uint32_t n);
+
 #endif /* __SECURE_UTILITIES_H__ */

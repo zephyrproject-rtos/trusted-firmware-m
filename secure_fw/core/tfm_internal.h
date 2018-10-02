@@ -97,4 +97,36 @@ void tfm_core_get_boot_data_handler(uint32_t args[]);
  */
 void tfm_core_validate_boot_data(void);
 
+/**
+ * \brief Handle deprivileged request
+ */
+extern uint32_t tfm_core_depriv_req_handler(uint32_t *svc_args,
+                                            uint32_t excReturn);
+
+/**
+ * \brief Handle request to return to privileged
+ */
+uint32_t tfm_core_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr);
+
+/**
+ * \brief Handle IRQ enable request
+ */
+void tfm_core_enable_irq_handler(uint32_t *svc_args);
+
+/**
+ * \brief Handle IRQ disable request
+ */
+void tfm_core_disable_irq_handler(uint32_t *svc_args);
+
+/**
+ * \brief Handle signal wait request
+ */
+void tfm_core_psa_wait(uint32_t *svc_args);
+
+/**
+ * \brief Handle request to record IRQ processed
+ */
+void tfm_core_psa_eoi(uint32_t *svc_args);
+
+
 #endif /* __TFM_INTERNAL_H__ */

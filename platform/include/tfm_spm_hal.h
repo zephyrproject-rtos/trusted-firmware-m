@@ -28,6 +28,11 @@
  */
 struct tfm_spm_partition_platform_data_t;
 
+enum irq_target_state_t {
+    TFM_IRQ_TARGET_STATE_SECURE,
+    TFM_IRQ_TARGET_STATE_NON_SECURE,
+};
+
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
 /**
  * \brief Holds SPM db fields that define the memory regions used by a
@@ -159,6 +164,42 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void);
  *          available priority bits in the underlying target platform.
  */
 void tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority);
+
+/**
+ * \brief Clears a pending IRQ
+ *
+ * \param[in] irq_line    The IRQ to clear pending for.
+ */
+void tfm_spm_hal_clear_pending_irq(int32_t irq_line);
+
+/**
+ * \brief Enables an IRQ
+ *
+ * \param[in] irq_line    The IRQ to be enabled.
+ */
+void tfm_spm_hal_enable_irq(int32_t irq_line);
+
+/**
+ * \brief Disables an IRQ
+ *
+ * \param[in] irq_line    The IRQ to be disabled
+ */
+void tfm_spm_hal_disable_irq(int32_t irq_line);
+
+/**
+ * \brief Set the target state of an IRQ
+ *
+ * \param[in] irq_line      The IRQ to set the priority for.
+ * \param[in] target_state  Target state to ret for the IRQ.
+ *
+ * \return                TFM_IRQ_TARGET_STATE_SECURE if interrupt is assigned
+ *                        to Secure
+ *                        TFM_IRQ_TARGET_STATE_NON_SECURE if interrupt is
+ *                        assigned to Non-Secure
+ */
+enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
+                                          int32_t irq_line,
+                                          enum irq_target_state_t target_state);
 
 #if (TFM_LVL != 1) && !defined(TFM_PSA_API)
 /**

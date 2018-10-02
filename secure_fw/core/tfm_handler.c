@@ -12,10 +12,14 @@
 #include "tfm_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"
+#include "spm_partition_defs.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"
 #include "tfm_memory_utils.h"
 #include "tfm_arch.h"
+#include "tfm_irq_signal_defs.h"
+#include "tfm_peripherals_def.h"
+#include "tfm_irq_list.h"
 #ifdef TFM_PSA_API
 #include <stdbool.h>
 #include "tfm_svcalls.h"
@@ -29,7 +33,13 @@ extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
 extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
 #endif
 
-uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
+
+/* Include the definitions of the privileged IRQ handlers, and the declarations
+ * of the unprivileged handlers.
+ */
+#include "tfm_secure_irq_handlers.inc"
+
+uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
 {
     uint8_t svc_number;
     /*
@@ -94,6 +104,24 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
         break;
     case TFM_SVC_SET_SHARE_AREA:
         tfm_core_set_buffer_area_handler(svc_args);
+        break;
+    case TFM_SVC_DEPRIV_REQ:
+        lr = tfm_core_depriv_req_handler(svc_args, lr);
+        break;
+    case TFM_SVC_DEPRIV_RET:
+        lr = tfm_core_depriv_return_handler(msp, lr);
+        break;
+    case TFM_SVC_PSA_WAIT:
+        tfm_core_psa_wait(svc_args);
+        break;
+    case TFM_SVC_PSA_EOI:
+        tfm_core_psa_eoi(svc_args);
+        break;
+    case TFM_SVC_ENABLE_IRQ:
+        tfm_core_enable_irq_handler(svc_args);
+        break;
+    case TFM_SVC_DISABLE_IRQ:
+        tfm_core_disable_irq_handler(svc_args);
         break;
 #endif
     case TFM_SVC_PRINT:

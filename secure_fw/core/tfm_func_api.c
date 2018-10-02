@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <arm_cmse.h>
 #include "tfm_secure_api.h"
@@ -17,8 +18,12 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
+#include "platform/include/tfm_spm_hal.h"
+#include "tfm_irq_list.h"
+#include "psa_service.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
+#define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
@@ -96,6 +101,42 @@ static uint32_t *prepare_partition_iovec_ctx(
     *(--dst) = (uint32_t)iovec_args->out_vec;
     *(--dst) = iovec_args->in_len;
     *(--dst) = (uint32_t)iovec_args->in_vec;
+
+    return dst;
+}
+
+/**
+ * \brief Create a stack frame that sets the execution environment to thread
+ *        mode on exception return.
+ *
+ * \param[in] svc_ctx         The stacked SVC context
+ * \param[in] unpriv_handler  The unprivileged IRQ handler to be called
+ * \param[in] dst             A pointer where the context is to be created. (the
+ *                            pointer is considered to be a stack pointer, and
+ *                            the frame is created below it)
+ *
+ * \return A pointer pointing at the created stack frame.
+ */
+static int32_t *prepare_partition_irq_ctx(
+                             const struct tfm_exc_stack_t *svc_ctx,
+                             sfn_t unpriv_handler,
+                             int32_t *dst)
+{
+    int i;
+
+    /* XPSR  = as was when called, but make sure it's thread mode */
+    *(--dst) = svc_ctx->XPSR & 0xFFFFFE00;
+    /* ReturnAddress = resume to the privileged handler code, but execute it
+     * unprivileged.
+     */
+    *(--dst) = svc_ctx->RetAddr;
+    /* LR = start address */
+    *(--dst) = (int32_t)unpriv_handler;
+
+    /* R12, R0-R3 unused arguments */
+    for (i = 0; i < 5; ++i) {
+        *(--dst) = 0;
+    }
 
     return dst;
 }
@@ -259,15 +300,37 @@ static int32_t check_partition_state(
     }
 
     if (curr_partition_state == SPM_PARTITION_STATE_RUNNING ||
+        curr_partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
         curr_partition_state == SPM_PARTITION_STATE_SUSPENDED ||
         curr_partition_state == SPM_PARTITION_STATE_BLOCKED) {
-        /* Recursion is not permitted! */
+        /* Active partitions cannot be called! */
         return TFM_ERROR_PARTITION_NON_REENTRANT;
     } else if (curr_partition_state != SPM_PARTITION_STATE_IDLE) {
         /* The partition to be called is not in a proper state */
         return TFM_SECURE_LOCK_FAILED;
     }
     return TFM_SUCCESS;
+}
+
+/**
+ * \brief Check whether the partitions for the secure function call are in a
+ *        proper state
+ *
+ * \param[in] called_partition_state    State of the partition to be called
+ *
+ * \return \ref TFM_SUCCESS if the check passes, error otherwise.
+ */
+static int32_t check_irq_partition_state(
+                                   enum spm_part_state_t called_partition_state)
+{
+    if (called_partition_state == SPM_PARTITION_STATE_IDLE ||
+        called_partition_state == SPM_PARTITION_STATE_RUNNING ||
+        called_partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
+        called_partition_state == SPM_PARTITION_STATE_SUSPENDED ||
+        called_partition_state == SPM_PARTITION_STATE_BLOCKED) {
+        return TFM_SUCCESS;
+    }
+    return TFM_SECURE_LOCK_FAILED;
 }
 
 /**
@@ -438,6 +501,89 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
     return TFM_SUCCESS;
 }
 
+static int32_t tfm_start_partition_for_irq_handling(
+                                                uint32_t excReturn,
+                                                struct tfm_exc_stack_t *svc_ctx)
+{
+    uint32_t handler_partition_id = svc_ctx->R0;
+    sfn_t unpriv_handler = (sfn_t)svc_ctx->R1;
+    uint32_t irq_signal = svc_ctx->R2;
+    uint32_t irq_line = svc_ctx->R3;
+    int32_t res;
+    uint32_t psp = __get_PSP();
+#if (TFM_LVL != 1)
+    uint32_t handler_partition_psplim;
+#endif
+    uint32_t handler_partition_psp;
+    enum spm_part_state_t handler_partition_state;
+    uint32_t interrupted_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
+    const struct spm_partition_runtime_data_t *handler_part_data;
+    uint32_t handler_partition_idx;
+
+    handler_partition_idx = get_partition_idx(handler_partition_id);
+    handler_part_data = tfm_spm_partition_get_runtime_data(
+                                                         handler_partition_idx);
+    handler_partition_state = handler_part_data->partition_state;
+
+    res = check_irq_partition_state(handler_partition_state);
+    if (res != TFM_SUCCESS) {
+        return res;
+    }
+
+    /* set mask for the partition */
+    tfm_spm_partition_set_signal_mask(
+                                   handler_partition_idx,
+                                   handler_part_data->signal_mask | irq_signal);
+
+    tfm_spm_hal_disable_irq(irq_line);
+
+    /* save the current context of the interrupted partition */
+    tfm_spm_partition_push_interrupted_ctx(interrupted_partition_idx);
+
+#if (TFM_LVL != 1)
+    /* Save the psp as it was when the interrupt happened */
+    tfm_spm_partition_set_stack(interrupted_partition_idx, psp);
+
+    handler_partition_psp = handler_part_data->stack_ptr;
+    handler_partition_psplim =
+            tfm_spm_partition_get_stack_bottom(handler_partition_idx);
+#else /* TFM_LVL != 1 */
+    handler_partition_psp = psp;
+#endif /* TFM_LVL != 1 */
+
+    /* save the current context of the handler partition */
+    tfm_spm_partition_push_handler_ctx(handler_partition_idx);
+
+    /* Store caller for the partition */
+    tfm_spm_partition_set_caller_partition_idx(handler_partition_idx,
+                                               interrupted_partition_idx);
+
+#if TFM_LVL == 3
+    /* Dynamic partitioning is only done is TFM level 3 */
+    tfm_spm_partition_sandbox_deconfig(interrupted_partition_idx);
+
+    /* Configure partition execution environment */
+    if (tfm_spm_partition_sandbox_config(handler_partition_idx) != SPM_ERR_OK) {
+        ERROR_MSG("Failed to configure sandbox for partition!");
+        tfm_secure_api_error_handler();
+    }
+#endif /* TFM_LVL == 3 */
+
+    psp = (uint32_t)prepare_partition_irq_ctx(svc_ctx, unpriv_handler,
+                                              (int32_t *)handler_partition_psp);
+    __set_PSP(psp);
+#if (TFM_LVL != 1)
+    __set_PSPLIM(handler_partition_psplim);
+#endif /* TFM_LVL != 1 */
+    tfm_spm_partition_set_state(interrupted_partition_idx,
+                                SPM_PARTITION_STATE_SUSPENDED);
+    tfm_spm_partition_set_state(handler_partition_idx,
+                                SPM_PARTITION_STATE_HANDLING_IRQ);
+
+    return TFM_SUCCESS;
+}
+
 static int32_t tfm_return_from_partition(uint32_t *excReturn)
 {
     uint32_t current_partition_idx =
@@ -561,6 +707,79 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
                                 SPM_PARTITION_STATE_IDLE);
     tfm_spm_partition_set_state(return_partition_idx,
                                 SPM_PARTITION_STATE_RUNNING);
+
+    return TFM_SUCCESS;
+}
+
+static int32_t tfm_return_from_partition_irq_handling(uint32_t *excReturn)
+{
+    uint32_t handler_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
+    const struct spm_partition_runtime_data_t *handler_part_data;
+#if TFM_LVL != 1
+    const struct spm_partition_runtime_data_t *interrupted_part_data;
+    uint32_t interrupted_partition_psplim;
+#endif /* TFM_LVL != 1 */
+    uint32_t interrupted_partition_idx;
+    uint32_t psp = __get_PSP();
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
+
+    if (handler_partition_idx == SPM_INVALID_PARTITION_IDX) {
+        return TFM_SECURE_UNLOCK_FAILED;
+    }
+
+    handler_part_data = tfm_spm_partition_get_runtime_data(
+                                                         handler_partition_idx);
+    interrupted_partition_idx = handler_part_data->caller_partition_idx;
+
+    if (interrupted_partition_idx == SPM_INVALID_PARTITION_IDX) {
+        return TFM_SECURE_UNLOCK_FAILED;
+    }
+
+#if TFM_LVL != 1
+    interrupted_part_data = tfm_spm_partition_get_runtime_data(
+            interrupted_partition_idx);
+
+#if TFM_LVL == 3
+    /* Deconfigure completed partition environment */
+    tfm_spm_partition_sandbox_deconfig(handler_partition_idx);
+
+    /* Configure the caller partition environment */
+    if (tfm_spm_partition_sandbox_config(interrupted_partition_idx)
+        != SPM_ERR_OK) {
+        ERROR_MSG("Failed to configure sandbox for partition!");
+        tfm_secure_api_error_handler();
+    }
+#endif /* TFM_LVL == 3 */
+
+    /* Restore caller context */
+    *excReturn = svc_ctx->RetAddr;
+
+    if (psp+sizeof(struct tfm_exc_stack_t) !=  handler_part_data->stack_ptr) {
+        ERROR_MSG("The interrupt handler unfolded its stack improperly!");
+        tfm_secure_api_error_handler();
+    }
+
+    psp = interrupted_part_data->stack_ptr;
+#else /* TFM_LVL != 1 */
+    /* For level 1, modify PSP, so that the SVC stack frame disappears,
+     * and return to the privileged handler using the stack frame still on the
+     * MSP stack.
+     */
+    *excReturn = svc_ctx->RetAddr;
+    psp += sizeof(struct tfm_exc_stack_t);
+#endif /* TFM_LVL != 1 */
+
+    tfm_spm_partition_pop_handler_ctx(handler_partition_idx);
+    tfm_spm_partition_pop_interrupted_ctx(interrupted_partition_idx);
+
+#if TFM_LVL != 1
+    interrupted_partition_psplim =
+        tfm_spm_partition_get_stack_bottom(interrupted_partition_idx);
+
+    __set_PSPLIM(interrupted_partition_psplim);
+#endif /* TFM_LVL != 1 */
+    __set_PSP(psp);
 
     return TFM_SUCCESS;
 }
@@ -720,8 +939,12 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     uint32_t caller_partition_flags =
             tfm_spm_partition_get_flags(curr_part_data->caller_partition_idx);
 
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT))  {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED)  {
         /* This handler shouldn't be called from outside partition context.
+         * Also if the current partition is handling IRQ, the caller partition
+         * index might not be valid;
          * Partitions are only allowed to run while S domain is locked.
          */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
@@ -802,8 +1025,12 @@ void tfm_core_get_caller_client_id_handler(uint32_t *svc_args)
             tfm_spm_partition_get_runtime_data(running_partition_idx);
     int res = 0;
 
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT))  {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED)  {
         /* This handler shouldn't be called from outside partition context.
+         * Also if the current partition is handling IRQ, the caller partition
+         * index might not be valid;
          * Partitions are only allowed to run while S domain is locked.
          */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
@@ -954,6 +1181,29 @@ uint32_t tfm_core_partition_request_svc_handler(
     return EXC_RETURN_SECURE_FUNCTION;
 }
 
+/* This SVC handler is called, if a thread mode execution environment is to
+ * be set up, to run an unprivileged IRQ handler
+ */
+uint32_t tfm_core_depriv_req_handler(uint32_t *svc_args, uint32_t excReturn)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+
+    int32_t res;
+
+    if (excReturn & EXC_RETURN_STACK_PROCESS) {
+        /* FixMe: error severity TBD */
+        ERROR_MSG("Partition request SVC called with PSP active!");
+        tfm_secure_api_error_handler();
+    }
+
+    res = tfm_start_partition_for_irq_handling(excReturn, svc_ctx);
+    if (res != TFM_SUCCESS) {
+        /* FixMe: consider possible fault scenarios */
+        return excReturn;
+    }
+    return EXC_RETURN_SECURE_FUNCTION;
+}
+
 /* This SVC handler is called when sfn returns */
 uint32_t tfm_core_partition_return_handler(uint32_t lr)
 {
@@ -997,6 +1247,38 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
     return lr;
 }
 
+/* This SVC handler is called if a deprivileged IRQ handler was executed, and
+ * the execution environment is to be set back for the privileged handler mode
+ */
+uint32_t tfm_core_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
+{
+    struct tfm_exc_stack_t *irq_svc_ctx =
+                                         (struct tfm_exc_stack_t *)irq_svc_args;
+
+    if (!(lr & EXC_RETURN_STACK_PROCESS)) {
+        /* Partition request SVC called with MSP active.
+         * FixMe: error severity TBD
+         */
+        ERROR_MSG("Partition request SVC called with MSP active!");
+        tfm_secure_api_error_handler();
+    }
+
+    int32_t res;
+
+    res = tfm_return_from_partition_irq_handling(&lr);
+    if (res != TFM_SUCCESS) {
+        /* Unlock errors indicate ctx database corruption or unknown anomalies
+         * Halt execution
+         */
+        ERROR_MSG("Secure API error during unlock!");
+        tfm_secure_api_error_handler();
+    }
+
+    irq_svc_ctx->RetAddr = lr;
+
+    return EXC_RETURN_SECURE_HANDLER;
+}
+
 void tfm_core_set_buffer_area_handler(uint32_t *args)
 {
     /* r0 is stored in args[0] in exception stack frame
@@ -1016,8 +1298,13 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];
 
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT)) {
-        /* This handler should only be called from a secure partition. */
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
+        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED) {
+        /* This handler shouldn't be called from outside partition context.
+         * Also if the current partition is handling IRQ, the caller partition
+         * index might not be valid;
+         */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
     }
@@ -1046,3 +1333,149 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
     return;
 }
 
+/* FIXME: get_irq_line_for_signal is also implemented in the ipc folder. */
+/**
+ * \brief Return the IRQ line number associated with a signal
+ *
+ * \param[in] partition_id    The ID of the partition in which we look for the
+ *                            signal
+ * \param[in] signal          The signal we do the query for
+ *
+ * \retval >=0     The IRQ line number associated with a signal in the partition
+ * \retval <0      error
+ */
+static int32_t get_irq_line_for_signal(int32_t partition_id,
+                                       psa_signal_t signal)
+{
+    size_t i;
+
+    for (i = 0; i < tfm_core_irq_signals_count; ++i) {
+        if (tfm_core_irq_signals[i].partition_id == partition_id &&
+            tfm_core_irq_signals[i].signal_value == signal) {
+            return tfm_core_irq_signals[i].irq_line;
+        }
+    }
+    return -1;
+}
+
+/* FIXME: tfm_core_psa_eoi, tfm_core_enable_irq_handler and
+ * tfm_core_disable_irq_handler function has an implementation in
+ * tfm_svcalls.c for the IPC model.
+ * The two implementations should be merged as part of restructuring common code
+ * among library and IPC model.
+ */
+void tfm_core_enable_irq_handler(uint32_t *svc_args)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    psa_signal_t irq_signal = svc_ctx->R0;
+    uint32_t running_partition_idx =
+                      tfm_spm_partition_get_running_partition_idx();
+    uint32_t running_partition_id =
+                      tfm_spm_partition_get_partition_id(running_partition_idx);
+    int32_t irq_line;
+
+    /* Only a single signal is allowed */
+    if (tfm_bitcount(irq_signal) != 1) {
+        /* FixMe: error severity TBD */
+        tfm_secure_api_error_handler();
+    }
+
+    irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
+
+    if (irq_line < 0) {
+        /* FixMe: error severity TBD */
+        tfm_secure_api_error_handler();
+    }
+
+    tfm_spm_hal_enable_irq(irq_line);
+}
+
+void tfm_core_disable_irq_handler(uint32_t *svc_args)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    psa_signal_t irq_signal = svc_ctx->R0;
+    uint32_t running_partition_idx =
+                      tfm_spm_partition_get_running_partition_idx();
+    uint32_t running_partition_id =
+                      tfm_spm_partition_get_partition_id(running_partition_idx);
+    int32_t irq_line;
+
+    /* Only a single signal is allowed */
+    if (tfm_bitcount(irq_signal) != 1) {
+        /* FixMe: error severity TBD */
+        tfm_secure_api_error_handler();
+    }
+
+    irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
+
+    if (irq_line < 0) {
+        /* FixMe: error severity TBD */
+        tfm_secure_api_error_handler();
+    }
+
+    tfm_spm_hal_disable_irq(irq_line);
+}
+
+void tfm_core_psa_wait(uint32_t *svc_args)
+{
+    /* Look for partition that is ready for run */
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    uint32_t running_partition_idx;
+    const struct spm_partition_runtime_data_t *curr_part_data;
+
+    psa_signal_t signal_mask = svc_ctx->R0;
+    uint32_t timeout = svc_ctx->R1;
+
+    /*
+     * Timeout[30:0] are reserved for future use.
+     * SPM must ignore the value of RES.
+     */
+    timeout &= PSA_TIMEOUT_MASK;
+
+    running_partition_idx = tfm_spm_partition_get_running_partition_idx();
+    curr_part_data = tfm_spm_partition_get_runtime_data(running_partition_idx);
+
+    if (timeout == PSA_BLOCK) {
+        /* FIXME: Scheduling is not available in library model, and busy wait is
+         * also not possible as this code is running in SVC context, and it
+         * cannot be pre-empted by interrupts. So do nothing here for now
+         */
+        (void) signal_mask;
+    }
+
+    svc_ctx->R0 = curr_part_data->signal_mask;
+}
+
+void tfm_core_psa_eoi(uint32_t *svc_args)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    psa_signal_t irq_signal =  svc_ctx->R0;
+    uint32_t signal_mask;
+    uint32_t running_partition_idx;
+    uint32_t running_partition_id;
+    const struct spm_partition_runtime_data_t *curr_part_data;
+    int32_t irq_line;
+
+    running_partition_idx = tfm_spm_partition_get_running_partition_idx();
+    running_partition_id =
+                      tfm_spm_partition_get_partition_id(running_partition_idx);
+    curr_part_data = tfm_spm_partition_get_runtime_data(running_partition_idx);
+
+    /* Only a single signal is allowed */
+    if (tfm_bitcount(irq_signal) != 1) {
+        tfm_secure_api_error_handler();
+    }
+
+    irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
+
+    if (irq_line < 0) {
+        /* FixMe: error severity TBD */
+        tfm_secure_api_error_handler();
+    }
+
+    tfm_spm_hal_clear_pending_irq(irq_line);
+    tfm_spm_hal_enable_irq(irq_line);
+
+    signal_mask = curr_part_data->signal_mask & ~irq_signal;
+    tfm_spm_partition_set_signal_mask(running_partition_idx, signal_mask);
+}

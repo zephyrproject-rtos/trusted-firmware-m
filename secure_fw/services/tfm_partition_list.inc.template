@@ -7,6 +7,8 @@
 
 {{utilities.donotedit_warning}}
 
+#include "tfm_partition_defs.inc"
+
 #ifndef __TFM_PARTITION_LIST_INC__
 #define __TFM_PARTITION_LIST_INC__
 
@@ -15,11 +17,16 @@
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
 /******** {{manifest.manifest.name}} ********/
+    {% if manifest.manifest.irqs %}
+#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT {{manifest.manifest.irqs | length() }}
+    {% else %}
+#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT 0
+    {% endif %}
 PARTITION_DECLARE({{manifest.manifest.name}}, 0
     {% if manifest.attr.tfm_partition_ipc %}
     | SPM_PART_FLAG_IPC
     {% endif %}
-    , "{{manifest.manifest.type}}", {{manifest.manifest.id}}, {{manifest.manifest.priority}});
+    , "{{manifest.manifest.type}}", {{manifest.manifest.name}}_ID, {{manifest.manifest.priority}});
 PARTITION_ADD_INIT_FUNC({{manifest.manifest.name}}, {{manifest.manifest.entry_point}});
     {% if manifest.manifest.mmio_regions %}
         {% for region in manifest.manifest.mmio_regions %}

@@ -22,6 +22,7 @@
 #include "tfm_pools.h"
 #include "tfm_spm.h"
 #include "tfm_spm_signal_defs.h"
+#include "tfm_irq_signal_defs.h"
 #include "tfm_thread.h"
 #include "region_defs.h"
 #include "tfm_nspm.h"

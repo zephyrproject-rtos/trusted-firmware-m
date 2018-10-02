@@ -20,6 +20,12 @@ typedef enum {
     TFM_SVC_SPM_REQUEST,
     TFM_SVC_PRINT,
     TFM_SVC_GET_BOOT_DATA,
+    TFM_SVC_DEPRIV_REQ,
+    TFM_SVC_DEPRIV_RET,
+    TFM_SVC_ENABLE_IRQ,
+    TFM_SVC_DISABLE_IRQ,
+    TFM_SVC_PSA_WAIT,
+    TFM_SVC_PSA_EOI,
 #ifdef TFM_PSA_API
     TFM_SVC_IPC_REQUEST,
     TFM_SVC_SCHEDULE,
@@ -31,7 +37,6 @@ typedef enum {
     TFM_SVC_PSA_CALL,
     TFM_SVC_PSA_CLOSE,
     /* PSA Service SVC */
-    TFM_SVC_PSA_WAIT,
     TFM_SVC_PSA_GET,
     TFM_SVC_PSA_SET_RHANDLE,
     TFM_SVC_PSA_READ,
@@ -40,7 +45,6 @@ typedef enum {
     TFM_SVC_PSA_REPLY,
     TFM_SVC_PSA_NOTIFY,
     TFM_SVC_PSA_CLEAR,
-    TFM_SVC_PSA_EOI,
 #endif
 } tfm_svc_number_t;
 

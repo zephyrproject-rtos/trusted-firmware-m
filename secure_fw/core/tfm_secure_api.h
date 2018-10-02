@@ -14,6 +14,7 @@
 #include "tfm_core.h"
 #include "tfm_api.h"
 #include "bl2/include/tfm_boot_status.h"
+#include "psa_service.h"
 
 /*!
  * \def __tfm_secure_gateway_attributes__
@@ -129,6 +130,9 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
                                             uint32_t ns_caller,
                                             uint32_t privileged);
+
+void tfm_enable_irq(psa_signal_t irq_signal);
+void tfm_disable_irq(psa_signal_t irq_signal);
 
 #ifdef TFM_PSA_API
 /* The following macros are only valid if secure services can be called

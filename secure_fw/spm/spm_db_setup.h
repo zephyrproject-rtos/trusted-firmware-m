@@ -56,22 +56,43 @@ struct spm_partition_db_t {
     } while (0)
 #endif
 
+/* The max size of the context stack can be calculated as a function of the IRQ
+ * count of the secure partition:
+ *
+ * max_stack_size = intr_ctx_size + (IRQ_CNT * (intr_ctx_size + hndl_ctx_size))
+ *
+ * where:
+ *   intr_ctx: Frame pushed when the partition is interrupted
+ *   hndl_ctx: Frame pushed when the partition is handling an interrupt
+ */
+#define DECLARE_CONTEXT_STACK(partition)                            \
+        static uint32_t ctx_stack_ptr_##partition[                  \
+            (sizeof(struct interrupted_ctx_stack_frame_t) +         \
+                (TFM_PARTITION_##partition##_IRQ_COUNT) * (         \
+                    sizeof(struct interrupted_ctx_stack_frame_t) +  \
+                    sizeof(struct handler_ctx_stack_frame_t)        \
+            )) / sizeof(uint32_t)]
+
 #if TFM_LVL == 1
-#define PARTITION_INIT_RUNTIME_DATA(data, partition)            \
-    do {                                                        \
-        data.partition_state      = SPM_PARTITION_STATE_UNINIT; \
+#define PARTITION_INIT_RUNTIME_DATA(data, partition)                \
+    do {                                                            \
+        DECLARE_CONTEXT_STACK(partition);                           \
+        data.partition_state = SPM_PARTITION_STATE_UNINIT;          \
+        data.ctx_stack_ptr = ctx_stack_ptr_##partition;             \
     } while (0)
 #else
 #define PARTITION_INIT_RUNTIME_DATA(data, partition)                \
     do {                                                            \
-        data.partition_state      = SPM_PARTITION_STATE_UNINIT;     \
+        DECLARE_CONTEXT_STACK(partition);                           \
+        data.partition_state = SPM_PARTITION_STATE_UNINIT;          \
         /* The top of the stack is reserved for the iovec        */ \
         /* parameters of the service called. That's why in       */ \
         /* data.stack_ptr we extract sizeof(struct iovec_args_t) */ \
         /* from the limit.                                       */ \
-        data.stack_ptr            =                                 \
+        data.stack_ptr =                                            \
                 PART_REGION_ADDR(partition, _STACK$$ZI$$Limit -     \
                                   sizeof(struct iovec_args_t));     \
+        data.ctx_stack_ptr = ctx_stack_ptr_##partition;             \
     } while (0)
 #endif
 
