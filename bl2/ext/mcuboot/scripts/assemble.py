@@ -44,8 +44,11 @@ class Assembly():
         offsets = {}
         sizes = {}
 
-        scriptsDir = os.path.dirname(os.path.abspath(__file__))
-        configFile = os.path.join(scriptsDir, self.layout_path)
+        if os.path.isabs(self.layout_path):
+            configFile = self.layout_path
+        else:
+            scriptsDir = os.path.dirname(os.path.abspath(__file__))
+            configFile = os.path.join(scriptsDir, self.layout_path)
 
         with open(configFile, 'r') as fd:
             for line in fd:

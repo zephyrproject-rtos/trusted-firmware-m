@@ -26,8 +26,13 @@ import sys
 
 def find_load_address(args):
     load_address_re = re.compile(r"^#define\sIMAGE_LOAD_ADDRESS\s+(0x[0-9a-fA-F]+)")
-    scriptsDir = os.path.dirname(os.path.abspath(__file__))
-    configFile = os.path.join(scriptsDir, args.layout)
+
+    if os.path.isabs(args.layout):
+            configFile = args.layout
+    else:
+        scriptsDir = os.path.dirname(os.path.abspath(__file__))
+        configFile = os.path.join(scriptsDir, args.layout)
+
     ramLoadAddress = None
     with open(configFile, 'r') as flash_layout_file:
         for line in flash_layout_file:
