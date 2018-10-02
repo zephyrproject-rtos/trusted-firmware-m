@@ -314,7 +314,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
     __set_PSPLIM(tfm_spm_partition_get_stack_bottom(return_partition_idx));
     /* Clear the context entry before returning */
     tfm_spm_partition_set_stack(
-                current_partition_idx, psp - sizeof(struct tfm_exc_stack_t));
+                current_partition_idx, psp + sizeof(struct tfm_exc_stack_t));
 #endif
 
     tfm_spm_partition_cleanup_context(current_partition_idx);
