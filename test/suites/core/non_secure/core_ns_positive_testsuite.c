@@ -34,6 +34,7 @@ static void tfm_core_test_share_change(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
+static void tfm_core_test_spm_request(struct test_result_t *ret);
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -63,6 +64,9 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_PERIPHERAL_ACCESS,
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_GET_CALLER_CLIENT_ID,
     tfm_core_test_get_caller_client_id,
     "Test get caller client ID function"),
+CORE_TEST_DESCRIPTION(CORE_TEST_ID_SPM_REQUEST,
+    tfm_core_test_spm_request,
+    "Test SPM request function"),
 };
 
 void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
@@ -354,3 +358,24 @@ static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+
+static void tfm_core_test_spm_request(struct test_result_t *ret)
+{
+    int32_t err;
+
+    args[0] = CORE_TEST_ID_SPM_REQUEST;
+    err = tfm_core_test_call(tfm_core_test_sfn, args);
+
+    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
+        TEST_FAIL("Call to secure service should be successful.");
+        return;
+    }
+
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
+        TEST_FAIL("The SPM request failed.");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+

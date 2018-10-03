@@ -14,6 +14,7 @@
 #include "uart_stdout.h"
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
+#include "secure_fw/include/tfm_spm_services_api.h"
 
 /*
  * Avoids the semihosting issue
@@ -164,6 +165,24 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
     /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
 
     return TFM_SUCCESS;
+}
+
+void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
+{
+    uint32_t *res_ptr = (uint32_t *)&svc_ctx->R0;
+
+    /* FixMe: check if caller partition is permitted to make an SPM request */
+
+    switch (svc_ctx->R0) {
+    case TFM_SPM_REQUEST_RESET_VOTE:
+        /* FixMe: this is a placeholder for checks to be performed before
+         * allowing execution of reset
+         */
+        *res_ptr = TFM_SUCCESS;
+        break;
+    default:
+        *res_ptr = TFM_ERROR_INVALID_PARAMETER;
+    }
 }
 
 int main(void)

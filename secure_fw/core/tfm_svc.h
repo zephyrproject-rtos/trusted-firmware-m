@@ -17,6 +17,7 @@ typedef enum {
     TFM_SVC_GET_CALLER_CLIENT_ID,
     TFM_SVC_MEMORY_CHECK,
     TFM_SVC_SET_SHARE_AREA,
+    TFM_SVC_SPM_REQUEST,
     TFM_SVC_PRINT,
 } tfm_svc_number_t;
 

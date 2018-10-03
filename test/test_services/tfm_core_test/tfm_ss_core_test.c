@@ -12,7 +12,8 @@
 #include "tfm_ss_core_test_veneers.h"
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_veneers.h"
 #include "secure_fw/core/secure_utilities.h"
-#include "tfm_secure_api.h"
+#include "secure_fw/core/tfm_secure_api.h"
+#include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
 
 #include "smm_mps2.h"
@@ -311,6 +312,23 @@ static int32_t test_get_caller_client_id(void)
     return TFM_SUCCESS;
 }
 
+static int32_t test_spm_request(int32_t arg1, int32_t arg2, int32_t arg3)
+{
+    /* Arguments not used yet */
+    (void)arg1;
+    (void)arg2;
+    (void)arg3;
+
+    /* Call to a different service, should be sucessful */
+    int32_t ret = tfm_spm_request_reset_vote();
+
+    if (ret != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
+    }
+
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
 #ifdef CORE_TEST_INTERACTIVE
 #define MPS2_USERPB0_BASE   (0x50302008)
 #define MPS2_USERPB0_MASK   (0x1)
@@ -376,6 +394,8 @@ int32_t spm_core_test_sfn(int32_t tc, int32_t arg1, int32_t arg2, int32_t arg3)
         return test_peripheral_access();
     case CORE_TEST_ID_GET_CALLER_CLIENT_ID:
         return test_get_caller_client_id();
+    case CORE_TEST_ID_SPM_REQUEST:
+        return test_spm_request(arg1, arg2, arg3);
     case CORE_TEST_ID_BLOCK:
         return test_block(arg1, arg2, arg3);
     case CORE_TEST_ID_NS_THREAD:

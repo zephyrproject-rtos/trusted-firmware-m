@@ -10,6 +10,7 @@
 #include "tfm_svc.h"
 #include "tfm_secure_api.h"
 #include "tfm_internal.h"
+#include "secure_fw/include/tfm_spm_services_api.h"
 
 uint8_t *tfm_scratch_area;
 int32_t tfm_scratch_area_size;
@@ -115,6 +116,24 @@ int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
         "SVC %0\n"
         "BX LR\n"
         : : "I" (TFM_SVC_GET_CALLER_CLIENT_ID));
+}
+
+__attribute__((naked))
+int32_t tfm_spm_request_reset_vote(void)
+{
+    __ASM(
+        "MOVS   R0, %0\n"
+        "B      tfm_spm_request\n"
+        : : "I" (TFM_SPM_REQUEST_RESET_VOTE));
+}
+
+__attribute__((naked))
+int32_t tfm_spm_request(void)
+{
+    __ASM(
+        "SVC    %0\n"
+        "BX     lr\n"
+        : : "I" (TFM_SVC_SPM_REQUEST));
 }
 
 __attribute__((naked))
