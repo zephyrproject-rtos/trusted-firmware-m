@@ -57,6 +57,7 @@
     /******** TFM_SP_CORE_TEST_2 ********/
     {spm_core_test_2_slave_service, TFM_CORE_TEST_2_SFN_SLAVE_SERVICE_SFID},
     {spm_core_test_2_sfn_invert, TFM_CORE_TEST_2_SFN_INVERT_SFID},
+    {spm_core_test_2_check_caller_client_id, TFM_CORE_TEST_2_SFN_CHECK_CALLER_CLIENT_ID_SFID},
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SST

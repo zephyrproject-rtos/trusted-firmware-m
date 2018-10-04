@@ -193,6 +193,7 @@ SECTIONS
     {
         *tfm_storage*:*(.text*)
         *tfm_storage*:*(.rodata*)
+        *(TFM_SP_STORAGE_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_STORAGE$$RO$$Base = ADDR(.TFM_SP_STORAGE);
@@ -204,6 +205,7 @@ SECTIONS
     {
         *tfm_audit*:*(.text*)
         *tfm_audit*:*(.rodata*)
+        *(TFM_SP_AUDIT_LOG_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_AUDIT_LOG$$RO$$Base = ADDR(.TFM_SP_AUDIT_LOG);
@@ -215,6 +217,7 @@ SECTIONS
     {
         *tfm_crypto*:*(.text*)
         *tfm_crypto*:*(.rodata*)
+        *(TFM_SP_CRYPTO_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_CRYPTO$$RO$$Base = ADDR(.TFM_SP_CRYPTO);
@@ -227,6 +230,7 @@ SECTIONS
     {
         *tfm_ss_core_test.*(.text*)
         *tfm_ss_core_test.*(.rodata*)
+        *(TFM_SP_CORE_TEST_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_CORE_TEST$$RO$$Base = ADDR(.TFM_SP_CORE_TEST);
@@ -240,6 +244,7 @@ SECTIONS
     {
         *tfm_ss_core_test_2.*(.text*)
         *tfm_ss_core_test_2.*(.rodata*)
+        *(TFM_SP_CORE_TEST_2_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_CORE_TEST_2$$RO$$Base = ADDR(.TFM_SP_CORE_TEST_2);
@@ -253,6 +258,7 @@ SECTIONS
     {
         *sst_test_service.*(.text*)
         *sst_test_service.*(.rodata*)
+        *(TFM_SP_SST_TEST_PARTITION_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_SST_TEST_PARTITION$$RO$$Base = ADDR(.TFM_SP_SST_TEST_PARTITION);
@@ -280,6 +286,7 @@ SECTIONS
         *arm_uart_drv.*(.rodata*)
         *uart_pl011_drv.*(.rodata*)
         *secure_suites.*(.rodata*)
+        *(TFM_SP_SECURE_TEST_PARTITION_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_SP_SECURE_TEST_PARTITION$$RO$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION);

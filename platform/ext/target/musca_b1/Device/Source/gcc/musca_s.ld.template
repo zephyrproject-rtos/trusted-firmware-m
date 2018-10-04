@@ -135,8 +135,8 @@ SECTIONS
         *tfm_unpriv_api.o(.rodata*)
         *dummy_crypto_keys.o(.text*)
         *dummy_crypto_keys.o(.rodata*)
-	*dummy_nv_counters.o(.text*)
-	*dummy_nv_counters.o(.rodata*)
+        *dummy_nv_counters.o(.text*)
+        *dummy_nv_counters.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
         *(SFN)
@@ -161,6 +161,7 @@ SECTIONS
         @@manifest.tfm_linker_pattern.object_list@@(.text*)
         @@manifest.tfm_linker_pattern.object_list@@(.rodata*)
 @!GENERATOR_CONDITIONAL_END!@
+        *(@@manifest.tfm_partition_name@@_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$$@@manifest.tfm_partition_name@@$$RO$$Base = ADDR(.@@manifest.tfm_partition_name@@);
