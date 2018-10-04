@@ -26,7 +26,7 @@ TF-M that is not supported by the platform results in compile error.
 This file contains the declarations of functions that a platform implementation
 has to provide for TF-M. For details see the comments in the file.
 
-### secure_fw/core/tfm_platform_api.h
+### secure_fw/core/tfm_platform_core_api.h
 This file contains declarations of functions that can be or have to be called
 from platform implementations. For details see the comments in the file.
 

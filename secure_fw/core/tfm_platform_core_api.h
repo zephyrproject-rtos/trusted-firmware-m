@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __TFM_PLATFORM_API_H__
-#define __TFM_PLATFORM_API_H__
+#ifndef __TFM_PLATFORM_CORE_API_H__
+#define __TFM_PLATFORM_CORE_API_H__
 
 /**
  * \brief Should be called in case of access violation.
@@ -21,4 +21,4 @@
  */
 void tfm_access_violation_handler(void);
 
-#endif /* __TFM_PLATFORM_API_H__ */
+#endif /* __TFM_PLATFORM_CORE_API_H__ */
