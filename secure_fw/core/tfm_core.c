@@ -119,6 +119,9 @@ int32_t tfm_core_init(void)
     /* Enables fault handlers */
     enable_fault_handlers();
 
+    /* Configures the system reset request properties */
+    system_reset_cfg();
+
     /* Configure the debug configuration registers */
     configure_debug_registers();
 
@@ -132,6 +135,7 @@ int32_t tfm_core_init(void)
 #endif
 
     tfm_spm_hal_init_isolation_hw();
+
     configure_ns_code();
 
     /* Configures all interrupts to retarget NS state, except for

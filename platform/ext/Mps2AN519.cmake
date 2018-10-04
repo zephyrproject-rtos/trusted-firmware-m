@@ -116,6 +116,7 @@ elseif(BUILD_TARGET_CFG)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/target_cfg.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/spm_hal.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/native_drivers/mpu_armv8m_drv.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/tfm_platform_system.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()
 

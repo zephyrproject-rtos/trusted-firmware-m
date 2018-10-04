@@ -72,6 +72,14 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
 
+/* Enable system reset request for CPU 0 */
+#define ENABLE_CPU0_SYSTEM_RESET_REQUEST (1U << 4U)
+
+/* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
+ * otherwise the processor ignores the write.
+ */
+#define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
+
 struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
         UART0_BASE_NS,
         UART0_BASE_NS + 0xFFF,
@@ -98,6 +106,22 @@ void enable_fault_handlers(void)
     /* Fault handles enable registers are not present in a baseline
      * implementation
      */
+}
+
+void system_reset_cfg(void)
+{
+    struct sysctrl_t *sysctrl = (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
+    uint32_t reg_value = SCB->AIRCR;
+
+    /* Enable system reset request for CPU 0, to be triggered via
+     * NVIC_SystemReset function.
+     */
+    sysctrl->resetmask |= ENABLE_CPU0_SYSTEM_RESET_REQUEST;
+
+    /* Enable system reset request for the secure world only */
+    reg_value |= (uint32_t)(SCB_AIRCR_WRITE_MASK | SCB_AIRCR_SYSRESETREQS_Msk);
+
+    SCB->AIRCR = reg_value;
 }
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/

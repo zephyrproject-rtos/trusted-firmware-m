@@ -124,6 +124,7 @@ function(set_up_secure_fw_build)
 	add_dependencies(${EXE_NAME} tfm_crypto)
 	add_dependencies(${EXE_NAME} tfm_storage)
 	add_dependencies(${EXE_NAME} tfm_audit)
+	add_dependencies(${EXE_NAME} tfm_platform)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
 
 	#Set macro definitions for the project.
@@ -133,14 +134,14 @@ function(set_up_secure_fw_build)
 		#The test service veneers may not be referenced in the secure binary so the
 		#veneer objects are explicitly loaded from the secure tests library.
 		if(${COMPILER} STREQUAL "ARMCLANG")
-			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
 		elseif(${COMPILER} STREQUAL "GNUARM")
-			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit)
+			target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit tfm_platform)
 		else()
 			message(FATAL_ERROR "unknown compiler" )
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit)
+		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform)
 	endif()
 
 
@@ -246,6 +247,9 @@ add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
 
 #Add the audit logging library target
 add_subdirectory(${SECURE_FW_DIR}/services/audit_logging)
+
+#Add the platform service library target
+add_subdirectory(${SECURE_FW_DIR}/services/platform)
 
 if (LINK_TO_BOTH_MEMORY_REGION)
 	#Link to primary memory region

@@ -94,6 +94,11 @@ void tfm_spm_hal_configure_default_isolation(
 void enable_fault_handlers(void);
 
 /**
+ * \brief Configures the system reset request properties
+ */
+void system_reset_cfg(void);
+
+/**
  * \brief Configures all external interrupts to target the
  *        NS state, apart for the ones associated to secure
  *        peripherals (plus MPC and PPC)

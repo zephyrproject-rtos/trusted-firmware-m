@@ -25,7 +25,7 @@ extern "C" {
  * \param[out] key   Buf to store the key in
  * \param[in]  size  Size of the buffer
  *
- * \return Returns error code specified in \ref tfm_plat_errno_t
+ * \return Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
 

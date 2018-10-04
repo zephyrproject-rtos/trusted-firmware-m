@@ -1,0 +1,37 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "SP_PLATFORM",
+  "type": "TRUSTED",
+  "tfm_partition_name": "TFM_SP_PLATFORM",
+  "tfm_trusted": true,
+  "priority": "NORMAL",
+  "id": "0x00000102",
+  "entry_point": "main",
+  "stack_size": "0x0400",
+  "heap_size": "0x0400",
+  "tfm_init_symbol": "platform_sp_init",
+  "secure_functions": [
+    {
+      "sfid": "TFM_SP_PLATFORM_SYSTEM_RESET_SFID",
+      "signal": "TFM_SP_PLATFORM_SYSTEM_RESET",
+      "tfm_symbol": "platform_sp_system_reset",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    }
+  ],
+  "source_files": [
+    "platform_sp.c",
+  ],
+  "tfm_linker_pattern": {
+    "library_list": [
+      "*tfm_platform*"
+    ]
+  }
+}

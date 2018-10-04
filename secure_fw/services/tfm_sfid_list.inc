@@ -46,6 +46,9 @@
     {tfm_crypto_hash_verify, TFM_CRYPTO_HASH_VERIFY_SFID},
     {tfm_crypto_hash_abort, TFM_CRYPTO_HASH_ABORT_SFID},
 
+    /******** TFM_SP_PLATFORM ********/
+    {platform_sp_system_reset, TFM_SP_PLATFORM_SYSTEM_RESET_SFID},
+
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
     {spm_core_test_sfn, TFM_CORE_TEST_SFN_SFID},

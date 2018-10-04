@@ -23,4 +23,16 @@ enum tfm_plat_err_t {
     TFM_PLAT_ERR_FORCE_INT_SIZE = INT_MAX
 };
 
+/*!
+ * \def TFM_LINK_SET_OBJECT_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
+ *
+ * \brief This macro provides a mechanism to place a function code in a specific
+ *        secure partition at linker time in TF-M Level 3.
+ *
+ * \param[in] TFM_PARTITION_NAME  TF-M partition name assigned in the manifest
+ *                                file "tfm_partition_name" field.
+ */
+#define TFM_LINK_SET_OBJECT_IN_PARTITION_SECTION(TFM_PARTITION_NAME) \
+                __attribute__((section(TFM_PARTITION_NAME"_ATTR_FN")))
+
 #endif /* __TFM_PLAT_DEFS_H__ */
