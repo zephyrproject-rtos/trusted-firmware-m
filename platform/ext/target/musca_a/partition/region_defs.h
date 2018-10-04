@@ -22,9 +22,6 @@
 #define TOTAL_ROM_SIZE (0x00200000) /* 2 MB */
 #define TOTAL_RAM_SIZE (0x00020000) /* 128KB */
 
-#define S_RAM_ALIAS_BASE  (0x30000000)
-#define NS_RAM_ALIAS_BASE (0x20000000)
-
 /*
  * MPC granularity is 128 KB on Musca. Alignment
  * of partitions is defined in accordance with this constraint.
@@ -144,4 +141,3 @@
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 #endif /* __REGION_DEFS_H__ */
-
