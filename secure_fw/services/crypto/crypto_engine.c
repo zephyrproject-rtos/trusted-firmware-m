@@ -27,51 +27,118 @@
 static uint8_t mbedtls_mem_buf[TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN] = {0};
 
 /**
- * \brief This function maps Mbed TLS return codes to PSA return codes.
+ * \brief Converts a PSA key type and key size to an Mbed TLS cipher ID.
  *
- * \param[in] ret Mbed TLS return value
+ * \param[in] key_type  PSA key type
+ * \param[in] key_size  Key size in bits
  *
- * \return Return values as specified by \ref psa_status_t
+ * \return An mbedtls_cipher_id_t value corresponding to key_type and key_size,
+ *         or MBEDTLS_CIPHER_ID_NONE if no such cipher ID is supported by
+ *         Mbed TLS.
  */
-static psa_status_t mbedtls_to_psa_return(int ret)
+static mbedtls_cipher_id_t psa_to_mbedtls_cipher_id(psa_key_type_t key_type,
+                                                    size_t key_size)
 {
-    /* zero return value means success */
-    if (ret == 0) {
-        return PSA_SUCCESS;
-    }
-
-    /* FIXME: For the time being map all errors to PSA_ERROR_UNKNOW_ERROR */
-    switch (ret) {
+    switch (key_type) {
+    case PSA_KEY_TYPE_AES:
+        return MBEDTLS_CIPHER_ID_AES;
+    case PSA_KEY_TYPE_DES:
+        return (key_size == 192) ? MBEDTLS_CIPHER_ID_3DES
+                                 : MBEDTLS_CIPHER_ID_DES;
+    case PSA_KEY_TYPE_CAMELLIA:
+        return MBEDTLS_CIPHER_ID_CAMELLIA;
+    case PSA_KEY_TYPE_ARC4:
+        return MBEDTLS_CIPHER_ID_ARC4;
     default:
-        return PSA_ERROR_UNKNOWN_ERROR;
+        return MBEDTLS_CIPHER_ID_NONE;
     }
 }
-#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
 
-psa_status_t tfm_crypto_engine_init(void)
+/**
+ * \brief Converts a PSA algorithm to an Mbed TLS cipher mode.
+ *
+ * \param[in] alg  PSA algorithm
+ *
+ * \return An mbedtls_cipher_mode_t value corresponding to alg, or
+ *         MBEDTLS_MODE_NONE if no such cipher mode is supported by Mbed TLS.
+ */
+static mbedtls_cipher_mode_t psa_to_mbedtls_cipher_mode(psa_algorithm_t alg)
 {
-    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+    if (PSA_ALG_IS_BLOCK_CIPHER(alg)) {
+        /* Clear the padding mask */
+        alg &= ~PSA_ALG_BLOCK_CIPHER_PADDING_MASK;
+    }
 
-#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
-    /* Initialise the Mbed TLS static memory allocator so that Mbed TLS
-     * allocates memory from the provided static buffer instead of from
-     * the heap.
-     */
-    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
-                                     TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN);
-    /* The previous function doesn't return any error code */
-    return_value = PSA_SUCCESS;
-#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
-
-    return return_value;
+    switch (alg) {
+    case PSA_ALG_CBC_BASE:
+        return MBEDTLS_MODE_CBC;
+    case PSA_ALG_CFB_BASE:
+        return MBEDTLS_MODE_CFB;
+    case PSA_ALG_OFB_BASE:
+        return MBEDTLS_MODE_OFB;
+    case PSA_ALG_XTS_BASE:
+        return MBEDTLS_MODE_NONE; /* FIXME: requires Mbed TLS 2.11 */
+    case PSA_ALG_CTR:
+        return MBEDTLS_MODE_CTR;
+    case PSA_ALG_ARC4:
+        return MBEDTLS_MODE_STREAM; /* ARC4 is a stream cipher */
+    case PSA_ALG_CCM:
+        return MBEDTLS_MODE_CCM;
+    case PSA_ALG_GCM:
+        return MBEDTLS_MODE_GCM;
+    default:
+        return MBEDTLS_MODE_NONE;
+    }
 }
 
-psa_status_t tfm_crypto_engine_hash_setup(const psa_algorithm_t alg,
-                                          struct hash_engine_info *engine_info)
+/**
+ * \brief Given a PSA key type, algorithm and key size, finds the corresponding
+ *        Mbed TLS cipher info struct.
+ *
+ * \param[in] key_type  PSA key type
+ * \param[in] alg       PSA algorithm
+ * \param[in] key_size  Key size in bits
+ *
+ * \return A pointer to the mbedtls_cipher_info_t struct corresponding to
+ *         key_type, alg and key_size, or NULL if Mbed TLS does not support this
+ *         combination.
+ */
+static const mbedtls_cipher_info_t *get_mbedtls_cipher_info(
+                                                        psa_key_type_t key_type,
+                                                        psa_algorithm_t alg,
+                                                        size_t key_size)
 {
-    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+    mbedtls_cipher_id_t cipher_id;
+    mbedtls_cipher_mode_t cipher_mode;
 
-#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
+    /* Get the Mbed TLS cipher ID */
+    cipher_id = psa_to_mbedtls_cipher_id(key_type, key_size);
+    if (cipher_id == MBEDTLS_CIPHER_ID_NONE) {
+        /* The requested key type is not supported by Mbed TLS */
+        return NULL;
+    }
+
+    /* Get the Mbed TLS cipher mode */
+    cipher_mode = psa_to_mbedtls_cipher_mode(alg);
+    if (cipher_mode == MBEDTLS_MODE_NONE) {
+        /* The requested algorithm is not supported by Mbed TLS */
+        return NULL;
+    }
+
+    /* Get the Mbed TLS cipher info pointer */
+    return mbedtls_cipher_info_from_values(cipher_id, key_size, cipher_mode);
+}
+
+/**
+ * \brief Converts a PSA algorithm to an Mbed TLS message digest type.
+ *
+ * \param[in] alg  PSA algorithm
+ *
+ * \return An mbedtls_md_type_t value corresponding to alg, or
+ *         MBEDTLS_MD_NONE if no such message digest is available.
+ */
+static mbedtls_md_type_t psa_to_mbedtls_md_type(psa_algorithm_t alg)
+{
     mbedtls_md_type_t type = MBEDTLS_MD_NONE;
 
     /* Mbed TLS message digest setup */
@@ -121,17 +188,77 @@ psa_status_t tfm_crypto_engine_hash_setup(const psa_algorithm_t alg,
         type = MBEDTLS_MD_SHA512;
 #endif
         break;
+    case PSA_ALG_SHA3_224:
+    case PSA_ALG_SHA3_256:
+    case PSA_ALG_SHA3_384:
+    case PSA_ALG_SHA3_512:
+        /* SHA3 not yet supported */
+        type = MBEDTLS_MD_NONE;
+        break;
+    case PSA_ALG_SHA_512_224:
+    case PSA_ALG_SHA_512_256:
+        /* SHA-512 Truncated modes not yet supported */
+        type = MBEDTLS_MD_NONE;
+        break;
     default:
         break;
     }
 
+    return type;
+}
+
+/**
+ * \brief This function maps Mbed TLS return codes to PSA return codes.
+ *
+ * \param[in] ret Mbed TLS return value
+ *
+ * \return Return values as specified by \ref psa_status_t
+ */
+static psa_status_t mbedtls_to_psa_return(int ret)
+{
+    /* zero return value means success */
+    if (ret == 0) {
+        return PSA_SUCCESS;
+    }
+
+    /* FIXME: For the time being map all errors to PSA_ERROR_UNKNOW_ERROR */
+    switch (ret) {
+    default:
+        return PSA_ERROR_UNKNOWN_ERROR;
+    }
+}
+#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
+
+psa_status_t tfm_crypto_engine_init(void)
+{
+    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+
+#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
+    /* Initialise the Mbed TLS static memory allocator so that Mbed TLS
+     * allocates memory from the provided static buffer instead of from
+     * the heap.
+     */
+    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
+                                     TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN);
+    /* The previous function doesn't return any error code */
+    return_value = PSA_SUCCESS;
+#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
+
+    return return_value;
+}
+
+psa_status_t tfm_crypto_engine_hash_setup(const psa_algorithm_t alg,
+                                          struct hash_engine_info *engine_info)
+{
+    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+
+#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
+    mbedtls_md_type_t type = MBEDTLS_MD_NONE;
+
+    type = psa_to_mbedtls_md_type(alg);
+
     engine_info->type = (uint32_t) type;
 
-    /* Mbed TLS currently does not support SHA3: PSA_ALG_SHA3_224,
-     * PSA_ALG_SHA3_256, PSA_ALG_SHA3_384, PSA_ALG_SHA3_512;
-     * Mbed TLS currently does not support SHA-512 Truncated modes:
-     * PSA_ALG_SHA_512_224, PSA_ALG_SHA_512_256
-     */
     if (type == MBEDTLS_MD_NONE) {
         return_value = PSA_ERROR_NOT_SUPPORTED;
     } else {
@@ -222,35 +349,24 @@ psa_status_t tfm_crypto_engine_cipher_setup(const psa_algorithm_t alg,
     psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
 
 #if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
-    mbedtls_cipher_type_t type = MBEDTLS_CIPHER_NONE;
+    const mbedtls_cipher_info_t *info;
     mbedtls_cipher_padding_t padding_mode = MBEDTLS_PADDING_NONE;
     psa_algorithm_t padding_mode_field = PSA_ALG_BLOCK_CIPHER_PAD_NONE;
 
-    /* FIXME: Check that key is compatible with alg. It's assumed that key
-     *        key_type will be AES, this needs to be extended as well. A
-     *        proper function to determine cipher type based on inputs
-     *        will need to be designed here.
-     */
     if ((engine_cipher_mode != ENGINE_CIPHER_MODE_ENCRYPT) &&
         (engine_cipher_mode != ENGINE_CIPHER_MODE_DECRYPT)) {
         return_value = PSA_ERROR_NOT_SUPPORTED;
     } else {
-        /* Mbed TLS cipher setup */
-        if (key_size == 128) {
-            if (alg == PSA_ALG_CBC_BASE) {
-                type = MBEDTLS_CIPHER_AES_128_CBC;
-            } else if (alg == PSA_ALG_CFB_BASE) {
-                if (engine_cipher_mode == ENGINE_CIPHER_MODE_ENCRYPT) {
-                   type = MBEDTLS_CIPHER_AES_128_CFB128;
-                }
-            }
-        }
-
-        if (type == MBEDTLS_CIPHER_NONE) {
+        /* Get the Mbed TLS cipher info from PSA key_type/alg/key_size. */
+        info = get_mbedtls_cipher_info(key_type, alg, key_size);
+        if (info == NULL) {
+            /* The combination of key_type, alg and key_size is not a valid
+             * Mbed TLS cipher configuration.
+             */
             return_value = PSA_ERROR_NOT_SUPPORTED;
         } else {
-            /* If CBC, need to set check the padding mode */
-            if ((alg & ~PSA_ALG_BLOCK_CIPHER_PADDING_MASK) == PSA_ALG_CBC_BASE) {
+            /* If CBC, need to check the padding mode */
+            if ((alg & ~PSA_ALG_BLOCK_CIPHER_PADDING_MASK) == PSA_ALG_CBC_BASE){
 
                 /* Check the value of padding field */
                 padding_mode_field = alg & PSA_ALG_BLOCK_CIPHER_PADDING_MASK;
@@ -275,7 +391,7 @@ psa_status_t tfm_crypto_engine_cipher_setup(const psa_algorithm_t alg,
     }
 
     if (return_value == PSA_SUCCESS) {
-        engine_info->type = (uint32_t) type;
+        engine_info->type = (uint32_t) (info->type);
         engine_info->cipher_mode = engine_cipher_mode;
         engine_info->padding_mode = (uint32_t) padding_mode;
     }
