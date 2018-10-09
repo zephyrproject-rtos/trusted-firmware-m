@@ -1,49 +1,51 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "tfm_crypto_defs.h"
+#include "crypto_engine.h"
 #include "tfm_crypto_api.h"
 
-/* Pre include Mbed TLS headers */
-#define LIB_PREFIX_NAME __tfm_crypto__
-#include "mbedtls_global_symbols.h"
+static enum tfm_crypto_err_t tfm_crypto_module_init(void)
+{
+    enum tfm_crypto_err_t err;
 
-/* Include the Mbed TLS configuration file, the way Mbed TLS does it
- * in each of its header files.
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "platform/ext/common/tfm_mbedtls_config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+    /* Init the Key module */
+    err = tfm_crypto_init_key();
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return err;
+    }
 
-#include "mbedtls/memory_buffer_alloc.h"
+    /* Init the Alloc module */
+    err = tfm_crypto_init_alloc();
 
-/**
- * \brief Buffer size used by Mbed TLS for its allocations
- */
-#define TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN (1024)
-
-/**
- * \brief Static buffer to be used by Mbed TLS for memory allocations
- *
- */
-static uint8_t mbedtls_mem_buf[TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN] = {0};
+    return err;
+}
 
 enum tfm_crypto_err_t tfm_crypto_init(void)
 {
-    /* Initialise everything that is needed */
+    psa_status_t status;
+    enum tfm_crypto_err_t err;
 
-    /* Initialise the Mbed TLS static memory allocator so that Mbed TLS
-     * allocates memory from the provided static buffer instead of from
-     * the heap.
-     */
-    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
-                                     TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN);
+    /* Initialise other modules of the service */
+    err = tfm_crypto_module_init();
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return err;
+    }
+
+    /* Initialise the engine interface module */
+    status = tfm_crypto_engine_init();
+    if (status != PSA_SUCCESS) {
+        /* FIXME: For the time being, keep returning success even if the engine
+         * is not initialised correctly. This can be used to test corner cases
+         * without triggering any TF-M recovery mechanism during boot-up if it
+         * recognises that a service has not completed booting correctly.
+         */
+        return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }

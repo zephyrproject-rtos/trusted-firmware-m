@@ -8,19 +8,7 @@
 #include <limits.h>
 
 #include "tfm_crypto_defs.h"
-
-/* Pre include Mbed TLS headers */
-#define LIB_PREFIX_NAME __tfm_crypto__
-#include "mbedtls_global_symbols.h"
-
-/* Include the Mbed TLS configuration file, the way Mbed TLS does it
- * in each of its header files. */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "platform/ext/common/tfm_mbedtls_config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
-
+#include "crypto_engine.h"
 #include "psa_crypto.h"
 
 #include "tfm_crypto_struct.h"
@@ -37,12 +25,10 @@
 enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
                                             psa_algorithm_t alg)
 {
-    int ret;
+    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
-    const mbedtls_md_info_t *info = NULL;
-    mbedtls_md_type_t type = MBEDTLS_MD_NONE;
-
     struct tfm_hash_operation_s *ctx = NULL;
+    struct hash_engine_info engine_info;
 
     /* Validate pointers */
     err = tfm_crypto_memory_check(operation,
@@ -56,67 +42,13 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Mbed TLS message digest setup */
-    switch(alg) {
-    case PSA_ALG_MD2:
-#if defined(MBEDTLS_MD2_C)
-        type = MBEDTLS_MD_MD2;
-#endif
-        break;
-    case PSA_ALG_MD4:
-#if defined(MBEDTLS_MD4_C)
-        type = MBEDTLS_MD_MD4;
-#endif
-        break;
-    case PSA_ALG_MD5:
-#if defined(MBEDTLS_MD5_C)
-        type = MBEDTLS_MD_MD5;
-#endif
-        break;
-    case PSA_ALG_RIPEMD160:
-#if defined(MBEDTLS_RIPEMD160_C)
-        type = MBEDTLS_MD_RIPEMD160;
-#endif
-        break;
-    case PSA_ALG_SHA_1:
-#if defined(MBEDTLS_SHA1_C)
-        type = MBEDTLS_MD_SHA1;
-#endif
-        break;
-    case PSA_ALG_SHA_224:
-#if defined(MBEDTLS_SHA256_C)
-        type = MBEDTLS_MD_SHA224;
-#endif
-        break;
-    case PSA_ALG_SHA_256:
-#if defined(MBEDTLS_SHA256_C)
-        type = MBEDTLS_MD_SHA256;
-#endif
-        break;
-    case PSA_ALG_SHA_384:
-#if defined(MBEDTLS_SHA512_C)
-        type = MBEDTLS_MD_SHA384;
-#endif
-        break;
-    case PSA_ALG_SHA_512:
-#if defined(MBEDTLS_SHA512_C)
-        type = MBEDTLS_MD_SHA512;
-#endif
-        break;
-    default:
-        break;
-    }
-
-    /* Mbed TLS currently does not support SHA3: PSA_ALG_SHA3_224,
-     * PSA_ALG_SHA3_256, PSA_ALG_SHA3_384, PSA_ALG_SHA3_512;
-     * Mbed TLS currently does not support SHA-512 Truncated modes:
-     * PSA_ALG_SHA_512_224, PSA_ALG_SHA_512_256
-     */
-    if (type == MBEDTLS_MD_NONE) {
+    /* Setup the engine for the requested algorithm */
+    status = tfm_crypto_engine_hash_setup(alg, &engine_info);
+    if (status != PSA_SUCCESS) {
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
-    /* Allocate the operation context in the Secure world */
+    /* Allocate the operation context in the secure world */
     err = tfm_crypto_operation_alloc(TFM_CRYPTO_HASH_OPERATION,
                                      &(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -136,22 +68,12 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
     /* Bind the algorithm to the hash context */
     ctx->alg = alg;
 
-    /* Mbed TLS message digest init */
-    mbedtls_md_init(&ctx->md);
-    info = mbedtls_md_info_from_type(type);
-    ret = mbedtls_md_setup(&(ctx->md), info, 0); /* 0: not HMAC */
-    if (ret != 0) {
+    /* Start the engine */
+    status = tfm_crypto_engine_hash_start(&(ctx->engine_ctx), &engine_info);
+    if (status != PSA_SUCCESS) {
         /* Release the operation context */
         tfm_crypto_operation_release(&(operation->handle));
-        return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
-    }
-
-    /* Start the message digest context */
-    ret = mbedtls_md_starts(&(ctx->md));
-    if (ret != 0) {
-        /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
-        return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
@@ -161,7 +83,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
                                              const uint8_t *input,
                                              size_t input_length)
 {
-    int ret;
+    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
     struct tfm_hash_operation_s *ctx = NULL;
 
@@ -187,12 +109,12 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
         return err;
     }
 
-    /* Process the input chunk */
-    ret = mbedtls_md_update(&(ctx->md), input, input_length);
-    if (ret != 0) {
-        /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
-        return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
+    /* Process the input chunk with the engine */
+    status = tfm_crypto_engine_hash_update(&(ctx->engine_ctx),
+                                           input,
+                                           input_length);
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
@@ -203,7 +125,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
                                              size_t hash_size,
                                              size_t *hash_length)
 {
-    int ret;
+    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
     struct tfm_hash_operation_s *ctx = NULL;
 
@@ -236,24 +158,23 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
     }
 
     if (hash_size < PSA_HASH_SIZE(ctx->alg)) {
-        /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    /* Finalise the hash value */
-    ret = mbedtls_md_finish(&(ctx->md), hash);
-    if (ret != 0) {
-        /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
-        return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
+    /* Finalise the hash value using the engine */
+    status = tfm_crypto_engine_hash_finish(&(ctx->engine_ctx), hash);
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
+    }
+
+    /* Release engine resources */
+    status = tfm_crypto_engine_hash_release(&(ctx->engine_ctx));
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
     /* Set the length of the hash that has been produced */
     *hash_length = PSA_HASH_SIZE(ctx->alg);
-
-    /* Clear the Mbed TLS message digest context */
-    mbedtls_md_free(&(ctx->md));
 
     /* Release the operation context */
     err = tfm_crypto_operation_release(&(operation->handle));
@@ -307,6 +228,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
 
 enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
 {
+    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
     struct tfm_hash_operation_s *ctx = NULL;
 
@@ -326,8 +248,11 @@ enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
         return err;
     }
 
-    /* Clear the Mbed TLS message digest context */
-    mbedtls_md_free(&(ctx->md));
+    /* Release engine resources */
+    status = tfm_crypto_engine_hash_release(&(ctx->engine_ctx));
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
+    }
 
     /* Release the operation context */
     err = tfm_crypto_operation_release(&(operation->handle));

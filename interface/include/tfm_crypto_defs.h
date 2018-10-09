@@ -67,16 +67,26 @@ enum tfm_crypto_err_t {
 
 /**
  * \brief A macro to translate TFM Crypto service return values to the
- *        corresponding PSA return value. The user of this macro needs
+ *        corresponding psa_status_t value. The user of this macro needs
  *        to cast the produced value to psa_status_t explicitly if needed
  *
  * \return Values specified by \ref psa_status_t
  */
-#define TFM_CRYPTO_PSA_RETURN(val) \
+#define TFM_CRYPTO_ERR_TO_PSA_STATUS(val) \
       ( (val == TFM_CRYPTO_ERR_PSA_SUCCESS) ? val : \
         ((val >= (enum tfm_crypto_err_t)TFM_CRYPTO_ERR_PSA_ERROR_OFFSET) ? \
          (val - ((enum tfm_crypto_err_t)TFM_CRYPTO_ERR_PSA_ERROR_OFFSET-1)) : \
           TFM_CRYPTO_ERR_INVALID) )
+/**
+ * \brief A macro to translate psa_status_t values to the corresponding return
+ *        values for the TFM Crypto service
+ *
+ * \return Values specified by \ref enum tfm_crypto_err_t
+ *
+ */
+#define PSA_STATUS_TO_TFM_CRYPTO_ERR(val) \
+      ( (val == PSA_SUCCESS) ? (enum tfm_crypto_err_t)val : \
+                (enum tfm_crypto_err_t)(val + TFM_CRYPTO_ERR_PSA_ERROR_OFFSET) )
 
 #ifdef __cplusplus
 }

@@ -31,7 +31,7 @@ psa_status_t psa_import_key(psa_key_slot_t key,
                                (uint32_t)data,
                                (uint32_t)data_length);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_destroy_key(psa_key_slot_t key)
@@ -44,7 +44,7 @@ psa_status_t psa_destroy_key(psa_key_slot_t key)
                                0,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_get_key_information(psa_key_slot_t key,
@@ -59,7 +59,7 @@ psa_status_t psa_get_key_information(psa_key_slot_t key,
                                (uint32_t)bits,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_export_key(psa_key_slot_t key,
@@ -75,7 +75,7 @@ psa_status_t psa_export_key(psa_key_slot_t key,
                                (uint32_t)data_size,
                                (uint32_t)data_length);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_export_public_key(psa_key_slot_t key,
@@ -99,7 +99,7 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                (uint32_t)iv_length,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
@@ -115,7 +115,7 @@ psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
                               (uint32_t)alg,
                               0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
@@ -131,7 +131,7 @@ psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
                               (uint32_t)alg,
                               0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
@@ -159,7 +159,7 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
                                (uint32_t)&output_s,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
@@ -172,7 +172,7 @@ psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
                                0,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
@@ -188,7 +188,7 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
                                (uint32_t)output_size,
                                (uint32_t)output_length);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
@@ -202,7 +202,7 @@ psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
                                0,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_hash_update(psa_hash_operation_t *operation,
@@ -217,7 +217,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
                                (uint32_t)input_length,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
@@ -233,7 +233,7 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
                                (uint32_t)hash_size,
                                (uint32_t)hash_length);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
@@ -248,7 +248,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
                                (uint32_t)hash_length,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
 
 psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
@@ -261,5 +261,5 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
                                0,
                                0);
 
-    return TFM_CRYPTO_PSA_RETURN(err);
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }

@@ -175,6 +175,8 @@ static void psa_cipher_test(const psa_algorithm_t alg,
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
     uint32_t comp_result;
 
+    ret->val = TEST_PASSED;
+
     /* Import a key on slot 0 */
     status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
     if (status != PSA_SUCCESS) {
@@ -185,31 +187,35 @@ static void psa_cipher_test(const psa_algorithm_t alg,
     status = psa_get_key_information(slot, &type, &bits);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
-        return;
+        goto destroy_key;
     }
 
     if (bits != BIT_SIZE_TEST_KEY) {
         TEST_FAIL("The number of key bits is different from expected");
-        return;
+        goto destroy_key;
     }
 
     if (type != PSA_KEY_TYPE_AES) {
         TEST_FAIL("The type of the key is different from expected");
-        return;
+        goto destroy_key;
     }
 
     /* Setup the encryption object */
     status = psa_cipher_encrypt_setup(&handle, slot, alg);
     if (status != PSA_SUCCESS) {
-        TEST_FAIL("Error setting up cipher operation object");
-        return;
+        if (status == PSA_ERROR_NOT_SUPPORTED) {
+            TEST_FAIL("Algorithm NOT SUPPORTED by the implementation");
+        } else {
+            TEST_FAIL("Error setting up cipher operation object");
+        }
+        goto destroy_key;
     }
 
     /* Set the IV */
     status = psa_cipher_set_iv(&handle, iv, iv_length);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV on the cypher operation object");
-        return;
+        goto destroy_key;
     }
 
     /* Encrypt one chunk of information */
@@ -219,12 +225,12 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error encrypting one chunk of information");
-        return;
+        goto destroy_key;
     }
 
     if (output_length != BYTE_SIZE_CHUNK) {
         TEST_FAIL("Expected encrypted data length is different from expected");
-        return;
+        goto destroy_key;
     }
 
     /* Finalise the cipher operation */
@@ -234,12 +240,12 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error finalising the cipher operation");
-        return;
+        goto destroy_key;
     }
 
     if (output_length != 0) {
         TEST_FAIL("Unexpected output length after finalisation");
-        return;
+        goto destroy_key;
     }
 
     /* Setup the decryption object */
@@ -252,7 +258,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting up cipher operation object");
-        return;
+        goto destroy_key;
     }
 
     /* Set the IV for decryption */
@@ -269,13 +275,13 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV for decryption");
-        return;
+        goto destroy_key;
     }
 
     if (alg != PSA_ALG_CFB_BASE) {
         if (output_length != 0) {
             TEST_FAIL("Expected output length is different from expected");
-            return;
+            goto destroy_key;
         }
     }
 
@@ -296,7 +302,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (output_length != expected_output_length) {
         TEST_FAIL("Decrypted length is different from expected one");
-        return;
+        goto destroy_key;
     }
 
     /* Check that the plain text matches the decrypted data */
@@ -304,7 +310,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
                                   sizeof(plain_text), sizeof(decrypted_data));
     if (comp_result != 0) {
         TEST_FAIL("Decrypted data doesn't match with plain text");
-        return;
+        goto destroy_key;
     }
 
     /* Finalise the cipher operation for decryption (destroys decrypted data) */
@@ -313,7 +319,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error finalising the cipher operation");
-        return;
+        goto destroy_key;
     }
 
     if (alg == PSA_ALG_CFB_BASE) {
@@ -324,17 +330,16 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (output_length != expected_output_length) {
         TEST_FAIL("After finalising, unexpected decrypted length");
-        return;
+        goto destroy_key;
     }
 
+destroy_key:
     /* Destroy the key on slot 0 */
     status = psa_destroy_key(slot);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
         return;
     }
-
-    ret->val = TEST_PASSED;
 }
 
 static void tfm_crypto_test_6002(struct test_result_t *ret)

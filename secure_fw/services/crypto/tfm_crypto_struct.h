@@ -11,41 +11,30 @@
  * \brief Similarly to what psa_crypto_struct.h defines for
  *        the frontend, this header provides Crypto service
  *        specific definitions for operation contexts.
- *        Current implementation is directly based on Mbed TLS.
  */
+
+#include "psa_crypto.h"
+#include "crypto_engine.h"
 
 #ifndef __TFM_CRYPTO_STRUCT_H__
 #define __TFM_CRYPTO_STRUCT_H__
 
-/* Include the Mbed TLS configuration file, the way Mbed TLS does it
- * in each of its header files.
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "platform/ext/common/tfm_mbedtls_config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+struct tfm_hash_operation_s {
 
-#include "mbedtls/cipher.h"
-#include "mbedtls/cmac.h"
-#include "mbedtls/md.h"
-
-struct tfm_hash_operation_s
-{
     psa_algorithm_t alg;
-    mbedtls_md_context_t md;
+    union engine_hash_context engine_ctx;
 };
 
-struct tfm_hmac_internal_data_s
-{
-    /* The hash context. */
-    struct psa_hash_operation_s hash_ctx;
+struct tfm_hmac_internal_data_s {
+
+    /* The hash operation. */
+    psa_hash_operation_t hash_operation;
     /* The HMAC part of the context. */
     uint8_t opad[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
 };
 
-struct tfm_mac_operation_s
-{
+struct tfm_mac_operation_s {
+
     psa_algorithm_t alg;
     uint8_t key_set;
     uint8_t iv_required;
@@ -54,17 +43,16 @@ struct tfm_mac_operation_s
     uint8_t key_usage_sign;
     uint8_t key_usage_verify;
     uint8_t mac_size;
-    union
-    {
+    union {
         struct tfm_hmac_internal_data_s hmac;
-        mbedtls_cipher_context_t cmac;
+        union engine_cmac_context cmac;
     } ctx;
 };
 
-#define PSA_CIPHER_IV_MAX_SIZE 16
+#define TFM_CIPHER_IV_MAX_SIZE 16
 
-struct tfm_cipher_operation_s
-{
+struct tfm_cipher_operation_s {
+
     psa_algorithm_t alg;
     uint8_t key_set;
     uint8_t iv_required;
@@ -72,6 +60,7 @@ struct tfm_cipher_operation_s
     uint8_t iv_size;
     uint8_t block_size;
     psa_key_slot_t key;
-    mbedtls_cipher_context_t cipher;
+    uint8_t cipher_mode;
+    union engine_cipher_context engine_ctx;
 };
 #endif /* __TFM_CRYPTO_STRUCT_H__ */

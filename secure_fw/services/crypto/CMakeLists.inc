@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,7 @@
 #This file assumes it will be included from a project specific cmakefile, and
 #will not create a library or executable.
 #Inputs:
-#       MBEDTLS_INSTALL_DIR - directory where mbed TLS headers and libraries can be found.
+#       MBEDTLS_INSTALL_DIR - directory where mbed TLS headers and libraries can be found. Needed only when using CRYPTO_ENGINE_MBEDTLS ON.
 #       TFM_ROOT_DIR        - root directory of the TF-M repository.
 #Outputs:
 #       Will modify include directories to make the source compile.
@@ -26,9 +26,15 @@ if (NOT DEFINED ENABLE_CRYPTO)
   message(FATAL_ERROR "Incomplete build configuration: ENABLE_CRYPTO is undefined. ")
 endif()
 
+if (NOT DEFINED CRYPTO_ENGINE_MBEDTLS)
+  message(FATAL_ERROR "Incomplete build configuration: CRYPTO_ENGINE_MBEDTLS is undefined. ")
+endif()
+
 if (ENABLE_CRYPTO)
-  if (NOT DEFINED MBEDTLS_INSTALL_DIR)
-    message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
+  if (CRYPTO_ENGINE_MBEDTLS)
+    if (NOT DEFINED MBEDTLS_INSTALL_DIR)
+      message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
+    endif()
   endif()
 
   if (NOT DEFINED TFM_ROOT_DIR)
@@ -42,6 +48,7 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_key.c"
                     "${CRYPTO_DIR}/crypto_wrappers.c"
                     "${CRYPTO_DIR}/crypto_utils.c"
+                    "${CRYPTO_DIR}/crypto_engine.c"
       )
 
   #Append all our source files to global lists.
@@ -51,7 +58,13 @@ if (ENABLE_CRYPTO)
   #Setting include directories
   embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
   embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-  embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+  if (CRYPTO_ENGINE_MBEDTLS)
+    embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+  endif()
+
+  #Inform the user about Crypto service features selected based on the Crypto service cmake flags
+  message("The Crypto service compile configuration is as follows:")
+  message("- CRYPTO_ENGINE_MBEDTLS: " ${CRYPTO_ENGINE_MBEDTLS})
 
 else()
   message(FATAL_ERROR "Build system currently doesn't support selectively disabling of a service.")

@@ -146,6 +146,7 @@
     "crypto_wrappers.c",
     "crypto_utils.c",
     "crypto_hash.c",
+    "crypto_engine.c",
   ],
   "tfm_linker_pattern": [
     "library_list": [

@@ -9,23 +9,11 @@
 
 #include "tfm_crypto_defs.h"
 
-/* Pre include Mbed TLS headers */
-#define LIB_PREFIX_NAME __tfm_crypto__
-#include "mbedtls_global_symbols.h"
-
-/* Include the Mbed TLS configuration file, the way Mbed TLS does it
- * in each of its header files.
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "platform/ext/common/tfm_mbedtls_config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
-
 #include "psa_crypto.h"
 #include "tfm_crypto_api.h"
 
 #include "tfm_crypto_struct.h"
+#include "secure_fw/core/secure_utilities.h"
 
 /**
  * \brief This value defines the maximum number of simultaneous operations
@@ -84,6 +72,13 @@ static void memset_operation_context(uint32_t index)
  */
 
 /*!@{*/
+enum tfm_crypto_err_t tfm_crypto_init_alloc(void)
+{
+    /* Clear the contents of the local contexts */
+    tfm_memset(operation, 0, sizeof(operation));
+    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+}
+
 enum tfm_crypto_err_t tfm_crypto_operation_alloc(
                                         enum tfm_crypto_operation_type type,
                                         uint32_t *handle)

@@ -32,15 +32,25 @@ refer to the comments in the `psa_crypto.h` header itself.
  - `crypto_init.c` :  This file provides basic functions to initialise the
  secure service during TF-M boot;
  - `crypto_key.c` : This file implements functionalities related to the key
- management module;
+ management module. The `TFM_CRYPTO_KEY_STORAGE_NUM`, defined in this file,
+ determines how many key stores are available (4 key stores for the current
+ implementation);
  - `crypto_alloc.c` : This file implements extensions to the PSA interface
  which are specifically required by the TF-M Crypto service, in particular
  related to the allocation and deallocation of crypto operation contexts in
- the secure world;
+ the secure world. The `TFM_CRYPTO_CONC_OPER_NUM`, defined in this file,
+ determines how many concurrent contexts are supported (8 for the current
+ implementation). For multipart cipher/hash/MAC operations, a context is
+ associated to the handle provided during the setup phase, and is explicitly
+ cleared only following a successful termination or an abort;
  - `crypto_wrappers.c` : This file implements TF-M compatible wrappers in
  case they are needed by the functions exported by other modules;
  - `crypto_utils.c` : This file implements utility functions that can be
- used by other modules of the TF-M Crypto service.
+ used by other modules of the TF-M Crypto service;
+ - `crypto_engine.c` : This file implements the layer which the other modules
+ use to interact with the cryptography primitives available (in SW or HW).
+ The current implementation provides only SW primitives based on Mbed TLS
+ functions.
 
 ## Crypto service integration guide
 
@@ -67,4 +77,4 @@ in the Secure world.
 
  --------------
 
-*Copyright (c) 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*

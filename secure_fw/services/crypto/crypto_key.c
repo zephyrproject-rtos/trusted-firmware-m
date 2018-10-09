@@ -8,23 +8,10 @@
 #include <limits.h>
 
 #include "tfm_crypto_defs.h"
-
-/* Pre include Mbed TLS headers */
-#define LIB_PREFIX_NAME __tfm_crypto__
-#include "mbedtls_global_symbols.h"
-
-/* Include the Mbed TLS configuration file, the way Mbed TLS does it
- * in each of its header files.
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "platform/ext/common/tfm_mbedtls_config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
-
 #include "psa_crypto.h"
 
 #include "tfm_crypto_struct.h"
+#include "secure_fw/core/secure_utilities.h"
 
 /**
  * \brief This value defines the maximum number of simultaneous key stores
@@ -47,6 +34,13 @@ static struct tfm_crypto_key_storage_s
  */
 
 /*!@{*/
+enum tfm_crypto_err_t tfm_crypto_init_key(void)
+{
+    /* Clear the contents of the local key_storage */
+    tfm_memset(key_storage, 0, sizeof(key_storage));
+    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+}
+
 enum tfm_crypto_err_t tfm_crypto_import_key(psa_key_slot_t key,
                                             psa_key_type_t type,
                                             const uint8_t *data,

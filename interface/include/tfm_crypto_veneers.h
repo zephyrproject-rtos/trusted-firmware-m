@@ -19,7 +19,7 @@ extern "C" {
 #include "crypto_psa_wrappers.h"
 
 /**
- * \brief Import the key data on the provided key slot (veneer function)
+ * \brief Import the key data in the provided key slot (veneer function)
  *
  * \param[in] key         Key slot
  * \param[in] type        Key type
@@ -57,9 +57,9 @@ enum tfm_crypto_err_t tfm_crypto_veneer_get_key_information(
 /**
  * \brief Export the key contained in the provided key slot (veneer function)
  *
- * \param[in] key          Key slot
+ * \param[in]  key         Key slot
  * \param[out] data        Buffer to hold the exported key
- * \param[in] data_size    Length of the buffer pointed to by data
+ * \param[in]  data_size   Length of the buffer pointed to by data
  * \param[out] data_length Length of the exported key
  *
  * \return Return values as described in \ref tfm_crypto_err_t
@@ -86,9 +86,12 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_set_iv(
  * \brief Set the cipher operation using the provided algorithm and key slot,
  *        for encryption context (veneer function)
  *
- * \param[in] operation Cipher operation context
- * \param[in] key       Key slot to bind to the cipher context
- * \param[in] alg       Algorithm to use for the cipher operation
+ * \note A successful call to this function initialises a cipher operation
+ *       context which will be referred using the operation parameter
+ *
+ * \param[out] operation Cipher operation context
+ * \param[in]  key       Key slot to bind to the cipher context
+ * \param[in]  alg       Algorithm to use for the cipher operation
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -100,9 +103,12 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_encrypt_setup(
  * \brief Set the cipher operation using the provided algorithm and key slot,
  *        for decryption context (veneer function)
  *
- * \param[in] operation Cipher operation context
- * \param[in] key       Key slot to bind to the cipher context
- * \param[in] alg       Algorithm to use for the cipher operation
+ * \note A successful call to this function initialises a cipher operation
+ *       context which will be referred using the operation parameter
+ *
+ * \param[out] operation Cipher operation context
+ * \param[in]  key       Key slot to bind to the cipher context
+ * \param[in]  alg       Algorithm to use for the cipher operation
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -127,24 +133,16 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_update(
                                      struct psa_cipher_update_input *input_s,
                                      struct psa_cipher_update_output *output_s);
 /**
- * \brief Abort a cipher operation, clears the operation context provided
- *        (veneer function)
- *
- * \param[in]  operation     Cipher operation context
- *
- * \return Return values as described in \ref tfm_crypto_err_t
- */
-enum tfm_crypto_err_t tfm_crypto_veneer_cipher_abort(
-                                             psa_cipher_operation_t *operation);
-
-/**
  * \brief Finalise a cipher context flushing out any remaining block of
  *        output data (veneer function)
  *
- * \param[in]  operation     Cipher operation context
- * \param[out] output        Buffer containing output data
- * \param[in]  output_size   Size of the output buffer
- * \param[out] output_length Size of the produced output
+ * \note A successful call to this function releases the cipher operation
+ *       context provided as parameter
+ *
+ * \param[in/out] operation     Cipher operation context
+ * \param[out]    output        Buffer containing output data
+ * \param[in]     output_size   Size of the output buffer
+ * \param[out]    output_length Size of the produced output
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -154,40 +152,59 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_finish(
                                               size_t output_size,
                                               size_t *output_length);
 /**
+ * \brief Abort a cipher operation, clear the operation context provided
+ *        (veneer function)
+ *
+ * \note A successful call to this function releases the cipher operation
+ *       context provided as parameter
+ *
+ * \param[in/out] operation Cipher operation context
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_abort(
+                                             psa_cipher_operation_t *operation);
+/**
  * \brief Setup a hash operation with the provided algorithm (veneer function)
  *
- * \param[in] operation Hash operation context
- * \param[in] alg       Algorithm chosen as hash
+ * \note A successful call to this function initialises a hash operation
+ *       context which will be referred using the operation parameter
  *
- * \return Returns values as described in \ref tfm_crypto_err_t
+ * \param[out] operation Hash operation context
+ * \param[in]  alg       Algorithm chosen as hash
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_setup(
                                                 psa_hash_operation_t *operation,
                                                 psa_algorithm_t alg);
 /**
- * \brief Adds a new input chunk to the data for which the final hash value
+ * \brief Add a new input chunk to the data for which the final hash value
  *        will be computed (veneer function)
  *
- * \param[in] operation    Hash operation context
- * \param[in] input        Buffer containing the input data
- * \param[in] input_length Size of the provided input data
+ * \param[in/out] operation    Hash operation context
+ * \param[in]     input        Buffer containing the input data
+ * \param[in]     input_length Size of the provided input data
  *
- * \return Returns values as described in \ref tfm_crypto_err_t
+ * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_update(
                                                 psa_hash_operation_t *operation,
                                                 const uint8_t *input,
                                                 size_t input_length);
 /**
- * \brief Finalises a hash context operation producing the final hash value
+ * \brief Finalise a hash context operation producing the final hash value
  *        (veneer function)
  *
- * \param[in]  operation   Hash operation context
- * \param[out] hash        Buffer containing hash data
- * \param[in]  hash_size   Size of the hash buffer
- * \param[out] hash_length Size of the produced hash
+ * \note A successful call to this function releases the hash operation
+ *       context provided as parameter
  *
- * \return Returns values as described in \ref tfm_crypto_err_t
+ * \param[in/out] operation   Hash operation context
+ * \param[out]    hash        Buffer containing hash data
+ * \param[in]     hash_size   Size of the hash buffer
+ * \param[out]    hash_length Size of the produced hash
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_finish(
                                                 psa_hash_operation_t *operation,
@@ -195,26 +212,33 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_finish(
                                                 size_t hash_size,
                                                 size_t *hash_length);
 /**
- * \brief Finalises a hash context operation, verifying that the final hash
+ * \brief Finalise a hash context operation, verifying that the final hash
  *        value matches the one provided as input (veneer function)
  *
- * \param[in] operation   Hash operation context
- * \param[in] hash        Buffer containing the provided hash value
- * \param[in] hash_length Size of the provided hash value
+ * \note A successful call to this function releases the hash operation
+ *       context provided as parameter. The hash operation is released
+ *       also in case TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE is returned
  *
- * \return Returns values as described in \ref tfm_crypto_err_t
+ * \param[in/out] operation   Hash operation context
+ * \param[in]     hash        Buffer containing the provided hash value
+ * \param[in]     hash_length Size of the provided hash value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_verify(
                                                 psa_hash_operation_t *operation,
                                                 const uint8_t *hash,
                                                 size_t hash_length);
 /**
- * \brief Aborts a hash operation, clears the operation context provided
+ * \brief Abort a hash operation, clears the operation context provided
  *        (veneer function)
  *
- * \param[in] operation Hash operation context
+ * \note A successful call to this function releases the hash operation
+ *       context provided as parameter
  *
- * \return Returns values as described in \ref tfm_crypto_err_t
+ * \param[in/out] operation Hash operation context
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_abort(
                                                psa_hash_operation_t *operation);
