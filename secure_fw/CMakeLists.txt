@@ -164,6 +164,18 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
 	endif()
 
+	if (NOT DEFINED TEST_FRAMEWORK_S)
+		message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_S is undefined.")
+	elseif (TEST_FRAMEWORK_S)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TEST_FRAMEWORK_S")
+	endif()
+
+	if (NOT DEFINED TEST_FRAMEWORK_NS)
+		message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_NS is undefined.")
+	elseif (TEST_FRAMEWORK_NS)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TEST_FRAMEWORK_NS")
+	endif()
+
 	if (NOT DEFINED BL2)
 		message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 	elseif (BL2)

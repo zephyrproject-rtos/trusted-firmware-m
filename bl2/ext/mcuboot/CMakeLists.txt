@@ -116,6 +116,18 @@ config_setting_shared_linker_flags(${PROJECT_NAME})
 #Add BL2 define to linker to resolve symbols in region_defs.h
 embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
 
+if(NOT DEFINED TEST_FRAMEWORK_S)
+	message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_S is undefined.")
+elseif(TEST_FRAMEWORK_S)
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TEST_FRAMEWORK_S")
+endif()
+
+if(NOT DEFINED TEST_FRAMEWORK_NS)
+	message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_NS is undefined.")
+elseif(TEST_FRAMEWORK_NS)
+	embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TEST_FRAMEWORK_NS")
+endif()
+
 #Link mbedcrypto library to project
 target_link_libraries(${PROJECT_NAME} "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
 add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
