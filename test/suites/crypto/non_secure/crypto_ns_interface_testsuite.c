@@ -5,8 +5,11 @@
  *
  */
 
+#include <string.h>
+
 #include "test/framework/test_framework_helpers.h"
 #include "tfm_api.h"
+#include "tfm_crypto_defs.h"
 #include "psa_crypto.h"
 
 #define BIT_SIZE_TEST_KEY (128)
@@ -14,10 +17,6 @@
 #define BYTE_SIZE_TEST_KEY (BIT_SIZE_TEST_KEY/8)
 #define BYTE_SIZE_CHUNK (16)
 #define ENC_DEC_BUFFER_SIZE (32)
-#define CIPHER_CFB_DECRYPT_LENGTH (32)
-#define CIPHER_CBC_DECRYPT_LENGTH (16)
-#define CIPHER_CFB_FLUSH_LENGTH (0)
-#define CIPHER_CBC_FLUSH_LENGTH (16)
 
 /* List of tests */
 static void tfm_crypto_test_6001(struct test_result_t *ret);
@@ -36,6 +35,12 @@ static void tfm_crypto_test_6013(struct test_result_t *ret);
 static void tfm_crypto_test_6014(struct test_result_t *ret);
 static void tfm_crypto_test_6015(struct test_result_t *ret);
 static void tfm_crypto_test_6016(struct test_result_t *ret);
+static void tfm_crypto_test_6017(struct test_result_t *ret);
+static void tfm_crypto_test_6018(struct test_result_t *ret);
+static void tfm_crypto_test_6019(struct test_result_t *ret);
+static void tfm_crypto_test_6020(struct test_result_t *ret);
+static void tfm_crypto_test_6021(struct test_result_t *ret);
+static void tfm_crypto_test_6022(struct test_result_t *ret);
 
 static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -45,30 +50,42 @@ static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6003, "TFM_CRYPTO_TEST_6003",
      "Non Secure Symmetric encryption (AES-128-CFB) interface", {0} },
     {&tfm_crypto_test_6004, "TFM_CRYPTO_TEST_6004",
-     "Non Secure Hash (SHA-1) interface", {0} },
+     "Non Secure Symmetric encryption (DES-128-CBC) interface", {0} },
     {&tfm_crypto_test_6005, "TFM_CRYPTO_TEST_6005",
-     "Non Secure Hash (SHA-224) interface", {0} },
+     "Non Secure Symmetric encryption (CAMELLIA-128-CTR) interface", {0} },
     {&tfm_crypto_test_6006, "TFM_CRYPTO_TEST_6006",
-     "Non Secure Hash (SHA-256) interface", {0} },
+     "Non Secure Symmetric encryption invalid cipher (DES-128-RC4)", {0} },
     {&tfm_crypto_test_6007, "TFM_CRYPTO_TEST_6007",
-     "Non Secure Hash (SHA-384) interface", {0} },
+     "Non Secure Symmetric encryption invalid cipher (AES-128-GCM)", {0} },
     {&tfm_crypto_test_6008, "TFM_CRYPTO_TEST_6008",
-     "Non Secure Hash (SHA-512) interface", {0} },
+     "Non Secure Symmetric encryption invalid cipher (DES-152-CBC)", {0} },
     {&tfm_crypto_test_6009, "TFM_CRYPTO_TEST_6009",
-     "Non Secure Hash (MD-5) interface", {0} },
+     "Non Secure Symmetric encryption invalid cipher (HMAC-128-CFB)", {0} },
     {&tfm_crypto_test_6010, "TFM_CRYPTO_TEST_6010",
-     "Non Secure Hash (RIPEMD-160) interface", {0} },
+     "Non Secure Hash (SHA-1) interface", {0} },
     {&tfm_crypto_test_6011, "TFM_CRYPTO_TEST_6011",
-     "Non Secure HMAC (SHA-1) interface", {0} },
+     "Non Secure Hash (SHA-224) interface", {0} },
     {&tfm_crypto_test_6012, "TFM_CRYPTO_TEST_6012",
-     "Non Secure HMAC (SHA-256) interface", {0} },
+     "Non Secure Hash (SHA-256) interface", {0} },
     {&tfm_crypto_test_6013, "TFM_CRYPTO_TEST_6013",
-     "Non Secure HMAC (SHA-384) interface", {0} },
+     "Non Secure Hash (SHA-384) interface", {0} },
     {&tfm_crypto_test_6014, "TFM_CRYPTO_TEST_6014",
-     "Non Secure HMAC (SHA-512) interface", {0} },
+     "Non Secure Hash (SHA-512) interface", {0} },
     {&tfm_crypto_test_6015, "TFM_CRYPTO_TEST_6015",
-     "Non Secure HMAC (MD-5) interface", {0} },
+     "Non Secure Hash (MD-5) interface", {0} },
     {&tfm_crypto_test_6016, "TFM_CRYPTO_TEST_6016",
+     "Non Secure Hash (RIPEMD-160) interface", {0} },
+    {&tfm_crypto_test_6017, "TFM_CRYPTO_TEST_6017",
+     "Non Secure HMAC (SHA-1) interface", {0} },
+    {&tfm_crypto_test_6018, "TFM_CRYPTO_TEST_6018",
+     "Non Secure HMAC (SHA-256) interface", {0} },
+    {&tfm_crypto_test_6019, "TFM_CRYPTO_TEST_6019",
+     "Non Secure HMAC (SHA-384) interface", {0} },
+    {&tfm_crypto_test_6020, "TFM_CRYPTO_TEST_6020",
+     "Non Secure HMAC (SHA-512) interface", {0} },
+    {&tfm_crypto_test_6021, "TFM_CRYPTO_TEST_6021",
+     "Non Secure HMAC (MD-5) interface", {0} },
+    {&tfm_crypto_test_6022, "TFM_CRYPTO_TEST_6022",
      "Non Secure HMAC with long key (SHA-1) interface", {0} },
 };
 
@@ -177,7 +194,8 @@ static uint32_t compare_buffers(const uint8_t *p1,
     return 0;
 }
 
-static void psa_cipher_test(const psa_algorithm_t alg,
+static void psa_cipher_test(const psa_key_type_t key_type,
+                            const psa_algorithm_t alg,
                             struct test_result_t *ret)
 {
     psa_cipher_operation_t handle, handle_dec;
@@ -186,18 +204,18 @@ static void psa_cipher_test(const psa_algorithm_t alg,
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
-    const size_t iv_length = 16;
+    const size_t iv_length = PSA_BLOCK_CIPHER_BLOCK_SIZE(key_type);
     const uint8_t iv[] = "012345678901234";
     const uint8_t plain_text[BYTE_SIZE_CHUNK] = "Sixteen bytes!!";
     uint8_t decrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
-    size_t output_length = 0, expected_output_length = 0;
+    size_t output_length = 0, total_output_length = 0;
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
     uint32_t comp_result;
 
     ret->val = TEST_PASSED;
 
     /* Import a key on slot 0 */
-    status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
+    status = psa_import_key(slot, key_type, data, sizeof(data));
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
         return;
@@ -214,7 +232,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
         goto destroy_key;
     }
 
-    if (type != PSA_KEY_TYPE_AES) {
+    if (type != key_type) {
         TEST_FAIL("The type of the key is different from expected");
         goto destroy_key;
     }
@@ -310,19 +328,10 @@ static void psa_cipher_test(const psa_algorithm_t alg,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error during decryption");
-        return;
-    }
-
-    if (alg == PSA_ALG_CFB_BASE) {
-        expected_output_length = CIPHER_CFB_DECRYPT_LENGTH;
-    } else {
-        expected_output_length = CIPHER_CBC_DECRYPT_LENGTH;
-    }
-
-    if (output_length != expected_output_length) {
-        TEST_FAIL("Decrypted length is different from expected one");
         goto destroy_key;
     }
+
+    total_output_length += output_length;
 
     /* Check that the plain text matches the decrypted data */
     comp_result = compare_buffers(plain_text, decrypted_data,
@@ -341,13 +350,10 @@ static void psa_cipher_test(const psa_algorithm_t alg,
         goto destroy_key;
     }
 
-    if (alg == PSA_ALG_CFB_BASE) {
-        expected_output_length = CIPHER_CFB_FLUSH_LENGTH;
-    } else {
-        expected_output_length = CIPHER_CBC_FLUSH_LENGTH;
-    }
+    total_output_length += output_length;
 
-    if (output_length != expected_output_length) {
+    /* Check that the decrypted length is equal to the original length */
+    if (total_output_length != ENC_DEC_BUFFER_SIZE) {
         TEST_FAIL("After finalising, unexpected decrypted length");
         goto destroy_key;
     }
@@ -357,18 +363,97 @@ destroy_key:
     status = psa_destroy_key(slot);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
-        return;
     }
 }
 
 static void tfm_crypto_test_6002(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_ALG_CBC_BASE, ret);
+    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CBC_BASE, ret);
 }
 
 static void tfm_crypto_test_6003(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_ALG_CFB_BASE, ret);
+    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CFB_BASE, ret);
+}
+
+static void tfm_crypto_test_6004(struct test_result_t *ret)
+{
+    psa_cipher_test(PSA_KEY_TYPE_DES, PSA_ALG_CBC_BASE, ret);
+}
+
+static void tfm_crypto_test_6005(struct test_result_t *ret)
+{
+    psa_cipher_test(PSA_KEY_TYPE_CAMELLIA, PSA_ALG_CTR, ret);
+}
+
+/**
+ * \brief Tests invalid key type and algorithm combinations for block ciphers.
+ *
+ * \param[in]  key_type  PSA key type
+ * \param[in]  alg       PSA algorithm
+ * \param[in]  key_size  Key size
+ * \param[out] ret       Test result
+ */
+static void psa_test_invalid_cipher(const psa_key_type_t key_type,
+                                    const psa_algorithm_t alg,
+                                    const size_t key_size,
+                                    struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_cipher_operation_t handle;
+    const psa_key_slot_t slot = 0;
+    uint8_t data[TFM_CRYPTO_MAX_KEY_LENGTH];
+
+    /* Fill the key data */
+    memset(data, 'A', key_size);
+
+    /* Import a key to slot 0 */
+    status = psa_import_key(slot, key_type, data, key_size);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        return;
+    }
+
+    /* Setup the encryption object */
+    status = psa_cipher_encrypt_setup(&handle, slot, alg);
+    if (status == PSA_SUCCESS) {
+        TEST_FAIL("Should not successfully setup an invalid cipher");
+        psa_destroy_key(slot);
+        return;
+    }
+
+    /* Destroy the key in slot 0 */
+    status = psa_destroy_key(slot);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying a key");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+static void tfm_crypto_test_6006(struct test_result_t *ret)
+{
+    /* Invalid combination: DES keytypes are not usable with a stream cipher */
+    psa_test_invalid_cipher(PSA_KEY_TYPE_DES, PSA_ALG_ARC4, 16, ret);
+}
+
+static void tfm_crypto_test_6007(struct test_result_t *ret)
+{
+    /* GCM is an AEAD mode */
+    psa_test_invalid_cipher(PSA_KEY_TYPE_AES, PSA_ALG_GCM, 16, ret);
+}
+
+static void tfm_crypto_test_6008(struct test_result_t *ret)
+{
+    /* DES does not support 152-bit keys */
+    psa_test_invalid_cipher(PSA_KEY_TYPE_DES, PSA_ALG_CBC_BASE, 19, ret);
+}
+
+static void tfm_crypto_test_6009(struct test_result_t *ret)
+{
+    /* HMAC is not a block cipher */
+    psa_test_invalid_cipher(PSA_KEY_TYPE_HMAC, PSA_ALG_CFB_BASE, 16, ret);
 }
 
 /*
@@ -473,37 +558,37 @@ static void psa_hash_test(const psa_algorithm_t alg,
     ret->val = TEST_PASSED;
 }
 
-static void tfm_crypto_test_6004(struct test_result_t *ret)
+static void tfm_crypto_test_6010(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_1, ret);
 }
 
-static void tfm_crypto_test_6005(struct test_result_t *ret)
+static void tfm_crypto_test_6011(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_224, ret);
 }
 
-static void tfm_crypto_test_6006(struct test_result_t *ret)
+static void tfm_crypto_test_6012(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_256, ret);
 }
 
-static void tfm_crypto_test_6007(struct test_result_t *ret)
+static void tfm_crypto_test_6013(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_384, ret);
 }
 
-static void tfm_crypto_test_6008(struct test_result_t *ret)
+static void tfm_crypto_test_6014(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_SHA_512, ret);
 }
 
-static void tfm_crypto_test_6009(struct test_result_t *ret)
+static void tfm_crypto_test_6015(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_MD5, ret);
 }
 
-static void tfm_crypto_test_6010(struct test_result_t *ret)
+static void tfm_crypto_test_6016(struct test_result_t *ret)
 {
     psa_hash_test(PSA_ALG_RIPEMD160, ret);
 }
@@ -652,32 +737,32 @@ destroy_key_mac:
     }
 }
 
-static void tfm_crypto_test_6011(struct test_result_t *ret)
+static void tfm_crypto_test_6017(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
 }
 
-static void tfm_crypto_test_6012(struct test_result_t *ret)
+static void tfm_crypto_test_6018(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_256), 0, ret);
 }
 
-static void tfm_crypto_test_6013(struct test_result_t *ret)
+static void tfm_crypto_test_6019(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_384), 0, ret);
 }
 
-static void tfm_crypto_test_6014(struct test_result_t *ret)
+static void tfm_crypto_test_6020(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_512), 0, ret);
 }
 
-static void tfm_crypto_test_6015(struct test_result_t *ret)
+static void tfm_crypto_test_6021(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_MD5), 0, ret);
 }
 
-static void tfm_crypto_test_6016(struct test_result_t *ret)
+static void tfm_crypto_test_6022(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
 }
