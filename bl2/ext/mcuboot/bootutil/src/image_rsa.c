@@ -17,6 +17,13 @@
  * under the License.
  */
 
+/*
+ * Original code taken from mcuboot project at:
+ * https://github.com/JuulLabs-OSS/mcuboot
+ * Git SHA of the original version: 178be54bd6e5f035cc60e98205535682acd26e64
+ * Modifications are Copyright (c) 2018-2019 Arm Limited.
+ */
+
 #include <string.h>
 
 #ifdef MCUBOOT_SIGN_RSA
@@ -264,7 +271,7 @@ bootutil_cmp_rsasig(mbedtls_rsa_context *ctx, uint8_t *hash, uint32_t hlen,
 }
 
 int
-bootutil_verify_sig(uint8_t *hash, uint32_t hlen, uint8_t *sig, int slen,
+bootutil_verify_sig(uint8_t *hash, uint32_t hlen, uint8_t *sig, size_t slen,
   uint8_t key_id)
 {
     mbedtls_rsa_context ctx;

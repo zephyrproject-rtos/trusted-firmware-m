@@ -19,8 +19,9 @@
 
 /*
  * Original code taken from mcuboot project at:
- * https://github.com/runtimeco/mcuboot
- * Modifications are Copyright (c) 2018 Arm Limited.
+ * https://github.com/JuulLabs-OSS/mcuboot
+ * Git SHA of the original version: 178be54bd6e5f035cc60e98205535682acd26e64
+ * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
 #include <assert.h>
@@ -62,12 +63,11 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
         bootutil_sha256_update(&sha256_ctx, seed, seed_len);
     }
 
-    size = hdr->ih_img_size + hdr->ih_hdr_size;
-
     /*
      * Hash is computed over image header and image itself. No TLV is
      * included ATM.
      */
+    size = hdr->ih_img_size + hdr->ih_hdr_size;
     for (off = 0; off < size; off += blk_sz) {
         blk_sz = size - off;
         if (blk_sz > tmp_buf_sz) {
