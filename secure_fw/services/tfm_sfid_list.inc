@@ -27,9 +27,6 @@
     {audit_core_delete_record, TFM_AUDIT_DELETE_RECORD_SFID},
 
     /******** TFM_SP_CRYPTO ********/
-    {tfm_crypto_alloc_operation, TFM_CRYPTO_ALLOC_OPERATION_SFID},
-    {tfm_crypto_check_operation, TFM_CRYPTO_CHECK_OPERATION_SFID},
-    {tfm_crypto_release_operation, TFM_CRYPTO_RELEASE_OPERATION_SFID},
     {tfm_crypto_import_key, TFM_CRYPTO_IMPORT_KEY_SFID},
     {tfm_crypto_destroy_key, TFM_CRYPTO_DESTROY_KEY_SFID},
     {tfm_crypto_get_key_information, TFM_CRYPTO_GET_KEY_INFORMATION_SFID},

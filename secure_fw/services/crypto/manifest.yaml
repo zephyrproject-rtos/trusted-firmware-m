@@ -18,30 +18,6 @@
   "tfm_init_symbol": "tfm_crypto_init",
   "secure_functions": [
     {
-      "sfid": "TFM_CRYPTO_ALLOC_OPERATION_SFID",
-      "signal": "TFM_CRYPTO_ALLOC_OPERATION",
-      "tfm_symbol": "tfm_crypto_alloc_operation",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
-      "sfid": "TFM_CRYPTO_CHECK_OPERATION_SFID",
-      "signal": "TFM_CRYPTO_CHECK_OPERATION",
-      "tfm_symbol": "tfm_crypto_check_operation",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
-      "sfid": "TFM_CRYPTO_RELEASE_OPERATION_SFID",
-      "signal": "TFM_CRYPTO_RELEASE_OPERATION",
-      "tfm_symbol": "tfm_crypto_release_operation",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
       "sfid": "TFM_CRYPTO_IMPORT_KEY_SFID",
       "signal": "TFM_CRYPTO_IMPORT_KEY",
       "tfm_symbol": "tfm_crypto_import_key",
