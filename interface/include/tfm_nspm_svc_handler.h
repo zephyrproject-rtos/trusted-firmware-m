@@ -17,9 +17,11 @@ extern "C" {
 /**
  * \brief Reports the client ID of this task to TF-M (SVC function)
  *
+ * \param [in] client_id Client ID to register.
+ *
  * \return Returns 1 if the client ID was successfully reported 0 otherwise
  */
-uint32_t tfm_nspm_svc_register_client_id(void);
+uint32_t tfm_nspm_svc_register_client_id(uint32_t client_id);
 
 #ifdef __cplusplus
 }
