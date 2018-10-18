@@ -659,6 +659,13 @@ static enum psa_sst_err_t sst_set_active_object_table(
           sst_obj_table_ctx.active_table  = SST_OBJ_TABLE_IDX_1;
           sst_obj_table_ctx.scratch_table = SST_OBJ_TABLE_IDX_0;
 
+          /* As table 1 is the active object, load the content into the
+           * SST object table context.
+           */
+          sst_utils_memcpy(&sst_obj_table_ctx.obj_table,
+                           init_ctx->p_table[SST_OBJ_TABLE_IDX_1],
+                           SST_OBJ_TABLE_SIZE);
+
           return PSA_SST_ERR_SUCCESS;
     } else {
         /* Table 1 is invalid, the active one is table 0 */
