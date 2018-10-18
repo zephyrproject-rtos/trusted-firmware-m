@@ -916,6 +916,7 @@ enum psa_sst_err_t sst_object_table_obj_exist(uint32_t uuid)
 
 enum psa_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid)
 {
+    enum psa_sst_err_t err;
     uint32_t fid;
     uint32_t idx;
 
@@ -934,8 +935,10 @@ enum psa_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid)
         /* Remove old file from the persistent area, to keep it consistent
          * with the table content.
          */
-        return sst_flash_fs_file_delete(fid);
-
+        err = sst_flash_fs_file_delete(fid);
+        if (err != PSA_SST_ERR_SUCCESS) {
+            return err;
+        }
     }
 
     *p_fid = fid;
