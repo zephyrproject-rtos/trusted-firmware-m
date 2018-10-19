@@ -7,13 +7,15 @@ The currently supported compiler versions are:
 - ARM Compiler v6.10
 - ARM Compiler v6.11
 - GNU Arm compiler v6.3.1
+- GNU Arm compiler v7.3
 
 *Note* The ARM compilers above are provided via Keil uVision v5.24.1 or greater,
 DS-5 v5.27.1 or greater, and Development Studio 2018.0, or they can be
 downloaded as standalone packages from [here](https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6).
 
 *Note* The GNU Arm compiler can be downloaded from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
-On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
+On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update* or *GNU Arm
+Embedded Toolchain: 7-2018-q2-update*
 
 *Note* In this version, you also need manually clone CMSIS_5 and mbedtls
 repositories at the same location where tfm repo is located.
