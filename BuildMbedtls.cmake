@@ -13,8 +13,8 @@ cmake_minimum_required(VERSION 3.7)
 set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
 
 #Check input variables
-if(NOT DEFINED MBEDTLS_BUILD_TYPE)
-	message(FATAL_ERROR "Please set MBEDTLS_BUILD_TYPE to 'Debug' or 'Release' before including this file.")
+if(NOT DEFINED MBEDTLS_DEBUG)
+	message(FATAL_ERROR "Please set MBEDTLS_DEBUG to 'OFF' or 'ON' before including this file.")
 endif()
 
 if(NOT DEFINED MBEDTLS_SOURCE_DIR)
@@ -31,6 +31,12 @@ endif()
 
 if(NOT DEFINED MBEDTLS_TARGET_NAME)
 	message(FATAL_ERROR "Please set MBEDTLS_TARGET_NAME before including this file.")
+endif()
+
+if(MBEDTLS_DEBUG)
+	set(MBEDTLS_BUILD_TYPE "Debug")
+else()
+	set(MBEDTLS_BUILD_TYPE "MinSizeRel")
 endif()
 
 #Based on preinclude input variables, decide if preinclude flags need to be appended
@@ -72,6 +78,7 @@ externalproject_add(${MBEDTLS_TARGET_NAME}
 	CMAKE_CACHE_ARGS -DCMAKE_C_COMPILER_ID:string=${CMAKE_C_COMPILER_ID}
 	CMAKE_CACHE_ARGS -DCMAKE_C_FLAGS:string=${MBEDTLS_C_FLAGS}
 	CMAKE_CACHE_ARGS -DCMAKE_C_FLAGS_DEBUG:string=${CMAKE_C_FLAGS_DEBUG}
+	CMAKE_CACHE_ARGS -DCMAKE_C_FLAGS_MINSIZEREL:string=${CMAKE_C_FLAGS_MINSIZEREL}
 	CMAKE_CACHE_ARGS -DCMAKE_C_FLAGS_RELEASE:string=${CMAKE_C_FLAGS_RELEASE}
 	CMAKE_CACHE_ARGS -DCMAKE_C_OUTPUT_EXTENSION:string=.o
 	CMAKE_CACHE_ARGS -DCMAKE_C_COMPILER_WORKS:bool=true

@@ -41,13 +41,6 @@ else()
   set (TFM_LVL 1)
 endif()
 
-#Set build type for mbed TLS libraries
-if (MBEDTLS_DEBUG)
-  set(MBEDTLS_BUILD_TYPE "Debug")
-else()
-  set(MBEDTLS_BUILD_TYPE "Release")
-endif()
-
 #Set preinclude header options for mbed TLS
 set(MBEDTLS_PREINCLUDE_PREFIX __tfm_crypto__)
 set(MBEDTLS_PREINCLUDE_HEADER ${CRYPTO_DIR}/mbedtls_global_symbols.h)

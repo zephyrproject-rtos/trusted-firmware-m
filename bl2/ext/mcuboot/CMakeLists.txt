@@ -26,10 +26,6 @@ elseif(NOT BL2)
     return()
 endif()
 
-if (NOT DEFINED MBEDTLS_DEBUG)
-	message(FATAL_ERROR "Incomplete build configuration: MBEDTLS_DEBUG is undefined.")
-endif()
-
 if (NOT DEFINED MBEDTLS_C_FLAGS_BL2)
 	message(FATAL_ERROR "Incomplete build configuration: MBEDTLS_C_FLAGS_BL2 is undefined.")
 endif()
@@ -77,13 +73,6 @@ if(NOT EXISTS ${MBEDTLS_SOURCE_DIR})
 endif()
 set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
 set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
-
-#Set build type for mbedtls libraries
-if (MBEDTLS_DEBUG)
-	set(MBEDTLS_BUILD_TYPE "Debug")
-else()
-	set(MBEDTLS_BUILD_TYPE "Release")
-endif()
 
 #Build mbedtls as external project.
 #This ensures mbedtls is built with exactly defined settings.

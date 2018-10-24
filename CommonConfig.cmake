@@ -230,14 +230,7 @@ if (NOT DEFINED ENABLE_SECURE_STORAGE)
 endif()
 
 if (NOT DEFINED MBEDTLS_DEBUG)
-	if (${COMPILER} STREQUAL "GNUARM" AND ${TARGET_PLATFORM} MATCHES "MUSCA_A|MUSCA_B1" AND BL2)
-		#The size of the MCUboot binary compiled with GCC exceeds the size limit on
-		#Musca-A/B1. By turning off the mbed TLS debug build is a good way to go below
-		#that limit, while it is still possible to debug TFM/bootloader code.
-		set (MBEDTLS_DEBUG OFF)
-	else ()
-		set (MBEDTLS_DEBUG ON)
-	endif ()
+	set(MBEDTLS_DEBUG OFF)
 endif()
 
 ##Set mbedTLS compiler flags for BL2 bootloader

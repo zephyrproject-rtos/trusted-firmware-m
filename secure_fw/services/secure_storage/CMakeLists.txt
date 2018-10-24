@@ -38,13 +38,6 @@ if (NOT DEFINED TFM_LVL)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
 endif()
 
-#Set build type for mbedtls libraries
-if (MBEDTLS_DEBUG)
-	set(MBEDTLS_BUILD_TYPE "Debug")
-else()
-	set(MBEDTLS_BUILD_TYPE "Release")
-endif()
-
 #Set preinclude header options for mbedtls
 set(MBEDTLS_PREINCLUDE_PREFIX __tfm_storage__)
 set(MBEDTLS_PREINCLUDE_HEADER ${SECURE_STORAGE_DIR}/crypto/mbedtls_global_symbols.h)
