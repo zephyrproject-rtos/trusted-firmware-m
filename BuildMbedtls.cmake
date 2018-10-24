@@ -43,6 +43,11 @@ endif()
 
 string(APPEND MBEDTLS_C_FLAGS ${CMAKE_C_FLAGS})
 
+# Workaround Mbed TLS issue https://github.com/ARMmbed/mbedtls/issues/1077
+if(${ARM_CPU_ARHITECTURE} STREQUAL "ARM8-M-BASE")
+	string(APPEND MBEDTLS_C_FLAGS " -DMULADDC_CANNOT_USE_R7")
+endif()
+
 if (TARGET ${MBEDTLS_TARGET_NAME})
 	message(FATAL_ERROR "A target with name ${MBEDTLS_TARGET_NAME} is already\
 defined. Please set MBEDTLS_TARGET_NAME to a unique value.")
