@@ -150,14 +150,6 @@ static struct log_vars log_state = {0};
 static uint64_t global_timestamp = 0;
 
 /*!
- * \def DUMMY_PARTITION_ID
- *
- * \brief Set to 1234, this will be changed when the TFM unpriviliged API to
- *        return the partition ID of the caller will be ready
- */
-#define DUMMY_PARTITION_ID (1234)
-
-/*!
  * \brief Static inline function to get the log buffer ptr from index
  *
  * \param[in] idx Byte index to be converted to pointer in the log buffer
@@ -355,12 +347,15 @@ static enum psa_audit_err audit_memcpy(const uint8_t *src,
 /*!
  * \brief Static function to format a log entry before the addition to the log
  *
- * \param[in]  record Pointer to the record to be added
- * \param[out] buffer Pointer to the buffer to format
+ * \param[in]  record       Pointer to the record to be added
+ * \param[in]  partition_id Value of the partition ID for the partition which
+ *                          originated the audit logging request
+ * \param[out] buffer       Pointer to the buffer to format
  *
  */
 static enum psa_audit_err audit_format_buffer(
                                           const struct psa_audit_record *record,
+                                          const int32_t partition_id,
                                           uint64_t *buffer)
 {
     struct log_hdr *hdr = NULL;
@@ -373,12 +368,17 @@ static enum psa_audit_err audit_format_buffer(
     /* Format the scratch buffer with the complete log item */
     hdr = (struct log_hdr *) buffer;
 
-    /* FIXME: Timestamping/IV counter and partition ID retrieval through
-     *        secure function to function calls and TFM API - not available yet.
+    /* FIXME: Timestamping needs to be obtained through Secure Time service, not
+     *        yet available. Use a global timestamp for the time being, without
+     *        the need to increase the value of iv_counter. In the final
+     *        implementation, iv_counter is concatenated to timestamp to get a
+     *        12 byte unique IV to be used by the encryption module, and needs
+     *        to be increased every time the timestamp didn't change between
+     *        consecutive invocations.
      */
     hdr->timestamp = global_timestamp++;
     hdr->iv_counter = 0;
-    hdr->partition_id = DUMMY_PARTITION_ID;
+    hdr->partition_id = partition_id;
 
     /* Copy the record into the scratch buffer */
     audit_memcpy( (const uint8_t *) record,
@@ -554,9 +554,15 @@ enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
     uint32_t start_pos = 0, stop_pos = 0;
     uint32_t first_el_idx = 0, last_el_idx = 0, size = 0;
     uint32_t num_items = 0, stored_size = 0;
+    int32_t partition_id;
 
-    /* Check that the request comes from the secure world */
-    if (tfm_core_validate_secure_caller() != TFM_SUCCESS) {
+    /* Get the value of the partition ID of the caller through TFM secure API */
+    if (tfm_core_get_caller_client_id(&partition_id) != TFM_SUCCESS) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
+
+    /* Check if the partition ID of the caller is from NS world */
+    if (TFM_CLIENT_ID_IS_NS(partition_id)) {
         return PSA_AUDIT_ERR_FAILURE;
     }
 
@@ -594,7 +600,7 @@ enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
     }
 
     /* Format the scratch buffer with the complete log item */
-    audit_format_buffer(record, &scratch_buffer[0]);
+    audit_format_buffer(record, partition_id, &scratch_buffer[0]);
 
     /* TODO: At this point, encryption should be called if supported */
 

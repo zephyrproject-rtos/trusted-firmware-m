@@ -111,7 +111,7 @@ struct audit_tlv_entry {
 struct log_hdr {
     uint64_t timestamp;
     uint32_t iv_counter;
-    uint32_t partition_id;
+    int32_t partition_id;
     uint32_t size;
     uint32_t id;
 };
