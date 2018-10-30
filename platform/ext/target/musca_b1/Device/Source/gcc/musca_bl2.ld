@@ -24,9 +24,8 @@
 
 MEMORY
 {
-  FLASH    (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
-  CODE_RAM (rx)  : ORIGIN = BL2_CODE_SRAM_EXEC_BASE, LENGTH = BL2_CODE_SIZE
-  RAM      (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
+    FLASH (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
+    RAM   (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
 }
 
 __heap_size__  = 0x00010000;
@@ -40,20 +39,6 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    /* Startup section is loaded to Flash and runs from Flash */
-    .startup :
-    {
-        KEEP(*(.vectors))
-        __Vectors_End = .;
-        __Vectors_Size = __Vectors_End - __Vectors;
-        __end__ = .;
-
-        KEEP(*(.init))
-        KEEP(*(.fini))
-
-        *startup_cmsdk_musca_bl2.*
-    } > FLASH
-
     .text :
     {
         KEEP(*(.vectors))
@@ -84,23 +69,12 @@ SECTIONS
         *(.rodata*)
 
         KEEP(*(.eh_frame*))
-        . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
-    } > CODE_RAM AT > FLASH
-
-    /* Create same symbols that armclang does so that in the c files
-     * we do not have to deal with the compiler type
-     */
-    Image$$ER_CODE_SRAM$$Base = ADDR(.text);
-    Image$$ER_CODE_SRAM$$Limit = .;
-    Image$$ER_CODE_SRAM$$Length = Image$$ER_CODE_SRAM$$Limit - Image$$ER_CODE_SRAM$$Base;
-    Load$$ER_CODE_SRAM$$Base = LOADADDR(.text);
-    Load$$ER_CODE_SRAM$$Length = Image$$ER_CODE_SRAM$$Length;
-    Load$$ER_CODE_SRAM$$Limit = Load$$ER_CODE_SRAM$$Base + Load$$ER_CODE_SRAM$$Length;
+    } > FLASH
 
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > FLASH AT > FLASH
+    } > FLASH
 
     __exidx_start = .;
     .ARM.exidx :
@@ -119,9 +93,6 @@ SECTIONS
         LONG (__etext)
         LONG (__data_start__)
         LONG (__data_end__ - __data_start__)
-        LONG (Load$$ER_CODE_SRAM$$Base)
-        LONG (Image$$ER_CODE_SRAM$$Base)
-        LONG (Image$$ER_CODE_SRAM$$Length)
         LONG (DEFINED(__etext2) ? __etext2 : 0)
         LONG (DEFINED(__data2_start__) ? __data2_start__ : 0)
         LONG (DEFINED(__data2_start__) ? __data2_end__ - __data2_start__ : 0)

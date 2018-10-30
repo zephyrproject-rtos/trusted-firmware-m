@@ -125,22 +125,6 @@
 #define S_CODE_SRAM_ALIAS_BASE   (0x1A400000)
 #define NS_CODE_SRAM_ALIAS_BASE  (0x0A400000)
 
-#define BL2_CODE_SRAM_EXEC_BASE  (S_CODE_SRAM_ALIAS_BASE)
-#define S_CODE_SRAM_EXEC_BASE    (S_CODE_SRAM_ALIAS_BASE)
-#define S_CODE_SRAM_EXEC_LIMIT   (S_CODE_SRAM_EXEC_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE / 2) - 1)
-#define NS_CODE_SRAM_EXEC_BASE   (NS_CODE_SRAM_ALIAS_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE / 2))
-#define NS_CODE_SRAM_EXEC_LIMIT  (NS_CODE_SRAM_EXEC_BASE + \
-                                 (TOTAL_CODE_SRAM_SIZE / 2) - 1)
-
-/* Since we enable/disable flash during s/ns code copy to code sram we cannot
- * access bl2 code from flash, hence we need to copy the bl2 code to code sram
- */
-#define BL2_CODE_SRAM_ALIAS_BASE (S_CODE_SRAM_ALIAS_BASE)
-#define BL2_CODE_SRAM_ALIAS(x)   (BL2_CODE_SRAM_ALIAS_BASE + x)
-#define BL2_CODE_SRAM_BASE       (BL2_CODE_SRAM_ALIAS(FLASH_AREA_BL2_OFFSET))
-
 #ifdef BL2
 /* Bootloader regions */
 #define BL2_CODE_START    (S_ROM_ALIAS(FLASH_AREA_BL2_OFFSET))

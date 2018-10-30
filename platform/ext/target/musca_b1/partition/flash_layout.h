@@ -30,11 +30,6 @@
  * 0x0022_5010 Unused
  */
 
-/* Code SRAM layout on Musca-B1 with BL2, after BL2 has been copied to SRAM:
- * 0x0A40_0000 BL2 - MCUBoot(128 KB)
- * 0x0A42_0000 Unused
- */
-
 /* Flash layout on Musca-B1 without BL2:
  * 0x0000_0000 Secure     image
  * 0x000A_0000 Non-secure image
