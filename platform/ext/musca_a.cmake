@@ -7,7 +7,7 @@
 
 #This file gathers all Musca-A specific files in the application.
 
-#MUSCA-A has a Cortex M33 CPU.
+#Musca-A has a Cortex M33 CPU.
 include("Common/CpuM33")
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})

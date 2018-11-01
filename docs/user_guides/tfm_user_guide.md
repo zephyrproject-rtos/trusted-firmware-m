@@ -204,7 +204,7 @@ under platform/ext/target/musca_b1 to have the correct setup.
 #### Example application with BL2 bootloader
 
 1. Create a unified hex file comprising of both mcuboot and tfm_sign binary
-  * For Musca-A1
+  * For Musca-A
     * Windows
     `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel`
     * Linux

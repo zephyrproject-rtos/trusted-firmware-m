@@ -98,7 +98,7 @@
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
 
 #if defined(TEST_FRAMEWORK_S) || defined(TEST_FRAMEWORK_NS)
-/* Increase secure DATA area to run the regression tests on Musca A1 */
+/* Increase secure DATA area to run the regression tests on Musca-A */
 #define S_DATA_SIZE     ((TOTAL_RAM_SIZE / 4) * 3)
 #else
 #define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)

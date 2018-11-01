@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
  * programabe (MTP) non-volatile counters or use a One-time Programmable (OTP)
  * non-volatile counters solution.
  *
- * Musca A1 does not have any available MTP or OTP non-volatile counters, so a
+ * Musca-A does not have any available MTP or OTP non-volatile counters, so a
  * software dummy implementation has been implemented in this case.
  */
 

@@ -12,7 +12,7 @@ The hardware platforms currently supported are:
 
 * Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
 * Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-* Musca-A1 test chip board (Cortex-M33 SSE-200 subsystem)
+* Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
 * Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 
 The files related to the supported platforms are contained under the `platform`
@@ -22,7 +22,7 @@ organized by boards (e.g. `platform/ext/target/mps2`), while the folder
 platform generic.
 More information about subsystems supported by the MPS2+ board can be found in:
 [MPS2+ homepage](https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2)
-More information about the Musca-A1 test chip board can be found in:
+More information about the Musca-A test chip board can be found in:
 [Musca-A homepage](https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board)
 More information about the Musca-B1 test chip board can be found in:
 [Musca-B1 homepage](https://www.arm.com/products/development-tools/development-boards/musca-b1-iot)
@@ -97,4 +97,4 @@ See [ns client identification documentation](tfm_ns_client_identification.md).
 
 --------------
 
-*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*

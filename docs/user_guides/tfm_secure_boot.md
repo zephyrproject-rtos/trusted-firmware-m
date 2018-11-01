@@ -108,7 +108,7 @@ At build time automatically two binaries are generated:
 ```
 
 ### RAM Loading firmware upgrade
-Musca A1 supports an image upgrade mode that is separate to both the swapping
+Musca-A supports an image upgrade mode that is separate to both the swapping
 and non-swapping modes. This is the `RAM loading` mode (please refer to the
 table below). Like the non-swapping mode, this selects the newest image by
 reading the image version numbers in the image headers, but instead of
@@ -129,7 +129,7 @@ are supported by which platforms:
 |    -     |             -            |   Swap <sup>3</sup>   |  No-swap <sup>4</sup> | RAM loading <sup>5</sup> |
 |  AN521   |            Yes           |          Yes          |          Yes          |            No            |
 |  AN519   |            Yes           |          Yes          |          Yes          |            No            |
-| Musca-A1 |            No            |          No           |          No           |            Yes           |
+| Musca-A  |            No            |          No           |          No           |            Yes           |
 | Musca-B1 |            Yes           |          No           |          Yes          |            No            |
 
 (1) To disable BL2, please turn off the `BL2` compiler switch in the
@@ -327,10 +327,10 @@ To enable RAM loading, please set `MCUBOOT_RAM_LOADING` to True (either in the
 configuration file or through the command line), and then specify a destination
 load address in RAM where the image can be copied to and executed from. The
 `IMAGE_LOAD_ADDRESS` macro must be specified in the target dependent files,
-for example with Musca A1, its `flash_layout.h` file in the `platform`
-folder should include `#define IMAGE_LOAD_ADDRESS #0x10020000`
+for example with Musca-A, its `flash_layout.h` file in the `platform` folder
+should include `#define IMAGE_LOAD_ADDRESS #0x10020000`
 
-#### Executing firmware upgrade on Musca-A1 board
+#### Executing firmware upgrade on Musca-A board
 After two images have been built, they can be concatenated to create the
 combined image using `srec_cat`:
 

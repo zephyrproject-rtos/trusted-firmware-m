@@ -74,12 +74,12 @@
 #define FLASH_AREA_IMAGE_1_OFFSET       (0x120000)
 #define FLASH_AREA_IMAGE_1_SIZE         (2 * FLASH_PARTITION_SIZE)
 
-/* Not used, only RAM loading is supported on Musca A1 */
+/* Not used, only RAM loading is supported on Musca-A */
 #define FLASH_AREA_IMAGE_SCRATCH_OFFSET (0x220000)
 #define FLASH_AREA_IMAGE_SCRATCH_SIZE   (0)
 
 /*
- * Not used, only RAM loading is supported on Musca A1.
+ * Not used, only RAM loading is supported on Musca-A.
  * The maximum number of status entries supported by the bootloader.
  */
 #define BOOT_STATUS_MAX_ENTRIES         (0)

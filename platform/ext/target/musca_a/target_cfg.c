@@ -267,7 +267,7 @@ void mpc_init_cfg(void)
     mpc_data_region2->Initialize();
 
 #if defined(TEST_FRAMEWORK_S) || defined(TEST_FRAMEWORK_NS)
-    /* To run the regression tests on Musca A1, it is required to assign more
+    /* To run the regression tests on Musca-A, it is required to assign more
      * RAM memory in the secure execution environment.
      * So, the secure RAM memory size is 96KB and the non-secure one is 32 KB.
      * When it is not required to run the regression tests, the RAM memory

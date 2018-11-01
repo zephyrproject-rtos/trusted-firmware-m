@@ -42,7 +42,7 @@
       "*uart_stdout.*",
       "*Driver_USART.*",
       "*arm_uart_drv.*",   # MPS2-AN521, MPS2-AN519
-      "*uart_pl011_drv.*", # Musca-A1, Musca-B1
+      "*uart_pl011_drv.*", # Musca-A, Musca-B1
       "*secure_suites.*",
       "*attestation_s_interface_testsuite.*"
     ]
