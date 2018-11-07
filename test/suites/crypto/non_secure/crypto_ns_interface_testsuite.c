@@ -17,6 +17,7 @@
 #define BYTE_SIZE_TEST_KEY (BIT_SIZE_TEST_KEY/8)
 #define BYTE_SIZE_CHUNK (16)
 #define ENC_DEC_BUFFER_SIZE (32)
+#define ASSOCIATED_DATA_SIZE (24)
 
 /* List of tests */
 static void tfm_crypto_test_6001(struct test_result_t *ret);
@@ -41,6 +42,9 @@ static void tfm_crypto_test_6019(struct test_result_t *ret);
 static void tfm_crypto_test_6020(struct test_result_t *ret);
 static void tfm_crypto_test_6021(struct test_result_t *ret);
 static void tfm_crypto_test_6022(struct test_result_t *ret);
+static void tfm_crypto_test_6028(struct test_result_t *ret);
+static void tfm_crypto_test_6029(struct test_result_t *ret);
+
 
 static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -87,6 +91,10 @@ static struct test_t crypto_veneers_tests[] = {
      "Non Secure HMAC (MD-5) interface", {0} },
     {&tfm_crypto_test_6022, "TFM_CRYPTO_TEST_6022",
      "Non Secure HMAC with long key (SHA-1) interface", {0} },
+    {&tfm_crypto_test_6028, "TFM_CRYPTO_TEST_6028",
+     "Non Secure AEAD (AES-128-CCM) interface", {0} },
+    {&tfm_crypto_test_6029, "TFM_CRYPTO_TEST_6029",
+     "Non Secure AEAD (AES-128-GCM) interface", {0} },
 };
 
 void register_testsuite_ns_crypto_interface(struct test_suite_t *p_test_suite)
@@ -666,6 +674,7 @@ static void psa_mac_test(const psa_algorithm_t alg,
     } else {
         status = psa_import_key(slot, PSA_KEY_TYPE_HMAC, data, sizeof(data));
     }
+
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
         return;
@@ -765,4 +774,128 @@ static void tfm_crypto_test_6021(struct test_result_t *ret)
 static void tfm_crypto_test_6022(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
+}
+
+static void psa_aead_test(const psa_key_type_t key_type,
+                          const psa_algorithm_t alg,
+                          struct test_result_t *ret)
+{
+    const psa_key_slot_t slot = 0;
+    const size_t nonce_length = 12;
+    const uint8_t nonce[] = "01234567890";
+    const uint8_t plain_text[BYTE_SIZE_CHUNK] = "Sixteen bytes!!";
+    const uint8_t associated_data[ASSOCIATED_DATA_SIZE] =
+                                                      "This is associated data";
+    uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
+    size_t encrypted_data_length = 0, decrypted_data_length = 0;
+    uint8_t decrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
+    psa_status_t status;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    psa_key_type_t type = PSA_KEY_TYPE_NONE;
+    size_t bits = 0;
+    uint32_t comp_result;
+
+    ret->val = TEST_PASSED;
+
+    /* Import a key on slot 0 */
+    status = psa_import_key(slot, key_type, data, sizeof(data));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        return;
+    }
+
+    status = psa_get_key_information(slot, &type, &bits);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error getting key metadata");
+        goto destroy_key_aead;
+    }
+
+    if (bits != BIT_SIZE_TEST_KEY) {
+        TEST_FAIL("The number of key bits is different from expected");
+        goto destroy_key_aead;
+    }
+
+    if (type != key_type) {
+        TEST_FAIL("The type of the key is different from expected");
+        goto destroy_key_aead;
+    }
+
+    /* Perform AEAD encryption */
+    status = psa_aead_encrypt(slot, alg, nonce, nonce_length,
+                              associated_data,
+                              sizeof(associated_data),
+                              plain_text,
+                              sizeof(plain_text),
+                              encrypted_data,
+                              sizeof(encrypted_data),
+                              &encrypted_data_length );
+
+    if (status != PSA_SUCCESS) {
+        if (status == PSA_ERROR_NOT_SUPPORTED) {
+            TEST_FAIL("Algorithm NOT SUPPORTED by the implementation");
+            goto destroy_key_aead;
+        }
+
+        TEST_FAIL("Error performing AEAD encryption");
+        goto destroy_key_aead;
+    }
+
+    /* Increment the encrypted_data_length with the tag size which has
+     * been appended to the encrypted data
+     */
+    encrypted_data_length += PSA_AEAD_TAG_SIZE(alg);
+
+    /* Perform AEAD decryption */
+    status = psa_aead_decrypt(slot, alg, nonce, nonce_length,
+                              associated_data,
+                              sizeof(associated_data),
+                              encrypted_data,
+                              encrypted_data_length,
+                              decrypted_data,
+                              sizeof(decrypted_data),
+                              &decrypted_data_length );
+
+    if (status != PSA_SUCCESS) {
+        if (status == PSA_ERROR_NOT_SUPPORTED) {
+            TEST_FAIL("Algorithm NOT SUPPORTED by the implementation");
+        } else {
+            TEST_FAIL("Error performing AEAD decryption");
+        }
+
+        goto destroy_key_aead;
+    }
+
+    if (sizeof(plain_text) != decrypted_data_length) {
+        TEST_FAIL("Decrypted data length is different from plain text");
+        goto destroy_key_aead;
+    }
+
+    /* Check that the decrypted data is the same as the original data */
+    comp_result = compare_buffers(plain_text,
+                                  decrypted_data,
+                                  sizeof(plain_text),
+                                  decrypted_data_length);
+
+    if (comp_result != 0) {
+        TEST_FAIL("Decrypted data doesn't match with plain text");
+        goto destroy_key_aead;
+    }
+
+
+destroy_key_aead:
+    /* Destroy the key on slot 0 */
+    status = psa_destroy_key(slot);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying a key");
+    }
+}
+
+static void tfm_crypto_test_6028(struct test_result_t *ret)
+{
+    psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM, ret);
+}
+
+static void tfm_crypto_test_6029(struct test_result_t *ret)
+{
+    psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_GCM, ret);
 }

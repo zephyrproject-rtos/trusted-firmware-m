@@ -405,6 +405,73 @@ enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
  */
 enum tfm_crypto_err_t tfm_crypto_mac_abort(psa_mac_operation_t *operation);
 
+/**
+ * \brief Perform an AEAD encryption operation on input data with additional
+ *        data to be authenticated, producing ciphertext in output with an
+ *        appended authentication tag
+ *
+ * \param[in]  key                    Key slot for the key
+ * \param[in]  alg                    Algorithm to be used
+ * \param[in]  nonce                  Pointer to a buffer holding a nonce or IV
+ *                                    to use
+ * \param[in]  nonce_length           Size in bytes of the nonce or IV data
+ * \param[in]  additional_data        Additional information to be authenticated
+ * \param[in]  additional_data_length Size in bytes of the additional data
+ * \param[in]  plaintext              Buffer pointing to data to be encrypted
+ * \param[in]  plaintext_length       Size in bytes of the plain text buffer
+ * \param[out] ciphertext             Output encrypted data, with the
+ *                                    authentication tag appended
+ * \param[in]  ciphertext_size        Size in bytes of the buffer to hold the
+ *                                    cipher text plus authentication tag
+ * \param[out] ciphertext_length      Size of the ciphertext plus tag produced
+ *                                    as output
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_aead_encrypt(psa_key_slot_t key,
+                                              psa_algorithm_t alg,
+                                              const uint8_t *nonce,
+                                              size_t nonce_length,
+                                              const uint8_t *additional_data,
+                                              size_t additional_data_length,
+                                              const uint8_t *plaintext,
+                                              size_t plaintext_length,
+                                              uint8_t *ciphertext,
+                                              size_t ciphertext_size,
+                                              size_t *ciphertext_length);
+/**
+ * \brief Perform an AEAD decryption operation on input data with additional
+ *        data to be verified, producing back the original plain text in case
+ *        the verification of the authentication tag is successful
+ *
+ * \param[in]  key                    Key slot for the key
+ * \param[in]  alg                    Algorithm to be used
+ * \param[in]  nonce                  Pointer to a buffer holding a nonce or IV
+ *                                    to use
+ * \param[in]  nonce_length           Size in bytes of the nonce or IV data
+ * \param[in]  additional_data        Additional information which was
+ *                                    authenticated but not encrypted
+ * \param[in]  additional_data_length Size in bytes of the additional data
+ * \param[in]  ciphertext             Buffer pointing to data be decrypted
+ * \param[in]  ciphertext_length      Size in bytes of the cipher text buffer
+ * \param[out] plaintext              Buffer for decrypted output data
+ * \param[in]  plaintext_size         Size in bytes of the buffer to hold the
+ *                                    plain text
+ * \param[out] plaintext_length       Size of the plain text actually produced
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_aead_decrypt(psa_key_slot_t key,
+                                              psa_algorithm_t alg,
+                                              const uint8_t *nonce,
+                                              size_t nonce_length,
+                                              const uint8_t *additional_data,
+                                              size_t additional_data_length,
+                                              const uint8_t *ciphertext,
+                                              size_t ciphertext_length,
+                                              uint8_t *plaintext,
+                                              size_t plaintext_size,
+                                              size_t *plaintext_length);
 #ifdef __cplusplus
 }
 #endif

@@ -352,3 +352,86 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 
     return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
 }
+
+psa_status_t psa_aead_encrypt(psa_key_slot_t key,
+                              psa_algorithm_t alg,
+                              const uint8_t *nonce,
+                              size_t nonce_length,
+                              const uint8_t *additional_data,
+                              size_t additional_data_length,
+                              const uint8_t *plaintext,
+                              size_t plaintext_length,
+                              uint8_t *ciphertext,
+                              size_t ciphertext_size,
+                              size_t *ciphertext_length)
+{
+    enum tfm_crypto_err_t err;
+
+    /* Packing in structures is needed to overcome the 4 parameters
+     * per call limit
+     */
+    struct psa_aead_encrypt_input input_s = {.key = key,
+                                             .alg = alg,
+                                             .nonce = nonce,
+                                             .nonce_length = nonce_length,
+                                             .additional_data = additional_data,
+                                             .additional_data_length =
+                                                         additional_data_length,
+                                             .plaintext = plaintext,
+                                             .plaintext_length =
+                                                              plaintext_length};
+    struct psa_aead_encrypt_output output_s = {.ciphertext = ciphertext,
+                                               .ciphertext_size =
+                                                                ciphertext_size,
+                                               .ciphertext_length =
+                                                             ciphertext_length};
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_aead_encrypt,
+                               (uint32_t)&input_s,
+                               (uint32_t)&output_s,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_aead_decrypt(psa_key_slot_t key,
+                              psa_algorithm_t alg,
+                              const uint8_t *nonce,
+                              size_t nonce_length,
+                              const uint8_t *additional_data,
+                              size_t additional_data_length,
+                              const uint8_t *ciphertext,
+                              size_t ciphertext_length,
+                              uint8_t *plaintext,
+                              size_t plaintext_size,
+                              size_t *plaintext_length)
+{
+    enum tfm_crypto_err_t err;
+
+    /* Packing in structures is needed to overcome the 4 parameters
+     * per call limit
+     */
+    struct psa_aead_decrypt_input input_s = {.key = key,
+                                             .alg = alg,
+                                             .nonce = nonce,
+                                             .nonce_length = nonce_length,
+                                             .additional_data = additional_data,
+                                             .additional_data_length =
+                                                         additional_data_length,
+                                             .ciphertext = ciphertext,
+                                             .ciphertext_length =
+                                                             ciphertext_length};
+    struct psa_aead_decrypt_output output_s = {.plaintext = plaintext,
+                                               .plaintext_size = plaintext_size,
+                                               .plaintext_length =
+                                                              plaintext_length};
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_aead_decrypt,
+                               (uint32_t)&input_s,
+                               (uint32_t)&output_s,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}

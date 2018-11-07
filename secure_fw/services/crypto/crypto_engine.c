@@ -537,3 +537,149 @@ psa_status_t tfm_crypto_engine_cipher_release(union engine_cipher_context *cp)
 
     return return_value;
 }
+
+psa_status_t tfm_crypto_engine_aead_encrypt(psa_key_type_t key_type,
+                                            psa_algorithm_t alg,
+                                            const uint8_t *key_data,
+                                            uint32_t key_size,
+                                            const uint8_t *nonce,
+                                            uint32_t nonce_length,
+                                            const uint8_t *additional_data,
+                                            uint32_t additional_data_length,
+                                            const uint8_t *plaintext,
+                                            uint32_t plaintext_length,
+                                            uint8_t *ciphertext,
+                                            uint32_t ciphertext_size,
+                                            uint32_t *ciphertext_length)
+{
+    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+
+#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
+    int ret;
+    mbedtls_cipher_context_t aead_ctx;
+    const uint32_t key_size_bits = PSA_BYTES_TO_BITS(key_size);
+
+    const mbedtls_cipher_info_t *info = get_mbedtls_cipher_info(key_type,
+                                                                alg,
+                                                                key_size_bits);
+    const uint32_t encrypted_message_length =
+                           PSA_AEAD_ENCRYPT_OUTPUT_SIZE(alg, plaintext_length) -
+                                                         PSA_AEAD_TAG_SIZE(alg);
+    if (info == NULL) {
+        /* The combination of key_type, alg and key_size is not a valid Mbed TLS
+         * cipher configuration.
+         */
+        return_value = PSA_ERROR_NOT_SUPPORTED;
+    } else {
+        /* Init the mbedTLS context */
+        mbedtls_cipher_init(&aead_ctx);
+
+        /* Setup the mbedTLS context */
+        ret = mbedtls_cipher_setup(&aead_ctx, info);
+        if (ret != 0) {
+            return_value = mbedtls_to_psa_return(ret);
+        } else {
+            /* Set the key on the Mbed TLS context */
+            ret = mbedtls_cipher_setkey(&aead_ctx,
+                                        key_data,
+                                        key_size_bits,
+                                        MBEDTLS_ENCRYPT);
+            if (ret != 0) {
+                return_value = mbedtls_to_psa_return(ret);
+            } else {
+                /* Perform the AEAD operation on the Mbed TLS context */
+                ret = mbedtls_cipher_auth_encrypt(&aead_ctx,
+                                                  nonce, nonce_length,
+                                                  additional_data,
+                                                  additional_data_length,
+                                                  plaintext,
+                                                  plaintext_length,
+                                                  ciphertext,
+                                                  (size_t *)ciphertext_length,
+                                                  ciphertext +
+                                                      encrypted_message_length,
+                                                  PSA_AEAD_TAG_SIZE(alg));
+
+                /* Clear the Mbed TLS context */
+                mbedtls_cipher_free(&aead_ctx);
+                return_value = mbedtls_to_psa_return(ret);
+            }
+        }
+    }
+#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
+
+    return return_value;
+}
+
+psa_status_t tfm_crypto_engine_aead_decrypt(psa_key_type_t key_type,
+                                            psa_algorithm_t alg,
+                                            const uint8_t *key_data,
+                                            uint32_t key_size,
+                                            const uint8_t *nonce,
+                                            uint32_t nonce_length,
+                                            const uint8_t *additional_data,
+                                            uint32_t additional_data_length,
+                                            const uint8_t *ciphertext,
+                                            uint32_t ciphertext_length,
+                                            uint8_t *plaintext,
+                                            uint32_t plaintext_size,
+                                            uint32_t *plaintext_length)
+{
+    psa_status_t return_value = PSA_ERROR_NOT_SUPPORTED;
+
+#if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
+    int ret;
+    mbedtls_cipher_context_t aead_ctx;
+    const uint32_t key_size_bits = PSA_BYTES_TO_BITS(key_size);
+
+    const mbedtls_cipher_info_t *info = get_mbedtls_cipher_info(key_type,
+                                                                alg,
+                                                                key_size_bits);
+
+    const uint32_t encrypted_message_length =
+                           PSA_AEAD_DECRYPT_OUTPUT_SIZE(alg, ciphertext_length);
+    if (info == NULL) {
+        /* The combination of key_type, alg and key_size is not a valid Mbed TLS
+         * cipher configuration.
+         */
+        return_value = PSA_ERROR_NOT_SUPPORTED;
+    } else {
+        /* Init the mbedTLS context */
+        mbedtls_cipher_init(&aead_ctx);
+
+        /* Setup the mbedTLS context */
+        ret = mbedtls_cipher_setup(&aead_ctx, info);
+        if (ret != 0) {
+            return_value = mbedtls_to_psa_return(ret);
+        } else {
+             /* Set the key on the Mbed TLS context */
+            ret = mbedtls_cipher_setkey(&aead_ctx,
+                                        key_data,
+                                        key_size_bits,
+                                        MBEDTLS_DECRYPT);
+            if (ret != 0) {
+                return_value = mbedtls_to_psa_return(ret);
+            } else {
+                /* Perform the AEAD operation on the Mbed TLS context */
+                ret = mbedtls_cipher_auth_decrypt(&aead_ctx,
+                                                  nonce, nonce_length,
+                                                  additional_data,
+                                                  additional_data_length,
+                                                  ciphertext,
+                                                  encrypted_message_length,
+                                                  plaintext,
+                                                  (size_t *)plaintext_length,
+                                                  ciphertext +
+                                                      encrypted_message_length,
+                                                  PSA_AEAD_TAG_SIZE(alg));
+
+                /* Clear the Mbed TLS context */
+                mbedtls_cipher_free(&aead_ctx);
+                return_value = mbedtls_to_psa_return(ret);
+            }
+        }
+    }
+#endif /* TFM_CRYPTO_ENGINE_MBEDTLS */
+
+    return return_value;
+}

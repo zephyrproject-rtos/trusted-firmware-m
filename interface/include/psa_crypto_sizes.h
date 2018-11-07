@@ -156,7 +156,7 @@
  */
 #define PSA_AEAD_DECRYPT_OUTPUT_SIZE(alg, ciphertext_length)    \
     (PSA_AEAD_TAG_SIZE(alg) != 0 ?                              \
-     (plaintext_length) - PSA_AEAD_TAG_SIZE(alg) :              \
+     (ciphertext_length) - PSA_AEAD_TAG_SIZE(alg) :              \
      0)
 
 /** Safe signature buffer size for psa_asymmetric_sign().

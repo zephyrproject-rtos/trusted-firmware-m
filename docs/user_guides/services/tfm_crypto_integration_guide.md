@@ -52,7 +52,9 @@ refer to the comments in the `psa_crypto.h` header itself.
  The current implementation provides only SW primitives based on Mbed TLS
  functions;
  - `crypto_mac.c` : This file implements functionalities related to the
- MAC (Message Authentication Code) module.
+ MAC (Message Authentication Code) module;
+ - `crypto_aead.c` : This file implements functionalities related to the AEAD
+ (Authenticated Encryption with Associated Data) module.
 
 ## Crypto service integration guide
 

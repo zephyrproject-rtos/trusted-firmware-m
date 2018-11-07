@@ -218,3 +218,21 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_abort(
     TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_mac_abort,
                          operation, 0, 0, 0);
 }
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_aead_encrypt(
+                                      struct psa_aead_encrypt_input *input_s,
+                                      struct psa_aead_encrypt_output *output_s)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_aead_encrypt_wrapper,
+                         input_s, output_s, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_aead_decrypt(
+                                      struct psa_aead_decrypt_input *input_s,
+                                      struct psa_aead_decrypt_output *output_s)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_aead_decrypt_wrapper,
+                         input_s, output_s, 0, 0);
+}

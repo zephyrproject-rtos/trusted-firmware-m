@@ -242,7 +242,6 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_verify(
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_hash_abort(
                                                psa_hash_operation_t *operation);
-
 /**
  * \brief Start a MAC operation with the provided algorithm (for signing)
  *        (veneer function)
@@ -342,6 +341,33 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_verify_finish(
  */
 enum tfm_crypto_err_t tfm_crypto_veneer_mac_abort(
                                                 psa_mac_operation_t *operation);
+/**
+ * \brief Perform an AEAD encryption operation on input data with additional
+ *        data to be authenticated, producing ciphertext in output with an
+ *        appended authentication tag (veneer function)
+ *
+ * \param[in]  input_s   Pointer to the struct containing input parameters
+ * \param[out] output_s  Pointer to the struct containing output parameters
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_aead_encrypt(
+                                     struct psa_aead_encrypt_input *input_s,
+                                     struct psa_aead_encrypt_output *output_s);
+/**
+ * \brief Perform an AEAD decryption operation on input data with additional
+ *        data to be verified, producing back the original plain text in case
+ *        the verification of the authentication tag is successful (veneer
+ *        function)
+ *
+ * \param[in]  input_s   Pointer to the struct containing input parameters
+ * \param[out] output_s  Pointer to the struct containing output parameters
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_aead_decrypt(
+                                     struct psa_aead_decrypt_input *input_s,
+                                     struct psa_aead_decrypt_output *output_s);
 
 #ifdef __cplusplus
 }

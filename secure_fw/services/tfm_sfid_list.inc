@@ -48,6 +48,8 @@
     {tfm_crypto_mac_sign_finish, TFM_CRYPTO_MAC_SIGN_FINISH_SFID},
     {tfm_crypto_mac_verify_finish, TFM_CRYPTO_MAC_VERIFY_FINISH_SFID},
     {tfm_crypto_mac_abort, TFM_CRYPTO_MAC_ABORT_SFID},
+    {tfm_crypto_aead_decrypt_wrapper, TFM_CRYPTO_AEAD_DECRYPT_SFID},
+    {tfm_crypto_aead_encrypt_wrapper, TFM_CRYPTO_AEAD_ENCRYPT_SFID},
 
     /******** TFM_SP_PLATFORM ********/
     {platform_sp_system_reset, TFM_SP_PLATFORM_SYSTEM_RESET_SFID},

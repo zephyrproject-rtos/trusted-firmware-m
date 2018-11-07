@@ -302,6 +302,82 @@ psa_status_t tfm_crypto_engine_cipher_finish(union engine_cipher_context *cp,
  * \return Return values as specified by \ref psa_status_t
  */
 psa_status_t tfm_crypto_engine_cipher_release(union engine_cipher_context *cp);
+
+/**
+ * \brief This function performs an AEAD encryption on the provided data
+ *
+ * \param[in]  key_type               Key type of the key that will be used
+ * \param[in]  alg                    Algorithm to be used
+ * \param[in]  key_data               Pointer to the buffer containing key
+ *                                    material
+ * \param[in]  key_size               Size in bytes of the key pointed to by
+ *                                    key_data
+ * \param[in]  nonce                  Pointer to a buffer holding a nonce or IV
+ *                                    to use
+ * \param[in]  nonce_length           Size in bytes of the nonce or IV data
+ * \param[in]  additional_data        Additional information to be authenticated
+ * \param[in]  additional_data_length Size in bytes of the additional data
+ * \param[in]  plaintext              Buffer pointing to data to be encrypted
+ * \param[in]  plaintext_length       Size in bytes of the plain text buffer
+ * \param[out] ciphertext             Output encrypted data, with the
+ *                                    authentication tag appended
+ * \param[in]  ciphertext_size        Size in bytes of the buffer to hold the
+ *                                    cipher text plus authentication tag
+ * \param[out] ciphertext_length      Size of the ciphertext plus tag produced
+ *                                    as output
+ *
+ * \return Return values as specified by \ref psa_status_t
+ */
+psa_status_t tfm_crypto_engine_aead_encrypt(psa_key_type_t key_type,
+                                            psa_algorithm_t alg,
+                                            const uint8_t *key_data,
+                                            uint32_t key_size,
+                                            const uint8_t *nonce,
+                                            uint32_t nonce_length,
+                                            const uint8_t *additional_data,
+                                            uint32_t additional_data_length,
+                                            const uint8_t *plaintext,
+                                            uint32_t plaintext_length,
+                                            uint8_t *ciphertext,
+                                            uint32_t ciphertext_size,
+                                            uint32_t *ciphertext_length);
+/**
+ * \brief This function performs an AEAD decryption on the provided data
+ *
+ * \param[in]  key_type               Key type of the key that will be used
+ * \param[in]  alg                    Algorithm to be used
+ * \param[in]  key_data               Pointer to the buffer containing key
+ *                                    material
+ * \param[in]  key_size               Size in bytes of the key pointed to by
+ *                                    key_data
+ * \param[in]  nonce                  Pointer to a buffer holding a nonce or IV
+ *                                    to use
+ * \param[in]  nonce_length           Size in bytes of the nonce or IV data
+ * \param[in]  additional_data        Additional information which was
+ *                                    authenticated but not encrypted
+ * \param[in]  additional_data_length Size in bytes of the additional data
+ * \param[in]  ciphertext             Buffer pointing to data be decrypted
+ * \param[in]  ciphertext_length      Size in bytes of the cipher text buffer
+ * \param[out] plaintext              Buffer for decrypted output data
+ * \param[in]  plaintext_size         Size in bytes of the buffer to hold the
+ *                                    plain text
+ * \param[out] plaintext_length       Size of the plain text actually produced
+ *
+ * \return Return values as specified by \ref psa_status_t
+ */
+psa_status_t tfm_crypto_engine_aead_decrypt(psa_key_type_t key_type,
+                                            psa_algorithm_t alg,
+                                            const uint8_t *key_data,
+                                            uint32_t key_size,
+                                            const uint8_t *nonce,
+                                            uint32_t nonce_length,
+                                            const uint8_t *additional_data,
+                                            uint32_t additional_data_length,
+                                            const uint8_t *ciphertext,
+                                            uint32_t ciphertext_length,
+                                            uint8_t *plaintext,
+                                            uint32_t plaintext_size,
+                                            uint32_t *plaintext_length);
 #ifdef __cplusplus
 }
 #endif
