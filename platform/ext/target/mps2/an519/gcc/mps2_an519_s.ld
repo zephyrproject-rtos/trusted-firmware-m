@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2018-2019 ARM Limited
+; * Copyright (c) 2018-2019 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -311,20 +311,20 @@ SECTIONS
     .TFM_SP_SECURE_TEST_PARTITION : ALIGN(32)
     {
         *tfm_secure_client_service.*(.text*)
-        *test_framework*(.text*)
-        *uart_stdout.*(.text*)
-        *Driver_USART.*(.text*)
-        *arm_uart_drv.*(.text*)
-        *uart_pl011_drv.*(.text*)
-        *secure_suites.*(.text*)
-        *attestation_s_interface_testsuite.*(.text*)
         *tfm_secure_client_service.*(.rodata*)
+        *test_framework*(.text*)
         *test_framework*(.rodata*)
+        *uart_stdout.*(.text*)
         *uart_stdout.*(.rodata*)
+        *Driver_USART.*(.text*)
         *Driver_USART.*(.rodata*)
+        *arm_uart_drv.*(.text*)
         *arm_uart_drv.*(.rodata*)
+        *uart_pl011_drv.*(.text*)
         *uart_pl011_drv.*(.rodata*)
+        *secure_suites.*(.text*)
         *secure_suites.*(.rodata*)
+        *attestation_s_interface_testsuite.*(.text*)
         *attestation_s_interface_testsuite.*(.rodata*)
         *(TFM_SP_SECURE_TEST_PARTITION_ATTR_FN)
         . = ALIGN(32);
@@ -683,20 +683,20 @@ SECTIONS
     .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
     {
         *tfm_secure_client_service.*(.bss*)
-        *test_framework*(.bss*)
-        *uart_stdout.*(.bss*)
-        *Driver_USART.*(.bss*)
-        *arm_uart_drv.*(.bss*)
-        *uart_pl011_drv.*(.bss*)
-        *secure_suites.*(.bss*)
-        *attestation_s_interface_testsuite.*(.bss*)
         *tfm_secure_client_service.*(COMMON)
+        *test_framework*(.bss*)
         *test_framework*(COMMON)
+        *uart_stdout.*(.bss*)
         *uart_stdout.*(COMMON)
+        *Driver_USART.*(.bss*)
         *Driver_USART.*(COMMON)
+        *arm_uart_drv.*(.bss*)
         *arm_uart_drv.*(COMMON)
+        *uart_pl011_drv.*(.bss*)
         *uart_pl011_drv.*(COMMON)
+        *secure_suites.*(.bss*)
         *secure_suites.*(COMMON)
+        *attestation_s_interface_testsuite.*(.bss*)
         *attestation_s_interface_testsuite.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2017-2019 ARM Limited
+; * Copyright (c) 2017-2019 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 ; * This file is derivative of CMSIS V5.00 gcc_arm.ld
 ; */
 
-@!GENERATOR_DONOTEDIT_WARNING!@
+{{utilities.donotedit_warning}}
 
 /* Linker script to configure memory regions. */
 /* This file will be run trough the pre-processor. */
@@ -90,17 +90,17 @@ SECTIONS
         LONG (LOADADDR(.TFM_UNPRIV_RO_DATA))
         LONG (ADDR(.TFM_UNPRIV_RO_DATA))
         LONG (SIZEOF(.TFM_UNPRIV_RO_DATA))
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-        LONG (LOADADDR(.@@manifest.name@@_DATA))
-        LONG (ADDR(.@@manifest.name@@_DATA))
-        LONG (SIZEOF(.@@manifest.name@@_DATA))
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_BLOCK_END!@
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+        LONG (LOADADDR(.{{manifest.manifest.name}}_DATA))
+        LONG (ADDR(.{{manifest.manifest.name}}_DATA))
+        LONG (SIZEOF(.{{manifest.manifest.name}}_DATA))
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+{% endfor %}
         __copy_table_end__ = .;
     } > FLASH
 
@@ -111,18 +111,18 @@ SECTIONS
         LONG (SIZEOF(.TFM_BSS))
         LONG (ADDR(.TFM_UNPRIV_RO_BSS))
         LONG (SIZEOF(.TFM_UNPRIV_RO_BSS))
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-        LONG (ADDR(.@@manifest.name@@_BSS))
-        LONG (SIZEOF(.@@manifest.name@@_BSS))
-        LONG (ADDR(.@@manifest.name@@_STACK))
-        LONG (SIZEOF(.@@manifest.name@@_STACK))
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_BLOCK_END!@
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+        LONG (ADDR(.{{manifest.manifest.name}}_BSS))
+        LONG (SIZEOF(.{{manifest.manifest.name}}_BSS))
+        LONG (ADDR(.{{manifest.manifest.name}}_STACK))
+        LONG (SIZEOF(.{{manifest.manifest.name}}_STACK))
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+{% endfor %}
         LONG (ADDR(.TFM_UNPRIV_SCRATCH))
         LONG (SIZEOF(.TFM_UNPRIV_SCRATCH))
         __zero_table_end__ = .;
@@ -152,32 +152,36 @@ SECTIONS
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-    .@@manifest.name@@ : ALIGN(32)
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+    .{{manifest.manifest.name}} : ALIGN(32)
     {
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
-        @@manifest.tfm_linker_pattern.library_list@@:*(.text*)
-        @@manifest.tfm_linker_pattern.library_list@@:*(.rodata*)
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.object_list@@
-        @@manifest.tfm_linker_pattern.object_list@@(.text*)
-        @@manifest.tfm_linker_pattern.object_list@@(.rodata*)
-@!GENERATOR_CONDITIONAL_END!@
-        *(@@manifest.name@@_ATTR_FN)
+    {% if manifest.manifest.tfm_linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+        {{pattern}}:*(.text*)
+        {{pattern}}:*(.rodata*)
+        {% endfor %}
+    {% endif %}
+    {% if manifest.manifest.tfm_linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+        {{pattern}}(.text*)
+        {{pattern}}(.rodata*)
+        {% endfor %}
+    {% endif %}
+        *({{manifest.manifest.name}}_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$$@@manifest.name@@$$RO$$Base = ADDR(.@@manifest.name@@);
-    Image$$@@manifest.name@@$$RO$$Limit = ADDR(.@@manifest.name@@) + SIZEOF(.@@manifest.name@@);
-    Image$$@@manifest.name@@$$Base = ADDR(.@@manifest.name@@);
-    Image$$@@manifest.name@@$$Limit = ADDR(.@@manifest.name@@) + SIZEOF(.@@manifest.name@@);
+    Image$${{manifest.manifest.name}}$$RO$$Base = ADDR(.{{manifest.manifest.name}});
+    Image$${{manifest.manifest.name}}$$RO$$Limit = ADDR(.{{manifest.manifest.name}}) + SIZEOF(.{{manifest.manifest.name}});
+    Image$${{manifest.manifest.name}}$$Base = ADDR(.{{manifest.manifest.name}});
+    Image$${{manifest.manifest.name}}$$Limit = ADDR(.{{manifest.manifest.name}}) + SIZEOF(.{{manifest.manifest.name}});
 
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_BLOCK_END!@
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+{% endfor %}
 
     .ARM.extab :
     {
@@ -307,49 +311,57 @@ SECTIONS
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-    .@@manifest.name@@_DATA : ALIGN(32)
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+    .{{manifest.manifest.name}}_DATA : ALIGN(32)
     {
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
-        @@manifest.tfm_linker_pattern.library_list@@:*(.data*)
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.object_list@@
-        @@manifest.tfm_linker_pattern.object_list@@(.data*)
-@!GENERATOR_CONDITIONAL_END!@
+    {% if manifest.manifest.tfm_linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+        {{pattern}}:*(.data*)
+        {% endfor %}
+    {% endif %}
+    {% if manifest.manifest.tfm_linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+        {{pattern}}(.data*)
+        {% endfor %}
+    {% endif %}
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$@@manifest.name@@_DATA$$RW$$Base = ADDR(.@@manifest.name@@_DATA);
-    Image$$@@manifest.name@@_DATA$$RW$$Limit = ADDR(.@@manifest.name@@_DATA) + SIZEOF(.@@manifest.name@@_DATA);
+    Image$${{manifest.manifest.name}}_DATA$$RW$$Base = ADDR(.{{manifest.manifest.name}}_DATA);
+    Image$${{manifest.manifest.name}}_DATA$$RW$$Limit = ADDR(.{{manifest.manifest.name}}_DATA) + SIZEOF(.{{manifest.manifest.name}}_DATA);
 
-    .@@manifest.name@@_BSS : ALIGN(32)
+    .{{manifest.manifest.name}}_BSS : ALIGN(32)
     {
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
-        @@manifest.tfm_linker_pattern.library_list@@:*(.bss*)
-        @@manifest.tfm_linker_pattern.library_list@@:*(COMMON)
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.object_list@@
-        @@manifest.tfm_linker_pattern.object_list@@(.bss*)
-        @@manifest.tfm_linker_pattern.object_list@@(COMMON)
-@!GENERATOR_CONDITIONAL_END!@
+    {% if manifest.manifest.tfm_linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+        {{pattern}}:*(.bss*)
+        {{pattern}}:*(COMMON)
+        {% endfor %}
+    {% endif %}
+    {% if manifest.manifest.tfm_linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+        {{pattern}}(.bss*)
+        {{pattern}}(COMMON)
+        {% endfor %}
+    {% endif %}
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$@@manifest.name@@_DATA$$ZI$$Base = ADDR(.@@manifest.name@@_BSS);
-    Image$$@@manifest.name@@_DATA$$ZI$$Limit = ADDR(.@@manifest.name@@_BSS) + SIZEOF(.@@manifest.name@@_BSS);
+    Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
+    Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
-    .@@manifest.name@@_STACK : ALIGN(128)
+    .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {
-        . += @@manifest.stack_size@@;
+        . += {{manifest.manifest.stack_size}};
     } > RAM AT> FLASH
-    Image$$@@manifest.name@@_STACK$$ZI$$Base = ADDR(.@@manifest.name@@_STACK);
-    Image$$@@manifest.name@@_STACK$$ZI$$Limit = ADDR(.@@manifest.name@@_STACK) + SIZEOF(.@@manifest.name@@_STACK);
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
 
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_BLOCK_END!@
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+{% endfor %}
 
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {

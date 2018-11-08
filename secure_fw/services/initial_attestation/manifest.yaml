@@ -39,9 +39,9 @@
     "attest_token.c",
     "tfm_attestation.c",
   ],
-  "tfm_linker_pattern": [
+  "tfm_linker_pattern": {
     "library_list": [
       "*tfm_attest*"
     ]
-  ]
+  }
 }

@@ -37,7 +37,8 @@ on specific products and licenses as explained in
   - pycrypto
   - pyasn1
   - yaml
-  - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml
+  - jinja2 v2.10
+  - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml python3-jinja2
 - SRecord v1.58 (for Musca test chip boards)
 
 
@@ -71,6 +72,7 @@ export PATH=<GNU_ARM_PATH>/bin:$PATH
   - pycryptodome (pip3 install --user pycryptodome)
   - pyasn1 (pip3 install --user pyasn1)
   - pyyaml (pip3 install --user pyyaml)
+  - jinja2 (pip3 install --user jinja2)
 - Python3 pip
 - SRecord v1.63 (for Musca test chip boards)
 

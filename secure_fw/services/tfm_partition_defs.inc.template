@@ -5,21 +5,24 @@
  *
  */
 
-@!GENERATOR_DONOTEDIT_WARNING!@
+{{utilities.donotedit_warning}}
 
 #ifndef __TFM_PARTITION_DEFS_INC__
 #define __TFM_PARTITION_DEFS_INC__
 
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-#define @@manifest.name@@_ID (TFM_SP_BASE + @!GENERATOR_ITERATION_COUNTER!@)
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
+{% set ns = namespace(iterator_counter=0) %}
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+#define {{manifest.manifest.name}}_ID (TFM_SP_BASE + {{ns.iterator_counter}})
+    {% set ns.found = true %}
+    {% set ns.iterator_counter = ns.iterator_counter + 1 %}
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
 
-@!GENERATOR_BLOCK_END!@
-#define TFM_MAX_USER_PARTITIONS (@!GENERATOR_ITERATION_COUNTER!@)
+{% endfor %}
+#define TFM_MAX_USER_PARTITIONS ({{manifests | length()}})
 
 #endif /* __TFM_PARTITION_DEFS_INC__ */

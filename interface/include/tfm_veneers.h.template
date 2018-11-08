@@ -5,7 +5,7 @@
  *
  */
 
-@!GENERATOR_DONOTEDIT_WARNING!@
+{{utilities.donotedit_warning}}
 
 #ifndef __TFM_VENEERS_H__
 #define __TFM_VENEERS_H__
@@ -16,17 +16,19 @@
 extern "C" {
 #endif
 
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.name@@ ********/
-psa_status_t tfm_@@manifest.secure_functions.tfm_symbol@@_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+/******** {{manifest.manifest.name}} ********/
+    {% for function in manifest.manifest.secure_functions%}
+psa_status_t tfm_{{function.tfm_symbol}}_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+    {% endfor %}
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
 
-@!GENERATOR_BLOCK_END!@
+{% endfor %}
 #ifdef __cplusplus
 }
 #endif

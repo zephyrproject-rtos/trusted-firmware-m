@@ -5,34 +5,36 @@
  *
  */
 
-@!GENERATOR_DONOTEDIT_WARNING!@
+{{utilities.donotedit_warning}}
 
 #ifndef __TFM_PARTITION_LIST_INC__
 #define __TFM_PARTITION_LIST_INC__
 
-@!GENERATOR_BLOCK_START!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#ifdef @@attr.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.name@@ ********/
-PARTITION_DECLARE(@@manifest.name@@, 0
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_partition_ipc@@
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+/******** {{manifest.manifest.name}} ********/
+PARTITION_DECLARE({{manifest.manifest.name}}, 0
+    {% if manifest.manifest.tfm_partition_ipc %}
     | SPM_PART_FLAG_IPC
-@!GENERATOR_CONDITIONAL_END!@
-    , "@@manifest.type@@", @@manifest.id@@, @@manifest.priority@@);
-PARTITION_ADD_INIT_FUNC(@@manifest.name@@, @@manifest.entry_point@@);
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
-#ifdef @@manifest.mmio_regions.conditional@@
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.name@@
-PARTITION_ADD_PERIPHERAL(@@manifest.name@@, @@manifest.mmio_regions.name@@);
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
-#endif /* @@manifest.mmio_regions.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
-@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
-#endif /* @@attr.conditional@@ */
-@!GENERATOR_CONDITIONAL_END!@
+    {% endif %}
+    , "{{manifest.manifest.type}}", {{manifest.manifest.id}}, {{manifest.manifest.priority}});
+PARTITION_ADD_INIT_FUNC({{manifest.manifest.name}}, {{manifest.manifest.entry_point}});
+    {% if manifest.manifest.mmio_regions %}
+        {% for region in manifest.manifest.mmio_regions %}
+            {% if region.conditional %}
+#ifdef {{region.conditional}}
+            {% endif %}
+PARTITION_ADD_PERIPHERAL({{manifest.manifest.name}}, {{region.name}});
+            {% if region.conditional %}
+#endif /* {{region.conditional}} */
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
 
-@!GENERATOR_BLOCK_END!@
+{% endfor %}
 #endif /* __TFM_PARTITION_LIST_INC__ */

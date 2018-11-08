@@ -275,9 +275,9 @@
     "crypto_mac.c",
     "crypto_aead.c",
   ],
-  "tfm_linker_pattern": [
+  "tfm_linker_pattern": {
     "library_list": [
       "*tfm_crypto*"
     ]
-  ]
+  }
 }
