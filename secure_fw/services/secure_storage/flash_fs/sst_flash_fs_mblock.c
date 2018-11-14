@@ -530,9 +530,9 @@ static enum psa_sst_err_t sst_mblock_copy_remaining_block_meta(uint32_t lblock)
          * the logical block provided in the function.
          */
         if (lblock > 1) {
-            pos = sst_mblock_file_meta_offset(SST_LOGICAL_DBLOCK0 + 1);
+            pos = sst_mblock_block_meta_offset(SST_LOGICAL_DBLOCK0 + 1);
 
-            size = sst_mblock_file_meta_offset(lblock) - pos;
+            size = sst_mblock_block_meta_offset(lblock) - pos;
 
             /* Copy rest of the block data from previous block */
             /* Data before updated content */
