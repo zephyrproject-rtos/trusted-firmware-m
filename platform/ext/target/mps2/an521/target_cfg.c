@@ -120,6 +120,9 @@ void system_reset_cfg(void)
      */
     sysctrl->resetmask |= ENABLE_CPU0_SYSTEM_RESET_REQUEST;
 
+    /* Clear SCB_AIRCR_VECTKEY value */
+    reg_value &= ~(uint32_t)(SCB_AIRCR_VECTKEY_Msk);
+
     /* Enable system reset request only to the secure world */
     reg_value |= (uint32_t)(SCB_AIRCR_WRITE_MASK | SCB_AIRCR_SYSRESETREQS_Msk);
 
