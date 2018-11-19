@@ -62,7 +62,9 @@ void SecureFault_Handler(void)
          sp <=  S_DATA_LIMIT - sizeof(tfm_fault_context) + 1) ||
         (sp >= NS_DATA_START &&
          sp <= NS_DATA_LIMIT - sizeof(tfm_fault_context) + 1)) {
-        memcpy(&tfm_fault_context, (const void *)sp, sizeof(tfm_fault_context));
+        tfm_memcpy(&tfm_fault_context,
+                   (const void *)sp,
+                   sizeof(tfm_fault_context));
     }
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");

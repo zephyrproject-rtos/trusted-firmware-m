@@ -11,6 +11,7 @@
 #include <string.h>
 #include "spm_api.h"
 #include "platform/include/tfm_spm_hal.h"
+#include "secure_utilities.h"
 #include "spm_db_setup.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
@@ -71,7 +72,7 @@ enum spm_err_t tfm_spm_db_init(void)
 {
     struct spm_partition_desc_t *part_ptr;
 
-    memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
+    tfm_memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
 
     /* This function initialises partition db */
     g_spm_partition_db.running_partition_idx = SPM_INVALID_PARTITION_IDX;
