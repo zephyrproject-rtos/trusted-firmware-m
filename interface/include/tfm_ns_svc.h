@@ -48,7 +48,9 @@ enum tfm_svc_num {
 #define X(SVC_ENUM, SVC_HANDLER) SVC_ENUM,
 
     /* SVC API for Services */
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     LIST_SVC_NSPM
+#endif
 
 #undef X
 

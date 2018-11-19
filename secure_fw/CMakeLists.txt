@@ -76,8 +76,16 @@ if(TARGET_NV_COUNTERS_ENABLE)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_NVCOUNTERS_ENABLE APPEND)
 endif()
 
-if(CORE_TEST)
+if (NOT DEFINED CORE_TEST)
+	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined.")
+elseif(CORE_TEST)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_CORE_DEBUG TFM_PARTITION_TEST_CORE APPEND)
+endif()
+
+if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
+elseif (TFM_NS_CLIENT_IDENTIFICATION)
+	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE TFM_NS_CLIENT_IDENTIFICATION)
 endif()
 
 #Set include directories

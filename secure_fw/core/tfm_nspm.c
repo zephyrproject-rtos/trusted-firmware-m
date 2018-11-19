@@ -14,7 +14,7 @@
 #endif
 #define INVALID_CLIENT_ID 0
 
-#define CLIENT_ID_RANGE_START ((int32_t)-1)
+#define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
 
 #define INVALID_NS_CLIENT_IDX (-1)
 #define DEFAULT_NS_CLIENT_IDX   0
@@ -32,13 +32,17 @@ static int32_t active_ns_client_idx = INVALID_NS_CLIENT_IDX;
 
 static int get_next_ns_client_id()
 {
-    static int32_t next_ns_client_id = CLIENT_ID_RANGE_START;
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
+    static int32_t next_ns_client_id = DEFAULT_NS_CLIENT_ID;
 
     if (next_ns_client_id > 0)
     {
-        next_ns_client_id = CLIENT_ID_RANGE_START;
+        next_ns_client_id = DEFAULT_NS_CLIENT_ID;
     }
     return next_ns_client_id--;
+#else
+    return DEFAULT_NS_CLIENT_ID;
+#endif
 }
 
 void tfm_nspm_configure_clients(void)
@@ -261,6 +265,7 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     return 1U;    // Success
 }
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 __attribute__((cmse_nonsecure_entry))
 enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
 {
@@ -294,3 +299,4 @@ enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
 
     return TFM_SUCCESS;
 }
+#endif

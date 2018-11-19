@@ -47,10 +47,17 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${INTERFACE_DIR}/src/tfm_audit_api.c"
 	"${INTERFACE_DIR}/src/tfm_crypto_api.c"
 	"${INTERFACE_DIR}/src/tfm_platform_api.c"
-	"${INTERFACE_DIR}/src/tfm_nspm_svc_handler.c"
-	"${INTERFACE_DIR}/src/tfm_nspm_api.c"
 	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
 	)
+
+if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
+elseif (TFM_NS_CLIENT_IDENTIFICATION)
+	list(APPEND NS_APP_SRC
+		"${INTERFACE_DIR}/src/tfm_nspm_svc_handler.c"
+		"${INTERFACE_DIR}/src/tfm_nspm_api.c"
+		)
+endif()
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
