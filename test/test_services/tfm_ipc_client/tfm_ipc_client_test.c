@@ -9,11 +9,8 @@
 #include "psa_client.h"
 #include "secure_utilities.h"
 
-/*
- * FixMe: These SID should come from manifest.
- * Temporarily adds them here for test.
- */
-#define IPC_TEST_SERVICE1_SID        (01)
+/* These SID should be same with service manifest.*/
+#define IPC_TEST_SERVICE1_SID        (0x1000)
 #define IPC_TEST_SERVICE1_MIN_VER    (0x0001)
 
 int ipc_client_init(void)

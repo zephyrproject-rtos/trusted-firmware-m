@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,18 +14,18 @@
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.tfm_partition_name@@ ********/
-@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_trusted@@
-PARTITION_DECLARE(@@manifest.tfm_partition_name@@, SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED);
-@!GENERATOR_CONDITIONAL_ELSE!@
-PARTITION_DECLARE(@@manifest.tfm_partition_name@@, SPM_PART_FLAG_SECURE);
+/******** @@manifest.name@@ ********/
+PARTITION_DECLARE(@@manifest.name@@, 0
+@!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_partition_ipc@@
+    | SPM_PART_FLAG_IPC
 @!GENERATOR_CONDITIONAL_END!@
-PARTITION_ADD_INIT_FUNC(@@manifest.tfm_partition_name@@, @@manifest.tfm_init_symbol@@);
+    , "@@manifest.type@@", @@manifest.id@@, @@manifest.priority@@);
+PARTITION_ADD_INIT_FUNC(@@manifest.name@@, @@manifest.entry_point@@);
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
 #ifdef @@manifest.mmio_regions.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.name@@
-PARTITION_ADD_PERIPHERAL(@@manifest.tfm_partition_name@@, @@manifest.mmio_regions.name@@);
+PARTITION_ADD_PERIPHERAL(@@manifest.name@@, @@manifest.mmio_regions.name@@);
 @!GENERATOR_CONDITIONAL_END!@
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.mmio_regions.conditional@@
 #endif /* @@manifest.mmio_regions.conditional@@ */

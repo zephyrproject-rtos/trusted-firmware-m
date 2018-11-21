@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+@!GENERATOR_DONOTEDIT_WARNING!@
+
+#ifndef __TFM_SERVICE_LIST_INC__
+#define __TFM_SERVICE_LIST_INC__
+
+@!GENERATOR_BLOCK_START!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#ifdef @@attr.conditional@@
+@!GENERATOR_CONDITIONAL_END!@
+/******** @@manifest.name@@ ********/
+@!GENERATOR_CONDITIONAL_START!@ @@manifest.services@@
+{"@@manifest.services.name@@", @@manifest.name@@_ID, @@manifest.services.signal@@, @@manifest.services.sid@@, @@manifest.services.non_secure_clients@@, @@manifest.services.minor_version@@, TFM_VERSION_POLICY_@@manifest.services.minor_policy@@},
+@!GENERATOR_CONDITIONAL_END!@
+@!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
+#endif /* @@attr.conditional@@ */
+@!GENERATOR_CONDITIONAL_END!@
+
+@!GENERATOR_BLOCK_END!@
+#endif /* __TFM_SERVICE_LIST_INC__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,10 +31,11 @@ struct spm_partition_db_t {
     struct spm_partition_desc_t partitions[SPM_MAX_PARTITIONS];
 };
 
-#define PARTITION_INIT_STATIC_DATA(data, partition, flags) \
-    do {                                                   \
-        data.partition_id    = partition##_ID;             \
-        data.partition_flags = flags;                      \
+#define PARTITION_INIT_STATIC_DATA(data, partition, flags, id, priority)      \
+    do {                                                                      \
+        data.partition_id    = partition##_ID;                                \
+        data.partition_flags = flags;                                         \
+        data.partition_priority = TFM_PRIORITY(priority);                     \
     } while (0)
 
 #if TFM_LVL == 1
@@ -70,7 +71,7 @@ struct spm_partition_db_t {
     } while (0)
 #endif
 
-#define PARTITION_DECLARE(partition, flags)                                  \
+#define PARTITION_DECLARE(partition, flag, type, id, priority)               \
     do {                                                                     \
         REGION_DECLARE(Image$$, partition, $$Base);                          \
         REGION_DECLARE(Image$$, partition, $$Limit);                         \
@@ -82,13 +83,24 @@ struct spm_partition_db_t {
         REGION_DECLARE(Image$$, partition, _DATA$$ZI$$Limit);                \
         REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Base);                \
         REGION_DECLARE(Image$$, partition, _STACK$$ZI$$Limit);               \
+        int32_t flags = flag;                                                \
+        if (tfm_memcmp(type, TFM_PARTITION_TYPE_APP,                         \
+            strlen(TFM_PARTITION_TYPE_APP)) == 0) {                          \
+            flags |= SPM_PART_FLAG_APP_ROT;                                  \
+        } else if (tfm_memcmp(type, TFM_PARTITION_TYPE_PSA,                  \
+                   strlen(TFM_PARTITION_TYPE_PSA)) == 0) {                   \
+            flags |= SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT;          \
+        } else {                                                             \
+            return SPM_ERR_INVALID_CONFIG;                                   \
+        }                                                                    \
         struct spm_partition_desc_t *part_ptr;                               \
         if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {      \
             return SPM_ERR_INVALID_CONFIG;                                   \
         }                                                                    \
         part_ptr = &(g_spm_partition_db.partitions[                          \
             g_spm_partition_db.partition_count]);                            \
-        PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition, flags); \
+        PARTITION_INIT_STATIC_DATA(part_ptr->static_data, partition, flags,  \
+                                   id, priority);                            \
         PARTITION_INIT_RUNTIME_DATA(part_ptr->runtime_data, partition);      \
         PARTITION_INIT_MEMORY_DATA(part_ptr->memory_data, partition);        \
         ++g_spm_partition_db.partition_count;                                \

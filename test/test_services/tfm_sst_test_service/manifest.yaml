@@ -1,21 +1,18 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 {
-  "name": "TFM_SST_TEST",
-  "tfm_partition_name": "TFM_SP_SST_TEST_PARTITION",
-  "type": "TRUSTED",
-  "tfm_trusted": true,
+  "name": "TFM_SP_SST_TEST_PARTITION",
+  "type": "PSA-ROT",
   "priority": "NORMAL",
   "id": "0x00000004",
-  "entry_point": "main",
+  "entry_point": "sst_test_service_init",
   "stack_size": "0x0400",
   "heap_size": "0x0400",
-  "tfm_init_symbol": "sst_test_service_init",
   "secure_functions": [
     {
       "sfid": "TFM_SST_TEST_SFN_SETUP_SFID",

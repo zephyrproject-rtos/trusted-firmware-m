@@ -1,0 +1,34 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "name": "TFM_SP_IPC_SERVICE_TEST",
+  "type": "APPLICATION-ROT",
+  "priority": "HIGH",
+  "id": "0x00000007",
+  "entry_point": "ipc_service_test_main",
+  "stack_size": "0x1000",
+  "heap_size": "0",
+  "tfm_partition_ipc": true,
+  "services" : [{
+    "name": "IPC_SID_BASIC",
+    "sid": "0x00001000",
+    "signal": "IPC_BASIC_SIGNAL",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   }
+  ],
+  "source_files": [
+    "./ipc_service_test.c",
+  ],
+  "tfm_linker_pattern": {
+    "library_list": [
+      "*ipc_service_test*"
+    ]
+  }
+}

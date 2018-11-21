@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -94,12 +94,13 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
     caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
 
     /* Check partition state consistency */
-    if (((caller_flags&SPM_PART_FLAG_SECURE) != 0) != (!desc_ptr->ns_caller)) {
+    if (((caller_flags & SPM_PART_FLAG_APP_ROT) != 0)
+        != (!desc_ptr->ns_caller)) {
         /* Partition state inconsistency detected */
         return TFM_SECURE_LOCK_FAILED;
     }
 
-    if((caller_flags & SPM_PART_FLAG_SECURE) == 0) {
+    if((caller_flags & SPM_PART_FLAG_APP_ROT) == 0) {
         /* Disable NS exception handling while secure service is running.
          * FixMe:
          * This restriction is applied to limit the number of possible attack
@@ -123,7 +124,7 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
         /* Make thread mode unprivileged while untrusted partition init is
          * executed
          */
-        if ((partition_flags & SPM_PART_FLAG_TRUSTED) == 0) {
+        if ((partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
             CONTROL_Type ctrl;
 
             ctrl.w = __get_CONTROL();
@@ -158,7 +159,7 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
                                                caller_partition_idx);
     tfm_spm_partition_store_context(caller_partition_idx, psp, excReturn);
 
-    if ((caller_flags&SPM_PART_FLAG_SECURE)) {
+    if ((caller_flags & SPM_PART_FLAG_APP_ROT)) {
         tfm_spm_partition_set_caller_client_id(partition_idx,
                                                caller_partition_id);
     } else {
@@ -245,7 +246,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
 
     tfm_secure_lock--;
 
-    if((return_partition_flags & SPM_PART_FLAG_SECURE) == 0) {
+    if((return_partition_flags & SPM_PART_FLAG_APP_ROT) == 0) {
         /* Re-enable NS exceptions when secure service returns to NS client.
          * FixMe:
          * To be removed when pre-emption and context management issues have
@@ -261,7 +262,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
         /* Restore privilege for thread mode during TF-M init. This is only
          * have to be done if the partition is not trusted.
          */
-        if ((current_partition_flags & SPM_PART_FLAG_TRUSTED) == 0) {
+        if ((current_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
             CONTROL_Type ctrl;
 
             ctrl.w = __get_CONTROL();
@@ -279,7 +280,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
             ERROR_MSG("Failed to configure sandbox for partition!");
             tfm_secure_api_error_handler();
         }
-        if (return_partition_flags&SPM_PART_FLAG_SECURE) {
+        if (return_partition_flags & SPM_PART_FLAG_APP_ROT) {
             /* Restore share status */
             tfm_spm_partition_set_share(
                 return_partition_idx,
@@ -290,7 +291,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
 #endif
 
 #if TFM_LVL == 1
-    if (!(return_partition_flags & SPM_PART_FLAG_SECURE) ||
+    if (!(return_partition_flags & SPM_PART_FLAG_APP_ROT) ||
         (tfm_secure_api_initializing)) {
         /* In TFM level 1 context restore is only done when
          * returning to NS or after initialization
@@ -472,7 +473,7 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     uint32_t caller_partition_flags =
             tfm_spm_partition_get_flags(curr_part_data->caller_partition_idx);
 
-    if (!(running_partition_flags&SPM_PART_FLAG_SECURE))  {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT))  {
         /* This handler shouldn't be called from outside partition context.
          * Partitions are only allowed to run while S domain is locked.
          */
@@ -481,7 +482,7 @@ void tfm_core_validate_secure_caller_handler(uint32_t *svc_args)
     }
 
     /* Store return value in r0 */
-    if (caller_partition_flags&SPM_PART_FLAG_SECURE) {
+    if (caller_partition_flags & SPM_PART_FLAG_APP_ROT) {
         res = TFM_SUCCESS;
     }
     svc_args[0] = res;
@@ -555,7 +556,7 @@ void tfm_core_get_caller_client_id_handler(uint32_t *svc_args)
             tfm_spm_partition_get_runtime_data(running_partition_idx);
     int res = 0;
 
-    if (!(running_partition_flags&SPM_PART_FLAG_SECURE))  {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT))  {
         /* This handler shouldn't be called from outside partition context.
          * Partitions are only allowed to run while S domain is locked.
          */
@@ -599,7 +600,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     int32_t flags = 0;
     void *rangeptr;
 
-    if (!(running_partition_flags&SPM_PART_FLAG_SECURE) || (size == 0)) {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) || (size == 0)) {
         /* This handler should only be called from a secure partition. */
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -768,7 +769,7 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
      /* tfm_core_set_buffer_area() returns int32_t */
     int32_t *res_ptr = (int32_t *)&args[0];
 
-    if (!(running_partition_flags&SPM_PART_FLAG_SECURE)) {
+    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT)) {
         /* This handler should only be called from a secure partition. */
         *res_ptr = TFM_ERROR_INVALID_PARAMETER;
         return;
@@ -776,7 +777,7 @@ void tfm_core_set_buffer_area_handler(uint32_t *args)
 
     switch (args[0]) {
     case TFM_BUFFER_SHARE_DEFAULT:
-        share = (!(caller_partition_flags&SPM_PART_FLAG_SECURE)) ?
+        share = (!(caller_partition_flags & SPM_PART_FLAG_APP_ROT)) ?
             (TFM_BUFFER_SHARE_NS_CODE) : (TFM_BUFFER_SHARE_SCRATCH);
         break;
     case TFM_BUFFER_SHARE_SCRATCH:

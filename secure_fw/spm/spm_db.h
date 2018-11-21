@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,35 @@
 #ifndef __SPM_DB_H__
 #define __SPM_DB_H__
 
+#ifdef TFM_PSA_API
+#include "tfm_thread.h"
+#endif
+
+struct spm_partition_desc_t;
+struct spm_partition_db_t;
+
+uint32_t get_partition_idx(uint32_t partition_id);
+
 typedef int32_t(*sp_init_function)(void);
+
+#define TFM_PARTITION_TYPE_APP   "APPLICATION-ROT"
+#define TFM_PARTITION_TYPE_PSA   "PSA-ROT"
+
+#ifdef TFM_PSA_API
+enum tfm_partition_priority {
+    TFM_PRIORITY_LOW = THRD_PRIOR_LOWEST,
+    TFM_PRIORITY_NORMAL = THRD_PRIOR_MEDIUM,
+    TFM_PRIORITY_HIGH = THRD_PRIOR_HIGHEST,
+};
+#else
+enum tfm_partition_priority {
+    TFM_PRIORITY_LOW = 0xFF,
+    TFM_PRIORITY_NORMAL = 0x7F,
+    TFM_PRIORITY_HIGH = 0,
+};
+#endif
+
+#define TFM_PRIORITY(LEVEL)      TFM_PRIORITY_##LEVEL
 
 /**
  * Holds the fields of the partition DB used by the SPM code. The values of
@@ -18,6 +46,7 @@ typedef int32_t(*sp_init_function)(void);
 struct spm_partition_static_data_t {
     uint32_t partition_id;
     uint32_t partition_flags;
+    uint32_t partition_priority;
     sp_init_function partition_init;
 };
 

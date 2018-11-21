@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,8 +32,9 @@ enum spm_part_state_t {
 };
 
 enum spm_part_flag_mask_t {
-    SPM_PART_FLAG_SECURE  = 0x01,
-    SPM_PART_FLAG_TRUSTED = 0x02,
+    SPM_PART_FLAG_APP_ROT = 0x01,
+    SPM_PART_FLAG_PSA_ROT = 0x02,
+    SPM_PART_FLAG_IPC     = 0x04
 };
 
 /**
