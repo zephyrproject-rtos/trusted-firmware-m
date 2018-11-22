@@ -190,6 +190,8 @@ SECTIONS
         *dummy_nv_counters.o(.rodata*)
         *dummy_boot_seed.o(.text*)
         *dummy_boot_seed.o(.rodata*)
+        *dummy_device_id.o(.text*)
+        *dummy_device_id.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
         *(SFN)
@@ -412,6 +414,7 @@ SECTIONS
         */dummy_crypto_keys.o(.data*)
         */dummy_nv_counters.o(.data*)
         */dummy_boot_seed.o(.data*)
+        */dummy_device_id.o(.data*)
         */platform_retarget_dev.o(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
@@ -425,11 +428,13 @@ SECTIONS
         */dummy_crypto_keys.o(.bss*)
         */dummy_nv_counters.o(.bss*)
         */dummy_boot_seed.o(.bss*)
+        */dummy_device_id.o(.bss*)
         */tfm_spm_services.o(COMMON)
         */platform_retarget_dev.o(COMMON)
         */dummy_crypto_keys.o(COMMON)
         */dummy_nv_counters.o(COMMON)
         */dummy_boot_seed.o(COMMON)
+        */dummy_device_id.o(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);

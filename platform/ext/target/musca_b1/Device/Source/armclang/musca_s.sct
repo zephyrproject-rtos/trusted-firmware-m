@@ -61,6 +61,7 @@ LR_CODE S_CODE_START {
         dummy_crypto_keys.o (+RO)
         dummy_nv_counters.o (+RO)
         dummy_boot_seed.o (+RO)
+        dummy_device_id.o (+RO)
         platform_retarget_dev.o (+RO)
         *(SFN)
         *armlib*
@@ -141,6 +142,7 @@ LR_CODE S_CODE_START {
         dummy_crypto_keys.o (+RW +ZI)
         dummy_nv_counters.o (+RW +ZI)
         dummy_boot_seed.o (+RW +ZI)
+        dummy_device_id.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
     }
 
