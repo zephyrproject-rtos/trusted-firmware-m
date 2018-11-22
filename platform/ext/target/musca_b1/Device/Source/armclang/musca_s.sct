@@ -60,6 +60,7 @@ LR_CODE S_CODE_START {
         tfm_spm_services.o (+RO)
         dummy_crypto_keys.o (+RO)
         dummy_nv_counters.o (+RO)
+        dummy_boot_seed.o (+RO)
         platform_retarget_dev.o (+RO)
         *(SFN)
         *armlib*
@@ -139,6 +140,7 @@ LR_CODE S_CODE_START {
         tfm_spm_services.o (+RW +ZI)
         dummy_crypto_keys.o (+RW +ZI)
         dummy_nv_counters.o (+RW +ZI)
+        dummy_boot_seed.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
     }
 
