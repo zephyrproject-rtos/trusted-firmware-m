@@ -355,9 +355,12 @@ enum psa_sst_err_t sst_flash_fs_file_delete(uint32_t fid)
             return err;
         }
 
-        /* Check if the file is located in the same logical block */
-        if (file_meta.lblock == del_file_lblock) {
-            /* If an file is located after the data to delete, this
+        /* Check if the file is located in the same logical block and has a
+         * valid FID.
+         */
+        if ((file_meta.lblock == del_file_lblock) &&
+            (file_meta.id != SST_INVALID_FID)) {
+            /* If a file is located after the data to delete, this
              * needs to be moved.
              */
             if (file_meta.data_idx > del_file_data_idx) {
