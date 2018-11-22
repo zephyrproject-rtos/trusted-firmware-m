@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,10 +24,7 @@
 
 #include "psa_crypto.h"
 
-/* The file "psa_crypto_struct.h" contains definitions for
- * implementation-specific structs that are declared in "psa_crypto.h".
- */
-#include "psa_crypto_struct.h"
+#include "tfm_crypto_struct.h"
 
 /**
  * \brief This value defines the maximum number of simultaneous key stores

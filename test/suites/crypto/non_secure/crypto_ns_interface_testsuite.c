@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -199,14 +199,14 @@ static void psa_cipher_test(const psa_algorithm_t alg,
     }
 
     /* Setup the encryption object */
-    status = psa_encrypt_setup(&handle, slot, alg);
+    status = psa_cipher_encrypt_setup(&handle, slot, alg);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting up cipher operation object");
         return;
     }
 
     /* Set the IV */
-    status = psa_encrypt_set_iv(&handle, iv, iv_length);
+    status = psa_cipher_set_iv(&handle, iv, iv_length);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV on the cypher operation object");
         return;
@@ -245,9 +245,9 @@ static void psa_cipher_test(const psa_algorithm_t alg,
     /* Setup the decryption object */
     if (alg == PSA_ALG_CFB_BASE) {
         /* In CFB mode the object is always in encryption mode */
-        status = psa_encrypt_setup(&handle_dec, slot, alg);
+        status = psa_cipher_encrypt_setup(&handle_dec, slot, alg);
     } else {
-        status = psa_decrypt_setup(&handle_dec, slot, alg);
+        status = psa_cipher_decrypt_setup(&handle_dec, slot, alg);
     }
 
     if (status != PSA_SUCCESS) {
@@ -260,7 +260,7 @@ static void psa_cipher_test(const psa_algorithm_t alg,
         /*  In CFB mode the object is in encryption mode, so follow the
          *  encryption flow.
          */
-        status = psa_encrypt_set_iv(&handle_dec, iv, iv_length);
+        status = psa_cipher_set_iv(&handle_dec, iv, iv_length);
     } else {
         status = psa_cipher_update(&handle_dec, iv, iv_length,
                                    encrypted_data, ENC_DEC_BUFFER_SIZE,
@@ -414,7 +414,7 @@ static void psa_hash_test(const psa_algorithm_t alg,
     psa_hash_operation_t handle;
 
     /* Setup the hash object for the desired hash*/
-    status = psa_hash_start(&handle, alg);
+    status = psa_hash_setup(&handle, alg);
 
     if (status != PSA_SUCCESS) {
         if (status == PSA_ERROR_NOT_SUPPORTED) {

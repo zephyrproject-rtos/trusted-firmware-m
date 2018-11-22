@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -50,25 +50,25 @@
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_CRYPTO_ENCRYPT_SET_IV_SFID",
-      "signal": "TFM_CRYPTO_ENCRYPT_SET_IV",
-      "tfm_symbol": "tfm_crypto_encrypt_set_iv",
+      "sfid": "TFM_CRYPTO_CIPHER_SET_IV_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_SET_IV",
+      "tfm_symbol": "tfm_crypto_cipher_set_iv",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_CRYPTO_ENCRYPT_SETUP_SFID",
-      "signal": "TFM_CRYPTO_ENCRYPT_SETUP",
-      "tfm_symbol": "tfm_crypto_encrypt_setup",
+      "sfid": "TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_ENCRYPT_SETUP",
+      "tfm_symbol": "tfm_crypto_cipher_encrypt_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_CRYPTO_DECRYPT_SETUP_SFID",
-      "signal": "TFM_CRYPTO_DECRYPT_SETUP",
-      "tfm_symbol": "tfm_crypto_decrypt_setup",
+      "sfid": "TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID",
+      "signal": "TFM_CRYPTO_CIPHER_DECRYPT_SETUP",
+      "tfm_symbol": "tfm_crypto_cipher_decrypt_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -98,9 +98,9 @@
       "minor_policy": "strict"
     },
     {
-      "sfid": "TFM_CRYPTO_HASH_START_SFID",
-      "signal": "TFM_CRYPTO_HASH_START",
-      "tfm_symbol": "tfm_crypto_hash_start",
+      "sfid": "TFM_CRYPTO_HASH_SETUP_SFID",
+      "signal": "TFM_CRYPTO_HASH_SETUP",
+      "tfm_symbol": "tfm_crypto_hash_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"

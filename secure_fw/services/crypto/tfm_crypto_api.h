@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -72,7 +72,7 @@ enum tfm_crypto_err_t tfm_crypto_operation_release(uint32_t *handle);
  */
 enum tfm_crypto_err_t tfm_crypto_operation_lookup(
                                         enum tfm_crypto_operation_type type,
-                                        uint32_t *handle,
+                                        uint32_t handle,
                                         void **oper);
 /**
  * \brief Import the key data in the provided key slot
@@ -148,7 +148,7 @@ enum tfm_crypto_err_t tfm_crypto_export_public_key(psa_key_slot_t key,
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_encrypt_set_iv(
+enum tfm_crypto_err_t tfm_crypto_cipher_set_iv(
                                               psa_cipher_operation_t *operation,
                                               const unsigned char *iv,
                                               size_t iv_length);
@@ -162,7 +162,7 @@ enum tfm_crypto_err_t tfm_crypto_encrypt_set_iv(
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_encrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_cipher_encrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg);
@@ -176,7 +176,7 @@ enum tfm_crypto_err_t tfm_crypto_encrypt_setup(
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_decrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_cipher_decrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg);
@@ -235,7 +235,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_abort(
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_hash_start(psa_hash_operation_t *operation,
+enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
                                             psa_algorithm_t alg);
 /**
  * \brief Adds a new input chunk to the data for which the final hash value

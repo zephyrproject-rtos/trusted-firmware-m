@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -78,7 +78,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_export_key(psa_key_slot_t key,
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_set_iv(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_set_iv(
                                               psa_cipher_operation_t *operation,
                                               const unsigned char *iv,
                                               size_t iv_length);
@@ -92,7 +92,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_set_iv(
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_encrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg);
@@ -106,7 +106,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_setup(
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_veneer_decrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_decrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg);
@@ -154,14 +154,14 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_finish(
                                               size_t output_size,
                                               size_t *output_length);
 /**
- * \brief Starts a hash operation with the provided algorithm (veneer function)
+ * \brief Setup a hash operation with the provided algorithm (veneer function)
  *
  * \param[in] operation Hash operation context
  * \param[in] alg       Algorithm chosen as hash
  *
  * \return Returns values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_veneer_hash_start(
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_setup(
                                                 psa_hash_operation_t *operation,
                                                 psa_algorithm_t alg);
 /**

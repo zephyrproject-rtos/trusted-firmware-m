@@ -1,40 +1,35 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
 /**
  * \file psa_crypto_extra.h
  *
  * \brief PSA cryptography module: vendor extensions
+ *
+ * \note This file may not be included directly. Applications must
+ * include psa_crypto.h.
+ *
+ * This file is reserved for vendor-specific definitions.
  */
 
-#ifndef __PSA_CRYPTO_EXTRA_H__
-#define __PSA_CRYPTO_EXTRA_H__
+/**
+ *\note This implementation currently doesn't provide support to any
+ *      vendor-specific extension or definition, so this header file
+ *      is empty.
+ */
+
+#ifndef PSA_CRYPTO_EXTRA_H
+#define PSA_CRYPTO_EXTRA_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * \note This file is meant to be included by psa_crypto.h only
- *
- */
-
-/**
- * \brief Library deinitialization.
- *
- * This function clears all data associated with the PSA layer,
- * including the whole key store.
- *
- * This is an Mbed TLS extension.
- */
-void mbedtls_psa_crypto_free(void);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __PSA_CRYPTO_EXTRA_H__ */
+#endif /* PSA_CRYPTO_EXTRA_H */

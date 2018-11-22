@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -54,32 +54,32 @@ enum tfm_crypto_err_t tfm_crypto_veneer_export_key(psa_key_slot_t key,
 
 
 __tfm_secure_gateway_attributes__
-enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_set_iv(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_set_iv(
                                               psa_cipher_operation_t *operation,
                                               const unsigned char *iv,
                                               size_t iv_length)
 {
-    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_encrypt_set_iv,
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_cipher_set_iv,
                          operation, iv, iv_length, 0);
 }
 
 __tfm_secure_gateway_attributes__
-enum tfm_crypto_err_t tfm_crypto_veneer_encrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_encrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg)
 {
-    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_encrypt_setup,
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_cipher_encrypt_setup,
                          operation, key, alg, 0);
 }
 
 __tfm_secure_gateway_attributes__
-enum tfm_crypto_err_t tfm_crypto_veneer_decrypt_setup(
+enum tfm_crypto_err_t tfm_crypto_veneer_cipher_decrypt_setup(
                                               psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg)
 {
-    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_decrypt_setup,
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_cipher_decrypt_setup,
                          operation, key, alg, 0);
 }
 
@@ -113,11 +113,11 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_finish(
 }
 
 __tfm_secure_gateway_attributes__
-enum tfm_crypto_err_t tfm_crypto_veneer_hash_start(
+enum tfm_crypto_err_t tfm_crypto_veneer_hash_setup(
                                                 psa_hash_operation_t *operation,
                                                 psa_algorithm_t alg)
 {
-    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_start,
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_hash_setup,
                          operation, alg, 0, 0);
 }
 

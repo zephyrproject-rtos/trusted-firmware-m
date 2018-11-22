@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,13 +31,13 @@
     {tfm_crypto_destroy_key, TFM_CRYPTO_DESTROY_KEY_SFID},
     {tfm_crypto_get_key_information, TFM_CRYPTO_GET_KEY_INFORMATION_SFID},
     {tfm_crypto_export_key, TFM_CRYPTO_EXPORT_KEY_SFID},
-    {tfm_crypto_encrypt_set_iv, TFM_CRYPTO_ENCRYPT_SET_IV_SFID},
-    {tfm_crypto_encrypt_setup, TFM_CRYPTO_ENCRYPT_SETUP_SFID},
-    {tfm_crypto_decrypt_setup, TFM_CRYPTO_DECRYPT_SETUP_SFID},
+    {tfm_crypto_cipher_set_iv, TFM_CRYPTO_CIPHER_SET_IV_SFID},
+    {tfm_crypto_cipher_encrypt_setup, TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID},
+    {tfm_crypto_cipher_decrypt_setup, TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID},
     {tfm_crypto_cipher_update_wrapper, TFM_CRYPTO_CIPHER_UPDATE_SFID},
     {tfm_crypto_cipher_abort, TFM_CRYPTO_CIPHER_ABORT_SFID},
     {tfm_crypto_cipher_finish, TFM_CRYPTO_CIPHER_FINISH_SFID},
-    {tfm_crypto_hash_start, TFM_CRYPTO_HASH_START_SFID},
+    {tfm_crypto_hash_setup, TFM_CRYPTO_HASH_SETUP_SFID},
     {tfm_crypto_hash_update, TFM_CRYPTO_HASH_UPDATE_SFID},
     {tfm_crypto_hash_finish, TFM_CRYPTO_HASH_FINISH_SFID},
     {tfm_crypto_hash_verify, TFM_CRYPTO_HASH_VERIFY_SFID},

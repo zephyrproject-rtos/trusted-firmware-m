@@ -37,13 +37,13 @@ psa_status_t tfm_tfm_crypto_import_key_veneer(struct psa_invec *in_vec, size_t i
 psa_status_t tfm_tfm_crypto_destroy_key_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_information_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_export_key_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_encrypt_set_iv_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_encrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_decrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_cipher_set_iv_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_cipher_encrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_cipher_decrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_update_wrapper_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_abort_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_finish_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_hash_start_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_hash_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_update_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_finish_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_verify_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);

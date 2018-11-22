@@ -32,13 +32,13 @@ psa_status_t tfm_crypto_import_key(struct psa_invec *, size_t, struct psa_outvec
 psa_status_t tfm_crypto_destroy_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_information(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_export_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_encrypt_set_iv(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_encrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_decrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_set_iv(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_encrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_decrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_update_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_start(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_update(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_verify(struct psa_invec *, size_t, struct psa_outvec *, size_t);
@@ -112,13 +112,13 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_key)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_encrypt_set_iv)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_encrypt_setup)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_decrypt_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_set_iv)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_encrypt_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_decrypt_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_update_wrapper)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_abort)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_finish)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_start)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_verify)

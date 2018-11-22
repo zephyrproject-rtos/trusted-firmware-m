@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -87,13 +87,13 @@ psa_status_t psa_export_public_key(psa_key_slot_t key,
     return PSA_ERROR_NOT_SUPPORTED;
 }
 
-psa_status_t psa_encrypt_set_iv(psa_cipher_operation_t *operation,
-                                const unsigned char *iv,
-                                size_t iv_length)
+psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
+                               const unsigned char *iv,
+                               size_t iv_length)
 {
     enum tfm_crypto_err_t err;
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_encrypt_set_iv,
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_cipher_set_iv,
                                (uint32_t)operation,
                                (uint32_t)iv,
                                (uint32_t)iv_length,
@@ -102,32 +102,34 @@ psa_status_t psa_encrypt_set_iv(psa_cipher_operation_t *operation,
     return TFM_CRYPTO_PSA_RETURN(err);
 }
 
-psa_status_t psa_encrypt_setup(psa_cipher_operation_t *operation,
-                               psa_key_slot_t key,
-                               psa_algorithm_t alg)
+psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
+                                      psa_key_slot_t key,
+                                      psa_algorithm_t alg)
 {
     enum tfm_crypto_err_t err;
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_encrypt_setup,
-                               (uint32_t)operation,
-                               (uint32_t)key,
-                               (uint32_t)alg,
-                               0);
+    err = tfm_ns_lock_dispatch(
+                              (veneer_fn)tfm_crypto_veneer_cipher_encrypt_setup,
+                              (uint32_t)operation,
+                              (uint32_t)key,
+                              (uint32_t)alg,
+                              0);
 
     return TFM_CRYPTO_PSA_RETURN(err);
 }
 
-psa_status_t psa_decrypt_setup(psa_cipher_operation_t *operation,
-                               psa_key_slot_t key,
-                               psa_algorithm_t alg)
+psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
+                                      psa_key_slot_t key,
+                                      psa_algorithm_t alg)
 {
     enum tfm_crypto_err_t err;
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_decrypt_setup,
-                               (uint32_t)operation,
-                               (uint32_t)key,
-                               (uint32_t)alg,
-                               0);
+    err = tfm_ns_lock_dispatch(
+                              (veneer_fn)tfm_crypto_veneer_cipher_decrypt_setup,
+                              (uint32_t)operation,
+                              (uint32_t)key,
+                              (uint32_t)alg,
+                              0);
 
     return TFM_CRYPTO_PSA_RETURN(err);
 }
@@ -189,12 +191,12 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
     return TFM_CRYPTO_PSA_RETURN(err);
 }
 
-psa_status_t psa_hash_start(psa_hash_operation_t *operation,
+psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
                             psa_algorithm_t alg)
 {
     enum tfm_crypto_err_t err;
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_start,
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_setup,
                                (uint32_t)operation,
                                (uint32_t)alg,
                                0,

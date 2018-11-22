@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,10 +24,7 @@
 
 #include "psa_crypto.h"
 
-/* The file "psa_crypto_struct.h" contains definitions for
- * implementation-specific structs that are declared in "psa_crypto.h".
- */
-#include "psa_crypto_struct.h"
+#include "tfm_crypto_struct.h"
 
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
@@ -43,7 +40,7 @@ enum tfm_crypto_cipher_mode_t {
 };
 
 static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
-                                           psa_cipher_operation_t *handle,
+                                           psa_cipher_operation_t *operation,
                                            psa_key_slot_t key,
                                            psa_algorithm_t alg,
                                            enum tfm_crypto_cipher_mode_t c_mode)
@@ -58,10 +55,10 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     mbedtls_cipher_type_t type = MBEDTLS_CIPHER_NONE;
     mbedtls_cipher_padding_t mbedtls_padding_mode = MBEDTLS_PADDING_NONE;
 
-    struct psa_cipher_operation_s *operation = NULL;
+    struct tfm_cipher_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_cipher_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -101,65 +98,63 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     }
 
     /* Allocate the operation context in the TFM space */
-    err = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION, handle);
+    err = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,
+                                     &(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
-
-
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* Bind the algorithm to the cipher operation */
-    operation->alg = alg;
+    ctx->alg = alg;
 
     /* Mbed TLS cipher init */
-    mbedtls_cipher_init(&(operation->ctx.cipher));
+    mbedtls_cipher_init(&(ctx->cipher));
     info = mbedtls_cipher_info_from_type(type);
-    ret = mbedtls_cipher_setup(&(operation->ctx.cipher), info);
+    ret = mbedtls_cipher_setup(&(ctx->cipher), info);
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     /* FIXME: Check based on the algorithm, if we need to have an IV */
-    operation->iv_required = 1;
+    ctx->iv_required = 1;
 
     /* Bind the key to the cipher operation */
-    operation->key = key;
-    operation->key_set = 1;
+    ctx->key = key;
+    ctx->key_set = 1;
 
     /* Mbed TLS cipher set key */
     if (c_mode == TFM_CRYPTO_CIPHER_MODE_ENCRYPT) {
 
-        ret = mbedtls_cipher_setkey(&(operation->ctx.cipher),
+        ret = mbedtls_cipher_setkey(&(ctx->cipher),
                                     &key_data[0],
                                     PSA_BYTES_TO_BITS(key_size),
                                     MBEDTLS_ENCRYPT);
 
     } else if (c_mode == TFM_CRYPTO_CIPHER_MODE_DECRYPT) {
 
-        ret = mbedtls_cipher_setkey(&(operation->ctx.cipher),
+        ret = mbedtls_cipher_setkey(&(ctx->cipher),
                                     &key_data[0],
                                     PSA_BYTES_TO_BITS(key_size),
                                     MBEDTLS_DECRYPT);
     } else {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
@@ -180,11 +175,11 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
             return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        ret = mbedtls_cipher_set_padding_mode(&(operation->ctx.cipher),
+        ret = mbedtls_cipher_set_padding_mode(&(ctx->cipher),
                                               mbedtls_padding_mode);
         if (ret != 0) {
             /* Release the operation context */
-            tfm_crypto_operation_release(handle);
+            tfm_crypto_operation_release(&(operation->handle));
             return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
         }
     }
@@ -198,17 +193,17 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
  */
 
 /*!@{*/
-enum tfm_crypto_err_t tfm_crypto_encrypt_set_iv(
-                                              psa_cipher_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_cipher_set_iv(
+                                              psa_cipher_operation_t *operation,
                                               const unsigned char *iv,
                                               size_t iv_length)
 {
     int ret;
     enum tfm_crypto_err_t err;
-    struct psa_cipher_operation_s *operation = NULL;
+    struct tfm_cipher_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_cipher_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -221,70 +216,69 @@ enum tfm_crypto_err_t tfm_crypto_encrypt_set_iv(
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
-    if (operation->iv_required == 0) {
+    if (ctx->iv_required == 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
     }
 
     if (iv_length > PSA_CIPHER_IV_MAX_SIZE) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
     /* Bind the IV to the cipher operation */
-    ret = mbedtls_cipher_set_iv(&(operation->ctx.cipher), iv, iv_length);
+    ret = mbedtls_cipher_set_iv(&(ctx->cipher), iv, iv_length);
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
-    operation->iv_set = 1;
-    operation->iv_size = iv_length;
+    ctx->iv_set = 1;
+    ctx->iv_size = iv_length;
 
     /* Reset the context after IV is set */
-    ret = mbedtls_cipher_reset(&(operation->ctx.cipher));
+    ret = mbedtls_cipher_reset(&(ctx->cipher));
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_encrypt_setup(
-                                              psa_cipher_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_cipher_encrypt_setup(
+                                              psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg)
 {
-    return tfm_crypto_cipher_setup(handle,
+    return tfm_crypto_cipher_setup(operation,
                                    key,
                                    alg,
                                    TFM_CRYPTO_CIPHER_MODE_ENCRYPT);
 }
 
-enum tfm_crypto_err_t tfm_crypto_decrypt_setup(
-                                              psa_cipher_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_cipher_decrypt_setup(
+                                              psa_cipher_operation_t *operation,
                                               psa_key_slot_t key,
                                               psa_algorithm_t alg)
 {
-    return tfm_crypto_cipher_setup(handle,
+    return tfm_crypto_cipher_setup(operation,
                                    key,
                                    alg,
                                    TFM_CRYPTO_CIPHER_MODE_DECRYPT);
 }
 
 enum tfm_crypto_err_t tfm_crypto_cipher_update(
-                                              psa_cipher_operation_t *handle,
+                                              psa_cipher_operation_t *operation,
                                               const uint8_t *input,
                                               size_t input_length,
                                               unsigned char *output,
@@ -294,10 +288,10 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
     int ret;
     enum tfm_crypto_err_t err;
     size_t olen;
-    struct psa_cipher_operation_s *operation = NULL;
+    struct tfm_cipher_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_cipher_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -324,24 +318,23 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* If the IV is required and it's not been set yet */
-    if ((operation->iv_required == 1) && (operation->iv_set == 0)) {
+    if ((ctx->iv_required == 1) && (ctx->iv_set == 0)) {
 
-        if (operation->ctx.cipher.operation != MBEDTLS_DECRYPT) {
+        if (ctx->cipher.operation != MBEDTLS_DECRYPT) {
             /* Release the operation context */
-            tfm_crypto_operation_release(handle);
+            tfm_crypto_operation_release(&(operation->handle));
             return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
         }
 
         /* This call is used to set the IV on the object */
-        err = tfm_crypto_encrypt_set_iv(handle, input, input_length);
+        err = tfm_crypto_cipher_set_iv(operation, input, input_length);
 
         *output_length = 0;
 
@@ -349,20 +342,19 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
     }
 
     /* If the key is not set, setup phase has not been completed */
-    if (operation->key_set == 0) {
+    if (ctx->key_set == 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
     *output_length = 0;
 
-    ret = mbedtls_cipher_update(&(operation->ctx.cipher), input, input_length,
+    ret = mbedtls_cipher_update(&(ctx->cipher), input, input_length,
                                 output, &olen);
-
     if ((ret != 0) || (olen == 0)) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
@@ -373,7 +365,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
 }
 
 enum tfm_crypto_err_t tfm_crypto_cipher_finish(
-                                              psa_cipher_operation_t *handle,
+                                              psa_cipher_operation_t *operation,
                                               uint8_t *output,
                                               size_t output_size,
                                               size_t *output_length)
@@ -381,10 +373,10 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
     int ret;
     enum tfm_crypto_err_t err;
     size_t olen;
-    struct psa_cipher_operation_s *operation = NULL;
+    struct tfm_cipher_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_cipher_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -407,27 +399,26 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
-    ret = mbedtls_cipher_finish(&(operation->ctx.cipher), output, &olen);
+    ret = mbedtls_cipher_finish(&(ctx->cipher), output, &olen);
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     *output_length = olen;
 
     /* Clear the Mbed TLS context */
-    mbedtls_cipher_free(&(operation->ctx.cipher));
+    mbedtls_cipher_free(&(ctx->cipher));
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(handle);
+    err = tfm_crypto_operation_release(&(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
@@ -435,13 +426,13 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_cipher_abort(psa_cipher_operation_t *handle)
+enum tfm_crypto_err_t tfm_crypto_cipher_abort(psa_cipher_operation_t *operation)
 {
     enum tfm_crypto_err_t err;
-    struct psa_cipher_operation_s *operation = NULL;
+    struct tfm_cipher_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_cipher_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -450,18 +441,17 @@ enum tfm_crypto_err_t tfm_crypto_cipher_abort(psa_cipher_operation_t *handle)
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* Clear the Mbed TLS context */
-    mbedtls_cipher_free(&(operation->ctx.cipher));
+    mbedtls_cipher_free(&(ctx->cipher));
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(handle);
+    err = tfm_crypto_operation_release(&(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }

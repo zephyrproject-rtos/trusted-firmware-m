@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,9 +23,7 @@
 
 #include "psa_crypto.h"
 
-/* The file "psa_crypto_struct.h" contains definitions for
- * implementation-specific structs that are declared in "psa_crypto.h". */
-#include "psa_crypto_struct.h"
+#include "tfm_crypto_struct.h"
 
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
@@ -36,7 +34,7 @@
  */
 
 /*!@{*/
-enum tfm_crypto_err_t tfm_crypto_hash_start(psa_hash_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
                                             psa_algorithm_t alg)
 {
     int ret;
@@ -44,10 +42,10 @@ enum tfm_crypto_err_t tfm_crypto_hash_start(psa_hash_operation_t *handle,
     const mbedtls_md_info_t *info = NULL;
     mbedtls_md_type_t type = MBEDTLS_MD_NONE;
 
-    struct psa_hash_operation_s *operation = NULL;
+    struct tfm_hash_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_hash_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -118,57 +116,57 @@ enum tfm_crypto_err_t tfm_crypto_hash_start(psa_hash_operation_t *handle,
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
-    /* Allocate the operation context in the TFM space */
-    err = tfm_crypto_operation_alloc(TFM_CRYPTO_HASH_OPERATION, handle);
+    /* Allocate the operation context in the Secure world */
+    err = tfm_crypto_operation_alloc(TFM_CRYPTO_HASH_OPERATION,
+                                     &(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return err;
     }
 
-    /* Bind the algorithm to the hash operation */
-    operation->alg = alg;
+    /* Bind the algorithm to the hash context */
+    ctx->alg = alg;
 
     /* Mbed TLS message digest init */
-    mbedtls_md_init(&operation->ctx.md);
+    mbedtls_md_init(&ctx->md);
     info = mbedtls_md_info_from_type(type);
-    ret = mbedtls_md_setup(&(operation->ctx.md), info, 0); /* 0: not HMAC */
+    ret = mbedtls_md_setup(&(ctx->md), info, 0); /* 0: not HMAC */
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     /* Start the message digest context */
-    ret = mbedtls_md_starts(&(operation->ctx.md));
+    ret = mbedtls_md_starts(&(ctx->md));
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
                                              const uint8_t *input,
                                              size_t input_length)
 {
     int ret;
     enum tfm_crypto_err_t err;
-    struct psa_hash_operation_s *operation = NULL;
+    struct tfm_hash_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_hash_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -183,43 +181,42 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *handle,
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* Process the input chunk */
-    ret = mbedtls_md_update(&(operation->ctx.md), input, input_length);
+    ret = mbedtls_md_update(&(ctx->md), input, input_length);
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
                                              uint8_t *hash,
                                              size_t hash_size,
                                              size_t *hash_length)
 {
     int ret;
     enum tfm_crypto_err_t err;
-    struct psa_hash_operation_s *operation = NULL;
+    struct tfm_hash_operation_s *ctx = NULL;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_hash_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
-    err = tfm_crypto_memory_check((void *)hash,
+    err = tfm_crypto_memory_check(hash,
                                   hash_size,
-                                  TFM_MEMORY_ACCESS_RO);
+                                  TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -232,35 +229,34 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *handle,
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
-    if (hash_size < PSA_HASH_SIZE(operation->alg)) {
+    if (hash_size < PSA_HASH_SIZE(ctx->alg)) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     /* Finalise the hash value */
-    ret = mbedtls_md_finish(&(operation->ctx.md), hash);
+    ret = mbedtls_md_finish(&(ctx->md), hash);
     if (ret != 0) {
         /* Release the operation context */
-        tfm_crypto_operation_release(handle);
+        tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE;
     }
 
     /* Set the length of the hash that has been produced */
-    *hash_length = PSA_HASH_SIZE(operation->alg);
+    *hash_length = PSA_HASH_SIZE(ctx->alg);
 
     /* Clear the Mbed TLS message digest context */
-    mbedtls_md_free(&(operation->ctx.md));
+    mbedtls_md_free(&(ctx->md));
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(handle);
+    err = tfm_crypto_operation_release(&(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
@@ -268,7 +264,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *handle,
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *handle,
+enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
                                              const uint8_t *hash,
                                              size_t hash_length)
 {
@@ -278,7 +274,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *handle,
     uint32_t idx, comp_mismatch = 0;
 
     /* Validate pointers */
-    err = tfm_crypto_memory_check(handle,
+    err = tfm_crypto_memory_check(operation,
                                   sizeof(psa_hash_operation_t),
                                   TFM_MEMORY_ACCESS_RW);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
@@ -286,7 +282,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *handle,
     }
 
     /* Finalise the hash operation */
-    err = tfm_crypto_hash_finish(handle,
+    err = tfm_crypto_hash_finish(operation,
                                  digest,
                                  PSA_HASH_MAX_SIZE,
                                  &digest_length);
@@ -309,25 +305,32 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *handle,
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *handle)
+enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
 {
     enum tfm_crypto_err_t err;
-    struct psa_hash_operation_s *operation = NULL;
+    struct tfm_hash_operation_s *ctx = NULL;
+
+    /* Validate pointers */
+    err = tfm_crypto_memory_check(operation,
+                                  sizeof(psa_hash_operation_t),
+                                  TFM_MEMORY_ACCESS_RW);
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      handle,
-                                      (void **)&operation);
-
+                                      operation->handle,
+                                      (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
 
     /* Clear the Mbed TLS message digest context */
-    mbedtls_md_free(&(operation->ctx.md));
+    mbedtls_md_free(&(ctx->md));
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(handle);
+    err = tfm_crypto_operation_release(&(operation->handle));
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
