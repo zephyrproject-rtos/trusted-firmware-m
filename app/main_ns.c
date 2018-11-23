@@ -31,6 +31,12 @@ extern ARM_DRIVER_USART NS_DRIVER_STDIO;
  * \details RTX has a weak definition of osRtxUserSVC, which
  *          is overridden here
  */
+#if (defined(__ARMCC_VERSION) && (__ARMCC_VERSION == 6110004))
+/* Workaround needed for a bug in Armclang 6.11, more details at:
+ * http://www.keil.com/support/docs/4089.htm
+ */
+__attribute__((section(".gnu.linkonce")))
+#endif
 extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
        void * const osRtxUserSVC[1+USER_SVC_COUNT] = {
   (void *)USER_SVC_COUNT,

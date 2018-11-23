@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,15 +11,13 @@
 Include(Common/CompilerArmClangCommon)
 Include(Common/Utils)
 
-check_armclang_input_vars("6.7")
+check_armclang_input_vars("6.11")
 
 if(NOT DEFINED ARM_CPU_ARCHITECTURE)
 	set(_NO_ARM_CPU_ARCHITECTURE true)
 elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.BASE")
 	string_append_unique_item(STRING CMAKE_C_FLAGS_CPU KEY "--target=" VAL "--target=arm-arm-none-eabi")
 	string_append_unique_item(STRING CMAKE_C_FLAGS_CPU KEY "-march=" VAL "-march=armv8-m.base")
-	#following is to work around an armclang compiler bug that is fixed in 6.10
-	string_append_unique_item(STRING CMAKE_C_FLAGS KEY "-fno-optimize-sibling-calls" VAL "-fno-optimize-sibling-calls")
 	string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "--target=" VAL "--target=arm-arm-none-eabi")
 	string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "-march=" VAL "-march=armv8-m.base")
 	string_append_unique_item(STRING CMAKE_ASM_FLAGS_CPU KEY "--cpu=" VAL "--cpu=8-M.Base")
@@ -57,10 +55,8 @@ if(NOT DEFINED ARM_CPU_ARCHITECTURE)
 		string_append_unique_item (CMAKE_ASM_FLAGS_CPU "--cpu=Cortex-M33")
 		string_append_unique_item (CMAKE_LINK_FLAGS_CPU "--cpu=Cortex-M33")
 	elseif(${ARM_CPU_TYPE} STREQUAL "Cortex-M23")
-		#-fno-optimize-sibling-calls is here to work around an armclang compiler
-		#bug that is fixed in 6.10
-		string_append_unique_item (CMAKE_C_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23 -fno-optimize-sibling-calls")
-		string_append_unique_item (CMAKE_CXX_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23 -fno-optimize-sibling-calls")
+		string_append_unique_item (CMAKE_C_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23")
+		string_append_unique_item (CMAKE_CXX_FLAGS_CPU "--target=arm-arm-none-eabi -mcpu=cortex-m23")
 		string_append_unique_item (CMAKE_ASM_FLAGS_CPU "--cpu=Cortex-M23")
 		string_append_unique_item (CMAKE_LINK_FLAGS_CPU "--cpu=Cortex-M23")
 	else()

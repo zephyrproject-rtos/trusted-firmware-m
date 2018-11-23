@@ -26,8 +26,8 @@ function(check_armclang_input_vars MY_VERSION)
 		message(WARNING "ARM_TOOL_VARIANT or ARM_PRODUCT_PATH environment variables are not set!")
 	endif()
 
-	if (NOT DEFINED ARM_CPU_ARHITECTURE AND NOT DEFINED ARM_CPU_TYPE)
-		message(FATAL_ERROR "ARM_CPU_TYPE and ARM_CPU_ARHITECTURE is not defined! Please include the CPU specific config file before this one.")
+	if (NOT DEFINED ARM_CPU_ARCHITECTURE AND NOT DEFINED ARM_CPU_TYPE)
+		message(FATAL_ERROR "ARM_CPU_TYPE and ARM_CPU_ARCHITECTURE is not defined! Please include the CPU specific config file before this one.")
 	endif()
 
 endfunction()

@@ -21,8 +21,8 @@ function(check_gnuarm_input_vars MY_VERSION)
 		message(FATAL_ERROR "GNUARM version (GNUARM_VER=${GNUARM_VER}) does not match ${MY_VERSION}")
 	endif()
 
-	if (NOT DEFINED ARM_CPU_ARHITECTURE AND NOT DEFINED ARM_CPU_TYPE)
-		message(FATAL_ERROR "ARM_CPU_TYPE and ARM_CPU_ARHITECTURE is not defined! Please include the CPU specific config file before this one.")
+	if (NOT DEFINED ARM_CPU_ARCHITECTURE AND NOT DEFINED ARM_CPU_TYPE)
+		message(FATAL_ERROR "ARM_CPU_TYPE and ARM_CPU_ARCHITECTURE is not defined! Please include the CPU specific config file before this one.")
 	endif()
 
 endfunction()
