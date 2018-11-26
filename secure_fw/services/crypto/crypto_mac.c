@@ -60,6 +60,7 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
     uint8_t ipad[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
     uint8_t *opad = ctx->ctx.hmac.opad;
     size_t i;
+    psa_key_usage_t usage;
 
     /* Check provided key */
     err = tfm_crypto_get_key_information(key, &key_type, &key_size);
@@ -71,11 +72,22 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
+    /* Set the key usage based on whether this is a sign or verify operation */
+    if ((ctx->key_usage_sign == 1) && (ctx->key_usage_verify == 0)) {
+        usage = PSA_KEY_USAGE_SIGN;
+    } else if ((ctx->key_usage_sign == 0) && (ctx->key_usage_verify == 1)) {
+        usage = PSA_KEY_USAGE_VERIFY;
+    } else {
+        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+    }
+
     /* Get the key data to start the HMAC */
-    err = tfm_crypto_export_key(key,
-                                &key_data[0],
-                                TFM_CRYPTO_MAX_KEY_LENGTH,
-                                &key_size);
+    err = tfm_crypto_get_key(key,
+                             usage,
+                             alg,
+                             key_data,
+                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }

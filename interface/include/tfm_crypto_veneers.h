@@ -68,6 +68,106 @@ enum tfm_crypto_err_t tfm_crypto_veneer_export_key(psa_key_slot_t key,
                                                    uint8_t *data,
                                                    size_t data_size,
                                                    size_t *data_length);
+
+/**
+ * \brief Initialise the key policy to a default that forbids any use of the
+ *        key (veneer function)
+ *
+ * \param[out] policy  Key policy to initialise
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_init(
+                                                      psa_key_policy_t *policy);
+
+/**
+ * \brief Set the permitted usage and algorithm for the provided key policy
+ *        (veneer function)
+ *
+ * \param[out] policy  Key policy to modify
+ * \param[in]  usage   Permitted usage
+ * \param[in]  alg     Permitted algorithm
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_set_usage(
+                                                       psa_key_policy_t *policy,
+                                                       psa_key_usage_t usage,
+                                                       psa_algorithm_t alg);
+
+/**
+ * \brief Get the permitted usage for the provided key policy (veneer function)
+ *
+ * \param[in]  policy  Key policy
+ * \param[out] usage   Permitted usage for this key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_get_usage(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_key_usage_t *usage);
+
+/**
+ * \brief Get the permitted algorithm for the provided key policy
+ *        (veneer function)
+ *
+ * \param[in]  policy  Key policy
+ * \param[out] alg     Permitted algorithm for this key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_get_algorithm(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_algorithm_t *alg);
+
+/**
+ * \brief Set the key policy for the provided key slot (veneer function)
+ *
+ * \param[in] key     Key slot
+ * \param[in] policy  Key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_set_key_policy(
+                                                psa_key_slot_t key,
+                                                const psa_key_policy_t *policy);
+
+/**
+ * \brief Get the key policy for the provided key slot (veneer function)
+ *
+ * \param[in]  key     Key slot
+ * \param[out] policy  Key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_get_key_policy(
+                                                      psa_key_slot_t key,
+                                                      psa_key_policy_t *policy);
+
+/**
+ * \brief Set the lifetime for the provided key slot (veneer function)
+ *
+ * \param[in] key       Key slot
+ * \param[in] lifetime  Lifetime value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_set_key_lifetime(
+                                                   psa_key_slot_t key,
+                                                   psa_key_lifetime_t lifetime);
+
+/**
+ * \brief Get the lifetime for the provided key slot (veneer function)
+ *
+ * \param[in]  key       Key slot
+ * \param[out] lifetime  Lifetime value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_veneer_get_key_lifetime(
+                                                  psa_key_slot_t key,
+                                                  psa_key_lifetime_t *lifetime);
+
 /**
  * \brief Set the initialisation vector on the provided cipher operation (veneer
  *        function)

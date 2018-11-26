@@ -44,7 +44,8 @@ static void tfm_crypto_test_6021(struct test_result_t *ret);
 static void tfm_crypto_test_6022(struct test_result_t *ret);
 static void tfm_crypto_test_6028(struct test_result_t *ret);
 static void tfm_crypto_test_6029(struct test_result_t *ret);
-
+static void tfm_crypto_test_6030(struct test_result_t *ret);
+static void tfm_crypto_test_6031(struct test_result_t *ret);
 
 static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -95,6 +96,10 @@ static struct test_t crypto_veneers_tests[] = {
      "Non Secure AEAD (AES-128-CCM) interface", {0} },
     {&tfm_crypto_test_6029, "TFM_CRYPTO_TEST_6029",
      "Non Secure AEAD (AES-128-GCM) interface", {0} },
+    {&tfm_crypto_test_6030, "TFM_CRYPTO_TEST_6030",
+     "Non Secure key policy interface", {0} },
+    {&tfm_crypto_test_6031, "TFM_CRYPTO_TEST_6031",
+     "Non Secure key policy check permissions", {0} },
 };
 
 void register_testsuite_ns_crypto_interface(struct test_suite_t *p_test_suite)
@@ -125,6 +130,16 @@ static void tfm_crypto_test_6001(struct test_result_t *ret)
     size_t bits = 0;
     uint8_t exported_data[sizeof(data)] = {0};
     size_t exported_data_size = 0;
+    psa_key_policy_t policy;
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, 0);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
     if (status != PSA_SUCCESS) {
@@ -219,6 +234,17 @@ static void psa_cipher_test(const psa_key_type_t key_type,
     size_t output_length = 0, total_output_length = 0;
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
     uint32_t comp_result;
+    psa_key_policy_t policy;
+    psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     ret->val = TEST_PASSED;
 
@@ -411,6 +437,17 @@ static void psa_test_invalid_cipher(const psa_key_type_t key_type,
     psa_cipher_operation_t handle;
     const psa_key_slot_t slot = 0;
     uint8_t data[TFM_CRYPTO_MAX_KEY_LENGTH];
+    psa_key_policy_t policy;
+    psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     /* Fill the key data */
     memset(data, 'A', key_size);
@@ -662,6 +699,17 @@ static void psa_mac_test(const psa_algorithm_t alg,
     size_t bit_size_test_key = 0;
     psa_status_t status;
     psa_mac_operation_t handle;
+    psa_key_policy_t policy;
+    psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY;
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     ret->val = TEST_PASSED;
 
@@ -794,6 +842,17 @@ static void psa_aead_test(const psa_key_type_t key_type,
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
     uint32_t comp_result;
+    psa_key_policy_t policy;
+    psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     ret->val = TEST_PASSED;
 
@@ -898,4 +957,170 @@ static void tfm_crypto_test_6028(struct test_result_t *ret)
 static void tfm_crypto_test_6029(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_GCM, ret);
+}
+
+static void tfm_crypto_test_6030(struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_algorithm_t alg = PSA_ALG_CBC_BASE;
+    psa_algorithm_t alg_out;
+    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
+    psa_key_lifetime_t lifetime_out;
+    psa_key_policy_t policy;
+    psa_key_policy_t policy_out;
+    psa_key_slot_t slot = 0;
+    psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
+    psa_key_usage_t usage_out;
+
+    /* Initialise the key policy */
+    psa_key_policy_init(&policy);
+
+    /* Verify that initialised policy forbids all usage */
+    usage_out = psa_key_policy_get_usage(&policy);
+    if (usage_out != 0) {
+        TEST_FAIL("Unexpected usage value");
+        return;
+    }
+
+    alg_out = psa_key_policy_get_algorithm(&policy);
+    if (alg_out != 0) {
+        TEST_FAIL("Unexpected algorithm value");
+        return;
+    }
+
+    /* Set the key policy values */
+    psa_key_policy_set_usage(&policy, usage, alg);
+
+    /* Check that the key policy has the correct usage */
+    usage_out = psa_key_policy_get_usage(&policy);
+    if (usage_out != usage) {
+        TEST_FAIL("Unexpected usage value");
+        return;
+    }
+
+    /* Check that the key policy has the correct algorithm */
+    alg_out = psa_key_policy_get_algorithm(&policy);
+    if (alg_out != alg) {
+        TEST_FAIL("Unexpected algorithm value");
+        return;
+    }
+
+    /* Set the key policy for the key slot */
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
+
+    /* Check the key slot has the correct key policy */
+    status = psa_get_key_policy(slot, &policy_out);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to get key policy");
+        return;
+    }
+
+    usage_out = psa_key_policy_get_usage(&policy_out);
+    if (usage_out != usage) {
+        TEST_FAIL("Unexpected usage value");
+        return;
+    }
+
+    alg_out = psa_key_policy_get_algorithm(&policy_out);
+    if (alg_out != alg) {
+        TEST_FAIL("Unexpected algorithm value");
+        return;
+    }
+
+    /* Set the key lifetime for the key slot */
+    status = psa_set_key_lifetime(slot, lifetime);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key lifetime");
+        return;
+    }
+
+    /* Check the key slot has the correct key lifetime */
+    status = psa_get_key_lifetime(slot, &lifetime_out);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to get key lifetime");
+        return;
+    }
+
+    if (lifetime_out != lifetime) {
+        TEST_FAIL("Unexpected key lifetime value");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+static void tfm_crypto_test_6031(struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_algorithm_t alg = PSA_ALG_CBC_BASE;
+    psa_cipher_operation_t handle;
+    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
+    psa_key_policy_t policy;
+    psa_key_slot_t slot = 0;
+    psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+    size_t data_len;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    uint8_t data_out[sizeof(data)];
+
+    ret->val = TEST_PASSED;
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
+
+    /* Set the key lifetime for the key slot */
+    status = psa_set_key_lifetime(slot, lifetime);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key lifetime");
+        return;
+    }
+
+    /* Import a key to the slot for which policy has been set */
+    status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to import a key");
+        return;
+    }
+
+    /* Setup a cipher permitted by the key policy */
+    status = psa_cipher_encrypt_setup(&handle, slot, alg);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to setup cipher operation");
+        goto destroy_key;
+    }
+
+    status = psa_cipher_abort(&handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to abort cipher operation");
+        goto destroy_key;
+    }
+
+    /* Attempt to setup a cipher with an alg not permitted by the policy */
+    status = psa_cipher_encrypt_setup(&handle, slot, PSA_ALG_CFB_BASE);
+    if (status != PSA_ERROR_NOT_PERMITTED) {
+        TEST_FAIL("Was able to setup cipher operation with wrong alg");
+        goto destroy_key;
+    }
+
+    /* Attempt to export the key, which is forbidden by the key policy */
+    status = psa_export_key(slot, data_out, sizeof(data_out), &data_len);
+    if (status != PSA_ERROR_NOT_PERMITTED) {
+        TEST_FAIL("Should not be able to export key without correct usage");
+        goto destroy_key;
+    }
+
+destroy_key:
+    status = psa_destroy_key(slot);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to destroy key");
+    }
 }

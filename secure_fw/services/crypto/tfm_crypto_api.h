@@ -27,7 +27,6 @@ enum tfm_crypto_operation_type {
     TFM_CRYPTO_CIPHER_OPERATION = 1,
     TFM_CRYPTO_MAC_OPERATION = 2,
     TFM_CRYPTO_HASH_OPERATION = 3,
-    TFM_CRYPTO_KEY_POLICY = 4,
 
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
@@ -89,6 +88,26 @@ enum tfm_crypto_err_t tfm_crypto_operation_lookup(
                                         uint32_t handle,
                                         void **oper);
 /**
+ * \brief Retrieve a key from the provided key slot according to the key
+ *        policy and algorithm provided. This function is expected to be
+ *        called intra-service
+ *
+ * \param[in]  key         Key slot
+ * \param[in]  usage       Usage policy to be used on the retrieved key
+ * \param[in]  alg         Algorithm to be used for the retrieved key
+ * \param[out] data        Buffer to hold the exported key
+ * \param[in]  data_size   Length of the buffer pointed to by data
+ * \param[out] data_length Length of the exported key
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_get_key(psa_key_slot_t key,
+                                         psa_key_usage_t usage,
+                                         psa_algorithm_t alg,
+                                         uint8_t *data,
+                                         size_t data_size,
+                                         size_t *data_length);
+/**
  * \brief Import the key data in the provided key slot
  *
  * \param[in] key         Key slot
@@ -137,6 +156,98 @@ enum tfm_crypto_err_t tfm_crypto_export_key(psa_key_slot_t key,
                                             uint8_t *data,
                                             size_t data_size,
                                             size_t *data_length);
+
+/**
+ * \brief Initialise the key policy to a default that forbids any use of the
+ *        key
+ *
+ * \param[out] policy  Key policy to initialise
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_key_policy_init(psa_key_policy_t *policy);
+
+/**
+ * \brief Set the permitted usage and algorithm for the provided key policy
+ *
+ * \param[out] policy  Key policy to modify
+ * \param[in]  usage   Permitted usage
+ * \param[in]  alg     Permitted algorithm
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_key_policy_set_usage(psa_key_policy_t *policy,
+                                                      psa_key_usage_t usage,
+                                                      psa_algorithm_t alg);
+
+/**
+ * \brief Get the permitted usage for the provided key policy
+ *
+ * \param[in]  policy  Key policy
+ * \param[out] usage   Permitted usage for this key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_key_policy_get_usage(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_key_usage_t *usage);
+
+/**
+ * \brief Get the permitted algorithm for the provided key policy
+ *
+ * \param[in]  policy  Key policy
+ * \param[out] alg     Permitted algorithm for this key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_key_policy_get_algorithm(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_algorithm_t *alg);
+
+/**
+ * \brief Set the key policy for the provided key slot
+ *
+ * \param[in] key     Key slot
+ * \param[in] policy  Key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_set_key_policy(psa_key_slot_t key,
+                                                const psa_key_policy_t *policy);
+
+/**
+ * \brief Get the key policy for the provided key slot
+ *
+ * \param[in]  key     Key slot
+ * \param[out] policy  Key policy
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_get_key_policy(psa_key_slot_t key,
+                                                psa_key_policy_t *policy);
+
+/**
+ * \brief Set the lifetime for the provided key slot
+ *
+ * \param[in] key       Key slot
+ * \param[in] lifetime  Lifetime value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_set_key_lifetime(psa_key_slot_t key,
+                                                  psa_key_lifetime_t lifetime);
+
+/**
+ * \brief Get the lifetime for the provided key slot
+ *
+ * \param[in]  key       Key slot
+ * \param[out] lifetime  Lifetime value
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+enum tfm_crypto_err_t tfm_crypto_get_key_lifetime(psa_key_slot_t key,
+                                                  psa_key_lifetime_t *lifetime);
+
 /**
  * \brief Export the public key contained in the provided key slot
  *        for an asymmetric key pair

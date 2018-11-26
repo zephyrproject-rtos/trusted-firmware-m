@@ -50,6 +50,70 @@
       "minor_policy": "strict"
     },
     {
+      "sfid": "TFM_CRYPTO_KEY_POLICY_INIT_SFID",
+      "signal": "TFM_CRYPTO_KEY_POLICY_INIT",
+      "tfm_symbol": "tfm_crypto_key_policy_init",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_KEY_POLICY_SET_USAGE_SFID",
+      "signal": "TFM_CRYPTO_KEY_POLICY_SET_USAGE",
+      "tfm_symbol": "tfm_crypto_key_policy_set_usage",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_KEY_POLICY_GET_USAGE_SFID",
+      "signal": "TFM_CRYPTO_KEY_POLICY_GET_USAGE",
+      "tfm_symbol": "tfm_crypto_key_policy_get_usage",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_KEY_POLICY_GET_ALGORITHM_SFID",
+      "signal": "TFM_CRYPTO_KEY_POLICY_GET_ALGORITHM",
+      "tfm_symbol": "tfm_crypto_key_policy_get_algorithm",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_SET_KEY_POLICY_SFID",
+      "signal": "TFM_CRYPTO_SET_KEY_POLICY",
+      "tfm_symbol": "tfm_crypto_set_key_policy",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_GET_KEY_POLICY_SFID",
+      "signal": "TFM_CRYPTO_GET_KEY_POLICY",
+      "tfm_symbol": "tfm_crypto_get_key_policy",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_GET_KEY_LIFETIME_SFID",
+      "signal": "TFM_CRYPTO_GET_KEY_LIFETIME",
+      "tfm_symbol": "tfm_crypto_get_key_lifetime",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
+      "sfid": "TFM_CRYPTO_SET_KEY_LIFETIME_SFID",
+      "signal": "TFM_CRYPTO_SET_KEY_LIFETIME",
+      "tfm_symbol": "tfm_crypto_set_key_lifetime",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "strict"
+    },
+    {
       "sfid": "TFM_CRYPTO_CIPHER_SET_IV_SFID",
       "signal": "TFM_CRYPTO_CIPHER_SET_IV",
       "tfm_symbol": "tfm_crypto_cipher_set_iv",

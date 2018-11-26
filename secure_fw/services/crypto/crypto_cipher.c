@@ -31,6 +31,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     enum tfm_crypto_err_t err;
     struct tfm_cipher_operation_s *ctx = NULL;
     struct cipher_engine_info engine_info;
+    psa_key_usage_t usage;
 
     /* Validate pointers */
     err = tfm_crypto_memory_check(operation,
@@ -91,11 +92,17 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
+    /* Set the key usage based on the cipher mode */
+    usage = (c_mode == ENGINE_CIPHER_MODE_DECRYPT) ? PSA_KEY_USAGE_DECRYPT
+                                                   : PSA_KEY_USAGE_ENCRYPT;
+
     /* Access the crypto service key module to retrieve key data */
-    err = tfm_crypto_export_key(key,
-                                &key_data[0],
-                                TFM_CRYPTO_MAX_KEY_LENGTH,
-                                &key_size);
+    err = tfm_crypto_get_key(key,
+                             usage,
+                             alg,
+                             key_data,
+                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
         tfm_crypto_operation_release(&(operation->handle));

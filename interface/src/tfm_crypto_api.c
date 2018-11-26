@@ -87,6 +87,125 @@ psa_status_t psa_export_public_key(psa_key_slot_t key,
     return PSA_ERROR_NOT_SUPPORTED;
 }
 
+void psa_key_policy_init(psa_key_policy_t *policy)
+{
+    /* PSA API returns void so just ignore error value returned */
+    (void)tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_key_policy_init,
+                               (uint32_t)policy,
+                               0,
+                               0,
+                               0);
+}
+
+void psa_key_policy_set_usage(psa_key_policy_t *policy,
+                              psa_key_usage_t usage,
+                              psa_algorithm_t alg)
+{
+    /* PSA API returns void so just ignore error value returned */
+    (void)tfm_ns_lock_dispatch(
+                              (veneer_fn)tfm_crypto_veneer_key_policy_set_usage,
+                              (uint32_t)policy,
+                              (uint32_t)usage,
+                              (uint32_t)alg,
+                              0);
+}
+
+psa_key_usage_t psa_key_policy_get_usage(const psa_key_policy_t *policy)
+{
+    psa_key_usage_t usage;
+
+    /* Initialise to a sensible default to avoid returning an uninitialised
+     * value in case the secure function fails.
+     */
+    usage = 0;
+
+    /* The PSA API does not return an error, so ignore any error from TF-M */
+    (void)tfm_ns_lock_dispatch(
+                              (veneer_fn)tfm_crypto_veneer_key_policy_get_usage,
+                              (uint32_t)policy,
+                              (uint32_t)&usage,
+                              0,
+                              0);
+
+    return usage;
+}
+
+psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
+{
+    psa_algorithm_t alg;
+
+    /* Initialise to a sensible default to avoid returning an uninitialised
+     * value in case the secure function fails.
+     */
+    alg = 0;
+
+    /* The PSA API does not return an error, so ignore any error from TF-M */
+    (void)tfm_ns_lock_dispatch(
+                          (veneer_fn)tfm_crypto_veneer_key_policy_get_algorithm,
+                          (uint32_t)policy,
+                          (uint32_t)&alg,
+                          0,
+                          0);
+
+    return alg;
+}
+
+psa_status_t psa_set_key_policy(psa_key_slot_t key,
+                                const psa_key_policy_t *policy)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_set_key_policy,
+                               (uint32_t)key,
+                               (uint32_t)policy,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_get_key_policy(psa_key_slot_t key,
+                                psa_key_policy_t *policy)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_get_key_policy,
+                               (uint32_t)key,
+                               (uint32_t)policy,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_set_key_lifetime(psa_key_slot_t key,
+                                  psa_key_lifetime_t lifetime)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_set_key_lifetime,
+                               (uint32_t)key,
+                               (uint32_t)lifetime,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
+psa_status_t psa_get_key_lifetime(psa_key_slot_t key,
+                                  psa_key_lifetime_t *lifetime)
+{
+    enum tfm_crypto_err_t err;
+
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_get_key_lifetime,
+                               (uint32_t)key,
+                               (uint32_t)lifetime,
+                               0,
+                               0);
+
+    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+}
+
 psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                const unsigned char *iv,
                                size_t iv_length)

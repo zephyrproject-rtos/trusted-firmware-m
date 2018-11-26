@@ -52,6 +52,76 @@ enum tfm_crypto_err_t tfm_crypto_veneer_export_key(psa_key_slot_t key,
                          key, data, data_size, data_length);
 }
 
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_init(
+                                                       psa_key_policy_t *policy)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_key_policy_init,
+                         policy, 0, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_set_usage(
+                                                       psa_key_policy_t *policy,
+                                                       psa_key_usage_t usage,
+                                                       psa_algorithm_t alg)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_key_policy_set_usage,
+                         policy, usage, alg, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_get_usage(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_key_usage_t *usage)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_key_policy_get_usage,
+                         policy, usage, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_key_policy_get_algorithm(
+                                                 const psa_key_policy_t *policy,
+                                                 psa_algorithm_t *alg)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_key_policy_get_algorithm,
+                         policy, alg, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_set_key_policy(
+                                                 psa_key_slot_t key,
+                                                 const psa_key_policy_t *policy)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_set_key_policy,
+                         key, policy, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_get_key_policy(psa_key_slot_t key,
+                                                       psa_key_policy_t *policy)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_get_key_policy,
+                         key, policy, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_set_key_lifetime(
+                                                    psa_key_slot_t key,
+                                                    psa_key_lifetime_t lifetime)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_set_key_lifetime,
+                         key, lifetime, 0, 0);
+}
+
+__tfm_secure_gateway_attributes__
+enum tfm_crypto_err_t tfm_crypto_veneer_get_key_lifetime(
+                                                   psa_key_slot_t key,
+                                                   psa_key_lifetime_t *lifetime)
+{
+    TFM_CORE_SFN_REQUEST(TFM_SP_CRYPTO_ID, tfm_crypto_get_key_lifetime,
+                         key, lifetime, 0, 0);
+}
 
 __tfm_secure_gateway_attributes__
 enum tfm_crypto_err_t tfm_crypto_veneer_cipher_set_iv(

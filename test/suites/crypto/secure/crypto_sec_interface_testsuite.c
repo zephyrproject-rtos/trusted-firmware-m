@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,11 +40,21 @@ static void tfm_crypto_test_5001(struct test_result_t *ret)
     enum tfm_crypto_err_t err;
     uint32_t i = 0;
     const psa_key_slot_t slot = 0;
-    const uint8_t data[] = "THIS IS MY KEY1";
+    uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
     uint8_t exported_data[sizeof(data)] = {0};
     size_t exported_data_size = 0;
+    psa_key_policy_t policy;
+
+    /* Setup the key policy */
+    tfm_crypto_veneer_key_policy_init(&policy);
+    tfm_crypto_veneer_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, 0);
+    err = tfm_crypto_veneer_set_key_policy(slot, &policy);
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
 
     err = tfm_crypto_veneer_import_key(slot,
                                        PSA_KEY_TYPE_AES,

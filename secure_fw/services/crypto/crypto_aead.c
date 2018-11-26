@@ -102,10 +102,12 @@ enum tfm_crypto_err_t tfm_crypto_aead_encrypt(psa_key_slot_t key,
     }
 
     /* Access the crypto service key module to retrieve key data */
-    err = tfm_crypto_export_key(key,
-                                &key_data[0],
-                                TFM_CRYPTO_MAX_KEY_LENGTH,
-                                (size_t *)&key_size);
+    err = tfm_crypto_get_key(key,
+                             PSA_KEY_USAGE_ENCRYPT,
+                             alg,
+                             key_data,
+                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             (size_t *)&key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
@@ -208,10 +210,12 @@ enum tfm_crypto_err_t tfm_crypto_aead_decrypt(psa_key_slot_t key,
     }
 
     /* Access the crypto service key module to retrieve key data */
-    err = tfm_crypto_export_key(key,
-                                &key_data[0],
-                                TFM_CRYPTO_MAX_KEY_LENGTH,
-                                (size_t *)&key_size);
+    err = tfm_crypto_get_key(key,
+                             PSA_KEY_USAGE_DECRYPT,
+                             alg,
+                             key_data,
+                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             (size_t *)&key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
