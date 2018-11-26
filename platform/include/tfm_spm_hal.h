@@ -87,6 +87,18 @@ void tfm_spm_hal_setup_isolation_hw(void);
  */
 void tfm_spm_hal_configure_default_isolation(
                  const struct tfm_spm_partition_platform_data_t *platform_data);
+/**
+ * \brief Configures the system debug properties.
+ *        The default configuration of this function should disable secure debug
+ *        when either DAUTH_NONE or DAUTH_NS_ONLY define is set. It is up to the
+ *        platform owner to decide if secure debug can be turned on in their
+ *        system, if DAUTH_FULL define is present.
+ *        The DAUTH_CHIP_DEFAULT define should not be considered a safe default
+ *        option unless explicitly noted by the chip vendor.
+ *        The implementation has to expect that one of those defines is going to
+ *        be set. Otherwise, a compile error needs to be triggered.
+ */
+void tfm_spm_hal_init_debug(void);
 
 /**
  * \brief Enables the fault handlers

@@ -80,6 +80,19 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
  */
 #define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
 
+/* Debug configuration flags */
+#define SPNIDEN_SEL_STATUS (0x01u << 7)
+#define SPNIDEN_STATUS     (0x01u << 6)
+#define SPIDEN_SEL_STATUS  (0x01u << 5)
+#define SPIDEN_STATUS      (0x01u << 4)
+#define NIDEN_SEL_STATUS   (0x01u << 3)
+#define NIDEN_STATUS       (0x01u << 2)
+#define DBGEN_SEL_STATUS   (0x01u << 1)
+#define DBGEN_STATUS       (0x01u << 0)
+
+#define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
+                        NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
+
 struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
         UART0_BASE_NS,
         UART0_BASE_NS + 0xFFF,
@@ -127,6 +140,44 @@ void system_reset_cfg(void)
     reg_value |= (uint32_t)(SCB_AIRCR_WRITE_MASK | SCB_AIRCR_SYSRESETREQS_Msk);
 
     SCB->AIRCR = reg_value;
+}
+
+void tfm_spm_hal_init_debug(void)
+{
+    volatile struct sysctrl_t *sys_ctrl =
+                                       (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
+
+#if defined(DAUTH_NONE)
+    /* Set all the debug enable selector bits to 1 */
+    sys_ctrl->secdbgset = All_SEL_STATUS;
+    /* Set all the debug enable bits to 0 */
+    sys_ctrl->secdbgclr =
+                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
+#elif defined(DAUTH_NS_ONLY)
+    /* Set all the debug enable selector bits to 1 */
+    sys_ctrl->secdbgset = All_SEL_STATUS;
+    /* Set the debug enable bits to 1 for NS, and 0 for S mode */
+    sys_ctrl->secdbgset = DBGEN_STATUS | NIDEN_STATUS;
+    sys_ctrl->secdbgclr = SPIDEN_STATUS | SPNIDEN_STATUS;
+#elif defined(DAUTH_FULL)
+    /* Set all the debug enable selector bits to 1 */
+    sys_ctrl->secdbgset = All_SEL_STATUS;
+    /* Set all the debug enable bits to 1 */
+    sys_ctrl->secdbgset =
+                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
+#else
+
+#if !defined(DAUTH_CHIP_DEFAULT)
+#error "No debug authentication setting is provided."
+#endif
+
+    /* Set all the debug enable selector bits to 0 */
+    sys_ctrl->secdbgclr = All_SEL_STATUS;
+
+    /* No need to set any enable bits because the value depends on
+     * input signals.
+     */
+#endif
 }
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/
