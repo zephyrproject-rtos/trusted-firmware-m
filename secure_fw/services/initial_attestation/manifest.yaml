@@ -20,7 +20,7 @@
     {
       "sfid": "TFM_ATTEST_GET_TOKEN_SFID",
       "signal": "TFM_ATTEST_GET_TOKEN",
-      "tfm_symbol": "attest_get_token",
+      "tfm_symbol": "initial_attest_get_token",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
