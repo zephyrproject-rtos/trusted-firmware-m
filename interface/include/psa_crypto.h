@@ -61,12 +61,15 @@ extern "C" {
  * together with PSA IPC, which also defines the identifier
  * PSA_SUCCESS. We must not define PSA_SUCCESS ourselves in that case;
  * the other error code names don't clash. Also define psa_status_t as
- * an alias for the type used by PSA IPC. This is a temporary hack
- * until we unify error reporting in PSA IPC and PSA crypo.
+ * an alias for the type used by PSA IPC if the PSA_FRAMEWORK_VERSION is
+ * less than 0x100. This is a temporary hack until we unify error reporting
+ * in PSA IPC and PSA crypo.
  *
  * Note that psa_defs.h must be included before this header!
  */
+#if (PSA_FRAMEWORK_VERSION < 0x100)
 typedef psa_error_t psa_status_t;
+#endif
 
 #else /* defined(PSA_SUCCESS) */
 
