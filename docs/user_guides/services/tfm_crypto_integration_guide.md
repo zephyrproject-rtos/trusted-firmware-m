@@ -32,9 +32,12 @@ refer to the comments in the `psa_crypto.h` header itself.
  - `crypto_init.c` :  This file provides basic functions to initialise the
  secure service during TF-M boot;
  - `crypto_key.c` : This file implements functionalities related to the key
- management module. The `TFM_CRYPTO_KEY_STORAGE_NUM`, defined in this file,
- determines how many key stores are available (4 key stores for the current
- implementation);
+ management module. The `TFM_CRYPTO_KEY_STORAGE_NUM` determines how many key
+ stores are available, while the `TFM_CRYPTO_MAX_KEY_LENGTH` defines the
+ maximum allowed key length in bytes supported in a key storage. These two
+ items can be modfied at the build configuration step by defining the
+ following variables, `-DCRYPTO_KEY_STORAGE_NUM=<value>` and the
+ `-DCRYPTO_KEY_MAX_KEY_LENGTH=<value>`;
  - `crypto_alloc.c` : This file implements extensions to the PSA interface
  which are specifically required by the TF-M Crypto service, in particular
  related to the allocation and deallocation of crypto operation contexts in
@@ -48,9 +51,12 @@ refer to the comments in the `psa_crypto.h` header itself.
  - `crypto_utils.c` : This file implements utility functions that can be
  used by other modules of the TF-M Crypto service;
  - `crypto_engine.c` : This file implements the layer which the other modules
- use to interact with the cryptography primitives available (in SW or HW).
- The current implementation provides only SW primitives based on Mbed TLS
- functions;
+ use to interact with the cryptography primitives available (in SW or HW). The
+ `TFM_CRYPTO_ENGINE_BUF_SIZE` determines the size in bytes of the static scratch
+ buffer used by this layer for its internal allocations. This item can be
+ modified at the build configuration step by defining
+ `-DCRYPTO_ENGINE_BUF_SIZE=<value>`. The current implementation provides only SW
+ primitives based on Mbed TLS functions;
  - `crypto_mac.c` : This file implements functionalities related to the
  MAC (Message Authentication Code) module;
  - `crypto_aead.c` : This file implements functionalities related to the AEAD

@@ -18,6 +18,8 @@
 #define BYTE_SIZE_CHUNK (16)
 #define ENC_DEC_BUFFER_SIZE (32)
 #define ASSOCIATED_DATA_SIZE (24)
+#define TEST_KEY_SLOT (1)
+#define TEST_MAX_KEY_LENGTH (64)
 
 /* List of tests */
 static void tfm_crypto_test_6001(struct test_result_t *ret);
@@ -42,10 +44,12 @@ static void tfm_crypto_test_6019(struct test_result_t *ret);
 static void tfm_crypto_test_6020(struct test_result_t *ret);
 static void tfm_crypto_test_6021(struct test_result_t *ret);
 static void tfm_crypto_test_6022(struct test_result_t *ret);
-static void tfm_crypto_test_6028(struct test_result_t *ret);
-static void tfm_crypto_test_6029(struct test_result_t *ret);
+static void tfm_crypto_test_6023(struct test_result_t *ret);
+static void tfm_crypto_test_6024(struct test_result_t *ret);
 static void tfm_crypto_test_6030(struct test_result_t *ret);
 static void tfm_crypto_test_6031(struct test_result_t *ret);
+static void tfm_crypto_test_6032(struct test_result_t *ret);
+static void tfm_crypto_test_6033(struct test_result_t *ret);
 
 static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -81,24 +85,28 @@ static struct test_t crypto_veneers_tests[] = {
     {&tfm_crypto_test_6016, "TFM_CRYPTO_TEST_6016",
      "Non Secure Hash (RIPEMD-160) interface", {0} },
     {&tfm_crypto_test_6017, "TFM_CRYPTO_TEST_6017",
-     "Non Secure HMAC (SHA-1) interface", {0} },
+     "Non Secure Hash (MD-2) interface", {0} },
     {&tfm_crypto_test_6018, "TFM_CRYPTO_TEST_6018",
-     "Non Secure HMAC (SHA-256) interface", {0} },
+     "Non Secure Hash (MD-4) interface", {0} },
     {&tfm_crypto_test_6019, "TFM_CRYPTO_TEST_6019",
-     "Non Secure HMAC (SHA-384) interface", {0} },
+     "Non Secure HMAC (SHA-1) interface", {0} },
     {&tfm_crypto_test_6020, "TFM_CRYPTO_TEST_6020",
-     "Non Secure HMAC (SHA-512) interface", {0} },
+     "Non Secure HMAC (SHA-256) interface", {0} },
     {&tfm_crypto_test_6021, "TFM_CRYPTO_TEST_6021",
-     "Non Secure HMAC (MD-5) interface", {0} },
+     "Non Secure HMAC (SHA-384) interface", {0} },
     {&tfm_crypto_test_6022, "TFM_CRYPTO_TEST_6022",
+     "Non Secure HMAC (SHA-512) interface", {0} },
+    {&tfm_crypto_test_6023, "TFM_CRYPTO_TEST_6023",
+     "Non Secure HMAC (MD-5) interface", {0} },
+    {&tfm_crypto_test_6024, "TFM_CRYPTO_TEST_6024",
      "Non Secure HMAC with long key (SHA-1) interface", {0} },
-    {&tfm_crypto_test_6028, "TFM_CRYPTO_TEST_6028",
-     "Non Secure AEAD (AES-128-CCM) interface", {0} },
-    {&tfm_crypto_test_6029, "TFM_CRYPTO_TEST_6029",
-     "Non Secure AEAD (AES-128-GCM) interface", {0} },
     {&tfm_crypto_test_6030, "TFM_CRYPTO_TEST_6030",
-     "Non Secure key policy interface", {0} },
+     "Non Secure AEAD (AES-128-CCM) interface", {0} },
     {&tfm_crypto_test_6031, "TFM_CRYPTO_TEST_6031",
+     "Non Secure AEAD (AES-128-GCM) interface", {0} },
+    {&tfm_crypto_test_6032, "TFM_CRYPTO_TEST_6032",
+     "Non Secure key policy interface", {0} },
+    {&tfm_crypto_test_6033, "TFM_CRYPTO_TEST_6033",
      "Non Secure key policy check permissions", {0} },
 };
 
@@ -124,7 +132,7 @@ static void tfm_crypto_test_6001(struct test_result_t *ret)
 {
     psa_status_t status = PSA_SUCCESS;
     uint32_t i = 0;
-    const psa_key_slot_t slot = 0;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
@@ -223,7 +231,7 @@ static void psa_cipher_test(const psa_key_type_t key_type,
 {
     psa_cipher_operation_t handle, handle_dec;
     psa_status_t status = PSA_SUCCESS;
-    const psa_key_slot_t slot = 0;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
@@ -236,6 +244,7 @@ static void psa_cipher_test(const psa_key_type_t key_type,
     uint32_t comp_result;
     psa_key_policy_t policy;
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+    uint32_t i;
 
     /* Setup the key policy */
     psa_key_policy_init(&policy);
@@ -286,6 +295,10 @@ static void psa_cipher_test(const psa_key_type_t key_type,
     status = psa_cipher_set_iv(&handle, iv, iv_length);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV on the cypher operation object");
+        status = psa_cipher_abort(&handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
@@ -296,11 +309,19 @@ static void psa_cipher_test(const psa_key_type_t key_type,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error encrypting one chunk of information");
+        status = psa_cipher_abort(&handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
     if (output_length != BYTE_SIZE_CHUNK) {
         TEST_FAIL("Expected encrypted data length is different from expected");
+        status = psa_cipher_abort(&handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
@@ -311,6 +332,10 @@ static void psa_cipher_test(const psa_key_type_t key_type,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error finalising the cipher operation");
+        status = psa_cipher_abort(&handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
@@ -346,32 +371,53 @@ static void psa_cipher_test(const psa_key_type_t key_type,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV for decryption");
+        status = psa_cipher_abort(&handle_dec);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
     if (alg != PSA_ALG_CFB_BASE) {
         if (output_length != 0) {
             TEST_FAIL("Expected output length is different from expected");
+            status = psa_cipher_abort(&handle_dec);
+            if (status != PSA_SUCCESS) {
+                TEST_FAIL("Error aborting the operation");
+            }
             goto destroy_key;
         }
     }
 
     /* Decrypt */
-    status = psa_cipher_update(&handle_dec, encrypted_data, ENC_DEC_BUFFER_SIZE,
-                               decrypted_data, BYTE_SIZE_CHUNK, &output_length);
+    for (i = 0; i < ENC_DEC_BUFFER_SIZE; i += BYTE_SIZE_CHUNK) {
+        status = psa_cipher_update(&handle_dec,
+                                   (encrypted_data + i), BYTE_SIZE_CHUNK,
+                                   (decrypted_data + total_output_length),
+                                   (ENC_DEC_BUFFER_SIZE - total_output_length),
+                                   &output_length);
 
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Error during decryption");
-        goto destroy_key;
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error during decryption");
+            status = psa_cipher_abort(&handle_dec);
+            if (status != PSA_SUCCESS) {
+                TEST_FAIL("Error aborting the operation");
+            }
+            goto destroy_key;
+        }
+
+        total_output_length += output_length;
     }
-
-    total_output_length += output_length;
 
     /* Check that the plain text matches the decrypted data */
     comp_result = compare_buffers(plain_text, decrypted_data,
                                   sizeof(plain_text), sizeof(decrypted_data));
     if (comp_result != 0) {
         TEST_FAIL("Decrypted data doesn't match with plain text");
+        status = psa_cipher_abort(&handle_dec);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
@@ -381,6 +427,10 @@ static void psa_cipher_test(const psa_key_type_t key_type,
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error finalising the cipher operation");
+        status = psa_cipher_abort(&handle_dec);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Error aborting the operation");
+        }
         goto destroy_key;
     }
 
@@ -435,8 +485,8 @@ static void psa_test_invalid_cipher(const psa_key_type_t key_type,
 {
     psa_status_t status;
     psa_cipher_operation_t handle;
-    const psa_key_slot_t slot = 0;
-    uint8_t data[TFM_CRYPTO_MAX_KEY_LENGTH];
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    uint8_t data[TEST_MAX_KEY_LENGTH];
     psa_key_policy_t policy;
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
 
@@ -491,8 +541,26 @@ static void tfm_crypto_test_6007(struct test_result_t *ret)
 
 static void tfm_crypto_test_6008(struct test_result_t *ret)
 {
+    psa_status_t status;
+    psa_key_policy_t policy;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    const uint8_t data[19] = {0};
+
+    /* Setup the key policy */
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_ENCRYPT, PSA_ALG_CBC_BASE);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
+
     /* DES does not support 152-bit keys */
-    psa_test_invalid_cipher(PSA_KEY_TYPE_DES, PSA_ALG_CBC_BASE, 19, ret);
+    status = psa_import_key(slot, PSA_KEY_TYPE_DES, data, sizeof(data));
+    if (status != PSA_ERROR_NOT_SUPPORTED) {
+        TEST_FAIL("Should not successfully import with an invalid key length");
+        return;
+    }
 }
 
 static void tfm_crypto_test_6009(struct test_result_t *ret)
@@ -514,7 +582,9 @@ static const psa_algorithm_t hash_alg[] = {
     PSA_ALG_SHA_384,
     PSA_ALG_SHA_512,
     PSA_ALG_MD5,
-    PSA_ALG_RIPEMD160
+    PSA_ALG_RIPEMD160,
+    PSA_ALG_MD2,
+    PSA_ALG_MD4
 };
 
 static const uint8_t hash_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
@@ -638,6 +708,16 @@ static void tfm_crypto_test_6016(struct test_result_t *ret)
     psa_hash_test(PSA_ALG_RIPEMD160, ret);
 }
 
+static void tfm_crypto_test_6017(struct test_result_t *ret)
+{
+    psa_hash_test(PSA_ALG_MD2, ret);
+}
+
+static void tfm_crypto_test_6018(struct test_result_t *ret)
+{
+    psa_hash_test(PSA_ALG_MD4, ret);
+}
+
 static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
     {0x0d, 0xa6, 0x9d, 0x02, 0x43, 0x17, 0x3e, 0x7e, /*!< SHA-1 */
      0xe7, 0x3b, 0xc6, 0xa9, 0x51, 0x06, 0x8a, 0xea,
@@ -691,7 +771,7 @@ static void psa_mac_test(const psa_algorithm_t alg,
     const uint32_t msg_num = sizeof(msg)/sizeof(msg[0]);
     uint32_t idx;
 
-    const psa_key_slot_t slot = 0;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
     const uint8_t data[] = "THIS IS MY KEY1";
     const uint8_t long_data[] = "THIS IS MY UNCOMMONLY LONG KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
@@ -794,32 +874,32 @@ destroy_key_mac:
     }
 }
 
-static void tfm_crypto_test_6017(struct test_result_t *ret)
+static void tfm_crypto_test_6019(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
 }
 
-static void tfm_crypto_test_6018(struct test_result_t *ret)
+static void tfm_crypto_test_6020(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_256), 0, ret);
 }
 
-static void tfm_crypto_test_6019(struct test_result_t *ret)
+static void tfm_crypto_test_6021(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_384), 0, ret);
 }
 
-static void tfm_crypto_test_6020(struct test_result_t *ret)
+static void tfm_crypto_test_6022(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_512), 0, ret);
 }
 
-static void tfm_crypto_test_6021(struct test_result_t *ret)
+static void tfm_crypto_test_6023(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_MD5), 0, ret);
 }
 
-static void tfm_crypto_test_6022(struct test_result_t *ret)
+static void tfm_crypto_test_6024(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
 }
@@ -828,7 +908,7 @@ static void psa_aead_test(const psa_key_type_t key_type,
                           const psa_algorithm_t alg,
                           struct test_result_t *ret)
 {
-    const psa_key_slot_t slot = 0;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
     const size_t nonce_length = 12;
     const uint8_t nonce[] = "01234567890";
     const uint8_t plain_text[BYTE_SIZE_CHUNK] = "Sixteen bytes!!";
@@ -899,10 +979,10 @@ static void psa_aead_test(const psa_key_type_t key_type,
         goto destroy_key_aead;
     }
 
-    /* Increment the encrypted_data_length with the tag size which has
-     * been appended to the encrypted data
-     */
-    encrypted_data_length += PSA_AEAD_TAG_SIZE(alg);
+    if (sizeof(plain_text) != (encrypted_data_length-PSA_AEAD_TAG_SIZE(alg))) {
+        TEST_FAIL("Encrypted data length is different than expected");
+        goto destroy_key_aead;
+    }
 
     /* Perform AEAD decryption */
     status = psa_aead_decrypt(slot, alg, nonce, nonce_length,
@@ -949,17 +1029,17 @@ destroy_key_aead:
     }
 }
 
-static void tfm_crypto_test_6028(struct test_result_t *ret)
+static void tfm_crypto_test_6030(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_CCM, ret);
 }
 
-static void tfm_crypto_test_6029(struct test_result_t *ret)
+static void tfm_crypto_test_6031(struct test_result_t *ret)
 {
     psa_aead_test(PSA_KEY_TYPE_AES, PSA_ALG_GCM, ret);
 }
 
-static void tfm_crypto_test_6030(struct test_result_t *ret)
+static void tfm_crypto_test_6032(struct test_result_t *ret)
 {
     psa_status_t status;
     psa_algorithm_t alg = PSA_ALG_CBC_BASE;
@@ -968,7 +1048,7 @@ static void tfm_crypto_test_6030(struct test_result_t *ret)
     psa_key_lifetime_t lifetime_out;
     psa_key_policy_t policy;
     psa_key_policy_t policy_out;
-    psa_key_slot_t slot = 0;
+    psa_key_slot_t slot = TEST_KEY_SLOT;
     psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
     psa_key_usage_t usage_out;
 
@@ -1053,14 +1133,14 @@ static void tfm_crypto_test_6030(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
-static void tfm_crypto_test_6031(struct test_result_t *ret)
+static void tfm_crypto_test_6033(struct test_result_t *ret)
 {
     psa_status_t status;
     psa_algorithm_t alg = PSA_ALG_CBC_BASE;
     psa_cipher_operation_t handle;
     psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
     psa_key_policy_t policy;
-    psa_key_slot_t slot = 0;
+    psa_key_slot_t slot = TEST_KEY_SLOT;
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
     size_t data_len;
     const uint8_t data[] = "THIS IS MY KEY1";

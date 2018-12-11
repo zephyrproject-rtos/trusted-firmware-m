@@ -18,11 +18,11 @@ embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../../../ConfigDefault.
 project(tfm_crypto LANGUAGES ASM C)
 embedded_project_fixup()
 
-###Some project global settings
+#Some project global settings
 set (CRYPTO_DIR "${CMAKE_CURRENT_LIST_DIR}")
 get_filename_component(TFM_ROOT_DIR "${CRYPTO_DIR}/../../.." ABSOLUTE)
 
-###Get the definition of what files we need to build
+#Get the definition of what files we need to build
 set (ENABLE_CRYPTO ON)
 if (NOT DEFINED CRYPTO_ENGINE_MBEDTLS)
     set (CRYPTO_ENGINE_MBEDTLS ON)
@@ -38,11 +38,29 @@ endif()
 
 include(CMakeLists.inc)
 
-###Configure how we build our target
+#Configure how we build our target
 if(DEFINED CORE_TEST)
   set (TFM_LVL 3)
 else()
   set (TFM_LVL 1)
+endif()
+
+#Create a list of the C defines
+list(APPEND TFM_CRYPTO_C_DEFINES_LIST __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
+
+if (CRYPTO_ENGINE_MBEDTLS)
+  list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_ENGINE_MBEDTLS MBEDTLS_CONFIG_FILE="platform/ext/common/tfm_mbedtls_config.h")
+endif()
+
+#Add module configuration parameters in case they are provided during cmake configuration step
+if (DEFINED CRYPTO_KEY_STORAGE_NUM)
+  list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_KEY_STORAGE_NUM=${CRYPTO_KEY_STORAGE_NUM})
+endif()
+if (DEFINED CRYPTO_KEY_MAX_KEY_LENGTH)
+  list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_KEY_MAX_KEY_LENGTH=${CRYPTO_KEY_MAX_KEY_LENGTH})
+endif()
+if (DEFINED CRYPTO_ENGINE_BUF_SIZE)
+  list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE})
 endif()
 
 if (CRYPTO_ENGINE_MBEDTLS)
@@ -61,15 +79,14 @@ endif()
 
 #Specify what we build (for the crypto service, build as a static library)
 add_library(tfm_crypto STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
+embedded_set_target_compile_defines(TARGET tfm_crypto LANGUAGE C DEFINES ${TFM_CRYPTO_C_DEFINES_LIST})
 if (CRYPTO_ENGINE_MBEDTLS)
-  embedded_set_target_compile_defines(TARGET tfm_crypto LANGUAGE C DEFINES __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL} MBEDTLS_CONFIG_FILE="platform/ext/common/tfm_mbedtls_config.h" TFM_CRYPTO_ENGINE_MBEDTLS)
   #Add a dependency on the mbed_tls_lib_install target.
   add_dependencies(tfm_crypto ${MBEDTLS_TARGET_NAME}_install)
   #Ask the compiler to merge the mbed TLS and the crypto libraries.
   compiler_merge_library(DEST tfm_crypto LIBS "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
-else()
-  embedded_set_target_compile_defines(TARGET tfm_crypto LANGUAGE C DEFINES __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
 endif()
+
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_crypto)
 config_setting_shared_linker_flags(tfm_crypto)

@@ -7,7 +7,7 @@
  *  or disable features selectively, and reduce the global
  *  memory footprint.
  *
- *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2019, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -1966,7 +1966,7 @@
  *
  * Uncomment to enable support for (rare) MD2-signed X.509 certs.
  */
-//#define MBEDTLS_MD2_C
+#define MBEDTLS_MD2_C
 
 /**
  * \def MBEDTLS_MD4_C
@@ -1978,7 +1978,7 @@
  *
  * Uncomment to enable support for (rare) MD4-signed X.509 certs.
  */
-//#define MBEDTLS_MD4_C
+#define MBEDTLS_MD4_C
 
 /**
  * \def MBEDTLS_MD5_C

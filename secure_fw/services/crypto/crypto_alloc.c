@@ -120,6 +120,6 @@ enum tfm_crypto_err_t tfm_crypto_operation_lookup(
         return TFM_CRYPTO_ERR_PSA_SUCCESS;
     }
 
-    return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
 }
 /*!@}*/

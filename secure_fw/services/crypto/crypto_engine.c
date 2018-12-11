@@ -14,11 +14,19 @@
  */
 #include "crypto_engine.h"
 
+/**
+ * \brief Default value for the size of the static buffer used by the Engine
+ *        module as a scratch buffer for its own internal allocations
+ */
+#ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
+#define TFM_CRYPTO_ENGINE_BUF_SIZE (1024)
+#endif
+
 #if defined(TFM_CRYPTO_ENGINE_MBEDTLS)
 /**
  * \brief Buffer size used by Mbed TLS for its allocations
  */
-#define TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN (1024)
+#define TFM_CRYPTO_MBEDTLS_MEM_BUF_LEN (TFM_CRYPTO_ENGINE_BUF_SIZE)
 
 /**
  * \brief Static buffer to be used by Mbed TLS for memory allocations
@@ -221,8 +229,14 @@ static psa_status_t mbedtls_to_psa_return(int ret)
         return PSA_SUCCESS;
     }
 
-    /* FIXME: For the time being map all errors to PSA_ERROR_UNKNOW_ERROR */
+    /* FIXME: Investigate all possible Mbed TLS errors and map them
+     *        to the the correct corresponding PSA status
+     */
     switch (ret) {
+    case MBEDTLS_ERR_CIPHER_FULL_BLOCK_EXPECTED:
+        return PSA_ERROR_INVALID_ARGUMENT;
+    case MBEDTLS_ERR_CIPHER_AUTH_FAILED:
+        return PSA_ERROR_INVALID_SIGNATURE;
     default:
         return PSA_ERROR_UNKNOWN_ERROR;
     }

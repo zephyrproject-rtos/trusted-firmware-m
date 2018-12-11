@@ -22,12 +22,6 @@ extern "C" {
 #define TFM_CRYPTO_ERR_PSA_ERROR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
 
 /**
- * \brief This defines the maximum supported key length in bytes
- *
- */
-#define TFM_CRYPTO_MAX_KEY_LENGTH (32)
-
-/**
  * \brief This value is used to mark an handle as invalid.
  *
  */
@@ -92,7 +86,7 @@ enum tfm_crypto_err_t {
  */
 #define PSA_STATUS_TO_TFM_CRYPTO_ERR(val) \
       ( (val == PSA_SUCCESS) ? (enum tfm_crypto_err_t)val : \
-                (enum tfm_crypto_err_t)(val + TFM_CRYPTO_ERR_PSA_ERROR_OFFSET) )
+              (enum tfm_crypto_err_t)(val + TFM_CRYPTO_ERR_PSA_ERROR_OFFSET-1) )
 
 #ifdef __cplusplus
 }

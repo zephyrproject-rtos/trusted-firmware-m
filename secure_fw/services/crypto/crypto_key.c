@@ -5,6 +5,7 @@
  *
  */
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "tfm_crypto_api.h"
@@ -14,10 +15,20 @@
 #include "secure_fw/core/secure_utilities.h"
 
 /**
- * \brief This value defines the maximum number of simultaneous key stores
- *        supported by this implementation.
+ * \brief This is the default value of maximum number of simultaneous
+ *        key stores supported.
  */
+#ifndef TFM_CRYPTO_KEY_STORAGE_NUM
 #define TFM_CRYPTO_KEY_STORAGE_NUM (4)
+#endif
+
+/**
+ * \brief This is the default value of the maximum supported key length
+ *        in bytes.
+ */
+#ifndef TFM_CRYPTO_MAX_KEY_LENGTH
+#define TFM_CRYPTO_MAX_KEY_LENGTH (32)
+#endif
 
 struct tfm_crypto_key_storage_s {
     uint8_t in_use;                 /*!< Indicates if the key store is in use */
@@ -30,6 +41,56 @@ struct tfm_crypto_key_storage_s {
 
 static struct tfm_crypto_key_storage_s
                                 key_storage[TFM_CRYPTO_KEY_STORAGE_NUM] = {{0}};
+
+/**
+ * \brief Get a pointer to the key store for the provided key slot.
+ *
+ * \param[in] key  Key slot
+ *
+ * \return Pointer to key store or NULL if key is not a valid key slot
+ */
+static struct tfm_crypto_key_storage_s *get_key_store(psa_key_slot_t key)
+{
+    if (key == 0 || key > TFM_CRYPTO_KEY_STORAGE_NUM) {
+        return NULL;
+    }
+
+    return &key_storage[key - 1];
+}
+
+/**
+ * \brief Check that the key type is supported and that key_length is a
+ *        supported key length for that key type.
+ *
+ * \param[in] type        Key type
+ * \param[in] key_length  Key data length in bytes
+ *
+ * \return True if the key type is supported and key_length is a supported
+ *         key length for that key type, false otherwise
+ */
+static bool key_type_is_supported(psa_key_type_t type, size_t key_length)
+{
+    if (key_length > TFM_CRYPTO_MAX_KEY_LENGTH) {
+        return false;
+    }
+
+    switch (type) {
+    case PSA_KEY_TYPE_RAW_DATA:
+    case PSA_KEY_TYPE_HMAC:
+    case PSA_KEY_TYPE_DERIVE:
+        return true; /* No further restictions on these key types */
+    case PSA_KEY_TYPE_AES:
+    case PSA_KEY_TYPE_CAMELLIA:
+        return (key_length == 16 || key_length == 24 || key_length == 32);
+    case PSA_KEY_TYPE_DES:
+        return (key_length == 8 || key_length == 16 || key_length == 24);
+    case PSA_KEY_TYPE_ARC4:
+        return key_length >= 1;
+    default:
+        return false; /* Other key types are not supported */
+    }
+}
+
 /*!
  * \defgroup public Public functions
  *
@@ -50,35 +111,37 @@ enum tfm_crypto_err_t tfm_crypto_get_key(psa_key_slot_t key,
                                          size_t data_size,
                                          size_t *data_length)
 {
+    struct tfm_crypto_key_storage_s *key_store;
     size_t i;
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key_storage[key].in_use == TFM_CRYPTO_NOT_IN_USE) {
+    if (key_store->in_use == TFM_CRYPTO_NOT_IN_USE) {
         return TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT;
     }
 
     /* Check that usage is permitted for this key */
-    if ((usage & key_storage[key].policy.usage) != usage) {
+    if ((usage & key_store->policy.usage) != usage) {
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
     }
 
     /* Check that alg is compatible with this key */
-    if (alg != 0 && alg != key_storage[key].policy.alg) {
+    if (alg != 0 && alg != key_store->policy.alg) {
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
     }
 
-    if (key_storage[key].data_length > data_size) {
+    if (key_store->data_length > data_size) {
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    for (i = 0; i < key_storage[key].data_length; i++) {
-        data[i] = key_storage[key].data[i];
+    for (i = 0; i < key_store->data_length; i++) {
+        data[i] = key_store->data[i];
     }
 
-    *data_length = key_storage[key].data_length;
+    *data_length = key_store->data_length;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -89,6 +152,7 @@ enum tfm_crypto_err_t tfm_crypto_import_key(psa_key_slot_t key,
                                             size_t data_length)
 {
     enum tfm_crypto_err_t err;
+    struct tfm_crypto_key_storage_s *key_store;
     size_t i;
 
     err = tfm_crypto_memory_check((uint8_t *)data, data_length,
@@ -97,39 +161,42 @@ enum tfm_crypto_err_t tfm_crypto_import_key(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key_storage[key].in_use != TFM_CRYPTO_NOT_IN_USE) {
+    if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
         return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
     }
 
-    if (data_length > TFM_CRYPTO_MAX_KEY_LENGTH) {
+    if (!key_type_is_supported(type, data_length)) {
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
-    key_storage[key].in_use = TFM_CRYPTO_IN_USE;
-    key_storage[key].type = type;
+    key_store->in_use = TFM_CRYPTO_IN_USE;
+    key_store->type = type;
 
     for (i=0; i<data_length; i++) {
-        key_storage[key].data[i] = data[i];
+        key_store->data[i] = data[i];
     }
 
-    key_storage[key].data_length = data_length;
+    key_store->data_length = data_length;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
 enum tfm_crypto_err_t tfm_crypto_destroy_key(psa_key_slot_t key)
 {
+    struct tfm_crypto_key_storage_s *key_store;
     uint32_t i;
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    volatile uint8_t *p_mem = (uint8_t *) &(key_storage[key]);
+    volatile uint8_t *p_mem = (uint8_t *)key_store;
     uint32_t size_mem = sizeof(struct tfm_crypto_key_storage_s);
 
     /* memset the key_storage */
@@ -138,7 +205,7 @@ enum tfm_crypto_err_t tfm_crypto_destroy_key(psa_key_slot_t key)
     }
 
     /* Set default values */
-    key_storage[key].in_use = TFM_CRYPTO_NOT_IN_USE;
+    key_store->in_use = TFM_CRYPTO_NOT_IN_USE;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -148,6 +215,7 @@ enum tfm_crypto_err_t tfm_crypto_get_key_information(psa_key_slot_t key,
                                                      size_t *bits)
 {
     enum tfm_crypto_err_t err;
+    struct tfm_crypto_key_storage_s *key_store;
 
     err = tfm_crypto_memory_check(type, sizeof(psa_key_type_t),
                                   TFM_MEMORY_ACCESS_RW);
@@ -160,17 +228,22 @@ enum tfm_crypto_err_t tfm_crypto_get_key_information(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    /* Initialise output parameters contents to zero */
+    *type = (psa_key_type_t) 0;
+    *bits = (size_t)0;
+
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key_storage[key].in_use == TFM_CRYPTO_NOT_IN_USE) {
+    if (key_store->in_use == TFM_CRYPTO_NOT_IN_USE) {
         return TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT;
     }
 
     /* Get basic metadata */
-    *type = key_storage[key].type;
-    *bits = PSA_BYTES_TO_BITS(key_storage[key].data_length);
+    *type = key_store->type;
+    *bits = PSA_BYTES_TO_BITS(key_store->data_length);
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -294,15 +367,12 @@ enum tfm_crypto_err_t tfm_crypto_set_key_policy(psa_key_slot_t key,
                                                 const psa_key_policy_t *policy)
 {
     enum tfm_crypto_err_t err;
+    struct tfm_crypto_key_storage_s *key_store;
 
     err = tfm_crypto_memory_check((psa_key_policy_t *)policy,
                                   sizeof(psa_key_policy_t),
                                   TFM_MEMORY_ACCESS_RO);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -316,14 +386,19 @@ enum tfm_crypto_err_t tfm_crypto_set_key_policy(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     /* Changing the policy of an occupied slot is not permitted as
      * this is a requirement of the PSA Crypto API
      */
-    if (key_storage[key].in_use != TFM_CRYPTO_NOT_IN_USE) {
+    if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
         return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
     }
 
-    key_storage[key].policy = *policy;
+    key_store->policy = *policy;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -332,6 +407,7 @@ enum tfm_crypto_err_t tfm_crypto_get_key_policy(psa_key_slot_t key,
                                                 psa_key_policy_t *policy)
 {
     enum tfm_crypto_err_t err;
+    struct tfm_crypto_key_storage_s *key_store;
 
     err = tfm_crypto_memory_check(policy, sizeof(psa_key_policy_t),
                                   TFM_MEMORY_ACCESS_RW);
@@ -339,11 +415,12 @@ enum tfm_crypto_err_t tfm_crypto_get_key_policy(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    *policy = key_storage[key].policy;
+    *policy = key_store->policy;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -351,9 +428,7 @@ enum tfm_crypto_err_t tfm_crypto_get_key_policy(psa_key_slot_t key,
 enum tfm_crypto_err_t tfm_crypto_set_key_lifetime(psa_key_slot_t key,
                                                   psa_key_lifetime_t lifetime)
 {
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
+    struct tfm_crypto_key_storage_s *key_store;
 
     /* Check that the lifetime is valid */
     if (lifetime != PSA_KEY_LIFETIME_VOLATILE
@@ -362,10 +437,15 @@ enum tfm_crypto_err_t tfm_crypto_set_key_lifetime(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     /* TF-M Crypto service does not support changing the lifetime of an occupied
      * slot.
      */
-    if (key_storage[key].in_use != TFM_CRYPTO_NOT_IN_USE) {
+    if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
         return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
     }
 
@@ -374,7 +454,7 @@ enum tfm_crypto_err_t tfm_crypto_set_key_lifetime(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
-    key_storage[key].lifetime = lifetime;
+    key_store->lifetime = lifetime;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
@@ -383,6 +463,7 @@ enum tfm_crypto_err_t tfm_crypto_get_key_lifetime(psa_key_slot_t key,
                                                   psa_key_lifetime_t *lifetime)
 {
     enum tfm_crypto_err_t err;
+    struct tfm_crypto_key_storage_s *key_store;
 
     err = tfm_crypto_memory_check(lifetime, sizeof(psa_key_lifetime_t),
                                   TFM_MEMORY_ACCESS_RW);
@@ -390,11 +471,12 @@ enum tfm_crypto_err_t tfm_crypto_get_key_lifetime(psa_key_slot_t key,
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (key >= TFM_CRYPTO_KEY_STORAGE_NUM) {
+    key_store = get_key_store(key);
+    if (key_store == NULL) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    *lifetime = key_storage[key].lifetime;
+    *lifetime = key_store->lifetime;
 
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }

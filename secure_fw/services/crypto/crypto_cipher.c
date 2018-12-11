@@ -18,13 +18,23 @@
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
 
+/**
+ * \def CRYPTO_CIPHER_MAX_KEY_LENGTH
+ *
+ * \brief Specifies the maximum key length supported by the
+ *        Cipher operations in this implementation
+ */
+#ifndef CRYPTO_CIPHER_MAX_KEY_LENGTH
+#define CRYPTO_CIPHER_MAX_KEY_LENGTH (32)
+#endif
+
 static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                            psa_cipher_operation_t *operation,
                                            psa_key_slot_t key,
                                            psa_algorithm_t alg,
                                            enum engine_cipher_mode_t c_mode)
 {
-    uint8_t key_data[TFM_CRYPTO_MAX_KEY_LENGTH];
+    uint8_t key_data[CRYPTO_CIPHER_MAX_KEY_LENGTH];
     size_t key_size;
     psa_key_type_t key_type = PSA_KEY_TYPE_NONE;
     psa_status_t status = PSA_SUCCESS;
@@ -48,6 +58,16 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     /* Access the key module to retrieve key related information */
     err = tfm_crypto_get_key_information(key, &key_type, &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return err;
+    }
+
+    /* Check if it's a raw data key type */
+    if (key_type == PSA_KEY_TYPE_RAW_DATA) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
+    }
+
+    /* Check compatibility between key and algorithm */
+    if ((key_type == PSA_KEY_TYPE_ARC4) && (alg != PSA_ALG_ARC4)) {
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -101,7 +121,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                              usage,
                              alg,
                              key_data,
-                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             CRYPTO_CIPHER_MAX_KEY_LENGTH,
                              &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
@@ -260,6 +280,9 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
+    /* Initialise the output length to zero */
+    *output_length = 0;
+
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
                                       operation->handle,
@@ -278,14 +301,19 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
         /* This call is used to set the IV on the object */
         err = tfm_crypto_cipher_set_iv(operation, input, input_length);
 
-        *output_length = 0;
-
         return err;
     }
 
     /* If the key is not set, setup phase has not been completed */
     if (ctx->key_set == 0) {
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+    }
+
+    /* FIXME: The implementation currently expects to work only on blocks
+     *        of input data whose length is equal to the block size
+     */
+    if (input_length > output_size) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     /* Update the cipher output with the input chunk on the engine */
@@ -337,6 +365,13 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
+    }
+
+    /* Check that the output buffer is large enough for up to one block size of
+     * output data.
+     */
+    if (output_size < ctx->block_size) {
+        return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     /* Finalise the operation on the crypto engine */

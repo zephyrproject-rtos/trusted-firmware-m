@@ -12,6 +12,7 @@
 
 #define BIT_SIZE_TEST_KEY (128)
 #define BYTE_SIZE_TEST_KEY (BIT_SIZE_TEST_KEY/8)
+#define TEST_KEY_SLOT (1)
 
 /* List of tests */
 static void tfm_crypto_test_5001(struct test_result_t *ret);
@@ -39,7 +40,7 @@ static void tfm_crypto_test_5001(struct test_result_t *ret)
 {
     enum tfm_crypto_err_t err;
     uint32_t i = 0;
-    const psa_key_slot_t slot = 0;
+    const psa_key_slot_t slot = TEST_KEY_SLOT;
     uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;

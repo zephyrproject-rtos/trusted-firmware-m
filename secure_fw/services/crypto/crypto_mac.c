@@ -15,6 +15,16 @@
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
 
+/**
+ * \def CRYPTO_HMAC_MAX_KEY_LENGTH
+ *
+ * \brief Specifies the maximum key length supported by the
+ *        HMAC operations in this implementation
+ */
+#ifndef CRYPTO_HMAC_MAX_KEY_LENGTH
+#define CRYPTO_HMAC_MAX_KEY_LENGTH (32)
+#endif
+
 static void mac_zeroize(void *data, size_t size)
 {
     tfm_memset(data, 0, size);
@@ -54,7 +64,7 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
     enum tfm_crypto_err_t err;
     psa_key_type_t key_type;
     size_t key_size;
-    uint8_t key_data[TFM_CRYPTO_MAX_KEY_LENGTH];
+    uint8_t key_data[CRYPTO_HMAC_MAX_KEY_LENGTH];
     uint8_t hashed_key[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
     size_t block_size;
     uint8_t ipad[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
@@ -86,7 +96,7 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
                              usage,
                              alg,
                              key_data,
-                             TFM_CRYPTO_MAX_KEY_LENGTH,
+                             CRYPTO_HMAC_MAX_KEY_LENGTH,
                              &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
