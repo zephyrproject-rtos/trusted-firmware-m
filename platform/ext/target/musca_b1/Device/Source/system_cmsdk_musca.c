@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * This file is derivative of CMSIS V5.01 \Device\ARM\ARMCM33\Source\system_ARMCM33.c
+ * https://github.com/ARM-software/CMSIS_5/tree/5.0.1
  * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
  */
 

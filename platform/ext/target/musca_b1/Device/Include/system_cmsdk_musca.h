@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/*
+ *
  * This file is derivative of CMSIS V5.01 Device\_Template_Vendor\Vendor\Device\Include\Device.h
+ * https://github.com/ARM-software/CMSIS_5/tree/5.0.1
+ * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
  */
 
 #ifndef __SYSTEM_CMSDK_MUSCA_H__
