@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,71 +15,55 @@
   "entry_point": "main",
   "stack_size": "0x2000",
   "heap_size": "0x0400",
-  "tfm_init_symbol": "sst_am_prepare",
+  "tfm_init_symbol": "tfm_sst_init",
   "secure_functions": [
     {
-      "sfid": "SST_AM_CREATE_SFID",
-      "signal": "SST_AM_CREATE",
-      "tfm_symbol": "sst_am_create",
+      "sfid": "TFM_SST_SET_SFID",
+      "signal": "TFM_SST_SET",
+      "tfm_symbol": "tfm_sst_set",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "SST_AM_GET_INFO_SFID",
-      "signal": "SST_AM_GET_INFO",
-      "tfm_symbol": "sst_am_get_info",
+      "sfid": "TFM_SST_GET_SFID",
+      "signal": "TFM_SST_GET",
+      "tfm_symbol": "tfm_sst_get",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "SST_AM_GET_ATTRIBUTES_SFID",
-      "signal": "SST_AM_GET_ATTRIBUTES",
-      "tfm_symbol": "sst_am_get_attributes",
+      "sfid": "TFM_SST_GET_INFO_SFID",
+      "signal": "TFM_SST_GET_INFO",
+      "tfm_symbol": "tfm_sst_get_info",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "SST_AM_SET_ATTRIBUTES_SFID",
-      "signal": "SST_AM_SET_ATTRIBUTES",
-      "tfm_symbol": "sst_am_set_attributes",
+      "sfid": "TFM_SST_REMOVE_SFID",
+      "signal": "TFM_SST_REMOVE",
+      "tfm_symbol": "tfm_sst_remove",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
-      "sfid": "SST_AM_READ_SFID",
-      "signal": "SST_AM_READ",
-      "tfm_symbol": "sst_am_read",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
-      "sfid": "SST_AM_WRITE_SFID",
-      "signal": "SST_AM_WRITE",
-      "tfm_symbol": "sst_am_write",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "strict"
-    },
-    {
-      "sfid": "SST_AM_DELETE_SFID",
-      "signal": "SST_AM_DELETE",
-      "tfm_symbol": "sst_am_delete",
+      "sfid": "TFM_SST_GET_SUPPORT_SFID",
+      "signal": "TFM_SST_GET_SUPPORT",
+      "tfm_symbol": "tfm_sst_get_support",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     }
   ],
   "source_files": [
-    "sst_utils.c",
     "sst_encrypted_object.c",
     "sst_object_system.c",
-    "sst_asset_management.c",
-    "assets/sst_asset_defs.c",
+    "sst_object_table.c",
+    "sst_utils.c",
+    "tfm_protected_storage.c",
     "crypto/sst_crypto_interface.c",
     "flash/sst_flash.c",
     "flash_fs/sst_flash_fs.c",

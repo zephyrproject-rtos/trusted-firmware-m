@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,27 +9,37 @@
 
 #include <stdio.h>
 
-const char *sst_err_to_str(enum psa_sst_err_t err)
+const char *psa_ps_status_to_str(psa_ps_status_t status)
 {
-    switch (err) {
-    case PSA_SST_ERR_SUCCESS:
-        return "PSA_SST_ERR_SUCCESS";
-    case PSA_SST_ERR_ASSET_NOT_PREPARED:
-        return "PSA_SST_ERR_ASSET_NOT_PREPARED";
-    case PSA_SST_ERR_ASSET_NOT_FOUND:
-        return "PSA_SST_ERR_ASSET_NOT_FOUND";
-    case PSA_SST_ERR_PARAM_ERROR:
-        return "PSA_SST_ERR_PARAM_ERROR";
-    case PSA_SST_ERR_STORAGE_SYSTEM_FULL:
-        return "PSA_SST_ERR_STORAGE_SYSTEM_FULL";
-    case PSA_SST_ERR_SYSTEM_ERROR:
-        return "PSA_SST_ERR_SYSTEM_ERROR";
-    case PSA_SST_ERR_FORCE_INT_SIZE:
-        return "PSA_SST_ERR_FORCE_INT_SIZE";
-    /* default:  The default is not defined intentionally to force the
-     *           compiler to check that all the enumeration values are
-     *           covered in the switch.
-     */
+    switch (status) {
+    case PSA_PS_SUCCESS:
+        return "PSA_PS_SUCCESS";
+    case PSA_PS_ERROR_WRITE_ONCE:
+        return "PSA_PS_ERROR_WRITE_ONCE";
+    case PSA_PS_ERROR_FLAGS_NOT_SUPPORTED:
+        return "PSA_PS_ERROR_FLAGS_NOT_SUPPORTED";
+    case PSA_PS_ERROR_INSUFFICIENT_SPACE:
+        return "PSA_PS_ERROR_INSUFFICIENT_SPACE";
+    case PSA_PS_ERROR_STORAGE_FAILURE:
+        return "PSA_PS_ERROR_STORAGE_FAILURE";
+    case PSA_PS_ERROR_UID_NOT_FOUND:
+        return "PSA_PS_ERROR_UID_NOT_FOUND";
+    case PSA_PS_ERROR_INCORRECT_SIZE:
+        return "PSA_PS_ERROR_INCORRECT_SIZE";
+    case PSA_PS_ERROR_OFFSET_INVALID:
+        return "PSA_PS_ERROR_OFFSET_INVALID";
+    case PSA_PS_ERROR_INVALID_ARGUMENT:
+        return "PSA_PS_ERROR_INVALID_ARGUMENT";
+    case PSA_PS_ERROR_DATA_CORRUPT:
+        return "PSA_PS_ERROR_DATA_CORRUPT";
+    case PSA_PS_ERROR_AUTH_FAILED:
+        return "PSA_PS_ERROR_AUTH_FAILED";
+    case PSA_PS_ERROR_OPERATION_FAILED:
+        return "PSA_PS_ERROR_OPERATION_FAILED";
+    case PSA_PS_ERROR_NOT_SUPPORTED:
+        return "PSA_PS_ERROR_NOT_SUPPORTED";
+    default:
+        return "Unknown error";
     }
 }
 

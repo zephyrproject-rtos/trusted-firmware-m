@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,36 +27,44 @@ endif()
 if (NOT DEFINED ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_SECURE_STORAGE_SERVICE_TESTS is undefined. ")
 elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-	list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/s_test_helpers.c"
-			"${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c"
-			"${SECURE_STORAGE_TEST_DIR}/secure/sst_reliability_testsuite.c"
+	if (NOT DEFINED PSA_PROTECTED_STORAGE)
+		message(FATAL_ERROR "Incomplete build configuration: PSA_PROTECTED_STORAGE is undefined.")
+
+	elseif (PSA_PROTECTED_STORAGE)
+		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS PSA_PROTECTED_STORAGE)
+		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS PSA_PROTECTED_STORAGE)
+
+	else()
+		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c"
+				"${SECURE_STORAGE_TEST_DIR}/secure/sst_reliability_testsuite.c"
+			)
+		if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
+			list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_rollback_protection_testsuite.c"
+						"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
+		endif()
+
+		list(APPEND ALL_SRC_C_NS
+				"${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
+				"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c"
 		)
-	if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
-		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_rollback_protection_testsuite.c"
-					"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
-	endif()
 
-	list(APPEND ALL_SRC_C_NS
-			"${SECURE_STORAGE_TEST_DIR}/non_secure/ns_test_helpers.c"
-			"${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_interface_testsuite.c"
-	)
+		if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
+			message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
+		elseif (TFM_NS_CLIENT_IDENTIFICATION)
+			list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_policy_testsuite.c")
+			set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS TFM_NS_CLIENT_IDENTIFICATION)
+		endif()
 
-	if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
-	elseif (TFM_NS_CLIENT_IDENTIFICATION)
-		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_policy_testsuite.c")
-		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS TFM_NS_CLIENT_IDENTIFICATION)
-	endif()
+		if (NOT DEFINED TFM_PARTITION_TEST_SST)
+			message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
+		elseif (TFM_PARTITION_TEST_SST AND TFM_NS_CLIENT_IDENTIFICATION)
+			list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
+		endif()
 
-	if (NOT DEFINED TFM_PARTITION_TEST_SST)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
-	elseif (TFM_PARTITION_TEST_SST AND TFM_NS_CLIENT_IDENTIFICATION)
-		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/sst_ns_ref_access_testsuite.c")
-	endif()
-
-	if (SST_ENABLE_PARTIAL_ASSET_RW)
-		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
-		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
+		if (SST_ENABLE_PARTIAL_ASSET_RW)
+			set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
+			set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENABLE_PARTIAL_ASSET_RW)
+		endif()
 	endif()
 
 	if (NOT SST_RAM_FS AND NOT REFERENCE_PLATFORM)

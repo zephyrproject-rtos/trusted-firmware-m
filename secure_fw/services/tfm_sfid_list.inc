@@ -11,13 +11,11 @@
 #define __TFM_SFID_LIST_INC__
 
     /******** TFM_SP_STORAGE ********/
-    {sst_am_create, SST_AM_CREATE_SFID},
-    {sst_am_get_info, SST_AM_GET_INFO_SFID},
-    {sst_am_get_attributes, SST_AM_GET_ATTRIBUTES_SFID},
-    {sst_am_set_attributes, SST_AM_SET_ATTRIBUTES_SFID},
-    {sst_am_read, SST_AM_READ_SFID},
-    {sst_am_write, SST_AM_WRITE_SFID},
-    {sst_am_delete, SST_AM_DELETE_SFID},
+    {tfm_sst_set, TFM_SST_SET_SFID},
+    {tfm_sst_get, TFM_SST_GET_SFID},
+    {tfm_sst_get_info, TFM_SST_GET_INFO_SFID},
+    {tfm_sst_remove, TFM_SST_REMOVE_SFID},
+    {tfm_sst_get_support, TFM_SST_GET_SUPPORT_SFID},
 
     /******** TFM_SP_AUDIT_LOG ********/
     {audit_core_retrieve_record, TFM_AUDIT_RETRIEVE_RECORD_SFID},

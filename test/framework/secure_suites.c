@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,8 +16,6 @@
 #include "test/suites/invert/secure/invert_s_tests.h"
 #include "test/suites/crypto/secure/crypto_s_tests.h"
 
-#include "secure_fw/services/secure_storage/sst_object_system.h"
-
 static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
 #ifdef SERVICES_TEST_S
@@ -30,6 +28,8 @@ static struct test_suite_t test_suites[] = {
 
 #ifdef SERVICES_TEST_S
     /* List test cases which compliant with level 1 isolation */
+
+#ifndef PSA_PROTECTED_STORAGE
     /* Secure SST test cases */
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
@@ -37,6 +37,7 @@ static struct test_suite_t test_suites[] = {
 #if defined(SST_ROLLBACK_PROTECTION) && defined(SST_ENCRYPTION)
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
+#endif /* !PSA_PROTECTED_STORAGE */
 
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
@@ -63,14 +64,12 @@ static void setup_integ_test(void)
      */
 }
 
-#if TFM_LVL == 1
 static void tear_down_integ_test(void)
 {
-    /* Leave the SST area clean after execute the tests */
-    sst_system_wipe_all();
-    sst_system_prepare();
+    /* Left empty intentionally, currently implemented
+     * test suites require no tear down
+     */
 }
-#endif /* TFM_LVL == 1 */
 
 void start_integ_test(void)
 {
@@ -78,7 +77,5 @@ void start_integ_test(void)
     integ_test("Secure",
                test_suites,
                sizeof(test_suites)/sizeof(test_suites[0]));
-#if TFM_LVL == 1
     tear_down_integ_test();
-#endif /* TFM_LVL == 1 */
 }

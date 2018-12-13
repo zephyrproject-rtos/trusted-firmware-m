@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +12,7 @@
 
 /******** TFM_SP_STORAGE ********/
 PARTITION_DECLARE(TFM_SP_STORAGE, SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED);
-PARTITION_ADD_INIT_FUNC(TFM_SP_STORAGE, sst_am_prepare);
+PARTITION_ADD_INIT_FUNC(TFM_SP_STORAGE, tfm_sst_init);
 
 /******** TFM_SP_AUDIT_LOG ********/
 PARTITION_DECLARE(TFM_SP_AUDIT_LOG, SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED);

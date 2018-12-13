@@ -1,152 +1,105 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "tfm_sst_veneers.h"
-#include "tfm_sst_defs.h"
+#include "psa_protected_storage.h"
+
 #include "tfm_ns_lock.h"
+#include "tfm_sst_defs.h"
+#include "tfm_sst_veneers.h"
 
-/* This define uses the TF-M invalid client ID to specify a direct client read,
- * as that it can not be used to identify a client.
- */
-#define SST_DIRECT_CLIENT_READ  TFM_INVALID_CLIENT_ID
-
-enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token,
-                                  uint32_t token_size)
+psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
+                           uint32_t data_length,
+                           const void *p_data,
+                           psa_ps_create_flags_t create_flags)
 {
-    struct tfm_sst_token_t s_token;
+    enum tfm_sst_err_t err;
 
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_set,
+                               (uint32_t)&uid,
+                               (uint32_t)data_length,
+                               (uint32_t)p_data,
+                               (uint32_t)create_flags);
 
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_create,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                0, 0);
+    return TFM_SST_PSA_RETURN(err);
 }
 
-enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid,
-                                    const uint8_t *token,
-                                    uint32_t token_size,
-                                    struct psa_sst_asset_info_t *info)
+psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
+                           uint32_t data_offset,
+                           uint32_t data_length,
+                           void *p_data)
 {
-    struct tfm_sst_token_t s_token;
+    enum tfm_sst_err_t err;
 
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_get,
+                               (uint32_t)&uid,
+                               (uint32_t)data_offset,
+                               (uint32_t)data_length,
+                               (uint32_t)p_data);
 
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_get_info,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                (uint32_t)info,
-                                0);
+    return TFM_SST_PSA_RETURN(err);
 }
 
-enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid,
-                                          const uint8_t *token,
-                                          uint32_t token_size,
-                                          struct psa_sst_asset_attrs_t *attrs)
+psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)
 {
-    struct tfm_sst_token_t s_token;
+    enum tfm_sst_err_t err;
 
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_get_info,
+                               (uint32_t)&uid,
+                               (uint32_t)p_info,
+                               (uint32_t)0,
+                               (uint32_t)0);
 
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_get_attributes,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                (uint32_t)attrs,
-                                0);
+    return TFM_SST_PSA_RETURN(err);
 }
 
-enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid,
-                                      const uint8_t *token,
-                                      uint32_t token_size,
-                                      const struct psa_sst_asset_attrs_t *attrs)
+psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
 {
-    struct tfm_sst_token_t s_token;
+    enum tfm_sst_err_t err;
 
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
+    err = tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_remove,
+                               (uint32_t)&uid,
+                               (uint32_t)0,
+                               (uint32_t)0,
+                               (uint32_t)0);
 
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_set_attributes,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                (uint32_t)attrs,
-                                0);
+    return TFM_SST_PSA_RETURN(err);
 }
 
-enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid,
-                                const uint8_t *token,
-                                uint32_t token_size,
-                                uint32_t size,
-                                uint32_t offset,
-                                uint8_t *data)
+psa_ps_status_t psa_ps_create(psa_ps_uid_t uid, uint32_t size,
+                              psa_ps_create_flags_t create_flags)
 {
-    struct tfm_sst_token_t s_token;
-    struct tfm_sst_buf_t   s_data;
-
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
-
-    /* Pack buffer information in the buffer structure */
-    s_data.size = size;
-    s_data.offset = offset;
-    s_data.data = data;
-
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_read,
-                                SST_DIRECT_CLIENT_READ,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                (uint32_t)&s_data);
+    (void)uid, (void)size, (void)create_flags;
+    return PSA_PS_ERROR_NOT_SUPPORTED;
 }
 
-enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid,
-                                 const uint8_t *token,
-                                 uint32_t token_size,
-                                 uint32_t size,
-                                 uint32_t offset,
-                                 const uint8_t *data)
+psa_ps_status_t psa_ps_set_extended(psa_ps_uid_t uid, uint32_t data_offset,
+                                    uint32_t data_length, const void *p_data)
 {
-    struct tfm_sst_token_t s_token;
-    struct tfm_sst_buf_t   s_data;
-
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
-
-    /* Pack buffer information in the buffer structure */
-    s_data.size = size;
-    s_data.offset = offset;
-    s_data.data = (uint8_t *)data;
-
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_write,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                (uint32_t)&s_data,
-                                0);
+    (void)uid, (void)data_offset, (void)data_length, (void)p_data;
+    return PSA_PS_ERROR_NOT_SUPPORTED;
 }
 
-enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid,
-                                  const uint8_t *token,
-                                  uint32_t token_size)
+uint32_t psa_ps_get_support(void)
 {
-    struct tfm_sst_token_t s_token;
+    uint32_t support_flags;
 
-    /* Pack the token information in the token structure */
-    s_token.token = token;
-    s_token.token_size = token_size;
+    /* Initialise support_flags to a sensible default, to avoid returning an
+     * uninitialised value in case the secure function fails.
+     */
+    support_flags = 0;
 
-    return tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_delete,
-                                asset_uuid,
-                                (uint32_t)&s_token,
-                                0, 0);
+    /* The PSA API does not return an error, so any error from TF-M is
+     * ignored.
+     */
+    (void)tfm_ns_lock_dispatch((veneer_fn)tfm_sst_veneer_get_support,
+                               (uint32_t)&support_flags,
+                               (uint32_t)0,
+                               (uint32_t)0,
+                               (uint32_t)0);
+
+    return support_flags;
 }

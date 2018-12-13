@@ -1,21 +1,20 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __HELPERS_H__
-#define __HELPERS_H__
+#ifndef __TEST_FRAMEWORK_HELPERS_H__
+#define __TEST_FRAMEWORK_HELPERS_H__
+
+#include <stdint.h>
+#include "psa_protected_storage.h"
+#include "test_framework.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
-#include "tfm_sst_defs.h"
-#include "secure_fw/services/secure_storage/sst_asset_management.h"
-#include "test_framework.h"
 
 enum serial_color_t {
     BLACK = 0,
@@ -29,13 +28,13 @@ enum serial_color_t {
 };
 
 /**
- * \brief Translates psa_sst_err_t into a string.
+ * \brief Translates psa_ps_status_t into a string.
  *
- * \param[in] err  psa_sst_err_t error value.
+ * \param[in] err  psa_ps_status_t status value.
  *
- * \return psa_sst_err_t as string.
+ * \return psa_ps_status_t as string.
  */
-const char *sst_err_to_str(enum psa_sst_err_t err);
+const char *psa_ps_status_to_str(psa_ps_status_t status);
 
 /**
  * \brief Translates asset permissions into a string.
@@ -59,4 +58,4 @@ void printf_set_color(enum serial_color_t color_id);
 }
 #endif
 
-#endif /* __HELPERS_H__ */
+#endif /* __TEST_FRAMEWORK_HELPERS_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,18 +17,6 @@ extern "C" {
 #define CONCAT_(x, y) x ## y
 #define CONCAT(x, y) CONCAT_(x, y)
 
-/*!
- * \struct sst_test_buf_t
- *
- * \brief Structure to store test data information to read/write from/to asset.
- *
- */
-struct sst_test_buf_t {
-    uint8_t *data;   /*!< Address of input/output data */
-    uint32_t size;   /*!< Size of input/output data */
-    uint32_t offset; /*!< Offset within asset */
-};
-
 /**
  * Several tests use a buffer to read back data from an asset. This buffer is
  * larger than the size of the asset data by PADDING_SIZE bytes. This allows
@@ -41,7 +29,7 @@ struct sst_test_buf_t {
  * Then a correct and successful read would give this result: "XXXXAAAAXXXX"
  * (Assuming a PADDING_SIZE of 8)
  */
-#define BUFFER_SIZE SST_ASSET_MAX_SIZE_AES_KEY_192
+#define BUFFER_SIZE 24
 #define PADDING_SIZE 8
 #define HALF_PADDING_SIZE 4
 

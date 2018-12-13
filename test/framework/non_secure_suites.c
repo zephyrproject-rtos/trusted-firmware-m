@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,6 +35,8 @@ static struct test_suite_t test_suites[] = {
 
 #ifdef SERVICES_TEST_NS
     /* List test cases which compliant with level 1 isolation */
+
+#ifndef PSA_PROTECTED_STORAGE
     /* Non-secure SST test cases */
     {&register_testsuite_ns_sst_interface, 0, 0, 0},
 
@@ -47,6 +49,7 @@ static struct test_suite_t test_suites[] = {
 #endif /* TFM_PARTITION_TEST_SST */
 
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
+#endif /* !PSA_PROTECTED_STORAGE */
 
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},

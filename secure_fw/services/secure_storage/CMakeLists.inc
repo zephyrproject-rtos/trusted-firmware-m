@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -61,21 +61,21 @@ if (ENABLE_SECURE_STORAGE)
 
 	set (SECURE_STORAGE_C_SRC
 		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
-		"${SECURE_STORAGE_DIR}/sst_asset_management.c"
-		"${SECURE_STORAGE_DIR}/sst_object_system.c"
-		"${SECURE_STORAGE_DIR}/sst_object_table.c"
-		"${SECURE_STORAGE_DIR}/sst_utils.c"
-		"${SECURE_STORAGE_DIR}/assets/sst_asset_defs.c"
-		"${SECURE_STORAGE_DIR}/flash/sst_flash.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c")
+		"${SECURE_STORAGE_DIR}/tfm_protected_storage.c"
+		# "${SECURE_STORAGE_DIR}/sst_object_system.c"
+		# "${SECURE_STORAGE_DIR}/sst_object_table.c"
+		# "${SECURE_STORAGE_DIR}/sst_utils.c"
+		# "${SECURE_STORAGE_DIR}/flash/sst_flash.c"
+		# "${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
+		# "${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
+		# "${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c"
+	)
 
 	if (SST_ENCRYPTION)
-		list(APPEND SECURE_STORAGE_C_SRC
-			"${SECURE_STORAGE_DIR}/crypto/sst_crypto_interface.c"
-			"${SECURE_STORAGE_DIR}/sst_encrypted_object.c"
-			)
+		# list(APPEND SECURE_STORAGE_C_SRC
+		# 	"${SECURE_STORAGE_DIR}/crypto/sst_crypto_interface.c"
+		# 	"${SECURE_STORAGE_DIR}/sst_encrypted_object.c"
+		# 	)
 		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
 		set_property(DIRECTORY ${TEST_DIR} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
 
@@ -83,8 +83,8 @@ if (ENABLE_SECURE_STORAGE)
 			if (NOT REGRESSION OR TFM_LVL GREATER 1)
 				# In case of regression test executed in TFM level 1, the SST rollback test suite has
 				# its own implementation of sst_nv_counters intefaces to be able to test different scenarios.
-				list (APPEND SECURE_STORAGE_C_SRC
-					"${SECURE_STORAGE_DIR}/nv_counters/sst_nv_counters.c")
+				# list (APPEND SECURE_STORAGE_C_SRC
+				# 	"${SECURE_STORAGE_DIR}/nv_counters/sst_nv_counters.c")
 			endif()
 			set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ROLLBACK_PROTECTION)
 		endif()

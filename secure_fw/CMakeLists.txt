@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -142,16 +142,16 @@ function(set_up_secure_fw_build)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} DAUTH_CHIP_DEFAULT APPEND)
 
 	if (REGRESSION OR CORE_TEST)
-		if (DEFINED TFM_PARTITION_TEST_SST AND TFM_PARTITION_TEST_SST)
+		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
 			#The test service veneers in the tfm_secure_tests library may not be
 			#referenced in the secure binary so the veneer objects are explicitly loaded
 			#from the secure tests library. However by generating the veneer files from
 			#the manifests, all the iovec interfaced veneers are in a single file in the
 			#secure_fw directory. The core test partitions use the veneers with the
-			#iovec API, so we only need the explicit load in case the SST test partition
-			#is present.
-			#FIXME Remove the explicit load and the above comment once the SST test
-			#partition uses the generated veneers.
+			#iovec API, so we only need the explicit load in case the secure client test
+			#partition is present.
+			#FIXME Remove the explicit load and the above comment once the secure client
+			#test partition uses the generated veneers.
 			if(${COMPILER} STREQUAL "ARMCLANG")
 				target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
 			elseif(${COMPILER} STREQUAL "GNUARM")

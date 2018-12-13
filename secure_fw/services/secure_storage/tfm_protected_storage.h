@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __TFM_SST_VENEERS_H__
-#define __TFM_SST_VENEERS_H__
+#ifndef __TFM_PROTECTED_STORAGE_H__
+#define __TFM_PROTECTED_STORAGE_H__
 
 #include <stdint.h>
 
@@ -18,9 +18,24 @@ extern "C" {
 #endif
 
 /**
- * \brief Creates a new or modifies an existing asset. (Veneer function)
+ * \brief Initializes the secure storage system.
  *
- * \param[in] uid           The unique identifier for the data
+ * \return A status indicating the success/failure of the operation as specified
+ *         in \ref tfm_sst_err_t
+ *
+ * \retval TFM_SST_ERR_SUCCESS            The operation completed successfully
+ * \retval TFM_SST_ERROR_STORAGE_FAILURE  The operation failed because the
+ *                                        storage system initialization has
+ *                                        failed (fatal error)
+ * \retval TFM_SST_ERR_OPERATION_FAILED   The operation failed because of an
+ *                                        unspecified internal failure
+ */
+enum tfm_sst_err_t tfm_sst_init(void);
+
+/**
+ * \brief Creates a new or modifies an existing asset.
+ *
+ * \param[in] uid           Pointer to the unique identifier for the data
  * \param[in] data_length   The size in bytes of the data in `p_data`
  * \param[in] p_data        A buffer containing the data
  * \param[in] create_flags  The flags indicating the properties of the data
@@ -46,17 +61,17 @@ extern "C" {
  *                                          physical storage has failed (fatal
  *                                          error)
  * \retval TFM_SST_ERR_OPERATION_FAILED     The operation failed because of an
- *                                          unspecified internal failure.
+ *                                          unspecified internal failure
  */
-enum tfm_sst_err_t tfm_sst_veneer_set(const psa_ps_uid_t *uid,
-                                      uint32_t data_length,
-                                      const void *p_data,
-                                      psa_ps_create_flags_t create_flags);
+enum tfm_sst_err_t tfm_sst_set(const psa_ps_uid_t *uid,
+                               uint32_t data_length,
+                               const void *p_data,
+                               psa_ps_create_flags_t create_flags);
 
 /**
- * \brief Gets the asset data for the provided uid. (Veneer function)
+ * \brief Gets the asset data for the provided uid.
  *
- * \param[in]  uid          The unique identifier for the data
+ * \param[in]  uid          Pointer to the unique identifier for the data
  * \param[in]  data_offset  The offset within the data associated with the `uid`
  *                          to start retrieving data
  * \param[in]  data_length  The amount of data to read (and the minimum
@@ -82,21 +97,21 @@ enum tfm_sst_err_t tfm_sst_veneer_set(const psa_ps_uid_t *uid,
  *                                       error)
  * \retval TFM_SST_ERR_OPERATION_FAILED  The operation failed because of an
  *                                       unspecified internal failure
- * \retval TFM_SST_ERR_DATA_CORRUPT      The operation failed because of an
- *                                       authentication failure when attempting
- *                                       to get the key
- * \retval TFM_SST_ERR_AUTH_FAILED       The operation failed because of an
- *                                       unspecified internal failure
+ * \retval TFM_SST_ERR_DATA_CORRUPT      The operation failed because the data
+ *                                       associated with the UID was corrupt
+ * \retval TFM_SST_ERR_AUTH_FAILED       The operation failed because the data
+ *                                       associated with the UID failed
+ *                                       authentication
  */
-enum tfm_sst_err_t tfm_sst_veneer_get(const psa_ps_uid_t *uid,
-                                      uint32_t data_offset,
-                                      uint32_t data_length,
-                                      void *p_data);
+enum tfm_sst_err_t tfm_sst_get(const psa_ps_uid_t *uid,
+                               uint32_t data_offset,
+                               uint32_t data_length,
+                               void *p_data);
 
 /**
- * \brief Gets the metadata for the provided uid. (Veneer function)
+ * \brief Gets the metadata for the provided uid.
  *
- * \param[in]  uid     The unique identifier for the data
+ * \param[in]  uid     Pointer to the unique identifier for the data
  * \param[out] p_info  A pointer to the `psa_ps_info_t` struct that will be
  *                     populated with the metadata
  *
@@ -115,20 +130,19 @@ enum tfm_sst_err_t tfm_sst_veneer_get(const psa_ps_uid_t *uid,
  *                                       error)
  * \retval TFM_SST_ERR_OPERATION_FAILED  The operation failed because of an
  *                                       unspecified internal failure
- * \retval TFM_SST_ERR_DATA_CORRUPT      The operation failed because of an
- *                                       authentication failure when attempting
- *                                       to get the key
- * \retval TFM_SST_ERR_AUTH_FAILED       The operation failed because of an
- *                                       unspecified internal failure
+ * \retval TFM_SST_ERR_DATA_CORRUPT      The operation failed because the data
+ *                                       associated with the UID was corrupt
+ * \retval TFM_SST_ERR_AUTH_FAILED       The operation failed because the data
+ *                                       associated with the UID failed
+ *                                       authentication
  */
-enum tfm_sst_err_t tfm_sst_veneer_get_info(const psa_ps_uid_t *uid,
-                                           struct psa_ps_info_t *p_info);
+enum tfm_sst_err_t tfm_sst_get_info(const psa_ps_uid_t *uid,
+                                    struct psa_ps_info_t *p_info);
 
 /**
- * \brief Removes the provided uid and its associated data from storage. (Veneer
- *        function)
+ * \brief Removes the provided uid and its associated data from storage.
  *
- * \param[in] uid  The unique identifier for the data to be removed
+ * \param[in] uid  Pointer to the unique identifier for the data to be removed
  *
  * \return A status indicating the success/failure of the operation as specified
  *         in \ref tfm_sst_err_t
@@ -149,11 +163,11 @@ enum tfm_sst_err_t tfm_sst_veneer_get_info(const psa_ps_uid_t *uid,
  * \retval TFM_SST_ERR_OPERATION_FAILED  The operation failed because of an
  *                                       unspecified internal failure
  */
-enum tfm_sst_err_t tfm_sst_veneer_remove(const psa_ps_uid_t *uid);
+enum tfm_sst_err_t tfm_sst_remove(const psa_ps_uid_t *uid);
 
 /**
  * \brief Gets a bitmask with flags set for all of the optional features
- *        supported by the implementation. (Veneer function)
+ *        supported by the implementation.
  *
  * \param[out] support_flags  A pointer to a variable that will be populated
  *                            with a uint32_t bitmask value which contains all
@@ -167,10 +181,10 @@ enum tfm_sst_err_t tfm_sst_veneer_remove(const psa_ps_uid_t *uid);
  * \retval TFM_SST_ERR_OPERATION_FAILED  The operation failed because of an
  *                                       unspecified internal failure
  */
-enum tfm_sst_err_t tfm_sst_veneer_get_support(uint32_t *support_flags);
+enum tfm_sst_err_t tfm_sst_get_support(uint32_t *support_flags);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __TFM_SST_VENEERS_H__ */
+#endif /* __TFM_PROTECTED_STORAGE_H__ */

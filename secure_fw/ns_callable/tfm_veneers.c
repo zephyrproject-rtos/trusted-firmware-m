@@ -12,13 +12,11 @@
 #include "secure_fw/spm/spm_partition_defs.h"
 
 /******** TFM_SP_STORAGE ********/
-psa_status_t sst_am_create(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_get_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_get_attributes(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_set_attributes(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_read(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_write(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_am_delete(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_set(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_get(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_get_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_remove(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_get_support(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 
 /******** TFM_SP_AUDIT_LOG ********/
 psa_status_t audit_core_retrieve_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
@@ -92,13 +90,11 @@ psa_status_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t,
     }
 
 /******** TFM_SP_STORAGE ********/
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_create)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_get_info)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_get_attributes)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_set_attributes)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_read)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_write)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, sst_am_delete)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_set)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_info)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_remove)
+TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_support)
 
 /******** TFM_SP_AUDIT_LOG ********/
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_retrieve_record)

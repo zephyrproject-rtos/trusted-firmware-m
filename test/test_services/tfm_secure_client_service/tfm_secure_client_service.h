@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,6 @@
 #define __TFM_SECURE_CLIENT_SERVICE_H__
 
 #include <stdint.h>
-#include "tfm_sst_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
