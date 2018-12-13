@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,7 +35,7 @@ extern "C" {
  * \return Returns \ref CORE_TEST_ERRNO_SUCCESS on success, and
  *                 \ref CORE_TEST_ERRNO_SP_NOT_INITED on failure.
  */
-int32_t spm_core_test_sfn_init_success(
+psa_status_t spm_core_test_sfn_init_success(
                                     struct psa_invec *in_vec, size_t in_len,
                                     struct psa_outvec *out_vec, size_t out_len);
 
@@ -57,7 +57,7 @@ int32_t spm_core_test_sfn_init_success(
  *
  * \return Returns \ref CORE_TEST_ERRNO_SUCCESS.
  */
-int32_t spm_core_test_sfn_direct_recursion(
+psa_status_t spm_core_test_sfn_direct_recursion(
                                     struct psa_invec *in_vec, size_t in_len,
                                     struct psa_outvec *out_vec, size_t out_len);
 
@@ -80,7 +80,7 @@ int32_t spm_core_test_sfn_direct_recursion(
  *
  * \return Can return various error codes.
  */
-int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
+psa_status_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
                           struct psa_outvec *out_vec, size_t out_len);
 
 #ifdef __cplusplus

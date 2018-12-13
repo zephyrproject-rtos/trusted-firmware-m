@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -94,7 +94,7 @@ static void tfm_core_test_ns_thread(struct test_result_t *ret)
 
     err = tfm_spm_core_test_sfn_veneer(in_vec, 1, NULL, 0);
 
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Secure function call from thread mode should be successful");
         return;
     }
@@ -110,12 +110,6 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret)
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-        TEST_FAIL("TFM Core returned error.");
-        return;
-    }
-
     switch (err) {
     case CORE_TEST_ERRNO_SUCCESS:
         ret->val = TEST_PASSED;
@@ -170,7 +164,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     args.out_vec = NULL;
     args.out_len = 0;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("iovec sanitization failed on empty vectors.");
         return;
     }
@@ -182,7 +176,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     args.out_vec = out_vec;
     args.out_len = PSA_MAX_IOVEC - args.in_len;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("iovec sanitization failed on full vectors.");
         return;
     }
@@ -194,7 +188,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     args.out_vec = out_vec;
     args.out_len = 1;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL(
                  "iovec sanitization failed on valid, partially full vectors.");
         return;
@@ -214,7 +208,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     args.out_len = 1;
     out_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("content of an outvec out of range should not be checked");
         return;
     }
@@ -229,7 +223,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     args.out_len = 1;
     in_vec[2].len = 0;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("content of an outvec out of range should not be checked");
         return;
     }
@@ -243,7 +237,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     in_vec[1].len = 0;
     in_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("If the len of an invec is 0, the base should be ignored");
         return;
     }
@@ -257,7 +251,7 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
     out_vec[1].len = 0;
     out_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("If the len of an outvec is 0, the base should be ignored");
         return;
     }
@@ -285,7 +279,7 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
     err = tfm_core_test_call(tfm_spm_core_test_2_get_every_second_byte_veneer,
                                                                         &args1);
 
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("call to secure function should be successful");
         return;
     }
@@ -313,7 +307,7 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
     in_vec[0].len = sizeof(int32_t);
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args2);
 
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute secure side test");
         return;
     }
@@ -332,11 +326,6 @@ static void tfm_core_test_check_init(struct test_result_t *ret)
     struct tfm_core_test_call_args_t args = {NULL, 0, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_init_success_veneer, &args);
-
-    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-        TEST_FAIL("TFM Core returned error.");
-        return;
-    }
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to initialise test service.");
@@ -382,11 +371,6 @@ static void tfm_core_test_mpu_access(struct test_result_t *ret)
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
-    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
-        TEST_FAIL("TFM Core returned error.");
-        return;
-    }
-
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         char *info = error_to_string(
             "Service memory accesses configured incorrectly.", err);
@@ -412,11 +396,6 @@ static void tfm_core_test_permissions(struct test_result_t *ret)
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
-    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
-        TEST_FAIL("TFM Core returned error.");
-        return;
-    }
-
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         char *info = error_to_string(
             "Service memory accesses configured incorrectly.", err);
@@ -433,18 +412,18 @@ static void tfm_core_test_buffer_check(struct test_result_t *ret)
 
     uint32_t inbuf[] = {1, 2, 3, 4, 0xAAAFFF, 0xFFFFFFFF};
     uint32_t outbuf[16] = {0};
-    int32_t result;
+    int32_t result = 1;
     psa_invec in_vec[] = { {inbuf, sizeof(inbuf)} };
     psa_outvec outvec[] = { {outbuf, sizeof(outbuf)},
                            {&result, sizeof(int32_t)} };
     struct tfm_core_test_call_args_t args = {in_vec, 1, outvec, 2};
 
     res = tfm_core_test_call(tfm_spm_core_test_2_sfn_invert_veneer, &args);
-    if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
+    if (res != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
     }
-    if ((result == 0) && (res == TFM_SUCCESS)) {
+    if (result == 0) {
         for (i = 0; i < sizeof(inbuf) >> 2; i++) {
             if (outbuf[i] != ~inbuf[i]) {
                 TEST_FAIL("Secure function failed to modify buffer.");
@@ -475,11 +454,6 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
-    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
-        TEST_FAIL("Call to secure service should be successful.");
-        return;
-    }
-
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("The internal service call failed.");
         return;
@@ -496,11 +470,6 @@ static void tfm_core_test_share_change(struct test_result_t *ret)
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if ((err != TFM_SUCCESS) && (err < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-        TEST_FAIL("TFM Core returned error.");
-        return;
-    }
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to redirect share region in service.");
@@ -525,12 +494,8 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
     struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
 
     res = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-    if ((res != TFM_SUCCESS) && (res < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-        TEST_FAIL("Call to secure service should be successful.");
-        return;
-    }
     switch (res) {
-    case TFM_SUCCESS:
+    case CORE_TEST_ERRNO_SUCCESS:
         for (i = 0; i < sizeof(inbuf) >> 2; i++) {
             if (outbuf[i] != ~inbuf[i]) {
                 TEST_FAIL("Secure function failed to modify buffer.");
@@ -569,11 +534,6 @@ static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
 
-    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
-        TEST_FAIL("Call to secure service should be successful.");
-        return;
-    }
-
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("The internal service call failed.");
         return;
@@ -590,11 +550,6 @@ static void tfm_core_test_spm_request(struct test_result_t *ret)
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if (err != TFM_SUCCESS && err < TFM_PARTITION_SPECIFIC_ERROR_MIN) {
-        TEST_FAIL("Call to secure service should be successful.");
-        return;
-    }
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("The SPM request failed.");

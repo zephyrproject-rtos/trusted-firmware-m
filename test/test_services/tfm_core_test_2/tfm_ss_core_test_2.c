@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stddef.h>
+#include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "tfm_ss_core_test_2.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
@@ -30,25 +31,27 @@ static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
  * closed, and none of its functions can be called.
  * A new test service for this purpose is to be added.
  */
-int32_t core_test_2_init(void)
+psa_status_t core_test_2_init(void)
 {
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
+psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
                                       size_t in_len,
                                       struct psa_outvec *out_vec,
                                       size_t out_len)
 {
     /* This function doesn't do any sanity check on the input parameters, nor
-     * makes any expectation of them, always returns successfully.
-     * This is to test the parameter sanitization mechanisms implemented in SPM.
+     * makes any expectation of them, always returns successfully, with a
+     * non-zero return value.
+     * This is to test the parameter sanitization mechanisms implemented in SPM,
+     * and the handling of non-zero success codes.
      */
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS_2;
 }
 
-int32_t spm_core_test_2_check_caller_client_id(void)
+psa_status_t spm_core_test_2_check_caller_client_id(void)
 {
     size_t i;
     int32_t caller_client_id_stack = INVALID_NS_CLIENT_ID;
@@ -82,34 +85,34 @@ int32_t spm_core_test_2_check_caller_client_id(void)
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t spm_core_test_2_get_every_second_byte(
+psa_status_t spm_core_test_2_get_every_second_byte(
                                      struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
     int i, j;
 
     if (in_len != out_len) {
-        return TFM_ERROR_INVALID_PARAMETER;
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
     for (i = 0; i < in_len; ++i) {
         if (in_vec[i].len/2 > out_vec[i].len) {
-            return TFM_ERROR_INVALID_PARAMETER;
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
         }
         for (j = 1; j < in_vec[i].len; j += 2) {
             ((uint8_t *)out_vec[i].base)[j/2] = ((uint8_t *)in_vec[i].base)[j];
         }
         out_vec[i].len = in_vec[i].len/2;
     }
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
 /* Invert function */
 #define SFN_INVERT_MAX_LEN 128
 
-int32_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
+psa_status_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
                                    struct psa_outvec *out_vec, size_t out_len)
 {
     int32_t i;
@@ -120,12 +123,12 @@ int32_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
     int32_t *res_ptr;
 
     if (in_len != 1 || out_len != 2) {
-        return TFM_ERROR_INVALID_PARAMETER;
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
     if ((out_vec[0].len < in_vec[0].len) || (in_vec[0].len%4 != 0) ||
         (out_vec[1].len < sizeof(int32_t))) {
-        return TFM_ERROR_INVALID_PARAMETER;
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
     len = in_vec[0].len / 4;
@@ -164,5 +167,5 @@ int32_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
     }
 
     *res_ptr = 0;
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }

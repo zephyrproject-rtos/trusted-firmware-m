@@ -43,6 +43,15 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 static int32_t tfm_secure_lock;
 static int32_t tfm_secure_api_initializing = 1;
 
+static int32_t is_iovec_api_call(void)
+{
+    uint32_t current_partition_idx =
+            tfm_spm_partition_get_running_partition_idx();
+    const struct spm_partition_runtime_data_t *curr_part_data =
+            tfm_spm_partition_get_runtime_data(current_partition_idx);
+    return curr_part_data->iovec_api;
+}
+
 static int32_t *prepare_partition_ctx(
             struct tfm_exc_stack_t *svc_ctx,
             struct tfm_sfn_req_s *desc_ptr,
@@ -252,7 +261,7 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
     /* The number of vectors are within range. Extra checks to avoid overflow */
     if ((in_len > PSA_MAX_IOVEC) || (out_len > PSA_MAX_IOVEC) ||
         (in_len + out_len > PSA_MAX_IOVEC)) {
-        return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+        return TFM_ERROR_INVALID_PARAMETER;
     }
 
     /* Check whether the caller partition has at write access to the iovec
@@ -262,22 +271,22 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
         if ((in_vec == NULL) ||
             (has_write_access_to_region(in_vec, sizeof(psa_invec)*in_len,
                                       desc_ptr->ns_caller) != 1)) {
-            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
         if (in_vec != NULL) {
-            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            return TFM_ERROR_INVALID_PARAMETER;
         }
     }
     if (out_len > 0) {
         if ((out_vec == NULL) ||
             (has_write_access_to_region(out_vec, sizeof(psa_outvec)*out_len,
                                       desc_ptr->ns_caller) != 1)) {
-            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
         if (out_vec != NULL) {
-            return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+            return TFM_ERROR_INVALID_PARAMETER;
         }
     }
 
@@ -289,7 +298,7 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
             if ((in_vec[i].base == NULL) ||
                 (has_read_access_to_region(in_vec[i].base, in_vec[i].len,
                                           desc_ptr->ns_caller) != 1)) {
-                return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+                return TFM_ERROR_INVALID_PARAMETER;
             }
         }
     }
@@ -298,7 +307,7 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
             if ((out_vec[i].base == NULL) ||
                 (has_write_access_to_region(out_vec[i].base, out_vec[i].len,
                                            desc_ptr->ns_caller) != 1)) {
-                return TFM_ERROR_STATUS(TFM_ERROR_INVALID_PARAMETER);
+                return TFM_ERROR_INVALID_PARAMETER;
             }
         }
     }
@@ -616,7 +625,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
 
         /* FIXME: The condition should be removed once all the secure service
          *        calls are done via the iovec veneers */
-        if (curr_part_data->orig_outvec != NULL) {
+        if (curr_part_data->iovec_api) {
             iovec_args = (struct iovec_args_t *)
                          (&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
                          sizeof(struct iovec_args_t));
@@ -640,7 +649,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
 
     /* FIXME: The condition should be removed once all the secure service
      *        calls are done via the iovec veneers */
-    if (curr_part_data->orig_outvec != NULL) {
+    if (curr_part_data->iovec_api) {
         iovec_args = (struct iovec_args_t *)
                      (tfm_spm_partition_get_stack_top(current_partition_idx) -
                      sizeof(struct iovec_args_t));
@@ -731,7 +740,7 @@ int32_t tfm_core_sfn_request_handler(
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {
         ERROR_MSG("Invalid service request!");
-        return TFM_ERROR_STATUS(res);
+        tfm_secure_api_error_handler();
     }
 
     __disable_irq();
@@ -743,7 +752,7 @@ int32_t tfm_core_sfn_request_handler(
         if (res != TFM_SUCCESS) {
             /* The sanity check of iovecs failed. */
             __enable_irq();
-            return TFM_ERROR_STATUS(res);
+            tfm_secure_api_error_handler();
         }
     }
 
@@ -754,7 +763,7 @@ int32_t tfm_core_sfn_request_handler(
             desc_ptr->caller_part_idx, SPM_PARTITION_STATE_CLOSED);
         __enable_irq();
         ERROR_MSG("Unauthorized service request!");
-        return TFM_ERROR_STATUS(res);
+        tfm_secure_api_error_handler();
     }
 
     res = tfm_start_partition(desc_ptr, excReturn);
@@ -762,7 +771,7 @@ int32_t tfm_core_sfn_request_handler(
         /* FixMe: consider possible fault scenarios */
         __enable_irq();
         ERROR_MSG("Failed to process service request!");
-        return TFM_ERROR_STATUS(res);
+        tfm_secure_api_error_handler();
     }
 
     __enable_irq();
@@ -1079,17 +1088,19 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
     /* Store return value from secure partition */
     int32_t retVal = *(int32_t *)__get_PSP();
 
-    if ((retVal > TFM_SUCCESS) &&
-        (retVal < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-        /* Secure function returned a reserved value */
+    if (!is_iovec_api_call()) {
+        if ((retVal > TFM_SUCCESS) &&
+            (retVal < TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
+            /* Secure function returned a reserved value */
 #ifdef TFM_CORE_DEBUG
-        LOG_MSG("Invalid return value from secure partition!");
+            LOG_MSG("Invalid return value from secure partition!");
 #endif
-        /* FixMe: error can be traced to specific secure partition
-         * and Core is not compromised. Error handling flow can be
-         * refined
-         */
-        tfm_secure_api_error_handler();
+            /* FixMe: error can be traced to specific secure partition
+             * and Core is not compromised. Error handling flow can be
+             * refined
+             */
+            tfm_secure_api_error_handler();
+        }
     }
 
     res = tfm_return_from_partition(&lr);

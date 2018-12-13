@@ -61,6 +61,11 @@ struct spm_partition_runtime_data_t {
     uint32_t share;
     uint32_t stack_ptr;
     uint32_t lr;
+    int32_t iovec_api;               /*!< Whether the function in the partition
+                                      * had been called using the iovec API.
+                                      * FIXME: Remove the field once this is the
+                                      * only option
+                                      */
     struct iovec_args_t iovec_args;
     psa_outvec *orig_outvec;
 };

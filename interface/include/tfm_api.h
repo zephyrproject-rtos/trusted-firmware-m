@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -41,11 +41,13 @@ extern "C" {
 
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
-/* Note:
+/* For secure functions using prorietary signatures
  * TFM will only return values recognized and parsed by TFM core.
  * Service return codes are not automatically passed on to REE.
  * Any non-zero return value is interpreted as an error that may trigger
  * TEE error handling flow.
+ * For secure functions using the veneers in secure_fw/ns_callable/tfm_veneers.c
+ * (iovec API) this limitation does not apply.
  */
 enum tfm_status_e
 {

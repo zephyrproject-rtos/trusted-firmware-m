@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,6 +32,7 @@ extern "C" {
 
 typedef int32_t psa_error_t;
 typedef int32_t psa_handle_t;
+typedef int32_t psa_status_t;
 
 /**
  * A read-only input memory region provided to a RoT Service.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #ifndef __SPM_DB_H__
 #define __SPM_DB_H__
 
-typedef int32_t(*sp_init_function)(void);
+typedef psa_status_t(*sp_init_function)(void);
 
 /**
  * Holds the fields of the partition DB used by the SPM code. The values of

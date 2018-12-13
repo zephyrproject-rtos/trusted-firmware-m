@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,7 +21,7 @@ extern "C" {
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
 /******** @@manifest.tfm_partition_name@@ ********/
-int32_t tfm_@@manifest.secure_functions.tfm_symbol@@_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_@@manifest.secure_functions.tfm_symbol@@_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
 @!GENERATOR_CONDITIONAL_END!@

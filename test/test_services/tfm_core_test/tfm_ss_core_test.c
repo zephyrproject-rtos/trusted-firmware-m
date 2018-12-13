@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017 - 2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include "tfm_ss_core_test.h"
 #include "tfm_api.h"
-#include "core_test_defs.h"
+#include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "tfm_veneers.h"
 #include "secure_fw/core/secure_utilities.h"
 #include "secure_fw/core/tfm_secure_api.h"
@@ -34,17 +34,18 @@ static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 
-int32_t core_test_init(void)
+psa_status_t core_test_init(void)
 {
     partition_init_done = 1;
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t spm_core_test_sfn_init_success(struct psa_invec *in_vec, size_t in_len,
+psa_status_t spm_core_test_sfn_init_success(
+                                     struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
     if ((in_len != 0) || (out_len != 0)) {
-        return TFM_ERROR_INVALID_PARAMETER;
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
     if (partition_init_done) {
@@ -54,15 +55,16 @@ int32_t spm_core_test_sfn_init_success(struct psa_invec *in_vec, size_t in_len,
     }
 }
 
-int32_t spm_core_test_sfn_direct_recursion(
+psa_status_t spm_core_test_sfn_direct_recursion(
                                      struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
     uint32_t depth;
     struct psa_invec new_vec = {NULL, sizeof(uint32_t)};
 
-    if ((in_len != 1) || (out_len != 0) || (in_vec[0].len != sizeof(uint32_t))) {
-            return TFM_ERROR_INVALID_PARAMETER;
+    if ((in_len != 1) || (out_len != 0) ||
+        (in_vec[0].len != sizeof(uint32_t))) {
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
     depth = *((uint32_t *)in_vec[0].base);
@@ -77,7 +79,7 @@ int32_t spm_core_test_sfn_direct_recursion(
     int32_t ret = tfm_spm_core_test_sfn_direct_recursion_veneer(&new_vec,
                                                                 1, NULL, 0);
 
-    if (ret == TFM_SUCCESS) {
+    if (ret == CORE_TEST_ERRNO_SUCCESS) {
         /* This is an unexpected return value */
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     } else if (ret == CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED) {
@@ -94,7 +96,7 @@ static int32_t mem[4] = {1, 2, 3, 4};
 
 #define MPS2_USERLED_MASK   (0x3)
 
-int32_t test_mpu_access(
+psa_status_t test_mpu_access(
     uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
 {
     /* If these accesses fail, TFM Core kicks in, there's no returning to sfn */
@@ -132,10 +134,10 @@ int32_t test_mpu_access(
     }
     data_w_ptr[2] = *code_ptr;
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t test_memory_permissions(
+psa_status_t test_memory_permissions(
     uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
 {
     int32_t len = sizeof(uint32_t);
@@ -175,10 +177,10 @@ int32_t test_memory_permissions(
         CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t test_share_redirection(void)
+psa_status_t test_share_redirection(void)
 {
     uint32_t tmp;
 
@@ -190,10 +192,10 @@ int32_t test_share_redirection(void)
     /* Write to scratch */
     tfm_scratch_area[1] = tmp;
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-int32_t test_peripheral_access(void)
+psa_status_t test_peripheral_access(void)
 {
     struct arm_mps2_fpgaio_t *fpgaio = SEC_MPS2_FPGAIO;
     /* Check read access */
@@ -208,12 +210,13 @@ int32_t test_peripheral_access(void)
         return CORE_TEST_ERRNO_PERIPHERAL_ACCESS_FAILED;
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
 #define SS_BUFFER_LEN 16
 
-int32_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr, int32_t len)
+psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
+                                  int32_t len)
 {
     int32_t i;
     /* Service internal buffer */
@@ -254,7 +257,7 @@ int32_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr, int32_t len)
     /* Call internal service with buffer handling */
     res = tfm_spm_core_test_2_sfn_invert_veneer(in_vec, 1, outvec, 2);
 
-    if (res != TFM_SUCCESS) {
+    if (res != CORE_TEST_ERRNO_SUCCESS) {
         return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
     }
 
@@ -273,10 +276,10 @@ int32_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr, int32_t len)
         out_ptr[i] = ss_buffer[i];
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-static int32_t test_outvec_write(void)
+static psa_status_t test_outvec_write(void)
 {
     int32_t err;
     int i;
@@ -323,7 +326,7 @@ static int32_t test_outvec_write(void)
     err = tfm_spm_core_test_2_get_every_second_byte_veneer(in_vec, 2,
                                                            out_vec, 2);
 
-    if (err != TFM_SUCCESS) {
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
@@ -346,22 +349,22 @@ static int32_t test_outvec_write(void)
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-static int32_t test_ss_to_ss(void)
+psa_status_t test_ss_to_ss(void)
 {
     /* Call to a different service, should be successful */
     int32_t ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);
 
-    if (ret == TFM_SUCCESS) {
+    if (ret == CORE_TEST_ERRNO_SUCCESS_2) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
         return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
     }
 }
 
-static int32_t test_get_caller_client_id(void)
+static psa_status_t test_get_caller_client_id(void)
 {
     /* Call to a special service that checks the caller service ID */
     size_t i;
@@ -371,7 +374,7 @@ static int32_t test_get_caller_client_id(void)
     caller_client_id_zi = INVALID_NS_CLIENT_ID;
 
     ret = tfm_spm_core_test_2_check_caller_client_id_veneer(NULL, 0, NULL, 0);
-    if (ret != TFM_SUCCESS) {
+    if (ret != CORE_TEST_ERRNO_SUCCESS) {
         return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
     }
 
@@ -401,10 +404,10 @@ static int32_t test_get_caller_client_id(void)
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 
-static int32_t test_spm_request(void)
+static psa_status_t test_spm_request(void)
 {
     /* Request a reset vote, should be successful */
     int32_t ret = tfm_spm_request_reset_vote();
@@ -442,16 +445,16 @@ static void wait_button_event(void)
     }
 }
 
-int32_t test_wait_button(void)
+psa_status_t test_wait_button(void)
 {
     LOG_MSG("Inside the service, press button to continue...");
     wait_button_event();
     LOG_MSG("Leaving the service");
-    return TFM_SUCCESS;
+    return CORE_TEST_ERRNO_SUCCESS;
 }
 #endif
 
-static int32_t test_block(void)
+static psa_status_t test_block(void)
 {
 #ifdef CORE_TEST_INTERACTIVE
     /* Only block if interactive test is turned on */
@@ -462,7 +465,7 @@ static int32_t test_block(void)
 #endif /* CORE_TEST_INTERACTIVE */
 }
 
-int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
+psa_status_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
                           struct psa_outvec *out_vec, size_t out_len)
 {
     uint32_t tc;
@@ -471,7 +474,7 @@ int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
     int32_t arg3;
 
     if ((in_len < 1) || (in_vec[0].len != sizeof(uint32_t))) {
-        return TFM_ERROR_INVALID_PARAMETER;
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
     tc = *((uint32_t *)in_vec[0].base);
 
@@ -481,7 +484,7 @@ int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
         (in_vec[1].len < sizeof(int32_t)) ||
         (in_vec[2].len < sizeof(int32_t)) ||
         (out_vec[0].len < 3*sizeof(int32_t))) {
-            return TFM_ERROR_INVALID_PARAMETER;
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
         }
         arg1 = (int32_t)in_vec[1].base;
         arg2 = (int32_t)in_vec[2].base;
@@ -493,7 +496,7 @@ int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
         (in_vec[1].len < sizeof(int32_t)) ||
         (in_vec[2].len < sizeof(int32_t)) ||
         (out_vec[0].len < sizeof(int32_t))) {
-            return TFM_ERROR_INVALID_PARAMETER;
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
         }
         arg1 = (int32_t)in_vec[1].base;
         arg2 = (int32_t)in_vec[2].base;
@@ -507,12 +510,12 @@ int32_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
     case CORE_TEST_ID_SS_TO_SS_BUFFER:
         if ((in_len != 3) || (out_len != 1) ||
         (in_vec[2].len != sizeof(int32_t))) {
-            return TFM_ERROR_INVALID_PARAMETER;
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
         }
         arg3 = *((int32_t *)in_vec[2].base);
         if ((in_vec[1].len < arg3*sizeof(int32_t)) ||
             (out_vec[0].len < arg3*sizeof(int32_t))) {
-            return TFM_ERROR_INVALID_PARAMETER;
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
         }
         arg1 = (int32_t)in_vec[1].base;
         arg2 = (int32_t)out_vec[0].base;

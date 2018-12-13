@@ -330,6 +330,7 @@ void tfm_spm_partition_set_iovec(uint32_t partition_idx, int32_t *args)
                                                  ((psa_outvec *)args[2])[i].len;
     }
     runtime_data->orig_outvec = (psa_outvec *)args[2];
+    runtime_data->iovec_api = 1;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_idx(void)
@@ -356,4 +357,5 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
         partition->runtime_data.iovec_args.out_vec[i].len = 0;
     }
     partition->runtime_data.orig_outvec = 0;
+    partition->runtime_data.iovec_api = 0;
 }
