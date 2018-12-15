@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,8 +27,10 @@ if (NOT DEFINED ENABLE_AUDIT_LOGGING)
 endif()
 
 if (ENABLE_AUDIT_LOGGING)
-	if (NOT DEFINED MBEDTLS_INSTALL_DIR)
-		message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
+	if (AUDIT_LOG_BUILD_MBEDTLS)
+		if (NOT DEFINED MBEDTLS_INSTALL_DIR)
+			message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
+		endif()
 	endif()
 
 	if (NOT DEFINED TFM_ROOT_DIR)
@@ -48,7 +50,9 @@ if (ENABLE_AUDIT_LOGGING)
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+	if (AUDIT_LOG_BUILD_MBEDTLS)
+		embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+	endif()
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
