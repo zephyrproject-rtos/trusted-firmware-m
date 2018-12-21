@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -123,6 +123,7 @@ endif()
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an519/dummy_crypto_keys.c")
 endif()
 
