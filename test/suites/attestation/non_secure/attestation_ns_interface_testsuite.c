@@ -127,6 +127,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
  *          - Challenge object
  *          - Caller ID
  *          - Implementation ID
+ *          - Hardware version
  *      - Comparing value of claims:
  *          - Boot seed: Compare boot seed from subsequent calls
  *          - Device ID: Currently compare with fix value
@@ -183,6 +184,14 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
                               &tlv_data_ptr);
     if (res != 0) {
         TEST_FAIL("Missing claim: TLV_MINOR_IAS_IMPLEMENTATION_ID");
+        return;
+    }
+
+    /* Check HARDWARE_VERSION, optional claim */
+    res = attest_get_tlv_data(TLV_MINOR_IAS_HW_VERSION, token_buffer,
+                              &tlv_data_ptr);
+    if (res != 0) {
+        TEST_FAIL("Missing claim: TLV_MINOR_IAS_HW_VERSION");
         return;
     }
 #endif
