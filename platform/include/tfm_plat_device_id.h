@@ -12,7 +12,8 @@
  *
  * The interfaces defined in this file are meant to provide the following
  * attributes of the device:
- *  - Instance ID: Unique identifier of the device.
+ *  - Instance ID:       Unique identifier of the device.
+ *  - Implementation ID: Original implementation signer of the attestation key.
  */
 
 /**
@@ -35,6 +36,13 @@ extern "C" {
 #define INSTANCE_ID_MAX_SIZE (33u)
 
 /**
+ * \def IMPLEMENTATION_ID_MAX_SIZE
+ *
+ * \brief Maximum size of implementation ID in bytes
+ */
+#define IMPLEMENTATION_ID_MAX_SIZE (32u)
+
+/**
  * \brief Get the UEID of the device.
  *
  * This mandatory claim represents the unique identifier of the instance.
@@ -52,6 +60,27 @@ extern "C" {
  * \return  Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_plat_get_instance_id(uint32_t *size, uint8_t *buf);
+
+/**
+ * \brief Get the Implementation ID of the device.
+ *
+ * This mandatory claim represents the original implementation signer of the
+ * attestation key and identifies the contract between the report and
+ * verification. A verification service will use this claim to locate the
+ * details of the verification process. The claim will be represented by a
+ * custom EAT claim with a value consisting of a CBOR byte string. The size of
+ * this string will normally be 32 bytes to accommodate a 256 bit hash.
+ *
+ * \param[in/out] size  As an input value it indicates the size of the caller
+ *                      allocated buffer (in bytes) to store the implementation
+ *                      ID. At return its value is updated with the exact size
+ *                      of the implementation ID.
+ * \param[out]    buf   Pointer to the buffer to store the implementation ID
+ *
+ * \return  Returns error code specified in \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
+                                                   uint8_t  *buf);
 
 #ifdef __cplusplus
 }

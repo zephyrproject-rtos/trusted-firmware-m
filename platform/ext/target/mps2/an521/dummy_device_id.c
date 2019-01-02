@@ -23,6 +23,12 @@
 extern const uint8_t  initial_attestation_raw_public_key_hash[];
 extern const uint32_t initial_attestation_raw_public_key_hash_size;
 
+static const uint8_t implementation_id[] = {
+    0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA,
+    0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB,
+    0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
+    0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
+};
 
 /**
  * \brief Copy the device specific ID to the destination buffer
@@ -65,6 +71,22 @@ enum tfm_plat_err_t tfm_plat_get_instance_id(uint32_t *size, uint8_t *buf)
 
     /* Instance ID size:  1 type byte + size of public key hash */
     *size = initial_attestation_raw_public_key_hash_size + 1;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
+                                                   uint8_t  *buf)
+{
+    const uint8_t *p_impl_id = implementation_id;
+    uint32_t impl_id_size = sizeof(implementation_id);
+
+    if (*size < impl_id_size) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    copy_id(buf, p_impl_id, impl_id_size);
+    *size = impl_id_size;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
