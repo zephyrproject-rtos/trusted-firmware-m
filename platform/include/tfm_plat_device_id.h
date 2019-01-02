@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,10 +9,10 @@
 #define __TFM_PLAT_DEVICE_ID_H__
 /**
  * \file tfm_plat_device_id.h
- * Provide the Universal Entity ID (UEID) of the device.
- * It identifies the entire device or a submodule or subsystem. Must be
- * universally and globally unique and immutable. Variable length with a
- * maximum size of 33 bytes: 1 type byte and 256 bits.
+ *
+ * The interfaces defined in this file are meant to provide the following
+ * attributes of the device:
+ *  - Instance ID: Unique identifier of the device.
  */
 
 /**
@@ -28,22 +28,30 @@ extern "C" {
 #endif
 
 /**
- * \def DEVICE_ID_MAX_SIZE
+ * \def INSTANCE_ID_MAX_SIZE
  *
- * \brief Maximum size of device ID in bytes
+ * \brief Maximum size of instance ID in bytes
  */
-#define DEVICE_ID_MAX_SIZE (33u)
+#define INSTANCE_ID_MAX_SIZE (33u)
 
 /**
  * \brief Get the UEID of the device.
  *
- * \param[in]  size The size of the buffer in bytes to store the UEID
- * \param[out] buf  Pointer to the buffer to store the UEID
+ * This mandatory claim represents the unique identifier of the instance.
+ * In the PSA definition is a hash of the public attestation key of the
+ * instance. The claim will be represented by the EAT standard claim UEID
+ * of type GUID. The EAT definition of a GUID type is that it will be between
+ * 128 & 256 bits but this implementation will use the full 256 bits to
+ * accommodate a hash result.
  *
- * \return  The size of device ID in bytes, if buffer big enough to store the
- *          ID, otherwise -1.
+ * \param[in/out] size  As an input value it indicates the size of the caller
+ *                      allocated buffer (in bytes) to store the UEID. At return
+ *                      its value is updated with the exact size of the UEID.
+ * \param[out]    buf   Pointer to the buffer to store the UEID
+ *
+ * \return  Returns error code specified in \ref tfm_plat_err_t
  */
-int32_t tfm_plat_get_device_id(uint32_t size, uint8_t *buf);
+enum tfm_plat_err_t tfm_plat_get_instance_id(uint32_t *size, uint8_t *buf);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -98,7 +98,7 @@ static uint32_t attest_get_tlv_data(uint8_t   minor_type,
  *
  * \return Returns 0 on success. Otherwise, 1.
  */
-#if TFM_LVL == 1
+#if !defined(TFM_LVL) || (TFM_LVL == 1)
 /* FixMe: This offset should be calculated per device */
 #define USUAL_S_NS_ALIAS_OFFSET 0x10000000u
 static uint32_t attest_get_s_ns_sha256(uint8_t **hash)
@@ -135,7 +135,7 @@ static uint32_t attest_get_s_ns_sha256(uint8_t **hash)
 
     return 1u;
 }
-#endif /* TFM_LVL == 1 */
+#endif
 
 void
 register_testsuite_s_attestation_interface(struct test_suite_t *p_test_suite)
@@ -157,7 +157,7 @@ register_testsuite_s_attestation_interface(struct test_suite_t *p_test_suite)
  *      - Check the existence of the fixed set of claims:
  *          - Boot status
  *          - Boot seed
- *          - Device ID
+ *          - Instance ID
  *          - Challenge object
  *          - Caller ID
  *      - Comparing value of claims:
@@ -173,9 +173,7 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
     enum psa_attest_err_t err;
     uint32_t token_size = TEST_TOKEN_SIZE;
     uint8_t boot_seed_buffer[BOOT_SEED_SIZE];
-    uint8_t device_id_buffer[DEVICE_ID_MAX_SIZE];
     uint8_t *tlv_data_ptr;
-    int32_t device_id_size;
     int32_t caller_id;
     uint32_t res;
 
@@ -202,7 +200,7 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
     /* Extract image hash from manifest data and compare with claim.
      * This can be done only from secure side if S_MPU is not enabled.
      */
-#if TFM_LVL == 1
+#if !defined(TFM_LVL) || (TFM_LVL == 1)
     uint8_t *hash_from_image;
     res = attest_get_s_ns_sha256(&hash_from_image);
     if (res == 0) {
@@ -211,29 +209,21 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
             return;
         }
     }
-#endif /* TFM_LVL == 1 */
+#endif
 
-    /* Check DEVICE_ID */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_DEVICE_ID, token_buffer,
+    /* FixMe: Remove this #if when MPU will be configured properly. Currently
+     *        in case of TFM_LVL == 3 unaligned access triggers a usage fault
+     *        exception.
+     */
+#if !defined(TFM_LVL) || (TFM_LVL == 1)
+    /* Check INSTANCE_ID */
+    res = attest_get_tlv_data(TLV_MINOR_IAS_INSTANCE_ID, token_buffer,
                               &tlv_data_ptr);
     if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_DEVICE_ID");
+        TEST_FAIL("Missing claim: TLV_MINOR_IAS_INSTANCE_ID");
         return;
     }
-
-    /* Get device ID directly */
-    device_id_size = tfm_plat_get_device_id(sizeof(device_id_buffer),
-                                            device_id_buffer);
-    if (device_id_size < 0) {
-        TEST_FAIL("Device ID unavailable");
-        return;
-    }
-
-    /* Compare the value from token and from direct call */
-    if (tfm_memcmp(tlv_data_ptr, device_id_buffer, device_id_size) != 0) {
-        TEST_FAIL("Faulty claim: TLV_MINOR_IAS_DEVICE_ID");
-        return;
-    }
+#endif
 
     /* Check CHALLENGE */
     res = attest_get_tlv_data(TLV_MINOR_IAS_CHALLENGE, token_buffer,

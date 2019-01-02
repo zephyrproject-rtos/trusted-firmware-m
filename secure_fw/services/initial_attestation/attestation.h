@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,7 +17,7 @@ extern "C" {
 
 /* Extension of shared data TLVs defined in bl2/include/tfm_boot_status.h */
 #define TLV_MINOR_IAS_BOOT_SEED       0x0f
-#define TLV_MINOR_IAS_DEVICE_ID       0x10
+#define TLV_MINOR_IAS_INSTANCE_ID     0x10
 #define TLV_MINOR_IAS_CHALLENGE       0x11
 #define TLV_MINOR_IAS_CALLER_ID       0x12
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,6 +15,7 @@
 #include "tfm_secure_api.h"
 #include "psa_client.h"
 #include "bl2/include/tfm_boot_status.h"
+#include "platform/include/tfm_plat_defs.h"
 #include "platform/include/tfm_plat_device_id.h"
 #include "platform/include/tfm_plat_boot_seed.h"
 
@@ -243,10 +244,10 @@ attest_add_boot_seed_claim(uint32_t token_buf_size, uint8_t *token_buf)
      */
     __attribute__ ((aligned(4)))
     uint8_t boot_seed[BOOT_SEED_SIZE];
-    uint32_t res;
+    enum tfm_plat_err_t res;
 
     res = tfm_plat_get_boot_seed(sizeof(boot_seed), boot_seed);
-    if (res != 0) {
+    if (res != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }
 
@@ -262,8 +263,13 @@ attest_add_boot_seed_claim(uint32_t token_buf_size, uint8_t *token_buf)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
+/* FixMe: Remove this #if when MPU will be configured properly. Currently
+ *        in case of TFM_LVL == 3 unaligned access triggers a usage fault
+ *        exception.
+ */
+#if !defined(TFM_LVL) || (TFM_LVL == 1)
 /*!
- * \brief Static function to add device id claim to attestation token.
+ * \brief Static function to add instance id claim to attestation token.
  *
  * \param[in]  token_buf_size Size of token buffer in bytes
  * \param[out] token_buf      Pointer to buffer which stores the token
@@ -271,25 +277,26 @@ attest_add_boot_seed_claim(uint32_t token_buf_size, uint8_t *token_buf)
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static enum psa_attest_err_t
-attest_add_device_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
+attest_add_instance_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
 {
     /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
      *        type is configured in the MPU to be normal, instead of device,
      *        which prohibits unaligned access.
      */
     __attribute__ ((aligned(4)))
-    uint8_t device_id[DEVICE_ID_MAX_SIZE];
+    uint8_t instance_id[INSTANCE_ID_MAX_SIZE];
     uint32_t res;
-    int32_t size;
+    enum tfm_plat_err_t res_plat;
+    uint32_t size = sizeof(instance_id);
 
-    size = tfm_plat_get_device_id(sizeof(device_id), device_id);
-    if (size < 0) {
+    res_plat = tfm_plat_get_instance_id(&size, instance_id);
+    if (res_plat != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }
 
-    res = attest_add_tlv(TLV_MINOR_IAS_DEVICE_ID,
+    res = attest_add_tlv(TLV_MINOR_IAS_INSTANCE_ID,
                          size,
-                         device_id,
+                         instance_id,
                          token_buf_size,
                          token_buf);
     if (res != 0) {
@@ -298,6 +305,7 @@ attest_add_device_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+#endif
 
 /*!
  * \brief Static function to add caller id claim to attestation token.
@@ -432,10 +440,16 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    attest_err = attest_add_device_id_claim(*token_buf_size, token_buf);
+    /* FixMe: Remove this #if when MPU will be configured properly. Currently
+     *        in case of TFM_LVL == 3 unaligned access triggers a usage fault
+     *        exception.
+     */
+#if !defined(TFM_LVL) || (TFM_LVL == 1)
+    attest_err = attest_add_instance_id_claim(*token_buf_size, token_buf);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
+#endif
 
     if (challenge_buf_size > 0) {
         attest_err = attest_add_challenge_claim(challenge_buf_size,
