@@ -14,6 +14,7 @@
 #include "test/suites/audit/non_secure/audit_ns_tests.h"
 #include "test/suites/crypto/non_secure/crypto_ns_tests.h"
 #include "test/suites/attestation/non_secure/attestation_ns_tests.h"
+#include "test/suites/qcbor/non_secure/qcbor_ns_tests.h"
 #include "test/suites/invert/non_secure/invert_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
 
@@ -21,6 +22,9 @@ static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
 #ifdef SERVICES_TEST_NS
     /* List test cases which compliant with level 3 isolation */
+
+    /* Non-secure QCBOR library test cases */
+    {&register_testsuite_ns_qcbor, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */
@@ -44,6 +48,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Non-secure initial attestation service test cases */
     {&register_testsuite_ns_attestation_interface, 0, 0, 0},
+
+    /* Non-secure QCBOR library test cases */
+    {&register_testsuite_ns_qcbor, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */

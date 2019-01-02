@@ -81,9 +81,15 @@ int _write(int fd, char * str, int len)
  * \brief List of RTOS thread attributes
  */
 #ifdef TEST_FRAMEWORK_NS
+/* Allocate dedicated stack for test executor thread.
+ * It must be 64 bit aligned.
+ */
+static uint64_t test_app_stack[(3u * 1024u) / (sizeof(uint64_t))]; /* 3KB */
+
 static const osThreadAttr_t tserv_test = {
     .name = "test_app",
-    .stack_size = 1024U
+    .stack_size = sizeof(test_app_stack),
+    .stack_mem = test_app_stack,
 };
 #elif PSA_API_TEST_NS
 static const osThreadAttr_t psa_api_test_attr = {

@@ -160,7 +160,7 @@ function(set_up_app_build)
 	set(VENEER_NAME ${_MY_PARAMS_VENEER_NAME}${_MY_PARAMS_POSTFIX}.o)
 
 	#Create linker target: add object library to executable
-	add_executable(${EXE_NAME} $<TARGET_OBJECTS:${PROJECT_OBJ_LIB}>)
+	add_executable(${EXE_NAME} $<TARGET_OBJECTS:${PROJECT_OBJ_LIB}> $<TARGET_OBJECTS:tfm_qcbor>)
 
 	#Set common linker flags
 	config_setting_shared_linker_flags(${EXE_NAME})
@@ -271,6 +271,10 @@ endfunction()
 if (NOT TARGET_TFM_S_EXISTED)
 	set(S_VENEER_FILE_LOCATION "${CMAKE_CURRENT_BINARY_DIR}")
 	add_subdirectory(../secure_fw ${CMAKE_CURRENT_BINARY_DIR}/secure_fw)
+endif()
+
+if (NOT TARGET tfm_qcbor)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
 endif()
 
 if (LINK_TO_BOTH_MEMORY_REGION)
