@@ -30,6 +30,7 @@ static const uint8_t implementation_id[] = {
     0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
 };
 
+static const uint8_t example_ean_13[] = "060456527282910010";
 /**
  * \brief Copy the device specific ID to the destination buffer
  *
@@ -87,6 +88,21 @@ enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
 
     copy_id(buf, p_impl_id, impl_id_size);
     *size = impl_id_size;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_get_hw_version(uint32_t *size, uint8_t *buf)
+{
+    const uint8_t *p_hw_version = example_ean_13;
+    uint32_t hw_version_size = sizeof(example_ean_13) - 1;
+
+    if (*size < hw_version_size) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    copy_id(buf, p_hw_version, hw_version_size);
+    *size = hw_version_size;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
