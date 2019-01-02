@@ -160,6 +160,7 @@ register_testsuite_s_attestation_interface(struct test_suite_t *p_test_suite)
  *          - Instance ID
  *          - Challenge object
  *          - Caller ID
+ *          - Implementation ID
  *      - Comparing value of claims:
  *          - Boot status: Get boot status from token and from image manifest
  *                         and compare them
@@ -221,6 +222,14 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
                               &tlv_data_ptr);
     if (res != 0) {
         TEST_FAIL("Missing claim: TLV_MINOR_IAS_INSTANCE_ID");
+        return;
+    }
+
+    /* Check IMPLEMENTATION_ID */
+    res = attest_get_tlv_data(TLV_MINOR_IAS_IMPLEMENTATION_ID, token_buffer,
+                              &tlv_data_ptr);
+    if (res != 0) {
+        TEST_FAIL("Missing claim: TLV_MINOR_IAS_IMPLEMENTATION_ID");
         return;
     }
 #endif

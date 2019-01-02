@@ -305,6 +305,44 @@ attest_add_instance_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+
+/*!
+ * \brief Static function to add implementation id claim to attestation token.
+ *
+ * \param[in]  token_buf_size Size of token buffer in bytes
+ * \param[out] token_buf      Pointer to buffer which stores the token
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_implementation_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
+{
+    /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
+     *        type is configured in the MPU to be normal, instead of device,
+     *        which prohibits unaligned access.
+     */
+    __attribute__ ((aligned(4)))
+    uint8_t implementation_id[IMPLEMENTATION_ID_MAX_SIZE];
+    uint32_t res;
+    enum tfm_plat_err_t res_plat;
+    uint32_t size = sizeof(implementation_id);
+
+    res_plat = tfm_plat_get_implementation_id(&size, implementation_id);
+    if (res_plat != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    res = attest_add_tlv(TLV_MINOR_IAS_IMPLEMENTATION_ID,
+                         size,
+                         implementation_id,
+                         token_buf_size,
+                         token_buf);
+    if (res != 0) {
+        return PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW;
+    }
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
 #endif
 
 /*!
@@ -446,6 +484,11 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
      */
 #if !defined(TFM_LVL) || (TFM_LVL == 1)
     attest_err = attest_add_instance_id_claim(*token_buf_size, token_buf);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
+    }
+
+    attest_err = attest_add_implementation_id_claim(*token_buf_size, token_buf);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
