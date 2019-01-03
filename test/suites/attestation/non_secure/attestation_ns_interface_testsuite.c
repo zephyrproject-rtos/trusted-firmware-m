@@ -128,6 +128,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
  *          - Caller ID
  *          - Implementation ID
  *          - Hardware version
+ *          - Security lifecycle
  *      - Comparing value of claims:
  *          - Boot seed: Compare boot seed from subsequent calls
  *          - Device ID: Currently compare with fix value
@@ -195,6 +196,14 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
         return;
     }
 #endif
+
+    /* Check SECURITY LIFECYCLE */
+    res = attest_get_tlv_data(TLV_MINOR_IAS_SECURITY_LIFECYCLE, token_buffer,
+                              &tlv_data_ptr);
+    if (res != 0) {
+        TEST_FAIL("Missing claim: TLV_MINOR_IAS_SECURITY_LIFECYCLE");
+        return;
+    }
 
     /* Check CHALLENGE */
     res = attest_get_tlv_data(TLV_MINOR_IAS_CHALLENGE, token_buffer,

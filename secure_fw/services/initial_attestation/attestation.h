@@ -22,6 +22,7 @@ extern "C" {
 #define TLV_MINOR_IAS_CALLER_ID          0x12
 #define TLV_MINOR_IAS_IMPLEMENTATION_ID  0x13
 #define TLV_MINOR_IAS_HW_VERSION         0x14
+#define TLV_MINOR_IAS_SECURITY_LIFECYCLE 0x15
 
 /*!
  * \brief Initialise the initial attestation service during the TF-M boot up

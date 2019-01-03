@@ -18,6 +18,7 @@
 #include "platform/include/tfm_plat_defs.h"
 #include "platform/include/tfm_plat_device_id.h"
 #include "platform/include/tfm_plat_boot_seed.h"
+#include "tfm_attest_hal.h"
 
 #define MAX_BOOT_STATUS 512
 
@@ -415,6 +416,34 @@ attest_add_caller_id_claim(uint32_t token_buf_size, uint8_t *token_buf)
 }
 
 /*!
+ * \brief Static function to add security lifecycle claim to attestation token.
+ *
+ * \param[in]  token_buf_size Size of token buffer in bytes
+ * \param[out] token_buf      Pointer to buffer which stores the token
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_security_lifecycle_claim(uint32_t token_buf_size, uint8_t *token_buf)
+{
+    uint32_t res;
+    enum tfm_security_lifecycle_t security_lifecycle;
+
+    security_lifecycle = tfm_attest_hal_get_security_lifecycle();
+
+    res = attest_add_tlv(TLV_MINOR_IAS_SECURITY_LIFECYCLE,
+                         sizeof(enum tfm_security_lifecycle_t),
+                         (uint8_t *)&security_lifecycle,
+                         token_buf_size,
+                         token_buf);
+    if (res != 0) {
+        return PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW;
+    }
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
  * \brief Static function to add challenge claim to attestation token.
  *
  * \param[in]  challenge_buf_size Size of challenge object in bytes
@@ -551,6 +580,13 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
+
+    attest_err = attest_add_security_lifecycle_claim(*token_buf_size,
+                                                     token_buf);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
+    }
+
      /* FixMe: Token should be signed with attestation key */
 
     *token_buf_size = attest_get_token_size(token_buf);
