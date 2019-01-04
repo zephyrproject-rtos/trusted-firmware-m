@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "psa_initial_attestation_api.h"
-#include "tfm_initial_attestation_veneers.h"
+#include "tfm_veneers.h"
 #include "secure_utilities.h"
 #include "psa_client.h"
 #include "tfm_secure_api.h"
@@ -57,7 +57,7 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     out_vec[0].base = token_buff;
     out_vec[0].len  = *token_size;
 
-    err = tfm_attest_veneer_get_token(in_vec, 1, out_vec, 1);
+    err = tfm_initial_attest_get_token_veneer(in_vec, 1, out_vec, 1);
     if (err != PSA_ATTEST_ERR_SUCCESS) {
         return err;
     }
@@ -65,6 +65,46 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     /* Copy output token to local buffer */
     tfm_memcpy(token, out_vec[0].base, out_vec[0].len);
     *token_size = out_vec[0].len;
+
+    return err;
+}
+
+__attribute__((section("SFN")))
+enum psa_attest_err_t
+psa_initial_attest_get_token_size(uint32_t  challenge_size,
+                                  uint32_t *token_size)
+{
+    enum psa_attest_err_t err;
+    struct paramters_t {
+        psa_invec in_vec;
+        uint32_t challenge_size;
+        psa_outvec out_vec;
+        uint32_t token_size;
+    };
+
+    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    struct paramters_t *param = (struct paramters_t *)tfm_scratch_area;
+    /*
+     * Scratch area layout
+     * ------------------------------------------------------
+     * |in_vec[0] | challenge_size | out_vec[0] | token_size|
+     * ------------------------------------------------------
+     */
+    param->challenge_size = challenge_size;
+    param->in_vec.base  = &param->challenge_size;
+    param->in_vec.len   = sizeof(uint32_t);
+    param->out_vec.base = &param->token_size;
+    param->out_vec.len  = sizeof(uint32_t);
+
+    err = tfm_initial_attest_get_token_size_veneer(&param->in_vec,  1,
+                                                   &param->out_vec, 1);
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        return err;
+    }
+    *token_size = param->token_size;
 
     return err;
 }

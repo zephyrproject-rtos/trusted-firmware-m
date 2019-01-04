@@ -174,11 +174,24 @@ register_testsuite_s_attestation_interface(struct test_suite_t *p_test_suite)
 static void tfm_attest_test_1001(struct test_result_t *ret)
 {
     enum psa_attest_err_t err;
-    uint32_t token_size = TEST_TOKEN_SIZE;
+    uint32_t token_size;
     uint8_t boot_seed_buffer[BOOT_SEED_SIZE];
     uint8_t *tlv_data_ptr;
     int32_t caller_id;
     uint32_t res;
+
+    /* Get attestation token size */
+    err = psa_initial_attest_get_token_size(TEST_CHALLENGE_OBJ_SIZE,
+                                            &token_size);
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        TEST_FAIL("Get token size failed");
+        return;
+    }
+
+    if (token_size != PSA_INITIAL_ATTEST_TOKEN_SIZE) {
+        TEST_FAIL("Token size is faulty");
+        return;
+    }
 
     /* Get attestation token
      * FixMe: Hard coded challenge is used, because currently there is no

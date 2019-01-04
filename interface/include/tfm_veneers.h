@@ -52,6 +52,7 @@ psa_status_t tfm_platform_sp_system_reset_veneer(struct psa_invec *in_vec, size_
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t tfm_initial_attest_get_token_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_initial_attest_get_token_size_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/

@@ -62,6 +62,7 @@
 
     /******** TFM_SP_INITIAL_ATTESTATION ********/
     {initial_attest_get_token, TFM_ATTEST_GET_TOKEN_SFID},
+    {initial_attest_get_token_size, TFM_ATTEST_GET_TOKEN_SIZE_SFID},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/

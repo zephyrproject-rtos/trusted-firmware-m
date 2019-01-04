@@ -594,3 +594,19 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
 error:
     return attest_err;
 }
+
+/* Initial implementation, just returns with hard coded value */
+enum psa_attest_err_t
+initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
+                                    psa_outvec *out_vec, uint32_t num_outvec)
+{
+    uint32_t *token_buf_size = (uint32_t *)out_vec[0].base;
+
+    if (out_vec[0].len < sizeof(uint32_t)) {
+        return PSA_ATTEST_ERR_INVALID_INPUT;
+    }
+
+    *token_buf_size = PSA_INITIAL_ATTEST_TOKEN_SIZE;
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}

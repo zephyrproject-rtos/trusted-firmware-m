@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,8 +27,7 @@ set (SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_sst_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_audit_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_crypto_veneers.c"
-                          "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c"
-                          "${CMAKE_CURRENT_LIST_DIR}/tfm_initial_attestation_veneers.c")
+                          "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c")
 
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C ${SS_NS_CALLABLE_C_SRC})

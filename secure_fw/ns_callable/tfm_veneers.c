@@ -47,6 +47,7 @@ psa_status_t platform_sp_system_reset(struct psa_invec *, size_t, struct psa_out
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t initial_attest_get_token(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t initial_attest_get_token_size(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
@@ -117,6 +118,7 @@ TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token)
+TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token_size)
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
