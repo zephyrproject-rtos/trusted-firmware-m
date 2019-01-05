@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/runtimeco/mcuboot
- * Modifications are Copyright (c) 2018 Arm Limited.
+ * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
 /**
@@ -298,7 +298,7 @@ boot_validate_slot(int slot)
         return -1;
     } else {
         if (0 != boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                              TLV_MINOR_IAS_S_NS_SHA256,
+                                              TLV_MINOR_IAS_S_NS_MEASURE_VALUE,
                                               sizeof(hash),
                                               hash)) {
             BOOT_LOG_ERR("Failed to add data to shared area");

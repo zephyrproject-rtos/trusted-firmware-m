@@ -42,7 +42,7 @@ static struct test_t attestation_interface_tests[] = {
  *
  * \return Returns 0 on success. Otherwise, 1.
  */
-static uint32_t attest_get_tlv_data(uint8_t   minor_type,
+static uint32_t attest_get_tlv_data(uint16_t  minor_type,
                                     uint8_t  *token_buf,
                                     uint8_t **tlv_data_ptr)
 {
@@ -65,7 +65,7 @@ static uint32_t attest_get_tlv_data(uint8_t   minor_type,
      */
     for(; tlv_curr < tlv_end; tlv_curr += tlv_entry->tlv_len) {
         tlv_entry = (struct shared_data_tlv_entry *)tlv_curr;
-        if (tlv_entry->tlv_minor_type == minor_type) {
+        if (GET_MINOR(tlv_entry->tlv_type) == minor_type) {
             *tlv_data_ptr = (uint8_t *)tlv_entry +
                             SHARED_DATA_ENTRY_HEADER_SIZE;
             return 0;
@@ -173,7 +173,7 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
      * The image hash cannot be retrieved from image manifest if code runs in
      * NS context, because the image header resides in S memory area.
      */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_S_NS_SHA256, token_buffer,
+    res = attest_get_tlv_data(TLV_MINOR_IAS_S_NS_MEASURE_VALUE, token_buffer,
                               &tlv_data_ptr);
     if (res != 0) {
         TEST_FAIL("Missing claim: TLV_MINOR_IAS_S_NS_SHA256");

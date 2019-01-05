@@ -62,7 +62,7 @@ enum psa_attest_err_t attest_init(void)
  *
  * \return Returns 0 on success. Otherwise, 1.
  */
-static uint32_t attest_get_tlv(uint8_t    minor_type,
+static uint32_t attest_get_tlv(uint16_t   minor_type,
                                uint16_t  *tlv_len,
                                uint8_t  **tlv_ptr)
 {
@@ -85,7 +85,7 @@ static uint32_t attest_get_tlv(uint8_t    minor_type,
      */
     for(; tlv_curr < tlv_end; tlv_curr += tlv_entry->tlv_len) {
         tlv_entry = (struct shared_data_tlv_entry *)tlv_curr;
-        if (tlv_entry->tlv_minor_type == minor_type) {
+        if (GET_MINOR(tlv_entry->tlv_type) == minor_type) {
             *tlv_ptr = (uint8_t *)tlv_entry;
             *tlv_len = tlv_entry ->tlv_len;
             return 0;
@@ -141,7 +141,7 @@ static uint32_t attest_copy_tlv(uint16_t       tlv_len,
  *
  * \return Returns 0 on success. Otherwise, 1.
  */
-static uint32_t attest_add_tlv(uint8_t        minor_type,
+static uint32_t attest_add_tlv(uint16_t       minor_type,
                                uint32_t       size,
                                const uint8_t *data,
                                uint32_t       token_buf_size,
@@ -165,8 +165,7 @@ static uint32_t attest_add_tlv(uint8_t        minor_type,
     tlv_header->tlv_tot_len += SHARED_DATA_ENTRY_SIZE(size);
 
     tlv_entry = (struct shared_data_tlv_entry *)next_tlv;
-    tlv_entry->tlv_major_type = TLV_MAJOR_IAS;
-    tlv_entry->tlv_minor_type = minor_type;
+    tlv_entry->tlv_type = SET_TLV_TYPE(TLV_MAJOR_IAS, minor_type);
     tlv_entry->tlv_len = SHARED_DATA_ENTRY_SIZE(size);
 
     next_tlv += SHARED_DATA_ENTRY_HEADER_SIZE;
@@ -215,7 +214,7 @@ attest_add_s_ns_sha256_claim(uint32_t token_buf_size, uint8_t *token_buf)
     uint8_t *tlv_ptr;
     uint32_t res;
 
-    res = attest_get_tlv(TLV_MINOR_IAS_S_NS_SHA256, &tlv_len, &tlv_ptr);
+    res = attest_get_tlv(TLV_MINOR_IAS_S_NS_MEASURE_VALUE, &tlv_len, &tlv_ptr);
     if (res != 0) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,7 +35,7 @@ static uint32_t shared_memory_init_done;
 
 enum shared_memory_err_t
 boot_add_data_to_shared_area(uint8_t        major_type,
-                             uint8_t        minor_type,
+                             uint16_t       minor_type,
                              size_t         size,
                              const uint8_t *data)
 {
@@ -67,16 +67,15 @@ boot_add_data_to_shared_area(uint8_t        major_type,
      */
     for(; offset < tlv_end; offset += tlv_entry.tlv_len) {
         tlv_entry = *((struct shared_data_tlv_entry *)offset);
-        if (tlv_entry.tlv_major_type == major_type &&
-            tlv_entry.tlv_minor_type == minor_type ) {
+        if (GET_MAJOR(tlv_entry.tlv_type) == major_type &&
+            GET_MINOR(tlv_entry.tlv_type) == minor_type) {
             return SHARED_MEMORY_OVERWRITE;
         }
     }
 
     /* Add TLV entry */
-    tlv_entry.tlv_major_type = major_type;
-    tlv_entry.tlv_minor_type = minor_type;
-    tlv_entry.tlv_len        = SHARED_DATA_ENTRY_SIZE(size);
+    tlv_entry.tlv_type = SET_TLV_TYPE(major_type, minor_type);
+    tlv_entry.tlv_len  = SHARED_DATA_ENTRY_SIZE(size);
 
     /* Verify overflow of shared area */
     if ((tlv_header->tlv_tot_len + tlv_entry.tlv_len) >

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -106,7 +106,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
      */
     for(; offset < tlv_end; offset += tlv_entry->tlv_len) {
         tlv_entry = (struct shared_data_tlv_entry *)offset;
-        if (tlv_entry->tlv_major_type == tlv_major) {
+        if (GET_MAJOR(tlv_entry->tlv_type) == tlv_major) {
             /* Check buffer overflow */
             if ((ptr - buf_start + tlv_entry->tlv_len) > buf_size) {
                 args[0] = TFM_ERROR_INVALID_PARAMETER;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -43,7 +43,7 @@ enum shared_memory_err_t {
  */
 enum shared_memory_err_t
 boot_add_data_to_shared_area(uint8_t        major_type,
-                             uint8_t        minor_type,
+                             uint16_t       minor_type,
                              size_t         size,
                              const uint8_t *data);
 
