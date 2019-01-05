@@ -53,46 +53,63 @@ enum psa_attest_err_t attest_init(void)
 }
 
 /*!
- * \brief Static function to look up a specific entry in the shared data
- *        section.
+ * \brief Static function to look up all entries in the shared data area
+ *       (boot status) which belong to a specific module.
  *
- * \param[in]  minor_type The identifier of the shared data entry
- * \param[out] tlv_len    Length of the shared data entry
- * \param[out] tlv_ptr    Pointer to the shared data entry
+ * \param[in]     module  The identifier of SW module to look up based on this
+ * \param[out]    claim   The type of SW module's attribute
+ * \param[out]    tlv_len Length of the shared data entry
+ * \param[in/out] tlv_ptr Pointer to the shared data entry. If its value NULL as
+ *                        input then it will starts the look up from the
+ *                        beginning of the shared data section. If not NULL then
+ *                        it continue look up from the next entry. It returns
+ *                        the address of next found entry which belongs to
+ *                        module.
  *
- * \return Returns 0 on success. Otherwise, 1.
+ * \retval    -1          Error, boot status is malformed
+ * \retval     0          Entry not found
+ * \retval     1          Entry found
  */
-static uint32_t attest_get_tlv(uint16_t   minor_type,
-                               uint16_t  *tlv_len,
-                               uint8_t  **tlv_ptr)
+static int32_t attest_get_tlv_by_module(uint8_t    module,
+                                        uint8_t   *claim,
+                                        uint16_t  *tlv_len,
+                                        uint8_t  **tlv_ptr)
 {
     struct shared_data_tlv_header *tlv_header;
     struct shared_data_tlv_entry  *tlv_entry;
-    uintptr_t tlv_end;
-    uintptr_t tlv_curr;
+    uint8_t *tlv_end;
+    uint8_t *tlv_curr;
 
     tlv_header = (struct shared_data_tlv_header *)boot_status;
     if (tlv_header->tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
-        return 1;
+        return -1;
     }
 
-    /* Get the boundaries of TLV section */
-    tlv_end  = (uintptr_t)boot_status + tlv_header->tlv_tot_len;
-    tlv_curr = (uintptr_t)boot_status + SHARED_DATA_HEADER_SIZE;
+    /* Get the boundaries of TLV section where to lookup*/
+    tlv_end  = boot_status + tlv_header->tlv_tot_len;
+    if (*tlv_ptr == NULL) {
+        /* At first call set to the beginning of the TLV section */
+        tlv_curr = boot_status + SHARED_DATA_HEADER_SIZE;
+    } else {
+        /* Any subsequent call set to the next TLV entry */
+        tlv_entry = (struct shared_data_tlv_entry *)(*tlv_ptr);
+        tlv_curr  = (*tlv_ptr) + tlv_entry->tlv_len;
+    }
 
-    /* Iterates over the TLV section and copy TLVs with requested minor
-     * type to the provided buffer.
+    /* Iterates over the TLV section and copy TLVs with requested module
+     * identifier to the provided buffer.
      */
-    for(; tlv_curr < tlv_end; tlv_curr += tlv_entry->tlv_len) {
+    for (; tlv_curr < tlv_end; tlv_curr += tlv_entry->tlv_len) {
         tlv_entry = (struct shared_data_tlv_entry *)tlv_curr;
-        if (GET_MINOR(tlv_entry->tlv_type) == minor_type) {
+        if (GET_IAS_MODULE(tlv_entry->tlv_type) == module) {
+            *claim   = GET_IAS_CLAIM(tlv_entry->tlv_type);
             *tlv_ptr = (uint8_t *)tlv_entry;
-            *tlv_len = tlv_entry ->tlv_len;
-            return 0;
+            *tlv_len = tlv_entry->tlv_len;
+            return 1;
         }
     }
 
-    return 1;
+    return 0;
 }
 
 /*!
@@ -200,7 +217,7 @@ attest_init_token(uint32_t token_buf_size, uint8_t *token_buf)
 }
 
 /*!
- * \brief Static function to add boot status claim to attestation token.
+ * \brief Static function to add SW modules related claims to attestation token.
  *
  * \param[in]  token_buf_size Size of token buffer in bytes
  * \param[out] token_buf      Pointer to buffer which stores the token
@@ -208,20 +225,62 @@ attest_init_token(uint32_t token_buf_size, uint8_t *token_buf)
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static enum psa_attest_err_t
-attest_add_s_ns_sha256_claim(uint32_t token_buf_size, uint8_t *token_buf)
+attest_add_sw_module_claims(uint32_t token_buf_size, uint8_t *token_buf)
 {
     uint16_t tlv_len;
     uint8_t *tlv_ptr;
+    uint8_t  claim;
+    uint32_t found;
     uint32_t res;
+    int module;
 
-    res = attest_get_tlv(TLV_MINOR_IAS_S_NS_MEASURE_VALUE, &tlv_len, &tlv_ptr);
-    if (res != 0) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
+    /* Starting from module 1, because module 0 contains general claims which
+     * are not related to SW module(i.e: boot_seed)
+     */
+    for (module = 1; module < SW_MAX; ++module) {
+        /* Indicates to restart the look up from the beginning of the shared
+         * data section
+         */
+        tlv_ptr = NULL;
 
-    res = attest_copy_tlv(tlv_len, tlv_ptr, token_buf_size, token_buf);
-    if (res != 0) {
-        return PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW;
+        /*Look up all entry which belongs to the same SW module */
+        do {
+            found = attest_get_tlv_by_module(module, &claim,
+                                             &tlv_len, &tlv_ptr);
+
+            if (found == -1) {
+                return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+            }
+
+            if (found == 1) {
+                switch (claim) {
+                /* Intentional fall through
+                 * Claims are handled in the same way with TLV encoding, they
+                 * are just copied to the token buffer.
+                 * But later in case of CBOR encoding they must be
+                 * differentiated in order to apply the corresponding claim
+                 * label.
+                 *
+                 * FixMe: Handle cases individually and apply the proper EAT
+                 *        label
+                 */
+                case SW_MEASURE_VALUE:
+                case SW_MEASURE_TYPE:
+                case SW_VERSION:
+                case SW_SIGNER_ID:
+                case SW_EPOCH:
+                case SW_TYPE:
+                    res = attest_copy_tlv(tlv_len, tlv_ptr,
+                                          token_buf_size, token_buf);
+                    if (res != 0) {
+                        return PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW;
+                    }
+                    break;
+                default:
+                    return PSA_ATTEST_ERR_GENERAL;
+                }
+            }
+        } while (found == 1);
     }
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -534,7 +593,7 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    attest_err = attest_add_s_ns_sha256_claim(*token_buf_size, token_buf);
+    attest_err = attest_add_sw_module_claims(*token_buf_size, token_buf);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
