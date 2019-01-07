@@ -888,6 +888,9 @@ SECTIONS
     Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
+    Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
+    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
+
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a
      * separate 32 bytes aligned region so that the SAU can programmed to just set
