@@ -29,7 +29,9 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_S
     /* List test cases which compliant with level 1 isolation */
 
-#ifndef PSA_PROTECTED_STORAGE
+#ifdef PSA_PROTECTED_STORAGE
+    {&register_testsuite_s_psa_ps_interface, 0, 0, 0},
+#else /* PSA_PROTECTED_STORAGE */
     /* Secure SST test cases */
     {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
     {&register_testsuite_s_sst_reliability, 0, 0, 0},
@@ -37,7 +39,7 @@ static struct test_suite_t test_suites[] = {
 #if defined(SST_ROLLBACK_PROTECTION) && defined(SST_ENCRYPTION)
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
-#endif /* !PSA_PROTECTED_STORAGE */
+#endif /* PSA_PROTECTED_STORAGE */
 
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},

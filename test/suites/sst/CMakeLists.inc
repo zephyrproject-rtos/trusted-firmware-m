@@ -33,6 +33,7 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 		message(FATAL_ERROR "Incomplete build configuration: PSA_PROTECTED_STORAGE is undefined.")
 
 	elseif (PSA_PROTECTED_STORAGE)
+		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_interface_testsuite.c")
 		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/psa_ps_ns_interface_testsuite.c")
 
 		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS PSA_PROTECTED_STORAGE)
