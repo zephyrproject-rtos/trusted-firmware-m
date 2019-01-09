@@ -15,8 +15,8 @@
 #ifndef __PSA_INITIAL_ATTESTATION_API_H__
 #define __PSA_INITIAL_ATTESTATION_API_H__
 
-#include "tfm_api.h"
 #include <limits.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,11 +28,6 @@ extern "C" {
 #define PSA_INITIAL_ATTEST_API_VERSION_MAJOR (0)
 #define PSA_INITIAL_ATTEST_API_VERSION_MINOR (1)
 
-/* The return value is shared with the TFM partition status value. The ATTEST
- * return codes shouldn't overlap with predefined TFM status values.
- */
-#define PSA_ATTEST_ERR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
-
 /**
  * \enum psa_attest_err_t
  *
@@ -43,7 +38,7 @@ enum psa_attest_err_t {
     /** Action was performed successfully */
     PSA_ATTEST_ERR_SUCCESS = 0,
     /** Boot status data is unavailable or malformed */
-    PSA_ATTEST_ERR_INIT_FAILED = PSA_ATTEST_ERR_OFFSET,
+    PSA_ATTEST_ERR_INIT_FAILED,
     /** Token buffer is too small to store the created token there */
     PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW,
     /** Some of the mandatory claims are unavailable*/
