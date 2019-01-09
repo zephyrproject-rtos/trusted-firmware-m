@@ -69,8 +69,6 @@ enum psa_attest_err_t {
 #define PSA_INITIAL_ATTEST_CHALLENGE_SIZE_48  (48u)
 #define PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64  (64u)
 
-#define PSA_INITIAL_ATTEST_MAX_CHALLENGE_SIZE (64u)
-
 /**
  * The list of fixed claims in the initial attestation token is still evolving,
  * you can expect slight changes in the future.

@@ -548,6 +548,30 @@ static uint32_t attest_get_token_size(const uint8_t *token_buf)
     return tlv_header->tlv_tot_len;
 }
 
+/*!
+ * \brief Static function to verify the input challenge size
+ *
+ * Only discrete sizes are accepted.
+ *
+ * \param[in] challenge_size  Size of challenge object in bytes.
+ *
+ * \retval  PSA_ATTEST_ERR_SUCCESS
+ * \retval  PSA_ATTEST_ERR_INVALID_INPUT
+ */
+static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
+{
+    switch (challenge_size) {
+    /* Intentional fall through */
+    case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32:
+    case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_48:
+    case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64:
+    case (PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32 + 4): /* Test purpose */
+        return PSA_ATTEST_ERR_SUCCESS;
+    }
+
+    return PSA_ATTEST_ERR_INVALID_INPUT;
+}
+
 /* Initial implementation of attestation service:
  *  - data is TLV encoded
  *  - token is not signed yet
@@ -566,18 +590,17 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
     uint8_t *token_buf           = (uint8_t *)out_vec[0].base;
     size_t  *token_buf_size      = &(out_vec[0].len);
 
-    if (challenge_buf_size > PSA_INITIAL_ATTEST_MAX_CHALLENGE_SIZE) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+    attest_err = attest_verify_challenge_size(challenge_buf_size);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
     }
 
-    if (challenge_buf_size > 0) {
-        tfm_err = tfm_core_memory_permission_check((void *)challenge_buf,
-                                                   challenge_buf_size,
-                                                   TFM_MEMORY_ACCESS_RO);
-        if (tfm_err != TFM_SUCCESS) {
-            attest_err =  PSA_ATTEST_ERR_INVALID_INPUT;
-            goto error;
-        }
+    tfm_err = tfm_core_memory_permission_check((void *)challenge_buf,
+                                               challenge_buf_size,
+                                               TFM_MEMORY_ACCESS_RO);
+    if (tfm_err != TFM_SUCCESS) {
+        attest_err =  PSA_ATTEST_ERR_INVALID_INPUT;
+        goto error;
     }
 
     tfm_err = tfm_core_memory_permission_check(token_buf,
@@ -624,14 +647,12 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
     }
 #endif
 
-    if (challenge_buf_size > 0) {
-        attest_err = attest_add_challenge_claim(challenge_buf_size,
-                                                challenge_buf,
-                                                *token_buf_size,
-                                                token_buf);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
+    attest_err = attest_add_challenge_claim(challenge_buf_size,
+                                            challenge_buf,
+                                            *token_buf_size,
+                                            token_buf);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
     }
 
     attest_err = attest_add_caller_id_claim(*token_buf_size, token_buf);
@@ -658,13 +679,22 @@ enum psa_attest_err_t
 initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec)
 {
+    enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
+    uint32_t  challenge_size = *(uint32_t *)in_vec[0].base;
     uint32_t *token_buf_size = (uint32_t *)out_vec[0].base;
 
     if (out_vec[0].len < sizeof(uint32_t)) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
+        goto error;
+    }
+
+    attest_err = attest_verify_challenge_size(challenge_size);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
     }
 
     *token_buf_size = PSA_INITIAL_ATTEST_TOKEN_SIZE;
 
-    return PSA_ATTEST_ERR_SUCCESS;
+error:
+    return attest_err;
 }

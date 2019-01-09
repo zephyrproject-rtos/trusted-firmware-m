@@ -300,7 +300,7 @@ static void tfm_attest_test_1002(struct test_result_t *ret)
 
     /* Call with with bigger challenge object than allowed */
     err = psa_initial_attest_get_token(challenge_buffer,
-                                       TOO_BIG_CHALLENGE_OBJECT,
+                                       INVALID_CHALLENGE_OBJECT_SIZE,
                                        token_buffer,
                                        &token_size);
 

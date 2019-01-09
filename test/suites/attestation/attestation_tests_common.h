@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,14 +34,14 @@ extern "C" {
  *
  * \brief Size of challenge object in bytes used for test.
  */
-#define TEST_CHALLENGE_OBJ_SIZE (16u)
+#define TEST_CHALLENGE_OBJ_SIZE (32u)
 
 /*!
- * \def TOO_BIG_CHALLENGE_OBJECT
+ * \def INVALID_CHALLENGE_OBJECT_SIZE
  *
- * \brief Size of challenge object that is bigger than it is allowed.
+ * \brief Size of challenge object that is
  */
-#define TOO_BIG_CHALLENGE_OBJECT (PSA_INITIAL_ATTEST_MAX_CHALLENGE_SIZE + 1)
+#define INVALID_CHALLENGE_OBJECT_SIZE (PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32 + 1)
 
 /*!
  * \def CHALLENGE_FOR_TEST
@@ -50,9 +50,9 @@ extern "C" {
  *        generation is not supported on secure side.
  */
 #define CHALLENGE_FOR_TEST    0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, \
-                              0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF
-
-
+                              0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF, \
+                              0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, \
+                              0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xEE, 0xEE, 0xEF,
 
 #ifdef __cplusplus
 }
