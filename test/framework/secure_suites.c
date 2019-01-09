@@ -20,8 +20,6 @@ static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
 #ifdef SERVICES_TEST_S
     /* List test cases which compliant with level 3 isolation */
-    /* Secure initial attestation service test cases */
-    {&register_testsuite_s_attestation_interface, 0, 0, 0},
 #endif /* SERVICES_TEST_S */
 
 #else /* TFM_LVL == 3 */

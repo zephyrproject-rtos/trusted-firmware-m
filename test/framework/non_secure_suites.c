@@ -21,8 +21,6 @@ static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
 #ifdef SERVICES_TEST_NS
     /* List test cases which compliant with level 3 isolation */
-    /* Non-secure initial attestation service test cases */
-    {&register_testsuite_ns_attestation_interface, 0, 0, 0},
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */

@@ -27,7 +27,7 @@
  *        in bytes.
  */
 #ifndef TFM_CRYPTO_MAX_KEY_LENGTH
-#define TFM_CRYPTO_MAX_KEY_LENGTH (32)
+#define TFM_CRYPTO_MAX_KEY_LENGTH (64)
 #endif
 
 struct tfm_crypto_key_storage_s {
