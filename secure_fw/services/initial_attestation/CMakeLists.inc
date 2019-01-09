@@ -35,6 +35,7 @@ if (ENABLE_INITIAL_ATTESTATION)
 	list(APPEND ALL_SRC_C
 		"${INITIAL_ATTESTATION_DIR}/tfm_attestation_secure_api.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_core.c"
+		"${INITIAL_ATTESTATION_DIR}/attestation_crypto_stub.c"
 		)
 
 	#Setting include directories

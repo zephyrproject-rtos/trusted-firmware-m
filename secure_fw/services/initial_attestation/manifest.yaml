@@ -35,7 +35,8 @@
     }
   ],
   "source_files": [
-    "attestation_core.c"
+    "attestation_core.c",
+    "attestation_crypto_stub.c",
   ],
   "tfm_linker_pattern": [
     "library_list": [
