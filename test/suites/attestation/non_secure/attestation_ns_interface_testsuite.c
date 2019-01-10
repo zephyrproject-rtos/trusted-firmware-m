@@ -22,13 +22,13 @@ static uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE];
 
 /* Define test suite for attestation service tests */
 /* List of tests */
-static void tfm_attest_test_1001(struct test_result_t *ret);
-static void tfm_attest_test_1002(struct test_result_t *ret);
+static void tfm_attest_test_2001(struct test_result_t *ret);
+static void tfm_attest_test_2002(struct test_result_t *ret);
 
 static struct test_t attestation_interface_tests[] = {
-    {&tfm_attest_test_1001, "TFM_ATTEST_TEST_1001",
+    {&tfm_attest_test_2001, "TFM_ATTEST_TEST_2001",
      "Get attestation token and check claims", {0} },
-    {&tfm_attest_test_1002, "TFM_ATTEST_TEST_1002",
+    {&tfm_attest_test_2002, "TFM_ATTEST_TEST_2002",
      "Negative test cases for initial attestation service", {0} },
 };
 
@@ -112,7 +112,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
                  sizeof(attestation_interface_tests[0]));
 
     set_testsuite("Initial Attestation Service secure interface tests"
-                  "(TFM_ATTEST_TEST_1XXX)",
+                  "(TFM_ATTEST_TEST_2XXX)",
                   attestation_interface_tests, list_size, p_test_suite);
 }
 
@@ -135,7 +135,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
  *          - Challenge: Compare with input object
  *          - Caller ID: Check whether is it in non-secure range
  */
-static void tfm_attest_test_1001(struct test_result_t *ret)
+static void tfm_attest_test_2001(struct test_result_t *ret)
 {
     enum psa_attest_err_t err;
     uint32_t token_size;
@@ -290,10 +290,10 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
  *
  *    - Calling initial attestation service with bigger challenge object than
  *      allowed.
- *    - Calling initial attesttion service with smaller buffer size than the
+ *    - Calling initial attestation service with smaller buffer size than the
  *      expected size of the token.
  */
-static void tfm_attest_test_1002(struct test_result_t *ret)
+static void tfm_attest_test_2002(struct test_result_t *ret)
 {
     enum psa_attest_err_t err;
     uint32_t token_size = TEST_TOKEN_SIZE;
