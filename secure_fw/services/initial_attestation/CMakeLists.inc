@@ -46,6 +46,8 @@ if (ENABLE_INITIAL_ATTESTATION)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
+	embedded_include_directories(PATH ${INITIAL_ATTESTATION_DIR} ABSOLUTE)
 
 	set(BUILD_CMSIS_CORE Off)
 	set(BUILD_RETARGET Off)
