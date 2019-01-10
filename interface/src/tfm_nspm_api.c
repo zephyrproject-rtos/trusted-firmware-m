@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,6 +28,9 @@ static struct thread_test_clientid_pair test_ns_policy_table[] =
     {"seq_task", -5},
     {"mid_task", -6},
     {"pri_task", -7},
+#ifdef PSA_API_TEST_NS
+    {"psa_api_test", -8}
+#endif
 };
 
 /**

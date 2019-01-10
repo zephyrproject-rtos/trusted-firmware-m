@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,15 +23,15 @@ else()
 	message(FATAL_ERROR "ERROR: Target \"${TARGET_PLATFORM}\" is not supported.")
 endif()
 
-##These variables select how the projects are built. Each project will set
+#These variables select how the projects are built. Each project will set
 #various project specific settings (e.g. what files to build, macro
 #definitions) based on these.
-set (REGRESSION True)
+set (REGRESSION False)
 set (CORE_TEST False)
-set (PSA_API_TEST False)
+set (PSA_API_TEST True)
 
-# TF-M isolation level: 1..3
-set (TFM_LVL 3)
+#TF-M isolation level: 1..3
+set (TFM_LVL 1)
 
 #BL2 bootloader(MCUBoot) related settings
 if(NOT DEFINED BL2)
@@ -44,6 +44,13 @@ endif()
 
 if(NOT DEFINED MCUBOOT_RAM_LOADING)
 	set(MCUBOOT_RAM_LOADING False)
+endif()
+
+#Service specific configuration for the PSA API Compliance test requirements
+if(PSA_API_TEST_CRYPTO)
+	set(CRYPTO_ENGINE_BUF_SIZE 3072)
+	set(CRYPTO_KEY_STORAGE_NUM 32)
+	set(CRYPTO_KEY_MAX_KEY_LENGTH 64)
 endif()
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")

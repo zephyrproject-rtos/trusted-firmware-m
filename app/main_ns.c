@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,7 +18,9 @@
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/test_framework_integ_test.h"
 #endif
-
+#ifdef PSA_API_TEST_NS
+#include "psa_api_test.h"
+#endif
 #include "target_cfg.h"
 #include "Driver_USART.h"
 
@@ -83,6 +85,11 @@ static const osThreadAttr_t tserv_test = {
     .name = "test_app",
     .stack_size = 1024U
 };
+#elif PSA_API_TEST_NS
+static const osThreadAttr_t psa_api_test_attr = {
+    .name = "psa_api_test",
+    .stack_size = 3072U
+};
 #endif
 
 /**
@@ -110,6 +117,8 @@ int main(void)
 
 #ifdef TEST_FRAMEWORK_NS
     thread_id = osThreadNew(test_app, NULL, &tserv_test);
+#elif PSA_API_TEST_NS
+    thread_id = osThreadNew(psa_api_test, NULL, &psa_api_test_attr);
 #else
     UNUSED_VARIABLE(thread_id);
 #endif

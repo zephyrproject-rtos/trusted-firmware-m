@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,6 +24,7 @@ endif()
 #definitions) based on these.
 set (REGRESSION False)
 set (CORE_TEST True)
+set (PSA_API_TEST False)
 
 # TF-M isolation level: 1..3
 set (TFM_LVL 3)

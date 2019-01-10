@@ -119,7 +119,25 @@ a single directory, `<build_dir>/install/export/tfm`. Further details on how to
 integrate a new NS app with TF-M are available in the
 [integration guide](tfm_integration_guide.md).
 
+## Build for PSA API compliance tests
+
+The build system provides the support for linking with prebuilt PSA API
+compliance NS test libraries when using the `ConfigPsaApiTest.cmake` config
+file. The build system assumes that the PSA API compliance test suite is
+checked out at the same level of the TF-M root folder and the default name for
+the build folder has been used when compiling the PSA API compliance tests. Each
+set of tests for the Secure Storage, Crypto and Attestation services needs to be
+enabled at the build configuration step by defining
+`-DPSA_API_TEST_SECURE_STORAGE`, `-DPSA_API_TEST_CRYPTO`,
+`-DPSA_API_TEST_ATTESTATION`, respectively for the corresponding service. For
+example, to enable the PSA API tests for the Crypto service only:
+
+```
+...
+cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+cmake --build ./ -- install
+```
 
 --------------
 
-*Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*

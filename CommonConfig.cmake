@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -126,7 +126,7 @@ endif()
 if (CORE_TEST)
 	set(CORE_TEST_POSITIVE ON)
 	set(CORE_TEST_INTERACTIVE OFF)
-	set (TFM_PARTITION_TEST_SECURE_SERVICES ON)
+	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
 	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
 endif()
 
@@ -169,6 +169,20 @@ endif()
 
 if (TFM_PARTITION_TEST_SST)
 	add_definitions(-DTFM_PARTITION_TEST_SST)
+endif()
+
+if (PSA_API_TEST)
+	add_definitions(-DPSA_API_TEST_NS)
+	set(PSA_API_TEST_NS ON)
+	if (NOT DEFINED PSA_API_TEST_CRYPTO)
+		set(PSA_API_TEST_CRYPTO OFF)
+	endif()
+	if (NOT DEFINED PSA_API_TEST_SECURE_STORAGE)
+		set(PSA_API_TEST_SECURE_STORAGE OFF)
+	endif()
+	if (NOT DEFINED PSA_API_TEST_ATTESTATION)
+		set(PSA_API_TEST_ATTESTATION OFF)
+	endif()
 endif()
 
 # This flag indicates if the non-secure OS is capable of identify the non-secure clients

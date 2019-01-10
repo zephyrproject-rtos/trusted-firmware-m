@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -58,6 +58,10 @@ elseif (TFM_NS_CLIENT_IDENTIFICATION)
 		"${INTERFACE_DIR}/src/tfm_nspm_svc_handler.c"
 		"${INTERFACE_DIR}/src/tfm_nspm_api.c"
 		)
+endif()
+
+if (PSA_API_TEST_NS)
+	list(APPEND NS_APP_SRC "${APP_DIR}/psa_api_test.c")
 endif()
 
 set(BUILD_CMSIS_CORE On)
@@ -173,6 +177,25 @@ function(set_up_app_build)
 		message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
 	endif()
 	target_link_libraries(${EXE_NAME} "${RTX_LIB_PATH}")
+
+	#Add the PSA API compliance test libraries
+	if(NOT DEFINED PSA_API_TEST_BUILD_PATH)
+		#If not specified, assume it's the default build folder checked out at the same level of TFM root dir
+		set(PSA_API_TEST_BUILD_PATH "${TFM_ROOT_DIR}/../psa-arch-tests/api-tests/BUILD")
+	endif()
+	if(PSA_API_TEST_NS)
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/val/val_nspe.a")
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/platform/pal_nspe.a")
+	endif()
+	if(PSA_API_TEST_NS AND PSA_API_TEST_SECURE_STORAGE)
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/protected_storage/test_combine.a")
+	endif()
+	if(PSA_API_TEST_NS AND PSA_API_TEST_CRYPTO)
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/crypto/test_combine.a")
+	endif()
+	if(PSA_API_TEST_NS AND PSA_API_TEST_ATTESTATION)
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/initial_attestation/test_combine.a")
+	endif()
 
 	if(NOT DEFINED PLATFORM_LINK_INCLUDES)
 		message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
