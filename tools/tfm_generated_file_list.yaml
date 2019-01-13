@@ -28,7 +28,7 @@
     },
     {
         "name": "AN521 secure ld file",
-        "short_name": "mps2_an521_s_ld",
+        "short_name": "mps2_an521_s.ld",
         "output": "platform/ext/target/mps2/an521/gcc/mps2_an521_s.ld"
     },
     {
@@ -38,13 +38,33 @@
     },
     {
         "name": "MUSCA-A secure ld file",
-        "short_name": "musca_s.ld",
+        "short_name": "musca_a_s.ld",
         "output": "platform/ext/target/musca_a/Device/Source/gcc/musca_s.ld"
     },
     {
         "name": "MUSCA-B1 secure ld file",
-        "short_name": "musca_s.ld",
+        "short_name": "musca_b1_s.ld",
         "output": "platform/ext/target/musca_b1/Device/Source/gcc/musca_s.ld"
+    },
+    {
+        "name": "AN521 secure sct file",
+        "short_name": "mps2_an521_s.sct",
+        "output": "platform/ext/target/mps2/an521/armclang/mps2_an521_s.sct"
+    },
+    {
+        "name": "AN519 secure sct file",
+        "short_name": "mps2_an519_s.sct",
+        "output": "platform/ext/target/mps2/an519/armclang/mps2_an519_s.sct"
+    },
+    {
+        "name": "MUSCA-A secure sct file",
+        "short_name": "musca_a_s_s.sct",
+        "output": "platform/ext/target/musca_a/Device/Source/armclang/musca_s.sct"
+    },
+    {
+        "name": "MUSCA-B1 secure sct file",
+        "short_name": "musca_b1_s.sct",
+        "output": "platform/ext/target/musca_b1/Device/Source/armclang/musca_s.sct"
     },
     {
         "name": "Secure Veneers C file",
