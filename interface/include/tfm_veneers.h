@@ -68,14 +68,6 @@ psa_status_t tfm_spm_core_test_2_check_caller_client_id_veneer(struct psa_invec 
 psa_status_t tfm_spm_core_test_2_get_every_second_byte_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_CORE */
 
-#ifdef TFM_PARTITION_TEST_SST
-/******** TFM_SP_SST_TEST_PARTITION ********/
-psa_status_t tfm_sst_test_service_sfn_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_sst_test_service_sfn_dummy_encrypt_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_sst_test_service_sfn_dummy_decrypt_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_sst_test_service_sfn_clean_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-#endif /* TFM_PARTITION_TEST_SST */
-
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 psa_status_t tfm_tfm_secure_client_service_sfn_run_tests_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);

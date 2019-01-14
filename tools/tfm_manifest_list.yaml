@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -66,15 +66,6 @@
       "manifest": "test/test_services/tfm_core_test_2/manifest.yaml",
       "tfm_extensions": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
-      "version_major": 0,
-      "version_minor": 1
-    },
-    {
-      "name": "TFM SST Test Service",
-      "short_name": "TFM_SST_Test",
-      "manifest": "test/test_services/tfm_sst_test_service/manifest.yaml",
-      "tfm_extensions": true,
-      "conditional": "TFM_PARTITION_TEST_SST",
       "version_major": 0,
       "version_minor": 1
     },

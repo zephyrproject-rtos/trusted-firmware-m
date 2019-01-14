@@ -78,14 +78,6 @@
     {spm_core_test_2_get_every_second_byte, TFM_CORE_TEST_2_SFN_GET_EVERY_SECOND_BYTE},
 #endif /* TFM_PARTITION_TEST_CORE */
 
-#ifdef TFM_PARTITION_TEST_SST
-    /******** TFM_SP_SST_TEST_PARTITION ********/
-    {sst_test_service_sfn_setup, TFM_SST_TEST_SFN_SETUP_SFID},
-    {sst_test_service_sfn_dummy_encrypt, TFM_SST_TEST_SFN_DUMMY_ENCRYPT_SFID},
-    {sst_test_service_sfn_dummy_decrypt, TFM_SST_TEST_SFN_DUMMY_DECRYPT_SFID},
-    {sst_test_service_sfn_clean, TFM_SST_TEST_SFN_CLEAN_SFID},
-#endif /* TFM_PARTITION_TEST_SST */
-
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     /******** TFM_SP_SECURE_TEST_PARTITION ********/
     {tfm_secure_client_service_sfn_run_tests, TFM_SECURE_CLIENT_SFN_RUN_TESTS_SFID},

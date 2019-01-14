@@ -34,24 +34,9 @@ static struct test_suite_t test_suites[] = {
 #else /* TFM_LVL == 3 */
 
 #ifdef SERVICES_TEST_NS
-    /* List test cases which compliant with level 1 isolation */
+    /* List test cases which are compliant with level 1 isolation */
 
-#ifdef PSA_PROTECTED_STORAGE
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
-#else /* PSA_PROTECTED_STORAGE */
-    /* Non-secure SST test cases */
-    {&register_testsuite_ns_sst_interface, 0, 0, 0},
-
-#ifdef TFM_NS_CLIENT_IDENTIFICATION
-    {&register_testsuite_ns_sst_policy, 0, 0, 0},
-
-#ifdef TFM_PARTITION_TEST_SST
-    /* Non-secure SST referenced access testsuite */
-    {&register_testsuite_ns_sst_ref_access, 0, 0, 0},
-#endif /* TFM_PARTITION_TEST_SST */
-
-#endif /* TFM_NS_CLIENT_IDENTIFICATION */
-#endif /* PSA_PROTECTED_STORAGE */
 
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},

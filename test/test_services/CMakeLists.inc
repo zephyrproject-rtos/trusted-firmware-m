@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -36,16 +36,6 @@ if (NOT DEFINED ENABLE_CORE_TESTS_2)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_CORE_TESTS_2 is undefined. ")
 elseif(ENABLE_CORE_TESTS_2)
 	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test_2/tfm_ss_core_test_2.c")
-endif()
-
-if (NOT DEFINED TFM_PARTITION_TEST_SST)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
-elseif (TFM_PARTITION_TEST_SST)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service.c"
-		"${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_veneers.c"
-		)
-
-	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/tfm_sst_test_service/sst_test_service_api.c")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)

@@ -63,14 +63,6 @@ psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *, size_t, 
 psa_status_t spm_core_test_2_get_every_second_byte(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_CORE */
 
-#ifdef TFM_PARTITION_TEST_SST
-/******** TFM_SP_SST_TEST_PARTITION ********/
-psa_status_t sst_test_service_sfn_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_test_service_sfn_dummy_encrypt(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_test_service_sfn_dummy_decrypt(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t sst_test_service_sfn_clean(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-#endif /* TFM_PARTITION_TEST_SST */
-
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 psa_status_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t, struct psa_outvec *, size_t);
@@ -140,14 +132,6 @@ TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_sfn_invert)
 TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_check_caller_client_id)
 TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_get_every_second_byte)
 #endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PARTITION_TEST_SST
-/******** TFM_SP_SST_TEST_PARTITION ********/
-TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_setup)
-TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_dummy_encrypt)
-TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_dummy_decrypt)
-TFM_VENEER_FUNCTION(TFM_SP_SST_TEST_PARTITION, sst_test_service_sfn_clean)
-#endif /* TFM_PARTITION_TEST_SST */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_TEST_PARTITION ********/

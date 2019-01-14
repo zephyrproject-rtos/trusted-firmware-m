@@ -27,21 +27,14 @@ static struct test_suite_t test_suites[] = {
 #else /* TFM_LVL == 3 */
 
 #ifdef SERVICES_TEST_S
-    /* List test cases which compliant with level 1 isolation */
+    /* List test cases which are compliant with level 1 isolation */
 
-#ifdef PSA_PROTECTED_STORAGE
     {&register_testsuite_s_psa_ps_interface, 0, 0, 0},
     {&register_testsuite_s_psa_ps_reliability, 0, 0, 0},
 
 #if defined(SST_ROLLBACK_PROTECTION) && defined(SST_ENCRYPTION)
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
-
-#else /* PSA_PROTECTED_STORAGE */
-    /* Secure SST test cases */
-    {&register_testsuite_s_sst_sec_interface, 0, 0, 0},
-
-#endif /* PSA_PROTECTED_STORAGE */
 
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},

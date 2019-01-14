@@ -21,27 +21,6 @@ extern "C" {
  */
 void register_testsuite_ns_psa_ps_interface(struct test_suite_t *p_test_suite);
 
-/**
- * \brief Register testsuite for the SST tests.
- *
- * \param[in] p_test_suite  The test suite to be executed.
- */
-void register_testsuite_ns_sst_interface(struct test_suite_t *p_test_suite);
-
-/**
- * \brief Register testsuite for the non-secure SST referenced access tests.
- *
- * \param[in] p_test_suite  The test suite to be executed.
- */
-void register_testsuite_ns_sst_ref_access(struct test_suite_t *p_test_suite);
-
-/**
- * \brief Register testsuite for the SST policy tests.
- *
- * \param[in] p_test_suite  The test suite to be executed.
- */
-void register_testsuite_ns_sst_policy(struct test_suite_t *p_test_suite);
-
 #ifdef __cplusplus
 }
 #endif

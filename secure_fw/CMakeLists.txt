@@ -175,12 +175,6 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 	endif()
 
-	if (NOT DEFINED TFM_PARTITION_TEST_SST)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined. ")
-	elseif (TFM_PARTITION_TEST_SST)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SST")
-	endif()
-
 	if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
 	elseif (TFM_PARTITION_TEST_SECURE_SERVICES)

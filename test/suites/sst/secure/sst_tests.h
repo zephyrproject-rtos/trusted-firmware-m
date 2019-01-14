@@ -22,13 +22,6 @@ extern "C" {
 void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite);
 
 /**
- * \brief Register testsuite for the sst interface tests.
- *
- * \param[in] p_test_suite  The test suite to be executed.
- */
-void register_testsuite_s_sst_sec_interface(struct test_suite_t *p_test_suite);
-
-/**
  * \brief Register testsuite for the sst reliability tests.
  *
  * \param[in] p_test_suite  The test suite to be executed.
