@@ -33,7 +33,8 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 		message(FATAL_ERROR "Incomplete build configuration: PSA_PROTECTED_STORAGE is undefined.")
 
 	elseif (PSA_PROTECTED_STORAGE)
-		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_interface_testsuite.c")
+		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_interface_testsuite.c"
+					"${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_reliability_testsuite.c")
 		list(APPEND ALL_SRC_C_NS "${SECURE_STORAGE_TEST_DIR}/non_secure/psa_ps_ns_interface_testsuite.c")
 
 		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS PSA_PROTECTED_STORAGE)
@@ -46,9 +47,8 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 		endif()
 
 	else()
-		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c"
-				"${SECURE_STORAGE_TEST_DIR}/secure/sst_reliability_testsuite.c"
-			)
+		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_sec_interface_testsuite.c")
+
 		if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
 			list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_rollback_protection_testsuite.c"
 						"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
