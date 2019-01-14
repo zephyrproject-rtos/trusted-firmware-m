@@ -76,7 +76,7 @@ if (ENABLE_SECURE_STORAGE)
 		set_property(DIRECTORY ${TEST_DIR} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
 
 		if (SST_ROLLBACK_PROTECTION)
-			if (NOT REGRESSION OR TFM_LVL GREATER 1 OR PSA_PROTECTED_STORAGE)
+			if (NOT REGRESSION OR TFM_LVL GREATER 1)
 				# In case of regression test executed in TFM level 1, the SST rollback test suite has
 				# its own implementation of sst_nv_counters intefaces to be able to test different scenarios.
 				list (APPEND SECURE_STORAGE_C_SRC
