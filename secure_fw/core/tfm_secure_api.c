@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -478,7 +478,7 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
              * tampered with since the check.
              */
             iovec_args = (struct iovec_args_t *)
-                    (&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+                    ((uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
                      sizeof(struct iovec_args_t));
             tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
             tfm_copy_iovec_parameters(iovec_args,
@@ -627,7 +627,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
          *        calls are done via the iovec veneers */
         if (curr_part_data->iovec_api) {
             iovec_args = (struct iovec_args_t *)
-                         (&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+                         ((uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
                          sizeof(struct iovec_args_t));
 
             for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
