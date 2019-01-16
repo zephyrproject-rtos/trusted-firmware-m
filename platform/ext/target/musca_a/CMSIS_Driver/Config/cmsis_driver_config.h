@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #define UART0_DEV           UART0_PL011_DEV_NS
 #define UART1_DEV           UART1_PL011_DEV_NS
 
-#define FLASH0_DEV          MT25QL_DEV_NS
+#define FLASH0_DEV          MT25QL_DEV_S
 
 #define MPC_ISRAM0_DEV      MPC_ISRAM0_DEV_S
 #define MPC_ISRAM1_DEV      MPC_ISRAM1_DEV_S
