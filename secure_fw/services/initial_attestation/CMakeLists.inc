@@ -37,6 +37,7 @@ if (ENABLE_INITIAL_ATTESTATION)
 		"${INITIAL_ATTESTATION_DIR}/attestation_core.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_crypto_stub.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_key.c"
+		"${INITIAL_ATTESTATION_DIR}/attest_token.c"
 		)
 
 	#Setting include directories
@@ -47,6 +48,8 @@ if (ENABLE_INITIAL_ATTESTATION)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/inc ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/src ABSOLUTE)
 	embedded_include_directories(PATH ${INITIAL_ATTESTATION_DIR} ABSOLUTE)
 
 	set(BUILD_CMSIS_CORE Off)

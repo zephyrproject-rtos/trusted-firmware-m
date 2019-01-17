@@ -15,30 +15,6 @@
 extern "C" {
 #endif
 
-/* Extension of shared data TLVs, defined in bl2/include/tfm_boot_status.h */
-/* #define GENERAL_BOOT_SEED          0x00 */ /* Defined in tfm_boot_status.h */
-#define GENERAL_INSTANCE_ID        0x01
-#define GENERAL_CHALLENGE          0x02
-#define GENERAL_CALLER_ID          0x03
-#define GENERAL_IMPLEMENTATION_ID  0x04
-#define GENERAL_HW_VERSION         0x05
-#define GENERAL_SECURITY_LIFECYCLE 0x06
-
-#define TLV_MINOR_IAS_INSTANCE_ID \
-                            ((SW_GENERAL << 6) | GENERAL_INSTANCE_ID)
-#define TLV_MINOR_IAS_CHALLENGE \
-                            ((SW_GENERAL << 6) | GENERAL_CHALLENGE)
-#define TLV_MINOR_IAS_CALLER_ID \
-                            ((SW_GENERAL << 6) | GENERAL_CALLER_ID)
-#define TLV_MINOR_IAS_IMPLEMENTATION_ID \
-                            ((SW_GENERAL << 6) | GENERAL_IMPLEMENTATION_ID)
-#define TLV_MINOR_IAS_HW_VERSION \
-                            ((SW_GENERAL << 6) | GENERAL_HW_VERSION)
-#define TLV_MINOR_IAS_SECURITY_LIFECYCLE \
-                            ((SW_GENERAL << 6) | GENERAL_SECURITY_LIFECYCLE)
-#define TLV_MINOR_IAS_IAT_VERSION \
-                            ((SW_GENERAL << 6) | GENERAL_IAT_VERSION)
-
 /*!
  * \brief Initialise the initial attestation service during the TF-M boot up
  *        process.

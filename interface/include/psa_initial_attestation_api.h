@@ -26,7 +26,7 @@ extern "C" {
  * \brief PSA INITIAL ATTESTATION API version
  */
 #define PSA_INITIAL_ATTEST_API_VERSION_MAJOR (0)
-#define PSA_INITIAL_ATTEST_API_VERSION_MINOR (1)
+#define PSA_INITIAL_ATTEST_API_VERSION_MINOR (9)
 
 /**
  * \enum psa_attest_err_t
@@ -179,19 +179,6 @@ enum psa_attest_err_t {
  *                 deliberate state. Custom claim a value is encoded as unsigned
  *                 integer set to 1.
  */
-
-/**
- * Calculated based on:
- *  - COSE header
- *    - Algorithm identifier
- *    - Key ID
- *  - Claims in initial attestation token
- *  - COSE Signature
- *
- * This size (in bytes) is a maximum value, actual token size can be smaller.
- */
-/* FixMe: Just initial value it must be updated if claims are fixed */
-#define PSA_INITIAL_ATTEST_TOKEN_SIZE (512u)
 
 /**
  * \brief Get initial attestation token

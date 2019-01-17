@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,8 +29,13 @@ if (NOT DEFINED ENABLE_ATTESTATION_SERVICE_TESTS)
 elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	list(APPEND ALL_SRC_C_S  "${ATTESTATION_TEST_DIR}/secure/attestation_s_interface_testsuite.c")
 	list(APPEND ALL_SRC_C_NS "${ATTESTATION_TEST_DIR}/non_secure/attestation_ns_interface_testsuite.c")
+	list(APPEND ALL_SRC_C_NS "${ATTESTATION_TEST_DIR}/token_test.c")
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/services/initial_attestation ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/inc ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/src ABSOLUTE)
 endif()

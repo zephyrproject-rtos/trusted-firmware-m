@@ -8,8 +8,6 @@
 #ifndef __ATTESTATION_TESTS_COMMON_H__
 #define __ATTESTATION_TESTS_COMMON_H__
 
-#include "psa_initial_attestation_api.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +17,7 @@ extern "C" {
  *
  * \brief Size of token buffer in bytes.
  */
-#define TEST_TOKEN_SIZE PSA_INITIAL_ATTEST_TOKEN_SIZE
+#define TEST_TOKEN_SIZE (0x200)
 
 /*!
  * \def TOO_SMALL_TOKEN_BUFFER

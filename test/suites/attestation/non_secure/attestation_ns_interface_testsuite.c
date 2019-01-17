@@ -16,6 +16,7 @@
 #include "tfm_api.h"
 #include <string.h>
 #include <stdlib.h>
+#include "../token_test.h"
 
 static uint8_t token_buffer[TEST_TOKEN_SIZE];
 static uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE];
@@ -24,56 +25,19 @@ static uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE];
 /* List of tests */
 static void tfm_attest_test_2001(struct test_result_t *ret);
 static void tfm_attest_test_2002(struct test_result_t *ret);
+static void tfm_attest_test_2003(struct test_result_t *ret);
+static void tfm_attest_test_2004(struct test_result_t *ret);
 
 static struct test_t attestation_interface_tests[] = {
     {&tfm_attest_test_2001, "TFM_ATTEST_TEST_2001",
      "Get attestation token and check claims", {0} },
     {&tfm_attest_test_2002, "TFM_ATTEST_TEST_2002",
      "Negative test cases for initial attestation service", {0} },
+    {&tfm_attest_test_2003, "TFM_ATTEST_TEST_2003",
+     "Minimal token test for CBOR/COSE encoding", {0} },
+    {&tfm_attest_test_2004, "TFM_ATTEST_TEST_2004",
+     "Minimal token size test for CBOR/COSE encoding", {0} },
 };
-
-/*!
- * \brief Static function to iterates over the TLV fields in the attestation
- *        token and look for the location of the specified TLV type.
- *
- * \param[in]  minor_type The identifier of the TLV data entry
- * \param[in]  token_buf  Pointer to the buffer which stores the token
- * \param[out] tlv_ptr    Pointer to the TLV data entry
- *
- * \return Returns 0 on success. Otherwise, 1.
- */
-static uint32_t attest_get_tlv_data(uint16_t  minor_type,
-                                    uint8_t  *token_buf,
-                                    uint8_t **tlv_data_ptr)
-{
-    struct shared_data_tlv_header *tlv_header;
-    struct shared_data_tlv_entry  *tlv_entry;
-    uintptr_t tlv_end;
-    uintptr_t tlv_curr;
-
-    tlv_header = (struct shared_data_tlv_header *)token_buf;
-    if (tlv_header->tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
-        return 1u;
-    }
-
-    /* Get the boundaries of TLV section */
-    tlv_end  = (uintptr_t)token_buf + tlv_header->tlv_tot_len;
-    tlv_curr = (uintptr_t)token_buf + SHARED_DATA_HEADER_SIZE;
-
-    /* Iterates over the TLV section and copy TLVs with requested minor
-     * type to the provided buffer.
-     */
-    for(; tlv_curr < tlv_end; tlv_curr += tlv_entry->tlv_len) {
-        tlv_entry = (struct shared_data_tlv_entry *)tlv_curr;
-        if (GET_MINOR(tlv_entry->tlv_type) == minor_type) {
-            *tlv_data_ptr = (uint8_t *)tlv_entry +
-                            SHARED_DATA_ENTRY_HEADER_SIZE;
-            return 0;
-        }
-    }
-
-    return 1u;
-}
 
 /*!
  * \brief Static function to generate a random byte stream. It is used as a
@@ -120,29 +84,11 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
  * \brief Positive tests for initial attestation service
  *
  *      - Calling Initial Attestation service to get token
- *      - Check the existence of the fixed set of claims:
- *          - Boot status
- *          - Boot seed
- *          - Instance ID
- *          - Challenge object
- *          - Caller ID
- *          - Implementation ID
- *          - Hardware version
- *          - Security lifecycle
- *      - Comparing value of claims:
- *          - Boot seed: Compare boot seed from subsequent calls
- *          - Device ID: Currently compare with fix value
- *          - Challenge: Compare with input object
- *          - Caller ID: Check whether is it in non-secure range
  */
 static void tfm_attest_test_2001(struct test_result_t *ret)
 {
     enum psa_attest_err_t err;
     uint32_t token_size;
-    uint8_t boot_seed_buffer[BOOT_SEED_SIZE];
-    uint8_t *tlv_data_ptr;
-    int32_t caller_id;
-    uint32_t res;
 
     generate_challenge(TEST_CHALLENGE_OBJ_SIZE, challenge_buffer);
 
@@ -154,8 +100,8 @@ static void tfm_attest_test_2001(struct test_result_t *ret)
         return;
     }
 
-    if (token_size != PSA_INITIAL_ATTEST_TOKEN_SIZE) {
-        TEST_FAIL("Token size is faulty");
+    if (token_size > TEST_TOKEN_SIZE) {
+        TEST_FAIL("Allocated buffer is smaller than required");
         return;
     }
 
@@ -166,119 +112,6 @@ static void tfm_attest_test_2001(struct test_result_t *ret)
                                        &token_size);
     if (err != PSA_ATTEST_ERR_SUCCESS) {
         TEST_FAIL("Get token failed");
-        return;
-    }
-
-    /* Check IMAGE HASH
-     * The image hash cannot be retrieved from image manifest if code runs in
-     * NS context, because the image header resides in S memory area.
-     */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_S_NS_MEASURE_VALUE, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_S_NS_SHA256");
-        return;
-    }
-
-    /* FixMe: Remove this #if when MPU will be configured properly. Currently
-     *        in case of TFM_LVL == 3 unaligned access triggers a usage fault
-     *        exception.
-     */
-#if !defined(TFM_LVL) || (TFM_LVL == 1)
-    /* Check INSTANCE_ID */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_INSTANCE_ID, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_INSTANCE_ID");
-        return;
-    }
-
-    /* Check IMPLEMENTATION_ID */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_IMPLEMENTATION_ID, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_IMPLEMENTATION_ID");
-        return;
-    }
-
-    /* Check HARDWARE_VERSION, optional claim */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_HW_VERSION, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_HW_VERSION");
-        return;
-    }
-#endif
-
-    /* Check SECURITY LIFECYCLE */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_SECURITY_LIFECYCLE, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_SECURITY_LIFECYCLE");
-        return;
-    }
-
-    /* Check CHALLENGE */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_CHALLENGE, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_CHALLENGE");
-        return;
-    }
-    if (tfm_memcmp(tlv_data_ptr, challenge_buffer,
-                   TEST_CHALLENGE_OBJ_SIZE) != 0) {
-        TEST_FAIL("Faulty claim: TLV_MINOR_IAS_CHALLENGE");
-        return;
-    }
-
-    /* Check CALLER ID */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_CALLER_ID, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_CALLER_ID");
-        return;
-    }
-
-    caller_id = *((int32_t *)tlv_data_ptr);
-    if (!TFM_CLIENT_ID_IS_NS(caller_id)) {
-        TEST_FAIL("Faulty claim: TLV_MINOR_IAS_CALLER_ID");
-        return;
-    }
-
-    /* Check BOOT_SEED */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_BOOT_SEED, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_BOOT_SEED");
-        return;
-    }
-
-    /* Store received boot seed. */
-    tfm_memcpy(boot_seed_buffer, tlv_data_ptr, BOOT_SEED_SIZE);
-
-    /* Call attest API again and compare the value of boot seed on subsequent
-     * calls. They must be equal within the same boot cycle.
-     */
-    err = psa_initial_attest_get_token(challenge_buffer,
-                                       TEST_CHALLENGE_OBJ_SIZE,
-                                       token_buffer,
-                                       &token_size);
-    if (err != PSA_ATTEST_ERR_SUCCESS) {
-        TEST_FAIL("Get token failed");
-        return;
-    }
-
-    /* Get boot seed again */
-    res = attest_get_tlv_data(TLV_MINOR_IAS_BOOT_SEED, token_buffer,
-                              &tlv_data_ptr);
-    if (res != 0) {
-        TEST_FAIL("Missing claim: TLV_MINOR_IAS_BOOT_SEED");
-        return;
-    }
-
-    /*Compare the values of boot seed on subsequent calls */
-    if (tfm_memcmp(tlv_data_ptr, boot_seed_buffer, BOOT_SEED_SIZE) != 0) {
-        TEST_FAIL("Faulty claim: TLV_MINOR_IAS_BOOT_SEED");
         return;
     }
 
@@ -316,8 +149,46 @@ static void tfm_attest_test_2002(struct test_result_t *ret)
                                        token_buffer,
                                        &token_size);
 
-    if (err == PSA_ATTEST_ERR_SUCCESS) {
+    if (err != PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW) {
         TEST_FAIL("Attestation should fail with too small token buffer");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/*!
+ * \brief Get minimal token, only include a hard coded challenge, but omit the
+ *        rest of the claims
+ *
+ * Calling the minimal_test, which just retrieves a specific token:
+ *  - only hard coded challenge is included
+ *  - token signature is the hash of the token concatenated twice
+ */
+static void tfm_attest_test_2003(struct test_result_t *ret)
+{
+    enum psa_attest_err_t err;
+
+    err = minimal_test();
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        TEST_FAIL("CBOR/COSE minimal_test has failed");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/*!
+ * \brief Get the size of the minimal token, only include a hard coded
+ *        challenge, but omit the rest of the claims
+ */
+static void tfm_attest_test_2004(struct test_result_t *ret)
+{
+    enum psa_attest_err_t err;
+
+    err = minimal_get_size_test();
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        TEST_FAIL("CBOR/COSE minimal_get_size_test has failed");
         return;
     }
 
