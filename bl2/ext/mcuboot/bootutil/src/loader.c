@@ -251,12 +251,12 @@ boot_read_sectors(void)
  * Validate image hash/signature in a slot.
  */
 static int
-boot_image_check(struct image_header *hdr, const struct flash_area *fap, uint8_t *out_hash)
+boot_image_check(struct image_header *hdr, const struct flash_area *fap)
 {
     static uint8_t tmpbuf[BOOT_TMPBUF_SZ];
 
     if (bootutil_img_validate(hdr, fap, tmpbuf, BOOT_TMPBUF_SZ,
-                              NULL, 0, out_hash)) {
+                              NULL, 0, NULL)) {
         return BOOT_EBADIMAGE;
     }
     return 0;
@@ -267,7 +267,6 @@ boot_validate_slot(int slot)
 {
     const struct flash_area *fap;
     struct image_header *hdr;
-    uint8_t hash[32];
     int rc;
 
     hdr = boot_img_hdr(&boot_data, slot);
@@ -282,7 +281,7 @@ boot_validate_slot(int slot)
     }
 
     if ((hdr->ih_magic != IMAGE_MAGIC ||
-        boot_image_check(hdr, fap, hash) != 0)) {
+        boot_image_check(hdr, fap) != 0)) {
         if (slot != 0) {
             rc = flash_area_erase(fap, 0, fap->fa_size);
             if(rc != 0) {
@@ -296,13 +295,6 @@ boot_validate_slot(int slot)
         BOOT_LOG_ERR("Authentication failed! Image in slot %d is not valid.",
                      slot);
         return -1;
-    } else {
-        if (0 != boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                              TLV_MINOR_IAS_S_NS_MEASURE_VALUE,
-                                              sizeof(hash),
-                                              hash)) {
-            BOOT_LOG_ERR("Failed to add data to shared area");
-        }
     }
 
     flash_area_close(fap);
@@ -1375,6 +1367,14 @@ boot_go(struct boot_rsp *rsp)
     rsp->br_image_off = boot_img_slot_off(&boot_data, 0);
     rsp->br_hdr = boot_img_hdr(&boot_data, slot);
 
+    /* Save boot status to shared memory area */
+    rc = boot_save_boot_status(SW_S_NS,
+                               rsp->br_hdr,
+                               BOOT_IMG_AREA(&boot_data, slot));
+    if (rc) {
+        BOOT_LOG_ERR("Failed to add data to shared area");
+    }
+
  out:
     flash_area_close(BOOT_SCRATCH_AREA(&boot_data));
     for (slot = 0; slot < BOOT_NUM_SLOTS; slot++) {
@@ -1689,6 +1689,14 @@ boot_go(struct boot_rsp *rsp)
     } else {
         /* No candidate image available */
         rc = BOOT_EBADIMAGE;
+    }
+
+    /* Save boot status to shared memory area */
+    rc = boot_save_boot_status(SW_S_NS,
+                               rsp->br_hdr,
+                               BOOT_IMG_AREA(&boot_data, slot));
+    if (rc) {
+        BOOT_LOG_ERR("Failed to add data to shared area");
     }
 
 out:
