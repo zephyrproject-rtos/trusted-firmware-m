@@ -14,6 +14,9 @@
 #include "secure_fw/core/tfm_secure_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
+#include "psa_service.h"
+#include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
+#include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
 
 #include "smm_mps2.h"
 
@@ -34,11 +37,28 @@ static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 
-psa_status_t core_test_init(void)
+#ifdef TFM_PSA_API
+static psa_status_t psa_test_common(uint32_t sid, uint32_t minor_version,
+                                    const psa_invec *in_vecs, size_t in_len,
+                                    psa_outvec *out_vecs, size_t out_len)
 {
-    partition_init_done = 1;
-    return CORE_TEST_ERRNO_SUCCESS;
+    psa_handle_t handle;
+    psa_status_t status;
+
+    handle = psa_connect(sid, minor_version);
+    if (handle <= 0) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    status = psa_call(handle, in_vecs, in_len, out_vecs, out_len);
+    if (status < 0) {
+        status = CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
+    }
+
+    psa_close(handle);
+    return status;
 }
+#endif /* TFM_PSA_API */
 
 psa_status_t spm_core_test_sfn_init_success(
                                      struct psa_invec *in_vec, size_t in_len,
@@ -96,7 +116,7 @@ static int32_t mem[4] = {1, 2, 3, 4};
 
 #define MPS2_USERLED_MASK   (0x3)
 
-psa_status_t test_mpu_access(
+static psa_status_t test_mpu_access(
     uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
 {
     /* If these accesses fail, TFM Core kicks in, there's no returning to sfn */
@@ -137,7 +157,7 @@ psa_status_t test_mpu_access(
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-psa_status_t test_memory_permissions(
+static psa_status_t test_memory_permissions(
     uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
 {
     int32_t len = sizeof(uint32_t);
@@ -180,13 +200,16 @@ psa_status_t test_memory_permissions(
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-psa_status_t test_share_redirection(void)
+static psa_status_t test_share_redirection(void)
 {
     uint32_t tmp;
 
+#ifndef TFM_PSA_API
     if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
+#endif /* TFM_PSA_API */
+
     /* Read from scratch */
     tmp = tfm_scratch_area[0];
     /* Write to scratch */
@@ -195,7 +218,7 @@ psa_status_t test_share_redirection(void)
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-psa_status_t test_peripheral_access(void)
+static psa_status_t test_peripheral_access(void)
 {
     struct arm_mps2_fpgaio_t *fpgaio = SEC_MPS2_FPGAIO;
     /* Check read access */
@@ -215,8 +238,8 @@ psa_status_t test_peripheral_access(void)
 
 #define SS_BUFFER_LEN 16
 
-psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
-                                  int32_t len)
+static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
+                                         int32_t len)
 {
     int32_t i;
     /* Service internal buffer */
@@ -234,6 +257,7 @@ psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
+#ifndef TFM_PSA_API
     /* Check requires byte-based size */
     if ((tfm_core_memory_permission_check(in_ptr, len << 2,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
@@ -241,21 +265,31 @@ psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
         return CORE_TEST_ERRNO_INVALID_BUFFER;
     }
+#endif /* TFM_PSA_API */
 
     for (i = 0; i < len; i++) {
         ss_buffer[i] = in_ptr[i];
     }
 
+#ifndef TFM_PSA_API
     if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
+#endif /* TFM_PSA_API */
 
     for (i = 0; i < len; i++) {
         slave_buffer[i] = ss_buffer[i];
     }
 
     /* Call internal service with buffer handling */
+
+#ifdef TFM_PSA_API
+    res = psa_test_common(SPM_CORE_TEST_2_INVERT_SID,
+                          SPM_CORE_TEST_2_INVERT_MIN_VER,
+                          in_vec, 1, outvec, 2);
+#else
     res = tfm_spm_core_test_2_sfn_invert_veneer(in_vec, 1, outvec, 2);
+#endif
 
     if (res != CORE_TEST_ERRNO_SUCCESS) {
         return CORE_TEST_ERRNO_SLAVE_SP_CALL_FAILURE;
@@ -268,9 +302,11 @@ psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
         ss_buffer[i] = slave_buffer[i];
     }
 
+#ifndef TFM_PSA_API
     if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_DEFAULT) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
+#endif /* TFM_PSA_API */
 
     for (i = 0; i < len; i++) {
         out_ptr[i] = ss_buffer[i];
@@ -291,9 +327,11 @@ static psa_status_t test_outvec_write(void)
     uint8_t *out_buf_0;
     uint8_t *out_buf_1;
 
+#ifndef TFM_PSA_API
     if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
+#endif /* TFM_PSA_API */
 
     in_buf_0 = scratch_ptr;
     for (i = 0; i < 5; ++i, ++scratch_ptr)
@@ -323,8 +361,14 @@ static psa_status_t test_outvec_write(void)
     out_vec[1].base = out_buf_0;
     out_vec[1].len = scratch_ptr - out_buf_0;
 
+#ifdef TFM_PSA_API
+    err = psa_test_common(SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
+                          SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_MIN_VER,
+                          in_vec, 2, out_vec, 2);
+#else
     err = tfm_spm_core_test_2_get_every_second_byte_veneer(in_vec, 2,
                                                            out_vec, 2);
+#endif
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         return CORE_TEST_ERRNO_TEST_FAULT;
@@ -345,18 +389,26 @@ static psa_status_t test_outvec_write(void)
         }
     }
 
+#ifndef TFM_PSA_API
     if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_DEFAULT) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }
+#endif /* TFM_PSA_API */
 
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-psa_status_t test_ss_to_ss(void)
+static psa_status_t test_ss_to_ss(void)
 {
+    int32_t ret;
     /* Call to a different service, should be successful */
-    int32_t ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);
-
+#ifdef TFM_PSA_API
+    ret = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          NULL, 0, NULL, 0);
+#else /* TFM_PAS_API*/
+    ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);
+#endif /* TFM_PAS_API*/
     if (ret == CORE_TEST_ERRNO_SUCCESS_2) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
@@ -536,4 +588,246 @@ psa_status_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
     default:
         return CORE_TEST_ERRNO_INVALID_TEST_ID;
     }
+}
+
+#ifdef TFM_PSA_API
+
+#define SS_TO_SS_BUFFER_SIZE (16*4)
+
+typedef psa_status_t (*core_test_func_t)(psa_msg_t *msg);
+
+static psa_status_t tfm_core_test_sfn_wrap_init_success(psa_msg_t *msg)
+{
+    return spm_core_test_sfn_init_success(NULL, 0, NULL, 0);
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_direct_recursion(psa_msg_t *msg)
+{
+    return CORE_TEST_ERRNO_TEST_FAULT;
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_mpu_access(psa_msg_t *msg)
+{
+    size_t num;
+    uint32_t *data_r_ptr;
+    uint32_t *code_ptr;
+    uint32_t *data_w_ptr;
+
+    if ((msg->in_size[0] < sizeof(int32_t)) ||
+        (msg->in_size[1] < sizeof(int32_t)) ||
+        (msg->in_size[2] < sizeof(int32_t))) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 0, &data_r_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 1, &code_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 2, &data_w_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    return test_mpu_access(data_r_ptr, code_ptr, data_w_ptr);
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_memory_permissions(psa_msg_t *msg)
+{
+    size_t num;
+    uint32_t *data_r_ptr;
+    uint32_t *code_ptr;
+    uint32_t *data_w_ptr;
+
+    if ((msg->in_size[0] < sizeof(int32_t)) ||
+        (msg->in_size[1] < sizeof(int32_t)) ||
+        (msg->in_size[2] < sizeof(int32_t))) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 0, &data_r_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 1, &code_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 2, &data_w_ptr, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    return test_memory_permissions(data_r_ptr, code_ptr, data_w_ptr);
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_share_redirection(psa_msg_t *msg)
+{
+    return test_share_redirection();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_ss_to_ss(psa_msg_t *msg)
+{
+    return test_ss_to_ss();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_ss_to_ss_buffer(psa_msg_t *msg)
+{
+    size_t num;
+    uint32_t inbuf[SS_TO_SS_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+    uint32_t outbuf[SS_TO_SS_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+    uint32_t len;
+    psa_status_t res;
+
+    if ((msg->in_size[0] > SS_TO_SS_BUFFER_SIZE) ||
+        (msg->in_size[1] != sizeof(int32_t)) ||
+        (msg->out_size[0] > SS_TO_SS_BUFFER_SIZE)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 0, inbuf, msg->in_size[0]);
+    if (num != msg->in_size[0]) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    num = psa_read(msg->handle, 1, &len, sizeof(int32_t));
+    if (num != sizeof(int32_t)) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    if (len > SS_TO_SS_BUFFER_SIZE) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    res = test_ss_to_ss_buffer(inbuf, outbuf, len);
+    if (res < 0) {
+        return res;
+    }
+
+    psa_write(msg->handle, 0, outbuf, len * sizeof(uint32_t));
+
+    return res;
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_outvec_write(psa_msg_t *msg)
+{
+    return test_outvec_write();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_peripheral_access(psa_msg_t *msg)
+{
+    return test_peripheral_access();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_get_caller_client_id(psa_msg_t *msg)
+{
+    return test_get_caller_client_id();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_spm_request(psa_msg_t *msg)
+{
+    return test_spm_request();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_block(psa_msg_t *msg)
+{
+    return test_block();
+}
+
+static psa_status_t tfm_core_test_sfn_wrap_ns_thread(psa_msg_t *msg)
+{
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
+static void core_test_signal_handle(psa_signal_t signal, core_test_func_t pfn)
+{
+    psa_msg_t msg;
+    psa_status_t status;
+
+    status = psa_get(signal, &msg);
+    if (status) {
+        return;
+    }
+
+    switch (msg.type) {
+    case PSA_IPC_CONNECT:
+        psa_reply(msg.handle, PSA_SUCCESS);
+        break;
+    case PSA_IPC_CALL:
+        status = pfn(&msg);
+        psa_reply(msg.handle, status);
+        break;
+    case PSA_IPC_DISCONNECT:
+        psa_reply(msg.handle, PSA_SUCCESS);
+        break;
+    default:
+        break;
+    }
+}
+#endif
+
+psa_status_t core_test_init(void)
+{
+#ifdef TFM_PSA_API
+    psa_signal_t signals = 0;
+#endif
+
+    partition_init_done = 1;
+
+#ifdef TFM_PSA_API
+    while (1) {
+        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
+        if (signals & SPM_CORE_TEST_INIT_SUCCESS_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_INIT_SUCCESS_SIGNAL,
+                                    tfm_core_test_sfn_wrap_init_success);
+        } else if (signals & SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL,
+                                    tfm_core_test_sfn_wrap_direct_recursion);
+        } else if (signals & SPM_CORE_TEST_MPU_ACCESS_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_MPU_ACCESS_SIGNAL,
+                                    tfm_core_test_sfn_wrap_mpu_access);
+        } else if (signals & SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL,
+                                    tfm_core_test_sfn_wrap_memory_permissions);
+        } else if (signals & SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL,
+                                    tfm_core_test_sfn_wrap_share_redirection);
+        } else if (signals & SPM_CORE_TEST_SS_TO_SS_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_SS_TO_SS_SIGNAL,
+                                    tfm_core_test_sfn_wrap_ss_to_ss);
+        } else if (signals & SPM_CORE_TEST_SS_TO_SS_BUFFER_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_SS_TO_SS_BUFFER_SIGNAL,
+                                    tfm_core_test_sfn_wrap_ss_to_ss_buffer);
+        } else if (signals & SPM_CORE_TEST_OUTVEC_WRITE_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_OUTVEC_WRITE_SIGNAL,
+                                    tfm_core_test_sfn_wrap_outvec_write);
+        } else if (signals & SPM_CORE_TEST_PERIPHERAL_ACCESS_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_PERIPHERAL_ACCESS_SIGNAL,
+                                    tfm_core_test_sfn_wrap_peripheral_access);
+        } else if (signals & SPM_CORE_TEST_GET_CALLER_CLIENT_ID_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_GET_CALLER_CLIENT_ID_SIGNAL,
+                                   tfm_core_test_sfn_wrap_get_caller_client_id);
+        } else if (signals & SPM_CORE_TEST_SPM_REQUEST_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_SPM_REQUEST_SIGNAL,
+                                    tfm_core_test_sfn_wrap_spm_request);
+        } else if (signals & SPM_CORE_TEST_BLOCK_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_BLOCK_SIGNAL,
+                                    tfm_core_test_sfn_wrap_block);
+        } else if (signals & SPM_CORE_TEST_NS_THREAD_SIGNAL) {
+            core_test_signal_handle(SPM_CORE_TEST_NS_THREAD_SIGNAL,
+                                    tfm_core_test_sfn_wrap_ns_thread);
+        } else {
+            ; /* do nothing */
+        }
+    }
+#endif
+
+    return CORE_TEST_ERRNO_SUCCESS;
 }

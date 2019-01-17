@@ -11,9 +11,11 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "spm_partition_defs.h"
-#include "test/test_services/tfm_core_test/core_test_defs.h"
+#include "psa_service.h"
+#include "tfm_ss_core_test_2_signal.h"
 
 #define INVALID_NS_CLIENT_ID  0x49abcdef
+#define INVERT_BUFFER_SIZE    (16*4)
 
 /* Don't initialise caller_partition_id_zi and expect it to be linked in the
  * zero-initialised data area
@@ -27,19 +29,10 @@ static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 
-/* FIXME: Add a testcase to test that a failed init makes the secure partition
- * closed, and none of its functions can be called.
- * A new test service for this purpose is to be added.
- */
-psa_status_t core_test_2_init(void)
-{
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
 psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
-                                      size_t in_len,
-                                      struct psa_outvec *out_vec,
-                                      size_t out_len)
+                                           size_t in_len,
+                                           struct psa_outvec *out_vec,
+                                           size_t out_len)
 {
     /* This function doesn't do any sanity check on the input parameters, nor
      * makes any expectation of them, always returns successfully, with a
@@ -52,9 +45,9 @@ psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
 }
 
 psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
-                                    size_t in_len,
-                                    struct psa_outvec *out_vec,
-                                    size_t out_len)
+                                                    size_t in_len,
+                                                    struct psa_outvec *out_vec,
+                                                    size_t out_len)
 {
     size_t i;
     int32_t caller_client_id_stack = INVALID_NS_CLIENT_ID;
@@ -91,35 +84,96 @@ psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
+psa_status_t spm_core_test_2_get_every_second_byte_internal(
+                                                           const uint8_t *inbuf,
+                                                           uint8_t *outbuf,
+                                                           size_t in_size,
+                                                           size_t *out_size)
+{
+    int j;
+
+    if (in_size/2 > *out_size) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+    for (j = 1; j < in_size; j += 2) {
+        outbuf[j/2] = inbuf[j];
+    }
+    *out_size = in_size/2;
+
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
 psa_status_t spm_core_test_2_get_every_second_byte(
                                      struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
-    int i, j;
+    int i;
+    psa_status_t res;
 
     if (in_len != out_len) {
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
     for (i = 0; i < in_len; ++i) {
-        if (in_vec[i].len/2 > out_vec[i].len) {
-            return CORE_TEST_ERRNO_INVALID_PARAMETER;
+        res = spm_core_test_2_get_every_second_byte_internal(
+                              in_vec[i].base, out_vec[i].base,
+                              in_vec[i].len, &out_vec[i].len);
+        if (res < 0) {
+            return res;
         }
-        for (j = 1; j < in_vec[i].len; j += 2) {
-            ((uint8_t *)out_vec[i].base)[j/2] = ((uint8_t *)in_vec[i].base)[j];
-        }
-        out_vec[i].len = in_vec[i].len/2;
     }
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
 /* Invert function */
 #define SFN_INVERT_MAX_LEN 128
-
-psa_status_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
-                                   struct psa_outvec *out_vec, size_t out_len)
+static psa_status_t spm_core_test_2_sfn_invert_internal(uint32_t *in_ptr,
+                                                        uint32_t *out_ptr,
+                                                        int32_t *res_ptr,
+                                                        int32_t len)
 {
     int32_t i;
     static uint32_t invert_buffer[SFN_INVERT_MAX_LEN];
+
+#ifndef TFM_PSA_API
+    if (tfm_core_memory_permission_check(res_ptr, sizeof(int32_t),
+        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {
+        return CORE_TEST_ERRNO_INVALID_BUFFER;
+    }
+#endif /* TFM_PSA_API */
+    *res_ptr = -1;
+
+    if (len > SFN_INVERT_MAX_LEN) {
+        return CORE_TEST_ERRNO_INVALID_BUFFER;
+    }
+
+#ifndef TFM_PSA_API
+    /* Check requires byte-based size */
+    if ((tfm_core_memory_permission_check(in_ptr, len << 2,
+        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
+        (tfm_core_memory_permission_check(out_ptr, len << 2,
+        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
+        return CORE_TEST_ERRNO_INVALID_BUFFER;
+    }
+#endif /* TFM_PSA_API */
+
+    for (i = 0; i < len; i++) {
+        invert_buffer[i] = in_ptr[i];
+    }
+    for (i = 0; i < len; i++) {
+        invert_buffer[i] = ~invert_buffer[i];
+    }
+    for (i = 0; i < len; i++) {
+        out_ptr[i] = invert_buffer[i];
+    }
+
+    *res_ptr = 0;
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
+psa_status_t spm_core_test_2_sfn_invert(
+                                     struct psa_invec *in_vec, size_t in_len,
+                                     struct psa_outvec *out_vec, size_t out_len)
+{
     int32_t len;
     uint32_t *in_ptr;
     uint32_t *out_ptr;
@@ -140,35 +194,150 @@ psa_status_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
     out_ptr = (uint32_t *)out_vec[0].base;
     res_ptr = (int32_t *)out_vec[1].base;
 
-    if (tfm_core_memory_permission_check(res_ptr, sizeof(int32_t),
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;;
+    return spm_core_test_2_sfn_invert_internal(in_ptr, out_ptr, res_ptr, len);
+}
+
+#ifdef TFM_PSA_API
+
+typedef psa_status_t (*core_test_2_func_t)(psa_msg_t *msg);
+
+static void core_test_2_signal_handle(psa_signal_t signal,
+                                      core_test_2_func_t pfn)
+{
+    psa_msg_t msg;
+    psa_status_t status;
+
+    status = psa_get(signal, &msg);
+    if (status) {
+        return;
     }
 
-    *res_ptr = -1;
+    switch (msg.type) {
+    case PSA_IPC_CONNECT:
+        psa_reply(msg.handle, PSA_SUCCESS);
+        break;
+    case PSA_IPC_CALL:
+        status = pfn(&msg);
+        psa_reply(msg.handle, status);
+        break;
+    case PSA_IPC_DISCONNECT:
+        psa_reply(msg.handle, PSA_SUCCESS);
+        break;
+    default:
+        break;
+    }
+}
 
-    if (len > SFN_INVERT_MAX_LEN) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;;
+psa_status_t spm_core_test_2_wrap_slave_service(psa_msg_t *msg)
+{
+    return spm_core_test_2_slave_service(NULL, 0, NULL, 0);
+}
+
+psa_status_t spm_core_test_2_wrap_check_caller_client_id(psa_msg_t *msg)
+{
+    return spm_core_test_2_check_caller_client_id(NULL, 0, NULL, 0);
+}
+
+psa_status_t spm_core_test_2_wrap_get_every_second_byte(psa_msg_t *msg)
+{
+    uint32_t inbuf[INVERT_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+    uint32_t outbuf[INVERT_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+
+    int i;
+    size_t num;
+    size_t out_len;
+    psa_status_t res;
+
+    for (i = 0; i < PSA_MAX_IOVEC; ++i) {
+        if (msg->in_size[i] > INVERT_BUFFER_SIZE) {
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
+        }
+
+        if (msg->in_size[i] == 0) {
+            continue;
+        }
+
+        num = psa_read(msg->handle, i, inbuf, msg->in_size[i]);
+        if (num != msg->in_size[i]) {
+            return CORE_TEST_ERRNO_INVALID_PARAMETER;
+        }
+
+        out_len = msg->out_size[i];
+
+        res = spm_core_test_2_get_every_second_byte_internal((uint8_t *)inbuf,
+                (uint8_t *)outbuf, msg->in_size[i], &out_len);
+        if (res < 0) {
+            return res;
+        }
+
+        psa_write(msg->handle, i, outbuf, out_len);
+    }
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
+psa_status_t spm_core_test_2_wrap_sfn_invert(psa_msg_t *msg)
+{
+    uint32_t inbuf[INVERT_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+    uint32_t outbuf[INVERT_BUFFER_SIZE/sizeof(uint32_t)] = {0};
+    size_t num;
+    int32_t res_ptr;
+    psa_status_t ret;
+
+    if ((msg->out_size[0] < msg->in_size[0]) ||
+        (msg->in_size[0] > INVERT_BUFFER_SIZE) ||
+        (msg->in_size[0]%4 != 0) ||
+        (msg->out_size[1] < sizeof(int32_t))) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    /* Check requires byte-based size */
-    if ((tfm_core_memory_permission_check(in_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
-        (tfm_core_memory_permission_check(out_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;;
+    num = psa_read(msg->handle, 0, inbuf, msg->in_size[0]);
+    if (num != msg->in_size[0]) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    for (i = 0; i < len; i++) {
-        invert_buffer[i] = in_ptr[i];
-    }
-    for (i = 0; i < len; i++) {
-        invert_buffer[i] = ~invert_buffer[i];
-    }
-    for (i = 0; i < len; i++) {
-        out_ptr[i] = invert_buffer[i];
+    ret = spm_core_test_2_sfn_invert_internal(inbuf, outbuf,
+                                              &res_ptr, msg->in_size[0]);
+    if (ret < 0) {
+        return ret;
     }
 
-    *res_ptr = 0;
+    psa_write(msg->handle, 0, outbuf, msg->in_size[0]);
+    psa_write(msg->handle, 1, &res_ptr, sizeof(int32_t));
+
+    return ret;
+}
+
+#endif
+
+/* FIXME: Add a testcase to test that a failed init makes the secure partition
+ * closed, and none of its functions can be called.
+ * A new test service for this purpose is to be added.
+ */
+psa_status_t core_test_2_init(void)
+{
+#ifdef TFM_PSA_API
+    psa_signal_t signals = 0;
+
+    while (1) {
+        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
+        if (signals & SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL) {
+            core_test_2_signal_handle(SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL,
+                                      spm_core_test_2_wrap_slave_service);
+        } else if (signals & SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL) {
+            core_test_2_signal_handle(
+                                  SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL,
+                                  spm_core_test_2_wrap_check_caller_client_id);
+        } else if (signals & SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL) {
+            core_test_2_signal_handle(
+                                   SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL,
+                                   spm_core_test_2_wrap_get_every_second_byte);
+        } else if (signals & SPM_CORE_TEST_2_INVERT_SIGNAL) {
+            core_test_2_signal_handle(SPM_CORE_TEST_2_INVERT_SIGNAL,
+                                      spm_core_test_2_wrap_sfn_invert);
+        } else {
+            ; /* do nothing */
+        }
+    }
+#endif
     return CORE_TEST_ERRNO_SUCCESS;
 }

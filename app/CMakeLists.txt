@@ -21,7 +21,7 @@ embedded_project_fixup()
 set(APP_DIR ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
 set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
-set(TEST_INTERFACE_DIR ${TFM_ROOT_DIR}/test/interface)
+set(TEST_DIR ${TFM_ROOT_DIR}/test)
 
 #Include BL2 bootloader related functions
 set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")

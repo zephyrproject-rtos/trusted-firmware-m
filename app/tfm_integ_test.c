@@ -42,16 +42,51 @@
                                                                    "generic!");\
         } \
     } while(0)
+
+#ifdef TFM_PSA_API
+static psa_status_t psa_test_common(uint32_t sid, uint32_t minor_version,
+                                    const psa_invec *in_vecs, size_t in_len,
+                                    psa_outvec *out_vecs, size_t out_len)
+{
+    psa_handle_t handle;
+    psa_status_t status;
+
+    handle = psa_connect(sid, minor_version);
+    if (handle <= 0) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    status = psa_call(handle, in_vecs, in_len, out_vecs, out_len);
+    if (status < 0) {
+        status = CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
+    }
+
+    psa_close(handle);
+    return status;
+}
+#endif /* TFM_PSA_API */
+
 /**
  * \brief secure_decrement_ns_lock_1
  *
  */
 void secure_decrement_ns_lock_1(void)
 {
+#ifndef TFM_PSA_API
     uint32_t testcase_id = CORE_TEST_ID_BLOCK;
     psa_invec in_vec = {&testcase_id, sizeof(testcase_id)};
 
     TRY_SFN(tfm_spm_core_test_sfn_veneer, &in_vec, 1, NULL, 0);
+#else
+    psa_status_t err;
+
+    err = psa_test_common(SPM_CORE_TEST_BLOCK_SID,
+                          SPM_CORE_TEST_BLOCK_MIN_VER,
+                          NULL, 0, NULL, 0);
+    if (err != PSA_SUCCESS) {
+        LOG_MSG("Secure call to sfn block failed, generic!");
+    }
+#endif
 }
 
 /**
@@ -60,10 +95,21 @@ void secure_decrement_ns_lock_1(void)
  */
 void secure_decrement_ns_lock_2(void)
 {
+#ifndef TFM_PSA_API
     uint32_t testcase_id = CORE_TEST_ID_BLOCK;
     psa_invec in_vec = {&testcase_id, sizeof(testcase_id)};
 
     TRY_SFN(tfm_spm_core_test_sfn_veneer, &in_vec, 1, NULL, 0);
+#else
+    psa_status_t err;
+
+    err = psa_test_common(SPM_CORE_TEST_BLOCK_SID,
+                          SPM_CORE_TEST_BLOCK_MIN_VER,
+                          NULL, 0, NULL, 0);
+    if (err != PSA_SUCCESS) {
+        LOG_MSG("Secure call to sfn block failed, generic!");
+    }
+#endif
 }
 /**
  * \brief Test definition for the RTX - TFM integration tests

@@ -27,7 +27,7 @@ endif()
 #various project specific settings (e.g. what files to build, macro
 #definitions) based on these.
 set (REGRESSION False)
-set (CORE_TEST False)
+set (CORE_TEST True)
 set (CORE_IPC True)
 
 # TF-M isolation level: 1..3

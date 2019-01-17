@@ -11,6 +11,7 @@
   "priority": "NORMAL",
   "id": "0x00000003",
   "entry_point": "core_test_2_init",
+  "tfm_partition_ipc": true,
   "stack_size": "0x0400",
   "heap_size": "0x0400",
   "secure_functions": [
@@ -54,5 +55,39 @@
     "object_list": [
       "*tfm_ss_core_test_2.*"
     ]
-  }
+  },
+  "services": [
+    {
+      "name": "SPM_CORE_TEST_2_SLAVE_SERVICE_SID",
+      "sid": "0x00002200",
+      "signal": "SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SID",
+      "sid": "0x00002201",
+      "signal": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID",
+      "sid": "0x00002202",
+      "signal": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "SPM_CORE_TEST_2_INVERT_SID",
+      "sid": "0x00002203",
+      "signal": "SPM_CORE_TEST_2_INVERT_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+  ]
 }

@@ -7,9 +7,11 @@
 
 #include "core_ns_tests.h"
 #include "tfm_api.h"
-#include "tfm_veneers.h"
 #include "test/suites/core/non_secure/core_test_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
+#ifndef TFM_PSA_API
+#include "tfm_veneers.h"
+#endif /* TFM_PSA_API */
 
 #include <stdio.h>
 #include <string.h>
@@ -22,17 +24,19 @@
     {fn, "TFM_CORE_TEST_"TOSTRING(number),\
      description, {0} }
 
+#ifndef TFM_PSA_API
+static void tfm_core_test_permissions(struct test_result_t *ret);
+static void tfm_core_test_mpu_access(struct test_result_t *ret);
+static void tfm_core_test_share_change(struct test_result_t *ret);
+static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
+#endif /* TFM_PSA_API */
 static void tfm_core_test_ns_thread(struct test_result_t *ret);
 static void tfm_core_test_check_init(struct test_result_t *ret);
 static void tfm_core_test_recursion(struct test_result_t *ret);
-static void tfm_core_test_permissions(struct test_result_t *ret);
-static void tfm_core_test_mpu_access(struct test_result_t *ret);
 static void tfm_core_test_buffer_check(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss(struct test_result_t *ret);
-static void tfm_core_test_share_change(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
-static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
 static void tfm_core_test_spm_request(struct test_result_t *ret);
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 static void tfm_core_test_outvec_write(struct test_result_t *ret);
@@ -44,27 +48,33 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_CHECK_INIT, tfm_core_test_check_init,
     "Test the success of service init"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_RECURSION, tfm_core_test_recursion,
     "Test direct recursion of secure services (DEPRECATED)"),
+#ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_MEMORY_PERMISSIONS,
     tfm_core_test_permissions,
     "Test secure service memory access permissions"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_MPU_ACCESS, tfm_core_test_mpu_access,
     "Test secure service MPU accesses"),
+#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_BUFFER_CHECK, tfm_core_test_buffer_check,
     "Test secure service buffer accesses"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SS_TO_SS, tfm_core_test_ss_to_ss,
     "Test secure service to service call"),
+#ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SHARE_REDIRECTION,
     tfm_core_test_share_change,
     "Test secure service share change request"),
+#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SS_TO_SS_BUFFER,
     tfm_core_test_ss_to_ss_buffer,
     "Test secure service to service call with buffer handling"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_PERIPHERAL_ACCESS,
     tfm_core_test_peripheral_access,
     "Test service peripheral access"),
+#ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_GET_CALLER_CLIENT_ID,
     tfm_core_test_get_caller_client_id,
     "Test get caller client ID function"),
+#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SPM_REQUEST,
     tfm_core_test_spm_request,
     "Test SPM request function"),
@@ -86,13 +96,42 @@ void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
                   core_tests, list_size, p_test_suite);
 }
 
+#ifdef TFM_PSA_API
+static psa_status_t psa_test_common(uint32_t sid, uint32_t minor_version,
+                                    const psa_invec *in_vecs, size_t in_len,
+                                    psa_outvec *out_vecs, size_t out_len)
+{
+    psa_handle_t handle;
+    psa_status_t status;
+
+    handle = psa_connect(sid, minor_version);
+    if (handle <= 0) {
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    status = psa_call(handle, in_vecs, in_len, out_vecs, out_len);
+    if (status < 0) {
+        status = CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
+    }
+
+    psa_close(handle);
+    return status;
+}
+#endif /* TFM_PSA_API */
+
 static void tfm_core_test_ns_thread(struct test_result_t *ret)
 {
     int32_t err;
+#ifndef TFM_PSA_API
     int32_t test_case_id = CORE_TEST_ID_NS_THREAD;
     psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
 
     err = tfm_spm_core_test_sfn_veneer(in_vec, 1, NULL, 0);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_NS_THREAD_SID,
+                          SPM_CORE_TEST_NS_THREAD_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Secure function call from thread mode should be successful");
@@ -105,11 +144,19 @@ static void tfm_core_test_ns_thread(struct test_result_t *ret)
 static void tfm_core_test_peripheral_access(struct test_result_t *ret)
 {
     int32_t err;
+
+#ifndef TFM_PSA_API
     int32_t test_case_id = CORE_TEST_ID_PERIPHERAL_ACCESS;
     psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_PERIPHERAL_ACCESS_SID,
+                          SPM_CORE_TEST_PERIPHERAL_ACCESS_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
+
     switch (err) {
     case CORE_TEST_ERRNO_SUCCESS:
         ret->val = TEST_PASSED;
@@ -153,17 +200,27 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
                                    {NULL, 0}, {NULL, 0}, {NULL, 0}, {NULL, 0} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = {
                                    {NULL, 0}, {NULL, 0}, {NULL, 0}, {NULL, 0} };
+
+#ifndef TFM_PSA_API
     struct tfm_core_test_call_args_t args = {NULL, 0, NULL, 0};
+#endif /* TFM_PSA_API */
 
     /* Check a few valid cases */
 
     /* Execute a call with valid iovecs (empty) */
     empty_iovecs(in_vec, out_vec);
+
+#ifndef TFM_PSA_API
     args.in_vec = NULL;
     args.in_len = 0;
     args.out_vec = NULL;
     args.out_len = 0;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("iovec sanitization failed on empty vectors.");
         return;
@@ -171,11 +228,17 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 
     /* Execute a call with valid iovecs (full) */
     full_iovecs(in_vec, out_vec);
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = PSA_MAX_IOVEC - args.in_len;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 2);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("iovec sanitization failed on full vectors.");
         return;
@@ -183,11 +246,17 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 
     /* Execute a call with valid iovecs (different number of vectors) */
     full_iovecs(in_vec, out_vec);
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = 1;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 1);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL(
                  "iovec sanitization failed on valid, partially full vectors.");
@@ -202,12 +271,18 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
      * range
      */
     full_iovecs(in_vec, out_vec);
+    out_vec[1].base = NULL;
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = 1;
-    out_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 1);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("content of an outvec out of range should not be checked");
         return;
@@ -217,12 +292,18 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
      * range
      */
     full_iovecs(in_vec, out_vec);
+    in_vec[2].len = 0;
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = 1;
-    in_vec[2].len = 0;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 1);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("content of an outvec out of range should not be checked");
         return;
@@ -230,13 +311,19 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 
     /* Execute a call with len = 0 in single vector in invec */
     full_iovecs(in_vec, out_vec);
+    in_vec[1].len = 0;
+    in_vec[1].base = NULL;
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = 2;
-    in_vec[1].len = 0;
-    in_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 2);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("If the len of an invec is 0, the base should be ignored");
         return;
@@ -244,13 +331,19 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 
     /* Execute a call with len = 0 in single vector in outvec */
     full_iovecs(in_vec, out_vec);
+    out_vec[1].len = 0;
+    out_vec[1].base = NULL;
+#ifndef TFM_PSA_API
     args.in_vec = in_vec;
     args.in_len = 2;
     args.out_vec = out_vec;
     args.out_len = 2;
-    out_vec[1].len = 0;
-    out_vec[1].base = NULL;
     err = tfm_core_test_call(tfm_spm_core_test_2_slave_service_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          in_vec, 2, out_vec, 2);
+#endif /* TFM_PSA_API */
     if (err != CORE_TEST_ERRNO_SUCCESS_2) {
         TEST_FAIL("If the len of an outvec is 0, the base should be ignored");
         return;
@@ -262,7 +355,6 @@ static void tfm_core_test_iovec_sanitization(struct test_result_t *ret)
 static void tfm_core_test_outvec_write(struct test_result_t *ret)
 {
     int32_t err;
-    int32_t test_case_id = CORE_TEST_ID_OUTVEC_WRITE;
     int i;
     uint8_t in_buf_0[] = {0, 1, 2, 3, 4};
     uint8_t in_buf_1[] = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89};
@@ -273,11 +365,18 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
                                         {in_buf_1, sizeof(in_buf_1)} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = { {out_buf_0, sizeof(out_buf_0) },
                                         {out_buf_1, sizeof(out_buf_1)} };
+#ifndef TFM_PSA_API
+    int32_t test_case_id = CORE_TEST_ID_OUTVEC_WRITE;
     struct tfm_core_test_call_args_t args1 = {in_vec, 2, out_vec, 2};
     struct tfm_core_test_call_args_t args2 = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_2_get_every_second_byte_veneer,
                                                                         &args1);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
+                          SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_MIN_VER,
+                          in_vec, 2, out_vec, 2);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("call to secure function should be successful");
@@ -303,9 +402,15 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
     }
 
     /* do the same test on the secure side */
+#ifndef TFM_PSA_API
     in_vec[0].base = &test_case_id;
     in_vec[0].len = sizeof(int32_t);
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args2);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_OUTVEC_WRITE_SID,
+                          SPM_CORE_TEST_OUTVEC_WRITE_MIN_VER,
+                          in_vec, 0, out_vec, 0);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute secure side test");
@@ -323,9 +428,15 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
 static void tfm_core_test_check_init(struct test_result_t *ret)
 {
     int32_t err;
+#ifndef TFM_PSA_API
     struct tfm_core_test_call_args_t args = {NULL, 0, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_init_success_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_INIT_SUCCESS_SID,
+                          SPM_CORE_TEST_INIT_SUCCESS_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to initialise test service.");
@@ -345,6 +456,7 @@ static void tfm_core_test_recursion(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifndef TFM_PSA_API
 static char *error_to_string(const char *desc, int32_t err)
 {
     static char info[80];
@@ -405,6 +517,7 @@ static void tfm_core_test_permissions(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#endif /* TFM_PSA_API */
 
 static void tfm_core_test_buffer_check(struct test_result_t *ret)
 {
@@ -416,9 +529,15 @@ static void tfm_core_test_buffer_check(struct test_result_t *ret)
     psa_invec in_vec[] = { {inbuf, sizeof(inbuf)} };
     psa_outvec outvec[] = { {outbuf, sizeof(outbuf)},
                            {&result, sizeof(int32_t)} };
+#ifndef TFM_PSA_API
     struct tfm_core_test_call_args_t args = {in_vec, 1, outvec, 2};
 
     res = tfm_core_test_call(tfm_spm_core_test_2_sfn_invert_veneer, &args);
+#else /* TFM_PSA_API */
+    res = psa_test_common(SPM_CORE_TEST_2_INVERT_SID,
+                          SPM_CORE_TEST_2_INVERT_MIN_VER,
+                          in_vec, 1, outvec, 2);
+#endif /* TFM_PSA_API */
     if (res != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Call to secure service should be successful.");
         return;
@@ -448,11 +567,17 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
 {
     int32_t err;
 
+#ifndef TFM_PSA_API
     int32_t test_case_id = CORE_TEST_ID_SS_TO_SS;
     psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_SS_TO_SS_SID,
+                          SPM_CORE_TEST_SS_TO_SS_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("The internal service call failed.");
@@ -462,6 +587,7 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifndef TFM_PSA_API
 static void tfm_core_test_share_change(struct test_result_t *ret)
 {
     int32_t err;
@@ -478,6 +604,7 @@ static void tfm_core_test_share_change(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#endif /* TFM_PSA_API */
 
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
 {
@@ -486,14 +613,23 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
     uint32_t inbuf[] = {1, 2, 3, 4, 0xAAAFFF, 0xFFFFFFFF};
     uint32_t outbuf[16] = {0};
     int32_t len = (int32_t)sizeof(inbuf) >> 2;
+    psa_outvec out_vec[] = { {outbuf, sizeof(outbuf)} };
+#ifndef TFM_PSA_API
     int32_t test_case_id = CORE_TEST_ID_SS_TO_SS_BUFFER;
     psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
                           {inbuf, sizeof(inbuf)},
                           {&len, sizeof(int32_t)} };
-    psa_outvec outvec[] = { {outbuf, sizeof(outbuf)} };
-    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
+    struct tfm_core_test_call_args_t args = {in_vec, 3, out_vec, 1};
 
     res = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
+#else /* TFM_PSA_API */
+    psa_invec in_vec[] = {{inbuf, sizeof(inbuf)},
+                          {&len, sizeof(int32_t)} };
+
+    res = psa_test_common(SPM_CORE_TEST_SS_TO_SS_BUFFER_SID,
+                          SPM_CORE_TEST_SS_TO_SS_BUFFER_MIN_VER,
+                          in_vec, 2, out_vec, 1);
+#endif /* TFM_PSA_API */
     switch (res) {
     case CORE_TEST_ERRNO_SUCCESS:
         for (i = 0; i < sizeof(inbuf) >> 2; i++) {
@@ -525,6 +661,7 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
     }
 }
 
+#ifndef TFM_PSA_API
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 {
     int32_t err;
@@ -541,15 +678,22 @@ static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#endif /* TFM_PSA_API */
 
 static void tfm_core_test_spm_request(struct test_result_t *ret)
 {
     int32_t err;
+#ifndef TFM_PSA_API
     int32_t test_case_id = CORE_TEST_ID_SPM_REQUEST;
     psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
     struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
 
     err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
+#else /* TFM_PSA_API */
+    err = psa_test_common(SPM_CORE_TEST_SPM_REQUEST_SID,
+                          SPM_CORE_TEST_SPM_REQUEST_MIN_VER,
+                          NULL, 0, NULL, 0);
+#endif /* TFM_PSA_API */
 
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("The SPM request failed.");
