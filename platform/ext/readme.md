@@ -107,12 +107,16 @@ The SST service requires the following definitions:
  - `SST_SECTOR_SIZE`
    Defines the size of the flash sectors.
  - `SST_NBR_OF_SECTORS`
-   Defines the number of sectors avilable for
+   Defines the number of sectors available for
    the secure area.
  - `FLASH_DEV_NAME`
    Specifies the flash device used by BL2 and SST.
  - `SST_FLASH_PROGRAM_UNIT`
    Defines the smallest flash programmable unit in bytes.
+ - `SST_MAX_ASSET_SIZE`
+   Defines the maximum asset size to be stored in the SST area.
+ - `SST_NUM_ASSETS`
+   Defines the maximum number of assets to be stored in the SST area.
 
 **Note**: The sectors must be consecutive.
 
@@ -128,4 +132,4 @@ target has the following HW components:
 
 --------------
 
-*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*

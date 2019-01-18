@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,16 +99,23 @@
  */
 #define FLASH_DEV_NAME Driver_FLASH0
 
-/* Secure Storage (SST) Service definitions */
+/* Secure Storage (SST) Service definitions
+ * Note: Further documentation of these definitions can be found in the
+ * TF-M SST Integration Guide.
+ */
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
  */
-#define SST_FLASH_AREA_ADDR  FLASH_SST_AREA_OFFSET
-#define SST_SECTOR_SIZE      FLASH_AREA_IMAGE_SECTOR_SIZE
+#define SST_FLASH_AREA_ADDR     FLASH_SST_AREA_OFFSET
+#define SST_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* The sectors must be in consecutive memory location */
-#define SST_NBR_OF_SECTORS  (FLASH_SST_AREA_SIZE / SST_SECTOR_SIZE)
+#define SST_NBR_OF_SECTORS     (FLASH_SST_AREA_SIZE / SST_SECTOR_SIZE)
 /* Specifies the smallest flash programmable unit in bytes */
 #define SST_FLASH_PROGRAM_UNIT  0x1
+/* The maximum asset size to be stored in the SST area */
+#define SST_MAX_ASSET_SIZE      2048
+/* The maximum number of assets to be stored in the SST area */
+#define SST_NUM_ASSETS          10
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

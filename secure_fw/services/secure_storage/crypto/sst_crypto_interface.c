@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,7 +29,7 @@ static uint8_t sst_crypto_iv_buf[SST_IV_LEN_BYTES];
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[SST_MBEDTLS_MEM_BUF_LEN];
 
-enum psa_sst_err_t sst_crypto_init(void)
+enum tfm_sst_err_t sst_crypto_init(void)
 {
     mbedtls_gcm_free(&sst_crypto_gcm_ctx);
 
@@ -44,10 +44,10 @@ enum psa_sst_err_t sst_crypto_init(void)
      * are void. When integrated with crypto engine or service
      * a return value may be required.
      */
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
+enum tfm_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
 {
     enum tfm_plat_err_t err;
 
@@ -61,23 +61,23 @@ enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len)
      */
     err = tfm_plat_get_crypto_huk(key, key_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
+enum tfm_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len)
 {
     int32_t err;
 
     err = mbedtls_gcm_setkey(&sst_crypto_gcm_ctx, MBEDTLS_CIPHER_ID_AES,
                              key, key_len*8);
     if (err != 0) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
 void sst_crypto_set_iv(const union sst_crypto_t *crypto)
@@ -128,7 +128,7 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
 
 }
 
-enum psa_sst_err_t sst_crypto_encrypt_and_tag(
+enum tfm_sst_err_t sst_crypto_encrypt_and_tag(
                                             union sst_crypto_t *crypto,
                                             const uint8_t *add, size_t add_len,
                                             const uint8_t *in, uint8_t *out,
@@ -141,13 +141,13 @@ enum psa_sst_err_t sst_crypto_encrypt_and_tag(
                                     add_len, in, out, SST_TAG_LEN_BYTES,
                                     crypto->ref.tag);
     if (err != 0) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_crypto_auth_and_decrypt(
+enum tfm_sst_err_t sst_crypto_auth_and_decrypt(
                                              const union sst_crypto_t *crypto,
                                              const uint8_t *add, size_t add_len,
                                              const uint8_t *in, uint8_t *out,
@@ -160,23 +160,23 @@ enum psa_sst_err_t sst_crypto_auth_and_decrypt(
                                    crypto->ref.tag, SST_TAG_LEN_BYTES,
                                    in, out);
     if (err != 0) {
-        return PSA_SST_ERR_ASSET_NOT_FOUND;
+        return TFM_SST_ERR_AUTH_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
+enum tfm_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
                                                 const uint8_t *add,
                                                 uint32_t add_len)
 {
-    enum psa_sst_err_t ret;
+    enum tfm_sst_err_t ret;
 
     ret = sst_crypto_encrypt_and_tag(crypto, add, add_len, 0, 0, 0);
     return ret;
 }
 
-enum psa_sst_err_t sst_crypto_authenticate(
+enum tfm_sst_err_t sst_crypto_authenticate(
                                          const union sst_crypto_t *crypto,
                                          const uint8_t *add, uint32_t add_len)
 {

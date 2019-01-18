@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,125 +8,100 @@
 #ifndef __SST_OBJECT_SYSTEM_H__
 #define __SST_OBJECT_SYSTEM_H__
 
+#include <stdint.h>
+
+#include "psa_protected_storage.h"
+#include "tfm_sst_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <inttypes.h>
-#include "tfm_sst_defs.h"
 
 /**
  * \brief Prepares the secure storage system for usage, populating internal
  *        structures.
  *        It identifies and validates the system metadata.
  *
- * \return Returns PSA_SST_ERR_SUCCESS or PSA_SST_ERR_INIT_FAILED
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_system_prepare(void);
+enum tfm_sst_err_t sst_system_prepare(void);
 
 /**
- * \brief Creates a new object with given object UUID.
+ * \brief Creates a new object with the provided UID and client ID.
  *
- * \param[in] uuid     Object UUID
- * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[in] type     Object type
- * \param[in] size     Object size
+ * \param[in] uid           Unique identifier for the data
+ * \param[in] client_id     Identifier of the asset's owner (client)
+ * \param[in] create_flags  Flags indicating the properties of the data
+ * \param[in] size          Size of the contents of `data` in bytes
+ * \param[in] data          Buffer containing the data to write
  *
- * \return Returns error code specified in \ref psa_sst_err_t
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_object_create(uint32_t uuid,
-                                     const struct tfm_sst_token_t *s_token,
-                                     uint32_t type, uint32_t size);
+enum tfm_sst_err_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
+                                     psa_ps_create_flags_t create_flags,
+                                     uint32_t size, const uint8_t *data);
 
 /**
- * \brief Gets object's data referenced by object UUID, and stores it
- *        in the data buffer.
+ * \brief Gets the data of the object with the provided UID and client ID.
  *
- * \param[in]  uuid     Object UUID
- * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[out] data     Data buffer to store the object data
- * \param[in]  offset   Offset from where the read is going to start
- * \param[in]  size     Data buffer size
+ * \param[in]  uid        Unique identifier for the data
+ * \param[in]  client_id  Identifier of the asset's owner (client)
+ * \param[in]  offset     Offset in the object at which to begin the read
+ * \param[in]  size       Size of the contents of `data` in bytes
+ * \param[out] data       Buffer where the data will be placed upon successful
+ *                        completion
  *
- * \return Returns error code specified in \ref psa_sst_err_t
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_object_read(uint32_t uuid,
-                                   const struct tfm_sst_token_t *s_token,
-                                   uint8_t *data, uint32_t offset,
-                                   uint32_t size);
-/**
- * \brief Writes data into the object referenced by object UUID.
- *
- * \param[in] uuid     Object UUID
- * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[in] data     Data buffer to write into object object
- * \param[in] offset   Offset from where the write is going to start
- * \param[in] size     Data buffer size
- *
- * \return Returns number of bytes read or a relevant error \ref psa_sst_err_t
- */
-enum psa_sst_err_t sst_object_write(uint32_t uuid,
-                                    const struct tfm_sst_token_t *s_token,
-                                    const uint8_t *data, uint32_t offset,
-                                    uint32_t size);
-/**
- * \brief Deletes the object referenced by object UUID.
- *
- * \param[in] uuid  Object UUID
- * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
- *
- * \return Returns error code specified in \ref psa_sst_err_t
- */
-enum psa_sst_err_t sst_object_delete(uint32_t uuid,
-                                     const struct tfm_sst_token_t *s_token);
+enum tfm_sst_err_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
+                                   uint32_t offset, uint32_t size,
+                                   uint8_t *data);
 
 /**
- * \brief Gets the object information referenced by object UUID.
+ * \brief Writes data into the object with the provided UID and client ID.
  *
- * \param[in]  uuid     Object UUID
- * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[out] info     Pointer to store the object's information
- *                      \ref struct psa_sst_asset_info_t
+ * \param[in] uid        Unique identifier for the data
+ * \param[in] client_id  Identifier of the asset's owner (client)
+ * \param[in] offset     Offset in the object at which to begin the write
+ * \param[in] size       Size of the contents of `data` in bytes
+ * \param[in] data       Buffer containing the data to write
  *
- * \return Returns error code specified in \ref psa_sst_err_t
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_object_get_info(uint32_t uuid,
-                                       const struct tfm_sst_token_t *s_token,
-                                       struct psa_sst_asset_info_t *info);
+enum tfm_sst_err_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
+                                    uint32_t offset, uint32_t size,
+                                    const uint8_t *data);
 
 /**
- * \brief Gets the object attributes referenced by object UUID.
+ * \brief Deletes the object with the provided UID and client ID.
  *
- * \param[in]  uuid     Object UUID
- * \param[in]  s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[out] attrs    Pointer to store the object's attributes
- *                      \ref psa_sst_asset_attrs_t
+ * \param[in] uid        Unique identifier for the data
+ * \param[in] client_id  Identifier of the asset's owner (client)
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_object_get_attributes(uint32_t uuid,
-                                          const struct tfm_sst_token_t *s_token,
-                                          struct psa_sst_asset_attrs_t *attrs);
-/**
- * \brief Sets the specific object attributes referenced by object UUID.
- *
- * \param[in] uuid     Object UUID \ref tfm_sst_token_t
- * \param[in] s_token  Pointer to the asset's token \ref tfm_sst_token_t
- * \param[in] attrs    Pointer to new the object's attributes
- *                     \ref psa_sst_asset_attrs_t
- *
- * \return Returns error code as specified in \ref psa_sst_err_t
- */
-enum psa_sst_err_t sst_object_set_attributes(uint32_t uuid,
-                                     const struct tfm_sst_token_t *s_token,
-                                     const struct psa_sst_asset_attrs_t *attrs);
+enum tfm_sst_err_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id);
 
 /**
- * \brief Wipes secure storage system and all object data.
+ * \brief Gets the asset information for the object with the provided UID and
+ *        client ID.
  *
- * \return Returns error code specified in \ref sst_errno_t
+ * \param[in]  uid        Unique identifier for the data
+ * \param[in]  client_id  Identifier of the asset's owner (client)
+ * \param[out] info       Pointer to the `psa_ps_info_t` struct that will be
+ *                        populated with the metadata
+ *
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_system_wipe_all(void);
+enum tfm_sst_err_t sst_object_get_info(psa_ps_uid_t uid, int32_t client_id,
+                                       struct psa_ps_info_t *info);
+
+/**
+ * \brief Wipes the secure storage system and all object data.
+ *
+ * \return Returns error code specified in \ref tfm_sst_err_t
+ */
+enum tfm_sst_err_t sst_system_wipe_all(void);
 
 #ifdef __cplusplus
 }

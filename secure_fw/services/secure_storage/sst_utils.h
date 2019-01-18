@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,11 +11,13 @@
 #include <stdint.h>
 
 #include "flash_layout.h"
+#include "tfm_sst_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define SST_INVALID_UID  0
 #define SST_INVALID_FID  0
 #define SST_DEFAULT_EMPTY_BUFF_VAL 0
 
@@ -70,11 +72,11 @@ void sst_global_unlock(void);
  * \param[in] client_id  Client ID
  * \param[in] access     Access type to be permormed on the given address
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
+enum tfm_sst_err_t sst_utils_memory_bound_check(void *addr,
                                                 uint32_t size,
-                                                uint32_t client_id,
+                                                int32_t client_id,
                                                 uint32_t access);
 
 /**
@@ -85,26 +87,33 @@ enum psa_sst_err_t sst_utils_memory_bound_check(void *addr,
  * \param[in] size       Size of the incoming buffer
  * \param[in] client_id  Client ID for the incoming buffer
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
+enum tfm_sst_err_t sst_utils_bound_check_and_copy(uint8_t *src,
                                                   uint8_t *dest,
                                                   uint32_t size,
-                                                  uint32_t client_id);
+                                                  int32_t client_id);
 
 /**
- * \brief Checks if a given memory region is contained within another region
+ * \brief Checks if a subset region is fully contained within a superset region.
  *
- * \param[in] superset_start  Start of superset region
- * \param[in] superset_size   Size of superset region
- * \param[in] subset_start    Start of subset region
- * \param[in] subset_size     Size of the subset region
+ * \param[in] superset_size  Size of superset region
+ * \param[in] subset_offset  Offset of start of subset region from start of
+ *                           superset region
+ * \param[in] subset_size    Size of subset region
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
+ *
+ * \retval TFM_SST_ERR_SUCCESS         The subset is contained within the
+ *                                     superset
+ * \retval TFM_SST_ERR_OFFSET_INVALID  The subset offset is greater than the
+ *                                     size of the superset
+ * \retval TFM_SST_ERR_INCORRECT_SIZE  The subset offset is valid, but the
+ *                                     subset offset + size is greater than the
+ *                                     size of the superset
  */
-enum psa_sst_err_t sst_utils_check_contained_in(uint32_t superset_start,
-                                                uint32_t superset_size,
-                                                uint32_t subset_start,
+enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_size,
+                                                uint32_t subset_offset,
                                                 uint32_t subset_size);
 
 /* FIXME: following functions(memcpy and memset) will be provided
@@ -144,9 +153,9 @@ uint32_t sst_utils_validate_secure_caller(void);
  *
  * \param[in] fid  File ID
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_utils_validate_fid(uint32_t fid);
+enum tfm_sst_err_t sst_utils_validate_fid(uint32_t fid);
 
 #ifdef __cplusplus
 }

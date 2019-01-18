@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -75,9 +75,9 @@ extern "C" {
 /**
  * \brief Initializes metadata block with the valid/active metablock.
  *
- * \return Returns value as specified in \ref psa_sst_err_t
+ * \return Returns value as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_init(void);
+enum tfm_sst_err_t sst_flash_fs_mblock_init(void);
 
 /**
  * \brief Copies rest of the file metadata, except for the one pointed by
@@ -85,9 +85,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_init(void);
  *
  * \param[in] idx  File metadata entry index to skip
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_cp_remaining_file_meta(uint32_t idx);
+enum tfm_sst_err_t sst_flash_fs_mblock_cp_remaining_file_meta(uint32_t idx);
 
 /**
  * \brief Gets current scratch datablock physical ID.
@@ -104,9 +104,9 @@ uint32_t sst_flash_fs_mblock_cur_data_scratch_id(uint32_t lblock);
  * \param[in]  fid  ID of the file
  * \param[out] idx  Index of the file metadata in the file system
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_get_file_idx(uint32_t fid,
+enum tfm_sst_err_t sst_flash_fs_mblock_get_file_idx(uint32_t fid,
                                                     uint32_t *idx);
 
 /**
@@ -115,7 +115,7 @@ enum psa_sst_err_t sst_flash_fs_mblock_get_file_idx(uint32_t fid,
  *
  * \return Returns offset value in metadata block
  */
-enum psa_sst_err_t sst_flash_fs_mblock_meta_update_finalize(void);
+enum tfm_sst_err_t sst_flash_fs_mblock_meta_update_finalize(void);
 
 /**
  * \brief Writes the files data area of logical block 0 into the scratch
@@ -127,9 +127,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_meta_update_finalize(void);
  *       medadata block needs to be copied in the scratch block, unless
  *       the data of the file processed is located in the logical block 0.
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_migrate_lb0_data_to_scratch(void);
+enum tfm_sst_err_t sst_flash_fs_mblock_migrate_lb0_data_to_scratch(void);
 
 /**
  * \brief Reads specified file metadata.
@@ -137,9 +137,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_migrate_lb0_data_to_scratch(void);
  * \param[in]  idx        File metadata entry index
  * \param[out] file_meta  Pointer to file meta structure
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_read_file_meta(uint32_t idx,
+enum tfm_sst_err_t sst_flash_fs_mblock_read_file_meta(uint32_t idx,
                                              struct sst_file_meta_t *file_meta);
 
 /**
@@ -148,9 +148,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_read_file_meta(uint32_t idx,
  * \param[in]  lblock      Logical block number
  * \param[out] block_meta  Pointer to block meta structure
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_read_block_metadata(uint32_t lblock,
+enum tfm_sst_err_t sst_flash_fs_mblock_read_block_metadata(uint32_t lblock,
                                            struct sst_block_meta_t *block_meta);
 
 /**
@@ -162,9 +162,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_read_block_metadata(uint32_t lblock,
  * \param[out] file_meta   File metadata entry
  * \param[out] block_meta  Block metadata entry
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_reserve_file(uint32_t file_id,
+enum tfm_sst_err_t sst_flash_fs_mblock_reserve_file(uint32_t file_id,
                                            uint32_t size,
                                            uint32_t *file_meta_idx,
                                            struct sst_file_meta_t *file_meta,
@@ -173,9 +173,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_reserve_file(uint32_t file_id,
 /**
  * \brief Resets metablock by cleaning and initializing the metadatablock.
  *
- * \return Returns value as specified in \ref psa_sst_err_t
+ * \return Returns value as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_reset_metablock(void);
+enum tfm_sst_err_t sst_flash_fs_mblock_reset_metablock(void);
 
 /**
  * \brief Sets current data scratch block
@@ -191,9 +191,9 @@ void sst_flash_fs_mblock_set_data_scratch(uint32_t phy_id, uint32_t lblock);
  * \param[in] lblock      Logical block number
  * \param[in] block_meta  Pointer to block's metadata
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_update_scratch_block_meta(
+enum tfm_sst_err_t sst_flash_fs_mblock_update_scratch_block_meta(
                                            uint32_t lblock,
                                            struct sst_block_meta_t *block_meta);
 
@@ -203,9 +203,9 @@ enum psa_sst_err_t sst_flash_fs_mblock_update_scratch_block_meta(
  * \param[in] idx        File's index in the metadata table
  * \param[in] file_meta  Metadata pointer
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_mblock_update_scratch_file_meta(uint32_t idx,
+enum tfm_sst_err_t sst_flash_fs_mblock_update_scratch_file_meta(uint32_t idx,
                                             struct sst_file_meta_t *file_meta);
 
 #ifdef __cplusplus

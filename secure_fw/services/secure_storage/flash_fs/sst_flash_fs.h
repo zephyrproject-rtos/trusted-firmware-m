@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,27 +38,27 @@ extern "C" {
 /**
  * \brief Prepares the filesystem to accept operations on the files.
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_prepare(void);
+enum tfm_sst_err_t sst_flash_fs_prepare(void);
 
 /**
  * \brief Wipes all files from the filesystem.
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_wipe_all(void);
+enum tfm_sst_err_t sst_flash_fs_wipe_all(void);
 
 /**
  * \brief Checks if a file exists in the filesystem.
  *
  * \param[in] fid  File ID
  *
- * \return Returns PSA_SST_ERR_SUCCESS if the file exists. If file does not
- *         exist, it returns PSA_SST_ERR_ASSET_NOT_FOUND. Otherwise, it returns
- *         error code as specified in \ref psa_sst_err_t.
+ * \return Returns TFM_SST_ERR_SUCCESS if the file exists. If file does not
+ *         exist, it returns TFM_SST_ERR_UID_NOT_FOUND. Otherwise, it returns
+ *         error code as specified in \ref tfm_sst_err_t.
  */
-enum psa_sst_err_t sst_flash_fs_file_exist(uint32_t fid);
+enum tfm_sst_err_t sst_flash_fs_file_exist(uint32_t fid);
 
 /**
  * \brief Creates a file in the filesystem.
@@ -71,11 +71,11 @@ enum psa_sst_err_t sst_flash_fs_file_exist(uint32_t fid);
  *                       This parameter is set to NULL when the file is empty
  *                       after the creation.
  *
- * \return Returns PSA_SST_ERR_SUCCESS if the file has been created correctly.
- *         If fid is in used, it returns PSA_SST_ERR_PARAM_ERROR.
- *         Otherwise, it returns error code as specified in \ref psa_sst_err_t.
+ * \return Returns TFM_SST_ERR_SUCCESS if the file has been created correctly.
+ *         If fid is in used, it returns TFM_SST_ERR_INVALID_ARGUMENT.
+ *         Otherwise, it returns error code as specified in \ref tfm_sst_err_t.
  */
-enum psa_sst_err_t sst_flash_fs_file_create(uint32_t fid,
+enum tfm_sst_err_t sst_flash_fs_file_create(uint32_t fid,
                                             uint32_t max_size,
                                             uint32_t data_size,
                                             const uint8_t *data);
@@ -87,9 +87,9 @@ enum psa_sst_err_t sst_flash_fs_file_create(uint32_t fid,
  * \param[out] info  Pointer to the information structure to store the
  *                   file information values \ref sst_file_info_t
  *
- * \return Returns error code specified in \ref psa_sst_err_t
+ * \return Returns error code specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_file_get_info(uint32_t fid,
+enum tfm_sst_err_t sst_flash_fs_file_get_info(uint32_t fid,
                                               struct sst_file_info_t *info);
 
 /**
@@ -100,9 +100,9 @@ enum psa_sst_err_t sst_flash_fs_file_get_info(uint32_t fid,
  * \param[in] offset  Offset in the file
  * \param[in] data    Pointer to buffer containing data to be written
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_file_write(uint32_t fid,
+enum tfm_sst_err_t sst_flash_fs_file_write(uint32_t fid,
                                            uint32_t size,
                                            uint32_t offset,
                                            const uint8_t *data);
@@ -115,9 +115,9 @@ enum psa_sst_err_t sst_flash_fs_file_write(uint32_t fid,
  * \param[in]  offset  Offset in the file
  * \param[out] data    Pointer to buffer to store the data
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_file_read(uint32_t fid,
+enum tfm_sst_err_t sst_flash_fs_file_read(uint32_t fid,
                                           uint32_t size,
                                           uint32_t offset,
                                           uint8_t *data);
@@ -127,9 +127,9 @@ enum psa_sst_err_t sst_flash_fs_file_read(uint32_t fid,
  *
  * \param[in] fid  File ID
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_flash_fs_file_delete(uint32_t fid);
+enum tfm_sst_err_t sst_flash_fs_file_delete(uint32_t fid);
 
 #ifdef __cplusplus
 }

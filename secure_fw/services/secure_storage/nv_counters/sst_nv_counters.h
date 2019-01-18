@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,7 +17,7 @@
  */
 
 #include <stdint.h>
-#include "psa_sst_api.h"
+#include "tfm_sst_defs.h"
 #include "platform/include/tfm_plat_nv_counters.h"
 
 #define SST_NV_COUNTER_SIZE        4 /* In bytes */
@@ -29,10 +29,10 @@ extern "C" {
 /**
  * \brief Initializes all non-volatile (NV) counters.
  *
- * \return  PSA_SST_ERR_SUCCESS if the initialization succeeds, otherwise
- *          PSA_SST_ERR_SYSTEM_ERROR
+ * \return  TFM_SST_ERR_SUCCESS if the initialization succeeds, otherwise
+ *          TFM_SST_ERR_OPERATION_FAILED
  */
-enum psa_sst_err_t sst_init_nv_counter(void);
+enum tfm_sst_err_t sst_init_nv_counter(void);
 
 /**
  * \brief Reads the given non-volatile (NV) counter.
@@ -40,10 +40,10 @@ enum psa_sst_err_t sst_init_nv_counter(void);
  * \param[in]  counter_id  NV counter ID.
  * \param[out] val         Pointer to store the current NV counter value.
  *
- * \return  PSA_SST_ERR_SUCCESS if the value is read correctly, otherwise
- *          PSA_SST_ERR_SYSTEM_ERROR
+ * \return  TFM_SST_ERR_SUCCESS if the value is read correctly, otherwise
+ *          TFM_SST_ERR_OPERATION_FAILED
  */
-enum psa_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+enum tfm_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                        uint32_t *val);
 
 /**
@@ -52,13 +52,12 @@ enum psa_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
  * \param[in] counter_id  NV counter ID.
  *
  * \return  If the counter is incremented correctly, it returns
- *          PSA_SST_ERR_SUCCESS. Otherwise, PSA_SST_ERR_SYSTEM_ERROR.
+ *          TFM_SST_ERR_SUCCESS. Otherwise, TFM_SST_ERR_OPERATION_FAILED.
  */
-enum psa_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
+enum tfm_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __SST_NV_COUNTERS_H__ */
-

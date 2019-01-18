@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include <string.h>
+#include "sst_object_system.h"
+
+#include <stddef.h>
 
 #include "cmsis_compiler.h"
 #include "flash_fs/sst_flash_fs.h"
@@ -13,7 +15,6 @@
 #include "sst_encrypted_object.h"
 #endif
 #include "sst_object_defs.h"
-#include "sst_object_system.h"
 #include "sst_object_table.h"
 #include "sst_utils.h"
 
@@ -24,7 +25,7 @@
 static uint8_t sst_system_ready = SST_SYSTEM_NOT_READY;
 
 /* Gets the size of object written to the object system below */
-#define SST_OBJECT_SIZE(max_size) (SST_OBJECT_HEADER_SIZE + max_size)
+#define SST_OBJECT_SIZE(max_size) (SST_OBJECT_HEADER_SIZE + (max_size))
 #define SST_OBJECT_START_POSITION  0
 
 /* Allocate static variables to process objects */
@@ -34,14 +35,15 @@ static struct sst_obj_table_info_t g_obj_tbl_info;
 /**
  * \brief Initialize g_sst_object based on the input parameters and empty data.
  *
- * \param[in]  type  Object type
- * \param[in]  size  Object size
- * \param[out] obj   Object to initialize
+ * \param[in]  create_flags  Object create flags
+ * \param[in]  size          Object size
+ * \param[out] obj           Object to initialize
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE void sst_init_empty_object(uint32_t type, uint32_t size,
+__STATIC_INLINE void sst_init_empty_object(psa_ps_create_flags_t create_flags,
+                                           uint32_t size,
                                            struct sst_object_t *obj)
 {
     /* Set all object data to 0 */
@@ -53,8 +55,8 @@ __STATIC_INLINE void sst_init_empty_object(uint32_t type, uint32_t size,
 #endif
 
     /* Set object header based on input parameters */
-    obj->header.info.size_max = size;
-    obj->header.info.type = type;
+    obj->header.info.max_size = size;
+    obj->header.info.create_flags = create_flags;
 }
 
 /**
@@ -62,15 +64,15 @@ __STATIC_INLINE void sst_init_empty_object(uint32_t type, uint32_t size,
  *
  * \param[in] old_fid  Old file ID to remove.
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-static enum psa_sst_err_t sst_remove_old_data(uint32_t old_fid)
+static enum tfm_sst_err_t sst_remove_old_data(uint32_t old_fid)
 {
-    enum psa_sst_err_t err;
+    enum tfm_sst_err_t err;
 
     /* Delete old object table from the persistent area */
     err = sst_object_table_delete_old_table();
-    if (err != PSA_SST_ERR_SUCCESS) {
+    if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -82,8 +84,8 @@ static enum psa_sst_err_t sst_remove_old_data(uint32_t old_fid)
 
 #ifndef SST_ENCRYPTION
 enum read_type_t {
-  READ_HEADER_ONLY = 0,
-  READ_ALL_OBJECT,
+    READ_HEADER_ONLY = 0,
+    READ_ALL_OBJECT,
 };
 
 /**
@@ -92,17 +94,17 @@ enum read_type_t {
  *
  * \param[in] type  Read type as specified in \ref read_type_t
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-static enum psa_sst_err_t sst_read_object(enum read_type_t type)
+static enum tfm_sst_err_t sst_read_object(enum read_type_t type)
 {
-    enum psa_sst_err_t err;
+    enum tfm_sst_err_t err;
 
     /* Read object header */
     err = sst_flash_fs_file_read(g_obj_tbl_info.fid, SST_OBJECT_HEADER_SIZE,
                                  SST_OBJECT_START_POSITION,
                                  (uint8_t *)&g_sst_object.header);
-    if (err != PSA_SST_ERR_SUCCESS) {
+    if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
@@ -111,17 +113,17 @@ static enum psa_sst_err_t sst_read_object(enum read_type_t type)
      */
     if (g_sst_object.header.fid != g_obj_tbl_info.fid ||
         g_sst_object.header.version != g_obj_tbl_info.version) {
-        err = PSA_SST_ERR_SYSTEM_ERROR;
+        err = TFM_SST_ERR_DATA_CORRUPT;
     }
 
     if (type == READ_ALL_OBJECT) {
         /* Read object data if any */
-        if (g_sst_object.header.info.size_current > 0) {
+        if (g_sst_object.header.info.current_size > 0) {
             err = sst_flash_fs_file_read(g_obj_tbl_info.fid,
-                                         g_sst_object.header.info.size_current,
+                                         g_sst_object.header.info.current_size,
                                          SST_OBJECT_HEADER_SIZE,
                                          g_sst_object.data);
-            if (err != PSA_SST_ERR_SUCCESS) {
+            if (err != TFM_SST_ERR_SUCCESS) {
                 return err;
             }
         }
@@ -136,12 +138,12 @@ static enum psa_sst_err_t sst_read_object(enum read_type_t type)
  *
  * \param[in] wrt_size  Number of bytes to write
  *
- * \return Returns error code as specified in \ref psa_sst_err_t
+ * \return Returns error code as specified in \ref tfm_sst_err_t
  */
-static enum psa_sst_err_t sst_write_object(uint32_t wrt_size)
+static enum tfm_sst_err_t sst_write_object(uint32_t wrt_size)
 {
-    enum psa_sst_err_t err;
-    uint32_t max_size = SST_OBJECT_SIZE(g_sst_object.header.info.size_max);
+    enum tfm_sst_err_t err;
+    uint32_t max_size = SST_OBJECT_SIZE(g_sst_object.header.info.max_size);
 
     /* Add object identification and increase object version */
     g_sst_object.header.fid = g_obj_tbl_info.fid;
@@ -157,16 +159,16 @@ static enum psa_sst_err_t sst_write_object(uint32_t wrt_size)
     return err;
 }
 
-#endif
+#endif /* !SST_ENCRYPTION */
 
-enum psa_sst_err_t sst_system_prepare(void)
+enum tfm_sst_err_t sst_system_prepare(void)
 {
-    enum psa_sst_err_t err;
+    enum tfm_sst_err_t err;
 
     sst_global_lock();
 
     err = sst_flash_fs_prepare();
-    if (err != PSA_SST_ERR_SUCCESS) {
+    if (err != TFM_SST_ERR_SUCCESS) {
         goto release_sst_lock_and_return;
     }
 
@@ -176,7 +178,7 @@ enum psa_sst_err_t sst_system_prepare(void)
      * be used for the first time in the object system.
      */
     err = sst_object_table_init(g_sst_object.data);
-    if (err == PSA_SST_ERR_SUCCESS) {
+    if (err == TFM_SST_ERR_SUCCESS) {
         sst_system_ready = SST_SYSTEM_READY;
     }
 
@@ -190,20 +192,11 @@ release_sst_lock_and_return:
     return err;
 }
 
-enum psa_sst_err_t sst_object_read(uint32_t uuid,
-                                   const struct tfm_sst_token_t *s_token,
-                                   uint8_t *data, uint32_t offset,
-                                   uint32_t size)
+enum tfm_sst_err_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
+                                   uint32_t offset, uint32_t size,
+                                   uint8_t *data)
 {
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
-
-#ifndef SST_ENCRYPTION
-    (void)s_token;
-#endif
-
-#ifndef SST_ENABLE_PARTIAL_ASSET_RW
-    (void)offset;
-#endif
+    enum tfm_sst_err_t err = TFM_SST_ERR_OPERATION_FAILED;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
@@ -211,37 +204,33 @@ enum psa_sst_err_t sst_object_read(uint32_t uuid,
         /* Retrieve the object information from the object table if
          * the object exist.
          */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_get_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
         /* Read object */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(g_obj_tbl_info.fid, s_token,
-                                        &g_sst_object);
+        err = sst_encrypted_object_read(g_obj_tbl_info.fid, &g_sst_object);
 #else
         /* Read object header */
         err = sst_read_object(READ_ALL_OBJECT);
 #endif
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
         /* Boundary check the incoming request */
-        err = sst_utils_check_contained_in(SST_OBJECT_START_POSITION,
-                                          g_sst_object.header.info.size_current,
+        err = sst_utils_check_contained_in(
+                                          g_sst_object.header.info.current_size,
                                           offset, size);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
         /* Copy the decrypted object data to the output buffer */
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
         sst_utils_memcpy(data, g_sst_object.data + offset, size);
-#else
-        sst_utils_memcpy(data, g_sst_object.data, size);
-#endif
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
@@ -254,52 +243,111 @@ release_sst_lock_and_return:
     return err;
 }
 
-enum psa_sst_err_t sst_object_create(uint32_t uuid,
-                                     const struct tfm_sst_token_t *s_token,
-                                     uint32_t type, uint32_t size)
+enum tfm_sst_err_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
+                                     psa_ps_create_flags_t create_flags,
+                                     uint32_t size, const uint8_t *data)
 {
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
+    enum tfm_sst_err_t err = TFM_SST_ERR_OPERATION_FAILED;
+    uint32_t old_fid = SST_INVALID_FID;
 
 #ifndef SST_ENCRYPTION
-    (void)s_token;
+    uint32_t wrt_size;
 #endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
-        /* Check if the object already exists */
-        err = sst_object_table_obj_exist(uuid);
-        if (err == PSA_SST_ERR_ASSET_NOT_FOUND) {
+        /* Boundary check the incoming request */
+        if (size > SST_MAX_ASSET_SIZE) {
+            err = TFM_SST_ERR_INVALID_ARGUMENT;
+            goto release_sst_lock_and_return;
+        }
 
-            /* Get internal ID */
-            err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
-            if (err != PSA_SST_ERR_SUCCESS) {
+        /* Retrieve the object information from the object table if
+         * the object exists.
+         */
+        err = sst_object_table_get_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err == TFM_SST_ERR_SUCCESS) {
+#ifdef SST_ENCRYPTION
+            /* Read the object */
+            err = sst_encrypted_object_read(g_obj_tbl_info.fid, &g_sst_object);
+#else
+            /* Read the object header */
+            err = sst_read_object(READ_HEADER_ONLY);
+#endif
+            if (err != TFM_SST_ERR_SUCCESS) {
                 goto release_sst_lock_and_return;
             }
 
-            /* Initialize object based on the input arguments and
-             * empty content.
+            /* If the object exists and has the write once flag set, then it
+             * cannot be modified.
              */
-            sst_init_empty_object(type, size, &g_sst_object);
+            if (g_sst_object.header.info.create_flags
+                & PSA_PS_FLAG_WRITE_ONCE) {
+                err = TFM_SST_ERR_WRITE_ONCE;
+                goto release_sst_lock_and_return;
+            }
+
+            /* Update the create flags and max object size */
+            g_sst_object.header.info.create_flags = create_flags;
+            g_sst_object.header.info.max_size = size;
+
+            /* Save old file ID */
+            old_fid = g_obj_tbl_info.fid;
+        } else if (err == TFM_SST_ERR_UID_NOT_FOUND) {
+            /* If the object does not exist, then initialize it based on the
+             * input arguments and empty content.
+             */
+            sst_init_empty_object(create_flags, size, &g_sst_object);
+        } else {
+            goto release_sst_lock_and_return;
+        }
+
+        /* Update the object data */
+        sst_utils_memcpy(g_sst_object.data, data, size);
+
+        /* Update the current object size */
+        g_sst_object.header.info.current_size = size;
+
+        /* Get new file ID */
+        err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
 
 #ifdef SST_ENCRYPTION
-            err = sst_encrypted_object_write(g_obj_tbl_info.fid, s_token,
-                                             &g_sst_object);
+        err = sst_encrypted_object_write(g_obj_tbl_info.fid, &g_sst_object);
 #else
-            err = sst_write_object(SST_OBJECT_HEADER_SIZE);
+        wrt_size = SST_OBJECT_SIZE(g_sst_object.header.info.current_size);
+
+        /* Write g_sst_object */
+        err = sst_write_object(wrt_size);
 #endif
-            if (err != PSA_SST_ERR_SUCCESS) {
-                goto release_sst_lock_and_return;
-            }
+        if (err != TFM_SST_ERR_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
 
-            /* Create entry in the table */
-            err = sst_object_table_set_obj_tbl_info(uuid, &g_obj_tbl_info);
-            if (err != PSA_SST_ERR_SUCCESS) {
-                goto release_sst_lock_and_return;
-            }
+        /* Update the table with the new internal ID and version for
+         * the object, and store it in the persistent area.
+         */
+        err = sst_object_table_set_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            /* Remove new object as object table is not persistent
+             * and propagate object table manipulation error.
+             */
+            (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
 
+            goto release_sst_lock_and_return;
+        }
+
+        if (old_fid == SST_INVALID_FID) {
             /* Delete old object table from the persistent area */
             err = sst_object_table_delete_old_table();
+        } else {
+            /* Remove old object and delete old object table */
+            err = sst_remove_old_data(old_fid);
         }
 
 release_sst_lock_and_return:
@@ -313,22 +361,15 @@ release_sst_lock_and_return:
     return err;
 }
 
-enum psa_sst_err_t sst_object_write(uint32_t uuid,
-                                    const struct tfm_sst_token_t *s_token,
-                                    const uint8_t *data, uint32_t offset,
-                                    uint32_t size)
+enum tfm_sst_err_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
+                                    uint32_t offset, uint32_t size,
+                                    const uint8_t *data)
 {
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
+    enum tfm_sst_err_t err = TFM_SST_ERR_OPERATION_FAILED;
     uint32_t old_fid;
 
 #ifndef SST_ENCRYPTION
     uint32_t wrt_size;
-
-    (void)s_token;
-#endif
-
-#ifndef SST_ENABLE_PARTIAL_ASSET_RW
-    (void)offset;
 #endif
 
     if (sst_system_ready == SST_SYSTEM_READY) {
@@ -337,76 +378,80 @@ enum psa_sst_err_t sst_object_write(uint32_t uuid,
         /* Retrieve the object information from the object table if
          * the object exists.
          */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_get_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
         /* Read the object */
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(g_obj_tbl_info.fid, s_token,
-                                        &g_sst_object);
+        err = sst_encrypted_object_read(g_obj_tbl_info.fid, &g_sst_object);
 #else
-        /* Read object header */
         err = sst_read_object(READ_ALL_OBJECT);
 #endif
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
+
+        /* If the object has the write once flag set, then it cannot be
+         * modified.
+         */
+        if (g_sst_object.header.info.create_flags & PSA_PS_FLAG_WRITE_ONCE) {
+            err = TFM_SST_ERR_WRITE_ONCE;
             goto release_sst_lock_and_return;
         }
 
         /* Offset must not be larger than the object's current size to
          * prevent gaps being created in the object data.
          */
-        if (offset > g_sst_object.header.info.size_current) {
-            err = PSA_SST_ERR_PARAM_ERROR;
+        if (offset > g_sst_object.header.info.current_size) {
+            err = TFM_SST_ERR_OFFSET_INVALID;
             goto release_sst_lock_and_return;
         }
 
-#ifdef SST_ENABLE_PARTIAL_ASSET_RW
+        /* Boundary check the incoming request */
+        err = sst_utils_check_contained_in(g_sst_object.header.info.max_size,
+                                           offset, size);
+        if (err != TFM_SST_ERR_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
+
         /* Update the object data */
         sst_utils_memcpy(g_sst_object.data + offset, data, size);
 
         /* Update the current object size if necessary */
-        if ((offset + size) > g_sst_object.header.info.size_current) {
-            g_sst_object.header.info.size_current = offset + size;
+        if ((offset + size) > g_sst_object.header.info.current_size) {
+            g_sst_object.header.info.current_size = offset + size;
         }
-#else
-        /* Update the object data */
-        sst_utils_memcpy(g_sst_object.data, data, size);
-
-        /* Update the current object size if necessary */
-        if (size > g_sst_object.header.info.size_current) {
-            g_sst_object.header.info.size_current = size;
-        }
-#endif
 
         /* Save old file ID */
         old_fid = g_obj_tbl_info.fid;
 
         /* Get new file ID */
         err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_write(g_obj_tbl_info.fid, s_token,
-                                         &g_sst_object);
+        err = sst_encrypted_object_write(g_obj_tbl_info.fid, &g_sst_object);
 #else
-        wrt_size = SST_OBJECT_SIZE(g_sst_object.header.info.size_current);
+        wrt_size = SST_OBJECT_SIZE(g_sst_object.header.info.current_size);
 
         /* Write g_sst_object */
         err = sst_write_object(wrt_size);
 #endif
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
         /* Update the table with the new internal ID and version for
          * the object, and store it in the persistent area.
          */
-        err = sst_object_table_set_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_set_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
             /* Remove new object as object table is not persistent
              * and propagate object table manipulation error.
              */
@@ -429,39 +474,35 @@ release_sst_lock_and_return:
     return err;
 }
 
-enum psa_sst_err_t sst_object_get_info(uint32_t uuid,
-                                       const struct tfm_sst_token_t *s_token,
-                                       struct psa_sst_asset_info_t *info)
+enum tfm_sst_err_t sst_object_get_info(psa_ps_uid_t uid, int32_t client_id,
+                                       struct psa_ps_info_t *info)
 {
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
-
-#ifndef SST_ENCRYPTION
-    (void)s_token;
-#endif
+    enum tfm_sst_err_t err = TFM_SST_ERR_OPERATION_FAILED;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Retrieve the object information from the object table if
-         * the object exist.
+         * the object exists.
          */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_get_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
 #ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(g_obj_tbl_info.fid, s_token,
-                                        &g_sst_object);
+        err = sst_encrypted_object_read(g_obj_tbl_info.fid, &g_sst_object);
 #else
         err = sst_read_object(READ_HEADER_ONLY);
 #endif
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
-        sst_utils_memcpy(info, &g_sst_object.header.info,
-                         PSA_SST_ASSET_INFO_SIZE);
+        /* Copy SST object info to the PSA PS info struct */
+        info->size = g_sst_object.header.info.current_size;
+        info->flags = g_sst_object.header.info.create_flags;
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
@@ -474,160 +515,42 @@ release_sst_lock_and_return:
     return err;
 }
 
-enum psa_sst_err_t sst_object_get_attributes(uint32_t uuid,
-                                          const struct tfm_sst_token_t *s_token,
-                                          struct psa_sst_asset_attrs_t *attrs)
+enum tfm_sst_err_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id)
 {
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
-
-#ifndef SST_ENCRYPTION
-    (void)s_token;
-#endif
+    enum tfm_sst_err_t err = TFM_SST_ERR_OPERATION_FAILED;
 
     if (sst_system_ready == SST_SYSTEM_READY) {
         sst_global_lock();
 
         /* Retrieve the object information from the object table if
-         * the object exist.
+         * the object exists.
          */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_get_obj_tbl_info(uid, client_id,
+                                                &g_obj_tbl_info);
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
 #ifdef SST_ENCRYPTION
-        /* Read the object from the the persistent area */
-        err = sst_encrypted_object_read(g_obj_tbl_info.fid, s_token,
-                                        &g_sst_object);
+        err = sst_encrypted_object_read(g_obj_tbl_info.fid, &g_sst_object);
 #else
-        /* Read object header */
         err = sst_read_object(READ_HEADER_ONLY);
 #endif
-        if (err != PSA_SST_ERR_SUCCESS) {
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
-        sst_utils_memcpy(attrs, &g_sst_object.header.attr,
-                         PSA_SST_ASSET_ATTR_SIZE);
-
-release_sst_lock_and_return:
-        /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
-                         SST_MAX_OBJECT_SIZE);
-
-        sst_global_unlock();
-    }
-
-    return err;
-}
-
-enum psa_sst_err_t sst_object_set_attributes(uint32_t uuid,
-                                      const struct tfm_sst_token_t *s_token,
-                                      const struct psa_sst_asset_attrs_t *attrs)
-{
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
-    uint32_t old_fid;
-
-#ifndef SST_ENCRYPTION
-    (void)s_token;
-#endif
-
-    if (sst_system_ready == SST_SYSTEM_READY) {
-        sst_global_lock();
-
-        /* Retrieve the object information from the object table if
-         * the object exist.
-         */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
-            goto release_sst_lock_and_return;
-        }
-
-        /* Read the object from the object system */
-#ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_read(g_obj_tbl_info.fid, s_token,
-                                        &g_sst_object);
-#else
-        /* Read object header */
-        err = sst_read_object(READ_HEADER_ONLY);
-#endif
-        if (err != PSA_SST_ERR_SUCCESS) {
-            goto release_sst_lock_and_return;
-        }
-
-        /* Set new attributes */
-        sst_utils_memcpy(&g_sst_object.header.attr,
-                         attrs, PSA_SST_ASSET_ATTR_SIZE);
-
-        /* Save old file ID */
-        old_fid = g_obj_tbl_info.fid;
-
-        /* Get new file ID */
-        err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
-        if (err != PSA_SST_ERR_SUCCESS) {
-            goto release_sst_lock_and_return;
-        }
-
-#ifdef SST_ENCRYPTION
-        err = sst_encrypted_object_write(g_obj_tbl_info.fid, s_token,
-                                         &g_sst_object);
-#else
-        /* Write g_sst_object */
-        err = sst_write_object(SST_OBJECT_HEADER_SIZE);
-#endif
-        if (err != PSA_SST_ERR_SUCCESS) {
-            goto release_sst_lock_and_return;
-        }
-
-        /* Update the table with the new internal ID and version for
-         * the object, and store it in the persistent area.
-         */
-        err = sst_object_table_set_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
-            /* Remove new object as object table is not persistent
-             * and propagate object table manipulation error.
-             */
-            (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
-
-            goto release_sst_lock_and_return;
-        }
-
-        /* Remove old object table and file */
-        err = sst_remove_old_data(old_fid);
-
-release_sst_lock_and_return:
-        /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
-                         SST_MAX_OBJECT_SIZE);
-
-        sst_global_unlock();
-    }
-
-    return err;
-}
-
-enum psa_sst_err_t sst_object_delete(uint32_t uuid,
-                                     const struct tfm_sst_token_t *s_token)
-{
-    enum psa_sst_err_t err = PSA_SST_ERR_SYSTEM_ERROR;
-
-    /* FIXME: Authenticate object data to validate token before delete it. */
-    (void)s_token;
-
-    if (sst_system_ready == SST_SYSTEM_READY) {
-        sst_global_lock();
-
-        /* Check if the object exist */
-        err = sst_object_table_get_obj_tbl_info(uuid, &g_obj_tbl_info);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        /* Check that the write once flag is not set */
+        if (g_sst_object.header.info.create_flags & PSA_PS_FLAG_WRITE_ONCE) {
+            err = TFM_SST_ERR_WRITE_ONCE;
             goto release_sst_lock_and_return;
         }
 
         /* Delete object from the table and stores the table in the persistent
          * area.
          */
-        err = sst_object_table_delete_object(uuid);
-        if (err != PSA_SST_ERR_SUCCESS) {
+        err = sst_object_table_delete_object(uid, client_id);
+        if (err != TFM_SST_ERR_SUCCESS) {
             goto release_sst_lock_and_return;
         }
 
@@ -635,15 +558,19 @@ enum psa_sst_err_t sst_object_delete(uint32_t uuid,
         err = sst_remove_old_data(g_obj_tbl_info.fid);
 
 release_sst_lock_and_return:
+        /* Remove data stored in the object before leaving the function */
+        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+                         SST_MAX_OBJECT_SIZE);
+
         sst_global_unlock();
     }
 
     return err;
 }
 
-enum psa_sst_err_t sst_system_wipe_all(void)
+enum tfm_sst_err_t sst_system_wipe_all(void)
 {
-    enum psa_sst_err_t err;
+    enum tfm_sst_err_t err;
 
     /* This function may get called as a corrective action
      * if a system level security violation is detected.
@@ -653,12 +580,12 @@ enum psa_sst_err_t sst_system_wipe_all(void)
      * moves to erasing the flash instead.
      */
     err = sst_flash_fs_wipe_all();
-    if (err != PSA_SST_ERR_SUCCESS) {
+    if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 
     err = sst_flash_fs_prepare();
-    if (err != PSA_SST_ERR_SUCCESS) {
+    if (err != TFM_SST_ERR_SUCCESS) {
         return err;
     }
 

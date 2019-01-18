@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,9 +36,9 @@ union sst_crypto_t {
 /**
  * \brief Initializes the crypto engine.
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_init(void);
+enum tfm_sst_err_t sst_crypto_init(void);
 
 /**
  * \brief Gets a key for specific client id
@@ -46,9 +46,9 @@ enum psa_sst_err_t sst_crypto_init(void);
  * \param[out] key      Cryptographic key
  * \param[in]  key_len  Key len
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len);
+enum tfm_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len);
 
 /**
  * \brief Sets key for crypto operations
@@ -56,9 +56,9 @@ enum psa_sst_err_t sst_crypto_getkey(uint8_t *key, size_t key_len);
  * \param[in] key      Cryptographic key
  * \param[in] key_len  Key len
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len);
+enum tfm_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len);
 
 /**
  * \brief Encrypts and tag the given plain text data.
@@ -70,9 +70,9 @@ enum psa_sst_err_t sst_crypto_setkey(const uint8_t *key, size_t key_len);
  * \param[out]    out      Buffer pointer to store the encrypted data
  * \param[in]     len      Input and output buffer lengths
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
+enum tfm_sst_err_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
                                               const uint8_t *add,
                                               size_t add_len,
                                               const uint8_t *in,
@@ -89,9 +89,9 @@ enum psa_sst_err_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
  * \param[out] out      Buffer pointer to store the encrypted data
  * \param[in]  len      Input and output buffer lengths
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
+enum tfm_sst_err_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
                                                const uint8_t *add,
                                                size_t add_len,
                                                const uint8_t *in,
@@ -105,9 +105,9 @@ enum psa_sst_err_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
  * \param[in]     add      Starting address of the data to authenticate
  * \param[in]     add_len  Length of data to authenticate
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
+enum tfm_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
                                                 const uint8_t *add,
                                                 uint32_t add_len);
 
@@ -118,9 +118,9 @@ enum psa_sst_err_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
  * \param[in] add      Starting address of the data to authenticate
  * \param[in] add_len  Length of data to authenticate
  *
- * \return Returns values as described in \ref psa_sst_err_t
+ * \return Returns values as described in \ref tfm_sst_err_t
  */
-enum psa_sst_err_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
+enum tfm_sst_err_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
                                            const uint8_t *add,
                                            uint32_t add_len);
 

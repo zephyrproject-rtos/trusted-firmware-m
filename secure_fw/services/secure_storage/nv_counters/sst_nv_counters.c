@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,19 +7,19 @@
 
 #include "sst_nv_counters.h"
 
-enum psa_sst_err_t sst_init_nv_counter(void)
+enum tfm_sst_err_t sst_init_nv_counter(void)
 {
     enum tfm_plat_err_t err;
 
     err = tfm_plat_init_nv_counter();
     if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+enum tfm_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                        uint32_t *val)
 {
     enum tfm_plat_err_t err;
@@ -27,13 +27,13 @@ enum psa_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
     err = tfm_plat_read_nv_counter(counter_id, SST_NV_COUNTER_SIZE,
                                    (uint8_t *)val);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
 
-enum psa_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
+enum tfm_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
 {
     enum tfm_plat_err_t err;
 
@@ -45,9 +45,8 @@ enum psa_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
      */
     err = tfm_plat_increment_nv_counter(counter_id);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_SST_ERR_SYSTEM_ERROR;
+        return TFM_SST_ERR_OPERATION_FAILED;
     }
 
-    return PSA_SST_ERR_SUCCESS;
+    return TFM_SST_ERR_SUCCESS;
 }
-
