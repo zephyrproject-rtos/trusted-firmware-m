@@ -116,6 +116,13 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
+#ifdef TFM_PSA_API
+    TFM_SP_IPC_SERVICE_TEST +0 ALIGN 32 {
+        *ipc_service_test* (+RO)
+        *(TFM_SP_IPC_SERVICE_TEST_ATTR_FN)
+    }
+#endif /* TFM_PSA_API */
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT code.
@@ -144,13 +151,6 @@ LR_CODE S_CODE_START {
         *(TFM_SP_CORE_TEST_2_ATTR_FN)
     }
 #endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PSA_API
-    TFM_SP_IPC_SERVICE_TEST +0 ALIGN 32 {
-        *ipc_service_test* (+RO)
-        *(TFM_SP_IPC_SERVICE_TEST_ATTR_FN)
-    }
-#endif /* TFM_PSA_API */
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_CLIENT_TEST +0 ALIGN 32 {
@@ -256,6 +256,15 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
+#ifdef TFM_PSA_API
+    TFM_SP_IPC_SERVICE_TEST_DATA +0 ALIGN 32 {
+        *ipc_service_test* (+RW +ZI)
+    }
+
+    TFM_SP_IPC_SERVICE_TEST_STACK +0 ALIGN 128 EMPTY 0x1000 {
+    }
+#endif /* TFM_PSA_API */
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT RW and Stack.
@@ -288,15 +297,6 @@ LR_CODE S_CODE_START {
     TFM_SP_CORE_TEST_2_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
 #endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PSA_API
-    TFM_SP_IPC_SERVICE_TEST_DATA +0 ALIGN 32 {
-        *ipc_service_test* (+RW +ZI)
-    }
-
-    TFM_SP_IPC_SERVICE_TEST_STACK +0 ALIGN 128 EMPTY 0x1000 {
-    }
-#endif /* TFM_PSA_API */
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_CLIENT_TEST_DATA +0 ALIGN 32 {
