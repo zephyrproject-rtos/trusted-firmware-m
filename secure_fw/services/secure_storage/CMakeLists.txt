@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,7 +31,6 @@ set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SERVICES})
 
 ###Get the definition of what files we need to build
-set (ENABLE_SECURE_STORAGE ON)
 include(CMakeLists.inc)
 
 if (NOT DEFINED TFM_LVL)

@@ -205,31 +205,27 @@ set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPI
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
 #Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.md
-if (NOT DEFINED ENABLE_SECURE_STORAGE)
-	set (ENABLE_SECURE_STORAGE ON)
+if (NOT DEFINED SST_ENCRYPTION)
+	set (SST_ENCRYPTION ON)
+endif()
 
-	if (NOT DEFINED SST_ENCRYPTION)
-		set (SST_ENCRYPTION ON)
-	endif()
+if (NOT DEFINED SST_ROLLBACK_PROTECTION)
+	set (SST_ROLLBACK_PROTECTION OFF)
+endif()
 
-	if (NOT DEFINED SST_ROLLBACK_PROTECTION)
-		set (SST_ROLLBACK_PROTECTION OFF)
-	endif()
+if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
+	set (SST_CREATE_FLASH_LAYOUT OFF)
+endif()
 
-	if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
-		set (SST_CREATE_FLASH_LAYOUT OFF)
-	endif()
+if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
+	set (SST_VALIDATE_METADATA_FROM_FLASH ON)
+endif()
 
-	if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
-		set (SST_VALIDATE_METADATA_FROM_FLASH ON)
-	endif()
-
-	if (NOT DEFINED SST_RAM_FS)
-		if (REGRESSION)
-			set (SST_RAM_FS ON)
-		else()
-			set (SST_RAM_FS OFF)
-		endif()
+if (NOT DEFINED SST_RAM_FS)
+	if (REGRESSION)
+		set (SST_RAM_FS ON)
+	else()
+		set (SST_RAM_FS OFF)
 	endif()
 endif()
 

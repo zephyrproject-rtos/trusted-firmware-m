@@ -22,128 +22,118 @@
 set(SECURE_STORAGE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 #Check input variables
-if (NOT DEFINED ENABLE_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: ENABLE_SECURE_STORAGE is undefined. ")
+if (NOT DEFINED MBEDTLS_INSTALL_DIR)
+	message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
 endif()
 
-if (ENABLE_SECURE_STORAGE)
-	if (NOT DEFINED MBEDTLS_INSTALL_DIR)
-		message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
-	endif()
+if (NOT DEFINED TFM_ROOT_DIR)
+	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
+endif()
 
-	if (NOT DEFINED TFM_ROOT_DIR)
-		message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
-	endif()
+if (NOT DEFINED SST_ENCRYPTION)
+	message(FATAL_ERROR "Incomplete build configuration: SST_ENCRYPTION is undefined. ")
+endif()
 
-	if (NOT DEFINED SST_ENCRYPTION)
-		message(FATAL_ERROR "Incomplete build configuration: SST_ENCRYPTION is undefined. ")
-	endif()
+if (NOT DEFINED SST_ROLLBACK_PROTECTION)
+	message(FATAL_ERROR "Incomplete build configuration: SST_ROLLBACK_PROTECTION is undefined.")
+endif()
 
-	if (NOT DEFINED SST_ROLLBACK_PROTECTION)
-		message(FATAL_ERROR "Incomplete build configuration: SST_ROLLBACK_PROTECTION is undefined.")
-	endif()
+if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
+	message(FATAL_ERROR "Incomplete build configuration: SST_CREATE_FLASH_LAYOUT is undefined. ")
+endif()
 
-	if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
-		message(FATAL_ERROR "Incomplete build configuration: SST_CREATE_FLASH_LAYOUT is undefined. ")
-	endif()
+if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
+	message(FATAL_ERROR "Incomplete build configuration: SST_VALIDATE_METADATA_FROM_FLASH is undefined. ")
+endif()
 
-	if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
-		message(FATAL_ERROR "Incomplete build configuration: SST_VALIDATE_METADATA_FROM_FLASH is undefined. ")
-	endif()
+if (NOT DEFINED SST_RAM_FS)
+	message(FATAL_ERROR "Incomplete build configuration: SST_RAM_FS is undefined. ")
+endif()
 
-	if (NOT DEFINED SST_RAM_FS)
-		message(FATAL_ERROR "Incomplete build configuration: SST_RAM_FS is undefined. ")
-	endif()
+set (SECURE_STORAGE_C_SRC
+	"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
+	"${SECURE_STORAGE_DIR}/tfm_protected_storage.c"
+	"${SECURE_STORAGE_DIR}/sst_object_system.c"
+	"${SECURE_STORAGE_DIR}/sst_object_table.c"
+	"${SECURE_STORAGE_DIR}/sst_utils.c"
+	"${SECURE_STORAGE_DIR}/flash/sst_flash.c"
+	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
+	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
+	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c"
+)
 
-	set (SECURE_STORAGE_C_SRC
-		"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
-		"${SECURE_STORAGE_DIR}/tfm_protected_storage.c"
-		"${SECURE_STORAGE_DIR}/sst_object_system.c"
-		"${SECURE_STORAGE_DIR}/sst_object_table.c"
-		"${SECURE_STORAGE_DIR}/sst_utils.c"
-		"${SECURE_STORAGE_DIR}/flash/sst_flash.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
-		"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c"
+if (SST_ENCRYPTION)
+	list(APPEND SECURE_STORAGE_C_SRC
+		"${SECURE_STORAGE_DIR}/crypto/sst_crypto_interface.c"
+		"${SECURE_STORAGE_DIR}/sst_encrypted_object.c"
 	)
+	set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
+	set_property(DIRECTORY ${TEST_DIR} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
 
-	if (SST_ENCRYPTION)
-		list(APPEND SECURE_STORAGE_C_SRC
-			"${SECURE_STORAGE_DIR}/crypto/sst_crypto_interface.c"
-			"${SECURE_STORAGE_DIR}/sst_encrypted_object.c"
-		)
-		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
-		set_property(DIRECTORY ${TEST_DIR} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
-
-		if (SST_ROLLBACK_PROTECTION)
-			if (NOT REGRESSION OR TFM_LVL GREATER 1)
-				# In case of regression test executed in TFM level 1, the SST rollback test suite has
-				# its own implementation of sst_nv_counters intefaces to be able to test different scenarios.
-				list (APPEND SECURE_STORAGE_C_SRC
-					"${SECURE_STORAGE_DIR}/nv_counters/sst_nv_counters.c")
-			endif()
-			set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ROLLBACK_PROTECTION)
+	if (SST_ROLLBACK_PROTECTION)
+		if (NOT REGRESSION OR TFM_LVL GREATER 1)
+			# In case of regression test executed in TFM level 1, the SST rollback test suite has
+			# its own implementation of sst_nv_counters intefaces to be able to test different scenarios.
+			list (APPEND SECURE_STORAGE_C_SRC
+				"${SECURE_STORAGE_DIR}/nv_counters/sst_nv_counters.c")
 		endif()
+		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ROLLBACK_PROTECTION)
 	endif()
+endif()
 
-	if (SST_VALIDATE_METADATA_FROM_FLASH)
-		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_VALIDATE_METADATA_FROM_FLASH)
-	endif()
+if (SST_VALIDATE_METADATA_FROM_FLASH)
+	set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_VALIDATE_METADATA_FROM_FLASH)
+endif()
 
-	if (SST_CREATE_FLASH_LAYOUT)
-		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_CREATE_FLASH_LAYOUT)
-	endif()
+if (SST_CREATE_FLASH_LAYOUT)
+	set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_CREATE_FLASH_LAYOUT)
+endif()
 
-	if (SST_RAM_FS)
-		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
-	endif()
+if (SST_RAM_FS)
+	set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
+endif()
 
-	#Append all our source files to global lists.
-	list(APPEND ALL_SRC_C ${SECURE_STORAGE_C_SRC})
-	unset(SECURE_STORAGE_C_SRC)
+#Append all our source files to global lists.
+list(APPEND ALL_SRC_C ${SECURE_STORAGE_C_SRC})
+unset(SECURE_STORAGE_C_SRC)
 
-	#Inform the user about SST service features selected based on the SST service cmake flags
-	message("The SST service compile configuration is as follows:")
-	message("- SST_ENCRYPTION: " ${SST_ENCRYPTION})
-	if (SST_ENCRYPTION)
-		message("- SST_ROLLBACK_PROTECTION: " ${SST_ROLLBACK_PROTECTION})
-	else()
-		message("- SST_ROLLBACK_PROTECTION: N/A")
-	endif()
-	message("- SST_VALIDATE_METADATA_FROM_FLASH: " ${SST_VALIDATE_METADATA_FROM_FLASH})
-	message("- SST_CREATE_FLASH_LAYOUT: " ${SST_CREATE_FLASH_LAYOUT})
-	message("- SST_RAM_FS: " ${SST_RAM_FS})
-
-	#Setting include directories
-	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/driver ABSOLUTE)
-
-	set(BUILD_CMSIS_CORE Off)
-	set(BUILD_RETARGET Off)
-	set(BUILD_NATIVE_DRIVERS Off)
-	set(BUILD_STARTUP Off)
-	set(BUILD_TARGET_CFG Off)
-	set(BUILD_TARGET_HARDWARE_KEYS Off)
-	set(BUILD_TARGET_NV_COUNTERS Off)
-	set(BUILD_CMSIS_DRIVERS Off)
-	set(BUILD_TIME Off)
-	set(BUILD_UART_STDOUT Off)
-	set(BUILD_FLASH Off)
-	set(BUILD_BOOT_SEED Off)
-	set(BUILD_DEVICE_ID Off)
-	if(NOT DEFINED PLATFORM_CMAKE_FILE)
-		message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
-	elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
-		message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
-	else()
-		include(${PLATFORM_CMAKE_FILE})
-	endif()
-
+#Inform the user about SST service features selected based on the SST service cmake flags
+message("The SST service compile configuration is as follows:")
+message("- SST_ENCRYPTION: " ${SST_ENCRYPTION})
+if (SST_ENCRYPTION)
+	message("- SST_ROLLBACK_PROTECTION: " ${SST_ROLLBACK_PROTECTION})
 else()
-	message(FATAL_ERROR "Build system currently doesn't support selectively disabling of a service.")
+	message("- SST_ROLLBACK_PROTECTION: N/A")
+endif()
+message("- SST_VALIDATE_METADATA_FROM_FLASH: " ${SST_VALIDATE_METADATA_FROM_FLASH})
+message("- SST_CREATE_FLASH_LAYOUT: " ${SST_CREATE_FLASH_LAYOUT})
+message("- SST_RAM_FS: " ${SST_RAM_FS})
+
+#Setting include directories
+embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
+embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/driver ABSOLUTE)
+set(BUILD_CMSIS_CORE Off)
+set(BUILD_RETARGET Off)
+set(BUILD_NATIVE_DRIVERS Off)
+set(BUILD_STARTUP Off)
+set(BUILD_TARGET_CFG Off)
+set(BUILD_TARGET_HARDWARE_KEYS Off)
+set(BUILD_TARGET_NV_COUNTERS Off)
+set(BUILD_CMSIS_DRIVERS Off)
+set(BUILD_TIME Off)
+set(BUILD_UART_STDOUT Off)
+set(BUILD_FLASH Off)
+set(BUILD_BOOT_SEED Off)
+set(BUILD_DEVICE_ID Off)
+if(NOT DEFINED PLATFORM_CMAKE_FILE)
+	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
+elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
+	message (FATAL_ERROR "Platform specific CMake \"${PLATFORM_CMAKE_FILE}\" file does not exist. Please fix value of PLATFORM_CMAKE_FILE.")
+else()
+	include(${PLATFORM_CMAKE_FILE})
 endif()
