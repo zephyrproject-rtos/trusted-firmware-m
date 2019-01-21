@@ -618,6 +618,57 @@ attest_add_challenge_claim(struct attest_token_ctx   *token_ctx,
 }
 
 /*!
+ * \brief Static function to add the verification service indicator claim
+ *        to the attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_verification_service(struct attest_token_ctx *token_ctx)
+{
+    struct useful_buf_c service;
+    uint32_t size;
+
+    service.ptr = tfm_attest_hal_get_verification_service(&size);
+
+    if (service.ptr) {
+        service.len = size;
+        attest_token_add_tstr(token_ctx,
+                              EAT_CBOR_ARM_LABEL_ORIGINATION,
+                              &service);
+    }
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to add the name of the profile definition document
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_profile_definition(struct attest_token_ctx *token_ctx)
+{
+    struct useful_buf_c profile;
+    uint32_t size;
+
+    profile.ptr = tfm_attest_hal_get_profile_definition(&size);
+
+    if (profile.ptr) {
+        profile.len = size;
+        attest_token_add_tstr(token_ctx,
+                              EAT_CBOR_ARM_LABEL_PROFILE_DEFINITION,
+                              &profile);
+    }
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
  * \brief Static function to verify the input challenge size
  *
  *  Only discrete sizes are accepted.
@@ -706,6 +757,16 @@ attest_create_token(struct useful_buf_c *challenge,
 
     if (!(option_flags & TOKEN_OPT_OMIT_CLAIMS)) {
         attest_err = attest_add_boot_seed_claim(&attest_token_ctx);
+        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+            goto error;
+        }
+
+        attest_err = attest_add_verification_service(&attest_token_ctx);
+        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+            goto error;
+        }
+
+        attest_err = attest_add_profile_definition(&attest_token_ctx);
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
         }
