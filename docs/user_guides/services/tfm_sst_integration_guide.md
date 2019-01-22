@@ -1,37 +1,28 @@
 # TF-M Secure Storage Service Integration Guide
 
 ## Introduction
+TF-M secure storage (SST) service implements PSA Protected Storage APIs.
 
-TF-M secure storage (SST) service allows storage of various types of data which
-have security implications. It is meant to store the platform credentials
-(keys, certificates, hashes, etc) that may require strict access controls.
 The service is backed by hardware isolation of the flash access domain and, in
 the current version, relies on hardware to isolate the flash area from
 non-secure access. In absence of hardware level isolation, the secrecy and
 integrity of data is still maintained.
 
 The current SST service design relies on hardware abstraction level provided
-by TF-M. The SST service provides a non-hierarchical storage model where all
-the assets are managed by linearly indexed list of metadata. A minimal set of
-APIs with limited options are provided. This allows a deterministic
-implementation, better flash utilization and a code base which is easy to
-security audit.
+by TF-M. The SST service provides a non-hierarchical storage model, as a
+filesystem, where all the assets are managed by linearly indexed list of
+metadata.
 
 The SST service implements an AES-GCM based AEAD encryption policy, as a
 reference, to protect data integrity and authenticity.
 
-The design addresses the following high level requirements:
+The design addresses the following high level requirements as well:
 
 **Confidentiality** - Resistance to unauthorised accesses through
 hardware/software attacks.
 
 **Access Authentication** - Mechanism to establish requester's identity (a
 non-secure entity, secure entity, or a remote server).
-
-**Access Granularity** - Access permissions to create, write, read, delete and
-reference an asset. Certain assets may be required to not be directly accessed
-by an authorized client. It that case, the authorized client should be able to
-reference the asset via another secure service.
 
 **Integrity** - Resistant to tampering by either the normal users of a product,
 package, or system or others with physical access to it. If the content of the
@@ -51,27 +42,60 @@ optimal.
 
 **Fragmentation** - The current design does not support fragmentation, as an
 asset is stored in a contiguous space in a block. This means that the maximum
-size of an asset can only be up-to a block size. Each block can potentially
-store multiple assets. A delete operation implicitly moves all the assets
-towards the top of the block to avoid fragmentation within block. However, this
-may also result in unutilized space at the end of each block.
+asset size can only be up-to a block size. Detailed information about the
+maximum asset size can be found in the section `Maximum asset size` below.
+Each block can potentially store multiple assets.
+A delete operation implicitly moves all the assets towards the top of the block
+to avoid fragmentation within block. However, this may also result in unutilized
+space at the end of each block.
 
-**Assets Size Limitation** - An asset is stored in a contiguous space in a
-block/sector. Hence, the maximum size of an asset can be up-to the size of the
-data block/sector.
+**Asset size limitation** - An asset is stored in a contiguous space in a
+block/sector. Hence, the maximum asset size can be up-to the size of the
+data block/sector. Detailed information about the maximum asset size can be
+found in the section `Maximum asset size` below.
 
-**Protection against Physical Storage Mediums Failure** - Complete handling of
+**Non-hierarchical storage model** - The current design uses a non-hierarchical
+storage model, as a filesystem, where all the assets are managed by a linearly
+indexed list of metadata. This model locates the metadata in blocks which are
+always stored in the same flash location. That increases the number of writes
+in a specific flash location as every change in the storage area requires a
+metadata update.
+
+**Flash device** - In the current design, the flash device is used by
+bootloader (BL2) and SST. In an alternative design, the flash device needs to be
+defined for SST separately from BL2 even though it is the same.
+
+**PSA internal trusted storage API** - In the current design, the service does
+not use the PSA Internal Trusted Storage API to write the rollback protection
+values stored in the internal storage. The PSA Internal Trusted Storage API is
+not supported in TF-M yet.
+
+**Uniform secure function signatures** - The current design does not support
+the use of uniform signature for all its secure functions yet.
+The advantages of this method are:
+- TF-M Core can do a sanity check on the access rights of the veneer parameters.
+- The veneer declarations and implementations for the secure functions can be
+  generated automatically from a template (using the secure function list in the
+  secure service's manifest)
+
+SST service does not support the full access rights checks of the veneer
+parameters yet.
+
+More detailed information can be found in
+[here](https://developer.trustedfirmware.org/w/tf_m/design/uniform_secure_service_signature)
+
+**Protection against physical storage medium failure** - Complete handling of
 inherent failures of storage mediums (e.g. bad blocks in a NAND based device)
 is not supported by the current design.
 
-**Key Diversification** - In a more robust design, each asset would be encrypted
+**Key diversification** - In a more robust design, each asset would be encrypted
 through a different key.
 
-**Lifecycle Management** - Currently, it does not support any subscription based
+**Lifecycle management** - Currently, it does not support any subscription based
 keys and certificates required in a secure lifecycle management. Hence, an
 asset's validity time-stamp can not be invalidated based on the system time.
 
-**Provisioning vs User/Device Data** - In the current design, all assets are
+**Provisioning vs user/device data** - In the current design, all assets are
 treated in the same manner. In an alternative design, it may be required to
 create separate partitions for provisioning content and user/device generated
 content. This is to allow safe update of provisioning data during firmware
@@ -87,29 +111,29 @@ and is divided as follows:
  - Flash interfaces
  - Cryptographic interfaces
  - Non-volatile (NV) counters interfaces
- - Assets definitions
 
-The PSA interfaces for SST service are located in `interface/include`
+The PSA PS interfaces for SST service are located in `interface/include`
 
+### PSA Protected Storage Interfaces
 
-### Platform Security Architecture (PSA) interfaces version 0.2
+The SST service exposes the following mandatory PSA PS interfaces version 1.0:
 
-The SST service exposes the following PSA interfaces:
+ - `psa_ps_status_t psa_ps_set(psa_ps_uid_t uid, uint32_t data_length, const void *p_data, psa_ps_create_flags_t create_flags)`
+ - `psa_ps_status_t psa_ps_get(psa_ps_uid_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)`
+ - `psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)`
+ - `psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)`
+ - `uint32_t psa_ps_get_support(void)`
 
- - `enum psa_sst_err_t psa_sst_create(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size)`
- - `enum psa_sst_err_t psa_sst_get_info(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, struct psa_sst_asset_info_t *info)`
- - `enum psa_sst_err_t psa_sst_get_attributes(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, struct psa_sst_asset_attrs_t *attrs)`
- - `enum psa_sst_err_t psa_sst_set_attributes(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, const struct psa_sst_asset_attrs_t *attrs)`
- - `enum psa_sst_err_t psa_sst_read(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, uint32_t size, uint32_t offset, uint8_t *data)`
- - `enum psa_sst_err_t psa_sst_reference_read(int32_t  client_id, uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, uint32_t size, uint32_t offset, uint8_t *data);`
- - `enum psa_sst_err_t psa_sst_write(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size, uint32_t size, uint32_t offset, const uint8_t *data)`
- - `enum psa_sst_err_t psa_sst_delete(uint32_t asset_uuid, const uint8_t *token, uint32_t token_size)`
+For the moment, it does not support the extended version of those APIs.
 
-These PSA interfaces and types are defined and documented
-in `interface/include/psa_sst_api.h`, `interface/include/psa_sst_asset_defs.h`
-and `interface/include/psa_sst_asset_macros.h`
+These PSA PS interfaces and SST TF-M types are defined and documented in
+`interface/include/psa_protected_storage.h` and
+`interface/include/tfm_sst_defs.h`
 
 ### Core Files
+
+`tfm_protected_storage.c` - Contains the TF-M protected storage API
+implementations which are the entry points to the SST service.
 
 `sst_object_system.c` - Contains the object system implementation to manage
 all objects in SST area.
@@ -117,18 +141,16 @@ all objects in SST area.
 `sst_object_table.c` - Contains the object system table implementation which
 complements the object system to manage all object in the SST area.
 The object table has an entry for each object stored in the object system
-and keeps track of its version.
+and keeps track of its version and owner.
 
 `sst_encrypted_object.c` - Contains an implementation to manipulate
 encrypted objects in the SST object system.
-
-`sst_asset_management.c` - Contains asset's access policy management code.
 
 `sst_utils.c` - Contains common and basic functionalities used across the
 SST service code.
 
 ### Flash Filesystem Interface
-`flash_fs/sst_flash_fs.h` - Abstracts the flash filesystem operations for
+`flash_fs/sst_flash_fs.h` - Abstracts the flash filesystem operations used by
 the secure storage service. The purpose of this abstraction is to have the
 ability to plug-in other filesystems or filesystem proxys (supplicant).
 
@@ -179,6 +201,9 @@ hardware crypto unit.
 
 ### Non-volatile (NV) Counters Interface
 
+The current SST service provides rollback protection based on NV counters.
+SST defines and implements the following NV counters functionalities:
+
 `nv_counters/sst_nv_counters.h` - Abstracts SST non-volatile counters
 operations. This API detaches the use of NV counters from the TF-M NV counters
 implementation, provided by the platform, and provides a mechanism to compile
@@ -189,16 +214,62 @@ use cases.
 `nv_counters/sst_nv_counters.c` - Implements the SST NV counters interfaces
 based on TF-M NV counters implementation provided by the platform.
 
-### Asset Definition
-
-`asset/sst_asset_defs.(c/h)` - Contain a reference implementation of the
-policy database of all assets in the system.
-
 ## SST Service Integration Guide
 
-This section describes which interfaces **must** and **may** be implemented by
-the system integrator in order to integrate the secure storage service in a new
+This section describes mandatory (i.e. **must** implement) or optional
+(i.e. **may** implement) interfaces which the system integrator have to take
+in to account in order to integrate the secure storage service in a new
 platform.
+
+### Maximum Asset Size
+An asset is stored in a contiguous space in a block/sector. The maximum
+size of an asset can be up-to the size of the data block/sector minus the object
+header size (`SST_OBJECT_HEADER_SIZE`) which is defined in `sst_object_defs.h`.
+The `SST_OBJECT_HEADER_SIZE` changes based on the `SST_ENCRYPTION` flag status.
+
+### Secure Storage Service Definitions
+
+The SST service requires the following platform definitions:
+
+ - `SST_FLASH_AREA_ADDR`
+   Defines the flash address where the secure store area starts.
+ - `SST_SECTOR_SIZE`
+   Defines the size of the flash sectors.
+ - `SST_NBR_OF_SECTORS`
+   Defines the number of sectors available for the secure area. The sectors must
+   be consecutive.
+ - `FLASH_DEV_NAME`
+   Specifies the flash device used by BL2 and SST.
+ - `SST_FLASH_PROGRAM_UNIT`
+   Defines the smallest flash programmable unit in bytes.
+   Currently, SST supports 1, 2 and 4.
+ - `SST_MAX_ASSET_SIZE`
+   Defines the maximum asset size to be stored in the SST area. This size is
+   used to define the temporary buffers used by SST to read/write the asset
+   content from/to flash. The memory used by the temporary buffers is allocated
+   statically as SST does not use dynamic memory allocation.
+ - `SST_NUM_ASSETS`
+   Defines the maximum number of assets to be stored in the SST area. This
+   number is used to dimension statically the object table size in RAM
+   (fast access) and flash (persistent storage). The memory used by the
+   object table is allocated statically as SST does not use dynamic memory
+   allocation.
+
+Target must provide a header file, called `flash_layout.h`, which defines the
+information explained above. The defines must be named as they are specified
+above.
+
+More information about the `flash_layout.h` content, not SST related, is
+available in `platform/ext/readme.md` along with other platform information.
+
+### TF-M NV Counter Interface
+To have a platform independent way to access the NV counters, TF-M defines a
+platform NV counter interface. For API specification, please check:
+`platform/include/tfm_plat_crypto_keys.h`
+
+The system integrators **may** implement this interface based on the target
+capabilities and set the **SST_ROLLBACK_PROTECTION** flag to compile in
+the rollback protection code.
 
 ### Secret Platform Unique Key
 
@@ -206,226 +277,20 @@ The encryption policy relies on a secret hardware unique key (HUK) per device.
 It is system integrator's responsibility to provide an implementation which
 **must** be a non-mutable target implementation.
 For API specification, please check:
-`platform/include/plat_crypto_keys.h`
+`platform/include/tfm_plat_crypto_keys.h`
 
 A stub implementation is provided in
-`platform/ext/sse_200_mps2/dummy_crypto_keys.c`
+`platform/ext/<target>/dummy_crypto_keys.c`
 
 ### Flash Interface
 
 For SST service operations, a contiguous set of blocks must be earmarked for
 the secure storage area. The design requires either 2 blocks, or any number of
-blocks greater than or equal to 4. Total number of blocks can not be 0,1 or 3.
+blocks greater than or equal to 4. Total number of blocks can not be 0, 1 or 3.
 This is a design choice limitation to provide power failure safe update
 operations.
 For API specification, please check:
 `secure_fw/services/secure_storage/flash/sst_flash.h`
-
-### Asset Access Policy Management
-
-Access to storage is governed by policy manager and policy database. The
-policy manager is implemented in `sst_asset_management.c` and contains the
-data driven access policy management code.
-The policy database, currently, is linked into the code at the compile time.
-The following files contain a reference implementation of policy database for
-all assets in the system.
-`secure_fw/services/secure_storage/assets/sst_asset_defs.h`
-`secure_fw/services/secure_storage/assets/sst_asset_defs.c`
-
-The system integrators **must** specify the policy database according to their
-requirements by implementing those files with the proper content.
-
-#### Policy Database Definition
-
-`sst_asset_defs.h` defines the list of asset IDs, maximum size of each asset,
-the client IDs allowed to access one or more assets, the number of assets
-defined and the size of the largest asset.
-
-The naming convention for those definition is as follows:
-
- - `SST_ASSET_ID_<ASSET NAME>` - To define an asset ID.
- - `SST_ASSET_MAX_SIZE_<ASSET NAME>` - To define the maximum size of the asset.
- - `SST_MAX_ASSET_SIZE` - To define the size of the largest asset defined in
-   the file.
- - `SST_NUM_ASSETS` - To define the number of assets defined in the file.
- - `SST_CLIENT_ID_<N>` - To define a client ID number N which is allowed to
-   access one or more assets.
-
-The asset IDs and client IDs are unique in the definitions.
-
-An example of `sst_asset_defs.h` definition is:
-```
-...
-/* SST service reserved IDs */
-#define SST_ASSET_ID_NO_ASSET 0
-/* End SST service reserved IDs */
-
-/* Asset IDs */
-#define SST_ASSET_ID_AES_KEY_128 1
-#define SST_ASSET_ID_AES_KEY_192 2
-
-/* Asset sizes */
-#define SST_ASSET_MAX_SIZE_AES_KEY_128 16
-#define SST_ASSET_MAX_SIZE_AES_KEY_192 24
-
-/* Client IDs which have access rights in one or more assets */
-#define SST_CLIENT_ID_1 1
-#define SST_CLIENT_ID_2 2
-
-/* Number of assets that can be stored in SST area */
-#define SST_NUM_ASSETS 2
-
-/* Largest defined asset size */
-#define SST_MAX_ASSET_SIZE 24
-...
-```
-
-The policy table is composed by the asset information vector (`asset_perms`)
-and the asset permissions mode vector (`asset_perms_modes`), in
-`sst_asset_defs.c`. The asset information vector defines the properties of
-all assets, while the asset permissions mode vector defines the access
-permissions to those assets for each client. By default, if a client ID is
-not defined for an specific asset in the `asset_perms_modes`, the asset is
-not accessible for that client in any direct or referenced way.
-
-The asset information structure (`struct sst_asset_policy_t`) contains the
-following items:
-
- - `type` - PSA asset type
- - `asset_uuid` - Asset unique ID.
- - `max_size` - Asset maximum size.
- - `perms_count` - Number of clients specified in `asset_perms_modes`
-   vector which have access rights for this asset in a direct or referenced
-   way.
- - `perms_modes_start_idx` - First index in the `asset_perms_modes` vectors
-   where the access permissions are defined for this specific asset.
-
-The `struct sst_asset_info_t` definition can be found in
-`secure_fw/services/secure_storage/sst_asset_management.h`
-
-An example of `asset_perms` definition can be found below:
-
-```
-const struct sst_asset_policy_t asset_perms[] = {
-{
-    .type = PSA_SST_ASSET_KEY_AES,
-    .asset_uuid = SST_ASSET_ID_AES_KEY_128,
-    .max_size = SST_ASSET_MAX_SIZE_AES_KEY_128,
-    .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_128,
-    .perms_modes_start_idx = 0,
-}, {
-    .type = PSA_SST_ASSET_KEY_AES,
-    .asset_uuid = SST_ASSET_ID_AES_KEY_192,
-    .max_size = SST_ASSET_MAX_SIZE_AES_KEY_192,
-    .perms_count = SST_ASSET_PERMS_COUNT_AES_KEY_192,
-    .perms_modes_start_idx = 1,
-}};
-```
-
-The asset permission structure (`struct sst_asset_perm_t`) is defined as
-follows:
-
- - `client_id` - Client ID. ID for secure partitions is always bigger
-   than 0. Non-secure clients use ID lower than 0. ID cannot be 0.
- - `perm` - Access permissions types, as a bit-field, allowed for this
-   client.
-
-The available access permission types are:
-
- - `SST_PERM_REFERENCE` - The client can request to a service to
-   manipulate the asset content in its behalf.
- - `SST_PERM_READ` - The client can read the asset content.
- - `SST_PERM_WRITE` - The client can create, write and delete the asset.
-
-The client permissions are defined in order for each asset. It means,
-the first entries in the vector define the access permissions for all
-the clients which have access to the first asset in `asset_perms`.
-Then, the access permissions for the clients which have access to the
-second asset, etc.
-The policy manager retrieves the client permissions for each asset by
-reading the proper entry in `asset_perms_modes` vector, based on
-`.perms_modes_start_idx` and `.perms_count` asset properties in
-`asset_perms`.
-
-The `struct sst_asset_perm_t` definition can be found in
-`secure_fw/services/secure_storage/sst_asset_management.h`
-
-An example of `asset_perms_modes` definition can be found below:
-
-```
-const struct sst_asset_perm_t asset_perms_modes[] = {
-{
-    .client_id = SST_CLIENT_ID_1,
-    .perm = SST_PERM_REFERENCE | SST_PERM_READ,
-}, {
-    .client_id = SST_CLIENT_ID_2,
-    .perm = SST_PERM_REFERENCE | SST_PERM_READ | SST_PERM_WRITE,
-} };
-```
-
-#### Generate a new policy database
-
-The Python script `gen_policy_db.py` can be used to generate a new policy
-DB based on the policy DB description in YAML format. The script is
-available in `tools/services/sst/policy_db`. This Python script generates
-automatically the `sst_asset_defs.h` and `sst_asset_defs.c` files which will be
-used in the SST service build process to compile in the policy DB.
-
-To define a policy for an asset, the asset definition must contain the
-following fields in the YAML file:
-
- - `type` - PSA asset type define name defined as a string.
- - `name` - Asset name defined as a string.
- - `uuid` - Asset unique ID defined as an integer.
- - `max_size` - Asset maximum size defined as an integer.
- - `client_perms` - List of client IDs which have access to this asset.
- - `client_id` - Client ID defined as an integer.
- - `perms` - List of access permissions types allowed for this client. Each
-   permission defined as a string.
-
-The available access permission strings are:
-
- - `REFERENCE` - The client can request to a service to
-   manipulate the asset content in its behalf.
- - `READ`  - The client can read the asset content.
- - `WRITE` - The client can create, write and delete the asset.
-
-An example of asset definition in YAML format can be found below:
-
-```
-...
-{
-  "type": "PSA_SST_ASSET_KEY_HMAC",
-  "name": "AES_KEY_128",
-  "uuid": 1,
-  "max_size": 16,
-  "client_perms": [
-    {
-      "client_id": 1,
-      "perms":  ["REFERENCE","READ"]
-    }, {
-      "client_id": 2,
-      "perms":  ["REFERENCE","READ","WRITE"]
-    }
-  ]
-},
-...
-```
-
-The following command can be executed to generate the new policy DB files based
-on a new YAML file description with `gen_policy_db.py`.
-```
-python gen_policy_db.py -i new_policy_db.yaml
-```
-
-Detailed information about how to use `gen_policy_db.py` can be found by
-executing the script with -h parameter.
-```
-python gen_policy_db.py -h
-```
-
-The current policy DB is defined in `tfm_sst_policy_db_definition.yaml`
-located in `tools/services/sst/policy_db` folder.
 
 ### Non-Secure Identity Manager
 
@@ -433,11 +298,12 @@ TF-M core tracks the current client IDs running in the secure or non-secure
 processing environment. It provides a dedicated API to retrieve the client ID
 which performs the service request.
 
-[ns client identification documentation](../tfm_ns_client_identification.md)
+[NS client identification documentation](../tfm_ns_client_identification.md)
 provides further details on how client identification works.
 
-SST service uses that TF-M core API to retrieve the client ID and validate the
-access permission against the requested asset.
+SST service uses that TF-M core API to retrieve the client ID and associate it
+as the owner of an asset. Only the owner can read, write or delete that asset
+based on the creation flags.
 
 The [integration guide](../tfm_integration_guide.md) provides further
 details of non-secure implementation requirements for TF-M.
@@ -462,8 +328,6 @@ of those flags. However, those flags values can be overwritten by setting them
 in `platform/ext/<TARGET_NAME>.cmake` based on the target capabilities or needs.
 The list of SST services flags are:
 
- - `ENABLE_SECURE_STORAGE`: this flag allows to compile in/out the secure
-   storage service.
  - `SST_ENCRYPTION`: this flag allows to enable/disable encryption option to
    encrypt the secure storage data.
  - `SST_CREATE_FLASH_LAYOUT`: this flag indicates that it is required to
@@ -481,9 +345,6 @@ The list of SST services flags are:
    not hardware protected against malicious writes. In case the flash is
    protected against malicious writes (i.e embedded flash, etc), this validation
    can be disabled in order to reduce the validation overhead.
- - `SST_ENABLE_PARTIAL_ASSET_RW`: this flag allows to enable/disable the
-   partial asset RW manipulation at compile time. The partial asset
-   manipulation is allowed by default.
  - `SST_ROLLBACK_PROTECTION`: this flag allows to enable/disable rollback
    protection in secure storage service. This flag takes effect only if the
    target has non-volatile counters and `SST_ENCRYPTION` flag is on.
@@ -495,4 +356,4 @@ The list of SST services flags are:
 
 --------------
 
-*Copyright (c) 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
