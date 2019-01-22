@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -44,8 +44,8 @@ __asm("  .global __ARM_use_no_argv\n");
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
 #endif
-#if (TFM_LVL != 1) && (TFM_LVL != 3)
-#error Only TFM_LVL 1 and 3 are supported!
+#if (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
+#error Only TFM_LVL 1, 2 and 3 are supported!
 #endif
 
 /* Macros to pick linker symbols and allow to form the partition data base */
