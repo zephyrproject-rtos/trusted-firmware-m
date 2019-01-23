@@ -34,6 +34,7 @@ if (ENABLE_INITIAL_ATTESTATION)
 	#Append all our source files to global lists.
 	list(APPEND ALL_SRC_C
 		"${INITIAL_ATTESTATION_DIR}/tfm_attestation_secure_api.c"
+		"${INITIAL_ATTESTATION_DIR}/tfm_attestation.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_core.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_crypto_stub.c"
 		"${INITIAL_ATTESTATION_DIR}/attestation_key.c"
@@ -45,6 +46,7 @@ if (ENABLE_INITIAL_ATTESTATION)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)

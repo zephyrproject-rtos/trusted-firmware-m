@@ -39,7 +39,7 @@
     "attestation_crypto_stub.c",
     "attestation_key.c",
     "attest_token.c",
-
+    "tfm_attestation.c",
   ],
   "tfm_linker_pattern": [
     "library_list": [

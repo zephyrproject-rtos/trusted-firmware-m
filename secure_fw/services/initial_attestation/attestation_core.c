@@ -8,15 +8,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <stddef.h>
+#include "tfm_client.h"
 #include "attestation.h"
-#include "secure_utilities.h"
-#include "tfm_api.h"
-#include "tfm_secure_api.h"
-#include "psa_client.h"
-#include "bl2/include/tfm_boot_status.h"
-#include "platform/include/tfm_plat_defs.h"
-#include "platform/include/tfm_plat_device_id.h"
-#include "platform/include/tfm_plat_boot_seed.h"
+#include "tfm_boot_status.h"
+#include "tfm_plat_defs.h"
+#include "tfm_plat_device_id.h"
+#include "tfm_plat_boot_seed.h"
 #include "tfm_attest_hal.h"
 #include "attest_token.h"
 #include "attest_eat_defines.h"
@@ -48,14 +45,11 @@ static uint8_t boot_status[MAX_BOOT_STATUS];
 
 enum psa_attest_err_t attest_init(void)
 {
-    enum tfm_status_e res;
+    enum psa_attest_err_t res;
 
-    res = tfm_core_get_boot_data(TLV_MAJOR_IAS, boot_status, MAX_BOOT_STATUS);
-    if (res != TFM_SUCCESS) {
-        return PSA_ATTEST_ERR_INIT_FAILED;
-    }
+    res = attest_get_boot_data(TLV_MAJOR_IAS, boot_status, MAX_BOOT_STATUS);
 
-    return PSA_ATTEST_ERR_SUCCESS;
+    return res;
 }
 
 /*!
@@ -564,12 +558,12 @@ attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_caller_id_claim(struct attest_token_ctx *token_ctx)
 {
-    uint32_t res;
+    enum psa_attest_err_t res;
     int32_t  caller_id;
 
-    res = tfm_core_get_caller_client_id(&caller_id);
-    if (res != 0) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    res = attest_get_caller_client_id(&caller_id);
+    if (res != PSA_ATTEST_ERR_SUCCESS) {
+        return res;
     }
 
     attest_token_add_integer(token_ctx,
@@ -586,6 +580,7 @@ attest_add_caller_id_claim(struct attest_token_ctx *token_ctx)
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
+
 static enum psa_attest_err_t
 attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
 {
@@ -830,7 +825,6 @@ enum psa_attest_err_t
 initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
                                psa_outvec *out_vec, uint32_t num_outvec)
 {
-    enum tfm_status_e tfm_err;
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     struct useful_buf_c challenge;
     struct useful_buf token;
@@ -846,19 +840,17 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    tfm_err = tfm_core_memory_permission_check((void *)challenge.ptr,
-                                               challenge.len,
-                                               TFM_MEMORY_ACCESS_RO);
-    if (tfm_err != TFM_SUCCESS) {
-        attest_err =  PSA_ATTEST_ERR_INVALID_INPUT;
+    attest_err = attest_check_memory_access((void *)challenge.ptr,
+                                            challenge.len,
+                                            TFM_ATTEST_ACCESS_RO);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
 
-    tfm_err = tfm_core_memory_permission_check(token.ptr,
-                                               token.len,
-                                               TFM_MEMORY_ACCESS_RW);
-    if (tfm_err != TFM_SUCCESS) {
-        attest_err =  PSA_ATTEST_ERR_INVALID_INPUT;
+    attest_err = attest_check_memory_access(token.ptr,
+                                            token.len,
+                                            TFM_ATTEST_ACCESS_RW);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
 

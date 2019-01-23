@@ -8,7 +8,7 @@
 #include "psa_initial_attestation_api.h"
 #include "tfm_veneers.h"
 #include "secure_utilities.h"
-#include "psa_client.h"
+#include "tfm_client.h"
 #include "tfm_secure_api.h"
 #include <string.h>
 
