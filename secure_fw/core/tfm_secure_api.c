@@ -483,14 +483,13 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
             tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
             tfm_copy_iovec_parameters(iovec_args,
                                       &(curr_part_data->iovec_args));
-        }
 
-        /* Prepare the partition context, update stack ptr */
-        if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+            /* Prepare the partition context, update stack ptr */
             psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
                                                         iovec_args,
                                                      (int32_t *)partition_psp);
         } else {
+            /* Prepare the partition context, update stack ptr */
             psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
                                                   (int32_t *)partition_psp);
         }
@@ -509,14 +508,13 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
         sizeof(struct iovec_args_t));
         tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
         tfm_copy_iovec_parameters(iovec_args, &(curr_part_data->iovec_args));
-    }
 
-    /* Prepare the partition context, update stack ptr */
-    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
+        /* Prepare the partition context, update stack ptr */
         psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
                                                     iovec_args,
                                                     (int32_t *)partition_psp);
     } else {
+        /* Prepare the partition context, update stack ptr */
         psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
                                               (int32_t *)partition_psp);
     }
