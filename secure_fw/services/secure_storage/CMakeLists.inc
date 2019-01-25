@@ -52,6 +52,7 @@ endif()
 
 set (SECURE_STORAGE_C_SRC
 	"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
+	"${SECURE_STORAGE_DIR}/tfm_sst_req_mngr.c"
 	"${SECURE_STORAGE_DIR}/tfm_protected_storage.c"
 	"${SECURE_STORAGE_DIR}/sst_object_system.c"
 	"${SECURE_STORAGE_DIR}/sst_object_table.c"

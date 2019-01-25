@@ -55,6 +55,9 @@ enum tfm_sst_err_t {
     TFM_SST_ERR_INVALID                                                        \
 )
 
+/* Invalid UID */
+#define TFM_SST_INVALID_UID 0
+
 #ifdef __cplusplus
 }
 #endif

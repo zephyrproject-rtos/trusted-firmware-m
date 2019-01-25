@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-#define SST_INVALID_UID  0
 #define SST_INVALID_FID  0
 #define SST_DEFAULT_EMPTY_BUFF_VAL 0
 

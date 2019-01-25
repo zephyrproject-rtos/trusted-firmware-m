@@ -17,7 +17,7 @@
     {
       "sfid": "TFM_SST_SET_SFID",
       "signal": "TFM_SST_SET",
-      "tfm_symbol": "tfm_sst_set",
+      "tfm_symbol": "tfm_sst_set_req",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -25,7 +25,7 @@
     {
       "sfid": "TFM_SST_GET_SFID",
       "signal": "TFM_SST_GET",
-      "tfm_symbol": "tfm_sst_get",
+      "tfm_symbol": "tfm_sst_get_req",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -33,7 +33,7 @@
     {
       "sfid": "TFM_SST_GET_INFO_SFID",
       "signal": "TFM_SST_GET_INFO",
-      "tfm_symbol": "tfm_sst_get_info",
+      "tfm_symbol": "tfm_sst_get_info_req",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -41,7 +41,7 @@
     {
       "sfid": "TFM_SST_REMOVE_SFID",
       "signal": "TFM_SST_REMOVE",
-      "tfm_symbol": "tfm_sst_remove",
+      "tfm_symbol": "tfm_sst_remove_req",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -49,7 +49,7 @@
     {
       "sfid": "TFM_SST_GET_SUPPORT_SFID",
       "signal": "TFM_SST_GET_SUPPORT",
-      "tfm_symbol": "tfm_sst_get_support",
+      "tfm_symbol": "tfm_sst_get_support_req",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -61,6 +61,7 @@
     "sst_object_table.c",
     "sst_utils.c",
     "tfm_protected_storage.c",
+    "tfm_sst_req_mngr.c",
     "crypto/sst_crypto_interface.c",
     "flash/sst_flash.c",
     "flash_fs/sst_flash_fs.c",

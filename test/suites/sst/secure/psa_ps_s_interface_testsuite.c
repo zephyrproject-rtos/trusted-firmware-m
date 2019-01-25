@@ -232,9 +232,15 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = 1;
 
+    /* A parameter with a null pointer is treated as a secure violation.
+     * TF-M framework rejects the request with a proper error code.
+     * The SST secure PSA PS implementation returns
+     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     */
+
     /* Set with NULL data pointer */
     status = psa_ps_set(uid, data_len, NULL, flags);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Set should not succeed with NULL data pointer");
         return;
     }
@@ -254,9 +260,16 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     const uint32_t data_len = INVALID_DATA_LEN;
     uint8_t write_data[] = WRITE_DATA;
 
+    /* A parameter with a buffer pointer where its data length is longer than
+     * maximum permitted, it is treated as a secure violation.
+     * TF-M framework rejects the request with a proper error code.
+     * The SST secure PSA PS implementation returns
+     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     */
+
     /* Set with data length longer than the maximum supported */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Set should not succeed with invalid data length");
         return;
     }
@@ -561,8 +574,15 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     read_len = INVALID_DATA_LEN;
     offset = INVALID_OFFSET;
 
+    /* A parameter with a buffer pointer where its data length is longer than
+     * maximum permitted, it is treated as a secure violation.
+     * TF-M framework rejects the request with a proper error code.
+     * The SST secure PSA PS implementation returns
+     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     */
+
     status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Get should not succeed with invalid arguments");
         return;
     }
@@ -602,9 +622,15 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
         return;
     }
 
+    /* A parameter with a null pointer is treated as a secure violation.
+     * TF-M framework rejects the request with a proper error code.
+     * The SST secure PSA PS implementation returns
+     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     */
+
     /* Get with NULL data pointer */
     status = psa_ps_get(uid, offset, data_len, NULL);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Get should not succeed with NULL data pointer");
         return;
     }
@@ -765,9 +791,15 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
         return;
     }
 
+    /* A parameter with a null pointer is treated as a secure violation.
+     * TF-M framework rejects the request with a proper error code.
+     * The SST secure PSA PS implementation returns
+     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     */
+
     /* Get info with NULL info pointer */
     status = psa_ps_get_info(uid, NULL);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Get info should not succeed with NULL info pointer");
         return;
     }

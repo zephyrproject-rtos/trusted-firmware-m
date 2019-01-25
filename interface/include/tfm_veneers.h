@@ -17,11 +17,11 @@ extern "C" {
 #endif
 
 /******** TFM_SP_STORAGE ********/
-psa_status_t tfm_tfm_sst_set_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_sst_get_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_sst_get_info_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_sst_remove_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_sst_get_support_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_sst_set_req_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_sst_get_req_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_sst_get_info_req_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_sst_remove_req_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_sst_get_support_req_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 
 /******** TFM_SP_AUDIT_LOG ********/
 psa_status_t tfm_audit_core_retrieve_record_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);

@@ -787,7 +787,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_table_free_idx(uint32_t *idx)
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
     for (i = 0; i < SST_OBJ_TABLE_ENTRIES; i++) {
-        if (p_table->obj_db[i].uid == SST_INVALID_UID) {
+        if (p_table->obj_db[i].uid == TFM_SST_INVALID_UID) {
             *idx = i;
             return TFM_SST_ERR_SUCCESS;
         }
@@ -806,7 +806,7 @@ static void sst_table_delete_entry(uint32_t idx)
 {
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
-    p_table->obj_db[idx].uid = SST_INVALID_UID;
+    p_table->obj_db[idx].uid = TFM_SST_INVALID_UID;
     p_table->obj_db[idx].client_id = 0;
 
 #ifdef SST_ENCRYPTION

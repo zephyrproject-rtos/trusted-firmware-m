@@ -82,7 +82,7 @@ static struct test_t psa_ps_ns_tests[] = {
     {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
      "Set interface with NULL data pointer"},
     {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
-     "Set interface with invalid data length"},
+     "Set interface with invalid data length (DEPRECATED)"},
     {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
      "Set interface with write once UID"},
     {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
@@ -102,7 +102,7 @@ static struct test_t psa_ps_ns_tests[] = {
     {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
      "Get info interface with invalid UIDs"},
     {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
-     "Get info interface with NULL info pointer"},
+     "Get info interface with NULL info pointer (DEPRECATED)"},
     {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
      "Remove interface with valid UID"},
     {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
@@ -241,10 +241,16 @@ TFM_SST_NS_TEST(1002, "Thread_A")
  */
 TFM_SST_NS_TEST(1003, "Thread_A")
 {
+    /* A parameter with a null pointer and data length different from 0 is
+     * treated as a secure violation.
+     * TF-M framework will stop this transaction and not return from this
+     * request to NSPE.
+     */
+
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
-    const uint32_t data_len = 1;
+    const uint32_t data_len = 0;
 
     /* Set with NULL data pointer */
     status = psa_ps_set(uid, data_len, NULL, flags);
@@ -262,6 +268,14 @@ TFM_SST_NS_TEST(1003, "Thread_A")
  */
 TFM_SST_NS_TEST(1004, "Thread_A")
 {
+    /* A parameter with a buffer pointer where its data length is longer than
+     * maximum permitted, it is treated as a secure violation.
+     * TF-M framework will stop this transaction and not return from this
+     * request to NSPE.
+     */
+    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
+
+#if 0
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -274,6 +288,7 @@ TFM_SST_NS_TEST(1004, "Thread_A")
         TEST_FAIL("Set should not succeed with invalid data length");
         return;
     }
+#endif
 
     ret->val = TEST_PASSED;
 }
@@ -502,7 +517,6 @@ TFM_SST_NS_TEST(1008, "Thread_A")
  * - Offset greater than UID length
  * - Data length greater than UID length
  * - Data length + offset greater than UID length
- * - Invalid data len and offset
  */
 TFM_SST_NS_TEST(1009, "Thread_A")
 {
@@ -571,22 +585,6 @@ TFM_SST_NS_TEST(1009, "Thread_A")
         return;
     }
 
-    /* Get with data length and offset set to invalid values */
-    read_len = INVALID_DATA_LEN;
-    offset = INVALID_OFFSET;
-
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
-        TEST_FAIL("Get should not succeed with invalid arguments");
-        return;
-    }
-
-    /* Check that the read data is unchanged */
-    if (memcmp(read_data, READ_DATA, sizeof(read_data)) != 0) {
-        TEST_FAIL("Read data should be equal to original read data");
-        return;
-    }
-
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
     if (status != PSA_PS_SUCCESS) {
@@ -603,6 +601,12 @@ TFM_SST_NS_TEST(1009, "Thread_A")
  */
 TFM_SST_NS_TEST(1010, "Thread_A")
 {
+    /* A parameter with a null pointer and data length different from 0 is
+     * treated as a secure violation.
+     * TF-M framework will stop this transaction and not return from this
+     * request to NSPE.
+     */
+
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -617,7 +621,7 @@ TFM_SST_NS_TEST(1010, "Thread_A")
     }
 
     /* Get with NULL data pointer */
-    status = psa_ps_get(uid, offset, data_len, NULL);
+    status = psa_ps_get(uid, offset, 0, NULL);
     if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get should not succeed with NULL data pointer");
         return;
@@ -767,6 +771,13 @@ TFM_SST_NS_TEST(1013, "Thread_A")
  */
 TFM_SST_NS_TEST(1014, "Thread_A")
 {
+    /* A parameter with a null pointer is treated as a secure violation.
+     * TF-M framework will stop this transaction and not return from this
+     * request to NSPE.
+     */
+    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
+
+#if 0
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -792,6 +803,7 @@ TFM_SST_NS_TEST(1014, "Thread_A")
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
+#endif
 
     ret->val = TEST_PASSED;
 }
