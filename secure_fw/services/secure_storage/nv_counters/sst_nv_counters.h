@@ -17,7 +17,7 @@
  */
 
 #include <stdint.h>
-#include "tfm_sst_defs.h"
+#include "psa_protected_storage.h"
 #include "platform/include/tfm_plat_nv_counters.h"
 
 #define SST_NV_COUNTER_SIZE        4 /* In bytes */
@@ -29,10 +29,10 @@ extern "C" {
 /**
  * \brief Initializes all non-volatile (NV) counters.
  *
- * \return  TFM_SST_ERR_SUCCESS if the initialization succeeds, otherwise
- *          TFM_SST_ERR_OPERATION_FAILED
+ * \return  PSA_PS_SUCCESS if the initialization succeeds, otherwise
+ *          PSA_PS_ERROR_OPERATION_FAILED
  */
-enum tfm_sst_err_t sst_init_nv_counter(void);
+psa_ps_status_t sst_init_nv_counter(void);
 
 /**
  * \brief Reads the given non-volatile (NV) counter.
@@ -40,11 +40,11 @@ enum tfm_sst_err_t sst_init_nv_counter(void);
  * \param[in]  counter_id  NV counter ID.
  * \param[out] val         Pointer to store the current NV counter value.
  *
- * \return  TFM_SST_ERR_SUCCESS if the value is read correctly, otherwise
- *          TFM_SST_ERR_OPERATION_FAILED
+ * \return  PSA_PS_SUCCESS if the value is read correctly, otherwise
+ *          PSA_PS_ERROR_OPERATION_FAILED
  */
-enum tfm_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
-                                       uint32_t *val);
+psa_ps_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+                                    uint32_t *val);
 
 /**
  * \brief Increments the given non-volatile (NV) counter.
@@ -52,9 +52,9 @@ enum tfm_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
  * \param[in] counter_id  NV counter ID.
  *
  * \return  If the counter is incremented correctly, it returns
- *          TFM_SST_ERR_SUCCESS. Otherwise, TFM_SST_ERR_OPERATION_FAILED.
+ *          PSA_PS_SUCCESS. Otherwise, PSA_PS_ERROR_OPERATION_FAILED.
  */
-enum tfm_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
+psa_ps_status_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
 
 #ifdef __cplusplus
 }

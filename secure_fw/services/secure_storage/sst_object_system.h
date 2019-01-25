@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #include "psa_protected_storage.h"
-#include "tfm_sst_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,9 +21,9 @@ extern "C" {
  *        structures.
  *        It identifies and validates the system metadata.
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_system_prepare(void);
+psa_ps_status_t sst_system_prepare(void);
 
 /**
  * \brief Creates a new object with the provided UID and client ID.
@@ -35,11 +34,11 @@ enum tfm_sst_err_t sst_system_prepare(void);
  * \param[in] size          Size of the contents of `data` in bytes
  * \param[in] data          Buffer containing the data to write
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
-                                     psa_ps_create_flags_t create_flags,
-                                     uint32_t size, const uint8_t *data);
+psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
+                                  psa_ps_create_flags_t create_flags,
+                                  uint32_t size, const uint8_t *data);
 
 /**
  * \brief Gets the data of the object with the provided UID and client ID.
@@ -51,11 +50,11 @@ enum tfm_sst_err_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
  * \param[out] data       Buffer where the data will be placed upon successful
  *                        completion
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
-                                   uint32_t offset, uint32_t size,
-                                   uint8_t *data);
+psa_ps_status_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
+                                uint32_t offset, uint32_t size,
+                                uint8_t *data);
 
 /**
  * \brief Writes data into the object with the provided UID and client ID.
@@ -66,11 +65,11 @@ enum tfm_sst_err_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
  * \param[in] size       Size of the contents of `data` in bytes
  * \param[in] data       Buffer containing the data to write
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
-                                    uint32_t offset, uint32_t size,
-                                    const uint8_t *data);
+psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
+                                 uint32_t offset, uint32_t size,
+                                 const uint8_t *data);
 
 /**
  * \brief Deletes the object with the provided UID and client ID.
@@ -78,9 +77,9 @@ enum tfm_sst_err_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
  * \param[in] uid        Unique identifier for the data
  * \param[in] client_id  Identifier of the asset's owner (client)
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id);
+psa_ps_status_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id);
 
 /**
  * \brief Gets the asset information for the object with the provided UID and
@@ -91,17 +90,17 @@ enum tfm_sst_err_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id);
  * \param[out] info       Pointer to the `psa_ps_info_t` struct that will be
  *                        populated with the metadata
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_get_info(psa_ps_uid_t uid, int32_t client_id,
-                                       struct psa_ps_info_t *info);
+psa_ps_status_t sst_object_get_info(psa_ps_uid_t uid, int32_t client_id,
+                                    struct psa_ps_info_t *info);
 
 /**
  * \brief Wipes the secure storage system and all object data.
  *
- * \return Returns error code specified in \ref tfm_sst_err_t
+ * \return Returns error code specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_system_wipe_all(void);
+psa_ps_status_t sst_system_wipe_all(void);
 
 #ifdef __cplusplus
 }

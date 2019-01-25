@@ -13,6 +13,7 @@
 #include "flash_fs/sst_flash_fs.h"
 #include "nv_counters/sst_nv_counters.h"
 #include "sst_utils.h"
+#include "tfm_sst_defs.h"
 
 /*!
  * \def SST_OBJECT_SYSTEM_VERSION
@@ -223,7 +224,7 @@ __attribute__ ((always_inline))
 __STATIC_INLINE void sst_object_table_fs_read_table(
                                       struct sst_obj_table_init_ctx_t *init_ctx)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     /* FIXME: Read table from a persistent memory (flash location or FS) */
 
     /* Read file with the table 0 data */
@@ -231,7 +232,7 @@ __STATIC_INLINE void sst_object_table_fs_read_table(
                              SST_OBJ_TABLE_SIZE,
                              SST_OBJECT_TABLE_OBJECT_OFFSET,
                              (uint8_t *)init_ctx->p_table[SST_OBJ_TABLE_IDX_0]);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         init_ctx->table_state[SST_OBJ_TABLE_IDX_0] = SST_OBJ_TABLE_INVALID;
     }
 
@@ -240,7 +241,7 @@ __STATIC_INLINE void sst_object_table_fs_read_table(
                              SST_OBJ_TABLE_SIZE,
                              SST_OBJECT_TABLE_OBJECT_OFFSET,
                              (uint8_t *)init_ctx->p_table[SST_OBJ_TABLE_IDX_1]);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         init_ctx->table_state[SST_OBJ_TABLE_IDX_1] = SST_OBJ_TABLE_INVALID;
     }
 }
@@ -251,13 +252,13 @@ __STATIC_INLINE void sst_object_table_fs_read_table(
  * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE enum tfm_sst_err_t sst_object_table_fs_write_table(
+__STATIC_INLINE psa_ps_status_t sst_object_table_fs_write_table(
                                               struct sst_obj_table_t *obj_table)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t obj_table_id = SST_TABLE_FS_ID(sst_obj_table_ctx.scratch_table);
     uint8_t swap_table_idxs = sst_obj_table_ctx.scratch_table;
 
@@ -267,7 +268,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_fs_write_table(
                                    SST_OBJ_TABLE_SIZE,
                                    SST_OBJ_TABLE_SIZE,
                                    (const uint8_t *)obj_table);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -275,27 +276,27 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_fs_write_table(
     sst_obj_table_ctx.scratch_table = sst_obj_table_ctx.active_table;
     sst_obj_table_ctx.active_table = swap_table_idxs;
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
 #ifdef SST_ENCRYPTION
 /**
  * \brief Sets crypto key for object table.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-static enum tfm_sst_err_t sst_object_table_set_crypto_key(void)
+static psa_ps_status_t sst_object_table_set_crypto_key(void)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint8_t sst_key[SST_KEY_LEN_BYTES];   /*!< Secure storage system key */
 
     err = sst_crypto_getkey(sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     err = sst_crypto_setkey(sst_key, SST_KEY_LEN_BYTES);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -308,40 +309,40 @@ static enum tfm_sst_err_t sst_object_table_set_crypto_key(void)
  *
  * \param[in] nvc_1  Value of SST non-volatile counter 1
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-static enum tfm_sst_err_t sst_object_table_align_nv_counters(uint32_t nvc_1)
+static psa_ps_status_t sst_object_table_align_nv_counters(uint32_t nvc_1)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t nvc_x_val = 0;
 
     /* Align SST NVC 2 with NVC 1 */
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_2, &nvc_x_val);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+    if (err != PSA_PS_SUCCESS) {
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     for (; nvc_x_val < nvc_1; nvc_x_val++) {
         err = sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
     }
 
     /* Align SST NVC 3 with NVC 1 */
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_3, &nvc_x_val);
-    if (err != TFM_SST_ERR_SUCCESS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+    if (err != PSA_PS_SUCCESS) {
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     for (; nvc_x_val < nvc_1; nvc_x_val++) {
         err = sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
 /**
@@ -351,10 +352,10 @@ static enum tfm_sst_err_t sst_object_table_align_nv_counters(uint32_t nvc_1)
  * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_generate_auth_tag(
+__STATIC_INLINE psa_ps_status_t sst_object_table_nvc_generate_auth_tag(
                                               uint32_t nvc_1,
                                               struct sst_obj_table_t *obj_table)
 {
@@ -385,7 +386,7 @@ static void sst_object_table_authenticate(uint8_t table_idx,
 {
     struct sst_crypto_assoc_data_t assoc_data;
     union sst_crypto_t *crypto = &init_ctx->p_table[table_idx]->crypto;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     /* Init associated data with NVC 1 */
     assoc_data.nv_counter = init_ctx->nvc_1;
@@ -395,7 +396,7 @@ static void sst_object_table_authenticate(uint8_t table_idx,
 
     err = sst_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                   SST_CRYPTO_ASSOCIATED_DATA_LEN);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_PS_SUCCESS) {
         init_ctx->table_state[table_idx] = SST_OBJ_TABLE_NVC_1_VALID;
         return;
     }
@@ -410,7 +411,7 @@ static void sst_object_table_authenticate(uint8_t table_idx,
 
     err = sst_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                   SST_CRYPTO_ASSOCIATED_DATA_LEN);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         init_ctx->table_state[table_idx] = SST_OBJ_TABLE_INVALID;
     } else {
         init_ctx->table_state[table_idx] = SST_OBJ_TABLE_NVC_3_VALID;
@@ -422,27 +423,27 @@ static void sst_object_table_authenticate(uint8_t table_idx,
  *
  * \param[in,out] init_ctx  Pointer to the object table to authenticate
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_authenticate(
+__STATIC_INLINE psa_ps_status_t sst_object_table_nvc_authenticate(
                                       struct sst_obj_table_init_ctx_t *init_ctx)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t nvc_2;
 
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &init_ctx->nvc_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_2, &nvc_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_3, &init_ctx->nvc_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -467,7 +468,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_authenticate(
         sst_object_table_authenticate(SST_OBJ_TABLE_IDX_1, init_ctx);
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 #else /* SST_ROLLBACK_PROTECTION */
 
@@ -477,10 +478,10 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_authenticate(
  * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE enum tfm_sst_err_t sst_object_table_generate_auth_tag(
+__STATIC_INLINE psa_ps_status_t sst_object_table_generate_auth_tag(
                                               struct sst_obj_table_t *obj_table)
 {
     union sst_crypto_t *crypto = &obj_table->crypto;
@@ -503,7 +504,7 @@ __attribute__ ((always_inline))
 __STATIC_INLINE void sst_object_table_authenticate_ctx_tables(
                                       struct sst_obj_table_init_ctx_t *init_ctx)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     union sst_crypto_t *crypto =
                                 &init_ctx->p_table[SST_OBJ_TABLE_IDX_0]->crypto;
 
@@ -512,7 +513,7 @@ __STATIC_INLINE void sst_object_table_authenticate_ctx_tables(
         err = sst_crypto_authenticate(crypto,
                                       SST_CRYPTO_ASSOCIATED_DATA(crypto),
                                       SST_CRYPTO_ASSOCIATED_DATA_LEN);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             init_ctx->table_state[SST_OBJ_TABLE_IDX_0] = SST_OBJ_TABLE_INVALID;
         }
     }
@@ -524,7 +525,7 @@ __STATIC_INLINE void sst_object_table_authenticate_ctx_tables(
         err = sst_crypto_authenticate(crypto,
                                       SST_CRYPTO_ASSOCIATED_DATA(crypto),
                                       SST_CRYPTO_ASSOCIATED_DATA_LEN);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             init_ctx->table_state[SST_OBJ_TABLE_IDX_1] = SST_OBJ_TABLE_INVALID;
         }
     }
@@ -537,23 +538,23 @@ __STATIC_INLINE void sst_object_table_authenticate_ctx_tables(
  *
  * \param[in,out] obj_table  Pointer to the object table to save
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-static enum tfm_sst_err_t sst_object_table_save_table(
+static psa_ps_status_t sst_object_table_save_table(
                                               struct sst_obj_table_t *obj_table)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
 #ifdef SST_ROLLBACK_PROTECTION
     uint32_t nvc_1 = 0;
 
     err = sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     err = sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &nvc_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #else
@@ -573,7 +574,7 @@ static enum tfm_sst_err_t sst_object_table_save_table(
 #ifdef SST_ENCRYPTION
     /* Set object table key */
     err = sst_object_table_set_crypto_key();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -587,7 +588,7 @@ static enum tfm_sst_err_t sst_object_table_save_table(
     err = sst_object_table_generate_auth_tag(obj_table);
 #endif /* SST_ROLLBACK_PROTECTION */
 
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #endif /* SST_ENCRYPTION */
@@ -595,7 +596,7 @@ static enum tfm_sst_err_t sst_object_table_save_table(
     err = sst_object_table_fs_write_table(obj_table);
 
 #ifdef SST_ROLLBACK_PROTECTION
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -636,8 +637,9 @@ __STATIC_INLINE void sst_object_table_validate_version(
  *
  * \param[in] init_ctx  Pointer to the init object table context
  *
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-static enum tfm_sst_err_t sst_set_active_object_table(
+static psa_ps_status_t sst_set_active_object_table(
                                 const struct sst_obj_table_init_ctx_t *init_ctx)
 {
 #ifndef SST_ROLLBACK_PROTECTION
@@ -652,7 +654,7 @@ static enum tfm_sst_err_t sst_set_active_object_table(
          && (init_ctx->table_state[SST_OBJ_TABLE_IDX_1] ==
                                                        SST_OBJ_TABLE_INVALID)) {
         /* Both tables are invalid */
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     } else if (init_ctx->table_state[SST_OBJ_TABLE_IDX_0] ==
                                                         SST_OBJ_TABLE_INVALID) {
           /* Table 0 is invalid, the active one is table 1 */
@@ -666,7 +668,7 @@ static enum tfm_sst_err_t sst_set_active_object_table(
                            init_ctx->p_table[SST_OBJ_TABLE_IDX_1],
                            SST_OBJ_TABLE_SIZE);
 
-          return TFM_SST_ERR_SUCCESS;
+          return PSA_PS_SUCCESS;
     } else if (init_ctx->table_state[SST_OBJ_TABLE_IDX_1] ==
                                                         SST_OBJ_TABLE_INVALID) {
         /* Table 1 is invalid, the active one is table 0 */
@@ -677,7 +679,7 @@ static enum tfm_sst_err_t sst_set_active_object_table(
          * needed to copy the table in the context.
          */
 
-        return TFM_SST_ERR_SUCCESS;
+        return PSA_PS_SUCCESS;
     }
 
 #ifdef SST_ROLLBACK_PROTECTION
@@ -739,7 +741,7 @@ static enum tfm_sst_err_t sst_set_active_object_table(
                          SST_OBJ_TABLE_SIZE);
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
 /**
@@ -749,12 +751,12 @@ static enum tfm_sst_err_t sst_set_active_object_table(
  * \param[in]  client_id  Client UID
  * \param[out] idx        Pointer to store the entry's index
  *
- * \return Returns TFM_SST_ERR_SUCCESS and index of the table, if object exists
- *         in the table. Otherwise, it returns TFM_SST_ERR_UID_NOT_FOUND.
+ * \return Returns PSA_PS_SUCCESS and index of the table, if object exists
+ *         in the table. Otherwise, it returns PSA_PS_ERROR_UID_NOT_FOUND.
  */
-static enum tfm_sst_err_t sst_get_object_entry_idx(psa_ps_uid_t uid,
-                                                   int32_t client_id,
-                                                   uint32_t *idx)
+static psa_ps_status_t sst_get_object_entry_idx(psa_ps_uid_t uid,
+                                                int32_t client_id,
+                                                uint32_t *idx)
 {
     uint32_t i;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
@@ -763,11 +765,11 @@ static enum tfm_sst_err_t sst_get_object_entry_idx(psa_ps_uid_t uid,
         if (p_table->obj_db[i].uid == uid
             && p_table->obj_db[i].client_id == client_id) {
             *idx = i;
-            return TFM_SST_ERR_SUCCESS;
+            return PSA_PS_SUCCESS;
         }
     }
 
-    return TFM_SST_ERR_UID_NOT_FOUND;
+    return PSA_PS_ERROR_UID_NOT_FOUND;
 }
 
 /**
@@ -777,11 +779,11 @@ static enum tfm_sst_err_t sst_get_object_entry_idx(psa_ps_uid_t uid,
  *
  * \note The table is dimensioned to fit SST_NUM_ASSETS + 1
  *
- * \return Returns TFM_SST_ERR_SUCCESS and a table index if a free index is
- *         available. Otherwise, it returns TFM_SST_ERR_INSUFFICIENT_SPACE.
+ * \return Returns PSA_PS_SUCCESS and a table index if a free index is
+ *         available. Otherwise, it returns PSA_PS_ERROR_INSUFFICIENT_SPACE.
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE enum tfm_sst_err_t sst_table_free_idx(uint32_t *idx)
+__STATIC_INLINE psa_ps_status_t sst_table_free_idx(uint32_t *idx)
 {
     uint32_t i;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
@@ -789,11 +791,11 @@ __STATIC_INLINE enum tfm_sst_err_t sst_table_free_idx(uint32_t *idx)
     for (i = 0; i < SST_OBJ_TABLE_ENTRIES; i++) {
         if (p_table->obj_db[i].uid == TFM_SST_INVALID_UID) {
             *idx = i;
-            return TFM_SST_ERR_SUCCESS;
+            return PSA_PS_SUCCESS;
         }
     }
 
-    return TFM_SST_ERR_INSUFFICIENT_SPACE;
+    return PSA_PS_ERROR_INSUFFICIENT_SPACE;
 }
 
 /**
@@ -817,16 +819,16 @@ static void sst_table_delete_entry(uint32_t idx)
 #endif
 }
 
-enum tfm_sst_err_t sst_object_table_create(void)
+psa_ps_status_t sst_object_table_create(void)
 {
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
 #ifdef SST_ROLLBACK_PROTECTION
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     /* Initialize SST NV counters */
     err = sst_init_nv_counter();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #endif
@@ -847,9 +849,9 @@ enum tfm_sst_err_t sst_object_table_create(void)
     return sst_object_table_save_table(p_table);
 }
 
-enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data)
+psa_ps_status_t sst_object_table_init(uint8_t *obj_data)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     struct sst_obj_table_init_ctx_t init_ctx = {
         .p_table = {&sst_obj_table_ctx.obj_table, 0},
         .table_state = {0, 0}
@@ -863,20 +865,20 @@ enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data)
 #ifdef SST_ENCRYPTION
     /* Set object table key */
     err = sst_object_table_set_crypto_key();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
 #ifdef SST_ROLLBACK_PROTECTION
     /* Initialize SST NV counters */
     err = sst_init_nv_counter();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     /* Authenticate table */
     err = sst_object_table_nvc_authenticate(&init_ctx);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #else
@@ -890,21 +892,21 @@ enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data)
 
     /* Set active tables */
     err = sst_set_active_object_table(&init_ctx);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     /* Remove the old object table file */
     err = sst_flash_fs_file_delete(SST_TABLE_FS_ID(
                                               sst_obj_table_ctx.scratch_table));
-    if (err != TFM_SST_ERR_SUCCESS && err != TFM_SST_ERR_UID_NOT_FOUND) {
+    if (err != PSA_PS_SUCCESS && err != PSA_PS_ERROR_UID_NOT_FOUND) {
         return err;
     }
 
 #ifdef SST_ROLLBACK_PROTECTION
     /* Align SST NV counters */
     err = sst_object_table_align_nv_counters(init_ctx.nvc_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #endif /* SST_ROLLBACK_PROTECTION */
@@ -917,25 +919,24 @@ enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data)
     sst_crypto_set_iv(&sst_obj_table_ctx.obj_table.crypto);
 #endif
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_object_table_obj_exist(psa_ps_uid_t uid,
-                                              int32_t client_id)
+psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid, int32_t client_id)
 {
     uint32_t idx = 0;
 
     return sst_get_object_entry_idx(uid, client_id, &idx);
 }
 
-enum tfm_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid)
+psa_ps_status_t sst_object_table_get_free_fid(uint32_t *p_fid)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t fid;
     uint32_t idx;
 
     err = sst_table_free_idx(&idx);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -948,33 +949,33 @@ enum tfm_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid)
      * can happened when the system is rebooted (e.g. power cut, ...) in the
      * middle of a create, write or delete operation.
      */
-    if (sst_flash_fs_file_exist(fid) == TFM_SST_ERR_SUCCESS) {
+    if (sst_flash_fs_file_exist(fid) == PSA_PS_SUCCESS) {
         /* Remove old file from the persistent area, to keep it consistent
          * with the table content.
          */
         err = sst_flash_fs_file_delete(fid);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
     }
 
     *p_fid = fid;
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
-                                                     int32_t client_id,
+psa_ps_status_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
+                                                  int32_t client_id,
                                 const struct sst_obj_table_info_t *obj_tbl_info)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t idx = 0;
     uint32_t backup_idx = 0;
     struct sst_obj_table_entry_t backup_entry;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
     err = sst_get_object_entry_idx(uid, client_id, &backup_idx);
-    if (err == TFM_SST_ERR_SUCCESS) {
+    if (err == PSA_PS_SUCCESS) {
         /* If an entry exists for this UID, it creates a backup copy in case
          * an error happens while updating the new table in the filesystem.
          */
@@ -999,7 +1000,7 @@ enum tfm_sst_err_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
 #endif
 
     err = sst_object_table_save_table(p_table);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         /* Rollback the change in the table */
         sst_utils_memcpy((uint8_t *)&p_table->obj_db[backup_idx],
                         (const uint8_t *)&backup_entry,
@@ -1011,16 +1012,16 @@ enum tfm_sst_err_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
-                                                     int32_t client_id,
+psa_ps_status_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
+                                                  int32_t client_id,
                                       struct sst_obj_table_info_t *obj_tbl_info)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t idx;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
     err = sst_get_object_entry_idx(uid, client_id, &idx);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -1033,22 +1034,22 @@ enum tfm_sst_err_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
     obj_tbl_info->version = p_table->obj_db[idx].version;
 #endif
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_object_table_delete_object(psa_ps_uid_t uid,
-                                                  int32_t client_id)
+psa_ps_status_t sst_object_table_delete_object(psa_ps_uid_t uid,
+                                               int32_t client_id)
 {
     uint32_t backup_idx = 0;
     struct sst_obj_table_entry_t backup_entry;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
     /* Create a backup copy in case an error happens while updating the new
      * table in the filesystem.
      */
     err = sst_get_object_entry_idx(uid, client_id, &backup_idx);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         /* If the object is not present in the table, it returns an error
          * to not generate a new file where the table content is the same.
          * Otherwise, that could be used by an attacker to get the encryption
@@ -1064,7 +1065,7 @@ enum tfm_sst_err_t sst_object_table_delete_object(psa_ps_uid_t uid,
     sst_table_delete_entry(backup_idx);
 
     err = sst_object_table_save_table(p_table);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
        /* Rollback the change in the table */
        sst_utils_memcpy((uint8_t *)&p_table->obj_db[backup_idx],
                         (const uint8_t *)&backup_entry,
@@ -1074,7 +1075,7 @@ enum tfm_sst_err_t sst_object_table_delete_object(psa_ps_uid_t uid,
     return err;
 }
 
-enum tfm_sst_err_t sst_object_table_delete_old_table(void)
+psa_ps_status_t sst_object_table_delete_old_table(void)
 {
     uint32_t table_id = SST_TABLE_FS_ID(sst_obj_table_ctx.scratch_table);
 

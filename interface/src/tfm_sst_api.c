@@ -8,7 +8,6 @@
 #include "psa_protected_storage.h"
 
 #include "tfm_ns_lock.h"
-#include "tfm_sst_defs.h"
 #include "tfm_veneers.h"
 
 #define IOVEC_LEN(x) (uint32_t)(sizeof(x)/sizeof(x[0]))
@@ -19,7 +18,7 @@ psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
                            psa_ps_create_flags_t create_flags)
 {
     psa_status_t status;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     psa_invec in_vec[] = {
         { .base = &uid,   .len = sizeof(uid) },
@@ -38,7 +37,7 @@ psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    return TFM_SST_PSA_RETURN(err);
+    return err;
 }
 
 psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
@@ -47,7 +46,7 @@ psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
                            void *p_data)
 {
     psa_status_t status;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) },
@@ -67,13 +66,13 @@ psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    return TFM_SST_PSA_RETURN(err);
+    return err;
 }
 
 psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)
 {
     psa_status_t status;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) }
@@ -92,13 +91,13 @@ psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    return TFM_SST_PSA_RETURN(err);
+    return err;
 }
 
 psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
 {
     psa_status_t status;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) }
@@ -116,7 +115,7 @@ psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    return TFM_SST_PSA_RETURN(err);
+    return err;
 }
 
 psa_ps_status_t psa_ps_create(psa_ps_uid_t uid, uint32_t size,

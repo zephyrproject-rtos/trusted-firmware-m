@@ -20,29 +20,29 @@
 static uint32_t sst_dblock_lo_to_phy(uint32_t lblock)
 {
     struct sst_block_meta_t block_meta;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     err = sst_flash_fs_mblock_read_block_metadata(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return SST_BLOCK_INVALID_ID;
     }
 
     return block_meta.phy_id;
 }
 
-enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
-                                                     uint32_t free_size,
-                                                     uint32_t src_offset,
-                                                     uint32_t dst_offset,
-                                                     uint32_t size)
+psa_ps_status_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
+                                                  uint32_t free_size,
+                                                  uint32_t src_offset,
+                                                  uint32_t dst_offset,
+                                                  uint32_t size)
 {
     struct sst_block_meta_t block_meta;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t scratch_id = 0;
 
     /* Read current block meta */
     err = sst_flash_fs_mblock_read_block_metadata(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
@@ -60,8 +60,8 @@ enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
         err = sst_flash_block_to_block_move(scratch_id, dst_offset,
                                             block_meta.phy_id, src_offset,
                                             size);
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_OPERATION_FAILED;
+        if (err != PSA_PS_SUCCESS) {
+            return PSA_PS_ERROR_OPERATION_FAILED;
         }
     }
 
@@ -74,8 +74,8 @@ enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
                                             block_meta.phy_id,
                                             block_meta.data_start,
                                             (dst_offset-block_meta.data_start));
-        if (err != TFM_SST_ERR_SUCCESS) {
-            return TFM_SST_ERR_OPERATION_FAILED;
+        if (err != PSA_PS_SUCCESS) {
+            return PSA_PS_ERROR_OPERATION_FAILED;
         }
     }
 
@@ -90,7 +90,7 @@ enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
 
     /* Update block metadata in scratch metadata block */
     err = sst_flash_fs_mblock_update_scratch_block_meta(lblock, &block_meta);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         /* Swap back the data block as there was an issue in the process */
         sst_flash_fs_mblock_set_data_scratch(scratch_id, lblock);
         return err;
@@ -99,9 +99,9 @@ enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
     return err;
 }
 
-enum tfm_sst_err_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
-                                                          uint32_t offset,
-                                                          uint32_t size)
+psa_ps_status_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
+                                                       uint32_t offset,
+                                                       uint32_t size)
 {
     uint32_t phys_block;
     uint32_t scratch_id;
@@ -109,7 +109,7 @@ enum tfm_sst_err_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
     /* Get physical block ID from where to read the data */
     phys_block = sst_dblock_lo_to_phy(lblock);
     if (phys_block == SST_BLOCK_INVALID_ID) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     /* Get the scratch data block ID to write the data */
@@ -121,8 +121,7 @@ enum tfm_sst_err_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
                                          size);
 }
 
-enum tfm_sst_err_t sst_flash_fs_dblock_read_file(
-                                              struct sst_file_meta_t *file_meta,
+psa_ps_status_t sst_flash_fs_dblock_read_file(struct sst_file_meta_t *file_meta,
                                               uint32_t offset,
                                               uint32_t size,
                                               uint8_t *buf)
@@ -132,7 +131,7 @@ enum tfm_sst_err_t sst_flash_fs_dblock_read_file(
 
     phys_block = sst_dblock_lo_to_phy(file_meta->lblock);
     if (phys_block == SST_BLOCK_INVALID_ID) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     pos = (file_meta->data_idx + offset);
@@ -140,10 +139,10 @@ enum tfm_sst_err_t sst_flash_fs_dblock_read_file(
     return sst_flash_read(phys_block, buf, pos, size);
 }
 
-enum tfm_sst_err_t sst_flash_fs_dblock_write_file(uint32_t lblock,
-                                                  uint32_t offset,
-                                                  uint32_t size,
-                                                  const uint8_t *data)
+psa_ps_status_t sst_flash_fs_dblock_write_file(uint32_t lblock,
+                                               uint32_t offset,
+                                               uint32_t size,
+                                               const uint8_t *data)
 {
     uint32_t scratch_id;
 
@@ -152,12 +151,12 @@ enum tfm_sst_err_t sst_flash_fs_dblock_write_file(uint32_t lblock,
     return sst_flash_write(scratch_id, data, offset, size);
 }
 
-enum tfm_sst_err_t sst_flash_fs_dblock_cp_remaining_data(
+psa_ps_status_t sst_flash_fs_dblock_cp_remaining_data(
                                       const struct sst_block_meta_t *block_meta,
                                       const struct sst_file_meta_t *file_meta)
 {
     uint32_t after_file_offset;
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint32_t scratch_id;
     uint32_t wrt_bytes;
 
@@ -172,7 +171,7 @@ enum tfm_sst_err_t sst_flash_fs_dblock_cp_remaining_data(
                                             block_meta->phy_id,
                                             block_meta->data_start,
                                             wrt_bytes);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
 

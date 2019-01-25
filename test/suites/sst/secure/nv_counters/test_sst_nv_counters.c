@@ -35,7 +35,7 @@ static uint32_t get_nv_counter_position(enum tfm_nv_counter_t counter_id)
 }
 
 /* Implementation of SST NV counter interfaces defined by sst_nv_counters.h */
-enum tfm_sst_err_t sst_init_nv_counter(void)
+psa_ps_status_t sst_init_nv_counter(void)
 {
     static uint8_t is_init = 0;
 
@@ -46,46 +46,46 @@ enum tfm_sst_err_t sst_init_nv_counter(void)
         is_init = 1;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
-                                       uint32_t *val)
+psa_ps_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+                                    uint32_t *val)
 {
     uint32_t nv_pos;
 
     nv_pos = get_nv_counter_position(counter_id);
     if (nv_pos >= TOTAL_SST_NV_COUNTERS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     /* Reads counter value */
     *val = test_nv_counters[nv_pos];
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
+psa_ps_status_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
 {
     uint32_t nv_pos;
 
     if (nv_increment_status == DISABLE_INCREMENT) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     nv_pos = get_nv_counter_position(counter_id);
     if (nv_pos >= TOTAL_SST_NV_COUNTERS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     if (test_nv_counters[nv_pos] == UINT32_MAX) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     /* Increments counter value */
     test_nv_counters[nv_pos]++;
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
 /* Implementation of SST NV counter interfaces defined by
@@ -101,50 +101,48 @@ void test_sst_enable_increment_nv_counter(void)
     nv_increment_status = ENABLE_INCREMENT;
 }
 
-enum tfm_sst_err_t test_sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
-                                            uint32_t *val)
+psa_ps_status_t test_sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+                                         uint32_t *val)
 {
     return sst_read_nv_counter(counter_id, val);
 }
 
-enum tfm_sst_err_t test_sst_increment_nv_counter(
-                                               enum tfm_nv_counter_t counter_id)
+psa_ps_status_t test_sst_increment_nv_counter(enum tfm_nv_counter_t counter_id)
 {
     return sst_increment_nv_counter(counter_id);
 }
 
-enum tfm_sst_err_t test_sst_decrement_nv_counter(
-                                               enum tfm_nv_counter_t counter_id)
+psa_ps_status_t test_sst_decrement_nv_counter(enum tfm_nv_counter_t counter_id)
 {
     uint32_t nv_pos;
 
     nv_pos = get_nv_counter_position(counter_id);
     if (nv_pos >= TOTAL_SST_NV_COUNTERS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     if (test_nv_counters[nv_pos] == 0) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     /* Decrements counter value */
     test_nv_counters[nv_pos]--;
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t test_sst_set_nv_counter(enum tfm_nv_counter_t counter_id,
-                                           uint32_t value)
+psa_ps_status_t test_sst_set_nv_counter(enum tfm_nv_counter_t counter_id,
+                                        uint32_t value)
 {
     uint32_t nv_pos;
 
     nv_pos = get_nv_counter_position(counter_id);
     if (nv_pos >= TOTAL_SST_NV_COUNTERS) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     /* Sets counter value */
     test_nv_counters[nv_pos] = value;
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }

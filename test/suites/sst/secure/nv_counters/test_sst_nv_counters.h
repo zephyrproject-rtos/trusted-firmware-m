@@ -9,7 +9,7 @@
 #define __TEST_SST_NV_COUNTERS_H__
 
 #include <stdint.h>
-#include "tfm_sst_defs.h"
+#include "psa_protected_storage.h"
 #include "platform/include/tfm_plat_nv_counters.h"
 
 #ifdef __cplusplus
@@ -22,11 +22,11 @@ extern "C" {
  * \param[in]  counter_id  NV counter ID.
  * \param[out] val         Pointer to store the current NV counter value.
  *
- * \return  TFM_SST_ERR_SUCCESS if the value is read correctly, otherwise
- *          TFM_SST_ERR_OPERATION_FAILED
+ * \return  PSA_PS_SUCCESS if the value is read correctly, otherwise
+ *          PSA_PS_ERROR_OPERATION_FAILED
  */
-enum tfm_sst_err_t test_sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
-                                            uint32_t *val);
+psa_ps_status_t test_sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+                                         uint32_t *val);
 
 /**
  * \brief Increments the given non-volatile (NV) counter.
@@ -34,11 +34,10 @@ enum tfm_sst_err_t test_sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
  * \param[in] counter_id  NV counter ID.
  *
  * \return  When the NV counter reaches its maximum value, the
- *          TFM_SST_ERR_OPERATION_FAILED error is returned to indicate the value
- *          cannot be incremented. Otherwise, TFM_SST_ERR_SUCCESS.
+ *          PSA_PS_ERROR_OPERATION_FAILED error is returned to indicate the
+ *          value cannot be incremented. Otherwise, PSA_PS_SUCCESS.
  */
-enum tfm_sst_err_t test_sst_increment_nv_counter(
-                                              enum tfm_nv_counter_t counter_id);
+psa_ps_status_t test_sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
 
 /**
  * \brief Decrements the given non-volatile (NV) counter.
@@ -46,15 +45,14 @@ enum tfm_sst_err_t test_sst_increment_nv_counter(
  * \param[in] counter_id  NV counter ID.
  *
  * \return  When the NV counter reaches its minimum value, the
- *          TFM_SST_ERR_OPERATION_FAILED error is returned to indicate the value
- *          cannot be decremented. Otherwise, TFM_SST_ERR_SUCCESS.
+ *          PSA_PS_ERROR_OPERATION_FAILED error is returned to indicate the
+ *          value cannot be decremented. Otherwise, PSA_PS_SUCCESS.
  */
-enum tfm_sst_err_t test_sst_decrement_nv_counter(
-                                              enum tfm_nv_counter_t counter_id);
+psa_ps_status_t test_sst_decrement_nv_counter(enum tfm_nv_counter_t counter_id);
 
 /**
  * \brief Disables SST increment nv counter function to force
- *        TFM_SST_ERR_OPERATION_FAILED return value as an indication that NV
+ *        PSA_PS_ERROR_OPERATION_FAILED return value as an indication that NV
  *        counter reaches its maximum value.
  */
 void test_sst_disable_increment_nv_counter(void);
@@ -71,11 +69,11 @@ void test_sst_enable_increment_nv_counter(void);
  * \param[in] value       New NV counter value.
  *
  * \return  When the NV counter reaches its maximum value, the
- *          TFM_SST_ERR_OPERATION_FAILED error is returned to indicate the value
- *          cannot be set. Otherwise, TFM_SST_ERR_SUCCESS.
+ *          PSA_PS_ERROR_OPERATION_FAILED error is returned to indicate the
+ *          value cannot be set. Otherwise, PSA_PS_SUCCESS.
  */
-enum tfm_sst_err_t test_sst_set_nv_counter(enum tfm_nv_counter_t counter_id,
-                                           uint32_t value);
+psa_ps_status_t test_sst_set_nv_counter(enum tfm_nv_counter_t counter_id,
+                                        uint32_t value);
 
 #ifdef __cplusplus
 }

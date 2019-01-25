@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #include "psa_protected_storage.h"
-#include "tfm_sst_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +33,9 @@ struct sst_obj_table_info_t {
 /**
  * \brief Creates object table.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_create(void);
+psa_ps_status_t sst_object_table_create(void);
 
 /**
  * \brief Initializes object table.
@@ -45,9 +44,9 @@ enum tfm_sst_err_t sst_object_table_create(void);
  *                          in other to reuse that memory to allocated a
  *                          temporary object table.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data);
+psa_ps_status_t sst_object_table_init(uint8_t *obj_data);
 
 /**
  * \brief Checks if there is an entry in the table for the provided UID and
@@ -56,23 +55,23 @@ enum tfm_sst_err_t sst_object_table_init(uint8_t *obj_data);
  * \param[in] uid        Identifier for the data
  * \param[in] client_id  Identifier of the asset’s owner (client)
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  *
- * \retval TFM_SST_ERR_SUCCESS        If there is a table entry for the object
- * \retval TFM_SST_ERR_UID_NOT_FOUND  If no table entry exists for the object
+ * \retval PSA_PS_SUCCESS              If there is a table entry for the object
+ * \retval PSA_PS_ERROR_UID_NOT_FOUND  If no table entry exists for the object
  */
-enum tfm_sst_err_t sst_object_table_obj_exist(psa_ps_uid_t uid,
-                                              int32_t client_id);
+psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid,
+                                           int32_t client_id);
 
 /**
  * \brief Gets a not in use file ID.
  *
  * \param[out] p_fid  Pointer to the location to store the file ID
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the fid is valid. Otherwise, it
- *         returns an error code as specified in \ref tfm_sst_err_t
+ * \return Returns PSA_PS_SUCCESS if the fid is valid. Otherwise, it
+ *         returns an error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid);
+psa_ps_status_t sst_object_table_get_free_fid(uint32_t *p_fid);
 
 /**
  * \brief Sets object table information in the object table and stores it
@@ -86,10 +85,10 @@ enum tfm_sst_err_t sst_object_table_get_free_fid(uint32_t *p_fid);
  * \note  A call to this function results in writing the table to the
  *        file system.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
-                                                     int32_t client_id,
+psa_ps_status_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
+                                                  int32_t client_id,
                                const struct sst_obj_table_info_t *obj_tbl_info);
 
 /**
@@ -101,11 +100,11 @@ enum tfm_sst_err_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
  * \param[out] obj_tbl_info  Pointer to the location to store object table
  *                           information
  *
- * \return Returns TFM_SST_ERR_SUCCESS if the object exists. Otherwise, it
- *         returns TFM_SST_ERR_UID_NOT_FOUND.
+ * \return Returns PSA_PS_SUCCESS if the object exists. Otherwise, it
+ *         returns PSA_PS_ERROR_UID_NOT_FOUND.
  */
-enum tfm_sst_err_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
-                                                     int32_t client_id,
+psa_ps_status_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
+                                                  int32_t client_id,
                                      struct sst_obj_table_info_t *obj_tbl_info);
 
 /**
@@ -114,17 +113,17 @@ enum tfm_sst_err_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
  * \param[in]  uid        Identifier for the data.
  * \param[in]  client_id  Identifier of the asset’s owner (client)
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_delete_object(psa_ps_uid_t uid,
-                                                  int32_t client_id);
+psa_ps_status_t sst_object_table_delete_object(psa_ps_uid_t uid,
+                                               int32_t client_id);
 
 /**
  * \brief Deletes old object table from the persistent area.
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_object_table_delete_old_table(void);
+psa_ps_status_t sst_object_table_delete_old_table(void);
 
 #ifdef __cplusplus
 }

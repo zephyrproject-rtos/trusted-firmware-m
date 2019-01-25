@@ -48,34 +48,34 @@ __STATIC_INLINE uint32_t get_phys_address(uint32_t block_id, uint32_t offset)
 }
 
 #ifdef SST_RAM_FS
-static enum tfm_sst_err_t flash_init(void)
+static psa_ps_status_t flash_init(void)
 {
     /* Nothing needs to be done in case of Flash emulated in RAM */
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_read(uint32_t flash_addr, uint32_t size,
-                                     uint8_t *buff)
+static psa_ps_status_t flash_read(uint32_t flash_addr, uint32_t size,
+                                  uint8_t *buff)
 {
     uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
 
     sst_utils_memcpy(buff, &block_data[idx], size);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_write(uint32_t flash_addr, uint32_t size,
-                                      const uint8_t *buff)
+static psa_ps_status_t flash_write(uint32_t flash_addr, uint32_t size,
+                                   const uint8_t *buff)
 {
     uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
 
     sst_utils_memcpy(&block_data[idx], buff, size);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_erase(uint32_t flash_addr)
+static psa_ps_status_t flash_erase(uint32_t flash_addr)
 {
     uint32_t idx = flash_addr - SST_FLASH_AREA_ADDR;
 
@@ -83,67 +83,67 @@ static enum tfm_sst_err_t flash_erase(uint32_t flash_addr)
                      SST_FLASH_DEFAULT_VAL,
                      SST_BLOCK_SIZE);
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 #else
-static enum tfm_sst_err_t flash_init(void)
+static psa_ps_status_t flash_init(void)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.Initialize(NULL);
-    if(err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_STORAGE_FAILURE;
+    if (err != ARM_DRIVER_OK) {
+        return PSA_PS_ERROR_STORAGE_FAILURE;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_read(uint32_t flash_addr, uint32_t size,
-                                     uint8_t *buff)
+static psa_ps_status_t flash_read(uint32_t flash_addr, uint32_t size,
+                                  uint8_t *buff)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.ReadData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_STORAGE_FAILURE;
+        return PSA_PS_ERROR_STORAGE_FAILURE;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_write(uint32_t flash_addr, uint32_t size,
-                                      const uint8_t *buff)
+static psa_ps_status_t flash_write(uint32_t flash_addr, uint32_t size,
+                                   const uint8_t *buff)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.ProgramData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_STORAGE_FAILURE;
+        return PSA_PS_ERROR_STORAGE_FAILURE;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-static enum tfm_sst_err_t flash_erase(uint32_t flash_addr)
+static psa_ps_status_t flash_erase(uint32_t flash_addr)
 {
     int32_t err;
 
     err = FLASH_DEV_NAME.EraseSector(flash_addr);
     if (err != ARM_DRIVER_OK) {
-        return TFM_SST_ERR_STORAGE_FAILURE;
+        return PSA_PS_ERROR_STORAGE_FAILURE;
     }
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 #endif /* SST_RAM_FS */
 
-enum tfm_sst_err_t sst_flash_init(void)
+psa_ps_status_t sst_flash_init(void)
 {
     return flash_init();
 }
 
-enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
-                                  uint32_t offset, uint32_t size)
+psa_ps_status_t sst_flash_read(uint32_t block_id, uint8_t *buff,
+                               uint32_t offset, uint32_t size)
 {
     uint32_t flash_addr;
 
@@ -155,8 +155,8 @@ enum tfm_sst_err_t sst_flash_read(uint32_t block_id, uint8_t *buff,
     return flash_read(flash_addr, size, buff);
 }
 
-enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
-                                   uint32_t offset, uint32_t size)
+psa_ps_status_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
+                                uint32_t offset, uint32_t size)
 {
     uint32_t flash_addr;
 
@@ -168,13 +168,13 @@ enum tfm_sst_err_t sst_flash_write(uint32_t block_id, const uint8_t *buff,
     return flash_write(flash_addr, size, buff);
 }
 
-enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
-                                                 uint32_t dst_offset,
-                                                 uint32_t src_block,
-                                                 uint32_t src_offset,
-                                                 uint32_t size)
+psa_ps_status_t sst_flash_block_to_block_move(uint32_t dst_block,
+                                              uint32_t dst_offset,
+                                              uint32_t src_block,
+                                              uint32_t src_offset,
+                                              uint32_t size)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
     uint8_t dst_block_data_copy[MAX_BLOCK_DATA_COPY];
     uint32_t dst_flash_addr;
     uint32_t src_flash_addr;
@@ -196,13 +196,13 @@ enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
          * destination content.
          */
         err = flash_read(src_flash_addr, bytes_to_move, dst_block_data_copy);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
 
         /* Writes in flash the in-memory block content after modification */
         err = flash_write(dst_flash_addr, bytes_to_move, dst_block_data_copy);
-        if (err != TFM_SST_ERR_SUCCESS) {
+        if (err != PSA_PS_SUCCESS) {
             return err;
         }
 
@@ -214,10 +214,10 @@ enum tfm_sst_err_t sst_flash_block_to_block_move(uint32_t dst_block,
         dst_flash_addr += bytes_to_move;
     };
 
-    return TFM_SST_ERR_SUCCESS;
+    return PSA_PS_SUCCESS;
 }
 
-enum tfm_sst_err_t sst_flash_erase_block(uint32_t block_id)
+psa_ps_status_t sst_flash_erase_block(uint32_t block_id)
 {
     uint32_t flash_addr;
 

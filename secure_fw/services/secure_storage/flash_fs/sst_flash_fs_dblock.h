@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include "sst_flash_fs_mblock.h"
-#include "tfm_sst_defs.h"
+#include "psa_protected_storage.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,13 +27,13 @@ extern "C" {
  *                        data position to store the data to be reallocated
  * \param[in] size        Number of bytes to be reallocated
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
-                                                     uint32_t free_size,
-                                                     uint32_t src_offset,
-                                                     uint32_t dst_offset,
-                                                     uint32_t size);
+psa_ps_status_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
+                                                  uint32_t free_size,
+                                                  uint32_t src_offset,
+                                                  uint32_t dst_offset,
+                                                  uint32_t size);
 
 /**
  * \brief Copies data from logical block to scratch data block.
@@ -44,11 +44,11 @@ enum tfm_sst_err_t sst_flash_fs_dblock_compact_block(uint32_t lblock,
  * \param[in] size        Number of bytes to be copied from logical block to
  *                        scratch data block
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
-                                                          uint32_t offset,
-                                                          uint32_t size);
+psa_ps_status_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
+                                                       uint32_t offset,
+                                                       uint32_t size);
 
 /**
  * \brief Reads the file content.
@@ -58,10 +58,9 @@ enum tfm_sst_err_t sst_flash_fs_dblock_cp_data_to_scratch(uint32_t lblock,
  * \param[in]  size      Size to be read
  * \param[out] buf       Buffer pointer to store the data
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_flash_fs_dblock_read_file(
-                                              struct sst_file_meta_t *file_meta,
+psa_ps_status_t sst_flash_fs_dblock_read_file(struct sst_file_meta_t *file_meta,
                                               uint32_t offset,
                                               uint32_t size,
                                               uint8_t *buf);
@@ -77,12 +76,12 @@ enum tfm_sst_err_t sst_flash_fs_dblock_read_file(
  * \param[in] data        Pointer to data buffer to copy in the scratch data
  *                        block
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_flash_fs_dblock_write_file(uint32_t lblock,
-                                                  uint32_t offset,
-                                                  uint32_t size,
-                                                  const uint8_t *data);
+psa_ps_status_t sst_flash_fs_dblock_write_file(uint32_t lblock,
+                                               uint32_t offset,
+                                               uint32_t size,
+                                               const uint8_t *data);
 
 /**
  * \brief Writes logical block data, which is not related with the file
@@ -91,9 +90,9 @@ enum tfm_sst_err_t sst_flash_fs_dblock_write_file(uint32_t lblock,
  * \param[in] block_meta  Pointer to block meta to process
  * \param[in] file_meta   Pointer to file's metadata manipulated
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_flash_fs_dblock_cp_remaining_data(
+psa_ps_status_t sst_flash_fs_dblock_cp_remaining_data(
                                      const struct sst_block_meta_t *block_meta,
                                      const struct sst_file_meta_t *file_meta);
 #ifdef __cplusplus

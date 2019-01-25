@@ -7,10 +7,11 @@
 
 #include "tfm_protected_storage.h"
 #include "sst_object_system.h"
+#include "tfm_sst_defs.h"
 
-enum tfm_sst_err_t tfm_sst_init(void)
+psa_ps_status_t tfm_sst_init(void)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     err = sst_system_prepare();
 #ifdef SST_CREATE_FLASH_LAYOUT
@@ -25,11 +26,11 @@ enum tfm_sst_err_t tfm_sst_init(void)
      * when it is the first time in the device life that the SST service is
      * executed.
      */
-    if (err != TFM_SST_ERR_SUCCESS) {
+    if (err != PSA_PS_SUCCESS) {
         /* Remove all data in the SST memory area and create a valid SST flash
          * layout in that area.
          */
-        sst_system_wipe_all();
+        err = sst_system_wipe_all();
 
         /* Attempt to initialise again */
         err = sst_system_prepare();
@@ -39,68 +40,68 @@ enum tfm_sst_err_t tfm_sst_init(void)
     return err;
 }
 
-enum tfm_sst_err_t tfm_sst_set(int32_t client_id,
-                               psa_ps_uid_t uid,
-                               uint32_t data_length,
-                               const void *p_data,
-                               psa_ps_create_flags_t create_flags)
+psa_ps_status_t tfm_sst_set(int32_t client_id,
+                            psa_ps_uid_t uid,
+                            uint32_t data_length,
+                            const void *p_data,
+                            psa_ps_create_flags_t create_flags)
 {
     /* Check that the UID is valid */
     if (uid == TFM_SST_INVALID_UID) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     if (p_data == NULL) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     /* Check that the create_flags does not contain any unsupported flags */
     if (create_flags & ~PSA_PS_FLAG_WRITE_ONCE) {
-        return TFM_SST_ERR_FLAGS_NOT_SUPPORTED;
+        return PSA_PS_ERROR_FLAGS_NOT_SUPPORTED;
     }
 
     /* Create the object in the object system */
     return sst_object_create(uid, client_id, create_flags, data_length, p_data);
 }
 
-enum tfm_sst_err_t tfm_sst_get(int32_t client_id,
-                               psa_ps_uid_t uid,
-                               uint32_t data_offset,
-                               uint32_t data_length,
-                               void *p_data)
+psa_ps_status_t tfm_sst_get(int32_t client_id,
+                            psa_ps_uid_t uid,
+                            uint32_t data_offset,
+                            uint32_t data_length,
+                            void *p_data)
 {
     /* Check that the UID is valid */
     if (uid == TFM_SST_INVALID_UID) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     if (p_data == NULL) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     /* Read the object data from the object system */
     return sst_object_read(uid, client_id, data_offset, data_length, p_data);
 }
 
-enum tfm_sst_err_t tfm_sst_get_info(int32_t client_id, psa_ps_uid_t uid,
-                                    struct psa_ps_info_t *p_info)
+psa_ps_status_t tfm_sst_get_info(int32_t client_id, psa_ps_uid_t uid,
+                                 struct psa_ps_info_t *p_info)
 {
     /* Check that the UID is valid */
     if (uid == TFM_SST_INVALID_UID) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     /* Get the info struct data from the object system */
     return sst_object_get_info(uid, client_id, p_info);
 }
 
-enum tfm_sst_err_t tfm_sst_remove(int32_t client_id, psa_ps_uid_t uid)
+psa_ps_status_t tfm_sst_remove(int32_t client_id, psa_ps_uid_t uid)
 {
-    enum tfm_sst_err_t err;
+    psa_ps_status_t err;
 
     /* Check that the UID is valid */
     if (uid == TFM_SST_INVALID_UID) {
-        return TFM_SST_ERR_INVALID_ARGUMENT;
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
     }
 
     /* Delete the object from the object system */
@@ -110,8 +111,8 @@ enum tfm_sst_err_t tfm_sst_remove(int32_t client_id, psa_ps_uid_t uid)
      * specification. So, this function returns TFM_SST_ERR_OPERATION_FAILED
      * instead.
      */
-    if (err == TFM_SST_ERR_AUTH_FAILED) {
-        return TFM_SST_ERR_OPERATION_FAILED;
+    if (err == PSA_PS_ERROR_AUTH_FAILED) {
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     return err;

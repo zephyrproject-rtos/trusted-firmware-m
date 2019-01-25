@@ -105,7 +105,6 @@ void register_testsuite_s_rollback_protection(struct test_suite_t *p_test_suite)
  */
 static void tfm_sst_test_4001(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -123,8 +122,8 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
     }
 
     /* Reads NV counter 1 to get the saved value to compare it later */
-    err = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &old_nvc_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &old_nvc_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -141,8 +140,8 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
      */
 
     /* Reads NV counter 1 to get the current value */
-    err = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &nvc_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &nvc_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -156,8 +155,8 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
     }
 
     /* Reads NV counter 2 to get the current value */
-    err = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_2, &nvc_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_2, &nvc_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -168,8 +167,8 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
     }
 
     /* Reads NV counter 3 to get the current value */
-    err = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_3, &nvc_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_3, &nvc_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -185,8 +184,8 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
      * Prepare should not fail as the NV counters has the same values and
      * the SST area authentication is aligned with those values.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("AM prepare should not fail");
         return;
     }
@@ -221,7 +220,6 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
  */
 static void tfm_sst_test_4002(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -236,20 +234,20 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
     }
 
     /* Increments all counters to make that SST area version old/invalid */
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -260,8 +258,8 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
      * Prepare should fail as the SST area version does not match the
      * NV counters values.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_OPERATION_FAILED) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("SST system prepare should fail as version is old");
         return;
     }
@@ -277,27 +275,27 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
      */
 
     /* Aligns NV counters with the SST area version */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -320,7 +318,6 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
  */
 static void tfm_sst_test_4003(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -339,8 +336,8 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
     /* Decrements NV counters 3 to make it different from the other two counters
      * and make the current SST area version match NV counter 1 and 2 values.
      */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -351,8 +348,8 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match NV counters 1 and
      * 2 values.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -390,7 +387,6 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
  */
 static void tfm_sst_test_4004(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -409,8 +405,8 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
     /* Increments NV counters 1 to make it different from the other two counters
      * and make the current SST area version match NV counter 2 and 3 values.
      */
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -421,8 +417,8 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match the NV counter 2
      * and 3 values.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -460,7 +456,6 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
  */
 static void tfm_sst_test_4005(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -479,14 +474,14 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
     /* Decrements NV counter 2 and 3 to make the SST area version match NV
      * counter 1 only.
      */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -496,8 +491,8 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
      *
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -532,7 +527,6 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
  */
 static void tfm_sst_test_4006(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -551,20 +545,20 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
     /* Decrements NV counter 2 (1 time) and 3 (2 times) to make the SST area
      * version match NV counter 1 only.
      */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -574,8 +568,8 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
      *
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -610,7 +604,6 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
  */
 static void tfm_sst_test_4007(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -627,14 +620,14 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
     /* Increments NV counter 1 and decrements 3 to make the SST area
      * version match NV counter 2 only.
      */
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -645,8 +638,8 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
      * Prepare should fail as the SST area version match the NV counter 2 and
      * the other counters are different.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_OPERATION_FAILED) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("SST system prepare should fail");
         return;
     }
@@ -662,21 +655,21 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
      */
 
     /* Aligns NV counters with the SST area version */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
@@ -697,7 +690,6 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
  */
 static void tfm_sst_test_4008(struct test_result_t *ret)
 {
-    enum tfm_sst_err_t err;
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -714,20 +706,20 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
     /* Increments NV counter 1 (2 times) and 2 (1 time) to make the SST area
      * version match NV counter 3 only.
      */
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
-    err = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -738,8 +730,8 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
      * Prepare should fail as the SST area version match the NV counter 2 and
      * the other counters are different.
      */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_OPERATION_FAILED) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("AM prepare should fail");
         return;
     }
@@ -755,27 +747,27 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
      */
 
     /* Align NV counters with the SST area version */
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
-    err = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    err = sst_system_prepare();
-    if (err != TFM_SST_ERR_SUCCESS) {
+    status = sst_system_prepare();
+    if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }

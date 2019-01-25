@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "flash_layout.h"
-#include "tfm_sst_defs.h"
+#include "psa_protected_storage.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,19 +70,19 @@ void sst_global_unlock(void);
  *                           superset region
  * \param[in] subset_size    Size of subset region
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  *
- * \retval TFM_SST_ERR_SUCCESS         The subset is contained within the
- *                                     superset
- * \retval TFM_SST_ERR_OFFSET_INVALID  The subset offset is greater than the
- *                                     size of the superset
- * \retval TFM_SST_ERR_INCORRECT_SIZE  The subset offset is valid, but the
- *                                     subset offset + size is greater than the
- *                                     size of the superset
+ * \retval PSA_PS_SUCCESS               The subset is contained within the
+ *                                      superset
+ * \retval PSA_PS_ERROR_OFFSET_INVALID  The subset offset is greater than the
+ *                                      size of the superset
+ * \retval PSA_PS_ERROR_INCORRECT_SIZE  The subset offset is valid, but the
+ *                                      subset offset + size is greater than the
+ *                                      size of the superset
  */
-enum tfm_sst_err_t sst_utils_check_contained_in(uint32_t superset_size,
-                                                uint32_t subset_offset,
-                                                uint32_t subset_size);
+psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
+                                             uint32_t subset_offset,
+                                             uint32_t subset_size);
 
 /* FIXME: following functions(memcpy and memset) will be provided
  * by core. This is only an interim abstraction. In the current
@@ -121,9 +121,9 @@ uint32_t sst_utils_validate_secure_caller(void);
  *
  * \param[in] fid  File ID
  *
- * \return Returns error code as specified in \ref tfm_sst_err_t
+ * \return Returns error code as specified in \ref psa_ps_status_t
  */
-enum tfm_sst_err_t sst_utils_validate_fid(uint32_t fid);
+psa_ps_status_t sst_utils_validate_fid(uint32_t fid);
 
 #ifdef __cplusplus
 }
