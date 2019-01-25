@@ -17,7 +17,6 @@
 #include "tfm_api.h"
 #include "tfm_nspm.h"
 #include "secure_fw/core/tfm_core.h"
-#include "platform_retarget.h"
 #include "tfm_peripherals_def.h"
 #include "spm_partition_defs.h"
 

@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cmsis.h"
 #include "secure_utilities.h"
 #include "arm_acle.h"
 #include "tfm_svc.h"
