@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "cmsis.h"
 #include "tfm_api.h"
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
