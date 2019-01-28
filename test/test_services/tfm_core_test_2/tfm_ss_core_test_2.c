@@ -11,7 +11,7 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "spm_partition_defs.h"
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_ss_core_test_2_signal.h"
 
 #define INVALID_NS_CLIENT_ID  0x49abcdef

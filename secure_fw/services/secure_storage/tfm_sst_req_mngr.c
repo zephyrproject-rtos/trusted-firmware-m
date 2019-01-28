@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "psa_protected_storage.h"
+#include "psa/protected_storage.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"
 #include "tfm_protected_storage.h"
 #ifdef TFM_PSA_API
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_sst_signal.h"
 #include "flash_layout.h"
 #endif

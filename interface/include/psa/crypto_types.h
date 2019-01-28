@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_types.h
+ * \file psa/crypto_types.h
  *
  * \brief PSA cryptography module: type aliases.
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h. Drivers must include the appropriate driver
+ * include psa/crypto.h. Drivers must include the appropriate driver
  * header file.
  *
  * This file contains portable definitions of integral types for properties

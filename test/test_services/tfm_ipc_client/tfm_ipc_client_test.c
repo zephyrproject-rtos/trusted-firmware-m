@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "psa_client.h"
+#include "psa/client.h"
 #include "secure_utilities.h"
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_ipc_client_partition.h"
 #include "tfm_utils.h"
 

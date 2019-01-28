@@ -13,7 +13,7 @@
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_irq_test_service_1_signal.h"
 #include "tfm_irq_signal_defs.h"
 #include "tfm_plat_test.h"

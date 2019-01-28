@@ -15,7 +15,7 @@ extern "C" {
 #include <stdint.h>
 #include <limits.h>
 #include "tfm_api.h"
-#include "psa_crypto.h"
+#include "psa/crypto.h"
 
 /**
  * \brief This type is used to overcome a limitation in the number of maximum

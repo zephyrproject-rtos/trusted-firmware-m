@@ -14,7 +14,7 @@ extern "C" {
 
 #include <inttypes.h>
 
-#include "psa_client.h"
+#include "psa/client.h"
 
 /********************** PSA Secure Partition Macros and Types ****************/
 

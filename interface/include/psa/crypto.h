@@ -5,14 +5,14 @@
  *
  */
 /**
- * \file psa_crypto.h
+ * \file psa/crypto.h
  * \brief Platform Security Architecture cryptography module
  */
 
 #ifndef PSA_CRYPTO_H
 #define PSA_CRYPTO_H
 
-#include "psa_crypto_platform.h"
+#include "psa/crypto_platform.h"
 
 #include <stddef.h>
 
@@ -45,11 +45,11 @@ extern "C" {
 
 /* The file "crypto_types.h" declares types that encode errors,
  * algorithms, key types, policies, etc. */
-#include "psa_crypto_types.h"
+#include "psa/crypto_types.h"
 
 /* The file "crypto_values.h" declares macros to build and analyze values
  * of integral types defined in "crypto_types.h". */
-#include "psa_crypto_values.h"
+#include "psa/crypto_values.h"
 
 /** \defgroup initialization Library initialization
  * @{
@@ -2365,14 +2365,14 @@ psa_status_t psa_generate_key(psa_key_handle_t handle,
 
 /* The file "crypto_sizes.h" contains definitions for size calculation
  * macros whose definitions are implementation-specific. */
-#include "psa_crypto_sizes.h"
+#include "psa/crypto_sizes.h"
 
 /* The file "crypto_struct.h" contains definitions for
  * implementation-specific structs that are declared above. */
-#include "psa_crypto_struct.h"
+#include "psa/crypto_struct.h"
 
 /* The file "crypto_extra.h" contains vendor-specific definitions. This
  * can include vendor-defined algorithms, extra functions, etc. */
-#include "psa_crypto_extra.h"
+#include "psa/crypto_extra.h"
 
 #endif /* PSA_CRYPTO_H */

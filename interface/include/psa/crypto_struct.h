@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_struct.h
+ * \file psa/crypto_struct.h
  *
  * \brief PSA cryptography module: structured type implementations
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h.
+ * include psa/crypto.h.
  *
  * This file contains the definitions of some data structures with
  * implementation-specific definitions.

@@ -5,7 +5,7 @@
  *
  */
 
-#include "psa_initial_attestation_api.h"
+#include "psa/initial_attestation.h"
 #include "tfm_veneers.h"
 #include "tfm_memory_utils.h"
 #include "tfm_client.h"

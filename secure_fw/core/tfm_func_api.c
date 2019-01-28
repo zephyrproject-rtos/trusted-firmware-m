@@ -20,7 +20,7 @@
 #include "tfm_arch.h"
 #include "platform/include/tfm_spm_hal.h"
 #include "tfm_irq_list.h"
-#include "psa_service.h"
+#include "psa/service.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1

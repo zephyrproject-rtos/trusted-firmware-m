@@ -12,7 +12,7 @@
 #include "tfm_internal.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_api.h"
-#include "psa_service.h"
+#include "psa/service.h"
 
 uint8_t *tfm_scratch_area;
 uint32_t tfm_scratch_area_size;

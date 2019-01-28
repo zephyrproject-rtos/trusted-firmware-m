@@ -7,8 +7,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "psa_client.h"
-#include "psa_service.h"
+#include "psa/client.h"
+#include "psa/service.h"
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"

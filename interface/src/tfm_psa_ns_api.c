@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "interface/include/psa_client.h"
+#include "psa/client.h"
 #include "tfm_ns_lock.h"
 #include "tfm_api.h"
 
@@ -72,4 +72,3 @@ void psa_close(psa_handle_t handle)
                          0,
                          0);
 }
-

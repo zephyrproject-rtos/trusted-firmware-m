@@ -8,8 +8,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "psa_client.h"
-#include "psa_service.h"
+#include "psa/client.h"
+#include "psa/service.h"
 #include "secure_fw/core/secure_utilities.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"

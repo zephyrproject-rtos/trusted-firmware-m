@@ -8,7 +8,7 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "attestation.h"
-#include "psa_initial_attestation_api.h"
+#include "psa/initial_attestation.h"
 #include "bl2/include/tfm_boot_status.h"
 
 #ifdef TFM_PSA_API

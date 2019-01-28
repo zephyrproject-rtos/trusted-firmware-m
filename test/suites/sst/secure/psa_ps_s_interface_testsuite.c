@@ -11,7 +11,7 @@
 
 #include "s_test_helpers.h"
 #include "secure_fw/core/tfm_memory_utils.h"
-#include "psa_protected_storage.h"
+#include "psa/protected_storage.h"
 #include "test/framework/test_framework_helpers.h"
 
 /* Test UIDs */

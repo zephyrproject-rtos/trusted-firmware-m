@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_platform.h
+ * \file psa/crypto_platform.h
  *
  * \brief PSA cryptography module: platform definitions
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h.
+ * include psa/crypto.h.
  *
  * This file contains platform-dependent type definitions.
  *

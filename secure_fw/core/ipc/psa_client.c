@@ -8,7 +8,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "tfm_svc.h"
-#include "psa_client.h"
+#include "psa/client.h"
 
 __attribute__((naked, section("SFN")))
 uint32_t psa_framework_version(void)

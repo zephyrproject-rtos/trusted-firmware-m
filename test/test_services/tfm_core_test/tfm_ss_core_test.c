@@ -14,7 +14,7 @@
 #include "secure_fw/core/tfm_secure_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
-#include "psa_service.h"
+#include "psa/service.h"
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
 #include "tfm_plat_test.h"

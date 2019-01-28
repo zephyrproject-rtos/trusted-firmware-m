@@ -91,7 +91,7 @@ const uint32_t initial_attestation_public_y_key_size =
 
 /* Hash (SHA256) of initial attestation public key.
  * Byte string representation of ECC public key according to
- * psa_export_public_key() in interface/include/psa_crypto.h:
+ * psa_export_public_key() in interface/include/psa/crypto.h:
  * 0x04 || X_coord || Y_coord
  */
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")

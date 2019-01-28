@@ -7,8 +7,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "psa_client.h"
-#include "psa_service.h"
+#include "psa/client.h"
+#include "psa/service.h"
 #include "tfm_svc.h"
 #include "tfm_svcalls.h"
 #include "tfm_thread.h"

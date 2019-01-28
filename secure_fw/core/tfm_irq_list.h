@@ -8,7 +8,7 @@
 #ifndef __TFM_IRQ_LIST_H__
 #define __TFM_IRQ_LIST_H__
 
-#include "psa_service.h"
+#include "psa/service.h"
 
 #define TFM_DEFAULT_SECURE_IRQ_PRIOTITY 128
 

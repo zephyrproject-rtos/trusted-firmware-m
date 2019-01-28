@@ -5,7 +5,7 @@
  *
  */
 
-#include "psa_protected_storage.h"
+#include "psa/protected_storage.h"
 #include "tfm_veneers.h"
 #include "tfm_sst_defs.h"
 

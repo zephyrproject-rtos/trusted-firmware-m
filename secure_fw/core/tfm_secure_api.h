@@ -14,7 +14,7 @@
 #include "tfm_core.h"
 #include "tfm_api.h"
 #include "bl2/include/tfm_boot_status.h"
-#include "psa_service.h"
+#include "psa/service.h"
 
 /*!
  * \def __tfm_secure_gateway_attributes__

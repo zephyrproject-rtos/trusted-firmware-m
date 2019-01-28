@@ -19,8 +19,8 @@
 #include "tfm_irq_signal_defs.h"
 #include "tfm_irq_list.h"
 #ifdef TFM_PSA_API
-#include "psa_client.h"
-#include "psa_service.h"
+#include "psa/client.h"
+#include "psa/service.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"

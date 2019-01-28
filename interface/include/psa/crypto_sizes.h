@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_sizes.h
+ * \file psa/crypto_sizes.h
  *
  * \brief PSA cryptography module: buffer size macros
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h.
+ * include psa/crypto.h.
  *
  * This file contains the definitions of macros that are useful to
  * compute buffer sizes. The signatures and semantics of these macros

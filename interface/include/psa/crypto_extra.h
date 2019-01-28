@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_extra.h
+ * \file psa/crypto_extra.h
  *
  * \brief PSA cryptography module: vendor extensions
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h.
+ * include psa/crypto.h.
  *
  * This file is reserved for vendor-specific definitions.
  */

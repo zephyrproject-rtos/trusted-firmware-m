@@ -5,10 +5,10 @@
  *
  */
 
-#include "psa_initial_attestation_api.h"
+#include "psa/initial_attestation.h"
 #include "tfm_veneers.h"
 #include "tfm_ns_lock.h"
-#include "psa_client.h"
+#include "psa/client.h"
 #ifdef TFM_PSA_API
 #include "tfm_attest_defs.h"
 #endif

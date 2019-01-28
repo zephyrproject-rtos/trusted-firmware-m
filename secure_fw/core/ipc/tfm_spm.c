@@ -8,8 +8,8 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "psa_client.h"
-#include "psa_service.h"
+#include "psa/client.h"
+#include "psa/service.h"
 #include "tfm_utils.h"
 #include "platform/include/tfm_spm_hal.h"
 #include "spm_api.h"

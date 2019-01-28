@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include "ipc_ns_tests.h"
-#include "psa_client.h"
+#include "psa/client.h"
 #include "test/framework/test_framework_helpers.h"
 
 /* Define the SID. These SIDs should align with the value in manifest file. */

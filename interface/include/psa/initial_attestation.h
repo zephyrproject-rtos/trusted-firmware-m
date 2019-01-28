@@ -12,8 +12,8 @@
 /*   to a stable set of APIs once all the feedback has been considered.    */
 /***************************************************************************/
 
-#ifndef __PSA_INITIAL_ATTESTATION_API_H__
-#define __PSA_INITIAL_ATTESTATION_API_H__
+#ifndef __PSA_INITIAL_ATTESTATION_H__
+#define __PSA_INITIAL_ATTESTATION_H__
 
 #include <limits.h>
 #include <stdint.h>
@@ -225,4 +225,4 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
 }
 #endif
 
-#endif /* __PSA_INITIAL_ATTESTATION_API_H__ */
+#endif /* __PSA_INITIAL_ATTESTATION_H__ */

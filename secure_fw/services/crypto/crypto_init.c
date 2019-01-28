@@ -21,7 +21,7 @@
 #endif
 
 #ifdef TFM_PSA_API
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_crypto_signal.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 

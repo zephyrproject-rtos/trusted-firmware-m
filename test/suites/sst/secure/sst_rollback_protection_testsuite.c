@@ -11,7 +11,7 @@
 
 #include "secure_fw/services/secure_storage/nv_counters/sst_nv_counters.h"
 #include "nv_counters/test_sst_nv_counters.h"
-#include "psa_protected_storage.h"
+#include "psa/protected_storage.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 #include "s_test_helpers.h"
 

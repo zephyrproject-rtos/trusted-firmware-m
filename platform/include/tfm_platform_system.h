@@ -12,7 +12,7 @@
  *       target.
  */
 
-#include "psa_client.h"
+#include "psa/client.h"
 #include "tfm_plat_defs.h"
 #include "tfm_platform_api.h"
 

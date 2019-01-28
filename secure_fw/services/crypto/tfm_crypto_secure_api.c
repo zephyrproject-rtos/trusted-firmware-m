@@ -7,12 +7,12 @@
 
 #include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
-#include "psa_crypto.h"
+#include "psa/crypto.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 #ifdef TFM_PSA_API
-#include "psa_client.h"
+#include "psa/client.h"
 
 /* Macro to check for a valid PSA handle */
 /* FixMe: Here temporarily until it's added to the framework headers */

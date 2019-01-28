@@ -7,7 +7,7 @@
 
 #include "tfm_secure_client_service_api.h"
 #ifdef TFM_PSA_API
-#include "psa_client.h"
+#include "psa/client.h"
 #include "tfm_api.h"
 
 /*

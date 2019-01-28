@@ -5,12 +5,12 @@
  *
  */
 /**
- * \file psa_crypto_values.h
+ * \file psa/crypto_values.h
  *
  * \brief PSA cryptography module: macros to build and analyze integer values.
  *
  * \note This file may not be included directly. Applications must
- * include psa_crypto.h. Drivers must include the appropriate driver
+ * include psa/crypto.h. Drivers must include the appropriate driver
  * header file.
  *
  * This file contains portable definitions of macros to build and analyze

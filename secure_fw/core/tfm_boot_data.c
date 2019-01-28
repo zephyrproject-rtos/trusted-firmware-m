@@ -15,7 +15,7 @@
 #ifdef TFM_PSA_API
 #include "tfm_internal_defines.h"
 #include "tfm_utils.h"
-#include "psa_service.h"
+#include "psa/service.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
