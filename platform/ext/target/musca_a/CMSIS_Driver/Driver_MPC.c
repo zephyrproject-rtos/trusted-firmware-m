@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 #include "Driver_MPC.h"
 
-#include "cmsis.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 
@@ -751,6 +750,145 @@ ARM_DRIVER_MPC Driver_CODE_SRAM_MPC = {
 };
 #endif /* RTE_CODE_SRAM_MPC */
 
+#if (RTE_SSRAM1_MPC)
+/* Ranges controlled by this SSRAM1_MPC */
+static const struct mpc_sie200_memory_range_t MPC_SSRAM1_RANGE_S = {
+    .base         = MPC_SSRAM1_RANGE_BASE_S,
+    .limit        = MPC_SSRAM1_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE200_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie200_memory_range_t MPC_SSRAM1_RANGE_NS = {
+    .base         = MPC_SSRAM1_RANGE_BASE_NS,
+    .limit        = MPC_SSRAM1_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE200_SEC_ATTR_NONSECURE
+};
+
+#define MPC_SSRAM1_RANGE_LIST_LEN  2u
+static const struct  mpc_sie200_memory_range_t*
+                     MPC_SSRAM1_RANGE_LIST[MPC_SSRAM1_RANGE_LIST_LEN] =
+                     {&MPC_SSRAM1_RANGE_S, &MPC_SSRAM1_RANGE_NS};
+
+/* SSRAM1_MPC Driver wrapper functions */
+static int32_t SSRAM1_MPC_Initialize(void)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_init(&MPC_SSRAM1_DEV,
+                          MPC_SSRAM1_RANGE_LIST,
+                          MPC_SSRAM1_RANGE_LIST_LEN);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_Uninitialize(void)
+{
+    /* Nothing to be done */
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SSRAM1_MPC_GetBlockSize(uint32_t* blk_size)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_get_block_size(&MPC_SSRAM1_DEV, blk_size);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_GetCtrlConfig(uint32_t* ctrl_val)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_get_ctrl(&MPC_SSRAM1_DEV, ctrl_val);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_SetCtrlConfig(uint32_t ctrl)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_set_ctrl(&MPC_SSRAM1_DEV, ctrl);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_GetRegionConfig(uintptr_t base,
+                                         uintptr_t limit,
+                                         ARM_MPC_SEC_ATTR* attr)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_get_region_config(&MPC_SSRAM1_DEV, base, limit,
+                                       (enum mpc_sie200_sec_attr_t*)attr);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_ConfigRegion(uintptr_t base,
+                                      uintptr_t limit,
+                                      ARM_MPC_SEC_ATTR attr)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_config_region(&MPC_SSRAM1_DEV, base, limit,
+                                   (enum mpc_sie200_sec_attr_t)attr);
+
+    return error_trans(ret);
+}
+
+static int32_t SSRAM1_MPC_EnableInterrupt(void)
+{
+    enum mpc_sie200_error_t ret;
+
+    ret = mpc_sie200_irq_enable(&MPC_SSRAM1_DEV);
+
+    return error_trans(ret);
+}
+
+static void SSRAM1_MPC_DisableInterrupt(void)
+{
+    mpc_sie200_irq_disable(&MPC_SSRAM1_DEV);
+}
+
+
+static void SSRAM1_MPC_ClearInterrupt(void)
+{
+    mpc_sie200_clear_irq(&MPC_SSRAM1_DEV);
+}
+
+static uint32_t SSRAM1_MPC_InterruptState(void)
+{
+    return mpc_sie200_irq_state(&MPC_SSRAM1_DEV);
+}
+
+static int32_t SSRAM1_MPC_LockDown(void)
+{
+    return mpc_sie200_lock_down(&MPC_SSRAM1_DEV);
+}
+
+/* SSRAM1_MPC Driver CMSIS access structure */
+extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
+ARM_DRIVER_MPC Driver_SRAM1_MPC = {
+    .GetVersion       = ARM_MPC_GetVersion,
+    .Initialize       = SSRAM1_MPC_Initialize,
+    .Uninitialize     = SSRAM1_MPC_Uninitialize,
+    .GetBlockSize     = SSRAM1_MPC_GetBlockSize,
+    .GetCtrlConfig    = SSRAM1_MPC_GetCtrlConfig,
+    .SetCtrlConfig    = SSRAM1_MPC_SetCtrlConfig,
+    .ConfigRegion     = SSRAM1_MPC_ConfigRegion,
+    .GetRegionConfig  = SSRAM1_MPC_GetRegionConfig,
+    .EnableInterrupt  = SSRAM1_MPC_EnableInterrupt,
+    .DisableInterrupt = SSRAM1_MPC_DisableInterrupt,
+    .ClearInterrupt   = SSRAM1_MPC_ClearInterrupt,
+    .InterruptState   = SSRAM1_MPC_InterruptState,
+    .LockDown         = SSRAM1_MPC_LockDown,
+};
+#endif /* RTE_SSRAM1_MPC */
+
 #if (RTE_SSRAM2_MPC)
 /* Ranges controlled by this SSRAM2_MPC */
 static const struct mpc_sie200_memory_range_t MPC_SSRAM2_RANGE_S = {
@@ -1026,7 +1164,6 @@ ARM_DRIVER_MPC Driver_SSRAM3_MPC = {
     .LockDown         = SSRAM3_MPC_LockDown,
 };
 #endif /* RTE_SSRAM3_MPC */
-
 
 #if (RTE_QSPI_MPC)
 /* Ranges controlled by this QSPI_MPC */

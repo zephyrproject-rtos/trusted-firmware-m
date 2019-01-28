@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
-#include "platform_retarget_dev.h"
+#include "platform_description.h"
+#include "device_definition.h"
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@
 #define __PPC_SSE_200_DRV_H__
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Secure Privilege Control Block aka SPCTRL */
 /* Non-Secure Privilege Control Block aka NSPCTRL */
@@ -186,5 +190,9 @@ void ppc_sse200_clear_irq(struct ppc_sse200_dev_t* dev);
  * \note This function doesn't check if dev is NULL.
  */
 uint32_t ppc_sse200_irq_state(struct ppc_sse200_dev_t* dev);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PPC_SSE_200_DRV_H__ */

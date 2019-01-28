@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,9 @@
 
 #include <stdint.h>
 
-#include "cmsis.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define PRIVILEGED_DEFAULT_ENABLE 1
 #define HARDFAULT_NMI_ENABLE      1
@@ -124,5 +126,9 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
 enum mpu_armv8m_error_t mpu_armv8m_region_disable(
                                 struct mpu_armv8m_dev_t *dev,
                                 uint32_t region_nr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __MPU_ARMV8M_DRV_H__ */

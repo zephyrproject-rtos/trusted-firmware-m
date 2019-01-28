@@ -41,9 +41,9 @@
 
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
- * here the platform_retarget.h to access flash related defines. To resolve this
- * some of the values are redefined here with different names, these are marked
- * with comment.
+ * here the platform_base_address.h to access flash related defines. To resolve
+ * this some of the values are redefined here with different names, these are
+ * marked with comment.
  */
 
 /* The size of a partition. This should be large enough to contain a S or NS
@@ -57,7 +57,9 @@
 #define FLASH_TOTAL_SIZE                (0x800000) /* 8MB */
 
 /* Flash layout info for BL2 bootloader */
-#define FLASH_BASE_ADDRESS              (0x10200000) /* same as FLASH0_BASE_S */
+#define FLASH_BASE_ADDRESS              (0x10200000) /* same as
+                                                      * MPC_QSPI_RANGE_BASE_S
+                                                      */
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_0 and IMAGE_1, SCRATCH

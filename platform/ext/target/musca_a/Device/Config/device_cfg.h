@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,5 +74,8 @@
 /* MT25QL Flash memory library */
 #define MT25QL_S
 #define MT25QL_NS
+
+/* Default UART baud rate */
+#define UART_DEFAULT_BAUD_RATE 115200
 
 #endif  /* __ARM_LTD_DEVICE_CFG_H__ */

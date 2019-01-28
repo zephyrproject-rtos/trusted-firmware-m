@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@
  *
  */
 
-#ifndef SYSTEM_MUSCA_H
-#define SYSTEM_MUSCA_H
+#ifndef __SYSTEM_CORE_INIT_H__
+#define __SYSTEM_CORE_INIT_H__
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,4 +53,4 @@ extern void SystemCoreClockUpdate (void);
 }
 #endif
 
-#endif /* SYSTEM_MUSCA_H */
+#endif /* __SYSTEM_CORE_INIT_H__ */

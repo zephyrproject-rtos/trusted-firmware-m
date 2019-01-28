@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #define __CMSIS_DRIVER_CONFIG_H__
 
 #include "device_cfg.h"
-#include "platform_retarget_dev.h"
-#include "platform_retarget_pins.h"
+#include "device_definition.h"
+#include "platform_description.h"
 #include "RTE_Device.h"
 #include "target_cfg.h"
 

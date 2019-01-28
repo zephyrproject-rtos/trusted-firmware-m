@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef __ARM_LTD_MUSCA_REGS_H__
-#define __ARM_LTD_MUSCA_REGS_H__
+#ifndef __PLATFORM_REGS__
+#define __PLATFORM_REGS__
 
 #include <stdint.h>
-#include "platform_retarget.h"
+#include "platform_base_address.h"
 
 /* sysinfo memory mapped register access structure */
 struct sysinfo_t {
@@ -261,8 +261,8 @@ struct nspctrl_def {
     volatile uint32_t pidr2;                   /* (R/W) Peripheral ID 2 */
     volatile uint32_t pidr3;                   /* (R/W) Peripheral ID 3 */
     volatile uint32_t cidr0;                   /* (R/W) Component ID 0 */
-    volatile uint32_t cidr2;                   /* (R/W) Component ID 1 */
-    volatile uint32_t cidr1;                   /* (R/W) Component ID 2 */
+    volatile uint32_t cidr1;                   /* (R/W) Component ID 1 */
+    volatile uint32_t cidr2;                   /* (R/W) Component ID 2 */
     volatile uint32_t cidr3;                   /* (R/W) Component ID 3 */
 };
 
@@ -302,4 +302,4 @@ struct nspctrl_def {
 
 /* End of ARM AHB PPCEXP3 peripherals definition */
 
-#endif /* __ARM_LTD_MUSCA_REGS_H__ */
+#endif /* __PLATFORM_REGS__ */

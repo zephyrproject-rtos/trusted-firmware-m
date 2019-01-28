@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited
+ * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 #include "Driver_Flash.h"
 
 #include <stdbool.h>
-#include "cmsis.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 #include "flash_layout.h"
@@ -107,7 +106,7 @@ static bool is_write_aligned(struct arm_flash_dev_t *flash_dev,
     return ((param % flash_dev->data->program_unit) != 0) ? (false) : (true);
 }
 
-#if (RTE_FLASH0)
+#if (RTE_QSPI_FLASH0)
 static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
     .sector_info    = NULL,     /* Uniform sector layout */
     .sector_count   = FLASH_TOTAL_SIZE / SUBSECTOR_4KB,
@@ -326,4 +325,4 @@ ARM_DRIVER_FLASH Driver_FLASH0 = {
     ARM_Flash_GetStatus,
     ARM_Flash_GetInfo
 };
-#endif /* RTE_FLASH0 */
+#endif /* RTE_QSPI_FLASH0 */

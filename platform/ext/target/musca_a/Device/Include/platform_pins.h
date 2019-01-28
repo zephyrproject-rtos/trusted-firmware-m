@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 /**
- * \file platform_retarget_pins.h
+ * \file platform_pins.h
  * \brief This file defines all the pins for this platform.
  */
 
-#ifndef __ARM_LTD_MUSCA_RETARGET_PINS_H__
-#define __ARM_LTD_MUSCA_RETARGET_PINS_H__
+#ifndef __PLATFORM_PINS__
+#define __PLATFORM_PINS__
 
 /* AHB GPIO pin names */
 enum arm_gpio_pin_name_t {
@@ -42,4 +42,4 @@ enum arm_gpio_pin_name_t {
   AHB_GPIO0_15,
 };
 
-#endif  /* __ARM_LTD_MUSCA_RETARGET_PINS_H__ */
+#endif  /* __PLATFORM_PINS__ */

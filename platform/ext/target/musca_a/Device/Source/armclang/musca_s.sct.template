@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
 
 /*
- * Copyright (c) 2018-2019 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ LR_CODE S_CODE_START {
         dummy_nv_counters.o (+RO)
         dummy_boot_seed.o (+RO)
         dummy_device_id.o (+RO)
-        platform_retarget_dev.o (+RO)
+        device_definition.o (+RO)
         *(SFN)
         *armlib*
     }
@@ -116,7 +116,7 @@ LR_CODE S_CODE_START {
         dummy_nv_counters.o (+RW +ZI)
         dummy_boot_seed.o (+RW +ZI)
         dummy_device_id.o (+RW +ZI)
-        platform_retarget_dev.o (+RW +ZI)
+        device_definition.o (+RW +ZI)
     }
 
     TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2018 Arm Limited
+ * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
  * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
  */
 
-#include "system_cmsdk_musca.h"
+#include <stdint.h>
+#include "system_core_init.h"
+#include "platform_description.h"
 
 /*----------------------------------------------------------------------------
   Define clocks

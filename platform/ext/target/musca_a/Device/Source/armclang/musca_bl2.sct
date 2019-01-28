@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
 
 /*
- * Copyright (c) 2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ LR_CODE BL2_CODE_START {
     ER_CODE BL2_CODE_START {
         startup_cmsdk_musca_bl2.o (RESET +First)
         startup_cmsdk_musca_bl2.o (+RO)
-        system_cmsdk_musca.o (+RO)             ; SystemInit
+        system_core_init.o (+RO)               ; SystemInit
         *(InRoot$$Sections)                    ; ARM library sections
     }
 

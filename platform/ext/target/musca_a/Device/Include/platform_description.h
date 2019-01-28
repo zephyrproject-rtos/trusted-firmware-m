@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef __CMSIS_CPU_H__
-#define __CMSIS_CPU_H__
+#ifndef __PLATFORM_DESCRIPTION_H__
+#define __PLATFORM_DESCRIPTION_H__
 
-#include "system_core_musca.h"
-#include "core_cm33.h"
+#include "platform_base_address.h"
+#include "platform_pins.h"
+#include "platform_regs.h"
+#include "cmsis.h"
 
-#endif /* __CMSIS_CPU_H__ */
+#endif  /* __PLATFORM_DESCRIPTION_H__ */
