@@ -37,9 +37,9 @@
 
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
- * here the platform_retarget.h to access flash related defines. To resolve this
- * some of the values are redefined here with different names, these are marked
- * with comment.
+ * here the platform_base_address.h to access flash related defines. To resolve
+ * this some of the values are redefined here with different names, these are
+ * marked with comment.
  */
 
 /* The size of a partition. This should be large enough to contain a S or NS

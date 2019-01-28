@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,8 +9,6 @@
 #define __MPU_ARMV8M_DRV_H__
 
 #include <stdint.h>
-
-#include "cmsis.h"
 
 #ifdef __cplusplus
 extern "C" {

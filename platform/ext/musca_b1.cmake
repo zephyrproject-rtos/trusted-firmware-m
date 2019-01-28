@@ -52,13 +52,13 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/partition" AB
 if (NOT DEFINED BUILD_CMSIS_CORE)
     message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif (BUILD_CMSIS_CORE)
-    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Device/Source/system_cmsdk_musca.c")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Device/Source/system_core_init.c")
 endif()
 
 if (NOT DEFINED BUILD_RETARGET)
     message(FATAL_ERROR "Configuration variable BUILD_RETARGET (true|false) is undefined!")
 elseif (BUILD_RETARGET)
-    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Device/Source/platform_retarget_dev.c")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Device/Source/device_definition.c")
 endif()
 
 if (NOT DEFINED BUILD_UART_STDOUT)

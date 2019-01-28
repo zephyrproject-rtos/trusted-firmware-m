@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 #include <stddef.h>
 
-#include "cmsis.h"
+#include "cmsis_compiler.h"
 
 #define MPC_SIE200_BLK_CFG_OFFSET  5U
 

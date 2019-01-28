@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 
 /**
- * \file platform_retarget_dev.c
+ * \file device_definition.c
  * \brief This file defines exports the structures based on the peripheral
  * definitions from device_cfg.h.
- * This retarget file is meant to be used as a helper for baremetal
+ * This file is meant to be used as a helper for baremetal
  * applications and/or as an example of how to configure the generic
  * driver structures.
  */
 
-#include "platform_retarget_dev.h"
-#include "platform_retarget.h"
-#include "system_cmsdk_musca.h"
+#include "device_cfg.h"
+#include "device_definition.h"
+#include "platform_base_address.h"
 
 /* ======= Peripheral configuration structure definitions ======= */
 /* MUSCA B1 SCC driver structures */
@@ -35,7 +35,7 @@ static const struct musca_b1_scc_dev_cfg_t MUSCA_B1_SCC_DEV_CFG_S = {
 struct musca_b1_scc_dev_t MUSCA_B1_SCC_DEV_S = {&(MUSCA_B1_SCC_DEV_CFG_S)};
 #endif
 
-/* ARM PPC SSE 200 driver structures */
+/* Arm PPC SSE 200 driver structures */
 #ifdef AHB_PPC0_S
 static struct ppc_sse200_dev_cfg_t AHB_PPC0_DEV_CFG_S = {
     .spctrl_base  = MUSCA_B1_SPCTRL_S_BASE,
@@ -190,7 +190,7 @@ struct ppc_sse200_dev_t APB_PPCEXP3_DEV_S = {
     &APB_PPCEXP3_DEV_CFG, &APB_PPCEXP3_DEV_DATA_S };
 #endif
 
-/* ARM MPC SIE 200 driver structures */
+/* Arm MPC SIE 200 driver structures */
 #ifdef MPC_ISRAM0_S
 static const struct mpc_sie200_dev_cfg_t MPC_ISRAM0_DEV_CFG_S = {
     .base = MUSCA_B1_MPC_SRAM0_S_BASE};
@@ -269,7 +269,78 @@ struct mpc_sie200_dev_t MPC_QSPI_DEV_S = {
     &(MPC_QSPI_DEV_DATA_S)};
 #endif
 
-/* CMSDK Timers driver structures */
+/** CMSDK GPIO driver structures */
+#ifdef GPIO0_CMSDK_S
+static const struct gpio_cmsdk_dev_cfg_t GPIO0_CMSDK_DEV_CFG_S = {
+    .base = MUSCA_B1_GPIO_S_BASE};
+struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_S = {&(GPIO0_CMSDK_DEV_CFG_S)};
+#endif
+#ifdef GPIO0_CMSDK_NS
+static const struct gpio_cmsdk_dev_cfg_t GPIO0_CMSDK_DEV_CFG_NS = {
+    .base = MUSCA_B1_GPIO_NS_BASE};
+struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_NS = {&(GPIO0_CMSDK_DEV_CFG_NS)};
+#endif
+
+/** Arm UART PL011 driver structures */
+#ifdef UART0_PL011_S
+static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
+    .base = MUSCA_B1_UART0_S_BASE,
+    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
+                                             &(UART0_PL011_DEV_DATA_S)};
+#endif
+#ifdef UART0_PL011_NS
+static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
+    .base = MUSCA_B1_UART0_NS_BASE,
+    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
+                                              &(UART0_PL011_DEV_DATA_NS)};
+#endif
+
+#ifdef UART1_PL011_S
+static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_S = {
+    .base = MUSCA_B1_UART1_S_BASE,
+    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_S = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART1_PL011_DEV_S = {&(UART1_PL011_DEV_CFG_S),
+                                             &(UART1_PL011_DEV_DATA_S)};
+#endif
+#ifdef UART1_PL011_NS
+static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_NS = {
+    .base = MUSCA_B1_UART1_NS_BASE,
+    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_NS = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART1_PL011_DEV_NS = {&(UART1_PL011_DEV_CFG_NS),
+                                              &(UART1_PL011_DEV_DATA_NS)};
+#endif
+
+/** CMSDK Timers driver structures */
 #ifdef CMSDK_TIMER0_S
 static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S = {
     .base = MUSCA_B1_CMSDK_TIMER0_S_BASE};
@@ -304,63 +375,77 @@ struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
                                                 &(CMSDK_TIMER1_DEV_DATA_NS)};
 #endif
 
-/* ARM UART PL011 driver structures */
-#ifdef UART0_PL011_S
-static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
-    .base = MUSCA_B1_UART0_S_BASE,
-    .def_baudrate = 115200,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
-                                               &(UART0_PL011_DEV_DATA_S)};
+/** GFC-100 eflash driver structures */
+#ifdef GFC100_EFLASH0_S
+static const struct gfc100_eflash_dev_cfg_t GFC100_EFLASH0_CFG_S = {
+    .base = MUSCA_B1_EFLASH0_REG_MAP_S_BASE};
+static struct gfc100_eflash_dev_data_t GFC100_EFLASH0_DATA_S = {
+    .is_initialized = false,
+    .flash_size = 0};
+struct gfc100_eflash_dev_t GFC100_EFLASH0_DEV_S = {&(GFC100_EFLASH0_CFG_S),
+                                                   &(GFC100_EFLASH0_DATA_S)};
 #endif
 
-#ifdef UART0_PL011_NS
-static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
-    .base = MUSCA_B1_UART0_NS_BASE,
-    .def_baudrate = 115200,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
-                                                &(UART0_PL011_DEV_DATA_NS)};
+#ifdef GFC100_EFLASH1_S
+static const struct gfc100_eflash_dev_cfg_t GFC100_EFLASH1_CFG_S = {
+    .base = MUSCA_B1_EFLASH1_REG_MAP_S_BASE};
+static struct gfc100_eflash_dev_data_t GFC100_EFLASH1_DATA_S = {
+    .is_initialized = false,
+    .flash_size = 0};
+struct gfc100_eflash_dev_t GFC100_EFLASH1_DEV_S = {&(GFC100_EFLASH1_CFG_S),
+                                                   &(GFC100_EFLASH1_DATA_S)};
 #endif
 
-#ifdef UART1_PL011_S
-static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_S = {
-    .base = MUSCA_B1_UART1_S_BASE,
-    .def_baudrate = 115200,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_S = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART1_PL011_DEV_S = {&(UART1_PL011_DEV_CFG_S),
-                                               &(UART1_PL011_DEV_DATA_S)};
+/* QSPI IP6514E driver structures */
+#ifdef QSPI_IP6514E_S
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_S = {
+    .base = MUSCA_B1_QSPI_REG_S_BASE,
+    .addr_mask = (1U << 23) - 1, /* 8MiB minus 1 byte */
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_S = {
+    &QSPI_DEV_CFG_S
+};
 #endif
 
-#ifdef UART1_PL011_NS
-static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_NS = {
-    .base = MUSCA_B1_UART1_NS_BASE,
-    .def_baudrate = 115200,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART1_PL011_DEV_DATA_NS = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART1_PL011_DEV_NS = {&(UART1_PL011_DEV_CFG_NS),
-                                                &(UART1_PL011_DEV_DATA_NS)};
+#ifdef QSPI_IP6514E_NS
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_NS = {
+    .base = MUSCA_B1_QSPI_REG_NS_BASE,
+    .addr_mask = (1U << 23) - 1, /* 8MiB minus 1 byte */
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_NS = {
+    &QSPI_DEV_CFG_NS
+};
+#endif
+
+/* ======= External peripheral configuration structure definitions ======= */
+
+/* MT25QL Flash memory library structures */
+#if (defined(MT25QL_S) && defined(QSPI_IP6514E_S))
+struct mt25ql_dev_t MT25QL_DEV_S = {
+    .controller = &QSPI_DEV_S,
+    .direct_access_start_addr = MUSCA_B1_QSPI_FLASH_S_BASE,
+    .baud_rate_div = 4U,
+    /*
+     * 8 MiB flash memory are advertised in the Arm Musca-B1 Test Chip and Board
+     * Technical Reference Manual. The MT25QL Flash device may however contain
+     * more.
+     */
+    .size = 0x00800000U, /* 8 MiB */
+    .func_state = MT25QL_FUNC_STATE_DEFAULT,
+};
+#endif
+
+#if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
+struct mt25ql_dev_t MT25QL_DEV_NS = {
+    .controller = &QSPI_DEV_NS,
+    .direct_access_start_addr = MUSCA_B1_QSPI_FLASH_NS_BASE,
+    .baud_rate_div = 4U,
+    /*
+     * 8 MiB flash memory are advertised in the Arm Musca-B1 Test Chip and Board
+     * Technical Reference Manual. The MT25QL Flash device may however contain
+     * more.
+     */
+    .size = 0x00800000U, /* 8 MiB */
+    .func_state = MT25QL_FUNC_STATE_DEFAULT,
+};
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
-#include "platform_retarget_dev.h"
+#include "Driver_PPC.h"
+#include "platform_description.h"
+#include "device_definition.h"
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 
@@ -70,6 +71,11 @@ extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC, Driver_QSPI_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC, Driver_ISRAM1_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 
+/* Import PPC driver */
+extern ARM_DRIVER_PPC Driver_APB_PPC0, Driver_APB_PPC1;
+extern ARM_DRIVER_PPC Driver_AHB_PPCEXP0;
+extern ARM_DRIVER_PPC Driver_APB_PPCEXP0, Driver_APB_PPCEXP1;
+
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START (0x40000000)
 #define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
@@ -101,6 +107,26 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
+
+static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
+    0,                      /* AHB PPC0 */
+    0,                      /* Reserved */
+    0,                      /* Reserved */
+    0,                      /* Reserved */
+    &Driver_AHB_PPCEXP0,    /* AHB PPCEXP0 */
+    0,                      /* AHB PPCEXP1 */
+    0,                      /* AHB PPCEXP2 */
+    0,                      /* AHB PPCEXP3 */
+    &Driver_APB_PPC0,       /* APB PPC0 */
+    &Driver_APB_PPC1,       /* APB PPC1 */
+    0,                      /* Reserved */
+    0,                      /* Reserved */
+    &Driver_APB_PPCEXP0,    /* APB PPCEXP0 */
+    &Driver_APB_PPCEXP1,    /* APB PPCEXP1 */
+};
+
+#define PPC_BANK_COUNT \
+    (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
 void enable_fault_handlers(void)
 {
@@ -184,8 +210,6 @@ void nvic_interrupt_target_state_cfg()
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/
 void nvic_interrupt_enable()
 {
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-
     /* MPC interrupt enabling */
     Driver_QSPI_MPC.EnableInterrupt();
     Driver_CODE_SRAM_MPC.EnableInterrupt();
@@ -198,15 +222,13 @@ void nvic_interrupt_enable()
      * peripherals used by NS. That triggers a PPC0 exception as that
      * register is meant for NS privileged access only. Clear it here
      */
-    spctrl->secppcintclr = CMSDK_APB_PPC0_INT_POS_MASK;
+    Driver_APB_PPC0.ClearInterrupt();
 
     /* Enable PPC interrupts for APB PPC */
-    spctrl->secppcinten |= CMSDK_APB_PPC0_INT_POS_MASK;
-    spctrl->secppcinten |= CMSDK_APB_PPC1_INT_POS_MASK;
-    spctrl->secppcinten |= CMSDK_APB_PPCEXP0_INT_POS_MASK;
-    spctrl->secppcinten |= CMSDK_APB_PPCEXP1_INT_POS_MASK;
-    spctrl->secppcinten |= CMSDK_APB_PPCEXP2_INT_POS_MASK;
-    spctrl->secppcinten |= CMSDK_APB_PPCEXP3_INT_POS_MASK;
+    Driver_APB_PPC0.EnableInterrupt();
+    Driver_APB_PPC1.EnableInterrupt();
+    Driver_APB_PPCEXP0.EnableInterrupt();
+    Driver_APB_PPCEXP1.EnableInterrupt();
     NVIC_EnableIRQ(S_PPC_COMBINED_IRQn);
 }
 
@@ -315,25 +337,68 @@ void mpc_init_cfg(void)
 void ppc_init_cfg(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    struct nspctrl_def* nspctrl = CMSDK_NSPCTRL;
 
-    /* Grant non-secure access to peripherals in the PPC0
-     * (timer0 and 1, dualtimer, watchdog, mhu 0 and 1)
+    /* Grant non-secure access to peripherals in the APB PPC0
+     * (timer0 and 1, dualtimer, mhu 0 and 1)
      */
-    spctrl->apbnsppc0 |= (1U << CMSDK_TIMER0_APB_PPC_POS);
-    spctrl->apbnsppc0 |= (1U << CMSDK_TIMER1_APB_PPC_POS);
-    spctrl->apbnsppc0 |= (1U << CMSDK_DTIMER_APB_PPC_POS);
-    spctrl->apbnsppc0 |= (1U << CMSDK_MHU0_APB_PPC_POS);
-    spctrl->apbnsppc0 |= (1U << CMSDK_MHU1_APB_PPC_POS);
-    /* Grant non-secure access to S32K Timer in PPC1*/
-    spctrl->apbnsppc1 |= (1U << CMSDK_S32K_TIMER_PPC_POS);
+    Driver_APB_PPC0.Initialize();
+    Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPC0.ConfigPeriph(CMSDK_DTIMER_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPC0.ConfigPeriph(CMSDK_MHU0_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPC0.ConfigPeriph(CMSDK_MHU1_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
 
     /* Grant non-secure access for APB peripherals on EXP1 */
-    /* FIXME: Add remaining peripherals in line with other targets */
-    spctrl->apbnsppcexp1 |= (1U << MUSCA_B1_UART1_APB_PPC_POS);
-
-    /* In NS, grant unprivileged access for UART1 */
-    nspctrl->apbnspppcexp1 |= (1U << MUSCA_B1_UART1_APB_PPC_POS);
+    Driver_APB_PPCEXP1.Initialize();
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM0_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM1_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM2_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2S_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_UART0_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_UART1_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_AND_NONPRIV);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2C0_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2C1_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_SPI_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_GPTIMER_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_RTC_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PVT_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
+    Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_SDIO_APB_PPC_POS,
+                                    ARM_PPC_NONSECURE_ONLY,
+                                    ARM_PPC_PRIV_ONLY);
 
     /* Configure the response to a security violation as a
      * bus error instead of RAZ/WI
@@ -344,32 +409,70 @@ void ppc_init_cfg(void)
 void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
 {
     /* Setting NS flag for peripheral to enable NS access */
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    ((uint32_t*)&(spctrl->ahbnsppc0))[bank] |= (1U << pos);
+    ARM_DRIVER_PPC *ppc_driver;
+
+    if (bank >= PPC_BANK_COUNT) {
+        return;
+    }
+
+    ppc_driver = ppc_bank_drivers[bank];
+    if (ppc_driver) {
+        ppc_driver->ConfigPeriph(pos, ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    }
 }
 
 void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
 {
     /* Clear NS flag for peripheral to prevent NS access */
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    ((uint32_t*)&(spctrl->ahbnsppc0))[bank] &= ~(1U << pos);
+    ARM_DRIVER_PPC *ppc_driver;
+
+    if (bank >= PPC_BANK_COUNT) {
+        return;
+    }
+
+    ppc_driver = ppc_bank_drivers[bank];
+    if (ppc_driver) {
+        ppc_driver->ConfigPeriph(pos, ARM_PPC_SECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    }
 }
 
 void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    ((uint32_t*)&(spctrl->ahbspppc0))[bank] |= (1U << pos);
+    ARM_DRIVER_PPC *ppc_driver;
+
+    if (bank >= PPC_BANK_COUNT) {
+        return;
+    }
+
+    ppc_driver = ppc_bank_drivers[bank];
+    if (ppc_driver) {
+        ppc_driver->ConfigPeriph(pos, ARM_PPC_SECURE_ONLY,
+                                 ARM_PPC_PRIV_AND_NONPRIV);
+    }
 }
 
 void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    ((uint32_t*)&(spctrl->ahbspppc0))[bank] &= ~(1U << pos);
+    ARM_DRIVER_PPC *ppc_driver;
+
+    if (bank >= PPC_BANK_COUNT) {
+        return;
+    }
+
+    ppc_driver = ppc_bank_drivers[bank];
+    if (ppc_driver) {
+        ppc_driver->ConfigPeriph(pos, ARM_PPC_SECURE_ONLY,
+                                 ARM_PPC_PRIV_ONLY);
+    }
 }
 
 void ppc_clear_irq(void)
 {
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    /* Clear APB PPC EXP2 IRQ */
-    spctrl->secppcintclr = CMSDK_APB_PPCEXP2_INT_POS_MASK;
+    Driver_AHB_PPCEXP0.ClearInterrupt();
+    Driver_APB_PPC0.ClearInterrupt();
+    Driver_APB_PPC1.ClearInterrupt();
+    Driver_APB_PPCEXP0.ClearInterrupt();
+    Driver_APB_PPCEXP1.ClearInterrupt();
 }

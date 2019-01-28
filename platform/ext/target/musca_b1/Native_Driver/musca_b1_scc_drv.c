@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,241 +14,384 @@
  * limitations under the License.
  */
 
- /* FIXME: This is a copy of the Musca-A1 SCC driver. It needs to be replaced
-  * with a Musca-B1 driver.
-  */
-
 #include "musca_b1_scc_drv.h"
 
+/* The first pin of the upper pins (out of 64) */
+#define GPIO_UPPER_PINS_MIN_VALUE          32U
+
 struct musca_b1_scc_reg_map_t {
-    volatile uint32_t reset_ctrl;             /* 0x00 RW Reset Control Register */
-    volatile uint32_t clk_ctrl;               /* 0x04 RW Clock Control Register*/
-    volatile uint32_t pwr_ctrl;               /* 0x08 RW Power Control Register*/
-    volatile uint32_t pll_ctrl;               /* 0x0C RW Power Control Register */
-    volatile uint32_t dbg_ctrl;               /* 0x10 RW Debug Control Register */
-    volatile uint32_t sram_ctrl;              /* 0x14 RW SRAM Control Register */
-    volatile uint32_t intr_ctrl;              /* 0x18 RW Interupt Control Register */
-    volatile uint32_t reserved1;              /* 0x1C RW reserved */
-    volatile uint32_t cpu0_vtor_sram;         /* 0x20 RW Reset vector for CPU0 Secure Mode */
-    volatile uint32_t cpu0_vtor_flash;        /* 0x24 RW Reset vector for CPU0 Secure Mode */
-    volatile uint32_t cpu1_vtor_sram;         /* 0x28 RW Reset vector for CPU1 Secure Mode */
-    volatile uint32_t cpu1_vtor_flash;        /* 0x2C RW Reset vector for CPU0 Secure Mode */
-    volatile uint32_t iomux_main_insel;       /* 0x30 RW Main function in data select */
-    volatile uint32_t iomux_main_outsel;      /* 0x34 RW Main function out data select */
-    volatile uint32_t iomux_main_oensel;      /* 0x38 RW Main function out enable select */
-    volatile uint32_t iomux_main_default_in;  /* 0x3C RW Main function default in select */
-    volatile uint32_t iomux_altf1_insel;      /* 0x40 RW Alt function 1 in data select */
-    volatile uint32_t iomux_altf1_outsel;     /* 0x44 RW Alt function 1 out data select */
-    volatile uint32_t iomux_altf1_oensel;     /* 0x48 RW Alt function 1 out enable select */
-    volatile uint32_t iomux_altf1_default_in; /* 0x4C RW Alt function 1 default in select */
-    volatile uint32_t iomux_altf2_insel;      /* 0x50 RW Alt function 2 in data select */
-    volatile uint32_t iomux_altf2_outsel;     /* 0x54 RW Alt function 2 out data select */
-    volatile uint32_t iomux_altf2_oensel;     /* 0x58 RW Alt function 2 out enable select */
-    volatile uint32_t iomux_altf2_default_in; /* 0x5C RW Alt function 2 default in select */
-    volatile uint32_t pvt_ctrl;               /* 0x60 RW PVT control register */
-    volatile uint32_t spare0;                 /* 0x64 RW reserved */
-    volatile uint32_t iopad_ds0;              /* 0x68 RW Drive Select 0 */
-    volatile uint32_t iopad_ds1;              /* 0x6C RW Drive Select 1 */
-    volatile uint32_t iopad_pe;               /* 0x70 RW Pull Enable */
-    volatile uint32_t iopad_ps;               /* 0x74 RW Pull Select */
-    volatile uint32_t iopad_sr;               /* 0x78 RW Slew Select */
-    volatile uint32_t iopad_is;               /* 0x7C RW Input Select */
-    volatile uint32_t sram_rw_margine;        /* 0x80 RW reserved */
-    volatile uint32_t static_conf_sig0;       /* 0x84 RW Static configuration */
-    volatile uint32_t static_conf_sig1;       /* 0x88 RW Static configuration */
-    volatile uint32_t req_set;                /* 0x8C RW External Event Enable */
-    volatile uint32_t req_clear;              /* 0x90 RW External Event Clear */
-    volatile uint32_t iomux_altf3_insel;      /* 0x94 RW Alt function 3 in data select */
-    volatile uint32_t iomux_altf3_outsel;     /* 0x98 RW Alt function 3 out data select */
-    volatile uint32_t iomux_altf3_oensel;     /* 0x9C RW Alt function 3 out enable select */
-    volatile uint32_t iomux_altf3_default_in; /* 0xA0 RW Alt function 3 default in select */
-    volatile uint32_t pcsm_ctrl_override;     /* 0xA4 RW Q-Channels QACTIVE Override */
-    volatile uint32_t pd_cpu0_iso_override;   /* 0xA8 RW CPU0 Isolation Override */
-    volatile uint32_t pd_cpu1_iso_override;   /* 0xAC RW CPU1 Isolation Override */
-    volatile uint32_t sys_sram_rw_assist0;    /* 0xB0 RW CPU0 icache sram ldata */
-    volatile uint32_t sys_sram_rw_assist1;    /* 0xB4 RW CPU0 icache sram tag */
-    volatile uint32_t sys_sram_rw_assist2;    /* 0xB8 RW CPU1 icache sram ldata */
-    volatile uint32_t sys_sram_rw_assist3;    /* 0xBC RW CPU1 icache sram tag */
-    volatile uint32_t sys_sram_rw_assist4;    /* 0xC0 RW System sram */
-    volatile uint32_t sys_sram_rw_assist5;    /* 0xC4 RW System sram */
-    volatile uint32_t reserved2[3];           /* reserved */
-    volatile uint32_t crypto_sram_rw_assist0; /* 0xD4 RW Crypto ram */
-    volatile uint32_t crypto_sram_rw_assist1; /* 0xD8 RW Crypto sec sram */
-    volatile uint32_t crypto_sram_rw_assist2; /* 0xDC RW Reserved */
-    volatile uint32_t req_edge_sel;           /* 0xC0 RW Power clock request edge select */
-    volatile uint32_t req_enable;             /* 0xC4 RW Power clock request enable */
-    volatile uint32_t reserved3[28];          /* reserved */
-    volatile uint32_t chip_id;                /* 0x100 RO Chip ID 0x0797_0477 */
-    volatile uint32_t clock_status;           /* 0x104 RO Clock status */
-    volatile uint32_t io_in_status;           /* 0x108 RO I/O in status */
+    volatile uint32_t clk_ctrl_sel;                    /* 0x00 RW Clock Control Select */
+    volatile uint32_t clk_pll_prediv_ctrl;             /* 0x04 RW clk_pll_prediv_ctrl */
+    volatile uint32_t reserved1;                       /* 0x08 Reserved */
+    volatile uint32_t clk_postdiv_ctrl_flash;          /* 0x0C RW clk_postdiv_ctrl_flash */
+    volatile uint32_t clk_postdiv_qspi;                /* 0x10 RW clk_postdiv_qspi */
+    volatile uint32_t clk_postdiv_rtc;                 /* 0x14 RW clk_postdiv_rtc */
+    volatile uint32_t clk_postdiv_sd;                  /* 0x18 RW clk_postdiv_sd */
+    volatile uint32_t clk_postdiv_test;                /* 0x1C RW clk_postdiv_test */
+    volatile uint32_t ctrl_bypass_div;                 /* 0x20 RW ctrl_bypass_div */
+    volatile uint32_t pll_ctrl_pll0_clk;               /* 0x24 RW pll_ctrl_pll0_clk */
+    volatile uint32_t pll_postdiv_ctrl_pll0_clk;       /* 0x28 RW pll_postdiv_ctrl_pll0_clk */
+    volatile uint32_t pll_ctrl_mult_pll0_clk;          /* 0x2C RW pll_ctrl_mult_pll0_clk */
+    volatile uint32_t clk_ctrl_enable;                 /* 0x30 RW Clock Control Enable */
+    volatile uint32_t clk_status;                      /* 0x34 RO Clock Status */
+    volatile uint32_t reserved2[2];                    /* 0x38 Reserved */
+    volatile uint32_t reset_ctrl;                      /* 0x40 RW Reset Control Register */
+    volatile uint32_t reserved3;                       /* 0x44 Reserved */
+    volatile uint32_t dbg_ctrl;                        /* 0x48 RW Debug Control Register */
+    volatile uint32_t sram_ctrl;                       /* 0x4C RW SRAM Control Register */
+    volatile uint32_t intr_ctrl;                       /* 0x50 RW Interupt Control Register */
+    volatile uint32_t clk_test_ctrl;                   /* 0x54 RW Clock Test Control Register */
+    volatile uint32_t cpu0_vtor;                       /* 0x58 RW Reset vector for CPU0 */
+    volatile uint32_t reserved4;                       /* 0x5C RW Reset vector for KX CPU */
+    volatile uint32_t cpu1_vtor;                       /* 0x60 Reserved */
+    volatile uint32_t az_cpu_vtor;                     /* 0x64 RW Reset vector for AZ CPU */
+    volatile uint32_t iomux_main_insel_0;              /* 0x68 RW Main function in data select */
+    volatile uint32_t iomux_main_insel_1;              /* 0x6C RW Main function in data select */
+    volatile uint32_t iomux_main_outsel_0;             /* 0x70 RW Main function out data select */
+    volatile uint32_t iomux_main_outsel_1;             /* 0x74 RW Main function out data select */
+    volatile uint32_t iomux_main_oensel_0;             /* 0x78 RW Main function out enable select */
+    volatile uint32_t iomux_main_oensel_1;             /* 0x7C RW Main function out enable select */
+    volatile uint32_t iomux_main_default_in_0;         /* 0x80 RW Main function default in select */
+    volatile uint32_t iomux_main_default_in_1;         /* 0x84 RW Main function default in select */
+    volatile uint32_t iomux_altf1_insel_0;             /* 0x88 RW Alt function 1 in data select */
+    volatile uint32_t iomux_altf1_insel_1;             /* 0x8C RW Alt function 1 in data select */
+    volatile uint32_t iomux_altf1_outsel_0;            /* 0x90 RW Alt function 1 out data select */
+    volatile uint32_t iomux_altf1_outsel_1;            /* 0x94 RW Alt function 1 out data select */
+    volatile uint32_t iomux_altf1_oensel_0;            /* 0x98 RW Alt function 1 out enable select */
+    volatile uint32_t iomux_altf1_oensel_1;            /* 0x9C RW Alt function 1 out enable select */
+    volatile uint32_t iomux_altf1_default_in_0;        /* 0xA0 RW Alt function 1 default in select */
+    volatile uint32_t iomux_altf1_default_in_1;        /* 0xA4 RW Alt function 1 default in select */
+    volatile uint32_t iomux_altf2_insel_0;             /* 0xA8 RW Alt function 2 in data select */
+    volatile uint32_t iomux_altf2_insel_1;             /* 0xAC RW Alt function 2 in data select */
+    volatile uint32_t iomux_altf2_outsel_0;            /* 0xB0 RW Alt function 2 out data select */
+    volatile uint32_t iomux_altf2_outsel_1;            /* 0xB4 RW Alt function 2 out data select */
+    volatile uint32_t iomux_altf2_oensel_0;            /* 0xB8 RW Alt function 2 out enable select */
+    volatile uint32_t iomux_altf2_oensel_1;            /* 0xBC RW Alt function 2 out enable select */
+    volatile uint32_t iomux_altf2_default_in_0;        /* 0xC0 RW Alt function 2 default in select */
+    volatile uint32_t iomux_altf2_default_in_1;        /* 0xC4 RW Alt function 2 default in select */
+    volatile uint32_t reserved5[8];                    /* 0xC8 Reserved */
+    volatile uint32_t iopad_ds0_0;                     /* 0xE8 RW Drive Select 0 */
+    volatile uint32_t iopad_ds0_1;                     /* 0xEC RW Drive Select 0 */
+    volatile uint32_t iopad_ds1_0;                     /* 0xF0 RW Drive Select 1 */
+    volatile uint32_t iopad_ds1_1;                     /* 0xF4 RW Drive Select 1 */
+    volatile uint32_t iopad_pe_0;                      /* 0xF8 RW Pull Enable */
+    volatile uint32_t iopad_pe_1;                      /* 0xFC RW Pull Enable */
+    volatile uint32_t iopad_ps_0;                      /* 0x100 RW Pull Select */
+    volatile uint32_t iopad_ps_1;                      /* 0x104 RW Pull Select */
+    volatile uint32_t iopad_sr_0;                      /* 0x108 RW Slew Select */
+    volatile uint32_t iopad_sr_1;                      /* 0x10C RW Slew Select */
+    volatile uint32_t iopad_is_0;                      /* 0x110 RW Input Select */
+    volatile uint32_t iopad_is_1;                      /* 0x114 RW Input Select */
+    volatile uint32_t pvt_ctrl;                        /* 0x118 RW PVT control register */
+    volatile uint32_t reserved6[5];                    /* 0x11C Reserved */
+    volatile uint32_t spare0;                          /* 0x130 RW spare0 */
+    volatile uint32_t reserved7[2];                    /* 0x134 Reserved */
+    volatile uint32_t static_conf_sig1;                /* 0x13C RW static_conf_sig1 */
+    volatile uint32_t reserved8[24];                   /* 0x140 Reserved */
+    volatile uint32_t flash0_din_0;                    /* 0x1A0 RW flash0_or 1 din_0 */
+    volatile uint32_t flash0_din_1;                    /* 0x1A4 RW flash0 or 1 din_1 */
+    volatile uint32_t flash0_din_2;                    /* 0x1A8 RW flash0_or 1 din_2 */
+    volatile uint32_t flash0_din_3;                    /* 0x1AC RW flash0_or 1 din_3 */
+    volatile uint32_t reserved9[4];                    /* 0x1B0 Reserved */
+    volatile uint32_t flash0_dout_0;                   /* 0x1C0 RO flash0_dout_0 */
+    volatile uint32_t flash0_dout_1;                   /* 0x1C4 RO flash0_dout_1 */
+    volatile uint32_t flash0_dout_2;                   /* 0x1C8 RO flash0_dout_2 */
+    volatile uint32_t flash0_dout_3;                   /* 0x1CC RO flash0_dout_3 */
+    volatile uint32_t flash1_dout_0;                   /* 0x1D0 RO flash1_dout_0 */
+    volatile uint32_t flash1_dout_1;                   /* 0x1D4 RO flash1_dout_1 */
+    volatile uint32_t flash1_dout_2;                   /* 0x1D8 RO flash1_dout_2 */
+    volatile uint32_t flash1_dout_3;                   /* 0x1DC RO flash1_dout_2 */
+    volatile uint32_t selection_control_reg;           /* 0x1E0 RW Selection Control Register */
+    volatile uint32_t az_rom_remap_mask;               /* 0x1E4 RW az_rom_remap_mask */
+    volatile uint32_t az_rom_remap_offset;             /* 0x1E8 RW az_rom_remap_offset */
+    volatile uint32_t az_code_remap_mask;              /* 0x1EC RW az_code_remap_mask */
+    volatile uint32_t az_code_remap_offset;            /* 0x1F0 RW az_code_remap_offset */
+    volatile uint32_t az_sys_remap_mask;               /* 0x1F4 RW az_sys_remap_mask */
+    volatile uint32_t az_sys_remap_offset;             /* 0x1F8 RW az_sys_remap_offset */
+    volatile uint32_t reserved10;                      /* 0x1FC RW Kalix Control */
+    volatile uint32_t az_ctrl;                         /* 0x200 RW  Alcatraz Control */
+    volatile uint32_t reserved11;                      /* 0x204 Reserved */
+    volatile uint32_t sse200_otp_rd_data;              /* 0x208 RO SSE200_otp_ctrl */
+    volatile uint32_t reserved12;                      /* 0x20C Reserved */
+    volatile uint32_t az_otp_rd_data;                  /* 0x210 RO az_otp_rd_data */
+    volatile uint32_t reserved13[2];                   /* 0x214 Reserved */
+    volatile uint32_t spare_ctrl0;                     /* 0x21C RW spare_ctrl0 */
+    volatile uint32_t spare_ctrl1;                     /* 0x220 RW spare_ctrl1 */
+    volatile uint32_t reserved[119];                   /* 0x224 Reserved */
+    volatile uint32_t chip_id;                         /* 0x400 RO Chip ID 0x07D00477 */
 };
 
 /**
  * \brief Clears selected alternate functions for selected pins
  *
- * \param[in] dev        SCC registers base address \ref musca_b1_scc_reg_map_t
+ * \param[in] scc_regs   SCC register map pointer \ref musca_b1_scc_reg_map_t
  * \param[in] func_mask  Bitmask of alternate functions to clear
  *                       \ref gpio_altfunc_mask_t
  * \param[in] pin_mask   Pin mask for the alternate functions
+ * \param[in] upper_pins True if pin_mask represents the upper 32 pins
  */
 static void scc_clear_alt_func(struct musca_b1_scc_reg_map_t* scc_regs,
                                enum gpio_altfunc_mask_t func_mask,
-                               uint32_t pin_mask)
+                               uint32_t pin_mask, bool upper_pins)
 {
+    /* The pin select pointers are pointing to the registers
+     * which control the lower 32 pins of the whole 64. If we need to reach
+     * the upper 32 pins, the pointers need to be incremented.
+     * Registers are 32 bites wide so offset is in 4 byte steps.
+     */
+    uint32_t reg_offset = (upper_pins ? 1U : 0U);
+
     if (func_mask & GPIO_MAIN_FUNC_MASK) {
-        scc_regs->iomux_main_insel &= ~pin_mask;
-        scc_regs->iomux_main_outsel &= ~pin_mask;
-        scc_regs->iomux_main_oensel &= ~pin_mask;
+        *(&scc_regs->iomux_main_insel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_main_outsel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_main_oensel_0 + reg_offset) &= (~pin_mask);
     }
     if (func_mask & GPIO_ALTFUNC_1_MASK) {
-        scc_regs->iomux_altf1_insel &= ~pin_mask;
-        scc_regs->iomux_altf1_outsel &= ~pin_mask;
-        scc_regs->iomux_altf1_oensel &= ~pin_mask;
+        *(&scc_regs->iomux_altf1_insel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_altf1_outsel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_altf1_oensel_0 + reg_offset) &= (~pin_mask);
     }
     if (func_mask & GPIO_ALTFUNC_2_MASK) {
-        scc_regs->iomux_altf2_insel &= ~pin_mask;
-        scc_regs->iomux_altf2_outsel &= ~pin_mask;
-        scc_regs->iomux_altf2_oensel &= ~pin_mask;
-    }
-    if (func_mask & GPIO_ALTFUNC_3_MASK) {
-        scc_regs->iomux_altf3_insel &= ~pin_mask;
-        scc_regs->iomux_altf3_outsel &= ~pin_mask;
-        scc_regs->iomux_altf3_oensel &= ~pin_mask;
+        *(&scc_regs->iomux_altf2_insel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_altf2_outsel_0 + reg_offset) &= (~pin_mask);
+        *(&scc_regs->iomux_altf2_oensel_0 + reg_offset) &= (~pin_mask);
     }
 }
 
-void musca_b1_scc_set_alt_func(struct musca_b1_scc_dev_t* dev,
-                          enum gpio_altfunc_t altfunc, uint32_t pin_mask)
+/**
+ * \brief Sets selected alternate functions for selected (max 32) pins
+ *
+ * \param[in] scc_regs   SCC register map pointer \ref musca_b1_scc_reg_map_t
+ * \param[in] altfunc    Alternate function to set \ref gpio_altfunc_t
+ * \param[in] pin_mask   Pin mask for the alternate functions
+ * \param[in] upper_pins True if pin_mask represents the upper 32 pins
+ *
+ * \note This function doesn't check if scc dev is NULL.
+ * \note If no alternate function is selected then this API won't do anything
+ */
+static void scc_set_alt_func(struct musca_b1_scc_reg_map_t* scc_regs,
+                             enum gpio_altfunc_t altfunc, uint32_t pin_mask,
+                             bool upper_pins)
 {
-    struct musca_b1_scc_reg_map_t* scc_regs =
-                                    (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
     enum gpio_altfunc_mask_t altfunc_to_clear = GPIO_ALTFUNC_NONE;
     volatile uint32_t *insel = NULL;
-    volatile uint32_t *outsel = NULL;
-    volatile uint32_t *oensel = NULL;
-
-    if (altfunc >= GPIO_ALTFUNC_MAX) {
-        /* If no altfunction is selected, then nothing to do.
-         * This is possible during init and we do not
-         * want to change the reset values set by the HW
-         */
-        return;
-    }
+    volatile uint32_t *outse = NULL;
+    volatile uint32_t *oense = NULL;
 
     switch (altfunc) {
         case GPIO_MAIN_FUNC:
-            insel = &scc_regs->iomux_main_insel;
-            outsel = &scc_regs->iomux_main_outsel;
-            oensel = &scc_regs->iomux_main_oensel;
+            insel = &scc_regs->iomux_main_insel_0;
+            outse = &scc_regs->iomux_main_outsel_0;
+            oense = &scc_regs->iomux_main_oensel_0;
             altfunc_to_clear = GPIO_MAIN_FUNC_NEG_MASK;
             break;
 
         case GPIO_ALTFUNC_1:
-            insel = &scc_regs->iomux_altf1_insel;
-            outsel = &scc_regs->iomux_altf1_outsel;
-            oensel = &scc_regs->iomux_altf1_oensel;
+            insel = &scc_regs->iomux_altf1_insel_0;
+            outse = &scc_regs->iomux_altf1_outsel_0;
+            oense = &scc_regs->iomux_altf1_oensel_0;
             altfunc_to_clear = GPIO_ALTFUNC_1_NEG_MASK;
             break;
 
         case GPIO_ALTFUNC_2:
-            insel = &scc_regs->iomux_altf2_insel;
-            outsel = &scc_regs->iomux_altf2_outsel;
-            oensel = &scc_regs->iomux_altf2_oensel;
+            insel = &scc_regs->iomux_altf2_insel_0;
+            outse = &scc_regs->iomux_altf2_outsel_0;
+            oense = &scc_regs->iomux_altf2_oensel_0;
             altfunc_to_clear = GPIO_ALTFUNC_2_NEG_MASK;
             break;
 
         case GPIO_ALTFUNC_3:
-            insel = &scc_regs->iomux_altf3_insel;
-            outsel = &scc_regs->iomux_altf3_outsel;
-            oensel = &scc_regs->iomux_altf3_oensel;
+            /* Nothing to do, clearing the other functions enables ALTFUNC 3 */
             altfunc_to_clear = GPIO_ALTFUNC_3_NEG_MASK;
-            break;
+            scc_clear_alt_func(scc_regs, altfunc_to_clear, pin_mask, upper_pins);
+            return;
         default:
-        break;
+            return;
+    }
+
+    if (upper_pins == true) {
+        /* All the pin select pointers are pointing to the registers
+         * which control the lower 32 pins of the whole 64. If we need to reach
+         * the upper 32 pins, the pointers need to be incremented.
+         */
+        insel++;
+        outse++;
+        oense++;
     }
 
     /* Select the wanted function's output enable bit first.
      * This way the output won't be disabled which is desired
      * if we switch from output to output function
      */
-    *oensel |= pin_mask;
+    *oense |= pin_mask;
 
     /* Clear all alternate function registers which are not selected */
-    scc_clear_alt_func(scc_regs, altfunc_to_clear, pin_mask);
+    scc_clear_alt_func(scc_regs, altfunc_to_clear, pin_mask, upper_pins);
 
     /* Enable input and output data line */
     *insel |= pin_mask;
-    *outsel |= pin_mask;
+    *outse |= pin_mask;
 }
 
-void musca_b1_scc_set_pinmode(struct musca_b1_scc_dev_t* dev, uint32_t pin_mask,
-                         enum pinmode_select_t mode)
+enum musca_b1_scc_error_t
+musca_b1_scc_set_alt_func(struct musca_b1_scc_dev_t* dev,
+                          enum gpio_altfunc_t altfunc, uint64_t pin_mask)
 {
     struct musca_b1_scc_reg_map_t* scc_regs =
-                                    (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+    uint32_t pin_mask_lo = (uint32_t)pin_mask;
+    uint32_t pin_mask_hi = (uint32_t)(pin_mask >> GPIO_UPPER_PINS_MIN_VALUE);
+
+    if (altfunc >= GPIO_ALTFUNC_MAX) {
+        /* Invalid input */
+        return SCC_INVALID_ARG;
+    }
+
+    /* Set alternate functions for the lower 32 pins - if needed */
+    if (pin_mask_lo != 0U) {
+        scc_set_alt_func(scc_regs, altfunc, pin_mask_lo, false);
+    }
+
+    /* Set alternate functions for the upper 32 pins - if needed */
+    if (pin_mask_hi != 0U) {
+        scc_set_alt_func(scc_regs, altfunc, pin_mask_hi, true);
+    }
+
+    return SCC_ERR_NONE;
+}
+
+/**
+ * \brief Sets pinmode for the given pins
+ *
+ * \param[in] scc_regs   SCC register map pointer \ref musca_b1_scc_reg_map_t
+ * \param[in] pin_mask   Pin mask for the alternate functions
+ * \param[in] mode       Pin mode to set \ref pinmode_select_t
+ * \param[in] upper_pins True if the pinmask is for the upper 32 pins,
+ *                       false otherwise
+ */
+static void scc_set_pinmode(struct musca_b1_scc_reg_map_t* scc_regs,
+                            uint32_t pin_mask,
+                            enum pinmode_select_t mode, bool upper_pins)
+{
+    /* The pin select pointers are pointing to the registers
+     * which control the lower 32 pins of the whole 64. If we need to reach
+     * the upper 32 pins, the pointers need to be incremented.
+     * Registers are 32 bites wide so offset is in 4 byte steps.
+     */
+    uint32_t reg_offset = (upper_pins ? 1U : 0U);
 
     switch (mode) {
         case PINMODE_NONE:
-            scc_regs->iopad_pe &= ~pin_mask;
+            *(&scc_regs->iopad_pe_0 + reg_offset) &= (~pin_mask);
             break;
         case PINMODE_PULL_DOWN:
             /* If the pull select bit is set to 0 it means pull down */
-            scc_regs->iopad_ps &= ~pin_mask;
-            scc_regs->iopad_pe |= pin_mask;
+            *(&scc_regs->iopad_ps_0 + reg_offset) &= (~pin_mask);
+            *(&scc_regs->iopad_pe_0 + reg_offset) |= pin_mask;
             break;
         case PINMODE_PULL_UP:
             /* If the pull select bit is set to 1 it means pull up */
-            scc_regs->iopad_ps |= pin_mask;
-            scc_regs->iopad_pe |= pin_mask;
+            *(&scc_regs->iopad_ps_0 + reg_offset) |= pin_mask;
+            *(&scc_regs->iopad_pe_0 + reg_offset) |= pin_mask;
             break;
         default:
             break;
     }
 }
 
-void musca_b1_scc_set_default_in(struct musca_b1_scc_dev_t* dev,
-                            enum gpio_altfunc_t altfunc,
-                            uint32_t default_in_mask,
-                            uint32_t default_in_value)
+enum musca_b1_scc_error_t
+musca_b1_scc_set_pinmode(struct musca_b1_scc_dev_t* dev, uint64_t pin_mask,
+                         enum pinmode_select_t mode)
 {
     struct musca_b1_scc_reg_map_t* scc_regs =
-                                    (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
-    uint32_t iomux_value = 0;
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+    uint32_t pin_mask_lo = (uint32_t)pin_mask;
+    uint32_t pin_mask_hi = (uint32_t)(pin_mask >> 32);
 
-    if (altfunc >= GPIO_ALTFUNC_MAX) {
-        /* If no altfunction is selected, then nothing to do */
-        return;
+    if (mode >= PINMODE_MAX) {
+        /* Invalid input */
+        return SCC_INVALID_ARG;
     }
+
+    /* Set pin mode for the lower 32 pins - if needed */
+    if (pin_mask_lo != 0U) {
+        scc_set_pinmode(scc_regs, pin_mask_lo, mode, false);
+    }
+
+    /* Set pin mode for the lower 32 pins - if needed */
+    if (pin_mask_hi != 0U) {
+        scc_set_pinmode(scc_regs, pin_mask_hi, mode, true);
+    }
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_set_default_in(struct musca_b1_scc_dev_t* dev,
+                            enum gpio_altfunc_t altfunc,
+                            uint32_t pin_num,
+                            bool default_in_value)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+    uint32_t iomux_value = 0U;
+    uint32_t pin_mask = 0U;
+    uint32_t default_in_mask = 0U;
+    uint32_t reg_offset = 0U;
+
+    if ((altfunc >= GPIO_ALTFUNC_MAX) || (pin_num >= GPIO_ALTFUNC_MAX_PINS)) {
+        /* Invalid input */
+        return SCC_INVALID_ARG;
+    }
+
+    /* Check if pin is the upper section */
+    if (pin_num >= GPIO_UPPER_PINS_MIN_VALUE) {
+        pin_num -= GPIO_UPPER_PINS_MIN_VALUE;
+        /* The pin select pointers are pointing to the registers
+         * which control the lower 32 pins of the whole 64. If we need
+         * to reach the upper 32 pins, the pointers need to be incremented.
+         * Registers are 32 bites wide so offset is in 4 byte steps.
+         */
+        reg_offset = 1U;
+    }
+
+    pin_mask = (1U << pin_num);
+    default_in_mask = ((default_in_value ? 1U : 0U) << pin_num);
 
     switch (altfunc) {
         case GPIO_MAIN_FUNC:
-            iomux_value = scc_regs->iomux_main_default_in & ~default_in_mask;
-            iomux_value |= (default_in_value & default_in_mask);
-            scc_regs->iomux_main_default_in = iomux_value;
-            scc_regs->iomux_main_insel = (scc_regs->iomux_main_insel & ~default_in_mask);
+            iomux_value =
+               *(&scc_regs->iomux_main_default_in_0 + reg_offset) & (~pin_mask);
+            *(&scc_regs->iomux_main_default_in_0 + reg_offset) =
+                                                (iomux_value | default_in_mask);
+            *(&scc_regs->iomux_main_insel_0 + reg_offset) =
+                  (*(&scc_regs->iomux_main_insel_0 + reg_offset) & (~pin_mask));
             break;
-
         case GPIO_ALTFUNC_1:
-            iomux_value = scc_regs->iomux_altf1_default_in & ~default_in_mask;
-            iomux_value |= (default_in_value & default_in_mask);
-            scc_regs->iomux_altf1_default_in = iomux_value;
-            scc_regs->iomux_altf1_insel = (scc_regs->iomux_altf1_insel & ~default_in_mask);
+            iomux_value =
+              *(&scc_regs->iomux_altf1_default_in_0 + reg_offset) & (~pin_mask);
+            *(&scc_regs->iomux_altf1_default_in_0 + reg_offset) =
+                                                (iomux_value | default_in_mask);
+            *(&scc_regs->iomux_altf1_insel_0 + reg_offset) =
+                 (*(&scc_regs->iomux_altf1_insel_0 + reg_offset) & (~pin_mask));
             break;
-
         case GPIO_ALTFUNC_2:
-            iomux_value = scc_regs->iomux_altf2_default_in & ~default_in_mask;
-            iomux_value |= (default_in_value & default_in_mask);
-            scc_regs->iomux_altf2_default_in = iomux_value;
-            scc_regs->iomux_altf2_insel = (scc_regs->iomux_altf2_insel & ~default_in_mask);
+            iomux_value =
+              *(&scc_regs->iomux_altf2_default_in_0 + reg_offset) & (~pin_mask);
+            *(&scc_regs->iomux_altf2_default_in_0 + reg_offset) =
+                                                (iomux_value | default_in_mask);
+            *(&scc_regs->iomux_altf2_insel_0 + reg_offset) =
+                 (*(&scc_regs->iomux_altf2_insel_0 + reg_offset) & (~pin_mask));
             break;
-
         case GPIO_ALTFUNC_3:
-            iomux_value = scc_regs->iomux_altf3_default_in & ~default_in_mask;
-            iomux_value |= (default_in_value & default_in_mask);
-            scc_regs->iomux_altf3_default_in = iomux_value;
-            scc_regs->iomux_altf3_insel = (scc_regs->iomux_altf3_insel & ~default_in_mask);
+            /* Reserved */
             break;
         default:
-        break;
+            /* Code should already returned error but just to be safe
+             * return here as well
+             */
+            return SCC_INVALID_ARG;
     }
+
+    return SCC_ERR_NONE;
 }

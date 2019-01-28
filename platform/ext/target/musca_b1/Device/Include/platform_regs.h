@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #define __MUSCA_B1_PLATFORM_REGS_H__
 
 #include <stdint.h>
-#include "platform_retarget.h"
+#include "platform_base_address.h"
 
 /* System info memory mapped register access structure */
 struct sysinfo_t {
@@ -55,7 +55,7 @@ struct sysctrl_t {
     volatile uint32_t sysclk_div;             /* (R/W) System Clock Divider
                                                *       Configuration Register */
     volatile uint32_t clockforce;             /* (R/W) Clock Forces */
-    volatile uint32_t reserved0[57];
+    volatile uint32_t reserved1[57];
     volatile uint32_t resetsyndrome;          /* (R/W) Reset syndrome */
     volatile uint32_t resetmask;              /* (R/W) Reset MASK */
     volatile uint32_t swreset;                /* ( /W) Software Reset */
@@ -67,7 +67,7 @@ struct sysctrl_t {
                                                *       Vector Register For CPU 1*/
     volatile uint32_t cpuwait;                /* (R/W) CPU Boot wait control
                                                *       after reset */
-    volatile uint32_t reserved1;
+    volatile uint32_t nmi_enable;             /* (R/W) NMI Enable Register.*/
     volatile uint32_t wicctrl;                /* (R/W) CPU WIC Request and
                                                *       Acknowledgement */
     volatile uint32_t ewctrl;                 /* (R/W) External Wakeup Control */
@@ -75,12 +75,7 @@ struct sysctrl_t {
     volatile uint32_t pdcm_pd_sys_sense;      /* (R/W) Power Control Dependency
                                                *       Matrix PD_SYS
                                                *       Power Domain Sensitivity.*/
-    volatile uint32_t pdcm_pd_cpu0core_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_CPU0CORE
-                                               *       Power Domain Sensitivity.*/
-    volatile uint32_t pdcm_pd_cpu1core_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_CPU1CORE
-                                               *       Power Domain Sensitivity.*/
+    volatile uint32_t reserved3[2];
     volatile uint32_t pdcm_pd_sram0_sense;    /* (R/W) Power Control Dependency
                                                *       Matrix PD_SRAM0 Power
                                                *       Domain Sensitivity.*/
@@ -93,19 +88,7 @@ struct sysctrl_t {
     volatile uint32_t pdcm_pd_sram3_sense;    /* (R/W) Power Control Dependency
                                                *       Matrix PD_SRAM3 Power
                                                *       Domain Sensitivity.*/
-    volatile uint32_t reserved3[5];
-    volatile uint32_t pdcm_pd_cc_sense;       /* (R/W) Power Control Dependency
-                                               *       Matrix PD_CC
-                                               *       Power Domain Sensitivity.*/
-    volatile uint32_t pdcm_pd_exp0_out_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_EXP0 Sensitivity. */
-    volatile uint32_t pdcm_pd_exp1_out_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_EXP1 Sensitivity. */
-    volatile uint32_t pdcm_pd_exp2_out_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_EXP2 Sensitivity. */
-    volatile uint32_t pdcm_pd_exp3_out_sense; /* (R/W) Power Control Dependency
-                                               *       Matrix PD_EXP3 Sensitivity. */
-    volatile uint32_t reserved4[864];
+    volatile uint32_t reserved4[877];
     volatile uint32_t pidr4;                  /* (R/ ) Peripheral ID 4 */
     volatile uint32_t reserved5[3];
     volatile uint32_t pidr0;                  /* (R/ ) Peripheral ID 0 */
@@ -269,16 +252,16 @@ struct nspctrl_def {
 /* SSE-200 specific PPC bit definitions */
 
 /* ARM APB PPC0 peripherals definition */
-#define CMSDK_TIMER0_APB_PPC_POS  0U
-#define CMSDK_TIMER1_APB_PPC_POS  1U
-#define CMSDK_DTIMER_APB_PPC_POS  2U
-#define CMSDK_MHU0_APB_PPC_POS    3U
-#define CMSDK_MHU1_APB_PPC_POS    4U
+#define CMSDK_TIMER0_APB_PPC_POS             0U
+#define CMSDK_TIMER1_APB_PPC_POS             1U
+#define CMSDK_DTIMER_APB_PPC_POS             2U
+#define CMSDK_MHU0_APB_PPC_POS               3U
+#define CMSDK_MHU1_APB_PPC_POS               4U
 /* The bits 31:5 are reserved */
 /* End ARM APB PPC0 peripherals definition */
 
 /* ARM APB PPC1 peripherals definition */
-#define CMSDK_S32K_TIMER_PPC_POS  0U
+#define CMSDK_S32K_TIMER_PPC_POS             0U
 /* The bits 31:1 are reserved */
 /* End ARM APB PPC1 peripherals definition */
 
@@ -289,6 +272,9 @@ struct nspctrl_def {
 /* Musca B1 specific PPC bit definitions */
 
 /* ARM AHB PPCEXP0 peripherals definition */
+/* Bit 0 is reserved */
+#define MUSCA_B1_GPIO_AHB_PPC_POS            1U
+/* The bits 31:2 are reserved */
 /* End of ARM AHB PPCEXP0 peripherals definition */
 
 /* ARM AHB PPCEXP1 peripherals definition */
@@ -303,8 +289,39 @@ struct nspctrl_def {
 /* The bits 31:0 are reserved */
 /* End of ARM AHB PPCEXP3 peripherals definition */
 
+/* ARM APB PPCEXP0 peripherals definition */
+#define MUSCA_B1_EFLASH0_CTRL_APB_PPC_POS    0U
+#define MUSCA_B1_EFLASH1_CTRL_APB_PPC_POS    1U
+#define MUSCA_B1_QSPI_APB_PPC_POS            2U
+#define MUSCA_B1_EFLASH0_MPC_APB_PPC_POS     3U
+#define MUSCA_B1_EFLASH1_MPC_APB_PPC_POS     4U
+#define MUSCA_B1_SRAM_MPC_APB_PPC_POS        5U
+#define MUSCA_B1_QSPI_MPC_APB_PPC_POS        6U
+#define MUSCA_B1_CI_MHU0_S_APB_PPC_POS       7U
+#define MUSCA_B1_CI_MHU0_R_APB_PPC_POS       8U
+/* The bits 13:9 are reserved. */
+#define MUSCA_B1_CI_MPC_APB_PPC_POS         14U
+/* The bits 31:15 are reserved */
+/* End of ARM APB PPCEXP0 peripherals definition */
+
 /* ARM APB PPCEXP1 peripherals definition */
-#define MUSCA_B1_UART1_APB_PPC_POS  6U
+/* Bit 0 is reserved. */
+#define MUSCA_B1_PWM0_APB_PPC_POS            1U
+#define MUSCA_B1_PWM1_APB_PPC_POS            2U
+#define MUSCA_B1_PWM2_APB_PPC_POS            3U
+#define MUSCA_B1_I2S_APB_PPC_POS             4U
+#define MUSCA_B1_UART0_APB_PPC_POS           5U
+#define MUSCA_B1_UART1_APB_PPC_POS           6U
+/* Bit 7 is reserved. */
+#define MUSCA_B1_I2C0_APB_PPC_POS            8U
+#define MUSCA_B1_I2C1_APB_PPC_POS            9U
+#define MUSCA_B1_SPI_APB_PPC_POS            10U
+#define MUSCA_B1_SCC_APB_PPC_POS            11U
+#define MUSCA_B1_GPTIMER_APB_PPC_POS        12U
+#define MUSCA_B1_RTC_APB_PPC_POS            13U
+#define MUSCA_B1_PVT_APB_PPC_POS            14U
+#define MUSCA_B1_SDIO_APB_PPC_POS           15U
+/* The bits 31:16 are reserved */
 /* End of ARM APB PPCEXP1 peripherals definition */
 
 #endif /* __MUSCA_B1_PLATFORM_REGS_H__ */

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "mpu_armv8m_drv.h"
-#include "cmsis_cpu.h"
+#include "cmsis.h"
 
 /*
  * FixMe:
