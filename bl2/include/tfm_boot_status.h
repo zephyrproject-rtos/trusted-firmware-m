@@ -88,12 +88,12 @@ extern "C" {
  * component. But they might be part of the boot status.
  */
 #define BOOT_SEED          0x00
-#define HW_ID              0x01
+#define HW_VERSION         0x01
 #define SECURITY_LIFECYCLE 0x02
 
 /* Minor numbers (12 bit) to identify attestation service related data */
 #define TLV_MINOR_IAS_BOOT_SEED       ((SW_GENERAL << 6) | BOOT_SEED)
-#define TLV_MINOR_IAS_HW_ID           ((SW_GENERAL << 6) | HW_ID)
+#define TLV_MINOR_IAS_HW_VERSION      ((SW_GENERAL << 6) | HW_VERSION)
 #define TLV_MINOR_IAS_SLC             ((SW_GENERAL << 6) | SECURITY_LIFECYCLE)
 
 /* Bootloader - It can be more stage */
