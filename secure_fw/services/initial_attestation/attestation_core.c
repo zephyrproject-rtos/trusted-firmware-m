@@ -25,6 +25,11 @@
 #define EAT_SW_COMPONENT_NESTED     1  /* Nested map */
 #define EAT_SW_COMPONENT_NOT_NESTED 0  /* Flat structure */
 
+/* Indicates that the boot status does not contain any SW components'
+ * measurement
+ */
+#define NO_SW_COMPONENT_FIXED_VALUE 1
+
 /*!
  * \var boot_status
  *
@@ -414,16 +419,12 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
     uint8_t *tlv_ptr;
     uint8_t  tlv_id;
     int32_t found;
+    uint32_t cnt = 0;
     uint32_t module;
     QCBOREncodeContext *cbor_encode_ctx;
 
-    /* Open array which stores SW components claims */
-    cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
-    QCBOREncode_OpenArrayInMapN(cbor_encode_ctx,
-                                EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
-
     /* Starting from module 1, because module 0 contains general claims which
-     * are not related to SW module(i.e: boot_seed)
+     * are not related to SW module(i.e: boot_seed, etc.)
      */
     for (module = 1; module < SW_MAX; ++module) {
         /* Indicates to restart the look up from the beginning of the shared
@@ -439,12 +440,28 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
         }
 
         if (found == 1) {
+            cnt++;
+            if (cnt == 1) {
+                /* Open array which stores SW components claims */
+                cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
+                QCBOREncode_OpenArrayInMapN(cbor_encode_ctx,
+                                            EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
+            }
             attest_add_single_sw_component(token_ctx, module, tlv_ptr);
         }
     }
 
-    /* Close array which stores SW components claims*/
-    QCBOREncode_CloseArray(cbor_encode_ctx);
+    if (cnt != 0) {
+        /* Close array which stores SW components claims*/
+        QCBOREncode_CloseArray(cbor_encode_ctx);
+    } else {
+        /* If there is not any SW components' measurement in the boot status
+         * then include this claim to indicate that this state is intentional
+         */
+        attest_token_add_integer(token_ctx,
+                                 EAT_CBOR_ARM_LABEL_NO_SW_COMPONENTS,
+                                 (int64_t)NO_SW_COMPONENT_FIXED_VALUE);
+    }
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
