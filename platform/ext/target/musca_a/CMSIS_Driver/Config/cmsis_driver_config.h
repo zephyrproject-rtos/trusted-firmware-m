@@ -26,7 +26,13 @@
 #define UART0_DEV           UART0_PL011_DEV_NS
 #define UART1_DEV           UART1_PL011_DEV_NS
 
-#define FLASH0_DEV          MT25QL_DEV_S
+/* Note: On Musca-A all expansion peripherals, including the flash controller,
+ * are configured by a single PPC bit position (see section 3.3.6 of the Musca-A
+ * Technical Reference Manual for details). This is set to non-secure to allow
+ * the UART (and other peripherals) to be accessed from NS code, so the flash
+ * controller must also be accessed through its non-secure alias.
+ */
+#define FLASH0_DEV          MT25QL_DEV_NS
 
 #define MPC_ISRAM0_DEV      MPC_ISRAM0_DEV_S
 #define MPC_ISRAM1_DEV      MPC_ISRAM1_DEV_S
