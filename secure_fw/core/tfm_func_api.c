@@ -204,6 +204,12 @@ static void tfm_copy_iovec_parameters(struct iovec_args_t *target,
 {
     size_t i;
 
+    /* The vectors have been sanity checked already, and since then the
+     * interrupts have been kept disabled. So we can be sure that the
+     * vectors haven't been tampered with since the check. So it is safe to pass
+     * it to the called partition.
+     */
+
     target->in_len = source->in_len;
     for (i = 0; i < source->in_len; ++i) {
         target->in_vec[i].base = source->in_vec[i].base;
@@ -232,16 +238,76 @@ static void tfm_clear_iovec_parameters(struct iovec_args_t *args)
     }
 }
 
+/**
+ * \brief Check whether the partitions for the secure function call are in a
+ *        proper state
+ *
+ * \param[in] curr_partition_state    State of the partition to be called
+ * \param[in] caller_partition_state  State of the caller partition
+ *
+ * \return \ref TFM_SUCCESS if the check passes, error otherwise.
+ */
+static int32_t check_partition_state(
+                                   enum spm_part_state_t curr_partition_state,
+                                   enum spm_part_state_t caller_partition_state)
+{
+    if (caller_partition_state != SPM_PARTITION_STATE_RUNNING) {
+        /* Calling partition from non-running state (e.g. during handling IRQ)
+         * is not allowed.
+         */
+        return TFM_ERROR_INVALID_EXC_MODE;
+    }
+
+    if (curr_partition_state == SPM_PARTITION_STATE_RUNNING ||
+        curr_partition_state == SPM_PARTITION_STATE_SUSPENDED ||
+        curr_partition_state == SPM_PARTITION_STATE_BLOCKED) {
+        /* Recursion is not permitted! */
+        return TFM_ERROR_PARTITION_NON_REENTRANT;
+    } else if (curr_partition_state != SPM_PARTITION_STATE_IDLE) {
+        /* The partition to be called is not in a proper state */
+        return TFM_SECURE_LOCK_FAILED;
+    }
+    return TFM_SUCCESS;
+}
+
+/**
+ * \brief Calculate the address where the iovec parameters are to be saved for
+ *        the called partition.
+ *
+ * \param[in] partition_idx  The index of the partition to be called.
+ *
+ * \return The address where the iovec parameters should be saved.
+ */
+static struct iovec_args_t *get_iovec_args_stack_address(uint32_t partition_idx)
+{
+    struct iovec_args_t *iovec_args;
+#if TFM_LVL == 1
+    /* Save the iovecs on the common stack. */
+    iovec_args = (struct iovec_args_t *)
+            ((uint8_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
+            sizeof(struct iovec_args_t));
+#else
+    /* Save the iovecs on the stack of the partition. */
+    iovec_args = (struct iovec_args_t *)
+            (tfm_spm_partition_get_stack_top(partition_idx) -
+            sizeof(struct iovec_args_t));
+#endif
+    return iovec_args;
+}
+
 static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
                                                              uint32_t excReturn)
 {
+    int32_t res;
     uint32_t caller_partition_idx = desc_ptr->caller_part_idx;
     const struct spm_partition_runtime_data_t *curr_part_data;
+    const struct spm_partition_runtime_data_t *caller_part_data;
     uint32_t caller_flags;
     register uint32_t partition_idx;
     uint32_t psp;
     uint32_t partition_psp, partition_psplim;
-    uint32_t partition_state;
+    enum spm_part_state_t partition_state;
+    enum spm_part_state_t caller_partition_state;
     uint32_t partition_flags;
     struct tfm_exc_stack_t *svc_ctx;
     uint32_t caller_partition_id;
@@ -262,7 +328,9 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
     partition_idx = get_partition_idx(desc_ptr->sp_id);
 
     curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
+    caller_part_data = tfm_spm_partition_get_runtime_data(caller_partition_idx);
     partition_state = curr_part_data->partition_state;
+    caller_partition_state = caller_part_data->partition_state;
     partition_flags = tfm_spm_partition_get_flags(partition_idx);
     caller_partition_id = tfm_spm_partition_get_partition_id(
                                                           caller_partition_idx);
@@ -277,14 +345,11 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
                                         TFM_PARTITION_UNPRIVILEGED_MODE);
         }
 #endif
-    } else if (partition_state == SPM_PARTITION_STATE_RUNNING ||
-        partition_state == SPM_PARTITION_STATE_SUSPENDED ||
-        partition_state == SPM_PARTITION_STATE_BLOCKED) {
-        /* Recursion is not permitted! */
-        return TFM_ERROR_PARTITION_NON_REENTRANT;
-    } else if (partition_state != SPM_PARTITION_STATE_IDLE) {
-        /* The partition to be called is not in a proper state */
-        return TFM_SECURE_LOCK_FAILED;
+    } else {
+        res = check_partition_state(partition_state, caller_partition_state);
+        if (res != TFM_SUCCESS) {
+            return res;
+        }
     }
 
 #if TFM_LVL == 1
@@ -340,20 +405,15 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
     /* In level one, only switch context and return from exception if in
      * handler mode
      */
-    if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing)) {
+    if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing))
+#endif
+    {
         if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
-            /* Save the iovecs on the common stack. The vectors had been sanity
-             * checked already, and since then the interrupts have been kept
-             * disabled. So we can be sure that the vectors haven't been
-             * tampered with since the check.
-             */
-            iovec_args = (struct iovec_args_t *)
-                ((uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
-                     sizeof(struct iovec_args_t));
             if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
                 SPM_ERR_OK) {
                 return TFM_ERROR_GENERIC;
             }
+            iovec_args = get_iovec_args_stack_address(partition_idx);
             tfm_copy_iovec_parameters(iovec_args,
                                       &(curr_part_data->iovec_args));
 
@@ -369,34 +429,6 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
         __set_PSP(psp);
         tfm_arch_set_psplim(partition_psplim);
     }
-#else
-    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
-        /* Save the iovecs on the stack of the partition. The vectors had been
-         * sanity checked already, and since then the interrupts have been kept
-         * disabled. So we can be sure that the vectors haven't been tampered
-         * with since the check.
-         */
-        iovec_args =
-        (struct iovec_args_t *)(tfm_spm_partition_get_stack_top(partition_idx) -
-        sizeof(struct iovec_args_t));
-        if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
-            SPM_ERR_OK) {
-            return TFM_ERROR_GENERIC;
-        }
-        tfm_copy_iovec_parameters(iovec_args, &(curr_part_data->iovec_args));
-
-        /* Prepare the partition context, update stack ptr */
-        psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
-                                                    iovec_args,
-                                                    (uint32_t *)partition_psp);
-    } else {
-        /* Prepare the partition context, update stack ptr */
-        psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
-                                              (uint32_t *)partition_psp);
-    }
-    __set_PSP(psp);
-    tfm_arch_set_psplim(partition_psplim);
-#endif
 
     tfm_spm_partition_set_state(caller_partition_idx,
                                 SPM_PARTITION_STATE_BLOCKED);
@@ -487,7 +519,8 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
          */
         if (curr_part_data->iovec_api) {
             iovec_args = (struct iovec_args_t *)
-               ((uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit) -
+               ((uint8_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK,
+                                                                  $$ZI$$Limit) -
                sizeof(struct iovec_args_t));
 
             for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
