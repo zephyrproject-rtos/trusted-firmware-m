@@ -51,5 +51,10 @@
         "short_name": "tfm_secure_irq_handlers",
         "output": "secure_fw/core/tfm_secure_irq_handlers.inc"
     },
+    {
+        "name": "Secure IRQ handlers for PSA API",
+        "short_name": "tfm_secure_irq_handlers_ipc",
+        "output": "secure_fw/core/ipc/tfm_secure_irq_handlers_ipc.inc"
+    },
   ]
 }

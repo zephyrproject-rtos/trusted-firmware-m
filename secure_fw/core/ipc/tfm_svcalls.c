@@ -17,10 +17,19 @@
 #include "tfm_internal_defines.h"
 #include "tfm_message_queue.h"
 #include "tfm_spm.h"
+#include "tfm_spm_hal.h"
+#include "tfm_spm_signal_defs.h"
+#include "tfm_irq_list.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
 #include "spm_api.h"
+#include "tfm_peripherals_def.h"
+
+void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
+                     int32_t irq_line);
+
+#include "tfm_secure_irq_handlers_ipc.inc"
 
 /************************* SVC handler for PSA Client APIs *******************/
 
@@ -861,21 +870,16 @@ static void tfm_svcall_psa_reply(uint32_t *args)
 }
 
 /**
- * \brief SVC handler for \ref psa_notify.
- *
- * \param[in] args              Include all input arguments: partition_id.
+ * \param[in] partition_id      The ID of the partition to be notified.
+ * \param[in] signal            The signal that the partition is to be notified
+ *                              with.
  *
  * \retval void                 Success.
- * \retval "Does not return"    partition_id does not correspond to a Secure
- *                              Partition.
+ * \retval "Does not return"    If partition_id is invalid.
  */
-static void tfm_svcall_psa_notify(uint32_t *args)
+static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 {
-    int32_t partition_id;
     struct tfm_spm_ipc_partition_t *partition = NULL;
-
-    TFM_ASSERT(args != NULL);
-    partition_id = (int32_t)args[0];
 
     /*
      * The value of partition_id must be greater than zero as the target of
@@ -895,7 +899,7 @@ static void tfm_svcall_psa_notify(uint32_t *args)
         tfm_panic();
     }
 
-    partition->signals |= PSA_DOORBELL;
+    partition->signals |= signal;
 
     /*
      * The target partition may be blocked with waiting for signals after
@@ -904,6 +908,42 @@ static void tfm_svcall_psa_notify(uint32_t *args)
      */
     tfm_event_wake(&partition->signal_evnt,
                    partition->signals & partition->signal_mask);
+}
+
+/**
+ * \brief SVC handler for \ref psa_notify.
+ *
+ * \param[in] args              Include all input arguments: partition_id.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    partition_id does not correspond to a Secure
+ *                              Partition.
+ */
+static void tfm_svcall_psa_notify(uint32_t *args)
+{
+    int32_t partition_id;
+
+    TFM_ASSERT(args != NULL);
+    partition_id = (int32_t)args[0];
+
+    return notify_with_signal(partition_id, PSA_DOORBELL);
+}
+
+/**
+ * \brief assert signal for a given IRQ line.
+ *
+ * \param[in] partition_id      The ID of the partition which handles this IRQ
+ * \param[in] signal            The signal associated with this IRQ
+ * \param[in] irq_line          The number of the IRQ line
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    Partition ID is invalid
+ */
+void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
+                     int32_t irq_line)
+{
+    tfm_spm_hal_disable_irq(irq_line);
+    notify_with_signal(partition_id, signal);
 }
 
 /**
@@ -933,6 +973,42 @@ static void tfm_svcall_psa_clear(uint32_t *args)
 }
 
 /**
+ * \brief Return the IRQ line number associated with a signal
+ *
+ * \param[in]      partition_id    The ID of the partition in which we look for
+ *                                 the signal.
+ * \param[in]      signal          The signal we do the query for.
+ * \param[out]     irq_line        The irq line associated with signal
+ *
+ * \retval IPC_SUCCESS          Execution successful, irq_line contains a valid
+ *                              value.
+ * \retval IPC_ERROR_GENERIC    There was an error finding the IRQ line for the
+ *                              signal. irq_line is unchanged.
+ */
+static int32_t get_irq_line_for_signal(int32_t partition_id,
+                                       psa_signal_t signal,
+                                       int32_t *irq_line)
+{
+    size_t i;
+
+    for (i = 0; i < tfm_core_irq_signals_count; ++i) {
+        if (tfm_core_irq_signals[i].partition_id == partition_id &&
+            tfm_core_irq_signals[i].signal_value == signal) {
+            *irq_line = tfm_core_irq_signals[i].irq_line;
+            return IPC_SUCCESS;
+        }
+    }
+    return IPC_ERROR_GENERIC;
+}
+
+/*
+ * FIXME: tfm_svcall_psa_eoi, tfm_core_enable_irq_handler and
+ * tfm_core_disable_irq_handler function has an implementation in
+ * tfm_secure_api.c for the library model.
+ * The two implementations should be merged as part of restructuring common code
+ * among library and IPC model.
+ */
+/**
  * \brief SVC handler for \ref psa_eoi.
  *
  * \param[in] args              Include all input arguments: irq_signal.
@@ -947,6 +1023,8 @@ static void tfm_svcall_psa_clear(uint32_t *args)
 static void tfm_svcall_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
+    int32_t irq_line = 0;
+    int32_t ret;
     struct tfm_spm_ipc_partition_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
@@ -957,9 +1035,11 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
         tfm_panic();
     }
 
-    /*
-     * FixMe: It is a fatal error if passed signal is not an interrupt signal.
-     */
+    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    /* It is a fatal error if passed signal is not an interrupt signal. */
+    if (ret != IPC_SUCCESS) {
+        tfm_panic();
+    }
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (tfm_bitcount(irq_signal) != 1) {
@@ -973,7 +1053,62 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
 
     partition->signals &= ~irq_signal;
 
-    /* FixMe: re-enable interrupt */
+    tfm_spm_hal_clear_pending_irq(irq_line);
+    tfm_spm_hal_enable_irq(irq_line);
+}
+
+void tfm_svcall_enable_irq(uint32_t *args)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)args;
+    psa_signal_t irq_signal = svc_ctx->R0;
+    int32_t irq_line = 0;
+    int32_t ret;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
+
+    /* It is a fatal error if passed signal indicates more than one signals. */
+    if (tfm_bitcount(irq_signal) != 1) {
+        tfm_panic();
+    }
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_panic();
+    }
+
+    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    /* It is a fatal error if passed signal is not an interrupt signal. */
+    if (ret != IPC_SUCCESS) {
+        tfm_panic();
+    }
+
+    tfm_spm_hal_enable_irq(irq_line);
+}
+
+void tfm_svcall_disable_irq(uint32_t *args)
+{
+    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)args;
+    psa_signal_t irq_signal = svc_ctx->R0;
+    int32_t irq_line = 0;
+    int32_t ret;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
+
+    /* It is a fatal error if passed signal indicates more than one signals. */
+    if (tfm_bitcount(irq_signal) != 1) {
+        tfm_panic();
+    }
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_panic();
+    }
+
+    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    /* It is a fatal error if passed signal is not an interrupt signal. */
+    if (ret != IPC_SUCCESS) {
+        tfm_panic();
+    }
+
+    tfm_spm_hal_disable_irq(irq_line);
 }
 
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
@@ -1022,8 +1157,16 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_PSA_EOI:
         tfm_svcall_psa_eoi(ctx);
         break;
-    default:
+    case TFM_SVC_ENABLE_IRQ:
+        tfm_svcall_enable_irq(ctx);
         break;
+    case TFM_SVC_DISABLE_IRQ:
+        tfm_svcall_disable_irq(ctx);
+        break;
+
+    default:
+        LOG_MSG("Unknown SVC number requested!");
+        return PSA_DROP_CONNECTION;
     }
     return PSA_SUCCESS;
 }

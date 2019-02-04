@@ -34,10 +34,12 @@ extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
 #endif
 
 
-/* Include the definitions of the privileged IRQ handlers, and the declarations
- * of the unprivileged handlers.
+/* Include the definitions of the privileged IRQ handlers in case of library
+ * model
  */
+#ifndef TFM_PSA_API
 #include "tfm_secure_irq_handlers.inc"
+#endif
 
 uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
 {
@@ -63,25 +65,6 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
 #ifdef TFM_PSA_API
     case TFM_SVC_IPC_REQUEST:
         tfm_psa_ipc_request_handler(svc_args);
-        break;
-    case TFM_SVC_SCHEDULE:
-    case TFM_SVC_EXIT_THRD:
-    case TFM_SVC_PSA_FRAMEWORK_VERSION:
-    case TFM_SVC_PSA_VERSION:
-    case TFM_SVC_PSA_CONNECT:
-    case TFM_SVC_PSA_CALL:
-    case TFM_SVC_PSA_CLOSE:
-    case TFM_SVC_PSA_WAIT:
-    case TFM_SVC_PSA_GET:
-    case TFM_SVC_PSA_SET_RHANDLE:
-    case TFM_SVC_PSA_READ:
-    case TFM_SVC_PSA_SKIP:
-    case TFM_SVC_PSA_WRITE:
-    case TFM_SVC_PSA_REPLY:
-    case TFM_SVC_PSA_NOTIFY:
-    case TFM_SVC_PSA_CLEAR:
-    case TFM_SVC_PSA_EOI:
-        svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, lr);
         break;
 #else
     case TFM_SVC_SFN_REQUEST:
@@ -131,7 +114,9 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_core_get_boot_data_handler(svc_args);
         break;
     default:
-        LOG_MSG("Unknown SVC number requested!");
+#ifdef TFM_PSA_API
+        svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, lr);
+#endif
         break;
     }
 

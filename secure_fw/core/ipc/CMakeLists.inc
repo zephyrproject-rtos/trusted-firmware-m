@@ -58,6 +58,7 @@ unset(SS_IPC_C_SRC)
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/ipc ABSOLUTE)
