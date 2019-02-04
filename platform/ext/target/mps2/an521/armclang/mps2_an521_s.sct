@@ -242,9 +242,10 @@ LR_VENEER CMSE_VENEER_REGION_START {
 LR_NS_PARTITION NS_PARTITION_START {
     /* Reserved place for NS application.
      * No code will be placed here, just address of this region is used in the
-     * secure code to configure certain HW components.
+     * secure code to configure certain HW components. This generates an empty
+     * execution region description warning during linking.
      */
-    ER_NS_PARTITION NS_PARTITION_START EMPTY NS_PARTITION_SIZE {
+    ER_NS_PARTITION NS_PARTITION_START UNINIT NS_PARTITION_SIZE {
     }
 }
 
@@ -252,10 +253,11 @@ LR_NS_PARTITION NS_PARTITION_START {
 LR_SECONDARY_PARTITION SECONDARY_PARTITION_START {
     /* Reserved place for new image in case of firmware upgrade.
      * No code will be placed here, just address of this region is used in the
-     * secure code to configure certain HW components.
+     * secure code to configure certain HW components. This generates an empty
+     * execution region description warning during linking.
      */
     ER_SECONDARY_PARTITION SECONDARY_PARTITION_START \
-        EMPTY SECONDARY_PARTITION_SIZE {
+        UNINIT SECONDARY_PARTITION_SIZE {
     }
 }
 #endif /* BL2 */
