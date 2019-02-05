@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -156,6 +156,10 @@
         CONCAT(LIB_PREFIX_NAME, mbedtls_ccm_self_test)
 #define mbedtls_ccm_setkey \
         CONCAT(LIB_PREFIX_NAME, mbedtls_ccm_setkey)
+#define mbedtls_ccm_star_auth_decrypt \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_ccm_star_auth_decrypt)
+#define mbedtls_ccm_star_encrypt_and_tag \
+        CONCAT(LIB_PREFIX_NAME, mbedtls_ccm_star_encrypt_and_tag)
 #define mbedtls_cipher_auth_decrypt \
         CONCAT(LIB_PREFIX_NAME, mbedtls_cipher_auth_decrypt)
 #define mbedtls_cipher_auth_encrypt \
