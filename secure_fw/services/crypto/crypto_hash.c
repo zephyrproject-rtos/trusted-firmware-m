@@ -16,6 +16,36 @@
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
 
+/**
+ * \brief Release all resources associated with a hash operation.
+ *
+ * \param[in] operation  Frontend hash operation context
+ * \param[in] ctx        Backend hash operation context
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+static enum tfm_crypto_err_t tfm_crypto_hash_release(
+                                               psa_hash_operation_t *operation,
+                                               struct tfm_hash_operation_s *ctx)
+{
+    psa_status_t status;
+    enum tfm_crypto_err_t err;
+
+    /* Release resources in the engine */
+    status = tfm_crypto_engine_hash_release(&(ctx->engine_ctx));
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
+    }
+
+    /* Release the operation context */
+    err = tfm_crypto_operation_release(&(operation->handle));
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return err;
+    }
+
+    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+}
+
 /*!
  * \defgroup public_psa Public functions, PSA
  *
@@ -61,7 +91,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return err;
     }
 
@@ -72,7 +102,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
     status = tfm_crypto_engine_hash_start(&(ctx->engine_ctx), &engine_info);
     if (status != PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_hash_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -114,6 +144,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
                                            input,
                                            input_length);
     if (status != PSA_SUCCESS) {
+        (void)tfm_crypto_hash_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -158,31 +189,21 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
     }
 
     if (hash_size < PSA_HASH_SIZE(ctx->alg)) {
+        (void)tfm_crypto_hash_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     /* Finalise the hash value using the engine */
     status = tfm_crypto_engine_hash_finish(&(ctx->engine_ctx), hash);
     if (status != PSA_SUCCESS) {
-        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
-    }
-
-    /* Release engine resources */
-    status = tfm_crypto_engine_hash_release(&(ctx->engine_ctx));
-    if (status != PSA_SUCCESS) {
+        (void)tfm_crypto_hash_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
     /* Set the length of the hash that has been produced */
     *hash_length = PSA_HASH_SIZE(ctx->alg);
 
-    /* Release the operation context */
-    err = tfm_crypto_operation_release(&(operation->handle));
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return tfm_crypto_hash_release(operation, ctx);
 }
 
 enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
@@ -228,7 +249,6 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
 
 enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
 {
-    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
     struct tfm_hash_operation_s *ctx = NULL;
 
@@ -248,18 +268,6 @@ enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
         return err;
     }
 
-    /* Release engine resources */
-    status = tfm_crypto_engine_hash_release(&(ctx->engine_ctx));
-    if (status != PSA_SUCCESS) {
-        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
-    }
-
-    /* Release the operation context */
-    err = tfm_crypto_operation_release(&(operation->handle));
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return tfm_crypto_hash_release(operation, ctx);
 }
 /*!@}*/

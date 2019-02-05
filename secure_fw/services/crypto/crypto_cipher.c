@@ -28,6 +28,36 @@
 #define CRYPTO_CIPHER_MAX_KEY_LENGTH (32)
 #endif
 
+/**
+ * \brief Release all resources associated with a cipher operation.
+ *
+ * \param[in] operation  Frontend cipher operation context
+ * \param[in] ctx        Backend cipher operation context
+ *
+ * \return Return values as described in \ref tfm_crypto_err_t
+ */
+static enum tfm_crypto_err_t tfm_crypto_cipher_release(
+                                             psa_cipher_operation_t *operation,
+                                             struct tfm_cipher_operation_s *ctx)
+{
+    psa_status_t status;
+    enum tfm_crypto_err_t err;
+
+    /* Release resources in the engine */
+    status = tfm_crypto_engine_cipher_release(&(ctx->engine_ctx));
+    if (status != PSA_SUCCESS) {
+        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
+    }
+
+    /* Release the operation context */
+    err = tfm_crypto_operation_release(&(operation->handle));
+    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        return err;
+    }
+
+    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+}
+
 static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                            psa_cipher_operation_t *operation,
                                            psa_key_slot_t key,
@@ -94,7 +124,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return err;
     }
 
@@ -108,7 +138,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     status = tfm_crypto_engine_cipher_start(&(ctx->engine_ctx), &engine_info);
     if (status != PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -125,7 +155,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                              &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return err;
     }
 
@@ -136,7 +166,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                               &engine_info);
     if (status != PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -151,7 +181,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                                            &engine_info);
         if (status != PSA_SUCCESS) {
             /* Release the operation context */
-            tfm_crypto_operation_release(&(operation->handle));
+            (void)tfm_crypto_cipher_release(operation, ctx);
             return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
         }
     }
@@ -199,10 +229,12 @@ enum tfm_crypto_err_t tfm_crypto_cipher_set_iv(
     }
 
     if ((iv_length != ctx->block_size) || (iv_length > TFM_CIPHER_IV_MAX_SIZE)){
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if ((ctx->iv_set == 1) || (ctx->iv_required == 0)) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
@@ -211,6 +243,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_set_iv(
                                              iv,
                                              iv_length);
     if (status != PSA_SUCCESS) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -295,17 +328,17 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
     if ((ctx->iv_required == 1) && (ctx->iv_set == 0)) {
 
         if (ctx->cipher_mode != ENGINE_CIPHER_MODE_DECRYPT) {
+            (void)tfm_crypto_cipher_release(operation, ctx);
             return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
         }
 
         /* This call is used to set the IV on the object */
-        err = tfm_crypto_cipher_set_iv(operation, input, input_length);
-
-        return err;
+        return tfm_crypto_cipher_set_iv(operation, input, input_length);
     }
 
     /* If the key is not set, setup phase has not been completed */
     if (ctx->key_set == 0) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
@@ -313,6 +346,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
      *        of input data whose length is equal to the block size
      */
     if (input_length > output_size) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -323,6 +357,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
                                              output,
                                              (uint32_t *)output_length);
     if (status != PSA_SUCCESS) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
@@ -371,6 +406,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
      * output data.
      */
     if (output_size < ctx->block_size) {
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -380,27 +416,15 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
                                              (uint32_t *)output_length);
     if (status != PSA_SUCCESS) {
         *output_length = 0;
+        (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
 
-    /* Release resources on the crypto engine */
-    status = tfm_crypto_engine_cipher_release(&(ctx->engine_ctx));
-    if (status != PSA_SUCCESS) {
-        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
-    }
-
-    /* Release the operation context */
-    err = tfm_crypto_operation_release(&(operation->handle));
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return tfm_crypto_cipher_release(operation, ctx);
 }
 
 enum tfm_crypto_err_t tfm_crypto_cipher_abort(psa_cipher_operation_t *operation)
 {
-    psa_status_t status = PSA_SUCCESS;
     enum tfm_crypto_err_t err;
     struct tfm_cipher_operation_s *ctx = NULL;
 
@@ -420,18 +444,6 @@ enum tfm_crypto_err_t tfm_crypto_cipher_abort(psa_cipher_operation_t *operation)
         return err;
     }
 
-    /* Release resources on the engine */
-    status = tfm_crypto_engine_cipher_release(&(ctx->engine_ctx));
-    if (status != PSA_SUCCESS) {
-        return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
-    }
-
-    /* Release the operation context */
-    err = tfm_crypto_operation_release(&(operation->handle));
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return tfm_crypto_cipher_release(operation, ctx);
 }
 /*!@}*/

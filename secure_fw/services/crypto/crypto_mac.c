@@ -122,7 +122,6 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
                                      &key_data[0],
                                      key_size);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            tfm_crypto_hash_abort(&(ctx->ctx.hmac.hash_operation));
             return err;
         }
 
@@ -131,7 +130,6 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
                                      hashed_key, sizeof(hashed_key),
                                      &key_size);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            tfm_crypto_hash_abort(&(ctx->ctx.hmac.hash_operation));
             return err;
         }
     } else {
@@ -168,7 +166,6 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
                                  ipad,
                                  block_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        tfm_crypto_hash_abort(&(ctx->ctx.hmac.hash_operation));
         return err;
     }
 
@@ -209,7 +206,7 @@ static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return err;
     }
 
@@ -229,7 +226,7 @@ static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation
         err = tfm_crypto_hmac_setup(ctx, key, alg);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
             /* Release the operation context */
-            tfm_crypto_operation_release(&(operation->handle));
+            (void)tfm_crypto_operation_release(&(operation->handle));
             return err;
         }
 
@@ -237,7 +234,7 @@ static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation
     } else {
         /* Other MAC types constructions are not supported */
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -318,9 +315,6 @@ static enum tfm_crypto_err_t tfm_crypto_mac_finish(
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Clear the mac context */
-    mac_zeroize(ctx, sizeof(struct tfm_mac_operation_s));
-
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
@@ -382,6 +376,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_update(psa_mac_operation_t *operation,
 
     /* Sanity check */
     if (!(ctx->key_set)) {
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
@@ -391,12 +386,14 @@ enum tfm_crypto_err_t tfm_crypto_mac_update(psa_mac_operation_t *operation,
                                      input,
                                      input_length);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+            (void)tfm_crypto_operation_release(&(operation->handle));
             return err;
         }
 
         /* Set this flag to avoid HMAC without data */
         ctx->has_input = 1;
     } else {
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -449,6 +446,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_sign_finish(psa_mac_operation_t *operation,
         /* Finalise the mac operation */
         err = tfm_crypto_mac_finish(ctx, mac, mac_size, mac_length);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+            (void)tfm_crypto_operation_release(&(operation->handle));
             return err;
         }
         /* Release the operation context */
@@ -457,6 +455,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_sign_finish(psa_mac_operation_t *operation,
             return err;
         }
     } else {
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
@@ -509,6 +508,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
                                     sizeof(computed_mac),
                                     &computed_mac_length);
         if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+            (void)tfm_crypto_operation_release(&(operation->handle));
             return err;
         }
         /* Release the operation context */
@@ -532,6 +532,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
             return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE;
         }
     } else {
+        (void)tfm_crypto_operation_release(&(operation->handle));
         return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
     }
 
@@ -570,7 +571,10 @@ enum tfm_crypto_err_t tfm_crypto_mac_abort(psa_mac_operation_t *operation)
         }
 
         /* Release the operation context */
-        tfm_crypto_operation_release(&(operation->handle));
+        err = tfm_crypto_operation_release(&(operation->handle));
+        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+            return err;
+        }
     } else {
         /* MACs other than HMACs not currently supported */
         return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
