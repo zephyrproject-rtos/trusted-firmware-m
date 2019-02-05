@@ -8,11 +8,19 @@
 #include "sst_crypto_interface.h"
 #include "secure_fw/services/secure_storage/sst_utils.h"
 
-/* pre include mbedTLS headers */
+/* Pre include Mbed TLS headers */
 #define LIB_PREFIX_NAME __tfm_storage__
 #include "mbedtls_global_symbols.h"
 
-#define MBEDTLS_CONFIG_FILE "tfm_mbedtls_config.h"
+/* Include the Mbed TLS configuration file, the way Mbed TLS does it
+ * in each of its header files.
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "platform/ext/common/tfm_mbedtls_config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
 #include "mbedtls/gcm.h"
 #include "mbedtls/memory_buffer_alloc.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
