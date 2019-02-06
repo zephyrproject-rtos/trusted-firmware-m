@@ -80,7 +80,7 @@
 (SST_METADATA_BLOCK1) : (SST_METADATA_BLOCK0))
 
 /*!
- * \enum sst_metadata_block_header_t
+ * \struct sst_metadata_block_header_t
  *
  * \brief Structure to store the metadata block header.
  *
@@ -97,7 +97,7 @@ struct __attribute__((__packed__)) sst_metadata_block_header_t {
 };
 
 /*!
- * \enum sst_flash_fs_context_t
+ * \struct sst_flash_fs_context_t
  *
  * \brief Structure to store the flash file system context.
  *
@@ -593,7 +593,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_mblock_validate_swap_count(
 /**
  * \brief Checks the validity of FS version.
  *
- * \param[in] swap_count  Swap count to validate
+ * \param[in] fs_version  File system version.
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */

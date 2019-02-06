@@ -321,7 +321,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_decrypt_setup(
  *        decrypt a chunk of encrypted input data to obtain decrypted data
  *        (for decryption contexts)
  *
- * \param[in/out] operation     Cipher operation context
+ * \param[in,out] operation     Cipher operation context
  * \param[in]     input         Buffer containing input data
  * \param[in]     input_length  Input length
  * \param[out]    output        Buffer containing output data
@@ -344,7 +344,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update(
  * \note A successful call to this function de-initialises the cipher operation
  *       context provided as parameter
  *
- * \param[in/out] operation     Cipher operation context
+ * \param[in,out] operation     Cipher operation context
  * \param[out]    output        Buffer containing output data
  * \param[in]     output_size   Size of the output buffer
  * \param[out]    output_length Size of the produced output
@@ -362,7 +362,7 @@ enum tfm_crypto_err_t tfm_crypto_cipher_finish(
  * \note A successful call to this function de-initialises the cipher operation
  *       context provided as parameter
  *
- * \param[in/out] operation Cipher operation context
+ * \param[in,out] operation Cipher operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -400,7 +400,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
  * \note A successful call to this function de-initialises the hash operation
  *       context provided as parameter
  *
- * \param[in/out] operation   Hash operation context
+ * \param[in,out] operation   Hash operation context
  * \param[out]    hash        Buffer containing hash data
  * \param[in]     hash_size   Size of the hash buffer
  * \param[out]    hash_length Size of the produced hash
@@ -419,7 +419,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
  *       context provided as parameter. The hash operation is de-initialised
  *       also in case TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE is returned
  *
- * \param[in/out] operation   Hash operation context
+ * \param[in,out] operation   Hash operation context
  * \param[in]     hash        Buffer containing the provided hash value
  * \param[in]     hash_length Size of the provided hash value
  *
@@ -434,7 +434,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_verify(psa_hash_operation_t *operation,
  * \note A successful call to this function de-initialises the hash operation
  *       context provided as parameter
  *
- * \param[in/out] operation Hash operation context
+ * \param[in,out] operation Hash operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -487,7 +487,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_update(psa_mac_operation_t *operation,
 /**
  * \brief Finalise a MAC context operation producing the final MAC value
  *
- * \param[in/out] operation  Mac operation context
+ * \param[in,out] operation  Mac operation context
  * \param[out]    mac        Buffer containing MAC data
  * \param[in]     mac_size   Size of the mac buffer
  * \param[out]    mac_length Size of the produced mac
@@ -502,7 +502,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_sign_finish(psa_mac_operation_t *operation,
  * \brief Finalise a MAC context operation, verifying that the final MAC value
  *        matches the one provided as input
  *
- * \param[in/out] operation  MAC operation context
+ * \param[in,out] operation  MAC operation context
  * \param[in]     mac        Buffer containing the provided MAC value
  * \param[in]     mac_length Size of the provided MAC value
  *
@@ -515,7 +515,7 @@ enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
 /**
  * \brief Abort a MAC operation, clear the operation context provided
  *
- * \param[in/out] operation MAC operation context
+ * \param[in,out] operation MAC operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */

@@ -200,7 +200,7 @@ psa_ps_status_t psa_ps_create( psa_ps_uid_t uid,
  * \retval PSA_PS_ERROR_STORAGE_FAILURE     If the data is not written correctly in the physical storage
  * \retval PSA_PS_ERROR_OFFSET_INVALID      The operation failed because an offset was supplied that is invalid
  *                                          for the allocated size of the space
- *                                          reserved for the `uid` when \ref psa_psa_create
+ *                                          reserved for the `uid` when \ref psa_ps_create
  *                                          was called. For example, offset + size
  *                                          is too large
  * \retval PSA_PS_ERROR_INVALID_ARGUMENT    The operation failed because one or more of the given arguments were invalid (null pointer, wrong flags, etc)

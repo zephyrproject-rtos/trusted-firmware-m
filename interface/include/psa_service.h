@@ -226,8 +226,6 @@ void psa_notify(int32_t partition_id);
 /**
  * \brief Clears the PSA_DOORBELL signal.
  *
- * \param[in] void
- *
  * \retval void              Success
  * \retval "Does not return" The Secure Partition's doorbell signal is not
  *                           currently asserted

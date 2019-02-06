@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -43,7 +43,7 @@ extern "C" {
  *
  * \brief A log item with no payload (standard size) has the following size.
  *        More details can be found observing \ref psa_audit_record
- *        \ref tfm_log_tlr and \ref tfm_log_hdr
+ *        \ref log_tlr and \ref log_hdr
  */
 #define STANDARD_LOG_ENTRY_SIZE (28)
 
@@ -82,7 +82,7 @@ extern "C" {
 #define FINAL_LOGGING_SIZE (56)
 
 /*!
- * \def DUMMY_TEST_ID_BASE
+ * \def DUMMY_TEST_RECORD_ID_BASE
  *
  * \brief The log record is initialized with a dummy ID which uses this value as
  *        base value

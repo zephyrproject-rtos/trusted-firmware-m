@@ -51,7 +51,10 @@ psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
     return CORE_TEST_ERRNO_SUCCESS_2;
 }
 
-psa_status_t spm_core_test_2_check_caller_client_id(void)
+psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
+                                    size_t in_len,
+                                    struct psa_outvec *out_vec,
+                                    size_t out_len)
 {
     size_t i;
     int32_t caller_client_id_stack = INVALID_NS_CLIENT_ID;

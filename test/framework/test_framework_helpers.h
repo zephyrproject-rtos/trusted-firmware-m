@@ -30,7 +30,7 @@ enum serial_color_t {
 /**
  * \brief Translates psa_ps_status_t into a string.
  *
- * \param[in] err  psa_ps_status_t status value.
+ * \param[in] status  psa_ps_status_t status value.
  *
  * \return psa_ps_status_t as string.
  */

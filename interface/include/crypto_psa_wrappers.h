@@ -39,10 +39,12 @@ struct psa_cipher_update_output {
  * \brief This function is a TF-M compatible wrapper for the
  *        \ref tfm_crypto_cipher_update implemented in the Crypto service
  *
- * \param[in]  input_s  Pointer to the structure containing input parameters
- *                      associated with \ref psa_cipher_update_input
- * \param[out] output_s Pointer to the structure containing output parameters
- *                      associated with \ref psa_cipher_update_output
+ * \param[out] operation Pointer to the structure containing output parameters
+ *                       associated with \ref psa_cipher_update_output
+ * \param[in]  input_s   Pointer to the structure containing input parameters
+ *                       associated with \ref psa_cipher_update_input
+ * \param[out] output_s  Pointer to the structure containing output parameters
+ *                       associated with \ref psa_cipher_update_output
  *
  */
 enum tfm_crypto_err_t tfm_crypto_cipher_update_wrapper(

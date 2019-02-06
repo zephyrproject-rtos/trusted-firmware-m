@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,10 +17,10 @@
  * Gets the index of a partition in the partition db based on the partition ID
  * provided as a parameter.
  *
- * \param[in] partition_id    The ID of the partition
+ * \param[in] partition_idx    The index of the partition
  *
- * \return \ref INVALID_PARTITION_IDX if the provided ID is invalid. The index
- *         of the partition otherwise.
+ * \return \ref INVALID_PARTITION_IDX if the provided index is invalid. The
+ *         index of the partition otherwise.
  */
 uint32_t get_partition_idx(uint32_t partition_id);
 

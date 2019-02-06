@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -86,12 +86,12 @@ enum test_suite_err_t {
 const char *test_err_to_str(enum test_suite_err_t err);
 
 /**
- * \brief Sets test suite parameters in the \ref structure.
+ * \brief Sets test suite parameters.
  *
  * \param[in] name       Test suite name
  * \param[in] test_list  Pointer to the test list
  * \param[in] size       Test list size
- * \param[in/out] p_ts   Pointer to test suite object to fill in the
+ * \param[in,out] p_ts   Pointer to test suite object to fill in the
  *                       parameters
  *
  * \returns Returns error code as specified in \ref test_suite_err_t
@@ -103,7 +103,7 @@ enum test_suite_err_t set_testsuite(const char *name,
 /**
  * \brief Runs the given test suite.
  *
- * \param[in/out] test_suite  Test suite to run the list of tests and
+ * \param[in,out] test_suite  Test suite to run the list of tests and
  *                            store test results.
  *
  * \returns Returns error code as specified in \ref test_suite_err_t
@@ -118,13 +118,13 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite);
 void show_tests(const struct test_suite_t *ts);
 
 /**
- * \brief Sets test failure state and information in the \ref sst_test_result_t
+ * \brief Sets test failure state and information in the \ref test_result_t
  *        structure.
  *
  * \param[in]  info_msg  Information message to show
  * \param[in]  filename  Filename where the error has ocurred
  * \param[in]  line      Line in the file where the error has ocurred
- * \param[out] ret       Pointer to \ref sst_test_result_t structure to
+ * \param[out] ret       Pointer to \ref test_result_t structure to
  *                       set the values
  *
  * \note: If info_msg is "" or , info message is not shown. If filename is "",

@@ -76,7 +76,7 @@ enum psa_attest_err_t attest_init(void);
  * \param[in]     in_vec     Pointer to in_vec array, which contains input data
  *                           to attestation service
  * \param[in]     num_invec  Number of elements in in_vec array
- * \param[in/out] out_vec    Pointer out_vec array, which contains output data
+ * \param[in,out] out_vec    Pointer out_vec array, which contains output data
  *                           to attestation service
  * \param[in]     num_outvec Number of elements in out_vec array
  *

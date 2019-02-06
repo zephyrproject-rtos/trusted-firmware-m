@@ -58,7 +58,7 @@ static enum tfm_sst_err_t sst_object_set_encryption_key(void)
  *
  * \param[in]  fid       File ID
  * \param[in]  cur_size  Size of the object data to decrypt
- * \param[in/out] obj    Pointer to the object structure to authenticate and
+ * \param[in,out] obj    Pointer to the object structure to authenticate and
  *                       fill in with the decrypted data. The tag of the object
  *                       is the one stored in the object table for the given
  *                       File ID.

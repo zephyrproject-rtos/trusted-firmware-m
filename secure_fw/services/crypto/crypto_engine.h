@@ -138,7 +138,7 @@ psa_status_t tfm_crypto_engine_hash_setup(const psa_algorithm_t alg,
 /**
  * \brief This function starts a multipart hash operation on the crypto engine
  *
- * \param[in/out] hp          Pointer to the hash engine context to be used
+ * \param[in,out] hp          Pointer to the hash engine context to be used
  * \param[in]     engine_info Pointer to the engine_info structure as determined
  *                            during the setup step
  *
@@ -150,7 +150,7 @@ psa_status_t tfm_crypto_engine_hash_start(union engine_hash_context *hp,
  * \brief This function updates a multipart hash operation with one chunk of
  *        input data
  *
- * \param[in/out] hp           Pointer to the hash engine context to be used
+ * \param[in,out] hp           Pointer to the hash engine context to be used
  * \param[in]     input        Pointer to the buffer containing the input data
  * \param[in]     input_length Size in bytes of the input data
  *
@@ -163,7 +163,7 @@ psa_status_t tfm_crypto_engine_hash_update(union engine_hash_context *hp,
  * \brief This function finalises a multipart hash operation producing one hash
  *        value in output as described by the operation context
  *
- * \param[in/out] hp   Pointer to the hash engine context to be used
+ * \param[in,out] hp   Pointer to the hash engine context to be used
  * \param[out]    hash Pointer to the buffer containing the output hash value
  *
  * \return Return values as specified by \ref psa_status_t
@@ -174,7 +174,7 @@ psa_status_t tfm_crypto_engine_hash_finish(union engine_hash_context *hp,
  * \brief This function releases the crypto engine resources associated to a
  *        multipart hash operation context
  *
- * \param[in/out] hp Pointer to the hash engine context to be used
+ * \param[in,out] hp Pointer to the hash engine context to be used
  *
  * \return Return values as specified by \ref psa_status_t
  */
@@ -204,7 +204,7 @@ psa_status_t tfm_crypto_engine_cipher_setup(const psa_algorithm_t alg,
  * \brief This function sets the padding mode on the crypto engine based on the
  *        information gathered during the setup phase
  *
- * \param[in/out] cp          Pointer to the cipher engine context to be used
+ * \param[in,out] cp          Pointer to the cipher engine context to be used
  * \param[in]     engine_info Pointer to the engine configuration structure
  *                            containing engine parameters determined during
  *                            setup
@@ -217,7 +217,7 @@ psa_status_t tfm_crypto_engine_cipher_set_padding_mode(
 /**
  * \brief This function starts a multipart cipher operation
  *
- * \param[in/out] cp          Pointer to the cipher engine context to be used
+ * \param[in,out] cp          Pointer to the cipher engine context to be used
  * \param[in]     engine_info Pointer to the engine configuration structure
  *                            containing engine parameters determined during
  *                            setup
@@ -233,7 +233,7 @@ psa_status_t tfm_crypto_engine_cipher_start(
  *        item to determine if the key needs to be set in encryption or
  *        decryption mode on the engine.
  *
- * \param[in/out] cp          Pointer to the cipher engine context to be used
+ * \param[in,out] cp          Pointer to the cipher engine context to be used
  * \param[in]     key_data    Pointer to the buffer containing key material
  * \param[in]     key_size    Size in bytes of the key pointed by key_data
  * \param[in]     engine_info Pointer to the engine configuration structure
@@ -251,7 +251,7 @@ psa_status_t tfm_crypto_engine_cipher_set_key(
  * \brief This function sets the initialisation vector on the crypto engine for
  *        a multipart cipher operation
  *
- * \param[in/out] cp        Pointer to the cipher engine context to be used
+ * \param[in,out] cp        Pointer to the cipher engine context to be used
  * \param[in]     iv        Pointer to the buffer containing the IV
  * \param[in]     iv_length Size in bytes of the initialisation vector
  *
@@ -264,7 +264,7 @@ psa_status_t tfm_crypto_engine_cipher_set_iv(union engine_cipher_context *cp,
  * \brief This function updates a multipart cipher operation on the crypto
  *        engine with a new chunk of input data. It may produce output data.
  *
- * \param[in/out] cp            Pointer to the cipher engine context to be used
+ * \param[in,out] cp            Pointer to the cipher engine context to be used
  * \param[in]     input         Pointer to the buffer containing the input data
  *                              chunk
  * \param[in]     input_length  Size in bytes of the input data chunk
@@ -283,7 +283,7 @@ psa_status_t tfm_crypto_engine_cipher_update(union engine_cipher_context *cp,
  * \brief This function finalises a multipart cipher operation on the crypto
  *        engine. It may produce output data.
  *
- * \param[in/out] cp            Pointer to the cipher engine context to be used
+ * \param[in,out] cp            Pointer to the cipher engine context to be used
  * \param[out]    output        Pointer to the buffer containing the output data
  * \param[out]    output_length Pointer to the size in bytes of the data produced
  *                              as output
@@ -297,7 +297,7 @@ psa_status_t tfm_crypto_engine_cipher_finish(union engine_cipher_context *cp,
  * \brief This function releases the crypto engine resources associated to a
  *        multipart cipher operation context
  *
- * \param[in/out] cp Pointer to the cipher engine context to be used
+ * \param[in,out] cp Pointer to the cipher engine context to be used
  *
  * \return Return values as specified by \ref psa_status_t
  */

@@ -32,7 +32,7 @@ enum tfm_sst_err_t sst_encrypted_object_read(uint32_t fid,
  *        sst_object_t structure data.
  *
  * \param[in]     fid      File ID
- * \param[in/out] obj      Pointer to the object structure to write.
+ * \param[in,out] obj      Pointer to the object structure to write.
  *
  * Note: The function will use obj to store the encrypted data before write it
  *       into the flash to reduce the memory requirements and the number of

@@ -41,7 +41,7 @@ enum tfm_sst_err_t sst_object_table_create(void);
 /**
  * \brief Initializes object table.
  *
- * \param[in/out] obj_data  Pointer to the static object data allocated
+ * \param[in,out] obj_data  Pointer to the static object data allocated
  *                          in other to reuse that memory to allocated a
  *                          temporary object table.
  *

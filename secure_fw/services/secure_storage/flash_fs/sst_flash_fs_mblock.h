@@ -92,7 +92,7 @@ enum tfm_sst_err_t sst_flash_fs_mblock_cp_remaining_file_meta(uint32_t idx);
 /**
  * \brief Gets current scratch datablock physical ID.
  *
- * \prama[in] lblock  Logical block number
+ * \param[in] lblock  Logical block number
  *
  * \return current scratch data block
  */
@@ -156,11 +156,11 @@ enum tfm_sst_err_t sst_flash_fs_mblock_read_block_metadata(uint32_t lblock,
 /**
  * \brief Reserves space for a file.
  *
- * \param[in]  file_id     File ID
- * \param[in]  size        Size of the file for which space is reserve
- * \param[out] idx         File metadata entry index
- * \param[out] file_meta   File metadata entry
- * \param[out] block_meta  Block metadata entry
+ * \param[in]  file_id       File ID
+ * \param[in]  size          Size of the file for which space is reserve
+ * \param[out] file_meta_idx File metadata entry index
+ * \param[out] file_meta     File metadata entry
+ * \param[out] block_meta    Block metadata entry
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */

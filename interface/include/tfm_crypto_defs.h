@@ -81,7 +81,7 @@ enum tfm_crypto_err_t {
  * \brief A macro to translate psa_status_t values to the corresponding return
  *        values for the TFM Crypto service
  *
- * \return Values specified by \ref enum tfm_crypto_err_t
+ * \return Values specified by \ref tfm_crypto_err_t
  *
  */
 #define PSA_STATUS_TO_TFM_CRYPTO_ERR(val) \

@@ -74,7 +74,9 @@ psa_status_t spm_core_test_2_sfn_invert(struct psa_invec *in_vec, size_t in_len,
  * \return Returns \ref TFM_SUCCESS on success, \ref CORE_TEST_ERRNO_TEST_FAULT
  *         othervise.
  */
-psa_status_t spm_core_test_2_check_caller_client_id(void);
+    psa_status_t spm_core_test_2_check_caller_client_id(
+            struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec,
+            size_t out_len);
 
 #ifdef __cplusplus
 }

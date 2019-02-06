@@ -188,12 +188,12 @@ enum psa_attest_err_t {
  * \param[in]     challenge_obj   Pointer to buffer where challenge input is
  *                                stored. Nonce and / or hash of attested data.
  *                                Must be always
- *                                \ref PSA_INITIAL_ATTEST_CHALLENGE_SIZE bytes
+ *                                \ref PSA_INITIAL_ATTEST_TOKEN_SIZE bytes
  *                                long.
  * \param[in]     challenge_size  Size of challenge object in bytes.
  * \param[out]    token           Pointer to the buffer where attestation token
  *                                must be stored.
- * \param[in/out] token_size      Size of allocated buffer for token, which
+ * \param[in,out] token_size      Size of allocated buffer for token, which
  *                                updated by initial attestation service with
  *                                final token size.
  *

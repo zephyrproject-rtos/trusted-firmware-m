@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -180,7 +180,7 @@ uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx);
  *
  * \note This function doesn't check if partition_idx is valid.
  */
-void tfm_spm_partition_set_stack(uint32_t partition_id, uint32_t stack_ptr);
+void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr);
 #endif
 
 /**
@@ -244,7 +244,7 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
  * \param[in] state          The state to be set
  *
  * \note This function doesn't check if partition_idx is valid.
- * \note The \ref state has to have the value set of \ref spm_part_state_t.
+ * \note The state has to have the value set of \ref spm_part_state_t.
  */
 void tfm_spm_partition_set_state(uint32_t partition_idx, uint32_t state);
 

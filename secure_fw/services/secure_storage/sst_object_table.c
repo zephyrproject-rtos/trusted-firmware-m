@@ -248,7 +248,7 @@ __STATIC_INLINE void sst_object_table_fs_read_table(
 /**
  * \brief Writes object table in persistent memory.
  *
- * \param[in/out] obj_table  Pointer to the object table to generate
+ * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
@@ -348,7 +348,7 @@ static enum tfm_sst_err_t sst_object_table_align_nv_counters(uint32_t nvc_1)
  * \brief Generates table authentication tag.
  *
  * \param[in]     nvc_1      Value of SST non-volatile counter 1
- * \param[in/out] obj_table  Pointer to the object table to generate
+ * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
@@ -377,7 +377,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_generate_auth_tag(
  * \brief Authenticates table of objects.
  *
  * \param[in]     table_idx  Table index in the init context
- * \param[in/out] init_ctx   Pointer to the object table to authenticate
+ * \param[in,out] init_ctx   Pointer to the object table to authenticate
  *
  */
 static void sst_object_table_authenticate(uint8_t table_idx,
@@ -420,7 +420,7 @@ static void sst_object_table_authenticate(uint8_t table_idx,
 /**
  * \brief Authenticates tables of objects.
  *
- * \param[in/out] init_ctx  Pointer to the object table to authenticate
+ * \param[in,out] init_ctx  Pointer to the object table to authenticate
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
@@ -474,7 +474,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_nvc_authenticate(
 /**
  * \brief Generates table authentication
  *
- * \param[in/out] obj_table  Pointer to the object table to generate
+ * \param[in,out] obj_table  Pointer to the object table to generate
  *                           authentication
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
@@ -496,7 +496,7 @@ __STATIC_INLINE enum tfm_sst_err_t sst_object_table_generate_auth_tag(
 /**
  * \brief Authenticates tables of objects.
  *
- * \param[in/out] init_ctx  Pointer to the object table to authenticate
+ * \param[in,out] init_ctx  Pointer to the object table to authenticate
  *
  */
 __attribute__ ((always_inline))
@@ -535,7 +535,7 @@ __STATIC_INLINE void sst_object_table_authenticate_ctx_tables(
 /**
  * \brief Saves object table in the persistent memory.
  *
- * \param[in/out] obj_table  Pointer to the object table to save
+ * \param[in,out] obj_table  Pointer to the object table to save
  *
  * \return Returns error code as specified in \ref tfm_sst_err_t
  */
@@ -609,7 +609,7 @@ static enum tfm_sst_err_t sst_object_table_save_table(
 /**
  * \brief Checks the validity of the table version.
  *
- * \param[in/out] init_ctx  Pointer to the init object table context
+ * \param[in,out] init_ctx  Pointer to the init object table context
  *
  */
 __attribute__ ((always_inline))

@@ -96,7 +96,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t minor_version);
  * \param[in] in_vec           Array of input \ref psa_invec structures
  * \param[in] in_len           Number of input \ref psa_invec structures
  * \param[in] out_vec          Array of input \ref psa_outvec structures
- * \param[in] in_len           Number of input \ref psa_outvec structures
+ * \param[in] out_len          Number of input \ref psa_outvec structures
  *
  * \retval >=0                 Application-specific return code
  * \retval <0                  Application-specific error code

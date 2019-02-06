@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,7 +59,7 @@ uint32_t os_wrapper_semaphore_release(uint32_t semaphore_id);
  *
  * \return 0 in case of successful release, or OS_WRAPPER_ERROR in case of error
  */
-uint32_t os_wrapper_semaphore_delete(uint32_t sema);
+uint32_t os_wrapper_semaphore_delete(uint32_t semaphore_id);
 
 /**
  * \brief Creates a new thread

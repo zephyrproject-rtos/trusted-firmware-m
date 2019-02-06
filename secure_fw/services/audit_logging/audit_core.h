@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,32 +26,15 @@ extern "C" {
  * \details This can't be represented as a
  *          structure because the payload
  *          is of variable size, i.e.
- *
- * +-------------+0
- * | TIMESTAMP   |
- * |             |
- * +-------------+8
- * | IV_COUNTER  |
- * |             |
- * +-------------+12
- * | PARTITION ID|
- * |             |
- * +-------------+16
- * | SIZE        |
- * |             |
- * +-------------+20
- * | RECORD_ID   |
- * |             |
- * +-------------+24
- * | PAYLOAD     |
- * |             |
- * |             |
- * |             |
- * +-------------+20 + SIZE
- * | MAC         |
- * |             |
- * |             |
- * +-------------+20 + SIZE + MAC_SIZE
+ * |Offset |Name        |
+ * |-------|------------|
+ * | 0     |TIMESTAMP   |
+ * | 8     |IV_COUNTER  |
+ * |12     |PARTITION ID|
+ * |16     |SIZE        |
+ * |20     |RECORD ID   |
+ * |24     |PAYLOAD     |
+ * |20+SIZE|MAC         |
  *
  * SIZE: at least LOG_MIN_SIZE bytes, known only at runtime. It's the size of
  *       the (RECORD_ID, PAYLOAD) fields

@@ -27,7 +27,7 @@ struct tfm_core_test_call_args_t {
 };
 
 /**
- * \brief Calls the secure function provided in \ref fn_ptr
+ * \brief Calls the secure function provided in \c fn_ptr
  *
  * \param[in] fn_ptr  Secure function to be called.
  * \param[in] args    Arguments for fn_ptr.

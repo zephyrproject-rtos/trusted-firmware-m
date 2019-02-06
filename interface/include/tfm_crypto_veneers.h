@@ -239,7 +239,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_update(
  * \note A successful call to this function releases the cipher operation
  *       context provided as parameter
  *
- * \param[in/out] operation     Cipher operation context
+ * \param[in,out] operation     Cipher operation context
  * \param[out]    output        Buffer containing output data
  * \param[in]     output_size   Size of the output buffer
  * \param[out]    output_length Size of the produced output
@@ -258,7 +258,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_cipher_finish(
  * \note A successful call to this function releases the cipher operation
  *       context provided as parameter
  *
- * \param[in/out] operation Cipher operation context
+ * \param[in,out] operation Cipher operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -282,7 +282,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_setup(
  * \brief Add a new input chunk to the data for which the final hash value
  *        will be computed (veneer function)
  *
- * \param[in/out] operation    Hash operation context
+ * \param[in,out] operation    Hash operation context
  * \param[in]     input        Buffer containing the input data
  * \param[in]     input_length Size of the provided input data
  *
@@ -299,7 +299,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_update(
  * \note A successful call to this function releases the hash operation
  *       context provided as parameter
  *
- * \param[in/out] operation   Hash operation context
+ * \param[in,out] operation   Hash operation context
  * \param[out]    hash        Buffer containing hash data
  * \param[in]     hash_size   Size of the hash buffer
  * \param[out]    hash_length Size of the produced hash
@@ -319,7 +319,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_finish(
  *       context provided as parameter. The hash operation is released
  *       also in case TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE is returned
  *
- * \param[in/out] operation   Hash operation context
+ * \param[in,out] operation   Hash operation context
  * \param[in]     hash        Buffer containing the provided hash value
  * \param[in]     hash_length Size of the provided hash value
  *
@@ -336,7 +336,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_hash_verify(
  * \note A successful call to this function releases the hash operation
  *       context provided as parameter
  *
- * \param[in/out] operation Hash operation context
+ * \param[in,out] operation Hash operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
@@ -380,7 +380,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_verify_setup(
  * \brief Adds a new input chunk to the data for which the final MAC value
  *        will be computed (veneer function)
  *
- * \param[in/out] operation    MAC operation context
+ * \param[in,out] operation    MAC operation context
  * \param[in]     input        Buffer containing the input data
  * \param[in]     input_length Size of the provided input data
  *
@@ -398,7 +398,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_update(
  * \note A successful call to this function releases the MAC operation
  *       context provided as parameter
  *
- * \param[in/out] operation   MAC operation context
+ * \param[in,out] operation   MAC operation context
  * \param[out]    mac         Buffer containing MAC data
  * \param[in]     mac_size    Size of the MAC buffer
  * \param[out]    mac_length  Size of the produced MAC
@@ -418,7 +418,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_sign_finish(
  *       context provided as parameter. The MAC operation is released
  *       also in case TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE is returned
  *
- * \param[in/out] operation   MAC operation context
+ * \param[in,out] operation   MAC operation context
  * \param[in]     mac         Buffer containing the provided MAC value
  * \param[in]     mac_length  Size of the provided MAC value
  *
@@ -435,7 +435,7 @@ enum tfm_crypto_err_t tfm_crypto_veneer_mac_verify_finish(
  * \note A successful call to this function releases the MAC operation
  *       context provided as parameter
  *
- * \param[in/out] operation MAC operation context
+ * \param[in,out] operation MAC operation context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */

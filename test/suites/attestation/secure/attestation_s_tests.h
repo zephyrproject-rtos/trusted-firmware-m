@@ -17,7 +17,7 @@ extern "C" {
 /**
  * \brief Register testsuite for the initial attestation service.
  *
- * \param[in] p_test_suite The test suite to be executed.
+ * \param[in] "p_test_suite" The test suite to be executed.
  */
 void
 register_testsuite_s_attestation_interface(struct test_suite_t *p_test_suite);
