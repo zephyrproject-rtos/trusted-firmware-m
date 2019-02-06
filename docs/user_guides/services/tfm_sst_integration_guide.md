@@ -70,20 +70,6 @@ not use the PSA Internal Trusted Storage API to write the rollback protection
 values stored in the internal storage. The PSA Internal Trusted Storage API is
 not supported in TF-M yet.
 
-**Uniform secure function signatures** - The current design does not support
-the use of uniform signature for all its secure functions yet.
-The advantages of this method are:
-- TF-M Core can do a sanity check on the access rights of the veneer parameters.
-- The veneer declarations and implementations for the secure functions can be
-  generated automatically from a template (using the secure function list in the
-  secure service's manifest)
-
-SST service does not support the full access rights checks of the veneer
-parameters yet.
-
-More detailed information can be found in
-[here](https://developer.trustedfirmware.org/w/tf_m/design/uniform_secure_service_signature)
-
 **Protection against physical storage medium failure** - Complete handling of
 inherent failures of storage mediums (e.g. bad blocks in a NAND based device)
 is not supported by the current design.
@@ -131,6 +117,11 @@ These PSA PS interfaces and SST TF-M types are defined and documented in
 `interface/include/tfm_sst_defs.h`
 
 ### Core Files
+
+`tfm_sst_req_mngr.c` - Contains the SST request manager implementation which
+handles all requests which arrive to the service. This layer extracts the
+arguments from the input and output vectors, and it calls the protected storage
+layer with the provided parameters.
 
 `tfm_protected_storage.c` - Contains the TF-M protected storage API
 implementations which are the entry points to the SST service.
