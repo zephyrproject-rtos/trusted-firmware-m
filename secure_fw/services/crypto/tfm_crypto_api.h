@@ -54,39 +54,44 @@ enum tfm_crypto_err_t tfm_crypto_init_key(void);
 enum tfm_crypto_err_t tfm_crypto_init_alloc(void);
 
 /**
- * \brief Allocate an operation object
+ * \brief Allocate an operation context in the backend
  *
- * \param[in]  type   Type of the operation object to allocate
- * \param[out] handle Pointer to the corresponding handle assigned
+ * \param[in]  type Type of the operation context to allocate
+ * \param[out] oper Pointer to the frontend operation
+ * \param[out  ctx  Double pointer to the corresponding context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_operation_alloc(
                                         enum tfm_crypto_operation_type type,
-                                        uint32_t *handle);
+                                        void *oper,
+                                        void **ctx);
 /**
- * \brief Release an operation object
+ * \brief Release an operation context in the backend
  *
- * \param[in] handle Pointer to the handle for the release of the
- *                   corresponding object
+ * \param[in]     type Type of the operation context to release
+ * \param[in/out] oper Pointer to the frontend operation for the release
+ *                     of the corresponding backend context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
-enum tfm_crypto_err_t tfm_crypto_operation_release(uint32_t *handle);
-
+enum tfm_crypto_err_t tfm_crypto_operation_release(
+                                        enum tfm_crypto_operation_type type,
+                                        void *oper);
 /**
- * \brief Look up an operation object pointer from the corresponding handle
+ * \brief Look up an operation context in the backend for the corresponding
+ *        frontend operation
  *
- * \param[in]  type   Type of the operation object to look up
- * \param[in]  handle Handle to the operation object to look up
- * \param[out] oper   Double pointer to the corresponding object
+ * \param[in]  type Type of the operation context to look up
+ * \param[in]  oper Pointer to the frontend operation
+ * \param[out] ctx  Double pointer to the corresponding context
  *
  * \return Return values as described in \ref tfm_crypto_err_t
  */
 enum tfm_crypto_err_t tfm_crypto_operation_lookup(
                                         enum tfm_crypto_operation_type type,
-                                        uint32_t handle,
-                                        void **oper);
+                                        void *oper,
+                                        void **ctx);
 /**
  * \brief Retrieve a key from the provided key slot according to the key
  *        policy and algorithm provided. This function is expected to be

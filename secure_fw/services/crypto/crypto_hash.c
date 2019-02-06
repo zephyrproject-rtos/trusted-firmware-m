@@ -38,7 +38,7 @@ static enum tfm_crypto_err_t tfm_crypto_hash_release(
     }
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(&(operation->handle));
+    err = tfm_crypto_operation_release(TFM_CRYPTO_HASH_OPERATION, operation);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
     }
@@ -80,18 +80,9 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
 
     /* Allocate the operation context in the secure world */
     err = tfm_crypto_operation_alloc(TFM_CRYPTO_HASH_OPERATION,
-                                     &(operation->handle));
+                                     operation,
+                                     (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    /* Look up the corresponding operation context */
-    err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      operation->handle,
-                                      (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        /* Release the operation context */
-        (void)tfm_crypto_operation_release(&(operation->handle));
         return err;
     }
 
@@ -133,7 +124,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_update(psa_hash_operation_t *operation,
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      operation->handle,
+                                      operation,
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
@@ -182,7 +173,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_finish(psa_hash_operation_t *operation,
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      operation->handle,
+                                      operation,
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
@@ -262,7 +253,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_abort(psa_hash_operation_t *operation)
 
     /* Look up the corresponding operation context */
     err = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
-                                      operation->handle,
+                                      operation,
                                       (void **)&ctx);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
         return err;
