@@ -51,6 +51,7 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_utils.c"
                     "${CRYPTO_DIR}/crypto_engine.c"
                     "${CRYPTO_DIR}/crypto_aead.c"
+                    "${CRYPTO_DIR}/tfm_crypto_secure_api.c"
       )
 
   #Append all our source files to global lists.

@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "test/framework/test_framework_helpers.h"
-#include "tfm_crypto_veneers.h"
+#include "psa_crypto.h"
 
 #define BIT_SIZE_TEST_KEY (128)
 #define BYTE_SIZE_TEST_KEY (BIT_SIZE_TEST_KEY/8)
@@ -38,7 +38,7 @@ void register_testsuite_s_crypto_interface(struct test_suite_t *p_test_suite)
  */
 static void tfm_crypto_test_5001(struct test_result_t *ret)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
     uint32_t i = 0;
     const psa_key_slot_t slot = TEST_KEY_SLOT;
     uint8_t data[] = "THIS IS MY KEY1";
@@ -49,26 +49,22 @@ static void tfm_crypto_test_5001(struct test_result_t *ret)
     psa_key_policy_t policy;
 
     /* Setup the key policy */
-    tfm_crypto_veneer_key_policy_init(&policy);
-    tfm_crypto_veneer_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, 0);
-    err = tfm_crypto_veneer_set_key_policy(slot, &policy);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    psa_key_policy_init(&policy);
+    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, 0);
+    status = psa_set_key_policy(slot, &policy);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
         return;
     }
 
-    err = tfm_crypto_veneer_import_key(slot,
-                                       PSA_KEY_TYPE_AES,
-                                       data,
-                                       sizeof(data));
-
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
         return;
     }
 
-    err = tfm_crypto_veneer_get_key_information(slot, &type, &bits);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    status = psa_get_key_information(slot, &type, &bits);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
         return;
     }
@@ -83,12 +79,12 @@ static void tfm_crypto_test_5001(struct test_result_t *ret)
         return;
     }
 
-    err = tfm_crypto_veneer_export_key(slot,
-                                       exported_data,
-                                       sizeof(data),
-                                       &exported_data_size);
+    status = psa_export_key(slot,
+                            exported_data,
+                            sizeof(data),
+                            &exported_data_size);
 
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Error exporting a key");
         return;
     }
@@ -106,14 +102,14 @@ static void tfm_crypto_test_5001(struct test_result_t *ret)
         }
     }
 
-    err = tfm_crypto_veneer_destroy_key(slot);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    status = psa_destroy_key(slot);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying the key");
         return;
     }
 
-    err = tfm_crypto_veneer_get_key_information(slot, &type, &bits);
-    if (err != TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT) {
+    status = psa_get_key_information(slot, &type, &bits);
+    if (status != PSA_ERROR_EMPTY_SLOT) {
         TEST_FAIL("Key slot should be empty now");
         return;
     }
