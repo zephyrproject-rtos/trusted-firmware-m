@@ -79,7 +79,7 @@ The BL2 bootloader requires the following definitions:
    Defines the size of the scratch area. The minimal size
    must be as the biggest sector size in the flash.
  - `FLASH_DEV_NAME`
-   Specifies the flash device used by BL2 and SST.
+   Specifies the flash device used by BL2.
 
 ##### Assemble tool
 
@@ -109,8 +109,8 @@ The SST service requires the following definitions:
  - `SST_NBR_OF_SECTORS`
    Defines the number of sectors available for
    the secure area.
- - `FLASH_DEV_NAME`
-   Specifies the flash device used by BL2 and SST.
+ - `SST_FLASH_DEV_NAME`
+   Specifies the flash device used by SST to store the data.
  - `SST_FLASH_PROGRAM_UNIT`
    Defines the smallest flash programmable unit in bytes.
  - `SST_MAX_ASSET_SIZE`

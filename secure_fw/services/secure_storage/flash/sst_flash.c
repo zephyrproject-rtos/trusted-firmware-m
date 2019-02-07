@@ -17,12 +17,12 @@
 #error "SST_FLASH_AREA_ADDR must be defined in flash_layout.h file"
 #endif
 
-#ifndef FLASH_DEV_NAME
-#error "FLASH_DEV_NAME must be defined in flash_layout.h file"
+#ifndef SST_FLASH_DEV_NAME
+#error "SST_FLASH_DEV_NAME must be defined in flash_layout.h file"
 #endif
 
 /* Import the CMSIS flash device driver */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH SST_FLASH_DEV_NAME;
 
 #define BLOCK_START_OFFSET  0
 #define MAX_BLOCK_DATA_COPY 256
@@ -90,7 +90,7 @@ static psa_ps_status_t flash_init(void)
 {
     int32_t err;
 
-    err = FLASH_DEV_NAME.Initialize(NULL);
+    err = SST_FLASH_DEV_NAME.Initialize(NULL);
     if (err != ARM_DRIVER_OK) {
         return PSA_PS_ERROR_STORAGE_FAILURE;
     }
@@ -103,7 +103,7 @@ static psa_ps_status_t flash_read(uint32_t flash_addr, uint32_t size,
 {
     int32_t err;
 
-    err = FLASH_DEV_NAME.ReadData(flash_addr, buff, size);
+    err = SST_FLASH_DEV_NAME.ReadData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
         return PSA_PS_ERROR_STORAGE_FAILURE;
     }
@@ -116,7 +116,7 @@ static psa_ps_status_t flash_write(uint32_t flash_addr, uint32_t size,
 {
     int32_t err;
 
-    err = FLASH_DEV_NAME.ProgramData(flash_addr, buff, size);
+    err = SST_FLASH_DEV_NAME.ProgramData(flash_addr, buff, size);
     if (err != ARM_DRIVER_OK) {
         return PSA_PS_ERROR_STORAGE_FAILURE;
     }
@@ -128,7 +128,7 @@ static psa_ps_status_t flash_erase(uint32_t flash_addr)
 {
     int32_t err;
 
-    err = FLASH_DEV_NAME.EraseSector(flash_addr);
+    err = SST_FLASH_DEV_NAME.EraseSector(flash_addr);
     if (err != ARM_DRIVER_OK) {
         return PSA_PS_ERROR_STORAGE_FAILURE;
     }

@@ -61,10 +61,6 @@ always stored in the same flash location. That increases the number of writes
 in a specific flash location as every change in the storage area requires a
 metadata update.
 
-**Flash device** - In the current design, the flash device is used by
-bootloader (BL2) and SST. In an alternative design, the flash device needs to be
-defined for SST separately from BL2 even though it is the same.
-
 **PSA internal trusted storage API** - In the current design, the service does
 not use the PSA Internal Trusted Storage API to write the rollback protection
 values stored in the internal storage. The PSA Internal Trusted Storage API is
@@ -229,8 +225,8 @@ The SST service requires the following platform definitions:
  - `SST_NBR_OF_SECTORS`
    Defines the number of sectors available for the secure area. The sectors must
    be consecutive.
- - `FLASH_DEV_NAME`
-   Specifies the flash device used by BL2 and SST.
+ - `SST_FLASH_DEV_NAME`
+   Specifies the flash device used by SST to store the data.
  - `SST_FLASH_PROGRAM_UNIT`
    Defines the smallest flash programmable unit in bytes.
    Currently, SST supports 1, 2 and 4.

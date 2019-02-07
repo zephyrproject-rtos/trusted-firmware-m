@@ -115,7 +115,7 @@
  */
 #define IMAGE_LOAD_ADDRESS            0x10020000
 
-/* Flash device name used by BL2 and SST
+/* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
@@ -124,6 +124,8 @@
  * Note: Further documentation of these definitions can be found in the
  * TF-M SST Integration Guide.
  */
+#define SST_FLASH_DEV_NAME Driver_FLASH0
+
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
  */
