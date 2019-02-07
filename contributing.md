@@ -28,8 +28,9 @@ Contributions to TF-M project need to follow the process below.
 - Maintainers will be notified and they will start review process.
 - You may be asked to provide further details or make additional changes.
 - You can discuss further with maintainer(s) offline if necessary.
-- Once the maintainers are satisfied then they will approve or merge the change.
+- Once the change is approved by maintainers, the patch can be submitted
+  either by maintainer or patch owner.
 
 --------------
 
-*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
