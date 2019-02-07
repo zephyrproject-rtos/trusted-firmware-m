@@ -97,7 +97,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
     } else {
-        tfm_memcpy(ptr, tlv_header, SHARED_DATA_HEADER_SIZE);
+        tlv_header = (struct shared_data_tlv_header *)ptr;
+        tlv_header->tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
+        tlv_header->tlv_tot_len = SHARED_DATA_HEADER_SIZE;
         ptr += SHARED_DATA_HEADER_SIZE;
     }
 
