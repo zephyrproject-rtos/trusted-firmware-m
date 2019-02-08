@@ -962,7 +962,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
      */
 
     /* It is a fatal error if passed signal indicates more than one signals. */
-    if (tfm_bitcount(partition->signals) != 1) {
+    if (tfm_bitcount(irq_signal) != 1) {
         tfm_panic();
     }
 
