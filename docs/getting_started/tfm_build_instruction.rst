@@ -158,14 +158,14 @@ PSA tests are configured by using the ``TEST_PSA_API`` cmake variable. The
 variable should be set to the name of the test suite that is desired. It is
 _not_ supported to set both ``TEST_PSA_API`` and ``TEST_S`` or ``TEST_NS``.
 
-The Developer api tests are:
+The Functional API tests are:
  - ``CRYPTO``
  - ``INITIAL_ATTESTATION``
  - ``STORAGE`` (INTERNAL_TRUSTED_STORAGE and PROTECTED_STORAGE)
  - ``INTERNAL_TRUSTED_STORAGE``
  - ``PROTECTED_STORAGE``
 
-The Firmware framework test suites are:
+The Firmware Framework test suites are:
  - ``IPC``
 
 Note that these map directly to the ``SUITE`` cmake variable used in the
@@ -289,8 +289,8 @@ Alternately using traditional cmake syntax
     cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
     make install
 
-Build for PSA Developer API compliance tests
-============================================
+Build for PSA Functional API compliance tests
+=============================================
 The build system provides support for building and integrating the PSA API tests
 from https://github.com/ARM-software/psa-arch-tests. PSA API tests are
 controlled using the TEST_PSA_API variable. Enabling both regression tests and

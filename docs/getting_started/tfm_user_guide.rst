@@ -322,6 +322,87 @@ DAPLink UART (baud 115200 8n1)::
       Description: 'Get attributes with null attributes struct pointer'
     ....
 
+PSA API tests
+=============
+Follow the build instructions for the PSA API tests and then follow the above
+procedures for flashing the image to the board. The PSA API tests are linked
+into the TF-M binaries and will automatically run. A log similar to the
+following should be visible on the UART; it is normal for some tests to be
+skipped but there should be no failed tests::
+
+    [Sec Thread] Secure image initializing!
+    Booting TFM v1.1
+    Non-Secure system starting...
+
+    ***** PSA Architecture Test Suite - Version 1.0 *****
+
+    Running.. Storage Suite
+    ******************************************
+
+    TEST: 401 | DESCRIPTION: UID not found check
+    [Info] Executing tests from non-secure
+
+    [Info] Executing ITS tests
+    [Check 1] Call get API for UID 6 which is not set
+    [Check 2] Call get_info API for UID 6 which is not set
+    [Check 3] Call remove API for UID 6 which is not set
+    [Check 4] Call get API for UID 6 which is removed
+    [Check 5] Call get_info API for UID 6 which is removed
+    [Check 6] Call remove API for UID 6 which is removed
+    [Check 7] Call get API for different UID 5
+    [Check 8] Call get_info API for different UID 5
+    [Check 9] Call remove API for different UID 5
+
+    [Info] Executing PS tests
+    [Check 1] Call get API for UID 6 which is not set
+    [Check 2] Call get_info API for UID 6 which is not set
+    [Check 3] Call remove API for UID 6 which is not set
+    [Check 4] Call get API for UID 6 which is removed
+    [Check 5] Call get_info API for UID 6 which is removed
+    [Check 6] Call remove API for UID 6 which is removed
+    [Check 7] Call get API for different UID 5
+    [Check 8] Call get_info API for different UID 5
+    [Check 9] Call remove API for different UID 5
+
+    TEST RESULT: PASSED
+
+    ******************************************
+
+    <further tests removed from log for brevity>
+
+    ************ Storage Suite Report **********
+    TOTAL TESTS     : 17
+    TOTAL PASSED    : 11
+    TOTAL SIM ERROR : 0
+    TOTAL FAILED    : 0
+    TOTAL SKIPPED   : 6
+    ******************************************
+
+.. note::
+    The Internal Trusted Storage and Protected Storage flash areas must be wiped
+    before running the Storage test suites.
+
+    Many IDEs for embedded development (such as Keil µVision) offer a function
+    to erase a device's flash. Refer to your IDE's documentation for
+    instructions.
+
+    Another way this can be achieved is by using ``srec_cat`` with the ``-fill``
+    parameter to fill the corresponding area in the binary with the erase value
+    of the flash (``0xFF``). For example, for Musca-A the command for
+    concatenating the ``bl2`` and ``tfm_s_ns_signed`` binaries would become::
+
+        srec_cat bin/bl2.bin -Binary -offset 0x200000 \
+                 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 \
+                 -fill 0xFF 0x420000 0x425000 -o tfm.hex -Intel
+
+    Refer to the platform flash layout for appropriate addresses to erase on
+    other platforms.
+
+    This step is not required on targets that emulate flash storage in RAM, as
+    it will be erased each time the device is reset. Note, however, that a warm
+    reset may not clear SRAM contents, so it may be necessary to power the
+    device off and on again between test runs.
+
 Example application or regression tests on Musca-B1 without BL2 bootloader
 ==========================================================================
 
