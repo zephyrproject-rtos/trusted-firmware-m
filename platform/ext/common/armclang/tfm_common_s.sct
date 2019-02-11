@@ -192,6 +192,8 @@ LR_CODE S_CODE_START {
 
     TFM_SP_STORAGE_DATA +0 ALIGN 32 {
         *tfm_storage* (+RW +ZI)
+        *(TFM_SP_STORAGE_ATTR_RW)
+        *(TFM_SP_STORAGE_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -202,6 +204,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_AUDIT_LOG
     TFM_SP_AUDIT_LOG_DATA +0 ALIGN 32 {
         *tfm_audit* (+RW +ZI)
+        *(TFM_SP_AUDIT_LOG_ATTR_RW)
+        *(TFM_SP_AUDIT_LOG_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API)
@@ -215,6 +219,8 @@ LR_CODE S_CODE_START {
 
     TFM_SP_CRYPTO_DATA +0 ALIGN 32 {
         *tfm_crypto* (+RW +ZI)
+        *(TFM_SP_CRYPTO_ATTR_RW)
+        *(TFM_SP_CRYPTO_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -225,6 +231,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_PLATFORM
     TFM_SP_PLATFORM_DATA +0 ALIGN 32 {
         *tfm_platform* (+RW +ZI)
+        *(TFM_SP_PLATFORM_ATTR_RW)
+        *(TFM_SP_PLATFORM_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API)
@@ -238,6 +246,8 @@ LR_CODE S_CODE_START {
 
     TFM_SP_INITIAL_ATTESTATION_DATA +0 ALIGN 32 {
         *tfm_attest* (+RW +ZI)
+        *(TFM_SP_INITIAL_ATTESTATION_ATTR_RW)
+        *(TFM_SP_INITIAL_ATTESTATION_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -256,6 +266,8 @@ LR_CODE S_CODE_START {
         *uart_cmsdk_drv* (+RW +ZI)
         *secure_suites.* (+RW +ZI)
         *attestation_s_interface_testsuite.* (+RW +ZI)
+        *(TFM_SP_SECURE_TEST_PARTITION_ATTR_RW)
+        *(TFM_SP_SECURE_TEST_PARTITION_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -267,6 +279,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     TFM_SP_IPC_SERVICE_TEST_DATA +0 ALIGN 32 {
         *ipc_service_test.* (+RW +ZI)
+        *(TFM_SP_IPC_SERVICE_TEST_ATTR_RW)
+        *(TFM_SP_IPC_SERVICE_TEST_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -293,6 +307,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_DATA +0 ALIGN 32 {
         *tfm_ss_core_test.* (+RW +ZI)
+        *(TFM_SP_CORE_TEST_ATTR_RW)
+        *(TFM_SP_CORE_TEST_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -304,6 +320,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_2_DATA +0 ALIGN 32 {
         *tfm_ss_core_test_2.* (+RW +ZI)
+        *(TFM_SP_CORE_TEST_2_ATTR_RW)
+        *(TFM_SP_CORE_TEST_2_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
@@ -315,6 +333,8 @@ LR_CODE S_CODE_START {
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     TFM_SP_IPC_CLIENT_TEST_DATA +0 ALIGN 32 {
         *ipc_client_test.* (+RW +ZI)
+        *(TFM_SP_IPC_CLIENT_TEST_ATTR_RW)
+        *(TFM_SP_IPC_CLIENT_TEST_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)

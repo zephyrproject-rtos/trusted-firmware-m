@@ -373,6 +373,7 @@ SECTIONS
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
+        *({{manifest.manifest.name}}_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$${{manifest.manifest.name}}_DATA$$RW$$Base = ADDR(.{{manifest.manifest.name}}_DATA);
@@ -393,6 +394,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
+        *({{manifest.manifest.name}}_ATTR_ZI)
         . += (. - start_of_{{manifest.manifest.name}}) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
@@ -451,6 +453,7 @@ SECTIONS
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
+        *({{manifest.manifest.name}}_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$${{manifest.manifest.name}}_DATA$$RW$$Base = ADDR(.{{manifest.manifest.name}}_DATA);
@@ -471,6 +474,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
+        *({{manifest.manifest.name}}_ATTR_ZI)
         . += (. - start_of_{{manifest.manifest.name}}) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
