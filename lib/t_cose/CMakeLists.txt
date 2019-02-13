@@ -25,6 +25,7 @@ set(T_COSE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 list(APPEND ALL_SRC_C
 	"${T_COSE_DIR}/src/t_cose_sign1_sign.c"
 	"${T_COSE_DIR}/src/t_cose_util.c"
+	"${T_COSE_DIR}/src/t_cose_psa_crypto.c"
 	)
 
 #Setting include directories
