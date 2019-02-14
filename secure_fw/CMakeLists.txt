@@ -153,17 +153,17 @@ function(set_up_secure_fw_build)
 			#FIXME Remove the explicit load and the above comment once the secure client
 			#test partition uses the generated veneers.
 			if(${COMPILER} STREQUAL "ARMCLANG")
-				target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_secure_tests)
+				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_attest)
 			elseif(${COMPILER} STREQUAL "GNUARM")
-				target_link_libraries(${EXE_NAME} tfm_secure_tests tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
+				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 			else()
 				message(FATAL_ERROR "unknown compiler" )
 			endif()
 		else()
-			target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest tfm_secure_tests)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_secure_tests tfm_attest)
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
+		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 	endif()
 
 
