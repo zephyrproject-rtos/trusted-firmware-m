@@ -1,4 +1,4 @@
-# Trusted Firmware M - v0.1
+# Trusted Firmware M - v1.0-beta
 
 Trusted Firmware M provides a reference implementation of secure world
 software for ARMv8-M.
@@ -6,7 +6,7 @@ software for ARMv8-M.
 *Note:* The software implementation contained in this project is designed to
 be a reference implementation of the Arm Platform Security Architecture (PSA).
 It currently does not implement all the features of that architecture, however
-we expect the code to evolve over 2018 along with the specifications.
+we expect the code to evolve along with the specifications.
 
 `Terms 'TFM' and 'TF-M' are commonly used in documents and code and both
 refer to Trusted Firmware M.`
@@ -40,8 +40,15 @@ This release includes
 * A Secure FW with support for PSA Level 1 isolation on ARMv8M.
 * The Interfaces exposed by the Secure FW to NS side.
 * A blocking secure fw model with NS application example.
-* Example secure service (or secure function) running within this SPE.
-	* Only secure storage service is supported in this release.
+* Secure services running within this SPE.
+	* Secure Storage Service
+	* Attestation
+	* Crypto Service
+	* TF-M Audit Log
+	* Platform Service
+	* Secure Storage Service
+* Support for ARMv8-M mainline and baseline
+
 * Testcases running baremetal and with RTX to test the functionality.
 * Basic support for higher level isolation but it is `in progress with
 limited testing`.
@@ -52,20 +59,15 @@ limited testing`.
 ### In progress
 
 * Ongoing and incremental support for PSA features.
-	* Level 3 PSA isolation
-	* PSA Crypto API support
+	* Level 2 and 3 PSA isolation
 	* PSA IPC support
+	* Bootloader enhancements
 	* ...
 * OS support and use case examples.
 	* mbed OS upstream support
 	* mbed cloud client examples
 	* ...
-* Additional platform support.
-	* Musca test chip
-	* Cortex M23 support
-	* ...
 * Ongoing security hardening, optimization and quality improvements.
-
 
 ### Platforms
 
@@ -75,6 +77,7 @@ Current release has been tested on
 	* [FPGA image loaded on MPS2 board.](https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2)
 	* [Fast model FVP_MPS2_AEMv8M.](https://developer.arm.com/products/system-design/fixed-virtual-platforms)
 	* [Musca-A1 test chip board.](https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a1-test-chip-board)
+	* [Musca-B1 test chip board.](https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board)
 * Cortex M23 based IoT Kit system -
 	* [FPGA image loaded on MPS2 board.](https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2)
 
@@ -127,9 +130,9 @@ For this early access release, feedback is requested via email to
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 0.1   | 2017-12-15 | Early Access Release |
+| v1.0-beta   | 2019-02-15 | 1.0-beta release |
 
 
 --------------
 
-*Copyright (c) 2017-2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
