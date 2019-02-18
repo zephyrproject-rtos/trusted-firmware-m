@@ -21,7 +21,9 @@ typedef psa_status_t(*sp_init_function)(void);
 #define TFM_PARTITION_TYPE_APP   "APPLICATION-ROT"
 #define TFM_PARTITION_TYPE_PSA   "PSA-ROT"
 
+#if TFM_LVL == 1
 #define TFM_STACK_SIZE           (1024 * 5)
+#endif
 
 #ifdef TFM_PSA_API
 enum tfm_partition_priority {
@@ -69,7 +71,9 @@ struct spm_partition_desc_t {
      * manifest. It will use the partition stacks in the linker scripts/sct
      * files include Level 1 to 3.
      */
+#if TFM_LVL == 1
     uint8_t stack[TFM_STACK_SIZE] __attribute__((aligned(8)));
+#endif
 #endif
 };
 
