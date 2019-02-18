@@ -10,6 +10,8 @@
 #include "tfm_thread.h"
 #include "tfm_utils.h"
 #include "tfm_memory_utils.h"
+#include "tfm_svc.h"
+#include "spm_api.h"
 
 /* Force ZERO in case ZI(bss) clear is missing */
 static struct tfm_thrd_ctx *p_thrd_head = NULL;
@@ -164,10 +166,19 @@ void tfm_thrd_activate_schedule(void)
 }
 
 /* Remove current thread out of the schedulable list */
-void tfm_thrd_do_exit(void)
+void tfm_svcall_thrd_exit(void)
 {
     CURR_THRD->status = THRD_STAT_DETACH;
     tfm_trigger_pendsv();
+}
+
+__attribute__((section("SFN")))
+void tfm_thrd_exit(void)
+{
+    SVC(TFM_SVC_EXIT_THRD);
+    while (1) {
+        ;
+    }
 }
 
 void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,

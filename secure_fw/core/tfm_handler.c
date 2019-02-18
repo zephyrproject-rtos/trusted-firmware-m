@@ -190,6 +190,7 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
         break;
 #ifdef TFM_PSA_API
     case TFM_SVC_SCHEDULE:
+    case TFM_SVC_EXIT_THRD:
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
     case TFM_SVC_PSA_VERSION:
     case TFM_SVC_PSA_CONNECT:

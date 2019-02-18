@@ -979,6 +979,9 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_SCHEDULE:
         tfm_thrd_activate_schedule();
         break;
+    case TFM_SVC_EXIT_THRD:
+        tfm_svcall_thrd_exit();
+        break;
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();
     case TFM_SVC_PSA_VERSION:

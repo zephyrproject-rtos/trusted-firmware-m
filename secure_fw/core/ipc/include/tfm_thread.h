@@ -201,12 +201,12 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
                              struct tfm_thrd_ctx *next);
 
 /*
- * Exit current running thread.
+ * Svcall to exit current running thread.
  *
  * Notes :
  *  Remove current thread out of schedulable list.
  */
-void tfm_thrd_do_exit(void);
+void tfm_svcall_thrd_exit(void);
 
 /*
  * PendSV specified function.
@@ -219,5 +219,13 @@ void tfm_thrd_do_exit(void);
  *  this function will be obsoleted later.
  */
 void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
+
+/*
+ * Exit current running thread for client.
+ *
+ * Notes:
+ *  Must be called in thread mode.
+ */
+void tfm_thrd_exit(void);
 
 #endif
