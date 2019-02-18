@@ -280,7 +280,8 @@ boot_add_data_to_shared_area(uint8_t        major_type,
      * returns with error: SHARED_MEMORY_OVERWRITE
      */
     for (; offset < tlv_end; offset += tlv_entry.tlv_len) {
-        tlv_entry = *((struct shared_data_tlv_entry *)offset);
+        /* Create local copy to avoid unaligned access */
+        memcpy(&tlv_entry, (const void *)offset, SHARED_DATA_ENTRY_HEADER_SIZE);
         if (GET_MAJOR(tlv_entry.tlv_type) == major_type &&
             GET_MINOR(tlv_entry.tlv_type) == minor_type) {
             return SHARED_MEMORY_OVERWRITE;
