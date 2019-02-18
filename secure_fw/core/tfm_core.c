@@ -181,6 +181,7 @@ int main(void)
 
     tfm_spm_hal_setup_isolation_hw();
 
+#ifndef TFM_PSA_API
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
@@ -200,7 +201,18 @@ int main(void)
      */
     tfm_core_set_secure_exception_priorities();
 
-#ifdef TFM_PSA_API
+    /* We close the TFM_SP_CORE_ID partition, because its only purpose is
+     * to be able to pass the state checks for the tests started from secure.
+     */
+    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
+    tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
+                                SPM_PARTITION_STATE_RUNNING);
+#else
+    /*
+     * Prioritise secure exceptions to avoid NS being able to pre-empt
+     * secure SVC or SecureFault. Do it before PSA API initialization.
+     */
+    tfm_core_set_secure_exception_priorities();
     tfm_spm_init();
 #endif
 
@@ -208,13 +220,6 @@ int main(void)
     /* Jumps to non-secure code */
     LOG_MSG("Jumping to non-secure code...");
 #endif
-
-    /* We close the TFM_SP_CORE_ID partition, because its only purpose is
-     * to be able to pass the state checks for the tests started from secure.
-     */
-    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
-    tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
-                              SPM_PARTITION_STATE_RUNNING);
 
     jump_to_ns_code();
 }

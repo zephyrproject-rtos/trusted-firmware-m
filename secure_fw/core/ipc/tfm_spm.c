@@ -507,6 +507,7 @@ void tfm_spm_init(void)
     struct tfm_spm_ipc_partition_t *partition;
     struct tfm_spm_service_t *service;
     struct tfm_thrd_ctx *pth;
+    struct spm_partition_desc_t *part;
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -521,6 +522,8 @@ void tfm_spm_init(void)
 
     /* Init partition first for it will be used when init service */
     for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
+        part = &g_spm_partition_db.partitions[i];
+        tfm_spm_hal_configure_default_isolation(part->platform_data);
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
