@@ -24,9 +24,11 @@ extern "C" {
 
 /**
  * \brief PSA INITIAL ATTESTATION API version
+ *
+ * Initial attestation API version is: 1.0-beta-0
  */
-#define PSA_INITIAL_ATTEST_API_VERSION_MAJOR (0)
-#define PSA_INITIAL_ATTEST_API_VERSION_MINOR (9)
+#define PSA_INITIAL_ATTEST_API_VERSION_MAJOR (1)
+#define PSA_INITIAL_ATTEST_API_VERSION_MINOR (0)
 
 /**
  * \enum psa_attest_err_t
