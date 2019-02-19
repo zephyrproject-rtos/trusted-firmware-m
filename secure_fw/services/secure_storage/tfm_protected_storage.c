@@ -177,6 +177,7 @@ enum tfm_sst_err_t tfm_sst_get_info(const psa_ps_uid_t *uid,
 enum tfm_sst_err_t tfm_sst_remove(const psa_ps_uid_t *uid)
 {
     enum tfm_status_e status;
+    enum tfm_sst_err_t err;
     int32_t client_id;
 
     status = tfm_core_memory_permission_check((psa_ps_uid_t *)uid,
@@ -198,7 +199,17 @@ enum tfm_sst_err_t tfm_sst_remove(const psa_ps_uid_t *uid)
     }
 
     /* Delete the object from the object system */
-    return sst_object_delete(*uid, client_id);
+    err = sst_object_delete(*uid, client_id);
+
+    /* PSA_PS_ERROR_AUTH_FAILED is not supported by psa_ps_remove
+     * specification. So, this function returns TFM_SST_ERR_OPERATION_FAILED
+     * instead.
+     */
+    if (err == TFM_SST_ERR_AUTH_FAILED) {
+        return TFM_SST_ERR_OPERATION_FAILED;
+    }
+
+    return err;
 }
 
 enum tfm_sst_err_t tfm_sst_get_support(uint32_t *support_flags)
