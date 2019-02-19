@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -70,5 +70,6 @@ enum psa_audit_err psa_audit_add_record(const struct psa_audit_record *record)
      * of the Non-Secure interface, always directly return an error without
      * routing the call to TF-M in the Secure world
      */
+    (void)record;
     return PSA_AUDIT_ERR_NOT_SUPPORTED;
 }

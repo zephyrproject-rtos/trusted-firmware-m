@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -53,8 +53,8 @@ struct audit_core_retrieve_output {
  *
  */
 enum psa_audit_err audit_core_retrieve_record_wrapper(
-                                const struct audit_core_retrieve_input *input_s,
-                                   struct audit_core_retrieve_output *output_s);
+                             const struct audit_core_retrieve_input *input_s,
+                             const struct audit_core_retrieve_output *output_s);
 
 #ifdef __cplusplus
 }

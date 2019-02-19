@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -85,14 +85,6 @@ static const char hex_values[] = "0123456789ABCDEF";
  * \note Must be a multiple of 8 bytes.
  */
 #define LOG_SIZE (1024)
-
-/*!
- * \def MIN(a,b)
- *
- * \brief A standard MIN macro
- *
- */
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 /*!
  * \var log_buffer
@@ -360,7 +352,8 @@ static enum psa_audit_err audit_format_buffer(
 {
     struct log_hdr *hdr = NULL;
     struct log_tlr *tlr = NULL;
-    uint32_t size, idx;
+    uint32_t size;
+    uint8_t idx;
 
     /* Get the size from the record */
     size = record->size;
@@ -381,9 +374,11 @@ static enum psa_audit_err audit_format_buffer(
     hdr->partition_id = partition_id;
 
     /* Copy the record into the scratch buffer */
-    audit_memcpy( (const uint8_t *) record,
+    if (audit_memcpy( (const uint8_t *) record,
                   size+4,
-                  (uint8_t *) &(hdr->size) );
+                  (uint8_t *) &(hdr->size) ) != PSA_AUDIT_ERR_SUCCESS) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
 
     /* FIXME: The MAC here is just a dummy value for prototyping. It will be
      *        filled by a call to the crypto interface directly when available.
@@ -582,12 +577,14 @@ enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
     }
 
     /* Get the size in bytes and num of elements present in the log */
-    audit_core_get_info(&num_items, &stored_size);
+    if (audit_core_get_info(&num_items, &stored_size) !=
+                                                        PSA_AUDIT_ERR_SUCCESS) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
 
     if (num_items == 0) {
 
         start_pos = 0;
-        stop_pos = COMPUTE_LOG_ENTRY_SIZE(size) - 1;
 
     } else {
 
@@ -600,14 +597,20 @@ enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
     }
 
     /* Format the scratch buffer with the complete log item */
-    audit_format_buffer(record, partition_id, &scratch_buffer[0]);
+    if (audit_format_buffer(record, partition_id, &scratch_buffer[0])
+                                                     != PSA_AUDIT_ERR_SUCCESS) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
 
     /* TODO: At this point, encryption should be called if supported */
 
     /* Do the copy of the log item to be added in the log */
-    audit_buffer_copy( (const uint8_t *) &scratch_buffer[0],
+    if (audit_buffer_copy( (const uint8_t *) &scratch_buffer[0],
                        COMPUTE_LOG_ENTRY_SIZE(size),
-                       (uint8_t *) &log_buffer[start_pos] );
+                       (uint8_t *) &log_buffer[start_pos] )
+                                                     != PSA_AUDIT_ERR_SUCCESS) {
+        return PSA_AUDIT_ERR_FAILURE;
+    }
 
     /* Retrieve current log state */
     first_el_idx = log_state.first_el_idx;
