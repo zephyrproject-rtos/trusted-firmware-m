@@ -121,14 +121,21 @@ psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
 psa_ps_status_t psa_ps_create(psa_ps_uid_t uid, uint32_t size,
                               psa_ps_create_flags_t create_flags)
 {
-    (void)uid, (void)size, (void)create_flags;
+    (void)uid;
+    (void)size;
+    (void)create_flags;
+
     return PSA_PS_ERROR_NOT_SUPPORTED;
 }
 
 psa_ps_status_t psa_ps_set_extended(psa_ps_uid_t uid, uint32_t data_offset,
                                     uint32_t data_length, const void *p_data)
 {
-    (void)uid, (void)data_offset, (void)data_length, (void)p_data;
+    (void)uid;
+    (void)data_offset;
+    (void)data_length;
+    (void)p_data;
+
     return PSA_PS_ERROR_NOT_SUPPORTED;
 }
 

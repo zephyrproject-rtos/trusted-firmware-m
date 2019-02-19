@@ -24,9 +24,11 @@
 /* Set to 1 once sst_system_prepare has been called */
 static uint8_t sst_system_ready = SST_SYSTEM_NOT_READY;
 
+#ifndef SST_ENCRYPTION
 /* Gets the size of object written to the object system below */
 #define SST_OBJECT_SIZE(max_size) (SST_OBJECT_HEADER_SIZE + (max_size))
 #define SST_OBJECT_START_POSITION  0
+#endif /* SST_ENCRYPTION */
 
 /* Allocate static variables to process objects */
 static struct sst_object_t g_sst_object;

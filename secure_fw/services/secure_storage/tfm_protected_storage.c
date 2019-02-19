@@ -31,6 +31,9 @@ psa_ps_status_t tfm_sst_init(void)
          * layout in that area.
          */
         err = sst_system_wipe_all();
+        if (err != PSA_PS_SUCCESS) {
+            return err;
+        }
 
         /* Attempt to initialise again */
         err = sst_system_prepare();

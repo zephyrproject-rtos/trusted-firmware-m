@@ -220,8 +220,8 @@ static void sst_mblock_swap_metablocks(void)
  * \return most recent metablock
  */
 static uint8_t sst_mblock_latest_meta_block(
-                                    struct sst_metadata_block_header_t *h_meta0,
-                                    struct sst_metadata_block_header_t *h_meta1)
+                              const struct sst_metadata_block_header_t *h_meta0,
+                              const struct sst_metadata_block_header_t *h_meta1)
 {
     uint8_t cur_meta;
     uint8_t meta0_swap_count = h_meta0->active_swap_count;
@@ -734,7 +734,7 @@ static psa_ps_status_t sst_mblock_reserve_file(uint32_t fid, uint32_t size,
  */
 static psa_ps_status_t sst_init_get_active_metablock(void)
 {
-    uint32_t cur_meta_block;
+    uint32_t cur_meta_block = SST_BLOCK_INVALID_ID;
     psa_ps_status_t err;
     struct sst_metadata_block_header_t h_meta0;
     struct sst_metadata_block_header_t h_meta1;
@@ -917,7 +917,8 @@ psa_ps_status_t sst_flash_fs_mblock_migrate_lb0_data_to_scratch(void)
     }
 
     /* Calculate data size stored in the B0 block */
-    data_size = (SST_BLOCK_SIZE - block_meta.data_start - block_meta.free_size);
+    data_size = ((SST_BLOCK_SIZE - block_meta.data_start)
+                                                        - block_meta.free_size);
 
     err = sst_flash_block_to_block_move(scratch_metablock,
                                         block_meta.data_start,
@@ -1025,7 +1026,11 @@ psa_ps_status_t sst_flash_fs_mblock_reset_metablock(void)
     block_meta.data_start = SST_ALL_METADATA_SIZE;
     block_meta.free_size = (SST_BLOCK_SIZE - block_meta.data_start);
     block_meta.phy_id = SST_METADATA_BLOCK0;
-    sst_mblock_update_scratch_block_meta(SST_LOGICAL_DBLOCK0, &block_meta);
+    err = sst_mblock_update_scratch_block_meta(SST_LOGICAL_DBLOCK0,
+                                               &block_meta);
+    if (err != PSA_PS_SUCCESS) {
+        return err;
+    }
 
     /* Fill the block metadata for the dedicated datablocks, which have logical
      * ids beginning from 1 and physical ids initially beginning from
