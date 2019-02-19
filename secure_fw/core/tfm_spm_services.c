@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "secure_fw/include/tfm_spm_services_api.h"
 
 uint8_t *tfm_scratch_area;
-int32_t tfm_scratch_area_size;
+uint32_t tfm_scratch_area_size;
 nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
@@ -36,7 +36,7 @@ void jump_to_ns_code(void)
 
 #if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) int32_t tfm_core_sfn_request(
-                                                 struct tfm_sfn_req_s *desc_ptr)
+                                           const struct tfm_sfn_req_s *desc_ptr)
 {
     __ASM(
           "PUSH   {r4-r12, lr}\n"
@@ -58,7 +58,7 @@ __attribute__((naked)) int32_t tfm_core_sfn_request(
 }
 #elif defined(__ARM_ARCH_8M_BASE__)
 __attribute__((naked)) int32_t tfm_core_sfn_request(
-                                                 struct tfm_sfn_req_s *desc_ptr)
+                                           const struct tfm_sfn_req_s *desc_ptr)
 {
     __ASM(
           ".syntax unified\n"

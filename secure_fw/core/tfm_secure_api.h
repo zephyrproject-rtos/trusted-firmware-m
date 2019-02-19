@@ -8,7 +8,7 @@
 #ifndef __TFM_SECURE_API_H__
 #define __TFM_SECURE_API_H__
 
-#include "arm_cmse.h"
+#include <arm_cmse.h>
 #include "tfm_svc.h"
 #include "secure_utilities.h"
 #include "tfm_core.h"
@@ -36,6 +36,9 @@
 #error TFM_LVL is not defined!
 #endif
 
+#define TFM_MEMORY_ACCESS_RO 1U
+#define TFM_MEMORY_ACCESS_RW 2U
+
 extern void tfm_secure_api_error_handler(void);
 
 typedef int32_t(*sfn_t)(int32_t, int32_t, int32_t, int32_t);
@@ -46,7 +49,7 @@ struct tfm_sfn_req_s {
     int32_t *args;
     uint32_t caller_part_idx;
     int32_t iovec_api;
-    int32_t ns_caller : 1;
+    uint32_t ns_caller;
 };
 
 enum tfm_buffer_share_region_e {
@@ -66,11 +69,6 @@ enum tfm_ns_region_e {
     TFM_NS_SECONDARY_IMAGE_REGION,
 };
 
-enum tfm_memory_access_e {
-    TFM_MEMORY_ACCESS_RO = 1,
-    TFM_MEMORY_ACCESS_RW = 2,
-};
-
 extern int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share);
 
 extern int32_t tfm_core_validate_secure_caller(void);
@@ -84,7 +82,7 @@ extern int32_t tfm_core_memory_permission_check(const void *ptr,
 extern int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr,
                                       uint32_t len);
 
-int32_t tfm_core_sfn_request(struct tfm_sfn_req_s *desc_ptr);
+int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr);
 
 int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
 
@@ -101,7 +99,7 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
  * \return 1 if the partition has access to the memory range, 0 otherwise.
  */
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           int32_t ns_caller);
+                                           uint32_t ns_caller);
 
 /**
  * \brief Check whether the current partition has write access to a memory range
@@ -116,7 +114,7 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
  * \return 1 if the partition has access to the memory range, 0 otherwise.
  */
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            int32_t ns_caller);
+                                            uint32_t ns_caller);
 
 #define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
         return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \
@@ -136,7 +134,31 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
     desc.sp_id = id;
     desc.sfn = fn;
     desc.args = args;
-    desc.ns_caller = cmse_nonsecure_caller();
+    /*
+     * This preprocessor condition checks if a version of GCC smaller than
+     * 7.3.1 is being used to compile the code.
+     * These versions are affected by a bug on the cmse_nonsecure_caller
+     * intrinsic which returns incorrect results.
+     * Please check Bug 85203 on GCC Bugzilla for more information.
+     */
+#if defined(__GNUC__) && !defined(__ARMCC_VERSION) && \
+    (__GNUC__ < 7 || \
+     (__GNUC__ == 7 && (__GNUC_MINOR__ < 3 || \
+                       (__GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ < 1))))
+    /*
+     * Use the fact that, if called from Non-Secure, the LSB of the return
+     * address is set to 0.
+     */
+    desc.ns_caller = (uint32_t)!(
+           (intptr_t)__builtin_extract_return_addr(__builtin_return_address(0U))
+           & 1);
+#else
+    /*
+     * Convert the result of cmse_nonsecure_caller from an int to a uint32_t
+     * to prevent using an int in the tfm_sfn_req_s structure.
+     */
+    desc.ns_caller = (cmse_nonsecure_caller() != 0) ? 1U : 0U;
+#endif /* Check for GCC compiler version smaller than 7.3.1 */
     desc.iovec_api = iovec_api;
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* FixMe: Error severity TBD */

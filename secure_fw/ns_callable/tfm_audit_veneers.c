@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,6 @@
 #include "tfm_audit_veneers.h"
 #include "secure_fw/services/audit_logging/audit_core.h"
 #include "tfm_secure_api.h"
-#include "tfm_api.h"
 #include "spm_partition_defs.h"
 #include "audit_wrappers.h"
 

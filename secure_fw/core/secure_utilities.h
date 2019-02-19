@@ -94,7 +94,7 @@ __STATIC_INLINE uint32_t __get_active_exc_num(void)
 }
 
 __attribute__ ((always_inline))
-__STATIC_INLINE void __set_CONTROL_SPSEL(int32_t SPSEL)
+__STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
 {
     CONTROL_Type ctrl;
 

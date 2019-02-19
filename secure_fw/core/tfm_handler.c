@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "secure_utilities.h"
-#include "arm_acle.h"
 #include "tfm_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"
@@ -66,9 +65,9 @@ void SecureFault_Handler(void)
 
     /* Only save the context if sp is valid */
     if ((sp >=  S_DATA_START &&
-         sp <=  S_DATA_LIMIT - sizeof(tfm_fault_context) + 1) ||
+         sp <=  (S_DATA_LIMIT - sizeof(tfm_fault_context)) + 1) ||
         (sp >= NS_DATA_START &&
-         sp <= NS_DATA_LIMIT - sizeof(tfm_fault_context) + 1)) {
+         sp <= (NS_DATA_LIMIT - sizeof(tfm_fault_context)) + 1)) {
         tfm_memcpy(&tfm_fault_context,
                    (const void *)sp,
                    sizeof(tfm_fault_context));

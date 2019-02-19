@@ -154,9 +154,13 @@ void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
 
 int main(void)
 {
-    tfm_core_init();
+    if (tfm_core_init() != 0) {
+        /* Placeholder for error handling, currently ignored. */
+    }
 
-    tfm_spm_db_init();
+    if (tfm_spm_db_init() != SPM_ERR_OK) {
+        /* Placeholder for error handling, currently ignored. */
+    }
 
     tfm_spm_hal_setup_isolation_hw();
 
@@ -192,7 +196,9 @@ int main(void)
     /* Prioritise secure exceptions to avoid NS being able to pre-empt secure
      * SVC or SecureFault
      */
-    tfm_core_set_secure_exception_priorities();
+    if (tfm_core_set_secure_exception_priorities() != SPM_ERR_OK) {
+        /* Placeholder for error handling, currently ignored. */
+    }
 
     jump_to_ns_code();
 }

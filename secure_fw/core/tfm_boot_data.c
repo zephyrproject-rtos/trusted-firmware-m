@@ -113,7 +113,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                    SHARED_DATA_ENTRY_HEADER_SIZE);
         if (GET_MAJOR(tlv_entry.tlv_type) == tlv_major) {
             /* Check buffer overflow */
-            if ((ptr - buf_start + tlv_entry.tlv_len) > buf_size) {
+            if (((ptr - buf_start) + tlv_entry.tlv_len) > buf_size) {
                 args[0] = TFM_ERROR_INVALID_PARAMETER;
                 return;
             }
