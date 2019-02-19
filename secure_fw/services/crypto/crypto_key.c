@@ -12,7 +12,7 @@
 #include "crypto_utils.h"
 #include "psa_crypto.h"
 #include "tfm_crypto_defs.h"
-#include "secure_fw/core/secure_utilities.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 
 /**
  * \brief This is the default value of maximum number of simultaneous

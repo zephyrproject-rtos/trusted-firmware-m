@@ -5,7 +5,7 @@
  *
  */
 
-#include "secure_utilities.h"
+#include "tfm_memory_utils.h"
 #include "tfm_crypto_defs.h"
 #include "psa_crypto.h"
 

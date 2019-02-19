@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "bl2/include/tfm_boot_status.h"
-#include "secure_utilities.h"
+#include "tfm_memory_utils.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "flash_layout.h"

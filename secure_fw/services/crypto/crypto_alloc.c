@@ -13,7 +13,7 @@
 #include "tfm_crypto_api.h"
 
 #include "tfm_crypto_struct.h"
-#include "secure_fw/core/secure_utilities.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 
 /**
  * \brief This value defines the maximum number of simultaneous operations

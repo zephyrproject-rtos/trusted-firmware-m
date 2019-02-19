@@ -10,7 +10,7 @@
 #include "secure_fw/services/initial_attestation/attestation.h"
 #include "../attestation_tests_common.h"
 #include "bl2/include/tfm_boot_status.h"
-#include "secure_utilities.h"
+#include "tfm_memory_utils.h"
 #include "platform/include/tfm_plat_device_id.h"
 #include "platform/include/tfm_plat_boot_seed.h"
 #include "tfm_api.h"

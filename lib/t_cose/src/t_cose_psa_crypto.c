@@ -14,7 +14,7 @@
 #include "attestation_key.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_crypto_keys.h"
-#include "secure_utilities.h"
+#include "tfm_memory_utils.h"
 #include "psa_crypto.h"
 
 /**

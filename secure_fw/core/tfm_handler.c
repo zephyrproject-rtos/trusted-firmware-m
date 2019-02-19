@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,7 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"
+#include "tfm_memory_utils.h"
 
 /* This SVC handler is called when a secure partition requests access to a
  * buffer area
