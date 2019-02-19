@@ -12,6 +12,7 @@
 #include "psa_client.h"
 #include "psa_service.h"
 #include "tfm_utils.h"
+#include "platform/include/tfm_spm_hal.h"
 #include "spm_api.h"
 #include "spm_db.h"
 #include "spm_db_setup.h"
