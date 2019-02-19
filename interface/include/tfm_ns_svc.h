@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,7 +59,7 @@ enum tfm_svc_num {
 };
 
 /* number of user SVC functions */
-#define USER_SVC_COUNT (SVC_TFM_MAX - 1)
+#define USER_SVC_COUNT ((uint32_t)SVC_TFM_MAX - 1)
 
 #ifdef __cplusplus
 }
