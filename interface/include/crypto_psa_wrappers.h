@@ -39,8 +39,7 @@ struct psa_cipher_update_output {
  * \brief This function is a TF-M compatible wrapper for the
  *        \ref tfm_crypto_cipher_update implemented in the Crypto service
  *
- * \param[out] operation Pointer to the structure containing output parameters
- *                       associated with \ref psa_cipher_update_output
+ * \param[out] operation Pointer to a cipher operation context in the backend
  * \param[in]  input_s   Pointer to the structure containing input parameters
  *                       associated with \ref psa_cipher_update_input
  * \param[out] output_s  Pointer to the structure containing output parameters
@@ -48,9 +47,9 @@ struct psa_cipher_update_output {
  *
  */
 enum tfm_crypto_err_t tfm_crypto_cipher_update_wrapper(
-                                              psa_cipher_operation_t *operation,
-                                        struct psa_cipher_update_input *input_s,
-                                     struct psa_cipher_update_output *output_s);
+                               psa_cipher_operation_t *operation,
+                               const struct psa_cipher_update_input *input_s,
+                               const struct psa_cipher_update_output *output_s);
 
 /*!
  * \struct psa_aead_encrypt_input
@@ -121,8 +120,8 @@ struct psa_aead_decrypt_output {
  *
  */
 enum tfm_crypto_err_t tfm_crypto_aead_encrypt_wrapper(
-                                        struct psa_aead_encrypt_input *input_s,
-                                     struct psa_aead_encrypt_output *output_s);
+                                const struct psa_aead_encrypt_input *input_s,
+                                const struct psa_aead_encrypt_output *output_s);
 /*!
  * \brief This function is a TF-M compatible wrapper for the
  *        \ref tfm_crypto_aead_decrypt implemented in the Crypto service
@@ -134,8 +133,8 @@ enum tfm_crypto_err_t tfm_crypto_aead_encrypt_wrapper(
  *
  */
 enum tfm_crypto_err_t tfm_crypto_aead_decrypt_wrapper(
-                                        struct psa_aead_decrypt_input *input_s,
-                                     struct psa_aead_decrypt_output *output_s);
+                                const struct psa_aead_decrypt_input *input_s,
+                                const struct psa_aead_decrypt_output *output_s);
 #ifdef __cplusplus
 }
 #endif

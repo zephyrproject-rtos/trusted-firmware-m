@@ -83,6 +83,11 @@ psa_status_t psa_export_public_key(psa_key_slot_t key,
                                    size_t data_size,
                                    size_t *data_length)
 {
+    (void)key;
+    (void)data;
+    (void)data_size;
+    (void)data_length;
+
     /* TODO: This API is not supported yet */
     return PSA_ERROR_NOT_SUPPORTED;
 }

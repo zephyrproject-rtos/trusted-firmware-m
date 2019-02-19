@@ -19,9 +19,9 @@
 
 /*!@{*/
 enum tfm_crypto_err_t tfm_crypto_cipher_update_wrapper(
-                                              psa_cipher_operation_t *operation,
-                                        struct psa_cipher_update_input *input_s,
-                                      struct psa_cipher_update_output *output_s)
+                                psa_cipher_operation_t *operation,
+                                const struct psa_cipher_update_input *input_s,
+                                const struct psa_cipher_update_output *output_s)
 {
     /* Extract the following fields from the input and output structures */
     const uint8_t *input = input_s->input;
@@ -36,8 +36,8 @@ enum tfm_crypto_err_t tfm_crypto_cipher_update_wrapper(
 }
 
 enum tfm_crypto_err_t tfm_crypto_aead_encrypt_wrapper(
-                                        struct psa_aead_encrypt_input *input_s,
-                                      struct psa_aead_encrypt_output *output_s)
+                                 const struct psa_aead_encrypt_input *input_s,
+                                 const struct psa_aead_encrypt_output *output_s)
 {
     /* Extract the following fields from the input and output structures */
     psa_key_slot_t key = input_s->key;
@@ -60,8 +60,8 @@ enum tfm_crypto_err_t tfm_crypto_aead_encrypt_wrapper(
 }
 
 enum tfm_crypto_err_t tfm_crypto_aead_decrypt_wrapper(
-                                        struct psa_aead_decrypt_input *input_s,
-                                      struct psa_aead_decrypt_output *output_s)
+                                 const struct psa_aead_decrypt_input *input_s,
+                                 const struct psa_aead_decrypt_output *output_s)
 {
     /* Extract the following fields from the input and output structures */
     psa_key_slot_t key = input_s->key;

@@ -128,7 +128,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
     /* Start the crypto engine */
     status = tfm_crypto_engine_cipher_start(&(ctx->engine_ctx), &engine_info);
     if (status != PSA_SUCCESS) {
-        /* Release the operation context */
+        /* Release the operation context, ignore if this operation fails. */
         (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
@@ -145,7 +145,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                              CRYPTO_CIPHER_MAX_KEY_LENGTH,
                              &key_size);
     if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        /* Release the operation context */
+        /* Release the operation context, ignore if this operation fails. */
         (void)tfm_crypto_cipher_release(operation, ctx);
         return err;
     }
@@ -156,7 +156,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
                                               key_size,
                                               &engine_info);
     if (status != PSA_SUCCESS) {
-        /* Release the operation context */
+        /* Release the operation context, ignore if this operation fails. */
         (void)tfm_crypto_cipher_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
@@ -171,7 +171,7 @@ static enum tfm_crypto_err_t tfm_crypto_cipher_setup(
         status = tfm_crypto_engine_cipher_set_padding_mode(&(ctx->engine_ctx),
                                                            &engine_info);
         if (status != PSA_SUCCESS) {
-            /* Release the operation context */
+            /* Release the operation context, ignore if this operation fails. */
             (void)tfm_crypto_cipher_release(operation, ctx);
             return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
         }

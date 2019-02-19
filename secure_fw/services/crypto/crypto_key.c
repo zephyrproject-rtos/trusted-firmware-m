@@ -10,9 +10,9 @@
 
 #include "tfm_crypto_api.h"
 #include "crypto_utils.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 #include "psa_crypto.h"
 #include "tfm_crypto_defs.h"
-#include "secure_fw/core/tfm_memory_utils.h"
 
 /**
  * \brief This is the default value of maximum number of simultaneous
@@ -100,7 +100,7 @@ static bool key_type_is_supported(psa_key_type_t type, size_t key_length)
 enum tfm_crypto_err_t tfm_crypto_init_key(void)
 {
     /* Clear the contents of the local key_storage */
-    tfm_memset(key_storage, 0, sizeof(key_storage));
+    (void)tfm_memset(key_storage, 0, sizeof(key_storage));
     return TFM_CRYPTO_ERR_PSA_SUCCESS;
 }
 
@@ -275,6 +275,11 @@ enum tfm_crypto_err_t tfm_crypto_export_public_key(psa_key_slot_t key,
                                                    size_t data_size,
                                                    size_t *data_length)
 {
+    (void)key;
+    (void)data;
+    (void)data_size;
+    (void)data_length;
+
     /* FIXME: This API is not supported yet */
     return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
 }

@@ -5,6 +5,7 @@
  *
  */
 
+#include "crypto_utils.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 #include "tfm_crypto_defs.h"
 
@@ -13,7 +14,6 @@
 #include "tfm_crypto_struct.h"
 
 #include "tfm_crypto_api.h"
-#include "crypto_utils.h"
 
 /**
  * \def UNUSED_VAR
@@ -34,7 +34,7 @@
 
 static void mac_zeroize(void *data, size_t size)
 {
-    tfm_memset(data, 0, size);
+    (void)tfm_memset(data, 0, size);
 }
 
 static size_t get_hash_block_size(psa_algorithm_t alg)
@@ -67,18 +67,11 @@ static enum tfm_crypto_err_t tfm_crypto_mac_release(
                                                 psa_mac_operation_t *operation,
                                                 struct tfm_mac_operation_s *ctx)
 {
-    enum tfm_crypto_err_t err;
-
     /* No release necessary on the ctx related quantites for the time being */
     UNUSED_VAR(ctx);
 
     /* Release the operation context */
-    err = tfm_crypto_operation_release(TFM_CRYPTO_MAC_OPERATION, operation);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
-    }
-
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return tfm_crypto_operation_release(TFM_CRYPTO_MAC_OPERATION, operation);
 }
 
 static enum tfm_crypto_err_t tfm_crypto_hmac_setup(

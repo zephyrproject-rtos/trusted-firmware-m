@@ -92,7 +92,7 @@ enum tfm_crypto_err_t tfm_crypto_hash_setup(psa_hash_operation_t *operation,
     /* Start the engine */
     status = tfm_crypto_engine_hash_start(&(ctx->engine_ctx), &engine_info);
     if (status != PSA_SUCCESS) {
-        /* Release the operation context */
+        /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_hash_release(operation, ctx);
         return PSA_STATUS_TO_TFM_CRYPTO_ERR(status);
     }
