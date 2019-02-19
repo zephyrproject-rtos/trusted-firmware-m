@@ -19,7 +19,7 @@ nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
 {
-#if TFM_LVL != 1
+#if TFM_LVL == 3 || ((!defined(TFM_PSA_API)) && (TFM_LVL != 1))
     /* Initialization is done, set thread mode to unprivileged. */
     tfm_spm_partition_change_privilege(TFM_PARTITION_UNPRIVILEGED_MODE);
 #endif
