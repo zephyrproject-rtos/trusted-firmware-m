@@ -130,7 +130,7 @@ are supported by which platforms:
 |  AN521   |            Yes           |          Yes          |          Yes          |            No            |
 |  AN519   |            Yes           |          Yes          |          Yes          |            No            |
 | Musca-A1 |            No            |          No           |          No           |            Yes           |
-| Musca-B1 |            Yes           |          Yes          |          Yes          |            No            |
+| Musca-B1 |            Yes           |          No           |          Yes          |            No            |
 
 (1) To disable BL2, please turn off the `BL2` compiler switch in the
 top-level configuration files or in the command line
@@ -302,9 +302,9 @@ IMAGE2FILE: \Software\tfm_sig1.bin ; TF-M regression test binary blob
 After two images have been built, they can be concatenated to create the
 combined image using `srec_cat`:
 
-- Linux: `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x0 tfm_sign_0.bin -Binary -offset 0x20000 tfm_sign_1.bin -Binary -offset 0x120000 -o tfm.hex -Intel`
+- Linux: `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign_0.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0A0000 -o tfm.hex -Intel`
 
-- Windows: `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x0 tfm_sign_0.bin -Binary -offset 0x20000 tfm_sign_1.bin -Binary -offset 0x120000 -o tfm.hex -Intel`
+- Windows: `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign_0.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0A0000 -o tfm.hex -Intel`
 
 The following message will be shown in case of successful firmware upgrade,
 notice that image with higher version number (`version=1.2.3.5`) is executed:
@@ -362,4 +362,4 @@ RAM loading is enabled, notice that image with higher version number
 
 --------------
 
-*Copyright (c) 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*

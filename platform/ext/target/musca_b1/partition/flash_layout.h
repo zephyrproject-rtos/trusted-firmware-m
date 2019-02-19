@@ -17,22 +17,23 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on Musca-B1 with BL2:
- * 0x0000_0000 BL2 - MCUBoot(128 KB)
- * 0x0002_0000 Flash_area_image_0(1 MB)
- *    0x0002_0000 Secure     image primary
- *    0x000A_0000 Non-secure image primary
- * 0x0012_0000 Flash_area_image_1(1 MB)
- *    0x0012_0000 Secure     image secondary
- *    0x001A_0000 Non-secure image secondary
- * 0x0022_0000 Secure Storage Area(0.02 MB)
- * 0x0022_5000 NV counters area(16 Bytes)
- * 0x0022_5010 Unused
+/* Flash layout on Musca-B1 with BL2(boot from eFlash 0):
+ * 0x0A00_0000 BL2 - MCUBoot(128 KB)
+ * 0x0A02_0000 Flash_area_image_0(512 KB)
+ *    0x0A02_0000 Secure     image primary
+ *    0x0A06_0000 Non-secure image primary
+ * 0x0A0A_0000 Flash_area_image_1(512 KB)
+ *    0x0A0A_0000 Secure     image secondary
+ *    0x0A0E_0000 Non-secure image secondary
+ * 0x0A12_0000 Scratch area (512 KB)
+ * 0x0A1A_0000 Secure Storage Area(0.02 MB)
+ * 0x0A1A_5000 NV counters area(16 Bytes)
+ * 0x0A1A_5010 Unused
  */
 
 /* Flash layout on Musca-B1 without BL2:
- * 0x0000_0000 Secure     image
- * 0x000A_0000 Non-secure image
+ * 0x0A00_0000 Secure     image
+ * 0x0A06_0000 Non-secure image
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -46,15 +47,15 @@
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
  */
-#define FLASH_PARTITION_SIZE            (0x80000)  /* 512KB */
+#define FLASH_PARTITION_SIZE            (0x40000)  /* 256KB */
 
 /* Sector size of the flash hardware */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4KB */
-#define FLASH_TOTAL_SIZE                (0x800000) /* 8MB */
+#define FLASH_TOTAL_SIZE                (0x200000) /* 2MB */
 
 /* Flash layout info for BL2 bootloader */
-/* Same as MUSCA_B1_QSPI_FLASH_S_BASE */
-#define FLASH_BASE_ADDRESS              (0x10000000)
+/* Same as MUSCA_B1_EFLASH0_S_BASE */
+#define FLASH_BASE_ADDRESS              (0x1A000000)
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_0 and IMAGE_1, SCRATCH
@@ -63,13 +64,16 @@
 #define FLASH_AREA_BL2_OFFSET           (0x0)
 #define FLASH_AREA_BL2_SIZE             (0x20000) /* 128KB */
 
-#define FLASH_AREA_IMAGE_0_OFFSET       (0x20000)
+#define FLASH_AREA_IMAGE_0_OFFSET       (FLASH_AREA_BL2_OFFSET + \
+                                         FLASH_AREA_BL2_SIZE)
 #define FLASH_AREA_IMAGE_0_SIZE         (2 * FLASH_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_1_OFFSET       (0x120000)
+#define FLASH_AREA_IMAGE_1_OFFSET       (FLASH_AREA_IMAGE_0_OFFSET + \
+                                         FLASH_AREA_IMAGE_0_SIZE)
 #define FLASH_AREA_IMAGE_1_SIZE         (2 * FLASH_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET (0x220000)
+#define FLASH_AREA_IMAGE_SCRATCH_OFFSET (FLASH_AREA_IMAGE_1_OFFSET + \
+                                         FLASH_AREA_IMAGE_1_SIZE)
 #define FLASH_AREA_IMAGE_SCRATCH_SIZE   (2 * FLASH_PARTITION_SIZE)
 
 /* Maximum number of status entries supported by the bootloader. */
@@ -94,10 +98,10 @@
 
 /* Offset and size definition in flash area, used by assemble.py */
 #define SECURE_IMAGE_OFFSET             0x0
-#define SECURE_IMAGE_MAX_SIZE           0x80000
+#define SECURE_IMAGE_MAX_SIZE           0x40000
 
-#define NON_SECURE_IMAGE_OFFSET         0x80000
-#define NON_SECURE_IMAGE_MAX_SIZE       0x80000
+#define NON_SECURE_IMAGE_OFFSET         0x40000
+#define NON_SECURE_IMAGE_MAX_SIZE       0x40000
 
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c

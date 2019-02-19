@@ -34,7 +34,7 @@ else()
 endif()
 set(FLASH_LAYOUT           "${PLATFORM_DIR}/target/musca_b1/partition/flash_layout.h")
 set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_b1/partition")
-set(SIGN_BIN_SIZE          0x100000)
+set(SIGN_BIN_SIZE          0x80000)
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})

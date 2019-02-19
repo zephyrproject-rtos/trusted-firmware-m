@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -44,9 +44,9 @@
                               + FLASH_NV_COUNTERS_AREA_SIZE)
 #define FLASH_REDIRECT_DEST  S_CODE_SRAM_ALIAS_BASE
 
-#define FLASH0_BASE_S         0x10000000
-#define FLASH0_BASE_NS        0x00000000
-#define FLASH0_SIZE           0x00800000 /* 8 MB */
+#define FLASH0_BASE_S         0x1A000000
+#define FLASH0_BASE_NS        0x0A000000
+#define FLASH0_SIZE           0x00200000 /* 2 MB */
 #define FLASH0_SECTOR_SIZE    0x00001000 /* 4 kB */
 #define FLASH0_PAGE_SIZE      0x00001000 /* 4 kB */
 #define FLASH0_PROGRAM_UNIT   0x4        /* Minimum write size */

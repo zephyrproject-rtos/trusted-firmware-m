@@ -67,7 +67,7 @@ const struct memory_region_limits memory_regions = {
 #define NSCCFG_CODENSC  1
 
 /* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC, Driver_QSPI_MPC;
+extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC, Driver_EFLASH0_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC, Driver_ISRAM1_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 
@@ -211,7 +211,7 @@ void nvic_interrupt_target_state_cfg()
 void nvic_interrupt_enable()
 {
     /* MPC interrupt enabling */
-    Driver_QSPI_MPC.EnableInterrupt();
+    Driver_EFLASH0_MPC.EnableInterrupt();
     Driver_CODE_SRAM_MPC.EnableInterrupt();
     NVIC_EnableIRQ(S_MPC_COMBINED_IRQn);
 
@@ -286,16 +286,16 @@ void mpc_init_cfg(void)
     ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
     ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
 
-    Driver_QSPI_MPC.Initialize();
-    Driver_QSPI_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
-                                 memory_regions.non_secure_partition_limit,
-                                 ARM_MPC_ATTR_NONSECURE);
+    Driver_EFLASH0_MPC.Initialize();
+    Driver_EFLASH0_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+                                    memory_regions.non_secure_partition_limit,
+                                    ARM_MPC_ATTR_NONSECURE);
 
 #ifdef BL2
     /* Secondary image region */
-    Driver_QSPI_MPC.ConfigRegion(memory_regions.secondary_partition_base,
-                                 memory_regions.secondary_partition_limit,
-                                 ARM_MPC_ATTR_NONSECURE);
+    Driver_EFLASH0_MPC.ConfigRegion(memory_regions.secondary_partition_base,
+                                    memory_regions.secondary_partition_limit,
+                                    ARM_MPC_ATTR_NONSECURE);
 #endif /* BL2 */
 
     mpc_data_region0->Initialize();
@@ -319,7 +319,7 @@ void mpc_init_cfg(void)
                                    ARM_MPC_ATTR_NONSECURE);
 
     /* Lock down the MPC configuration */
-    Driver_QSPI_MPC.LockDown();
+    Driver_EFLASH0_MPC.LockDown();
     mpc_data_region0->LockDown();
     mpc_data_region1->LockDown();
     mpc_data_region2->LockDown();

@@ -198,6 +198,9 @@ This test is DEPRECATED and the test execution was SKIPPED
 
 ## Execute TF-M example and regression tests on Musca test chip boards ##
 
+Note: Before executing any images on Musca-B1 board, please check the readme
+under platform/ext/target/musca_b1 to have the correct setup.
+
 #### Example application with BL2 bootloader
 
 1. Create a unified hex file comprising of both mcuboot and tfm_sign binary
@@ -208,9 +211,9 @@ This test is DEPRECATED and the test execution was SKIPPED
     `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel`
   * For Musca-B1
     * Windows
-    `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x0 tfm_sign.bin -Binary -offset 0x20000 -o tfm.hex -Intel`
+    `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel`
     * Linux
-    `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x0 tfm_sign.bin -Binary -offset 0x20000 -o tfm.hex -Intel`
+    `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel`
 2. Plug the Musca board into your computer. The board should appear as a USB
    drive
 3. Copy `tfm.hex` to the USB drive
@@ -271,9 +274,9 @@ Follow the above procedures, but create a unified hex file out of `tfm_s.bin`
 and `tfm_ns.bin`:
 
 * Windows
-`srec_cat.exe app\secure_fw\tfm_s.bin -Binary -offset 0x0 app\tfm_ns.bin -Binary -offset 0xA0000 -o tfm.hex -Intel`
+`srec_cat.exe app\secure_fw\tfm_s.bin -Binary -offset 0xA000000 app\tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel`
 * Linux
-`srec_cat app/secure_fw/tfm_s.bin -Binary -offset 0x0 app/tfm_ns.bin -Binary -offset 0xA0000 -o tfm.hex -Intel`
+`srec_cat app/secure_fw/tfm_s.bin -Binary -offset 0xA000000 app/tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel`
 
 ## Firmware upgrade and image validation with BL2 bootloader
 High level operation of BL2 bootloader and instructions for testing firmware
@@ -281,4 +284,4 @@ upgrade is described in [secure boot](tfm_secure_boot.md) document.
 
 --------------
 
-*Copyright (c) 2017 - 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*

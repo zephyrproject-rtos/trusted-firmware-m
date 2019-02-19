@@ -86,9 +86,9 @@
  */
 #define CMSE_VENEER_REGION_SIZE     (0x00000380)
 
-/* Use QSPI Flash memory to store Code data */
-#define S_ROM_ALIAS_BASE  (0x10000000)
-#define NS_ROM_ALIAS_BASE (0x00000000)
+/* Use eFlash 0 memory to store Code data */
+#define S_ROM_ALIAS_BASE  (0x1A000000)
+#define NS_ROM_ALIAS_BASE (0x0A000000)
 
 #define S_RAM_ALIAS_BASE  (0x30000000)
 #define NS_RAM_ALIAS_BASE (0x20000000)

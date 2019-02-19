@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited. All rights reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,16 @@
 // <i> Configuration settings for Driver_QSPI_MPC in component ::Drivers:MPC
 #define   RTE_QSPI_MPC                    1
 // </e> MPC (Memory Protection Controller) [Driver_QSPI_MPC]
+
+// <e> MPC (Memory Protection Controller) [Driver_EFLASH0_MPC]
+// <i> Configuration settings for Driver_EFLASH0_MPC in component ::Drivers:MPC
+#define   RTE_EFLASH0_MPC                 1
+// </e> MPC (Memory Protection Controller) [Driver_EFLASH0_MPC]
+
+// <e> MPC (Memory Protection Controller) [Driver_EFLASH1_MPC]
+// <i> Configuration settings for Driver_EFLASH1_MPC in component ::Drivers:MPC
+#define   RTE_EFLASH1_MPC                 1
+// </e> MPC (Memory Protection Controller) [Driver_EFLASH1_MPC]
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART

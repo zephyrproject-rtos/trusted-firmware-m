@@ -269,6 +269,32 @@ struct mpc_sie200_dev_t MPC_QSPI_DEV_S = {
     &(MPC_QSPI_DEV_DATA_S)};
 #endif
 
+#ifdef MPC_EFLASH0_S
+static const struct mpc_sie200_dev_cfg_t MPC_EFLASH0_DEV_CFG_S = {
+    .base = MUSCA_B1_EFLASH0_MPC_S_BASE};
+static struct mpc_sie200_dev_data_t MPC_EFLASH0_DEV_DATA_S = {
+    .range_list = 0,
+    .nbr_of_ranges = 0,
+    .state = 0,
+    .reserved = 0};
+struct mpc_sie200_dev_t MPC_EFLASH0_DEV_S = {
+    &(MPC_EFLASH0_DEV_CFG_S),
+    &(MPC_EFLASH0_DEV_DATA_S)};
+#endif
+
+#ifdef MPC_EFLASH1_S
+static const struct mpc_sie200_dev_cfg_t MPC_EFLASH1_DEV_CFG_S = {
+    .base = MUSCA_B1_EFLASH1_MPC_S_BASE};
+static struct mpc_sie200_dev_data_t MPC_EFLASH1_DEV_DATA_S = {
+    .range_list = 0,
+    .nbr_of_ranges = 0,
+    .state = 0,
+    .reserved = 0};
+struct mpc_sie200_dev_t MPC_EFLASH1_DEV_S = {
+    &(MPC_EFLASH1_DEV_CFG_S),
+    &(MPC_EFLASH1_DEV_DATA_S)};
+#endif
+
 /** CMSDK GPIO driver structures */
 #ifdef GPIO0_CMSDK_S
 static const struct gpio_cmsdk_dev_cfg_t GPIO0_CMSDK_DEV_CFG_S = {

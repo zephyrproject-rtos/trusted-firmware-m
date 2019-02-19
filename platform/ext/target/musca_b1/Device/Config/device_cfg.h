@@ -37,6 +37,8 @@
 #define MPC_ISRAM3_S
 #define MPC_CODE_SRAM_S
 #define MPC_QSPI_S
+#define MPC_EFLASH0_S
+#define MPC_EFLASH1_S
 
 /* ARM Peripheral Protection Controllers (PPC) */
 #define AHB_PPC0_S

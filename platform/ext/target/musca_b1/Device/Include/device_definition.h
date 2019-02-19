@@ -121,6 +121,14 @@ extern struct mpc_sie200_dev_t MPC_CODE_SRAM_DEV_S;
 #include "mpc_sie200_drv.h"
 extern struct mpc_sie200_dev_t MPC_QSPI_DEV_S;
 #endif
+#ifdef MPC_EFLASH0_S
+#include "mpc_sie200_drv.h"
+extern struct mpc_sie200_dev_t MPC_EFLASH0_DEV_S;
+#endif
+#ifdef MPC_EFLASH1_S
+#include "mpc_sie200_drv.h"
+extern struct mpc_sie200_dev_t MPC_EFLASH1_DEV_S;
+#endif
 
 /** CMSDK GPIO driver structures */
 #ifdef GPIO0_CMSDK_S
