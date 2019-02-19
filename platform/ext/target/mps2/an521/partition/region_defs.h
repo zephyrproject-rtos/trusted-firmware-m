@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,11 +90,11 @@
 #define NS_ROM_ALIAS_BASE (0x00000000)
 
 /* Alias definitions for secure and non-secure areas*/
-#define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + x)
-#define NS_ROM_ALIAS(x) (NS_ROM_ALIAS_BASE + x)
+#define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + (x))
+#define NS_ROM_ALIAS(x) (NS_ROM_ALIAS_BASE + (x))
 
-#define S_RAM_ALIAS(x)  (S_RAM_ALIAS_BASE + x)
-#define NS_RAM_ALIAS(x) (NS_RAM_ALIAS_BASE + x)
+#define S_RAM_ALIAS(x)  (S_RAM_ALIAS_BASE + (x))
+#define NS_RAM_ALIAS(x) (NS_RAM_ALIAS_BASE + (x))
 
 /* Secure regions */
 #define  S_IMAGE_PRIMARY_AREA_OFFSET \
