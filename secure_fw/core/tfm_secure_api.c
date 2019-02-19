@@ -461,7 +461,10 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
             iovec_args = (struct iovec_args_t *)
                     ((uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
                      sizeof(struct iovec_args_t));
-            tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
+            if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
+                SPM_ERR_OK) {
+                return TFM_ERROR_GENERIC;
+            }
             tfm_copy_iovec_parameters(iovec_args,
                                       &(curr_part_data->iovec_args));
 
@@ -487,7 +490,10 @@ static int32_t tfm_start_partition(struct tfm_sfn_req_s *desc_ptr,
         iovec_args =
         (struct iovec_args_t *)(tfm_spm_partition_get_stack_top(partition_idx) -
         sizeof(struct iovec_args_t));
-        tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args);
+        if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
+            SPM_ERR_OK) {
+            return TFM_ERROR_GENERIC;
+        }
         tfm_copy_iovec_parameters(iovec_args, &(curr_part_data->iovec_args));
 
         /* Prepare the partition context, update stack ptr */
