@@ -11,6 +11,10 @@
 #ifndef __TOKEN_TEST_H__
 #define __TOKEN_TEST_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \file token_test.h
  *
@@ -32,5 +36,10 @@ int minimal_test(void);
  * \return non-zero on failure.
  */
 int minimal_get_size_test(void);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TOKEN_TEST_H__ */

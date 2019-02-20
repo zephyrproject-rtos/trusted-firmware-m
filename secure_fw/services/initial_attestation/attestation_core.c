@@ -237,7 +237,7 @@ static int32_t attest_get_tlv_by_id(uint8_t    claim,
 static enum psa_attest_err_t
 attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
                               uint8_t tlv_id,
-                              const struct useful_buf_c *claim_value)
+                              const struct q_useful_buf_c *claim_value)
 {
     int32_t res;
     uint32_t value;
@@ -308,7 +308,7 @@ attest_add_single_sw_measurment(struct attest_token_ctx *token_ctx,
     uint8_t  tlv_id;
     uint8_t *tlv_ptr = tlv_address;
     int32_t found = 1;
-    struct useful_buf_c claim_value;
+    struct q_useful_buf_c claim_value;
     enum psa_attest_err_t res;
     QCBOREncodeContext *cbor_encode_ctx;
 
@@ -376,7 +376,7 @@ attest_add_single_sw_component(struct attest_token_ctx *token_ctx,
     uint8_t *tlv_ptr = tlv_address;
     int32_t found = 1;
     uint32_t measurement_claim_cnt = 0;
-    struct useful_buf_c claim_value;
+    struct q_useful_buf_c claim_value;
     QCBOREncodeContext *cbor_encode_ctx;
 
     /* Create local copy to avoid unaligned access */
@@ -500,7 +500,7 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
     __attribute__ ((aligned(4)))
     uint8_t boot_seed[BOOT_SEED_SIZE];
     enum tfm_plat_err_t res;
-    struct useful_buf_c claim_value = {0};
+    struct q_useful_buf_c claim_value = {0};
     uint16_t tlv_len;
     uint8_t *tlv_ptr = NULL;
     int32_t found = 0;
@@ -552,7 +552,7 @@ attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
     uint8_t instance_id[INSTANCE_ID_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(instance_id);
-    struct useful_buf_c claim_value;
+    struct q_useful_buf_c claim_value;
 
     res_plat = tfm_plat_get_instance_id(&size, instance_id);
     if (res_plat != TFM_PLAT_ERR_SUCCESS) {
@@ -586,7 +586,7 @@ attest_add_implementation_id_claim(struct attest_token_ctx *token_ctx)
     uint8_t implementation_id[IMPLEMENTATION_ID_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(implementation_id);
-    struct useful_buf_c claim_value;
+    struct q_useful_buf_c claim_value;
 
     res_plat = tfm_plat_get_implementation_id(&size, implementation_id);
     if (res_plat != TFM_PLAT_ERR_SUCCESS) {
@@ -620,7 +620,7 @@ attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
     uint8_t hw_version[HW_VERSION_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(hw_version);
-    struct useful_buf_c claim_value = {0};
+    struct q_useful_buf_c claim_value = {0};
     uint16_t tlv_len;
     uint8_t *tlv_ptr = NULL;
     int32_t found = 0;
@@ -691,7 +691,7 @@ attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
     enum tfm_security_lifecycle_t security_lifecycle;
     uint32_t slc_value;
     int32_t res;
-    struct useful_buf_c claim_value = {0};
+    struct q_useful_buf_c claim_value = {0};
     uint16_t tlv_len;
     uint8_t *tlv_ptr = NULL;
     int32_t found = 0;
@@ -738,7 +738,7 @@ attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
  */
 static enum psa_attest_err_t
 attest_add_challenge_claim(struct attest_token_ctx   *token_ctx,
-                           const struct useful_buf_c *challenge)
+                           const struct q_useful_buf_c *challenge)
 {
     attest_token_add_bstr(token_ctx, EAT_CBOR_ARM_LABEL_CHALLENGE, challenge);
 
@@ -756,7 +756,7 @@ attest_add_challenge_claim(struct attest_token_ctx   *token_ctx,
 static enum psa_attest_err_t
 attest_add_verification_service(struct attest_token_ctx *token_ctx)
 {
-    struct useful_buf_c service;
+    struct q_useful_buf_c service;
     uint32_t size;
 
     service.ptr = tfm_attest_hal_get_verification_service(&size);
@@ -781,7 +781,7 @@ attest_add_verification_service(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_profile_definition(struct attest_token_ctx *token_ctx)
 {
-    struct useful_buf_c profile;
+    struct q_useful_buf_c profile;
     uint32_t size;
 
     profile.ptr = tfm_attest_hal_get_profile_definition(&size);
@@ -833,9 +833,9 @@ static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static enum psa_attest_err_t
-attest_create_token(struct useful_buf_c *challenge,
-                    struct useful_buf   *token,
-                    struct useful_buf_c *completed_token)
+attest_create_token(struct q_useful_buf_c *challenge,
+                    struct q_useful_buf   *token,
+                    struct q_useful_buf_c *completed_token)
 {
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     enum attest_token_err_t token_err;
@@ -959,9 +959,9 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
                                psa_outvec *out_vec, uint32_t num_outvec)
 {
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
-    struct useful_buf_c challenge;
-    struct useful_buf token;
-    struct useful_buf_c completed_token;
+    struct q_useful_buf_c challenge;
+    struct q_useful_buf token;
+    struct q_useful_buf_c completed_token;
 
     challenge.ptr = in_vec[0].base;
     challenge.len = in_vec[0].len;
@@ -1007,9 +1007,9 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     uint32_t  challenge_size = *(uint32_t *)in_vec[0].base;
     uint32_t *token_buf_size = (uint32_t *)out_vec[0].base;
-    struct useful_buf_c challenge;
-    struct useful_buf token;
-    struct useful_buf_c completed_token;
+    struct q_useful_buf_c challenge;
+    struct q_useful_buf token;
+    struct q_useful_buf_c completed_token;
 
     /* Only the size of the challenge is needed */
     challenge.ptr = NULL;

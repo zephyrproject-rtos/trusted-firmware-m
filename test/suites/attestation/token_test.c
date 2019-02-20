@@ -9,7 +9,7 @@
  */
 
 #include "token_test.h"
-#include "useful_buf.h"
+#include "q_useful_buf.h"
 #include "psa_initial_attestation_api.h"
 #include "attest_token.h"
 
@@ -34,18 +34,18 @@
  *
  */
 int token_main_alt(uint32_t option_flags,
-                   struct useful_buf_c nonce,
-                   struct useful_buf buffer,
-                   struct useful_buf_c *completed_token)
+                   struct q_useful_buf_c nonce,
+                   struct q_useful_buf buffer,
+                   struct q_useful_buf_c *completed_token)
 {
     uint32_t completed_token_len;
 
     /* 68 = 64 + 4, the max expected nonce and 4 for the options */
-    USEFUL_BUF_MAKE_STACK_UB(nonce2_storage, 68);
-    struct useful_buf_c nonce2;
+    Q_USEFUL_BUF_MAKE_STACK_UB(nonce2_storage, 68);
+    struct q_useful_buf_c nonce2;
     int return_value;
 
-    nonce2 = useful_buf_copy(nonce2_storage, nonce);
+    nonce2 = q_useful_buf_copy(nonce2_storage, nonce);
     /* Now for the hack... */
     memcpy((uint8_t *)nonce2.ptr + nonce2.len, (uint8_t *) &option_flags, 4);
     nonce2.len += 4;
@@ -56,7 +56,7 @@ int token_main_alt(uint32_t option_flags,
                                                 buffer.ptr,
                                                 &completed_token_len);
 
-    *completed_token = (struct useful_buf_c) {buffer.ptr, completed_token_len};
+    *completed_token = (struct q_useful_buf_c) {buffer.ptr, completed_token_len};
 
     return return_value;
 }
@@ -130,15 +130,15 @@ static const uint8_t expected_minimal_token_bytes[] = {
 int minimal_test()
 {
     int return_value = 0;
-    USEFUL_BUF_MAKE_STACK_UB(token_storage,
+    Q_USEFUL_BUF_MAKE_STACK_UB(token_storage,
                              sizeof(expected_minimal_token_bytes));
-    struct useful_buf_c completed_token;
-    struct useful_buf_c expected_token;
+    struct q_useful_buf_c completed_token;
+    struct q_useful_buf_c expected_token;
 
     return_value =
         token_main_alt(TOKEN_OPT_SHORT_CIRCUIT_SIGN |
                            TOKEN_OPT_OMIT_CLAIMS,
-                       USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes),
+                       Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes),
                        token_storage,
                        &completed_token);
     if(return_value) {
@@ -146,9 +146,9 @@ int minimal_test()
     }
 
     expected_token =
-        USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
+        Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
 
-    if(useful_buf_compare(completed_token,expected_token)) {
+    if(q_useful_buf_compare(completed_token,expected_token)) {
        return_value = -3;
     }
 
@@ -164,14 +164,14 @@ int minimal_get_size_test()
 {
     int                 return_value;
     uint32_t            length;
-    struct useful_buf_c expected_token;
-    struct useful_buf_c nonce;
+    struct q_useful_buf_c expected_token;
+    struct q_useful_buf_c nonce;
 
     return_value = 0;
 
-    nonce = USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes);
+    nonce = Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes);
     expected_token =
-        USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
+        Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
 
 
     return_value = psa_initial_attest_get_token_size((uint32_t)nonce.len,

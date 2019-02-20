@@ -31,9 +31,9 @@ struct t_cose_psa_crypto_hash {
 enum t_cose_err_t
 t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
                            int32_t key_select,
-                           struct useful_buf_c hash_to_sign,
-                           struct useful_buf signature_buffer,
-                           struct useful_buf_c *signature)
+                           struct q_useful_buf_c hash_to_sign,
+                           struct q_useful_buf signature_buffer,
+                           struct q_useful_buf_c *signature)
 {
     enum t_cose_err_t cose_ret = T_COSE_SUCCESS;
     enum psa_attest_err_t attest_ret;
@@ -84,12 +84,12 @@ error:
 
 enum t_cose_err_t
 t_cose_crypto_get_ec_pub_key(int32_t key_select,
-                             struct useful_buf_c kid,
+                             struct q_useful_buf_c kid,
                              int32_t *cose_curve_id,
-                             struct useful_buf buf_to_hold_x_coord,
-                             struct useful_buf buf_to_hold_y_coord,
-                             struct useful_buf_c *x_coord,
-                             struct useful_buf_c *y_coord)
+                             struct q_useful_buf buf_to_hold_x_coord,
+                             struct q_useful_buf buf_to_hold_y_coord,
+                             struct q_useful_buf_c *x_coord,
+                             struct q_useful_buf_c *y_coord)
 {
     enum tfm_plat_err_t plat_res;
     enum ecc_curve_t cose_curve;
@@ -232,7 +232,7 @@ error:
 }
 
 void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
-                               struct useful_buf_c data_to_hash)
+                               struct q_useful_buf_c data_to_hash)
 {
     struct t_cose_psa_crypto_hash *psa_hash_ctx;
 
@@ -259,8 +259,8 @@ void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
 
 enum t_cose_err_t
 t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
-                          struct useful_buf buffer_to_hold_result,
-                          struct useful_buf_c *hash_result)
+                          struct q_useful_buf buffer_to_hold_result,
+                          struct q_useful_buf_c *hash_result)
 {
     enum t_cose_err_t cose_ret = T_COSE_SUCCESS;
     psa_status_t psa_ret;

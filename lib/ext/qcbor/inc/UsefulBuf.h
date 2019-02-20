@@ -150,7 +150,7 @@ extern "C" {
  Eeyore's balloon fits beautifully, "it goes in and out like anything".
 
 */
-typedef struct useful_buf_c {
+typedef struct q_useful_buf_c {
     const void *ptr;
     size_t      len;
 } UsefulBufC;
@@ -161,7 +161,7 @@ typedef struct useful_buf_c {
  that is to be filled in. The len is the amount of memory,
  not the length of the valid data in the buffer.
  */
-typedef struct useful_buf {
+typedef struct q_useful_buf {
    void  *ptr;
    size_t len;
 } UsefulBuf;

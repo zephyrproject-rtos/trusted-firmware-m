@@ -13,10 +13,13 @@
 #define __T_COSE_CRYPTO_H__
 
 #include "t_cose_common.h"
-#include "useful_buf.h"
+#include "q_useful_buf.h"
 #include <stdint.h>
 #include "t_cose_defines.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * \file t_cose_crypto.h
@@ -27,8 +30,8 @@
  * This is  small wrapper around the cryptographic functions to:
  * - Map COSE algorithm IDs to TF-M algorithm IDs
  * - Map crypto errors to \ref t_cose_err_t errors
- * - Have inputs and outputs be \c struct \c useful_buf_c and
- *   \c struct \c useful_buf
+ * - Have inputs and outputs be \c struct \c q_useful_buf_c and
+ *   \c struct \c q_useful_buf
  * - Handle key selection
  *
  * The idea is that implementations can be made of these functions
@@ -45,14 +48,14 @@
  * the IANA registry.
  *
  * Binary data is returned to the caller using a \c struct \c
- * useful_buf to pass the buffer to receive the data and its length in
- * and a \c useful_buf_c to return the pointer and length of the
+ * q_useful_buf to pass the buffer to receive the data and its length in
+ * and a \c q_useful_buf_c to return the pointer and length of the
  * returned data. The point of this is coding hygiene. The buffer
  * passed in is not const as it is to be modified.  The \c
- * useful_buf_c returned is const.
+ * q_useful_buf_c returned is const.
  *
- * The pointer in the \c useful_buf_c will always point to the buffer
- * passed in via the \c useful_buf so the lifetime of the data is
+ * The pointer in the \c q_useful_buf_c will always point to the buffer
+ * passed in via the \c q_useful_buf so the lifetime of the data is
  * under control of the caller.
  *
  * This is not intended as any sort of general cryptographic API. It
@@ -137,7 +140,7 @@ static inline size_t t_cose_signature_size(int32_t cose_sig_alg_id);
  * The key selection depends on the platform / OS.
  *
  * See the note in the Detailed Description (the \\file comment block)
- * for details on how \c useful_buf and \c useful_buf_c are used to
+ * for details on how \c q_useful_buf and \c q_useful_buf_c are used to
  * return the signature.
  *
  * To find out the size of the signature buffer needed, call this with
@@ -148,9 +151,9 @@ static inline size_t t_cose_signature_size(int32_t cose_sig_alg_id);
 enum t_cose_err_t
 t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
                            int32_t key_select,
-                           struct useful_buf_c hash_to_sign,
-                           struct useful_buf signature_buffer,
-                           struct useful_buf_c *signature);
+                           struct q_useful_buf_c hash_to_sign,
+                           struct q_useful_buf signature_buffer,
+                           struct q_useful_buf_c *signature);
 
 
 /**
@@ -166,7 +169,7 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
  *                           locally (\c \#define) if the needed one
  *                           hasn't been registered.
  * \param[in] key_select     Verification key selection.
- * \param[in] key_id         A key id or \c NULL_USEFUL_BUF_C.
+ * \param[in] key_id         A key id or \c NULL_Q_USEFUL_BUF_C.
  * \param[in] hash_to_verify The data or hash that is to be verified.
  * \param[in] signature      The signature.
  *
@@ -174,7 +177,7 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
  * hash_to_verify passed in.
  *
  * The public key used to verify the signature is selected by the \c
- * key_id if it is not \c NULL_USEFUL_BUF_C or the \c key_select if it
+ * key_id if it is not \c NULL_Q_USEFUL_BUF_C or the \c key_select if it
  * is.
  *
  * The key selected must be, or include, a public key of the correct
@@ -206,9 +209,9 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
 enum t_cose_err_t
 t_cose_crypto_pub_key_verify(int32_t cose_alg_id,
                              int32_t key_select,
-                             struct useful_buf_c key_id,
-                             struct useful_buf_c hash_to_verify,
-                             struct useful_buf_c signature);
+                             struct q_useful_buf_c key_id,
+                             struct q_useful_buf_c hash_to_verify,
+                             struct q_useful_buf_c signature);
 
 
 /**
@@ -228,9 +231,9 @@ t_cose_crypto_pub_key_verify(int32_t cose_alg_id,
  *
  * \param[in] key_select     Used to look up the public
  *                           key to return when \c kid is
- *                           \c NULL_USEFUL_BUF_C.
+ *                           \c NULL_Q_USEFUL_BUF_C.
  * \param[in] kid            A key ID to look up against. May be
- *                           \c NULL_USEFUL_BUF_C. This is typically
+ *                           \c NULL_Q_USEFUL_BUF_C. This is typically
  *                           the kid from the COSE unprotected header.
  * \param[out] cose_curve_id The curve ID of the key returned as
  *                           defined by [COSE (RFC 8152)]
@@ -265,17 +268,17 @@ t_cose_crypto_pub_key_verify(int32_t cose_alg_id,
  * coordinate for the NIST P-256 curve.
  *
  * See the note in the Detailed Description (the \\file comment block)
- * for details on how \c useful_buf and \c useful_buf_c are used to
+ * for details on how \c q_useful_buf and \c q_useful_buf_c are used to
  * return the X and Y coordinates.
  */
 enum t_cose_err_t
 t_cose_crypto_get_ec_pub_key(int32_t key_select,
-                             struct useful_buf_c kid,
+                             struct q_useful_buf_c kid,
                              int32_t *cose_curve_id,
-                             struct useful_buf buf_to_hold_x_coord,
-                             struct useful_buf buf_to_hold_y_coord,
-                             struct useful_buf_c  *x_coord,
-                             struct useful_buf_c  *y_coord);
+                             struct q_useful_buf buf_to_hold_x_coord,
+                             struct q_useful_buf buf_to_hold_y_coord,
+                             struct q_useful_buf_c  *x_coord,
+                             struct q_useful_buf_c  *y_coord);
 
 
 /*
@@ -361,7 +364,7 @@ t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
  * not do anything.
  */
 void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
-                               struct useful_buf_c data_to_hash);
+                               struct q_useful_buf_c data_to_hash);
 
 
 /**
@@ -386,13 +389,13 @@ void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
  * returned here.
  *
  * See the note in the Detailed Description (the \\file comment block)
- * for details on how \c useful_buf and \c useful_buf_c are used to
+ * for details on how \c q_useful_buf and \c q_useful_buf_c are used to
  * return the hash.
  */
 enum t_cose_err_t
 t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
-                          struct useful_buf buffer_to_hold_result,
-                          struct useful_buf_c *hash_result);
+                          struct q_useful_buf buffer_to_hold_result,
+                          struct q_useful_buf_c *hash_result);
 
 
 
@@ -409,5 +412,9 @@ static inline size_t t_cose_signature_size(int32_t cose_sig_alg_id)
     }
 }
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __T_COSE_CRYPTO_H__ */

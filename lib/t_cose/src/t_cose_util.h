@@ -13,8 +13,12 @@
 #define __T_COSE_UTIL_H__
 
 #include <stdint.h>
-#include "useful_buf.h"
+#include "q_useful_buf.h"
 #include "t_cose_common.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * \file t_cose_util.h
@@ -79,10 +83,10 @@ int32_t hash_alg_id_from_sig_alg_id(int32_t cose_sig_alg_id);
  * "TBS" bytes.
  */
 enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
-                                  struct useful_buf buffer_for_hash,
-                                  struct useful_buf_c *hash,
-                                  struct useful_buf_c protected_headers,
-                                  struct useful_buf_c payload);
+                                  struct q_useful_buf buffer_for_hash,
+                                  struct q_useful_buf_c *hash,
+                                  struct q_useful_buf_c protected_headers,
+                                  struct q_useful_buf_c payload);
 
 
 /**
@@ -120,7 +124,11 @@ enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
  *
  */
 enum t_cose_err_t
-get_short_circuit_kid(struct useful_buf buffer_for_kid,
-                      struct useful_buf_c *kid);
+get_short_circuit_kid(struct q_useful_buf buffer_for_kid,
+                      struct q_useful_buf_c *kid);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __T_COSE_UTIL_H__ */

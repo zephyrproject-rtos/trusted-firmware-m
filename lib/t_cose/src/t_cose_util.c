@@ -76,10 +76,10 @@ int32_t hash_alg_id_from_sig_alg_id(int32_t cose_sig_alg_id)
  * Public function. See t_cose_util.h
  */
 enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
-                                  struct useful_buf buffer_for_hash,
-                                  struct useful_buf_c *hash,
-                                  struct useful_buf_c protected_headers,
-                                  struct useful_buf_c payload)
+                                  struct q_useful_buf buffer_for_hash,
+                                  struct q_useful_buf_c *hash,
+                                  struct q_useful_buf_c protected_headers,
+                                  struct q_useful_buf_c payload)
 {
     /* approximate stack use on 32-bit machine:
      * local use: 320
@@ -88,7 +88,7 @@ enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
     enum t_cose_err_t           return_value;
     QCBOREncodeContext          cbor_encode_ctx;
     UsefulBuf_MAKE_STACK_UB(    buffer_for_TBS_first_part, T_COSE_SIZE_OF_TBS);
-    struct useful_buf_c         tbs_first_part;
+    struct q_useful_buf_c       tbs_first_part;
     QCBORError                  qcbor_result;
     struct t_cose_crypto_hash   hash_ctx;
     int32_t                     hash_alg_id;
@@ -103,14 +103,14 @@ enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
     QCBOREncode_AddBytes(&cbor_encode_ctx,
                          protected_headers);
     /* sign_protected */
-    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_USEFUL_BUF_C);
+    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_Q_USEFUL_BUF_C);
     /* external_aad */
-    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_USEFUL_BUF_C);
+    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_Q_USEFUL_BUF_C);
     /* fake payload */
-    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_USEFUL_BUF_C);
+    QCBOREncode_AddBytes(&cbor_encode_ctx, NULL_Q_USEFUL_BUF_C);
     QCBOREncode_CloseArray(&cbor_encode_ctx);
 
-    /* get the result and convert it to struct useful_buf_c representation */
+    /* get the result and convert it to struct q_useful_buf_c representation */
     qcbor_result = QCBOREncode_Finish(&cbor_encode_ctx, &tbs_first_part);
     if(qcbor_result) {
         /* Mainly means that the protected_headers were too big
@@ -137,8 +137,8 @@ enum t_cose_err_t create_tbs_hash(int32_t cose_alg_id,
      * buffer for the whole cose sign1.
      */
     t_cose_crypto_hash_update(&hash_ctx,
-                              useful_buf_head(tbs_first_part,
-                                              tbs_first_part.len - 2));
+                              q_useful_buf_head(tbs_first_part,
+                                                tbs_first_part.len - 2));
 
     /* Hash the payload */
     t_cose_crypto_hash_update(&hash_ctx, payload);
@@ -157,8 +157,8 @@ Done:
  * Public function. See t_cose_util.h
  */
 enum t_cose_err_t
-get_short_circuit_kid(struct useful_buf buffer_for_kid,
-                     struct useful_buf_c *kid)
+get_short_circuit_kid(struct q_useful_buf buffer_for_kid,
+                      struct q_useful_buf_c *kid)
 {
     /* This is a random hard coded key ID that is used to indicate
      * short-circuit signing. It is OK to hard code this as the
@@ -179,11 +179,11 @@ get_short_circuit_kid(struct useful_buf buffer_for_kid,
         return T_COSE_ERR_BAD_SHORT_CIRCUIT_KID;
     }
 
-    *kid = useful_buf_copy(buffer_for_kid,
-                           USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(
-                               defined_short_circuit_kid));
+    *kid = q_useful_buf_copy(buffer_for_kid,
+                             Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(
+                                 defined_short_circuit_kid));
 
-    return useful_buf_c_is_null(*kid) ?
+    return q_useful_buf_c_is_null(*kid) ?
               T_COSE_ERR_KEY_BUFFER_SIZE :
               T_COSE_SUCCESS;
 }
