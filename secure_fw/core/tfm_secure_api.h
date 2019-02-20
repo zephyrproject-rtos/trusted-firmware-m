@@ -13,6 +13,7 @@
 #include "secure_utilities.h"
 #include "tfm_core.h"
 #include "tfm_api.h"
+#include "bl2/include/tfm_boot_status.h"
 
 /*!
  * \def __tfm_secure_gateway_attributes__
@@ -81,7 +82,8 @@ extern int32_t tfm_core_memory_permission_check(const void *ptr,
                                                 uint32_t size,
                                                 int32_t access);
 
-extern int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr,
+extern int32_t tfm_core_get_boot_data(uint8_t major_type,
+                                      struct tfm_boot_data *boot_data,
                                       uint32_t len);
 
 int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr);

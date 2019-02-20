@@ -156,7 +156,9 @@ int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share)
 }
 
 __attribute__((naked))
-int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr, uint32_t len)
+int32_t tfm_core_get_boot_data(uint8_t major_type,
+                               struct tfm_boot_data *boot_status,
+                               uint32_t len)
 {
     __ASM(
         "SVC    %0\n"

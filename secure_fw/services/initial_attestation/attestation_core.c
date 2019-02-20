@@ -27,25 +27,38 @@
 #define EAT_SW_COMPONENT_NOT_NESTED 0  /* Flat structure */
 
 /*!
- * \var boot_status
+ * \struct attest_boot_data
  *
- * \brief Array variable to store the boot status in service's memory.
+ * \brief Contains the received boot status information from bootloader
+ *
+ * \details This is a redefinition of \ref tfm_boot_data to allocate the
+ *          appropriate, service dependent size of \ref boot_data.
+ */
+struct attest_boot_data {
+    struct shared_data_tlv_header header;
+    uint8_t data[MAX_BOOT_STATUS];
+};
+
+/*!
+ * \var boot_data
+ *
+ * \brief Store the boot status in service's memory.
  *
  * \details Boot status comes from the secure bootloader and primarily stored
  *          on a memory area which is shared between bootloader and SPM.
  *          SPM provides the \ref tfm_core_get_boot_data() API to retrieve
  *          the service related data from shared area.
  */
-
-/* Enforcement of 4 byte alignment, which is checked by TF-M SPM */
 __attribute__ ((aligned(4)))
-static uint8_t boot_status[MAX_BOOT_STATUS];
+static struct attest_boot_data boot_data;
 
 enum psa_attest_err_t attest_init(void)
 {
     enum psa_attest_err_t res;
 
-    res = attest_get_boot_data(TLV_MAJOR_IAS, boot_status, MAX_BOOT_STATUS);
+    res = attest_get_boot_data(TLV_MAJOR_IAS,
+                               (struct tfm_boot_data *)&boot_data,
+                               MAX_BOOT_STATUS);
 
     return res;
 }
@@ -136,21 +149,19 @@ static int32_t attest_get_tlv_by_module(uint8_t    module,
                                         uint16_t  *tlv_len,
                                         uint8_t  **tlv_ptr)
 {
-    struct shared_data_tlv_header *tlv_header;
     struct shared_data_tlv_entry tlv_entry;
     uint8_t *tlv_end;
     uint8_t *tlv_curr;
 
-    tlv_header = (struct shared_data_tlv_header *)boot_status;
-    if (tlv_header->tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
+    if (boot_data.header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
         return -1;
     }
 
     /* Get the boundaries of TLV section where to lookup*/
-    tlv_end  = (uint8_t *)boot_status + tlv_header->tlv_tot_len;
+    tlv_end = (uint8_t *)&boot_data + boot_data.header.tlv_tot_len;
     if (*tlv_ptr == NULL) {
         /* At first call set to the beginning of the TLV section */
-        tlv_curr = (uint8_t *)boot_status + SHARED_DATA_HEADER_SIZE;
+        tlv_curr = boot_data.data;
     } else {
         /* Any subsequent call set to the next TLV entry */
         tfm_memcpy(&tlv_entry, *tlv_ptr, SHARED_DATA_ENTRY_HEADER_SIZE);
