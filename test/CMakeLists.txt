@@ -81,8 +81,8 @@ endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
 				${CMAKE_CURRENT_SOURCE_DIR}/suites/sst/non_secure/os_wrapper.h
-				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service.h
-		DESTINATION tfm/test/inc)
+				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service_api.h
+		DESTINATION export/tfm/test/inc)
 
 install(TARGETS tfm_non_secure_tests
 		DESTINATION export/tfm/test/lib
