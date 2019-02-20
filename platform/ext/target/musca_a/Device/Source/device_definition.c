@@ -26,6 +26,7 @@
 #include "device_cfg.h"
 #include "device_definition.h"
 #include "platform_base_address.h"
+#include "tfm_plat_defs.h"
 
 /* ======= Peripheral configuration structure definitions ======= */
 /* MUSCA A1 SCC driver structures */
@@ -620,7 +621,9 @@ struct mt25ql_dev_t MT25QL_DEV_S = {
 #endif
 
 #if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
-struct mt25ql_dev_t MT25QL_DEV_NS = {
+struct mt25ql_dev_t MT25QL_DEV_NS
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_STORAGE")
+    = {
     .controller = &QSPI_DEV_NS,
     .direct_access_start_addr = MUSCA_QSPI_FLASH_NS_BASE,
     .baud_rate_div = 4U,

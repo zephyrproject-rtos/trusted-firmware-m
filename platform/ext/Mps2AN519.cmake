@@ -50,6 +50,7 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_core"
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/retarget" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/native_drivers" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/partition" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 #Gather all source files we need.
 if (NOT DEFINED BUILD_CMSIS_CORE)
@@ -124,6 +125,12 @@ elseif(BUILD_TARGET_CFG)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/services/src/tfm_platform_system.c")
   endif()
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
+endif()
+
+if (NOT DEFINED BUILD_PLAT_TEST)
+  message(FATAL_ERROR "Configuration variable BUILD_PLAT_TEST (true|false) is undefined!")
+elseif(BUILD_PLAT_TEST)
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an519/plat_test.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)

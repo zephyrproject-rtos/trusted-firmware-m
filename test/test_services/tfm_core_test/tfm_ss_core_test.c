@@ -17,8 +17,7 @@
 #include "psa_service.h"
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
-
-#include "smm_mps2.h"
+#include "tfm_plat_test.h"
 
 static int32_t partition_init_done;
 
@@ -114,7 +113,6 @@ psa_status_t spm_core_test_sfn_direct_recursion(
 /* Service RW data array for testing memory accesses */
 static int32_t mem[4] = {1, 2, 3, 4};
 
-#define MPS2_USERLED_MASK   (0x3)
 
 static psa_status_t test_mpu_access(
     uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
@@ -220,15 +218,16 @@ static psa_status_t test_share_redirection(void)
 
 static psa_status_t test_peripheral_access(void)
 {
-    struct arm_mps2_fpgaio_t *fpgaio = SEC_MPS2_FPGAIO;
-    /* Check read access */
-    uint32_t leds = fpgaio->LED;
-    /* Write access */
-    fpgaio->LED = ~leds;
-    /* Check result of write access, only compare 2 valid bits */
-    uint32_t invleds = fpgaio->LED;
+    uint32_t leds;
+    uint32_t invleds;
+    uint32_t userled_mask;
 
-    if ((invleds & MPS2_USERLED_MASK) != (~leds & MPS2_USERLED_MASK)) {
+    leds = tfm_plat_test_get_led_status();
+    tfm_plat_test_set_led_status(~leds);
+    invleds = tfm_plat_test_get_led_status();
+    userled_mask = tfm_plat_test_get_userled_mask();
+
+    if ((invleds & userled_mask) != (~leds & userled_mask)) {
         /* Code failed to invert value in peripheral reg */
         return CORE_TEST_ERRNO_PERIPHERAL_ACCESS_FAILED;
     }
@@ -472,29 +471,16 @@ static psa_status_t test_spm_request(void)
 }
 
 #ifdef CORE_TEST_INTERACTIVE
-#define MPS2_USERPB0_BASE   (0x50302008)
-#define MPS2_USERPB0_MASK   (0x1)
-
 static void wait_button_event(void)
 {
-    volatile uint32_t *p_btn = (volatile uint32_t *) MPS2_USERPB0_BASE;
-    *p_btn = *p_btn;
-
-    /* Wait until user button 0 is pressed */
-    while (!(*p_btn & MPS2_USERPB0_MASK)) {
-      ;
-    }
-
+    tfm_plat_test_wait_user_button_pressed();
     /*
      * The follow wait is required to skip multiple continues in one go due to
      * the fast execution of the code and time used by the user to
      * release button.
      */
 
-    /* Wait until user button 0 is released */
-    while ((*p_btn & MPS2_USERPB0_MASK)) {
-      ;
-    }
+    tfm_plat_test_wait_user_button_released();
 }
 
 psa_status_t test_wait_button(void)

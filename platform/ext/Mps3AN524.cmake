@@ -133,6 +133,12 @@ elseif(BUILD_TARGET_CFG)
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()
 
+if (NOT DEFINED BUILD_PLAT_TEST)
+  message(FATAL_ERROR "Configuration variable BUILD_PLAT_TEST (true|false) is undefined!")
+elseif(BUILD_PLAT_TEST)
+  list(APPEND ALL_SRC_C_S "${AN524_DIR}/plat_test.c")
+endif()
+
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)

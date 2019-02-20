@@ -52,6 +52,7 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Device/Includ
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Native_Driver" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/partition" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/services/include" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 # Gather all source files we need.
 if (TFM_PARTITION_PLATFORM)
@@ -131,6 +132,12 @@ elseif (BUILD_TARGET_CFG)
         list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/services/src/tfm_ioctl_s_api.c")
     endif()
     embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
+endif()
+
+if (NOT DEFINED BUILD_PLAT_TEST)
+    message(FATAL_ERROR "Configuration variable BUILD_PLAT_TEST (true|false) is undefined!")
+elseif(BUILD_PLAT_TEST)
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/plat_test.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
