@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -47,6 +47,15 @@ else()
 	string(APPEND MBEDTLS_C_FLAGS ${MBEDTLS_PREINCLUDE_C_FLAGS})
 endif()
 
+function(get_mbedtls_version)
+	file(READ "${MBEDTLS_SOURCE_DIR}/include/mbedtls/version.h" MBEDTLS_VER_FILE)
+	string(REGEX REPLACE ".*#define[ ]+MBEDTLS_VERSION_STRING[^\"]+\"+([0-9.]+)\".*" "\\1"
+		_MBEDTLS_VER ${MBEDTLS_VER_FILE})
+	set(MBEDTLS_VERSION ${_MBEDTLS_VER} PARENT_SCOPE)
+endfunction()
+
+get_mbedtls_version()
+
 string(APPEND MBEDTLS_C_FLAGS ${CMAKE_C_FLAGS})
 
 # Workaround Mbed TLS issue https://github.com/ARMmbed/mbedtls/issues/1077
@@ -71,6 +80,10 @@ externalproject_add(${MBEDTLS_TARGET_NAME}
 	CMAKE_ARGS -DENABLE_TESTING=OFF -DENABLE_PROGRAMS=OFF
 	#Enforce our build system's settings.
 	CMAKE_ARGS -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+	#Workaround for MbedTLS issue https://github.com/ARMmbed/mbedtls/issues/1496
+	if(MBEDTLS_VERSION VERSION_GREATER "2.7.0")
+		CMAKE_ARGS -DCMAKE_HOST_UNIX:bool=true
+	endif()
 	#Inherit the build setting of this project
 	CMAKE_ARGS -DCMAKE_BUILD_TYPE=${MBEDTLS_BUILD_TYPE}
 	#C compiler settings
