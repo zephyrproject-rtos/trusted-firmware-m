@@ -1,4 +1,22 @@
 # TF-M Software requirements
+
+## Supported build environments
+TF-M officially supports a limited set of build environments and setups. In
+this context, official support means that the environments listed below
+are actively used by team members and active developers hence users should
+be able to recreate the same configurations by following the instructions
+described below.  In case of problems, the TF-M team provides support only for
+these environments, but building in other environments can still be possible.
+
+The following environments are supported:
+- Windows 10 x64 + Cygwin x64 (example configuration is provided for this
+  Windows setup only).
+- Windows 10 x64 + msys2 x64.
+- Windows 10 x65 + git-bash (MinGW) + gnumake from DS-5 or msys2.
+- Ubuntu 16.04 x64
+- Ubuntu 18.04 x64
+
+## Supported C compilers
 To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment.
 The currently supported compiler versions are:
@@ -12,26 +30,58 @@ The currently supported compiler versions are:
 **Notes:**
 
   - The Arm compilers above are provided via Keil uVision v5.24.1 or greater,
-    DS-5 v5.27.1 or greater, and Development Studio 2018.0, or they can be
-    downloaded as standalone packages from [here](https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6).
-
-  - The GNU Arm compiler can be downloaded from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
-    On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update* or *GNU Arm
-    Embedded Toolchain: 7-2018-q2-update*
-
-  - In this version, you also need manually clone CMSIS_5 and mbedtls
-    repositories at the same location where tfm repo is located.
+     DS-5 v5.27.1 or greater, and Development Studio 2018.0, or they can be
+     downloaded as standalone packages from [here](https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6).
 
   - Arm compiler specific environment variable may need updating based
     on specific products and licenses as explained in
     [product-and-toolkit-configuration](https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration).
 
+  - The GNU Arm compiler can be downloaded from [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
+    On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update* or
+    *GNU Arm Embedded Toolchain: 7-2018-q2-update*
 
-## Linux
+## Supported CMake versions
+The build-system is CMake based and supports the following versions:
+- 3.7
+- 3.10
+- 3.11
+- 3.12
+- 3.13
+- 3.14
+
+Please use the latest build version available (i.e. 3.7.2 instead of 3.7.0).
+While it is preferable to use the newest version this is not required and any
+version from the above list should work.
+
+Recent versions of CMake can be downloaded from https://cmake.org/download/, and
+older releases are available from https://cmake.org/files.
+
+## Supported GNU make versions
+The TF-M team builds using the "Unix Makefiles" generator of CMake and thus
+GNU make is needed for the build. On Linux please use the version
+available from the official repository of your distribution.
+
+On Windows the following binaries are supported:
+- GNU make v4.2.1 executable from Cygwin
+- GNU make v4.2.1 executable from msys2
+- GNU make v4.2 executable from DS5 v5.29.1 (see <DS-5_PATH>/bin)
+
+CMake is quiet tolerant to GNU make versions and basically any "reasonably
+recent" GNU make version shall work.
+
+CMake generators other than "Unix Makefiles" may work, but are not officially
+supported.
+
+# Example setups
+This section lists dependencies and some exact and tested steps to set-up a
+TF-M-m build environment under various OSes.
+
+## Ubuntu
 - DS-5 v5.27.1.
 - Git tools v2.10.0
-- [CMake v3.7.0](https://cmake.org/files/v3.7/)
-- GNU Make v3.81
+- CMake (see the "Supported CMake versions" chapter)
+- GNU Make (see the "Supported make versions" chapter)
 - Python3, with the following libraries:
   - pycrypto
   - pyasn1
@@ -63,13 +113,13 @@ To import GNU Arm in your bash shell console:
 export PATH=<GNU_ARM_PATH>/bin:$PATH
 ~~~
 
-## Windows
+## Windows + Cygwin
 - uVision v5.24.1 or DS-5 v5.27.1 (DS-5 Ultimate Edition) which provides the
   Arm Compiler v6.7.1 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
-- [CMake v3.7.0](https://cmake.org/files/v3.7/)
+- CMake (see the "Supported CMake versions" chapter)
 - [Cygwin]( https://www.cygwin.com/ ). Tests done with version 2.877 (64 bits)
-- GNU make should be installed by selecting appropriate package during Cygwin
+- GNU make should be installed by selecting appropriate package during cygwin
   installation.
 - Python3 [(native Windows version)](https://www.python.org/downloads/), with the following libraries:
   - pycryptodome (pip3 install --user pycryptodome)
@@ -97,16 +147,17 @@ change permanent, add the command line into ~/.bashrc
 
 ~~~
 export PATH="/cygdrive/c/<DS-5_PATH>/sw/ARMCompiler6.7.1/bin":$PATH
-export ARM_PRODUCT_PATH="c:/<DS-5_PATH>/sw/mappings"
+export ARM_PRODUCT_PATH="C:/<DS-5_PATH>/sw/mappings"
 export ARM_TOOL_VARIANT="ult"
 export ARMLMD_LICENSE_FILE="<LICENSE_FILE_PATH>"
 ~~~
 
 **Keil MDK Arm**
 
-**Note:** Arm compiler specific environment variable may need updating based
-on specific products and licenses as explained in
-[product-and-toolkit-configuration](https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration).
+**Notes:**
+- Arm compiler specific environment variable may need updating based
+  on specific products and licenses as explained in
+  [product-and-toolkit-configuration](https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration).
 
 ~~~
 export PATH="/cygdrive/c/<uVision path>/ARM/ARMCLANG/bin":$PATH
@@ -173,7 +224,7 @@ set-up these.
 export PLANTUML_JAR_PATH="~/plantuml/plantuml.jar"
 ~~~
 
-#### Windows
+#### Windows + Cygwin
 Assumptions for the settings below:
 - plantuml.jar is available at c:\plantuml\plantuml.jar
 - doxygen, dot, and MikTeX binaries are available on the PATH.
