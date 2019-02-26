@@ -60,7 +60,7 @@ line arguments:
 *******************
 External dependency
 *******************
-- CMSIS_5 is used to import RTX for the example non-secure app
+- `CMSIS_5` is used to import RTX for the example non-secure app
 - Mbed TLS and Mbed Crypto are used as crypto libraries on the secure side
 
 ****************
@@ -82,7 +82,12 @@ Getting the source-code
     git clone https://git.trustedfirmware.org/trusted-firmware-m.git
     git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.7.9
     git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-1.0.0
-    git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
+    git clone https://github.com/ARM-software/CMSIS_5.git -b 5.5.0
+
+.. Note::
+   `CMSIS_5` now uses `git-lfs` for storing large size binaries so the cloning
+   process has changed from previous releases. Please refer to the `CMSIS_5`
+   documentation for more details.
 
 Build steps for the AN521 target platform:
 ==========================================

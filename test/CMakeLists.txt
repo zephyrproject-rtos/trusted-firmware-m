@@ -98,8 +98,9 @@ add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OB
 config_setting_shared_compiler_flags(tfm_non_secure_tests)
 config_setting_shared_linker_flags(tfm_non_secure_tests)
 
-embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 __DOMAIN_NS=1 TFM_LVL=${TFM_LVL} APPEND)
-#__DOMAIN_NS=1
+#Set macro definitions
+set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL})
+embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for tfm_storage." FORCE)
