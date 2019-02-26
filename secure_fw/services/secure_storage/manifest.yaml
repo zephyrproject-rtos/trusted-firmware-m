@@ -10,9 +10,10 @@
   "type": "PSA-ROT",
   "priority": "NORMAL",
   "id": "0x00000100",
-  "entry_point": "tfm_sst_init",
+  "entry_point": "tfm_sst_req_mngr_init",
   "stack_size": "0x2000",
   "heap_size": "0x0400",
+  "tfm_partition_ipc": true,
   "secure_functions": [
     {
       "sfid": "TFM_SST_SET_SFID",
@@ -54,6 +55,47 @@
       "minor_version": 1,
       "minor_policy": "strict"
     }
+  ],
+  "services" : [{
+    "name": "TFM_SST_SET_SID",
+    "sid": "0x00002000",
+    "signal": "TFM_SST_SET_SIG",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   },
+   {
+    "name": "TFM_SST_GET_SID",
+    "sid": "0x00002001",
+    "signal": "TFM_SST_GET_SIG",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   },
+   {
+    "name": "TFM_SST_GET_INFO_SID",
+    "sid": "0x00002002",
+    "signal": "TFM_SST_GET_INFO_SIG",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   },
+   {
+    "name": "TFM_SST_REMOVE_SID",
+    "sid": "0x00002003",
+    "signal": "TFM_SST_REMOVE_SIG",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   },
+   {
+    "name": "TFM_SST_GET_SUPPORT_SID",
+    "sid": "0x00002004",
+    "signal": "TFM_SST_GET_SUPPORT_SIG",
+    "non_secure_clients": "true",
+    "minor_version": 1,
+    "minor_policy": "STRICT"
+   }
   ],
   "source_files": [
     "sst_encrypted_object.c",

@@ -10,5 +10,6 @@
 #include "test/test_services/tfm_ipc_service/tfm_ipc_service_partition.h"
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
+#include "secure_fw/services/secure_storage/tfm_sst_signal.h"
 
 #endif

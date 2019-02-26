@@ -227,6 +227,7 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
  */
 static void tfm_sst_test_2003(struct test_result_t *ret)
 {
+#ifndef TFM_PSA_API
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -245,6 +246,7 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
         return;
     }
 
+#endif
     ret->val = TEST_PASSED;
 }
 
@@ -254,6 +256,7 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
  */
 static void tfm_sst_test_2004(struct test_result_t *ret)
 {
+#ifndef TFM_PSA_API
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
@@ -274,6 +277,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
         return;
     }
 
+#endif
     ret->val = TEST_PASSED;
 }
 
@@ -570,6 +574,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
         return;
     }
 
+#ifndef TFM_PSA_API
     /* Get with data length and offset set to invalid values */
     read_len = INVALID_DATA_LEN;
     offset = INVALID_OFFSET;
@@ -592,6 +597,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
         TEST_FAIL("Read data should be equal to original read data");
         return;
     }
+#endif
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
@@ -613,7 +619,9 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
+#ifndef TFM_PSA_API
     const uint32_t offset = 0;
+#endif
     uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
@@ -629,11 +637,13 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
      */
 
     /* Get with NULL data pointer */
+#ifndef TFM_PSA_API
     status = psa_ps_get(uid, offset, data_len, NULL);
     if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Get should not succeed with NULL data pointer");
         return;
     }
+#endif
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
@@ -798,11 +808,13 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
      */
 
     /* Get info with NULL info pointer */
+#ifndef TFM_PSA_API
     status = psa_ps_get_info(uid, NULL);
     if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("Get info should not succeed with NULL info pointer");
         return;
     }
+#endif
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
