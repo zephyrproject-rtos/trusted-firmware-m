@@ -410,8 +410,8 @@ SECTIONS
         . = ALIGN(4);
 
     } > RAM AT> FLASH
-    Image$$TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
-    Image$$TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
+    Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
+    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
 
     .TFM_BSS : ALIGN(4)
     {
@@ -421,8 +421,8 @@ SECTIONS
         . = ALIGN(4);
         __bss_end__ = .;
     } > RAM AT> FLASH
-    Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
-    Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+    Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
+    Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
