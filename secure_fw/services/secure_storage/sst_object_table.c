@@ -288,7 +288,12 @@ __STATIC_INLINE psa_ps_status_t sst_object_table_fs_write_table(
 static psa_ps_status_t sst_object_table_set_crypto_key(void)
 {
     psa_ps_status_t err;
-    static uint8_t sst_key[SST_KEY_LEN_BYTES]; /*!< Secure storage system key */
+
+    /* Secure storage system key. Aligned to a 32-bit boundary so that crypto
+     * implementations can copy key material with 32-bit accesses.
+     */
+    __attribute__ ((aligned(4)))
+    static uint8_t sst_key[SST_KEY_LEN_BYTES];
 
     err = sst_crypto_getkey(SST_KEY_LEN_BYTES, sst_key);
     if (err != PSA_PS_SUCCESS) {

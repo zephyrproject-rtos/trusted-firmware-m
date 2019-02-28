@@ -39,7 +39,10 @@ static psa_ps_status_t sst_object_set_encryption_key(void)
 {
     psa_ps_status_t err;
 
-    /* Key used for authenticated encryption and decryption */
+    /* SST object key. Aligned to a 32-bit boundary so that crypto
+     * implementations can copy key material with 32-bit accesses.
+     */
+    __attribute__ ((aligned(4)))
     static uint8_t sst_encryption_key[SST_KEY_LEN_BYTES];
 
     /* Get the encryption key */
