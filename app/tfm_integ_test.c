@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 - 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +24,7 @@
 
 #ifdef CORE_TEST_INTERACTIVE
 #include "test/test_services/tfm_core_test/core_test_defs.h"
-#include "test/test_services/tfm_core_test/tfm_ss_core_test_veneers.h"
+#include "tfm_veneers.h"
 
 #define TRY_SFN(fn, ...) \
     do { \
@@ -48,7 +48,10 @@
  */
 void secure_decrement_ns_lock_1(void)
 {
-    TRY_SFN(tfm_core_test_sfn, CORE_TEST_ID_BLOCK, 0x1, 0x1, 0x1);
+    uint32_t testcase_id = CORE_TEST_ID_BLOCK;
+    psa_invec in_vec = {&testcase_id, sizeof(testcase_id)};
+
+    TRY_SFN(tfm_spm_core_test_sfn_veneer, &in_vec, 1, NULL, 0);
 }
 
 /**
@@ -57,7 +60,10 @@ void secure_decrement_ns_lock_1(void)
  */
 void secure_decrement_ns_lock_2(void)
 {
-    TRY_SFN(tfm_core_test_sfn, CORE_TEST_ID_BLOCK, 0x2, 0x2, 0x2);
+    uint32_t testcase_id = CORE_TEST_ID_BLOCK;
+    psa_invec in_vec = {&testcase_id, sizeof(testcase_id)};
+
+    TRY_SFN(tfm_spm_core_test_sfn_veneer, &in_vec, 1, NULL, 0);
 }
 /**
  * \brief Test definition for the RTX - TFM integration tests

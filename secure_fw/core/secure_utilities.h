@@ -8,6 +8,7 @@
 #ifndef __SECURE_UTILITIES_H__
 #define __SECURE_UTILITIES_H__
 
+#include <stdio.h>
 #include "cmsis_compiler.h"
 #include "tfm_svc.h"
 
