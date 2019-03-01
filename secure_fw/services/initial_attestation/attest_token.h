@@ -1,7 +1,7 @@
 /*
  * attest_token.h
  *
- * Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
+ * Copyright (c) 2018-2019, Laurence Lundblade.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -80,8 +80,12 @@ enum attest_token_err_t {
     ATTEST_TOKEN_ERR_TAMPERING_DETECTED,
     /** Verification key is not found or of wrong type. */
     ATTEST_TOKEN_ERR_VERIFICATION_KEY,
-    /** */
-    ATTEST_TOKEN_ERR_NO_VALID_TOKEN
+    /** No token was given or validated */
+    ATTEST_TOKEN_ERR_NO_VALID_TOKEN,
+    /** Data item with label wasn't found. */
+    ATTEST_TOKEN_ERR_NOT_FOUND,
+    /** SW Compoments absence not correctly indicated. */
+    ATTEST_TOKEN_ERR_SW_COMPONENTS_MISSING
 };
 
 

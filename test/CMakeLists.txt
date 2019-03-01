@@ -54,8 +54,12 @@ set(ENABLE_ATTESTATION_SERVICE_TESTS TRUE)
 set(ENABLE_QCBOR_TESTS TRUE)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.inc)
 
+if (NOT TARGET tfm_t_cose_verify)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
+endif()
+
 #Build the secure library
-add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S})
+add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S} $<TARGET_OBJECTS:tfm_t_cose_verify>)
 
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_secure_tests)
@@ -66,7 +70,7 @@ embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES _
 
 #Build the non-secure library
 set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
-add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
+add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OBJECTS:tfm_t_cose_verify>)
 
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_non_secure_tests)

@@ -31,6 +31,7 @@ list(APPEND ALL_SRC_C_SIGN
 	)
 
 list(APPEND ALL_SRC_C_VERIFY
+	"${T_COSE_DIR}/src/t_cose_sign1_verify.c"
 	"${T_COSE_DIR}/src/t_cose_util.c"
 	"${T_COSE_DIR}/src/t_cose_psa_crypto_hash.c"
 	"${T_COSE_DIR}/src/t_cose_psa_crypto_verify.c"

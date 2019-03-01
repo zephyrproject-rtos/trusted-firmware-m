@@ -16,7 +16,7 @@
 #include "tfm_api.h"
 #include <string.h>
 #include <stdlib.h>
-#include "../token_test.h"
+#include "../attest_token_test.h"
 
 static uint8_t token_buffer[TEST_TOKEN_SIZE];
 static uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE];
