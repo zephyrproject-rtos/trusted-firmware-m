@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2019 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,12 @@ struct tfm_spm_partition_platform_data_t
  * \brief Configures the Memory Protection Controller.
  */
 void mpc_init_cfg(void);
+
+/**
+ * \brief Set to secure the initialized non-secure regions of
+ *        the Memory Protection Controller.
+ */
+void mpc_revert_non_secure_to_secure_cfg(void);
 
 /**
  * \brief Configures the Peripheral Protection Controller.

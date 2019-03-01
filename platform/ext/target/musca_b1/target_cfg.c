@@ -318,12 +318,29 @@ void mpc_init_cfg(void)
                                    MPC_ISRAM3_RANGE_LIMIT_NS,
                                    ARM_MPC_ATTR_NONSECURE);
 
-    /* Lock down the MPC configuration */
-    Driver_EFLASH0_MPC.LockDown();
-    mpc_data_region0->LockDown();
-    mpc_data_region1->LockDown();
-    mpc_data_region2->LockDown();
-    mpc_data_region3->LockDown();
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
+}
+
+void mpc_revert_non_secure_to_secure_cfg(void)
+{
+    ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
+    ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
+
+    Driver_EFLASH0_MPC.ConfigRegion(MPC_EFLASH0_RANGE_BASE_S,
+                                    MPC_EFLASH0_RANGE_LIMIT_S,
+                                    ARM_MPC_ATTR_SECURE);
+
+    mpc_data_region2->ConfigRegion(MPC_ISRAM2_RANGE_BASE_S,
+                                   MPC_ISRAM2_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    mpc_data_region3->ConfigRegion(MPC_ISRAM3_RANGE_BASE_S,
+                                   MPC_ISRAM3_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
