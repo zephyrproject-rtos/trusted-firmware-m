@@ -1379,7 +1379,7 @@ void tfm_core_enable_irq_handler(uint32_t *svc_args)
     int32_t irq_line;
 
     /* Only a single signal is allowed */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         /* FixMe: error severity TBD */
         tfm_secure_api_error_handler();
     }
@@ -1405,7 +1405,7 @@ void tfm_core_disable_irq_handler(uint32_t *svc_args)
     int32_t irq_line;
 
     /* Only a single signal is allowed */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         /* FixMe: error severity TBD */
         tfm_secure_api_error_handler();
     }
@@ -1466,7 +1466,7 @@ void tfm_core_psa_eoi(uint32_t *svc_args)
     curr_part_data = tfm_spm_partition_get_runtime_data(running_partition_idx);
 
     /* Only a single signal is allowed */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         tfm_secure_api_error_handler();
     }
 

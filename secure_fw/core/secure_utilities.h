@@ -9,6 +9,7 @@
 #define __SECURE_UTILITIES_H__
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "cmsis_compiler.h"
 #include "tfm_svc.h"
 
@@ -57,5 +58,7 @@ struct tfm_exc_stack_t {
 #endif
 
 int32_t tfm_bitcount(uint32_t n);
+
+bool tfm_is_one_bit_set(uint32_t n);
 
 #endif /* __SECURE_UTILITIES_H__ */

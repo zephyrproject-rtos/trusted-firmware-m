@@ -1046,7 +1046,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     }
 
     /* It is a fatal error if passed signal indicates more than one signals. */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         tfm_panic();
     }
 
@@ -1070,7 +1070,7 @@ void tfm_svcall_enable_irq(uint32_t *args)
     struct tfm_spm_ipc_partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         tfm_panic();
     }
 
@@ -1097,7 +1097,7 @@ void tfm_svcall_disable_irq(uint32_t *args)
     struct tfm_spm_ipc_partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
-    if (tfm_bitcount(irq_signal) != 1) {
+    if (!tfm_is_one_bit_set(irq_signal)) {
         tfm_panic();
     }
 
