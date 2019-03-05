@@ -131,7 +131,7 @@ endif()
 if (NOT DEFINED BUILD_PLAT_TEST)
   message(FATAL_ERROR "Configuration variable BUILD_PLAT_TEST (true|false) is undefined!")
 elseif(BUILD_PLAT_TEST)
-  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/mps2/an521/plat_test.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps2/an521/plat_test.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)

@@ -126,6 +126,13 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
 #define PPC_BANK_COUNT \
     (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+        MUSCA_B1_CMSDK_TIMER0_S_BASE,
+        MUSCA_B1_CMSDK_TIMER1_S_BASE - 1,
+        PPC_SP_APB_PPC0,
+        CMSDK_TIMER0_APB_PPC_POS
+};
+
 void enable_fault_handlers(void)
 {
     /* Explicitly set secure fault priority to the highest */

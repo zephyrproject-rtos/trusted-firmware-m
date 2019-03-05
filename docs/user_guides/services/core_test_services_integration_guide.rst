@@ -37,6 +37,7 @@ The required features are:
   read/write access tests
 - Get a button state that can be pressed by the user to simulate a secure
   service with an arbitrarily long blocking execution.
+- Access to a timer that is able to interrupt the core running TF-M.
 
 The functionality that have to be implemented by the platform is described in
 ``platform/include/tfm_plat_test.h``. For details see the documentation of the

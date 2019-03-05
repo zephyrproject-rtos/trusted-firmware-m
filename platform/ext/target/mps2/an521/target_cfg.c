@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2019 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,13 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io = {
         MPS2_IO_FPGAIO_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP2,
         CMSDK_FPGA_IO_PPC_POS
+};
+
+struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+        CMSDK_TIMER0_BASE_S,
+        CMSDK_TIMER1_BASE_S - 1,
+        PPC_SP_APB_PPC0,
+        CMSDK_TIMER0_APB_PPC_POS
 };
 
 void enable_fault_handlers(void)

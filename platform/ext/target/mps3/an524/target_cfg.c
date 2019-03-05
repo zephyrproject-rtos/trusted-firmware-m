@@ -123,6 +123,13 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
 
 #define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+        CMSDK_TIMER0_BASE_S,
+        CMSDK_TIMER1_BASE_S - 1,
+        PPC_SP_APB_PPC0,
+        CMSDK_TIMER0_APB_PPC_POS
+};
+
 void enable_fault_handlers(void)
 {
     /* Enables BUS, MEM, USG and Secure faults */

@@ -91,6 +91,13 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
         -1
 };
 
+struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+        MUSCA_CMSDK_TIMER0_S_BASE,
+        MUSCA_CMSDK_TIMER1_S_BASE - 1,
+        PPC_SP_APB_PPC0,
+        CMSDK_TIMER0_APB_PPC_POS
+};
+
 void enable_fault_handlers(void)
 {
     /* Explicitly set secure fault priority to the highest */

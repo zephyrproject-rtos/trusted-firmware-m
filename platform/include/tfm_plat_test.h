@@ -46,4 +46,35 @@ void tfm_plat_test_set_led_status(uint32_t status);
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST")
 uint32_t tfm_plat_test_get_userled_mask(void);
 
+/**
+ * \brief starts Secure timer
+ *
+ * Configures a timer to start counting, and generate a timer interrupt after a
+ * certain amount of time. For the test case to be useful, the timeout value of
+ * the timer should be long enough so that the test service can go to the state
+ * where it starts waiting for the interrupt.
+ */
+void tfm_plat_test_secure_timer_start(void);
+
+/**
+ * \brief Stops the Secure timer and clears the timer interrupt.
+ */
+void tfm_plat_test_secure_timer_stop(void);
+
+/**
+ * \brief starts Non-secure timer
+ *
+ * Configures a timer to start counting, and generate a timer interrupt after a
+ * certain amount of time. For the test case to be useful, the timeout value of
+ * the timer should be long enough so that the test service can go to the state
+ * where it starts waiting for the interrupt.
+ */
+void tfm_plat_test_non_secure_timer_start(void);
+
+/**
+ * \brief Stops the non-Secure timer and clears the timer interrupt.
+ */
+void tfm_plat_test_non_secure_timer_stop(void);
+
+
 #endif /* __TFM_PLAT_TEST_H__ */

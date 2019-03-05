@@ -26,6 +26,7 @@
 #include "device_cfg.h"
 #include "device_definition.h"
 #include "platform_base_address.h"
+#include "platform/include/tfm_plat_defs.h"
 
 /* ======= Peripheral configuration structure definitions ======= */
 /* MUSCA B1 SCC driver structures */
