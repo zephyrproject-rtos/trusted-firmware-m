@@ -45,8 +45,8 @@ __Vectors:
     .long    NS_WATCHDOG_RESET_IRQHandler    /*  0: Non-Secure Watchdog Reset Request Interrupt */
     .long    NS_WATCHDOG_IRQHandler          /*  1: Non-Secure Watchdog Interrupt */
     .long    S32K_TIMER_IRQHandler           /*  2: S32K Timer Interrupt */
-    .long    TIMER0_Handler                  /*  3: CMSDK Timer 0 Interrupt */
-    .long    TIMER1_Handler                  /*  4: CMSDK Timer 1 Interrupt */
+    .long    TFM_TIMER0_IRQ_Handler          /*  3: CMSDK Timer 0 Interrupt */
+    .long    TIMER1_IRQHandler               /*  4: CMSDK Timer 1 Interrupt */
     .long    DUALTIMER_IRQHandler            /*  5: CMSDK Dual Timer Interrupt */
     .long    MHU0_IRQHandler                 /*  6: Message Handling Unit 0 Interrupt */
     .long    MHU1_IRQHandler                 /*  7: Message Handling Unit 1 Interrupt */
@@ -290,8 +290,8 @@ Reset_Handler:
     def_irq_handler     NS_WATCHDOG_RESET_IRQHandler    /*  0: Non-Secure Watchdog Reset Request Interrupt */
     def_irq_handler     NS_WATCHDOG_IRQHandler          /*  1: Non-Secure Watchdog Interrupt */
     def_irq_handler     S32K_TIMER_IRQHandler           /*  2: S32K Timer Interrupt */
-    def_irq_handler     TIMER0_Handler                  /*  3: CMSDK Timer 0 Interrupt */
-    def_irq_handler     TIMER1_Handler                  /*  4: CMSDK Timer 1 Interrupt */
+    def_irq_handler     TFM_TIMER0_IRQ_Handler          /*  3: CMSDK Timer 0 Interrupt */
+    def_irq_handler     TIMER1_IRQHandler               /*  4: CMSDK Timer 1 Interrupt */
     def_irq_handler     DUALTIMER_IRQHandler            /*  5: CMSDK Dual Timer Interrupt */
     def_irq_handler     MHU0_IRQHandler                 /*  6: Message Handling Unit 0 Interrupt */
     def_irq_handler     MHU1_IRQHandler                 /*  7: Message Handling Unit 1 Interrupt */

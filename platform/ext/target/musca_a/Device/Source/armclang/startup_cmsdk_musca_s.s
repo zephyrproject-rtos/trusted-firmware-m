@@ -56,8 +56,8 @@ __Vectors       ;Core Interrupts
                 DCD    NS_WATCHDOG_RESET_IRQHandler    ;  0: Non-Secure Watchdog Reset Request Interrupt
                 DCD    NS_WATCHDOG_IRQHandler          ;  1: Non-Secure Watchdog Interrupt
                 DCD    S32K_TIMER_IRQHandler           ;  2: S32K Timer Interrupt
-                DCD    TIMER0_Handler                  ;  3: CMSDK Timer 0 Interrupt
-                DCD    TIMER1_Handler                  ;  4: CMSDK Timer 1 Interrupt
+                DCD    TFM_TIMER0_IRQ_Handler          ;  3: CMSDK Timer 0 Interrupt
+                DCD    TIMER1_IRQHandler               ;  4: CMSDK Timer 1 Interrupt
                 DCD    DUALTIMER_IRQHandler            ;  5: CMSDK Dual Timer Interrupt
                 DCD    MHU0_IRQHandler                 ;  6: Message Handling Unit 0 Interrupt
                 DCD    MHU1_IRQHandler                 ;  7: Message Handling Unit 1 Interrupt
@@ -178,8 +178,8 @@ $handler_name   PROC
                 Default_Handler NS_WATCHDOG_RESET_IRQHandler
                 Default_Handler NS_WATCHDOG_IRQHandler
                 Default_Handler S32K_TIMER_IRQHandler
-                Default_Handler TIMER0_Handler
-                Default_Handler TIMER1_Handler
+                Default_Handler TFM_TIMER0_IRQ_Handler
+                Default_Handler TIMER1_IRQHandler
                 Default_Handler DUALTIMER_IRQHandler
                 Default_Handler MHU0_IRQHandler
                 Default_Handler MHU1_IRQHandler

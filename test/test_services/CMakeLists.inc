@@ -38,6 +38,13 @@ elseif(ENABLE_CORE_TESTS_2)
 	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_core_test_2/tfm_ss_core_test_2.c")
 endif()
 
+if (NOT DEFINED ENABLE_IRQ_TEST_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: ENABLE_IRQ_TEST_SERVICES is undefined. ")
+elseif(ENABLE_IRQ_TEST_SERVICES)
+	list(APPEND ALL_SRC_C_S
+		"${CORE_TEST_DIR}/tfm_irq_test_service_1/tfm_irq_test_service_1.c")
+endif()
+
 if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
 elseif (TFM_PARTITION_TEST_SECURE_SERVICES)

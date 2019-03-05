@@ -136,6 +136,14 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
+#ifdef TFM_PARTITION_TEST_CORE
+    TFM_IRQ_TEST_1 +0 ALIGN 32 {
+        *tfm_irq_test_service_1.* (+RO)
+        *timer_cmsdk* (+RO)
+        *(TFM_IRQ_TEST_1_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_TEST_CORE */
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -342,6 +350,20 @@ LR_CODE S_CODE_START {
     }
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    TFM_IRQ_TEST_1_DATA +0 ALIGN 32 {
+        *tfm_irq_test_service_1.* (+RW +ZI)
+        *timer_cmsdk* (+RW +ZI)
+        *(TFM_IRQ_TEST_1_ATTR_RW)
+        *(TFM_IRQ_TEST_1_ATTR_ZI)
+    }
+
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
+    TFM_IRQ_TEST_1_STACK +0 ALIGN 128 EMPTY 0x0400 {
+    }
+#endif
+#endif /* TFM_PARTITION_TEST_CORE */
 
     /*
      * This empty, zero long execution region is here to mark the end address

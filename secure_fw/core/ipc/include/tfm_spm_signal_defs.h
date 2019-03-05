@@ -15,5 +15,6 @@
 #include "secure_fw/services/secure_storage/tfm_sst_signal.h"
 #include "secure_fw/services/initial_attestation/tfm_attest_signal.h"
 #include "test/test_services/tfm_ipc_client/tfm_ipc_client_partition.h"
+#include "test/test_services/tfm_irq_test_service_1/tfm_irq_test_service_1_signal.h"
 
 #endif /* __TFM_SPM_SIGNAL_DEFS_H__ */

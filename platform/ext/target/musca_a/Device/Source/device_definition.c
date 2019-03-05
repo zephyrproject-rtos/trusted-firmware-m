@@ -395,12 +395,15 @@ struct i2c_ip6510_dev_t I2C1_IP6510_DEV_NS = {
 
 /* CMSDK Timers driver structures */
 #ifdef CMSDK_TIMER0_S
-static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S = {
-    .base = MUSCA_CMSDK_TIMER0_S_BASE};
-static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_S = {
-    .is_initialized = 0};
-struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_S = {&(CMSDK_TIMER0_DEV_CFG_S),
-                                               &(CMSDK_TIMER0_DEV_DATA_S)};
+static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S
+    TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_IRQ_TEST_1")
+    = {.base = MUSCA_CMSDK_TIMER0_S_BASE};
+static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_S
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_IRQ_TEST_1")
+    = {.is_initialized = 0};
+struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_S
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_IRQ_TEST_1")
+    = {&(CMSDK_TIMER0_DEV_CFG_S), &(CMSDK_TIMER0_DEV_DATA_S)};
 #endif
 #ifdef CMSDK_TIMER0_NS
 static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_NS = {

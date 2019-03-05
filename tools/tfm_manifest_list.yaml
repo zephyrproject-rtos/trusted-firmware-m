@@ -107,6 +107,16 @@
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
       "version_minor": 1
+    },
+    {
+      "name": "TFM IRQ Test Service 1",
+      "short_name": "TFM_IRQ_Test_1",
+      "manifest": "test/test_services/tfm_irq_test_service_1/manifest.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_TEST_CORE",
+      "version_major": 0,
+      "version_minor": 1
     }
   ]
 }

@@ -54,11 +54,13 @@ uint32_t tfm_plat_test_get_userled_mask(void);
  * the timer should be long enough so that the test service can go to the state
  * where it starts waiting for the interrupt.
  */
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_IRQ_TEST_1")
 void tfm_plat_test_secure_timer_start(void);
 
 /**
  * \brief Stops the Secure timer and clears the timer interrupt.
  */
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_IRQ_TEST_1")
 void tfm_plat_test_secure_timer_stop(void);
 
 /**

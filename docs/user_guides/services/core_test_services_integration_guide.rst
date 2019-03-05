@@ -54,6 +54,44 @@ It is possible that a platform implementation mocks the implementation of some
 or all of the functions, by returning the values expected by the test cases,
 without actually executing the action expected by the test.
 
+******************
+IRQ handling tests
+******************
+
+The IRQ handling test currently tests the following scenarios:
+
+- NS code execution is interrupted by a secure IRQ (``IRQ_TEST_SCENARIO_1``)
+- S code execution is interrupted by a secure IRQ, The handler is not the
+  interrupted service (``IRQ_TEST_SCENARIO_2``)
+- S code execution is interrupted by a secure IRQ, The handler is the
+  interrupted service (``IRQ_TEST_SCENARIO_3``)
+- S code waits for an interrupt (calling ``psa_wait()``), the handler is in
+  the service that is waiting, ``psa_eoi()`` is called after ``psa_wait()`` returns
+  (``IRQ_TEST_SCENARIO_4``)
+
+The following test services participate in the test execution:
+
+- ``TFM_IRQ_TEST_1`` has the role of the interrupted partition with the IRQ
+  handler
+- ``TFM_SP_CORE_TEST_2`` has the role of the interrupted partition without the
+  IRQ handler
+
+All the test executions are initiated from the NS positive test suite. For each
+scenario the non-secure testcase calls the following secure functions in order:
+
+1. prepare_test_scenario for ``TFM_IRQ_TEST_1``
+2. prepare_test_scenario for ``TFM_SP_CORE_TEST_2``
+3. execute_test_scenario for ``TFM_IRQ_TEST_1``
+4. execute_test_scenario for ``TFM_SP_CORE_TEST_2``
+
+During these steps, the ``TFM_IRQ_TEST_1`` sets up a timer with a convenient
+init value, and depending on the scenario, one of the services, or the NS code
+enters a busy wait waiting for the timer interrupt to be raised. In case of
+``IRQ_TEST_SCENARIO_3``, when ``PSA API`` is used, the execute_test_scenario
+request of the NS code is only replied when the IRQ is handled, so no explicit
+busy wait is required. In all the other cases, handling of the irq is signalled
+to the waiting party by setting a variable in a non-secure memory location.
+
 --------------
 
 *Copyright (c) 2019, Arm Limited. All rights reserved.*
