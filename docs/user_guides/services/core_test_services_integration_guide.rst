@@ -1,0 +1,58 @@
+################################
+TF-M Core Test integration guide
+################################
+
+************
+Introduction
+************
+
+The core test suites test some of the features of the TF-M core. There are
+multiple services that are used by the core test suites. The services are
+defined in the ``test/test_services`` folder.
+
+Currently there are two test suites, *interactive* and *positive*. The positive
+test suite can be run, by building using ``ConfigCoreTest.cmake`` as cmake
+config file. The interactive test suite is only available by manually setting
+CORE_TEST_INTERACTIVE to ON in the following block in ``CommonConfig.cmake``:
+
+.. code-block:: cmake
+
+	if (CORE_TEST)
+		set(CORE_TEST_POSITIVE ON)
+		set(CORE_TEST_INTERACTIVE OFF)
+		set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
+		add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
+	endif()
+
+After making the change, the tests can be run by building using
+``ConfigCoreTest.cmake`` as cmake config file.
+
+**************************
+Platform specific features
+**************************
+For certain test cases the core test services rely on platform functionality.
+The required features are:
+
+- Access to LEDs or registers that can be used as scratch registers for
+  read/write access tests
+- Get a button state that can be pressed by the user to simulate a secure
+  service with an arbitrarily long blocking execution.
+
+The functionality that have to be implemented by the platform is described in
+``platform/include/tfm_plat_test.h``. For details see the documentation of the
+functions.
+
+It is the responsibility of the platform implementation to ensure that the
+resources needed for the core test services are properly linked to the service.
+This can be achieved by using the
+``TFM_LINK_SET_<memory_type>_IN_PARTITION_SECTION(...)`` macros in
+``platform/include/tfm_plat_defs.h``. More details regarding the usage of these
+macros are available in the header file.
+
+It is possible that a platform implementation mocks the implementation of some
+or all of the functions, by returning the values expected by the test cases,
+without actually executing the action expected by the test.
+
+--------------
+
+*Copyright (c) 2019, Arm Limited. All rights reserved.*
