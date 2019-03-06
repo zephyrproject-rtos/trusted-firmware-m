@@ -2,6 +2,7 @@
  * attest_token_test_values.h
  *
  * Copyright (c) 2019, Laurence Lundblade.
+ * Copyright (c) 2019, Arm Limited.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -67,83 +68,102 @@
  * bytes. They length must be the number of bytes in the first.
  */
 
+/* Hard coded value for test */
+#define NONCE_FOR_TEST  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
+                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
 
 /* A 32 byte mostly random value. Binary. */
 #define TOKEN_TEST_VALUE_NONCE \
     (struct q_useful_buf_c) {\
-        (uint8_t[]){ \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08  \
-        },\
+        (uint8_t[]){ NONCE_FOR_TEST },\
         32\
     }
 #define TOKEN_TEST_REQUIRE_NONCE true
 
 
-/* A 32 byte mostly random value. Binary. */
+/* A 32 byte mostly random value. Binary.
+ *    platform/ext/common/tfm_initial_attestation_key_material.c
+ */
 #define TOKEN_TEST_VALUE_UEID \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
-            0x21, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08  \
+            0x01, \
+            0xf4, 0x0c, 0x8f, 0xbf, 0x12, 0xdb, 0x78, 0x2a, \
+            0xfd, 0xf4, 0x75, 0x96, 0x6a, 0x06, 0x82, 0x36, \
+            0xe0, 0x32, 0xab, 0x80, 0xd1, 0xb7, 0xf1, 0xbc, \
+            0x9f, 0xe7, 0xd8, 0x7a, 0x88, 0xcb, 0x26, 0xd0  \
         },\
-        32\
+        33\
     }
 #define TOKEN_TEST_REQUIRE_UEID true
 
-/* A 32 byte mostly random value. Binary. */
+
+/* A 32 byte mostly random value. Binary.
+ *    platform/ext/target/<TARGET>/dummy_boot_seed.c
+ */
 #define TOKEN_TEST_VALUE_BOOT_SEED \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
-            0x31, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08  \
+            0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, \
+            0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, \
+            0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, \
+            0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF  \
         },\
         32\
     }
 #define TOKEN_TEST_REQUIRE_BOOT_SEED true
 
 
-/* A text string mostly in EAN 13 format */
-#define TOKEN_TEST_VALUE_HW_VERSION "4 003994 155486"
-#define TOKEN_TEST_REQUIRE_HW_VERSION true
+/* A text string mostly in EAN 13 format
+ *    platform/ext/target/<TARGET>/dummy_device_id.c
+ */
+#define TOKEN_TEST_VALUE_HW_VERSION "060456527282910010"
+#define TOKEN_TEST_REQUIRE_HW_VERSION false /* Optional field */
 
-/* A 32 byte mostly random value. Binary. */
+/* A 32 byte mostly random value. Binary.
+ *    platform/ext/target/<TARGET>/dummy_device_id.c
+ */
 #define TOKEN_TEST_VALUE_IMPLEMENTATION_ID \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
-            0x41, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, \
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08  \
+            0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, \
+            0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, \
+            0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, \
+            0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD  \
         },\
         32\
     }
 #define TOKEN_TEST_REQUIRE_IMPLEMENTATION_ID true
 
-/* A small unsigned integer */
-#define TOKEN_TEST_VALUE_SECURITY_LIFECYCLE  4
+
+/* A small unsigned integer
+ *    platform/ext/target/<TARGET>/attest_hal.c
+ */
+#define TOKEN_TEST_VALUE_SECURITY_LIFECYCLE  0x3000u
 #define TOKEN_TEST_REQUIRE_SECURITY_LIFECYCLE true
 
-/* An integer (can be positive or negative */
-#define TOKEN_TEST_VALUE_CLIENT_ID  589
+
+/* Disable checking value of client ID */
+#define TOKEN_TEST_VALUE_CLIENT_ID INT32_MAX
 #define TOKEN_TEST_REQUIRE_CLIENT_ID true
 
-
-/* Text string naming the profile definition */
-#define TOKEN_TEST_VALUE_PROFILE_DEFINITION  "psa_tfm-profile-1.md"
-#define TOKEN_TEST_REQUIRE_PROFILE_DEFINITION true
+/* An integer (can be positive or negative */
+/* #define TOKEN_TEST_VALUE_CLIENT_ID  589 */
 
 
-/* Text string with verification URL or similar */
-#define TOKEN_TEST_VALUE_ORIGINATION  \
-                        "https://verification.attestationtoken.com"
-#define TOKEN_TEST_REQUIRE_ORIGINATION true
+/* Text string naming the profile definition:
+ *    platform/ext/target/<TARGET>/attest_hal.c
+ */
+#define TOKEN_TEST_VALUE_PROFILE_DEFINITION  "PSA_IOT_PROFILE_1"
+#define TOKEN_TEST_REQUIRE_PROFILE_DEFINITION false /* Optional field */
+
+/* Text string with verification URL or similar
+ *    platform/ext/target/<TARGET>/attest_hal.c
+ */
+#define TOKEN_TEST_VALUE_ORIGINATION "www.trustedfirmware.org"
+#define TOKEN_TEST_REQUIRE_ORIGINATION false /* Optional field */
 
 
 
@@ -172,10 +192,14 @@
 #define TOKEN_TEST_REQUIRED_NUM_SWC 0
 
 /* Text string */
-#define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_TYPE "type library"
-#define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_TYPE true
+#define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_TYPE "NSPE_SPE"
+#define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_TYPE false /* Optional field */
+
+/* Disable check of measurement value */
+#define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_VAL NULL_Q_USEFUL_BUF_C
 
 /* A 32 byte mostly random value. Binary. */
+/*
 #define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_VAL \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
@@ -186,18 +210,30 @@
         },\
         32\
     }
+*/
 #define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_VAL true
 
-/* Small unsigned integer */
-#define TOKEN_TEST_VALUE_SWC1_EPOCH 2
-#define TOKEN_TEST_REQUIRE_SWC1_EPOCH true
+
+/* Small unsigned integer, disable to check because it was removed from
+ * specification 1.0-Beta-1
+ */
+#define TOKEN_TEST_VALUE_SWC1_EPOCH INT32_MAX
+#define TOKEN_TEST_REQUIRE_SWC1_EPOCH false /* Optional field */
+
+
+/* Disable check of software version */
+#define TOKEN_TEST_VALUE_SWC1_VERSION NULL
 
 /* Text string */
-#define TOKEN_TEST_VALUE_SWC1_VERSION "v1.2.4.8"
-#define TOKEN_TEST_REQUIRE_SWC1_VERSION true
+/* #define TOKEN_TEST_VALUE_SWC1_VERSION "v1.2.4.8" */
+#define TOKEN_TEST_REQUIRE_SWC1_VERSION false /* Optional field */
 
+
+/* Disable check of signer ID */
+#define TOKEN_TEST_VALUE_SWC1_SIGNER_ID NULL_Q_USEFUL_BUF_C
 
 /* A 32 byte mostly random value. Binary. */
+/*
 #define TOKEN_TEST_VALUE_SWC1_SIGNER_ID \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
@@ -208,11 +244,12 @@
         },\
         32\
     }
+*/
 #define TOKEN_TEST_REQUIRE_SWC1_SIGNER_ID true
 
 /* Text string */
-#define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_DESC "execute-in-place-rom"
-#define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_DESC true
+#define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_DESC "SHA256"
+#define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_DESC false /* Optional field */
 
 
 
