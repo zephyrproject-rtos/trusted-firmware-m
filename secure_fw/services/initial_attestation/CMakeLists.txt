@@ -30,7 +30,9 @@ if (NOT DEFINED TFM_LVL)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined.")
 endif()
 
-add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
+if (NOT TARGET tfm_qcbor)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
+endif()
 
 if (NOT TARGET tfm_t_cose_sign)
 	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)

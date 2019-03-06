@@ -58,7 +58,13 @@ if (NOT TARGET tfm_t_cose_verify)
 	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
 endif()
 
-#Build the secure library
+if (NOT TARGET tfm_qcbor)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
+endif()
+
+#Build the secure library. Even though secure tests files depend on tfm_qcbor,
+#this is not expressed here as the tfm_attest library is expected to hold the
+#compiled tfm_qcbor files.
 add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S} $<TARGET_OBJECTS:tfm_t_cose_verify>)
 
 #Set common compiler and linker flags
@@ -70,7 +76,7 @@ embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES _
 
 #Build the non-secure library
 set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
-add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OBJECTS:tfm_t_cose_verify>)
+add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OBJECTS:tfm_t_cose_verify> $<TARGET_OBJECTS:tfm_qcbor>)
 
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_non_secure_tests)
