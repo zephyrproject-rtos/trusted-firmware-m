@@ -26,11 +26,6 @@
 #define EAT_SW_COMPONENT_NESTED     1  /* Nested map */
 #define EAT_SW_COMPONENT_NOT_NESTED 0  /* Flat structure */
 
-/* Indicates that the boot status does not contain any SW components'
- * measurement
- */
-#define NO_SW_COMPONENT_FIXED_VALUE 1
-
 /*!
  * \var boot_status
  *

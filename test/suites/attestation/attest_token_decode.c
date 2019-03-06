@@ -490,12 +490,6 @@ Done:
     return return_value;
 }
 
-/** Value for EAT_CBOR_ARM_LABEL_NO_SW_COMPONENTS when present.
- * It must be this value if present.
- * Indicates that the boot status does not contain any SW components'
- * measurement
- */
-#define NO_SW_COMPONENT_FIXED_VALUE 1
 
 /*
  * Public function. See attest_token_decode.h
