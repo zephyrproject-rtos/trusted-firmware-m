@@ -1,5 +1,5 @@
 /*
- * t_cose_psa_crypto.c
+ * t_cose_psa_crypto_hash.c
  *
  * Copyright 2019, Laurence Lundblade
  *
@@ -11,10 +11,6 @@
  */
 
 #include "t_cose_crypto.h"
-#include "attestation_key.h"
-#include "tfm_plat_defs.h"
-#include "tfm_plat_crypto_keys.h"
-#include "tfm_memory_utils.h"
 #include "psa_crypto.h"
 
 /**
@@ -28,124 +24,6 @@ struct t_cose_psa_crypto_hash {
     psa_hash_operation_t operation;
 };
 
-enum t_cose_err_t
-t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
-                           int32_t key_select,
-                           struct q_useful_buf_c hash_to_sign,
-                           struct q_useful_buf signature_buffer,
-                           struct q_useful_buf_c *signature)
-{
-    enum t_cose_err_t cose_ret = T_COSE_SUCCESS;
-    enum psa_attest_err_t attest_ret;
-    psa_status_t psa_ret;
-    const size_t sig_size = t_cose_signature_size(cose_alg_id);
-
-    /* Avoid compiler warning due to unused argument */
-    (void)key_select;
-
-    if (sig_size > signature_buffer.len) {
-        return T_COSE_ERR_SIG_BUFFER_SIZE;
-    }
-
-    /* FixMe: Registration of key(s) should not be error by attestation service.
-     *        Later crypto service is going to get the attestation key from
-     *        platform layer.
-     */
-    attest_ret = attest_register_initial_attestation_key();
-    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        cose_ret = T_COSE_ERR_FAIL;
-        goto error;
-    }
-
-    psa_ret = psa_asymmetric_sign(ATTEST_PRIVATE_KEY_SLOT,
-                                  0, /* FixMe: algorithm ID */
-                                  hash_to_sign.ptr,
-                                  hash_to_sign.len,
-                                  signature_buffer.ptr, /* Sig buf */
-                                  signature_buffer.len, /* Sig buf size */
-                                  &(signature->len));   /* Sig length */
-
-    if (psa_ret != PSA_SUCCESS) {
-        cose_ret = T_COSE_ERR_FAIL;
-        goto error;
-    } else {
-        signature->ptr = signature_buffer.ptr;
-    }
-
-    attest_ret = attest_unregister_initial_attestation_key();
-    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        cose_ret = T_COSE_ERR_FAIL;
-        goto error;
-    }
-
-error:
-    return cose_ret;
-}
-
-enum t_cose_err_t
-t_cose_crypto_get_ec_pub_key(int32_t key_select,
-                             struct q_useful_buf_c kid,
-                             int32_t *cose_curve_id,
-                             struct q_useful_buf buf_to_hold_x_coord,
-                             struct q_useful_buf buf_to_hold_y_coord,
-                             struct q_useful_buf_c *x_coord,
-                             struct q_useful_buf_c *y_coord)
-{
-    enum tfm_plat_err_t plat_res;
-    enum ecc_curve_t cose_curve;
-    struct ecc_key_t attest_key = {0};
-    uint8_t  key_buf[ECC_P_256_KEY_SIZE];
-
-    /* Avoid compiler warning due to unused argument */
-    (void)key_select;
-
-    /* Get the initial attestation key */
-    plat_res = tfm_plat_get_initial_attest_key(key_buf, sizeof(key_buf),
-                                               &attest_key, &cose_curve);
-
-    /* Check the availability of the private key */
-    if (plat_res != TFM_PLAT_ERR_SUCCESS ||
-        attest_key.pubx_key == NULL ||
-        attest_key.puby_key == NULL) {
-        return T_COSE_ERR_KEY_BUFFER_SIZE;
-    }
-
-    *cose_curve_id = (int32_t)cose_curve;
-
-    /* Check buffer size to avoid overflow */
-    if (buf_to_hold_x_coord.len < attest_key.pubx_key_size) {
-        return T_COSE_ERR_KEY_BUFFER_SIZE;
-    }
-
-    /* Copy the X coordinate of the public key to the buffer */
-    tfm_memcpy(buf_to_hold_x_coord.ptr,
-               (const void *)attest_key.pubx_key,
-               attest_key.pubx_key_size);
-
-    /* Update size */
-    buf_to_hold_x_coord.len = attest_key.pubx_key_size;
-
-    /* Check buffer size to avoid overflow */
-    if (buf_to_hold_y_coord.len < attest_key.puby_key_size) {
-        return T_COSE_ERR_KEY_BUFFER_SIZE;
-    }
-
-    /* Copy the Y coordinate of the public key to the buffer */
-    tfm_memcpy(buf_to_hold_y_coord.ptr,
-               (const void *)attest_key.puby_key,
-               attest_key.puby_key_size);
-
-    /* Update size */
-    buf_to_hold_y_coord.len = attest_key.puby_key_size;
-
-    x_coord->ptr = buf_to_hold_x_coord.ptr;
-    x_coord->len = buf_to_hold_x_coord.len;
-    y_coord->ptr = buf_to_hold_y_coord.ptr;
-    y_coord->len = buf_to_hold_y_coord.len;
-
-    return T_COSE_SUCCESS;
-}
-
 /**
  * \brief Check some of the sizes for hash implementation.
  *
@@ -155,7 +33,7 @@ t_cose_crypto_get_ec_pub_key(int32_t key_select,
  * implementation.  This gets evaluated at compile time and will
  * optimize out to nothing when all checks pass.
  */
-static inline enum t_cose_err_t check_hash_sizes()
+static inline enum t_cose_err_t check_hash_sizes(void)
 {
     if (T_COSE_CRYPTO_SHA256_SIZE != PSA_HASH_SIZE(PSA_ALG_SHA_256)) {
         return T_COSE_ERR_HASH_GENERAL_FAIL;
@@ -201,7 +79,7 @@ t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
      */
     cose_ret = check_hash_sizes();
     if (cose_ret) {
-        goto error;
+        return cose_ret;
     }
 
     /* This mostly turns into a compile-time check. If it succeeds,
@@ -210,8 +88,7 @@ t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
      */
     if (sizeof(struct t_cose_crypto_hash) <
        sizeof(struct t_cose_psa_crypto_hash)) {
-        cose_ret = T_COSE_ERR_HASH_GENERAL_FAIL;
-        goto error;
+        return T_COSE_ERR_HASH_GENERAL_FAIL;
     }
     psa_hash_ctx = (struct t_cose_psa_crypto_hash *)hash_ctx;
 
@@ -227,7 +104,6 @@ t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
         cose_ret = T_COSE_ERR_HASH_GENERAL_FAIL;
     }
 
-error:
     return cose_ret;
 }
 
@@ -252,7 +128,13 @@ void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
                                                    data_to_hash.ptr,
                                                    data_to_hash.len);
         } else {
-            /* Intentionally do nothing, just computing the size of the token */
+            /* No data was passed in to be hashed indicating the mode of use is
+             * the computation of the size of hash. This mode is hashing is used
+             * by t_cose when it is requested to compute the size of the signed
+             * data it might compute, which is in turn used to compute the
+             * size of a would be token. When computing the size, the size
+             * like this, there is nothing to do in update()
+             */
         }
     }
 }
@@ -272,8 +154,7 @@ t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
      */
     if (sizeof(struct t_cose_crypto_hash) <
        sizeof(struct t_cose_psa_crypto_hash)) {
-        cose_ret = T_COSE_ERR_HASH_GENERAL_FAIL;
-        goto error;
+        return T_COSE_ERR_HASH_GENERAL_FAIL;
     }
     psa_hash_ctx = (struct t_cose_psa_crypto_hash *)hash_ctx;
 
@@ -295,6 +176,5 @@ t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
         cose_ret = T_COSE_ERR_HASH_GENERAL_FAIL;
     }
 
-error:
     return cose_ret;
 }

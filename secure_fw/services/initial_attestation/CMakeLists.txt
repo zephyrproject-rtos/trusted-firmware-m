@@ -31,10 +31,13 @@ if (NOT DEFINED TFM_LVL)
 endif()
 
 add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
-add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
+
+if (NOT TARGET tfm_t_cose_sign)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
+endif()
 
 #Specify what we build (for the initial attestation service, build as a static library)
-add_library(tfm_attest STATIC ${ALL_SRC_ASM} ${ALL_SRC_C} $<TARGET_OBJECTS:tfm_qcbor> $<TARGET_OBJECTS:tfm_t_cose>)
+add_library(tfm_attest STATIC ${ALL_SRC_ASM} ${ALL_SRC_C} $<TARGET_OBJECTS:tfm_qcbor> $<TARGET_OBJECTS:tfm_t_cose_sign>)
 embedded_set_target_compile_defines(TARGET tfm_attest LANGUAGE C DEFINES __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
 
 #Set common compiler flags
