@@ -20,7 +20,7 @@ extern "C" {
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.tfm_partition_name@@ ********/
+/******** @@manifest.name@@ ********/
 psa_status_t tfm_@@manifest.secure_functions.tfm_symbol@@_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */

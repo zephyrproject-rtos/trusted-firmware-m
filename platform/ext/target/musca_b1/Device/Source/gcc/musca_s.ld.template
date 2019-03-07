@@ -94,9 +94,9 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-        LONG (LOADADDR(.@@manifest.tfm_partition_name@@_DATA))
-        LONG (ADDR(.@@manifest.tfm_partition_name@@_DATA))
-        LONG (SIZEOF(.@@manifest.tfm_partition_name@@_DATA))
+        LONG (LOADADDR(.@@manifest.name@@_DATA))
+        LONG (ADDR(.@@manifest.name@@_DATA))
+        LONG (SIZEOF(.@@manifest.name@@_DATA))
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
 @!GENERATOR_CONDITIONAL_END!@
@@ -115,10 +115,10 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-        LONG (ADDR(.@@manifest.tfm_partition_name@@_BSS))
-        LONG (SIZEOF(.@@manifest.tfm_partition_name@@_BSS))
-        LONG (ADDR(.@@manifest.tfm_partition_name@@_STACK))
-        LONG (SIZEOF(.@@manifest.tfm_partition_name@@_STACK))
+        LONG (ADDR(.@@manifest.name@@_BSS))
+        LONG (SIZEOF(.@@manifest.name@@_BSS))
+        LONG (ADDR(.@@manifest.name@@_STACK))
+        LONG (SIZEOF(.@@manifest.name@@_STACK))
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
 @!GENERATOR_CONDITIONAL_END!@
@@ -156,7 +156,7 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-    .@@manifest.tfm_partition_name@@ : ALIGN(32)
+    .@@manifest.name@@ : ALIGN(32)
     {
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
         @@manifest.tfm_linker_pattern.library_list@@:*(.text*)
@@ -166,13 +166,13 @@ SECTIONS
         @@manifest.tfm_linker_pattern.object_list@@(.text*)
         @@manifest.tfm_linker_pattern.object_list@@(.rodata*)
 @!GENERATOR_CONDITIONAL_END!@
-        *(@@manifest.tfm_partition_name@@_ATTR_FN)
+        *(@@manifest.name@@_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$$@@manifest.tfm_partition_name@@$$RO$$Base = ADDR(.@@manifest.tfm_partition_name@@);
-    Image$$@@manifest.tfm_partition_name@@$$RO$$Limit = ADDR(.@@manifest.tfm_partition_name@@) + SIZEOF(.@@manifest.tfm_partition_name@@);
-    Image$$@@manifest.tfm_partition_name@@$$Base = ADDR(.@@manifest.tfm_partition_name@@);
-    Image$$@@manifest.tfm_partition_name@@$$Limit = ADDR(.@@manifest.tfm_partition_name@@) + SIZEOF(.@@manifest.tfm_partition_name@@);
+    Image$$@@manifest.name@@$$RO$$Base = ADDR(.@@manifest.name@@);
+    Image$$@@manifest.name@@$$RO$$Limit = ADDR(.@@manifest.name@@) + SIZEOF(.@@manifest.name@@);
+    Image$$@@manifest.name@@$$Base = ADDR(.@@manifest.name@@);
+    Image$$@@manifest.name@@$$Limit = ADDR(.@@manifest.name@@) + SIZEOF(.@@manifest.name@@);
 
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
@@ -311,7 +311,7 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-    .@@manifest.tfm_partition_name@@_DATA : ALIGN(32)
+    .@@manifest.name@@_DATA : ALIGN(32)
     {
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
         @@manifest.tfm_linker_pattern.library_list@@:*(.data*)
@@ -321,10 +321,10 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_END!@
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$@@manifest.tfm_partition_name@@_DATA$$RW$$Base = ADDR(.@@manifest.tfm_partition_name@@_DATA);
-    Image$$@@manifest.tfm_partition_name@@_DATA$$RW$$Limit = ADDR(.@@manifest.tfm_partition_name@@_DATA) + SIZEOF(.@@manifest.tfm_partition_name@@_DATA);
+    Image$$@@manifest.name@@_DATA$$RW$$Base = ADDR(.@@manifest.name@@_DATA);
+    Image$$@@manifest.name@@_DATA$$RW$$Limit = ADDR(.@@manifest.name@@_DATA) + SIZEOF(.@@manifest.name@@_DATA);
 
-    .@@manifest.tfm_partition_name@@_BSS : ALIGN(32)
+    .@@manifest.name@@_BSS : ALIGN(32)
     {
 @!GENERATOR_CONDITIONAL_START!@ @@manifest.tfm_linker_pattern.library_list@@
         @@manifest.tfm_linker_pattern.library_list@@:*(.bss*)
@@ -336,15 +336,15 @@ SECTIONS
 @!GENERATOR_CONDITIONAL_END!@
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$@@manifest.tfm_partition_name@@_DATA$$ZI$$Base = ADDR(.@@manifest.tfm_partition_name@@_BSS);
-    Image$$@@manifest.tfm_partition_name@@_DATA$$ZI$$Limit = ADDR(.@@manifest.tfm_partition_name@@_BSS) + SIZEOF(.@@manifest.tfm_partition_name@@_BSS);
+    Image$$@@manifest.name@@_DATA$$ZI$$Base = ADDR(.@@manifest.name@@_BSS);
+    Image$$@@manifest.name@@_DATA$$ZI$$Limit = ADDR(.@@manifest.name@@_BSS) + SIZEOF(.@@manifest.name@@_BSS);
 
-    .@@manifest.tfm_partition_name@@_STACK : ALIGN(128)
+    .@@manifest.name@@_STACK : ALIGN(128)
     {
         . += @@manifest.stack_size@@;
     } > RAM AT> FLASH
-    Image$$@@manifest.tfm_partition_name@@_STACK$$ZI$$Base = ADDR(.@@manifest.tfm_partition_name@@_STACK);
-    Image$$@@manifest.tfm_partition_name@@_STACK$$ZI$$Limit = ADDR(.@@manifest.tfm_partition_name@@_STACK) + SIZEOF(.@@manifest.tfm_partition_name@@_STACK);
+    Image$$@@manifest.name@@_STACK$$ZI$$Base = ADDR(.@@manifest.name@@_STACK);
+    Image$$@@manifest.name@@_STACK$$ZI$$Limit = ADDR(.@@manifest.name@@_STACK) + SIZEOF(.@@manifest.name@@_STACK);
 
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
@@ -422,6 +422,9 @@ SECTIONS
     } > RAM AT> FLASH
     Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+
+    Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
+    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
 
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a

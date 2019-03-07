@@ -31,8 +31,13 @@ if (NOT DEFINED TFM_LVL)
 endif()
 
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
-include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
+#Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
+if(TFM_PSA_API)
+	include(${SECURE_FW_DIR}/core/ipc/CMakeLists.inc)
+else()
+	include(${SECURE_FW_DIR}/core/CMakeLists.inc)
+endif()
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
@@ -144,7 +149,7 @@ function(set_up_secure_fw_build)
 	#Set macro definitions for the project.
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} DAUTH_CHIP_DEFAULT APPEND)
 
-	if (REGRESSION OR CORE_TEST)
+	if (REGRESSION OR CORE_TEST OR CORE_IPC)
 		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
 			#The test service veneers in the tfm_secure_tests library may not be
 			#referenced in the secure binary so the veneer objects are explicitly loaded
@@ -200,6 +205,12 @@ function(set_up_secure_fw_build)
 		message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 	elseif (BL2)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2")
+	endif()
+
+	if (NOT DEFINED TFM_PSA_API)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
+	elseif (TFM_PSA_API)
+		embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PSA_API")
 	endif()
 
 	if(CORE_TEST)

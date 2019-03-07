@@ -15,6 +15,7 @@
 #include "test/suites/attestation/secure/attestation_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
 #include "test/suites/crypto/secure/crypto_s_tests.h"
+#include "test/suites/ipc/secure/ipc_s_tests.h"
 
 static struct test_suite_t test_suites[] = {
 #if TFM_LVL == 3
@@ -48,6 +49,11 @@ static struct test_suite_t test_suites[] = {
     /* Note: since this is sample code, only run if test services are enabled */
     {&register_testsuite_s_invert_interface, 0, 0, 0},
 #endif /* TFM_PARTITION_TEST_CORE*/
+
+#ifdef CORE_TEST_IPC
+    /* Secure IPC test cases */
+    {&register_testsuite_s_ipc_interface, 0, 0, 0},
+#endif
 #endif /* SERVICES_TEST_S */
 #endif /* TFM_LVL == 3 */
 };

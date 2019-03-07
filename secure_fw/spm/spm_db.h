@@ -8,7 +8,36 @@
 #ifndef __SPM_DB_H__
 #define __SPM_DB_H__
 
+
+#ifdef TFM_PSA_API
+#include "tfm_thread.h"
+#endif
+
+struct spm_partition_desc_t;
+struct spm_partition_db_t;
+
 typedef psa_status_t(*sp_init_function)(void);
+
+#define TFM_PARTITION_TYPE_APP   "APPLICATION-ROT"
+#define TFM_PARTITION_TYPE_PSA   "PSA-ROT"
+
+#define TFM_STACK_SIZE  1024
+
+#ifdef TFM_PSA_API
+enum tfm_partition_priority {
+    TFM_PRIORITY_LOW = THRD_PRIOR_LOWEST,
+    TFM_PRIORITY_NORMAL = THRD_PRIOR_MEDIUM,
+    TFM_PRIORITY_HIGH = THRD_PRIOR_HIGHEST,
+};
+#else
+enum tfm_partition_priority {
+    TFM_PRIORITY_LOW = 0xFF,
+    TFM_PRIORITY_NORMAL = 0x7F,
+    TFM_PRIORITY_HIGH = 0,
+};
+#endif
+
+#define TFM_PRIORITY(LEVEL)      TFM_PRIORITY_##LEVEL
 
 /**
  * Holds the fields of the partition DB used by the SPM code. The values of
@@ -18,6 +47,7 @@ typedef psa_status_t(*sp_init_function)(void);
 struct spm_partition_static_data_t {
     uint32_t partition_id;
     uint32_t partition_flags;
+    uint32_t partition_priority;
     sp_init_function partition_init;
 };
 
@@ -31,6 +61,15 @@ struct spm_partition_desc_t {
     struct tfm_spm_partition_platform_data_t *platform_data;
 #if TFM_LVL != 1
     struct tfm_spm_partition_memory_data_t memory_data;
+#endif
+#ifdef TFM_PSA_API
+    struct tfm_thrd_ctx sp_thrd;
+    /*
+     * FixMe: Hard code stack is not aligned with the definition in the
+     * manifest. It will use the partition stacks in the linker scripts/sct
+     * files include Level 1 to 3.
+     */
+    uint8_t stack[TFM_STACK_SIZE] __attribute__((aligned(8)));
 #endif
 };
 

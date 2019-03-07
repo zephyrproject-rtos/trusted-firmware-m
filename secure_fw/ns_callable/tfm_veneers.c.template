@@ -15,7 +15,7 @@
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.tfm_partition_name@@ ********/
+/******** @@manifest.name@@ ********/
 psa_status_t @@manifest.secure_functions.tfm_symbol@@(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
@@ -39,8 +39,8 @@ psa_status_t @@manifest.secure_functions.tfm_symbol@@(struct psa_invec *, size_t
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #ifdef @@attr.conditional@@
 @!GENERATOR_CONDITIONAL_END!@
-/******** @@manifest.tfm_partition_name@@ ********/
-TFM_VENEER_FUNCTION(@@manifest.tfm_partition_name@@, @@manifest.secure_functions.tfm_symbol@@)
+/******** @@manifest.name@@ ********/
+TFM_VENEER_FUNCTION(@@manifest.name@@, @@manifest.secure_functions.tfm_symbol@@)
 @!GENERATOR_CONDITIONAL_START!@ @@attr.conditional@@
 #endif /* @@attr.conditional@@ */
 @!GENERATOR_CONDITIONAL_END!@

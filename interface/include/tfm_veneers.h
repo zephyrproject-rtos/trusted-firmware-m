@@ -35,6 +35,14 @@ psa_status_t tfm_tfm_crypto_import_key_veneer(struct psa_invec *in_vec, size_t i
 psa_status_t tfm_tfm_crypto_destroy_key_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_information_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_export_key_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_key_policy_init_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_key_policy_set_usage_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_key_policy_get_usage_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_key_policy_get_algorithm_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_set_key_policy_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_get_key_policy_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_get_key_lifetime_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_set_key_lifetime_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_set_iv_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_encrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_decrypt_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
@@ -46,6 +54,14 @@ psa_status_t tfm_tfm_crypto_hash_update_veneer(struct psa_invec *in_vec, size_t 
 psa_status_t tfm_tfm_crypto_hash_finish_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_verify_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_abort_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_sign_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_verify_setup_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_update_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_sign_finish_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_verify_finish_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_mac_abort_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_aead_decrypt_wrapper_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_aead_encrypt_wrapper_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t tfm_platform_sp_system_reset_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
@@ -73,6 +89,14 @@ psa_status_t tfm_spm_core_test_2_get_every_second_byte_veneer(struct psa_invec *
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 psa_status_t tfm_tfm_secure_client_service_sfn_run_tests_veneer(struct psa_invec *in_vec, size_t in_len, struct psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_SERVICE_TEST ********/
+#endif /* TFM_PSA_API */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_CLIENT_TEST ********/
+#endif /* TFM_PSA_API */
 
 #ifdef __cplusplus
 }

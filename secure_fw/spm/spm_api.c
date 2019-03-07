@@ -118,7 +118,7 @@ enum spm_err_t tfm_spm_db_init(void)
             g_spm_partition_db.partition_count]);
     part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
     part_ptr->static_data.partition_flags =
-                    SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED;
+                    SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     ++g_spm_partition_db.partition_count;
 
@@ -142,6 +142,11 @@ enum spm_err_t tfm_spm_partition_init(void)
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
         tfm_spm_hal_configure_default_isolation(part->platform_data);
+#ifdef TFM_PSA_API
+        if (part->static_data.partition_flags & SPM_PART_FLAG_IPC) {
+            continue;
+        }
+#endif
         if (part->static_data.partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             tfm_spm_partition_set_caller_partition_idx(idx,

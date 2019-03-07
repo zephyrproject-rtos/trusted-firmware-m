@@ -64,6 +64,12 @@ if (PSA_API_TEST_NS)
 	list(APPEND NS_APP_SRC "${APP_DIR}/psa_api_test.c")
 endif()
 
+if (NOT DEFINED TFM_PSA_API)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
+elseif (TFM_PSA_API)
+	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
+endif()
+
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
 set(BUILD_NATIVE_DRIVERS On)

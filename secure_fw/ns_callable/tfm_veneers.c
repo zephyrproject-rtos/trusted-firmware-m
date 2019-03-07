@@ -30,6 +30,14 @@ psa_status_t tfm_crypto_import_key(struct psa_invec *, size_t, struct psa_outvec
 psa_status_t tfm_crypto_destroy_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_information(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_export_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_init(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_set_usage(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_get_usage(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_get_algorithm(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_set_key_policy(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_key_policy(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_key_lifetime(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_set_key_lifetime(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_set_iv(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_encrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_decrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
@@ -41,6 +49,14 @@ psa_status_t tfm_crypto_hash_update(struct psa_invec *, size_t, struct psa_outve
 psa_status_t tfm_crypto_hash_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_verify(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_sign_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_verify_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_update(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_sign_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_verify_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_decrypt_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_encrypt_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t platform_sp_system_reset(struct psa_invec *, size_t, struct psa_outvec *, size_t);
@@ -68,6 +84,14 @@ psa_status_t spm_core_test_2_get_every_second_byte(struct psa_invec *, size_t, s
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 psa_status_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t, struct psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_SERVICE_TEST ********/
+#endif /* TFM_PSA_API */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_CLIENT_TEST ********/
+#endif /* TFM_PSA_API */
 
 
 #define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
@@ -101,6 +125,14 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_init)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_set_usage)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_get_usage)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_get_algorithm)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_policy)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_policy)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_lifetime)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_lifetime)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_set_iv)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_encrypt_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_decrypt_setup)
@@ -112,6 +144,14 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_verify)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_abort)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_sign_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_verify_setup)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_update)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_sign_finish)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_verify_finish)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_abort)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_decrypt_wrapper)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_encrypt_wrapper)
 
 /******** TFM_SP_PLATFORM ********/
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
@@ -139,4 +179,12 @@ TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_get_every_second_byte)
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 TFM_VENEER_FUNCTION(TFM_SP_SECURE_TEST_PARTITION, tfm_secure_client_service_sfn_run_tests)
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_SERVICE_TEST ********/
+#endif /* TFM_PSA_API */
+
+#ifdef TFM_PSA_API
+/******** TFM_SP_IPC_CLIENT_TEST ********/
+#endif /* TFM_PSA_API */
 

@@ -33,8 +33,9 @@ enum spm_part_state_t {
 };
 
 enum spm_part_flag_mask_t {
-    SPM_PART_FLAG_SECURE  = 0x01,
-    SPM_PART_FLAG_TRUSTED = 0x02,
+    SPM_PART_FLAG_APP_ROT = 0x01,
+    SPM_PART_FLAG_PSA_ROT = 0x02,
+    SPM_PART_FLAG_IPC     = 0x04
 };
 
 /**

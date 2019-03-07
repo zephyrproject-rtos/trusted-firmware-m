@@ -77,6 +77,24 @@
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
       "version_minor": 1
+    },
+    {
+      "name": "TFM IPC Service Test",
+      "short_name": "TFM_IPC_Service",
+      "manifest": "test/test_services/tfm_ipc_service/tfm_ipc_service_partition.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PSA_API",
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
+      "name": "TFM IPC Client Service",
+      "short_name": "TFM_IPC_Client",
+      "manifest": "test/test_services/tfm_ipc_client/tfm_ipc_client_partition.yaml",
+      "tfm_extensions": true,
+      "conditional": "TFM_PSA_API",
+      "version_major": 0,
+      "version_minor": 1
     }
   ]
 }

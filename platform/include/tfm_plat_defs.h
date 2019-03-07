@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,7 +30,7 @@ enum tfm_plat_err_t {
  *        secure partition at linker time in TF-M Level 3.
  *
  * \param[in] TFM_PARTITION_NAME  TF-M partition name assigned in the manifest
- *                                file "tfm_partition_name" field.
+ *                                file "name" field.
  */
 #define TFM_LINK_SET_OBJECT_IN_PARTITION_SECTION(TFM_PARTITION_NAME) \
                 __attribute__((section(TFM_PARTITION_NAME"_ATTR_FN")))

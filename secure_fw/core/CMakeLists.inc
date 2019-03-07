@@ -69,4 +69,3 @@ elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
 else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
-
