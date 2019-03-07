@@ -174,7 +174,7 @@ Service source files
 - Initial Attestation Service:
     - ``attestation_core.c`` : Implements core functionalities such as
       implementation of APIs, retrieval of claims and token creation.
-    - ``attest_token.c``: Implements the token creation function such as
+    - ``attest_token_encode.c``: Implements the token creation functions such as
       start and finish token creation and adding claims to the token.
     - ``attestation_key.c``: Get the asymmetric attestation key from platform
       layer and register it to the TF-M Crypto service for further usage.

@@ -1,5 +1,5 @@
 /*
- * attest_token.c
+ * attest_token_encode.c
  *
  * Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
  * Copyright (c) 2020, Arm Limited.
@@ -24,18 +24,17 @@
 
 
 /**
- * \file attest_token.c
+ * \file attest_token_encode.c
  *
  * \brief Attestation token creation implementation
  */
 
-/*
+/**
  * \brief Map t_cose error to attestation token error.
  *
  * \param[in] err   The t_cose error to map.
  *
  * \return the attestation token error.
- *
  */
 static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
 {
@@ -72,7 +71,7 @@ static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
  *   - Unprotected Headers
  *     - Key ID
  * - Open payload bstr
- *   - Write payload data… lots of it…
+ *   - Write payload data, maybe lots of it
  *   - Get bstr that is the encoded payload
  * - Compute tag
  *   - Create a separate encoder context for \c MAC_structure
@@ -93,11 +92,12 @@ static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
 /*
  * Public function. See attest_token.h
  */
-enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
-                                           uint32_t opt_flags,
-                                           int32_t key_select,
-                                           int32_t cose_alg_id,
-                                           const struct q_useful_buf *out_buf)
+enum attest_token_err_t
+attest_token_encode_start(struct attest_token_encode_ctx *me,
+                          uint32_t opt_flags,
+                          int32_t key_select,
+                          int32_t cose_alg_id,
+                          const struct q_useful_buf *out_buf)
 {
     psa_key_handle_t key_handle = 0;
     struct t_cose_key attest_key;
@@ -157,8 +157,8 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
  * Public function. See attest_token.h
  */
 enum attest_token_err_t
-attest_token_finish(struct attest_token_ctx *me,
-                    struct q_useful_buf_c *completed_token)
+attest_token_encode_finish(struct attest_token_encode_ctx *me,
+                           struct q_useful_buf_c *completed_token)
 {
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
     /* The completed and tagged encoded COSE_Mac0 */
@@ -206,7 +206,7 @@ Done:
  *   - Unprotected Headers
  *     - Key ID
  * - Open payload bstr
- *   - Write payload data lots of it
+ *   - Write payload data, maybe lots of it
  *   - Get bstr that is the encoded payload
  * - Compute signature
  *   - Create a separate encoder context for \c Sig_structure
@@ -224,13 +224,14 @@ Done:
  */
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
-enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
-                                           uint32_t opt_flags,
-                                           int32_t key_select,
-                                           int32_t cose_alg_id,
-                                           const struct q_useful_buf *out_buf)
+enum attest_token_err_t
+attest_token_encode_start(struct attest_token_encode_ctx *me,
+                          uint32_t opt_flags,
+                          int32_t key_select,
+                          int32_t cose_alg_id,
+                          const struct q_useful_buf *out_buf)
 {
     enum t_cose_err_t cose_ret;
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
@@ -287,11 +288,11 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
 }
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
 enum attest_token_err_t
-attest_token_finish(struct attest_token_ctx *me,
-                    struct q_useful_buf_c *completed_token)
+attest_token_encode_finish(struct attest_token_encode_ctx *me,
+                           struct q_useful_buf_c *completed_token)
 {
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
     /* The completed and signed encoded cose_sign1 */
@@ -329,31 +330,32 @@ Done:
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
-QCBOREncodeContext *attest_token_borrow_cbor_cntxt(struct attest_token_ctx *me)
+QCBOREncodeContext *
+attest_token_encode_borrow_cbor_cntxt(struct attest_token_encode_ctx *me)
 {
     return &(me->cbor_enc_ctx);
 }
 
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
-void attest_token_add_integer(struct attest_token_ctx *me,
-                              int32_t label,
-                              int64_t Value)
+void attest_token_encode_add_integer(struct attest_token_encode_ctx *me,
+                                     int32_t label,
+                                     int64_t Value)
 {
     QCBOREncode_AddInt64ToMapN(&(me->cbor_enc_ctx), label, Value);
 }
 
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
-void attest_token_add_bstr(struct attest_token_ctx *me,
-                           int32_t label,
-                           const struct q_useful_buf_c *bstr)
+void attest_token_encode_add_bstr(struct attest_token_encode_ctx *me,
+                                  int32_t label,
+                                  const struct q_useful_buf_c *bstr)
 {
     QCBOREncode_AddBytesToMapN(&(me->cbor_enc_ctx),
                                label,
@@ -362,22 +364,22 @@ void attest_token_add_bstr(struct attest_token_ctx *me,
 
 
 /*
- Public function. See attest_token.h
+ * Public function. See attest_token.h
  */
-void attest_token_add_tstr(struct attest_token_ctx *me,
-                           int32_t label,
-                           const struct q_useful_buf_c *tstr)
+void attest_token_encode_add_tstr(struct attest_token_encode_ctx *me,
+                                  int32_t label,
+                                  const struct q_useful_buf_c *tstr)
 {
     QCBOREncode_AddTextToMapN(&(me->cbor_enc_ctx), label, *tstr);
 }
 
 
 /*
- See attest_token.h
+ * Public function. See attest_token.h
  */
-void attest_token_add_encoded(struct attest_token_ctx *me,
-                              int32_t label,
-                              const struct q_useful_buf_c *encoded)
+void attest_token_encode_add_encoded(struct attest_token_encode_ctx *me,
+                                      int32_t label,
+                                      const struct q_useful_buf_c *encoded)
 {
     QCBOREncode_AddEncodedToMapN(&(me->cbor_enc_ctx), label, *encoded);
 }
