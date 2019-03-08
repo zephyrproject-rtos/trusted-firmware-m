@@ -819,11 +819,59 @@ static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
     case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32:
     case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_48:
     case PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64:
-    case (PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32 + 4): /* Test purpose */
         return PSA_ATTEST_ERR_SUCCESS;
     }
 
     return PSA_ATTEST_ERR_INVALID_INPUT;
+}
+
+/*!
+ * \brief Static function to get the option flags from challenge object
+ *
+ * Option flags are passed in if the challenge is 64 bytes long and the last
+ * 60 bytes are all 0. In this case the first 4 bytes of the challenge is
+ * the option flags for test.
+ *
+ * See flag definition in attest_token.h
+ *
+ * \param[in]  challenge     Structure to carry the challenge value:
+ *                           pointer + challeng's length.
+ * \param[out] option_flags  Flags to select different custom options,
+ *                           for example \ref TOKEN_OPT_OMIT_CLAIMS.
+ * \param[out] key_select    Selects which attestation key to sign with.
+ */
+static void attest_get_option_flags(struct q_useful_buf_c *challenge,
+                                    uint32_t *option_flags,
+                                    int32_t  *key_select)
+{
+    uint32_t found_option_flags = 1;
+    uint32_t option_flags_size = sizeof(uint32_t);
+    uint8_t *challenge_end;
+    uint8_t *challenge_data;
+
+    /* Get option flags if there is encoded in the challenge object */
+    if (challenge->len == PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) {
+        challenge_end  = ((uint8_t *)challenge->ptr) + challenge->len;
+        challenge_data = ((uint8_t *)challenge->ptr) + option_flags_size;
+
+        /* Compare bytes(4-63) with 0 */
+        while (challenge_data < challenge_end) {
+            if (*challenge_data++ != 0) {
+                found_option_flags = 0;
+                break;
+            }
+        }
+    }
+
+    if (found_option_flags) {
+        tfm_memcpy(option_flags, challenge->ptr, option_flags_size);
+
+        /* Lower three bits are the key select */
+        *key_select = *option_flags & 0x7;
+    } else {
+        *option_flags = 0;
+        *key_select = 0;
+    }
 }
 
 /*!
@@ -847,27 +895,9 @@ attest_create_token(struct q_useful_buf_c *challenge,
     enum attest_token_err_t token_err;
     struct attest_token_ctx attest_token_ctx;
     int32_t key_select;
-    int32_t alg_select;
-    uint32_t option_flags = 0;
+    uint32_t option_flags;
 
-    if (challenge->len == 36) {
-        /* FixMe: Special challenge with option flags appended. This might can
-         *        be removed when the public API can take option_flags.
-         */
-        option_flags = *(uint32_t *)(challenge->ptr + 32);
-        challenge->len = 32;
-    }
-
-    /* Lower three bits are the key select */
-    key_select = option_flags & 0x7;
-
-    /* Map the key select to an algorithm. Maybe someday we'll support something
-     * other than ES256
-     */
-    switch (key_select) {
-    default:
-        alg_select = COSE_ALGORITHM_ES256;
-    }
+    attest_get_option_flags(challenge, &option_flags, &key_select);
 
     /* Get started creating the token. This sets up the CBOR and COSE contexts
      * which causes the COSE headers to be constructed.

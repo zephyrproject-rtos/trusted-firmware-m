@@ -51,21 +51,25 @@ int token_main_alt(uint32_t option_flags,
                    struct q_useful_buf buffer,
                    struct q_useful_buf_c *completed_token)
 {
-    uint32_t completed_token_len;
+    int                          return_value;
+    uint32_t                     completed_token_len;
+    struct q_useful_buf_c        actual_nonce;
+    Q_USEFUL_BUF_MAKE_STACK_UB(  actual_nonce_storage, 64);
 
-    /* 36 = 32 + 4, the max expected nonce and 4 for the options */
-    Q_USEFUL_BUF_MAKE_STACK_UB(nonce2_storage, 36);
-    struct q_useful_buf_c nonce2;
-    int return_value;
-
-    nonce2 = q_useful_buf_copy(nonce2_storage, nonce);
-    /* Now for the hack... */
-    memcpy((uint8_t *)nonce2.ptr + nonce2.len, (uint8_t *) &option_flags, 4);
-    nonce2.len += 4;
+    if(nonce.len == 64 && q_useful_buf_is_value(nonce, 0)) {
+        /* Go into special option-packed nonce mode */
+        actual_nonce = q_useful_buf_copy(actual_nonce_storage, nonce);
+        /* Use memcpy as it always works and avoids type punning */
+        memcpy((uint8_t *)actual_nonce_storage.ptr,
+               &option_flags,
+               sizeof(uint32_t));
+    } else {
+        actual_nonce = nonce;
+    }
 
     completed_token_len = (uint32_t)buffer.len;
-    return_value = psa_initial_attest_get_token(nonce2.ptr,
-                                                (uint32_t)nonce2.len,
+    return_value = psa_initial_attest_get_token(actual_nonce.ptr,
+                                                (uint32_t)actual_nonce.len,
                                                 buffer.ptr,
                                                 &completed_token_len);
 
@@ -73,11 +77,6 @@ int token_main_alt(uint32_t option_flags,
 
     return return_value;
 }
-
-
-/** A fake hard coded nonce for testing. */
-static const uint8_t nonce_bytes[] = { NONCE_FOR_TEST };
-
 
 /**
  * This is the expected output for the minimal test. It is the result
@@ -96,11 +95,12 @@ static const uint8_t nonce_bytes[] = { NONCE_FOR_TEST };
  *               4: h'EF954B4BD9BDF670D0336082F5EF152AF8F35B6A6C00EFA6A9
  *                    A71F49517E18C6'
  *           },
- *           h'A13A000124FF5820010203040506070801020304050607080102030405
- *             0607080102030405060708',
- *           h'BD0990E025C671BF0FEB35D8908AF9E4F36706D04044BEB7325C2C
- *             A2753E4263BD0990E025C671BF0FEB35D8908AF9E4F36706D04044
- *             BEB7325C2CA2753E4263'
+ *           h'A13A000124FF5840000000C0000000000000000000000000000000000
+ *             000000000000000000000000000000000000000000000000000000000
+ *             000000000000000000000000000000',
+ *           h'CE52E46D564F1A6DBCEE106341CC80CDC0A3480999AFA8067747CA255
+ *             EEDFD8BCE52E46D564F1A6DBCEE106341CC80CDC0A3480999AFA80677
+ *             47CA255EEDFD8B'
  *       ]
  *     )
  *
@@ -112,20 +112,24 @@ static const uint8_t expected_minimal_token_bytes[] = {
     0xF6, 0x70, 0xD0, 0x33, 0x60, 0x82, 0xF5, 0xEF,
     0x15, 0x2A, 0xF8, 0xF3, 0x5B, 0x6A, 0x6C, 0x00,
     0xEF, 0xA6, 0xA9, 0xA7, 0x1F, 0x49, 0x51, 0x7E,
-    0x18, 0xC6, 0x58, 0x28, 0xA1, 0x3A, 0x00, 0x01,
-    0x24, 0xFF, 0x58, 0x20, 0x01, 0x02, 0x03, 0x04,
-    0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04,
-    0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04,
-    0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04,
-    0x05, 0x06, 0x07, 0x08, 0x58, 0x40, 0xBD, 0x09,
-    0x90, 0xE0, 0x25, 0xC6, 0x71, 0xBF, 0x0F, 0xEB,
-    0x35, 0xD8, 0x90, 0x8A, 0xF9, 0xE4, 0xF3, 0x67,
-    0x06, 0xD0, 0x40, 0x44, 0xBE, 0xB7, 0x32, 0x5C,
-    0x2C, 0xA2, 0x75, 0x3E, 0x42, 0x63, 0xBD, 0x09,
-    0x90, 0xE0, 0x25, 0xC6, 0x71, 0xBF, 0x0F, 0xEB,
-    0x35, 0xD8, 0x90, 0x8A, 0xF9, 0xE4, 0xF3, 0x67,
-    0x06, 0xD0, 0x40, 0x44, 0xBE, 0xB7, 0x32, 0x5C,
-    0x2C, 0xA2, 0x75, 0x3E, 0x42, 0x63
+    0x18, 0xC6, 0x58, 0x48, 0xA1, 0x3A, 0x00, 0x01,
+    0x24, 0xFF, 0x58, 0x40, 0x00, 0x00, 0x00, 0xC0,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x58, 0x40, 0xCE, 0x52,
+    0xE4, 0x6D, 0x56, 0x4F, 0x1A, 0x6D, 0xBC, 0xEE,
+    0x10, 0x63, 0x41, 0xCC, 0x80, 0xCD, 0xC0, 0xA3,
+    0x48, 0x09, 0x99, 0xAF, 0xA8, 0x06, 0x77, 0x47,
+    0xCA, 0x25, 0x5E, 0xED, 0xFD, 0x8B, 0xCE, 0x52,
+    0xE4, 0x6D, 0x56, 0x4F, 0x1A, 0x6D, 0xBC, 0xEE,
+    0x10, 0x63, 0x41, 0xCC, 0x80, 0xCD, 0xC0, 0xA3,
+    0x48, 0x09, 0x99, 0xAF, 0xA8, 0x06, 0x77, 0x47,
+    0xCA, 0x25, 0x5E, 0xED, 0xFD, 0x8B
 };
 
 
@@ -136,14 +140,14 @@ int_fast16_t minimal_test()
 {
     int_fast16_t return_value = 0;
     Q_USEFUL_BUF_MAKE_STACK_UB(token_storage,
-                             sizeof(expected_minimal_token_bytes));
+                               sizeof(expected_minimal_token_bytes));
     struct q_useful_buf_c completed_token;
     struct q_useful_buf_c expected_token;
 
     return_value =
         token_main_alt(TOKEN_OPT_SHORT_CIRCUIT_SIGN |
                            TOKEN_OPT_OMIT_CLAIMS,
-                       Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes),
+                       TOKEN_TEST_VALUE_NONCE,
                        token_storage,
                        &completed_token);
     if(return_value) {
@@ -174,7 +178,7 @@ int_fast16_t minimal_get_size_test()
 
     return_value = 0;
 
-    nonce = Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes);
+    nonce = TOKEN_TEST_VALUE_NONCE;
     expected_token =
         Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
 
@@ -209,7 +213,7 @@ int_fast16_t buffer_too_small_test()
     struct q_useful_buf_c nonce;
 
 
-    nonce = Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes);
+    nonce = TOKEN_TEST_VALUE_NONCE;
 
     return_value = token_main_alt(TOKEN_OPT_SHORT_CIRCUIT_SIGN,
                                   nonce,
@@ -247,8 +251,9 @@ static int_fast16_t check_simple_claims(
                     const struct attest_token_iat_simple_t *simple_claims)
 {
     int_fast16_t return_value;
-    /* Use a temp variable to make lines less than 80 columns below. */
+    /* Use temp variables to make lines less than 80 columns below. */
     struct q_useful_buf_c tmp;
+    struct q_useful_buf_c tail;
     /* Use a temporary string variable to make the static analyzer
      * happy. It doesn't like comparing a string literal to NULL
      */
@@ -269,11 +274,31 @@ static int_fast16_t check_simple_claims(
         /* Claim is present */
         /* Don't have to check if its presence is required */
         tmp = TOKEN_TEST_VALUE_NONCE;
-        if(!q_useful_buf_c_is_null(tmp) &&
-           q_useful_buf_compare(simple_claims->nonce, tmp)) {
-            /* Check of its value was requested and failed */
-            return_value = -51;
-            goto Done;
+        if(!q_useful_buf_c_is_null(tmp)) {
+            /* request to check for the nonce */
+            if(q_useful_buf_compare(simple_claims->nonce, tmp)) {
+                /* Didn't match in the standard way. See if it is a
+                 * special option-packed nonce by checking for length
+                 * 64 and all bytes except the first four are 0.
+                 * nonce_tail is everything after the first 4 bytes.
+                 */
+                tail = q_useful_buf_tail(simple_claims->nonce, 4);
+                if(simple_claims->nonce.len == 64 &&
+                   q_useful_buf_is_value(tail, 0) == SIZE_MAX){
+                    /* It is an option-packed nonce.
+                     * Don't compare the first four bytes.
+                     */
+                    if(q_useful_buf_compare(q_useful_buf_tail(tmp, 4), tail)) {
+                        /* The option-packed nonce didn't match */
+                        return_value = -51;
+                        goto Done;
+                    }
+                } else {
+                    /* Just a normal nonce that didn't match */
+                    return_value = -51;
+                    goto Done;
+                }
+            }
         }
     }
 
@@ -410,7 +435,8 @@ static int_fast16_t check_simple_claims(
         /* Don't have to check if its presence is required */
         tmp_string = TOKEN_TEST_VALUE_PROFILE_DEFINITION;
         if(tmp_string != NULL) {
-            tmp = Q_USEFUL_BUF_FROM_SZ_LITERAL(TOKEN_TEST_VALUE_PROFILE_DEFINITION);
+            tmp = Q_USEFUL_BUF_FROM_SZ_LITERAL(
+                                        TOKEN_TEST_VALUE_PROFILE_DEFINITION);
             if(q_useful_buf_compare(simple_claims->profile_definition, tmp)) {
                 /* Check of its value was requested and failed */
                 return_value = -65;
@@ -826,7 +852,7 @@ static int_fast16_t decode_test_internal(enum decode_test_mode_t mode)
     }
 
     /* -- Make a token with all the claims -- */
-    tmp = Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(nonce_bytes);
+    tmp = TOKEN_TEST_VALUE_NONCE;
     return_value = token_main_alt(token_encode_options,
                                   tmp,
                                   token_storage,

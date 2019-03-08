@@ -136,6 +136,12 @@ static inline int q_useful_buf_compare(const struct q_useful_buf_c buf1,
     return UsefulBuf_Compare(buf1, buf2);
 }
 
+static inline size_t q_useful_buf_is_value(const struct q_useful_buf_c buf,
+                                           uint8_t uValue)
+{
+    return UsefulBuf_IsValue(buf, uValue);
+}
+
 static inline size_t
 useful_buf_find_bytes(const struct q_useful_buf_c bytes_to_search,
                       const struct q_useful_buf_c bytes_to_find)
