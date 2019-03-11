@@ -14,7 +14,7 @@
 
 static uint8_t token_buffer[TEST_TOKEN_SIZE];
 static const uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE] = {
-                                      NONCE_FOR_TEST};
+                                      TOKEN_TEST_NONCE_BYTES};
 
 /* Define test suite for attestation service tests */
 /* List of tests */
