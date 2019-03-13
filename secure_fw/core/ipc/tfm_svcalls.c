@@ -107,7 +107,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
     return PSA_NULL_HANDLE;
 }
 
-psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller)
+psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
 {
     psa_handle_t handle;
     psa_invec *inptr, invecs[PSA_MAX_IOVEC];
@@ -124,14 +124,25 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller)
         in_num = (size_t)args[2];
         outptr = (psa_outvec *)args[3];
         /*
-         * FixMe: 5th parameter is pushed at stack top before SVC; plus
-         * exception stacked contents, 5th parameter is now at 8th position
-         * in SVC handler. However, if thread mode applies FloatPoint, then
-         * FloatPoint context is pushed into stack and then 5th parameter
-         * will not be args[8].
-         * Will refine it later.
+         * 5th parameter is pushed at stack top before SVC, then PE hardware
+         * stacks the execution context. The size of the context depends on
+         * various settings:
+         * - if FP is not used, 5th parameter is at 8th position counting
+         *   from SP;
+         * - if FP is used and FPCCR_S.TS is 0, 5th parameter is at 26th
+         *   position counting from SP;
+         * - if FP is used and FPCCR_S.TS is 1, 5th parameter is at 42th
+         *   position counting from SP.
          */
-         out_num = (size_t)args[8];
+         if (lr & EXC_RETURN_FPU_FRAME_BASIC) {
+            out_num = (size_t)args[8];
+#if defined (__FPU_USED) && (__FPU_USED == 1U)
+         } else if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
+            out_num = (size_t)args[42];
+#endif
+         } else {
+            out_num = (size_t)args[26];
+         }
     } else {
         /*
          * FixMe: From non-secure caller, vec and len are composed into a new
@@ -926,7 +937,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     /* FixMe: re-enable interrupt */
 }
 
-int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx)
+int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 {
     switch (svc_num) {
     case TFM_SVC_SCHEDULE:
@@ -939,7 +950,7 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx)
     case TFM_SVC_PSA_CONNECT:
         return tfm_svcall_psa_connect(ctx, 0);
     case TFM_SVC_PSA_CALL:
-        return tfm_svcall_psa_call(ctx, 0);
+        return tfm_svcall_psa_call(ctx, 0, lr);
     case TFM_SVC_PSA_CLOSE:
         tfm_svcall_psa_close(ctx, 0);
         break;
