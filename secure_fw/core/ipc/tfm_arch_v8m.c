@@ -93,6 +93,7 @@ void tfm_initialize_context(struct tfm_state_context *ctx,
  */
 __attribute__((naked)) void PendSV_Handler(void)
 {
+#if defined(__ARM_ARCH_8M_MAIN__)
     __ASM(
         "mrs     r0, psp                    \n"
         "mrs     r1, psplim                 \n"
@@ -106,6 +107,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "msr     psplim, r1                 \n"
         "bx      lr                         \n"
     );
+#endif
 }
 
 /* Reserved for future usage */
