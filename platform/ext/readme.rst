@@ -58,12 +58,16 @@ The BL2 bootloader requires the following definitions:
 - ``FLASH_AREA_BL2_OFFSET`` - Defines the offset from the flash base address
   where the BL2 - MCUBOOT area starts.
 - ``FLASH_AREA_BL2_SIZE`` - Defines the size of the BL2 area.
-- ``FLASH_AREA_IMAGE_0_OFFSET`` - Defines the offset from the flash base address
-  where the image 0 area starts, which hosts the active firmware image.
-- ``FLASH_AREA_IMAGE_0_SIZE`` - Defines the size of the image 0 area.
-- ``FLASH_AREA_IMAGE_1_OFFSET`` - Defines the offset from the flash base address
-  where the image 1 area starts, which is a placeholder for new firmware images.
-- ``FLASH_AREA_IMAGE_1_SIZE`` - Defines the size of the image 1 area.
+- ``FLASH_AREA_IMAGE_PRIMARY_OFFSET`` - Defines the offset from the flash base
+  address where the primary image area starts, which hosts the active firmware
+  image.
+- ``FLASH_AREA_IMAGE_PRIMARY_SIZE`` - Defines the size of the primary image
+  area.
+- ``FLASH_AREA_IMAGE_SECONDARY_OFFSET`` - Defines the offset from the flash base
+  address where the secondary image area starts, which is a placeholder for new
+  firmware images.
+- ``FLASH_AREA_IMAGE_SECONDARY_SIZE`` - Defines the size of the secondary image
+  area.
 - ``FLASH_AREA_IMAGE_SCRATCH_OFFSET`` - Defines the offset from the flash base
   address where the scratch area starts, which is used during image swapping.
 - ``FLASH_AREA_IMAGE_SCRATCH_SIZE`` - Defines the size of the scratch area. The

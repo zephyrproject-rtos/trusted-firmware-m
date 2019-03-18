@@ -50,9 +50,9 @@ extern "C" {
  */
 #include <inttypes.h>
 
-#define FLASH_AREA_IMAGE_0       1
-#define FLASH_AREA_IMAGE_1       2
-#define FLASH_AREA_IMAGE_SCRATCH 3
+#define FLASH_AREA_IMAGE_PRIMARY      1
+#define FLASH_AREA_IMAGE_SECONDARY    2
+#define FLASH_AREA_IMAGE_SCRATCH      3
 
 /**
  * @brief Structure describing an area on a flash device.

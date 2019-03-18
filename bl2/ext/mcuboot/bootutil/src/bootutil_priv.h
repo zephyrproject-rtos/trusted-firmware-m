@@ -119,17 +119,20 @@ struct boot_swap_state {
 #endif
 
 /** Number of image slots in flash; currently limited to two. */
-#define BOOT_NUM_SLOTS             2
+#define BOOT_NUM_SLOTS                  2
 
 /** Maximum number of image sectors supported by the bootloader. */
-#define BOOT_STATUS_STATE_COUNT    3
+#define BOOT_STATUS_STATE_COUNT         3
 
-#define BOOT_STATUS_SOURCE_NONE    0
-#define BOOT_STATUS_SOURCE_SCRATCH 1
-#define BOOT_STATUS_SOURCE_SLOT0   2
+#define BOOT_PRIMARY_SLOT               0
+#define BOOT_SECONDARY_SLOT             1
 
-#define BOOT_FLAG_IMAGE_OK         0
-#define BOOT_FLAG_COPY_DONE        1
+#define BOOT_STATUS_SOURCE_NONE         0
+#define BOOT_STATUS_SOURCE_SCRATCH      1
+#define BOOT_STATUS_SOURCE_PRIMARY_SLOT 2
+
+#define BOOT_FLAG_IMAGE_OK              0
+#define BOOT_FLAG_COPY_DONE             1
 
 extern const uint32_t BOOT_MAGIC_SZ;
 
@@ -252,11 +255,11 @@ boot_initialize_area(struct boot_loader_state *state, int flash_area)
     int rc;
 
     switch (flash_area) {
-    case FLASH_AREA_IMAGE_0:
-        slot = 0;
+    case FLASH_AREA_IMAGE_PRIMARY:
+        slot = BOOT_PRIMARY_SLOT;
         break;
-    case FLASH_AREA_IMAGE_1:
-        slot = 1;
+    case FLASH_AREA_IMAGE_SECONDARY:
+        slot = BOOT_SECONDARY_SLOT;
         break;
     default:
         return BOOT_EFLASH;
@@ -297,15 +300,15 @@ boot_initialize_area(struct boot_loader_state *state, int flash_area)
     int rc;
 
     switch (flash_area) {
-    case FLASH_AREA_IMAGE_0:
+    case FLASH_AREA_IMAGE_PRIMARY:
         num_sectors = BOOT_MAX_IMG_SECTORS;
-        out_sectors = state->imgs[0].sectors;
-        out_num_sectors = &state->imgs[0].num_sectors;
+        out_sectors = state->imgs[BOOT_PRIMARY_SLOT].sectors;
+        out_num_sectors = &state->imgs[BOOT_PRIMARY_SLOT].num_sectors;
         break;
-    case FLASH_AREA_IMAGE_1:
+    case FLASH_AREA_IMAGE_SECONDARY:
         num_sectors = BOOT_MAX_IMG_SECTORS;
-        out_sectors = state->imgs[1].sectors;
-        out_num_sectors = &state->imgs[1].num_sectors;
+        out_sectors = state->imgs[BOOT_SECONDARY_SLOT].sectors;
+        out_num_sectors = &state->imgs[BOOT_SECONDARY_SLOT].num_sectors;
         break;
     default:
         return -1;

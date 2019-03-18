@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2017, Linaro Ltd
- *  Copyright (c) 2018, Arm Limited.
+ *  Copyright (c) 2018-2019, Arm Limited.
  *
  *  SPDX-License-Identifier: Apache-2.0
  */
@@ -21,20 +21,20 @@
 #error "FLASH_AREA_IMAGE_SECTOR_SIZE must be defined by the target"
 #endif
 
-#ifndef FLASH_AREA_IMAGE_0_OFFSET
-#error "FLASH_AREA_IMAGE_0_OFFSET must be defined by the target"
+#ifndef FLASH_AREA_IMAGE_PRIMARY_OFFSET
+#error "FLASH_AREA_IMAGE_PRIMARY_OFFSET must be defined by the target"
 #endif
 
-#ifndef FLASH_AREA_IMAGE_0_SIZE
-#error "FLASH_AREA_IMAGE_0_SIZE must be defined by the target"
+#ifndef FLASH_AREA_IMAGE_PRIMARY_SIZE
+#error "FLASH_AREA_IMAGE_PRIMARY_SIZE must be defined by the target"
 #endif
 
-#ifndef FLASH_AREA_IMAGE_1_OFFSET
-#error "FLASH_AREA_IMAGE_1_OFFSET must be defined by the target"
+#ifndef FLASH_AREA_IMAGE_SECONDARY_OFFSET
+#error "FLASH_AREA_IMAGE_SECONDARY_OFFSET must be defined by the target"
 #endif
 
-#ifndef FLASH_AREA_IMAGE_1_SIZE
-#error "FLASH_AREA_IMAGE_1_SIZE must be defined by the target"
+#ifndef FLASH_AREA_IMAGE_SECONDARY_SIZE
+#error "FLASH_AREA_IMAGE_SECONDARY_SIZE must be defined by the target"
 #endif
 
 #ifndef FLASH_AREA_IMAGE_SCRATCH_OFFSET

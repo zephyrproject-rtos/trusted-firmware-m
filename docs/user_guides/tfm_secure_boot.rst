@@ -46,12 +46,13 @@ successful build signed TF-M payload can be found in:
 Integration with TF-M
 *********************
 MCUBoot assumes a predefined memory layout which is described below (applicable
-for AN521). It is mandatory to define slot 0 and slot 1 partitions, but their
-size can be changed::
+for AN521). It is mandatory to define the primary slot and the secondary slot
+partitions, but their size can be changed::
 
     - 0x0000_0000 - 0x0007_FFFF:    BL2 bootloader - MCUBoot
-    - 0x0008_0000 - 0x000F_FFFF:    Slot 0 : Single binary blob: Secure + Non-Secure
-                                    image; Primary memory partition
+    - 0x0008_0000 - 0x000F_FFFF:    Primary slot : Single binary blob:
+                                    Secure + Non-Secure image;
+                                    Primary memory partition
       - 0x0008_0000 - 0x0008_03FF:  Common image header
       - 0x0008_0400 - 0x0008_xxxx:  Secure image
       - 0x0008_xxxx - 0x0010_03FF:  Padding (with 0xFF)
@@ -59,9 +60,9 @@ size can be changed::
       - 0x0010_xxxx - 0x0010_xxxx:  Hash value(SHA256) and RSA signature
                                     of combined image
 
-    - 0x0018_0000 - 0x0027_FFFF:    Slot 1 : Secure + Non-Secure image; Secondary
-                                    memory partition, structured identically to slot
-                                    0
+    - 0x0018_0000 - 0x0027_FFFF:    Secondary slot : Secure + Non-Secure image;
+                                    Secondary memory partition, structured
+                                    identically to the primary slot
     - 0x0028_0000 - 0x0037_FFFF:    Scratch area, only used during image swapping
 
 **************************
@@ -72,39 +73,41 @@ firmware switch part of the firmware update process. Downloading the new version
 of the firmware is out-of-scope for MCUBoot. MCUBoot supports three different
 ways to switch to the new firmware and it is assumed that firmware images are
 executed-in-place (XIP). The default behaviour is the overwrite-based image
-upgrade. In this case the active firmware is always executed from slot 0 and
-slot 1 is a staging area for new images. Before executing the new firmware
-image, the content of slot 0 must be overwritten with the content of slot 1
-(the new firmware image). The second option is the image swapping strategy when
-the content of the two memory slots must be physically swapped. This needs the
-scratch area to be defined in the memory layout. The third option is the
-non-swapping version, which eliminates the complexity of image swapping and its
-administration. Active image can be executed from either memory slot, but new
-firmware must be linked to the address space of the proper (currently inactive)
-memory slot.
+upgrade. In this case the active firmware is always executed from the primary
+slot and the secondary slot is a staging area for new images. Before executing
+the new firmware image, the content of the primary slot must be overwritten with
+the content of the secondary slot (the new firmware image). The second option is
+the image swapping strategy when the content of the two memory slots must be
+physically swapped. This needs the scratch area to be defined in the memory
+layout. The third option is the non-swapping version, which eliminates the
+complexity of image swapping and its administration. Active image can be
+executed from either memory slot, but new firmware must be linked to the address
+space of the proper (currently inactive) memory slot.
 
 Overwrite operation
 ===================
-Active image is stored in slot 0, and this image is started always by the
-bootloader. Therefore images must be linked to slot 0. If the bootloader finds
-a valid image in slot 1, which is marked for upgrade, then the content of slot 0
-will be simply overwritten with the content of slot 1, before starting the new
-image from slot 0. After the content of slot 0 has been successfully
-overwritten, the header and trailer of the new image in slot 1 is erased to
-prevent the triggering of another unncessary image uprade after a restart. The
-overwrite operation is fail-safe and resistant to power-cut failures. For more
-details please refer to the MCUBoot
+Active image is stored in the primary slot, and this image is started always by
+the bootloader. Therefore images must be linked to the primary slot. If the
+bootloader finds a valid image in the secondary slot, which is marked for
+upgrade, then the content of the primary slot will be simply overwritten with
+the content of the secondary slot, before starting the new image from the
+primary slot. After the content of the primary slot has been successfully
+overwritten, the header and trailer of the new image in the secondary slot is
+erased to prevent the triggering of another unncessary image uprade after a
+restart. The overwrite operation is fail-safe and resistant to power-cut
+failures. For more details please refer to the MCUBoot
 `documentation <https://www.mcuboot.com/mcuboot/design.html>`__.
 
 Swapping operation
 ==================
 This operation can be set with the ``MCUBOOT_UPGRADE_STRATEGY`` compile time
 switch (see `Build time configuration`_). With swapping image upgrade strategy
-the active image is also stored in slot 0 and it will always be started by the
-bootloader. If the bootloader finds a valid image in slot 1, which is marked for
-upgrade, then contents of slot 0 and slot 1 will be swapped, before starting the
-new image from slot 0. Scratch area is used as a temporary storage place during
-image swapping. Update mark from slot 1 is removed when the swapping is
+the active image is also stored in the primary slot and it will always be
+started by the bootloader. If the bootloader finds a valid image in the
+secondary slot, which is marked for upgrade, then contents of the primary slot
+and the secondary slot will be swapped, before starting the new image from the
+primary slot. Scratch area is used as a temporary storage place during image
+swapping. Update mark from the secondary slot is removed when the swapping is
 successful. The boot loader can revert the swapping as a fall-back mechanism to
 recover the previous working firmware version after a faulty update. The swap
 operation is fail-safe and resistant to power-cut failures. For more details
@@ -126,22 +129,22 @@ This operation can be set with the ``MCUBOOT_UPGRADE_STRATEGY`` compile time
 switch (see `Build time configuration`_). When enabling non-swapping operation
 then the active image flag is moved between slots during firmware upgrade. If
 firmware is executed-in-place (XIP), then two firmware images must be generated.
-One of them is linked to be executed from slot 0 memory region and the other
-from slot 1. The firmware upgrade client, which downloads the new image, must be
-aware, which slot hosts the active firmware and which acts as a staging area and
-it is responsible for downloading the proper firmware image. At boot time
-MCUBoot inspects the version number in the image header and passes execution to
-the newer firmware version. New image must be marked for upgrade which is
-automatically done by Python scripts at compile time. Image verification is done
-the same way in all operational modes. If new image fails during authentication
-then MCUBoot erases the memory slot and starts the other image, after successful
-authentication.
+One of them is linked to be executed from the primary slot memory region and the
+other from the secondary slot. The firmware upgrade client, which downloads the
+new image, must be aware, which slot hosts the active firmware and which acts as
+a staging area and it is responsible for downloading the proper firmware image.
+At boot time MCUBoot inspects the version number in the image header and passes
+execution to the newer firmware version. New image must be marked for upgrade
+which is automatically done by Python scripts at compile time. Image
+verification is done the same way in all operational modes. If new image fails
+during authentication then MCUBoot erases the memory slot and starts the other
+image, after successful authentication.
 
 At build time automatically two binaries are generated::
 
-    <build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin : Image linked for slot 0 memory partition
+    <build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin : Image linked for the primary slot memory partition
 
-    <build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for slot 1 memory partition
+    <build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for the secondary slot memory partition
 
 RAM Loading firmware upgrade
 ============================
@@ -297,8 +300,8 @@ Overwriting firmware upgrade
 ============================
 Run TF-M build twice with two different build configuration: default and
 regression. Save the artifacts between builds, because second run can overwrite
-original binaries. Download default build to slot 0 and regression build to
-slot 1.
+original binaries. Download default build to the primary slot and regression
+build to the secondary slot.
 
 Executing firmware upgrade on FVP_MPS2_AEMv8M
 ---------------------------------------------
@@ -341,9 +344,9 @@ The following message will be shown in case of successful firmware upgrade:
 
     [INF] Starting bootloader
     [INF] Swap type: test
-    [INF] Image upgrade slot1 -> slot0
-    [INF] Erasing slot0
-    [INF] Copying slot 1 to slot 0: 0x100000 bytes
+    [INF] Image upgrade secondary slot -> primary slot
+    [INF] Erasing the primary slot
+    [INF] Copying the secondary slot to the primary slot: 0x100000 bytes
     [INF] Bootloader chainload address offset: 0x80000
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
@@ -367,7 +370,7 @@ The following message will be shown in case of successful firmware upgrade,
     [INF] Starting bootloader
     [INF] Image 0: magic= good, copy_done=0x3, image_ok=0x3
     [INF] Scratch: magic=  bad, copy_done=0x0, image_ok=0x2
-    [INF] Boot source: slot 0
+    [INF] Boot source: primary slot
     [INF] Swap type: test
     [INF] Bootloader chainload address offset: 0x80000
     [INF] Jumping to the first image slot
@@ -443,7 +446,7 @@ notice that image with higher version number (``version=1.2.3.5``) is executed:
     [INF] Starting bootloader
     [INF] Image 0: version=1.2.3.4, magic= good, image_ok=0x3
     [INF] Image 1: version=1.2.3.5, magic= good, image_ok=0x3
-    [INF] Booting image from slot 1
+    [INF] Booting image from the secondary slot
     [INF] Bootloader chainload address offset: 0xa0000
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
@@ -503,7 +506,7 @@ RAM loading is enabled, notice that image with higher version number
     [INF] Starting bootloader
     [INF] Image 0: version=0.0.0.1, magic= good, image_ok=0x3
     [INF] Image 1: version=0.0.0.2, magic= good, image_ok=0x3
-    [INF] Image has been copied from slot 1 in flash to SRAM address 0x10020000
+    [INF] Image has been copied from the secondary slot in flash to SRAM address 0x10020000
     [INF] Booting image from SRAM at address 0x10020000
     [INF] Bootloader chainload address offset: 0x20000
     [INF] Jumping to the first image slot

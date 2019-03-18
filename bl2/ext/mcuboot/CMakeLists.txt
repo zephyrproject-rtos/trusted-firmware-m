@@ -134,7 +134,7 @@ message(STATUS "MCUBOOT_SIGNATURE_TYPE is set to: '${MCUBOOT_SIGNATURE_TYPE}'.")
 
 #Set macro definitions for the project.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-							MCUBOOT_VALIDATE_SLOT0
+							MCUBOOT_VALIDATE_PRIMARY_SLOT
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 							MBEDTLS_CONFIG_FILE="config-boot.h"
 							MCUBOOT_TARGET_CONFIG="flash_layout.h")

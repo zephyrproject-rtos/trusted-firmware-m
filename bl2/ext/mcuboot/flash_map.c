@@ -58,25 +58,25 @@ struct flash_map_entry {
 
 /*
  * The flash area describes essentially the partition table of the
- * flash.  In this case, it starts with FLASH_AREA_IMAGE_0.
+ * flash.  In this case, it starts with FLASH_AREA_IMAGE_PRIMARY.
  */
 static struct flash_map_entry part_map[] = {
     {
         .magic = FLASH_MAP_ENTRY_MAGIC,
         .area = {
-            .fa_id = FLASH_AREA_IMAGE_0,
+            .fa_id = FLASH_AREA_IMAGE_PRIMARY,
             .fa_device_id = FLASH_DEVICE_ID,
-            .fa_off = FLASH_AREA_IMAGE_0_OFFSET,
-            .fa_size = FLASH_AREA_IMAGE_0_SIZE,
+            .fa_off = FLASH_AREA_IMAGE_PRIMARY_OFFSET,
+            .fa_size = FLASH_AREA_IMAGE_PRIMARY_SIZE,
         },
     },
     {
         .magic = FLASH_MAP_ENTRY_MAGIC,
         .area = {
-            .fa_id = FLASH_AREA_IMAGE_1,
+            .fa_id = FLASH_AREA_IMAGE_SECONDARY,
             .fa_device_id = FLASH_DEVICE_ID,
-            .fa_off = FLASH_AREA_IMAGE_1_OFFSET,
-            .fa_size = FLASH_AREA_IMAGE_1_SIZE,
+            .fa_off = FLASH_AREA_IMAGE_SECONDARY_OFFSET,
+            .fa_size = FLASH_AREA_IMAGE_SECONDARY_SIZE,
         },
     },
     {
@@ -246,12 +246,12 @@ uint8_t flash_area_align(const struct flash_area *area)
 }
 
 /*
- * This depends on the mappings defined in sysflash.h, and assumes
- * that slot 0, slot 1, and the scratch area area contiguous.
+ * This depends on the mappings defined in sysflash.h, and assumes that the
+ * primary slot, the secondary slot, and the scratch area are contiguous.
  */
 int flash_area_id_from_image_slot(int slot)
 {
-    return slot + FLASH_AREA_IMAGE_0;
+    return slot + FLASH_AREA_IMAGE_PRIMARY;
 }
 
 static int validate_idx(int idx, uint32_t *off, uint32_t *len)
@@ -262,13 +262,13 @@ static int validate_idx(int idx, uint32_t *off, uint32_t *len)
      */
 
     switch (idx) {
-    case FLASH_AREA_IMAGE_0:
-        *off = FLASH_AREA_IMAGE_0_OFFSET;
-        *len = FLASH_AREA_IMAGE_0_SIZE;
+    case FLASH_AREA_IMAGE_PRIMARY:
+        *off = FLASH_AREA_IMAGE_PRIMARY_OFFSET;
+        *len = FLASH_AREA_IMAGE_PRIMARY_SIZE;
         break;
-    case FLASH_AREA_IMAGE_1:
-        *off = FLASH_AREA_IMAGE_1_OFFSET;
-        *len = FLASH_AREA_IMAGE_1_SIZE;
+    case FLASH_AREA_IMAGE_SECONDARY:
+        *off = FLASH_AREA_IMAGE_SECONDARY_OFFSET;
+        *len = FLASH_AREA_IMAGE_SECONDARY_SIZE;
         break;
     case FLASH_AREA_IMAGE_SCRATCH:
         *off = FLASH_AREA_IMAGE_SCRATCH_OFFSET;

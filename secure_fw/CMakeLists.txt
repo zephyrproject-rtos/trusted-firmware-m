@@ -117,9 +117,9 @@ endif()
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 
 # For the non-swapping BL2 configuration two executables need to be built.
-# One can be executed from flash partition slot_0 and other from slot_1.
-# Only the linking phase is different. This function captures common settings
-# and eliminates copy-paste.
+# One can be executed from the primary slot flash partition and other from the
+# the secondary slot. Only the linking phase is different. This function
+# captures common settings and eliminates copy-paste.
 function(set_up_secure_fw_build)
 	set( _OPTIONS_ARGS)                                #Option (on/off) arguments (e.g. IGNORE_CASE)
 	set( _ONE_VALUE_ARGS S_TARGET VENEER_NAME POSTFIX) #Single option arguments (e.g. PATH "./foo/bar")

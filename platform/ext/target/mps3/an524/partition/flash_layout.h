@@ -27,10 +27,10 @@
  * Flash layout on MPS3 AN524 with BL2:
  *
  * 0x0000_0000 BL2 - MCUBoot            (256 KB)
- * Flash_area_image_0
+ * Flash_area_image_primary:
  *     0x0004_0000 Secure image         (256 KB)
  *     0x0008_0000 Non-secure image     (256 KB)
- * Flash_area_image_1:
+ * Flash_area_image_secondary:
  *     0x000C_0000 Secure image         (256 KB)
  *     0x0010_0000 Non-secure image     (256 KB)
  * 0x0014_0000 Scratch area             (512 KB)
@@ -60,24 +60,24 @@
 /* Flash base info for BL2 bootloader */
 #define FLASH_BASE_ADDRESS              (0x10000000)
 
-/* offset to QSPI base */
-#define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0x40000)     /* 256 KB */
+/* Offset to QSPI base */
+#define FLASH_AREA_BL2_OFFSET             (0x0)
+#define FLASH_AREA_BL2_SIZE               (0x40000)     /* 256 KB */
 
-#define FLASH_AREA_IMAGE_0_OFFSET       (FLASH_AREA_BL2_OFFSET + \
-                                         FLASH_AREA_BL2_SIZE)
-#define FLASH_AREA_IMAGE_0_SIZE         (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+#define FLASH_AREA_IMAGE_PRIMARY_OFFSET   (FLASH_AREA_BL2_OFFSET + \
+                                           FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_IMAGE_PRIMARY_SIZE     (FLASH_S_PARTITION_SIZE + \
+                                           FLASH_NS_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_1_OFFSET       (FLASH_AREA_IMAGE_0_OFFSET + \
-                                         FLASH_AREA_IMAGE_0_SIZE)
-#define FLASH_AREA_IMAGE_1_SIZE         (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+#define FLASH_AREA_IMAGE_SECONDARY_OFFSET (FLASH_AREA_IMAGE_PRIMARY_OFFSET + \
+                                           FLASH_AREA_IMAGE_PRIMARY_SIZE)
+#define FLASH_AREA_IMAGE_SECONDARY_SIZE   (FLASH_S_PARTITION_SIZE + \
+                                           FLASH_NS_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET (FLASH_AREA_IMAGE_1_OFFSET + \
-                                         FLASH_AREA_IMAGE_1_SIZE)
-#define FLASH_AREA_IMAGE_SCRATCH_SIZE   (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+#define FLASH_AREA_IMAGE_SCRATCH_OFFSET   (FLASH_AREA_IMAGE_SECONDARY_OFFSET + \
+                                           FLASH_AREA_IMAGE_SECONDARY_SIZE)
+#define FLASH_AREA_IMAGE_SCRATCH_SIZE     (FLASH_S_PARTITION_SIZE + \
+                                           FLASH_NS_PARTITION_SIZE)
 
 /* The maximum number of status entries supported by the bootloader. */
 /* The maximum number of status entries must be at least 2. For more

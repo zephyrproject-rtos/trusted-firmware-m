@@ -20,10 +20,10 @@
 /* Flash layout on Musca with BL2:
  *
  * 0x0020_0000 BL2 - MCUBoot(128 KB)
- * 0x0022_0000 Flash_area_image_0(1 MB)
+ * 0x0022_0000 Flash_area_image_primary(1 MB)
  *    0x0022_0000 Secure     image primary
  *    0x002A_0000 Non-secure image primary
- * 0x0032_0000 Flash_area_image_1(1 MB)
+ * 0x0032_0000 Flash_area_image_secondary(1 MB)
  *    0x0032_0000 Secure     image secondary
  *    0x003A_0000 Non-secure image secondary
  * 0x0042_0000 Secure Storage Area(0.02 MB)
@@ -60,28 +60,29 @@
 #define FLASH_BASE_ADDRESS              (0x10200000)
 
 /* Offset and size definitions of the flash partitions that are handled by the
- * bootloader. The image swapping is done between IMAGE_0 and IMAGE_1, SCRATCH
- * is used as a temporary storage during image swapping.
+ * bootloader. The image swapping is done between IMAGE_PRIMARY and
+ * IMAGE_SECONDARY, SCRATCH is used as a temporary storage during image
+ * swapping.
  */
-#define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0x20000) /* 128 KB */
+#define FLASH_AREA_BL2_OFFSET             (0x0)
+#define FLASH_AREA_BL2_SIZE               (0x20000) /* 128KB */
 
-#define FLASH_AREA_IMAGE_0_OFFSET       (FLASH_AREA_BL2_OFFSET + \
-                                         FLASH_AREA_BL2_SIZE)
-#define FLASH_AREA_IMAGE_0_SIZE         (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+#define FLASH_AREA_IMAGE_PRIMARY_OFFSET   (FLASH_AREA_BL2_OFFSET + \
+                                           FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_IMAGE_PRIMARY_SIZE     (FLASH_S_PARTITION_SIZE + \
+                                           FLASH_NS_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_1_OFFSET       (FLASH_AREA_IMAGE_0_OFFSET + \
-                                         FLASH_AREA_IMAGE_0_SIZE)
-#define FLASH_AREA_IMAGE_1_SIZE         (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+#define FLASH_AREA_IMAGE_SECONDARY_OFFSET (FLASH_AREA_IMAGE_PRIMARY_OFFSET + \
+                                           FLASH_AREA_IMAGE_PRIMARY_SIZE)
+#define FLASH_AREA_IMAGE_SECONDARY_SIZE   (FLASH_S_PARTITION_SIZE + \
+                                           FLASH_NS_PARTITION_SIZE)
 
 /* Not used, only the RAM loading firmware upgrade operation
  * is supported on Musca-A.
  */
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET (FLASH_AREA_IMAGE_1_OFFSET + \
-                                         FLASH_AREA_IMAGE_1_SIZE)
-#define FLASH_AREA_IMAGE_SCRATCH_SIZE   (0)
+#define FLASH_AREA_IMAGE_SCRATCH_OFFSET   (FLASH_AREA_IMAGE_SECONDARY_OFFSET + \
+                                           FLASH_AREA_IMAGE_SECONDARY_SIZE)
+#define FLASH_AREA_IMAGE_SCRATCH_SIZE     (0)
 
 /* Not used, only the RAM loading firmware upgrade operation
  * is supported on Musca-A. The maximum number of status entries
