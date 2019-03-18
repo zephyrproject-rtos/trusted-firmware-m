@@ -207,6 +207,13 @@ int main(void)
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
     tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
                                 SPM_PARTITION_STATE_RUNNING);
+
+#ifdef TFM_CORE_DEBUG
+    /* Jumps to non-secure code */
+    LOG_MSG("Jumping to non-secure code...");
+#endif
+
+    jump_to_ns_code();
 #else
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
@@ -215,11 +222,4 @@ int main(void)
     tfm_core_set_secure_exception_priorities();
     tfm_spm_init();
 #endif
-
-#ifdef TFM_CORE_DEBUG
-    /* Jumps to non-secure code */
-    LOG_MSG("Jumping to non-secure code...");
-#endif
-
-    jump_to_ns_code();
 }

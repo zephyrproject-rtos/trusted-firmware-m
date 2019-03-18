@@ -524,10 +524,10 @@ void tfm_spm_init(void)
     for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
         part = &g_spm_partition_db.partitions[i];
         tfm_spm_hal_configure_default_isolation(part->platform_data);
+        g_spm_ipc_partition[i].index = i;
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
-        g_spm_ipc_partition[i].index = i;
         g_spm_ipc_partition[i].id = tfm_spm_partition_get_partition_id(i);
 
         tfm_event_init(&g_spm_ipc_partition[i].signal_evnt);

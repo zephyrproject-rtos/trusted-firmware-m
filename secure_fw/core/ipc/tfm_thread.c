@@ -126,42 +126,9 @@ void tfm_thrd_set_status(struct tfm_thrd_ctx *pth, uint32_t new_status)
     update_running_head(&RUNN_HEAD, pth);
 }
 
-/*
- * TEMP WORKAROUND: The caller function who called thread module init needs to
- * be returned. The caller is not a thread. Create a dummy IDLE thread to
- * collect caller context; and schedule back to the caller with this context
- * after all other real threads blocked.
- *
- * This WORKAROUND needs to be removed after IPC NSPM takes place.
- */
-#define DUMMY_IDLE_TAG       0xDEEDDEED
-static uint8_t idle_stack[32] __attribute__((aligned(8)));
-static struct tfm_thrd_ctx idle_thread;
-static struct tfm_thrd_ctx *init_idle_thread(struct tfm_thrd_ctx *pth)
-{
-    /*
-     * IDLE thread is a thread with the lowest priority.
-     * It gets scheduled after all other higher priority threads get blocked.
-     * The entry of IDLE thread is a dummy and has no mean.
-     */
-    tfm_thrd_init(pth, (tfm_thrd_func_t)DUMMY_IDLE_TAG, NULL,
-                  (uint8_t *)&idle_stack[32], (uint8_t *)idle_stack);
-    tfm_thrd_priority(pth, THRD_PRIOR_LOWEST);
-    tfm_thrd_start(pth);
-    return pth;
-}
-
 /* Scheduling won't happen immediately but after the exception returns */
 void tfm_thrd_activate_schedule(void)
 {
-    /*
-     * The current thread can be NULL only when initializing. Create the IDLE
-     * thread and set it as the current thread to collect caller context.
-     */
-    if (CURR_THRD == NULL) {
-        CURR_THRD = init_idle_thread(&idle_thread);
-    }
-
     tfm_trigger_pendsv();
 }
 
