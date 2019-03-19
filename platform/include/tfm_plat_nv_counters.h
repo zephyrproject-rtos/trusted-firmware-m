@@ -22,6 +22,8 @@ enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_0 = 0,  /* Used by SST service */
     PLAT_NV_COUNTER_1,      /* Used by SST service */
     PLAT_NV_COUNTER_2,      /* Used by SST service */
+    PLAT_NV_COUNTER_3,      /* Used by bootloader */
+    PLAT_NV_COUNTER_MAX
 };
 
 #ifdef __cplusplus
