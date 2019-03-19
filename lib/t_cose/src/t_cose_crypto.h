@@ -290,15 +290,60 @@ t_cose_crypto_get_ec_pub_key(int32_t key_select,
 
 
 
+#ifdef T_COSE_USE_B_CON_SHA256
+/* This is code for use with Brad Conte's crypto.  See
+ * https://github.com/B-Con/crypto-algorithms and see the description
+ * of t_cose_crypto_hash
+ */
+#include "sha256.h"
+#endif
+
+
 /**
  * The context for use with the hash adaptation layer here.
+ *
+ * Hash implementations for this porting layer are put into two
+ * different categories.
+ *
+ * The first can be supported generically without any dependency on
+ * the actual hash implementation in this header. These only need a
+ * pointer or handle for the hash context.  Usually these are
+ * implemented by a service, system API or crypto HW that runs in a
+ * separate context or process. They probably allocate memory
+ * internally. These can use context.ptr or context.handle to hold the
+ * pointer or handle to the hash context.
+ *
+ * The second sort of hash implementations need more than just a
+ * pointer or handle. Typically these are libraries that are linked
+ * with this code and run in the same process / context / thread as
+ * this code. These can be efficient requiring no context switches or
+ * memory allocations. These type require this header be modified for
+ * the #include which defines the hash context and so this struct
+ * includes that context as a member. This context is allocated on the
+ * stack, so any members added here should be small enough to go on
+ * the stack. USE_B_CON_SHA256 is an example of this type.
+ *
+ * The actual implementation of the hash is in a separate .c file
+ * that will be specific to the particular platform, library,
+ * service or such used.
  */
 struct t_cose_crypto_hash {
-    /* Can't put the actual size here without creating dependecy on
-     * actual hash implementation, so this is a fairly large and
-     * accommodating size.
+
+#ifdef T_COSE_USE_B_CON_SHA256
+    /* Specific context for Brad Conte's sha256.c */
+    SHA256_CTX context;
+#else
+    /*
+     *  Generic pointer / handle that can work for many
+     *  hash implementations.
      */
-    uint8_t bytes[128];
+    union {
+        void    *ptr;
+        uint64_t handle;
+    } context;
+    int64_t status;
+#endif
+
 };
 
 
@@ -362,6 +407,11 @@ t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
  * hash_ctx and returned when t_cose_crypto_hash_finish() is called.
  * Once in the error state, this function may be called, but it will
  * not do anything.
+ *
+ * This function can be called with \c data_to_hash.ptr NULL and it
+ * will pretend to hash. This allows the same code that is used to
+ * produce the real hash to be used to return a length of the would be
+ * hash for encoded data structure size calculations.
  */
 void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
                                struct q_useful_buf_c data_to_hash);
@@ -389,8 +439,8 @@ void t_cose_crypto_hash_update(struct t_cose_crypto_hash *hash_ctx,
  * returned here.
  *
  * See the note in the Detailed Description (the \\file comment block)
- * for details on how \c q_useful_buf and \c q_useful_buf_c are used to
- * return the hash.
+ * for details on how \c q_useful_buf and \c q_useful_buf_c are used
+ * to return the hash.
  */
 enum t_cose_err_t
 t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
