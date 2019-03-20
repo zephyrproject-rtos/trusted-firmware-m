@@ -69,6 +69,7 @@ LR_CODE S_CODE_START {
         *armlib*
     }
 
+    /**** PSA RoT RO part (CODE + RODATA) start here */
     TFM_SP_STORAGE +0 ALIGN 32 {
         *tfm_storage* (+RO)
         *(TFM_SP_STORAGE_ATTR_FN)
@@ -94,20 +95,6 @@ LR_CODE S_CODE_START {
         *(TFM_SP_INITIAL_ATTESTATION_ATTR_FN)
     }
 
-#ifdef TFM_PARTITION_TEST_CORE
-    TFM_SP_CORE_TEST +0 ALIGN 32 {
-        *tfm_ss_core_test.* (+RO)
-        *(TFM_SP_CORE_TEST_ATTR_FN)
-    }
-#endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PARTITION_TEST_CORE
-    TFM_SP_CORE_TEST_2 +0 ALIGN 32 {
-        *tfm_ss_core_test_2.* (+RO)
-        *(TFM_SP_CORE_TEST_2_ATTR_FN)
-    }
-#endif /* TFM_PARTITION_TEST_CORE */
-
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     TFM_SP_SECURE_TEST_PARTITION +0 ALIGN 32 {
         *tfm_secure_client_service.* (+RO)
@@ -121,6 +108,21 @@ LR_CODE S_CODE_START {
         *(TFM_SP_SECURE_TEST_PARTITION_ATTR_FN)
     }
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+    /**** APPLICATION RoT RO part (CODE + RODATA) start here */
+#ifdef TFM_PARTITION_TEST_CORE
+    TFM_SP_CORE_TEST +0 ALIGN 32 {
+        *tfm_ss_core_test.* (+RO)
+        *(TFM_SP_CORE_TEST_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    TFM_SP_CORE_TEST_2 +0 ALIGN 32 {
+        *tfm_ss_core_test_2.* (+RO)
+        *(TFM_SP_CORE_TEST_2_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_SERVICE_TEST +0 ALIGN 32 {
@@ -167,6 +169,7 @@ LR_CODE S_CODE_START {
     TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
     }
 
+    /**** PSA RoT DATA start here */
     TFM_SP_STORAGE_DATA +0 ALIGN 32 {
         *tfm_storage* (+RW +ZI)
     }
@@ -202,6 +205,23 @@ LR_CODE S_CODE_START {
     TFM_SP_INITIAL_ATTESTATION_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    TFM_SP_SECURE_TEST_PARTITION_DATA +0 ALIGN 32 {
+        *tfm_secure_client_service.* (+RW +ZI)
+        *test_framework* (+RW +ZI)
+        *uart_stdout.* (+RW +ZI)
+        *Driver_USART.* (+RW +ZI)
+        *arm_uart_drv.* (+RW +ZI)
+        *uart_pl011_drv.* (+RW +ZI)
+        *secure_suites.* (+RW +ZI)
+        *attestation_s_interface_testsuite.* (+RW +ZI)
+    }
+
+    TFM_SP_SECURE_TEST_PARTITION_STACK +0 ALIGN 128 EMPTY 0x1000 {
+    }
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+    /**** APPLICATION RoT DATA start here */
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_DATA +0 ALIGN 32 {
         *tfm_ss_core_test.* (+RW +ZI)
@@ -219,22 +239,6 @@ LR_CODE S_CODE_START {
     TFM_SP_CORE_TEST_2_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
 #endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    TFM_SP_SECURE_TEST_PARTITION_DATA +0 ALIGN 32 {
-        *tfm_secure_client_service.* (+RW +ZI)
-        *test_framework* (+RW +ZI)
-        *uart_stdout.* (+RW +ZI)
-        *Driver_USART.* (+RW +ZI)
-        *arm_uart_drv.* (+RW +ZI)
-        *uart_pl011_drv.* (+RW +ZI)
-        *secure_suites.* (+RW +ZI)
-        *attestation_s_interface_testsuite.* (+RW +ZI)
-    }
-
-    TFM_SP_SECURE_TEST_PARTITION_STACK +0 ALIGN 128 EMPTY 0x1000 {
-    }
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_SERVICE_TEST_DATA +0 ALIGN 32 {
