@@ -65,6 +65,7 @@ psa_status_t tfm_tfm_crypto_aead_encrypt_wrapper_veneer(psa_invec *in_vec, size_
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t tfm_platform_sp_system_reset_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_platform_sp_pin_service_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t tfm_initial_attest_get_token_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);

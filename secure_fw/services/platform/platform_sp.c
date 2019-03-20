@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -39,3 +39,15 @@ enum tfm_platform_err_t platform_sp_system_reset(void)
 
     return TFM_PLATFORM_ERR_SUCCESS;
 }
+
+enum tfm_platform_err_t
+platform_sp_pin_service(const psa_invec  *in_vec,  uint32_t num_invec,
+                        const psa_outvec *out_vec, uint32_t num_outvec)
+{
+    enum tfm_plat_err_t ret = tfm_platform_hal_pin_service(in_vec, num_invec,
+                                                           out_vec, num_outvec);
+
+    return ((ret == TFM_PLAT_ERR_SUCCESS) ? TFM_PLATFORM_ERR_SUCCESS :
+                                                 TFM_PLATFORM_ERR_SYSTEM_ERROR);
+}
+

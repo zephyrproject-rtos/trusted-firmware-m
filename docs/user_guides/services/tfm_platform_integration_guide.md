@@ -51,6 +51,19 @@ check  `platform/ext/target/<SPECIFIC_TARGET_FOLDER>/tfm_platform_system.c`
 
 The API **must** be implemented by the system integrators for their targets.
 
+## Platform pin service
+
+This service is designed to perform secure pin services of the platform
+(e.g alternate function setting, pin mode setting, etc).
+The veneer implementation follows IOVEC API implementation, which allows
+the NS application to pack many pin service requests into one service call
+to reduce the overhead of the Secure-Non-Secure context switch.
+Since packing many service requests into one call is application and use-case
+specific, the API implementations in tfm_platform_api.c and
+tfm_platform_secure_api.c follow the one service in one veneer call design but
+the service implementation in tfm_platform_system.c is prepared to serve packed
+requests.
+
 ## Current Service Limitations
 
 The system reset functionality is only supported in isolation level 1.
