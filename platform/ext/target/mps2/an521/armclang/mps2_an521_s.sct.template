@@ -70,6 +70,13 @@ LR_CODE S_CODE_START {
     }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
+    /*
+     * This empty, zero long execution region is here to mark the start address
+     * of PSA RoT code.
+     */
+    TFM_PSA_CODE_START +0 ALIGN 32 EMPTY 0x0 {
+    }
+
 {% for manifest in manifests %}
     {% if manifest.manifest.type == 'PSA-ROT' %}
     {% if manifest.attr.conditional %}
@@ -94,7 +101,21 @@ LR_CODE S_CODE_START {
 
     {% endif %}
 {% endfor %}
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of PSA RoT code.
+     */
+    TFM_PSA_CODE_END +0 ALIGN 32 EMPTY 0x0 {
+    }
+
     /**** APPLICATION RoT RO part (CODE + RODATA) start here */
+    /*
+     * This empty, zero long execution region is here to mark the start address
+     * of APP RoT code.
+     */
+    TFM_APP_CODE_START +0 ALIGN 32 EMPTY 0x0 {
+    }
+
 {% for manifest in manifests %}
     {% if manifest.manifest.type == 'APPLICATION-ROT' %}
     {% if manifest.attr.conditional %}
@@ -119,6 +140,13 @@ LR_CODE S_CODE_START {
 
     {% endif %}
 {% endfor %}
+    /*
+     * This empty, zero long execution region is here to mark the start address
+     * of APP RoT code.
+     */
+    TFM_APP_CODE_END +0 ALIGN 32 EMPTY 0x0 {
+    }
+
     /* Shared area between BL2 and runtime to exchange data */
     TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
@@ -151,6 +179,13 @@ LR_CODE S_CODE_START {
     }
 
     /**** PSA RoT DATA start here */
+    /*
+     * This empty, zero long execution region is here to mark the start address
+     * of PSA RoT RW and Stack.
+     */
+    TFM_PSA_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
+    }
+
 {% for manifest in manifests %}
     {% if manifest.manifest.type == 'PSA-ROT' %}
     {% if manifest.attr.conditional %}
@@ -177,7 +212,21 @@ LR_CODE S_CODE_START {
 
     {% endif %}
 {% endfor %}
-    /**** APPLICATION RoT DATA start here */
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of PSA RoT RW and Stack.
+     */
+    TFM_PSA_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
+    }
+
+    /**** APP RoT DATA start here */
+    /*
+     * This empty, zero long execution region is here to mark the start address
+     * of APP RoT RW and Stack.
+     */
+    TFM_APP_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
+    }
+
 {% for manifest in manifests %}
     {% if manifest.manifest.type == 'APPLICATION-ROT' %}
     {% if manifest.attr.conditional %}
@@ -204,6 +253,12 @@ LR_CODE S_CODE_START {
 
     {% endif %}
 {% endfor %}
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of APP RoT RW and Stack.
+     */
+    TFM_APP_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
+    }
 #endif /* TFM_LVL == 1 */
 
     /* This empty, zero long execution region is here to mark the limit address
