@@ -307,4 +307,16 @@ int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
 /* This function should be called before schedule function */
 void tfm_spm_init(void);
 
+/*
+ * PendSV specified function.
+ *
+ * Parameters :
+ *  ctxb        -    State context storage pointer
+ *
+ * Notes:
+ *  This is a staging API. Scheduler should be called in SPM finally and
+ *  this function will be obsoleted later.
+ */
+void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
+
 #endif

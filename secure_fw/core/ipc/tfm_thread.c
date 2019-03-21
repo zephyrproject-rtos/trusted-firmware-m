@@ -192,18 +192,3 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
     /* Set current thread indicator with next thread */
     CURR_THRD = next;
 }
-
-/*
- * This function is a reference implementation for PendSV handler in
- * isolation level 1. More jobs (sandboxing e.g.) need to be done while
- * scheduling in other isolation levels.
- */
-void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
-{
-    struct tfm_thrd_ctx *pth = tfm_thrd_next_thread();
-
-    /* Swith context if another thread ready to run */
-    if (pth && pth != CURR_THRD) {
-        tfm_thrd_context_switch(ctxb, CURR_THRD, pth);
-    }
-}

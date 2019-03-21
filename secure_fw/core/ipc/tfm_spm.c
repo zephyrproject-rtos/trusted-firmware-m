@@ -578,3 +578,31 @@ void tfm_spm_init(void)
     /* All thread inited.... trigger scheduler */
     tfm_thrd_activate_schedule();
 }
+
+void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
+{
+#if TFM_LVL == 2
+    struct spm_partition_desc_t *p_next_partition;
+    uint32_t is_privileged;
+#endif
+    struct tfm_thrd_ctx *pth_next = tfm_thrd_next_thread();
+    struct tfm_thrd_ctx *pth_curr = tfm_thrd_curr_thread();
+
+    if (pth_curr != pth_next) {
+#if TFM_LVL == 2
+        p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
+                                                 struct spm_partition_desc_t,
+                                                 sp_thrd);
+
+        if (p_next_partition->static_data.partition_flags &
+            SPM_PART_FLAG_PSA_ROT) {
+            is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
+        } else {
+            is_privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
+        }
+
+        tfm_spm_partition_change_privilege(is_privileged);
+#endif
+        tfm_thrd_context_switch(ctxb, pth_curr, pth_next);
+    }
+}

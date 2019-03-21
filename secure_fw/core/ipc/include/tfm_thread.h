@@ -209,18 +209,6 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
 void tfm_svcall_thrd_exit(void);
 
 /*
- * PendSV specified function.
- *
- * Parameters :
- *  ctxb        -    State context storage pointer
- *
- * Notes:
- *  This is a staging API. Scheduler should be called in SPM finally and
- *  this function will be obsoleted later.
- */
-void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
-
-/*
  * Exit current running thread for client.
  *
  * Notes:
