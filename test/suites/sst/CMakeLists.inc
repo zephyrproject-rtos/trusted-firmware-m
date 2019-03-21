@@ -33,9 +33,10 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 	list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_interface_testsuite.c"
 				"${SECURE_STORAGE_TEST_DIR}/secure/psa_ps_s_reliability_testsuite.c")
 
-	if (SST_ROLLBACK_PROTECTION AND SST_ENCRYPTION AND TFM_LVL EQUAL 1)
+	if (SST_ENCRYPTION AND SST_ROLLBACK_PROTECTION AND SST_TEST_NV_COUNTERS)
 		list(APPEND ALL_SRC_C_S "${SECURE_STORAGE_TEST_DIR}/secure/sst_rollback_protection_testsuite.c"
 					"${SECURE_STORAGE_TEST_DIR}/secure/nv_counters/test_sst_nv_counters.c")
+		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_TEST_NV_COUNTERS)
 	endif()
 
 	if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)

@@ -252,10 +252,10 @@ available in `platform/ext/readme.md` along with other platform information.
 ### TF-M NV Counter Interface
 To have a platform independent way to access the NV counters, TF-M defines a
 platform NV counter interface. For API specification, please check:
-`platform/include/tfm_plat_crypto_keys.h`
+`platform/include/tfm_plat_nv_counters.h`
 
 The system integrators **may** implement this interface based on the target
-capabilities and set the **SST_ROLLBACK_PROTECTION** flag to compile in
+capabilities and set the `SST_ROLLBACK_PROTECTION` flag to compile in
 the rollback protection code.
 
 ### Secret Platform Unique Key
@@ -310,7 +310,7 @@ Mbed TLS library.
 ### SST Service Features Flags
 
 SST service defines a set of flags that can be used to compile in/out certain
-SST service features. The **CommonConfig.cmake** file sets the default values
+SST service features. The `CommonConfig.cmake` file sets the default values
 of those flags. However, those flags values can be overwritten by setting them
 in `platform/ext/<TARGET_NAME>.cmake` based on the target capabilities or needs.
 The list of SST services flags are:
@@ -340,6 +340,20 @@ The list of SST services flags are:
    by default in the regression tests, if it is not defined by the platform.
    The SST regression tests reduce the life of the flash memory as they
    write/erase multiple times in the memory.
+ - `SST_TEST_NV_COUNTERS`: this flag enables the virtual implementation of the
+   SST NV counters interface in `test/suites/sst/secure/nv_counters`, which
+   emulates NV counters in RAM, and disables the hardware implementation of NV
+   counters provided by the secure service. This flag is enabled by default when
+   building the regression tests and disabled by default otherwise.
+   - This flag can be overridden to `OFF` when building the regression tests. In
+     this case, the SST rollback protection test suite will not be built, as it
+     relies on extra functionality provided by the virtual NV counters to
+     simulate different rollback scenarios. The remainder of the SST test suites
+     will run using the hardware NV counters. Please note that running the tests
+     in this configuration will quickly increase the hardware NV counter values,
+     which cannot be decreased again.
+   - Overriding this flag from its default value of `OFF` when not building the
+     regression tests is not currently supported.
 
 --------------
 

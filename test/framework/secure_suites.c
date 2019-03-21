@@ -31,7 +31,7 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_psa_ps_interface, 0, 0, 0},
     {&register_testsuite_s_psa_ps_reliability, 0, 0, 0},
 
-#if defined(SST_ROLLBACK_PROTECTION) && defined(SST_ENCRYPTION)
+#ifdef SST_TEST_NV_COUNTERS
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
 

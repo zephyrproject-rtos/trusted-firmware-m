@@ -50,6 +50,10 @@ if (NOT DEFINED SST_RAM_FS)
 	message(FATAL_ERROR "Incomplete build configuration: SST_RAM_FS is undefined. ")
 endif()
 
+if (NOT DEFINED SST_TEST_NV_COUNTERS)
+	message(FATAL_ERROR "Incomplete build configuration: SST_TEST_NV_COUNTERS is undefined.")
+endif()
+
 set (SECURE_STORAGE_C_SRC
 	"${SECURE_STORAGE_DIR}/tfm_sst_secure_api.c"
 	"${SECURE_STORAGE_DIR}/tfm_sst_req_mngr.c"
@@ -69,13 +73,14 @@ if (SST_ENCRYPTION)
 		"${SECURE_STORAGE_DIR}/sst_encrypted_object.c"
 	)
 	set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
-	set_property(DIRECTORY ${TEST_DIR} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
 
 	if (SST_ROLLBACK_PROTECTION)
-		if (NOT REGRESSION OR TFM_LVL GREATER 1)
-			# In case of regression test executed in TFM level 1, the SST rollback test suite has
-			# its own implementation of sst_nv_counters intefaces to be able to test different scenarios.
-			list (APPEND SECURE_STORAGE_C_SRC
+		# Only build the NV counters implementation if the SST_TEST_NV_COUNTERS
+		# flag is off. When this flag is on, a virtual implementation of the SST
+		# NV counters interface is used instead. Full documentation for this
+		# flag can be found in the SST Integration Guide.
+		if (NOT SST_TEST_NV_COUNTERS)
+			list(APPEND SECURE_STORAGE_C_SRC
 				"${SECURE_STORAGE_DIR}/nv_counters/sst_nv_counters.c")
 		endif()
 		set_property(SOURCE ${SECURE_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ROLLBACK_PROTECTION)
@@ -109,6 +114,7 @@ endif()
 message("- SST_VALIDATE_METADATA_FROM_FLASH: " ${SST_VALIDATE_METADATA_FROM_FLASH})
 message("- SST_CREATE_FLASH_LAYOUT: " ${SST_CREATE_FLASH_LAYOUT})
 message("- SST_RAM_FS: " ${SST_RAM_FS})
+message("- SST_TEST_NV_COUNTERS: " ${SST_TEST_NV_COUNTERS})
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
