@@ -203,7 +203,7 @@ under platform/ext/target/musca_b1 to have the correct setup.
 
 #### Example application with BL2 bootloader
 
-1. Create a unified hex file comprising of both mcuboot and tfm_sign binary
+1. Create a unified hex file comprising of both `mcuboot.bin` and `tfm_sign.bin`
   * For Musca-A
     * Windows
     `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel`
@@ -214,12 +214,14 @@ under platform/ext/target/musca_b1 to have the correct setup.
     `srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel`
     * Linux
     `srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel`
-2. Plug the Musca board into your computer. The board should appear as a USB
-   drive
-3. Copy `tfm.hex` to the USB drive
-4. Reset the board to execute the TF-M example application
-5. After completing the procedure you should be able to see on the UART0
- (baud 115200 8n1) the following messages:
+2. Power up the Musca board by connecting it to a computer with a USB lead.
+   Press the `PBON` button if the green `ON` LED does not immediately come on.
+   The board should appear as a USB drive.
+3. Copy `tfm.hex` to the USB drive. The orange `PWR` LED should start blinking.
+4. Once the `PWR` LED stops blinking, power cycle or reset the board to boot
+   from the new image.
+5. After completing the procedure you should see the following messages on the
+   DAPLink UART (baud 115200 8n1):
 
 ```
 [INF] Starting bootloader
@@ -235,7 +237,7 @@ under platform/ext/target/musca_b1 to have the correct setup.
 #### Regression tests with BL2 bootloader
 
 After completing the procedure you should see the following messages on the
-UART0 (baud 115200 8n1):
+DAPLink UART (baud 115200 8n1):
 
 ```
 [INF] Starting bootloader
