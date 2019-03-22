@@ -11,6 +11,7 @@
 #include "tfm_secure_api.h"
 #include "tfm_internal.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
+#include "spm_api.h"
 
 uint8_t *tfm_scratch_area;
 uint32_t tfm_scratch_area_size;
@@ -20,11 +21,7 @@ void jump_to_ns_code(void)
 {
 #if TFM_LVL != 1
     /* Initialization is done, set thread mode to unprivileged. */
-    CONTROL_Type ctrl;
-
-    ctrl.w = __get_CONTROL();
-    ctrl.b.nPRIV = 1;
-    __set_CONTROL(ctrl.w);
+    tfm_spm_partition_change_privilege(TFM_PARTITION_UNPRIVILEGED_MODE);
 #endif
     /* All changes made to memory will be effective after this point */
     __DSB();

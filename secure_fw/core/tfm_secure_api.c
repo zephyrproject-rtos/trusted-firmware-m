@@ -406,13 +406,8 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
          * executed
          */
         if ((partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            CONTROL_Type ctrl;
-
-            ctrl.w = __get_CONTROL();
-            ctrl.b.nPRIV = 1;
-            __set_CONTROL(ctrl.w);
-            __DSB();
-            __ISB();
+            tfm_spm_partition_change_privilege(
+                                        TFM_PARTITION_UNPRIVILEGED_MODE);
         }
 #endif
     } else if (partition_state == SPM_PARTITION_STATE_RUNNING ||
@@ -594,13 +589,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
          * have to be done if the partition is not trusted.
          */
         if ((current_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            CONTROL_Type ctrl;
-
-            ctrl.w = __get_CONTROL();
-            ctrl.b.nPRIV = 0;
-            __set_CONTROL(ctrl.w);
-            __DSB();
-            __ISB();
+            tfm_spm_partition_change_privilege(TFM_PARTITION_PRIVILEGED_MODE);
         }
     } else {
         /* Configure the caller partition environment in case this was a

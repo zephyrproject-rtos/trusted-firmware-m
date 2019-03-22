@@ -334,4 +334,18 @@ enum spm_err_t tfm_spm_partition_init(void);
  */
 void tfm_spm_partition_cleanup_context(uint32_t partition_idx);
 
+/**
+ * \brief Change the privilege mode for partition thread mode.
+ *
+ * \param[in] privileged        Privileged mode,
+ *                                \ref TFM_PARTITION_PRIVILEGED_MODE
+ *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *
+ * \note Barrier instructions are not called by this function, and if
+ *       it is called in thread mode, it might be necessary to call
+ *       them after this function returns (just like it is done in
+ *       jump_to_ns_code()).
+ */
+void tfm_spm_partition_change_privilege(uint32_t privileged);
+
 #endif /*__SPM_API_H__ */

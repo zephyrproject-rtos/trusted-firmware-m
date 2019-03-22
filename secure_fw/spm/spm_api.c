@@ -388,3 +388,19 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
     partition->runtime_data.orig_outvec = 0;
     partition->runtime_data.iovec_api = 0;
 }
+
+__attribute__((section("SFN")))
+void tfm_spm_partition_change_privilege(uint32_t privileged)
+{
+    CONTROL_Type ctrl;
+
+    ctrl.w = __get_CONTROL();
+
+    if (privileged == TFM_PARTITION_PRIVILEGED_MODE) {
+        ctrl.b.nPRIV = 0;
+    } else {
+        ctrl.b.nPRIV = 1;
+    }
+
+    __set_CONTROL(ctrl.w);
+}
