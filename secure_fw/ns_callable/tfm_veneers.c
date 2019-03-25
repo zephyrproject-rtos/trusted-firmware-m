@@ -40,7 +40,7 @@ psa_status_t tfm_crypto_set_key_lifetime(psa_invec *, size_t, psa_outvec *, size
 psa_status_t tfm_crypto_cipher_set_iv(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_update_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_update(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_abort(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_setup(psa_invec *, size_t, psa_outvec *, size_t);
@@ -54,8 +54,8 @@ psa_status_t tfm_crypto_mac_update(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_sign_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_verify_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_abort(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_aead_decrypt_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_aead_encrypt_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_decrypt(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_encrypt(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t);
@@ -136,7 +136,7 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_lifetime)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_set_iv)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_encrypt_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_decrypt_setup)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_update_wrapper)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_abort)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_setup)
@@ -150,8 +150,8 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_sign_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_verify_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_abort)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_decrypt_wrapper)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_encrypt_wrapper)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_decrypt)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_encrypt)
 
 /******** TFM_SP_PLATFORM ********/
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)

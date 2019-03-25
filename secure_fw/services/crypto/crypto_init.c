@@ -5,35 +5,31 @@
  *
  */
 
-#include "tfm_crypto_defs.h"
-#include "crypto_engine.h"
 #include "tfm_crypto_api.h"
+#include "crypto_engine.h"
 
-static enum tfm_crypto_err_t tfm_crypto_module_init(void)
+static psa_status_t tfm_crypto_module_init(void)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
 
     /* Init the Key module */
-    err = tfm_crypto_init_key();
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_init_key();
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /* Init the Alloc module */
-    err = tfm_crypto_init_alloc();
-
-    return err;
+    return tfm_crypto_init_alloc();
 }
 
-enum tfm_crypto_err_t tfm_crypto_init(void)
+psa_status_t tfm_crypto_init(void)
 {
     psa_status_t status;
-    enum tfm_crypto_err_t err;
 
     /* Initialise other modules of the service */
-    err = tfm_crypto_module_init();
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_module_init();
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /* Initialise the engine interface module */
@@ -44,8 +40,8 @@ enum tfm_crypto_err_t tfm_crypto_init(void)
          * without triggering any TF-M recovery mechanism during boot-up if it
          * recognises that a service has not completed booting correctly.
          */
-        return TFM_CRYPTO_ERR_PSA_SUCCESS;
+        return PSA_SUCCESS;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }

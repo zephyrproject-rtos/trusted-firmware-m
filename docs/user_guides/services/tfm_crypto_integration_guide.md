@@ -46,10 +46,6 @@ refer to the comments in the `psa_crypto.h` header itself.
  implementation). For multipart cipher/hash/MAC operations, a context is
  associated to the handle provided during the setup phase, and is explicitly
  cleared only following a successful termination or an abort;
- - `crypto_wrappers.c` : This file implements TF-M compatible wrappers in
- case they are needed by the functions exported by other modules;
- - `crypto_utils.c` : This file implements utility functions that can be
- used by other modules of the TF-M Crypto service;
  - `crypto_engine.c` : This file implements the layer which the other modules
  use to interact with the cryptography primitives available (in SW or HW). The
  `TFM_CRYPTO_ENGINE_BUF_SIZE` determines the size in bytes of the static scratch

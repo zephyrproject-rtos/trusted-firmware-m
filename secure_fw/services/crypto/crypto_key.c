@@ -9,10 +9,9 @@
 #include <stddef.h>
 
 #include "tfm_crypto_api.h"
-#include "crypto_utils.h"
-#include "secure_fw/core/tfm_memory_utils.h"
 #include "psa_crypto.h"
 #include "tfm_crypto_defs.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 
 /**
  * \brief This is the default value of maximum number of simultaneous
@@ -97,44 +96,44 @@ static bool key_type_is_supported(psa_key_type_t type, size_t key_length)
  */
 
 /*!@{*/
-enum tfm_crypto_err_t tfm_crypto_init_key(void)
+psa_status_t tfm_crypto_init_key(void)
 {
     /* Clear the contents of the local key_storage */
     (void)tfm_memset(key_storage, 0, sizeof(key_storage));
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_get_key(psa_key_slot_t key,
-                                         psa_key_usage_t usage,
-                                         psa_algorithm_t alg,
-                                         uint8_t *data,
-                                         size_t data_size,
-                                         size_t *data_length)
+psa_status_t tfm_crypto_get_key(psa_key_slot_t key,
+                                psa_key_usage_t usage,
+                                psa_algorithm_t alg,
+                                uint8_t *data,
+                                size_t data_size,
+                                size_t *data_length)
 {
     struct tfm_crypto_key_storage_s *key_store;
     size_t i;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (key_store->in_use == TFM_CRYPTO_NOT_IN_USE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT;
+        return PSA_ERROR_EMPTY_SLOT;
     }
 
     /* Check that usage is permitted for this key */
     if ((usage & key_store->policy.usage) != usage) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
+        return PSA_ERROR_NOT_PERMITTED;
     }
 
     /* Check that alg is compatible with this key */
     if (alg != 0 && alg != key_store->policy.alg) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
+        return PSA_ERROR_NOT_PERMITTED;
     }
 
     if (key_store->data_length > data_size) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     for (i = 0; i < key_store->data_length; i++) {
@@ -143,35 +142,42 @@ enum tfm_crypto_err_t tfm_crypto_get_key(psa_key_slot_t key,
 
     *data_length = key_store->data_length;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_import_key(psa_key_slot_t key,
-                                            psa_key_type_t type,
-                                            const uint8_t *data,
-                                            size_t data_length)
+psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
+                                   size_t in_len,
+                                   psa_outvec out_vec[],
+                                   size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
     size_t i;
 
-    err = tfm_crypto_memory_check((uint8_t *)data, data_length,
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 3) || (out_len != 0)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (in_vec[1].len != sizeof(psa_key_type_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_type_t type = *((psa_key_type_t *)in_vec[1].base);
+    const uint8_t *data = in_vec[2].base;
+    size_t data_length = in_vec[2].len;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
+        return PSA_ERROR_OCCUPIED_SLOT;
     }
 
     if (!key_type_is_supported(type, data_length)) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     key_store->in_use = TFM_CRYPTO_IN_USE;
@@ -183,17 +189,30 @@ enum tfm_crypto_err_t tfm_crypto_import_key(psa_key_slot_t key,
 
     key_store->data_length = data_length;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_destroy_key(psa_key_slot_t key)
+psa_status_t tfm_crypto_destroy_key(psa_invec in_vec[],
+                                    size_t in_len,
+                                    psa_outvec out_vec[],
+                                    size_t out_len)
 {
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
     uint32_t i;
+
+    if ((in_len != 1) || (out_len != 0)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if (in_vec[0].len != sizeof(psa_key_slot_t)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     volatile uint8_t *p_mem = (uint8_t *)key_store;
@@ -207,179 +226,193 @@ enum tfm_crypto_err_t tfm_crypto_destroy_key(psa_key_slot_t key)
     /* Set default values */
     key_store->in_use = TFM_CRYPTO_NOT_IN_USE;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_get_key_information(psa_key_slot_t key,
-                                                     psa_key_type_t *type,
-                                                     size_t *bits)
+psa_status_t tfm_crypto_get_key_information(psa_invec in_vec[],
+                                            size_t in_len,
+                                            psa_outvec out_vec[],
+                                            size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
 
-    err = tfm_crypto_memory_check(type, sizeof(psa_key_type_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 2)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
-    err = tfm_crypto_memory_check(bits, sizeof(size_t), TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (out_vec[0].len != sizeof(psa_key_type_t)) ||
+        (out_vec[1].len != sizeof(size_t))) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_type_t *type = out_vec[0].base;
+    size_t *bits = out_vec[1].base;
 
     /* Initialise output parameters contents to zero */
     *type = (psa_key_type_t) 0;
-    *bits = (size_t)0;
+    *bits = (size_t) 0;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (key_store->in_use == TFM_CRYPTO_NOT_IN_USE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT;
+        return PSA_ERROR_EMPTY_SLOT;
     }
 
     /* Get basic metadata */
     *type = key_store->type;
     *bits = PSA_BYTES_TO_BITS(key_store->data_length);
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_export_key(psa_key_slot_t key,
-                                            uint8_t *data,
-                                            size_t data_size,
-                                            size_t *data_length)
+psa_status_t tfm_crypto_export_key(psa_invec in_vec[],
+                                   size_t in_len,
+                                   psa_outvec out_vec[],
+                                   size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
-    err = tfm_crypto_memory_check(data, data_size, TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
-    err = tfm_crypto_memory_check(data_length, sizeof(size_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if (in_vec[0].len != sizeof(psa_key_slot_t)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    uint8_t *data = out_vec[0].base;
+    size_t data_size = out_vec[0].len;
 
     return tfm_crypto_get_key(key, PSA_KEY_USAGE_EXPORT, 0, data, data_size,
-                              data_length);
+                              &(out_vec[0].len));
 }
 
-enum tfm_crypto_err_t tfm_crypto_export_public_key(psa_key_slot_t key,
-                                                   uint8_t *data,
-                                                   size_t data_size,
-                                                   size_t *data_length)
+psa_status_t tfm_crypto_export_public_key(psa_invec in_vec[],
+                                          size_t in_len,
+                                          psa_outvec out_vec[],
+                                          size_t out_len)
 {
-    (void)key;
-    (void)data;
-    (void)data_size;
-    (void)data_length;
+    (void)in_vec;
+    (void)in_len;
+    (void)out_vec;
+    (void)out_len;
 
     /* FIXME: This API is not supported yet */
-    return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
+    return PSA_ERROR_NOT_SUPPORTED;
 }
 
-enum tfm_crypto_err_t tfm_crypto_key_policy_init(psa_key_policy_t *policy)
+psa_status_t tfm_crypto_key_policy_init(psa_invec in_vec[],
+                                        size_t in_len,
+                                        psa_outvec out_vec[],
+                                        size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
-    err = tfm_crypto_memory_check(policy, sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 0) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if (out_vec[0].len != sizeof(psa_key_policy_t)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_policy_t *policy = out_vec[0].base;
 
     policy->usage = 0;
     policy->alg = 0;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_key_policy_set_usage(psa_key_policy_t *policy,
-                                                      psa_key_usage_t usage,
-                                                      psa_algorithm_t alg)
+psa_status_t tfm_crypto_key_policy_set_usage(psa_invec in_vec[],
+                                             size_t in_len,
+                                             psa_outvec out_vec[],
+                                             size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
-    err = tfm_crypto_memory_check(policy, sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 2) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if ((out_vec[0].len != sizeof(psa_key_policy_t)) ||
+        (in_vec[0].len != sizeof(psa_key_usage_t))  ||
+        (in_vec[1].len != sizeof(psa_algorithm_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_policy_t *policy = out_vec[0].base;
+    psa_key_usage_t usage = *((psa_key_usage_t *)in_vec[0].base);
+    psa_algorithm_t alg = *((psa_algorithm_t *)in_vec[1].base);
 
     policy->usage = usage;
     policy->alg = alg;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_key_policy_get_usage(
-                                                 const psa_key_policy_t *policy,
-                                                 psa_key_usage_t *usage)
+psa_status_t tfm_crypto_key_policy_get_usage(psa_invec in_vec[],
+                                             size_t in_len,
+                                             psa_outvec out_vec[],
+                                             size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
-    err = tfm_crypto_memory_check((psa_key_policy_t *)policy,
-                                  sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
-    err = tfm_crypto_memory_check((psa_key_policy_t *)usage,
-                                  sizeof(psa_key_usage_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_vec[0].len != sizeof(psa_key_policy_t)) ||
+        (out_vec[0].len != sizeof(psa_key_usage_t))) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    const psa_key_policy_t *policy = in_vec[0].base;
+    psa_key_usage_t *usage = out_vec[0].base;
 
     *usage = policy->usage;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_key_policy_get_algorithm(
-                                                 const psa_key_policy_t *policy,
-                                                 psa_algorithm_t *alg)
+psa_status_t tfm_crypto_key_policy_get_algorithm(psa_invec in_vec[],
+                                                 size_t in_len,
+                                                 psa_outvec out_vec[],
+                                                 size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
-    err = tfm_crypto_memory_check((psa_key_policy_t *)policy,
-                                  sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
-    err = tfm_crypto_memory_check((psa_key_policy_t *)alg,
-                                  sizeof(psa_algorithm_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_vec[0].len != sizeof(psa_key_policy_t)) ||
+        (out_vec[0].len != sizeof(psa_algorithm_t))) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    const psa_key_policy_t *policy = in_vec[0].base;
+    psa_algorithm_t *alg = out_vec[0].base;
 
     *alg = policy->alg;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_set_key_policy(psa_key_slot_t key,
-                                                const psa_key_policy_t *policy)
+psa_status_t tfm_crypto_set_key_policy(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
 
-    err = tfm_crypto_memory_check((psa_key_policy_t *)policy,
-                                  sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 2) || (out_len != 0)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (in_vec[1].len != sizeof(psa_key_policy_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    const psa_key_policy_t *policy = in_vec[1].base;
 
     /* Check that the policy is valid */
     if (policy->usage & ~(PSA_KEY_USAGE_EXPORT
@@ -388,102 +421,129 @@ enum tfm_crypto_err_t tfm_crypto_set_key_policy(psa_key_slot_t key,
                           | PSA_KEY_USAGE_SIGN
                           | PSA_KEY_USAGE_VERIFY
                           | PSA_KEY_USAGE_DERIVE)) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Changing the policy of an occupied slot is not permitted as
      * this is a requirement of the PSA Crypto API
      */
     if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
+        return PSA_ERROR_OCCUPIED_SLOT;
     }
 
     key_store->policy = *policy;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_get_key_policy(psa_key_slot_t key,
-                                                psa_key_policy_t *policy)
+psa_status_t tfm_crypto_get_key_policy(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
 
-    err = tfm_crypto_memory_check(policy, sizeof(psa_key_policy_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (out_vec[0].len != sizeof(psa_key_policy_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_policy_t *policy = out_vec[0].base;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     *policy = key_store->policy;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_set_key_lifetime(psa_key_slot_t key,
-                                                  psa_key_lifetime_t lifetime)
+psa_status_t tfm_crypto_set_key_lifetime(psa_invec in_vec[],
+                                         size_t in_len,
+                                         psa_outvec out_vec[],
+                                         size_t out_len)
 {
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
+
+    if ((in_len != 2) || (out_len != 0)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (in_vec[1].len != sizeof(psa_key_lifetime_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_lifetime_t lifetime = *((psa_key_lifetime_t *)in_vec[1].base);
 
     /* Check that the lifetime is valid */
     if (lifetime != PSA_KEY_LIFETIME_VOLATILE
         && lifetime != PSA_KEY_LIFETIME_PERSISTENT
         && lifetime != PSA_KEY_LIFETIME_WRITE_ONCE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* TF-M Crypto service does not support changing the lifetime of an occupied
      * slot.
      */
     if (key_store->in_use != TFM_CRYPTO_NOT_IN_USE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT;
+        return PSA_ERROR_OCCUPIED_SLOT;
     }
 
     /* Only volatile keys are currently supported */
     if (lifetime != PSA_KEY_LIFETIME_VOLATILE) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     key_store->lifetime = lifetime;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_get_key_lifetime(psa_key_slot_t key,
-                                                  psa_key_lifetime_t *lifetime)
+psa_status_t tfm_crypto_get_key_lifetime(psa_invec in_vec[],
+                                         size_t in_len,
+                                         psa_outvec out_vec[],
+                                         size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-    struct tfm_crypto_key_storage_s *key_store;
+    struct tfm_crypto_key_storage_s *key_store = NULL;
 
-    err = tfm_crypto_memory_check(lifetime, sizeof(psa_key_lifetime_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (out_vec[0].len != sizeof(psa_key_lifetime_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_lifetime_t *lifetime = out_vec[0].base;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     *lifetime = key_store->lifetime;
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
-
 /*!@}*/

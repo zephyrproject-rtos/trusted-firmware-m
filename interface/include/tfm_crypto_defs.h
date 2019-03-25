@@ -15,11 +15,7 @@ extern "C" {
 #include <stdint.h>
 #include <limits.h>
 #include "tfm_api.h"
-
-/* The return value is shared with the TFM service status value. The Crypto
- * return codes shouldn't overlap with predefined TFM status values.
- */
-#define TFM_CRYPTO_ERR_PSA_ERROR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
+#include "psa_crypto.h"
 
 /**
  * \brief This value is used to mark an handle as invalid.
@@ -28,7 +24,7 @@ extern "C" {
 #define TFM_CRYPTO_INVALID_HANDLE (0xFFFFFFFF)
 
 /**
- * \brief Define miscellaneous literal constants that are used in the module
+ * \brief Define miscellaneous literal constants that are used in the service
  *
  */
 enum {
@@ -37,56 +33,17 @@ enum {
 };
 
 /**
- * \brief Possible return values from the TFM Crypto service. They must
- *        provide corresponding return values for psa_status_t possible
- *        values as specified in psa_crypto.h
+ * \brief This type is used to overcome a limitation in the number of maximum
+ *        IOVECs that can be used especially in psa_aead_encrypt and
+ *        psa_aead_decrypt. To be removed in case the AEAD APIs number of
+ *        parameters passed gets restructured
  */
-enum tfm_crypto_err_t {
-    TFM_CRYPTO_ERR_PSA_SUCCESS = 0,
-    TFM_CRYPTO_ERR_PSA_ERROR_UNKNOWN_ERROR = TFM_CRYPTO_ERR_PSA_ERROR_OFFSET,
-    TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED,
-    TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED,
-    TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL,
-    TFM_CRYPTO_ERR_PSA_ERROR_OCCUPIED_SLOT,
-    TFM_CRYPTO_ERR_PSA_ERROR_EMPTY_SLOT,
-    TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE,
-    TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT,
-    TFM_CRYPTO_ERR_PSA_ERROR_INSUFFICIENT_MEMORY,
-    TFM_CRYPTO_ERR_PSA_ERROR_INSUFFICIENT_STORAGE,
-    TFM_CRYPTO_ERR_PSA_ERROR_COMMUNICATION_FAILURE,
-    TFM_CRYPTO_ERR_PSA_ERROR_STORAGE_FAILURE,
-    TFM_CRYPTO_ERR_PSA_ERROR_HARDWARE_FAILURE,
-    TFM_CRYPTO_ERR_PSA_ERROR_TAMPERING_DETECTED,
-    TFM_CRYPTO_ERR_PSA_ERROR_INSUFFICIENT_ENTROPY,
-    TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE,
-    TFM_CRYPTO_ERR_PSA_ERROR_INVALID_PADDING,
-
-    /* Add an invalid return code which forces the size of the type as well */
-    TFM_CRYPTO_ERR_INVALID = INT_MAX
+#define TFM_CRYPTO_MAX_NONCE_LENGTH (16u)
+struct tfm_crypto_aead_pack_input {
+    psa_key_slot_t key;
+    psa_algorithm_t alg;
+    uint8_t nonce[TFM_CRYPTO_MAX_NONCE_LENGTH];
 };
-
-/**
- * \brief A macro to translate TFM Crypto service return values to the
- *        corresponding psa_status_t value. The user of this macro needs
- *        to cast the produced value to psa_status_t explicitly if needed
- *
- * \return Values specified by \ref psa_status_t
- */
-#define TFM_CRYPTO_ERR_TO_PSA_STATUS(val) \
-      ( (val == TFM_CRYPTO_ERR_PSA_SUCCESS) ? val : \
-        ((val >= (enum tfm_crypto_err_t)TFM_CRYPTO_ERR_PSA_ERROR_OFFSET) ? \
-         (val - ((enum tfm_crypto_err_t)TFM_CRYPTO_ERR_PSA_ERROR_OFFSET-1)) : \
-          TFM_CRYPTO_ERR_INVALID) )
-/**
- * \brief A macro to translate psa_status_t values to the corresponding return
- *        values for the TFM Crypto service
- *
- * \return Values specified by \ref tfm_crypto_err_t
- *
- */
-#define PSA_STATUS_TO_TFM_CRYPTO_ERR(val) \
-      ( (val == PSA_SUCCESS) ? (enum tfm_crypto_err_t)val : \
-              (enum tfm_crypto_err_t)(val + TFM_CRYPTO_ERR_PSA_ERROR_OFFSET-1) )
 
 #ifdef __cplusplus
 }

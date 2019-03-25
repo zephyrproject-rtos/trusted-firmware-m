@@ -5,10 +5,29 @@
  *
  */
 
-#include "tfm_crypto_veneers.h"
+#include "tfm_veneers.h"
+#include "tfm_crypto_defs.h"
 #include "psa_crypto.h"
 #include "tfm_ns_lock.h"
-#include "crypto_psa_wrappers.h"
+
+#define NS_LOCK_DISPATCH(sfn_name)                                   \
+    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,         \
+        (uint32_t)in_vec, sizeof(in_vec)/sizeof(in_vec[0]),          \
+        (uint32_t)out_vec, sizeof(out_vec)/sizeof(out_vec[0]))
+
+#define NS_LOCK_DISPATCH_NO_INVEC(sfn_name)                          \
+    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,         \
+        (uint32_t)NULL, 0,                                           \
+        (uint32_t)out_vec, sizeof(out_vec)/sizeof(out_vec[0]))
+
+#define NS_LOCK_DISPATCH_NO_OUTVEC(sfn_name)                         \
+    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,         \
+        (uint32_t)in_vec, sizeof(in_vec)/sizeof(in_vec[0]),          \
+        (uint32_t)NULL, 0)
+
+#define API_DISPATCH(sfn_name) NS_LOCK_DISPATCH(sfn_name)
+#define API_DISPATCH_NO_INVEC(sfn_name) NS_LOCK_DISPATCH_NO_INVEC(sfn_name)
+#define API_DISPATCH_NO_OUTVEC(sfn_name) NS_LOCK_DISPATCH_NO_OUTVEC(sfn_name)
 
 psa_status_t psa_crypto_init(void)
 {
@@ -23,43 +42,46 @@ psa_status_t psa_import_key(psa_key_slot_t key,
                             const uint8_t *data,
                             size_t data_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &type, .len = sizeof(psa_key_type_t)},
+        {.base = data, .len = data_length}
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_import_key,
-                               (uint32_t)key,
-                               (uint32_t)type,
-                               (uint32_t)data,
-                               (uint32_t)data_length);
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_import_key);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_destroy_key(psa_key_slot_t key)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_destroy_key,
-                               (uint32_t)key,
-                               0,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_destroy_key);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_get_key_information(psa_key_slot_t key,
                                      psa_key_type_t *type,
                                      size_t *bits)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = type, .len = sizeof(psa_key_type_t)},
+        {.base = bits, .len = sizeof(size_t)}
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_get_key_information,
-                               (uint32_t)key,
-                               (uint32_t)type,
-                               (uint32_t)bits,
-                               0);
+    status = API_DISPATCH(tfm_crypto_get_key_information);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_export_key(psa_key_slot_t key,
@@ -67,15 +89,19 @@ psa_status_t psa_export_key(psa_key_slot_t key,
                             size_t data_size,
                             size_t *data_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = data, .len = data_size}
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_export_key,
-                               (uint32_t)key,
-                               (uint32_t)data,
-                               (uint32_t)data_size,
-                               (uint32_t)data_length);
+    status = API_DISPATCH(tfm_crypto_export_key);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    *data_length = out_vec[0].len;
+
+    return status;
 }
 
 psa_status_t psa_export_public_key(psa_key_slot_t key,
@@ -94,29 +120,35 @@ psa_status_t psa_export_public_key(psa_key_slot_t key,
 
 void psa_key_policy_init(psa_key_policy_t *policy)
 {
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
+
     /* PSA API returns void so just ignore error value returned */
-    (void)tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_key_policy_init,
-                               (uint32_t)policy,
-                               0,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_key_policy_init);
 }
 
 void psa_key_policy_set_usage(psa_key_policy_t *policy,
                               psa_key_usage_t usage,
                               psa_algorithm_t alg)
 {
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &usage, .len = sizeof(psa_key_usage_t)},
+        {.base = &alg, .len = sizeof(psa_algorithm_t)}
+    };
+    psa_outvec out_vec[] = {
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
+
     /* PSA API returns void so just ignore error value returned */
-    (void)tfm_ns_lock_dispatch(
-                              (veneer_fn)tfm_crypto_veneer_key_policy_set_usage,
-                              (uint32_t)policy,
-                              (uint32_t)usage,
-                              (uint32_t)alg,
-                              0);
+    status = API_DISPATCH(tfm_crypto_key_policy_set_usage);
 }
 
 psa_key_usage_t psa_key_policy_get_usage(const psa_key_policy_t *policy)
 {
+    psa_status_t status;
     psa_key_usage_t usage;
 
     /* Initialise to a sensible default to avoid returning an uninitialised
@@ -124,19 +156,22 @@ psa_key_usage_t psa_key_policy_get_usage(const psa_key_policy_t *policy)
      */
     usage = 0;
 
+    psa_invec in_vec[] = {
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = &usage, .len = sizeof(psa_key_usage_t)},
+    };
+
     /* The PSA API does not return an error, so ignore any error from TF-M */
-    (void)tfm_ns_lock_dispatch(
-                              (veneer_fn)tfm_crypto_veneer_key_policy_get_usage,
-                              (uint32_t)policy,
-                              (uint32_t)&usage,
-                              0,
-                              0);
+    status = API_DISPATCH(tfm_crypto_key_policy_get_usage);
 
     return usage;
 }
 
 psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
 {
+    psa_status_t status;
     psa_algorithm_t alg;
 
     /* Initialise to a sensible default to avoid returning an uninitialised
@@ -144,13 +179,15 @@ psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
      */
     alg = 0;
 
+    psa_invec in_vec[] = {
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = &alg, .len = sizeof(psa_algorithm_t)},
+    };
+
     /* The PSA API does not return an error, so ignore any error from TF-M */
-    (void)tfm_ns_lock_dispatch(
-                          (veneer_fn)tfm_crypto_veneer_key_policy_get_algorithm,
-                          (uint32_t)policy,
-                          (uint32_t)&alg,
-                          0,
-                          0);
+    status = API_DISPATCH(tfm_crypto_key_policy_get_algorithm);
 
     return alg;
 }
@@ -158,104 +195,114 @@ psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
 psa_status_t psa_set_key_policy(psa_key_slot_t key,
                                 const psa_key_policy_t *policy)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_set_key_policy,
-                               (uint32_t)key,
-                               (uint32_t)policy,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_set_key_policy);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_get_key_policy(psa_key_slot_t key,
                                 psa_key_policy_t *policy)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = policy, .len = sizeof(psa_key_policy_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_get_key_policy,
-                               (uint32_t)key,
-                               (uint32_t)policy,
-                               0,
-                               0);
+    status = API_DISPATCH(tfm_crypto_get_key_policy);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_set_key_lifetime(psa_key_slot_t key,
                                   psa_key_lifetime_t lifetime)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &lifetime, .len = sizeof(psa_key_lifetime_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_set_key_lifetime,
-                               (uint32_t)key,
-                               (uint32_t)lifetime,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_set_key_lifetime);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_get_key_lifetime(psa_key_slot_t key,
                                   psa_key_lifetime_t *lifetime)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = lifetime, .len = sizeof(psa_key_lifetime_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_get_key_lifetime,
-                               (uint32_t)key,
-                               (uint32_t)lifetime,
-                               0,
-                               0);
+    status = API_DISPATCH(tfm_crypto_get_key_lifetime);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                const unsigned char *iv,
                                size_t iv_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = iv, .len = iv_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_cipher_set_iv,
-                               (uint32_t)operation,
-                               (uint32_t)iv,
-                               (uint32_t)iv_length,
-                               0);
+    status = API_DISPATCH(tfm_crypto_cipher_set_iv);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_slot_t key,
                                       psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &alg, .len = sizeof(psa_algorithm_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch(
-                              (veneer_fn)tfm_crypto_veneer_cipher_encrypt_setup,
-                              (uint32_t)operation,
-                              (uint32_t)key,
-                              (uint32_t)alg,
-                              0);
+    status = API_DISPATCH(tfm_crypto_cipher_encrypt_setup);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_slot_t key,
                                       psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &alg, .len = sizeof(psa_algorithm_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch(
-                              (veneer_fn)tfm_crypto_veneer_cipher_decrypt_setup,
-                              (uint32_t)operation,
-                              (uint32_t)key,
-                              (uint32_t)alg,
-                              0);
+    status = API_DISPATCH(tfm_crypto_cipher_decrypt_setup);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
@@ -265,38 +312,32 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+        {.base = output, .len = output_size}
+    };
 
-    /* Packing in structures is needed to overcome the 4 parameters
-     * per call limit
-     */
-    struct psa_cipher_update_input input_s = {.input = input,
-                                              .input_length = input_length};
-    struct psa_cipher_update_output output_s = {.output = output,
-                                                .output_size = output_size,
-                                                .output_length =
-                                                               output_length};
+    status = API_DISPATCH(tfm_crypto_cipher_update);
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_cipher_update,
-                               (uint32_t)operation,
-                               (uint32_t)&input_s,
-                               (uint32_t)&output_s,
-                               0);
+    *output_length = out_vec[1].len;
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_cipher_abort,
-                               (uint32_t)operation,
-                               0,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_cipher_abort);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
@@ -304,44 +345,50 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_cipher_operation_t)},
+        {.base = output, .len = output_size},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_cipher_finish,
-                               (uint32_t)operation,
-                               (uint32_t)output,
-                               (uint32_t)output_size,
-                               (uint32_t)output_length);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_cipher_finish);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    *output_length = out_vec[1].len;
+
+    return status;
 }
 
 psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
                             psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &alg, .len = sizeof(psa_algorithm_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_setup,
-                               (uint32_t)operation,
-                               (uint32_t)alg,
-                               0,
-                               0);
+    status = API_DISPATCH(tfm_crypto_hash_setup);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_hash_update(psa_hash_operation_t *operation,
                              const uint8_t *input,
                              size_t input_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_update,
-                               (uint32_t)operation,
-                               (uint32_t)input,
-                               (uint32_t)input_length,
-                               0);
+    status = API_DISPATCH(tfm_crypto_hash_update);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
@@ -349,88 +396,99 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
                              size_t hash_size,
                              size_t *hash_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+        {.base = hash, .len = hash_size},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_finish,
-                               (uint32_t)operation,
-                               (uint32_t)hash,
-                               (uint32_t)hash_size,
-                               (uint32_t)hash_length);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_hash_finish);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    *hash_length = out_vec[1].len;
+
+    return status;
 }
 
 psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
                              const uint8_t *hash,
                              size_t hash_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = hash, .len = hash_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_verify,
-                               (uint32_t)operation,
-                               (uint32_t)hash,
-                               (uint32_t)hash_length,
-                               0);
+    status = API_DISPATCH(tfm_crypto_hash_verify);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_hash_abort,
-                               (uint32_t)operation,
-                               0,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_hash_abort);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
                                 psa_key_slot_t key,
                                 psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &alg, .len = sizeof(psa_algorithm_t)}
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_sign_setup,
-                               (uint32_t)operation,
-                               (uint32_t)key,
-                               (uint32_t)alg,
-                               0);
+    status = API_DISPATCH(tfm_crypto_mac_sign_setup);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
                                   psa_key_slot_t key,
                                   psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &alg, .len = sizeof(psa_algorithm_t)}
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_verify_setup,
-                               (uint32_t)operation,
-                               (uint32_t)key,
-                               (uint32_t)alg,
-                               0);
+    status = API_DISPATCH(tfm_crypto_mac_verify_setup);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_mac_update(psa_mac_operation_t *operation,
                             const uint8_t *input,
                             size_t input_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_update,
-                               (uint32_t)operation,
-                               (uint32_t)input,
-                               (uint32_t)input_length,
-                               0);
+    status = API_DISPATCH(tfm_crypto_mac_update);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
@@ -438,43 +496,46 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
                                  size_t mac_size,
                                  size_t *mac_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+        {.base = mac, .len = mac_size},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_sign_finish,
-                               (uint32_t)operation,
-                               (uint32_t)mac,
-                               (uint32_t)mac_size,
-                               (uint32_t)mac_length);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_mac_sign_finish);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    *mac_length = out_vec[1].len;
+
+    return status;
 }
 
 psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
                                    const uint8_t *mac,
                                    size_t mac_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_invec in_vec[] = {
+        {.base = mac, .len = mac_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_verify_finish,
-                               (uint32_t)operation,
-                               (uint32_t)mac,
-                               (uint32_t)mac_length,
-                               0);
+    status = API_DISPATCH(tfm_crypto_mac_verify_finish);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_mac_operation_t)},
+    };
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_mac_abort,
-                               (uint32_t)operation,
-                               0,
-                               0,
-                               0);
+    status = API_DISPATCH_NO_INVEC(tfm_crypto_mac_abort);
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    return status;
 }
 
 psa_status_t psa_aead_encrypt(psa_key_slot_t key,
@@ -489,34 +550,38 @@ psa_status_t psa_aead_encrypt(psa_key_slot_t key,
                               size_t ciphertext_size,
                               size_t *ciphertext_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    struct tfm_crypto_aead_pack_input input_s = {
+      .key = key,
+      .alg = alg,
+      .nonce = {0},
+    };
+    size_t idx = 0;
+    psa_invec in_vec[] = {
+        {.base = &input_s, .len = nonce_length + sizeof(psa_key_slot_t)
+                                               + sizeof(psa_algorithm_t)},
+        {.base = additional_data, .len = additional_data_length},
+        {.base = plaintext, .len = plaintext_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = ciphertext, .len = ciphertext_size},
+    };
 
-    /* Packing in structures is needed to overcome the 4 parameters
-     * per call limit
-     */
-    struct psa_aead_encrypt_input input_s = {.key = key,
-                                             .alg = alg,
-                                             .nonce = nonce,
-                                             .nonce_length = nonce_length,
-                                             .additional_data = additional_data,
-                                             .additional_data_length =
-                                                         additional_data_length,
-                                             .plaintext = plaintext,
-                                             .plaintext_length =
-                                                              plaintext_length};
-    struct psa_aead_encrypt_output output_s = {.ciphertext = ciphertext,
-                                               .ciphertext_size =
-                                                                ciphertext_size,
-                                               .ciphertext_length =
-                                                             ciphertext_length};
+    if (nonce_length > TFM_CRYPTO_MAX_NONCE_LENGTH) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_aead_encrypt,
-                               (uint32_t)&input_s,
-                               (uint32_t)&output_s,
-                               0,
-                               0);
+    if (nonce != NULL) {
+        for (idx = 0; idx < nonce_length; idx++) {
+            input_s.nonce[idx] = nonce[idx];
+        }
+    }
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    status = API_DISPATCH(tfm_crypto_aead_encrypt);
+
+    *ciphertext_length = out_vec[0].len;
+
+    return status;
 }
 
 psa_status_t psa_aead_decrypt(psa_key_slot_t key,
@@ -531,31 +596,36 @@ psa_status_t psa_aead_decrypt(psa_key_slot_t key,
                               size_t plaintext_size,
                               size_t *plaintext_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status;
+    struct tfm_crypto_aead_pack_input input_s = {
+      .key = key,
+      .alg = alg,
+      .nonce = {0},
+    };
+    size_t idx = 0;
+    psa_invec in_vec[] = {
+        {.base = &input_s, .len = nonce_length + sizeof(psa_key_slot_t)
+                                               + sizeof(psa_algorithm_t)},
+        {.base = additional_data, .len = additional_data_length},
+        {.base = ciphertext, .len = ciphertext_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = plaintext, .len = plaintext_size},
+    };
 
-    /* Packing in structures is needed to overcome the 4 parameters
-     * per call limit
-     */
-    struct psa_aead_decrypt_input input_s = {.key = key,
-                                             .alg = alg,
-                                             .nonce = nonce,
-                                             .nonce_length = nonce_length,
-                                             .additional_data = additional_data,
-                                             .additional_data_length =
-                                                         additional_data_length,
-                                             .ciphertext = ciphertext,
-                                             .ciphertext_length =
-                                                             ciphertext_length};
-    struct psa_aead_decrypt_output output_s = {.plaintext = plaintext,
-                                               .plaintext_size = plaintext_size,
-                                               .plaintext_length =
-                                                              plaintext_length};
+    if (nonce_length > TFM_CRYPTO_MAX_NONCE_LENGTH) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-    err = tfm_ns_lock_dispatch((veneer_fn)tfm_crypto_veneer_aead_decrypt,
-                               (uint32_t)&input_s,
-                               (uint32_t)&output_s,
-                               0,
-                               0);
+    if (nonce != NULL) {
+        for (idx = 0; idx < nonce_length; idx++) {
+            input_s.nonce[idx] = nonce[idx];
+        }
+    }
 
-    return TFM_CRYPTO_ERR_TO_PSA_STATUS(err);
+    status = API_DISPATCH(tfm_crypto_aead_decrypt);
+
+    *plaintext_length = out_vec[0].len;
+
+    return status;
 }

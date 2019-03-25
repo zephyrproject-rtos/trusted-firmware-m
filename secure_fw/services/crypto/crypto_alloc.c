@@ -121,7 +121,8 @@ static void memset_operation_context(uint32_t index)
  *                TFM_CRYPTO_INVALID_HANDLE in case of problems
  *
  */
-static uint32_t get_handle(enum tfm_crypto_operation_type type, void *oper)
+static uint32_t get_handle(enum tfm_crypto_operation_type type,
+                           const void *oper)
 {
     uint32_t handle = TFM_CRYPTO_INVALID_HANDLE;
 
@@ -189,21 +190,23 @@ LIST_OPERATION_LOOKUP
  */
 
 /*!@{*/
-enum tfm_crypto_err_t tfm_crypto_init_alloc(void)
+psa_status_t tfm_crypto_init_alloc(void)
 {
     /* Clear the contents of the local contexts */
     (void)tfm_memset(operation, 0, sizeof(operation));
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_operation_alloc(
-                                        enum tfm_crypto_operation_type type,
+psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
                                         void *oper,
                                         void **ctx)
 {
     uint32_t i = 0, handle;
 
     /* Init to invalid values */
+    if (ctx == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
     *ctx = NULL;
 
     for (i=0; i<TFM_CRYPTO_CONC_OPER_NUM; i++) {
@@ -212,19 +215,18 @@ enum tfm_crypto_err_t tfm_crypto_operation_alloc(
             operation[i].type = type;
             handle = set_handle(type, oper, i);
             if (handle == TFM_CRYPTO_INVALID_HANDLE) {
-                return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
+                return PSA_ERROR_NOT_PERMITTED;
             }
             *ctx = (void *) &(operation[i].operation);
-            return TFM_CRYPTO_ERR_PSA_SUCCESS;
+            return PSA_SUCCESS;
         }
     }
 
-    return TFM_CRYPTO_ERR_PSA_ERROR_NOT_PERMITTED;
+    return PSA_ERROR_NOT_PERMITTED;
 }
 
-enum tfm_crypto_err_t tfm_crypto_operation_release(
-                                        enum tfm_crypto_operation_type type,
-                                        void *oper)
+psa_status_t tfm_crypto_operation_release(enum tfm_crypto_operation_type type,
+                                          void *oper)
 {
     uint32_t handle = get_handle(type, oper);
 
@@ -235,16 +237,15 @@ enum tfm_crypto_err_t tfm_crypto_operation_release(
         operation[handle].in_use = TFM_CRYPTO_NOT_IN_USE;
         operation[handle].type = TFM_CRYPTO_OPERATION_NONE;
         (void)set_handle(type, oper, TFM_CRYPTO_INVALID_HANDLE);
-        return TFM_CRYPTO_ERR_PSA_SUCCESS;
+        return PSA_SUCCESS;
     }
 
-    return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    return PSA_ERROR_INVALID_ARGUMENT;
 }
 
-enum tfm_crypto_err_t tfm_crypto_operation_lookup(
-                                        enum tfm_crypto_operation_type type,
-                                        void *oper,
-                                        void **ctx)
+psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
+                                         const void *oper,
+                                         void **ctx)
 {
     uint32_t handle = get_handle(type, oper);
 
@@ -253,9 +254,9 @@ enum tfm_crypto_err_t tfm_crypto_operation_lookup(
          (operation[handle].in_use == TFM_CRYPTO_IN_USE) &&
          (operation[handle].type == type) ) {
         *ctx = (void *) &(operation[handle].operation);
-        return TFM_CRYPTO_ERR_PSA_SUCCESS;
+        return PSA_SUCCESS;
     }
 
-    return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+    return PSA_ERROR_BAD_STATE;
 }
 /*!@}*/

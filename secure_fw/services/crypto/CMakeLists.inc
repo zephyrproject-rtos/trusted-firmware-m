@@ -47,8 +47,6 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_hash.c"
                     "${CRYPTO_DIR}/crypto_mac.c"
                     "${CRYPTO_DIR}/crypto_key.c"
-                    "${CRYPTO_DIR}/crypto_wrappers.c"
-                    "${CRYPTO_DIR}/crypto_utils.c"
                     "${CRYPTO_DIR}/crypto_engine.c"
                     "${CRYPTO_DIR}/crypto_aead.c"
                     "${CRYPTO_DIR}/tfm_crypto_secure_api.c"

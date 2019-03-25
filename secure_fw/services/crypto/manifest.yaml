@@ -137,7 +137,7 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_UPDATE_SFID",
       "signal": "TFM_CRYPTO_CIPHER_UPDATE",
-      "tfm_symbol": "tfm_crypto_cipher_update_wrapper",
+      "tfm_symbol": "tfm_crypto_cipher_update",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -249,7 +249,7 @@
     {
       "sfid": "TFM_CRYPTO_AEAD_DECRYPT_SFID",
       "signal": "TFM_CRYPTO_AEAD_DECRYPT",
-      "tfm_symbol": "tfm_crypto_aead_decrypt_wrapper",
+      "tfm_symbol": "tfm_crypto_aead_decrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -257,7 +257,7 @@
     {
       "sfid": "TFM_CRYPTO_AEAD_ENCRYPT_SFID",
       "signal": "TFM_CRYPTO_AEAD_ENCRYPT",
-      "tfm_symbol": "tfm_crypto_aead_encrypt_wrapper",
+      "tfm_symbol": "tfm_crypto_aead_encrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -268,8 +268,6 @@
     "crypto_cipher.c",
     "crypto_key.c",
     "crypto_init.c",
-    "crypto_wrappers.c",
-    "crypto_utils.c",
     "crypto_hash.c",
     "crypto_engine.c",
     "crypto_mac.c",

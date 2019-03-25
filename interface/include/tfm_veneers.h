@@ -46,7 +46,7 @@ psa_status_t tfm_tfm_crypto_set_key_lifetime_veneer(psa_invec *in_vec, size_t in
 psa_status_t tfm_tfm_crypto_cipher_set_iv_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_encrypt_setup_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_decrypt_setup_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_cipher_update_wrapper_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_cipher_update_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_abort_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_finish_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_hash_setup_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
@@ -60,8 +60,8 @@ psa_status_t tfm_tfm_crypto_mac_update_veneer(psa_invec *in_vec, size_t in_len, 
 psa_status_t tfm_tfm_crypto_mac_sign_finish_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_mac_verify_finish_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_mac_abort_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_aead_decrypt_wrapper_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_aead_encrypt_wrapper_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_aead_decrypt_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_aead_encrypt_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t tfm_platform_sp_system_reset_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);

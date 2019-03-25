@@ -5,15 +5,84 @@
  *
  */
 
-#include "crypto_utils.h"
 #include "secure_fw/core/tfm_memory_utils.h"
-#include "tfm_crypto_defs.h"
-
-#include "psa_crypto.h"
-
+#include "tfm_crypto_api.h"
+#include "crypto_engine.h"
 #include "tfm_crypto_struct.h"
 
-#include "tfm_crypto_api.h"
+static psa_status_t _psa_get_key_information(psa_key_slot_t key,
+                                             psa_key_type_t *type,
+                                             size_t *bits)
+{
+    psa_invec in_vec[] = {
+        {.base = &key, .len = sizeof(psa_key_slot_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = type, .len = sizeof(psa_key_type_t)},
+        {.base = bits, .len = sizeof(size_t)}
+    };
+
+    return tfm_crypto_get_key_information(
+                 in_vec, sizeof(in_vec)/sizeof(in_vec[0]),
+                 out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+}
+
+static psa_status_t _psa_hash_setup(psa_hash_operation_t *operation,
+                                    psa_algorithm_t alg)
+{
+    psa_invec in_vec[] = {
+        {.base = &alg, .len = sizeof(psa_algorithm_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
+
+    return tfm_crypto_hash_setup(in_vec, sizeof(in_vec)/sizeof(in_vec[0]),
+                 out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+}
+
+static psa_status_t _psa_hash_update(psa_hash_operation_t *operation,
+                                     const uint8_t *input,
+                                     size_t input_length)
+{
+    psa_invec in_vec[] = {
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
+
+    return tfm_crypto_hash_update(in_vec, sizeof(in_vec)/sizeof(in_vec[0]),
+                 out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+}
+
+static psa_status_t _psa_hash_finish(psa_hash_operation_t *operation,
+                                     uint8_t *hash,
+                                     size_t hash_size,
+                                     size_t *hash_length)
+{
+    psa_status_t status;
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+        {.base = hash, .len = hash_size},
+    };
+
+    status = tfm_crypto_hash_finish(NULL, 0,
+                   out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+    *hash_length = out_vec[1].len;
+
+    return status;
+}
+
+static psa_status_t _psa_hash_abort(psa_hash_operation_t *operation)
+{
+    psa_outvec out_vec[] = {
+        {.base = operation, .len = sizeof(psa_hash_operation_t)},
+    };
+
+    return tfm_crypto_hash_abort(NULL, 0,
+                 out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+}
 
 /**
  * \def UNUSED_VAR
@@ -63,23 +132,21 @@ static size_t get_hash_block_size(psa_algorithm_t alg)
     }
 }
 
-static enum tfm_crypto_err_t tfm_crypto_mac_release(
-                                                psa_mac_operation_t *operation,
-                                                struct tfm_mac_operation_s *ctx)
+static psa_status_t tfm_crypto_mac_release(psa_mac_operation_t *operation,
+                                           struct tfm_mac_operation_s *ctx)
 {
-    /* No release necessary on the ctx related quantites for the time being */
+    /* No release necessary on the ctx related items for the time being */
     UNUSED_VAR(ctx);
 
     /* Release the operation context */
     return tfm_crypto_operation_release(TFM_CRYPTO_MAC_OPERATION, operation);
 }
 
-static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
-                                          struct tfm_mac_operation_s *ctx,
+static psa_status_t tfm_crypto_hmac_setup(struct tfm_mac_operation_s *ctx,
                                           psa_key_slot_t key,
                                           psa_algorithm_t alg)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
     psa_key_type_t key_type;
     size_t key_size;
     uint8_t key_data[CRYPTO_HMAC_MAX_KEY_LENGTH];
@@ -91,13 +158,13 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
     psa_key_usage_t usage;
 
     /* Check provided key */
-    err = tfm_crypto_get_key_information(key, &key_type, &key_size);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = _psa_get_key_information(key, &key_type, &key_size);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     if (key_type != PSA_KEY_TYPE_HMAC){
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Set the key usage based on whether this is a sign or verify operation */
@@ -106,18 +173,18 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
     } else if ((ctx->key_usage_sign == 0) && (ctx->key_usage_verify == 1)) {
         usage = PSA_KEY_USAGE_VERIFY;
     } else {
-        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_BAD_STATE;
     }
 
     /* Get the key data to start the HMAC */
-    err = tfm_crypto_get_key(key,
-                             usage,
-                             alg,
-                             key_data,
-                             CRYPTO_HMAC_MAX_KEY_LENGTH,
-                             &key_size);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_get_key(key,
+                                usage,
+                                alg,
+                                key_data,
+                                CRYPTO_HMAC_MAX_KEY_LENGTH,
+                                &key_size);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /* Bind the digest size to the MAC operation */
@@ -130,25 +197,26 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
      */
     if (key_size > block_size) {
         /* Hash the key to reduce it to block size */
-        err = tfm_crypto_hash_setup(&(ctx->ctx.hmac.hash_operation),
-                                    PSA_ALG_HMAC_HASH(alg));
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            return err;
+        status = _psa_hash_setup(&(ctx->ctx.hmac.hash_operation),
+                                 PSA_ALG_HMAC_HASH(alg));
+        if (status != PSA_SUCCESS) {
+            return status;
         }
 
-        err = tfm_crypto_hash_update(&(ctx->ctx.hmac.hash_operation),
-                                     &key_data[0],
-                                     key_size);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            return err;
+        status = _psa_hash_update(&(ctx->ctx.hmac.hash_operation),
+                                  &key_data[0],
+                                  key_size);
+        if (status != PSA_SUCCESS) {
+            return status;
         }
 
         /* Replace the key with the hashed key */
-        err = tfm_crypto_hash_finish(&(ctx->ctx.hmac.hash_operation),
-                                     hashed_key, sizeof(hashed_key),
-                                     &key_size);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            return err;
+        status = _psa_hash_finish(&(ctx->ctx.hmac.hash_operation),
+                                  hashed_key,
+                                  sizeof(hashed_key),
+                                  &key_size);
+        if (status != PSA_SUCCESS) {
+            return status;
         }
     } else {
         /* Copy the key inside the hashed_key buffer */
@@ -169,54 +237,45 @@ static enum tfm_crypto_err_t tfm_crypto_hmac_setup(
     }
 
     /* Start hash1 = H(i_key_pad || message) */
-    err = tfm_crypto_hash_setup(&(ctx->ctx.hmac.hash_operation),
-                                PSA_ALG_HMAC_HASH(alg));
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+    status = _psa_hash_setup(&(ctx->ctx.hmac.hash_operation),
+                             PSA_ALG_HMAC_HASH(alg));
+    if (status != PSA_SUCCESS) {
         /* Clear key information on stack */
         for (i=0; i<key_size; i++) {
             hashed_key[i] = 0;
             ipad[i] = 0;
         }
-        return err;
+        return status;
     }
 
-    err = tfm_crypto_hash_update(&(ctx->ctx.hmac.hash_operation),
-                                 ipad,
-                                 block_size);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = _psa_hash_update(&(ctx->ctx.hmac.hash_operation),
+                              ipad,
+                              block_size);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation,
-                                                  psa_key_slot_t key,
-                                                  psa_algorithm_t alg,
-                                                  uint8_t sign_operation)
+static psa_status_t tfm_crypto_mac_setup(psa_mac_operation_t *operation,
+                                         psa_key_slot_t key,
+                                         psa_algorithm_t alg,
+                                         uint8_t sign_operation)
 {
-    enum tfm_crypto_err_t err;
-
+    psa_status_t status = PSA_SUCCESS;
     struct tfm_mac_operation_s *ctx = NULL;
 
     if (!PSA_ALG_IS_MAC(alg)) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    /* Validate pointers */
-    err = tfm_crypto_memory_check(operation,
-                                  sizeof(psa_mac_operation_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     /* Allocate the operation context in the secure world */
-    err = tfm_crypto_operation_alloc(TFM_CRYPTO_MAC_OPERATION,
-                                     operation,
-                                     (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_operation_alloc(TFM_CRYPTO_MAC_OPERATION,
+                                        operation,
+                                        (void **)&ctx);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /* Bind the algorithm to the mac operation */
@@ -232,11 +291,11 @@ static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation
     }
 
     if (PSA_ALG_IS_HMAC(alg)) {
-        err = tfm_crypto_hmac_setup(ctx, key, alg);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = tfm_crypto_hmac_setup(ctx, key, alg);
+        if (status != PSA_SUCCESS) {
             /* Release the operation context */
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
         ctx->key_set = 1;
@@ -244,20 +303,19 @@ static enum tfm_crypto_err_t tfm_crypto_mac_setup(psa_mac_operation_t *operation
         /* Other MAC types constructions are not supported */
         /* Release the operation context */
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-static enum tfm_crypto_err_t tfm_crypto_mac_finish(
-                                                psa_mac_operation_t *operation,
-                                                struct tfm_mac_operation_s *ctx,
-                                                uint8_t *mac,
-                                                size_t mac_size,
-                                                size_t *mac_length)
+static psa_status_t tfm_crypto_mac_finish(psa_mac_operation_t *operation,
+                                          struct tfm_mac_operation_s *ctx,
+                                          uint8_t *mac,
+                                          size_t mac_size,
+                                          size_t *mac_length)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
     uint8_t hash1[PSA_HASH_MAX_SIZE];
     size_t hash_size;
     uint8_t *opad;
@@ -266,12 +324,12 @@ static enum tfm_crypto_err_t tfm_crypto_mac_finish(
     /* Sanity checks */
     if (mac_size < ctx->mac_size) {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_BUFFER_TOO_SMALL;
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     if (!(ctx->has_input)) {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_BAD_STATE;
     }
 
     if (PSA_ALG_IS_HMAC(ctx->alg)) {
@@ -279,57 +337,57 @@ static enum tfm_crypto_err_t tfm_crypto_mac_finish(
         block_size = get_hash_block_size(PSA_ALG_HMAC_HASH(ctx->alg));
 
         /* finish the hash1 = H(ipad || message) */
-        err = tfm_crypto_hash_finish(&(ctx->ctx.hmac.hash_operation),
-                                     hash1,
-                                     sizeof(hash1),
-                                     &hash_size);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_finish(&(ctx->ctx.hmac.hash_operation),
+                                  hash1,
+                                  sizeof(hash1),
+                                  &hash_size);
+        if (status != PSA_SUCCESS) {
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
         /* compute the final mac value = H(opad || hash1) */
-        err = tfm_crypto_hash_setup(&(ctx->ctx.hmac.hash_operation),
-                                    PSA_ALG_HMAC_HASH(ctx->alg));
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_setup(&(ctx->ctx.hmac.hash_operation),
+                                 PSA_ALG_HMAC_HASH(ctx->alg));
+        if (status != PSA_SUCCESS) {
             mac_zeroize(hash1, sizeof(hash1));
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
-        err = tfm_crypto_hash_update(&(ctx->ctx.hmac.hash_operation),
-                                     opad,
-                                     block_size);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_update(&(ctx->ctx.hmac.hash_operation),
+                                  opad,
+                                  block_size);
+        if (status != PSA_SUCCESS) {
             mac_zeroize(hash1, sizeof(hash1));
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
-        err = tfm_crypto_hash_update(&(ctx->ctx.hmac.hash_operation),
-                                     hash1,
-                                     hash_size);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_update(&(ctx->ctx.hmac.hash_operation),
+                                  hash1,
+                                  hash_size);
+        if (status != PSA_SUCCESS) {
             mac_zeroize(hash1, sizeof(hash1));
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
-        err = tfm_crypto_hash_finish(&(ctx->ctx.hmac.hash_operation),
-                                     mac,
-                                     mac_size,
-                                     mac_length);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_finish(&(ctx->ctx.hmac.hash_operation),
+                                  mac,
+                                  mac_size,
+                                  mac_length);
+        if (status != PSA_SUCCESS) {
             mac_zeroize(hash1, sizeof(hash1));
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
         /* Clear intermediate hash value */
         mac_zeroize(hash1, sizeof(hash1));
 
     } else {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     return tfm_crypto_mac_release(operation, ctx);
@@ -341,194 +399,211 @@ static enum tfm_crypto_err_t tfm_crypto_mac_finish(
  */
 
 /*!@{*/
-enum tfm_crypto_err_t tfm_crypto_mac_sign_setup(psa_mac_operation_t *operation,
-                                                psa_key_slot_t key,
-                                                psa_algorithm_t alg)
+psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
 {
+    if ((in_len != 2) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t)) ||
+        (in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (in_vec[1].len != sizeof(psa_algorithm_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_algorithm_t alg = *((psa_algorithm_t *)in_vec[1].base);
+
     return tfm_crypto_mac_setup(operation, key, alg, 1);
 }
 
-enum tfm_crypto_err_t tfm_crypto_mac_verify_setup(
-                                                psa_mac_operation_t *operation,
-                                                psa_key_slot_t key,
-                                                psa_algorithm_t alg)
+psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
+                                         size_t in_len,
+                                         psa_outvec out_vec[],
+                                         size_t out_len)
 {
+    if ((in_len != 2) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t)) ||
+        (in_vec[0].len != sizeof(psa_key_slot_t)) ||
+        (in_vec[1].len != sizeof(psa_algorithm_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_algorithm_t alg = *((psa_algorithm_t *)in_vec[1].base);
+
     return tfm_crypto_mac_setup(operation, key, alg, 0);
 }
 
-enum tfm_crypto_err_t tfm_crypto_mac_update(psa_mac_operation_t *operation,
-                                            const uint8_t *input,
-                                            size_t input_length)
+psa_status_t tfm_crypto_mac_update(psa_invec in_vec[],
+                                   size_t in_len,
+                                   psa_outvec out_vec[],
+                                   size_t out_len)
 {
-    enum tfm_crypto_err_t err;
-
+    psa_status_t status = PSA_SUCCESS;
     struct tfm_mac_operation_s *ctx = NULL;
 
-    /* Validate pointers */
-    err = tfm_crypto_memory_check(operation,
-                                  sizeof(psa_mac_operation_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
-    err = tfm_crypto_memory_check((void *)input,
-                                  input_length,
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t))) {
+        return PSA_CONNECTION_REFUSED;
     }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+    const uint8_t *input = in_vec[0].base;
+    size_t input_length = in_vec[0].len;
 
     /* Look up the corresponding operation context */
-    err = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
-                                      operation,
-                                      (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
+                                         operation,
+                                         (void **)&ctx);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /* Sanity check */
     if (!(ctx->key_set)) {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_BAD_STATE;
     }
     if (input_length == 0) {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Process the input chunk */
     if (PSA_ALG_IS_HMAC(ctx->alg)) {
-        err = tfm_crypto_hash_update(&(ctx->ctx.hmac.hash_operation),
-                                     input,
-                                     input_length);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
+        status = _psa_hash_update(&(ctx->ctx.hmac.hash_operation),
+                                  input,
+                                  input_length);
+        if (status != PSA_SUCCESS) {
             (void)tfm_crypto_mac_release(operation, ctx);
-            return err;
+            return status;
         }
 
         /* Set this flag to avoid HMAC without data */
         ctx->has_input = 1;
     } else {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_mac_sign_finish(psa_mac_operation_t *operation,
-                                                 uint8_t *mac,
-                                                 size_t mac_size,
-                                                 size_t *mac_length)
+psa_status_t tfm_crypto_mac_sign_finish(psa_invec in_vec[],
+                                        size_t in_len,
+                                        psa_outvec out_vec[],
+                                        size_t out_len)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
     struct tfm_mac_operation_s *ctx = NULL;
 
+    if ((in_len != 0) || (out_len != 2)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+    uint8_t *mac = out_vec[1].base;
+    size_t mac_size = out_vec[1].len;
+
+    /* Initialise mac_length to zero */
+    out_vec[1].len = 0;
+
     if (mac_size == 0) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Validate pointers */
-    err = tfm_crypto_memory_check(operation,
-                                  sizeof(psa_mac_operation_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    err = tfm_crypto_memory_check((void *)mac,
-                                  mac_size,
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    err = tfm_crypto_memory_check(mac_length,
-                                  sizeof(size_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Look up the corresponding operation context */
-    err = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
-                                      operation,
-                                      (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
+                                         operation,
+                                         (void **)&ctx);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     if ((ctx->key_usage_sign == 1) && (ctx->key_usage_verify == 0)) {
         /* Finalise the mac operation */
-        err = tfm_crypto_mac_finish(operation, ctx, mac, mac_size, mac_length);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            return err;
+        status = tfm_crypto_mac_finish(operation,
+                       ctx, mac, mac_size, &(out_vec[1].len));
+        if (status != PSA_SUCCESS) {
+            return status;
         }
         /* A call to tfm_crypto_mac_finish() always releases the operation */
 
     } else {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_BAD_STATE;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
-                                                 psa_mac_operation_t *operation,
-                                                 const uint8_t *mac,
-                                                 size_t mac_length)
+psa_status_t tfm_crypto_mac_verify_finish(psa_invec in_vec[],
+                                          size_t in_len,
+                                          psa_outvec out_vec[],
+                                          size_t out_len)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
     struct tfm_mac_operation_s *ctx = NULL;
     uint8_t computed_mac[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
     size_t computed_mac_length;
     size_t i;
     uint32_t comp_mismatch = 0;
 
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+    const uint8_t *mac = in_vec[0].base;
+    size_t mac_length = in_vec[0].len;
+
     if (mac_length == 0) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Validate pointers */
-    err = tfm_crypto_memory_check(operation,
-                                  sizeof(psa_mac_operation_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    err = tfm_crypto_memory_check((void *)mac,
-                                  mac_length,
-                                  TFM_MEMORY_ACCESS_RO);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Look up the corresponding operation context */
-    err = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
-                                      operation,
-                                      (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
+                                         operation,
+                                         (void **)&ctx);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     if ((ctx->key_usage_sign == 0) && (ctx->key_usage_verify == 1)) {
         /* Finalise the mac operation */
-        err = tfm_crypto_mac_finish(operation,
-                                    ctx,
-                                    computed_mac,
-                                    sizeof(computed_mac),
-                                    &computed_mac_length);
-        if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-            return err;
+        status = tfm_crypto_mac_finish(operation,
+                                       ctx,
+                                       computed_mac,
+                                       sizeof(computed_mac),
+                                       &computed_mac_length);
+        if (status != PSA_SUCCESS) {
+            return status;
         }
         /* A call to tfm_crypto_mac_finish() always releases the operation */
 
         /* Check that the computed mac match the expected one */
         if (computed_mac_length != mac_length) {
-            return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE;
+            return PSA_ERROR_INVALID_SIGNATURE;
         }
 
         for (i=0; i<computed_mac_length ; i++) {
@@ -538,49 +613,54 @@ enum tfm_crypto_err_t tfm_crypto_mac_verify_finish(
         }
 
         if (comp_mismatch == 1) {
-            return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_SIGNATURE;
+            return PSA_ERROR_INVALID_SIGNATURE;
         }
     } else {
         (void)tfm_crypto_mac_release(operation, ctx);
-        return TFM_CRYPTO_ERR_PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_BAD_STATE;
     }
 
-    return TFM_CRYPTO_ERR_PSA_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-enum tfm_crypto_err_t tfm_crypto_mac_abort(psa_mac_operation_t *operation)
+psa_status_t tfm_crypto_mac_abort(psa_invec in_vec[],
+                                  size_t in_len,
+                                  psa_outvec out_vec[],
+                                  size_t out_len)
 {
-    enum tfm_crypto_err_t err;
+    psa_status_t status = PSA_SUCCESS;
     struct tfm_mac_operation_s *ctx = NULL;
 
-    /* Validate pointers */
-    err = tfm_crypto_memory_check(operation,
-                                  sizeof(psa_mac_operation_t),
-                                  TFM_MEMORY_ACCESS_RW);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return TFM_CRYPTO_ERR_PSA_ERROR_INVALID_ARGUMENT;
+    if ((in_len != 0) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
     }
 
+    if ((out_vec[0].len != sizeof(psa_mac_operation_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    psa_mac_operation_t *operation = out_vec[0].base;
+
     /* Look up the corresponding operation context */
-    err = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
-                                      operation,
-                                      (void **)&ctx);
-    if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-        return err;
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
+                                         operation,
+                                         (void **)&ctx);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     if (PSA_ALG_IS_HMAC(ctx->alg)){
         /* Check if the HMAC internal context needs to be deallocated */
         if (ctx->ctx.hmac.hash_operation.handle != TFM_CRYPTO_INVALID_HANDLE) {
             /* Clear hash context */
-            err = tfm_crypto_hash_abort(&(ctx->ctx.hmac.hash_operation));
-            if (err != TFM_CRYPTO_ERR_PSA_SUCCESS) {
-                return err;
+            status = _psa_hash_abort(&(ctx->ctx.hmac.hash_operation));
+            if (status != PSA_SUCCESS) {
+                return status;
             }
         }
     } else {
         /* MACs other than HMACs not currently supported */
-        return TFM_CRYPTO_ERR_PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     return tfm_crypto_mac_release(operation, ctx);
