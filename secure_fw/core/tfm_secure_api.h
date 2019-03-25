@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -87,6 +87,36 @@ extern int32_t tfm_core_get_boot_data(uint8_t major_type, void *ptr,
 int32_t tfm_core_sfn_request(struct tfm_sfn_req_s *desc_ptr);
 
 int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
+
+/**
+ * \brief Check whether the current partition has read access to a memory range
+ *
+ * This function assumes, that the current MPU configuration is set for the
+ * partition to be checked.
+ *
+ * \param[in] p          The start address of the range to check
+ * \param[in] s          The size of the range to check
+ * \param[in] ns_caller  Whether the current partition is a non-secure one
+ *
+ * \return 1 if the partition has access to the memory range, 0 otherwise.
+ */
+int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
+                                           int32_t ns_caller);
+
+/**
+ * \brief Check whether the current partition has write access to a memory range
+ *
+ * This function assumes, that the current MPU configuration is set for the
+ * partition to be checked.
+ *
+ * \param[in] p          The start address of the range to check
+ * \param[in] s          The size of the range to check
+ * \param[in] ns_caller  Whether the current partition is a non-secure one
+ *
+ * \return 1 if the partition has access to the memory range, 0 otherwise.
+ */
+int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
+                                            int32_t ns_caller);
 
 #define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
         return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \

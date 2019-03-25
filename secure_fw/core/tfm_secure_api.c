@@ -193,20 +193,8 @@ static int32_t has_access_to_region(const void *p, size_t s, uint32_t flags)
       check_address_range(p, s, NS_DATA_START, NS_DATA_LIMIT+1-NS_DATA_START);
 }
 
-/**
- * \brief Check whether the current partition has read access to a memory range
- *
- * This function assumes, that the current MPU configuration is set for the
- * partition to be checked.
- *
- * \param[in] p          The start address of the range to check
- * \param[in] s          The size of the range to check
- * \param[in] ns_caller  Whether the current partition is a non-secure one
- *
- * \return 1 if the partition has access to the memory range, 0 otherwise.
- */
-static int32_t has_read_access_to_region(const void *p, size_t s,
-                                         int32_t ns_caller)
+int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
+                                           int32_t ns_caller)
 {
     uint32_t flags = CMSE_MPU_UNPRIV|CMSE_MPU_READ;
 
@@ -217,19 +205,8 @@ static int32_t has_read_access_to_region(const void *p, size_t s,
     return has_access_to_region(p, s, flags);
 }
 
-/**
- * \brief Check whether the current partition has write access to a memory range
- *
- * This function assumes, that the current MPU configuration is set for the
- * partition to be checked.
- *
- * \param[in] p          The start address of the range to check
- * \param[in] s          The size of the range to check
- * \param[in] ns_caller  Whether the current partition is a non-secure one
- *
- * \return 1 if the partition has access to the memory range, 0 otherwise.
- */
-static int32_t has_write_access_to_region(void *p, size_t s, int32_t ns_caller)
+int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
+                                            int32_t ns_caller)
 {
     uint32_t flags = CMSE_MPU_UNPRIV|CMSE_MPU_READWRITE;
 
@@ -268,8 +245,9 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
      */
     if (in_len > 0) {
         if ((in_vec == NULL) ||
-            (has_write_access_to_region(in_vec, sizeof(psa_invec)*in_len,
-                                      desc_ptr->ns_caller) != 1)) {
+            (tfm_core_has_write_access_to_region(in_vec,
+                                                 sizeof(psa_invec)*in_len,
+                                                 desc_ptr->ns_caller) != 1)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -279,8 +257,9 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
     }
     if (out_len > 0) {
         if ((out_vec == NULL) ||
-            (has_write_access_to_region(out_vec, sizeof(psa_outvec)*out_len,
-                                      desc_ptr->ns_caller) != 1)) {
+            (tfm_core_has_write_access_to_region(out_vec,
+                                                 sizeof(psa_outvec)*out_len,
+                                                 desc_ptr->ns_caller) != 1)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -295,8 +274,9 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
     for (i = 0; i < in_len; ++i) {
         if (in_vec[i].len > 0) {
             if ((in_vec[i].base == NULL) ||
-                (has_read_access_to_region(in_vec[i].base, in_vec[i].len,
-                                          desc_ptr->ns_caller) != 1)) {
+                (tfm_core_has_read_access_to_region(in_vec[i].base,
+                                                  in_vec[i].len,
+                                                  desc_ptr->ns_caller) != 1)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
@@ -304,8 +284,9 @@ static int32_t tfm_core_check_sfn_parameters(struct tfm_sfn_req_s *desc_ptr)
     for (i = 0; i < out_len; ++i) {
         if (out_vec[i].len > 0) {
             if ((out_vec[i].base == NULL) ||
-                (has_write_access_to_region(out_vec[i].base, out_vec[i].len,
-                                           desc_ptr->ns_caller) != 1)) {
+                (tfm_core_has_write_access_to_region(out_vec[i].base,
+                                                  out_vec[i].len,
+                                                  desc_ptr->ns_caller) != 1)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
