@@ -16,14 +16,39 @@
   "secure_functions": [
   ],
   "tfm_partition_ipc": true,
-  "services" : [{
-    "name": "IPC_SID_BASIC",
-    "sid": "0x00001000",
-    "signal": "IPC_BASIC_SIGNAL",
-    "non_secure_clients": "true",
-    "minor_version": 1,
-    "minor_policy": "STRICT"
-   }
+  "services" : [
+    {
+      "name": "IPC_SERVICE_TEST_BASIC_SID",
+      "sid": "0x00001000",
+      "signal": "IPC_SERVICE_TEST_BASIC_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID",
+      "sid": "0x00001001",
+      "signal": "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID",
+      "sid": "0x00001002",
+      "signal": "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID",
+      "sid": "0x00001003",
+      "signal": "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SIGNAL",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    }
   ],
   "source_files": [
     "./ipc_service_test.c",
