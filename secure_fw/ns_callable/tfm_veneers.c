@@ -8,81 +8,80 @@
 /*********** WARNING: This is an auto-generated file. Do not edit! ***********/
 
 #include "tfm_secure_api.h"
-#include "tfm_api.h"
 #include "secure_fw/spm/spm_partition_defs.h"
 
 /******** TFM_SP_STORAGE ********/
-psa_status_t tfm_sst_set_req(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_sst_get_req(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_sst_get_info_req(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_sst_remove_req(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_sst_get_support_req(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_sst_set_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_sst_get_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_sst_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_sst_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_sst_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_AUDIT_LOG ********/
-psa_status_t audit_core_retrieve_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t audit_core_add_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t audit_core_get_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t audit_core_get_record_info(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t audit_core_delete_record(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t audit_core_retrieve_record(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t audit_core_add_record(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t audit_core_get_info(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t audit_core_get_record_info(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t audit_core_delete_record(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_CRYPTO ********/
-psa_status_t tfm_crypto_import_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_destroy_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_get_key_information(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_export_key(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_init(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_set_usage(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_get_usage(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_get_algorithm(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_set_key_policy(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_get_key_policy(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_get_key_lifetime(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_set_key_lifetime(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_set_iv(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_encrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_decrypt_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_update_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_cipher_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_update(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_verify(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_hash_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_sign_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_verify_setup(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_update(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_sign_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_verify_finish(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_mac_abort(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_aead_decrypt_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t tfm_crypto_aead_encrypt_wrapper(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_crypto_import_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_destroy_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_key_information(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_export_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_init(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_set_usage(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_get_usage(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_policy_get_algorithm(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_set_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_key_lifetime(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_set_key_lifetime(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_set_iv(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_update_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_abort(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_finish(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_setup(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_update(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_finish(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_verify(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_abort(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_sign_setup(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_verify_setup(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_update(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_sign_finish(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_verify_finish(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_mac_abort(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_decrypt_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_encrypt_wrapper(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_PLATFORM ********/
-psa_status_t platform_sp_system_reset(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
-psa_status_t initial_attest_get_token(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t initial_attest_get_token_size(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t initial_attest_get_token(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t initial_attest_get_token_size(psa_invec *, size_t, psa_outvec *, size_t);
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
-psa_status_t spm_core_test_sfn(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t spm_core_test_sfn_init_success(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t spm_core_test_sfn_direct_recursion(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t spm_core_test_sfn(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t spm_core_test_sfn_init_success(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t spm_core_test_sfn_direct_recursion(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST_2 ********/
-psa_status_t spm_core_test_2_slave_service(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t spm_core_test_2_sfn_invert(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *, size_t, struct psa_outvec *, size_t);
-psa_status_t spm_core_test_2_get_every_second_byte(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t spm_core_test_2_slave_service(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t spm_core_test_2_sfn_invert(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t spm_core_test_2_check_caller_client_id(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t spm_core_test_2_get_every_second_byte(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
-psa_status_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t, struct psa_outvec *, size_t);
+psa_status_t tfm_secure_client_service_sfn_run_tests(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #ifdef TFM_PSA_API
@@ -96,9 +95,9 @@ psa_status_t tfm_secure_client_service_sfn_run_tests(struct psa_invec *, size_t,
 
 #define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
     __tfm_secure_gateway_attributes__ \
-    psa_status_t tfm_##sfn_name##_veneer(struct psa_invec *in_vec, \
+    psa_status_t tfm_##sfn_name##_veneer(psa_invec *in_vec, \
                                          size_t in_len, \
-                                         struct psa_outvec *out_vec, \
+                                         psa_outvec *out_vec, \
                                          size_t out_len) \
     { \
         TFM_CORE_IOVEC_SFN_REQUEST(partition_name##_ID, \
