@@ -231,18 +231,18 @@ SECTIONS
     .tfm_bl2_shared_data : ALIGN(32)
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
-    } > RAM AT> FLASH
+    } > RAM
 
     .msp_stack : ALIGN(32)
     {
         . += __msp_init_stack_size__;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     .psp_stack : ALIGN(32)
     {
         . += __psp_stack_size__;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
@@ -251,14 +251,14 @@ SECTIONS
     .TFM_SECURE_STACK : ALIGN(128)
     {
         . += 0x2000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
         . += 0x400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
@@ -270,7 +270,7 @@ SECTIONS
         . += __heap_size__;
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> FLASH
+    } > RAM
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA : ALIGN(32)
     {
@@ -300,14 +300,14 @@ SECTIONS
         */dummy_boot_seed.o(COMMON)
         */dummy_device_id.o(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_RO_BSS) + SIZEOF(.TFM_UNPRIV_RO_BSS);
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
         . += 0x400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
@@ -347,14 +347,14 @@ SECTIONS
         {% endfor %}
     {% endif %}
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
     .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {
         . += {{manifest.manifest.stack_size}};
-    } > RAM AT> FLASH
+    } > RAM
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
 
@@ -390,7 +390,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
 
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
 #endif /* TFM_LVL == 1 */
 
     .TFM_DATA : ALIGN(4)
@@ -431,7 +431,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 

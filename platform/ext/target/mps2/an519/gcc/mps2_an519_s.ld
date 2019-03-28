@@ -412,18 +412,18 @@ SECTIONS
     .tfm_bl2_shared_data : ALIGN(32)
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
-    } > RAM AT> FLASH
+    } > RAM
 
     .msp_stack : ALIGN(32)
     {
         . += __msp_init_stack_size__;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     .psp_stack : ALIGN(32)
     {
         . += __psp_stack_size__;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
@@ -432,14 +432,14 @@ SECTIONS
     .TFM_SECURE_STACK : ALIGN(128)
     {
         . += 0x2000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
         . += 0x400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
@@ -451,7 +451,7 @@ SECTIONS
         . += __heap_size__;
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> FLASH
+    } > RAM
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA : ALIGN(32)
     {
@@ -481,14 +481,14 @@ SECTIONS
         */dummy_boot_seed.o(COMMON)
         */dummy_device_id.o(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_RO_BSS) + SIZEOF(.TFM_UNPRIV_RO_BSS);
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
         . += 0x400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
@@ -505,14 +505,14 @@ SECTIONS
         *tfm_storage*:*(.bss*)
         *tfm_storage*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_STORAGE_DATA$$ZI$$Base = ADDR(.TFM_SP_STORAGE_BSS);
     Image$$TFM_SP_STORAGE_DATA$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_BSS) + SIZEOF(.TFM_SP_STORAGE_BSS);
 
     .TFM_SP_STORAGE_STACK : ALIGN(128)
     {
         . += 0x2000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Base = ADDR(.TFM_SP_STORAGE_STACK);
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_STACK) + SIZEOF(.TFM_SP_STORAGE_STACK);
 
@@ -529,14 +529,14 @@ SECTIONS
         *tfm_audit*:*(.bss*)
         *tfm_audit*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_AUDIT_LOG_DATA$$ZI$$Base = ADDR(.TFM_SP_AUDIT_LOG_BSS);
     Image$$TFM_SP_AUDIT_LOG_DATA$$ZI$$Limit = ADDR(.TFM_SP_AUDIT_LOG_BSS) + SIZEOF(.TFM_SP_AUDIT_LOG_BSS);
 
     .TFM_SP_AUDIT_LOG_STACK : ALIGN(128)
     {
         . += 0x1000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_AUDIT_LOG_STACK$$ZI$$Base = ADDR(.TFM_SP_AUDIT_LOG_STACK);
     Image$$TFM_SP_AUDIT_LOG_STACK$$ZI$$Limit = ADDR(.TFM_SP_AUDIT_LOG_STACK) + SIZEOF(.TFM_SP_AUDIT_LOG_STACK);
 
@@ -553,14 +553,14 @@ SECTIONS
         *tfm_crypto*:*(.bss*)
         *tfm_crypto*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CRYPTO_DATA$$ZI$$Base = ADDR(.TFM_SP_CRYPTO_BSS);
     Image$$TFM_SP_CRYPTO_DATA$$ZI$$Limit = ADDR(.TFM_SP_CRYPTO_BSS) + SIZEOF(.TFM_SP_CRYPTO_BSS);
 
     .TFM_SP_CRYPTO_STACK : ALIGN(128)
     {
         . += 0x2000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CRYPTO_STACK$$ZI$$Base = ADDR(.TFM_SP_CRYPTO_STACK);
     Image$$TFM_SP_CRYPTO_STACK$$ZI$$Limit = ADDR(.TFM_SP_CRYPTO_STACK) + SIZEOF(.TFM_SP_CRYPTO_STACK);
 
@@ -577,14 +577,14 @@ SECTIONS
         *tfm_platform*:*(.bss*)
         *tfm_platform*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_PLATFORM_DATA$$ZI$$Base = ADDR(.TFM_SP_PLATFORM_BSS);
     Image$$TFM_SP_PLATFORM_DATA$$ZI$$Limit = ADDR(.TFM_SP_PLATFORM_BSS) + SIZEOF(.TFM_SP_PLATFORM_BSS);
 
     .TFM_SP_PLATFORM_STACK : ALIGN(128)
     {
         . += 0x0400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_PLATFORM_STACK$$ZI$$Base = ADDR(.TFM_SP_PLATFORM_STACK);
     Image$$TFM_SP_PLATFORM_STACK$$ZI$$Limit = ADDR(.TFM_SP_PLATFORM_STACK) + SIZEOF(.TFM_SP_PLATFORM_STACK);
 
@@ -601,14 +601,14 @@ SECTIONS
         *tfm_attest*:*(.bss*)
         *tfm_attest*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_INITIAL_ATTESTATION_DATA$$ZI$$Base = ADDR(.TFM_SP_INITIAL_ATTESTATION_BSS);
     Image$$TFM_SP_INITIAL_ATTESTATION_DATA$$ZI$$Limit = ADDR(.TFM_SP_INITIAL_ATTESTATION_BSS) + SIZEOF(.TFM_SP_INITIAL_ATTESTATION_BSS);
 
     .TFM_SP_INITIAL_ATTESTATION_STACK : ALIGN(128)
     {
         . += 0x0400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_INITIAL_ATTESTATION_STACK$$ZI$$Base = ADDR(.TFM_SP_INITIAL_ATTESTATION_STACK);
     Image$$TFM_SP_INITIAL_ATTESTATION_STACK$$ZI$$Limit = ADDR(.TFM_SP_INITIAL_ATTESTATION_STACK) + SIZEOF(.TFM_SP_INITIAL_ATTESTATION_STACK);
 
@@ -626,14 +626,14 @@ SECTIONS
         *tfm_ss_core_test.*(.bss*)
         *tfm_ss_core_test.*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CORE_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_BSS);
     Image$$TFM_SP_CORE_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_BSS) + SIZEOF(.TFM_SP_CORE_TEST_BSS);
 
     .TFM_SP_CORE_TEST_STACK : ALIGN(128)
     {
         . += 0x0400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CORE_TEST_STACK$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_STACK);
     Image$$TFM_SP_CORE_TEST_STACK$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_STACK) + SIZEOF(.TFM_SP_CORE_TEST_STACK);
 
@@ -652,14 +652,14 @@ SECTIONS
         *tfm_ss_core_test_2.*(.bss*)
         *tfm_ss_core_test_2.*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_BSS);
     Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_BSS) + SIZEOF(.TFM_SP_CORE_TEST_2_BSS);
 
     .TFM_SP_CORE_TEST_2_STACK : ALIGN(128)
     {
         . += 0x0400;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_STACK);
     Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_STACK) + SIZEOF(.TFM_SP_CORE_TEST_2_STACK);
 
@@ -699,14 +699,14 @@ SECTIONS
         *attestation_s_interface_testsuite.*(.bss*)
         *attestation_s_interface_testsuite.*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS);
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Limit = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS) + SIZEOF(.TFM_SP_SECURE_TEST_PARTITION_BSS);
 
     .TFM_SP_SECURE_TEST_PARTITION_STACK : ALIGN(128)
     {
         . += 0x1000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_SECURE_TEST_PARTITION_STACK$$ZI$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_STACK);
     Image$$TFM_SP_SECURE_TEST_PARTITION_STACK$$ZI$$Limit = ADDR(.TFM_SP_SECURE_TEST_PARTITION_STACK) + SIZEOF(.TFM_SP_SECURE_TEST_PARTITION_STACK);
 
@@ -725,14 +725,14 @@ SECTIONS
         *ipc_service_test*:*(.bss*)
         *ipc_service_test*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_BSS);
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_SERVICE_TEST_BSS) + SIZEOF(.TFM_SP_IPC_SERVICE_TEST_BSS);
 
     .TFM_SP_IPC_SERVICE_TEST_STACK : ALIGN(128)
     {
         . += 0x1000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_IPC_SERVICE_TEST_STACK$$ZI$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_STACK);
     Image$$TFM_SP_IPC_SERVICE_TEST_STACK$$ZI$$Limit = ADDR(.TFM_SP_IPC_SERVICE_TEST_STACK) + SIZEOF(.TFM_SP_IPC_SERVICE_TEST_STACK);
 
@@ -751,14 +751,14 @@ SECTIONS
         *ipc_client_test*:*(.bss*)
         *ipc_client_test*:*(COMMON)
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS);
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_BSS);
 
     .TFM_SP_IPC_CLIENT_TEST_STACK : ALIGN(128)
     {
         . += 0x1000;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK);
     Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_STACK);
 
@@ -791,7 +791,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
 
         . = ALIGN(32);
-    } > RAM AT> FLASH
+    } > RAM
 #endif /* TFM_LVL == 1 */
 
     .TFM_DATA : ALIGN(4)
@@ -832,7 +832,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
