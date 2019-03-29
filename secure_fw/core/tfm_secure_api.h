@@ -96,15 +96,19 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
  * This function assumes, that the current MPU configuration is set for the
  * partition to be checked.
  *
- * \param[in] p          The start address of the range to check
- * \param[in] s          The size of the range to check
- * \param[in] ns_caller  Whether the current partition is a non-secure one
+ * \param[in] p                The start address of the range to check
+ * \param[in] s                The size of the range to check
+ * \param[in] ns_caller        Whether the current partition is a non-secure one
+ * \param[in] privileged       Privileged mode or unprivileged mode:
+ *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *                             \ref TFM_PARTITION_PRIVILEGED_MODE
  *
  * \return TFM_SUCCESS if the partition has access to the memory range,
  *         TFM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           uint32_t ns_caller);
+                                           uint32_t ns_caller,
+                                           uint32_t privileged);
 
 /**
  * \brief Check whether the current partition has write access to a memory range
@@ -112,15 +116,19 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
  * This function assumes, that the current MPU configuration is set for the
  * partition to be checked.
  *
- * \param[in] p          The start address of the range to check
- * \param[in] s          The size of the range to check
- * \param[in] ns_caller  Whether the current partition is a non-secure one
+ * \param[in] p                The start address of the range to check
+ * \param[in] s                The size of the range to check
+ * \param[in] ns_caller        Whether the current partition is a non-secure one
+ * \param[in] privileged       Privileged mode or unprivileged mode:
+ *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *                             \ref TFM_PARTITION_PRIVILEGED_MODE
  *
  * \return TFM_SUCCESS if the partition has access to the memory range,
  *         TFM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            uint32_t ns_caller);
+                                            uint32_t ns_caller,
+                                            uint32_t privileged);
 
 #define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
         return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \

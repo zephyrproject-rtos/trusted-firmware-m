@@ -204,9 +204,14 @@ static int32_t has_access_to_region(const void *p, size_t s, int flags)
 }
 
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           uint32_t ns_caller)
+                                           uint32_t ns_caller,
+                                           uint32_t privileged)
 {
-    int flags = CMSE_MPU_UNPRIV|CMSE_MPU_READ;
+    int flags = CMSE_MPU_READ;
+
+    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
 
     if (ns_caller) {
         flags |= CMSE_NONSECURE;
@@ -216,9 +221,14 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
 }
 
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            uint32_t ns_caller)
+                                            uint32_t ns_caller,
+                                            uint32_t privileged)
 {
-    int flags = CMSE_MPU_UNPRIV|CMSE_MPU_READWRITE;
+    int flags = CMSE_MPU_READWRITE;
+
+    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
 
     if (ns_caller) {
         flags |= CMSE_NONSECURE;
@@ -264,8 +274,8 @@ static int32_t tfm_core_check_sfn_parameters(
     if (in_len > 0) {
         if ((in_vec == NULL) ||
             (tfm_core_has_write_access_to_region(in_vec,
-                                        sizeof(psa_invec)*in_len,
-                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
+                            sizeof(psa_invec)*in_len, desc_ptr->ns_caller,
+                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -276,8 +286,8 @@ static int32_t tfm_core_check_sfn_parameters(
     if (out_len > 0) {
         if ((out_vec == NULL) ||
             (tfm_core_has_write_access_to_region(out_vec,
-                                        sizeof(psa_outvec)*out_len,
-                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
+                            sizeof(psa_outvec)*out_len, desc_ptr->ns_caller,
+                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -293,8 +303,8 @@ static int32_t tfm_core_check_sfn_parameters(
         if (in_vec[i].len > 0) {
             if ((in_vec[i].base == NULL) ||
                 (tfm_core_has_read_access_to_region(in_vec[i].base,
-                                        in_vec[i].len,
-                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
+                            in_vec[i].len, desc_ptr->ns_caller,
+                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
@@ -303,8 +313,8 @@ static int32_t tfm_core_check_sfn_parameters(
         if (out_vec[i].len > 0) {
             if ((out_vec[i].base == NULL) ||
                 (tfm_core_has_write_access_to_region(out_vec[i].base,
-                                        out_vec[i].len,
-                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
+                            out_vec[i].len, desc_ptr->ns_caller,
+                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }

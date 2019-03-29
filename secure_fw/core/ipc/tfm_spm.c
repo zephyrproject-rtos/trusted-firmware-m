@@ -455,9 +455,9 @@ static uint32_t tfm_spm_partition_get_priority_ext(uint32_t partition_idx)
                     partition_priority;
 }
 
-/* FixMe: This is only valid for TFM LVL 1 now */
 int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
-                         enum tfm_memory_access_e access)
+                         enum tfm_memory_access_e access,
+                         uint32_t privileged)
 {
     int32_t err;
 
@@ -475,15 +475,26 @@ int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
     }
 
     if (access == TFM_MEMORY_ACCESS_RW) {
-        err = tfm_core_has_write_access_to_region(buffer, len, ns_caller);
+        err = tfm_core_has_write_access_to_region(buffer, len, ns_caller,
+                                                  privileged);
     } else {
-        err = tfm_core_has_read_access_to_region(buffer, len, ns_caller);
+        err = tfm_core_has_read_access_to_region(buffer, len, ns_caller,
+                                                 privileged);
     }
     if (err == TFM_SUCCESS) {
         return IPC_SUCCESS;
     }
 
     return IPC_ERROR_MEMORY_CHECK;
+}
+
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_idx)
+{
+    if (tfm_spm_partition_get_flags(partition_idx) & SPM_PART_FLAG_PSA_ROT) {
+        return TFM_PARTITION_PRIVILEGED_MODE;
+    } else {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
 }
 
 /********************** SPM functions for thread mode ************************/

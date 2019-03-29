@@ -15,6 +15,10 @@
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
+/* Privileged definitions for partition thread mode */
+#define TFM_PARTITION_PRIVILEGED_MODE   1
+#define TFM_PARTITION_UNPRIVILEGED_MODE 0
+
 enum spm_err_t {
     SPM_ERR_OK = 0,
     SPM_ERR_PARTITION_DB_NOT_INIT,
