@@ -22,8 +22,8 @@ extern "C" {
 
 /* FIXME: Support other flash program units.*/
 #if ((SST_FLASH_PROGRAM_UNIT != 1) && (SST_FLASH_PROGRAM_UNIT != 2) \
-      && (SST_FLASH_PROGRAM_UNIT != 4))
-#error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4 bytes"
+      && (SST_FLASH_PROGRAM_UNIT != 4) && (SST_FLASH_PROGRAM_UNIT != 8))
+#error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4, 8 bytes"
 #endif
 
 /**

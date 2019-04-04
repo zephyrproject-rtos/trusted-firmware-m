@@ -50,7 +50,7 @@ struct sst_obj_table_entry_t {
  *
  * \brief Object table structure.
  */
-struct __attribute__((__packed__)) sst_obj_table_t {
+struct __attribute__((__aligned__(SST_FLASH_PROGRAM_UNIT))) sst_obj_table_t {
 #ifdef SST_ENCRYPTION
   union sst_crypto_t crypto;     /*!< Crypto metadata. */
 #endif
@@ -61,9 +61,6 @@ struct __attribute__((__packed__)) sst_obj_table_t {
   uint8_t swap_count;            /*!< Swap counter to distinguish 2 different
                                   *   object tables.
                                   */
-  uint8_t reserved[2];           /*!< 32 bits alignment. */
-#else
-  uint8_t reserved[3];           /*!< 32 bits alignment. */
 #endif /* SST_ROLLBACK_PROTECTION */
 
   struct sst_obj_table_entry_t obj_db[SST_OBJ_TABLE_ENTRIES]; /*!< Table's
@@ -121,11 +118,10 @@ struct __attribute__((__packed__)) sst_obj_table_t {
  *
  * \brief Object table context structure.
  */
-struct __attribute__((__packed__)) sst_obj_table_ctx_t {
+struct sst_obj_table_ctx_t {
     struct sst_obj_table_t obj_table; /*!< Object tables */
     uint8_t active_table;             /*!< Active object table */
     uint8_t scratch_table;            /*!< Scratch object table */
-    uint8_t reserved[2];              /*!< 32 bits alignment */
 };
 
 /* Object table context */

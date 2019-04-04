@@ -87,13 +87,13 @@
  * \note  The active_swap_count must be the last member to allow it to be
  *        programmed last.
  */
-struct __attribute__((__packed__)) sst_metadata_block_header_t {
+struct __attribute__((__aligned__(SST_FLASH_PROGRAM_UNIT)))
+sst_metadata_block_header_t {
     uint32_t scratch_dblock;    /*!< Physical block ID of the data
                                  *   section's scratch block
                                  */
     uint8_t fs_version;         /*!< SST system version */
     uint8_t active_swap_count;  /*!< Physical block ID of the data */
-    uint8_t reserved[2];        /*!< 32 bits alignment */
 };
 
 /*!

@@ -198,6 +198,14 @@ psa_ps_status_t sst_encrypted_object_write(uint32_t fid,
 
     wrt_size = GET_ALIGNED_FLASH_BYTES(wrt_size);
 
+#if (SST_FLASH_PROGRAM_UNIT!=1)
+    /* FIX ME
+     * As GET_ALIGNED_FLASH_BYTES is called twice
+     * to align  IV ,and header + payload
+     */
+    wrt_size +=SST_FLASH_PROGRAM_UNIT;
+#endif
+
     /* Create an object in the object system */
     err = sst_flash_fs_file_create(fid, wrt_size, SST_EMPTY_OBJECT_SIZE, NULL);
     if (err != PSA_PS_SUCCESS) {
