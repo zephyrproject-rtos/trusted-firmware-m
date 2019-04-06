@@ -43,6 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  when               who             what, where, why
  --------           ----            ---------------------------------------------------
+ 4/6/19             llundblade      Wrapped bstr returned now includes the wrapping bstr
  02/16/19           llundblade      Redesign MemPool to fix memory access alignment bug
  12/18/18           llundblade      Move decode malloc optional code to separate repository
  12/13/18           llundblade      Documentatation improvements
@@ -213,6 +214,7 @@ struct _QCBORDecodeContext {
 // Must not conflict with any of the official CBOR types
 #define CBOR_MAJOR_NONE_TYPE_RAW  9
 #define CBOR_MAJOR_NONE_TAG_LABEL_REORDER 10
+#define CBOR_MAJOR_NONE_TYPE_BSTR_LEN_ONLY 11
 
 
 /* ===========================================================================
@@ -1539,15 +1541,16 @@ static void QCBOREncode_BstrWrapInMapN(QCBOREncodeContext *pCtx, int64_t nLabel)
 /**
  @brief Close a wrapping bstr.
 
- @param[in] pCtx The context to add to.
- @param[out] pWrappedCBOR UsefulBufC containing wrapped bytes
+ @param[in]  pCtx          The context to add to.
+ @param[out] pWrappedCBOR  UsefulBufC containing wrapped bytes.
 
  The closes a wrapping bstr opened by QCBOREncode_BstrWrap(). It reduces
  nesting level by one.
 
- A pointer and length of the enclosed encoded CBOR is returned in
- *pWrappedCBOR if it is not NULL. The main purpose of this is so this
- data can be hashed (e.g., with SHA-256) as part of a COSE (RFC 8152)
+ A pointer and length of the wrapped and encoded CBOR is returned in
+ *pWrappedCBOR if it is not NULL. This includes the wrapping bstr
+ itself. The main purpose of this is so this data can be hashed
+ (e.g., with SHA-256) as part of a COSE (RFC 8152)
  implementation. **WARNING**, this pointer and length should be used
  right away before any other calls to QCBOREncode_xxxx() as they will
  move data around and the pointer and length will no longer be to the
@@ -2197,6 +2200,35 @@ void QCBOREncode_CloseMapOrArray(QCBOREncodeContext *pCtx, uint8_t uMajorType, U
 void  QCBOREncode_AddType7(QCBOREncodeContext *pCtx, size_t uSize, uint64_t uNum);
 
 
+/**
+ @brief Semi-private method to add only the type and length of a byte string.
+
+ @param[in] pCtx    The context to initialize.
+ @param[in] Bytes   Pointer and length of the input data.
+
+ This is the same as QCBOREncode_AddBytes() except it only adds the
+ CBOR encoding for the type and the length. It doesn't actually add
+ the bytes. You can't actually produce correct CBOR with this and the
+ rest of this API. It is only used for a special case where
+ the valid CBOR is created manually by putting this type and length in
+ and then adding the actual bytes. In particular, when only a hash of
+ the encoded CBOR is needed, where the type and header are hashed
+ separately and then the bytes is hashed. This makes it possible to
+ implement COSE Sign1 with only one copy of the payload in the output
+ buffer, rather than two, roughly cutting memory use in half.
+
+ This is only used for this odd case, but this is a supported
+ tested function.
+*/
+static inline void QCBOREncode_AddBytesLenOnly(QCBOREncodeContext *pCtx, UsefulBufC Bytes);
+
+static inline void QCBOREncode_AddBytesLenOnlyToMap(QCBOREncodeContext *pCtx, const char *szLabel, UsefulBufC Bytes);
+
+static inline void QCBOREncode_AddBytesLenOnlyToMapN(QCBOREncodeContext *pCtx, int64_t nLabel, UsefulBufC Bytes);
+
+
+
+
 static inline void QCBOREncode_AddInt64ToMap(QCBOREncodeContext *pCtx, const char *szLabel, int64_t uNum)
 {
    QCBOREncode_AddBuffer(pCtx, CBOR_MAJOR_TYPE_TEXT_STRING, UsefulBuf_FromSZ(szLabel)); // AddSZString not defined yet
@@ -2310,6 +2342,22 @@ static inline void QCBOREncode_AddBytesToMapN(QCBOREncodeContext *pCtx, int64_t 
    QCBOREncode_AddBytes(pCtx, Bytes);
 }
 
+static inline void QCBOREncode_AddBytesLenOnly(QCBOREncodeContext *pCtx, UsefulBufC Bytes)
+{
+    QCBOREncode_AddBuffer(pCtx, CBOR_MAJOR_NONE_TYPE_BSTR_LEN_ONLY, Bytes);
+}
+
+static inline void QCBOREncode_AddBytesLenOnlyToMap(QCBOREncodeContext *pCtx, const char *szLabel, UsefulBufC Bytes)
+{
+    QCBOREncode_AddSZString(pCtx, szLabel);
+    QCBOREncode_AddBytesLenOnly(pCtx, Bytes);
+}
+
+static inline void QCBOREncode_AddBytesLenOnlyToMapN(QCBOREncodeContext *pCtx, int64_t nLabel, UsefulBufC Bytes)
+{
+    QCBOREncode_AddInt64(pCtx, nLabel);
+    QCBOREncode_AddBytesLenOnly(pCtx, Bytes);
+}
 
 static inline void QCBOREncode_AddBinaryUUID(QCBOREncodeContext *pCtx, UsefulBufC Bytes)
 {
