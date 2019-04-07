@@ -447,7 +447,7 @@ enum t_cose_err_t t_cose_sign1_finish(struct t_cose_sign1_ctx *me,
                                      T_COSE_CRYPTO_SHA256_SIZE);
 
     /* Create the hash of the to-be-signed bytes. Inputs to the hash
-     * are the protected headers, the payload that getting signed, the
+     * are the protected headers, the payload that is getting signed, the
      * cose signature alg from which the hash alg is determined. The
      * cose_algorithm_id was checked in t_cose_sign1_init() so it
      * doesn't need to be checked here.
@@ -456,6 +456,7 @@ enum t_cose_err_t t_cose_sign1_finish(struct t_cose_sign1_ctx *me,
                                    buffer_for_tbs_hash,
                                    &tbs_hash,
                                    me->protected_headers,
+                                   T_COSE_TBS_PAYLOAD_IS_BSTR_WRAPPED,
                                    signed_payload);
     if(return_value) {
         goto Done;

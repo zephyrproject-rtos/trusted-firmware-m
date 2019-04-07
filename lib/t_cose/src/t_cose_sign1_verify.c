@@ -250,6 +250,7 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
                                    buffer_for_tbs_hash,
                                    &tbs_hash,
                                    protected_headers,
+                                   T_COSE_TBS_BARE_PAYLOAD,
                                    *payload);
     if(return_value) {
         goto Done;
