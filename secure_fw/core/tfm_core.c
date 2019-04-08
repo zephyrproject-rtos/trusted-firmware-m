@@ -131,6 +131,12 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
 
     /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
 
+    /*
+     * Set PendSV priority to the lowest. NVIC_SetPriority converts '0xFF'
+     * to the lowest priority value architecture/platform supported.
+     */
+    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+
     return TFM_SUCCESS;
 }
 
@@ -177,6 +183,12 @@ int main(void)
          */
     }
 
+    /*
+     * Prioritise secure exceptions to avoid NS being able to pre-empt
+     * secure SVC or SecureFault. Do it before PSA API initialization.
+     */
+    tfm_core_set_secure_exception_priorities();
+
 #ifdef TFM_PSA_API
     tfm_spm_init();
 #endif
@@ -192,13 +204,6 @@ int main(void)
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
     tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
                               SPM_PARTITION_STATE_RUNNING);
-
-    /* Prioritise secure exceptions to avoid NS being able to pre-empt secure
-     * SVC or SecureFault
-     */
-    if (tfm_core_set_secure_exception_priorities() != SPM_ERR_OK) {
-        /* Placeholder for error handling, currently ignored. */
-    }
 
     jump_to_ns_code();
 }
