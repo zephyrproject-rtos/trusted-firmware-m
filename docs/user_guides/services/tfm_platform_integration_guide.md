@@ -73,6 +73,28 @@ NVIC_SystemReset call performed by the service, it is expected to generate a
 memory fault when it tries to access the SCB->AIRCR register in level 3
 isolation.
 
+## Debug authentication settings
+
+A platform may provide the option to configure debug authentication. TF-M core
+calls the HAL function `void tfm_spm_hal_init_debug(void)` which configures
+debug outhentication based on the following defines:
+ - `DAUTH_NONE`: Debugging the system is not enabled.
+ - `DAUTH_NS_ONLY`: Invasive and non invasive debugging of non-secure code is
+   enabled.
+ - `DAUTH_FULL`: Invasive and non-invasive debugging of non-secure and secure
+   code is enabled.
+ - `DAUTH_CHIP_DEFAULT`: The debug auhentication options are used that are set
+   by the chip vendor.
+
+The desired debug authentication configuration can be selected by setting one of
+the options above to the cmake command with the
+`-DDEBUG_AUTHENTICATION="<define>"` option. The default value of
+`DEBUG_AUTHENTICATION` is `DAUTH_CHIP_DEFAULT`.
+
+*Note*: `void tfm_spm_hal_init_debug(void)` is called during the TF-M core
+initialisation phase, before initialising secure partition. This means that BL2
+runs with the chip default setting.
+
 --------------
 
-*Copyright (c) 2018, Arm Limited. All rights reserved.*
+*Copyright (c) 2019, Arm Limited. All rights reserved.*
