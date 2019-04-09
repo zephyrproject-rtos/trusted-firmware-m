@@ -5,8 +5,16 @@
  *
  */
 
+#include "tfm_mbedcrypto_include.h"
+
 #include "tfm_crypto_api.h"
-#include "crypto_engine.h"
+#include "tfm_crypto_defs.h"
+
+/*
+ * \brief This Mbed TLS include is needed to initialise the memory allocator
+ *        inside the Mbed TLS layer of Mbed Crypto
+ */
+#include "mbedtls/memory_buffer_alloc.h"
 
 #ifdef TFM_PSA_API
 #include "psa_service.h"
@@ -18,17 +26,13 @@
  *        by the TF-M Crypto partition
  */
 static const tfm_crypto_us_t sfid_func_table[TFM_CRYPTO_SFID_MAX] = {
+    tfm_crypto_allocate_key,
     tfm_crypto_import_key,
     tfm_crypto_destroy_key,
     tfm_crypto_get_key_information,
     tfm_crypto_export_key,
-    tfm_crypto_key_policy_init,
-    tfm_crypto_key_policy_set_usage,
-    tfm_crypto_key_policy_get_usage,
-    tfm_crypto_key_policy_get_algorithm,
     tfm_crypto_set_key_policy,
     tfm_crypto_get_key_policy,
-    tfm_crypto_set_key_lifetime,
     tfm_crypto_get_key_lifetime,
     tfm_crypto_cipher_set_iv,
     tfm_crypto_cipher_encrypt_setup,
@@ -123,7 +127,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
 
     /* There will always be a tfm_crypto_pack_iovec in the first iovec */
     if (in_len < 1) {
-        return PSA_ERROR_UNKNOWN_ERROR;
+        return PSA_ERROR_GENERIC_ERROR;
     }
     /* Initialise the first iovec with the IOV read when parsing */
     in_vec[0].base = iov;
@@ -169,7 +173,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
 
     /* Clear the allocated internal scratch before returning */
     if (tfm_crypto_clear_scratch() != PSA_SUCCESS) {
-        return PSA_ERROR_UNKNOWN_ERROR;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     return status;
@@ -188,12 +192,12 @@ static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
                          sizeof(struct tfm_crypto_pack_iovec));
 
     if (read_size != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_UNKNOWN_ERROR;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     if (iov->sfn_id >= TFM_CRYPTO_SFID_MAX) {
         *sfn_id_p = TFM_CRYPTO_SFID_INVALID;
-        return PSA_ERROR_UNKNOWN_ERROR;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     *sfn_id_p = iov->sfn_id;
@@ -233,7 +237,7 @@ static void tfm_crypto_ipc_handler(void)
                 if (sfn_id != TFM_CRYPTO_SFID_INVALID) {
                     status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
                 } else {
-                    status = PSA_ERROR_UNKNOWN_ERROR;
+                    status = PSA_ERROR_GENERIC_ERROR;
                 }
                 psa_reply(msg.handle, status);
                 break;
@@ -256,16 +260,37 @@ static void tfm_crypto_ipc_handler(void)
 }
 #endif /* TFM_PSA_API */
 
+/**
+ * \brief Default value for the size of the static buffer used by Mbed
+ *        Crypto for its dynamic allocations
+ */
+#ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
+#define TFM_CRYPTO_ENGINE_BUF_SIZE (1024)
+#endif
+
+/**
+ * \brief Static buffer to be used by Mbed Crypto for memory allocations
+ *
+ */
+static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
+
+static psa_status_t tfm_crypto_engine_init(void)
+{
+    /* Initialise the Mbed Crypto memory allocator to use static
+     * memory allocation from the provided buffer instead of using
+     * the heap
+     */
+    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
+                                     TFM_CRYPTO_ENGINE_BUF_SIZE);
+
+    /* Previous function does not return any value, so just call the
+     * initialisation function of the Mbed Crypto layer
+     */
+    return psa_crypto_init();
+}
+
 static psa_status_t tfm_crypto_module_init(void)
 {
-    psa_status_t status = PSA_SUCCESS;
-
-    /* Init the Key module */
-    status = tfm_crypto_init_key();
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     /* Init the Alloc module */
     return tfm_crypto_init_alloc();
 }
@@ -280,7 +305,7 @@ psa_status_t tfm_crypto_init(void)
         return status;
     }
 
-    /* Initialise the engine interface module */
+    /* Initialise the engine layer */
     status = tfm_crypto_engine_init();
     if (status != PSA_SUCCESS) {
         return status;

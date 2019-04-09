@@ -5,51 +5,18 @@
  *
  */
 
-#include <limits.h>
-
-#include "tfm_crypto_api.h"
-#include "crypto_engine.h"
-#include "tfm_crypto_struct.h"
+#include <stddef.h>
+#include <stdint.h>
 
 /* FixMe: Use PSA_CONNECTION_REFUSED when performing parameter
  *        integrity checks but this will have to be revised
  *        when the full set of error codes mandated by PSA FF
  *        is available.
  */
+#include "tfm_mbedcrypto_include.h"
 
-/**
- * \def CRYPTO_AEAD_MAX_KEY_LENGTH
- *
- * \brief Specifies the maximum key length supported by the
- *        AEAD operations in this implementation
- */
-#ifndef CRYPTO_AEAD_MAX_KEY_LENGTH
-#define CRYPTO_AEAD_MAX_KEY_LENGTH (32)
-#endif
-
-static psa_status_t _psa_get_key_information(psa_key_slot_t key,
-                                             psa_key_type_t *type,
-                                             size_t *bits)
-{
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_GET_KEY_INFORMATION_SFID,
-        .key = key,
-    };
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = type, .len = sizeof(psa_key_type_t)},
-        {.base = bits, .len = sizeof(size_t)}
-    };
-
-    status = tfm_crypto_get_key_information(
-                 in_vec, sizeof(in_vec)/sizeof(in_vec[0]),
-                 out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
-
-    return status;
-}
+#include "tfm_crypto_api.h"
+#include "tfm_crypto_defs.h"
 
 /*!
  * \defgroup public_psa Public functions, PSA
@@ -63,9 +30,6 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
                                      size_t out_len)
 {
     psa_status_t status = PSA_SUCCESS;
-    uint8_t key_data[CRYPTO_AEAD_MAX_KEY_LENGTH];
-    uint32_t key_size;
-    psa_key_type_t key_type;
 
     if ( !((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
@@ -76,7 +40,7 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
-    psa_key_slot_t key = iov->key;
+    psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *nonce = aead_pack_input->nonce;
     size_t nonce_length = aead_pack_input->nonce_length;
@@ -96,67 +60,10 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     /* Initialise ciphertext_length to zero */
     out_vec[0].len = 0;
 
-    if (PSA_ALG_IS_AEAD(alg) == 0) {
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    if (PSA_AEAD_TAG_SIZE(alg) == 0) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (PSA_AEAD_ENCRYPT_OUTPUT_SIZE(alg, plaintext_length) > ciphertext_size) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    if ((nonce_length == 0) ||
-        ((additional_data_length == 0) && (additional_data != NULL))) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Access the key data */
-    status = _psa_get_key_information(key, &key_type, (size_t *)&key_size);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Support only AES based AEAD */
-    if (key_type != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    /* Access the crypto service key module to retrieve key data */
-    status = tfm_crypto_get_key(key,
-                                PSA_KEY_USAGE_ENCRYPT,
-                                alg,
-                                key_data,
-                                CRYPTO_AEAD_MAX_KEY_LENGTH,
-                                (size_t *)&key_size);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Request AEAD encryption on the crypto engine */
-    status = tfm_crypto_engine_aead_encrypt(key_type,
-                                            alg,
-                                            key_data,
-                                            key_size,
-                                            nonce,
-                                            nonce_length,
-                                            additional_data,
-                                            additional_data_length,
-                                            plaintext,
-                                            plaintext_length,
-                                            ciphertext,
-                                            ciphertext_size,
-                                            (uint32_t *)&(out_vec[0].len));
-    if (status == PSA_SUCCESS) {
-        /* The ciphertext_length needs to take into account the tag length */
-        out_vec[0].len += PSA_AEAD_TAG_SIZE(alg);
-    } else {
-        /* In case of failure set the ciphertext_length to zero */
-        out_vec[0].len = 0;
-    }
-
+    status = psa_aead_encrypt(key_handle, alg, nonce, nonce_length,
+                              additional_data, additional_data_length,
+                              plaintext, plaintext_length,
+                              ciphertext, ciphertext_size, &out_vec[0].len);
     return status;
 }
 
@@ -166,9 +73,6 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
                                      size_t out_len)
 {
     psa_status_t status = PSA_SUCCESS;
-    uint8_t key_data[CRYPTO_AEAD_MAX_KEY_LENGTH];
-    uint32_t key_size;
-    psa_key_type_t key_type;
 
     if ( !((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
@@ -179,7 +83,7 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
-    psa_key_slot_t key = iov->key;
+    psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *nonce = aead_pack_input->nonce;
     size_t nonce_length = aead_pack_input->nonce_length;
@@ -199,64 +103,10 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     /* Initialise plaintext_length to zero */
     out_vec[0].len = 0;
 
-    if (PSA_ALG_IS_AEAD(alg) == 0) {
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    if ((PSA_AEAD_TAG_SIZE(alg) == 0) ||
-        (ciphertext_length < PSA_AEAD_TAG_SIZE(alg))) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (PSA_AEAD_DECRYPT_OUTPUT_SIZE(alg,ciphertext_length) > plaintext_size) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    if ((nonce_length == 0) ||
-        ((additional_data_length == 0) && (additional_data != NULL))) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Access the key data */
-    status = _psa_get_key_information(key, &key_type, (size_t *)&key_size);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Support only AES based AEAD */
-    if (key_type != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    /* Access the crypto service key module to retrieve key data */
-    status = tfm_crypto_get_key(key,
-                                PSA_KEY_USAGE_DECRYPT,
-                                alg,
-                                key_data,
-                                CRYPTO_AEAD_MAX_KEY_LENGTH,
-                                (size_t *)&key_size);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Request AEAD decryption on the crypto engine */
-    status = tfm_crypto_engine_aead_decrypt(key_type,
-                                            alg,
-                                            key_data,
-                                            key_size,
-                                            nonce,
-                                            nonce_length,
-                                            additional_data,
-                                            additional_data_length,
-                                            ciphertext,
-                                            ciphertext_length,
-                                            plaintext,
-                                            plaintext_size,
-                                            (uint32_t *)&(out_vec[0].len));
-    if (status != PSA_SUCCESS) {
-        out_vec[0].len = 0;
-    }
-
+    status = psa_aead_decrypt(key_handle, alg, nonce, nonce_length,
+                              additional_data, additional_data_length,
+                              ciphertext, ciphertext_length,
+                              plaintext, plaintext_size, &out_vec[0].len);
     return status;
 }
 /*!@}*/

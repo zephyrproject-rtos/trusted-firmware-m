@@ -31,18 +31,14 @@ psa_status_t tfm_audit_core_get_record_info_veneer(psa_invec *in_vec, size_t in_
 psa_status_t tfm_audit_core_delete_record_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 
 /******** TFM_SP_CRYPTO ********/
+psa_status_t tfm_tfm_crypto_allocate_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_import_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_destroy_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_information_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_export_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_key_policy_init_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_key_policy_set_usage_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_key_policy_get_usage_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_key_policy_get_algorithm_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_set_key_policy_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_policy_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_lifetime_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_tfm_crypto_set_key_lifetime_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_set_iv_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_encrypt_setup_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_cipher_decrypt_setup_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);

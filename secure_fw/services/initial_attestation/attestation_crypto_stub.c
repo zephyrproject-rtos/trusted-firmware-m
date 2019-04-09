@@ -15,7 +15,7 @@
  * simulates a real ECDSA P-256 over SHA256 signature generation. The size of
  * the signature will be equal with a real one.
  */
-psa_status_t psa_asymmetric_sign(psa_key_slot_t key,
+psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
                                  psa_algorithm_t alg,
                                  const uint8_t *hash,
                                  size_t hash_length,

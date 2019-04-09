@@ -29,6 +29,7 @@ set (MBEDTLS_TARGET_NAME "mbedtls_sst_lib")
 
 #Set mbedTLS compiler flags
 set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_SERVICES})
+string(APPEND MBEDTLS_C_FLAGS " -DMBEDTLS_CONFIG_FILE=\\\\\\\"tfm_mbedtls_config.h\\\\\\\"")
 
 ###Get the definition of what files we need to build
 include(CMakeLists.inc)

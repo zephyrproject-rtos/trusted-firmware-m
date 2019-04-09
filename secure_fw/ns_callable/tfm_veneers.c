@@ -25,18 +25,14 @@ psa_status_t audit_core_get_record_info(psa_invec *, size_t, psa_outvec *, size_
 psa_status_t audit_core_delete_record(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_CRYPTO ********/
+psa_status_t tfm_crypto_allocate_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_import_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_destroy_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_information(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_export_key(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_init(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_set_usage(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_get_usage(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_key_policy_get_algorithm(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_set_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_lifetime(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_set_key_lifetime(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_set_iv(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
@@ -121,18 +117,14 @@ TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_record_info)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_delete_record)
 
 /******** TFM_SP_CRYPTO ********/
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_allocate_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_key)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_init)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_set_usage)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_get_usage)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_policy_get_algorithm)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_policy)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_policy)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_lifetime)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_lifetime)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_set_iv)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_encrypt_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_decrypt_setup)

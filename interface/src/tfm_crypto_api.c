@@ -19,33 +19,33 @@
 /* FixMe: Here temporarily until it's added to the framework headers */
 #define PSA_IS_HANDLE_VALID(handle) ((handle) > (psa_handle_t)0)
 
-#define PSA_CONNECT(service)                                \
-    psa_handle_t handle;                                    \
-    handle = psa_connect(service##_SID, service##_MIN_VER); \
-    if (!PSA_IS_HANDLE_VALID(handle)) {                     \
-        return PSA_ERROR_UNKNOWN_ERROR;                     \
-    }                                                       \
+#define PSA_CONNECT(service)                                    \
+    psa_handle_t ipc_handle;                                    \
+    ipc_handle = psa_connect(service##_SID, service##_MIN_VER); \
+    if (!PSA_IS_HANDLE_VALID(ipc_handle)) {                     \
+        return PSA_ERROR_GENERIC_ERROR;                         \
+    }                                                           \
 
-#define PSA_CLOSE() psa_close(handle)
+#define PSA_CLOSE() psa_close(ipc_handle)
 
-#define API_DISPATCH(sfn_name, sfn_id)                     \
-    psa_call(handle, /*PSA_IPC_CALL,*/                     \
-        in_vec, ARRAY_SIZE(in_vec),                        \
+#define API_DISPATCH(sfn_name, sfn_id)                          \
+    psa_call(ipc_handle, /*PSA_IPC_CALL,*/                      \
+        in_vec, ARRAY_SIZE(in_vec),                             \
         out_vec, ARRAY_SIZE(out_vec))
 
-#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)           \
-    psa_call(handle, /*PSA_IPC_CALL,*/                     \
-        in_vec, ARRAY_SIZE(in_vec),                        \
+#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                \
+    psa_call(ipc_handle, /*PSA_IPC_CALL,*/                      \
+        in_vec, ARRAY_SIZE(in_vec),                             \
         (psa_outvec *)NULL, 0)
 #else
-#define API_DISPATCH(sfn_name, sfn_id)                         \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,   \
-        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                  \
+#define API_DISPATCH(sfn_name, sfn_id)                          \
+    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,    \
+        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                   \
         (uint32_t)out_vec, ARRAY_SIZE(out_vec))
 
-#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)               \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,   \
-        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                  \
+#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                \
+    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,    \
+        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                   \
         (uint32_t)NULL, 0)
 #endif
 
@@ -57,7 +57,65 @@ psa_status_t psa_crypto_init(void)
     return PSA_SUCCESS;
 }
 
-psa_status_t psa_import_key(psa_key_slot_t key,
+psa_status_t psa_allocate_key(psa_key_handle_t *handle)
+{
+    psa_status_t status;
+    const struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_ALLOCATE_KEY_SFID,
+    };
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = handle, .len = sizeof(psa_key_handle_t)},
+    };
+
+#ifdef TFM_PSA_API
+    PSA_CONNECT(TFM_CRYPTO);
+#endif
+
+    status = API_DISPATCH(tfm_crypto_allocate_key,
+                          TFM_CRYPTO_ALLOCATE_KEY);
+#ifdef TFM_PSA_API
+    PSA_CLOSE();
+#endif
+
+    return status;
+}
+
+psa_status_t psa_open_key(psa_key_lifetime_t lifetime,
+                          psa_key_id_t id,
+                          psa_key_handle_t *handle)
+{
+    (void)lifetime;
+    (void)id;
+    (void)handle;
+
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
+                            psa_key_id_t id,
+                            psa_key_handle_t *handle)
+{
+    (void)lifetime;
+    (void)id;
+    (void)handle;
+
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_close_key(psa_key_handle_t handle)
+{
+    (void)handle;
+
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_import_key(psa_key_handle_t handle,
                             psa_key_type_t type,
                             const uint8_t *data,
                             size_t data_length)
@@ -65,7 +123,7 @@ psa_status_t psa_import_key(psa_key_slot_t key,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_IMPORT_KEY_SFID,
-        .key = key,
+        .key_handle = handle,
         .type = type,
     };
     psa_invec in_vec[] = {
@@ -86,12 +144,12 @@ psa_status_t psa_import_key(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_destroy_key(psa_key_slot_t key)
+psa_status_t psa_destroy_key(psa_key_handle_t handle)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_DESTROY_KEY_SFID,
-        .key = key,
+        .key_handle = handle,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -110,14 +168,14 @@ psa_status_t psa_destroy_key(psa_key_slot_t key)
     return status;
 }
 
-psa_status_t psa_get_key_information(psa_key_slot_t key,
+psa_status_t psa_get_key_information(psa_key_handle_t handle,
                                      psa_key_type_t *type,
                                      size_t *bits)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_INFORMATION_SFID,
-        .key = key,
+        .key_handle = handle,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -140,7 +198,7 @@ psa_status_t psa_get_key_information(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_export_key(psa_key_slot_t key,
+psa_status_t psa_export_key(psa_key_handle_t handle,
                             uint8_t *data,
                             size_t data_size,
                             size_t *data_length)
@@ -148,7 +206,7 @@ psa_status_t psa_export_key(psa_key_slot_t key,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_EXPORT_KEY_SFID,
-        .key = key,
+        .key_handle = handle,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -173,12 +231,12 @@ psa_status_t psa_export_key(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_export_public_key(psa_key_slot_t key,
+psa_status_t psa_export_public_key(psa_key_handle_t handle,
                                    uint8_t *data,
                                    size_t data_size,
                                    size_t *data_length)
 {
-    (void)key;
+    (void)handle;
     (void)data;
     (void)data_size;
     (void)data_length;
@@ -187,149 +245,43 @@ psa_status_t psa_export_public_key(psa_key_slot_t key,
     return PSA_ERROR_NOT_SUPPORTED;
 }
 
-void psa_key_policy_init(psa_key_policy_t *policy)
+psa_status_t psa_copy_key(psa_key_handle_t source_handle,
+                          psa_key_handle_t target_handle,
+                          const psa_key_policy_t *constraint)
 {
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_POLICY_INIT_SFID,
-    };
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = policy, .len = sizeof(psa_key_policy_t)},
-    };
+    (void)source_handle;
+    (void)target_handle;
+    (void)constraint;
 
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-    handle = psa_connect(TFM_CRYPTO_SID,
-                         TFM_CRYPTO_MIN_VER);
-    if (!PSA_IS_HANDLE_VALID(handle)) {
-        return;
-    }
-#endif
-
-    /* PSA API returns void so just ignore error value returned */
-    status = API_DISPATCH(tfm_crypto_key_policy_init,
-                          TFM_CRYPTO_KEY_POLICY_INIT);
-#ifdef TFM_PSA_API
-    PSA_CLOSE();
-#endif
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
 }
 
 void psa_key_policy_set_usage(psa_key_policy_t *policy,
                               psa_key_usage_t usage,
                               psa_algorithm_t alg)
 {
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_POLICY_SET_USAGE_SFID,
-        .usage = usage,
-        .alg = alg,
-    };
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = policy, .len = sizeof(psa_key_policy_t)},
-    };
-
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-    handle = psa_connect(TFM_CRYPTO_SID,
-                         TFM_CRYPTO_MIN_VER);
-    if (!PSA_IS_HANDLE_VALID(handle)) {
-        return;
-    }
-#endif
-
-    /* PSA API returns void so just ignore error value returned */
-    status = API_DISPATCH(tfm_crypto_key_policy_set_usage,
-                          TFM_CRYPTO_KEY_POLICY_SET_USAGE);
-#ifdef TFM_PSA_API
-    PSA_CLOSE();
-#endif
+    policy->usage = usage;
+    policy->alg = alg;
 }
 
 psa_key_usage_t psa_key_policy_get_usage(const psa_key_policy_t *policy)
 {
-    psa_status_t status;
-    psa_key_usage_t usage;
-
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_POLICY_GET_USAGE_SFID,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = policy, .len = sizeof(psa_key_policy_t)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = &usage, .len = sizeof(psa_key_usage_t)},
-    };
-
-    /* Initialise to a sensible default to avoid returning an uninitialised
-     * value in case the secure function fails.
-     */
-    usage = 0;
-
-#ifdef TFM_PSA_API
-    PSA_CONNECT(TFM_CRYPTO);
-#endif
-
-    /* The PSA API does not return an error, so ignore any error from TF-M */
-    status = API_DISPATCH(tfm_crypto_key_policy_get_usage,
-                          TFM_CRYPTO_KEY_POLICY_GET_USAGE);
-#ifdef TFM_PSA_API
-    PSA_CLOSE();
-#endif
-
-    return usage;
+    return policy->usage;
 }
 
 psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
 {
-    psa_status_t status;
-    psa_algorithm_t alg;
-
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_POLICY_GET_ALGORITHM_SFID,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = policy, .len = sizeof(psa_key_policy_t)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = &alg, .len = sizeof(psa_algorithm_t)},
-    };
-
-    /* Initialise to a sensible default to avoid returning an uninitialised
-     * value in case the secure function fails.
-     */
-    alg = 0;
-
-#ifdef TFM_PSA_API
-    PSA_CONNECT(TFM_CRYPTO);
-#endif
-
-    /* The PSA API does not return an error, so ignore any error from TF-M */
-    status = API_DISPATCH(tfm_crypto_key_policy_get_algorithm,
-                          TFM_CRYPTO_KEY_POLICY_GET_ALGORITHM);
-#ifdef TFM_PSA_API
-    PSA_CLOSE();
-#endif
-
-    return alg;
+    return policy->alg;
 }
 
-psa_status_t psa_set_key_policy(psa_key_slot_t key,
+psa_status_t psa_set_key_policy(psa_key_handle_t handle,
                                 const psa_key_policy_t *policy)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_SET_KEY_POLICY_SFID,
-        .key = key,
+        .key_handle = handle,
     };
 
     psa_invec in_vec[] = {
@@ -350,13 +302,13 @@ psa_status_t psa_set_key_policy(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_get_key_policy(psa_key_slot_t key,
+psa_status_t psa_get_key_policy(psa_key_handle_t handle,
                                 psa_key_policy_t *policy)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_POLICY_SFID,
-        .key = key,
+        .key_handle = handle,
     };
 
     psa_invec in_vec[] = {
@@ -379,40 +331,13 @@ psa_status_t psa_get_key_policy(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_set_key_lifetime(psa_key_slot_t key,
-                                  psa_key_lifetime_t lifetime)
-{
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_SET_KEY_LIFETIME_SFID,
-        .key = key,
-        .lifetime = lifetime,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-
-#ifdef TFM_PSA_API
-    PSA_CONNECT(TFM_CRYPTO);
-#endif
-
-    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_set_key_lifetime,
-                                    TFM_CRYPTO_SET_KEY_LIFETIME);
-#ifdef TFM_PSA_API
-    PSA_CLOSE();
-#endif
-
-    return status;
-}
-
-psa_status_t psa_get_key_lifetime(psa_key_slot_t key,
+psa_status_t psa_get_key_lifetime(psa_key_handle_t handle,
                                   psa_key_lifetime_t *lifetime)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_LIFETIME_SFID,
-        .key = key,
+        .key_handle = handle,
     };
 
     psa_invec in_vec[] = {
@@ -435,6 +360,20 @@ psa_status_t psa_get_key_lifetime(psa_key_slot_t key,
     return status;
 }
 
+psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
+                                    unsigned char *iv,
+                                    size_t iv_size,
+                                    size_t *iv_length)
+{
+    (void) operation;
+    (void) iv;
+    (void) iv_size;
+    (void) iv_length;
+
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
 psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                const unsigned char *iv,
                                size_t iv_length)
@@ -442,7 +381,7 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_SET_IV_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -467,15 +406,15 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
 }
 
 psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
-                                      psa_key_slot_t key,
+                                      psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -499,15 +438,15 @@ psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
 }
 
 psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
-                                      psa_key_slot_t key,
+                                      psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -540,7 +479,7 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_UPDATE_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -573,7 +512,7 @@ psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ABORT_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -604,7 +543,7 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_FINISH_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -638,7 +577,7 @@ psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_SETUP_SFID,
         .alg = alg,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -669,7 +608,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_UPDATE_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -702,7 +641,7 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_FINISH_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -736,7 +675,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_VERIFY_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -765,7 +704,7 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_ABORT_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -788,16 +727,26 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
     return status;
 }
 
+psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
+                            psa_hash_operation_t *target_operation)
+{
+    (void)source_operation;
+    (void)target_operation;
+
+    /* TODO: This API is not supported yet */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
 psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
-                                psa_key_slot_t key,
+                                psa_key_handle_t handle,
                                 psa_algorithm_t alg)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_SIGN_SETUP_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -821,15 +770,15 @@ psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
 }
 
 psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
-                                  psa_key_slot_t key,
+                                  psa_key_handle_t handle,
                                   psa_algorithm_t alg)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_VERIFY_SETUP_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -859,7 +808,7 @@ psa_status_t psa_mac_update(psa_mac_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_UPDATE_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -891,7 +840,7 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_SIGN_FINISH_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -925,7 +874,7 @@ psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_VERIFY_FINISH_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -955,7 +904,7 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_ABORT_SFID,
-        .handle = operation->handle,
+        .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
@@ -978,7 +927,7 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
     return status;
 }
 
-psa_status_t psa_aead_encrypt(psa_key_slot_t key,
+psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
                               psa_algorithm_t alg,
                               const uint8_t *nonce,
                               size_t nonce_length,
@@ -993,7 +942,7 @@ psa_status_t psa_aead_encrypt(psa_key_slot_t key,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_AEAD_ENCRYPT_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
         .aead_in = {.nonce = {0}, .nonce_length = nonce_length}
     };
@@ -1023,12 +972,12 @@ psa_status_t psa_aead_encrypt(psa_key_slot_t key,
 #endif
 
 #ifdef TFM_PSA_API
-    size_t in_len = sizeof(in_vec)/sizeof(in_vec[0]);
+    size_t in_len = ARRAY_SIZE(in_vec);
     if (additional_data == NULL) {
-      in_len--;
+        in_len--;
     }
-    status = psa_call(handle, in_vec, in_len,
-                      out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+    status = psa_call(ipc_handle, in_vec, in_len,
+                      out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_aead_encrypt,
                           TFM_CRYPTO_AEAD_ENCRYPT);
@@ -1043,7 +992,7 @@ psa_status_t psa_aead_encrypt(psa_key_slot_t key,
     return status;
 }
 
-psa_status_t psa_aead_decrypt(psa_key_slot_t key,
+psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
                               psa_algorithm_t alg,
                               const uint8_t *nonce,
                               size_t nonce_length,
@@ -1058,7 +1007,7 @@ psa_status_t psa_aead_decrypt(psa_key_slot_t key,
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_AEAD_DECRYPT_SFID,
-        .key = key,
+        .key_handle = handle,
         .alg = alg,
         .aead_in = {.nonce = {0}, .nonce_length = nonce_length}
     };
@@ -1088,12 +1037,12 @@ psa_status_t psa_aead_decrypt(psa_key_slot_t key,
 #endif
 
 #ifdef TFM_PSA_API
-    size_t in_len = sizeof(in_vec)/sizeof(in_vec[0]);
+    size_t in_len = ARRAY_SIZE(in_vec);
     if (additional_data == NULL) {
-      in_len--;
+        in_len--;
     }
-    status = psa_call(handle, in_vec, in_len,
-                      out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+    status = psa_call(ipc_handle, in_vec, in_len,
+                      out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_aead_decrypt,
                           TFM_CRYPTO_AEAD_DECRYPT);

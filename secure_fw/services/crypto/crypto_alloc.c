@@ -5,31 +5,33 @@
  *
  */
 
-#include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include "tfm_crypto_defs.h"
+#include "tfm_mbedcrypto_include.h"
 
-#include "psa_crypto.h"
 #include "tfm_crypto_api.h"
-
-#include "tfm_crypto_struct.h"
+#include "tfm_crypto_defs.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 
 /**
  * \def TFM_CRYPTO_CONC_OPER_NUM
  *
- * \brief This value defines the maximum number of simultaneous operations
- *        supported by this implementation.
+ * \brief This is the default value for the maximum number of concurrent
+ *        operations that can be active (allocated) at any time, supported
+ *        by the implementation
  */
+#ifndef TFM_CRYPTO_CONC_OPER_NUM
 #define TFM_CRYPTO_CONC_OPER_NUM (8)
+#endif
 
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
     enum tfm_crypto_operation_type type; /*!< Type of the operation */
     union {
-        struct tfm_cipher_operation_s cipher;   /*!< Cipher operation context */
-        struct tfm_mac_operation_s mac;         /*!< MAC operation context */
-        struct tfm_hash_operation_s hash;       /*!< Hash operation context */
+        psa_cipher_operation_t cipher;   /*!< Cipher operation context */
+        psa_mac_operation_t mac;         /*!< MAC operation context */
+        psa_hash_operation_t hash;       /*!< Hash operation context */
     } operation;
 };
 
@@ -51,13 +53,13 @@ static void memset_operation_context(uint32_t index)
 
     switch(operation[index].type) {
     case TFM_CRYPTO_CIPHER_OPERATION:
-        mem_size = sizeof(struct tfm_cipher_operation_s);
+        mem_size = sizeof(psa_cipher_operation_t);
         break;
     case TFM_CRYPTO_MAC_OPERATION:
-        mem_size = sizeof(struct tfm_mac_operation_s);
+        mem_size = sizeof(psa_mac_operation_t);
         break;
     case TFM_CRYPTO_HASH_OPERATION:
-        mem_size = sizeof(struct tfm_hash_operation_s);
+        mem_size = sizeof(psa_hash_operation_t);
         break;
     case TFM_CRYPTO_OPERATION_NONE:
     default:

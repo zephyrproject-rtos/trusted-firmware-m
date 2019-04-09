@@ -79,7 +79,7 @@ attest_register_initial_attestation_key(void)
     psa_key_type_t attest_key_type;
     size_t public_key_size;
     psa_status_t crypto_res;
-    psa_key_policy_t policy;
+    psa_key_policy_t policy = psa_key_policy_init();
 
     /* Key(s) should be unregistered at this point */
     if (private_key_registered != 0 || public_key_registered != 0) {
@@ -102,9 +102,8 @@ attest_register_initial_attestation_key(void)
     }
 
     /* Setup the key policy for private key */
-    psa_key_policy_init(&policy);
     psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_SIGN, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy((psa_key_slot_t)ATTEST_PRIVATE_KEY_SLOT,
+    crypto_res = psa_set_key_policy((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT,
                                     &policy);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
@@ -117,7 +116,7 @@ attest_register_initial_attestation_key(void)
     attest_key_type = PSA_KEY_TYPE_RAW_DATA;
 
     /* Register private key to crypto service */
-    crypto_res = psa_import_key((psa_key_slot_t)ATTEST_PRIVATE_KEY_SLOT,
+    crypto_res = psa_import_key((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT,
                                 attest_key_type,
                                 attest_key.priv_key,
                                 attest_key.priv_key_size);
@@ -133,9 +132,9 @@ attest_register_initial_attestation_key(void)
     }
 
     /* Setup the key policy for public key */
-    psa_key_policy_init(&policy);
+    policy = psa_key_policy_init();
     psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_VERIFY, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy((psa_key_slot_t)ATTEST_PUBLIC_KEY_SLOT,
+    crypto_res = psa_set_key_policy((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT,
                                     &policy);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
@@ -150,7 +149,7 @@ attest_register_initial_attestation_key(void)
     /* Register public key to crypto service */
     public_key_size = attest_key.pubx_key_size + attest_key.puby_key_size;
 
-    crypto_res = psa_import_key((psa_key_slot_t)ATTEST_PUBLIC_KEY_SLOT,
+    crypto_res = psa_import_key((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT,
                                 attest_key_type,
                                 attest_key.pubx_key,
                                 public_key_size);
@@ -173,14 +172,14 @@ attest_unregister_initial_attestation_key(void)
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    crypto_res = psa_destroy_key((psa_key_slot_t)ATTEST_PRIVATE_KEY_SLOT);
+    crypto_res = psa_destroy_key((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
     private_key_registered = 0;
 
     if (public_key_registered) {
-        crypto_res = psa_destroy_key((psa_key_slot_t)ATTEST_PUBLIC_KEY_SLOT);
+        crypto_res = psa_destroy_key((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT);
         if (crypto_res != PSA_SUCCESS) {
             return PSA_ATTEST_ERR_GENERAL;
         }

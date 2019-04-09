@@ -122,17 +122,17 @@ static void tfm_crypto_test_6001(struct test_result_t *ret)
 
 static void tfm_crypto_test_6002(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CBC_BASE, ret);
+    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CBC_NO_PADDING, ret);
 }
 
 static void tfm_crypto_test_6003(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CFB_BASE, ret);
+    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CFB, ret);
 }
 
 static void tfm_crypto_test_6004(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_KEY_TYPE_DES, PSA_ALG_CBC_BASE, ret);
+    psa_cipher_test(PSA_KEY_TYPE_DES, PSA_ALG_CBC_NO_PADDING, ret);
 }
 
 static void tfm_crypto_test_6005(struct test_result_t *ret)
@@ -160,7 +160,7 @@ static void tfm_crypto_test_6008(struct test_result_t *ret)
 static void tfm_crypto_test_6009(struct test_result_t *ret)
 {
     /* HMAC is not a block cipher */
-    psa_invalid_cipher_test(PSA_KEY_TYPE_HMAC, PSA_ALG_CFB_BASE, 16, ret);
+    psa_invalid_cipher_test(PSA_KEY_TYPE_HMAC, PSA_ALG_CFB, 16, ret);
 }
 
 static void tfm_crypto_test_6010(struct test_result_t *ret)
