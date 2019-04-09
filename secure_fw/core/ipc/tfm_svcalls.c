@@ -65,6 +65,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
     uint32_t minor_version;
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
+    psa_handle_t connect_handle;
 
     TFM_ASSERT(args != NULL);
     sid = (uint32_t)args[0];
@@ -74,6 +75,15 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
     service = tfm_spm_get_service_by_sid(sid);
     if (!service) {
         tfm_panic();
+    }
+
+    /*
+     * Create connection handle here since it is possible to return the error
+     * code to client when creation fails.
+     */
+    connect_handle = tfm_spm_create_conn_handle(service);
+    if (connect_handle == PSA_NULL_HANDLE) {
+        return PSA_CONNECTION_BUSY;
     }
 
     /*
@@ -93,7 +103,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
     }
 
     /* No input or output needed for connect message */
-    msg = tfm_spm_create_msg(service, PSA_NULL_HANDLE, PSA_IPC_CONNECT,
+    msg = tfm_spm_create_msg(service, connect_handle, PSA_IPC_CONNECT,
                              ns_caller, NULL, 0, NULL, 0, NULL);
     if (!msg) {
         /* Have no enough resource to create message */
@@ -762,7 +772,6 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     psa_status_t status;
     struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *msg = NULL;
-    psa_handle_t connect_handle;
     int32_t ret = PSA_SUCCESS;
 
     TFM_ASSERT(args != NULL);
@@ -792,20 +801,16 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     switch (msg->msg.type) {
     case PSA_IPC_CONNECT:
         /*
-         * Reply to PSA_IPC_CONNECT message. Connect handle is created if the
+         * Reply to PSA_IPC_CONNECT message. Connect handle is returned if the
          * input status is PSA_SUCCESS. Others return values are based on the
          * input status.
          */
         if (status == PSA_SUCCESS) {
-            connect_handle = tfm_spm_create_conn_handle(service);
-            if (connect_handle == PSA_NULL_HANDLE) {
-                tfm_panic();
-            }
-            ret = connect_handle;
+            ret = msg->handle;
 
             /* Set reverse handle after connection created if needed. */
             if (msg->msg.rhandle) {
-                tfm_spm_set_rhandle(service, connect_handle, msg->msg.rhandle);
+                tfm_spm_set_rhandle(service, msg->handle, msg->msg.rhandle);
             }
         } else if (status == PSA_CONNECTION_REFUSED) {
             ret = PSA_CONNECTION_REFUSED;

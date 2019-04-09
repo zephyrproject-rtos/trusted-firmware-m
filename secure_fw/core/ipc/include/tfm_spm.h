@@ -220,8 +220,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  *
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
- * \prarm[in] handle        Connect handle return by psa_connect(). Should
- *                          be \ref PSA_NULL_HANDLE in psa_connect().
+ * \prarm[in] handle        Connect handle return by psa_connect().
  * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
  *                          PSA_IPC_DISCONNECT
  * \param[in] ns_caller     Whether from NS caller
