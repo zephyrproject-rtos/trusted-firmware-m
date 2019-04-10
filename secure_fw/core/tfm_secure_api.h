@@ -36,9 +36,6 @@
 #error TFM_LVL is not defined!
 #endif
 
-#define TFM_MEMORY_ACCESS_RO 1U
-#define TFM_MEMORY_ACCESS_RW 2U
-
 extern void tfm_secure_api_error_handler(void);
 
 typedef int32_t(*sfn_t)(int32_t, int32_t, int32_t, int32_t);
@@ -67,6 +64,11 @@ enum tfm_ns_region_e {
     TFM_NS_REGION_PERIPH_1,
     TFM_NS_REGION_PERIPH_2,
     TFM_NS_SECONDARY_IMAGE_REGION,
+};
+
+enum tfm_memory_access_e {
+    TFM_MEMORY_ACCESS_RO = 1,
+    TFM_MEMORY_ACCESS_RW = 2,
 };
 
 extern int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share);
