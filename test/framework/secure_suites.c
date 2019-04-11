@@ -35,6 +35,9 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
 
+    /* Crypto test cases */
+    {&register_testsuite_s_crypto_interface, 0, 0, 0},
+
 #ifndef TFM_PSA_API
     /*
      * FixMe: since the following partitions haven't implement the IPC model,
@@ -42,9 +45,6 @@ static struct test_suite_t test_suites[] = {
      */
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
-
-    /* Crypto test cases */
-    {&register_testsuite_s_crypto_interface, 0, 0, 0},
 
     /* Secure initial attestation service test cases */
     {&register_testsuite_s_attestation_interface, 0, 0, 0},

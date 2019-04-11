@@ -25,6 +25,7 @@ extern "C" {
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "platform/ext/common/tfm_mbedtls_config.h"
 #else
+// cppcheck-suppress preprocessorErrorDirective
 #include MBEDTLS_CONFIG_FILE
 #endif
 

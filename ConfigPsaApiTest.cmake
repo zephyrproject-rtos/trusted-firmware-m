@@ -14,7 +14,7 @@ if(NOT DEFINED TARGET_PLATFORM)
 elseif(${TARGET_PLATFORM} STREQUAL "AN521")
 	set(PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/Mps2AN521.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "AN519")
-	set (PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/Mps2AN519.cmake")
+	set(PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/Mps2AN519.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_A")
 	set(PLATFORM_CMAKE_FILE "${CMAKE_CURRENT_LIST_DIR}/platform/ext/musca_a.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_B1")
@@ -28,6 +28,7 @@ endif()
 #definitions) based on these.
 set (REGRESSION False)
 set (CORE_TEST False)
+set (CORE_IPC False)
 set (PSA_API_TEST True)
 
 #TF-M isolation level: 1..3

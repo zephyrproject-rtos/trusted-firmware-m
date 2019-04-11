@@ -160,7 +160,12 @@ endif()
 if (CORE_TEST_IPC)
 	add_definitions(-DCORE_TEST_IPC)
 	set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
-	set(TEST_FRAMEWORK_NS ON)
+	# If PSA_API_TEST is enabled, don't run TF-M test framework from NS
+	if (PSA_API_TEST)
+	  set(TEST_FRAMEWORK_NS OFF)
+	else()
+	  set(TEST_FRAMEWORK_NS ON)
+	endif()
 endif()
 
 if (SERVICE_TEST_S)

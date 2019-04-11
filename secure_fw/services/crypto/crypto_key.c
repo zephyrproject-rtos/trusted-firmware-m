@@ -13,6 +13,12 @@
 #include "tfm_crypto_defs.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 
+/* FixMe: Use PSA_CONNECTION_REFUSED when performing parameter
+ *        integrity checks but this will have to be revised
+ *        when the full set of error codes mandated by PSA FF
+ *        is available.
+ */
+
 /**
  * \brief This is the default value of maximum number of simultaneous
  *        key stores supported.
@@ -153,19 +159,19 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
     struct tfm_crypto_key_storage_s *key_store = NULL;
     size_t i;
 
-    if ((in_len != 3) || (out_len != 0)) {
+    if ((in_len != 2) || (out_len != 0)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
-        (in_vec[1].len != sizeof(psa_key_type_t))) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
-    psa_key_type_t type = *((psa_key_type_t *)in_vec[1].base);
-    const uint8_t *data = in_vec[2].base;
-    size_t data_length = in_vec[2].len;
+    psa_key_slot_t key = iov->key;
+    psa_key_type_t type = iov->type;
+    const uint8_t *data = in_vec[1].base;
+    size_t data_length = in_vec[1].len;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
@@ -204,11 +210,12 @@ psa_status_t tfm_crypto_destroy_key(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if (in_vec[0].len != sizeof(psa_key_slot_t)) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
 
     key_store = get_key_store(key);
     if (key_store == NULL) {
@@ -240,13 +247,14 @@ psa_status_t tfm_crypto_get_key_information(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(psa_key_type_t)) ||
         (out_vec[1].len != sizeof(size_t))) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
     psa_key_type_t *type = out_vec[0].base;
     size_t *bits = out_vec[1].base;
 
@@ -279,11 +287,12 @@ psa_status_t tfm_crypto_export_key(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if (in_vec[0].len != sizeof(psa_key_slot_t)) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
     uint8_t *data = out_vec[0].base;
     size_t data_size = out_vec[0].len;
 
@@ -310,11 +319,12 @@ psa_status_t tfm_crypto_key_policy_init(psa_invec in_vec[],
                                         psa_outvec out_vec[],
                                         size_t out_len)
 {
-    if ((in_len != 0) || (out_len != 1)) {
+    if ((in_len != 1) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if (out_vec[0].len != sizeof(psa_key_policy_t)) {
+    if ((out_vec[0].len != sizeof(psa_key_policy_t)) ||
+        (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_CONNECTION_REFUSED;
     }
 
@@ -331,19 +341,19 @@ psa_status_t tfm_crypto_key_policy_set_usage(psa_invec in_vec[],
                                              psa_outvec out_vec[],
                                              size_t out_len)
 {
-    if ((in_len != 2) || (out_len != 1)) {
+    if ((in_len != 1) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
     if ((out_vec[0].len != sizeof(psa_key_policy_t)) ||
-        (in_vec[0].len != sizeof(psa_key_usage_t))  ||
-        (in_vec[1].len != sizeof(psa_algorithm_t))) {
+        (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_policy_t *policy = out_vec[0].base;
-    psa_key_usage_t usage = *((psa_key_usage_t *)in_vec[0].base);
-    psa_algorithm_t alg = *((psa_algorithm_t *)in_vec[1].base);
+    psa_key_usage_t usage = iov->usage;
+    psa_algorithm_t alg = iov->alg;
 
     policy->usage = usage;
     policy->alg = alg;
@@ -356,16 +366,17 @@ psa_status_t tfm_crypto_key_policy_get_usage(psa_invec in_vec[],
                                              psa_outvec out_vec[],
                                              size_t out_len)
 {
-    if ((in_len != 1) || (out_len != 1)) {
+    if ((in_len != 2) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_policy_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
+        (in_vec[1].len != sizeof(psa_key_policy_t)) ||
         (out_vec[0].len != sizeof(psa_key_usage_t))) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    const psa_key_policy_t *policy = in_vec[0].base;
+    const psa_key_policy_t *policy = in_vec[1].base;
     psa_key_usage_t *usage = out_vec[0].base;
 
     *usage = policy->usage;
@@ -378,16 +389,17 @@ psa_status_t tfm_crypto_key_policy_get_algorithm(psa_invec in_vec[],
                                                  psa_outvec out_vec[],
                                                  size_t out_len)
 {
-    if ((in_len != 1) || (out_len != 1)) {
+    if ((in_len != 2) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_policy_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
+        (in_vec[1].len != sizeof(psa_key_policy_t)) ||
         (out_vec[0].len != sizeof(psa_algorithm_t))) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    const psa_key_policy_t *policy = in_vec[0].base;
+    const psa_key_policy_t *policy = in_vec[1].base;
     psa_algorithm_t *alg = out_vec[0].base;
 
     *alg = policy->alg;
@@ -406,12 +418,13 @@ psa_status_t tfm_crypto_set_key_policy(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (in_vec[1].len != sizeof(psa_key_policy_t))) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
     const psa_key_policy_t *policy = in_vec[1].base;
 
     /* Check that the policy is valid */
@@ -452,12 +465,13 @@ psa_status_t tfm_crypto_get_key_policy(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(psa_key_policy_t))) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
     psa_key_policy_t *policy = out_vec[0].base;
 
     key_store = get_key_store(key);
@@ -477,17 +491,17 @@ psa_status_t tfm_crypto_set_key_lifetime(psa_invec in_vec[],
 {
     struct tfm_crypto_key_storage_s *key_store = NULL;
 
-    if ((in_len != 2) || (out_len != 0)) {
+    if ((in_len != 1) || (out_len != 0)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
-        (in_vec[1].len != sizeof(psa_key_lifetime_t))) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
-    psa_key_lifetime_t lifetime = *((psa_key_lifetime_t *)in_vec[1].base);
+    psa_key_slot_t key = iov->key;
+    psa_key_lifetime_t lifetime = iov->lifetime;
 
     /* Check that the lifetime is valid */
     if (lifetime != PSA_KEY_LIFETIME_VOLATILE
@@ -529,12 +543,13 @@ psa_status_t tfm_crypto_get_key_lifetime(psa_invec in_vec[],
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len != sizeof(psa_key_slot_t)) ||
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(psa_key_lifetime_t))) {
         return PSA_CONNECTION_REFUSED;
     }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
-    psa_key_slot_t key = *((psa_key_slot_t *)in_vec[0].base);
+    psa_key_slot_t key = iov->key;
     psa_key_lifetime_t *lifetime = out_vec[0].base;
 
     key_store = get_key_store(key);

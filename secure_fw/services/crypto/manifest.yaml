@@ -13,6 +13,7 @@
   "entry_point": "tfm_crypto_init",
   "stack_size": "0x2000",
   "heap_size": "0x0400",
+  "tfm_partition_ipc": true,
   "secure_functions": [
     {
       "sfid": "TFM_CRYPTO_IMPORT_KEY_SFID",
@@ -261,6 +262,16 @@
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
+    },
+  ],
+  "services" : [
+    {
+      "name": "TFM_CRYPTO_SID",
+      "sid": "0x00004000",
+      "signal": "TFM_CRYPTO_SIG",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
     },
   ],
   "source_files": [

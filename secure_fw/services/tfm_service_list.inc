@@ -58,6 +58,16 @@
 },
 
 
+/******** TFM_SP_CRYPTO ********/
+{
+        "TFM_CRYPTO_SID",
+        TFM_SP_CRYPTO_ID,
+        TFM_CRYPTO_SIG,
+        0x00004000,
+        true,
+        1,
+        TFM_VERSION_POLICY_STRICT
+},
 
 
 

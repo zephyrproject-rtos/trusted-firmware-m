@@ -16,6 +16,15 @@ extern "C" {
 #include "tfm_api.h"
 #include "tfm_crypto_defs.h"
 #include "psa_crypto.h"
+#ifdef TFM_PSA_API
+#include "psa_service.h"
+
+/**
+ * \brief This define is a function pointer type to the Uniform Signature API
+ *        prototype.
+ */
+typedef psa_status_t (*tfm_crypto_us_t)(psa_invec[],size_t,psa_outvec[],size_t);
+#endif
 
 #define UNIFORM_SIGNATURE_API(api_name) \
     psa_status_t api_name(psa_invec[], size_t, psa_outvec[], size_t)
@@ -60,38 +69,35 @@ psa_status_t tfm_crypto_init_alloc(void);
 /**
  * \brief Allocate an operation context in the backend
  *
- * \param[in]  type Type of the operation context to allocate
- * \param[out] oper Pointer to the frontend operation
- * \param[out  ctx  Double pointer to the corresponding context
+ * \param[in]  type   Type of the operation context to allocate
+ * \param[out] handle Pointer to the hold the allocated handle
+ * \param[out  ctx    Double pointer to the corresponding context
  *
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
-                                        void *oper,
+                                        uint32_t *handle,
                                         void **ctx);
 /**
  * \brief Release an operation context in the backend
  *
- * \param[in]     type Type of the operation context to release
- * \param[in/out] oper Pointer to the frontend operation for the release
- *                     of the corresponding backend context
+ * \param[in] handle Pointer to the handle of the context to release
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_operation_release(enum tfm_crypto_operation_type type,
-                                          void *oper);
+psa_status_t tfm_crypto_operation_release(uint32_t *handle);
 /**
  * \brief Look up an operation context in the backend for the corresponding
  *        frontend operation
  *
- * \param[in]  type Type of the operation context to look up
- * \param[in]  oper Pointer to the frontend operation
- * \param[out] ctx  Double pointer to the corresponding context
+ * \param[in]  type   Type of the operation context to look up
+ * \param[in]  handle Handle of the context to lookup
+ * \param[out] ctx    Double pointer to the corresponding context
  *
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
-                                         const void *oper,
+                                         uint32_t handle,
                                          void **ctx);
 /**
  * \brief Retrieve a key from the provided key slot according to the key

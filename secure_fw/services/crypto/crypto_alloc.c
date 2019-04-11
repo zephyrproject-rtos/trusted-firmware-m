@@ -16,47 +16,6 @@
 #include "secure_fw/core/tfm_memory_utils.h"
 
 /**
- * \def LIST_OPERATION_LOOKUP
- *
- * \brief This is an X macro which enforces the correspondence
- *        between backend operation type (through the enum
- *        tfm_crypto_operation_type) and the corresponding frontend type
- */
-#define LIST_OPERATION_LOOKUP \
-    X(TFM_CRYPTO_CIPHER_OPERATION, psa_cipher_operation_t) \
-    X(TFM_CRYPTO_MAC_OPERATION, psa_mac_operation_t) \
-    X(TFM_CRYPTO_HASH_OPERATION, psa_hash_operation_t)
-
-/**
- * \def CHECK_ALIGNMENT
- *
- * \brief This macro checks the alignment of the operation object pointer which
- *        receives as input based on the requirement of the front end operation
- *        type. This macro expands in a case statement so it must be used in a
- *        switch-case construct. It sets the handle value it receives in input
- *        with the proper value or TFM_CRYPTO_INVALID_HANDLE in case the oper
- *        pointer does not satisfy alignment requirements of the front end type
- */
-#define CHECK_ALIGNMENT(e,t,oper,handle)                           \
-    case e:                                                        \
-        if ((uintptr_t)oper % offsetof(struct {char c; t x;},x)) { \
-            handle = TFM_CRYPTO_INVALID_HANDLE;                    \
-        } else {                                                   \
-            handle = ((t *)oper)->handle;                          \
-        }                                                          \
-        break;
-/**
- * \def GET_HANDLE_POINTER
- *
- * \brief This macro extracts the pointer to handle value from the object
- *        operation pointer it receives as input. This macro expands in a case
- *        statement so it must be used in a switch case-case construct.
- */
-#define GET_HANDLE_POINTER(e,t,oper,handle) \
-    case e:                                 \
-        handle = &(((t *)oper)->handle);    \
-        break;
-/**
  * \def TFM_CRYPTO_CONC_OPER_NUM
  *
  * \brief This value defines the maximum number of simultaneous operations
@@ -110,80 +69,6 @@ static void memset_operation_context(uint32_t index)
     (void)tfm_memset(mem_ptr, 0, mem_size);
 }
 
-/*
- * \brief Function used to extract the handle value from a pointer to a
- *        frontend operation
- *
- * \param[in] type Type of the operation context to extract from
- * \param[in] oper Pointer to the frontend operation
- *
- * \return handle 4-byte identifier associated to the context,
- *                TFM_CRYPTO_INVALID_HANDLE in case of problems
- *
- */
-static uint32_t get_handle(enum tfm_crypto_operation_type type,
-                           const void *oper)
-{
-    uint32_t handle = TFM_CRYPTO_INVALID_HANDLE;
-
-    /* Dereference the pointer */
-    switch(type) {
-    /* Generate the list of cases needed to check alignment for all the
-     * possible operation types listed in LIST_OPERATION_LOOKUP. The default
-     * case and TFM_CRYPTO_OPERATION_NONE must be created explicitly
-     */
-#define X(e,t) CHECK_ALIGNMENT(e,t,oper,handle)
-LIST_OPERATION_LOOKUP
-#undef X
-    case TFM_CRYPTO_OPERATION_NONE:
-    default:
-        break;
-    }
-
-    return handle;
-}
-
-/*
- * \brief Function used to set the handle value in a pointer to a
- *        frontend operation
- *
- * \param[in]  type Type of the operation context to extract from
- * \param[out] oper Pointer to the frontend operation
- *
- * \return handle 4-byte identifier associated to the context,
- *                TFM_CRYPTO_INVALID_HANDLE in case of problems
- *
- */
-static uint32_t set_handle(enum tfm_crypto_operation_type type,
-                           void *oper,
-                           uint32_t set_value)
-{
-    uint32_t *handle = NULL;
-
-    /* Extract the pointer value */
-    switch(type) {
-    /* Generate the list of cases needed to get the handle pointer for all the
-     * possible operation types listed in LIST_OPERATION_LOOKUP. The default
-     * case and TFM_CRYPTO_OPERATION_NONE must be created explicitly
-     */
-#define X(e,t) GET_HANDLE_POINTER(e,t,oper,handle)
-LIST_OPERATION_LOOKUP
-#undef X
-    case TFM_CRYPTO_OPERATION_NONE:
-    default:
-        break;
-    }
-
-    if (handle == NULL || ((uintptr_t)handle % sizeof(uint32_t))) {
-        return TFM_CRYPTO_INVALID_HANDLE;
-    }
-
-    /* Set the value by derefencing the pointer, alignment is correct */
-    *handle = set_value;
-
-    return set_value;
-}
-
 /*!
  * \defgroup public Public functions
  *
@@ -198,10 +83,10 @@ psa_status_t tfm_crypto_init_alloc(void)
 }
 
 psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
-                                        void *oper,
+                                        uint32_t *handle,
                                         void **ctx)
 {
-    uint32_t i = 0, handle;
+    uint32_t i = 0;
 
     /* Init to invalid values */
     if (ctx == NULL) {
@@ -213,30 +98,27 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
         if (operation[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
             operation[i].in_use = TFM_CRYPTO_IN_USE;
             operation[i].type = type;
-            handle = set_handle(type, oper, i);
-            if (handle == TFM_CRYPTO_INVALID_HANDLE) {
-                return PSA_ERROR_NOT_PERMITTED;
-            }
+            *handle = i;
             *ctx = (void *) &(operation[i].operation);
             return PSA_SUCCESS;
         }
     }
 
+    *handle = TFM_CRYPTO_INVALID_HANDLE;
     return PSA_ERROR_NOT_PERMITTED;
 }
 
-psa_status_t tfm_crypto_operation_release(enum tfm_crypto_operation_type type,
-                                          void *oper)
+psa_status_t tfm_crypto_operation_release(uint32_t *handle)
 {
-    uint32_t handle = get_handle(type, oper);
+    uint32_t h_val = *handle;
 
-    if ( (handle != TFM_CRYPTO_INVALID_HANDLE) &&
-         (handle < TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[handle].in_use == TFM_CRYPTO_IN_USE) ) {
-        memset_operation_context(handle);
-        operation[handle].in_use = TFM_CRYPTO_NOT_IN_USE;
-        operation[handle].type = TFM_CRYPTO_OPERATION_NONE;
-        (void)set_handle(type, oper, TFM_CRYPTO_INVALID_HANDLE);
+    if ( (h_val != TFM_CRYPTO_INVALID_HANDLE) &&
+         (h_val < TFM_CRYPTO_CONC_OPER_NUM) &&
+         (operation[h_val].in_use == TFM_CRYPTO_IN_USE) ) {
+        memset_operation_context(h_val);
+        operation[h_val].in_use = TFM_CRYPTO_NOT_IN_USE;
+        operation[h_val].type = TFM_CRYPTO_OPERATION_NONE;
+        *handle = TFM_CRYPTO_INVALID_HANDLE;
         return PSA_SUCCESS;
     }
 
@@ -244,11 +126,9 @@ psa_status_t tfm_crypto_operation_release(enum tfm_crypto_operation_type type,
 }
 
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
-                                         const void *oper,
+                                         uint32_t handle,
                                          void **ctx)
 {
-    uint32_t handle = get_handle(type, oper);
-
     if ( (handle != TFM_CRYPTO_INVALID_HANDLE) &&
          (handle < TFM_CRYPTO_CONC_OPER_NUM) &&
          (operation[handle].in_use == TFM_CRYPTO_IN_USE) &&

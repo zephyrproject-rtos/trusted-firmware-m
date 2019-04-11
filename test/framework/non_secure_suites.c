@@ -41,6 +41,9 @@ static struct test_suite_t test_suites[] = {
 
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
 
+    /* Non-secure Crypto test cases */
+    {&register_testsuite_ns_crypto_interface, 0, 0, 0},
+
 #ifndef TFM_PSA_API
     /*
      * FixMe: skip below test cases temporary since target service is not
@@ -48,9 +51,6 @@ static struct test_suite_t test_suites[] = {
      */
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
-
-    /* Non-secure Crypto test cases */
-    {&register_testsuite_ns_crypto_interface, 0, 0, 0},
 
     /* Non-secure initial attestation service test cases */
     {&register_testsuite_ns_attestation_interface, 0, 0, 0},

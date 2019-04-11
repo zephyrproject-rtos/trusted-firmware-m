@@ -7,13 +7,15 @@
 
 #include <limits.h>
 
-#include "tfm_crypto_defs.h"
-
-#include "crypto_engine.h"
-
-#include "psa_crypto.h"
-
 #include "tfm_crypto_api.h"
+#include "crypto_engine.h"
+#include "tfm_crypto_struct.h"
+
+/* FixMe: Use PSA_CONNECTION_REFUSED when performing parameter
+ *        integrity checks but this will have to be revised
+ *        when the full set of error codes mandated by PSA FF
+ *        is available.
+ */
 
 /**
  * \def CRYPTO_AEAD_MAX_KEY_LENGTH
@@ -29,17 +31,24 @@ static psa_status_t _psa_get_key_information(psa_key_slot_t key,
                                              psa_key_type_t *type,
                                              size_t *bits)
 {
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_GET_KEY_INFORMATION_SFID,
+        .key = key,
+    };
     psa_invec in_vec[] = {
-        {.base = &key, .len = sizeof(psa_key_slot_t)},
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
     };
     psa_outvec out_vec[] = {
         {.base = type, .len = sizeof(psa_key_type_t)},
         {.base = bits, .len = sizeof(size_t)}
     };
 
-    return tfm_crypto_get_key_information(
+    status = tfm_crypto_get_key_information(
                  in_vec, sizeof(in_vec)/sizeof(in_vec[0]),
                  out_vec, sizeof(out_vec)/sizeof(out_vec[0]));
+
+    return status;
 }
 
 /*!
@@ -58,28 +67,31 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     uint32_t key_size;
     psa_key_type_t key_type;
 
-    if ((in_len != 3) || (out_len != 1)) {
+    if ( !((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    if ((in_vec[0].len < (sizeof(psa_key_slot_t) + sizeof(psa_algorithm_t))) ||
-        (in_vec[0].len > (TFM_CRYPTO_MAX_NONCE_LENGTH
-                       + (sizeof(psa_key_slot_t) + sizeof(psa_algorithm_t))))) {
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_CONNECTION_REFUSED;
     }
-
-    const struct tfm_crypto_aead_pack_input *input_s = in_vec[0].base;
-    psa_key_slot_t key = input_s->key;
-    psa_algorithm_t alg = input_s->alg;
-    const uint8_t *nonce = input_s->nonce;
-    size_t nonce_length = in_vec[0].len - sizeof(psa_key_slot_t)
-                                        - sizeof(psa_algorithm_t);
-    const uint8_t *additional_data = in_vec[1].base;
-    size_t additional_data_length = in_vec[1].len;
-    const uint8_t *plaintext = in_vec[2].base;
-    size_t plaintext_length = in_vec[2].len;
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
+    psa_key_slot_t key = iov->key;
+    psa_algorithm_t alg = iov->alg;
+    const uint8_t *nonce = aead_pack_input->nonce;
+    size_t nonce_length = aead_pack_input->nonce_length;
+    const uint8_t *plaintext = in_vec[1].base;
+    size_t plaintext_length = in_vec[1].len;
     uint8_t *ciphertext = out_vec[0].base;
     size_t ciphertext_size = out_vec[0].len;
+    const uint8_t *additional_data = NULL;
+    size_t additional_data_length = 0;
+
+    /* Check if additional data has been passed and initialise it */
+    if (in_len == 3) {
+        additional_data = in_vec[2].base;
+        additional_data_length = in_vec[2].len;
+    }
 
     /* Initialise ciphertext_length to zero */
     out_vec[0].len = 0;
@@ -158,24 +170,31 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     uint32_t key_size;
     psa_key_type_t key_type;
 
-    if ((in_vec[0].len < (sizeof(psa_key_slot_t) + sizeof(psa_algorithm_t))) ||
-        (in_vec[0].len > (TFM_CRYPTO_MAX_NONCE_LENGTH
-                       + (sizeof(psa_key_slot_t) + sizeof(psa_algorithm_t))))) {
+    if ( !((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
-    const struct tfm_crypto_aead_pack_input *input_s = in_vec[0].base;
-    psa_key_slot_t key = input_s->key;
-    psa_algorithm_t alg = input_s->alg;
-    const uint8_t *nonce = input_s->nonce;
-    size_t nonce_length = in_vec[0].len - sizeof(psa_key_slot_t)
-                                        - sizeof(psa_algorithm_t);
-    const uint8_t *additional_data = in_vec[1].base;
-    size_t additional_data_length = in_vec[1].len;
-    const uint8_t *ciphertext = in_vec[2].base;
-    size_t ciphertext_length = in_vec[2].len;
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
+    psa_key_slot_t key = iov->key;
+    psa_algorithm_t alg = iov->alg;
+    const uint8_t *nonce = aead_pack_input->nonce;
+    size_t nonce_length = aead_pack_input->nonce_length;
+    const uint8_t *ciphertext = in_vec[1].base;
+    size_t ciphertext_length = in_vec[1].len;
     uint8_t *plaintext = out_vec[0].base;
     size_t plaintext_size = out_vec[0].len;
+    const uint8_t *additional_data = NULL;
+    size_t additional_data_length = 0;
+
+    /* Check if additional data has been passed and initialise it */
+    if (in_len == 3) {
+        additional_data = in_vec[2].base;
+        additional_data_length = in_vec[2].len;
+    }
 
     /* Initialise plaintext_length to zero */
     out_vec[0].len = 0;
