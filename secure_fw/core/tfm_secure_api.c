@@ -122,16 +122,17 @@ static void restore_caller_ctx(
  * \param[in] region_len    The size of the region, which should contain the
  *                          range
  *
- * \return 1 if the region contains the range, 0 otherwise.
+ * \return TFM_SUCCESS if the region contains the range,
+ *         TFM_ERROR_GENERIC otherwise.
  */
 static int32_t check_address_range(const void *p, size_t s,
                                    uintptr_t region_start, uint32_t region_len)
 {
-    int32_t range_in_region = 0;
+    int32_t range_in_region;
 
     /* Check for overflow in the range parameters */
     if ((uintptr_t)p > UINTPTR_MAX-s) {
-        return 0;
+        return TFM_ERROR_GENERIC;
     }
 
     /* We trust the region parameters, and don't check for overflow */
@@ -139,8 +140,11 @@ static int32_t check_address_range(const void *p, size_t s,
     /* Calculate the result */
     range_in_region = ((uintptr_t)p >= region_start) &&
                       ((uintptr_t)p+s <= region_start+region_len);
-
-    return range_in_region;
+    if (range_in_region) {
+        return TFM_SUCCESS;
+    } else {
+        return TFM_ERROR_GENERIC;
+    }
 }
 
 /**
@@ -156,7 +160,8 @@ static int32_t check_address_range(const void *p, size_t s,
  * \param[in] s      The size of the range to check
  * \param[in] flags  The flags to pass to the cmse_check_address_range func
  *
- * \return 1 if the partition has access to the memory range, 0 otherwise.
+ * \return TFM_SUCCESS if the partition has access to the memory range,
+ *         TFM_ERROR_GENERIC otherwise.
  */
 static int32_t has_access_to_region(const void *p, size_t s, int flags)
 {
@@ -172,7 +177,7 @@ static int32_t has_access_to_region(const void *p, size_t s, int flags)
                           cmse_check_address_range((void *)p, s, flags) != NULL;
 
     if (range_access_allowed_by_mpu) {
-        return 1;
+        return TFM_SUCCESS;
     }
 
     /* If the check for the current MPU settings fails, check for the share
@@ -180,17 +185,22 @@ static int32_t has_access_to_region(const void *p, size_t s, int flags)
      */
     if ((flags & CMSE_NONSECURE) == 0) {
         if (check_address_range(p, s, scratch_base,
-                                scratch_limit+1-scratch_base)) {
-            return 1;
+                                scratch_limit+1-scratch_base) == TFM_SUCCESS) {
+            return TFM_SUCCESS;
         }
     }
 
     /* If all else fails, check whether the region is in the non-secure
      * memory
      */
-    return
-      check_address_range(p, s, NS_CODE_START, NS_CODE_LIMIT+1-NS_CODE_START) ||
-      check_address_range(p, s, NS_DATA_START, NS_DATA_LIMIT+1-NS_DATA_START);
+    if (check_address_range(p, s, NS_CODE_START,
+                            NS_CODE_LIMIT+1-NS_CODE_START) == TFM_SUCCESS ||
+        check_address_range(p, s, NS_DATA_START,
+                            NS_DATA_LIMIT+1-NS_DATA_START) == TFM_SUCCESS) {
+        return TFM_SUCCESS;
+    } else {
+        return TFM_ERROR_GENERIC;
+    }
 }
 
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
@@ -254,8 +264,8 @@ static int32_t tfm_core_check_sfn_parameters(
     if (in_len > 0) {
         if ((in_vec == NULL) ||
             (tfm_core_has_write_access_to_region(in_vec,
-                                                 sizeof(psa_invec)*in_len,
-                                                 desc_ptr->ns_caller) != 1)) {
+                                        sizeof(psa_invec)*in_len,
+                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -266,8 +276,8 @@ static int32_t tfm_core_check_sfn_parameters(
     if (out_len > 0) {
         if ((out_vec == NULL) ||
             (tfm_core_has_write_access_to_region(out_vec,
-                                                 sizeof(psa_outvec)*out_len,
-                                                 desc_ptr->ns_caller) != 1)) {
+                                        sizeof(psa_outvec)*out_len,
+                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -283,8 +293,8 @@ static int32_t tfm_core_check_sfn_parameters(
         if (in_vec[i].len > 0) {
             if ((in_vec[i].base == NULL) ||
                 (tfm_core_has_read_access_to_region(in_vec[i].base,
-                                                  in_vec[i].len,
-                                                  desc_ptr->ns_caller) != 1)) {
+                                        in_vec[i].len,
+                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
@@ -293,8 +303,8 @@ static int32_t tfm_core_check_sfn_parameters(
         if (out_vec[i].len > 0) {
             if ((out_vec[i].base == NULL) ||
                 (tfm_core_has_write_access_to_region(out_vec[i].base,
-                                                  out_vec[i].len,
-                                                  desc_ptr->ns_caller) != 1)) {
+                                        out_vec[i].len,
+                                        desc_ptr->ns_caller) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }

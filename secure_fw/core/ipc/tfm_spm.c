@@ -479,7 +479,7 @@ int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
     } else {
         err = tfm_core_has_read_access_to_region(buffer, len, ns_caller);
     }
-    if (err == 1) {
+    if (err == TFM_SUCCESS) {
         return IPC_SUCCESS;
     }
 

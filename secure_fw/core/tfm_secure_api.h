@@ -100,7 +100,8 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
  * \param[in] s          The size of the range to check
  * \param[in] ns_caller  Whether the current partition is a non-secure one
  *
- * \return 1 if the partition has access to the memory range, 0 otherwise.
+ * \return TFM_SUCCESS if the partition has access to the memory range,
+ *         TFM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
                                            uint32_t ns_caller);
@@ -115,7 +116,8 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
  * \param[in] s          The size of the range to check
  * \param[in] ns_caller  Whether the current partition is a non-secure one
  *
- * \return 1 if the partition has access to the memory range, 0 otherwise.
+ * \return TFM_SUCCESS if the partition has access to the memory range,
+ *         TFM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
                                             uint32_t ns_caller);
