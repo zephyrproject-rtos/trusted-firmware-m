@@ -11,8 +11,8 @@
   "priority": "NORMAL",
   "id": "0x00000101",
   "entry_point": "audit_core_init",
-  "stack_size": "0x1000",
-  "heap_size": "0x0400",
+  "stack_size": "0x0200",
+  "heap_size": "0",
   "mmio_regions" : [
     {
       "name": "TFM_PERIPHERAL_UART1",

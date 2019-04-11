@@ -11,7 +11,7 @@
   "priority": "HIGH",
   "id": "0x00000007",
   "entry_point": "ipc_service_test_main",
-  "stack_size": "0x1000",
+  "stack_size": "0x0200",
   "heap_size": "0",
   "secure_functions": [
   ],
