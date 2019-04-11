@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -69,18 +69,13 @@ endmacro()
 #Override CMake default behaviour
 macro(embedded_project_fixup)
 	get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-	if("CXX" IN_LIST languages)
-		include(Common/CompilerDetermineCXX)
-		#since all CMake "built in" scripts already executed, we need fo fix up some things here.
-		embedded_fixup_build_type_vars(CXX)
-	endif()
-	if("C" IN_LIST languages)
-		include(Common/CompilerDetermineC)
-		embedded_fixup_build_type_vars(C)
-	endif()
 
 	#Merge CPU and configuration specific compiler and linker flags.
 	foreach(LNG ${languages})
+		include(Common/CompilerDetermine${LNG})
+		#since all CMake "built in" scripts already executed, we need fo fix up some things here.
+		embedded_fixup_build_type_vars(${LNG})
+
 		#Apply CPU specific and configuration specific compile flags.
 		if(NOT CMAKE_${LNG}_FLAGS MATCHES ".*${CMAKE_${LNG}_FLAGS_CPU}.*")
 			set(CMAKE_${LNG}_FLAGS "${CMAKE_${LNG}_FLAGS} ${CMAKE_${LNG}_FLAGS_CPU}")
@@ -118,10 +113,10 @@ endmacro()
 
 macro(embedded_fixup_build_type_vars LANG)
 	#since all CMake "built in" scripts already executed, we need fo fix up some things here.
-	set (CMAKE_${LANG}_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING "Flags used by the compiler during debug builds." FORCE)
-	set (CMAKE_${LANG}_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING "Flags used by the compiler during release builds for minimum size." FORCE)
-	set (CMAKE_${LANG}_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING "Flags used by the compiler during release builds." FORCE)
-	set (CMAKE_${LANG}_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING "Flags used by the compiler during release builds with debug info." FORCE)
+	set (CMAKE_${LANG}_FLAGS_DEBUG "${CMAKE_${LANG}_FLAGS_DEBUG_INIT}" CACHE STRING "Flags used by the compiler during debug builds." FORCE)
+	set (CMAKE_${LANG}_FLAGS_MINSIZEREL "${CMAKE_${LANG}_FLAGS_MINSIZEREL_INIT}" CACHE STRING "Flags used by the compiler during release builds for minimum size." FORCE)
+	set (CMAKE_${LANG}_FLAGS_RELEASE "${CMAKE_${LANG}_FLAGS_RELEASE_INIT}" CACHE STRING "Flags used by the compiler during release builds." FORCE)
+	set (CMAKE_${LANG}_FLAGS_RELWITHDEBINFO "${CMAKE_${LANG}_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING "Flags used by the compiler during release builds with debug info." FORCE)
 endmacro()
 
 
