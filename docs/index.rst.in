@@ -87,6 +87,13 @@ Welcome to TF-M's documentation!
 
     @REJECTED_DD_LIST@
 
+.. toctree::
+    :maxdepth: 2
+    :caption: Tools
+    :glob:
+    :hidden:
+    tools/iat-verifier/*
+
 .. include:: readme.rst
 
 -----------
