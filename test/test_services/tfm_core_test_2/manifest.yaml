@@ -47,9 +47,6 @@
       "minor_policy": "strict"
     }
   ],
-  "source_files": [
-    "./tfm_ss_core_test_2.c"
-  ],
   "tfm_linker_pattern": {
     "object_list": [
       "*tfm_ss_core_test_2.*"

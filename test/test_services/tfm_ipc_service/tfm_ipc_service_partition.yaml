@@ -49,9 +49,6 @@
       "minor_policy": "STRICT"
     }
   ],
-  "source_files": [
-    "./ipc_service_test.c",
-  ],
   "tfm_linker_pattern": {
     "object_list": [
       "*ipc_service_test.*"

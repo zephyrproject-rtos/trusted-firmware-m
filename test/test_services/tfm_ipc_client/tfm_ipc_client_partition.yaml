@@ -57,9 +57,6 @@
       "minor_policy": "STRICT"
     }
   ],
-  "source_files": [
-    "ipc_client_test.c",
-  ],
   "tfm_linker_pattern": {
     "object_list": [
       "*ipc_client_test.*"

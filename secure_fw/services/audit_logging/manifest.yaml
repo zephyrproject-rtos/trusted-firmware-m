@@ -62,11 +62,6 @@
       "minor_policy": "strict"
     }
   ],
-  "source_files": [
-    "audit_core.c",
-    "audit_wrappers.c",
-    "tfm_audit_secure_api.c"
-  ],
   "tfm_linker_pattern": {
     "library_list": [
       "*tfm_audit*"

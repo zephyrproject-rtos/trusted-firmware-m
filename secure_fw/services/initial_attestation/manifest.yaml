@@ -31,13 +31,6 @@
       "minor_policy": "strict"
     }
   ],
-  "source_files": [
-    "attestation_core.c",
-    "attestation_key.c",
-    "attest_token.c",
-    "tfm_attestation.c",
-    "tfm_attestation_req_mngr.c",
-  ],
   "tfm_linker_pattern": {
     "library_list": [
       "*tfm_attest*"

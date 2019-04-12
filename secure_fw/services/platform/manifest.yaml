@@ -31,9 +31,6 @@
       "minor_policy": "strict"
      }
   ],
-  "source_files": [
-    "platform_sp.c",
-  ],
   "tfm_linker_pattern": {
     "library_list": [
       "*tfm_platform*"

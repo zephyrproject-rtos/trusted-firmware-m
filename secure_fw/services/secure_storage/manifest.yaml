@@ -96,20 +96,6 @@
     "minor_policy": "STRICT"
    }
   ],
-  "source_files": [
-    "sst_encrypted_object.c",
-    "sst_object_system.c",
-    "sst_object_table.c",
-    "sst_utils.c",
-    "tfm_protected_storage.c",
-    "tfm_sst_req_mngr.c",
-    "crypto/sst_crypto_interface.c",
-    "flash/sst_flash.c",
-    "flash_fs/sst_flash_fs.c",
-    "flash_fs/sst_flash_dblock.c",
-    "flash_fs/sst_flash_mbock.c",
-    "nv_counters/sst_nv_counters.c",
-  ],
   "tfm_linker_pattern": {
     "library_list": [
       "*tfm_storage*"
