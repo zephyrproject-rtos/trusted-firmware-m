@@ -11,7 +11,6 @@
   "priority": "NORMAL",
   "id": "0x00000003",
   "entry_point": "core_test_2_init",
-  "tfm_partition_ipc": true,
   "stack_size": "0x0200",
   "heap_size": "0",
   "secure_functions": [

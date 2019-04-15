@@ -15,7 +15,6 @@
   "heap_size": "0",
   "secure_functions": [
   ],
-  "tfm_partition_ipc": true,
   "services" : [
     {
       "name": "IPC_CLIENT_TEST_BASIC_SID",

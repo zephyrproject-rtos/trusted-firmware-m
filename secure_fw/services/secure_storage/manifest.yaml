@@ -13,7 +13,6 @@
   "entry_point": "tfm_sst_req_mngr_init",
   "stack_size": "0x1800",
   "heap_size": "0",
-  "tfm_partition_ipc": true,
   "secure_functions": [
     {
       "sfid": "TFM_SST_SET_SFID",

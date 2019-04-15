@@ -13,7 +13,6 @@
   "entry_point": "tfm_secure_client_service_init",
   "stack_size": "0x0C00",
   "heap_size": "0",
-  "tfm_partition_ipc": true,
   "mmio_regions": [
     {
       "name": "TFM_PERIPHERAL_STD_UART",

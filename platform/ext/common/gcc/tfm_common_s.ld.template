@@ -399,7 +399,7 @@ SECTIONS
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
-    {% if manifest.manifest.tfm_partition_ipc %}
+    {% if manifest.attr.tfm_partition_ipc %}
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
     .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {
@@ -477,7 +477,7 @@ SECTIONS
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
-    {% if manifest.manifest.tfm_partition_ipc %}
+    {% if manifest.attr.tfm_partition_ipc %}
 #if defined (TFM_PSA_API) || (TFM_LVL != 1)
     .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {

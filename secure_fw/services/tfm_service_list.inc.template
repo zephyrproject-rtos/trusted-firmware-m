@@ -11,7 +11,7 @@
 #define __TFM_SERVICE_LIST_INC__
 
 {% for manifest in manifests %}
-    {% if manifest.manifest.tfm_partition_ipc %}
+    {% if manifest.attr.tfm_partition_ipc %}
         {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
         {% endif %}
