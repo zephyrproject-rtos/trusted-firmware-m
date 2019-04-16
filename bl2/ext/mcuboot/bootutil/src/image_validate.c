@@ -63,11 +63,17 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
         bootutil_sha256_update(&sha256_ctx, seed, seed_len);
     }
 
-    /*
-     * Hash is computed over image header and image itself. No TLV is
-     * included ATM.
-     */
+    /* Hash is computed over image header and image itself. */
     size = hdr->ih_img_size + hdr->ih_hdr_size;
+
+    /* If a security counter TLV is present then the TLV info header and the
+     * security counter are also protected and must be included in the hash
+     * calculation.
+     */
+    if (hdr->ih_protect_tlv_size != 0) {
+        size += hdr->ih_protect_tlv_size;
+    }
+
     for (off = 0; off < size; off += blk_sz) {
         blk_sz = size - off;
         if (blk_sz > tmp_buf_sz) {
@@ -229,7 +235,6 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
     }
 
     /* The TLVs come after the image. */
-    /* After image there are TLVs. */
     off = hdr->ih_img_size + hdr->ih_hdr_size;
 
     rc = flash_area_read(fap, off, &info, sizeof(info));

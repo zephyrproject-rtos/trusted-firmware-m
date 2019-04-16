@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -47,6 +47,12 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "ERROR: Incomplete Configuration: FLASH_LAYOUT is not defined.")
 	endif()
 
+	if (DEFINED SECURITY_COUNTER)
+		set (ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
+	else()
+		set (ADD_SECURITY_COUNTER "")
+	endif()
+
 	add_custom_command(TARGET ${_MY_PARAMS_NS_BIN}
 						POST_BUILD
 						#Create concatenated binary image from the two binary file
@@ -63,6 +69,7 @@ function(mcuboot_create_boot_payload)
 							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
 							 --align 1
 							 -v ${IMAGE_VERSION}
+							 ${ADD_SECURITY_COUNTER}
 							 -H 0x400
 							 --pad ${SIGN_BIN_SIZE}
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
