@@ -42,8 +42,8 @@ enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
     mpu->CTRL |= MPU_CTRL_ENABLE_Msk;
 
     /* Enable MPU before next instruction */
-    __asm("DSB");
-    __asm("ISB");
+    __DSB();
+    __ISB();
     return MPU_ARMV8M_OK;
 }
 
@@ -104,8 +104,8 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     mpu->CTRL = ctrl_before;
 
     /* Enable MPU before the next instruction */
-    __asm("DSB");
-    __asm("ISB");
+    __DSB();
+    __ISB();
 
     return ret_val;
 }

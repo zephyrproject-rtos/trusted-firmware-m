@@ -49,9 +49,9 @@ struct tfm_exc_stack_t {
 #endif
 
 #define LOG_MSG_THR(MSG) \
-            __ASM("MOV r0, %0\n" \
-                  "SVC %1\n" \
-                  : : "r" (MSG), "I" (TFM_SVC_PRINT))
+            __ASM volatile("MOV r0, %0\n" \
+                           "SVC %1\n" \
+                           : : "r" (MSG), "I" (TFM_SVC_PRINT))
 
 #define LOG_MSG(MSG) \
             do { \
@@ -101,7 +101,7 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     ctrl.w = __get_CONTROL();
     ctrl.b.SPSEL = SPSEL;
     __set_CONTROL(ctrl.w);
-    __asm("ISB");
+    __ISB();
 }
 
 #endif /* __SECURE_UTILITIES_H__ */

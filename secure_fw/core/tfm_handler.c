@@ -102,7 +102,7 @@ void HardFault_Handler(void)
 #if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {
-    __ASM(
+    __ASM volatile(
     "TST     lr, #4\n"  /* Check store SP in thread mode to r0 */
     "IT      EQ\n"
     "BXEQ    lr\n"
@@ -115,7 +115,7 @@ __attribute__((naked)) void SVC_Handler(void)
 #elif defined(__ARM_ARCH_8M_BASE__)
 __attribute__((naked)) void SVC_Handler(void)
 {
-    __ASM(
+    __ASM volatile(
     ".syntax unified\n"
     "MOVS    r0, #4\n"  /* Check store SP in thread mode to r0 */
     "MOV     r1, lr\n"

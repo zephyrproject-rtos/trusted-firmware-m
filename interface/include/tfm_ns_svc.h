@@ -24,7 +24,7 @@ extern "C" {
  * \brief Macro to encode an svc instruction
  *
  */
-#define SVC(code) __ASM("svc %0" : : "I" (code))
+#define SVC(code) __ASM volatile("svc %0" : : "I" (code))
 
 /**
  * \def LIST_SVC_NSPM
