@@ -22,24 +22,21 @@
   "secure_functions": [
     {
       "sfid": "TFM_CORE_TEST_SFN_SFID",
-      "signal": "TFM_CORE_TEST_SFN",
-      "tfm_symbol": "spm_core_test_sfn",
+      "signal": "SPM_CORE_TEST_SFN",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
       "sfid": "TFM_CORE_TEST_SFN_INIT_SUCCESS_SFID",
-      "signal": "TFM_CORE_TEST_SFN_INIT_SUCCESS",
-      "tfm_symbol": "spm_core_test_sfn_init_success",
+      "signal": "SPM_CORE_TEST_SFN_INIT_SUCCESS",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
       "sfid": "TFM_CORE_TEST_SFN_DIRECT_RECURSION_SFID",
-      "signal": "TFM_CORE_TEST_SFN_DIRECT_RECURSION",
-      "tfm_symbol": "spm_core_test_sfn_direct_recursion",
+      "signal": "SPM_CORE_TEST_SFN_DIRECT_RECURSION",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"

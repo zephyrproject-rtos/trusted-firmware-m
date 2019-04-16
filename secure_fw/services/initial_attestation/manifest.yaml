@@ -16,16 +16,14 @@
   "secure_functions": [
     {
       "sfid": "TFM_ATTEST_GET_TOKEN_SFID",
-      "signal": "TFM_ATTEST_GET_TOKEN",
-      "tfm_symbol": "initial_attest_get_token",
+      "signal": "INITIAL_ATTEST_GET_TOKEN",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
     },
     {
       "sfid": "TFM_ATTEST_GET_TOKEN_SIZE_SFID",
-      "signal": "TFM_ATTEST_GET_TOKEN_SIZE",
-      "tfm_symbol": "initial_attest_get_token_size",
+      "signal": "INITIAL_ATTEST_GET_TOKEN_SIZE",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"

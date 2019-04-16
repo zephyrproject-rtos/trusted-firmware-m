@@ -22,8 +22,7 @@
   "secure_functions": [
     {
       "sfid": "TFM_SECURE_CLIENT_SFN_RUN_TESTS_SFID",
-      "signal": "TFM_SECURE_CLIENT_SFN_RUN_TESTS",
-      "tfm_symbol": "tfm_secure_client_service_sfn_run_tests",
+      "signal": "TFM_SECURE_CLIENT_SERVICE_SFN_RUN_TESTS",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"

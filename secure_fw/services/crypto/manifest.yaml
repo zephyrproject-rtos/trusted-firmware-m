@@ -17,7 +17,6 @@
     {
       "sfid": "TFM_CRYPTO_ALLOCATE_KEY_SFID",
       "signal": "TFM_CRYPTO_ALLOCATE_KEY",
-      "tfm_symbol": "tfm_crypto_allocate_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -25,7 +24,6 @@
     {
       "sfid": "TFM_CRYPTO_IMPORT_KEY_SFID",
       "signal": "TFM_CRYPTO_IMPORT_KEY",
-      "tfm_symbol": "tfm_crypto_import_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -33,7 +31,6 @@
     {
       "sfid": "TFM_CRYPTO_DESTROY_KEY_SFID",
       "signal": "TFM_CRYPTO_DESTROY_KEY",
-      "tfm_symbol": "tfm_crypto_destroy_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -41,7 +38,6 @@
     {
       "sfid": "TFM_CRYPTO_GET_KEY_INFORMATION_SFID",
       "signal": "TFM_CRYPTO_GET_KEY_INFORMATION",
-      "tfm_symbol": "tfm_crypto_get_key_information",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -49,7 +45,6 @@
     {
       "sfid": "TFM_CRYPTO_EXPORT_KEY_SFID",
       "signal": "TFM_CRYPTO_EXPORT_KEY",
-      "tfm_symbol": "tfm_crypto_export_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -57,7 +52,6 @@
     {
       "sfid": "TFM_CRYPTO_EXPORT_PUBLIC_KEY_SFID",
       "signal": "TFM_CRYPTO_EXPORT_PUBLIC_KEY",
-      "tfm_symbol": "tfm_crypto_export_public_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -65,7 +59,6 @@
     {
       "sfid": "TFM_CRYPTO_COPY_KEY_SFID",
       "signal": "TFM_CRYPTO_COPY_KEY",
-      "tfm_symbol": "tfm_crypto_copy_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -73,7 +66,6 @@
     {
       "sfid": "TFM_CRYPTO_SET_KEY_POLICY_SFID",
       "signal": "TFM_CRYPTO_SET_KEY_POLICY",
-      "tfm_symbol": "tfm_crypto_set_key_policy",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -81,7 +73,6 @@
     {
       "sfid": "TFM_CRYPTO_GET_KEY_POLICY_SFID",
       "signal": "TFM_CRYPTO_GET_KEY_POLICY",
-      "tfm_symbol": "tfm_crypto_get_key_policy",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -89,7 +80,6 @@
     {
       "sfid": "TFM_CRYPTO_GET_KEY_LIFETIME_SFID",
       "signal": "TFM_CRYPTO_GET_KEY_LIFETIME",
-      "tfm_symbol": "tfm_crypto_get_key_lifetime",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -97,7 +87,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_GENERATE_IV_SFID",
       "signal": "TFM_CRYPTO_CIPHER_GENERATE_IV",
-      "tfm_symbol": "tfm_crypto_cipher_generate_iv",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -105,7 +94,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_SET_IV_SFID",
       "signal": "TFM_CRYPTO_CIPHER_SET_IV",
-      "tfm_symbol": "tfm_crypto_cipher_set_iv",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -113,7 +101,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID",
       "signal": "TFM_CRYPTO_CIPHER_ENCRYPT_SETUP",
-      "tfm_symbol": "tfm_crypto_cipher_encrypt_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -121,7 +108,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID",
       "signal": "TFM_CRYPTO_CIPHER_DECRYPT_SETUP",
-      "tfm_symbol": "tfm_crypto_cipher_decrypt_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -129,7 +115,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_UPDATE_SFID",
       "signal": "TFM_CRYPTO_CIPHER_UPDATE",
-      "tfm_symbol": "tfm_crypto_cipher_update",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -137,7 +122,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_ABORT_SFID",
       "signal": "TFM_CRYPTO_CIPHER_ABORT",
-      "tfm_symbol": "tfm_crypto_cipher_abort",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -145,7 +129,6 @@
     {
       "sfid": "TFM_CRYPTO_CIPHER_FINISH_SFID",
       "signal": "TFM_CRYPTO_CIPHER_FINISH",
-      "tfm_symbol": "tfm_crypto_cipher_finish",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -153,7 +136,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_SETUP_SFID",
       "signal": "TFM_CRYPTO_HASH_SETUP",
-      "tfm_symbol": "tfm_crypto_hash_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -161,7 +143,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_UPDATE_SFID",
       "signal": "TFM_CRYPTO_HASH_UPDATE",
-      "tfm_symbol": "tfm_crypto_hash_update",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -169,7 +150,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_FINISH_SFID",
       "signal": "TFM_CRYPTO_HASH_FINISH",
-      "tfm_symbol": "tfm_crypto_hash_finish",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -177,7 +157,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_VERIFY_SFID",
       "signal": "TFM_CRYPTO_HASH_VERIFY",
-      "tfm_symbol": "tfm_crypto_hash_verify",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -185,7 +164,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_ABORT_SFID",
       "signal": "TFM_CRYPTO_HASH_ABORT",
-      "tfm_symbol": "tfm_crypto_hash_abort",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -193,7 +171,6 @@
     {
       "sfid": "TFM_CRYPTO_HASH_CLONE_SFID",
       "signal": "TFM_CRYPTO_HASH_CLONE",
-      "tfm_symbol": "tfm_crypto_hash_clone",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -201,7 +178,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_SIGN_SETUP_SFID",
       "signal": "TFM_CRYPTO_MAC_SIGN_SETUP",
-      "tfm_symbol": "tfm_crypto_mac_sign_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -209,7 +185,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_VERIFY_SETUP_SFID",
       "signal": "TFM_CRYPTO_MAC_VERIFY_SETUP",
-      "tfm_symbol": "tfm_crypto_mac_verify_setup",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -217,7 +192,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_UPDATE_SFID",
       "signal": "TFM_CRYPTO_MAC_UPDATE",
-      "tfm_symbol": "tfm_crypto_mac_update",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -225,7 +199,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_SIGN_FINISH_SFID",
       "signal": "TFM_CRYPTO_MAC_SIGN_FINISH",
-      "tfm_symbol": "tfm_crypto_mac_sign_finish",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -233,7 +206,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_VERIFY_FINISH_SFID",
       "signal": "TFM_CRYPTO_MAC_VERIFY_FINISH",
-      "tfm_symbol": "tfm_crypto_mac_verify_finish",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -241,7 +213,6 @@
     {
       "sfid": "TFM_CRYPTO_MAC_ABORT_SFID",
       "signal": "TFM_CRYPTO_MAC_ABORT",
-      "tfm_symbol": "tfm_crypto_mac_abort",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -249,7 +220,6 @@
     {
       "sfid": "TFM_CRYPTO_AEAD_ENCRYPT_SFID",
       "signal": "TFM_CRYPTO_AEAD_ENCRYPT",
-      "tfm_symbol": "tfm_crypto_aead_encrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -257,7 +227,6 @@
     {
       "sfid": "TFM_CRYPTO_AEAD_DECRYPT_SFID",
       "signal": "TFM_CRYPTO_AEAD_DECRYPT",
-      "tfm_symbol": "tfm_crypto_aead_decrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -265,7 +234,6 @@
     {
       "sfid": "TFM_CRYPTO_ASYMMETRIC_SIGN_SFID",
       "signal": "TFM_CRYPTO_ASYMMETRIC_SIGN",
-      "tfm_symbol": "tfm_crypto_asymmetric_sign",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -273,7 +241,6 @@
     {
       "sfid": "TFM_CRYPTO_ASYMMETRIC_VERIFY_SFID",
       "signal": "TFM_CRYPTO_ASYMMETRIC_VERIFY",
-      "tfm_symbol": "tfm_crypto_asymmetric_verify",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -281,7 +248,6 @@
     {
       "sfid": "TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SFID",
       "signal": "TFM_CRYPTO_ASYMMETRIC_ENCRYPT",
-      "tfm_symbol": "tfm_crypto_asymmetric_encrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -289,7 +255,6 @@
     {
       "sfid": "TFM_CRYPTO_ASYMMETRIC_DECRYPT_SFID",
       "signal": "TFM_CRYPTO_ASYMMETRIC_DECRYPT",
-      "tfm_symbol": "tfm_crypto_asymmetric_decrypt",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -297,7 +262,6 @@
     {
       "sfid": "TFM_CRYPTO_GET_GENERATOR_CAPACITY_SFID",
       "signal": "TFM_CRYPTO_GET_GENERATOR_CAPACITY",
-      "tfm_symbol": "tfm_crypto_get_generator_capacity",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -305,7 +269,6 @@
     {
       "sfid": "TFM_CRYPTO_GENERATOR_READ_SFID",
       "signal": "TFM_CRYPTO_GENERATOR_READ",
-      "tfm_symbol": "tfm_crypto_generator_read",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -313,7 +276,6 @@
     {
       "sfid": "TFM_CRYPTO_GENERATOR_IMPORT_KEY_SFID",
       "signal": "TFM_CRYPTO_GENERATOR_IMPORT_KEY",
-      "tfm_symbol": "tfm_crypto_generator_import_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -321,7 +283,6 @@
     {
       "sfid": "TFM_CRYPTO_GENERATOR_ABORT_SFID",
       "signal": "TFM_CRYPTO_GENERATOR_ABORT",
-      "tfm_symbol": "tfm_crypto_generator_abort",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -329,7 +290,6 @@
     {
       "sfid": "TFM_CRYPTO_KEY_DERIVATION_SFID",
       "signal": "TFM_CRYPTO_KEY_DERIVATION",
-      "tfm_symbol": "tfm_crypto_key_derivation",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -337,7 +297,6 @@
     {
       "sfid": "TFM_CRYPTO_KEY_AGREEMENT_SFID",
       "signal": "TFM_CRYPTO_KEY_AGREEMENT",
-      "tfm_symbol": "tfm_crypto_key_agreement",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -345,7 +304,6 @@
     {
       "sfid": "TFM_CRYPTO_GENERATE_RANDOM_SFID",
       "signal": "TFM_CRYPTO_GENERATE_RANDOM",
-      "tfm_symbol": "tfm_crypto_generate_random",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
@@ -353,7 +311,6 @@
     {
       "sfid": "TFM_CRYPTO_GENERATE_KEY_SFID",
       "signal": "TFM_CRYPTO_GENERATE_KEY",
-      "tfm_symbol": "tfm_crypto_generate_key",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "strict"
