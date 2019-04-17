@@ -18,7 +18,7 @@
   "services" : [
     {
       "name": "IPC_SERVICE_TEST_BASIC",
-      "sid": "0x00001000",
+      "sid": "0x0000F080",
       "signal": "IPC_SERVICE_TEST_BASIC_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -26,7 +26,7 @@
     },
     {
       "name": "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM",
-      "sid": "0x00001001",
+      "sid": "0x0000F081",
       "signal": "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -34,7 +34,7 @@
     },
     {
       "name": "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM",
-      "sid": "0x00001002",
+      "sid": "0x0000F082",
       "signal": "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -42,7 +42,7 @@
     },
     {
       "name": "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM",
-      "sid": "0x00001003",
+      "sid": "0x0000F083",
       "signal": "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,

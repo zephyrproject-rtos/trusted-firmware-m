@@ -11,12 +11,12 @@
 #include "test/framework/test_framework_helpers.h"
 
 /* Define the SID. These SIDs should align with the value in manifest file. */
-#define IPC_CLIENT_TEST_BASIC_SID                               (0x00001100)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SID                  (0x00001101)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID        (0x00001102)
-#define IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SID                  (0x00001103)
-#define IPC_CLIENT_TEST_MEM_CHECK_SID                           (0x00001104)
-#define IPC_SERVICE_TEST_BASIC_SID                              (0x00001000)
+#define IPC_CLIENT_TEST_BASIC_SID                               (0x0000F060)
+#define IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SID                  (0x0000F061)
+#define IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID        (0x0000F062)
+#define IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SID                  (0x0000F063)
+#define IPC_CLIENT_TEST_MEM_CHECK_SID                           (0x0000F064)
+#define IPC_SERVICE_TEST_BASIC_SID                              (0x0000F080)
 
 /*
  * Define the MIN_VER. These MIN_VER should align with the value in

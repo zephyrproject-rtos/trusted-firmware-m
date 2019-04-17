@@ -319,7 +319,7 @@
   "services" : [
     {
       "name": "TFM_CRYPTO",
-      "sid": "0x00004000",
+      "sid": "0x00000080",
       "signal": "TFM_CRYPTO_SIG",
       "non_secure_clients": true,
       "minor_version": 1,

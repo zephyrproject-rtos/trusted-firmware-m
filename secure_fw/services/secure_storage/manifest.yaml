@@ -52,7 +52,7 @@
   ],
   "services" : [{
     "name": "TFM_SST_SET",
-    "sid": "0x00002000",
+    "sid": "0x00000060",
     "signal": "TFM_SST_SET_SIG",
     "non_secure_clients": true,
     "minor_version": 1,
@@ -60,7 +60,7 @@
    },
    {
     "name": "TFM_SST_GET",
-    "sid": "0x00002001",
+    "sid": "0x00000061",
     "signal": "TFM_SST_GET_SIG",
     "non_secure_clients": true,
     "minor_version": 1,
@@ -68,7 +68,7 @@
    },
    {
     "name": "TFM_SST_GET_INFO",
-    "sid": "0x00002002",
+    "sid": "0x00000062",
     "signal": "TFM_SST_GET_INFO_SIG",
     "non_secure_clients": true,
     "minor_version": 1,
@@ -76,7 +76,7 @@
    },
    {
     "name": "TFM_SST_REMOVE",
-    "sid": "0x00002003",
+    "sid": "0x00000063",
     "signal": "TFM_SST_REMOVE_SIG",
     "non_secure_clients": true,
     "minor_version": 1,
@@ -84,7 +84,7 @@
    },
    {
     "name": "TFM_SST_GET_SUPPORT",
-    "sid": "0x00002004",
+    "sid": "0x00000064",
     "signal": "TFM_SST_GET_SUPPORT_SIG",
     "non_secure_clients": true,
     "minor_version": 1,

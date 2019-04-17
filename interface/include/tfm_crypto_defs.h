@@ -108,7 +108,7 @@ enum {
  * \brief Define the SID values and minor versions to match the ones defined in
  *        the service manifest files
  */
-#define TFM_CRYPTO_SID     (0x00004000u)
+#define TFM_CRYPTO_SID     (0x00000080u)
 #define TFM_CRYPTO_MIN_VER (0x0001)
 
 /**

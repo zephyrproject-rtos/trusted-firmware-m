@@ -14,10 +14,10 @@
 #include "tfm_utils.h"
 
 /* Define the SID. These SIDs should align with the value in manifest file. */
-#define IPC_SERVICE_TEST_BASIC_SID                                 (0x00001000)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID                    (0x00001001)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID          (0x00001002)
-#define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID                    (0x00001003)
+#define IPC_SERVICE_TEST_BASIC_SID                                 (0x0000F080)
+#define IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID                    (0x0000F081)
+#define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID          (0x0000F082)
+#define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID                    (0x0000F083)
 
 /*
  * Define the MIN_VER. These MIN_VER should align with the value in

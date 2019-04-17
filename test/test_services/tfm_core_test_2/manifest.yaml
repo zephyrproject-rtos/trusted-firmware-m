@@ -65,7 +65,7 @@
   "services": [
     {
       "name": "SPM_CORE_TEST_2_SLAVE_SERVICE",
-      "sid": "0x00002200",
+      "sid": "0x0000F040",
       "signal": "SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -73,7 +73,7 @@
     },
     {
       "name": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID",
-      "sid": "0x00002201",
+      "sid": "0x0000F041",
       "signal": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -81,7 +81,7 @@
     },
     {
       "name": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE",
-      "sid": "0x00002202",
+      "sid": "0x0000F042",
       "signal": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -89,7 +89,7 @@
     },
     {
       "name": "SPM_CORE_TEST_2_INVERT",
-      "sid": "0x00002203",
+      "sid": "0x0000F043",
       "signal": "SPM_CORE_TEST_2_INVERT_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -97,7 +97,7 @@
     },
     {
     "name": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO",
-    "sid": "0x00002204",
+    "sid": "0x0000F044",
     "signal": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
     "minor_version": 1,
@@ -105,7 +105,7 @@
     },
     {
     "name": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO",
-    "sid": "0x00002205",
+    "sid": "0x0000F045",
     "signal": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
     "minor_version": 1,
