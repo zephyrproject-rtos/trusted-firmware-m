@@ -132,10 +132,21 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
     /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
 
     /*
-     * Set PendSV priority to the lowest. NVIC_SetPriority converts '0xFF'
-     * to the lowest priority value architecture/platform supported.
+     * Set secure PendSV priority to the lowest in SECURE state.
+     *
+     * IMPORTANT NOTE:
+     *
+     * Although the priority of the secure PendSV must be the lowest possible
+     * among other interrupts in the Secure state, it must be ensured that
+     * PendSV is not preempted nor masked by Non-Secure interrupts to ensure
+     * the integrity of the Secure operation.
+     * When AIRCR.PRIS is set, the Non-Secure execution can act on
+     * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
+     * number up to the value 0x80.
+     * For this reason, set the priority of the PendSV interrupt to the next
+     * priority level configurable on the platform, just below 0x80.
      */
-    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+    NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
 
     return TFM_SUCCESS;
 }
