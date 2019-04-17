@@ -33,10 +33,11 @@ Include(CMakeParseArguments)
 #   SphinxFindTools()
 #
 function(SphinxFindTools)
+	#Find Sphinx
 	find_package(Sphinx)
 
-	#Find additional needed python dependencies.
-	find_package(PythonModules COMPONENTS m2r sphinx-rtd-theme)
+	#Find additional needed Sphinx dependencies.
+	find_package(PythonModules COMPONENTS m2r sphinx-rtd-theme sphinxcontrib.plantuml)
 
 	#Find plantUML
 	find_package(PlantUML)
@@ -48,10 +49,11 @@ function(SphinxFindTools)
 	endif()
 
 	if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R_FOUND
-			AND PY_SPHINX-RTD-THEME_FOUND)
+			AND PY_SPHINX-RTD-THEME_FOUND AND PY_SPHINXCONTRIB.PLANTUML)
 		#Export executable locations to global scope.
 		set(SPHINX_EXECUTABLE "${SPHINX_EXECUTABLE}" PARENT_SCOPE)
 		set(PLANTUML_JAR_PATH "${PLANTUML_JAR_PATH}" PARENT_SCOPE)
+		set(Java_JAVA_EXECUTABLE "${Java_JAVA_EXECUTABLE}" PARENT_SCOPE)
 		set(SPHINX_NODOC False PARENT_SCOPE)
 	else()
 		message(WARNING "Some tools are missing for Sphinx document generation. Document generation target is not created.")
@@ -73,8 +75,8 @@ if (NOT SPHINX_NODOC)
 
 	set(SPHINX_TMP_DOC_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc_sphinx_in")
 
-	set(SPHINXCFG_TEMPLATE_FILE "${TFM_ROOT_DIR}/docs/Conf.py.in")
-	set(SPHINXCFG_CONFIGURED_FILE "${SPHINXCFG_OUTPUT_PATH}/Conf.py")
+	set(SPHINXCFG_TEMPLATE_FILE "${TFM_ROOT_DIR}/docs/conf.py.in")
+	set(SPHINXCFG_CONFIGURED_FILE "${SPHINXCFG_OUTPUT_PATH}/conf.py")
 
 
 	#Version ID of TF-M.
@@ -91,10 +93,14 @@ if (NOT SPHINX_NODOC)
 		VERBATIM
 		)
 
+	add_custom_target(create_sphinx_input
+		SOURCES "${SPHINX_TMP_DOC_DIR}"
+	)
+
 	add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/html"
 		COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b html "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/html"
 		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
-		DEPENDS "${SPHINX_TMP_DOC_DIR}"
+		DEPENDS create_sphinx_input
 		COMMENT "Running Sphinx to generate user guide (HTML)."
 		VERBATIM
 		)
@@ -120,7 +126,7 @@ if (NOT SPHINX_NODOC)
 		add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex"
 			COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b latex "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/latex"
 			WORKING_DIRECTORY "${TFM_ROOT_DIR}"
-			DEPENDS "${SPHINX_TMP_DOC_DIR}"
+			DEPENDS create_sphinx_input
 			COMMENT "Running Sphinx to generate user guide (LaTeX)."
 			VERBATIM
 			)

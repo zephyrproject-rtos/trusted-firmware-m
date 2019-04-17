@@ -13,69 +13,70 @@ Welcome to TF-M's documentation!
     :maxdepth: 2
     :glob:
     :hidden:
-    
-    contributing.md
-    glossary.md
-    maintainers.md
-    docs/user_guides/tfm_sw_requirement.md
-    docs/user_guides/tfm_build_instruction.md
-    docs/coding_guide.md
-    docs/user_guides/tfm_user_guide.md
-    docs/user_guides/os_migration_guide_armv8m.md
-    docs/user_guides/tfm_integration_guide.md
-    docs/user_guides/tfm_ns_client_identification.md
-    docs/user_guides/tfm_secure_boot.md
-    
+
+    contributing
+    docs/dco
+    glossary
+    maintainers
+    docs/user_guides/tfm_sw_requirement
+    docs/user_guides/tfm_build_instruction
+    docs/coding_guide
+    docs/user_guides/tfm_user_guide
+    docs/user_guides/os_migration_guide_armv8m
+    docs/user_guides/tfm_integration_guide
+    docs/user_guides/tfm_ns_client_identification
+    docs/user_guides/tfm_secure_boot
+
 .. toctree::
     :maxdepth: 2
     :caption: Secure services
     :glob:
     :hidden:
-    
+
     docs/user_guides/services/*
-    
+
 .. toctree::
     :maxdepth: 2
     :caption: Components
     :glob:
     :hidden:
-    
+
     lib/**
-    
+
 .. toctree::
     :maxdepth: 2
     :caption: Target platforms
     :glob:
     :hidden:
-    
+
     platform/**
-    
+
 .. toctree::
     :caption: Design documents
     :maxdepth: 2
     :glob:
     :hidden:
-    
+
     docs/design_documents/*
-    
+
 .. toctree::
     :caption: Draft design documents
     :maxdepth: 2
     :glob:
     :hidden:
-    
+
     docs/design_documents/drafts/*
-    
+
 .. toctree::
     :caption: Rejected design documents
     :maxdepth: 2
     :glob:
     :hidden:
-    
+
     docs/design_documents/rejected/*
 
-.. mdinclude:: readme.md
+.. include:: readme.rst
 
 -----------
 
-:Copyright: Copyright (c) 2019, Arm Limited. All rights reserved.
+*Copyright (c) 2019, Arm Limited. All rights reserved.*

@@ -25,7 +25,7 @@
 #    |
 #
 #Usage:
-#   cmake -DDST_RIR=<path to destination> -DTFM_ROOT_DIR=<path to tf-m root> \
+#   cmake -DDST_DIR=<path to destination> -DTFM_ROOT_DIR=<path to tf-m root> \
 #          -P SphinxCopyDoc.cmake
 
 #Check input parameters
@@ -42,7 +42,8 @@ file(GLOB_RECURSE _COPY_FILES
 		LIST_DIRECTORIES false
 		RELATIVE "${TFM_ROOT_DIR}"
 		"${TFM_ROOT_DIR}/*.md"
-		"${TFM_ROOT_DIR}/*.rst")
+		"${TFM_ROOT_DIR}/*.rst"
+		"${TFM_ROOT_DIR}/dco.txt")
 
 #Subtract exluded files from copy files
 list(REMOVE_ITEM _COPY_FILES "docs/index.rst")

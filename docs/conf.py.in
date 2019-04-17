@@ -40,15 +40,25 @@ release = '@SPHINXCFG_TFM_VERSION_FULL@'
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+# needs_sphinx = '1.4'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.imgmath',
-    'm2r',
+    'm2r', #Support markdown files. Needed for external code.
+    'sphinx.ext.autosectionlabel', #Make sphinx generate a label for each section
+    'sphinxcontrib.plantuml' #Add support for PlantUML drawings
 ]
+
+#Location of PlantUML
+plantuml = '@Java_JAVA_EXECUTABLE@ -jar @PLANTUML_JAR_PATH@'
+
+#Make auso section labals generated be prefixed with file name.
+autosectionlabel_prefix_document=True
+#Add auso section label for level 1 headers only.
+autosectionlabel_maxdepth=1
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -89,11 +99,11 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 # html_theme_options = {}
-
+#
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['@TFM_ROOT_DIR@/docs/_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -107,6 +117,10 @@ html_static_path = ['_static']
 
 #Disable adding conf.py copyright notice to HTML output
 html_show_copyright = False
+
+#Add custom css for HTML. Used to allow full page width rendering
+def setup(app):
+    app.add_stylesheet('css/custom.css')
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
