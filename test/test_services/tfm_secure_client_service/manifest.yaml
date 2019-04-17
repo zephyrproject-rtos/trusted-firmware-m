@@ -33,7 +33,7 @@
       "name": "TFM_SECURE_CLIENT_SFN_RUN_TESTS",
       "sid": "0x0000F000",
       "signal": "TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     }

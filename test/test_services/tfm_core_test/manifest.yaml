@@ -52,7 +52,7 @@
       "name": "SPM_CORE_TEST_INIT_SUCCESS",
       "sid": "0x00002100",
       "signal": "SPM_CORE_TEST_INIT_SUCCESS_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -60,7 +60,7 @@
       "name": "SPM_CORE_TEST_DIRECT_RECURSION",
       "sid": "0x00002101",
       "signal": "SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -68,7 +68,7 @@
       "name": "SPM_CORE_TEST_MPU_ACCESS",
       "sid": "0x00002102",
       "signal": "SPM_CORE_TEST_MPU_ACCESS_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -76,7 +76,7 @@
       "name": "SPM_CORE_TEST_MEMORY_PERMISSIONS",
       "sid": "0x00002103",
       "signal": "SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -84,7 +84,7 @@
       "name": "SPM_CORE_TEST_SHARE_REDIRECTION",
       "sid": "0x00002104",
       "signal": "SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -92,7 +92,7 @@
       "name": "SPM_CORE_TEST_SS_TO_SS",
       "sid": "0x00002105",
       "signal": "SPM_CORE_TEST_SS_TO_SS_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -100,7 +100,7 @@
       "name": "SPM_CORE_TEST_SS_TO_SS_BUFFER",
       "sid": "0x00002106",
       "signal": "SPM_CORE_TEST_SS_TO_SS_BUFFER_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -108,7 +108,7 @@
       "name": "SPM_CORE_TEST_OUTVEC_WRITE",
       "sid": "0x00002107",
       "signal": "SPM_CORE_TEST_OUTVEC_WRITE_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -116,7 +116,7 @@
       "name": "SPM_CORE_TEST_PERIPHERAL_ACCESS",
       "sid": "0x00002108",
       "signal": "SPM_CORE_TEST_PERIPHERAL_ACCESS_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -124,7 +124,7 @@
       "name": "SPM_CORE_TEST_GET_CALLER_CLIENT_ID",
       "sid": "0x00002109",
       "signal": "SPM_CORE_TEST_GET_CALLER_CLIENT_ID_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -132,7 +132,7 @@
       "name": "SPM_CORE_TEST_SPM_REQUEST",
       "sid": "0x0000210A",
       "signal": "SPM_CORE_TEST_SPM_REQUEST_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -140,7 +140,7 @@
       "name": "SPM_CORE_TEST_BLOCK",
       "sid": "0x0000210B",
       "signal": "SPM_CORE_TEST_BLOCK_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -148,7 +148,7 @@
       "name": "SPM_CORE_TEST_NS_THREAD",
       "sid": "0x0000210C",
       "signal": "SPM_CORE_TEST_NS_THREAD_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     }

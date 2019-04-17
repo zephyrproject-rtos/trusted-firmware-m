@@ -41,7 +41,7 @@
       "name": "TFM_ATTEST_GET_TOKEN",
       "sid": "0x00000020",
       "signal": "PSA_ATTEST_GET_TOKEN_SIG",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -49,7 +49,7 @@
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
       "signal": "PSA_ATTEST_GET_TOKEN_SIZE_SIG",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     }

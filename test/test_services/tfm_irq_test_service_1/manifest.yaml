@@ -60,7 +60,7 @@
     "name": "SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO",
     "sid": "0x00002300",
     "signal": "SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SIGNAL",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
     },
@@ -68,7 +68,7 @@
     "name": "SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO",
     "sid": "0x00002301",
     "signal": "SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SIGNAL",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
     },

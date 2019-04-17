@@ -20,7 +20,7 @@
       "name": "IPC_CLIENT_TEST_BASIC",
       "sid": "0x00001100",
       "signal": "IPC_CLIENT_TEST_BASIC_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -28,7 +28,7 @@
       "name": "IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM",
       "sid": "0x00001101",
       "signal": "IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -36,7 +36,7 @@
       "name": "IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM",
       "sid": "0x00001102",
       "signal": "IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -44,7 +44,7 @@
       "name": "IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM",
       "sid": "0x00001103",
       "signal": "IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -52,7 +52,7 @@
       "name": "IPC_CLIENT_TEST_MEM_CHECK",
       "sid": "0x00001104",
       "signal": "IPC_CLIENT_TEST_MEM_CHECK_SIGNAL",
-      "non_secure_clients": "true",
+      "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     }

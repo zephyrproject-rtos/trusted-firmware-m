@@ -54,7 +54,7 @@
     "name": "TFM_SST_SET",
     "sid": "0x00002000",
     "signal": "TFM_SST_SET_SIG",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
    },
@@ -62,7 +62,7 @@
     "name": "TFM_SST_GET",
     "sid": "0x00002001",
     "signal": "TFM_SST_GET_SIG",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
    },
@@ -70,7 +70,7 @@
     "name": "TFM_SST_GET_INFO",
     "sid": "0x00002002",
     "signal": "TFM_SST_GET_INFO_SIG",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
    },
@@ -78,7 +78,7 @@
     "name": "TFM_SST_REMOVE",
     "sid": "0x00002003",
     "signal": "TFM_SST_REMOVE_SIG",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
    },
@@ -86,7 +86,7 @@
     "name": "TFM_SST_GET_SUPPORT",
     "sid": "0x00002004",
     "signal": "TFM_SST_GET_SUPPORT_SIG",
-    "non_secure_clients": "true",
+    "non_secure_clients": true,
     "minor_version": 1,
     "minor_policy": "STRICT"
    }

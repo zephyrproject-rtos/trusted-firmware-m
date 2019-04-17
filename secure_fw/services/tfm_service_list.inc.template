@@ -23,7 +23,11 @@
         {{manifest.manifest.name}}_ID,
         {{service.signal}},
         {{service.sid}},
-        {{service.non_secure_clients}},
+    {% if service.non_secure_clients is sameas true %}
+        true,
+    {% else %}
+        false,
+    {% endif %}
     {% if service.minor_version %}
         {{service.minor_version}},
     {% else %}
