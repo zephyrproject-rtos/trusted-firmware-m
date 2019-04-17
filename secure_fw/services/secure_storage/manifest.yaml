@@ -15,43 +15,43 @@
   "heap_size": "0",
   "secure_functions": [
     {
-      "sfid": "TFM_SST_SET_SFID",
+      "name": "TFM_SST_SET",
       "signal": "TFM_SST_SET_REQ",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_SST_GET_SFID",
+      "name": "TFM_SST_GET",
       "signal": "TFM_SST_GET_REQ",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_SST_GET_INFO_SFID",
+      "name": "TFM_SST_GET_INFO",
       "signal": "TFM_SST_GET_INFO_REQ",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_SST_REMOVE_SFID",
+      "name": "TFM_SST_REMOVE",
       "signal": "TFM_SST_REMOVE_REQ",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_SST_GET_SUPPORT_SFID",
+      "name": "TFM_SST_GET_SUPPORT",
       "signal": "TFM_SST_GET_SUPPORT_REQ",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     }
   ],
   "services" : [{
-    "name": "TFM_SST_SET_SID",
+    "name": "TFM_SST_SET",
     "sid": "0x00002000",
     "signal": "TFM_SST_SET_SIG",
     "non_secure_clients": "true",
@@ -59,7 +59,7 @@
     "minor_policy": "STRICT"
    },
    {
-    "name": "TFM_SST_GET_SID",
+    "name": "TFM_SST_GET",
     "sid": "0x00002001",
     "signal": "TFM_SST_GET_SIG",
     "non_secure_clients": "true",
@@ -67,7 +67,7 @@
     "minor_policy": "STRICT"
    },
    {
-    "name": "TFM_SST_GET_INFO_SID",
+    "name": "TFM_SST_GET_INFO",
     "sid": "0x00002002",
     "signal": "TFM_SST_GET_INFO_SIG",
     "non_secure_clients": "true",
@@ -75,7 +75,7 @@
     "minor_policy": "STRICT"
    },
    {
-    "name": "TFM_SST_REMOVE_SID",
+    "name": "TFM_SST_REMOVE",
     "sid": "0x00002003",
     "signal": "TFM_SST_REMOVE_SIG",
     "non_secure_clients": "true",
@@ -83,7 +83,7 @@
     "minor_policy": "STRICT"
    },
    {
-    "name": "TFM_SST_GET_SUPPORT_SID",
+    "name": "TFM_SST_GET_SUPPORT",
     "sid": "0x00002004",
     "signal": "TFM_SST_GET_SUPPORT_SIG",
     "non_secure_clients": "true",

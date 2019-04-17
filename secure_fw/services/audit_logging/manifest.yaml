@@ -22,39 +22,44 @@
   ],
   "secure_functions": [
     {
-      "sfid": "TFM_AUDIT_RETRIEVE_RECORD_SFID",
+      "name": "TFM_AUDIT_RETRIEVE_RECORD",
       "signal": "AUDIT_CORE_RETRIEVE_RECORD",
+      "sid": "0x00000000",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_AUDIT_ADD_RECORD_SFID",
+      "name": "TFM_AUDIT_ADD_RECORD",
       "signal": "AUDIT_CORE_ADD_RECORD",
+      "sid": "0x00000001",
       "non_secure_clients": false,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_AUDIT_GET_INFO_SFID",
+      "name": "TFM_AUDIT_GET_INFO",
       "signal": "AUDIT_CORE_GET_INFO",
+      "sid": "0x00000002",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_AUDIT_GET_RECORD_INFO_SFID",
+      "name": "TFM_AUDIT_GET_RECORD_INFO",
       "signal": "AUDIT_CORE_GET_RECORD_INFO",
+      "sid": "0x00000003",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_AUDIT_DELETE_RECORD_SFID",
+      "name": "TFM_AUDIT_DELETE_RECORD",
       "signal": "AUDIT_CORE_DELETE_RECORD",
+      "sid": "0x00000004",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     }
   ],
   "linker_pattern": {

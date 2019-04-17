@@ -15,33 +15,32 @@
   "heap_size": "0",
   "secure_functions": [
     {
-      "sfid": "TFM_CORE_TEST_2_SFN_SLAVE_SERVICE_SFID",
+      "name": "TFM_CORE_TEST_2_SFN_SLAVE_SERVICE",
       "signal": "SPM_CORE_TEST_2_SLAVE_SERVICE",
       "non_secure_clients": false,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_CORE_TEST_2_SFN_INVERT_SFID",
+      "name": "TFM_CORE_TEST_2_SFN_INVERT",
       "signal": "SPM_CORE_TEST_2_SFN_INVERT",
-
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_CORE_TEST_2_SFN_CHECK_CALLER_CLIENT_ID_SFID",
+      "name": "TFM_CORE_TEST_2_SFN_CHECK_CALLER_CLIENT_ID",
       "signal": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     },
     {
-      "sfid": "TFM_CORE_TEST_2_SFN_GET_EVERY_SECOND_BYTE",
+      "name": "TFM_CORE_TEST_2_SFN_GET_EVERY_SECOND_BYTE",
       "signal": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE",
       "non_secure_clients": true,
       "minor_version": 1,
-      "minor_policy": "strict"
+      "minor_policy": "STRICT"
     }
   ],
   "linker_pattern": {
@@ -51,7 +50,7 @@
   },
   "services": [
     {
-      "name": "SPM_CORE_TEST_2_SLAVE_SERVICE_SID",
+      "name": "SPM_CORE_TEST_2_SLAVE_SERVICE",
       "sid": "0x00002200",
       "signal": "SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL",
       "non_secure_clients": "true",
@@ -59,7 +58,7 @@
       "minor_policy": "STRICT"
     },
     {
-      "name": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SID",
+      "name": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID",
       "sid": "0x00002201",
       "signal": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL",
       "non_secure_clients": "true",
@@ -67,7 +66,7 @@
       "minor_policy": "STRICT"
     },
     {
-      "name": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID",
+      "name": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE",
       "sid": "0x00002202",
       "signal": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL",
       "non_secure_clients": "true",
@@ -75,7 +74,7 @@
       "minor_policy": "STRICT"
     },
     {
-      "name": "SPM_CORE_TEST_2_INVERT_SID",
+      "name": "SPM_CORE_TEST_2_INVERT",
       "sid": "0x00002203",
       "signal": "SPM_CORE_TEST_2_INVERT_SIGNAL",
       "non_secure_clients": "true",

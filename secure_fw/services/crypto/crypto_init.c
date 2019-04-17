@@ -29,7 +29,7 @@
  * \brief Table containing all the Uniform Signature API exposed
  *        by the TF-M Crypto partition
  */
-static const tfm_crypto_us_t sfid_func_table[TFM_CRYPTO_SFID_MAX] = {
+static const tfm_crypto_us_t sfid_func_table[TFM_CRYPTO_SID_MAX] = {
 #define X(api_name) api_name,
 LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
 #undef X
@@ -194,8 +194,8 @@ static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if (iov->sfn_id >= TFM_CRYPTO_SFID_MAX) {
-        *sfn_id_p = TFM_CRYPTO_SFID_INVALID;
+    if (iov->sfn_id >= TFM_CRYPTO_SID_MAX) {
+        *sfn_id_p = TFM_CRYPTO_SID_INVALID;
         return PSA_ERROR_GENERIC_ERROR;
     }
 
@@ -209,7 +209,7 @@ static void tfm_crypto_ipc_handler(void)
     psa_signal_t signals = 0;
     psa_msg_t msg;
     psa_status_t status = PSA_SUCCESS;
-    uint32_t sfn_id = TFM_CRYPTO_SFID_INVALID;
+    uint32_t sfn_id = TFM_CRYPTO_SID_INVALID;
     struct tfm_crypto_pack_iovec iov = {0};
 
     while (1) {
@@ -232,8 +232,8 @@ static void tfm_crypto_ipc_handler(void)
             case PSA_IPC_CALL:
                 /* Parse the message */
                 status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);
-                /* Call the dispatcher based on the SFID passed as type */
-                if (sfn_id != TFM_CRYPTO_SFID_INVALID) {
+                /* Call the dispatcher based on the SID passed as type */
+                if (sfn_id != TFM_CRYPTO_SID_INVALID) {
                     status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
                 } else {
                     status = PSA_ERROR_GENERIC_ERROR;
