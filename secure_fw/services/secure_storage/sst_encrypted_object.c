@@ -11,6 +11,7 @@
 
 #include "crypto/sst_crypto_interface.h"
 #include "flash_fs/sst_flash_fs.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 #include "sst_object_defs.h"
 #include "sst_utils.h"
 
@@ -88,7 +89,7 @@ static psa_ps_status_t sst_object_auth_decrypt(uint32_t fid,
         return err;
     }
 
-    sst_utils_memcpy(sst_crypto_buf, p_obj_data, cur_size);
+    (void)tfm_memcpy(sst_crypto_buf, p_obj_data, cur_size);
 
     /* Use File ID as a part of the associated data to authenticate
      * the object in the FS. The tag will be stored in the object table and
@@ -155,7 +156,7 @@ static psa_ps_status_t sst_object_auth_encrypt(uint32_t fid,
         return err;
     }
 
-    sst_utils_memcpy(p_obj_data, sst_crypto_buf, cur_size);
+    (void)tfm_memcpy(p_obj_data, sst_crypto_buf, cur_size);
 
     return PSA_PS_SUCCESS;
 }

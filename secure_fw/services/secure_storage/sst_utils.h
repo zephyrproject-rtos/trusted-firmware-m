@@ -84,29 +84,6 @@ psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
                                              uint32_t subset_offset,
                                              uint32_t subset_size);
 
-/* FIXME: following functions(memcpy and memset) will be provided
- * by core. This is only an interim abstraction. In the current
- * implementation the stdlib is linked and protected as part of the TFM core
- * and not available for services.
- */
-/**
- * \brief Memory copy function
- *
- * \param[out] dest  Destination position
- * \param[in]  src   Source position
- * \param[in]  size  Size of data to copy
- */
-void sst_utils_memcpy(void *dest, const void *src, uint32_t size);
-
-/**
- * \brief Memory set function
- *
- * \param[out] dest     Destination position
- * \param[in]  pattern  Pattern value to set
- * \param[in]  size     Size of data to set
- */
-void sst_utils_memset(void *dest, const uint8_t pattern, uint32_t size);
-
 /**
  * \brief Validates file ID
  *

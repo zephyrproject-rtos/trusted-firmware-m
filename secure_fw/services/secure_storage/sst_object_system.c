@@ -11,6 +11,7 @@
 
 #include "cmsis_compiler.h"
 #include "flash_fs/sst_flash_fs.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 #ifdef SST_ENCRYPTION
 #include "sst_encrypted_object.h"
 #endif
@@ -48,7 +49,7 @@ __STATIC_INLINE void sst_init_empty_object(psa_ps_create_flags_t create_flags,
                                            struct sst_object_t *obj)
 {
     /* Set all object data to 0 */
-    sst_utils_memset(obj, SST_DEFAULT_EMPTY_BUFF_VAL, SST_MAX_OBJECT_SIZE);
+    (void)tfm_memset(obj, SST_DEFAULT_EMPTY_BUFF_VAL, SST_MAX_OBJECT_SIZE);
 
 #ifndef SST_ENCRYPTION
     /* Initialize object version */
@@ -230,11 +231,11 @@ psa_ps_status_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Copy the decrypted object data to the output buffer */
-        sst_utils_memcpy(data, g_sst_object.data + offset, size);
+        (void)tfm_memcpy(data, g_sst_object.data + offset, size);
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+        (void)tfm_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
                          SST_MAX_OBJECT_SIZE);
 
         sst_global_unlock();
@@ -305,7 +306,7 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Update the object data */
-        sst_utils_memcpy(g_sst_object.data, data, size);
+        (void)tfm_memcpy(g_sst_object.data, data, size);
 
         /* Update the current object size */
         g_sst_object.header.info.current_size = size;
@@ -352,7 +353,7 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+        (void)tfm_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
                          SST_MAX_OBJECT_SIZE);
 
         sst_global_unlock();
@@ -418,7 +419,7 @@ psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Update the object data */
-        sst_utils_memcpy(g_sst_object.data + offset, data, size);
+        (void)tfm_memcpy(g_sst_object.data + offset, data, size);
 
         /* Update the current object size if necessary */
         if ((offset + size) > g_sst_object.header.info.current_size) {
@@ -465,7 +466,7 @@ psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+        (void)tfm_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
                          SST_MAX_OBJECT_SIZE);
 
         sst_global_unlock();
@@ -506,7 +507,7 @@ psa_ps_status_t sst_object_get_info(psa_ps_uid_t uid, int32_t client_id,
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+        (void)tfm_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
                          SST_MAX_OBJECT_SIZE);
 
         sst_global_unlock();
@@ -559,7 +560,7 @@ psa_ps_status_t sst_object_delete(psa_ps_uid_t uid, int32_t client_id)
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
-        sst_utils_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
+        (void)tfm_memset(&g_sst_object, SST_DEFAULT_EMPTY_BUFF_VAL,
                          SST_MAX_OBJECT_SIZE);
 
         sst_global_unlock();

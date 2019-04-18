@@ -11,7 +11,7 @@
 
 #include "platform/include/tfm_plat_crypto_keys.h"
 #include "psa_crypto.h"
-#include "secure_fw/services/secure_storage/sst_utils.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 
 /* FIXME: HUK management should be part of Crypto service, with keys hidden from
  *        SST.
@@ -96,7 +96,7 @@ psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key)
 
 void sst_crypto_set_iv(const union sst_crypto_t *crypto)
 {
-    sst_utils_memcpy(sst_crypto_iv_buf, crypto->ref.iv, SST_IV_LEN_BYTES);
+    (void)tfm_memcpy(sst_crypto_iv_buf, crypto->ref.iv, SST_IV_LEN_BYTES);
 }
 
 void sst_crypto_get_iv(union sst_crypto_t *crypto)
@@ -126,8 +126,8 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
     uint64_t iv_l;
     uint32_t iv_h;
 
-    sst_utils_memcpy(&iv_l, sst_crypto_iv_buf, sizeof(iv_l));
-    sst_utils_memcpy(&iv_h, (sst_crypto_iv_buf+sizeof(iv_l)), sizeof(iv_h));
+    (void)tfm_memcpy(&iv_l, sst_crypto_iv_buf, sizeof(iv_l));
+    (void)tfm_memcpy(&iv_h, (sst_crypto_iv_buf+sizeof(iv_l)), sizeof(iv_h));
     iv_l++;
     /* If overflow, increment the MSBs */
     if (iv_l == 0) {
@@ -135,10 +135,10 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
     }
 
     /* Update the local buffer */
-    sst_utils_memcpy(sst_crypto_iv_buf, &iv_l, sizeof(iv_l));
-    sst_utils_memcpy((sst_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
+    (void)tfm_memcpy(sst_crypto_iv_buf, &iv_l, sizeof(iv_l));
+    (void)tfm_memcpy((sst_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
     /* Update the caller buffer */
-    sst_utils_memcpy(crypto->ref.iv, sst_crypto_iv_buf, SST_IV_LEN_BYTES);
+    (void)tfm_memcpy(crypto->ref.iv, sst_crypto_iv_buf, SST_IV_LEN_BYTES);
 }
 
 psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
@@ -163,7 +163,7 @@ psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
 
     /* Copy the tag out of the output buffer */
     *out_len -= SST_TAG_LEN_BYTES;
-    sst_utils_memcpy(crypto->ref.tag, (out + *out_len), SST_TAG_LEN_BYTES);
+    (void)tfm_memcpy(crypto->ref.tag, (out + *out_len), SST_TAG_LEN_BYTES);
 
     return PSA_PS_SUCCESS;
 }
@@ -180,7 +180,7 @@ psa_ps_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
     psa_status_t status;
 
     /* Copy the tag into the input buffer */
-    sst_utils_memcpy((in + in_len), crypto->ref.tag, SST_TAG_LEN_BYTES);
+    (void)tfm_memcpy((in + in_len), crypto->ref.tag, SST_TAG_LEN_BYTES);
     in_len += SST_TAG_LEN_BYTES;
 
     status = psa_aead_decrypt(sst_key_handle, SST_CRYPTO_ALG,

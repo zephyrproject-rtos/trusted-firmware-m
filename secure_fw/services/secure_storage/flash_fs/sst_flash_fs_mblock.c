@@ -10,6 +10,7 @@
 #include <stddef.h>
 
 #include "cmsis_compiler.h"
+#include "secure_fw/core/tfm_memory_utils.h"
 #include "secure_fw/services/secure_storage/sst_object_defs.h"
 #include "secure_fw/services/secure_storage/sst_utils.h"
 
@@ -1062,7 +1063,7 @@ psa_ps_status_t sst_flash_fs_mblock_reset_metablock(void)
     }
 
     /* Initialize file metadata table */
-    sst_utils_memset(&file_metadata, SST_DEFAULT_EMPTY_BUFF_VAL,
+    (void)tfm_memset(&file_metadata, SST_DEFAULT_EMPTY_BUFF_VAL,
                      SST_FILE_METADATA_SIZE);
     for (i = 0; i < SST_MAX_NUM_OBJECTS; i++) {
         /* In the beginning phys id is same as logical id */
