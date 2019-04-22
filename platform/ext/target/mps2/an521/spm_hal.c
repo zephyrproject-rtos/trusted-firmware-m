@@ -141,6 +141,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
         (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
     region_cfg.region_limit =
         (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
@@ -154,6 +155,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
     region_cfg.region_limit =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base);
+    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
@@ -167,6 +169,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
     region_cfg.region_limit =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base);
+    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
