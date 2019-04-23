@@ -11,5 +11,6 @@
 #include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
 #include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
 #include "secure_fw/services/secure_storage/tfm_sst_signal.h"
+#include "test/test_services/tfm_secure_client_service/tfm_sec_client_ser_sig.h"
 
 #endif

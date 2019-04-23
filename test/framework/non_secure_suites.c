@@ -41,6 +41,11 @@ static struct test_suite_t test_suites[] = {
 
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
 
+#ifndef TFM_PSA_API
+    /*
+     * FixMe: skip below test cases temporary since target service is not
+     * IPC compatible yet.
+     */
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
 
@@ -52,6 +57,7 @@ static struct test_suite_t test_suites[] = {
 
     /* Non-secure QCBOR library test cases */
     {&register_testsuite_ns_qcbor, 0, 0, 0},
+#endif
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Non-secure invert test cases */
@@ -62,8 +68,10 @@ static struct test_suite_t test_suites[] = {
 #endif /* TFM_LVL == 3 */
 
 #ifdef CORE_TEST_POSITIVE
+#if !((TFM_LVL == 2) && defined(TFM_PSA_API))
     /* Non-secure core test cases */
     {&register_testsuite_ns_core_positive, 0, 0, 0},
+#endif
 #endif
 
 #ifdef CORE_TEST_INTERACTIVE

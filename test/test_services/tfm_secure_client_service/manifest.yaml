@@ -13,6 +13,7 @@
   "entry_point": "tfm_secure_client_service_init",
   "stack_size": "0x1000",
   "heap_size": "0x0400",
+  "tfm_partition_ipc": true,
   "mmio_regions": [
     {
       "name": "TFM_PERIPHERAL_STD_UART",
@@ -28,6 +29,16 @@
       "minor_version": 1,
       "minor_policy": "strict"
     },
+  ],
+  "services": [
+    {
+      "name": "TFM_SECURE_CLIENT_SFN_RUN_TESTS_SID",
+      "sid": "0x0000F000",
+      "signal": "TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    }
   ],
   "source_files": [
     "tfm_secure_client_service.c"

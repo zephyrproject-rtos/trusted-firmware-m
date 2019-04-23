@@ -35,6 +35,11 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
 
+#ifndef TFM_PSA_API
+    /*
+     * FixMe: since the following partitions haven't implement the IPC model,
+     * they will block the process. Skip them in IPC model.
+     */
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
 
@@ -43,6 +48,7 @@ static struct test_suite_t test_suites[] = {
 
     /* Secure initial attestation service test cases */
     {&register_testsuite_s_attestation_interface, 0, 0, 0},
+#endif
 
 #ifdef TFM_PARTITION_TEST_CORE
     /* Secure invert test cases */
