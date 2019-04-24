@@ -132,6 +132,20 @@ void tfm_thrd_activate_schedule(void)
     tfm_trigger_pendsv();
 }
 
+void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
+{
+    /*
+     * There is no selected thread before scheduler start, assign
+     * a caller provided thread as current thread. This function
+     * should get called only ONCE; further calling triggers assert.
+     */
+    TFM_ASSERT(CURR_THRD == NULL);
+    TFM_ASSERT(pth != NULL);
+
+    CURR_THRD = pth;
+    tfm_thrd_activate_schedule();
+}
+
 /* Remove current thread out of the schedulable list */
 void tfm_svcall_thrd_exit(void)
 {
@@ -152,10 +166,16 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
                              struct tfm_thrd_ctx *prev,
                              struct tfm_thrd_ctx *next)
 {
-    /* Update latest context into the current thread context */
+    TFM_ASSERT(prev != NULL);
+    TFM_ASSERT(next != NULL);
+
+    /*
+     * First, update latest context into the current thread context.
+     * Then, update background context with next thread's context.
+     */
     tfm_memcpy(&prev->state_ctx.ctxb, ctxb, sizeof(*ctxb));
-    /* Update background context with next thread's context */
     tfm_memcpy(ctxb, &next->state_ctx.ctxb, sizeof(next->state_ctx.ctxb));
-    /* Set current thread indicator with next thread */
+
+    /* Update current thread indicator */
     CURR_THRD = next;
 }

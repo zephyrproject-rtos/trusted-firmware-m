@@ -178,6 +178,19 @@ struct tfm_thrd_ctx *tfm_thrd_curr_thread(void);
 struct tfm_thrd_ctx *tfm_thrd_next_thread(void);
 
 /*
+ * Start scheduler for existing threads
+ *
+ * Parameters:
+ *  pth         -     pointer of the caller context collecting thread
+ *
+ * Notes :
+ *  This function should be called only ONCE to start the scheduler.
+ *  Caller needs to provide a thread object to collect current context.
+ *  The usage of the collected context is caller defined.
+ */
+void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth);
+
+/*
  * Activate a scheduling action after exception.
  *
  * Notes :
