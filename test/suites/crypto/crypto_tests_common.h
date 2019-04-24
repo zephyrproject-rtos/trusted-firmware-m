@@ -53,12 +53,6 @@ extern "C" {
 #define ASSOCIATED_DATA_SIZE (24)
 
 /**
- * \brief The key slot number to be used by the tests
- *
- */
-#define TEST_KEY_SLOT (1)
-
-/**
  * \brief The maximum allowed key length in bytes used in the
  *        tests
  */

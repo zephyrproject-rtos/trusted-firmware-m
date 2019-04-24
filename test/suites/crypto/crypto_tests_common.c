@@ -15,33 +15,44 @@
 void psa_key_interface_test(const psa_key_type_t key_type,
                             struct test_result_t *ret)
 {
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     psa_status_t status = PSA_SUCCESS;
     uint32_t i = 0;
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_handle_t key_handle;
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
     uint8_t exported_data[sizeof(data)] = {0};
     size_t exported_data_size = 0;
-    psa_key_policy_t policy;
+    psa_key_policy_t policy = psa_key_policy_init();
+
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
 
     /* Setup the key policy */
-    psa_key_policy_init(&policy);
     psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, 0);
-    status = psa_set_key_policy(slot, &policy);
+    status = psa_set_key_policy(key_handle, &policy);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
         return;
     }
 
-    status = psa_import_key(slot, key_type, data, sizeof(data));
+    status = psa_get_key_information(key_handle, &type, &bits);
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
+        TEST_FAIL("Key handle does not yet contain key material");
+        return;
+    }
+
+    status = psa_import_key(key_handle, key_type, data, sizeof(data));
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
         return;
     }
 
-    status = psa_get_key_information(slot, &type, &bits);
+    status = psa_get_key_information(key_handle, &type, &bits);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
         return;
@@ -52,12 +63,12 @@ void psa_key_interface_test(const psa_key_type_t key_type,
         return;
     }
 
-    if (type != PSA_KEY_TYPE_AES) {
+    if (type != key_type) {
         TEST_FAIL("The type of the key is different from expected");
         return;
     }
 
-    status = psa_export_key(slot,
+    status = psa_export_key(key_handle,
                             exported_data,
                             sizeof(data),
                             &exported_data_size);
@@ -80,18 +91,18 @@ void psa_key_interface_test(const psa_key_type_t key_type,
         }
     }
 
-    status = psa_destroy_key(slot);
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying the key");
         return;
     }
 
-    status = psa_get_key_information(slot, &type, &bits);
-    if (status != PSA_ERROR_EMPTY_SLOT) {
-        TEST_FAIL("Key slot should be empty now");
+    status = psa_get_key_information(key_handle, &type, &bits);
+    if (status != PSA_ERROR_INVALID_HANDLE) {
+        TEST_FAIL("Key handle should be invalid now");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
 
@@ -99,10 +110,10 @@ void psa_cipher_test(const psa_key_type_t key_type,
                      const psa_algorithm_t alg,
                      struct test_result_t *ret)
 {
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
-    psa_cipher_operation_t handle, handle_dec;
+    psa_cipher_operation_t handle = psa_cipher_operation_init();
+    psa_cipher_operation_t handle_dec = psa_cipher_operation_init();
     psa_status_t status = PSA_SUCCESS;
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_handle_t key_handle;
     const uint8_t data[] = "THIS IS MY KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
@@ -113,29 +124,35 @@ void psa_cipher_test(const psa_key_type_t key_type,
     size_t output_length = 0, total_output_length = 0;
     uint8_t encrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
     uint32_t comp_result;
-    psa_key_policy_t policy;
+    psa_key_policy_t policy = psa_key_policy_init();
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
     uint32_t i;
 
-    /* Setup the key policy */
-    psa_key_policy_init(&policy);
-    psa_key_policy_set_usage(&policy, usage, alg);
-    status = psa_set_key_policy(slot, &policy);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key policy");
-        return;
-    }
-
     ret->val = TEST_PASSED;
 
-    /* Import a key on slot 0 */
-    status = psa_import_key(slot, key_type, data, sizeof(data));
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
     if (status != PSA_SUCCESS) {
-        TEST_FAIL("Error importing a key");
+        TEST_FAIL("Failed to allocate key");
         return;
     }
 
-    status = psa_get_key_information(slot, &type, &bits);
+    /* Setup the key policy */
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(key_handle, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        goto destroy_key;
+    }
+
+    /* Import a key */
+    status = psa_import_key(key_handle, key_type, data, sizeof(data));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        goto destroy_key;
+    }
+
+    status = psa_get_key_information(key_handle, &type, &bits);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
         goto destroy_key;
@@ -152,7 +169,7 @@ void psa_cipher_test(const psa_key_type_t key_type,
     }
 
     /* Setup the encryption object */
-    status = psa_cipher_encrypt_setup(&handle, slot, alg);
+    status = psa_cipher_encrypt_setup(&handle, key_handle, alg);
     if (status != PSA_SUCCESS) {
         if (status == PSA_ERROR_NOT_SUPPORTED) {
             TEST_FAIL("Algorithm NOT SUPPORTED by the implementation");
@@ -216,11 +233,11 @@ void psa_cipher_test(const psa_key_type_t key_type,
     }
 
     /* Setup the decryption object */
-    if (alg == PSA_ALG_CFB_BASE) {
+    if (alg == PSA_ALG_CFB) {
         /* In CFB mode the object is always in encryption mode */
-        status = psa_cipher_encrypt_setup(&handle_dec, slot, alg);
+        status = psa_cipher_encrypt_setup(&handle_dec, key_handle, alg);
     } else {
-        status = psa_cipher_decrypt_setup(&handle_dec, slot, alg);
+        status = psa_cipher_decrypt_setup(&handle_dec, key_handle, alg);
     }
 
     if (status != PSA_SUCCESS) {
@@ -229,17 +246,7 @@ void psa_cipher_test(const psa_key_type_t key_type,
     }
 
     /* Set the IV for decryption */
-    if (alg == PSA_ALG_CFB_BASE) {
-        /*  In CFB mode the object is in encryption mode, so follow the
-         *  encryption flow.
-         */
-        status = psa_cipher_set_iv(&handle_dec, iv, iv_length);
-    } else {
-        status = psa_cipher_update(&handle_dec, iv, iv_length,
-                                   encrypted_data, ENC_DEC_BUFFER_SIZE,
-                                   &output_length);
-    }
-
+    status = psa_cipher_set_iv(&handle_dec, iv, iv_length);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting the IV for decryption");
         status = psa_cipher_abort(&handle_dec);
@@ -247,17 +254,6 @@ void psa_cipher_test(const psa_key_type_t key_type,
             TEST_FAIL("Error aborting the operation");
         }
         goto destroy_key;
-    }
-
-    if (alg != PSA_ALG_CFB_BASE) {
-        if (output_length != 0) {
-            TEST_FAIL("Expected output length is different from expected");
-            status = psa_cipher_abort(&handle_dec);
-            if (status != PSA_SUCCESS) {
-                TEST_FAIL("Error aborting the operation");
-            }
-            goto destroy_key;
-        }
     }
 
     /* Decrypt */
@@ -317,12 +313,12 @@ void psa_cipher_test(const psa_key_type_t key_type,
     }
 
 destroy_key:
-    /* Destroy the key on slot 0 */
-    status = psa_destroy_key(slot);
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
     }
-#endif
+
 }
 
 void psa_invalid_cipher_test(const psa_key_type_t key_type,
@@ -330,18 +326,23 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
                              const size_t key_size,
                              struct test_result_t *ret)
 {
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     psa_status_t status;
-    psa_cipher_operation_t handle;
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_cipher_operation_t handle = psa_cipher_operation_init();
+    psa_key_handle_t key_handle;
     uint8_t data[TEST_MAX_KEY_LENGTH];
-    psa_key_policy_t policy;
+    psa_key_policy_t policy = psa_key_policy_init();
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
 
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
     /* Setup the key policy */
-    psa_key_policy_init(&policy);
     psa_key_policy_set_usage(&policy, usage, alg);
-    status = psa_set_key_policy(slot, &policy);
+    status = psa_set_key_policy(key_handle, &policy);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
         return;
@@ -354,28 +355,28 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
     (void)tfm_memset(data, 'A', key_size);
 #endif
 
-    /* Import a key to slot 0 */
-    status = psa_import_key(slot, key_type, data, key_size);
+    /* Import a key */
+    status = psa_import_key(key_handle, key_type, data, key_size);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
         return;
     }
 
     /* Setup the encryption object */
-    status = psa_cipher_encrypt_setup(&handle, slot, alg);
+    status = psa_cipher_encrypt_setup(&handle, key_handle, alg);
     if (status == PSA_SUCCESS) {
         TEST_FAIL("Should not successfully setup an invalid cipher");
-        psa_destroy_key(slot);
+        (void)psa_destroy_key(key_handle);
         return;
     }
 
-    /* Destroy the key in slot 0 */
-    status = psa_destroy_key(slot);
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
 
@@ -385,7 +386,6 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
  *        service. In case the crypto engine default capabilities
  *        is changed, this list needs to be updated accordingly
  */
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
 static const psa_algorithm_t hash_alg[] = {
     PSA_ALG_SHA_1,
     PSA_ALG_SHA_224,
@@ -434,12 +434,10 @@ static const uint8_t hash_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
     {0xA0, 0xB9, 0x82, 0x4E, 0xE0, 0x74, 0x4F, 0x1E, /*!< MD-4 */
      0xA4, 0x7F, 0xA3, 0xDF, 0xD0, 0x0D, 0x97, 0xEB},
 };
-#endif
 
 void psa_hash_test(const psa_algorithm_t alg,
                    struct test_result_t *ret)
 {
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     const char *msg[] = {"This is my test message, ",
                          "please generate a hash for this."};
 
@@ -448,7 +446,7 @@ void psa_hash_test(const psa_algorithm_t alg,
     uint32_t idx;
 
     psa_status_t status;
-    psa_hash_operation_t handle;
+    psa_hash_operation_t handle = psa_hash_operation_init();
 
     /* Setup the hash object for the desired hash*/
     status = psa_hash_setup(&handle, alg);
@@ -482,11 +480,10 @@ void psa_hash_test(const psa_algorithm_t alg,
         TEST_FAIL("Error verifying the hash operation object");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
 
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
 static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
     {0x0d, 0xa6, 0x9d, 0x02, 0x43, 0x17, 0x3e, 0x7e, /*!< SHA-1 */
      0xe7, 0x3b, 0xc6, 0xa9, 0x51, 0x06, 0x8a, 0xea,
@@ -529,58 +526,64 @@ static const uint8_t long_key_hmac_val[PSA_HASH_SIZE(PSA_ALG_SHA_1)] = {
     0x2d, 0x44, 0x46, 0x1f, 0x4a, 0xbd, 0x22, 0x53,
     0x9c, 0x05, 0x34, 0x34
 };
-#endif
 
 void psa_mac_test(const psa_algorithm_t alg,
                   uint8_t use_long_key,
                   struct test_result_t *ret)
 {
-    ret->val = TEST_PASSED;
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     const char *msg[] = {"This is my test message, ",
                          "please generate a hmac for this."};
     const size_t msg_size[] = {25, 32}; /* Length in bytes of msg[0], msg[1] */
     const uint32_t msg_num = sizeof(msg)/sizeof(msg[0]);
     uint32_t idx;
 
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_handle_t key_handle;
     const uint8_t data[] = "THIS IS MY KEY1";
     const uint8_t long_data[] = "THIS IS MY UNCOMMONLY LONG KEY1";
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
     size_t bit_size_test_key = 0;
     psa_status_t status;
-    psa_mac_operation_t handle;
-    psa_key_policy_t policy;
+    psa_mac_operation_t handle = psa_mac_operation_init();
+    psa_key_policy_t policy = psa_key_policy_init();
     psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY;
-
-    /* Setup the key policy */
-    psa_key_policy_init(&policy);
-    psa_key_policy_set_usage(&policy, usage, alg);
-    status = psa_set_key_policy(slot, &policy);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key policy");
-        return;
-    }
 
     ret->val = TEST_PASSED;
 
-    /* Import key on slot 0 */
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
+    /* Setup the key policy */
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(key_handle, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        goto destroy_key_mac;
+    }
+
+    /* Import key */
     if (use_long_key == 1) {
-        status = psa_import_key(slot,
+        status = psa_import_key(key_handle,
                                 PSA_KEY_TYPE_HMAC,
                                 long_data,
                                 sizeof(long_data));
     } else {
-        status = psa_import_key(slot, PSA_KEY_TYPE_HMAC, data, sizeof(data));
+        status = psa_import_key(key_handle,
+                                PSA_KEY_TYPE_HMAC,
+                                data,
+                                sizeof(data));
     }
 
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error importing a key");
-        return;
+        goto destroy_key_mac;
     }
 
-    status = psa_get_key_information(slot, &type, &bits);
+    status = psa_get_key_information(key_handle, &type, &bits);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
         goto destroy_key_mac;
@@ -603,7 +606,7 @@ void psa_mac_test(const psa_algorithm_t alg,
     }
 
     /* Setup the mac object for hmac */
-    status = psa_mac_verify_setup(&handle, slot, alg);
+    status = psa_mac_verify_setup(&handle, key_handle, alg);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error setting up mac operation object");
         goto destroy_key_mac;
@@ -621,17 +624,19 @@ void psa_mac_test(const psa_algorithm_t alg,
     }
 
     /* Cycle until idx points to the correct index in the algorithm table */
-    for (idx=0; hash_alg[idx] != PSA_ALG_HMAC_HASH(alg); idx++);
+    for (idx=0; hash_alg[idx] != PSA_ALG_HMAC_GET_HASH(alg); idx++);
 
     /* Finalise and verify the mac value */
     if (use_long_key == 1) {
-        status = psa_mac_verify_finish(&handle,
-                                       &(long_key_hmac_val[0]),
-                                       PSA_HASH_SIZE(PSA_ALG_HMAC_HASH(alg)));
+        status = psa_mac_verify_finish(
+                                     &handle,
+                                     &(long_key_hmac_val[0]),
+                                     PSA_HASH_SIZE(PSA_ALG_HMAC_GET_HASH(alg)));
     } else {
-        status = psa_mac_verify_finish(&handle,
-                                       &(hmac_val[idx][0]),
-                                       PSA_HASH_SIZE(PSA_ALG_HMAC_HASH(alg)));
+        status = psa_mac_verify_finish(
+                                     &handle,
+                                     &(hmac_val[idx][0]),
+                                     PSA_HASH_SIZE(PSA_ALG_HMAC_GET_HASH(alg)));
     }
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error during finalising the mac operation");
@@ -640,20 +645,17 @@ void psa_mac_test(const psa_algorithm_t alg,
 
 destroy_key_mac:
     /* Destroy the key */
-    status = psa_destroy_key(slot);
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying the key");
     }
-#endif
 }
 
 void psa_aead_test(const psa_key_type_t key_type,
                    const psa_algorithm_t alg,
                    struct test_result_t *ret)
 {
-    ret->val = TEST_PASSED;
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_handle_t key_handle;
     const size_t nonce_length = 12;
     const uint8_t nonce[] = "01234567890";
     const uint8_t plain_text[BYTE_SIZE_CHUNK] = "Sixteen bytes!!";
@@ -667,28 +669,34 @@ void psa_aead_test(const psa_key_type_t key_type,
     psa_key_type_t type = PSA_KEY_TYPE_NONE;
     size_t bits = 0;
     uint32_t comp_result;
-    psa_key_policy_t policy;
+    psa_key_policy_t policy = psa_key_policy_init();
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
-
-    /* Setup the key policy */
-    psa_key_policy_init(&policy);
-    psa_key_policy_set_usage(&policy, usage, alg);
-    status = psa_set_key_policy(slot, &policy);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key policy");
-        return;
-    }
 
     ret->val = TEST_PASSED;
 
-    /* Import a key on slot 0 */
-    status = psa_import_key(slot, key_type, data, sizeof(data));
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
     if (status != PSA_SUCCESS) {
-        TEST_FAIL("Error importing a key");
+        TEST_FAIL("Failed to allocate key");
         return;
     }
 
-    status = psa_get_key_information(slot, &type, &bits);
+    /* Setup the key policy */
+    psa_key_policy_set_usage(&policy, usage, alg);
+    status = psa_set_key_policy(key_handle, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        goto destroy_key_aead;
+    }
+
+    /* Import a key */
+    status = psa_import_key(key_handle, key_type, data, sizeof(data));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        goto destroy_key_aead;
+    }
+
+    status = psa_get_key_information(key_handle, &type, &bits);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error getting key metadata");
         goto destroy_key_aead;
@@ -705,14 +713,14 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     /* Perform AEAD encryption */
-    status = psa_aead_encrypt(slot, alg, nonce, nonce_length,
+    status = psa_aead_encrypt(key_handle, alg, nonce, nonce_length,
                               associated_data,
                               sizeof(associated_data),
                               plain_text,
                               sizeof(plain_text),
                               encrypted_data,
                               sizeof(encrypted_data),
-                              &encrypted_data_length );
+                              &encrypted_data_length);
 
     if (status != PSA_SUCCESS) {
         if (status == PSA_ERROR_NOT_SUPPORTED) {
@@ -724,20 +732,21 @@ void psa_aead_test(const psa_key_type_t key_type,
         goto destroy_key_aead;
     }
 
-    if (sizeof(plain_text) != (encrypted_data_length-PSA_AEAD_TAG_SIZE(alg))) {
+    if (encrypted_data_length
+        != PSA_AEAD_ENCRYPT_OUTPUT_SIZE(alg, sizeof(plain_text))) {
         TEST_FAIL("Encrypted data length is different than expected");
         goto destroy_key_aead;
     }
 
     /* Perform AEAD decryption */
-    status = psa_aead_decrypt(slot, alg, nonce, nonce_length,
+    status = psa_aead_decrypt(key_handle, alg, nonce, nonce_length,
                               associated_data,
                               sizeof(associated_data),
                               encrypted_data,
                               encrypted_data_length,
                               decrypted_data,
                               sizeof(decrypted_data),
-                              &decrypted_data_length );
+                              &decrypted_data_length);
 
     if (status != PSA_SUCCESS) {
         if (status == PSA_ERROR_NOT_SUPPORTED) {
@@ -766,57 +775,65 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
 destroy_key_aead:
-    /* Destroy the key on slot 0 */
-    status = psa_destroy_key(slot);
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
     }
-#endif
 }
 
 void psa_invalid_key_length_test(struct test_result_t *ret)
 {
-    ret->val = TEST_PASSED;
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     psa_status_t status;
-    psa_key_policy_t policy;
-    const psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_policy_t policy = psa_key_policy_init();
+    psa_key_handle_t key_handle;
     const uint8_t data[19] = {0};
 
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
     /* Setup the key policy */
-    psa_key_policy_init(&policy);
-    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_ENCRYPT, PSA_ALG_CBC_BASE);
-    status = psa_set_key_policy(slot, &policy);
+    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_ENCRYPT,
+                             PSA_ALG_CBC_NO_PADDING);
+    status = psa_set_key_policy(key_handle, &policy);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
         return;
     }
 
     /* DES does not support 152-bit keys */
-    status = psa_import_key(slot, PSA_KEY_TYPE_DES, data, sizeof(data));
-    if (status != PSA_ERROR_NOT_SUPPORTED) {
+    status = psa_import_key(key_handle, PSA_KEY_TYPE_DES, data, sizeof(data));
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Should not successfully import with an invalid key length");
         return;
     }
-#endif
+
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying a key");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
 }
 
 void psa_policy_key_interface_test(struct test_result_t *ret)
 {
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     psa_status_t status;
-    psa_algorithm_t alg = PSA_ALG_CBC_BASE;
+    psa_algorithm_t alg = PSA_ALG_CBC_NO_PADDING;
     psa_algorithm_t alg_out;
     psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
     psa_key_lifetime_t lifetime_out;
-    psa_key_policy_t policy;
-    psa_key_policy_t policy_out;
-    psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_key_policy_t policy = psa_key_policy_init();
+    psa_key_policy_t policy_out = psa_key_policy_init();
+    psa_key_handle_t key_handle;
     psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
     psa_key_usage_t usage_out;
-
-    /* Initialise the key policy */
-    psa_key_policy_init(&policy);
 
     /* Verify that initialised policy forbids all usage */
     usage_out = psa_key_policy_get_usage(&policy);
@@ -848,15 +865,22 @@ void psa_policy_key_interface_test(struct test_result_t *ret)
         return;
     }
 
-    /* Set the key policy for the key slot */
-    status = psa_set_key_policy(slot, &policy);
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
+    /* Set the key policy for the key handle */
+    status = psa_set_key_policy(key_handle, &policy);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
         return;
     }
 
-    /* Check the key slot has the correct key policy */
-    status = psa_get_key_policy(slot, &policy_out);
+    /* Check the key handle has the correct key policy */
+    status = psa_get_key_policy(key_handle, &policy_out);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to get key policy");
         return;
@@ -874,15 +898,8 @@ void psa_policy_key_interface_test(struct test_result_t *ret)
         return;
     }
 
-    /* Set the key lifetime for the key slot */
-    status = psa_set_key_lifetime(slot, lifetime);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key lifetime");
-        return;
-    }
-
-    /* Check the key slot has the correct key lifetime */
-    status = psa_get_key_lifetime(slot, &lifetime_out);
+    /* Check the key handle has the correct key lifetime */
+    status = psa_get_key_lifetime(key_handle, &lifetime_out);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to get key lifetime");
         return;
@@ -892,20 +909,24 @@ void psa_policy_key_interface_test(struct test_result_t *ret)
         TEST_FAIL("Unexpected key lifetime value");
         return;
     }
-#endif
+
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying a key");
+        return;
+    }
+
     ret->val = TEST_PASSED;
 }
 
 void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
 {
-    ret->val = TEST_PASSED;
-#if 0 /* FixMe: To be restored when Tests are aligned to the new API */
     psa_status_t status;
-    psa_algorithm_t alg = PSA_ALG_CBC_BASE;
-    psa_cipher_operation_t handle;
-    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
-    psa_key_policy_t policy;
-    psa_key_slot_t slot = TEST_KEY_SLOT;
+    psa_algorithm_t alg = PSA_ALG_CBC_NO_PADDING;
+    psa_cipher_operation_t handle = psa_cipher_operation_init();
+    psa_key_policy_t policy = psa_key_policy_init();
+    psa_key_handle_t key_handle;
     psa_key_usage_t usage = (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
     size_t data_len;
     const uint8_t data[] = "THIS IS MY KEY1";
@@ -913,31 +934,30 @@ void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
     /* Setup the key policy */
-    psa_key_policy_init(&policy);
     psa_key_policy_set_usage(&policy, usage, alg);
-    status = psa_set_key_policy(slot, &policy);
+    status = psa_set_key_policy(key_handle, &policy);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to set key policy");
-        return;
+        goto destroy_key;
     }
 
-    /* Set the key lifetime for the key slot */
-    status = psa_set_key_lifetime(slot, lifetime);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key lifetime");
-        return;
-    }
-
-    /* Import a key to the slot for which policy has been set */
-    status = psa_import_key(slot, PSA_KEY_TYPE_AES, data, sizeof(data));
+    /* Import a key to the key handle for which policy has been set */
+    status = psa_import_key(key_handle, PSA_KEY_TYPE_AES, data, sizeof(data));
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to import a key");
-        return;
+        goto destroy_key;
     }
 
     /* Setup a cipher permitted by the key policy */
-    status = psa_cipher_encrypt_setup(&handle, slot, alg);
+    status = psa_cipher_encrypt_setup(&handle, key_handle, alg);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to setup cipher operation");
         goto destroy_key;
@@ -950,23 +970,22 @@ void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
     }
 
     /* Attempt to setup a cipher with an alg not permitted by the policy */
-    status = psa_cipher_encrypt_setup(&handle, slot, PSA_ALG_CFB_BASE);
+    status = psa_cipher_encrypt_setup(&handle, key_handle, PSA_ALG_CFB);
     if (status != PSA_ERROR_NOT_PERMITTED) {
         TEST_FAIL("Was able to setup cipher operation with wrong alg");
         goto destroy_key;
     }
 
     /* Attempt to export the key, which is forbidden by the key policy */
-    status = psa_export_key(slot, data_out, sizeof(data_out), &data_len);
+    status = psa_export_key(key_handle, data_out, sizeof(data_out), &data_len);
     if (status != PSA_ERROR_NOT_PERMITTED) {
         TEST_FAIL("Should not be able to export key without correct usage");
         goto destroy_key;
     }
 
 destroy_key:
-    status = psa_destroy_key(slot);
+    status = psa_destroy_key(key_handle);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to destroy key");
     }
-#endif
 }
