@@ -80,7 +80,7 @@ psa_status_t tfm_tfm_crypto_generate_key_veneer(psa_invec *in_vec, size_t in_len
 #ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
 psa_status_t tfm_platform_sp_system_reset_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_platform_sp_pin_service_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_platform_sp_ioctl_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_PLATFORM */
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/

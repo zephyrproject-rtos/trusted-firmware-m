@@ -27,12 +27,6 @@ The TF-M Platform service source files are located in
 *********************
 TF-M Platform service
 *********************
-The Platform service exposes the following interfaces:
-
-.. code-block:: c
-
-    enum tfm_platform_err_t tfm_platform_system_reset(void)
-
 The Platform service interfaces and types are defined and documented in
 ``interface/include/tfm_platform_api.h``
 
@@ -43,47 +37,49 @@ The Platform service interfaces and types are defined and documented in
   when the secure partitions request an action to the Platform service
   (e.g system reset).
 
-*************************
-Platform HAL system reset
-*************************
+************
+Platform HAL
+************
 
-The Platform service service relies on a platform-specific implementation to
-perform some functionalities (e.g. system reset). The platform-specific
-implementation of those APIs will be located in the platform service code
-section (TF-M level 3 isolation) in order to protect it from a direct call from
-other secure partitions.
+The Platform Service relies on a platform-specific implementation to
+perform some functionalities. Mandatory functionality (e.g. system reset)
+that are required to be implemented for a platform to be supported by TF-M have
+their dedicated HAL API functions. Additional platform-specific services can be
+provided using the IOCTL function call.
 
 For API specification, please check: ``platform/include/tfm_platform_system.h``
 
-An implementation is provided in all the supported platforms. Please,
-check  ``platform/ext/target/<SPECIFIC_TARGET_FOLDER>/tfm_platform_system.c``
+An implementation is provided in all the supported platforms. Please, check
+``platform/ext/target/<SPECIFIC_TARGET_FOLDER>/services/src/tfm_platform_system.c``
+for examples.
 
 The API **must** be implemented by the system integrators for their targets.
 
-The API **must** be implemented by the system integrators for their
-targets.
+IOCTL
+=====
 
-********************
-Platform pin service
-********************
-This service is designed to perform secure pin services of the platform
-(e.g alternate function setting, pin mode setting, etc).
-The veneer implementation follows IOVEC API implementation, which allows
-the NS application to pack many pin service requests into one service call
-to reduce the overhead of the Secure-Non-Secure context switch.
-Since packing many service requests into one call is application and use-case
-specific, the API implementations in ``tfm_platform_api.c`` and
-```tfm_platform_secure_api.c`` follow the one service in one veneer call design
-but the service implementation in tfm_platform_system.c is prepared to serve
-packed requests.
+A single entry point to platform-specific code across the HAL is provided by the
+IOCTL service and HAL function:
+
+.. code-block:: c
+
+  enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
+                                                 psa_invec *in_vec,
+                                                 psa_outvec *out_vec);
+
+A request type is provided by the client, with additional parameters contained
+in the optional ``in_vec`` parameter. An optional output buffer can be passed to
+the service in ``out_vec``.
+An IOCTL request type not supported on a particular platform should return
+``TFM_PLATFORM_ERR_NOT_SUPPORTED``
 
 ***************************
 Current Service Limitations
 ***************************
 - **system reset** - The system reset functionality is only supported in
-  isolation level 1. Currently, the mechanism by which PRoT services should run
-  in privileged mode in level 3, it is not in place due to an ongoing work in
-  TF-M Core. So, the ``NVIC_SystemReset`` call performed by the service, is
+  isolation level 1. Currently the mechanism by which PSA-RoT services should
+  run in privileged mode in level 3 is not in place due to an ongoing work in
+  TF-M Core. So, the ``NVIC_SystemReset`` call performed by the service is
   expected to generate a memory fault when it tries to access the ``SCB->AIRCR``
   register in level 3 isolation.
 
@@ -108,7 +104,7 @@ the options above to the cmake command with the
 `DEBUG_AUTHENTICATION` is `DAUTH_CHIP_DEFAULT`.
 
 .. Note::
-   `void tfm_spm_hal_init_debug(void)` is called during the TF-M core
+   ``void tfm_spm_hal_init_debug(void)`` is called during the TF-M core
    initialisation phase, before initialising secure partition. This means that BL2
    runs with the chip default setting.
 

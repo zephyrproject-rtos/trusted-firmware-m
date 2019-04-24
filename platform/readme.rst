@@ -7,9 +7,9 @@ Details for the platform folder
     This folder and subfolders, especially the target folder, are likely to be
     refactored and updated to improve the overall structure of dependencies.
 
-**************************
-Interfacing with TF-M core
-**************************
+*********************
+Interfacing with TF-M
+*********************
 
 platformext/target/tfm_peripherals_def.h
 ========================================
@@ -35,12 +35,18 @@ Peripherals currently used by the services in TF-M
 platform/include/tfm_spm_hal.h
 ==============================
 This file contains the declarations of functions that a platform implementation
-has to provide for TF-M. For details see the comments in the file.
+has to provide for TF-M's SPM. For details see the comments in the file.
 
 secure_fw/core/tfm_platform_core_api.h
 ======================================
 This file contains declarations of functions that can be or have to be called
 from platform implementations. For details see the comments in the file.
+
+platform/include/tfm_platform_system.h
+======================================
+This file contains the declarations of functions that a platform implementation
+has to provide for TF-M's Platform Service. For details see
+``docs/user_guides/services/tfm_platform_integration_guide.rst``
 
 ***********
 Sub-folders

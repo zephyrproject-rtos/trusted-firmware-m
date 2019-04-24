@@ -51,8 +51,13 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Device/Config
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Device/Include" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Native_Driver" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/partition" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/services/include" ABSOLUTE)
 
 # Gather all source files we need.
+if (TFM_PARTITION_PLATFORM)
+    list(APPEND ALL_SRC_C_NS "${PLATFORM_DIR}/target/musca_b1/services/src/tfm_ioctl_ns_api.c")
+endif()
+
 if (NOT DEFINED BUILD_CMSIS_CORE)
     message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif (BUILD_CMSIS_CORE)
@@ -122,7 +127,8 @@ elseif (BUILD_TARGET_CFG)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/attest_hal.c")
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/Native_Driver/mpu_armv8m_drv.c")
     if (TFM_PARTITION_PLATFORM)
-        list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/tfm_platform_system.c")
+        list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/services/src/tfm_platform_system.c")
+        list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/services/src/tfm_ioctl_s_api.c")
     endif()
     embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()

@@ -6,7 +6,7 @@
  */
 
 #include "platform/include/tfm_platform_system.h"
-#include "cmsis.h"
+#include "platform_description.h"
 
 void tfm_platform_hal_system_reset(void)
 {
@@ -14,15 +14,15 @@ void tfm_platform_hal_system_reset(void)
     NVIC_SystemReset();
 }
 
-enum tfm_plat_err_t
-tfm_platform_hal_pin_service(const psa_invec  *in_vec,  uint32_t num_invec,
-                             const psa_outvec *out_vec, uint32_t num_outvec)
+enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
+                                               psa_invec  *in_vec,
+                                               psa_outvec *out_vec)
 {
+    (void)request;
     (void)in_vec;
-    (void)num_invec;
     (void)out_vec;
-    (void)num_outvec;
+
     /* Not needed for this platform */
-    return TFM_PLAT_ERR_SUCCESS;
+    return TFM_PLATFORM_ERR_NOT_SUPPORTED;
 }
 
