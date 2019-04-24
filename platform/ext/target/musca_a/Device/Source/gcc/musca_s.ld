@@ -87,9 +87,9 @@ SECTIONS
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-        LONG (LOADADDR(.TFM_UNPRIV_RO_DATA))
-        LONG (ADDR(.TFM_UNPRIV_RO_DATA))
-        LONG (SIZEOF(.TFM_UNPRIV_RO_DATA))
+        LONG (LOADADDR(.TFM_UNPRIV_DATA))
+        LONG (ADDR(.TFM_UNPRIV_DATA))
+        LONG (SIZEOF(.TFM_UNPRIV_DATA))
         LONG (LOADADDR(.TFM_SP_STORAGE_DATA))
         LONG (ADDR(.TFM_SP_STORAGE_DATA))
         LONG (SIZEOF(.TFM_SP_STORAGE_DATA))
@@ -138,8 +138,8 @@ SECTIONS
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
-        LONG (ADDR(.TFM_UNPRIV_RO_BSS))
-        LONG (SIZEOF(.TFM_UNPRIV_RO_BSS))
+        LONG (ADDR(.TFM_UNPRIV_BSS))
+        LONG (SIZEOF(.TFM_UNPRIV_BSS))
         LONG (ADDR(.TFM_SP_STORAGE_BSS))
         LONG (SIZEOF(.TFM_SP_STORAGE_BSS))
         LONG (ADDR(.TFM_SP_STORAGE_STACK))
@@ -453,7 +453,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 #else /* TFM_LVL == 1 */
-    .TFM_UNPRIV_RO_DATA : ALIGN(32)
+    .TFM_UNPRIV_DATA : ALIGN(32)
     {
         */tfm_spm_services.o(.data*)
         */dummy_crypto_keys.o(.data*)
@@ -463,10 +463,10 @@ SECTIONS
         */device_definition.o(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$TFM_UNPRIV_RO_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_RO_DATA);
-    Image$$TFM_UNPRIV_RO_DATA$$RW$$Limit = ADDR(.TFM_UNPRIV_RO_DATA) + SIZEOF(.TFM_UNPRIV_RO_DATA);
+    Image$$TFM_UNPRIV_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_DATA);
+    Image$$TFM_UNPRIV_DATA$$RW$$Limit = ADDR(.TFM_UNPRIV_DATA) + SIZEOF(.TFM_UNPRIV_DATA);
 
-    .TFM_UNPRIV_RO_BSS : ALIGN(32)
+    .TFM_UNPRIV_BSS : ALIGN(32)
     {
         */tfm_spm_services.o(.bss*)
         */device_definition.o(.bss*)
@@ -482,8 +482,8 @@ SECTIONS
         */dummy_device_id.o(COMMON)
         . = ALIGN(32);
     } > RAM
-    Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);
-    Image$$TFM_UNPRIV_RO_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_RO_BSS) + SIZEOF(.TFM_UNPRIV_RO_BSS);
+    Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
+    Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {

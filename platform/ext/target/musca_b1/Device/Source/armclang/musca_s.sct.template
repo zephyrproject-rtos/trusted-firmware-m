@@ -110,7 +110,7 @@ LR_CODE S_CODE_START {
         .ANY (+RW +ZI)
     }
 
-    TFM_UNPRIV_RO_DATA +0 ALIGN 32 {
+    TFM_UNPRIV_DATA +0 ALIGN 32 {
         tfm_spm_services.o (+RW +ZI)
         dummy_crypto_keys.o (+RW +ZI)
         dummy_nv_counters.o (+RW +ZI)
