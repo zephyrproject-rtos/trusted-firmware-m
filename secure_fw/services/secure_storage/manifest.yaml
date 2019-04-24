@@ -11,8 +11,8 @@
   "priority": "NORMAL",
   "id": "0x00000100",
   "entry_point": "tfm_sst_req_mngr_init",
-  "stack_size": "0x2000",
-  "heap_size": "0x0400",
+  "stack_size": "0x5000",
+  "heap_size": "0",
   "tfm_partition_ipc": true,
   "secure_functions": [
     {
