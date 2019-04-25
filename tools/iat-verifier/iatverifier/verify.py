@@ -17,7 +17,7 @@ from ecdsa import SigningKey
 from pycose.sign1message import Sign1Message
 
 from iatverifier import const
-from iatverifier.util import extract_iat_from_cose
+from iatverifier.util import extract_iat_from_cose, recursive_bytes_to_strings
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)8s: %(message)s')
@@ -44,7 +44,7 @@ def decode(value, key, keep_going=False):
             error(msg.format(key, e), keep_going)
             return str(value)[2:-1]
     else:  # not a UTF-8 value, i.e. a bytestring
-        return str(value)[2:-1]
+        return value
 
 
 # ----------------------------------------------------------------------------
@@ -306,5 +306,6 @@ def main():
 
     if args.print_iat:
         print('Token:')
-        json.dump(token, sys.stdout, indent=4)
+        json.dump(recursive_bytes_to_strings(token, in_place=True),
+                  sys.stdout, indent=4)
         print('')

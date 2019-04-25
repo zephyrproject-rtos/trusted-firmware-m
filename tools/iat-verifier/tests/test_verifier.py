@@ -77,6 +77,10 @@ class TestIatVerifier(unittest.TestCase):
         self.assertIn('NO_MEASUREMENTS claim is not present',
                       cm.exception.args[0])
 
+    def test_binary_string_decoding(self):
+        iat = create_and_read_iat('valid-iat.yaml', KEYFILE)
+        self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')
+
     def test_security_lifecycle_decoding(self):
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE)
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')

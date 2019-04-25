@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 from collections.abc import Iterable
+from copy import deepcopy
 
 import cbor
 import yaml
@@ -87,6 +88,25 @@ def get_cose_payload(cose, sk=None):
         except Exception:
             raise ValueError('Bad signature')
     return msg.payload
+
+
+def recursive_bytes_to_strings(d, in_place=False):
+    if in_place:
+        result = d
+    else:
+        result = deepcopy(d)
+
+    if hasattr(result, 'items'):
+        for k, v in result.items():
+            result[k] = recursive_bytes_to_strings(v, in_place=True)
+    elif (isinstance(result, Iterable) and
+            not isinstance(result, (str, bytes))):
+        result = [recursive_bytes_to_strings(r, in_place=True)
+                  for r in result]
+    elif isinstance(result, bytes):
+        result = str(result)[2:-1]
+
+    return result
 
 
 def _parse_raw_token(raw):
