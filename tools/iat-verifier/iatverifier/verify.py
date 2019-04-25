@@ -1,9 +1,9 @@
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import argparse
 import base64
@@ -249,7 +249,8 @@ def decode_and_validate_iat(encoded_iat, keep_going=False):
                       keep_going)
         elif entry_name == 'SECURITY_LIFECYCLE':
             try:
-                token[entry_name] = const.SL_NAMES[(value >> const.SL_SHIFT) - 1]
+                name_idx = (value >> const.SL_SHIFT) - 1
+                token[entry_name] = const.SL_NAMES[name_idx]
             except IndexError:
                 token[entry_name] = 'CUSTOM({})'.format(value)
         else:  # not SW_COMPONENT or SECURITY_LIFECYCLE

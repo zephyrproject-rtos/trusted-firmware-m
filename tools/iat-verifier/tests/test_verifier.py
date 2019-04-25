@@ -1,9 +1,9 @@
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import os
 import sys
@@ -84,4 +84,3 @@ class TestIatVerifier(unittest.TestCase):
     def test_security_lifecycle_decoding(self):
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE)
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')
-

@@ -1,9 +1,9 @@
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from collections.abc import Iterable
 from copy import deepcopy
@@ -123,7 +123,8 @@ def _parse_raw_token(raw):
                 raise ValueError(msg)
 
         if key == const.SECURITY_LIFECYCLE:
-            value = (const.SL_NAMES.index(raw_value.upper()) + 1) << const.SL_SHIFT
+            name_idx = const.SL_NAMES.index(raw_value.upper())
+            value = (name_idx + 1) << const.SL_SHIFT
         elif hasattr(raw_value, 'items'):
             value = _parse_raw_token(raw_value)
         elif (isinstance(raw_value, Iterable) and
