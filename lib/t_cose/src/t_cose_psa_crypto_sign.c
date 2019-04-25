@@ -26,6 +26,7 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
     enum psa_attest_err_t attest_ret;
     psa_status_t psa_ret;
     const size_t sig_size = t_cose_signature_size(cose_alg_id);
+    psa_key_handle_t key_handle_private, key_handle_public;
 
     ARG_UNUSED(key_select);
 
@@ -37,12 +38,13 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
      *        Later crypto service is going to get the attestation key from
      *        platform layer.
      */
-    attest_ret = attest_register_initial_attestation_key();
+    attest_ret = attest_register_initial_attestation_key(&key_handle_private,
+                                                         &key_handle_public);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
         return T_COSE_ERR_FAIL;
     }
 
-    psa_ret = psa_asymmetric_sign(ATTEST_PRIVATE_KEY_SLOT,
+    psa_ret = psa_asymmetric_sign(key_handle_private,
                                   0, /* FixMe: algorithm ID */
                                   hash_to_sign.ptr,
                                   hash_to_sign.len,
@@ -56,7 +58,8 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
         signature->ptr = signature_buffer.ptr;
     }
 
-    attest_ret = attest_unregister_initial_attestation_key();
+    attest_ret = attest_unregister_initial_attestation_key(key_handle_private,
+                                                           key_handle_public);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
         return T_COSE_ERR_FAIL;
     }

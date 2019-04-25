@@ -8,9 +8,6 @@
 #include "attestation_key.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "tfm_crypto_defs.h"
-#include "psa_crypto.h"
-#include "psa_crypto_platform.h"
 #include "psa_initial_attestation_api.h"
 #include "platform/include/tfm_plat_defs.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
@@ -69,7 +66,8 @@ attest_map_elliptic_curve_type(enum ecc_curve_t cose_curve)
 }
 
 enum psa_attest_err_t
-attest_register_initial_attestation_key(void)
+attest_register_initial_attestation_key(psa_key_handle_t *key_handle_private,
+                                        psa_key_handle_t *key_handle_public)
 {
     enum tfm_plat_err_t plat_res;
     psa_ecc_curve_t psa_curve;
@@ -83,6 +81,12 @@ attest_register_initial_attestation_key(void)
 
     /* Key(s) should be unregistered at this point */
     if (private_key_registered != 0 || public_key_registered != 0) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    /* Allocate a transient key for the private key in the Crypto service */
+    crypto_res = psa_allocate_key(key_handle_private);
+    if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
@@ -103,8 +107,7 @@ attest_register_initial_attestation_key(void)
 
     /* Setup the key policy for private key */
     psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_SIGN, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT,
-                                    &policy);
+    crypto_res = psa_set_key_policy(*key_handle_private, &policy);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
@@ -116,7 +119,7 @@ attest_register_initial_attestation_key(void)
     attest_key_type = PSA_KEY_TYPE_RAW_DATA;
 
     /* Register private key to crypto service */
-    crypto_res = psa_import_key((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT,
+    crypto_res = psa_import_key(*key_handle_private,
                                 attest_key_type,
                                 attest_key.priv_key,
                                 attest_key.priv_key_size);
@@ -126,6 +129,12 @@ attest_register_initial_attestation_key(void)
     }
     private_key_registered = 1;
 
+    /* Allocate a transient key for the public key in the Crypto service */
+    crypto_res = psa_allocate_key(key_handle_public);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
     /* Check whether public key is available, not mandatory */
     if (attest_key.pubx_key == NULL) {
         return PSA_ATTEST_ERR_SUCCESS;
@@ -134,8 +143,7 @@ attest_register_initial_attestation_key(void)
     /* Setup the key policy for public key */
     policy = psa_key_policy_init();
     psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_VERIFY, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT,
-                                    &policy);
+    crypto_res = psa_set_key_policy(*key_handle_public, &policy);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
@@ -149,7 +157,7 @@ attest_register_initial_attestation_key(void)
     /* Register public key to crypto service */
     public_key_size = attest_key.pubx_key_size + attest_key.puby_key_size;
 
-    crypto_res = psa_import_key((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT,
+    crypto_res = psa_import_key(*key_handle_public,
                                 attest_key_type,
                                 attest_key.pubx_key,
                                 public_key_size);
@@ -163,7 +171,8 @@ attest_register_initial_attestation_key(void)
 }
 
 enum psa_attest_err_t
-attest_unregister_initial_attestation_key(void)
+attest_unregister_initial_attestation_key(psa_key_handle_t key_handle_private,
+                                          psa_key_handle_t key_handle_public)
 {
     psa_status_t crypto_res;
 
@@ -172,14 +181,14 @@ attest_unregister_initial_attestation_key(void)
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    crypto_res = psa_destroy_key((psa_key_handle_t)ATTEST_PRIVATE_KEY_SLOT);
+    crypto_res = psa_destroy_key(key_handle_private);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
     private_key_registered = 0;
 
     if (public_key_registered) {
-        crypto_res = psa_destroy_key((psa_key_handle_t)ATTEST_PUBLIC_KEY_SLOT);
+        crypto_res = psa_destroy_key(key_handle_public);
         if (crypto_res != PSA_SUCCESS) {
             return PSA_ATTEST_ERR_GENERAL;
         }

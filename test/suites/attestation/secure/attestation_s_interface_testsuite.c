@@ -12,11 +12,9 @@
 #include "../attest_token_test_values.h"
 #include "../attest_token_test.h"
 
-#if 0 /* FIXME: To be restored when Attestation is aligned to the new API */
 static uint8_t token_buffer[TEST_TOKEN_SIZE];
 static const uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE] = {
                                       TOKEN_TEST_NONCE_BYTES};
-#endif
 
 /* Define test suite for attestation service tests */
 /* List of tests */
@@ -80,7 +78,6 @@ static void tfm_attest_test_1001(struct test_result_t *ret)
  */
 static void tfm_attest_test_1002(struct test_result_t *ret)
 {
-#if 0 /* FIXME: To be restored when Attestation is aligned to the new API */
     int32_t err;
 
     err = minimal_get_size_test();
@@ -89,7 +86,7 @@ static void tfm_attest_test_1002(struct test_result_t *ret)
         TEST_FAIL("Attest token minimal_get_size_test() has failed");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
 
@@ -125,7 +122,6 @@ static void tfm_attest_test_1003(struct test_result_t *ret)
  */
 static void tfm_attest_test_1004(struct test_result_t *ret)
 {
-#if 0 /* FIXME: To be restored when Attestation is aligned to the new API */
     int32_t err;
 
     err = decode_test_normal_sig();
@@ -134,7 +130,7 @@ static void tfm_attest_test_1004(struct test_result_t *ret)
         TEST_FAIL("Attest token decode_test_normal_sig() has failed");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
 
@@ -148,7 +144,6 @@ static void tfm_attest_test_1004(struct test_result_t *ret)
  */
 static void tfm_attest_test_1005(struct test_result_t *ret)
 {
-#if 0 /* FIXME: To be restored when Attestation is aligned to the new API */
     enum psa_attest_err_t err;
     uint32_t token_size = TEST_TOKEN_SIZE;
 
@@ -174,6 +169,6 @@ static void tfm_attest_test_1005(struct test_result_t *ret)
         TEST_FAIL("Attestation should fail with too small token buffer");
         return;
     }
-#endif
+
     ret->val = TEST_PASSED;
 }
