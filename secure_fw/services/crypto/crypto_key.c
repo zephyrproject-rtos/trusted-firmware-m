@@ -128,9 +128,8 @@ psa_status_t tfm_crypto_export_key(psa_invec in_vec[],
     psa_key_handle_t key = iov->key_handle;
     uint8_t *data = out_vec[0].base;
     size_t data_size = out_vec[0].len;
-    size_t *data_length = &(out_vec[0].len);
 
-    return psa_export_key(key, data, data_size, data_length);
+    return psa_export_key(key, data, data_size, &(out_vec[0].len));
 }
 
 psa_status_t tfm_crypto_export_public_key(psa_invec in_vec[],
@@ -138,13 +137,45 @@ psa_status_t tfm_crypto_export_public_key(psa_invec in_vec[],
                                           psa_outvec out_vec[],
                                           size_t out_len)
 {
-    (void)in_vec;
-    (void)in_len;
-    (void)out_vec;
-    (void)out_len;
+    if ((in_len != 1) || (out_len != 1)) {
+        return PSA_CONNECTION_REFUSED;
+    }
 
-    /* FIXME: This API is not supported yet */
-    return PSA_ERROR_NOT_SUPPORTED;
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+
+    psa_key_handle_t key = iov->key_handle;
+    uint8_t *data = out_vec[0].base;
+    size_t data_size = out_vec[0].len;
+
+    return psa_export_public_key(key, data, data_size, &(out_vec[0].len));
+}
+
+psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
+                                 size_t in_len,
+                                 psa_outvec out_vec[],
+                                 size_t out_len)
+{
+    (void)out_vec;
+
+    if ((in_len != 3) || (out_len != 0)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
+        (in_vec[1].len != sizeof(psa_key_handle_t)) ||
+        (in_vec[2].len != sizeof(psa_key_policy_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+
+    psa_key_handle_t source_handle = iov->key_handle;
+    psa_key_handle_t target_handle = *((psa_key_handle_t *)in_vec[1].base);
+    const psa_key_policy_t *policy = in_vec[2].base;
+
+    return psa_copy_key(source_handle, target_handle, policy);
 }
 
 psa_status_t tfm_crypto_set_key_policy(psa_invec in_vec[],

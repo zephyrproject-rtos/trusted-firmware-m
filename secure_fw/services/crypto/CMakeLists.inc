@@ -48,6 +48,8 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_mac.c"
                     "${CRYPTO_DIR}/crypto_key.c"
                     "${CRYPTO_DIR}/crypto_aead.c"
+                    "${CRYPTO_DIR}/crypto_asymmetric.c"
+                    "${CRYPTO_DIR}/crypto_generator.c"
                     "${CRYPTO_DIR}/tfm_crypto_secure_api.c"
       )
 

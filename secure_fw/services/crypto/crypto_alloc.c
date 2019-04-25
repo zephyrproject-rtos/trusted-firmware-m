@@ -29,9 +29,10 @@ struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
     enum tfm_crypto_operation_type type; /*!< Type of the operation */
     union {
-        psa_cipher_operation_t cipher;   /*!< Cipher operation context */
-        psa_mac_operation_t mac;         /*!< MAC operation context */
-        psa_hash_operation_t hash;       /*!< Hash operation context */
+        psa_cipher_operation_t cipher;    /*!< Cipher operation context */
+        psa_mac_operation_t mac;          /*!< MAC operation context */
+        psa_hash_operation_t hash;        /*!< Hash operation context */
+        psa_crypto_generator_t generator; /*!< Generator operation context */
     } operation;
 };
 
@@ -60,6 +61,9 @@ static void memset_operation_context(uint32_t index)
         break;
     case TFM_CRYPTO_HASH_OPERATION:
         mem_size = sizeof(psa_hash_operation_t);
+        break;
+    case TFM_CRYPTO_GENERATOR_OPERATION:
+        mem_size = sizeof(psa_crypto_generator_t);
         break;
     case TFM_CRYPTO_OPERATION_NONE:
     default:
@@ -117,6 +121,7 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle)
     if ( (h_val != TFM_CRYPTO_INVALID_HANDLE) &&
          (h_val < TFM_CRYPTO_CONC_OPER_NUM) &&
          (operation[h_val].in_use == TFM_CRYPTO_IN_USE) ) {
+
         memset_operation_context(h_val);
         operation[h_val].in_use = TFM_CRYPTO_NOT_IN_USE;
         operation[h_val].type = TFM_CRYPTO_OPERATION_NONE;
@@ -135,6 +140,7 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
          (handle < TFM_CRYPTO_CONC_OPER_NUM) &&
          (operation[handle].in_use == TFM_CRYPTO_IN_USE) &&
          (operation[handle].type == type) ) {
+
         *ctx = (void *) &(operation[handle].operation);
         return PSA_SUCCESS;
     }

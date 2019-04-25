@@ -15,13 +15,13 @@
  * simulates a real ECDSA P-256 over SHA256 signature generation. The size of
  * the signature will be equal with a real one.
  */
-psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
-                                 psa_algorithm_t alg,
-                                 const uint8_t *hash,
-                                 size_t hash_length,
-                                 uint8_t *signature,
-                                 size_t signature_size,
-                                 size_t *signature_length)
+psa_status_t psa_asymmetric_sign_stub(psa_key_handle_t handle,
+                                      psa_algorithm_t alg,
+                                      const uint8_t *hash,
+                                      size_t hash_length,
+                                      uint8_t *signature,
+                                      size_t signature_size,
+                                      size_t *signature_length)
 {
     if (2 * hash_length > signature_size) {
         return PSA_ERROR_BUFFER_TOO_SMALL;

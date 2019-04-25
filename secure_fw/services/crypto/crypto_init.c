@@ -26,33 +26,9 @@
  *        by the TF-M Crypto partition
  */
 static const tfm_crypto_us_t sfid_func_table[TFM_CRYPTO_SFID_MAX] = {
-    tfm_crypto_allocate_key,
-    tfm_crypto_import_key,
-    tfm_crypto_destroy_key,
-    tfm_crypto_get_key_information,
-    tfm_crypto_export_key,
-    tfm_crypto_set_key_policy,
-    tfm_crypto_get_key_policy,
-    tfm_crypto_get_key_lifetime,
-    tfm_crypto_cipher_set_iv,
-    tfm_crypto_cipher_encrypt_setup,
-    tfm_crypto_cipher_decrypt_setup,
-    tfm_crypto_cipher_update,
-    tfm_crypto_cipher_abort,
-    tfm_crypto_cipher_finish,
-    tfm_crypto_hash_setup,
-    tfm_crypto_hash_update,
-    tfm_crypto_hash_finish,
-    tfm_crypto_hash_verify,
-    tfm_crypto_hash_abort,
-    tfm_crypto_mac_sign_setup,
-    tfm_crypto_mac_verify_setup,
-    tfm_crypto_mac_update,
-    tfm_crypto_mac_sign_finish,
-    tfm_crypto_mac_verify_finish,
-    tfm_crypto_mac_abort,
-    tfm_crypto_aead_encrypt,
-    tfm_crypto_aead_decrypt
+#define X(api_name) api_name,
+LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
+#undef X
 };
 
 /**

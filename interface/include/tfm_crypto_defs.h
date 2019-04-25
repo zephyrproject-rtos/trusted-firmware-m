@@ -45,6 +45,7 @@ struct tfm_crypto_pack_iovec {
     uint32_t op_handle;          /*!< Frontend context handle associated to a
                                   *   multipart operation
                                   */
+    size_t capacity;             /*!< Generator capacity */
 
     struct tfm_crypto_aead_pack_input aead_in; /*!< FixMe: Temporarily used for
                                                 *   AEAD until the API is
@@ -53,36 +54,55 @@ struct tfm_crypto_pack_iovec {
 };
 
 /**
- * \brief Define a numerical value for each SFID which can be used when
- *        dispatching the requests to the service
+ * \brief Define a progressive numerical value for each SFID which can be used
+ *        when dispatching the requests to the service
  */
-#define TFM_CRYPTO_ALLOCATE_KEY_SFID             (0u)
-#define TFM_CRYPTO_IMPORT_KEY_SFID               (1u)
-#define TFM_CRYPTO_DESTROY_KEY_SFID              (2u)
-#define TFM_CRYPTO_GET_KEY_INFORMATION_SFID      (3u)
-#define TFM_CRYPTO_EXPORT_KEY_SFID               (4u)
-#define TFM_CRYPTO_SET_KEY_POLICY_SFID           (5u)
-#define TFM_CRYPTO_GET_KEY_POLICY_SFID           (6u)
-#define TFM_CRYPTO_GET_KEY_LIFETIME_SFID         (7u)
-#define TFM_CRYPTO_CIPHER_SET_IV_SFID            (8u)
-#define TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID     (9u)
-#define TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID     (10u)
-#define TFM_CRYPTO_CIPHER_UPDATE_SFID            (11u)
-#define TFM_CRYPTO_CIPHER_ABORT_SFID             (12u)
-#define TFM_CRYPTO_CIPHER_FINISH_SFID            (13u)
-#define TFM_CRYPTO_HASH_SETUP_SFID               (14u)
-#define TFM_CRYPTO_HASH_UPDATE_SFID              (15u)
-#define TFM_CRYPTO_HASH_FINISH_SFID              (16u)
-#define TFM_CRYPTO_HASH_VERIFY_SFID              (17u)
-#define TFM_CRYPTO_HASH_ABORT_SFID               (18u)
-#define TFM_CRYPTO_MAC_SIGN_SETUP_SFID           (19u)
-#define TFM_CRYPTO_MAC_VERIFY_SETUP_SFID         (20u)
-#define TFM_CRYPTO_MAC_UPDATE_SFID               (21u)
-#define TFM_CRYPTO_MAC_SIGN_FINISH_SFID          (22u)
-#define TFM_CRYPTO_MAC_VERIFY_FINISH_SFID        (23u)
-#define TFM_CRYPTO_MAC_ABORT_SFID                (24u)
-#define TFM_CRYPTO_AEAD_ENCRYPT_SFID             (25u)
-#define TFM_CRYPTO_AEAD_DECRYPT_SFID             (26u)
+enum {
+    TFM_CRYPTO_ALLOCATE_KEY_SFID = (0u),
+    TFM_CRYPTO_IMPORT_KEY_SFID,
+    TFM_CRYPTO_DESTROY_KEY_SFID,
+    TFM_CRYPTO_GET_KEY_INFORMATION_SFID,
+    TFM_CRYPTO_EXPORT_KEY_SFID,
+    TFM_CRYPTO_EXPORT_PUBLIC_KEY_SFID,
+    TFM_CRYPTO_COPY_KEY_SFID,
+    TFM_CRYPTO_SET_KEY_POLICY_SFID,
+    TFM_CRYPTO_GET_KEY_POLICY_SFID,
+    TFM_CRYPTO_GET_KEY_LIFETIME_SFID,
+    TFM_CRYPTO_CIPHER_GENERATE_IV_SFID,
+    TFM_CRYPTO_CIPHER_SET_IV_SFID,
+    TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SFID,
+    TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SFID,
+    TFM_CRYPTO_CIPHER_UPDATE_SFID,
+    TFM_CRYPTO_CIPHER_ABORT_SFID,
+    TFM_CRYPTO_CIPHER_FINISH_SFID,
+    TFM_CRYPTO_HASH_SETUP_SFID,
+    TFM_CRYPTO_HASH_UPDATE_SFID,
+    TFM_CRYPTO_HASH_FINISH_SFID,
+    TFM_CRYPTO_HASH_VERIFY_SFID,
+    TFM_CRYPTO_HASH_ABORT_SFID,
+    TFM_CRYPTO_HASH_CLONE_SFID,
+    TFM_CRYPTO_MAC_SIGN_SETUP_SFID,
+    TFM_CRYPTO_MAC_VERIFY_SETUP_SFID,
+    TFM_CRYPTO_MAC_UPDATE_SFID,
+    TFM_CRYPTO_MAC_SIGN_FINISH_SFID,
+    TFM_CRYPTO_MAC_VERIFY_FINISH_SFID,
+    TFM_CRYPTO_MAC_ABORT_SFID,
+    TFM_CRYPTO_AEAD_ENCRYPT_SFID,
+    TFM_CRYPTO_AEAD_DECRYPT_SFID,
+    TFM_CRYPTO_ASYMMETRIC_SIGN_SFID,
+    TFM_CRYPTO_ASYMMETRIC_VERIFY_SFID,
+    TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SFID,
+    TFM_CRYPTO_ASYMMETRIC_DECRYPT_SFID,
+    TFM_CRYPTO_GET_GENERATOR_CAPACITY_SFID,
+    TFM_CRYPTO_GENERATOR_READ_SFID,
+    TFM_CRYPTO_GENERATOR_IMPORT_KEY_SFID,
+    TFM_CRYPTO_GENERATOR_ABORT_SFID,
+    TFM_CRYPTO_KEY_DERIVATION_SFID,
+    TFM_CRYPTO_KEY_AGREEMENT_SFID,
+    TFM_CRYPTO_GENERATE_RANDOM_SFID,
+    TFM_CRYPTO_GENERATE_KEY_SFID,
+    TFM_CRYPTO_SFID_MAX,
+};
 
 /**
  * \brief Define the SID values and minor versions to match the ones defined in
@@ -92,10 +112,9 @@ struct tfm_crypto_pack_iovec {
 #define TFM_CRYPTO_MIN_VER (0x0001)
 
 /**
- * \brief Define the maximum value based on the previous list, and
- *        an invalid value
+ * \brief Define an invalid value for an SFID
+ *
  */
-#define TFM_CRYPTO_SFID_MAX (TFM_CRYPTO_AEAD_DECRYPT_SFID + 1u)
 #define TFM_CRYPTO_SFID_INVALID (~0x0u)
 
 /**

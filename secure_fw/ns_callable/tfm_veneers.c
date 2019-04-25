@@ -30,9 +30,12 @@ psa_status_t tfm_crypto_import_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_destroy_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_information(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_export_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_export_public_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_copy_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_set_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_policy(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_lifetime(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_cipher_generate_iv(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_set_iv(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec *, size_t, psa_outvec *, size_t);
@@ -44,14 +47,27 @@ psa_status_t tfm_crypto_hash_update(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_verify(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_hash_abort(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_hash_clone(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_sign_setup(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_verify_setup(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_update(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_sign_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_verify_finish(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_mac_abort(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_crypto_aead_decrypt(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_aead_encrypt(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_aead_decrypt(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_asymmetric_sign(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_asymmetric_verify(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_get_generator_capacity(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_generator_read(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_generator_import_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_generator_abort(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_derivation(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_key_agreement(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_generate_random(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_generate_key(psa_invec *, size_t, psa_outvec *, size_t);
 
 /******** TFM_SP_PLATFORM ********/
 psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t);
@@ -122,9 +138,12 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_export_public_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_copy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_set_key_policy)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_policy)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_lifetime)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_generate_iv)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_set_iv)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_encrypt_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_cipher_decrypt_setup)
@@ -136,14 +155,27 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_verify)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_abort)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_hash_clone)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_sign_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_verify_setup)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_update)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_sign_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_verify_finish)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_mac_abort)
-TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_decrypt)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_encrypt)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_aead_decrypt)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_asymmetric_sign)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_asymmetric_verify)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_asymmetric_encrypt)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_asymmetric_decrypt)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_generator_capacity)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generator_read)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generator_import_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generator_abort)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_derivation)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_agreement)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_random)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_key)
 
 /******** TFM_SP_PLATFORM ********/
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)

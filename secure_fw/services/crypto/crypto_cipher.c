@@ -24,6 +24,52 @@
  */
 
 /*!@{*/
+psa_status_t tfm_crypto_cipher_generate_iv(psa_invec in_vec[],
+                                           size_t in_len,
+                                           psa_outvec out_vec[],
+                                           size_t out_len)
+{
+    psa_status_t status = PSA_SUCCESS;
+    psa_cipher_operation_t *operation = NULL;
+
+    if ((in_len != 1) || (out_len != 2)) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
+        (out_vec[0].len != sizeof(uint32_t))) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    uint32_t handle = iov->op_handle;
+    uint32_t *handle_out = out_vec[0].base;
+    unsigned char *iv = out_vec[1].base;
+    size_t iv_size = out_vec[1].len;
+
+    /* Init the handle in the operation with the one passed from the iov */
+    *handle_out = iov->op_handle;
+
+    /* Look up the corresponding operation context */
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
+                                         handle,
+                                         (void **)&operation);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    *handle_out = handle;
+
+    status = psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[1].len);
+    if (status != PSA_SUCCESS) {
+        /* Release the operation context, ignore if the operation fails. */
+        (void)tfm_crypto_operation_release(handle_out);
+        return status;
+    }
+
+    return status;
+}
+
 psa_status_t tfm_crypto_cipher_set_iv(psa_invec in_vec[],
                                       size_t in_len,
                                       psa_outvec out_vec[],
@@ -66,11 +112,6 @@ psa_status_t tfm_crypto_cipher_set_iv(psa_invec in_vec[],
 
     return status;
 }
-
-/**
- * TODO: psa_cipher_generate_iv(...)
- *
- */
 
 psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
                                              size_t in_len,
@@ -281,7 +322,8 @@ psa_status_t tfm_crypto_cipher_abort(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-        return status;
+        /* Operation does not exist, so abort has no effect */
+        return PSA_SUCCESS;
     }
 
     status = psa_cipher_abort(operation);

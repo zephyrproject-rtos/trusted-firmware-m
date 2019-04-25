@@ -15,6 +15,15 @@
 /* Avoid compiler warning due to unused argument */
 #define ARG_UNUSED(arg) (void)(arg)
 
+/* FixMe: To be removed when the real Crypto API is used */
+psa_status_t psa_asymmetric_sign_stub(psa_key_handle_t handle,
+                                 psa_algorithm_t alg,
+                                 const uint8_t *hash,
+                                 size_t hash_length,
+                                 uint8_t *signature,
+                                 size_t signature_size,
+                                 size_t *signature_length);
+
 enum t_cose_err_t
 t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
                            int32_t key_select,
@@ -44,13 +53,14 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
         return T_COSE_ERR_FAIL;
     }
 
-    psa_ret = psa_asymmetric_sign(key_handle_private,
-                                  0, /* FixMe: algorithm ID */
-                                  hash_to_sign.ptr,
-                                  hash_to_sign.len,
-                                  signature_buffer.ptr, /* Sig buf */
-                                  signature_buffer.len, /* Sig buf size */
-                                  &(signature->len));   /* Sig length */
+    /* FixMe: To be removed when the real Crypto API is used */
+    psa_ret = psa_asymmetric_sign_stub(key_handle_private,
+                                       0, /* FixMe: algorithm ID */
+                                       hash_to_sign.ptr,
+                                       hash_to_sign.len,
+                                       signature_buffer.ptr, /* Sig buf */
+                                       signature_buffer.len, /* Sig buf size */
+                                       &(signature->len));   /* Sig length */
 
     if (psa_ret != PSA_SUCCESS) {
         return T_COSE_ERR_FAIL;

@@ -278,7 +278,8 @@ psa_status_t tfm_crypto_mac_abort(psa_invec in_vec[],
                                          handle,
                                          (void **)&operation);
     if (status != PSA_SUCCESS) {
-        return status;
+        /* Operation does not exist, so abort has no effect */
+        return PSA_SUCCESS;
     }
 
     status = psa_mac_abort(operation);

@@ -40,6 +40,7 @@ enum tfm_crypto_operation_type {
     TFM_CRYPTO_CIPHER_OPERATION = 1,
     TFM_CRYPTO_MAC_OPERATION = 2,
     TFM_CRYPTO_HASH_OPERATION = 3,
+    TFM_CRYPTO_GENERATOR_OPERATION = 4,
 
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
@@ -94,36 +95,51 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          void **ctx);
 
 #define LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API \
-    X(tfm_crypto_allocate_key);               \
-    X(tfm_crypto_import_key);                 \
-    X(tfm_crypto_destroy_key);                \
-    X(tfm_crypto_get_key_information);        \
-    X(tfm_crypto_export_key);                 \
-    X(tfm_crypto_export_public_key);          \
-    X(tfm_crypto_set_key_policy);             \
-    X(tfm_crypto_get_key_policy);             \
-    X(tfm_crypto_get_key_lifetime);           \
-    X(tfm_crypto_cipher_set_iv);              \
-    X(tfm_crypto_cipher_encrypt_setup);       \
-    X(tfm_crypto_cipher_decrypt_setup);       \
-    X(tfm_crypto_cipher_update);              \
-    X(tfm_crypto_cipher_finish);              \
-    X(tfm_crypto_cipher_abort);               \
-    X(tfm_crypto_hash_setup);                 \
-    X(tfm_crypto_hash_update);                \
-    X(tfm_crypto_hash_finish);                \
-    X(tfm_crypto_hash_verify);                \
-    X(tfm_crypto_hash_abort);                 \
-    X(tfm_crypto_mac_sign_setup);             \
-    X(tfm_crypto_mac_verify_setup);           \
-    X(tfm_crypto_mac_update);                 \
-    X(tfm_crypto_mac_sign_finish);            \
-    X(tfm_crypto_mac_verify_finish);          \
-    X(tfm_crypto_mac_abort);                  \
-    X(tfm_crypto_aead_encrypt);               \
-    X(tfm_crypto_aead_decrypt);               \
+    X(tfm_crypto_allocate_key)                \
+    X(tfm_crypto_import_key)                  \
+    X(tfm_crypto_destroy_key)                 \
+    X(tfm_crypto_get_key_information)         \
+    X(tfm_crypto_export_key)                  \
+    X(tfm_crypto_export_public_key)           \
+    X(tfm_crypto_copy_key)                    \
+    X(tfm_crypto_set_key_policy)              \
+    X(tfm_crypto_get_key_policy)              \
+    X(tfm_crypto_get_key_lifetime)            \
+    X(tfm_crypto_cipher_generate_iv)          \
+    X(tfm_crypto_cipher_set_iv)               \
+    X(tfm_crypto_cipher_encrypt_setup)        \
+    X(tfm_crypto_cipher_decrypt_setup)        \
+    X(tfm_crypto_cipher_update)               \
+    X(tfm_crypto_cipher_abort)                \
+    X(tfm_crypto_cipher_finish)               \
+    X(tfm_crypto_hash_setup)                  \
+    X(tfm_crypto_hash_update)                 \
+    X(tfm_crypto_hash_finish)                 \
+    X(tfm_crypto_hash_verify)                 \
+    X(tfm_crypto_hash_abort)                  \
+    X(tfm_crypto_hash_clone)                  \
+    X(tfm_crypto_mac_sign_setup)              \
+    X(tfm_crypto_mac_verify_setup)            \
+    X(tfm_crypto_mac_update)                  \
+    X(tfm_crypto_mac_sign_finish)             \
+    X(tfm_crypto_mac_verify_finish)           \
+    X(tfm_crypto_mac_abort)                   \
+    X(tfm_crypto_aead_encrypt)                \
+    X(tfm_crypto_aead_decrypt)                \
+    X(tfm_crypto_asymmetric_sign)             \
+    X(tfm_crypto_asymmetric_verify)           \
+    X(tfm_crypto_asymmetric_encrypt)          \
+    X(tfm_crypto_asymmetric_decrypt)          \
+    X(tfm_crypto_get_generator_capacity)      \
+    X(tfm_crypto_generator_read)              \
+    X(tfm_crypto_generator_import_key)        \
+    X(tfm_crypto_generator_abort)             \
+    X(tfm_crypto_key_derivation)              \
+    X(tfm_crypto_key_agreement)               \
+    X(tfm_crypto_generate_random)             \
+    X(tfm_crypto_generate_key)                \
 
-#define X(api_name) UNIFORM_SIGNATURE_API(api_name)
+#define X(api_name) UNIFORM_SIGNATURE_API(api_name);
 LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
 #undef X
 

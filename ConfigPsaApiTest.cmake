@@ -49,7 +49,7 @@ endif()
 
 #Service specific configuration for the PSA API Compliance test requirements
 if(PSA_API_TEST_CRYPTO)
-	set(CRYPTO_ENGINE_BUF_SIZE 3072)
+	set(CRYPTO_ENGINE_BUF_SIZE 20480)
 endif()
 
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")
