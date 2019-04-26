@@ -586,7 +586,7 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
     struct tfm_thrd_ctx *pth_next = tfm_thrd_next_thread();
     struct tfm_thrd_ctx *pth_curr = tfm_thrd_curr_thread();
 
-    if (pth_curr != pth_next) {
+    if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL == 2
         p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
                                                  struct spm_partition_desc_t,
