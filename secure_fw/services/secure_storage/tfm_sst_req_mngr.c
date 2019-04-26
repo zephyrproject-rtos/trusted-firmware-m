@@ -7,6 +7,8 @@
 
 #include "tfm_sst_req_mngr.h"
 
+#include <stdbool.h>
+
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"
 #include "tfm_protected_storage.h"
@@ -16,6 +18,32 @@
 #include "tfm_sst_signal.h"
 #include "flash_layout.h"
 #endif
+
+/*
+ * \brief Indicates whether SST has been initialised.
+ */
+static bool sst_is_init = false;
+
+/*
+ * \brief Initialises SST, if not already initialised.
+ *
+ * \note In library mode, initialisation is delayed until the first secure
+ *       function call, as calls to the Crypto service are required for
+ *       initialisation.
+ *
+ * \return PSA_SUCCESS if SST is initialised, PSA_CONNECTION_REFUSED otherwise.
+ */
+static psa_status_t sst_check_init(void)
+{
+    if (!sst_is_init) {
+        if (tfm_sst_init() != PSA_PS_SUCCESS) {
+            return PSA_CONNECTION_REFUSED;
+        }
+        sst_is_init = true;
+    }
+
+    return PSA_SUCCESS;
+}
 
 psa_status_t tfm_sst_set_req(struct psa_invec *in_vec, size_t in_len,
                              struct psa_outvec *out_vec, size_t out_len)
@@ -27,6 +55,10 @@ psa_status_t tfm_sst_set_req(struct psa_invec *in_vec, size_t in_len,
     enum tfm_status_e status;
     psa_ps_create_flags_t create_flags;
     psa_ps_status_t *err;
+
+    if (sst_check_init() != PSA_SUCCESS) {
+        return PSA_CONNECTION_REFUSED;
+    }
 
     if ((in_len != 3) || (out_len != 1)) {
         /* The number of arguments are incorrect */
@@ -79,6 +111,10 @@ psa_status_t tfm_sst_get_req(struct psa_invec *in_vec, size_t in_len,
     enum tfm_status_e status;
     psa_ps_status_t *err;
 
+    if (sst_check_init() != PSA_SUCCESS) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
     if ((in_len != 2) || (out_len != 2)) {
         /* The number of arguments are incorrect */
         return PSA_CONNECTION_REFUSED;
@@ -129,6 +165,10 @@ psa_status_t tfm_sst_get_info_req(struct psa_invec *in_vec, size_t in_len,
     enum tfm_status_e status;
     psa_ps_status_t *err;
 
+    if (sst_check_init() != PSA_SUCCESS) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
     if ((in_len != 1) || (out_len != 2)) {
         /* The number of arguments are incorrect */
         return PSA_CONNECTION_REFUSED;
@@ -174,6 +214,10 @@ psa_status_t tfm_sst_remove_req(struct psa_invec *in_vec, size_t in_len,
     enum tfm_status_e status;
     psa_ps_status_t *err;
 
+    if (sst_check_init() != PSA_SUCCESS) {
+        return PSA_CONNECTION_REFUSED;
+    }
+
     if ((in_len != 1) || (out_len != 1)) {
         /* The number of arguments are incorrect */
         return PSA_CONNECTION_REFUSED;
@@ -208,6 +252,10 @@ psa_status_t tfm_sst_get_support_req(struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
     uint32_t *support_flags;
+
+    if (sst_check_init() != PSA_SUCCESS) {
+        return PSA_CONNECTION_REFUSED;
+    }
 
     if ((in_len != 0) || (out_len != 1)) {
         /* The number of arguments are incorrect */
@@ -424,17 +472,14 @@ static void ps_signal_handle(psa_signal_t signal, sst_func_t pfn)
 
 psa_ps_status_t tfm_sst_req_mngr_init(void)
 {
-    psa_ps_status_t err;
 #ifdef TFM_PSA_API
     psa_signal_t signals = 0;
-#endif
 
-    err = tfm_sst_init();
-    if (err != PSA_PS_SUCCESS) {
-        return err;
+    if (tfm_sst_init() != PSA_PS_SUCCESS) {
+        tfm_abort();
     }
+    sst_is_init = true;
 
-#ifdef TFM_PSA_API
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
         if (signals & TFM_SST_SET_SIG) {
@@ -452,5 +497,9 @@ psa_ps_status_t tfm_sst_req_mngr_init(void)
         }
     }
 #endif
-    return err;
+    /* In library mode, initialisation is delayed until the first secure
+     * function call, as calls to the Crypto service are required for
+     * initialisation.
+     */
+    return PSA_PS_SUCCESS;
 }

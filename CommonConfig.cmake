@@ -229,7 +229,7 @@ else()
 	endif()
 endif()
 
-##Set mbedTLS compiler flags and variables for secure storage, audit log and crypto
+##Set Mbed TLS compiler flags and variables for audit log and crypto
 set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=3 -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 #Default TF-M secure storage flags.
