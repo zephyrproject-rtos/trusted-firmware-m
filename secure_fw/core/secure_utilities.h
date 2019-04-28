@@ -25,11 +25,6 @@
 #define EXC_NUM_PENDSV          (14)
 #define EXC_NUM_SYSTICK         (15)
 
-/* Disable NS exceptions by setting NS PRIMASK to 1 */
-#define TFM_NS_EXC_DISABLE()    __TZ_set_PRIMASK_NS(1)
-/* Enable NS exceptions by setting NS PRIMASK to 0 */
-#define TFM_NS_EXC_ENABLE()    __TZ_set_PRIMASK_NS(0)
-
 struct tfm_exc_stack_t {
     uint32_t R0;
     uint32_t R1;

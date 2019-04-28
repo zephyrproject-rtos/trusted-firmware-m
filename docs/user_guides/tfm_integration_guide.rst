@@ -125,6 +125,17 @@ NS client Identification
 See
 :doc:`ns client identification documentation <tfm_ns_client_identification>`.
 
+*********************
+Non-secure interrupts
+*********************
+Non-secure interrupts are allowed to preempt Secure thread mode.
+With the current implementation, a NSPE task can spoof the identity of another
+NSPE task. This is an issue only when NSPE has provisions for task isolation.
+Note, that ``AIRCR.PRIS`` is still set to restrict the priority range available
+to NS interrupts to the lower half of available priorities so that it wouldn't
+be possible for any non-secure interrupt to preempt a higher-priority secure
+interrupt.
+
 --------------
 
 *Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
