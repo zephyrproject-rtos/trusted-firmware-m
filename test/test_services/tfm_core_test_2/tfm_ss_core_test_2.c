@@ -219,6 +219,7 @@ static psa_status_t spm_core_test_2_prepare_test_scenario_internal(
     case IRQ_TEST_SCENARIO_2:
     case IRQ_TEST_SCENARIO_3:
     case IRQ_TEST_SCENARIO_4:
+    case IRQ_TEST_SCENARIO_5:
         /* No action is necessary*/
         break;
     default:
@@ -268,6 +269,14 @@ static psa_status_t spm_core_test_2_execute_test_scenario_internal(
     case IRQ_TEST_SCENARIO_3:
     case IRQ_TEST_SCENARIO_4:
         /* No action is necessary*/
+        break;
+    case IRQ_TEST_SCENARIO_5:
+        if (current_execution_data->timer1_triggered) {
+            return CORE_TEST_ERRNO_TEST_FAULT;
+        }
+        while (!current_execution_data->timer1_triggered) {
+            ;
+        }
         break;
     default:
         return CORE_TEST_ERRNO_INVALID_PARAMETER;

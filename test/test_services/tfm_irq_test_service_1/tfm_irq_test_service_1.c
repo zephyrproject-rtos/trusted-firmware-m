@@ -64,6 +64,9 @@ uint32_t spm_irq_test_1_prepare_test_scenario_internal(
     case IRQ_TEST_SCENARIO_4:
         tfm_plat_test_secure_timer_start();
         break;
+    case IRQ_TEST_SCENARIO_5:
+        /* Do nothing */
+        break;
     default:
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
@@ -111,6 +114,9 @@ uint32_t spm_irq_test_1_execute_test_scenario(
             return CORE_TEST_ERRNO_TEST_FAULT;
         }
         psa_eoi(SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ);
+        break;
+    case IRQ_TEST_SCENARIO_5:
+        /* nothing to do*/
         break;
     default:
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
@@ -169,6 +175,10 @@ void SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ_isr(void)
         break;
     case IRQ_TEST_SCENARIO_4:
         /* nothing to do*/
+        break;
+    case IRQ_TEST_SCENARIO_5:
+        halt_test_execution();
+        /* No secure interrups are used in this scenario */
         break;
     default:
         halt_test_execution();
@@ -241,6 +251,10 @@ void TIMER_0_isr_ipc(void)
          */
         halt_test_execution();
         break;
+    case IRQ_TEST_SCENARIO_5:
+        /* No secure interrups are used in this scenario */
+        halt_test_execution();
+        break;
     default:
         halt_test_execution();
         break;
@@ -293,6 +307,7 @@ static void spm_irq_test_1_execute_test_scenario_ipc_call(psa_msg_t *msg)
         return;
     case IRQ_TEST_SCENARIO_1:
     case IRQ_TEST_SCENARIO_2:
+    case IRQ_TEST_SCENARIO_5:
         /* nothing to do, return success */
         psa_reply(msg->handle, CORE_TEST_ERRNO_SUCCESS);
         return;

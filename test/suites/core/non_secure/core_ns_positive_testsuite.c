@@ -5,16 +5,18 @@
  *
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "core_ns_tests.h"
 #include "tfm_api.h"
+#include "tfm_plat_test.h"
 #include "test/suites/core/non_secure/core_test_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
+#include "platform_irq.h"
 #ifndef TFM_PSA_API
 #include "tfm_veneers.h"
 #endif /* TFM_PSA_API */
-
-#include <stdio.h>
-#include <string.h>
 
 /* Define test suite for core tests */
 /* List of tests */
@@ -40,7 +42,10 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 static void tfm_core_test_outvec_write(struct test_result_t *ret);
-static void tfm_core_test_secure_irq(struct test_result_t *ret);
+static void tfm_core_test_irq(struct test_result_t *ret);
+
+static enum irq_test_scenario_t executing_irq_test_scenario = IRQ_TEST_SCENARIO_NONE;
+static struct irq_test_execution_data_t irq_test_execution_data = {0};
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -55,7 +60,7 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_MEMORY_PERMISSIONS,
     "Test secure service memory access permissions"),
 #endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SECURE_IRQ,
-    tfm_core_test_secure_irq,
+    tfm_core_test_irq,
     "Test secure irq"),
 #ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_MPU_ACCESS, tfm_core_test_mpu_access,
@@ -426,6 +431,31 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+static int32_t prepare_test_scenario_ns(
+                               enum irq_test_scenario_t test_scenario,
+                               struct irq_test_execution_data_t *execution_data)
+{
+    executing_irq_test_scenario = test_scenario;
+    switch (test_scenario) {
+    case IRQ_TEST_SCENARIO_NONE:
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    case IRQ_TEST_SCENARIO_1:
+    case IRQ_TEST_SCENARIO_2:
+    case IRQ_TEST_SCENARIO_3:
+    case IRQ_TEST_SCENARIO_4:
+        /* nothing to be done here */
+        break;
+    case IRQ_TEST_SCENARIO_5:
+        execution_data->timer1_triggered = 0;
+        tfm_plat_test_non_secure_timer_start();
+        break;
+    default:
+        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+    }
+
+    return CORE_TEST_ERRNO_SUCCESS;
+}
+
 static int32_t execute_test_scenario_ns(
                                enum irq_test_scenario_t test_scenario,
                                struct irq_test_execution_data_t *execution_data)
@@ -445,6 +475,7 @@ static int32_t execute_test_scenario_ns(
     case IRQ_TEST_SCENARIO_2:
     case IRQ_TEST_SCENARIO_3:
     case IRQ_TEST_SCENARIO_4:
+    case IRQ_TEST_SCENARIO_5:
         /* nothing to be done here */
         break;
     default:
@@ -454,11 +485,33 @@ static int32_t execute_test_scenario_ns(
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-static int32_t tfm_core_test_secure_irq_scenario(
+void TIMER1_Handler (void)
+{
+    tfm_plat_test_non_secure_timer_stop();
+
+    switch (executing_irq_test_scenario) {
+    case IRQ_TEST_SCENARIO_NONE:
+    case IRQ_TEST_SCENARIO_1:
+    case IRQ_TEST_SCENARIO_2:
+    case IRQ_TEST_SCENARIO_3:
+    case IRQ_TEST_SCENARIO_4:
+        while (1) {}
+        /* shouldn't happen */
+        break;
+    case IRQ_TEST_SCENARIO_5:
+        irq_test_execution_data.timer1_triggered = 1;
+        break;
+    default:
+        while (1) {}
+        /* shouldn't happen */
+        break;
+    }
+}
+
+static int32_t tfm_core_test_irq_scenario(
                                          enum irq_test_scenario_t test_scenario)
 {
-    struct irq_test_execution_data_t execution_data = {0};
-    struct irq_test_execution_data_t *execution_data_address = &execution_data;
+    struct irq_test_execution_data_t *execution_data_address = &irq_test_execution_data;
     uint32_t scenario = test_scenario;
 
     psa_invec in_vec[] = {
@@ -489,6 +542,11 @@ static int32_t tfm_core_test_secure_irq_scenario(
         return err;
     }
 
+    err = prepare_test_scenario_ns(test_scenario, &irq_test_execution_data);
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
+        return err;
+    }
+
 #ifdef TFM_PSA_API
     err = psa_test_common(SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SID,
                           SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_MIN_VER,
@@ -511,7 +569,7 @@ static int32_t tfm_core_test_secure_irq_scenario(
         return err;
     }
 
-    err = execute_test_scenario_ns(test_scenario, &execution_data);
+    err = execute_test_scenario_ns(test_scenario, &irq_test_execution_data);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         return err;
     }
@@ -519,31 +577,39 @@ static int32_t tfm_core_test_secure_irq_scenario(
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-static void tfm_core_test_secure_irq(struct test_result_t *ret)
+static void tfm_core_test_irq(struct test_result_t *ret)
 {
     int32_t err;
 
-    err = tfm_core_test_secure_irq_scenario(IRQ_TEST_SCENARIO_1);
+    NVIC_EnableIRQ(4);
+
+    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_1);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute IRQ test scenario 1.");
         return;
     }
 
-    err = tfm_core_test_secure_irq_scenario(IRQ_TEST_SCENARIO_2);
+    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_2);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute IRQ test scenario 2.");
         return;
     }
 
-    err = tfm_core_test_secure_irq_scenario(IRQ_TEST_SCENARIO_3);
+    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_3);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute IRQ test scenario 3.");
         return;
     }
 
-    err = tfm_core_test_secure_irq_scenario(IRQ_TEST_SCENARIO_4);
+    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_4);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
         TEST_FAIL("Failed to execute IRQ test scenario 4.");
+        return;
+    }
+
+    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_5);
+    if (err != CORE_TEST_ERRNO_SUCCESS) {
+        TEST_FAIL("Failed to execute IRQ test scenario 5.");
         return;
     }
 
