@@ -914,10 +914,6 @@ psa_ps_status_t sst_object_table_init(uint8_t *obj_data)
     sst_crypto_set_iv(&sst_obj_table_ctx.obj_table.crypto);
 #endif
 
-#ifdef SST_ENCRYPTION
-    sst_crypto_set_iv(&sst_obj_table_ctx.obj_table.crypto);
-#endif
-
     return PSA_PS_SUCCESS;
 }
 
