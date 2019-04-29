@@ -8,12 +8,13 @@
 #include "tfm_sst_req_mngr.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
+#include "psa_protected_storage.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"
 #include "tfm_protected_storage.h"
 #ifdef TFM_PSA_API
-#include "psa_client.h"
 #include "psa_service.h"
 #include "tfm_sst_signal.h"
 #include "flash_layout.h"
@@ -46,8 +47,8 @@ static psa_status_t sst_check_init(void)
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_sst_set_req(struct psa_invec *in_vec, size_t in_len,
-                             struct psa_outvec *out_vec, size_t out_len)
+psa_status_t tfm_sst_set_req(psa_invec *in_vec, size_t in_len,
+                             psa_outvec *out_vec, size_t out_len)
 {
     psa_ps_uid_t uid;
     uint32_t data_length;
@@ -101,8 +102,8 @@ psa_status_t tfm_sst_set_req(struct psa_invec *in_vec, size_t in_len,
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_sst_get_req(struct psa_invec *in_vec, size_t in_len,
-                             struct psa_outvec *out_vec, size_t out_len)
+psa_status_t tfm_sst_get_req(psa_invec *in_vec, size_t in_len,
+                             psa_outvec *out_vec, size_t out_len)
 {
     uint32_t data_offset;
     uint32_t data_length;
@@ -157,8 +158,8 @@ psa_status_t tfm_sst_get_req(struct psa_invec *in_vec, size_t in_len,
 
 }
 
-psa_status_t tfm_sst_get_info_req(struct psa_invec *in_vec, size_t in_len,
-                                  struct psa_outvec *out_vec, size_t out_len)
+psa_status_t tfm_sst_get_info_req(psa_invec *in_vec, size_t in_len,
+                                  psa_outvec *out_vec, size_t out_len)
 {
     int32_t client_id;
     psa_ps_uid_t uid;
@@ -207,8 +208,8 @@ psa_status_t tfm_sst_get_info_req(struct psa_invec *in_vec, size_t in_len,
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_sst_remove_req(struct psa_invec *in_vec, size_t in_len,
-                                struct psa_outvec *out_vec, size_t out_len)
+psa_status_t tfm_sst_remove_req(psa_invec *in_vec, size_t in_len,
+                                psa_outvec *out_vec, size_t out_len)
 {
     int32_t client_id;
     psa_ps_uid_t uid;
@@ -249,10 +250,12 @@ psa_status_t tfm_sst_remove_req(struct psa_invec *in_vec, size_t in_len,
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_sst_get_support_req(struct psa_invec *in_vec, size_t in_len,
-                                     struct psa_outvec *out_vec, size_t out_len)
+psa_status_t tfm_sst_get_support_req(psa_invec *in_vec, size_t in_len,
+                                     psa_outvec *out_vec, size_t out_len)
 {
     uint32_t *support_flags;
+
+    (void)in_vec;
 
     if (sst_check_init() != PSA_SUCCESS) {
         return PSA_CONNECTION_REFUSED;
