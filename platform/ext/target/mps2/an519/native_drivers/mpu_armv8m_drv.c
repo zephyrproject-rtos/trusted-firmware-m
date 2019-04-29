@@ -21,6 +21,18 @@ enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
 
     MPU_Type *mpu = (MPU_Type *)dev->base;
 
+    /*
+     * FixMe: Set 3 pre-defined MAIR_ATTR for memory. The attributes come
+     * from default memory map, need to check if fine-tune is necessary.
+     *
+     * MAIR0_0: Peripheral, Device-nGnRE.
+     * MAIR0_1: Code, WT RA. Same attr for Outer and Inner.
+     * MAIR0_2: SRAM, WBWA RA. Same attr for Outer and Inner.
+     */
+    mpu->MAIR0 = (MPU_ARMV8M_MAIR_ATTR_DEVICE_VAL << MPU_MAIR0_Attr0_Pos) |
+                 (MPU_ARMV8M_MAIR_ATTR_CODE_VAL << MPU_MAIR0_Attr1_Pos) |
+                 (MPU_ARMV8M_MAIR_ATTR_DATA_VAL << MPU_MAIR0_Attr2_Pos);
+
     mpu->CTRL =
             (privdef_en ? MPU_CTRL_PRIVDEFENA_Msk : 0) |
             (hfnmi_en   ? MPU_CTRL_HFNMIENA_Msk   : 0);
@@ -81,7 +93,9 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     /*This 0s the lower bits of base address but they are treated as 1 */
     limit_cfg = (region_cfg->region_limit-1) & MPU_RLAR_LIMIT_Msk;
 
-    /*FIXME: Enable the memory attr setting */
+    limit_cfg |= (region_cfg->region_attridx << MPU_RLAR_AttrIndx_Pos) &
+                 MPU_RLAR_AttrIndx_Msk;
+
     limit_cfg |= MPU_RLAR_EN_Msk;
 
     mpu->RLAR = limit_cfg;
