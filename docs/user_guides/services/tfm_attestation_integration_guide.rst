@@ -174,6 +174,9 @@ Service source files
         - ``tfm_attestation_secure_api.c``: Implements the secure API layer to
           allow other services in the secure domain to request functionalities
           from the attestation service using the PSA API interface.
+        - ``tfm_attestation_req_mngr.c``: Includes the initialization entry of
+          attestation service and handles attestation service requests in IPC
+          model.
 
 Service interface definitions
 =============================

@@ -70,6 +70,25 @@
 },
 
 
+/******** TFM_SP_INITIAL_ATTESTATION ********/
+{
+        "TFM_ATTEST_GET_TOKEN_SID",
+        TFM_SP_INITIAL_ATTESTATION_ID,
+        PSA_ATTEST_GET_TOKEN_SIG,
+        0x00000020,
+        true,
+        1,
+        TFM_VERSION_POLICY_STRICT
+},
+{
+        "TFM_ATTEST_GET_TOKEN_SIZE_SID",
+        TFM_SP_INITIAL_ATTESTATION_ID,
+        PSA_ATTEST_GET_TOKEN_SIZE_SIG,
+        0x00000021,
+        true,
+        1,
+        TFM_VERSION_POLICY_STRICT
+},
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/

@@ -10,10 +10,10 @@
   "type": "PSA-ROT",
   "priority": "NORMAL",
   "id": "0x00000103",
-  "entry_point": "attest_init",
+  "entry_point": "attest_partition_init",
   "stack_size": "0x0A00",
   "heap_size": "0x0400",
-  "tfm_init_symbol": "attest_init",
+  "tfm_partition_ipc": true,
   "secure_functions": [
     {
       "sfid": "TFM_ATTEST_GET_TOKEN_SFID",
@@ -38,10 +38,29 @@
     "attestation_key.c",
     "attest_token.c",
     "tfm_attestation.c",
+    "tfm_attestation_req_mngr.c",
   ],
   "tfm_linker_pattern": {
     "library_list": [
       "*tfm_attest*"
     ]
-  }
+  },
+  "services": [
+    {
+      "name": "TFM_ATTEST_GET_TOKEN_SID",
+      "sid": "0x00000020",
+      "signal": "PSA_ATTEST_GET_TOKEN_SIG",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "TFM_ATTEST_GET_TOKEN_SIZE_SID",
+      "sid": "0x00000021",
+      "signal": "PSA_ATTEST_GET_TOKEN_SIZE_SIG",
+      "non_secure_clients": "true",
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    }
+  ]
 }

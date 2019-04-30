@@ -663,7 +663,7 @@ static enum psa_attest_err_t
 attest_add_caller_id_claim(struct attest_token_ctx *token_ctx)
 {
     enum psa_attest_err_t res;
-    int32_t  caller_id;
+    int32_t caller_id;
 
     res = attest_get_caller_client_id(&caller_id);
     if (res != PSA_ATTEST_ERR_SUCCESS) {
