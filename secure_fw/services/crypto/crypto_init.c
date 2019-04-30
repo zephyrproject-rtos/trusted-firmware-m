@@ -91,14 +91,14 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
                                         const uint32_t sfn_id)
 {
     psa_status_t status = PSA_SUCCESS;
-    size_t in_len = 0, out_len = 0, i, read_size;
+    size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i, read_size;
     psa_invec in_vec[PSA_MAX_IOVEC] = { {0} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = { {0} };
     void *alloc_buf_ptr = NULL;
 
     /* Check the number of in_vec filled */
-    while ((in_len < PSA_MAX_IOVEC) && (msg->in_size[in_len] != 0)) {
-        in_len++;
+    while ((in_len > 0) && (msg->in_size[in_len - 1] == 0)) {
+        in_len--;
     }
 
     /* There will always be a tfm_crypto_pack_iovec in the first iovec */
@@ -124,8 +124,8 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
     }
 
     /* Check the number of out_vec filled */
-    while ((out_len < PSA_MAX_IOVEC) && (msg->out_size[out_len] != 0)) {
-        out_len++;
+    while ((out_len > 0) && (msg->out_size[out_len - 1] == 0)) {
+        out_len--;
     }
 
     for (i = 0; i < out_len; i++) {

@@ -74,7 +74,7 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
 {
     psa_status_t status = PSA_SUCCESS;
 
-    if ( !((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
+    if ( !((in_len == 2) || (in_len == 3)) || (out_len > 1)) {
         return PSA_CONNECTION_REFUSED;
     }
 
