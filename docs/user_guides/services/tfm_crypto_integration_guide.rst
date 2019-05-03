@@ -21,62 +21,60 @@ The TF-M Crypto service source files are located in
 PSA interfaces
 ==============
 The TF-M Crypto service exposes the PSA interfaces detailed in the header
-``psa_crypto.h``. There are two additional header files, named
-``psa_crypto_extra.h`` and ``psa_crypto_platform.h``, which are meant to be
-included only by the ``psa_crypto.h`` header itself, that specify, respectively,
-extensions to the API that are vendor specific, and provide definitions and
-types which are platform specific. For a detailed description of the PSA API
-interface, please refer to the comments in the ``psa_crypto.h`` header itself.
+``psa_crypto.h``. This header, in turn, includes several other headers which
+are not meant to be included directly by user applications. For a detailed
+description of the PSA API interface, please refer to the comments in the
+``psa_crypto.h`` header itself.
 
 Service source files
 ====================
-- ``crypto_cipher.c`` : This file implements functionalities related to the
-  ciphering module
-- ``crypto_hash.c`` : This file implements functionalities related to
-  the hashing module
-- ``crypto_init.c`` : This file provides basic functions to initialise
-  the secure service during TF-M boot;
-- ``crypto_key.c`` : This file implements functionalities related to
-  the key management module. The ``TFM_CRYPTO_KEY_STORAGE_NUM`` determines how
-  many key stores are available, while the ``TFM_CRYPTO_MAX_KEY_LENGTH`` defines
-  the maximum allowed key length in bytes supported in a key storage. These
-  two items can be modfied at the build configuration step by defining the
-  following variables, ``-DCRYPTO_KEY_STORAGE_NUM=<value>`` and the
-  ``-DCRYPTO_KEY_MAX_KEY_LENGTH=<value>``
-- ``crypto_alloc.c`` : This file implements extensions to the PSA interface
-  which are specifically required by the TF-M Crypto service, in particular
-  related to the allocation and deallocation of crypto operation contexts in
-  the secure world. The ``TFM_CRYPTO_CONC_OPER_NUM``, defined in this file,
-  determines how many concurrent contexts are supported (8 for the current
-  implementation). For multipart cipher/hash/MAC operations, a context is
-  associated to the handle provided during the setup phase, and is explicitly
-  cleared only following a successful termination or an abort
-- ``crypto_engine.c`` : This file implements the layer which the other
-  modules use to interact with the cryptography primitives available (in SW or
-  HW). The ``TFM_CRYPTO_ENGINE_BUF_SIZE`` determines the size in bytes of the
-  static scratch buffer used by this layer for its internal allocations. This
-  item can be modified at the build configuration step by defining
-  ``-DCRYPTO_ENGINE_BUF_SIZE=<value>``. The current implementation provides only
-  SW primitives based on Mbed TLS functions
-- ``crypto_mac.c`` : This file implements functionalities related to the
-  MAC (Message Authentication Code) module
-- ``crypto_aead.c`` : This file implements functionalities related to the AEAD
-  (Authenticated Encryption with Associated Data) module.
+- ``crypto_cipher.c`` : This module handles requests for symmetric cipher
+  operations
+- ``crypto_hash.c`` : This module handles requests for hashing operations
+- ``crypto_mac.c`` : This module handles requests for MAC operations
+- ``crypto_aead.c`` : This module handles requests for AEAD operations
+- ``crypto_generator.c`` : This module handles requests for generator related
+  operations
+- ``crypto_key.c`` : This module handles requests for key related operations
+- ``crypto_asymmetric.c`` : This module handles requests for asymmetric
+  cryptographic operations
+- ``crypto_init.c`` : This module provides basic functions to initialise the
+  secure service during TF-M boot. When the service is built for IPC mode
+  compatibility, this layer handles as well the connection requests and the
+  proper dispatching of requests to the corresponding functions, and it holds
+  the internal buffer used to allocate temporarily the IOVECs needed. The size
+  of this buffer is controlled by the ``TFM_CRYPTO_IOVEC_BUFFER_SIZE`` define.
+  This module also provides a static buffer which is used by the Mbed Crypto
+  library for its own allocations. The size of this buffer is controlled by
+  the ``TFM_CRYPTO_ENGINE_BUF_SIZE`` define
+- ``crypto_alloc.c`` : This module is required for the allocation and release of
+  crypto operation contexts in the SPE. The ``TFM_CRYPTO_CONC_OPER_NUM``,
+  defined in this file, determines how many concurrent contexts are supported
+  for multipart operations (8 for the current implementation). For multipart
+  cipher/hash/MAC/generator operations, a context is associated to the handle
+  provided during the setup phase, and is explicitly cleared only following a
+  termination or an abort
+ - ``tfm_crypto_secure_api.c`` : This module implements the PSA Crypto API
+  client interface exposed to the Secure Processing Environment
+ - ``tfm_crypto_api.c`` :  This module is contained in ``interface\src`` and
+  implements the PSA Crypto API client interface exposed to the  Non-Secure
+  Processing Environment.
 
 ********************************
 Crypto service integration guide
 ********************************
-n this section, a brief description of the required flow of operation for the
+In this section, a brief description of the required flow of operation for the
 functionalities exported by the PSA Crypto interface is given, with particular
 focus on the TF-M Crypto service specific operations. For the details of the
 generic PSA Crypto interface operations, please refer directly to the header
 ``psa_crypto.h``.
 
-Most of the PSA Crypto APIs require an operation context to be allocated by the
-application and then to be passed as a pointer during the following API calls.
-These operation contexts are of four main types describes below:
+Most of the PSA Crypto multipart APIs require an operation context to be
+allocated by the application and then to be passed as a pointer during the
+following API calls. These operation contexts are of four main types described
+below:
 
-- ``psa_key_policy_t`` - Operation context to be used when setting key policies
+- ``psa_crypto_generator_t`` - Operation context for generator operations
 - ``psa_hash_operation_t`` - Operation context for multipart hash operations
 - ``psa_mac_operation_t`` - Operation context for multipart MAC operations
 - ``psa_cipher_operation_t`` - Operation context for multipart cipher operations

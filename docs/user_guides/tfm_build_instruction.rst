@@ -15,16 +15,16 @@ line arguments:
 
    * - -DPROJ_CONFIG=<file>
      - Specifies the way the application is built.
-       
+
        | <file> is the absolute path to configurations file
          named as ``Config<APP_NAME>.cmake``.
        | i.e. On Linux:
          ``-DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake```
-    
+
    * - -DTARGET_PLATFORM=<target platform name>
      - Specifies the target platform.
        Supported platforms:
-       
+
           - Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
             ``-DTARGET_PLATFORM=AN521``
           - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
@@ -33,24 +33,24 @@ line arguments:
             ``-DTARGET_PLATFORM=MUSCA_A``
           - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
             ``-DTARGET_PLATFORM=MUSCA_B1``
-    
+
    * - -DCOMPILER=<compiler name>
      - Specifies the compiler toolchain
        The possible values are:
-       
+
          - ``ARMCLANG``
          - ``GNUARM``
    * - -DCMAKE_BUILD_TYPE=<build type>
      - Configures debugging support.
        The possible values are:
-       
+
          - ``Debug``
          - ``Release``
          - ``Relwithdebinfo``
          - ``Minsizerel``
    * - -DMBEDTLS_DEBUG=<ON|OFF>
-     - To enables debug symbols for the Mbed TLS library.
-   
+     - Enables debug symbols for the Mbed TLS and Mbed Crypto libraries.
+
 .. Note::
     Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
     without BL2 bootloader.
@@ -59,7 +59,7 @@ line arguments:
 External dependency
 *******************
 - CMSIS_5 is used to import RTX for the example non-secure app
-- Mbed TLS is used as a crypto library on the secure side
+- Mbed TLS and Mbed Crypto are used as crypto libraries on the secure side
 
 ****************
 TF-M build steps
@@ -79,6 +79,7 @@ Getting the source-code
     cd <TF-M base folder>
     git clone https://git.trustedfirmware.org/trusted-firmware-m.git
     git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.7.9
+    git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-1.0.0
     git clone https://github.com/ARM-software/CMSIS_5.git -b 5.2.0
 
 Build steps for the AN521 target platform:

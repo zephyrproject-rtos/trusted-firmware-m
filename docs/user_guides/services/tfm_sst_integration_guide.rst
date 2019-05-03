@@ -24,21 +24,21 @@ The design addresses the following high level requirements as well:
 
 - **Confidentiality** - Resistance to unauthorised accesses through
   hardware/software attacks.
-  
+
 - **Access Authentication** - Mechanism to establish requester's identity (a
   non-secure entity, secure entity, or a remote server).
-  
+
 - **Integrity** - Resistant to tampering by either the normal users of a product,
   package, or system or others with physical access to it. If the content of the
   secure storage is changed maliciously, the service is able to detect it.
-  
+
 - **Reliability** - Resistant to power failure scenarios and incomplete write
   cycles.
-  
+
 - **Configurability** - High level configurability to scale up/down memory
   footprint to cater for a variety of devices with varying security
   requirements.
-  
+
 - **Performance** - Optimized to be used for resource constrained devices with
   very small silicon footprint, the PPA (power, performance, area) should be
   optimal.
@@ -54,19 +54,19 @@ Current SST Service Limitations
   A delete operation implicitly moves all the assets towards the top of the block
   to avoid fragmentation within block. However, this may also result in
   unutilized space at the end of each block.
-  
+
 - **Asset size limitation** - An asset is stored in a contiguous space in a
   block/sector. Hence, the maximum asset size can be up-to the size of the
   data block/sector. Detailed information about the maximum asset size can be
   found in the section `Maximum asset size` below.
-  
+
 - **Non-hierarchical storage model** - The current design uses a
   non-hierarchical storage model, as a filesystem, where all the assets are
   managed by a linearly indexed list of metadata. This model locates the
   metadata in blocks which are always stored in the same flash location. That
   increases the number of writes in a specific flash location as every change in
   the storage area requires a metadata update.
-  
+
 - **PSA internal trusted storage API** - In the current design, the service does
   not use the PSA Internal Trusted Storage API to write the rollback protection
   values stored in the internal storage. The PSA Internal Trusted Storage API is
@@ -191,13 +191,11 @@ to be used as secure storage **must** be contiguous sectors starting at
 
 Cryptographic Interface
 =======================
--``crypto/sst_crypto_interface.h`` - Abstracts the cryptographic
-  operations for the secure storage service.
+- ``crypto/sst_crypto_interface.h`` - Abstracts the cryptographic operations for
+  the secure storage service.
 
-- ``crypto/sst_crypto_interface.c`` - Currently, it implements the SST
-  service cryptographic operations using Mbed TLS library. The system integrator
-  **may** replace this implementation with calls to another service, crypto
-  library or hardware crypto unit.
+- ``crypto/sst_crypto_interface.c`` - Implements the SST service cryptographic
+  operations with calls to the TF-M Crypto service.
 
 Non-volatile (NV) Counters Interface
 ====================================
@@ -319,9 +317,9 @@ The SST service abstracts all the cryptographic requirements and specifies the
 required cryptographic interface in
 ``secure_fw/services/secure_storage/crypto/sst_crypto_interface.h``
 
-Currently, the SST service cryptographic operations are implemented in
-``secure_fw/services/secure_storage/crypto/sst_crypto_interface.c``, using
-Mbed TLS library.
+The SST service cryptographic operations are implemented in
+``secure_fw/services/secure_storage/crypto/sst_crypto_interface.c``, using calls
+to the TF-M Crypto service.
 
 SST Service Features Flags
 ==========================
