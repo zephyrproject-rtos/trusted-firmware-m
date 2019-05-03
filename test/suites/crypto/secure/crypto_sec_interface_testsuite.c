@@ -13,9 +13,7 @@
 static void tfm_crypto_test_5001(struct test_result_t *ret);
 static void tfm_crypto_test_5002(struct test_result_t *ret);
 static void tfm_crypto_test_5003(struct test_result_t *ret);
-static void tfm_crypto_test_5004(struct test_result_t *ret);
 static void tfm_crypto_test_5005(struct test_result_t *ret);
-static void tfm_crypto_test_5006(struct test_result_t *ret);
 static void tfm_crypto_test_5007(struct test_result_t *ret);
 static void tfm_crypto_test_5008(struct test_result_t *ret);
 static void tfm_crypto_test_5009(struct test_result_t *ret);
@@ -24,15 +22,10 @@ static void tfm_crypto_test_5011(struct test_result_t *ret);
 static void tfm_crypto_test_5012(struct test_result_t *ret);
 static void tfm_crypto_test_5013(struct test_result_t *ret);
 static void tfm_crypto_test_5014(struct test_result_t *ret);
-static void tfm_crypto_test_5015(struct test_result_t *ret);
-static void tfm_crypto_test_5016(struct test_result_t *ret);
-static void tfm_crypto_test_5017(struct test_result_t *ret);
-static void tfm_crypto_test_5018(struct test_result_t *ret);
 static void tfm_crypto_test_5019(struct test_result_t *ret);
 static void tfm_crypto_test_5020(struct test_result_t *ret);
 static void tfm_crypto_test_5021(struct test_result_t *ret);
 static void tfm_crypto_test_5022(struct test_result_t *ret);
-static void tfm_crypto_test_5023(struct test_result_t *ret);
 static void tfm_crypto_test_5024(struct test_result_t *ret);
 static void tfm_crypto_test_5030(struct test_result_t *ret);
 static void tfm_crypto_test_5031(struct test_result_t *ret);
@@ -46,16 +39,12 @@ static struct test_t crypto_tests[] = {
      "Secure Symmetric encryption (AES-128-CBC) interface", {0} },
     {&tfm_crypto_test_5003, "TFM_CRYPTO_TEST_5003",
      "Secure Symmetric encryption (AES-128-CFB) interface", {0} },
-    {&tfm_crypto_test_5004, "TFM_CRYPTO_TEST_5004",
-     "Secure Symmetric encryption (DES-128-CBC) interface", {0} },
     {&tfm_crypto_test_5005, "TFM_CRYPTO_TEST_5005",
-     "Secure Symmetric encryption (CAMELLIA-128-CTR) interface", {0} },
-    {&tfm_crypto_test_5006, "TFM_CRYPTO_TEST_5006",
-     "Secure Symmetric encryption invalid cipher (DES-128-RC4)", {0} },
+     "Secure Symmetric encryption (AES-128-CTR) interface", {0} },
     {&tfm_crypto_test_5007, "TFM_CRYPTO_TEST_5007",
      "Secure Symmetric encryption invalid cipher (AES-128-GCM)", {0} },
     {&tfm_crypto_test_5008, "TFM_CRYPTO_TEST_5008",
-     "Secure Symmetric encryption invalid cipher (DES-152-CBC)", {0} },
+     "Secure Symmetric encryption invalid cipher (AES-152-CBC)", {0} },
     {&tfm_crypto_test_5009, "TFM_CRYPTO_TEST_5009",
      "Secure Symmetric encryption invalid cipher (HMAC-128-CFB)", {0} },
     {&tfm_crypto_test_5010, "TFM_CRYPTO_TEST_5010",
@@ -68,14 +57,6 @@ static struct test_t crypto_tests[] = {
      "Secure Hash (SHA-384) interface", {0} },
     {&tfm_crypto_test_5014, "TFM_CRYPTO_TEST_5014",
      "Secure Hash (SHA-512) interface", {0} },
-    {&tfm_crypto_test_5015, "TFM_CRYPTO_TEST_5015",
-     "Secure Hash (MD-5) interface", {0} },
-    {&tfm_crypto_test_5016, "TFM_CRYPTO_TEST_5016",
-     "Secure Hash (RIPEMD-160) interface", {0} },
-    {&tfm_crypto_test_5017, "TFM_CRYPTO_TEST_5017",
-     "Secure Hash (MD-2) interface", {0} },
-    {&tfm_crypto_test_5018, "TFM_CRYPTO_TEST_5018",
-     "Secure Hash (MD-4) interface", {0} },
     {&tfm_crypto_test_5019, "TFM_CRYPTO_TEST_5019",
      "Secure HMAC (SHA-1) interface", {0} },
     {&tfm_crypto_test_5020, "TFM_CRYPTO_TEST_5020",
@@ -84,8 +65,6 @@ static struct test_t crypto_tests[] = {
      "Secure HMAC (SHA-384) interface", {0} },
     {&tfm_crypto_test_5022, "TFM_CRYPTO_TEST_5022",
      "Secure HMAC (SHA-512) interface", {0} },
-    {&tfm_crypto_test_5023, "TFM_CRYPTO_TEST_5023",
-     "Secure HMAC (MD-5) interface", {0} },
     {&tfm_crypto_test_5024, "TFM_CRYPTO_TEST_5024",
      "Secure HMAC with long key (SHA-1) interface", {0} },
     {&tfm_crypto_test_5030, "TFM_CRYPTO_TEST_5030",
@@ -130,20 +109,9 @@ static void tfm_crypto_test_5003(struct test_result_t *ret)
     psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CFB, ret);
 }
 
-static void tfm_crypto_test_5004(struct test_result_t *ret)
-{
-    psa_cipher_test(PSA_KEY_TYPE_DES, PSA_ALG_CBC_NO_PADDING, ret);
-}
-
 static void tfm_crypto_test_5005(struct test_result_t *ret)
 {
-    psa_cipher_test(PSA_KEY_TYPE_CAMELLIA, PSA_ALG_CTR, ret);
-}
-
-static void tfm_crypto_test_5006(struct test_result_t *ret)
-{
-    /* Invalid combination: DES keytypes are not usable with a stream cipher */
-    psa_invalid_cipher_test(PSA_KEY_TYPE_DES, PSA_ALG_ARC4, 16, ret);
+    psa_cipher_test(PSA_KEY_TYPE_AES, PSA_ALG_CTR, ret);
 }
 
 static void tfm_crypto_test_5007(struct test_result_t *ret)
@@ -188,26 +156,6 @@ static void tfm_crypto_test_5014(struct test_result_t *ret)
     psa_hash_test(PSA_ALG_SHA_512, ret);
 }
 
-static void tfm_crypto_test_5015(struct test_result_t *ret)
-{
-    psa_hash_test(PSA_ALG_MD5, ret);
-}
-
-static void tfm_crypto_test_5016(struct test_result_t *ret)
-{
-    psa_hash_test(PSA_ALG_RIPEMD160, ret);
-}
-
-static void tfm_crypto_test_5017(struct test_result_t *ret)
-{
-    psa_hash_test(PSA_ALG_MD2, ret);
-}
-
-static void tfm_crypto_test_5018(struct test_result_t *ret)
-{
-    psa_hash_test(PSA_ALG_MD4, ret);
-}
-
 static void tfm_crypto_test_5019(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
@@ -226,11 +174,6 @@ static void tfm_crypto_test_5021(struct test_result_t *ret)
 static void tfm_crypto_test_5022(struct test_result_t *ret)
 {
     psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_512), 0, ret);
-}
-
-static void tfm_crypto_test_5023(struct test_result_t *ret)
-{
-    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_MD5), 0, ret);
 }
 
 static void tfm_crypto_test_5024(struct test_result_t *ret)
