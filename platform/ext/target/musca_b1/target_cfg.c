@@ -128,6 +128,9 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
 
 void enable_fault_handlers(void)
 {
+    /* Explicitly set secure fault priority to the highest */
+    NVIC_SetPriority(SecureFault_IRQn, 0);
+
     /* Enables BUS, MEM, USG and Secure faults */
     SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk
                   | SCB_SHCSR_BUSFAULTENA_Msk

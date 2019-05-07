@@ -101,7 +101,9 @@ void tfm_spm_hal_configure_default_isolation(
 void tfm_spm_hal_init_debug(void);
 
 /**
- * \brief Enables the fault handlers
+ * \brief Enables the fault handlers and sets priorities.
+ *
+ * Secure fault (if present) must have the highest possible priority
  */
 void enable_fault_handlers(void);
 

@@ -140,7 +140,8 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
                  VECTKEY |
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 
-    /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
+    /* Explicitly set Secure SVC priority to highest */
+    tfm_spm_hal_set_secure_irq_priority(SVCall_IRQn, 0);
 
     /*
      * Set secure PendSV priority to the lowest in SECURE state.
