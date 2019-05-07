@@ -48,15 +48,17 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Only TFM_LVL 1, 2 and 3 are supported!
 #endif
 
-#ifndef TFM_PSA_API
 /* Macros to pick linker symbols and allow to form the partition data base */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
+#ifndef TFM_PSA_API
 REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
 #endif
+
+REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
 
 void configure_ns_code(void)
 {
@@ -183,6 +185,12 @@ void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
 
 int main(void)
 {
+    /* set Main Stack Pointer limit */
+    uint32_t msp_stack_bottom =
+            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base);
+
+    __set_MSPLIM(msp_stack_bottom);
+
     if (tfm_core_init() != 0) {
         /* Placeholder for error handling, currently ignored. */
     }
