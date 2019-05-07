@@ -823,8 +823,7 @@ enum decode_test_mode_t {
 static int_fast16_t decode_test_internal(enum decode_test_mode_t mode)
 {
     int_fast16_t                        return_value;
-    /* Typical expected values give a 620 byte payload, so 800 */
-    Q_USEFUL_BUF_MAKE_STACK_UB(         token_storage, 800);
+    Q_USEFUL_BUF_MAKE_STACK_UB(         token_storage, ATTEST_TOKEN_MAX_SIZE);
     struct q_useful_buf_c               completed_token;
     struct attest_token_decode_context  token_decode;
     struct attest_token_iat_simple_t    simple_claims;

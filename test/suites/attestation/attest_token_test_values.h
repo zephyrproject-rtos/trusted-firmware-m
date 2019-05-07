@@ -300,6 +300,9 @@
 #define TOKEN_TEST_VALUE_SWC2_MEASUREMENT_DESC "dynamically-loaded"
 #define TOKEN_TEST_REQUIRE_SWC2_MEASUREMENT_DESC true
 
-
+/* Attest token maximum size, there are also platform dependent values
+ * defined in region_defs.h
+ */
+#define ATTEST_TOKEN_MAX_SIZE  0x200
 
 #endif /* __ATTEST_TOKEN_TEST_VALUES_H__ */
