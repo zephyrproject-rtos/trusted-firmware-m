@@ -8,3 +8,15 @@
 .wy-nav-content {
   max-width: 85% !important;
 }
+
+/* Avoid tables not wrapping text */
+@media screen and (min-width: 767px) {
+
+   .wy-table-responsive table td {
+      white-space: normal !important;
+   }
+
+   .wy-table-responsive {
+      overflow: visible !important;
+   }
+}
