@@ -121,7 +121,7 @@ if (NOT SPHINX_NODOC)
 
 	#If PDF documentation is being made.
 	if (PDFLATEX_COMPILER)
-		set(_PDF_FILE "${SPHINXCFG_OUTPUT_PATH}/latex/tf-m.pdf")
+		set(_PDF_FILE "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf")
 
 		add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex"
 			COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b latex "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/latex"

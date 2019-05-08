@@ -43,6 +43,8 @@ file(GLOB_RECURSE _COPY_FILES
 		RELATIVE "${TFM_ROOT_DIR}"
 		"${TFM_ROOT_DIR}/*.md"
 		"${TFM_ROOT_DIR}/*.rst"
+		"${TFM_ROOT_DIR}/*.png"
+		"${TFM_ROOT_DIR}/*.jpg"
 		"${TFM_ROOT_DIR}/dco.txt")
 
 #Subtract exluded files from copy files
