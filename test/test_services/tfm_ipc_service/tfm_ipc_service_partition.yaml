@@ -29,8 +29,8 @@
     "./ipc_service_test.c",
   ],
   "tfm_linker_pattern": {
-    "library_list": [
-      "*ipc_service_test*"
+    "object_list": [
+      "*ipc_service_test.*"
     ]
   }
 }

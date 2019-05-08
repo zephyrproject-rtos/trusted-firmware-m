@@ -313,8 +313,8 @@ SECTIONS
 #ifdef TFM_PSA_API
     .TFM_SP_IPC_SERVICE_TEST : ALIGN(32)
     {
-        *ipc_service_test*:*(.text*)
-        *ipc_service_test*:*(.rodata*)
+        *ipc_service_test.*(.text*)
+        *ipc_service_test.*(.rodata*)
         *(TFM_SP_IPC_SERVICE_TEST_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
@@ -361,8 +361,8 @@ SECTIONS
 #ifdef TFM_PSA_API
     .TFM_SP_IPC_CLIENT_TEST : ALIGN(32)
     {
-        *ipc_client_test*:*(.text*)
-        *ipc_client_test*:*(.rodata*)
+        *ipc_client_test.*(.text*)
+        *ipc_client_test.*(.rodata*)
         *(TFM_SP_IPC_CLIENT_TEST_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
@@ -676,7 +676,7 @@ SECTIONS
 #ifdef TFM_PSA_API
     .TFM_SP_IPC_SERVICE_TEST_DATA : ALIGN(32)
     {
-        *ipc_service_test*:*(.data*)
+        *ipc_service_test.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$RW$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_DATA);
@@ -684,8 +684,8 @@ SECTIONS
 
     .TFM_SP_IPC_SERVICE_TEST_BSS : ALIGN(32)
     {
-        *ipc_service_test*:*(.bss*)
-        *ipc_service_test*:*(COMMON)
+        *ipc_service_test.*(.bss*)
+        *ipc_service_test.*(COMMON)
         . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_BSS);
@@ -760,7 +760,7 @@ SECTIONS
 #ifdef TFM_PSA_API
     .TFM_SP_IPC_CLIENT_TEST_DATA : ALIGN(32)
     {
-        *ipc_client_test*:*(.data*)
+        *ipc_client_test.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$RW$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA);
@@ -768,8 +768,8 @@ SECTIONS
 
     .TFM_SP_IPC_CLIENT_TEST_BSS : ALIGN(32)
     {
-        *ipc_client_test*:*(.bss*)
-        *ipc_client_test*:*(COMMON)
+        *ipc_client_test.*(.bss*)
+        *ipc_client_test.*(COMMON)
         . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS);

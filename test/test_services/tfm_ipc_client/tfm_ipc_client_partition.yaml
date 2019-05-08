@@ -20,8 +20,8 @@
     "ipc_client_test.c",
   ],
   "tfm_linker_pattern": {
-    "library_list": [
-      "*ipc_client_test*"
+    "object_list": [
+      "*ipc_client_test.*"
     ]
   }
 }

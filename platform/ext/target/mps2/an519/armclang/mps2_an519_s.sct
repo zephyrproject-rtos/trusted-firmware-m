@@ -124,14 +124,14 @@ LR_CODE S_CODE_START {
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_SERVICE_TEST +0 ALIGN 32 {
-        *ipc_service_test* (+RO)
+        *ipc_service_test.* (+RO)
         *(TFM_SP_IPC_SERVICE_TEST_ATTR_FN)
     }
 #endif /* TFM_PSA_API */
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_CLIENT_TEST +0 ALIGN 32 {
-        *ipc_client_test* (+RO)
+        *ipc_client_test.* (+RO)
         *(TFM_SP_IPC_CLIENT_TEST_ATTR_FN)
     }
 #endif /* TFM_PSA_API */
@@ -238,7 +238,7 @@ LR_CODE S_CODE_START {
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_SERVICE_TEST_DATA +0 ALIGN 32 {
-        *ipc_service_test* (+RW +ZI)
+        *ipc_service_test.* (+RW +ZI)
     }
 
     TFM_SP_IPC_SERVICE_TEST_STACK +0 ALIGN 128 EMPTY 0x0200 {
@@ -247,7 +247,7 @@ LR_CODE S_CODE_START {
 
 #ifdef TFM_PSA_API
     TFM_SP_IPC_CLIENT_TEST_DATA +0 ALIGN 32 {
-        *ipc_client_test* (+RW +ZI)
+        *ipc_client_test.* (+RW +ZI)
     }
 
     TFM_SP_IPC_CLIENT_TEST_STACK +0 ALIGN 128 EMPTY 0x0200 {
