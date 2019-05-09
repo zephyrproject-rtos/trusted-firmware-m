@@ -7,6 +7,7 @@
 
 #include "t_cose_crypto.h"
 #include "psa_crypto.h"
+#include "attest_public_key.h"
 
 /* Avoid compiler warning due to unused argument */
 #define ARG_UNUSED(arg) (void)(arg)
@@ -18,14 +19,33 @@ t_cose_crypto_pub_key_verify(int32_t cose_alg_id,
                              struct q_useful_buf_c hash_to_verify,
                              struct q_useful_buf_c signature)
 {
-    /* FIXME: Implement this function to call psa_asymmetric_verify() when
-     *        it will be supported by Crypto service in TF-M.
-     */
+    enum t_cose_err_t cose_ret = T_COSE_SUCCESS;
+    enum psa_attest_err_t attest_ret;
+    psa_status_t psa_ret;
+    psa_key_handle_t public_key;
+
     ARG_UNUSED(cose_alg_id);
     ARG_UNUSED(key_select);
-    ARG_UNUSED(key_id);
-    ARG_UNUSED(hash_to_verify);
-    ARG_UNUSED(signature);
 
-    return T_COSE_SUCCESS;
+    attest_ret = attest_register_initial_attestation_public_key(&public_key);
+    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+        return T_COSE_ERR_FAIL;
+    }
+
+    psa_ret = psa_asymmetric_verify(public_key,
+                                    PSA_ALG_ECDSA(PSA_ALG_SHA_256),
+                                    hash_to_verify.ptr,
+                                    hash_to_verify.len,
+                                    signature.ptr,
+                                    signature.len);
+    if (psa_ret != PSA_SUCCESS) {
+        cose_ret = T_COSE_ERR_SIG_VERIFY;
+    }
+
+    attest_ret = attest_unregister_initial_attestation_public_key(public_key);
+    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+        cose_ret = T_COSE_ERR_FAIL;
+    }
+
+    return cose_ret;
 }

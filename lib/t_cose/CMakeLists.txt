@@ -40,6 +40,7 @@ list(APPEND ALL_SRC_C_VERIFY
 #Setting include directories
 embedded_include_directories(PATH ${T_COSE_DIR}/inc ABSOLUTE)
 embedded_target_include_directories(TARGET tfm_t_cose_verify PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/util ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET tfm_t_cose_verify PATH ${TFM_ROOT_DIR}/test/suites/attestation ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET tfm_t_cose_sign   PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE APPEND)
 
 #Specify what we build (t_cose_sign and t_cose_verify build as an object library)

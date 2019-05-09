@@ -34,7 +34,6 @@
   ],
   "source_files": [
     "attestation_core.c",
-    "attestation_crypto_stub.c",
     "attestation_key.c",
     "attest_token.c",
     "tfm_attestation.c",

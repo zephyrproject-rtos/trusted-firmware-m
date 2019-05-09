@@ -162,11 +162,9 @@ Service source files
       and ports ``t_cose`` to psa_crypto library.
     - Initial Attestation Service:
         - ``attestation_core.c`` : Implements core functionalities such as
-          implementation  of APIs, retrieval of claims and token creation.
+          implementation of APIs, retrieval of claims and token creation.
         - ``attest_token.c``: Implements the token creation function such as
           start and finish token creation and adding claims to the token.
-        - ``attestation_crypto_stub.c``: Temporary file, it implements the
-          missing psa_crypto APIs.
         - ``attestation_key.c``: Get the attestation key from platform layer
           and register it to psa_crypto service for further usage.
         - ``tfm_attestation.c``: Implements the SPM abstraction layer, and bind

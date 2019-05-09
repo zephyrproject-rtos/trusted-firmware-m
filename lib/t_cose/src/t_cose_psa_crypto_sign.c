@@ -15,15 +15,6 @@
 /* Avoid compiler warning due to unused argument */
 #define ARG_UNUSED(arg) (void)(arg)
 
-/* FixMe: To be removed when the real Crypto API is used */
-psa_status_t psa_asymmetric_sign_stub(psa_key_handle_t handle,
-                                 psa_algorithm_t alg,
-                                 const uint8_t *hash,
-                                 size_t hash_length,
-                                 uint8_t *signature,
-                                 size_t signature_size,
-                                 size_t *signature_length);
-
 enum t_cose_err_t
 t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
                            int32_t key_select,
@@ -35,7 +26,7 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
     enum psa_attest_err_t attest_ret;
     psa_status_t psa_ret;
     const size_t sig_size = t_cose_signature_size(cose_alg_id);
-    psa_key_handle_t key_handle_private, key_handle_public;
+    psa_key_handle_t private_key;
 
     ARG_UNUSED(key_select);
 
@@ -43,35 +34,32 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
         return T_COSE_ERR_SIG_BUFFER_SIZE;
     }
 
-    /* FixMe: Registration of key(s) should not be error by attestation service.
-     *        Later crypto service is going to get the attestation key from
+    /* FixMe: Registration of key(s) should not be done by attestation service.
+     *        Later Crypto service is going to get the attestation key from
      *        platform layer.
      */
-    attest_ret = attest_register_initial_attestation_key(&key_handle_private,
-                                                         &key_handle_public);
+    attest_ret = attest_register_initial_attestation_private_key(&private_key);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
         return T_COSE_ERR_FAIL;
     }
 
-    /* FixMe: To be removed when the real Crypto API is used */
-    psa_ret = psa_asymmetric_sign_stub(key_handle_private,
-                                       0, /* FixMe: algorithm ID */
-                                       hash_to_sign.ptr,
-                                       hash_to_sign.len,
-                                       signature_buffer.ptr, /* Sig buf */
-                                       signature_buffer.len, /* Sig buf size */
-                                       &(signature->len));   /* Sig length */
+    psa_ret = psa_asymmetric_sign(private_key,
+                                  PSA_ALG_ECDSA(PSA_ALG_SHA_256),
+                                  hash_to_sign.ptr,
+                                  hash_to_sign.len,
+                                  signature_buffer.ptr, /* Sig buf */
+                                  signature_buffer.len, /* Sig buf size */
+                                  &(signature->len));   /* Sig length */
 
     if (psa_ret != PSA_SUCCESS) {
-        return T_COSE_ERR_FAIL;
+        cose_ret = T_COSE_ERR_FAIL;
     } else {
         signature->ptr = signature_buffer.ptr;
     }
 
-    attest_ret = attest_unregister_initial_attestation_key(key_handle_private,
-                                                           key_handle_public);
+    attest_ret = attest_unregister_initial_attestation_private_key(private_key);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        return T_COSE_ERR_FAIL;
+        cose_ret =  T_COSE_ERR_FAIL;
     }
 
     return cose_ret;

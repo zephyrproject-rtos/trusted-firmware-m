@@ -16,35 +16,31 @@ extern "C" {
 #endif
 
 /**
- * \brief Get the initial attestation key from platform layer and register it
- *        to crypto service for further usage (signing or verification).
+ * \brief Get the initial attestation private key from platform layer and
+ *        register it to Crypto service to sign the token.
  *
- * \param[out] key_handle_private Pointer to the key handle allocated for the
- *                                private key
- * \param[out] key_handle_public  Pointer to the key handle allocated for the
- *                                public key
+ * \param[out] key_handle_private  Pointer to the key handle allocated for the
+ *                                 private key
  *
- * Private key MUST be present on the device, public key is optional.
+ * Private key MUST be present on the device, otherwise token cannot be signed.
  *
  * \retval  PSA_ATTEST_ERR_SUCCESS   Key(s) was registered.
  * \retval  PSA_ATTEST_ERR_GENERAL   Key(s) could not be registered.
  */
-enum psa_attest_err_t attest_register_initial_attestation_key(
-                                           psa_key_handle_t *key_handle_private,
-                                           psa_key_handle_t *key_handle_public);
+enum psa_attest_err_t attest_register_initial_attestation_private_key(
+                                          psa_key_handle_t *key_handle_private);
+
 /**
- * \brief Unregister the initial attestation key(s) from crypto service to do
- *        not occupy key slot(s).
+ * \brief Unregister the initial attestation private key from Crypto service
+ *        to do not occupy key slot.
  *
- * \param[in] key_handle_private Key handle associated to the private key
- * \param[in] key_handle_public  Key handle associated to the public key
+ * \param[in] key_handle_private  Key handle associated to the private key
  *
  * \retval  PSA_ATTEST_ERR_SUCCESS   Key(s) was unregistered.
  * \retval  PSA_ATTEST_ERR_GENERAL   Key(s) could not be unregistered.
  */
-enum psa_attest_err_t attest_unregister_initial_attestation_key(
-                                            psa_key_handle_t key_handle_private,
-                                            psa_key_handle_t key_handle_public);
+enum psa_attest_err_t attest_unregister_initial_attestation_private_key(
+                                           psa_key_handle_t key_handle_private);
 #ifdef __cplusplus
 }
 #endif

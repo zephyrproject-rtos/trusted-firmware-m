@@ -16,17 +16,9 @@
  * \var private_key_registered
  *
  * \brief Indicates whether the private part of the attestation key pair was
- *        registered to crypto service or not.
+ *        registered to Crypto service or not.
  */
 static uint32_t private_key_registered = 0;
-
-/*!
- * \var public_key_registered
- *
- * \brief Indicates whether the public part of the attestation key pair was
- *        registered to crypto service or not.
- */
-static uint32_t public_key_registered = 0;
 
 /**
  * \brief Map the curve type definition by RFC8152 (COSE) to PSA curve types
@@ -66,8 +58,7 @@ attest_map_elliptic_curve_type(enum ecc_curve_t cose_curve)
 }
 
 enum psa_attest_err_t
-attest_register_initial_attestation_key(psa_key_handle_t *key_handle_private,
-                                        psa_key_handle_t *key_handle_public)
+attest_register_initial_attestation_private_key(psa_key_handle_t *private_key)
 {
     enum tfm_plat_err_t plat_res;
     psa_ecc_curve_t psa_curve;
@@ -75,17 +66,16 @@ attest_register_initial_attestation_key(psa_key_handle_t *key_handle_private,
     struct ecc_key_t attest_key = {0};
     uint8_t  key_buf[ECC_P_256_KEY_SIZE];
     psa_key_type_t attest_key_type;
-    size_t public_key_size;
     psa_status_t crypto_res;
     psa_key_policy_t policy = psa_key_policy_init();
 
-    /* Key(s) should be unregistered at this point */
-    if (private_key_registered != 0 || public_key_registered != 0) {
+    /* Private key should be unregistered at this point */
+    if (private_key_registered != 0) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
     /* Allocate a transient key for the private key in the Crypto service */
-    crypto_res = psa_allocate_key(key_handle_private);
+    crypto_res = psa_allocate_key(private_key);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
@@ -106,20 +96,19 @@ attest_register_initial_attestation_key(psa_key_handle_t *key_handle_private,
     }
 
     /* Setup the key policy for private key */
-    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_SIGN, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy(*key_handle_private, &policy);
+    psa_key_policy_set_usage(&policy,
+                             PSA_KEY_USAGE_SIGN,
+                             PSA_ALG_ECDSA(PSA_ALG_SHA_256));
+    crypto_res = psa_set_key_policy(*private_key, &policy);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
     /* Set key type for private key */
-    /* FixMe: Use PSA_KEY_TYPE_ECC_KEYPAIR(psa_curve) when ECC key type will be
-     * supported in Crypto service
-     */
-    attest_key_type = PSA_KEY_TYPE_RAW_DATA;
+    attest_key_type = PSA_KEY_TYPE_ECC_KEYPAIR(psa_curve);
 
-    /* Register private key to crypto service */
-    crypto_res = psa_import_key(*key_handle_private,
+    /* Register private key to Crypto service */
+    crypto_res = psa_import_key(*private_key,
                                 attest_key_type,
                                 attest_key.priv_key,
                                 attest_key.priv_key_size);
@@ -129,71 +118,24 @@ attest_register_initial_attestation_key(psa_key_handle_t *key_handle_private,
     }
     private_key_registered = 1;
 
-    /* Allocate a transient key for the public key in the Crypto service */
-    crypto_res = psa_allocate_key(key_handle_public);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Check whether public key is available, not mandatory */
-    if (attest_key.pubx_key == NULL) {
-        return PSA_ATTEST_ERR_SUCCESS;
-    }
-
-    /* Setup the key policy for public key */
-    policy = psa_key_policy_init();
-    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_VERIFY, 0); /* FixMe: alg */
-    crypto_res = psa_set_key_policy(*key_handle_public, &policy);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Set key type for public key */
-    /* FixMe: Use PSA_KEY_TYPE_ECC_PUBLIC_KEY(psa_curve) when ECC key type will
-     * be supported in Crypto service
-     */
-    attest_key_type = PSA_KEY_TYPE_RAW_DATA;
-
-    /* Register public key to crypto service */
-    public_key_size = attest_key.pubx_key_size + attest_key.puby_key_size;
-
-    crypto_res = psa_import_key(*key_handle_public,
-                                attest_key_type,
-                                attest_key.pubx_key,
-                                public_key_size);
-
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-    public_key_registered = 1;
-
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
 enum psa_attest_err_t
-attest_unregister_initial_attestation_key(psa_key_handle_t key_handle_private,
-                                          psa_key_handle_t key_handle_public)
+attest_unregister_initial_attestation_private_key(psa_key_handle_t private_key)
 {
     psa_status_t crypto_res;
 
-    /* Only private key is mandatory */
+    /* Private key must be registered at this point */
     if (private_key_registered != 1) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    crypto_res = psa_destroy_key(key_handle_private);
+    crypto_res = psa_destroy_key(private_key);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
     private_key_registered = 0;
-
-    if (public_key_registered) {
-        crypto_res = psa_destroy_key(key_handle_public);
-        if (crypto_res != PSA_SUCCESS) {
-            return PSA_ATTEST_ERR_GENERAL;
-        }
-        public_key_registered = 0;
-    }
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
