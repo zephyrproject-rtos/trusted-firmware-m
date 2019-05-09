@@ -9,7 +9,6 @@
 #This file assumes it will be included from a project specific cmakefile, and
 #will not create a library or executable.
 #Inputs:
-#	MBEDTLS_INSTALL_DIR - directory where mbedtls headers and libraries can be found.
 #	TFM_ROOT_DIR		- root directory of the TF-M repository.
 #Outputs:
 #	Will modify include directories to make the source compile.
@@ -27,12 +26,6 @@ if (NOT DEFINED ENABLE_AUDIT_LOGGING)
 endif()
 
 if (ENABLE_AUDIT_LOGGING)
-	if (AUDIT_LOG_BUILD_MBEDTLS)
-		if (NOT DEFINED MBEDTLS_INSTALL_DIR)
-			message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
-		endif()
-	endif()
-
 	if (NOT DEFINED TFM_ROOT_DIR)
 		message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 	endif()
@@ -50,13 +43,9 @@ if (ENABLE_AUDIT_LOGGING)
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	if (AUDIT_LOG_BUILD_MBEDTLS)
-		embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
-	endif()
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/common ABSOLUTE)
-
 else()
 	message(FATAL_ERROR "Build system currently doesn't support selectively disabling of a service.")
 endif()
