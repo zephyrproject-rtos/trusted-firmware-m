@@ -38,6 +38,8 @@ static struct tfm_spm_ipc_partition_t
 /* Extern SPM variable */
 extern struct spm_partition_db_t g_spm_partition_db;
 
+/* Extern secure lock variable */
+extern int32_t tfm_secure_lock;
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
@@ -569,7 +571,10 @@ void tfm_spm_init(void)
      * of being saved somewhere if there are potential usage purpose.
      * Let's save this context in a local variable 'this_thrd' at
      * current since there is no usage for it.
+     * Also set tfm_nspm_thread_entry as pfn for this thread to
+     * use in detecting NS/S thread scheduling changes.
      */
+    this_thrd.pfn = (tfm_thrd_func_t)tfm_nspm_thread_entry;
     tfm_thrd_start_scheduler(&this_thrd);
 }
 
@@ -597,6 +602,15 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
 
         tfm_spm_partition_change_privilege(is_privileged);
 #endif
+        /* Increase the secure lock, if we enter secure from non-secure */
+        if ((void *)pth_curr->pfn == (void *)tfm_nspm_thread_entry) {
+            ++tfm_secure_lock;
+        }
+        /* Decrease the secure lock, if we return from secure to non-secure */
+        if ((void *)pth_next->pfn == (void *)tfm_nspm_thread_entry) {
+            --tfm_secure_lock;
+        }
+
         tfm_thrd_context_switch(ctxb, pth_curr, pth_next);
     }
 }
