@@ -28,35 +28,6 @@ LR_CODE S_CODE_START {
         .ANY (+RO)
     }
 
-#if TFM_LVL == 1
-
-    /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
-    }
-
-    /* MSP */
-    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
-    }
-
-    /* PSP */
-    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
-    }
-
-    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
-    }
-
-    ER_TFM_DATA +0 {
-        .ANY (+RW +ZI)
-    }
-
-    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
-    }
-
-    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
-    }
-
-#else /* TFM_LVL == 1 */
-
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
         tfm_spm_services.o (+RO)
@@ -186,6 +157,11 @@ LR_CODE S_CODE_START {
     ER_TFM_DATA +0 {
         .ANY (+RW +ZI)
     }
+
+#if TFM_LVL == 1
+    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+#endif /* TFM_LVL == 1 */
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
         tfm_spm_services.o (+RW +ZI)
@@ -317,8 +293,6 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
     }
-
-#endif /* TFM_LVL == 1 */
 
     /* This empty, zero long execution region is here to mark the limit address
      * of the last execution region that is allocated in SRAM.

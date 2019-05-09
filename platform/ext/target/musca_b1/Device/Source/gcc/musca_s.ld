@@ -58,38 +58,17 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
-#if TFM_LVL == 1
     .copy.table : ALIGN(4)
     {
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-        __copy_table_end__ = .;
-    } > FLASH
-
-    .zero.table : ALIGN(4)
-    {
-        __zero_table_start__ = .;
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
-        LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK))
-        LONG (ADDR(.TFM_UNPRIV_SCRATCH))
-        LONG (SIZEOF(.TFM_UNPRIV_SCRATCH))
-        __zero_table_end__ = .;
-    } > FLASH
-
-#else /* TFM_LVL == 1 */
-    .copy.table : ALIGN(4)
-    {
-        __copy_table_start__ = .;
-        LONG (LOADADDR(.TFM_DATA))
-        LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+#if TFM_LVL != 1
         LONG (LOADADDR(.TFM_UNPRIV_DATA))
         LONG (ADDR(.TFM_UNPRIV_DATA))
         LONG (SIZEOF(.TFM_UNPRIV_DATA))
+#endif /* TFM_LVL != 1 */
         LONG (LOADADDR(.TFM_SP_STORAGE_DATA))
         LONG (ADDR(.TFM_SP_STORAGE_DATA))
         LONG (SIZEOF(.TFM_SP_STORAGE_DATA))
@@ -138,8 +117,13 @@ SECTIONS
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
+#if TFM_LVL == 1
+        LONG (ADDR(.TFM_SECURE_STACK))
+        LONG (SIZEOF(.TFM_SECURE_STACK))
+#else /* TFM_LVL == 1 */
         LONG (ADDR(.TFM_UNPRIV_BSS))
         LONG (SIZEOF(.TFM_UNPRIV_BSS))
+#endif /* TFM_LVL == 1 */
         LONG (ADDR(.TFM_SP_STORAGE_BSS))
         LONG (SIZEOF(.TFM_SP_STORAGE_BSS))
         LONG (ADDR(.TFM_SP_STORAGE_STACK))
@@ -195,6 +179,7 @@ SECTIONS
         __zero_table_end__ = .;
     } > FLASH
 
+#if TFM_LVL != 1
     .TFM_UNPRIV_CODE : ALIGN(32)
     {
         *libc_nano*:*(.text*)
@@ -218,6 +203,7 @@ SECTIONS
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
+#endif /* TFM_LVL != 1 */
 
     /**** PSA RoT (CODE + RODATA) start here */
     Image$$TFM_PSA_CODE_START$$Base = .;
@@ -375,6 +361,7 @@ SECTIONS
     /**** APPLICATION RoT (CODE + RODATA) end here */
     Image$$TFM_APP_CODE_END$$Base = .;
 
+#if TFM_LVL != 1
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -387,7 +374,7 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-#endif /* TFM_LVL == 1 */
+#endif /* TFM_LVL != 1 */
 
     .ER_TFM_CODE : ALIGN(4)
     {
@@ -447,13 +434,6 @@ SECTIONS
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 
-    .TFM_UNPRIV_SCRATCH : ALIGN(32)
-    {
-        . += 0x400;
-    } > RAM
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
-
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -495,6 +475,7 @@ SECTIONS
     } > RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
+#endif /* TFM_LVL == 1 */
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
@@ -786,6 +767,7 @@ SECTIONS
     /**** APP RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
 
+#if TFM_LVL != 1
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
         *libc_nano*:*(.data*)
@@ -814,7 +796,7 @@ SECTIONS
 
         . = ALIGN(32);
     } > RAM
-#endif /* TFM_LVL == 1 */
+#endif /* TFM_LVL != 1 */
 
     .TFM_DATA : ALIGN(4)
     {
