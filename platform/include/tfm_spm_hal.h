@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,7 +28,6 @@
  */
 struct tfm_spm_partition_platform_data_t;
 
-#if TFM_LVL != 1
 /**
  * \brief Holds SPM db fields that define the memory regions used by a
  *        partition.
@@ -58,7 +57,6 @@ struct tfm_spm_partition_memory_data_t
     uint32_t stack_bottom; /*!< The bottom of the stack for the partition. */
     uint32_t stack_top;    /*!< The top of the stack for the partition. */
 };
-#endif
 
 /**
  * \brief This function initialises the HW used for isolation, and sets the

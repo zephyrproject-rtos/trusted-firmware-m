@@ -431,19 +431,6 @@ tfm_spm_partition_get_thread_info_ext(uint32_t partition_idx)
     return &g_spm_partition_db.partitions[partition_idx].sp_thrd;
 }
 
-#if TFM_LVL == 1
-static uint32_t tfm_spm_partition_get_stack_base_ext(uint32_t partition_idx)
-{
-    return (uint32_t)&(g_spm_partition_db.partitions[partition_idx].
-                       stack[TFM_STACK_SIZE]);
-}
-
-static uint32_t tfm_spm_partition_get_stack_limit_ext(uint32_t partition_idx)
-{
-    return (uint32_t)&g_spm_partition_db.partitions[partition_idx].stack;
-}
-#endif
-
 static tfm_thrd_func_t
         tfm_spm_partition_get_init_func_ext(uint32_t partition_idx)
 {
@@ -541,13 +528,8 @@ void tfm_spm_init(void)
         tfm_thrd_init(pth,
                       tfm_spm_partition_get_init_func_ext(i),
                       NULL,
-#if TFM_LVL == 1
-                      (uint8_t *)tfm_spm_partition_get_stack_base_ext(i),
-                      (uint8_t *)tfm_spm_partition_get_stack_limit_ext(i));
-#else
                       (uint8_t *)tfm_spm_partition_get_stack_top(i),
                       (uint8_t *)tfm_spm_partition_get_stack_bottom(i));
-#endif
 
         pth->prior = tfm_spm_partition_get_priority_ext(i);
 

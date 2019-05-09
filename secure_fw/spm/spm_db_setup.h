@@ -38,9 +38,6 @@ struct spm_partition_db_t {
         data.partition_priority = TFM_PRIORITY(priority);                     \
     } while (0)
 
-#if TFM_LVL == 1
-#define PARTITION_INIT_MEMORY_DATA(data, partition)
-#else
 #define PARTITION_INIT_MEMORY_DATA(data, partition)                            \
     do {                                                                       \
         data.code_start      = PART_REGION_ADDR(partition, $$Base);            \
@@ -54,7 +51,6 @@ struct spm_partition_db_t {
         data.stack_bottom    = PART_REGION_ADDR(partition, _STACK$$ZI$$Base);  \
         data.stack_top       = PART_REGION_ADDR(partition, _STACK$$ZI$$Limit); \
     } while (0)
-#endif
 
 
 #if TFM_LVL == 1

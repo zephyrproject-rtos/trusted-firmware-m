@@ -87,6 +87,28 @@ struct spm_partition_runtime_data_t {
  */
 uint32_t get_partition_idx(uint32_t partition_id);
 
+/**
+ * \brief Get bottom of stack region for a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Stack region bottom value
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
+
+/**
+ * \brief Get top of stack region for a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Stack region top value
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
+
 #if TFM_LVL != 1
 /**
  * \brief Configure isolated sandbox for a partition
@@ -109,28 +131,6 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx);
  * \note This function doesn't check if partition_idx is valid.
  */
 enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx);
-
-/**
- * \brief Get bottom of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region bottom value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
-
-/**
- * \brief Get top of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region top value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
 
 /**
  * \brief Get the start of the zero-initialised region for a partition
