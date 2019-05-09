@@ -159,8 +159,13 @@ LR_CODE S_CODE_START {
     }
 
 #if TFM_LVL == 1
+#ifdef TFM_PSA_API
+    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x0200 {
+    }
+#else
     TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
     }
+#endif /* TFM_PSA_API */
 #endif /* TFM_LVL == 1 */
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
@@ -172,8 +177,13 @@ LR_CODE S_CODE_START {
         platform_retarget_dev.o (+RW +ZI)
     }
 
+#ifdef TFM_PSA_API
+    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x0 {
+    }
+#else
     TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
     }
+#endif /* TFM_PSA_API */
 
     /**** PSA RoT DATA start here */
     /*

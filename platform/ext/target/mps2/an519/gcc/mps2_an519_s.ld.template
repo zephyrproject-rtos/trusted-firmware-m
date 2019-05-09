@@ -282,7 +282,11 @@ SECTIONS
 
     .TFM_SECURE_STACK : ALIGN(128)
     {
+#ifdef TFM_PSA_API
+        . += 0x0200;
+#else
         . += 0x2000;
+#endif /* TFM_PSA_API */
     } > RAM
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
@@ -332,7 +336,11 @@ SECTIONS
 
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
+#ifdef TFM_PSA_API
+        . += 0x0;
+#else
         . += 0x400;
+#endif /* TFM_PSA_API */
     } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
