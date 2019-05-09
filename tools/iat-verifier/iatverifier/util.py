@@ -66,7 +66,7 @@ def extract_iat_from_cose(keyfile, tokenfile, keep_going=False):
             sk = SigningKey.from_pem(open(keyfile, 'rb').read())
         except Exception as e:
             msg = 'Bad key file "{}": {}'
-            error(msg.format(keyfile, e), keep_going)
+            raise ValueError(msg.format(keyfile, e))
     else:  # no keyfile
         sk = None
 
