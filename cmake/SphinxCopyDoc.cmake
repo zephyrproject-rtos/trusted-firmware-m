@@ -26,10 +26,10 @@
 #
 #Usage:
 #   cmake -DDST_DIR=<path to destination> -DTFM_ROOT_DIR=<path to tf-m root> \
-#          -P SphinxCopyDoc.cmake
+#          -DBINARY_DIR=${CMAKE_BINARY_DIR} -P SphinxCopyDoc.cmake
 
 #Check input parameters
-foreach(_PARAM IN ITEMS TFM_ROOT_DIR DST_DIR)
+foreach(_PARAM IN ITEMS TFM_ROOT_DIR DST_DIR BINARY_DIR)
 	if (NOT DEFINED ${_PARAM})
 		message(FATAL_ERROR "Variable ${_PARAM} is undefined. Please add -D${_PARAM}=<...> when calling this script.")
 	endif()
@@ -47,14 +47,14 @@ file(GLOB_RECURSE _COPY_FILES
 		"${TFM_ROOT_DIR}/*.jpg"
 		"${TFM_ROOT_DIR}/dco.txt")
 
-#Subtract exluded files from copy files
-list(REMOVE_ITEM _COPY_FILES "docs/index.rst")
+#Remove intermediate and final document build outputs.
+foreach(_PATH IN ITEMS BINARY_DIR DST_DIR)
+	file(RELATIVE_PATH _REL_DIR ${TFM_ROOT_DIR} ${${_PATH}})
+	list(FILTER _COPY_FILES EXCLUDE REGEX "${_REL_DIR}/.*")
+endforeach()
 
 #Copy files with directory tree.
 foreach(_FILE ${_COPY_FILES})
 	get_filename_component(_DIR ${_FILE} DIRECTORY)
 	file(COPY ${_FILE} DESTINATION "${DST_DIR}/${_DIR}")
 endforeach()
-
-#Copy index.rst to the top level
-file(COPY "${TFM_ROOT_DIR}/docs/index.rst" DESTINATION "${DST_DIR}")

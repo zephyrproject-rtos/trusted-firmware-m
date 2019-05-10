@@ -78,6 +78,9 @@ if (NOT SPHINX_NODOC)
 	set(SPHINXCFG_TEMPLATE_FILE "${TFM_ROOT_DIR}/docs/conf.py.in")
 	set(SPHINXCFG_CONFIGURED_FILE "${SPHINXCFG_OUTPUT_PATH}/conf.py")
 
+	set(SPHINX_TEMPLATE_INDEX_FILE "${TFM_ROOT_DIR}/docs/index.rst.in")
+	set(SPHINX_CONFIGURED_INDEX_FILE "${SPHINX_TMP_DOC_DIR}/index.rst")
+	set(SPHINX_DESIGN_DOC_ROOT "${TFM_ROOT_DIR}/docs/design_documents")
 
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. We need a process to define the
@@ -85,11 +88,34 @@ if (NOT SPHINX_NODOC)
 	set(SPHINXCFG_TFM_VERSION "1.0.0-Beta")
 	set(SPHINXCFG_TFM_VERSION_FULL "Version 1.0.0-Beta")
 
+	get_filename_component(_NDX_FILE_DIR ${SPHINX_CONFIGURED_INDEX_FILE} DIRECTORY )
+
+	#This command does not generates the specifyed output file and thus it will
+	#allways be run. Any other command or target depending on the "run-allways"
+	#output will be alwways executed too.
+	add_custom_command(OUTPUT run-allways
+		COMMAND "${CMAKE_COMMAND}" -E echo)
+
 	#Using add_custom_command allows CMake to generate proper clean commands
 	#for document generation.
 	add_custom_command(OUTPUT "${SPHINX_TMP_DOC_DIR}"
-		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR} -D DST_DIR=${SPHINX_TMP_DOC_DIR} -P "${TFM_ROOT_DIR}/cmake/SphinxCopyDoc.cmake"
+								"${SPHINX_CONFIGURED_INDEX_FILE}"
+		#Create target directory for SPHINX_CONFIGURED_INDEX_FILE. Needed
+		#by the next command.
+		COMMAND "${CMAKE_COMMAND}" -E make_directory "${_NDX_FILE_DIR}"
+		#Fill out index.rst template
+		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR}
+				-D SPHINX_TEMPLATE_INDEX_FILE=${SPHINX_TEMPLATE_INDEX_FILE}
+				-D SPHINX_CONFIGURED_INDEX_FILE=${SPHINX_CONFIGURED_INDEX_FILE}
+				-D SPHINX_DESIGN_DOC_ROOT=${SPHINX_DESIGN_DOC_ROOT}
+				-P "${TFM_ROOT_DIR}/cmake/SphinxDesignDocStatus.cmake"
+		#Copy document files to temp direcotry
+		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR}
+				-D DST_DIR=${SPHINX_TMP_DOC_DIR}
+				-D BINARY_DIR=${CMAKE_BINARY_DIR}
+				-P "${TFM_ROOT_DIR}/cmake/SphinxCopyDoc.cmake"
 		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
+		DEPENDS run-allways
 		VERBATIM
 		)
 
@@ -100,7 +126,7 @@ if (NOT SPHINX_NODOC)
 	add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/html"
 		COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b html "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/html"
 		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
-		DEPENDS create_sphinx_input
+		DEPENDS create_sphinx_input run-allways
 		COMMENT "Running Sphinx to generate user guide (HTML)."
 		VERBATIM
 		)
