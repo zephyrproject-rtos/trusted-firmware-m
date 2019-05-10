@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,9 +19,9 @@
 #include "tfm_plat_defs.h"
 
 enum tfm_nv_counter_t {
-    TFM_SST_NV_COUNTER_1 = 0,
-    TFM_SST_NV_COUNTER_2,
-    TFM_SST_NV_COUNTER_3,
+    PLAT_NV_COUNTER_0 = 0,  /* Used by SST service */
+    PLAT_NV_COUNTER_1,      /* Used by SST service */
+    PLAT_NV_COUNTER_2,      /* Used by SST service */
 };
 
 #ifdef __cplusplus
