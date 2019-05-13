@@ -36,6 +36,7 @@ TLV_VALUES = {
         'KEYHASH': 0x01,
         'SHA256' : 0x10,
         'RSA2048': 0x20,
+        'RSA3072': 0x23,
         'SEC_CNT': 0x50, }
 
 TLV_INFO_SIZE = 4

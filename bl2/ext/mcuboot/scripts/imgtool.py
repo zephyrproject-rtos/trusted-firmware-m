@@ -80,10 +80,14 @@ def next_version_number(args, defaultVersion, path):
     return newVersion
 
 def gen_rsa2048(args):
-    keys.RSA2048.generate().export_private(args.key)
+    keys.RSAutil.generate().export_private(args.key)
+
+def gen_rsa3072(args):
+    keys.RSAutil.generate(key_size=3072).export_private(args.key)
 
 keygens = {
-        'rsa-2048': gen_rsa2048, }
+        'rsa-2048': gen_rsa2048,
+        'rsa-3072': gen_rsa3072, }
 
 def do_keygen(args):
     if args.type not in keygens:
