@@ -11,7 +11,7 @@
   "priority": "NORMAL",
   "id": "0x00000005",
   "entry_point": "tfm_secure_client_service_init",
-  "stack_size": "0x0300",
+  "stack_size": "0x0400",
   "heap_size": "0",
   "tfm_partition_ipc": true,
   "mmio_regions": [
