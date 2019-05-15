@@ -535,11 +535,6 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-/* FixMe: Remove this #if when MPU will be configured properly. Currently
- *        in case of TFM_LVL == 3 unaligned access triggers a usage fault
- *        exception.
- */
-#if !defined(TFM_LVL) || (TFM_LVL == 1)
 /*!
  * \brief Static function to add instance id claim to attestation token.
  *
@@ -656,7 +651,6 @@ attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif
 
 /*!
  * \brief Static function to add caller id claim to attestation token.
@@ -935,11 +929,6 @@ attest_create_token(struct q_useful_buf_c *challenge,
             goto error;
         }
 
-        /* FixMe: Remove this #if when MPU will be configured properly.
-         *        Currently in case of TFM_LVL == 3 unaligned access triggers
-         *        a usage fault exception.
-         */
-#if !defined(TFM_LVL) || (TFM_LVL == 1)
         attest_err = attest_add_instance_id_claim(&attest_token_ctx);
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
@@ -954,7 +943,6 @@ attest_create_token(struct q_useful_buf_c *challenge,
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
         }
-#endif
 
         attest_err = attest_add_caller_id_claim(&attest_token_ctx);
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
