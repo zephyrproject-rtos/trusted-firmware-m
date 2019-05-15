@@ -223,30 +223,27 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
 
 /**
  * \brief Tests set function with:
- * - NULL data pointer
+ * - NULL data pointer and zero data length
+ *
+ * \note A request with a null data pointer and data length not equal to zero is
+ *       treated as a secure violation. TF-M framework will reject such requests
+ *       so this case is not tested here.
+ *
  */
 static void tfm_sst_test_2003(struct test_result_t *ret)
 {
-#ifndef TFM_PSA_API
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
-    const uint32_t data_len = 1;
-
-    /* A parameter with a null pointer is treated as a secure violation.
-     * TF-M framework rejects the request with a proper error code.
-     * The SST secure PSA PS implementation returns
-     * PSA_PS_ERROR_OPERATION_FAILED in that case.
-     */
+    const uint32_t data_len = 0;
 
     /* Set with NULL data pointer */
     status = psa_ps_set(uid, data_len, NULL, flags);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
-        TEST_FAIL("Set should not succeed with NULL data pointer");
+    if (status != PSA_PS_SUCCESS) {
+        TEST_FAIL("Set should succeed with NULL data pointer and zero length");
         return;
     }
 
-#endif
     ret->val = TEST_PASSED;
 }
 
@@ -611,7 +608,12 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
 /**
  * \brief Tests get function with:
- * - NULL data pointer
+ * - NULL data pointer and zero data length
+ *
+ * \note A request with a null data pointer and data length not equal to zero is
+ *       treated as a secure violation. TF-M framework will reject such requests
+ *       so this case is not tested here.
+ *
  */
 static void tfm_sst_test_2010(struct test_result_t *ret)
 {
@@ -619,10 +621,8 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
-#ifndef TFM_PSA_API
     const uint32_t offset = 0;
-#endif
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
     if (status != PSA_PS_SUCCESS) {
@@ -630,20 +630,12 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
         return;
     }
 
-    /* A parameter with a null pointer is treated as a secure violation.
-     * TF-M framework rejects the request with a proper error code.
-     * The SST secure PSA PS implementation returns
-     * PSA_PS_ERROR_OPERATION_FAILED in that case.
-     */
-
     /* Get with NULL data pointer */
-#ifndef TFM_PSA_API
-    status = psa_ps_get(uid, offset, data_len, NULL);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
-        TEST_FAIL("Get should not succeed with NULL data pointer");
+    status = psa_ps_get(uid, offset, 0, NULL);
+    if (status != PSA_PS_SUCCESS) {
+        TEST_FAIL("Get should succeed with NULL data pointer and zero length");
         return;
     }
-#endif
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);

@@ -36,10 +36,6 @@ psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
     };
 
 #ifdef TFM_PSA_API
-    if (p_data == NULL) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
-    }
-
     handle = psa_connect(TFM_SST_SET_SID, TFM_SST_SET_MIN_VER);
     if (!TFM_PSA_HANDLE_IS_VALID(handle)) {
         return PSA_PS_ERROR_OPERATION_FAILED;
@@ -87,10 +83,6 @@ psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
     };
 
 #ifdef TFM_PSA_API
-    if (p_data == NULL) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
-    }
-
     handle = psa_connect(TFM_SST_GET_SID, TFM_SST_GET_MIN_VER);
     if (!TFM_PSA_HANDLE_IS_VALID(handle)) {
         return PSA_PS_ERROR_OPERATION_FAILED;
