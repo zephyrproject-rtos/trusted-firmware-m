@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,13 @@
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
 #endif
+
+/* Macros to pick linker symbols */
+#define REGION(a, b, c) a##b##c
+#define REGION_NAME(a, b, c) REGION(a, b, c)
+#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -85,6 +92,12 @@ static void do_boot(struct boot_rsp *rsp)
 
     stdio_uninit();
 
+    /* Restore the Main Stack Pointer Limit register's reset value
+     * before passing execution to runtime firmware to make the
+     * bootloader transparent to it.
+     */
+    __set_MSPLIM(0);
+
     __set_MSP(vt->msp);
     __DSB();
     __ISB();
@@ -94,8 +107,12 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
+    uint32_t msp_stack_bottom =
+            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
     struct boot_rsp rsp;
     int rc;
+
+    __set_MSPLIM(msp_stack_bottom);
 
     stdio_init();
 
