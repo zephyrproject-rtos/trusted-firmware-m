@@ -8,7 +8,6 @@
 #include "sst_tests.h"
 
 #include <stdio.h>
-#include <string.h>
 
 #include "s_test_helpers.h"
 #include "secure_fw/core/tfm_memory_utils.h"
@@ -27,11 +26,6 @@
 #define INVALID_OFFSET           UINT32_MAX
 #define INVALID_FLAG             (1U << 31)
 #define INVALID_THREAD_NAME      "Thread_INVALID"
-
-/* Memory bounds to check */
-#define ROM_ADDR_LOCATION        ((void *)0x00100000)
-#define DEV_ADDR_LOCATION        ((void *)0x40000000)
-#define NON_EXIST_ADDR_LOCATION  ((void *)0xEFFFFFFF)
 
 /* Write once data */
 #define WRITE_ONCE_DATA          "THE_FIVE_BOXING_WIZARDS_JUMP_QUICKLY"
@@ -129,11 +123,6 @@ void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite)
 #endif
 }
 
-/* Note: Some buffers that are not modified are intentionally not marked const,
- * as tfm_core_memory_permission_check requires that pointers passed by secure
- * callers are in the secure data region, and not the secure code region.
- */
-
 /**
  * \brief Tests set function with:
  * - Valid UID, no data, no flags
@@ -190,8 +179,7 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_2;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
-    uint8_t write_data[] = WRITE_DATA;
-    uint8_t write_once_data[] = WRITE_ONCE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
 
     /* Set with no flags */
     status = psa_ps_set(WRITE_ONCE_UID, data_len, write_data, flags);
@@ -204,7 +192,7 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
      * Note: Once created, WRITE_ONCE_UID cannot be deleted. It is reused across
      * multiple tests.
      */
-    status = psa_ps_set(WRITE_ONCE_UID, WRITE_ONCE_DATA_SIZE, write_once_data,
+    status = psa_ps_set(WRITE_ONCE_UID, WRITE_ONCE_DATA_SIZE, WRITE_ONCE_DATA,
                         PSA_PS_FLAG_WRITE_ONCE);
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("Set should not fail with valid flags (and existing UID)");
@@ -258,7 +246,7 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_1;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = INVALID_DATA_LEN;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
 
     /* A parameter with a buffer pointer where its data length is longer than
      * maximum permitted, it is treated as a secure violation.
@@ -290,7 +278,7 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
     const uint32_t write_len = WRITE_DATA_SIZE;
     const uint32_t read_len = WRITE_ONCE_DATA_SIZE;
     const uint32_t offset = 0;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = WRITE_ONCE_READ_DATA;
 
     /* Set a write once UID a second time */
@@ -328,7 +316,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     uint32_t data_len = WRITE_DATA_SIZE;
     uint32_t offset = 0;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
     const uint8_t *p_read_data = read_data;
 
@@ -407,7 +395,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
     const uint32_t write_len = WRITE_DATA_SIZE;
     const uint32_t read_len = 0;
     uint32_t offset = 0;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
 
     status = psa_ps_set(uid, write_len, write_data, flags);
@@ -512,7 +500,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     const uint32_t write_len = WRITE_DATA_SIZE;
     uint32_t read_len;
     uint32_t offset;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
 
     status = psa_ps_set(uid, write_len, write_data, flags);
@@ -689,7 +677,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
     struct psa_ps_info_t info = {0};
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
     if (status != PSA_PS_SUCCESS) {
@@ -785,7 +773,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_3;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
     if (status != PSA_PS_SUCCESS) {
@@ -830,7 +818,7 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
@@ -923,8 +911,8 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len_2 = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
-    uint8_t write_data_1[] = "UID 1 DATA";
-    uint8_t write_data_2[] = WRITE_DATA;
+    const uint8_t write_data_1[] = "UID 1 DATA";
+    const uint8_t write_data_2[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
 
     /* Set UID 1 */
@@ -986,7 +974,7 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     uint32_t offset = 0;
-    uint8_t write_data[] = WRITE_DATA;
+    const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
 
     /* Set the entire data into UID */
@@ -1032,9 +1020,9 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
     const psa_ps_uid_t uid = TEST_UID_2;
     const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
     const uint32_t offset = 0;
-    uint8_t write_data_1[] = "ONE";
-    uint8_t write_data_2[] = "TWO";
-    uint8_t write_data_3[] = "THREE";
+    const uint8_t write_data_1[] = "ONE";
+    const uint8_t write_data_2[] = "TWO";
+    const uint8_t write_data_3[] = "THREE";
     uint8_t read_data[] = READ_DATA;
 
     /* Set write data 1 into UID */

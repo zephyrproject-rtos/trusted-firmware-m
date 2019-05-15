@@ -27,12 +27,6 @@
 #define INVALID_FLAG             (1U << 31)
 #define INVALID_THREAD_NAME      "Thread_INVALID"
 
-/* Memory bounds to check */
-#define ROM_ADDR_LOCATION        ((void *)0x00100000)
-#define DEV_ADDR_LOCATION        ((void *)0x40000000)
-#define SECURE_ADDR_LOCATION     ((void *)0x30000000)
-#define NON_EXIST_ADDR_LOCATION  ((void *)0xEFFFFFFF)
-
 /* Write once data */
 #define WRITE_ONCE_DATA          "THE_FIVE_BOXING_WIZARDS_JUMP_QUICKLY"
 #define WRITE_ONCE_DATA_SIZE     (sizeof(WRITE_ONCE_DATA) - 1)
