@@ -5,7 +5,6 @@
  *
  */
 #include <inttypes.h>
-#include <stdio.h>
 #include "tfm_arch_v8m.h"
 #include "tfm_thread.h"
 #include "tfm_utils.h"

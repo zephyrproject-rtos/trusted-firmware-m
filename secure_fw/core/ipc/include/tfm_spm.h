@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include "tfm_list.h"
+#include "tfm_message_queue.h"
 #include "tfm_secure_api.h"
 
 #define TFM_SPM_MAX_ROT_SERV_NUM        28

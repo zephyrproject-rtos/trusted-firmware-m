@@ -5,7 +5,6 @@
  *
  */
 
-#include <stdio.h>
 #include <stdbool.h>
 #include "secure_utilities.h"
 #include "tfm_api.h"

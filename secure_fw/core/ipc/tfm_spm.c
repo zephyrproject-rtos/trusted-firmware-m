@@ -7,7 +7,6 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "psa_client.h"
 #include "psa_service.h"
