@@ -98,7 +98,7 @@ endif()
 if (NOT DEFINED CORE_TEST)
 	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined.")
 elseif(CORE_TEST)
-	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_CORE_DEBUG TFM_PARTITION_TEST_CORE APPEND)
+	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_CORE_DEBUG APPEND)
 endif()
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
@@ -166,7 +166,7 @@ function(set_up_secure_fw_build)
 	#Set macro definitions for the project.
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=3 TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION} APPEND)
 
-	if (REGRESSION OR CORE_TEST OR CORE_IPC)
+	if (REGRESSION OR CORE_TEST)
 		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
 			#The test service veneers in the tfm_secure_tests library may not be
 			#referenced in the secure binary so the veneer objects are explicitly loaded
@@ -211,6 +211,12 @@ function(set_up_secure_fw_build)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
 	elseif (TFM_PARTITION_TEST_CORE)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
+	endif()
+
+	if (NOT DEFINED TFM_PARTITION_TEST_CORE_IPC)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE_IPC is undefined.")
+	elseif (TFM_PARTITION_TEST_CORE_IPC)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE_IPC")
 	endif()
 
 	if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)

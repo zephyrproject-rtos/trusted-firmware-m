@@ -103,6 +103,7 @@ list_to_string(COMMON_COMPILE_FLAGS_STR ${COMMON_COMPILE_FLAGS})
 #Settings which shall be set for all projects the same way based
 # on the variables above.
 set (TFM_PARTITION_TEST_CORE OFF)
+set (TFM_PARTITION_TEST_CORE_IPC OFF)
 set (CORE_TEST_POSITIVE OFF)
 set (CORE_TEST_INTERACTIVE OFF)
 set (REFERENCE_PLATFORM OFF)
@@ -130,7 +131,6 @@ endif()
 
 if (CORE_IPC)
 	set(TFM_PSA_API ON)
-	set(CORE_TEST_IPC ON)
 endif()
 
 if (TFM_PSA_API)
@@ -144,14 +144,20 @@ endif()
 if (SERVICES_TEST_ENABLED)
 	set(SERVICE_TEST_S ON)
 	set(SERVICE_TEST_NS ON)
-	if (REFERENCE_PLATFORM AND NOT CORE_IPC)
+	if (CORE_IPC)
+		set(CORE_TEST_IPC ON)
+	elseif (REFERENCE_PLATFORM)
 		set(CORE_TEST_POSITIVE ON)
 	endif()
 endif()
 
 if (CORE_TEST)
-	set(CORE_TEST_POSITIVE ON)
-	set(CORE_TEST_INTERACTIVE OFF)
+	if (CORE_IPC)
+		set(CORE_TEST_IPC ON)
+	elseif (REFERENCE_PLATFORM)
+		set(CORE_TEST_POSITIVE ON)
+		set(CORE_TEST_INTERACTIVE OFF)
+	endif()
 endif()
 
 if (CORE_TEST_INTERACTIVE)
@@ -168,12 +174,14 @@ endif()
 
 if (CORE_TEST_IPC)
 	add_definitions(-DCORE_TEST_IPC)
-	# If PSA_API_TEST is enabled, don't run TF-M test framework from NS
-	if (PSA_API_TEST)
-	  set(TEST_FRAMEWORK_NS OFF)
-	else()
-	  set(TEST_FRAMEWORK_NS ON)
-	endif()
+	set(TEST_FRAMEWORK_NS ON)
+	set(TFM_PARTITION_TEST_CORE_IPC ON)
+elseif (CORE_IPC AND (NOT PSA_API_TEST) AND (TFM_LVL EQUAL 1))
+	# FIXME: Running the Core IPC tests in this config is deprecated and will
+	# be removed in the future.
+	set(CORE_TEST_IPC ON)
+	add_definitions(-DCORE_TEST_IPC)
+	set(TEST_FRAMEWORK_NS ON)
 endif()
 
 if (SERVICE_TEST_S)
@@ -211,6 +219,10 @@ endif()
 
 if (TFM_PARTITION_TEST_CORE)
 	add_definitions(-DTFM_PARTITION_TEST_CORE)
+endif()
+
+if (TFM_PARTITION_TEST_CORE_IPC)
+	add_definitions(-DTFM_PARTITION_TEST_CORE_IPC)
 endif()
 
 if (TFM_PARTITION_TEST_SECURE_SERVICES)

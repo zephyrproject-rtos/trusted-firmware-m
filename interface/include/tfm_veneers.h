@@ -107,13 +107,13 @@ psa_status_t tfm_spm_core_test_2_get_every_second_byte_veneer(psa_invec *in_vec,
 psa_status_t tfm_tfm_secure_client_service_sfn_run_tests_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_SERVICE_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_CLIENT_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef __cplusplus
 }

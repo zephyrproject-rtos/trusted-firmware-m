@@ -101,13 +101,13 @@ psa_status_t spm_core_test_2_get_every_second_byte(psa_invec *, size_t, psa_outv
 psa_status_t tfm_secure_client_service_sfn_run_tests(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_SERVICE_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_CLIENT_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 
 #define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
@@ -213,11 +213,11 @@ TFM_VENEER_FUNCTION(TFM_SP_CORE_TEST_2, spm_core_test_2_get_every_second_byte)
 TFM_VENEER_FUNCTION(TFM_SP_SECURE_TEST_PARTITION, tfm_secure_client_service_sfn_run_tests)
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_SERVICE_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_CLIENT_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 

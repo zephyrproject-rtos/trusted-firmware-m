@@ -131,12 +131,6 @@ embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
 
-if (NOT DEFINED CORE_TEST)
-	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST is undefined. ")
-elseif(CORE_TEST)
-	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE CORE_TEST)
-endif()
-
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
 elseif (TFM_NS_CLIENT_IDENTIFICATION)
@@ -238,6 +232,12 @@ function(set_up_app_build)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
 	elseif (TFM_PARTITION_TEST_CORE)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
+	endif()
+
+	if (NOT DEFINED TFM_PARTITION_TEST_CORE_IPC)
+		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE_IPC is undefined.")
+	elseif (TFM_PARTITION_TEST_CORE_IPC)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE_IPC")
 	endif()
 
 	if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)

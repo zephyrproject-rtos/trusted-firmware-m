@@ -15,11 +15,14 @@
 
 /* List of tests */
 static void tfm_ipc_test_1001(struct test_result_t *ret);
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 static void tfm_ipc_test_1002(struct test_result_t *ret);
 static void tfm_ipc_test_1003(struct test_result_t *ret);
 static void tfm_ipc_test_1004(struct test_result_t *ret);
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 static struct test_t ipc_veneers_tests[] = {
+#ifdef TFM_PARTITION_TEST_CORE_IPC
     {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
      "Get PSA framework version", {0} },
     {&tfm_ipc_test_1002, "TFM_IPC_TEST_1002",
@@ -28,6 +31,10 @@ static struct test_t ipc_veneers_tests[] = {
      "Connect to a RoT Service", {0} },
     {&tfm_ipc_test_1004, "TFM_IPC_TEST_1004",
      "Call a RoT Service", {0} }
+#else /* TFM_PARTITION_TEST_CORE_IPC */
+    {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
+     "Deprecated", {0} },
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 };
 
 void register_testsuite_ns_ipc_interface(struct test_suite_t *p_test_suite)
@@ -49,6 +56,7 @@ void register_testsuite_ns_ipc_interface(struct test_suite_t *p_test_suite)
  */
 static void tfm_ipc_test_1001(struct test_result_t *ret)
 {
+#ifdef TFM_PARTITION_TEST_CORE_IPC
     uint32_t version;
 
     version = psa_framework_version();
@@ -58,8 +66,12 @@ static void tfm_ipc_test_1001(struct test_result_t *ret)
         TEST_FAIL("The version of the PSA Framework API is not valid!\r\n");
         return;
     }
+#else /* TFM_PARTITION_TEST_CORE_IPC */
+    TEST_LOG("Running IPC tests in this config is deprecated\r\n");
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 }
 
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /**
  * \brief Retrieve the minor version of a RoT Service.
  */
@@ -131,3 +143,4 @@ static void tfm_ipc_test_1004(struct test_result_t *ret)
     psa_close(handle);
     ret->val = TEST_PASSED;
 }
+#endif /* TFM_PARTITION_TEST_CORE_IPC */

@@ -264,7 +264,7 @@
 },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_SERVICE_TEST ********/
 {
         "IPC_SID_BASIC",
@@ -275,10 +275,10 @@
         1,
         TFM_VERSION_POLICY_STRICT
 },
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PSA_API
+#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_CLIENT_TEST ********/
-#endif /* TFM_PSA_API */
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #endif /* __TFM_SERVICE_LIST_INC__ */

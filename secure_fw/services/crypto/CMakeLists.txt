@@ -37,13 +37,6 @@ endif()
 
 include(CMakeLists.inc)
 
-#Configure how we build our target
-if(DEFINED CORE_TEST)
-  set (TFM_LVL 3)
-else()
-  set (TFM_LVL 1)
-endif()
-
 #Create a list of the C defines
 list(APPEND TFM_CRYPTO_C_DEFINES_LIST __ARM_FEATURE_CMSE=3 __thumb2__ TFM_LVL=${TFM_LVL})
 
