@@ -1004,6 +1004,11 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
+    if (token.len == 0) {
+        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
+        goto error;
+    }
+
     attest_err = attest_check_memory_access(token.ptr,
                                             token.len,
                                             TFM_ATTEST_ACCESS_RW);
