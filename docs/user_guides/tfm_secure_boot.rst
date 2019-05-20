@@ -20,14 +20,14 @@ integrated to TF-M.
 
 Bootloader is started when CPU is released from reset. It runs in secure mode.
 It authenticates the firmware image by hash (SHA-256) and digital signature
-(RSA-2048) validation. Public key, that the checks happens against, is built
+(RSA-3072) validation. Public key, that the checks happens against, is built
 into the bootloader image. Metadata of the image is delivered together with the
 image itself in a header and trailer section. In case of successful
 authentication, bootloader passes execution to the secure image. Execution never
 returns to bootloader until next reset.
 
 A default RSA key pair is stored in the repository, public key is in ``keys.c``
-and private key is in ``root-rsa-2048.pem``.
+and private key is in ``root-rsa-3072.pem``.
 
 .. Warning::
     DO NOT use them in production code, they are exclusively for testing!
@@ -37,7 +37,7 @@ Private key must be stored in a safe place outside of the repository.
 
 The bootloader handles the secure and non-secure images as a single blob which
 is contiguous in the device memory. At compile time these images are
-concatenated and signed with RSA-2048 digital signature. Preparation of payload
+concatenated and signed with RSA-3072 digital signature. Preparation of payload
 is done by Python scripts: ``bl2/ext/mcuboot/scripts/``. At the end of a
 successful build signed TF-M payload can be found in:
 ``<build_dir>/install/outputs/fvp/tfm_sign.bin``
@@ -196,6 +196,15 @@ modes are supported by which platforms:
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the top-level
     configuration file, or include this macro definition in the command line
 
+********************
+Signature algorithms
+********************
+MbedTLS library is used to sign the images. The list of supported signing
+algorithms:
+    - RSA-2048
+    - RSA-3072 (default)
+Example keys stored in ``root-rsa-2048.pem`` and ``root-rsa-3072.pem``.
+
 ************************
 Build time configuration
 ************************
@@ -219,6 +228,9 @@ Compile time switches:
     - **"RAM_LOADING":** Activate RAM loading firmware upgrade operation, where
       latest image is copied to RAM and runs from there instead of being
       executed in-place.
+- MCUBOOT_SIGNATURE_TYPE (default: RSA-3072):
+    - **RSA-3072** Image is signed with RSA-3072 algorithm
+    - **RSA-2048** Image is signed with RSA-2048 algorithm
 
 Image versioning
 ================

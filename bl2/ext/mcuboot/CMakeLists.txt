@@ -130,11 +130,18 @@ compiler_generate_binary_output(${PROJECT_NAME})
 
 #Set macro definitions for the project.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-							MCUBOOT_SIGN_RSA
 							MCUBOOT_VALIDATE_SLOT0
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 							MBEDTLS_CONFIG_FILE="config-boot.h"
 							MCUBOOT_TARGET_CONFIG="flash_layout.h")
+
+if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_SIGN_RSA MCUBOOT_SIGN_RSA_LEN=3072)
+elseif(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_SIGN_RSA MCUBOOT_SIGN_RSA_LEN=2048)
+else()
+	message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
+endif()
 
 if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY")
 	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_OVERWRITE_ONLY)

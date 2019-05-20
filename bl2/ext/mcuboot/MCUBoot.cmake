@@ -47,6 +47,14 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "ERROR: Incomplete Configuration: FLASH_LAYOUT is not defined.")
 	endif()
 
+	if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
+		set(KEY_FILE "${MCUBOOT_DIR}/root-rsa-3072.pem")
+	elseif(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
+		set(KEY_FILE "${MCUBOOT_DIR}/root-rsa-2048.pem")
+	else()
+		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
+	endif()
+
 	if (DEFINED SECURITY_COUNTER)
 		set (ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
 	else()
@@ -66,7 +74,7 @@ function(mcuboot_create_boot_payload)
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
 						ARGS sign
 							 --layout ${FLASH_LAYOUT}
-							 -k ${MCUBOOT_DIR}/root-rsa-2048.pem
+							 -k ${KEY_FILE}
 							 --align 1
 							 -v ${IMAGE_VERSION}
 							 ${ADD_SECURITY_COUNTER}
