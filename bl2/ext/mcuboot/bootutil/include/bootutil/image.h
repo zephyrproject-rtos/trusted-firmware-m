@@ -67,6 +67,7 @@ struct flash_area;
 #define IMAGE_TLV_KEYHASH           0x01   /* hash of the public key */
 #define IMAGE_TLV_SHA256            0x10   /* SHA256 of image hdr and body */
 #define IMAGE_TLV_RSA2048_PSS       0x20   /* RSA2048 of hash output */
+#define IMAGE_TLV_RSA3072_PSS       0x23   /* RSA3072 of hash output */
 #define IMAGE_TLV_SEC_CNT           0x50   /* security counter */
 
 #define IMAGE_VER_MAJOR_LENGTH      8

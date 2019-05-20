@@ -38,13 +38,13 @@
 
 /*
  * Constants for this particular constrained implementation of
- * RSA-PSS.  In particular, we support RSA 2048, with a SHA256 hash,
- * and a 32-byte salt.  A signature with different parameters will be
+ * RSA-PSS.  In particular, we support RSA 2048 and RSA 3072, with a SHA256
+ * hash, and a 32-byte salt.  A signature with different parameters will be
  * rejected as invalid.
  */
 
 /* The size, in octets, of the message. */
-#define PSS_EMLEN 256
+#define PSS_EMLEN (MCUBOOT_SIGN_RSA_LEN / 8)
 
 /* The size of the hash function.  For SHA256, this is 32 bytes. */
 #define PSS_HLEN 32
@@ -53,7 +53,7 @@
 #define PSS_SLEN 32
 
 /* The length of the mask: emLen - hLen - 1. */
-#define PSS_MASK_LEN (256 - PSS_HLEN - 1)
+#define PSS_MASK_LEN (PSS_EMLEN - PSS_HLEN - 1)
 
 #define PSS_HASH_OFFSET PSS_MASK_LEN
 

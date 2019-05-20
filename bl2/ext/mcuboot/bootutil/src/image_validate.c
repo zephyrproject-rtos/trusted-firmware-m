@@ -106,9 +106,19 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
  * call.  List the type of TLV we are expecting.  If we aren't
  * configured for any signature, don't define this macro.
  */
+
 #if defined(MCUBOOT_SIGN_RSA)
-#    define EXPECTED_SIG_TLV IMAGE_TLV_RSA2048_PSS
-#    define EXPECTED_SIG_LEN(x) ((x) == 256) /* 2048 bits */
+#    if MCUBOOT_SIGN_RSA_LEN == 2048
+#        define EXPECTED_SIG_TLV IMAGE_TLV_RSA2048_PSS
+#    elif MCUBOOT_SIGN_RSA_LEN == 3072
+#        define EXPECTED_SIG_TLV IMAGE_TLV_RSA3072_PSS
+#    else
+#        error "Unsupported RSA signature length"
+#    endif
+#    define SIG_BUF_SIZE (MCUBOOT_SIGN_RSA_LEN / 8)
+#    define EXPECTED_SIG_LEN(x) ((x) == SIG_BUF_SIZE)
+#else
+#    define SIG_BUF_SIZE 32 /* no signing, sha256 digest only */
 #endif
 
 #ifdef EXPECTED_SIG_TLV
@@ -320,7 +330,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
     int key_id = -1;
 #endif
     struct image_tlv tlv;
-    uint8_t buf[256];
+    uint8_t buf[SIG_BUF_SIZE];
     uint8_t hash[32] = {0};
     uint32_t security_cnt;
     uint32_t img_security_cnt;
