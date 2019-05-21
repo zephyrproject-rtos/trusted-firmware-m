@@ -168,6 +168,8 @@ elseif (TFM_NS_CLIENT_IDENTIFICATION)
 	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE TFM_NS_CLIENT_IDENTIFICATION)
 endif()
 
+add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/non_secure_test)
+
 # For the non-swapping BL2 configuration two executables need to be built.
 # One can be executed from the primary slot flash partition and other from the
 # secondary slot. Only the linking phase is different. This function captures

@@ -92,6 +92,10 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.inc)
 
+if (NOT DEFINED TFM_BUILD_IN_SPE)
+	message(FATAL_ERROR "TFM_BUILD_IN_SPE is not set. Cannot specify current building status")
+endif()
+
 if (NOT TARGET tfm_t_cose_verify)
 	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
 endif()
@@ -100,48 +104,58 @@ if (NOT TARGET tfm_qcbor)
 	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
 endif()
 
-#Build the secure library. Even though secure tests files depend on tfm_qcbor,
-#this is not expressed here as the tfm_attest library is expected to hold the
-#compiled tfm_qcbor files.
-add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S} $<TARGET_OBJECTS:tfm_t_cose_verify>)
+if (TFM_BUILD_IN_SPE)
+	#Build the secure library. Even though secure tests files depend on
+	#tfm_qcbor, this is not expressed here as the tfm_attest library is expected
+	#to hold the compiled tfm_qcbor files.
+	add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S} $<TARGET_OBJECTS:tfm_t_cose_verify>)
 
-#Set common compiler and linker flags
-config_setting_shared_compiler_flags(tfm_secure_tests)
-config_setting_shared_linker_flags(tfm_secure_tests)
+	#Set common compiler and linker flags
+	config_setting_shared_compiler_flags(tfm_secure_tests)
+	config_setting_shared_linker_flags(tfm_secure_tests)
 
-embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} APPEND)
 
+	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+		set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE
+			PATH "Default install location for tfm_storage."
+			FORCE)
+	endif()
 
-#Build the non-secure library
-set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
-add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OBJECTS:tfm_t_cose_verify> $<TARGET_OBJECTS:tfm_qcbor>)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
+			${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service_api.h
+			DESTINATION export/tfm/test/inc)
 
-#Set common compiler and linker flags
-config_setting_shared_compiler_flags(tfm_non_secure_tests)
-config_setting_shared_linker_flags(tfm_non_secure_tests)
+	embedded_project_end(tfm_secure_tests)
+else ()
+	#Build the non-secure library
+	set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
+	add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS} $<TARGET_OBJECTS:tfm_t_cose_verify> $<TARGET_OBJECTS:tfm_qcbor>)
 
-#Set macro definitions
-set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL})
-embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
+	#Set common compiler and linker flags
+	config_setting_shared_compiler_flags(tfm_non_secure_tests)
+	config_setting_shared_linker_flags(tfm_non_secure_tests)
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for tfm_storage." FORCE)
+	#Set macro definitions
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL})
+	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
+
+	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+		set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE
+			PATH "Default install location for tfm_storage."
+			FORCE)
+	endif()
+
+	install(TARGETS tfm_non_secure_tests
+			DESTINATION export/tfm/test/lib
+			PUBLIC_HEADER DESTINATION export/tfm/test/inc)
+
+	if(ENABLE_SECURE_STORAGE_SERVICE_TESTS)
+		#only SST tests are using semaphore and thread APIs
+		install(FILES ${TFM_ROOT_DIR}/interface/include/os_wrapper/semaphore.h
+				${TFM_ROOT_DIR}/interface/include/os_wrapper/thread.h
+			DESTINATION export/tfm/include/os_wrapper)
+	endif()
+
+	embedded_project_end(tfm_non_secure_tests)
 endif()
-
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
-				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service_api.h
-		DESTINATION export/tfm/test/inc)
-
-install(TARGETS tfm_non_secure_tests
-		DESTINATION export/tfm/test/lib
-		PUBLIC_HEADER DESTINATION export/tfm/test/inc)
-
-if(ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-    #only SST tests are using semaphore and thread APIs
-    install(FILES ${TFM_ROOT_DIR}/interface/include/os_wrapper/semaphore.h
-                  ${TFM_ROOT_DIR}/interface/include/os_wrapper/thread.h
-            DESTINATION export/tfm/include/os_wrapper)
-endif()
-
-embedded_project_end(tfm_non_secure_tests)
-embedded_project_end(tfm_secure_tests)
