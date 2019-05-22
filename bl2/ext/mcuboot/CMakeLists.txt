@@ -40,7 +40,7 @@ set(BUILD_NATIVE_DRIVERS On)
 set(BUILD_STARTUP On)
 set(BUILD_TARGET_CFG Off)
 set(BUILD_TARGET_HARDWARE_KEYS Off)
-set(BUILD_TARGET_NV_COUNTERS Off)
+set(BUILD_TARGET_NV_COUNTERS On)
 set(BUILD_CMSIS_DRIVERS On)
 set(BUILD_TIME Off)
 set(BUILD_UART_STDOUT On)
@@ -64,6 +64,7 @@ list(APPEND ALL_SRC_C
 		"${MCUBOOT_DIR}/bootutil/src/image_rsa.c"
 		"${MCUBOOT_DIR}/bootutil/src/caps.c"
 		"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
+		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 	)
 
 #Define location of mbedtls source, build, and installation directory.

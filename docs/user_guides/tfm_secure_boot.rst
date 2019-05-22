@@ -246,6 +246,29 @@ the previous one: 0.0.0+1 -> 0.0.0+2. Note: To re-apply automatic image
 versioning, please start a clean build without specifying the image version
 number at all.
 
+Security counter
+================
+Each signed image contains a security counter in its manifest. It is used by the
+bootloader and its aim is to have an independent (from the image version)
+counter to ensure rollback protection by comparing the new image's security
+counter against the original (currently active) image's security counter during
+the image upgrade process. It is added to the manifest (to the TLV area that is
+appended to the end of the image) by one of the python scripts when signing the
+image. The value of the security counter is security critical data and it is in
+the integrity protected part of the image. The last valid security counter is
+always stored in a non-volatile and trusted component of the device and its
+value should always be increased if a security flaw was fixed in the current
+image version. The value of the security counter can be specified at build time
+in the cmake configuration step::
+
+    cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DSECURITY_COUNTER=42 ../
+
+The security counter can be independent from the image version, but not
+necessarily. Alternatively, if it is not specified at build time with the
+``SECURITY_COUNTER`` option the python script will automatically generate it
+from the image version number (not including the build number) and this value
+will be added to the signed image.
+
 ************************
 Testing firmware upgrade
 ************************

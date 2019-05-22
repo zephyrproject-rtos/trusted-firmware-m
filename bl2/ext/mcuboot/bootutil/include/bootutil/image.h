@@ -114,6 +114,10 @@ int bootutil_img_validate(struct image_header *hdr,
                           uint8_t *tmp_buf, uint32_t tmp_buf_sz,
                           uint8_t *seed, int seed_len, uint8_t *out_hash);
 
+int32_t bootutil_get_img_security_cnt(struct image_header *hdr,
+                                      const struct flash_area *fap,
+                                      uint32_t *security_cnt);
+
 #ifdef MCUBOOT_RAM_LOADING
 int bootutil_check_hash_after_loading(struct image_header *hdr);
 #endif

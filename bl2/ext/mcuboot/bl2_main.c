@@ -28,6 +28,7 @@
 #include "bootutil/bootutil.h"
 #include "flash_map/flash_map.h"
 #include "bl2/include/boot_record.h"
+#include "security_cnt.h"
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -126,6 +127,13 @@ int main(void)
     rc = FLASH_DEV_NAME.Initialize(NULL);
     if(rc != ARM_DRIVER_OK) {
         BOOT_LOG_ERR("Error while initializing Flash Interface");
+        while (1)
+            ;
+    }
+
+    rc = boot_nv_security_counter_init();
+    if (rc != 0) {
+        BOOT_LOG_ERR("Error while initializing the security counter");
         while (1)
             ;
     }

@@ -44,6 +44,7 @@ struct flash_area;
 #define BOOT_EBADSTATUS 5
 #define BOOT_ENOMEM     6
 #define BOOT_EBADARGS   7
+#define BOOT_EBADMAGIC  8
 
 #define BOOT_TMPBUF_SZ  256
 
