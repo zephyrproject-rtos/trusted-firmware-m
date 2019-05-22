@@ -843,6 +843,7 @@ SECTIONS
     Image$$TFM_APP_RW_STACK_END$$Base = .;
 
 #if TFM_LVL != 1
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
     {
         *libc_nano*:*(.data*)
@@ -871,6 +872,17 @@ SECTIONS
 
         . = ALIGN(32);
     } > RAM AT> RAM
+#else /* TFM_PARTITION_TEST_SECURE_SERVICES */
+    .heap : ALIGN(8)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+    } > RAM AT> RAM
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 #endif /* TFM_LVL != 1 */
 
     .TFM_DATA : ALIGN(4)
