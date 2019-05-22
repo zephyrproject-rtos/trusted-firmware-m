@@ -476,7 +476,7 @@ SECTIONS
         */dummy_boot_seed.o(COMMON)
         */dummy_device_id.o(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 #endif /* TFM_LVL == 1 */
@@ -508,7 +508,7 @@ SECTIONS
         *tfm_storage*:*(.bss*)
         *tfm_storage*:*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_STORAGE_DATA$$ZI$$Base = ADDR(.TFM_SP_STORAGE_BSS);
     Image$$TFM_SP_STORAGE_DATA$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_BSS) + SIZEOF(.TFM_SP_STORAGE_BSS);
 
@@ -532,7 +532,7 @@ SECTIONS
         *tfm_audit*:*(.bss*)
         *tfm_audit*:*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_AUDIT_LOG_DATA$$ZI$$Base = ADDR(.TFM_SP_AUDIT_LOG_BSS);
     Image$$TFM_SP_AUDIT_LOG_DATA$$ZI$$Limit = ADDR(.TFM_SP_AUDIT_LOG_BSS) + SIZEOF(.TFM_SP_AUDIT_LOG_BSS);
 
@@ -556,7 +556,7 @@ SECTIONS
         *tfm_crypto*:*(.bss*)
         *tfm_crypto*:*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_CRYPTO_DATA$$ZI$$Base = ADDR(.TFM_SP_CRYPTO_BSS);
     Image$$TFM_SP_CRYPTO_DATA$$ZI$$Limit = ADDR(.TFM_SP_CRYPTO_BSS) + SIZEOF(.TFM_SP_CRYPTO_BSS);
 
@@ -580,7 +580,7 @@ SECTIONS
         *tfm_platform*:*(.bss*)
         *tfm_platform*:*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_PLATFORM_DATA$$ZI$$Base = ADDR(.TFM_SP_PLATFORM_BSS);
     Image$$TFM_SP_PLATFORM_DATA$$ZI$$Limit = ADDR(.TFM_SP_PLATFORM_BSS) + SIZEOF(.TFM_SP_PLATFORM_BSS);
 
@@ -604,7 +604,7 @@ SECTIONS
         *tfm_attest*:*(.bss*)
         *tfm_attest*:*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_INITIAL_ATTESTATION_DATA$$ZI$$Base = ADDR(.TFM_SP_INITIAL_ATTESTATION_BSS);
     Image$$TFM_SP_INITIAL_ATTESTATION_DATA$$ZI$$Limit = ADDR(.TFM_SP_INITIAL_ATTESTATION_BSS) + SIZEOF(.TFM_SP_INITIAL_ATTESTATION_BSS);
 
@@ -650,7 +650,7 @@ SECTIONS
         *attestation_s_interface_testsuite.*(.bss*)
         *attestation_s_interface_testsuite.*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Base = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS);
     Image$$TFM_SP_SECURE_TEST_PARTITION_DATA$$ZI$$Limit = ADDR(.TFM_SP_SECURE_TEST_PARTITION_BSS) + SIZEOF(.TFM_SP_SECURE_TEST_PARTITION_BSS);
 
@@ -676,7 +676,7 @@ SECTIONS
         *ipc_service_test.*(.bss*)
         *ipc_service_test.*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_BSS);
     Image$$TFM_SP_IPC_SERVICE_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_SERVICE_TEST_BSS) + SIZEOF(.TFM_SP_IPC_SERVICE_TEST_BSS);
 
@@ -708,7 +708,7 @@ SECTIONS
         *tfm_ss_core_test.*(.bss*)
         *tfm_ss_core_test.*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_CORE_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_BSS);
     Image$$TFM_SP_CORE_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_BSS) + SIZEOF(.TFM_SP_CORE_TEST_BSS);
 
@@ -734,7 +734,7 @@ SECTIONS
         *tfm_ss_core_test_2.*(.bss*)
         *tfm_ss_core_test_2.*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_BSS);
     Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_BSS) + SIZEOF(.TFM_SP_CORE_TEST_2_BSS);
 
@@ -760,7 +760,7 @@ SECTIONS
         *ipc_client_test.*(.bss*)
         *ipc_client_test.*(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS);
     Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_BSS);
 
@@ -803,7 +803,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
 
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
 #endif /* TFM_LVL != 1 */
 
     .TFM_DATA : ALIGN(4)
@@ -844,7 +844,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM
+    } > RAM AT> RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 

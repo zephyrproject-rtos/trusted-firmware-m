@@ -329,7 +329,7 @@ SECTIONS
         */dummy_boot_seed.o(COMMON)
         */dummy_device_id.o(COMMON)
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 #endif /* TFM_LVL == 1 */
@@ -385,7 +385,7 @@ SECTIONS
         {% endfor %}
     {% endif %}
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
@@ -444,7 +444,7 @@ SECTIONS
         {% endfor %}
     {% endif %}
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
@@ -491,7 +491,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
 
         . = ALIGN(32);
-    } > RAM
+    } > RAM AT> RAM
 #endif /* TFM_LVL != 1 */
 
     .TFM_DATA : ALIGN(4)
@@ -532,7 +532,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM
+    } > RAM AT> RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
