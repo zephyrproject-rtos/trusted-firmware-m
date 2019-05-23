@@ -28,6 +28,7 @@ endif()
 #definitions) based on these.
 set (REGRESSION True)
 set (CORE_TEST False)
+set (CORE_IPC False)
 set (PSA_API_TEST False)
 
 # TF-M isolation level: 1..3

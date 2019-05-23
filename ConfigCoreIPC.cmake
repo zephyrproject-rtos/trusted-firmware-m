@@ -26,7 +26,7 @@ endif()
 ##These variables select how the projects are built. Each project will set
 #various project specific settings (e.g. what files to build, macro
 #definitions) based on these.
-set (REGRESSION True)
+set (REGRESSION False)
 set (CORE_TEST False)
 set (CORE_IPC True)
 set (PSA_API_TEST False)
