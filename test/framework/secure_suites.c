@@ -46,8 +46,10 @@ static struct test_suite_t test_suites[] = {
      * FixMe: since the following partitions haven't implement the IPC model,
      * they will block the process. Skip them in IPC model.
      */
+#ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
+#endif
 
 #endif
 

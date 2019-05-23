@@ -17,12 +17,14 @@ psa_status_t tfm_sst_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
 
+#ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
 psa_status_t audit_core_retrieve_record(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t audit_core_add_record(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t audit_core_get_info(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t audit_core_get_record_info(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t audit_core_delete_record(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_AUDIT_LOG */
 
 /******** TFM_SP_CRYPTO ********/
 psa_status_t tfm_crypto_allocate_key(psa_invec *, size_t, psa_outvec *, size_t);
@@ -125,12 +127,14 @@ TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_info_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_remove_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_support_req)
 
+#ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_retrieve_record)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_add_record)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_info)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_record_info)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_delete_record)
+#endif /* TFM_PARTITION_AUDIT_LOG */
 
 /******** TFM_SP_CRYPTO ********/
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_allocate_key)

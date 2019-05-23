@@ -23,6 +23,7 @@
       "name": "TFM Audit Log Service",
       "short_name": "TFM_Audit_Log",
       "manifest": "secure_fw/services/audit_logging/manifest.yaml",
+      "conditional": "TFM_PARTITION_AUDIT_LOG",
       "tfm_extensions": true,
       "version_major": 0,
       "version_minor": 1

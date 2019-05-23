@@ -23,7 +23,6 @@ set (AUDIT_LOGGING_DIR "${CMAKE_CURRENT_LIST_DIR}")
 get_filename_component(TFM_ROOT_DIR "${AUDIT_LOGGING_DIR}/../../.." ABSOLUTE)
 
 ###Get the definition of what files we need to build
-set (ENABLE_AUDIT_LOGGING ON)
 include(CMakeLists.inc)
 
 if (NOT DEFINED TFM_LVL)

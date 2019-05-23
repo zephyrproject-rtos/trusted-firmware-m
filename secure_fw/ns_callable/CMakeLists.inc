@@ -24,8 +24,11 @@ if(NOT DEFINED TFM_ROOT_DIR)
 endif()
 
 set (SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_veneers.c"
-                          "${CMAKE_CURRENT_LIST_DIR}/tfm_audit_veneers.c"
                           "${CMAKE_CURRENT_LIST_DIR}/tfm_platform_veneers.c")
+
+if (TFM_PARTITION_AUDIT_LOG)
+	list(APPEND SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_audit_veneers.c")
+endif()
 
 if (TFM_PSA_API)
 	list(APPEND SS_NS_CALLABLE_C_SRC "${CMAKE_CURRENT_LIST_DIR}/tfm_psa_api_veneers.c")

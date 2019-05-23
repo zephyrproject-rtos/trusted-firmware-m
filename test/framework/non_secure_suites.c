@@ -55,8 +55,10 @@ static struct test_suite_t test_suites[] = {
      * FixMe: skip below test cases temporary since target service is not
      * IPC compatible yet.
      */
+#ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
+#endif
 
 #endif
 

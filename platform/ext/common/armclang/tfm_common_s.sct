@@ -54,10 +54,12 @@ LR_CODE S_CODE_START {
         *(TFM_SP_STORAGE_ATTR_FN)
     }
 
+#ifdef TFM_PARTITION_AUDIT_LOG
     TFM_SP_AUDIT_LOG +0 ALIGN 32 {
         *tfm_audit* (+RO)
         *(TFM_SP_AUDIT_LOG_ATTR_FN)
     }
+#endif /* TFM_PARTITION_AUDIT_LOG */
 
     TFM_SP_CRYPTO +0 ALIGN 32 {
         *tfm_crypto* (+RO)
@@ -194,6 +196,7 @@ LR_CODE S_CODE_START {
     }
 #endif
 
+#ifdef TFM_PARTITION_AUDIT_LOG
     TFM_SP_AUDIT_LOG_DATA +0 ALIGN 32 {
         *tfm_audit* (+RW +ZI)
     }
@@ -205,6 +208,7 @@ LR_CODE S_CODE_START {
     TFM_SP_AUDIT_LOG_STACK +0 ALIGN 128 EMPTY 0x0200 {
     }
 #endif
+#endif /* TFM_PARTITION_AUDIT_LOG */
 
     TFM_SP_CRYPTO_DATA +0 ALIGN 32 {
         *tfm_crypto* (+RW +ZI)

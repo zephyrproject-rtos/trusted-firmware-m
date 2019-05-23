@@ -38,18 +38,25 @@ if (NOT DEFINED BL2)
 	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 endif ()
 
+if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
+endif()
+
 set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_rtx.c"
 	"${INTERFACE_DIR}/src/tfm_sst_api.c"
-	"${INTERFACE_DIR}/src/tfm_audit_api.c"
 	"${INTERFACE_DIR}/src/tfm_crypto_api.c"
 	"${INTERFACE_DIR}/src/tfm_platform_api.c"
 	"${INTERFACE_DIR}/src/tfm_initial_attestation_api.c"
 	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
 	)
+
+if (TFM_PARTITION_AUDIT_LOG)
+	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_audit_api.c")
+endif()
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
