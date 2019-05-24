@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2018-2019 Arm Limited
+; * Copyright (c) 2009-2019 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -196,6 +196,8 @@ SECTIONS
         *dummy_device_id.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
+        *device_definition.o(.text*)
+        *device_definition.o(.rodata*)
         *(SFN)
         *libgcc*:*(.text*)
         *libgcc*:*(.rodata*)
@@ -456,6 +458,7 @@ SECTIONS
         */dummy_boot_seed.o(.data*)
         */dummy_device_id.o(.data*)
         */platform_retarget_dev.o(.data*)
+        */device_definition.o(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_DATA);
@@ -465,12 +468,14 @@ SECTIONS
     {
         */tfm_spm_services.o(.bss*)
         */platform_retarget_dev.o(.bss*)
+        */device_definition.o(.bss*)
         */dummy_crypto_keys.o(.bss*)
         */dummy_nv_counters.o(.bss*)
         */dummy_boot_seed.o(.bss*)
         */dummy_device_id.o(.bss*)
         */tfm_spm_services.o(COMMON)
         */platform_retarget_dev.o(COMMON)
+        */device_definition.o(COMMON)
         */dummy_crypto_keys.o(COMMON)
         */dummy_nv_counters.o(COMMON)
         */dummy_boot_seed.o(COMMON)

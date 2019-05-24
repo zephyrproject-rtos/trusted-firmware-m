@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
 
 /*
- * Copyright (c) 2017-2019 Arm Limited
+ * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 
 LR_CODE S_CODE_START {
 
-    /****  This initial section contains common code for TEE */
+    /****  This initial section contains common code for secure binary */
     ER_TFM_CODE S_CODE_START S_CODE_SIZE {
         *.o (RESET +First)
         .ANY (+RO)
@@ -36,6 +36,7 @@ LR_CODE S_CODE_START {
         dummy_boot_seed.o (+RO)
         dummy_device_id.o (+RO)
         platform_retarget_dev.o (+RO)
+        device_definition.o (+RO)
         *(SFN)
         *armlib*
     }
@@ -94,7 +95,6 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PSA_API */
 
-    /**** PSA RoT RO part (CODE + RODATA) end here */
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT code.
@@ -131,7 +131,6 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PSA_API */
 
-    /**** APPLICATION RoT RO part (CODE + RODATA) end here */
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -175,6 +174,7 @@ LR_CODE S_CODE_START {
         dummy_boot_seed.o (+RW +ZI)
         dummy_device_id.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
+        device_definition.o (+RW +ZI)
     }
 
 #ifdef TFM_PSA_API
@@ -253,7 +253,6 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PSA_API */
 
-    /**** PSA RoT DATA end here */
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT RW and Stack.
@@ -296,7 +295,6 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PSA_API */
 
-    /**** APP RoT DATA end here */
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT RW and Stack.

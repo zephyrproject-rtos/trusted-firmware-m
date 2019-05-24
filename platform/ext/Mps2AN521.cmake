@@ -15,16 +15,16 @@ set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 #Specify the location of platform specific build dependencies.
 #FIXME use CMAKE_C_COMPILER_ID here instead?
 if(COMPILER STREQUAL "ARMCLANG")
+    set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_bl2.sct")
-    set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_s.sct")
     set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an521/armclang/mps2_an521_ns.sct")
     if (DEFINED CMSIS_5_DIR)
       # not all project defines CMSIS_5_DIR, only the ones that use it.
       set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif(COMPILER STREQUAL "GNUARM")
+    set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set (BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/mps2/an521/gcc/mps2_an521_bl2.ld")
-    set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/mps2/an521/gcc/mps2_an521_s.ld")
     set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/mps2/an521/gcc/mps2_an521_ns.ld")
     if (DEFINED CMSIS_5_DIR)
       # not all project defines CMSIS_5_DIR, only the ones that use it.

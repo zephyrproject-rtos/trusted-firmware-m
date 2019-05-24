@@ -14,16 +14,16 @@ set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # Specify the location of platform specific build dependencies.
 if (COMPILER STREQUAL "ARMCLANG")
+    set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_bl2.sct")
-    set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_s.sct")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_ns.sct")
     if (DEFINED CMSIS_5_DIR)
         # Not all projects define CMSIS_5_DIR, only the ones that use it.
         set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif (COMPILER STREQUAL "GNUARM")
+    set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_bl2.ld")
-    set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_s.ld")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_ns.ld")
     if (DEFINED CMSIS_5_DIR)
         # Not all projects define CMSIS_5_DIR, only the ones that use it.
