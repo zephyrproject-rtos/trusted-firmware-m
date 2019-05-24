@@ -39,6 +39,9 @@ set (SIGN_BIN_SIZE          0x100000)
 
 if (BL2)
   set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
+  if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+      message(FATAL_ERROR "ERROR: RAM_LOADING upgrade strategy is not supported on target '${TARGET_PLATFORM}'.")
+  endif()
 endif()
 
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
@@ -165,10 +168,6 @@ elseif(BUILD_FLASH)
   set(SST_CREATE_FLASH_LAYOUT ON)
   set(SST_RAM_FS OFF)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an521/cmsis_drivers" ABSOLUTE)
-endif()
-
-if (MCUBOOT_RAM_LOADING)
-	message (FATAL_ERROR "MCUBOOT_RAM_LOADING is not supported on " ${TARGET_PLATFORM})
 endif()
 
 if (NOT DEFINED BUILD_BOOT_SEED)

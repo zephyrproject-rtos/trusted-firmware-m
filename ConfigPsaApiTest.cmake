@@ -34,19 +34,6 @@ set (PSA_API_TEST True)
 #TF-M isolation level: 1..3
 set (TFM_LVL 1)
 
-#BL2 bootloader(MCUBoot) related settings
-if(NOT DEFINED BL2)
-	set(BL2 True)
-endif()
-
-if(NOT DEFINED MCUBOOT_NO_SWAP)
-	set(MCUBOOT_NO_SWAP False)
-endif()
-
-if(NOT DEFINED MCUBOOT_RAM_LOADING)
-	set(MCUBOOT_RAM_LOADING False)
-endif()
-
 #Service specific configuration for the PSA API Compliance test requirements
 if(PSA_API_TEST_CRYPTO)
 	set(CRYPTO_ENGINE_BUF_SIZE 20480)

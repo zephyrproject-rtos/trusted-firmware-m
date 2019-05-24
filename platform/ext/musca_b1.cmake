@@ -38,6 +38,10 @@ set(SIGN_BIN_SIZE          0xC0000)
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
+    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
+        message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
+        set(MCUBOOT_UPGRADE_STRATEGY "NO_SWAP")
+    endif()
 endif()
 
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
@@ -162,10 +166,6 @@ elseif (BUILD_FLASH)
     set(SST_CREATE_FLASH_LAYOUT ON)
     embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
-endif()
-
-if (MCUBOOT_RAM_LOADING)
-    message(FATAL_ERROR "MCUBOOT_RAM_LOADING is not supported on " ${TARGET_PLATFORM})
 endif()
 
 if (NOT DEFINED BUILD_BOOT_SEED)

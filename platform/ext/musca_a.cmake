@@ -168,17 +168,14 @@ elseif(BUILD_FLASH)
 endif()
 
 if (NOT BL2)
-	message(STATUS "WARNING: BL2 is mandatory on target \"${TARGET_PLATFORM}\" Your choice was override.")
-	set(BL2 True)
-endif()
-
-if (NOT MCUBOOT_RAM_LOADING)
-	message(STATUS "WARNING: MCUBOOT_RAM_LOADING is mandatory on target \"${TARGET_PLATFORM}\" Your choice was override.")
-	set(MCUBOOT_RAM_LOADING True)
-endif()
-
-if (MCUBOOT_NO_SWAP)
-	message (FATAL_ERROR "MCUBOOT_NO_SWAP configuration is not supported on " ${TARGET_PLATFORM})
+    message(WARNING "BL2 is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
+    set(BL2 True)
+    set(MCUBOOT_UPGRADE_STRATEGY "RAM_LOADING")
+else() #BL2 is True
+    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+        message(WARNING "RAM_LOADING upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
+        set(MCUBOOT_UPGRADE_STRATEGY "RAM_LOADING")
+    endif()
 endif()
 
 if (NOT DEFINED BUILD_BOOT_SEED)

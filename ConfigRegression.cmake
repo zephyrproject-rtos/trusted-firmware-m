@@ -33,17 +33,4 @@ set (PSA_API_TEST False)
 # TF-M isolation level: 1..3
 set (TFM_LVL 1)
 
-#BL2 bootloader(MCUBoot) related settings
-if(NOT DEFINED BL2)
-	set(BL2 True)
-endif()
-
-if(NOT DEFINED MCUBOOT_NO_SWAP)
-	set(MCUBOOT_NO_SWAP False)
-endif()
-
-if(NOT DEFINED MCUBOOT_RAM_LOADING)
-	set(MCUBOOT_RAM_LOADING False)
-endif()
-
 include ("${CMAKE_CURRENT_LIST_DIR}/CommonConfig.cmake")
