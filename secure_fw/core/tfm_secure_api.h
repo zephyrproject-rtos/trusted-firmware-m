@@ -165,7 +165,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
     struct tfm_sfn_req_s desc, *desc_ptr = &desc;
 
     desc.sp_id = id;
-    desc.sfn = fn;
+    desc.sfn = (sfn_t) fn;
     desc.args = args;
     /*
      * This preprocessor condition checks if a version of GCC smaller than
