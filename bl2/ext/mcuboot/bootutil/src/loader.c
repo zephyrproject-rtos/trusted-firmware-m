@@ -1090,7 +1090,7 @@ boot_copy_image(struct boot_status *bs)
         size += this_size;
     }
 
-    BOOT_LOG_INF("Copying slot 1 to slot 0: 0x%lx bytes", size);
+    BOOT_LOG_INF("Copying slot 1 to slot 0: 0x%zx bytes", size);
     rc = boot_copy_sector(FLASH_AREA_IMAGE_1, FLASH_AREA_IMAGE_0,
                           0, 0, size);
 
@@ -1778,9 +1778,11 @@ boot_go(struct boot_rsp *rsp)
             BOOT_LOG_INF("Booting image from SRAM at address 0x%"PRIx32"",
                          newest_image_header->ih_load_addr);
         } else {
+#endif /* MCUBOOT_RAM_LOADING */
             BOOT_LOG_INF("Booting image from slot %d", slot);
+#ifdef MCUBOOT_RAM_LOADING
         }
-        #endif /* MCUBOOT_RAM_LOADING */
+#endif
 
         rsp->br_hdr = newest_image_header;
         rsp->br_image_off = boot_img_slot_off(&boot_data, slot);
