@@ -130,6 +130,25 @@ int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
                                             uint32_t ns_caller,
                                             uint32_t privileged);
 
+#ifdef TFM_PSA_API
+/* The following macros are only valid if secure services can be called
+ * using veneer functions. This is not the case if IPC messaging is enabled
+ */
+#define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d)               \
+        do {                                                         \
+            ERROR_MSG("Invalid TF-M configuration detected");        \
+            tfm_secure_api_error_handler();                          \
+            /* This point never reached */                           \
+            return (int32_t)TFM_ERROR_GENERIC;                       \
+        } while (0)
+#define TFM_CORE_SFN_REQUEST(id, fn, a, b, c, d)                     \
+        do {                                                         \
+            ERROR_MSG("Invalid TF-M configuration detected");        \
+            tfm_secure_api_error_handler();                          \
+            /* This point never reached */                           \
+            return (int32_t)TFM_ERROR_GENERIC;                       \
+        } while (0)
+#else
 #define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
         return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \
                 (int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d)
@@ -190,5 +209,6 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
 
     }
 }
+#endif
 
 #endif /* __TFM_SECURE_API_H__ */

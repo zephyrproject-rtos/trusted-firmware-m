@@ -87,6 +87,7 @@ struct spm_partition_runtime_data_t {
  */
 uint32_t get_partition_idx(uint32_t partition_id);
 
+#if (TFM_LVL != 1) || defined(TFM_PSA_API)
 /**
  * \brief Get bottom of stack region for a partition
  *
@@ -108,8 +109,9 @@ uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
  * \note This function doesn't check if partition_idx is valid.
  */
 uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
+#endif
 
-#if TFM_LVL != 1
+#if (TFM_LVL != 1) && !defined(TFM_PSA_API)
 /**
  * \brief Configure isolated sandbox for a partition
  *

@@ -138,15 +138,10 @@ LR_CODE S_CODE_START {
         .ANY (+RW +ZI)
     }
 
-#if TFM_LVL == 1
-#ifdef TFM_PSA_API
-    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x0200 {
-    }
-#else
+#if (TFM_LVL == 1) && !defined(TFM_PSA_API)
     TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
     }
-#endif /* TFM_PSA_API */
-#endif /* TFM_LVL == 1 */
+#endif /* (TFM_LVL == 1) && !defined(TFM_PSA_API) */
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
         tfm_spm_services.o (+RW +ZI)
@@ -158,10 +153,7 @@ LR_CODE S_CODE_START {
         device_definition.o (+RW +ZI)
     }
 
-#ifdef TFM_PSA_API
-    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x0 {
-    }
-#else
+#if !defined(TFM_PSA_API)
     TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
     }
 #endif /* TFM_PSA_API */
@@ -192,8 +184,20 @@ LR_CODE S_CODE_START {
     {% endif %}
     }
 
+    {% if manifest.manifest.tfm_partition_ipc %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
     {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
     }
+#endif
+    {% else %}
+#if defined (TFM_PSA_API)
+    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY 0 {
+    }
+#elif TFM_LVL != 1
+    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
+    }
+#endif
+    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -233,8 +237,20 @@ LR_CODE S_CODE_START {
     {% endif %}
     }
 
+    {% if manifest.manifest.tfm_partition_ipc %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
     {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
     }
+#endif
+    {% else %}
+#if defined (TFM_PSA_API)
+    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY 0 {
+    }
+#elif TFM_LVL != 1
+    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
+    }
+#endif
+    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}

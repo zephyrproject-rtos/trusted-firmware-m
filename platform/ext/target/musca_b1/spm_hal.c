@@ -63,8 +63,10 @@ REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
+#ifndef TFM_PSA_API
 REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
+#endif
 #if TFM_LVL == 2
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
@@ -275,6 +277,7 @@ enum spm_err_t tfm_spm_hal_partition_sandbox_deconfig(
     return SPM_ERR_OK;
 }
 
+#if !defined(TFM_PSA_API)
 /**
  * Set share region to which the partition needs access
  */
@@ -328,7 +331,7 @@ enum spm_err_t tfm_spm_hal_set_share_region(
 
     return res;
 }
-
+#endif /* !defined(TFM_PSA_API) */
 #endif /* TFM_LVL != 1 */
 
 void tfm_spm_hal_setup_isolation_hw(void)

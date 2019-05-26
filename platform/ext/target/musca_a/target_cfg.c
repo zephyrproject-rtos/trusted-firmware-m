@@ -231,10 +231,6 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-    /* FIXME: Secondary image partition info comes from BL2. Configure SAU
-     * based on those limits.
-     */
-
     /* Allows SAU to define the code region as a NSC */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     spctrl->nsccfg |= NSCCFG_CODENSC;

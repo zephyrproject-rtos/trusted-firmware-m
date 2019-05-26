@@ -165,12 +165,10 @@ function(set_up_secure_fw_build)
 			#partition is present.
 			#FIXME Remove the explicit load and the above comment once the secure client
 			#test partition uses the generated veneers.
-			if(${COMPILER} STREQUAL "ARMCLANG")
+			if((${COMPILER} STREQUAL "ARMCLANG") AND (NOT TFM_PSA_API))
 				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_attest)
-			elseif(${COMPILER} STREQUAL "GNUARM")
-				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 			else()
-				message(FATAL_ERROR "unknown compiler" )
+				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_attest)
 			endif()
 		else()
 			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_audit tfm_platform tfm_secure_tests tfm_attest)

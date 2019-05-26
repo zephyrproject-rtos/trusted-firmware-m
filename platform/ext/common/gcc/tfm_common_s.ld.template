@@ -88,6 +88,7 @@ SECTIONS
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
+#if !defined(TFM_PSA_API)
 #if TFM_LVL == 1
         LONG (ADDR(.TFM_SECURE_STACK))
         LONG (SIZEOF(.TFM_SECURE_STACK))
@@ -95,20 +96,25 @@ SECTIONS
         LONG (ADDR(.TFM_UNPRIV_BSS))
         LONG (SIZEOF(.TFM_UNPRIV_BSS))
 #endif /* TFM_LVL == 1 */
+#endif /* !defined(TFM_PSA_API) */
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
         LONG (ADDR(.{{manifest.manifest.name}}_BSS))
         LONG (SIZEOF(.{{manifest.manifest.name}}_BSS))
+#if defined(TFM_PSA_API) || (TFM_LVL != 1)
         LONG (ADDR(.{{manifest.manifest.name}}_STACK))
         LONG (SIZEOF(.{{manifest.manifest.name}}_STACK))
-    {% if manifest.attr.conditional %}
+#endif
+        {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
 {% endfor %}
+#if !defined(TFM_PSA_API)
         LONG (ADDR(.TFM_UNPRIV_SCRATCH))
         LONG (SIZEOF(.TFM_UNPRIV_SCRATCH))
+#endif /* !defined(TFM_PSA_API) */
         __zero_table_end__ = .;
     } > FLASH
 
@@ -282,16 +288,14 @@ SECTIONS
 
 #if TFM_LVL == 1
 
+#if !defined(TFM_PSA_API)
     .TFM_SECURE_STACK : ALIGN(128)
     {
-#ifdef TFM_PSA_API
-        . += 0x0200;
-#else
         . += 0x2000;
-#endif /* TFM_PSA_API */
     } > RAM
     Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
+#endif /* !defined(TFM_PSA_API) */
 
     .heap : ALIGN(8)
     {
@@ -339,16 +343,14 @@ SECTIONS
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 #endif /* TFM_LVL == 1 */
 
+#if !defined(TFM_PSA_API)
     .TFM_UNPRIV_SCRATCH : ALIGN(32)
     {
-#ifdef TFM_PSA_API
-        . += 0x0;
-#else
         . += 0x400;
-#endif /* TFM_PSA_API */
     } > RAM
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
+#endif /* !defined(TFM_PSA_API) */
 
     /**** PSA RoT DATA start here */
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
@@ -394,12 +396,29 @@ SECTIONS
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
+    {% if manifest.manifest.tfm_partition_ipc %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
     .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {
         . += {{manifest.manifest.stack_size}};
     } > RAM
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
+#endif
+    {% else %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
+    .{{manifest.manifest.name}}_STACK : ALIGN(128)
+    {
+        {# Note: Don't allocate stack for partition when using TFM_PSA_API if tfm_partition_ipc is false #}
+#if !defined(TFM_PSA_API)
+        . += {{manifest.manifest.stack_size}};
+#endif
+    } > RAM
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
+#endif
+    {% endif %}
+
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -453,12 +472,29 @@ SECTIONS
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_BSS) + SIZEOF(.{{manifest.manifest.name}}_BSS);
 
+    {% if manifest.manifest.tfm_partition_ipc %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
     .{{manifest.manifest.name}}_STACK : ALIGN(128)
     {
         . += {{manifest.manifest.stack_size}};
     } > RAM
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
     Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
+#endif
+    {% else %}
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
+    .{{manifest.manifest.name}}_STACK : ALIGN(128)
+    {
+        {# Note: Don't allocate stack for partition when using TFM_PSA_API if tfm_partition_ipc is false #}
+#if !defined(TFM_PSA_API)
+        . += {{manifest.manifest.stack_size}};
+#endif
+    } > RAM
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_STACK);
+    Image$${{manifest.manifest.name}}_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_STACK) + SIZEOF(.{{manifest.manifest.name}}_STACK);
+#endif
+    {% endif %}
+
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}

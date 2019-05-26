@@ -98,10 +98,12 @@ enum spm_err_t tfm_spm_db_init(void)
      */
 
     /* For the non secure Execution environment */
+#if (TFM_LVL != 1) || defined(TFM_PSA_API)
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
     uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
     uint32_t psp_stack_top    = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Limit;
+#endif
     if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {
         return SPM_ERR_INVALID_CONFIG;
     }
@@ -117,12 +119,14 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags = 0;
 #endif
 
+#if (TFM_LVL != 1) || defined(TFM_PSA_API)
     part_ptr->memory_data.stack_bottom = psp_stack_bottom;
     part_ptr->memory_data.stack_top    = psp_stack_top;
     /* Since RW, ZI and stack are configured as one MPU region, configure
      * RW start address to psp_stack_bottom to get RW access to stack
      */
     part_ptr->memory_data.rw_start     = psp_stack_bottom;
+#endif
 
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     tfm_nspm_configure_clients();
@@ -189,7 +193,10 @@ enum spm_err_t tfm_spm_partition_init(void)
         }
     }
 
+#ifndef TFM_PSA_API
+    /* Not applicable if IPC messaging is used */
     tfm_secure_api_init_done();
+#endif
 
     if (fail_cnt == 0) {
         return SPM_ERR_OK;
@@ -198,6 +205,7 @@ enum spm_err_t tfm_spm_partition_init(void)
     }
 }
 
+#if (TFM_LVL != 1) || defined(TFM_PSA_API)
 uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].
@@ -208,8 +216,9 @@ uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].memory_data.stack_top;
 }
+#endif
 
-#if TFM_LVL != 1
+#if (TFM_LVL != 1) && !defined(TFM_PSA_API)
 enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
 {
     struct spm_partition_desc_t *part;
@@ -319,6 +328,7 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
             caller_client_id = caller_client_id;
 }
 
+#ifndef TFM_PSA_API
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share)
 {
@@ -334,6 +344,7 @@ enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
     }
     return ret;
 }
+#endif
 
 enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
                                            const int32_t *args)

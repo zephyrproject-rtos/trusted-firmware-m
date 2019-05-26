@@ -28,6 +28,7 @@
  */
 struct tfm_spm_partition_platform_data_t;
 
+#if defined (TFM_PSA_API) || (TFM_LVL != 1)
 /**
  * \brief Holds SPM db fields that define the memory regions used by a
  *        partition.
@@ -57,6 +58,7 @@ struct tfm_spm_partition_memory_data_t
     uint32_t stack_bottom; /*!< The bottom of the stack for the partition. */
     uint32_t stack_top;    /*!< The top of the stack for the partition. */
 };
+#endif
 
 /**
  * \brief This function initialises the HW used for isolation, and sets the
@@ -145,7 +147,7 @@ uint32_t tfm_spm_hal_get_ns_MSP(void);
 uint32_t tfm_spm_hal_get_ns_entry_point(void);
 
 
-#if TFM_LVL != 1
+#if (TFM_LVL != 1) && !defined(TFM_PSA_API)
 /**
  * \brief Configure the sandbox for a partition.
  *
