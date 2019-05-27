@@ -16,17 +16,6 @@ used to verify the device integrity and assess its trustworthiness. Attestation
 key provisioning is out of scope for the attestation service and is expected to
 take part during manufacturing of the device.
 
-***************************
-Current service limitations
-***************************
-**Signing of token**: In the current implementation the token is not properly
-signed. Signature is generated according to the
-`COSE <https://datatracker.ietf.org/doc/rfc8152/>`__ format. But its actual
-value is not a correct ECDSA P256 signature, due to the lack of support of the
-ECDSA algorithm in the current implementation of the TF-M Crypto service. A fake
-signature is created, which is the concatenation of the token's hash value
-twice.
-
 ***************************************
 Claims in the initial attestation token
 ***************************************
