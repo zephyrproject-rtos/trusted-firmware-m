@@ -215,7 +215,7 @@ function(set_up_secure_fw_build)
 	if (NOT DEFINED TFM_PSA_API)
 		message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
 	elseif (TFM_PSA_API)
-		embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "TFM_PSA_API")
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PSA_API")
 	endif()
 
 	if(CORE_TEST)
