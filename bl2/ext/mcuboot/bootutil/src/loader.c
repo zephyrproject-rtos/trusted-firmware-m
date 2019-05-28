@@ -1727,7 +1727,7 @@ boot_copy_image_to_sram(int slot, struct image_header *hdr)
     uint32_t img_sz;
 
     if (dst % 4 != 0) {
-        BOOT_LOG_INF("Cannot copy the image to the SRAM address 0x%lx "
+        BOOT_LOG_INF("Cannot copy the image to the SRAM address 0x%x "
         "- the load address must be aligned with 4 bytes due to SRAM "
         "restrictions", dst);
         return BOOT_EBADARGS;
@@ -1851,15 +1851,15 @@ boot_go(struct boot_rsp *rsp)
             rc = boot_copy_image_to_sram(slot, newest_image_header);
             if (rc != 0) {
                 rc = BOOT_EBADIMAGE;
-                BOOT_LOG_INF("Could not copy image from slot 0x%lx in "
-                             "the Flash to load address 0x%lx in SRAM, "
+                BOOT_LOG_INF("Could not copy image from slot 0x%x in "
+                             "the Flash to load address 0x%x in SRAM, "
                              "aborting..",
                              slot,
                              newest_image_header->ih_load_addr);
                 goto out;
             } else {
                 BOOT_LOG_INF("Image has been copied from slot %d in flash to "
-                             "SRAM address 0x%lx",
+                             "SRAM address 0x%x",
                              slot,
                              newest_image_header->ih_load_addr);
             }
@@ -1873,7 +1873,7 @@ boot_go(struct boot_rsp *rsp)
                 goto out;
             }
 
-            BOOT_LOG_INF("Booting image from SRAM at address 0x%lx",
+            BOOT_LOG_INF("Booting image from SRAM at address 0x%x",
                          newest_image_header->ih_load_addr);
         } else {
 #endif /* MCUBOOT_RAM_LOADING */
