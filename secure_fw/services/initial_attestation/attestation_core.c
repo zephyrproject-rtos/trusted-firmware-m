@@ -855,6 +855,8 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
                 break;
             }
         }
+    } else {
+        found_option_flags = 0;
     }
 
     if (found_option_flags) {
