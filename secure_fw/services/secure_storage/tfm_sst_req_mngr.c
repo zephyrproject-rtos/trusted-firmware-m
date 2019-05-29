@@ -19,6 +19,7 @@
 #include "flash_layout.h"
 #endif
 
+#ifndef TFM_PSA_API
 /*
  * \brief Indicates whether SST has been initialised.
  */
@@ -274,7 +275,7 @@ psa_status_t tfm_sst_get_support_req(struct psa_invec *in_vec, size_t in_len,
     return PSA_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
+#else /* !defined(TFM_PSA_API) */
 typedef psa_status_t (*sst_func_t)(const psa_msg_t *msg);
 static uint8_t asset_data[SST_MAX_ASSET_SIZE] = {0};
 
@@ -468,7 +469,7 @@ static void ps_signal_handle(psa_signal_t signal, sst_func_t pfn)
         tfm_abort();
     }
 }
-#endif /* TFM_PSA_API */
+#endif /* !defined(TFM_PSA_API) */
 
 psa_ps_status_t tfm_sst_req_mngr_init(void)
 {
@@ -478,7 +479,6 @@ psa_ps_status_t tfm_sst_req_mngr_init(void)
     if (tfm_sst_init() != PSA_PS_SUCCESS) {
         tfm_abort();
     }
-    sst_is_init = true;
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);

@@ -31,6 +31,7 @@ void jump_to_ns_code(void)
     ns_entry();
 }
 
+#ifndef TFM_PSA_API
 #if defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) int32_t tfm_core_sfn_request(
                                            const struct tfm_sfn_req_s *desc_ptr)
@@ -151,6 +152,7 @@ int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share)
         "BX     lr\n"
         : : "I" (TFM_SVC_SET_SHARE_AREA));
 }
+#endif
 
 __attribute__((naked))
 int32_t tfm_core_get_boot_data(uint8_t major_type,

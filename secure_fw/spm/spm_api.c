@@ -32,6 +32,7 @@ typedef enum {
  * In case of an error in the error handling, a non-zero value have to be
  * returned.
  */
+#ifndef TFM_PSA_API
 static void tfm_spm_partition_err_handler(
     const struct spm_partition_desc_t *partition,
     sp_error_type_t err_type,
@@ -53,6 +54,7 @@ static void tfm_spm_partition_err_handler(
     tfm_spm_partition_set_state(partition->static_data.partition_id,
             SPM_PARTITION_STATE_CLOSED);
 }
+#endif /* !defined(TFM_PSA_API) */
 
 /*
  * This function prevents name clashes between the variable names accessibles in
@@ -154,6 +156,7 @@ enum spm_err_t tfm_spm_db_init(void)
     return SPM_ERR_OK;
 }
 
+#ifndef TFM_PSA_API
 enum spm_err_t tfm_spm_partition_init(void)
 {
     struct spm_partition_desc_t *part;
@@ -166,11 +169,6 @@ enum spm_err_t tfm_spm_partition_init(void)
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
         tfm_spm_hal_configure_default_isolation(part->platform_data);
-#ifdef TFM_PSA_API
-        if (part->static_data.partition_flags & SPM_PART_FLAG_IPC) {
-            continue;
-        }
-#endif
         if (part->static_data.partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             tfm_spm_partition_set_caller_partition_idx(idx,
@@ -193,10 +191,7 @@ enum spm_err_t tfm_spm_partition_init(void)
         }
     }
 
-#ifndef TFM_PSA_API
-    /* Not applicable if IPC messaging is used */
     tfm_secure_api_init_done();
-#endif
 
     if (fail_cnt == 0) {
         return SPM_ERR_OK;
@@ -204,6 +199,7 @@ enum spm_err_t tfm_spm_partition_init(void)
         return SPM_ERR_PARTITION_NOT_AVAILABLE;
     }
 }
+#endif /* !defined(TFM_PSA_API) */
 
 #if (TFM_LVL != 1) || defined(TFM_PSA_API)
 uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
@@ -278,15 +274,6 @@ void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr)
 }
 #endif
 
-void tfm_spm_partition_store_context(uint32_t partition_idx,
-        uint32_t stack_ptr, uint32_t lr)
-{
-    g_spm_partition_db.partitions[partition_idx].
-            runtime_data.stack_ptr = stack_ptr;
-    g_spm_partition_db.partitions[partition_idx].
-            runtime_data.lr = lr;
-}
-
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data.
@@ -297,6 +284,16 @@ uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data.
             partition_flags;
+}
+
+#ifndef TFM_PSA_API
+void tfm_spm_partition_store_context(uint32_t partition_idx,
+        uint32_t stack_ptr, uint32_t lr)
+{
+    g_spm_partition_db.partitions[partition_idx].
+            runtime_data.stack_ptr = stack_ptr;
+    g_spm_partition_db.partitions[partition_idx].
+            runtime_data.lr = lr;
 }
 
 const struct spm_partition_runtime_data_t *
@@ -328,7 +325,6 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
             caller_client_id = caller_client_id;
 }
 
-#ifndef TFM_PSA_API
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share)
 {
@@ -344,7 +340,6 @@ enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
     }
     return ret;
 }
-#endif
 
 enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
                                            const int32_t *args)
@@ -402,6 +397,7 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
     partition->runtime_data.orig_outvec = 0;
     partition->runtime_data.iovec_api = 0;
 }
+#endif /* !defined(TFM_PSA_API) */
 
 __attribute__((section("SFN")))
 void tfm_spm_partition_change_privilege(uint32_t privileged)

@@ -108,15 +108,6 @@ void sst_utils_memcpy(void *dest, const void *src, uint32_t size);
 void sst_utils_memset(void *dest, const uint8_t pattern, uint32_t size);
 
 /**
- * \brief Checks if the sst function caller is located in the secure or
- *        non-secure space.
- *
- * \return Returns 0 if the caller is located in the secure area, otherwise
- *         returns unspecified non-zero value if it is in the non-secure area
- */
-uint32_t sst_utils_validate_secure_caller(void);
-
-/**
  * \brief Validates file ID
  *
  * \param[in] fid  File ID

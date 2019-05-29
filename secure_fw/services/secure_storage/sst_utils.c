@@ -44,11 +44,6 @@ psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
     return PSA_PS_SUCCESS;
 }
 
-uint32_t sst_utils_validate_secure_caller(void)
-{
-    return tfm_core_validate_secure_caller();
-}
-
 psa_ps_status_t sst_utils_validate_fid(uint32_t fid)
 {
     if (fid == SST_INVALID_FID) {
