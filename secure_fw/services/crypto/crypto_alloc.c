@@ -94,6 +94,11 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 {
     uint32_t i = 0;
 
+    /* Handle must be initialised before calling a setup function */
+    if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
+        return PSA_ERROR_BAD_STATE;
+    }
+
     /* Init to invalid values */
     if (ctx == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -104,13 +109,12 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
         if (operation[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
             operation[i].in_use = TFM_CRYPTO_IN_USE;
             operation[i].type = type;
-            *handle = i;
+            *handle = i + 1;
             *ctx = (void *) &(operation[i].operation);
             return PSA_SUCCESS;
         }
     }
 
-    *handle = TFM_CRYPTO_INVALID_HANDLE;
     return PSA_ERROR_NOT_PERMITTED;
 }
 
@@ -119,12 +123,12 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle)
     uint32_t h_val = *handle;
 
     if ( (h_val != TFM_CRYPTO_INVALID_HANDLE) &&
-         (h_val < TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[h_val].in_use == TFM_CRYPTO_IN_USE) ) {
+         (h_val <= TFM_CRYPTO_CONC_OPER_NUM) &&
+         (operation[h_val - 1].in_use == TFM_CRYPTO_IN_USE) ) {
 
-        memset_operation_context(h_val);
-        operation[h_val].in_use = TFM_CRYPTO_NOT_IN_USE;
-        operation[h_val].type = TFM_CRYPTO_OPERATION_NONE;
+        memset_operation_context(h_val - 1);
+        operation[h_val - 1].in_use = TFM_CRYPTO_NOT_IN_USE;
+        operation[h_val - 1].type = TFM_CRYPTO_OPERATION_NONE;
         *handle = TFM_CRYPTO_INVALID_HANDLE;
         return PSA_SUCCESS;
     }
@@ -137,11 +141,11 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          void **ctx)
 {
     if ( (handle != TFM_CRYPTO_INVALID_HANDLE) &&
-         (handle < TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[handle].in_use == TFM_CRYPTO_IN_USE) &&
-         (operation[handle].type == type) ) {
+         (handle <= TFM_CRYPTO_CONC_OPER_NUM) &&
+         (operation[handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
+         (operation[handle - 1].type == type) ) {
 
-        *ctx = (void *) &(operation[handle].operation);
+        *ctx = (void *) &(operation[handle - 1].operation);
         return PSA_SUCCESS;
     }
 

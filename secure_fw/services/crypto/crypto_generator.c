@@ -156,6 +156,8 @@ psa_status_t tfm_crypto_generator_abort(psa_invec in_vec[],
 
     status = psa_generator_abort(generator);
     if (status != PSA_SUCCESS) {
+        /* Release the operation context, ignore if the operation fails. */
+        (void)tfm_crypto_operation_release(handle_out);
         return status;
     }
 
@@ -211,8 +213,14 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    return psa_key_derivation(generator, key_handle, alg, salt, salt_length,
-                              label, label_length, capacity);
+    status = psa_key_derivation(generator, key_handle, alg, salt, salt_length,
+                                label, label_length, capacity);
+    if (status != PSA_SUCCESS) {
+        /* Release the operation context, ignore if the operation fails. */
+        (void)tfm_crypto_operation_release(handle_out);
+    }
+
+    return status;
 }
 
 psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
@@ -249,8 +257,14 @@ psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    return psa_key_agreement(generator, private_key,
-                             peer_key, peer_key_length, alg);
+    status = psa_key_agreement(generator, private_key,
+                               peer_key, peer_key_length, alg);
+    if (status != PSA_SUCCESS) {
+        /* Release the operation context, ignore if the operation fails. */
+        (void)tfm_crypto_operation_release(handle_out);
+    }
+
+    return status;
 }
 
 psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],

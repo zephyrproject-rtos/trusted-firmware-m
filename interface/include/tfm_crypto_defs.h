@@ -121,7 +121,7 @@ enum {
  * \brief This value is used to mark an handle as invalid.
  *
  */
-#define TFM_CRYPTO_INVALID_HANDLE (~0x0u)
+#define TFM_CRYPTO_INVALID_HANDLE (0x0u)
 
 /**
  * \brief Define miscellaneous literal constants that are used in the service

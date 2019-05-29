@@ -79,6 +79,8 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
                                            psa_outvec out_vec[],
                                            size_t out_len)
 {
+    psa_status_t status;
+
     if (!((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_CONNECTION_REFUSED;
     }
@@ -96,10 +98,22 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
     size_t salt_length = 0;
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
+    psa_key_type_t type;
+    size_t key_bits;
 
     if (in_len == 3) {
         salt = in_vec[2].base;
         salt_length = in_vec[2].len;
+    }
+
+    status = psa_get_key_information(handle, &type, &key_bits);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Check that the output buffer is large enough */
+    if (output_size < PSA_ASYMMETRIC_ENCRYPT_OUTPUT_SIZE(type, key_bits, alg)) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     return psa_asymmetric_encrypt(handle, alg, input, input_length,
