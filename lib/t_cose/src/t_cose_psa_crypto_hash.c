@@ -92,11 +92,8 @@ enum t_cose_err_t t_cose_crypto_hash_start(struct t_cose_crypto_hash *hash_ctx,
      * The status member of t_cose_crypto_hash is used to hold a
      * psa_status_t error code.
      */
-    psa_hash_operation_t psa_hash;
+    psa_hash_operation_t psa_hash = PSA_HASH_OPERATION_INIT;
     psa_algorithm_t      psa_alg;
-
-    /* Copy the PSA handle out of the generic context */
-    psa_hash.handle = (uint32_t)hash_ctx->context.handle;
 
     /* Map the algorithm ID */
     psa_alg = cose_hash_alg_id_to_psa(cose_hash_alg_id);
