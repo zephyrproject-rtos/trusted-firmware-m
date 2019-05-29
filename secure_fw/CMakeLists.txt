@@ -35,6 +35,10 @@ if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
 endif()
 
+if (NOT DEFINED TFM_PARTITION_PLATFORM)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
+endif()
+
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
 include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
 #Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
@@ -150,11 +154,13 @@ function(set_up_secure_fw_build)
 
 	add_dependencies(${EXE_NAME} tfm_crypto)
 	add_dependencies(${EXE_NAME} tfm_storage)
-	add_dependencies(${EXE_NAME} tfm_platform)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
 	add_dependencies(${EXE_NAME} tfm_attest)
 	if (TFM_PARTITION_AUDIT_LOG)
 		add_dependencies(${EXE_NAME} tfm_audit)
+	endif()
+	if (TFM_PARTITION_PLATFORM)
+		add_dependencies(${EXE_NAME} tfm_platform)
 	endif()
 
 	#Set macro definitions for the project.
@@ -172,25 +178,33 @@ function(set_up_secure_fw_build)
 			#FIXME Remove the explicit load and the above comment once the secure client
 			#test partition uses the generated veneers.
 			if((${COMPILER} STREQUAL "ARMCLANG") AND (NOT TFM_PSA_API))
-				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_platform $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_attest)
+				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_attest)
 			else()
-				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_platform tfm_attest)
+				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_attest)
 			endif()
 		else()
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_platform tfm_secure_tests tfm_attest)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_secure_tests tfm_attest)
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_platform tfm_attest)
+		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_attest)
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
 		target_link_libraries(${EXE_NAME} tfm_audit)
 	endif()
 
+	if (TFM_PARTITION_PLATFORM)
+		target_link_libraries(${EXE_NAME} tfm_platform)
+	endif()
+
 	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
 
 	if (TFM_PARTITION_AUDIT_LOG)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_AUDIT_LOG")
+	endif()
+
+	if (TFM_PARTITION_PLATFORM)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PLATFORM")
 	endif()
 
 	if (NOT DEFINED TFM_PARTITION_TEST_CORE)
@@ -292,7 +306,9 @@ add_subdirectory(${SECURE_FW_DIR}/services/crypto)
 add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
 
 #Add the platform service library target
-add_subdirectory(${SECURE_FW_DIR}/services/platform)
+if (TFM_PARTITION_PLATFORM)
+	add_subdirectory(${SECURE_FW_DIR}/services/platform)
+endif()
 
 #Add the initial attestation service library target
 add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)

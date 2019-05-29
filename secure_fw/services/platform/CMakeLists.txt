@@ -23,7 +23,6 @@ set (PLATFORM_SP_DIR "${CMAKE_CURRENT_LIST_DIR}")
 get_filename_component(TFM_ROOT_DIR "${PLATFORM_SP_DIR}/../../.." ABSOLUTE)
 
 ###Get the definition of what files we need to build
-set (ENABLE_PLATFORM_SERVICE ON)
 include(CMakeLists.inc)
 
 if (NOT DEFINED TFM_LVL)

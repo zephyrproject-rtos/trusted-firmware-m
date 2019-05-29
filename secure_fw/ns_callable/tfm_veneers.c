@@ -71,9 +71,11 @@ psa_status_t tfm_crypto_key_agreement(psa_invec *, size_t, psa_outvec *, size_t)
 psa_status_t tfm_crypto_generate_random(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_generate_key(psa_invec *, size_t, psa_outvec *, size_t);
 
+#ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
 psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t platform_sp_pin_service(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_PLATFORM */
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t initial_attest_get_token(psa_invec *, size_t, psa_outvec *, size_t);
@@ -181,9 +183,11 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_agreement)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_random)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_key)
 
+#ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_pin_service)
+#endif /* TFM_PARTITION_PLATFORM */
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token)

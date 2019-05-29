@@ -66,10 +66,12 @@ LR_CODE S_CODE_START {
         *(TFM_SP_CRYPTO_ATTR_FN)
     }
 
+#ifdef TFM_PARTITION_PLATFORM
     TFM_SP_PLATFORM +0 ALIGN 32 {
         *tfm_platform* (+RO)
         *(TFM_SP_PLATFORM_ATTR_FN)
     }
+#endif /* TFM_PARTITION_PLATFORM */
 
     TFM_SP_INITIAL_ATTESTATION +0 ALIGN 32 {
         *tfm_attest* (+RO)
@@ -219,6 +221,7 @@ LR_CODE S_CODE_START {
     }
 #endif
 
+#ifdef TFM_PARTITION_PLATFORM
     TFM_SP_PLATFORM_DATA +0 ALIGN 32 {
         *tfm_platform* (+RW +ZI)
     }
@@ -230,6 +233,7 @@ LR_CODE S_CODE_START {
     TFM_SP_PLATFORM_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
 #endif
+#endif /* TFM_PARTITION_PLATFORM */
 
     TFM_SP_INITIAL_ATTESTATION_DATA +0 ALIGN 32 {
         *tfm_attest* (+RW +ZI)
