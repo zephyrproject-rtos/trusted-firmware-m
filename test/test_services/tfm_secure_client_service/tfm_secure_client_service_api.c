@@ -6,8 +6,6 @@
  */
 
 #include "tfm_secure_client_service_api.h"
-#include "tfm_secure_client_service_veneers.h"
-
 #ifdef TFM_PSA_API
 #include "psa_client.h"
 #include "tfm_api.h"
@@ -18,7 +16,9 @@
  */
 #define TFM_SECURE_CLIENT_SFN_RUN_TESTS_SID     (0x0000F000)
 #define TFM_SECURE_CLIENT_SFN_RUN_TESTS_MIN_VER (0x00000001)
-#endif
+#else /* TFM_PSA_API */
+#include "tfm_secure_client_service_veneers.h"
+#endif /* TFM_PSA_API */
 
 int32_t tfm_secure_client_run_tests(void)
 {
