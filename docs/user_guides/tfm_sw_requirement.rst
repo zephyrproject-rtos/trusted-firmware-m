@@ -128,13 +128,14 @@ versions are:
     - Arm Compiler v6.9
     - Arm Compiler v6.10
     - Arm Compiler v6.11
+    - Arm Compiler v6.12
     - GNU Arm compiler v6.3.1
     - GNU Arm compiler v7.3
 
 .. Note::
 	- The Arm compilers above are provided via Keil uVision v5.24.1 or
-	  greater, DS-5 v5.27.1 or greater, and Development Studio 2018.0, or they can
-	  be downloaded as standalone packages from
+	  greater, DS-5 v5.27.1 or greater, and Development Studio 2018.0 or greater,
+	  or they can be downloaded as standalone packages from
 	  `here <https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6>`__.
 	
 	- Arm compiler specific environment variable may need updating based
