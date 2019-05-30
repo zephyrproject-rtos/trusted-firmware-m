@@ -261,24 +261,13 @@ void mpc_init_cfg(void)
                                    ARM_MPC_ATTR_SECURE);
 
     mpc_data_region2->Initialize();
-
-#if defined(TEST_FRAMEWORK_S) || defined(TEST_FRAMEWORK_NS)
-    /* To run the regression tests on Musca-A, it is required to assign more
-     * RAM memory in the secure execution environment.
-     * So, the secure RAM memory size is 96KB and the non-secure one is 32 KB.
-     * When it is not required to run the regression tests, the RAM memory
-     * partition is the original one which is 64KB of the RAM memory for each
-     * execution environment.
-     */
     mpc_data_region2->ConfigRegion(MPC_ISRAM2_RANGE_BASE_S,
                                    MPC_ISRAM2_RANGE_LIMIT_S,
                                    ARM_MPC_ATTR_SECURE);
-#else
-    mpc_data_region2->ConfigRegion(MPC_ISRAM2_RANGE_BASE_NS,
-                                   MPC_ISRAM2_RANGE_LIMIT_NS,
-                                   ARM_MPC_ATTR_NONSECURE);
-#endif
 
+    /* First three regions (96KB) are marked Secure, the last region of
+     * 32 KB is marked Non-Secure
+     */
     mpc_data_region3->Initialize();
     mpc_data_region3->ConfigRegion(MPC_ISRAM3_RANGE_BASE_NS,
                                    MPC_ISRAM3_RANGE_LIMIT_NS,
