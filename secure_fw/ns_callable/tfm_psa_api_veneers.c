@@ -59,7 +59,7 @@ int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
     int32_t args[4] = {arg1, arg2, arg3, arg4};
     struct tfm_sfn_req_s desc = {0};
 
-    desc.sfn = fn;
+    desc.sfn = (sfn_t)fn;
     desc.args = args;
     desc.ns_caller = cmse_nonsecure_caller();
 
