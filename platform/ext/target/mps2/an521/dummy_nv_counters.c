@@ -65,6 +65,11 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     uint32_t *p_nv_counter;
     uint8_t sector_data[TFM_NV_COUNTERS_SECTOR_SIZE] = {0};
 
+    err = FLASH_DEV_NAME.Initialize(NULL);
+    if (err != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     /* Read the whole sector to be able to erase and write later in the flash */
     err = FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_SECTOR_ADDR, sector_data,
                                   TFM_NV_COUNTERS_SECTOR_SIZE);
