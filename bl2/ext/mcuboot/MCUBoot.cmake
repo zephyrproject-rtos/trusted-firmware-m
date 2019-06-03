@@ -61,11 +61,32 @@ function(mcuboot_create_boot_payload)
 		set (ADD_SECURITY_COUNTER "")
 	endif()
 
+	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess.c)
+	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed.c)
+	set(CONTENT_FOR_PREPROCESSING "#include \"${FLASH_LAYOUT}\"\n\n"
+		"/* Enumeration that is used by the assemble.py script for correct binary generation when nested macros are used */\n"
+		"enum image_attributes {\n"
+		"\tRE_SECURE_IMAGE_OFFSET = SECURE_IMAGE_OFFSET,\n"
+		"\tRE_SECURE_IMAGE_MAX_SIZE = SECURE_IMAGE_MAX_SIZE,\n"
+		"\tRE_NON_SECURE_IMAGE_OFFSET = NON_SECURE_IMAGE_OFFSET,\n"
+		"\tRE_NON_SECURE_IMAGE_MAX_SIZE = NON_SECURE_IMAGE_MAX_SIZE\n}\;"
+	)
+
+	#Create a file that will be preprocessed later in order to be able to handle nested macros
+	#in the flash_layout.h file for certain macros
+	file(WRITE ${FILE_TO_PREPROCESS} ${CONTENT_FOR_PREPROCESSING})
+
+	#Preprocess the .c file that contains the image related macros
+	compiler_preprocess_file(SRC ${FILE_TO_PREPROCESS}
+							DST ${PREPROCESSED_FILE}
+							BEFORE_TARGET ${_MY_PARAMS_NS_BIN}
+							TARGET_PREFIX ${_MY_PARAMS_NS_BIN})
+
 	add_custom_command(TARGET ${_MY_PARAMS_NS_BIN}
 						POST_BUILD
 						#Create concatenated binary image from the two binary file
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
-						ARGS -l ${FLASH_LAYOUT}
+						ARGS -l ${PREPROCESSED_FILE}
 							 -s $<TARGET_FILE_DIR:${_MY_PARAMS_S_BIN}>/${_MY_PARAMS_S_BIN}.bin
 							 -n $<TARGET_FILE_DIR:${_MY_PARAMS_NS_BIN}>/${_MY_PARAMS_NS_BIN}.bin
 							 -o ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
