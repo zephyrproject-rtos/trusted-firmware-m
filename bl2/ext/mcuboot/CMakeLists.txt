@@ -10,11 +10,15 @@ cmake_minimum_required(VERSION 3.7)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../../cmake)
 
+#Set variables to appropriate path
+set(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR})
+get_filename_component(TFM_ROOT_DIR "${MCUBOOT_DIR}/../../.." ABSOLUTE)
+
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
 #Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../../../ConfigDefault.cmake")
+embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(mcuboot LANGUAGES ASM C)
 embedded_project_fixup()
 
@@ -29,10 +33,6 @@ endif()
 if (NOT DEFINED MBEDTLS_C_FLAGS_BL2)
 	message(FATAL_ERROR "Incomplete build configuration: MBEDTLS_C_FLAGS_BL2 is undefined.")
 endif()
-
-#Set variables to appropriate path
-set(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR})
-get_filename_component(TFM_ROOT_DIR "${MCUBOOT_DIR}/../../.." ABSOLUTE)
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)

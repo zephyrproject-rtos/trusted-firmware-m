@@ -19,7 +19,7 @@ line arguments:
        | <file> is the absolute path to configurations file
          named as ``Config<APP_NAME>.cmake``.
        | i.e. On Linux:
-         ``-DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake```
+         ``-DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake```
 
    * - -DTARGET_PLATFORM=<target platform name>
      - Specifies the target platform.
@@ -103,7 +103,7 @@ Regression Tests for the AN521 target platform
     cd trusted-firmware-m
     mkdir cmake_test
     cd cmake_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
 *TF-M build regression tests on Windows*
@@ -114,7 +114,7 @@ Regression Tests for the AN521 target platform
     cd trusted-firmware-m
     mkdir cmake_test
     cd cmake_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -am ../ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -am ../configs/ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
 Build for PSA API compliance tests
@@ -138,7 +138,7 @@ tests for the Crypto service only:
     cd trusted-firmware-m
     mkdir cmake_psa_test
     cd cmake_psa_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
 Location of build artifacts

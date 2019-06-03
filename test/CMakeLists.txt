@@ -10,15 +10,16 @@ cmake_minimum_required(VERSION 3.7)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 
+#Tell TFM Root before calling sub cmake
+get_filename_component(TFM_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
 #Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
+embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(tfm_tests LANGUAGES ASM C)
 embedded_project_fixup()
-
-get_filename_component(TFM_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 
 #Check incoming configuration options
 if (NOT DEFINED SERVICES_TEST_ENABLED)

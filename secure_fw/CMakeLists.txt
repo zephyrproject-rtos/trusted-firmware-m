@@ -10,6 +10,11 @@ cmake_minimum_required(VERSION 3.7)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 
+set(SECURE_FW_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(TFM_ROOT_DIR  "${SECURE_FW_DIR}/..")
+set(TEST_DIR      "${TFM_ROOT_DIR}/test")
+set(INTERFACE_DIR "${TFM_ROOT_DIR}/interface")
+
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
@@ -18,14 +23,9 @@ include("Common/BuildDoxygenDoc")
 include("Common/BuildSphinxDoc")
 
 #Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
+embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(tfm_s LANGUAGES ASM C)
 embedded_project_fixup()
-
-set(SECURE_FW_DIR "${CMAKE_CURRENT_LIST_DIR}")
-set(TFM_ROOT_DIR  "${SECURE_FW_DIR}/..")
-set(TEST_DIR      "${TFM_ROOT_DIR}/test")
-set(INTERFACE_DIR "${TFM_ROOT_DIR}/interface")
 
 if (NOT DEFINED TFM_LVL)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,17 +10,17 @@ cmake_minimum_required(VERSION 3.7)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../../cmake)
 
+###Some project global settings
+set (PLATFORM_SP_DIR "${CMAKE_CURRENT_LIST_DIR}")
+get_filename_component(TFM_ROOT_DIR "${PLATFORM_SP_DIR}/../../.." ABSOLUTE)
+
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
 #Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../../../ConfigDefault.cmake")
+embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(tfm_platform LANGUAGES ASM C)
 embedded_project_fixup()
-
-###Some project global settings
-set (PLATFORM_SP_DIR "${CMAKE_CURRENT_LIST_DIR}")
-get_filename_component(TFM_ROOT_DIR "${PLATFORM_SP_DIR}/../../.." ABSOLUTE)
 
 ###Get the definition of what files we need to build
 include(CMakeLists.inc)

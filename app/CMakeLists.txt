@@ -10,18 +10,18 @@ cmake_minimum_required(VERSION 3.7)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 
-#Include common stuff to control cmake.
-include("Common/BuildSys")
-
-#Start an embedded project.
-embedded_project_start(CONFIG "${CMAKE_CURRENT_LIST_DIR}/../ConfigDefault.cmake")
-project(tfm_ns LANGUAGES ASM C)
-embedded_project_fixup()
-
 set(APP_DIR ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
 set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
 set(TEST_DIR ${TFM_ROOT_DIR}/test)
+
+#Include common stuff to control cmake.
+include("Common/BuildSys")
+
+#Start an embedded project.
+embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
+project(tfm_ns LANGUAGES ASM C)
+embedded_project_fixup()
 
 #Include BL2 bootloader related functions
 set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")
