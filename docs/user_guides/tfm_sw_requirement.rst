@@ -2,6 +2,10 @@
 TF-M Software requirements
 ##########################
 
+.. |DS5_VERSION| replace:: v5.29.1
+.. |KEIL_VERSION| replace:: v5.25.2
+.. |DEV_STUDIO_VERSION| replace:: 2018.0
+
 To build the TF-M firmware the following tools are needed:
 
 .. csv-table:: Tool dependencies
@@ -123,9 +127,7 @@ Supported C compilers
 To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
-    
-    - Arm Compiler v6.7.1
-    - Arm Compiler v6.9
+
     - Arm Compiler v6.10
     - Arm Compiler v6.11
     - Arm Compiler v6.12
@@ -133,32 +135,33 @@ versions are:
     - GNU Arm compiler v7.3
 
 .. Note::
-	- The Arm compilers above are provided via Keil uVision v5.24.1 or
-	  greater, DS-5 v5.27.1 or greater, and Development Studio 2018.0 or greater,
-	  or they can be downloaded as standalone packages from
-	  `here <https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6>`__.
-	
-	- Arm compiler specific environment variable may need updating based
-	  on specific products and licenses as explained in
-	  `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
-	
-	- The GNU Arm compiler can be downloaded from
-	  `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
-	  On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
-	  or *GNU Arm Embedded Toolchain: 7-2018-q2-update*
+    - The Arm compilers above are provided via Keil uVision |KEIL_VERSION|
+      or greater, DS-5 |DS5_VERSION| or greater, and Development Studio
+      |DEV_STUDIO_VERSION| or greater, or they can be downloaded as standalone
+      packages from
+      `here <https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6>`__.
+
+    - Arm compiler specific environment variable may need updating based
+      on specific products and licenses as explained in
+      `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
+
+    - The GNU Arm compiler can be downloaded from
+      `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
+      On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
+      or *GNU Arm Embedded Toolchain: 7-2018-q2-update*
 
 ************************
 Supported CMake versions
 ************************
 
 The build-system is CMake based and supports the following versions:
-	
-	- 3.7
-	- 3.10
-	- 3.11
-	- 3.12
-	- 3.13
-	- 3.14
+
+    - 3.7
+    - 3.10
+    - 3.11
+    - 3.12
+    - 3.13
+    - 3.14
 
 .. Note::
     - Please use the latest build version available (i.e. 3.7.2 instead of
@@ -181,7 +184,7 @@ On Windows the following binaries are supported:
     
     - GNU make v4.2.1 executable from Cygwin
     - GNU make v4.2.1 executable from msys2
-    - GNU make v4.2 executable from DS5 v5.29.1 (see <DS5 install root>/bin)
+    - GNU make v4.2 executable from DS5 |DS5_VERSION| (see <DS5 directory>/bin)
 
 CMake is quiet tolerant to GNU make versions and basically any
 "reasonably recent" GNU make version shall work.
@@ -199,7 +202,7 @@ TF-M-m build environment under various OSes.
 Ubuntu
 ======
 
-- DS-5 v5.27.1.
+- DS-5 |DS5_VERSION|.
 - Git tools v2.10.0
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
@@ -215,7 +218,7 @@ Ubuntu
 Setup a shell to enable compiler toolchain and CMake after installation.
 ------------------------------------------------------------------------
 
-To import Arm Compiler v6.7.1 in your bash shell console:
+To import Arm Compiler v6.10 in your bash shell console:
 
 .. Warning::
     Arm compiler specific environment variable may need updating based on
@@ -224,7 +227,7 @@ To import Arm Compiler v6.7.1 in your bash shell console:
 
 .. code-block:: bash
 
-    export PATH=<DS-5_PATH>/sw/ARMCompiler6.7.1/bin:$PATH
+    export PATH=<DS-5_PATH>/sw/ARMCompiler6.10/bin:$PATH
     export ARM_TOOL_VARIANT="ult"
     export ARM_PRODUCT_PATH="<DS-5_PATH>/sw/mappings"
     export ARMLMD_LICENSE_FILE="<LICENSE_FILE_PATH>"
@@ -244,9 +247,8 @@ To import GNU Arm in your bash shell console:
 Windows + Cygwin
 ================
 
-- uVision v5.24.1 or DS-5 v5.27.1 (DS-5 Ultimate Edition) which
-  provides the
-  Arm Compiler v6.7.1 compiler or GNU Arm compiler v6.3.1.
+- uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition) which
+  provides the Arm Compiler v6.10 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
 - CMake (see the "Supported CMake versions" chapter)
 - `Cygwin <https://www.cygwin.com/>`__. Tests done with version 2.877
@@ -268,7 +270,7 @@ Windows + Cygwin
 Setup Cygwin to enable a compiler toolchain and CMake after installation.
 -------------------------------------------------------------------------
 
-If applicable, import Arm Compiler v6.7.1 in your shell console. To make this
+If applicable, import Arm Compiler v6.10 in your shell console. To make this
 change permanent, add the command line into ~/.bashrc
 
 Armclang + DS-5
@@ -283,7 +285,7 @@ Armclang + DS-5
 
 .. code-block:: bash
 
-    export PATH="/cygdrive/c/<DS-5_PATH>/sw/ARMCompiler6.7.1/bin":$PATH
+    export PATH="/cygdrive/c/<DS-5_PATH>/sw/ARMCompiler6.10/bin":$PATH
     export ARM_PRODUCT_PATH="C:/<DS-5_PATH>/sw/mappings"
     export ARM_TOOL_VARIANT="ult"
     export ARMLMD_LICENSE_FILE="<LICENSE_FILE_PATH>"
@@ -455,11 +457,11 @@ Windows + Cygwin
 Download and install the following tools:
     - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
     - Pip packages *m2r, Sphinx, sphinx-rtd-theme sphinxcontrib-plantuml*
-      
+
       .. code-block:: bash
-        
+
         pip --user install m2r Sphinx sphinx-rtd-theme sphinxcontrib-plantuml
-    
+
     - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
     - The Java runtime is part of the DS5 installation or can be
       `downloaded from here <https://www.java.com/en/download/>`__
