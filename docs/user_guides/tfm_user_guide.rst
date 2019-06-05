@@ -130,10 +130,10 @@ port (baud 115200 8n1) the following messages::
     [INF] Bootloader chainload address offset: 0x80000
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
-    
+
     #### Execute test suites for the secure storage service ####
     Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
-    
+
     > Executing 'TFM_SST_TEST_2001'
       Description: 'Create interface'
       TEST PASSED!
@@ -186,10 +186,10 @@ After completing the procedure you should be able to visualize on the serial
 port (baud 115200 8n1) the following messages::
 
     [Sec Thread] Secure image initializing!
-    
+
     #### Execute test suites for the secure storage service ####
     Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
-    
+
     > Executing 'TFM_SST_TEST_2001'
       Description: 'Create interface'
       TEST PASSED!
@@ -223,24 +223,24 @@ Example application with BL2 bootloader
 #. Create a unified hex file comprising of both mcuboot and tfm_sign
    binary
 
--  For Musca-A1
+-  For Musca-A
 
    - Windows::
-   
+
       srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
-   
+
    - Linux::
-   
+
       srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
 
 -  For Musca-B1
 
    - Windows::
-   
+
       srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
-   
+
    - Linux::
-   
+
       srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
 #. Plug the Musca board into your computer. The board should appear as a USB
@@ -272,7 +272,7 @@ UART0 (baud 115200 8n1)::
     [INF] Bootloader chainload address offset: 0x20000
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
-    
+
     #### Execute test suites for the secure storage service ####
     Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
     > Executing 'TFM_SST_TEST_2001'

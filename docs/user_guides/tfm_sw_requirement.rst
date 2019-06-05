@@ -264,8 +264,8 @@ Windows + Cygwin
 - pyyaml (pip3 install --user pyyaml)
 - jinja2 (pip3 install --user jinja2)
 - Python3 pip
-- `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for
-  Musca-A1 test chip board)
+- `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
+  chip boards)
 
 Setup Cygwin to enable a compiler toolchain and CMake after installation.
 -------------------------------------------------------------------------

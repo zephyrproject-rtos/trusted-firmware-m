@@ -90,8 +90,8 @@ Current release has been tested on:
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`__
         - `Fast model FVP_MPS2_AEMv8M.
           <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`__
-        - `Musca-A1 test chip board.
-          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a1-test-chip-board>`__
+        - `Musca-A test chip board.
+          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
         - `Musca-B1 test chip board.
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`__
 
