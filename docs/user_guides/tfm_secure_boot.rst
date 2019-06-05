@@ -84,7 +84,7 @@ firmware must be linked to the address space of the proper (currently inactive)
 memory slot.
 
 Overwrite operation
-==================
+===================
 Active image is stored in slot 0, and this image is started always by the
 bootloader. Therefore images must be linked to slot 0. If the bootloader finds
 a valid image in slot 1, which is marked for upgrade, then the content of slot 0
@@ -201,8 +201,10 @@ Signature algorithms
 ********************
 MbedTLS library is used to sign the images. The list of supported signing
 algorithms:
-    - RSA-2048
-    - RSA-3072 (default)
+
+  - `RSA-2048`
+  - `RSA-3072`: default
+
 Example keys stored in ``root-rsa-2048.pem`` and ``root-rsa-3072.pem``.
 
 ************************
@@ -290,7 +292,7 @@ programmed to the appropriate memory slots. To generate the original and a new
 firmware package, TF-M is built twice with different build configurations.
 
 Overwriting firmware upgrade
-=========================
+============================
 Run TF-M build twice with two different build configuration: default and
 regression. Save the artifacts between builds, because second run can overwrite
 original binaries. Download default build to slot 0 and regression build to
