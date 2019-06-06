@@ -299,8 +299,7 @@ if (LINK_TO_BOTH_MEMORY_REGION)
 					 S_TARGET      tfm_s
 					 FULL_BIN      tfm_full
 					 SIGN_BIN      tfm_sign
-					 VENEER_NAME   s_veneers
-					 POSTFIX       "_0")
+					 VENEER_NAME   s_veneers)
 
 	#Link to secondary memory region(add extra linker flag)
 	set_up_app_build(NS_TARGET     ${PROJECT_NAME}
@@ -332,10 +331,6 @@ endif()
 #Finally let CMake system apply changes after the whole project is defined.
 if (TARGET ${PROJECT_NAME})
 	embedded_project_end(${PROJECT_NAME})
-endif()
-
-if (TARGET ${PROJECT_NAME}_0)
-	embedded_project_end(${PROJECT_NAME}_0)
 endif()
 
 if (TARGET ${PROJECT_NAME}_1)

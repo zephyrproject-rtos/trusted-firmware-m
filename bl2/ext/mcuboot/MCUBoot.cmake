@@ -30,10 +30,10 @@ function(mcuboot_create_boot_payload)
 	endif()
 
 	if (DEFINED _MY_PARAMS_POSTFIX)
-		if (${_MY_PARAMS_POSTFIX} STREQUAL "_0")
-			set(MY_POSTFIX "0")
-		else()
+		if (${_MY_PARAMS_POSTFIX} STREQUAL "_1")
 			set(MY_POSTFIX "1")
+		else()
+			message(FATAL_ERROR "Unknown artefacts postfix: ${_MY_PARAMS_POSTFIX}")
 		endif()
 	endif()
 

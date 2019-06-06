@@ -139,7 +139,7 @@ authentication.
 
 At build time automatically two binaries are generated::
 
-    <build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin : Image linked for slot 0 memory partition
+    <build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin : Image linked for slot 0 memory partition
 
     <build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for slot 1 memory partition
 
@@ -402,7 +402,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
     --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
-    --data cpu0=<default_build_dir>/install/outputs/fvp/tfm_s_ns_signed_0.bin@0x10080000 \
+    --data cpu0=<default_build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10080000 \
     --data cpu0=<regresssion_build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin@0x10180000
 
 Executing firmware upgrade on SSE 200 FPGA on MPS2 board
@@ -416,7 +416,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     IMAGE0ADDRESS: 0x00000000
     IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
-    IMAGE1FILE: \Software\tfm_sig0.bin ; TF-M default test binary blob
+    IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
     IMAGE2FILE: \Software\tfm_sig1.bin ; TF-M regression test binary blob
 
@@ -427,11 +427,11 @@ combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign_0.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0E0000 -o tfm.hex -Intel
+    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0E0000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign_0.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0E0000 -o tfm.hex -Intel
+    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA0E0000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade,
 notice that image with higher version number (``version=1.2.3.5``) is executed:
