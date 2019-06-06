@@ -72,7 +72,7 @@ The BL2 bootloader requires the following definitions:
 
 Assemble tool
 ^^^^^^^^^^^^^
-The ``assemble.py`` tools is used to concatenate secure and non-secure binary
+The ``assemble.py`` tool is used to concatenate secure and non-secure binary
 to a single binary blob. It requires the following definitions:
 
 - ``SECURE_IMAGE_OFFSET`` - Defines the offset from the single binary blob base
@@ -82,6 +82,17 @@ to a single binary blob. It requires the following definitions:
   base address,   where the non-secure image starts.
 - ``NON_SECURE_IMAGE_MAX_SIZE`` - Defines the maximum size of the non-secure
   image area.
+
+Image tool
+^^^^^^^^^^^^^
+The ``imgtool.py`` tool is used to handle the tasks related to signing the
+binary. It requires the following definitions:
+
+- ``SIGN_BIN_SIZE`` - Defines the size of the concatenated binary that is to
+  be signed.
+- ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded
+  and is executed from. Only used in case the ``MCUBOOT_UPGRADE_STRATEGY``
+  is configured to be ``RAM_LOADING``.
 
 Secure Storage (SST) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
