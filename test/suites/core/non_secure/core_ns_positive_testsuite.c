@@ -29,6 +29,7 @@ static void tfm_core_test_permissions(struct test_result_t *ret);
 static void tfm_core_test_mpu_access(struct test_result_t *ret);
 static void tfm_core_test_share_change(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
+static void tfm_core_test_spm_request(struct test_result_t *ret);
 #endif /* TFM_PSA_API */
 static void tfm_core_test_ns_thread(struct test_result_t *ret);
 static void tfm_core_test_check_init(struct test_result_t *ret);
@@ -37,7 +38,6 @@ static void tfm_core_test_buffer_check(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
-static void tfm_core_test_spm_request(struct test_result_t *ret);
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 static void tfm_core_test_outvec_write(struct test_result_t *ret);
 static void tfm_core_test_secure_irq(struct test_result_t *ret);
@@ -80,10 +80,10 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_PERIPHERAL_ACCESS,
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_GET_CALLER_CLIENT_ID,
     tfm_core_test_get_caller_client_id,
     "Test get caller client ID function"),
-#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SPM_REQUEST,
     tfm_core_test_spm_request,
     "Test SPM request function"),
+#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_IOVEC_SANITIZATION,
     tfm_core_test_iovec_sanitization,
     "Test service parameter sanitization"),
@@ -807,7 +807,6 @@ static void tfm_core_test_get_caller_client_id(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
-#endif /* TFM_PSA_API */
 
 static void tfm_core_test_spm_request(struct test_result_t *ret)
 {
@@ -831,3 +830,5 @@ static void tfm_core_test_spm_request(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+
+#endif /* TFM_PSA_API */

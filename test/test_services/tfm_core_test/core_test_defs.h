@@ -100,6 +100,7 @@ struct irq_test_execution_data_t {
 #define CORE_TEST_ERROR_GET_CODE(x) (x & 0xFFFF)
 
 enum core_test_errno_t {
+    CORE_TEST_ERRNO_TEST_NOT_SUPPORTED         = -13,
     CORE_TEST_ERRNO_SP_NOT_INITED              = -12,
     CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR  = -11,
     CORE_TEST_ERRNO_SP_RECURSION_NOT_REJECTED  = -10,

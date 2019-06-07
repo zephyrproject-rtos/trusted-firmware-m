@@ -12,7 +12,7 @@
 #include "tfm_message_queue.h"
 #include "tfm_secure_api.h"
 
-#define TFM_SPM_MAX_ROT_SERV_NUM        28
+#define TFM_SPM_MAX_ROT_SERV_NUM        48
 #define TFM_VERSION_POLICY_RELAXED      0
 #define TFM_VERSION_POLICY_STRICT       1
 

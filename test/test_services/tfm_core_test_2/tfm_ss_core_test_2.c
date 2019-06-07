@@ -17,6 +17,7 @@
 #define INVALID_NS_CLIENT_ID  0x49abcdef
 #define INVERT_BUFFER_SIZE    (16*4)
 
+#ifndef TFM_PSA_API
 /* Don't initialise caller_partition_id_zi and expect it to be linked in the
  * zero-initialised data area
  */
@@ -28,6 +29,7 @@ static int32_t caller_client_id_zi;
 static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
+#endif /* !defined(TFM_PSA_API) */
 
 /* structures for secure IRQ testing */
 static enum irq_test_scenario_t current_scenario = IRQ_TEST_SCENARIO_NONE;
@@ -48,6 +50,7 @@ psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
     return CORE_TEST_ERRNO_SUCCESS_2;
 }
 
+#ifndef TFM_PSA_API
 psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
                                                     size_t in_len,
                                                     struct psa_outvec *out_vec,
@@ -87,6 +90,7 @@ psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
 
     return CORE_TEST_ERRNO_SUCCESS;
 }
+#endif /* !defined(TFM_PSA_API) */
 
 psa_status_t spm_core_test_2_get_every_second_byte_internal(
                                                            const uint8_t *inbuf,
@@ -143,7 +147,7 @@ static psa_status_t spm_core_test_2_sfn_invert_internal(uint32_t *in_ptr,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {
         return CORE_TEST_ERRNO_INVALID_BUFFER;
     }
-#endif /* TFM_PSA_API */
+#endif /* !defined(TFM_PSA_API) */
     *res_ptr = -1;
 
     if (len > SFN_INVERT_MAX_LEN) {
@@ -158,7 +162,7 @@ static psa_status_t spm_core_test_2_sfn_invert_internal(uint32_t *in_ptr,
         TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
         return CORE_TEST_ERRNO_INVALID_BUFFER;
     }
-#endif /* TFM_PSA_API */
+#endif /* !defined(TFM_PSA_API) */
 
     for (i = 0; i < len; i++) {
         invert_buffer[i] = in_ptr[i];
@@ -321,7 +325,7 @@ psa_status_t spm_core_test_2_wrap_slave_service(psa_msg_t *msg)
 
 psa_status_t spm_core_test_2_wrap_check_caller_client_id(psa_msg_t *msg)
 {
-    return spm_core_test_2_check_caller_client_id(NULL, 0, NULL, 0);
+    return CORE_TEST_ERRNO_TEST_NOT_SUPPORTED;
 }
 
 psa_status_t spm_core_test_2_wrap_get_every_second_byte(psa_msg_t *msg)
@@ -382,7 +386,7 @@ psa_status_t spm_core_test_2_wrap_sfn_invert(psa_msg_t *msg)
     }
 
     ret = spm_core_test_2_sfn_invert_internal(inbuf, outbuf,
-                                              &res_ptr, msg->in_size[0]);
+                                              &res_ptr, msg->in_size[0] / 4);
     if (ret < 0) {
         return ret;
     }
@@ -436,7 +440,7 @@ psa_status_t spm_core_test_2_wrap_execute_test_scenario(psa_msg_t *msg)
     return spm_core_test_2_execute_test_scenario_internal(irq_test_scenario);
 }
 
-#endif
+#endif /* defined(TFM_PSA_API) */
 
 /* FIXME: Add a testcase to test that a failed init makes the secure partition
  * closed, and none of its functions can be called.
@@ -475,6 +479,6 @@ psa_status_t core_test_2_init(void)
             ; /* do nothing */
         }
     }
-#endif
+#endif /* defined(TFM_PSA_API) */
     return CORE_TEST_ERRNO_SUCCESS;
 }
