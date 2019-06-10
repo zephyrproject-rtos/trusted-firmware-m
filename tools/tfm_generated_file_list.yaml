@@ -56,5 +56,10 @@
         "short_name": "tfm_secure_irq_handlers_ipc",
         "output": "secure_fw/core/ipc/tfm_secure_irq_handlers_ipc.inc"
     },
+    {
+        "name": "SID H file",
+        "short_name": "sid.h",
+        "output": "interface/include/psa_manifest/sid.h"
+    }
   ]
 }
