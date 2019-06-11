@@ -84,6 +84,7 @@ def generate_manifestfilename(env):
     env :
         The instance of Environment.
     """
+    manifest_header_list = []
     with open(manifest_list_yaml_file_path) as manifest_list_yaml_file:
         manifest_list = yaml.load(manifest_list_yaml_file)
         templatefile_name = 'secure_fw/services/manifestfilename.template'
@@ -108,6 +109,8 @@ def generate_manifestfilename(env):
 
             context['file_name'] = outfile_name.replace('.h', '')
 
+            manifest_header_list.append(outfile_path)
+
             print ("Generating " + outfile_path)
 
             if not os.path.exists(os.path.dirname(outfile_path)):
@@ -119,7 +122,7 @@ def generate_manifestfilename(env):
             outfile = io.open(outfile_path, "w", newline='\n')
             outfile.write(template.render(context))
             outfile.close()
-    return
+    return manifest_header_list
 
 def main():
     """
@@ -135,14 +138,18 @@ def main():
         keep_trailing_newline = True
     )
 
+    # Generate manifestfilename
+    manifest_header_list = generate_manifestfilename(env)
+    utilities = {}
+    context = {}
+
     with open(manifest_list_yaml_file_path) as manifest_list_yaml_file:
         # Read manifest list file, build database
         db = load_manifest_list(manifest_list_yaml_file)
 
-        utilities = {}
         utilities['donotedit_warning']=donotedit_warning
+        utilities['manifest_header_list']=manifest_header_list
 
-        context = {}
         context['manifests'] = db
         context['utilities'] = utilities
 
@@ -162,9 +169,6 @@ def main():
             outfile = io.open(outfile_name, "w", newline='\n')
             outfile.write(template.render(context))
             outfile.close()
-
-    # Generate manifestfilename
-    generate_manifestfilename(env)
 
     print ("Generation of files done")
 

@@ -10,6 +10,10 @@
 #ifndef __TFM_SERVICE_LIST_INC__
 #define __TFM_SERVICE_LIST_INC__
 
+{% for header in utilities.manifest_header_list %}
+#include "{{header}}"
+{% endfor %}
+
 {% for manifest in manifests %}
     {% if manifest.attr.tfm_partition_ipc %}
         {% if manifest.manifest.services %}
