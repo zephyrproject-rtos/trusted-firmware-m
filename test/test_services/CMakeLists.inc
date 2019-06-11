@@ -55,9 +55,9 @@ elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
 	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/tfm_secure_client_service/tfm_secure_client_service_api.c")
 endif()
 
-if (NOT DEFINED CORE_TEST_IPC)
-	message(FATAL_ERROR "Incomplete build configuration: CORE_TEST_IPC is undefined. ")
-elseif (CORE_TEST_IPC)
+if (NOT DEFINED TFM_PARTITION_TEST_CORE_IPC)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE_IPC is undefined. ")
+elseif (TFM_PARTITION_TEST_CORE_IPC)
 	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_ipc_service/tfm_ipc_service_test.c"
 		"${CORE_TEST_DIR}/tfm_ipc_client/tfm_ipc_client_test.c"
 		)
