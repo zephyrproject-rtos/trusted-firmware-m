@@ -12,39 +12,39 @@
 
 {% for manifest in manifests %}
     {% if manifest.attr.tfm_partition_ipc %}
-        {% if manifest.attr.conditional %}
+        {% if manifest.manifest.services %}
+            {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
-        {% endif %}
+            {% endif %}
 /******** {{manifest.manifest.name}} ********/
-    {% if manifest.manifest.services %}
-        {% for service in manifest.manifest.services %}
+            {% for service in manifest.manifest.services %}
 {{'{'}}
         "{{service.name}}",
         {{manifest.manifest.name}}_ID,
         {{service.signal}},
         {{service.sid}},
-    {% if service.non_secure_clients is sameas true %}
+                {% if service.non_secure_clients is sameas true %}
         true,
-    {% else %}
+                {% else %}
         false,
-    {% endif %}
-    {% if service.minor_version %}
+                {% endif %}
+                {% if service.minor_version %}
         {{service.minor_version}},
-    {% else %}
+                {% else %}
         1,
-    {% endif %}
-    {% if service.minor_policy %}
+                {% endif %}
+                {% if service.minor_policy %}
         TFM_VERSION_POLICY_{{service.minor_policy}}
-    {% else %}
+                {% else %}
         TFM_VERSION_POLICY_STRICT
-    {% endif %}
+                {% endif %}
 {{'}'}},
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.conditional %}
+            {% endfor %}
+            {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
+            {% endif %}
         {% endif %}
-    {% endif %}
 
+    {% endif %}
 {% endfor %}
 #endif /* __TFM_SERVICE_LIST_INC__ */

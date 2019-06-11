@@ -57,7 +57,6 @@
         TFM_VERSION_POLICY_STRICT
 },
 
-
 /******** TFM_SP_CRYPTO ********/
 {
         "TFM_CRYPTO",
@@ -68,7 +67,6 @@
         1,
         TFM_VERSION_POLICY_STRICT
 },
-
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 {
