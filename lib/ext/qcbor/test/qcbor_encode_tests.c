@@ -1910,7 +1910,7 @@ int EncodeErrorTests()
 
    // ------ Test for QCBOR_ERR_BUFFER_TOO_LARGE ------
    // Do all of these tests with NULL buffers so no actual large allocations are neccesary
-   UsefulBuf Buffer = (UsefulBuf){NULL, UINT32_MAX};
+   const UsefulBuf Buffer = (UsefulBuf){NULL, UINT32_MAX};
 
    // First verify no error from a big buffer
    QCBOREncode_Init(&EC, Buffer);
@@ -1925,10 +1925,15 @@ int EncodeErrorTests()
    }
 
    // Second verify error from an array in encoded output too large
+   // Also test fetching the error code before finish
    QCBOREncode_Init(&EC, Buffer);
    QCBOREncode_OpenArray(&EC);
    QCBOREncode_AddBytes(&EC, (UsefulBufC){NULL, UINT32_MAX-6});
    QCBOREncode_OpenArray(&EC); // Where QCBOR internally encounters and records error
+   if(QCBOREncode_GetErrorState(&EC) != QCBOR_ERR_BUFFER_TOO_LARGE) {
+      // Error fetch failed.
+      return -12;
+   }
    QCBOREncode_CloseArray(&EC);
    QCBOREncode_CloseArray(&EC);
    if(QCBOREncode_FinishGetSize(&EC, &xx) != QCBOR_ERR_BUFFER_TOO_LARGE) {
@@ -1950,7 +1955,7 @@ int EncodeErrorTests()
    // ----- QCBOR_ERR_BUFFER_TOO_SMALL --------------
    // Work close to the 4GB size limit for a better test
    const uint32_t uLargeSize =  UINT32_MAX - 1024;
-   UsefulBuf Large = (UsefulBuf){NULL,uLargeSize};
+   const UsefulBuf Large = (UsefulBuf){NULL,uLargeSize};
 
    QCBOREncode_Init(&EC, Large);
    QCBOREncode_OpenArray(&EC);
@@ -2037,6 +2042,13 @@ int EncodeErrorTests()
 
    /* QCBOR_ERR_ARRAY_TOO_LONG is not tested here as
     it would require a 64KB of RAM to test */
+
+
+   // ----- Test the check for NULL buffer ------
+   QCBOREncode_Init(&EC, Buffer);
+   if(QCBOREncode_IsBufferNULL(&EC) == 0) {
+      return -11;
+   }
 
    return 0;
 }
