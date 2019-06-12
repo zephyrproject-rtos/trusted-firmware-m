@@ -10,6 +10,7 @@
 #include "tfm_core.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
+#include "tfm_arch.h"
 #include "platform/include/tfm_spm_hal.h"
 #include "uart_stdout.h"
 #include "secure_utilities.h"
@@ -131,16 +132,7 @@ int32_t tfm_core_init(void)
 
 static int32_t tfm_core_set_secure_exception_priorities(void)
 {
-    uint32_t VECTKEY;
-    SCB_Type *scb = SCB;
-    uint32_t AIRCR;
-
-    /* Set PRIS flag is AIRCR */
-    AIRCR = scb->AIRCR;
-    VECTKEY = (~AIRCR & SCB_AIRCR_VECTKEYSTAT_Msk);
-    scb->AIRCR = SCB_AIRCR_PRIS_Msk |
-                 VECTKEY |
-                 (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
+    tfm_arch_prioritize_secure_exception();
 
     /* Explicitly set Secure SVC priority to highest */
     tfm_spm_hal_set_secure_irq_priority(SVCall_IRQn, 0);

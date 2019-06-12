@@ -93,4 +93,9 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
 void tfm_arch_initialize_ctx_ext(struct tfm_state_context_ext *p_ctxb,
                                  uint32_t sp, uint32_t sp_limit);
 
+/*
+ * Prioritize Secure exceptions
+ */
+void tfm_arch_prioritize_secure_exception(void);
+
 #endif

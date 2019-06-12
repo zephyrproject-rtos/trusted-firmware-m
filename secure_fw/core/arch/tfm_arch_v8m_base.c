@@ -175,3 +175,17 @@ __attribute__((naked)) void UsageFault_Handler(void)
 {
     __ASM volatile("b    .");
 }
+
+void tfm_arch_prioritize_secure_exception(void)
+{
+    uint32_t VECTKEY;
+    SCB_Type *scb = SCB;
+    uint32_t AIRCR;
+
+    /* Set PRIS flag in AIRCR */
+    AIRCR = scb->AIRCR;
+    VECTKEY = (~AIRCR & SCB_AIRCR_VECTKEYSTAT_Msk);
+    scb->AIRCR = SCB_AIRCR_PRIS_Msk |
+                 VECTKEY |
+                 (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
+}
