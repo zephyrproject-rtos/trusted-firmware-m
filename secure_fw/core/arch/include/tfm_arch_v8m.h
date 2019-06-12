@@ -76,4 +76,14 @@ __STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
     return (lr & EXC_RETURN_SECURE_STACK);
 }
 
+/**
+ * \brief Set PSPLIM register.
+ *
+ * \param[in] psplim        Register value to be written into PSPLIM.
+ */
+__STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
+{
+    (void)__set_PSPLIM(psplim);
+}
+
 #endif

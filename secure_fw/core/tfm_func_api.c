@@ -367,7 +367,7 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
                                                   (uint32_t *)partition_psp);
         }
         __set_PSP(psp);
-        __set_PSPLIM(partition_psplim);
+        tfm_arch_set_psplim(partition_psplim);
     }
 #else
     if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
@@ -395,7 +395,7 @@ static int32_t tfm_start_partition(const struct tfm_sfn_req_s *desc_ptr,
                                               (uint32_t *)partition_psp);
     }
     __set_PSP(psp);
-    __set_PSPLIM(partition_psplim);
+    tfm_arch_set_psplim(partition_psplim);
 #endif
 
     tfm_spm_partition_set_state(caller_partition_idx,
@@ -480,7 +480,7 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
         __set_PSP(ret_part_data->stack_ptr);
         REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
         uint32_t psp_stack_bottom = (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
-       __set_PSPLIM(psp_stack_bottom);
+        tfm_arch_set_psplim(psp_stack_bottom);
 
         /* FIXME: The condition should be removed once all the secure service
          *        calls are done via the iovec veneers
@@ -502,7 +502,8 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
         (struct tfm_exc_stack_t *)ret_part_data->stack_ptr);
     *excReturn = ret_part_data->lr;
     __set_PSP(ret_part_data->stack_ptr);
-    __set_PSPLIM(tfm_spm_partition_get_stack_bottom(return_partition_idx));
+    tfm_arch_set_psplim(
+                    tfm_spm_partition_get_stack_bottom(return_partition_idx));
     /* Clear the context entry before returning */
     tfm_spm_partition_set_stack(
                 current_partition_idx, psp + sizeof(struct tfm_exc_stack_t));
