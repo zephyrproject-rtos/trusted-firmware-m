@@ -10,6 +10,7 @@
 #include "psa_client.h"
 #include "psa_service.h"
 #include "secure_utilities.h"
+#include "tfm_arch.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
 #include "tfm_svcalls.h"

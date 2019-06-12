@@ -15,6 +15,7 @@
 #include "tfm_api.h"
 #include "tfm_internal.h"
 #include "tfm_memory_utils.h"
+#include "tfm_arch.h"
 #ifdef TFM_PSA_API
 #include <stdbool.h>
 #include "tfm_svcalls.h"
@@ -26,113 +27,6 @@
 extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
 #ifdef TFM_PSA_API
 extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
-#endif
-
-struct tfm_fault_context_s {
-    uint32_t R0;
-    uint32_t R1;
-    uint32_t R2;
-    uint32_t R3;
-    uint32_t R12;
-    uint32_t LR;
-    uint32_t ReturnAddress;
-    uint32_t RETPSR;
-} tfm_fault_context;
-
-#if defined(__ARM_ARCH_8M_MAIN__)
-/**
- * \brief Overwrites default Secure fault handler.
- */
-void SecureFault_Handler(void)
-{
-    /* figure out context from which we landed in fault handler */
-    uint32_t lr = __get_LR();
-    uint32_t sp;
-
-    if (lr & EXC_RETURN_SECURE_STACK) {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp = __get_PSP();
-        } else {
-            sp = __get_MSP();
-        }
-    } else {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp =  __TZ_get_PSP_NS();
-        } else {
-            sp = __TZ_get_MSP_NS();
-        }
-    }
-
-    /* Only save the context if sp is valid */
-    if ((sp >=  S_DATA_START &&
-         sp <=  (S_DATA_LIMIT - sizeof(tfm_fault_context)) + 1) ||
-        (sp >= NS_DATA_START &&
-         sp <= (NS_DATA_LIMIT - sizeof(tfm_fault_context)) + 1)) {
-        tfm_memcpy(&tfm_fault_context,
-                   (const void *)sp,
-                   sizeof(tfm_fault_context));
-    }
-
-    LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
-    while (1) {
-        ;
-    }
-}
-#elif defined(__ARM_ARCH_8M_BASE__)
-/**
- * \brief Overwrites default Hard fault handler.
- *
- * In case of a baseline implementation fault conditions that would generate a
- * SecureFault in a mainline implementation instead generate a Secure HardFault.
- */
-void HardFault_Handler(void)
-{
-    /* In a baseline implementation there is no way, to find out whether this is
-     * a hard fault triggered directly, or another fault that has been
-     * escalated.
-     */
-    while (1) {
-        ;
-    }
-}
-#else
-#error "Unsupported ARM Architecture."
-#endif
-
-#if defined(__ARM_ARCH_8M_MAIN__)
-__attribute__((naked)) void SVC_Handler(void)
-{
-    __ASM volatile(
-    "TST     lr, #4\n"  /* Check store SP in thread mode to r0 */
-    "IT      EQ\n"
-    "BXEQ    lr\n"
-    "MRS     r0, PSP\n"
-    "MOV     r1, lr\n"
-    "BL      SVCHandler_main\n"
-    "BX      r0\n"
-    );
-}
-#elif defined(__ARM_ARCH_8M_BASE__)
-__attribute__((naked)) void SVC_Handler(void)
-{
-    __ASM volatile(
-    ".syntax unified\n"
-    "MOVS    r0, #4\n"  /* Check store SP in thread mode to r0 */
-    "MOV     r1, lr\n"
-    "TST     r0, r1\n"
-    "BEQ     handler\n"
-    "MRS     r0, PSP\n"  /* Coming from thread mode */
-    "B sp_stored\n"
-    "handler:\n"
-    "BX      lr\n"  /* Coming from handler mode */
-    "sp_stored:\n"
-    "MOV     r1, lr\n"
-    "BL      SVCHandler_main\n"
-    "BX      r0\n"
-    );
-}
-#else
-#error "Unsupported ARM Architecture."
 #endif
 
 uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)

@@ -7,7 +7,7 @@
 #ifndef __TFM_THREAD_H__
 #define __TFM_THREAD_H__
 
-#include "tfm_arch_v8m.h"
+#include "tfm_arch.h"
 #include "cmsis_compiler.h"
 
 /* Status code */
@@ -34,6 +34,10 @@
 
 /* Thread entry function type */
 typedef void *(*tfm_thrd_func_t)(void *);
+
+struct tfm_state_context {
+    struct tfm_state_context_ext  ctxb;
+};
 
 /* Thread context */
 struct tfm_thrd_ctx {

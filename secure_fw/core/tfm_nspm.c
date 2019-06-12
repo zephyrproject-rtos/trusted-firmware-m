@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include "secure_utilities.h"
+#include "tfm_arch.h"
 #include "tfm_api.h"
 #if TFM_PSA_API
 #include "tfm_utils.h"

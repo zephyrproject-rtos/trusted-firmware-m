@@ -47,6 +47,7 @@ if(TFM_PSA_API)
 else()
 	include(${SECURE_FW_DIR}/core/CMakeLists.inc)
 endif()
+include(${SECURE_FW_DIR}/core/arch/CMakeLists.inc)
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)

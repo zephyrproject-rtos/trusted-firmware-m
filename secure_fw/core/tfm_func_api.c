@@ -16,6 +16,7 @@
 #include "secure_fw/spm/spm_api.h"
 #include "region_defs.h"
 #include "tfm_api.h"
+#include "tfm_arch.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 

@@ -9,8 +9,8 @@
 #define __TFM_SECURE_API_H__
 
 #include <arm_cmse.h>
+#include "tfm_arch.h"
 #include "tfm_svc.h"
-#include "secure_utilities.h"
 #include "tfm_core.h"
 #include "tfm_api.h"
 #include "bl2/include/tfm_boot_status.h"

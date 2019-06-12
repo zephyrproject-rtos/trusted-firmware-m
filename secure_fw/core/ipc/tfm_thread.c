@@ -5,7 +5,7 @@
  *
  */
 #include <inttypes.h>
-#include "tfm_arch_v8m.h"
+#include "tfm_arch.h"
 #include "tfm_thread.h"
 #include "tfm_utils.h"
 #include "tfm_memory_utils.h"
@@ -93,6 +93,41 @@ void tfm_thrd_init(struct tfm_thrd_ctx *pth,
     pth->sp_top = sp_top;
 }
 
+__attribute__((section("SFN")))
+static void exit_zone(void)
+{
+    tfm_thrd_exit();
+}
+
+static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
+                                        uint32_t param, uint32_t pfn,
+                                        uint32_t sp_base, uint32_t sp_limit)
+{
+    /*
+     * For security consideration, set unused registers into ZERO;
+     * and only necessary registers are set here.
+     */
+    struct tfm_state_context_base *p_ctxa =
+                            (struct tfm_state_context_base *)sp_base;
+
+    /*
+     * Shift back SP to leave space for holding base context
+     * since thread is kicked off through exception return.
+     */
+    p_ctxa--;
+
+    /* Basic context is considerate at thread start.*/
+    tfm_memset(p_ctxa, 0, sizeof(*p_ctxa));
+    p_ctxa->r0 = param;
+    p_ctxa->ra = pfn;
+    p_ctxa->ra_lr = (uint32_t)exit_zone;
+    p_ctxa->xpsr = XPSR_T32;
+
+    tfm_memset(ctx, 0, sizeof(*ctx));
+
+    tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa, sp_limit);
+}
+
 uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth)
 {
     /* Validate parameters before really start */
@@ -104,9 +139,9 @@ uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth)
     }
 
     /* Thread management runs in handler mode; set context for thread mode. */
-    tfm_initialize_context(&pth->state_ctx,
-                           (uint32_t)pth->param, (uint32_t)pth->pfn,
-                           (uint32_t)pth->sp_base, (uint32_t)pth->sp_top);
+    tfm_thrd_initialize_context(&pth->state_ctx,
+                                (uint32_t)pth->param, (uint32_t)pth->pfn,
+                                (uint32_t)pth->sp_base, (uint32_t)pth->sp_top);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, pth);
@@ -128,7 +163,7 @@ void tfm_thrd_set_status(struct tfm_thrd_ctx *pth, uint32_t new_status)
 /* Scheduling won't happen immediately but after the exception returns */
 void tfm_thrd_activate_schedule(void)
 {
-    tfm_trigger_pendsv();
+    tfm_arch_trigger_pendsv();
 }
 
 void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
@@ -149,7 +184,7 @@ void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
 void tfm_svcall_thrd_exit(void)
 {
     CURR_THRD->status = THRD_STAT_DETACH;
-    tfm_trigger_pendsv();
+    tfm_arch_trigger_pendsv();
 }
 
 __attribute__((section("SFN")))

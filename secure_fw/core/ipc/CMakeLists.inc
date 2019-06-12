@@ -36,7 +36,6 @@ elseif (TFM_PSA_API)
 	set (SS_IPC_C_SRC "${SS_IPC_DIR}/tfm_svcalls.c"
 			"${SS_IPC_DIR}/psa_service.c"
 			"${SS_IPC_DIR}/psa_client.c"
-			"${SS_IPC_DIR}/tfm_arch_v8m.c"
 			"${SS_IPC_DIR}/tfm_thread.c"
 			"${SS_IPC_DIR}/tfm_wait.c"
 			"${SS_IPC_DIR}/tfm_utils.c"
@@ -63,6 +62,7 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/ipc ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/ipc/include ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/arch/include ABSOLUTE)
 
 if(NOT DEFINED PLATFORM_CMAKE_FILE)
 	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")

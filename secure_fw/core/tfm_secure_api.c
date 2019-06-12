@@ -11,7 +11,6 @@
 #include <arm_cmse.h>
 #include "tfm_secure_api.h"
 #include "tfm_nspm.h"
-#include "secure_utilities.h"
 #include "uart_stdout.h"
 #include "secure_fw/spm/spm_api.h"
 #include "region_defs.h"
