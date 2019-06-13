@@ -8,13 +8,15 @@
 #ifndef __PSA_SERVICE_H__
 #define __PSA_SERVICE_H__
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include "psa/error.h"
+#include "psa/client.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <inttypes.h>
-
-#include "psa/client.h"
 
 /********************** PSA Secure Partition Macros and Types ****************/
 

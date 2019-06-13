@@ -8,12 +8,14 @@
 #ifndef __PSA_CLIENT_H__
 #define __PSA_CLIENT_H__
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include "psa/error.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
-#include <stddef.h>
 
 /*********************** PSA Client Macros and Types *************************/
 
@@ -22,7 +24,6 @@ extern "C" {
 #define PSA_VERSION_NONE       (0)
 
 /* PSA response types */
-#define PSA_SUCCESS            (0)
 #define PSA_CONNECTION_REFUSED (INT32_MIN + 1)
 #define PSA_CONNECTION_BUSY    (INT32_MIN + 2)
 #define PSA_DROP_CONNECTION    (INT32_MIN)
@@ -30,7 +31,6 @@ extern "C" {
 /* PSA message handles */
 #define PSA_NULL_HANDLE        ((psa_handle_t)0)
 
-typedef int32_t psa_status_t;
 typedef int32_t psa_handle_t;
 
 /**
