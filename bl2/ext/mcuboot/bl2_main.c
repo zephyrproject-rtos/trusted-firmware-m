@@ -35,12 +35,14 @@
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
 /* Macros to pick linker symbols */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+#endif
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -93,11 +95,13 @@ static void do_boot(struct boot_rsp *rsp)
 
     stdio_uninit();
 
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     /* Restore the Main Stack Pointer Limit register's reset value
      * before passing execution to runtime firmware to make the
      * bootloader transparent to it.
      */
     __set_MSPLIM(0);
+#endif
 
     __set_MSP(vt->msp);
     __DSB();
@@ -108,12 +112,16 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     uint32_t msp_stack_bottom =
             (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+#endif
     struct boot_rsp rsp;
     int rc;
 
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     __set_MSPLIM(msp_stack_bottom);
+#endif
 
     stdio_init();
 
