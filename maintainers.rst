@@ -36,9 +36,9 @@ Tamas Ban
 Secure Storage
 ~~~~~~~~~~~~~~
 
-Marc Moreno Berengue
-    :email: `marc.morenoberengue@arm.com <marc.morenoberengue@arm.com>`__
-    :github: `mmorenobarm <https://github.com/mmorenobarm>`__
+Jamie Fox
+    :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
+    :github: `jf549 <https://github.com/jf549>`__
 
 Crypto
 ~~~~~~
