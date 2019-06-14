@@ -497,8 +497,8 @@ static int32_t tfm_return_from_partition(uint32_t *excReturn)
             (struct tfm_exc_stack_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
-        extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
-        uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
+        REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
+        uint32_t psp_stack_bottom = (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
        __set_PSPLIM(psp_stack_bottom);
 
         /* FIXME: The condition should be removed once all the secure service
@@ -829,7 +829,6 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     uint32_t running_partition_flags =
             tfm_spm_partition_get_flags(running_partition_idx);
     int32_t flags = 0;
-    void *rangeptr;
 
     if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) || (size == 0)) {
         /* This handler should only be called from a secure partition. */
@@ -848,15 +847,13 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     }
 
     /* Check if partition access to address would fail */
-    rangeptr = cmse_check_address_range((void *)ptr, size, flags);
-
-    /* Get regions associated with address */
-    cmse_address_info_t addr_info = cmse_TT((void *)ptr);
-
-    if (rangeptr == NULL) {
+    if (cmse_check_address_range((void *)ptr, size, flags) == NULL) {
         svc_args[0] = TFM_ERROR_INVALID_PARAMETER;
         return;
     }
+
+    /* Get regions associated with address */
+    cmse_address_info_t addr_info = cmse_TT((void *)ptr);
 
     if (addr_info.flags.secure) {
 #if TFM_LVL == 1

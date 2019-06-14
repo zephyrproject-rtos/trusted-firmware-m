@@ -195,8 +195,8 @@ int main(void)
 #ifndef TFM_PSA_API
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
-    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
-    uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
+    REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
+    uint32_t psp_stack_bottom = (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
     __set_PSPLIM(psp_stack_bottom);
 

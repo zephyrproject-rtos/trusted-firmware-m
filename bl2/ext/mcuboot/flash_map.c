@@ -95,7 +95,7 @@ int flash_device_base(uint8_t fd_id, uintptr_t *ret)
     if (fd_id != FLASH_DEVICE_ID) {
         BOOT_LOG_ERR("invalid flash ID %d; expected %d",
                      fd_id, FLASH_DEVICE_ID);
-        return -EINVAL;
+        return -1;
     }
     *ret = FLASH_DEVICE_BASE;
     return 0;

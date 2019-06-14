@@ -56,6 +56,43 @@ if("ASM" IN_LIST languages)
 	include(Compiler/GNUARM-ASM)
 endif()
 
+function(compiler_get_preinclude_option_string INCLUDE RES)
+	set(${RES} "-include ${INCLUDE}" PARENT_SCOPE)
+endfunction()
+
+function(compiler_set_preinclude_file)
+	#Option (on/off) arguments.
+	set( _OPTIONS_ARGS GLOBAL)
+	#Single option arguments.
+	set( _ONE_VALUE_ARGS INCLUDE)
+	#List arguments
+	set( _MULTI_VALUE_ARGS TARGETS FILES)
+	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
+	if(NOT DEFINED _MY_PARAMS)
+        	message(FATAL_ERROR "compiler_set_preinclude_file: missing mandatory parameter INCLUDE.")
+	endif()
+	compiler_get_preinclude_option_string(${INCLUDE} _OPTION_STRING)
+	#If include is to be set globally, we ignore TARGETS and FILES
+	if(_MY_PARAMS_GLOBAL)
+		set_property(DIRECTORY ${CMAKE_SOURCE_DIR} APPEND PROPERTY COMPILE_OPTIONS "${_OPTION_STRING}")
+	else()
+		#If GLOBAL was not passed, then either TARGETS or FILES must be present
+		if(NOT DEFINED _MY_PARAM_TARGETS AND NOT DEFINED _MY_PARAM_FILES)
+			message(FATAL_ERROR "compiler_set_preinclude_file: missing mandatory parameter. Either TARGETS and/or FILES must be specified.")
+		endif()
+		#Iterate over targets. Note: call embedded_set_target_compile_flags to
+		#allow the target to be defined after this function call. This helps
+		#modularisation
+		foreach(_TGT IN_LISTS _MY_PARAM_TARGETS)
+			embedded_set_target_compile_flags(TARGET ${_TGT} LANGUAGE "C" FLAGS "${_OPTION_STRING}")
+		endforeach()
+		#Iterate over files
+		foreach(_FILE IN_LISTS _MY_PARAM_FILES)
+			set_property(FILE ${_FILE} APPEND PROPERTY COMPILE_OPTIONS "${_OPTION_STRING}")
+		endforeach()
+	endif()
+endfunction()
+
 function(compiler_set_linkercmdfile)
 	set( _OPTIONS_ARGS )							#Option (on/off) arguments.
 	set( _ONE_VALUE_ARGS TARGET PATH)				#Single option arguments.

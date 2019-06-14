@@ -86,12 +86,13 @@ static struct test_suite_t test_suites[] = {
     /* Non-secure IPC test cases */
     {&register_testsuite_ns_ipc_interface, 0, 0, 0},
 #endif
+    /* End of test suites */
+    {0, 0, 0, 0}
 };
 
 void start_integ_test(void)
 {
-    integ_test("Non-secure", test_suites,
-               sizeof(test_suites)/sizeof(test_suites[0]));
+    integ_test("Non-secure", test_suites);
 }
 
 /* Service stand-in for NS tests. To be called from a non-secure context */

@@ -68,7 +68,7 @@ attest_token_decode_set_pub_key(struct attest_token_decode_context *me,
     (void)me; /* unused parameter */
     (void)cose_pub_key; /* unused parameter */
 
-    return 0;
+    return ATTEST_TOKEN_ERR_SUCCESS;
 }
 
 
@@ -279,7 +279,7 @@ attest_token_decode_get_int(struct attest_token_decode_context *me,
         goto Done;
     }
 
-    QCBORDecode_Init(&decode_context, me->payload, 0);
+    QCBORDecode_Init(&decode_context, me->payload, QCBOR_DECODE_MODE_NORMAL);
 
     return_value = qcbor_util_get_item_in_map(&decode_context,
                                              label,
@@ -327,7 +327,7 @@ attest_token_decode_get_uint(struct attest_token_decode_context *me,
         goto Done;
     }
 
-    QCBORDecode_Init(&decode_context, me->payload, 0);
+    QCBORDecode_Init(&decode_context, me->payload, QCBOR_DECODE_MODE_NORMAL);
 
     return_value = qcbor_util_get_item_in_map(&decode_context,
                                              label,
@@ -417,7 +417,7 @@ attest_token_decode_get_iat_simple(struct attest_token_decode_context *me,
         goto Done;
     }
 
-    QCBORDecode_Init(&decode_context, me->payload, 0);
+    QCBORDecode_Init(&decode_context, me->payload, QCBOR_DECODE_MODE_NORMAL);
 
     return_value = qcbor_util_get_items_in_map(&decode_context,
                                               list);
@@ -697,7 +697,7 @@ attest_token_get_sw_component(struct attest_token_decode_context *me,
         goto Done;
     }
 
-    QCBORDecode_Init(&decode_context, me->payload, 0);
+    QCBORDecode_Init(&decode_context, me->payload, QCBOR_DECODE_MODE_NORMAL);
 
     /* Find the map containing all the SW Components */
     return_value = qcbor_util_decode_to_labeled_item(&decode_context,

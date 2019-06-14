@@ -576,7 +576,7 @@ void QCBOREncode_CloseMapOrArray(QCBOREncodeContext *me,
  */
 QCBORError QCBOREncode_Finish(QCBOREncodeContext *me, UsefulBufC *pEncodedCBOR)
 {
-   QCBORError uReturn = me->uError;
+   QCBORError uReturn = (QCBORError) me->uError;
 
    if(uReturn != QCBOR_SUCCESS) {
       goto Done;

@@ -39,7 +39,7 @@ extern "C" {
  *          "... error: 'err_msg' declared as an array with a negative size"
  */
 #define SST_UTILS_BOUND_CHECK(err_msg, data_size, data_buf_size) \
-typedef char err_msg[(data_size <= data_buf_size) - 1]
+typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
 
 /**
  * \brief Macro to get the number of bytes aligned with the

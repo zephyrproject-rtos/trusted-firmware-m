@@ -232,7 +232,7 @@ qcbor_util_get_top_level_item_in_map(struct q_useful_buf_c payload,
         goto Done;
     }
 
-    QCBORDecode_Init(&decode_context, payload, 0);
+    QCBORDecode_Init(&decode_context, payload, QCBOR_DECODE_MODE_NORMAL);
 
     return_value = qcbor_util_get_item_in_map(&decode_context,
                                               label,

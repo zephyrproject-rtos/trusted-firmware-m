@@ -65,6 +65,8 @@ static struct test_suite_t test_suites[] = {
 #endif
 #endif /* SERVICES_TEST_S */
 #endif /* TFM_LVL == 3 */
+    /* End of test suites */
+    {0, 0, 0, 0}
 };
 
 static void setup_integ_test(void)
@@ -84,8 +86,6 @@ static void tear_down_integ_test(void)
 void start_integ_test(void)
 {
     setup_integ_test();
-    integ_test("Secure",
-               test_suites,
-               sizeof(test_suites)/sizeof(test_suites[0]));
+    integ_test("Secure", test_suites);
     tear_down_integ_test();
 }

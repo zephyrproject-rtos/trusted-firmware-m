@@ -660,7 +660,7 @@ inline static QCBORError DecodeBigNum(QCBORItem *pDecodedItem)
 /*
  The epoch formatted date. Turns lots of different forms of encoding date into uniform one
  */
-static int DecodeDateEpoch(QCBORItem *pDecodedItem)
+static QCBORError DecodeDateEpoch(QCBORItem *pDecodedItem)
 {
    // Stack usage: 1
    QCBORError nReturn = QCBOR_SUCCESS;
@@ -688,7 +688,7 @@ static int DecodeDateEpoch(QCBORItem *pDecodedItem)
                nReturn = QCBOR_ERR_DATE_OVERFLOW;
                goto Done;
             }
-            pDecodedItem->val.epochDate.nSeconds = d; // Float to integer conversion happening here.
+            pDecodedItem->val.epochDate.nSeconds = (int64_t) d; // Float to integer conversion happening here.
             pDecodedItem->val.epochDate.fSecondsFraction = d - pDecodedItem->val.epochDate.nSeconds;
          }
          break;
@@ -1199,7 +1199,7 @@ int QCBORDecode_IsTagged(QCBORDecodeContext *me, const QCBORItem *pItem, uint64_
  */
 QCBORError QCBORDecode_Finish(QCBORDecodeContext *me)
 {
-   int nReturn = QCBOR_SUCCESS;
+   QCBORError nReturn = QCBOR_SUCCESS;
 
    // Error out if all the maps/arrays are not closed out
    if(DecodeNesting_IsNested(&(me->nesting))) {

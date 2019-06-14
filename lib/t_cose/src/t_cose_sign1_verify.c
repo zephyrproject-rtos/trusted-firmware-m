@@ -92,7 +92,7 @@ static int parse_protected_headers(struct q_useful_buf_c protected_headers,
     QCBORDecodeContext  decode_context;
     QCBORItem           item;
 
-    QCBORDecode_Init(&decode_context, protected_headers, 0);
+    QCBORDecode_Init(&decode_context, protected_headers, QCBOR_DECODE_MODE_NORMAL);
 
     if(qcbor_util_get_item_in_map(&decode_context,
                                  COSE_HEADER_PARAM_ALG,
