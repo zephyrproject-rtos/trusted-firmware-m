@@ -379,6 +379,7 @@ SECTIONS
 
     .{{manifest.manifest.name}}_BSS : ALIGN(32)
     {
+        start_of_{{manifest.manifest.name}} = .;
     {% if manifest.manifest.tfm_linker_pattern.library_list %}
         {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
@@ -391,6 +392,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
+        . += (. - start_of_{{manifest.manifest.name}}) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
@@ -455,6 +457,7 @@ SECTIONS
 
     .{{manifest.manifest.name}}_BSS : ALIGN(32)
     {
+        start_of_{{manifest.manifest.name}} = .;
     {% if manifest.manifest.tfm_linker_pattern.library_list %}
         {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
@@ -467,6 +470,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
+        . += (. - start_of_{{manifest.manifest.name}}) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
     Image$${{manifest.manifest.name}}_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_BSS);
