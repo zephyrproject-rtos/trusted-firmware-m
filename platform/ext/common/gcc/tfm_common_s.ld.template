@@ -156,14 +156,14 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}} : ALIGN(32)
     {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}(.rodata*)
         {% endfor %}
@@ -194,14 +194,14 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}} : ALIGN(32)
     {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}(.rodata*)
         {% endfor %}
@@ -363,13 +363,13 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_DATA : ALIGN(32)
     {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
@@ -381,14 +381,14 @@ SECTIONS
     .{{manifest.manifest.name}}_BSS : ALIGN(32)
     {
         start_of_{{manifest.manifest.name}} = .;
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}
@@ -441,13 +441,13 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_DATA : ALIGN(32)
     {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
@@ -459,14 +459,14 @@ SECTIONS
     .{{manifest.manifest.name}}_BSS : ALIGN(32)
     {
         start_of_{{manifest.manifest.name}} = .;
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}

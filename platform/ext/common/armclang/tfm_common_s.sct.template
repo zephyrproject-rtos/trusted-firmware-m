@@ -55,13 +55,13 @@ LR_CODE S_CODE_START {
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{manifest.manifest.name}} +0 ALIGN 32 {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
@@ -94,13 +94,13 @@ LR_CODE S_CODE_START {
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{manifest.manifest.name}} +0 ALIGN 32 {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
@@ -172,13 +172,13 @@ LR_CODE S_CODE_START {
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{manifest.manifest.name}}_DATA +0 ALIGN 32 {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
@@ -225,13 +225,13 @@ LR_CODE S_CODE_START {
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{manifest.manifest.name}}_DATA +0 ALIGN 32 {
-    {% if manifest.manifest.tfm_linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.library_list %}
+    {% if manifest.manifest.linker_pattern.library_list %}
+        {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.tfm_linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.tfm_linker_pattern.object_list %}
+    {% if manifest.manifest.linker_pattern.object_list %}
+        {% for pattern in manifest.manifest.linker_pattern.object_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}

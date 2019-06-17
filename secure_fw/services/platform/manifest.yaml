@@ -31,7 +31,7 @@
       "minor_policy": "strict"
      }
   ],
-  "tfm_linker_pattern": {
+  "linker_pattern": {
     "library_list": [
       "*tfm_platform*"
     ]

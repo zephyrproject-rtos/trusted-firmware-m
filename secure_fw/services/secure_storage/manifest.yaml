@@ -96,7 +96,7 @@
     "minor_policy": "STRICT"
    }
   ],
-  "tfm_linker_pattern": {
+  "linker_pattern": {
     "library_list": [
       "*tfm_storage*"
     ]

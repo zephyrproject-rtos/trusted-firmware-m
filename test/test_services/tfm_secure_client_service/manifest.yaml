@@ -42,7 +42,7 @@
 # Currently there is no platform dependent section of the manifest file,
 # therefore all platform dependent files must be listed here which can be used
 # on any supported platform.
-  "tfm_linker_pattern": {
+  "linker_pattern": {
     "object_list": [
       "*tfm_secure_client_service.*",
       "*test_framework*",

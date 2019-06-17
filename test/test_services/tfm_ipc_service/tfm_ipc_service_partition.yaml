@@ -49,7 +49,7 @@
       "minor_policy": "STRICT"
     }
   ],
-  "tfm_linker_pattern": {
+  "linker_pattern": {
     "object_list": [
       "*ipc_service_test.*"
     ]
