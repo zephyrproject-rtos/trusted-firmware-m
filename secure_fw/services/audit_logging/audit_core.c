@@ -552,7 +552,7 @@ enum psa_audit_err audit_core_add_record(const struct psa_audit_record *record)
     int32_t partition_id;
 
     /* Get the value of the partition ID of the caller through TFM secure API */
-    if (tfm_core_get_caller_client_id(&partition_id) != TFM_SUCCESS) {
+    if (tfm_core_get_caller_client_id(&partition_id) != (int32_t)TFM_SUCCESS) {
         return PSA_AUDIT_ERR_FAILURE;
     }
 
