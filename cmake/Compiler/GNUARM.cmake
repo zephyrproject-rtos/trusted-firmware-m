@@ -31,7 +31,7 @@ macro(__compiler_gnuarm lang)
     string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g -O0")
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
-    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O3 -g")
+    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O3 -g -DNDEBUG")
 
     set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
     set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
