@@ -50,6 +50,13 @@ psa_ps_status_t sst_crypto_init(void);
 psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key);
 
 /**
+ * \brief Destroys the transient key used for crypto operations.
+ *
+ * \return Returns values as described in \ref psa_ps_status_t
+ */
+psa_ps_status_t sst_crypto_destroykey(void);
+
+/**
  * \brief Sets the key to use for crypto operations.
  *
  * \param[in] key_len  Key length

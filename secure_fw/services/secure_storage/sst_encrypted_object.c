@@ -105,10 +105,11 @@ static psa_ps_status_t sst_object_auth_decrypt(uint32_t fid,
                                       sizeof(*obj) - sizeof(obj->header.crypto),
                                       &out_len);
     if (err != PSA_PS_SUCCESS || out_len != cur_size) {
+        (void)sst_crypto_destroykey();
         return err;
     }
 
-    return PSA_PS_SUCCESS;
+    return sst_crypto_destroykey();
 }
 
 /**
@@ -153,12 +154,13 @@ static psa_ps_status_t sst_object_auth_encrypt(uint32_t fid,
                                      sizeof(sst_crypto_buf),
                                      &out_len);
     if (err != PSA_PS_SUCCESS || out_len != cur_size) {
+        (void)sst_crypto_destroykey();
         return err;
     }
 
     (void)tfm_memcpy(p_obj_data, sst_crypto_buf, cur_size);
 
-    return PSA_PS_SUCCESS;
+    return sst_crypto_destroykey();
 }
 
 psa_ps_status_t sst_encrypted_object_read(uint32_t fid,

@@ -60,24 +60,12 @@ psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key)
 {
     psa_status_t status;
     psa_key_policy_t key_policy = PSA_KEY_POLICY_INIT;
-    static bool key_is_allocated = false;
-
-    /* Destroy the previous key if it exists */
-    if (key_is_allocated) {
-        status = psa_destroy_key(sst_key_handle);
-        if (status != PSA_SUCCESS) {
-            return PSA_PS_ERROR_OPERATION_FAILED;
-        }
-        key_is_allocated = false;
-    }
 
     /* Allocate a transient key handle for SST */
     status = psa_allocate_key(&sst_key_handle);
     if (status != PSA_SUCCESS) {
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
-
-    key_is_allocated = true;
 
     /* Set the key policy */
     psa_key_policy_set_usage(&key_policy, SST_KEY_USAGE, SST_CRYPTO_ALG);
@@ -87,6 +75,19 @@ psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key)
     }
 
     status = psa_import_key(sst_key_handle, SST_KEY_TYPE, key, key_len);
+    if (status != PSA_SUCCESS) {
+        return PSA_PS_ERROR_OPERATION_FAILED;
+    }
+
+    return PSA_PS_SUCCESS;
+}
+
+psa_ps_status_t sst_crypto_destroykey(void)
+{
+    psa_status_t status;
+
+    /* Destroy the transient key */
+    status = psa_destroy_key(sst_key_handle);
     if (status != PSA_SUCCESS) {
         return PSA_PS_ERROR_OPERATION_FAILED;
     }

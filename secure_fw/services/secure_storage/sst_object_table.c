@@ -585,6 +585,12 @@ static psa_ps_status_t sst_object_table_save_table(
 #endif /* SST_ROLLBACK_PROTECTION */
 
     if (err != PSA_PS_SUCCESS) {
+        (void)sst_crypto_destroykey();
+        return err;
+    }
+
+    err = sst_crypto_destroykey();
+    if (err != PSA_PS_SUCCESS) {
         return err;
     }
 #endif /* SST_ENCRYPTION */
@@ -873,18 +879,24 @@ psa_ps_status_t sst_object_table_init(uint8_t *obj_data)
     /* Initialize SST NV counters */
     err = sst_init_nv_counter();
     if (err != PSA_PS_SUCCESS) {
+        (void)sst_crypto_destroykey();
         return err;
     }
 
     /* Authenticate table */
     err = sst_object_table_nvc_authenticate(&init_ctx);
     if (err != PSA_PS_SUCCESS) {
+        (void)sst_crypto_destroykey();
         return err;
     }
 #else
     sst_object_table_authenticate_ctx_tables(&init_ctx);
 #endif /* SST_ROLLBACK_PROTECTION */
 
+    err = sst_crypto_destroykey();
+    if (err != PSA_PS_SUCCESS) {
+        return err;
+    }
 #endif /* SST_ENCRYPTION */
 
     /* Check tables version */
