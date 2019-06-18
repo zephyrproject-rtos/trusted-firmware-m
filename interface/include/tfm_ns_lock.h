@@ -23,9 +23,9 @@ typedef int32_t (*veneer_fn) (uint32_t arg0, uint32_t arg1,
  * \details To be called from the wrapper API interface
  */
 
-uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
-                              uint32_t arg0, uint32_t arg1,
-                              uint32_t arg2, uint32_t arg3);
+int32_t tfm_ns_lock_dispatch(veneer_fn fn,
+                             uint32_t arg0, uint32_t arg1,
+                             uint32_t arg2, uint32_t arg3);
 
 /**
  * \brief NS world, Init NS lock

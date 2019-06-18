@@ -38,26 +38,26 @@ static const osMutexAttr_t ns_lock_attrib = {
 /**
  * \brief NS world, NS lock based dispatcher
  */
-uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
-                              uint32_t arg0, uint32_t arg1,
-                              uint32_t arg2, uint32_t arg3)
+int32_t tfm_ns_lock_dispatch(veneer_fn fn,
+                             uint32_t arg0, uint32_t arg1,
+                             uint32_t arg2, uint32_t arg3)
 {
-    uint32_t result;
+    int32_t result;
 
     /* Check the NS lock has been initialized */
     if (ns_lock.init == false) {
-        return TFM_ERROR_GENERIC;
+        return (int32_t)TFM_ERROR_GENERIC;
     }
 
     /* TFM request protected by NS lock */
     if (osMutexAcquire(ns_lock.id, osWaitForever) != osOK) {
-        return TFM_ERROR_GENERIC;
+        return (int32_t)TFM_ERROR_GENERIC;
     }
 
     result = fn(arg0, arg1, arg2, arg3);
 
     if (osMutexRelease(ns_lock.id) != osOK) {
-        return TFM_ERROR_GENERIC;
+        return (int32_t)TFM_ERROR_GENERIC;
     }
 
     return result;
