@@ -28,21 +28,17 @@ enum spm_err_t {
     SPM_ERR_INVALID_CONFIG,
 };
 
-enum spm_part_state_t {
-    SPM_PARTITION_STATE_UNINIT = 0,
-    SPM_PARTITION_STATE_IDLE,
-    SPM_PARTITION_STATE_RUNNING,
-    SPM_PARTITION_STATE_HANDLING_IRQ,
-    SPM_PARTITION_STATE_SUSPENDED,
-    SPM_PARTITION_STATE_BLOCKED,
-    SPM_PARTITION_STATE_CLOSED
-};
+#define SPM_PARTITION_STATE_UNINIT       0
+#define SPM_PARTITION_STATE_IDLE         1
+#define SPM_PARTITION_STATE_RUNNING      2
+#define SPM_PARTITION_STATE_HANDLING_IRQ 3
+#define SPM_PARTITION_STATE_SUSPENDED    4
+#define SPM_PARTITION_STATE_BLOCKED      5
+#define SPM_PARTITION_STATE_CLOSED       6
 
-enum spm_part_flag_mask_t {
-    SPM_PART_FLAG_APP_ROT = 0x01,
-    SPM_PART_FLAG_PSA_ROT = 0x02,
-    SPM_PART_FLAG_IPC     = 0x04
-};
+#define SPM_PART_FLAG_APP_ROT 0x01
+#define SPM_PART_FLAG_PSA_ROT 0x02
+#define SPM_PART_FLAG_IPC     0x04
 
 /**
  * \brief Holds the iovec parameters that are passed to a service
@@ -339,7 +335,12 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
  * \return Error code \ref spm_err_t
  *
  * \note This function doesn't check if partition_idx is valid.
- * \note share has to have the value set of \ref tfm_buffer_share_region_e
+ * \note share has to have one of the buffer share values:
+ *           - TFM_BUFFER_SHARE_DISABLE
+ *           - TFM_BUFFER_SHARE_NS_CODE
+ *           - TFM_BUFFER_SHARE_SCRATCH
+ *           - TFM_BUFFER_SHARE_PRIV
+ *           - TFM_BUFFER_SHARE_DEFAULT
  */
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share);

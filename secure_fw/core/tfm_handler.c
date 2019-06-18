@@ -28,7 +28,7 @@
 /* This SVC handler is called when a secure partition requests access to a
  * buffer area
  */
-extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
+extern void tfm_core_set_buffer_area_handler(const uint32_t args[]);
 #ifdef TFM_PSA_API
 extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
 #endif

@@ -237,8 +237,7 @@ enum spm_err_t tfm_spm_hal_partition_sandbox_deconfig(
  *
  * \return Returns the result operation as per \ref spm_err_t
  */
-enum spm_err_t tfm_spm_hal_set_share_region(
-                                          enum tfm_buffer_share_region_e share);
+enum spm_err_t tfm_spm_hal_set_share_region(uint32_t share);
 #endif
 
 #endif /* __TFM_SPM_HAL_H__ */

@@ -282,8 +282,7 @@ enum spm_err_t tfm_spm_hal_partition_sandbox_deconfig(
 /**
  * Set share region to which the partition needs access
  */
-enum spm_err_t tfm_spm_hal_set_share_region(
-        enum tfm_buffer_share_region_e share)
+enum spm_err_t tfm_spm_hal_set_share_region(uint32_t share)
 {
     struct mpu_armv8m_region_cfg_t region_cfg;
     enum spm_err_t res = SPM_ERR_INVALID_CONFIG;

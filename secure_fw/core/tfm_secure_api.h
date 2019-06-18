@@ -51,13 +51,12 @@ struct tfm_sfn_req_s {
     uint32_t ns_caller;
 };
 
-enum tfm_buffer_share_region_e {
-    TFM_BUFFER_SHARE_DISABLE,
-    TFM_BUFFER_SHARE_NS_CODE,
-    TFM_BUFFER_SHARE_SCRATCH,
-    TFM_BUFFER_SHARE_PRIV, /* only for TCB in level 2, all in level 1 */
-    TFM_BUFFER_SHARE_DEFAULT,
-};
+#define TFM_BUFFER_SHARE_DISABLE 0U
+#define TFM_BUFFER_SHARE_NS_CODE 1U
+#define TFM_BUFFER_SHARE_SCRATCH 2U
+/* only for TCB in level 2, all in level 1 */
+#define TFM_BUFFER_SHARE_PRIV    3U
+#define TFM_BUFFER_SHARE_DEFAULT 4U
 
 enum tfm_ns_region_e {
     TFM_NS_REGION_CODE = 0,
@@ -73,7 +72,7 @@ enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RW = 2,
 };
 
-extern int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share);
+extern int32_t tfm_core_set_buffer_area(uint32_t share);
 
 extern int32_t tfm_core_validate_secure_caller(void);
 
@@ -107,9 +106,9 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
  * \return TFM_SUCCESS if the partition has access to the memory range,
  *         TFM_ERROR_GENERIC otherwise.
  */
-int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           uint32_t ns_caller,
-                                           uint32_t privileged);
+enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
+                                                     uint32_t ns_caller,
+                                                     uint32_t privileged);
 
 /**
  * \brief Check whether the current partition has write access to a memory range
@@ -127,9 +126,9 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
  * \return TFM_SUCCESS if the partition has access to the memory range,
  *         TFM_ERROR_GENERIC otherwise.
  */
-int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            uint32_t ns_caller,
-                                            uint32_t privileged);
+enum tfm_status_e tfm_core_has_write_access_to_region(void *p, size_t s,
+                                                      uint32_t ns_caller,
+                                                      uint32_t privileged);
 
 void tfm_enable_irq(psa_signal_t irq_signal);
 void tfm_disable_irq(psa_signal_t irq_signal);
@@ -199,7 +198,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
     desc.iovec_api = iovec_api;
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* FixMe: Error severity TBD */
-        return TFM_ERROR_GENERIC;
+        return (int32_t)TFM_ERROR_GENERIC;
     } else {
 #if TFM_LVL == 1
         if (desc.ns_caller) {

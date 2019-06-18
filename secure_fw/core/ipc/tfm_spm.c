@@ -450,7 +450,7 @@ int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged)
 {
-    int32_t err;
+    enum tfm_status_e err;
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {

@@ -143,7 +143,7 @@ int32_t tfm_core_init(void)
     return 0;
 }
 
-static int32_t tfm_core_set_secure_exception_priorities(void)
+static void tfm_core_set_secure_exception_priorities(void)
 {
     tfm_arch_prioritize_secure_exception();
 
@@ -166,8 +166,6 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
      * priority level configurable on the platform, just below 0x80.
      */
     NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
-
-    return TFM_SUCCESS;
 }
 
 void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
@@ -181,10 +179,10 @@ void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
         /* FixMe: this is a placeholder for checks to be performed before
          * allowing execution of reset
          */
-        *res_ptr = TFM_SUCCESS;
+        *res_ptr = (uint32_t)TFM_SUCCESS;
         break;
     default:
-        *res_ptr = TFM_ERROR_INVALID_PARAMETER;
+        *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
 }
 

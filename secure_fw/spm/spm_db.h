@@ -22,17 +22,13 @@ typedef psa_status_t(*sp_init_function)(void);
 #define TFM_PARTITION_TYPE_PSA   "PSA-ROT"
 
 #ifdef TFM_PSA_API
-enum tfm_partition_priority {
-    TFM_PRIORITY_LOW = THRD_PRIOR_LOWEST,
-    TFM_PRIORITY_NORMAL = THRD_PRIOR_MEDIUM,
-    TFM_PRIORITY_HIGH = THRD_PRIOR_HIGHEST,
-};
+#define TFM_PRIORITY_LOW    THRD_PRIOR_LOWEST
+#define TFM_PRIORITY_NORMAL THRD_PRIOR_MEDIUM
+#define TFM_PRIORITY_HIGH   THRD_PRIOR_HIGHEST
 #else
-enum tfm_partition_priority {
-    TFM_PRIORITY_LOW = 0xFF,
-    TFM_PRIORITY_NORMAL = 0x7F,
-    TFM_PRIORITY_HIGH = 0,
-};
+#define TFM_PRIORITY_LOW    0xFF
+#define TFM_PRIORITY_NORMAL 0x7F
+#define TFM_PRIORITY_HIGH   0
 #endif
 
 #define TFM_PRIORITY(LEVEL)      TFM_PRIORITY_##LEVEL

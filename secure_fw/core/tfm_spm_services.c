@@ -81,7 +81,7 @@ int32_t tfm_core_validate_secure_caller(void)
 }
 
 __attribute__((naked))
-int32_t tfm_core_set_buffer_area(enum tfm_buffer_share_region_e share)
+int32_t tfm_core_set_buffer_area(uint32_t share)
 {
     __ASM volatile(
         "SVC    %0\n"
