@@ -25,7 +25,7 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
 #else
-    uint32_t res;
+    int32_t res;
 #endif
     psa_invec in_vec[] = {
         {challenge_obj, challenge_size}
@@ -60,7 +60,7 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
                                (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
-    if (res == PSA_ATTEST_ERR_SUCCESS) {
+    if (res == (int32_t)PSA_ATTEST_ERR_SUCCESS) {
         *token_size = out_vec[0].len;
     }
 
