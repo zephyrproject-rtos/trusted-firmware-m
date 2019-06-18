@@ -46,6 +46,11 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
     psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
 
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
@@ -90,6 +95,11 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
     uint32_t *handle_out = out_vec[0].base;
     psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
+
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;

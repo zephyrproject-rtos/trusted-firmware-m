@@ -60,10 +60,15 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     /* Initialise ciphertext_length to zero */
     out_vec[0].len = 0;
 
-    status = psa_aead_encrypt(key_handle, alg, nonce, nonce_length,
-                              additional_data, additional_data_length,
-                              plaintext, plaintext_length,
-                              ciphertext, ciphertext_size, &out_vec[0].len);
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status == PSA_SUCCESS) {
+
+        status = psa_aead_encrypt(key_handle, alg, nonce, nonce_length,
+                                  additional_data, additional_data_length,
+                                  plaintext, plaintext_length,
+                                  ciphertext, ciphertext_size, &out_vec[0].len);
+    }
+
     return status;
 }
 
@@ -103,10 +108,15 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     /* Initialise plaintext_length to zero */
     out_vec[0].len = 0;
 
-    status = psa_aead_decrypt(key_handle, alg, nonce, nonce_length,
-                              additional_data, additional_data_length,
-                              ciphertext, ciphertext_length,
-                              plaintext, plaintext_size, &out_vec[0].len);
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status == PSA_SUCCESS) {
+
+        status = psa_aead_decrypt(key_handle, alg, nonce, nonce_length,
+                                  additional_data, additional_data_length,
+                                  ciphertext, ciphertext_length,
+                                  plaintext, plaintext_size, &out_vec[0].len);
+    }
+
     return status;
 }
 /*!@}*/

@@ -17,13 +17,53 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
+#include <stdbool.h>
 
+#ifndef TFM_CRYPTO_MAX_KEY_HANDLES
+#define TFM_CRYPTO_MAX_KEY_HANDLES (16)
+#endif
+struct tfm_crypto_handle_owner_s {
+    int32_t owner;           /*!< Owner of the allocated handle */
+    psa_key_handle_t handle; /*!< Allocated handle */
+    uint8_t in_use;          /*!< Flag to indicate if this in use */
+};
+
+static struct tfm_crypto_handle_owner_s
+                                 handle_owner[TFM_CRYPTO_MAX_KEY_HANDLES] = {0};
 /*!
  * \defgroup public Public functions
  *
  */
 
 /*!@{*/
+psa_status_t tfm_crypto_check_handle_owner(psa_key_handle_t handle,
+                                           uint32_t *index)
+{
+    int32_t partition_id = 0;
+    uint32_t i = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use && handle_owner[i].handle == handle) {
+            if (handle_owner[i].owner == partition_id) {
+                if (index != NULL) {
+                    *index = i;
+                }
+                return PSA_SUCCESS;
+            } else {
+                return PSA_ERROR_NOT_PERMITTED;
+            }
+        }
+    }
+
+    return PSA_ERROR_INVALID_HANDLE;
+}
+
 psa_status_t tfm_crypto_allocate_key(psa_invec in_vec[],
                                      size_t in_len,
                                      psa_outvec out_vec[],
@@ -39,8 +79,36 @@ psa_status_t tfm_crypto_allocate_key(psa_invec in_vec[],
     }
 
     psa_key_handle_t *key_handle = out_vec[0].base;
+    uint32_t i = 0;
+    int32_t partition_id = 0;
+    bool empty_found = false;
+    psa_status_t status;
 
-    return psa_allocate_key(key_handle);
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
+            empty_found = true;
+            break;
+        }
+    }
+
+    if (!empty_found) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_allocate_key(key_handle);
+
+    if (status == PSA_SUCCESS) {
+        handle_owner[i].owner = partition_id;
+        handle_owner[i].handle = *key_handle;
+        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+    }
+
+    return status;
 }
 
 psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
@@ -63,6 +131,11 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
     psa_key_type_t type = iov->type;
     const uint8_t *data = in_vec[1].base;
     size_t data_length = in_vec[1].len;
+    psa_status_t status = tfm_crypto_check_handle_owner(key, NULL);
+
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     return psa_import_key(key, type, data, data_length);
 }
@@ -84,8 +157,22 @@ psa_status_t tfm_crypto_destroy_key(psa_invec in_vec[],
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_handle_t key = iov->key_handle;
+    uint32_t index;
+    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
 
-    return psa_destroy_key(key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_destroy_key(key);
+
+    if (status == PSA_SUCCESS) {
+        handle_owner[index].owner = 0;
+        handle_owner[index].handle = 0;
+        handle_owner[index].in_use = TFM_CRYPTO_NOT_IN_USE;
+    }
+
+    return status;
 }
 
 psa_status_t tfm_crypto_get_key_information(psa_invec in_vec[],
@@ -197,8 +284,13 @@ psa_status_t tfm_crypto_set_key_policy(psa_invec in_vec[],
 
     psa_key_handle_t key = iov->key_handle;
     const psa_key_policy_t *policy = in_vec[1].base;
+    psa_status_t status = tfm_crypto_check_handle_owner(key, NULL);
 
-    return psa_set_key_policy(key, policy);
+    if (status == PSA_SUCCESS) {
+        return psa_set_key_policy(key, policy);
+    } else {
+        return status;
+    }
 }
 
 psa_status_t tfm_crypto_get_key_policy(psa_invec in_vec[],

@@ -135,6 +135,11 @@ psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
     psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
 
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     /* Allocate the operation context in the secure world */
     status = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,
                                         &handle,
@@ -176,6 +181,11 @@ psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec in_vec[],
     uint32_t *handle_out = out_vec[0].base;
     psa_key_handle_t key_handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
+
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     /* Allocate the operation context in the secure world */
     status = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,

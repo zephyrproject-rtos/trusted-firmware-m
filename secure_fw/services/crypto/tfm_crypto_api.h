@@ -61,10 +61,33 @@ psa_status_t tfm_crypto_init(void);
 psa_status_t tfm_crypto_init_alloc(void);
 
 /**
+ * \brief Returns the ID of the caller
+ *
+ * \param[out] id Pointer to hold the ID of the caller
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_get_caller_id(int32_t *id);
+
+/**
+ * \brief Checks that the requested handle belongs to the requesting
+ *        partition
+ *
+ * \param[in]  handle Handle given as input
+ * \param[out] index  Optionally, pointer to hold the internal index
+ *                    corresponding to the input handle. Valid only
+ *                    on PSA_SUCCESS, it's returned only if the input
+ *                    parameter is not NULL.
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_check_handle_owner(psa_key_handle_t handle,
+                                           uint32_t *index);
+/**
  * \brief Allocate an operation context in the backend
  *
  * \param[in]  type   Type of the operation context to allocate
- * \param[out] handle Pointer to the hold the allocated handle
+ * \param[out] handle Pointer to hold the allocated handle
  * \param[out  ctx    Double pointer to the corresponding context
  *
  * \return Return values as described in \ref psa_status_t

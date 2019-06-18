@@ -27,6 +27,9 @@
 
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
+    int32_t owner;                  /*!< Indicates an ID of the owner of
+                                     *   the context
+                                     */
     enum tfm_crypto_operation_type type; /*!< Type of the operation */
     union {
         psa_cipher_operation_t cipher;    /*!< Cipher operation context */
@@ -93,6 +96,13 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
                                         void **ctx)
 {
     uint32_t i = 0;
+    int32_t partition_id = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     /* Handle must be initialised before calling a setup function */
     if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
@@ -108,6 +118,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
     for (i=0; i<TFM_CRYPTO_CONC_OPER_NUM; i++) {
         if (operation[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
             operation[i].in_use = TFM_CRYPTO_IN_USE;
+            operation[i].owner = partition_id;
             operation[i].type = type;
             *handle = i + 1;
             *ctx = (void *) &(operation[i].operation);
@@ -121,14 +132,23 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 psa_status_t tfm_crypto_operation_release(uint32_t *handle)
 {
     uint32_t h_val = *handle;
+    int32_t partition_id = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     if ( (h_val != TFM_CRYPTO_INVALID_HANDLE) &&
          (h_val <= TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[h_val - 1].in_use == TFM_CRYPTO_IN_USE) ) {
+         (operation[h_val - 1].in_use == TFM_CRYPTO_IN_USE) &&
+         (operation[h_val - 1].owner == partition_id)) {
 
         memset_operation_context(h_val - 1);
         operation[h_val - 1].in_use = TFM_CRYPTO_NOT_IN_USE;
         operation[h_val - 1].type = TFM_CRYPTO_OPERATION_NONE;
+        operation[h_val - 1].owner = 0;
         *handle = TFM_CRYPTO_INVALID_HANDLE;
         return PSA_SUCCESS;
     }
@@ -140,10 +160,19 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          uint32_t handle,
                                          void **ctx)
 {
+    int32_t partition_id = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     if ( (handle != TFM_CRYPTO_INVALID_HANDLE) &&
          (handle <= TFM_CRYPTO_CONC_OPER_NUM) &&
          (operation[handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
-         (operation[handle - 1].type == type) ) {
+         (operation[handle - 1].type == type) &&
+         (operation[handle - 1].owner == partition_id)) {
 
         *ctx = (void *) &(operation[handle - 1].operation);
         return PSA_SUCCESS;

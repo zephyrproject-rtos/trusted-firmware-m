@@ -44,6 +44,11 @@ psa_status_t tfm_crypto_asymmetric_sign(psa_invec in_vec[],
     size_t hash_length = in_vec[1].len;
     uint8_t *signature = out_vec[0].base;
     size_t signature_size = out_vec[0].len;
+    psa_status_t status = tfm_crypto_check_handle_owner(handle, NULL);
+
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     return psa_asymmetric_sign(handle, alg, hash, hash_length,
                                signature, signature_size, &(out_vec[0].len));
@@ -69,6 +74,11 @@ psa_status_t tfm_crypto_asymmetric_verify(psa_invec in_vec[],
     size_t hash_length = in_vec[1].len;
     const uint8_t *signature = in_vec[2].base;
     size_t signature_length = in_vec[2].len;
+    psa_status_t status = tfm_crypto_check_handle_owner(handle, NULL);
+
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     return psa_asymmetric_verify(handle, alg, hash, hash_length,
                                  signature, signature_length);
@@ -104,6 +114,11 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
     if (in_len == 3) {
         salt = in_vec[2].base;
         salt_length = in_vec[2].len;
+    }
+
+    status = tfm_crypto_check_handle_owner(handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     status = psa_get_key_information(handle, &type, &key_bits);
@@ -143,10 +158,16 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
     size_t salt_length = 0;
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
+    psa_status_t status;
 
     if (in_len == 3) {
         salt = in_vec[2].base;
         salt_length = in_vec[2].len;
+    }
+
+    status = tfm_crypto_check_handle_owner(handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     return psa_asymmetric_decrypt(handle, alg, input, input_length,

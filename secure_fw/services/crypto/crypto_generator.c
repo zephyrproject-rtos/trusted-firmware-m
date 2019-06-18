@@ -109,6 +109,11 @@ psa_status_t tfm_crypto_generator_import_key(psa_invec in_vec[],
     size_t bits = *(size_t *)(in_vec[1].base);
     psa_crypto_generator_t *generator = NULL;
 
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_GENERATOR_OPERATION,
                                          handle,
@@ -203,6 +208,11 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
         label_length = in_vec[3].len;
     }
 
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     /* Allocate the generator context in the secure world */
     status = tfm_crypto_operation_alloc(TFM_CRYPTO_GENERATOR_OPERATION,
                                         &handle,
@@ -246,6 +256,11 @@ psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
     const uint8_t *peer_key = in_vec[1].base;
     size_t peer_key_length = in_vec[1].len;
     psa_crypto_generator_t *generator = NULL;
+
+    status = tfm_crypto_check_handle_owner(private_key, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     /* Allocate the generator context in the secure world */
     status = tfm_crypto_operation_alloc(TFM_CRYPTO_GENERATOR_OPERATION,
@@ -304,6 +319,12 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     size_t bits = *((size_t *)(in_vec[1].base));
     const void *extra = NULL;
     size_t extra_size = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     if (in_len == 3) {
         extra = in_vec[2].base;

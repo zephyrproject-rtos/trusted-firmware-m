@@ -16,6 +16,10 @@
  */
 #include "mbedtls/memory_buffer_alloc.h"
 
+#ifndef TFM_PSA_API
+#include "tfm_secure_api.h"
+#endif
+
 #ifdef TFM_PSA_API
 #include "psa_service.h"
 #include "tfm_crypto_signal.h"
@@ -58,7 +62,20 @@ static struct tfm_crypto_scratch {
     __attribute__((__aligned__(TFM_CRYPTO_IOVEC_ALIGNMENT)))
     uint8_t buf[TFM_CRYPTO_IOVEC_BUFFER_SIZE];
     uint32_t alloc_index;
+    int32_t owner;
 } scratch = {.buf = {0}, .alloc_index = 0};
+
+static psa_status_t tfm_crypto_set_scratch_owner(int32_t id)
+{
+    scratch.owner = id;
+    return PSA_SUCCESS;
+}
+
+static psa_status_t tfm_crypto_get_scratch_owner(int32_t *id)
+{
+    *id = scratch.owner;
+    return PSA_SUCCESS;
+}
 
 static psa_status_t tfm_crypto_alloc_scratch(size_t requested_size, void **buf)
 {
@@ -81,6 +98,7 @@ static psa_status_t tfm_crypto_alloc_scratch(size_t requested_size, void **buf)
 static psa_status_t tfm_crypto_clear_scratch(void)
 {
     scratch.alloc_index = 0;
+    scratch.owner = 0;
     (void)tfm_memset(scratch.buf, 0, sizeof(scratch.buf));
 
     return PSA_SUCCESS;
@@ -114,6 +132,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
         /* Allocate necessary space in the internal scratch */
         status = tfm_crypto_alloc_scratch(msg->in_size[i], &alloc_buf_ptr);
         if (status != PSA_SUCCESS) {
+            (void)tfm_crypto_clear_scratch();
             return status;
         }
         /* Read from the IPC framework inputs into the scratch */
@@ -132,12 +151,16 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
         /* Allocate necessary space for the output in the internal scratch */
         status = tfm_crypto_alloc_scratch(msg->out_size[i], &alloc_buf_ptr);
         if (status != PSA_SUCCESS) {
+            (void)tfm_crypto_clear_scratch();
             return status;
         }
         /* Populate the fields of the output to the secure function */
         out_vec[i].base = alloc_buf_ptr;
         out_vec[i].len = msg->out_size[i];
     }
+
+    /* Set the owner of the data in the scratch */
+    (void)tfm_crypto_set_scratch_owner(msg->client_id);
 
     /* Call the uniform signature API */
     status = sfid_func_table[sfn_id](in_vec, in_len, out_vec, out_len);
@@ -269,6 +292,22 @@ static psa_status_t tfm_crypto_module_init(void)
 {
     /* Init the Alloc module */
     return tfm_crypto_init_alloc();
+}
+
+psa_status_t tfm_crypto_get_caller_id(int32_t *id)
+{
+#ifdef TFM_PSA_API
+    return tfm_crypto_get_scratch_owner(id);
+#else
+    int32_t res;
+
+    res = tfm_core_get_caller_client_id(id);
+    if (res != TFM_SUCCESS) {
+        return PSA_ERROR_NOT_PERMITTED;
+    } else {
+        return PSA_SUCCESS;
+    }
+#endif
 }
 
 psa_status_t tfm_crypto_init(void)
