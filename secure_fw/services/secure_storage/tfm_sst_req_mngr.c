@@ -54,7 +54,7 @@ psa_status_t tfm_sst_set_req(psa_invec *in_vec, size_t in_len,
     uint32_t data_length;
     int32_t client_id;
     const void *p_data;
-    enum tfm_status_e status;
+    int32_t status;
     psa_ps_create_flags_t create_flags;
     psa_ps_status_t *err;
 
@@ -93,7 +93,7 @@ psa_status_t tfm_sst_set_req(psa_invec *in_vec, size_t in_len,
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
-    if (status != TFM_SUCCESS) {
+    if (status != (int32_t)TFM_SUCCESS) {
         return PSA_CONNECTION_REFUSED;
     }
 
@@ -110,7 +110,7 @@ psa_status_t tfm_sst_get_req(psa_invec *in_vec, size_t in_len,
     int32_t client_id;
     psa_ps_uid_t uid;
     void *p_data;
-    enum tfm_status_e status;
+    int32_t status;
     psa_ps_status_t *err;
 
     if (sst_check_init() != PSA_SUCCESS) {
@@ -148,7 +148,7 @@ psa_status_t tfm_sst_get_req(psa_invec *in_vec, size_t in_len,
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
-    if (status != TFM_SUCCESS) {
+    if (status != (int32_t)TFM_SUCCESS) {
         return PSA_CONNECTION_REFUSED;
     }
 
@@ -164,7 +164,7 @@ psa_status_t tfm_sst_get_info_req(psa_invec *in_vec, size_t in_len,
     int32_t client_id;
     psa_ps_uid_t uid;
     struct psa_ps_info_t *p_info;
-    enum tfm_status_e status;
+    int32_t status;
     psa_ps_status_t *err;
 
     if (sst_check_init() != PSA_SUCCESS) {
@@ -199,7 +199,7 @@ psa_status_t tfm_sst_get_info_req(psa_invec *in_vec, size_t in_len,
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
-    if (status != TFM_SUCCESS) {
+    if (status != (int32_t)TFM_SUCCESS) {
         return PSA_CONNECTION_REFUSED;
     }
 
@@ -213,7 +213,7 @@ psa_status_t tfm_sst_remove_req(psa_invec *in_vec, size_t in_len,
 {
     int32_t client_id;
     psa_ps_uid_t uid;
-    enum tfm_status_e status;
+    int32_t status;
     psa_ps_status_t *err;
 
     if (sst_check_init() != PSA_SUCCESS) {
@@ -241,7 +241,7 @@ psa_status_t tfm_sst_remove_req(psa_invec *in_vec, size_t in_len,
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
-    if (status != TFM_SUCCESS) {
+    if (status != (int32_t)TFM_SUCCESS) {
         return PSA_CONNECTION_REFUSED;
     }
 
