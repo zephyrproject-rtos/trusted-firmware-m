@@ -175,12 +175,6 @@ if (CORE_TEST_IPC)
 	add_definitions(-DCORE_TEST_IPC)
 	set(TEST_FRAMEWORK_NS ON)
 	set(TFM_PARTITION_TEST_CORE_IPC ON)
-elseif (CORE_IPC AND (NOT PSA_API_TEST) AND (TFM_LVL EQUAL 1))
-	# FIXME: Running the Core IPC tests in this config is deprecated and will
-	# be removed in the future.
-	set(CORE_TEST_IPC ON)
-	add_definitions(-DCORE_TEST_IPC)
-	set(TEST_FRAMEWORK_NS ON)
 endif()
 
 if (SERVICE_TEST_S)
