@@ -5,7 +5,6 @@
  *
  */
 
-#include <stdio.h>
 #include "region_defs.h"
 #include "tfm_core.h"
 #include "tfm_internal.h"
@@ -115,7 +114,7 @@ int32_t tfm_core_init(void)
     LOG_MSG("Secure image initializing!");
 
 #ifdef TFM_CORE_DEBUG
-    printf("TFM level is: %d\r\n", TFM_LVL);
+    TFM_LVL_MSG(TFM_LVL);
 #endif
 
     tfm_core_validate_boot_data();

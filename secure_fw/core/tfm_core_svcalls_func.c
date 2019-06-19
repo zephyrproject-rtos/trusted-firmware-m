@@ -5,7 +5,6 @@
  *
  */
 
-#include <stdio.h>
 #include <string.h>
 
 #include "secure_utilities.h"
@@ -83,7 +82,7 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_core_disable_irq_handler(svc_args);
         break;
     case TFM_SVC_PRINT:
-        printf("\033[1;34m[Sec Thread] %s\033[0m\r\n", (char *)svc_args[0]);
+        TFM_CORE_MSG((char *)svc_args[0]);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
