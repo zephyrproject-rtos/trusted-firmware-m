@@ -50,11 +50,11 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
-	"${APP_DIR}/os_wrapper_rtx.c"
+	"${APP_DIR}/os_wrapper_cmsis_rtos.c"
 	"${INTERFACE_DIR}/src/tfm_sst_api.c"
 	"${INTERFACE_DIR}/src/tfm_crypto_api.c"
 	"${INTERFACE_DIR}/src/tfm_initial_attestation_api.c"
-	"${INTERFACE_DIR}/src/tfm_ns_lock_rtx.c"
+	"${INTERFACE_DIR}/src/tfm_ns_lock_cmsis_rtos.c"
 	)
 
 if (TFM_PARTITION_AUDIT_LOG)
@@ -126,7 +126,8 @@ add_library(${PROJECT_OBJ_LIB} OBJECT ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
 #Set macro definitions
-target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3 LOG_MSG_HANDLER_MODE_PRINTF_ENABLED)
+set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 __ARM_FEATURE_CMSE=3)
+target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE ${TARGET_COMPILE_DEFINITIONS})
 
 #Set include directories.
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TEST_INTERFACE_DIR}/include ABSOLUTE APPEND)

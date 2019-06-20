@@ -10,18 +10,21 @@
 #include <string.h>
 #include "cmsis_os2.h"
 
-/* This is an example OS abstraction layer rtx RTOS for non-secure test
- * environment */
+/* This is an example OS abstraction layer for CMSIS-RTOS for non-secure test
+ * environment
+ */
 
-uint32_t os_wrapper_new_thread(const char* name, uint32_t stack_size,
+uint32_t os_wrapper_thread_new(const char *name, int32_t stack_size,
                                os_wrapper_thread_func func, void *arg,
                                uint32_t priority)
 {
     osThreadAttr_t task_attribs = {.tz_module = 1};
     osThreadId_t thread_id;
 
-    task_attribs.attr_bits = osThreadJoinable;
-    task_attribs.stack_size = stack_size;
+    /* By default, the thread starts as osThreadDetached */
+    if (stack_size != OS_WRAPPER_DEFAULT_STACK_SIZE) {
+        task_attribs.stack_size = stack_size;
+    }
     task_attribs.name = name;
     task_attribs.priority = (osPriority_t) priority;
 
@@ -35,7 +38,7 @@ uint32_t os_wrapper_new_thread(const char* name, uint32_t stack_size,
 
 
 uint32_t os_wrapper_semaphore_create(uint32_t max_count, uint32_t initial_count,
-                                     const char* name)
+                                     const char *name)
 {
     osSemaphoreAttr_t sema_attrib = {0};
     osSemaphoreId_t semaphore;
@@ -54,7 +57,9 @@ uint32_t os_wrapper_semaphore_acquire(uint32_t semaphore_id, uint32_t timeout)
 {
     osStatus_t status;
 
-    status = osSemaphoreAcquire((osSemaphoreId_t)semaphore_id, timeout);
+    status = osSemaphoreAcquire((osSemaphoreId_t)semaphore_id,
+                                (timeout == OS_WRAPPER_WAIT_FOREVER) ?
+                                osWaitForever : timeout);
     if (status != osOK) {
         return OS_WRAPPER_ERROR;
     }
@@ -86,19 +91,19 @@ uint32_t os_wrapper_semaphore_delete(uint32_t sema)
     return 0;
 }
 
-uint32_t os_wrapper_get_thread_id(void)
+uint32_t os_wrapper_thread_get_id(void)
 {
     osThreadId_t thread_id;
 
     thread_id = osThreadGetId();
-    if(thread_id == NULL) {
+    if (thread_id == NULL) {
         return OS_WRAPPER_ERROR;
     }
 
     return (uint32_t)thread_id;
 }
 
-uint32_t os_wrapper_get_thread_priority(uint32_t id)
+uint32_t os_wrapper_thread_get_priority(uint32_t id)
 {
     osPriority_t prio;
 
@@ -110,19 +115,7 @@ uint32_t os_wrapper_get_thread_priority(uint32_t id)
     return prio;
 }
 
-uint32_t os_wrapper_join_thread(uint32_t id)
+void os_wrapper_thread_exit(void)
 {
-    osStatus_t status;
-
-    /* Wait for the thread to terminate */
-    status = osThreadJoin((osThreadId_t)id);
-    if (status != osOK) {
-        return OS_WRAPPER_ERROR;
-    }
-
-    /* RTX handles thread deletion automatically. So, no action is required in
-     * this function to delete the thread.
-     */
-
-    return 0;
+    osThreadExit();
 }

@@ -33,7 +33,7 @@ uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
  * \details Needs to be called during non-secure app init
  *          to initialize the TFM NS lock object
  */
-enum tfm_status_e tfm_ns_lock_init();
+enum tfm_status_e tfm_ns_lock_init(void);
 
 #ifdef __cplusplus
 }

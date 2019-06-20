@@ -15,8 +15,7 @@
 /**
  * \brief struct ns_lock_state type
  */
-struct ns_lock_state
-{
+struct ns_lock_state {
     bool        init;
     osMutexId_t id;
 };
@@ -24,7 +23,7 @@ struct ns_lock_state
 /**
  * \brief ns_lock status
  */
-static struct ns_lock_state ns_lock = {.init=false, .id=NULL};
+static struct ns_lock_state ns_lock = {.init = false, .id = NULL};
 
 /**
  * \brief Mutex properties, NS lock
@@ -51,7 +50,7 @@ uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
     }
 
     /* TFM request protected by NS lock */
-    if (osMutexAcquire(ns_lock.id,osWaitForever) != osOK) {
+    if (osMutexAcquire(ns_lock.id, osWaitForever) != osOK) {
         return TFM_ERROR_GENERIC;
     }
 
@@ -67,20 +66,13 @@ uint32_t tfm_ns_lock_dispatch(veneer_fn fn,
 /**
  * \brief NS world, Init NS lock
  */
-enum tfm_status_e tfm_ns_lock_init()
+enum tfm_status_e tfm_ns_lock_init(void)
 {
     if (ns_lock.init == false) {
         ns_lock.id = osMutexNew(&ns_lock_attrib);
         ns_lock.init = true;
         return TFM_SUCCESS;
-    }
-    else {
+    } else {
         return TFM_ERROR_GENERIC;
     }
 }
-
-bool tfm_ns_lock_get_init_state()
-{
-    return ns_lock.init;
-}
-
