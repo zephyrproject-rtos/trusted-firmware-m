@@ -21,6 +21,9 @@
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 
+#define MIN(A, B) (((A) < (B)) ? (A) : (B))
+#define MAX(A, B) (((A) > (B)) ? (A) : (B))
+
 /* Macros to pick linker symbols */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
@@ -248,6 +251,22 @@ void sau_and_idau_cfg(void)
 
 /*------------------- Memory configuration functions -------------------------*/
 
+void mpc_init_region_with_attr(ARM_DRIVER_MPC *region,
+                         uintptr_t region_base, uintptr_t region_limit,
+                         uintptr_t attr_range_start, uintptr_t attr_range_limit,
+                         ARM_MPC_SEC_ATTR attr)
+{
+    uintptr_t range_start = MAX(region_base, attr_range_start);
+    uintptr_t range_limit = MIN(region_limit, attr_range_limit);
+
+    if (range_start < range_limit) {
+        /* ConfigRegion checks whether the range addresses are aligned at MPC
+         * block border
+         */
+        region->ConfigRegion(range_start, range_limit, attr);
+    }
+}
+
 void mpc_init_cfg(void)
 {
     ARM_DRIVER_MPC* mpc_data_region0 = &Driver_ISRAM0_MPC;
@@ -275,13 +294,17 @@ void mpc_init_cfg(void)
                                    MPC_ISRAM2_RANGE_LIMIT_S,
                                    ARM_MPC_ATTR_SECURE);
 
-    /* First three regions (96KB) are marked Secure, the last region of
-     * 32 KB is marked Non-Secure
-     */
+    /* Set MPC_ISRAM3 based on regions defined in region_defs.h */
     mpc_data_region3->Initialize();
-    mpc_data_region3->ConfigRegion(MPC_ISRAM3_RANGE_BASE_NS,
-                                   MPC_ISRAM3_RANGE_LIMIT_NS,
-                                   ARM_MPC_ATTR_NONSECURE);
+    mpc_init_region_with_attr(mpc_data_region3,
+                              MPC_ISRAM3_RANGE_BASE_S, MPC_ISRAM3_RANGE_LIMIT_S,
+                              S_DATA_START, S_DATA_LIMIT,
+                              ARM_MPC_ATTR_SECURE);
+    mpc_init_region_with_attr(
+                            mpc_data_region3,
+                            MPC_ISRAM3_RANGE_BASE_NS, MPC_ISRAM3_RANGE_LIMIT_NS,
+                            NS_DATA_START, NS_DATA_LIMIT,
+                            ARM_MPC_ATTR_NONSECURE);
 
     /* Lock down the MPC configuration */
     Driver_CODE_SRAM_MPC.LockDown();
