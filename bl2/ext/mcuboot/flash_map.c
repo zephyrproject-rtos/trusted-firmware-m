@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: b69841820462fa0227d7fb407620405f6426bb4b
+ * Git SHA of the original version: 3c469bc698a9767859ed73cd0201c44161204d5c
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -251,7 +251,28 @@ uint8_t flash_area_align(const struct flash_area *area)
  */
 int flash_area_id_from_image_slot(int slot)
 {
-    return slot + FLASH_AREA_IMAGE_PRIMARY;
+    static const int area_id_tab[] = {FLASH_AREA_IMAGE_PRIMARY,
+                                      FLASH_AREA_IMAGE_SECONDARY,
+                                      FLASH_AREA_IMAGE_SCRATCH};
+
+    if (slot >= 0 && slot < ARRAY_SIZE(area_id_tab)) {
+        return area_id_tab[slot];
+    }
+
+    return -EINVAL; /* flash_area_open will fail on that */
+}
+
+int flash_area_id_to_image_slot(int area_id)
+{
+    switch (area_id) {
+    case FLASH_AREA_IMAGE_PRIMARY:
+        return 0;
+    case FLASH_AREA_IMAGE_SECONDARY:
+        return 1;
+    default:
+        BOOT_LOG_ERR("invalid flash area ID");
+        return -1;
+    }
 }
 
 static int validate_idx(int idx, uint32_t *off, uint32_t *len)
