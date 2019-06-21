@@ -9,25 +9,9 @@
 #include "ipc_ns_tests.h"
 #include "psa/client.h"
 #include "test/framework/test_framework_helpers.h"
-
-/* Define the SID. These SIDs should align with the value in manifest file. */
-#define IPC_CLIENT_TEST_BASIC_SID                               (0x0000F060)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SID                  (0x0000F061)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID        (0x0000F062)
-#define IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SID                  (0x0000F063)
-#define IPC_CLIENT_TEST_MEM_CHECK_SID                           (0x0000F064)
-#define IPC_SERVICE_TEST_BASIC_SID                              (0x0000F080)
-
-/*
- * Define the MIN_VER. These MIN_VER should align with the value in
- * manifest file.
- */
-#define IPC_CLIENT_TEST_BASIC_MIN_VER                           (0x0001)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_MIN_VER              (0x0001)
-#define IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_MIN_VER    (0x0001)
-#define IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_MIN_VER              (0x0001)
-#define IPC_CLIENT_TEST_MEM_CHECK_MIN_VER                       (0x0001)
-#define IPC_BASIC_MIN_VER                                       (0x0001)
+#ifdef TFM_PSA_API
+#include "psa_manifest/sid.h"
+#endif
 
 /* List of tests */
 static void tfm_ipc_test_1001(struct test_result_t *ret);
@@ -144,7 +128,8 @@ static void tfm_ipc_test_1003(struct test_result_t *ret)
 {
     psa_handle_t handle;
 
-    handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID, IPC_BASIC_MIN_VER);
+    handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID,
+                         IPC_SERVICE_TEST_BASIC_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!\r\n");
     } else {
@@ -173,7 +158,8 @@ static void tfm_ipc_test_1004(struct test_result_t *ret)
 
     min_version = psa_version(IPC_SERVICE_TEST_BASIC_SID);
     TEST_LOG("TFM service support minor version is %d.\r\n", min_version);
-    handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID, IPC_BASIC_MIN_VER);
+    handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID,
+                         IPC_SERVICE_TEST_BASIC_VERSION);
     status = psa_call(handle, invecs, 2, outvecs, 2);
     if (status >= 0) {
         TEST_LOG("psa_call is successful!\r\n");
@@ -202,7 +188,7 @@ static void tfm_ipc_test_1005(struct test_result_t *ret)
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
     handle = psa_connect(IPC_CLIENT_TEST_BASIC_SID,
-                         IPC_CLIENT_TEST_BASIC_MIN_VER);
+                         IPC_CLIENT_TEST_BASIC_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!");
     } else {
@@ -239,7 +225,7 @@ static void tfm_ipc_test_1006(struct test_result_t *ret)
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
     handle = psa_connect(IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SID,
-                         IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_MIN_VER);
+                         IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!");
     } else {
@@ -276,7 +262,7 @@ static void tfm_ipc_test_1007(struct test_result_t *ret)
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
     handle = psa_connect(IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID,
-                         IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_MIN_VER);
+                         IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!");
     } else {
@@ -305,7 +291,7 @@ static void tfm_ipc_test_1008(struct test_result_t *ret)
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
     handle = psa_connect(IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SID,
-                         IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_MIN_VER);
+                         IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!");
     } else {
@@ -334,7 +320,7 @@ static void tfm_ipc_test_1009(struct test_result_t *ret)
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
     handle = psa_connect(IPC_CLIENT_TEST_MEM_CHECK_SID,
-                         IPC_CLIENT_TEST_MEM_CHECK_MIN_VER);
+                         IPC_CLIENT_TEST_MEM_CHECK_VERSION);
     if (handle > 0) {
         TEST_LOG("Connect success!");
     } else {

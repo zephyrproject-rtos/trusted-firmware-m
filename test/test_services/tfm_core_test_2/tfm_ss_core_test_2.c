@@ -12,7 +12,7 @@
 #include "tfm_secure_api.h"
 #include "spm_partition_defs.h"
 #include "psa/service.h"
-#include "tfm_ss_core_test_2_signal.h"
+#include "psa_manifest/tfm_test_core_2.h"
 
 #define INVALID_NS_CLIENT_ID  0x49abcdef
 #define INVERT_BUFFER_SIZE    (16*4)

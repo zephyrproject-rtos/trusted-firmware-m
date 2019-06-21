@@ -16,6 +16,9 @@
 
 #include "tfm_integ_test.h"
 #include "test/framework/test_framework_integ_test.h"
+#ifdef TFM_PSA_API
+#include "psa_manifest/sid.h"
+#endif
 
 #ifdef TEST_FRAMEWORK_S
 #include \
@@ -81,7 +84,7 @@ void secure_decrement_ns_lock_1(void)
     psa_status_t err;
 
     err = psa_test_common(SPM_CORE_TEST_BLOCK_SID,
-                          SPM_CORE_TEST_BLOCK_MIN_VER,
+                          SPM_CORE_TEST_BLOCK_VERSION,
                           NULL, 0, NULL, 0);
     if (err != PSA_SUCCESS) {
         LOG_MSG("Secure call to sfn block failed, generic!");
@@ -104,7 +107,7 @@ void secure_decrement_ns_lock_2(void)
     psa_status_t err;
 
     err = psa_test_common(SPM_CORE_TEST_BLOCK_SID,
-                          SPM_CORE_TEST_BLOCK_MIN_VER,
+                          SPM_CORE_TEST_BLOCK_VERSION,
                           NULL, 0, NULL, 0);
     if (err != PSA_SUCCESS) {
         LOG_MSG("Secure call to sfn block failed, generic!");

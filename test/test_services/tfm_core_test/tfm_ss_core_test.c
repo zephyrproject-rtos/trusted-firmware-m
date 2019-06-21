@@ -15,9 +15,11 @@
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
 #include "psa/service.h"
-#include "test/test_services/tfm_core_test/tfm_ss_core_test_signal.h"
-#include "test/test_services/tfm_core_test_2/tfm_ss_core_test_2_signal.h"
 #include "tfm_plat_test.h"
+#include "psa_manifest/tfm_test_core.h"
+#ifdef TFM_PSA_API
+#include "psa_manifest/sid.h"
+#endif
 
 static int32_t partition_init_done;
 
@@ -293,7 +295,7 @@ static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
 
 #ifdef TFM_PSA_API
     res = psa_test_common(SPM_CORE_TEST_2_INVERT_SID,
-                          SPM_CORE_TEST_2_INVERT_MIN_VER,
+                          SPM_CORE_TEST_2_INVERT_VERSION,
                           in_vec, 1, outvec, 2);
 #else /* defined(TFM_PSA_API) */
     res = tfm_spm_core_test_2_sfn_invert_veneer(in_vec, 1, outvec, 2);
@@ -376,7 +378,7 @@ static psa_status_t test_outvec_write(void)
 
 #ifdef TFM_PSA_API
     err = psa_test_common(SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
-                          SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_MIN_VER,
+                          SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_VERSION,
                           in_vec, 2, out_vec, 2);
 #else /* defined(TFM_PSA_API) */
     err = tfm_spm_core_test_2_get_every_second_byte_veneer(in_vec, 2,
@@ -417,7 +419,7 @@ static psa_status_t test_ss_to_ss(void)
     /* Call to a different service, should be successful */
 #ifdef TFM_PSA_API
     ret = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
-                          SPM_CORE_TEST_2_SLAVE_SERVICE_MIN_VER,
+                          SPM_CORE_TEST_2_SLAVE_SERVICE_VERSION,
                           NULL, 0, NULL, 0);
 #else /* defined(TFM_PSA_API) */
     ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);

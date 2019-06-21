@@ -13,7 +13,7 @@
 #include "secure_fw/core/secure_utilities.h"
 #include "secure_fw/core/tfm_secure_api.h"
 #include "tfm_api.h"
-#include "tfm_ipc_service_partition.h"
+#include "psa_manifest/tfm_ipc_service_partition.h"
 
 #define IPC_SERVICE_BUFFER_LEN                          32
 

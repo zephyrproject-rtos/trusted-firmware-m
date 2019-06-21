@@ -10,23 +10,9 @@
 #include "psa/client.h"
 #include "secure_utilities.h"
 #include "psa/service.h"
-#include "tfm_ipc_client_partition.h"
+#include "psa_manifest/tfm_ipc_client_partition.h"
 #include "tfm_utils.h"
-
-/* Define the SID. These SIDs should align with the value in manifest file. */
-#define IPC_SERVICE_TEST_BASIC_SID                                 (0x0000F080)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID                    (0x0000F081)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID          (0x0000F082)
-#define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID                    (0x0000F083)
-
-/*
- * Define the MIN_VER. These MIN_VER should align with the value in
- * manifest file.
- */
-#define IPC_SERVICE_TEST_BASIC_MIN_VER                             (0x0001)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_MIN_VER                (0x0001)
-#define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_MIN_VER      (0x0001)
-#define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_MIN_VER                (0x0001)
+#include "psa_manifest/sid.h"
 
 /* Define the return status */
 #define IPC_SP_TEST_SUCCESS     (1)
@@ -63,7 +49,7 @@ static int ipc_isolation_2_psa_access_app_readonly_memory(void)
     struct psa_invec invecs[1] = {{&client_data_p, sizeof(client_data_p)}};
 
     handle = psa_connect(IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID,
-                         IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_MIN_VER);
+                         IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_VERSION);
 
     if (handle <= 0) {
         return IPC_SP_TEST_FAILED;
@@ -87,7 +73,7 @@ static int ipc_isolation_2_psa_access_app_memory(void)
     struct psa_invec invecs[1] = {{&client_data_p, sizeof(client_data_p)}};
 
     handle = psa_connect(IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID,
-                         IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_MIN_VER);
+                         IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_VERSION);
 
     if (handle <= 0) {
         return result;
@@ -117,7 +103,7 @@ static int ipc_client_base_test(void)
                                     {str4, sizeof(str4)/sizeof(char)}};
 
     handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID,
-                         IPC_SERVICE_TEST_BASIC_MIN_VER);
+                         IPC_SERVICE_TEST_BASIC_VERSION);
     if (handle <= 0) {
         return result;
     }
@@ -140,7 +126,7 @@ static int ipc_client_app_access_psa_mem_test(void)
     struct psa_outvec outvecs[1] = {{outvec_data, sizeof(outvec_data[0])}};
 
     handle = psa_connect(IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID,
-                         IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_MIN_VER);
+                         IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_VERSION);
 
     if (handle <= 0) {
         return IPC_SP_TEST_FAILED;
@@ -174,7 +160,7 @@ static int ipc_client_mem_check_test(void)
     struct psa_invec invecs[1] = {{NULL, 0}};
 
     handle = psa_connect(IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID,
-                         IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_MIN_VER);
+                         IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_VERSION);
 
     if (handle <= 0) {
         return IPC_SP_TEST_FAILED;
