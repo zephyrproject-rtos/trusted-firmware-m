@@ -8,6 +8,9 @@
 #include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
+#ifdef TFM_PSA_API
+#include "psa_manifest/sid.h"
+#endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -20,7 +23,7 @@
 
 #define PSA_CONNECT(service)                                    \
     psa_handle_t ipc_handle;                                    \
-    ipc_handle = psa_connect(service##_SID, service##_MIN_VER); \
+    ipc_handle = psa_connect(service##_SID, service##_VERSION); \
     if (!PSA_IS_HANDLE_VALID(ipc_handle)) {                     \
         return PSA_ERROR_GENERIC_ERROR;                         \
     }                                                           \

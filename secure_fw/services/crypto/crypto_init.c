@@ -22,7 +22,7 @@
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"
-#include "tfm_crypto_signal.h"
+#include "psa_manifest/tfm_crypto.h"
 #include "secure_fw/core/tfm_memory_utils.h"
 
 /**
