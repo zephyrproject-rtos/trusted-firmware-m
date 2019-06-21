@@ -11,7 +11,7 @@
 #include "tfm_client.h"
 #include "tfm_secure_api.h"
 #ifdef TFM_PSA_API
-#include "tfm_attest_defs.h"
+#include "psa_manifest/sid.h"
 #endif
 #include <string.h>
 
@@ -49,7 +49,7 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 
 #ifdef TFM_PSA_API
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SID,
-                         TFM_ATTEST_GET_TOKEN_MINOR_VER);
+                         TFM_ATTEST_GET_TOKEN_VERSION);
     if (handle <= 0) {
         return PSA_ATTEST_ERR_GENERAL;
     }
@@ -129,7 +129,7 @@ psa_initial_attest_get_token_size(uint32_t challenge_size,
 
 #ifdef TFM_PSA_API
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SIZE_SID,
-                         TFM_ATTEST_GET_TOKEN_SIZE_MINOR_VER);
+                         TFM_ATTEST_GET_TOKEN_SIZE_VERSION);
     if (handle <= 0) {
         return PSA_ATTEST_ERR_GENERAL;
     }
