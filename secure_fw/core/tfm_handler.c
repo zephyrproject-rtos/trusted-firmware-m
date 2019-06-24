@@ -37,7 +37,7 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
      * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
      * First argument (r0) is svc_args[0]
      */
-    if (lr & EXC_RETURN_SECURE_STACK) {
+    if (is_return_secure_stack(lr)) {
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */

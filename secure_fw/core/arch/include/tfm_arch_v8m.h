@@ -60,4 +60,20 @@ struct tfm_state_context_ext {
 /* Enable NS exceptions by setting NS PRIMASK to 0 */
 #define TFM_NS_EXC_ENABLE()     __TZ_set_PRIMASK_NS(0)
 
+/**
+ * \brief Check whether Secure or Non-secure stack is used to restore stack
+ *        frame on exception return.
+ *
+ * \param[in] lr            LR register containing the EXC_RETURN value.
+ *
+ * \retval true             Secure stack is used to restore stack frame on
+ *                          exception return.
+ * \retval false            Non-secure stack is used to restore stack frame on
+ *                          exception return.
+ */
+__STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
+{
+    return (lr & EXC_RETURN_SECURE_STACK);
+}
+
 #endif
