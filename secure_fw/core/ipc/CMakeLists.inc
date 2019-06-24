@@ -49,6 +49,7 @@ elseif (TFM_PSA_API)
 			"${SS_IPC_DIR}/../tfm_boot_data.c"
 			"${SS_IPC_DIR}/../tfm_core_mem_check.c"
 			"${SS_IPC_DIR}/../tfm_core_log.c"
+			"${SS_IPC_DIR}/../tfm_core_utils.c"
 			)
 endif()
 
