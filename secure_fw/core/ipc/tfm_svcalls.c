@@ -1114,9 +1114,6 @@ void tfm_svcall_disable_irq(uint32_t *args)
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 {
     switch (svc_num) {
-    case TFM_SVC_SCHEDULE:
-        tfm_thrd_activate_schedule();
-        break;
     case TFM_SVC_EXIT_THRD:
         tfm_svcall_thrd_exit();
         break;
