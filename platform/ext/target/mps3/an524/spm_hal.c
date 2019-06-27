@@ -421,3 +421,9 @@ void tfm_spm_hal_init_debug(void)
      */
 #endif
 }
+
+void tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority)
+{
+    uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
+    NVIC_SetPriority(irq_line, quantized_priority);
+}

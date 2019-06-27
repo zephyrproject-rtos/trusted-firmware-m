@@ -392,3 +392,9 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
 {
     return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
 }
+
+void tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority)
+{
+    uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
+    NVIC_SetPriority(irq_line, quantized_priority);
+}
