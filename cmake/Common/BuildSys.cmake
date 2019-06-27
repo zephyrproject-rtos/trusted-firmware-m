@@ -656,8 +656,8 @@ endfunction()
 #
 function(embedded_set_target_link_defines)
 	set( _OPTIONS_ARGS )				#Option (on/off) arguments (e.g. IGNORE_CASE)
-	set( _ONE_VALUE_ARGS  TARGET DEFINES)	#Single option arguments (e.g. PATH "./foo/bar")
-	set( _MULTI_VALUE_ARGS )			#List arguments (e.g. LANGUAGES C ASM CXX)
+	set( _ONE_VALUE_ARGS TARGET)	#Single option arguments (e.g. PATH "./foo/bar")
+	set( _MULTI_VALUE_ARGS DEFINES)			#List arguments (e.g. LANGUAGES C ASM CXX)
 	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN} )
 
 	if (NOT DEFINED _MY_PARAMS_TARGET)
