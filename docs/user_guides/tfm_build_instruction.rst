@@ -140,7 +140,7 @@ tests for the Crypto service only:
     cd trusted-firmware-m
     mkdir cmake_psa_test
     cd cmake_psa_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO=ON -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
 Location of build artifacts
