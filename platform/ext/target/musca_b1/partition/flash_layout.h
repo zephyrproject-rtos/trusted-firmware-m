@@ -27,8 +27,8 @@
  *    0x0A0E_0000 Secure     image secondary (256 KB)
  *    0x0A12_0000 Non-secure image secondary (512 KB)
  * 0x0A1E_0000 Secure Storage Area (0.02 MB)
- * 0x0A1E_5000 NV counters area (20 Bytes)
- * 0x0A1E_5014 Unused
+ * 0x0A1E_5000 NV counters area (24 Bytes)
+ * 0x0A1E_5018 Unused
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
@@ -134,7 +134,7 @@
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (0x14)     /* 20 Bytes */
+#define FLASH_NV_COUNTERS_AREA_SIZE     (0x18)     /* 24 Bytes */
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)

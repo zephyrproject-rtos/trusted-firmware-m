@@ -392,7 +392,7 @@ boot_update_security_counter(int slot, struct image_header *hdr)
         goto done;
     }
 
-    rc = boot_nv_security_counter_update(0, img_security_cnt);
+    rc = boot_nv_security_counter_update(current_image, img_security_cnt);
     if (rc != 0) {
         goto done;
     }

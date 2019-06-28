@@ -35,16 +35,16 @@
  *     0x0010_0000 Non-secure image     (256 KB)
  * 0x0014_0000 Scratch area             (512 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 NV counters              (20 B)
- * 0x001C_5014 Unused
+ * 0x001C_5000 NV counters              (24 B)
+ * 0x001C_5018 Unused
  *
  * Flash layout without BL2
  *
  * 0x0000_0000 Secure image             (256 KB)
  * 0x0008_0000 Non-secure image         (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 NV counter               (20 B)
- * 0x001C_5014 Unused
+ * 0x001C_5000 NV counter               (24 B)
+ * 0x001C_5018 Unused
  */
 
 /* Size of a Secure and of a Non-secure image */
@@ -132,7 +132,7 @@
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (0x14)     /* 20 Bytes */
+#define FLASH_NV_COUNTERS_AREA_SIZE     (0x18)     /* 24 Bytes */
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
