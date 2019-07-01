@@ -30,14 +30,14 @@ claims are included in the token:
       eventually represented by the EAT standard claim nonce. Until such a
       time as that standard exists, the claim will be represented by a custom
       claim. Value is encoded as byte string.
-     
+
     - **Instance ID**: It represents the unique identifier of the instance. In
       the PSA definition it is a hash of the public attestation key of the
       instance. The claim is modeled to be eventually represented by the EAT
       standard claim UEID of type GUID. Until such a time as that standard
       exists, the claim will be represented by a custom claim  Value is encoded
       as byte string.
-     
+
     - **Verification service indicator**: Optional, recommended claim. It
       is used by a Relying Party to locate a validation service for the
       token. The value is a text string that can be used to locate the service
@@ -45,64 +45,64 @@ claims are included in the token:
       be eventually represented by the EAT standard claim origination. Until
       such a time as that standard exists, the claim will be represented by
       a custom claim. Value is encoded as text string.
-     
+
     - **Profile definition**: Optional, recommended claim. It contains the
       name of a document that describes the 'profile' of the token, being
       a full description of the claims, their usage, verification and token
       signing. The document name may include versioning. Custom claim with a
       value encoded as text string.
-     
+
     - **Implementation ID**: It represents the original implementation
       signer of the attestation key and identifies the contract between the
       report and verification.  A verification service will use this claim
       to locate the details of the verification process. Custom claim with a
       value encoded as byte string.
-     
+
     - **Security lifecycle**: It represents the current lifecycle state of
       the instance. Custom claim with a value encoded as an integer.
-     
+
     - **Client ID**: The partition ID of that secure partition or non-secure
       thread who called the initial attestation API. Custom claim with a value
       encoded as a `signed` integer. Negative number represents non-secure
       caller, positive numbers represents secure callers, zero is invalid.
-     
+
     - **HW version**: Optional claim. Globally unique number in EAN-13 format
       identifying the GDSII that went to fabrication, HW and ROM. It can be
       used to reference the security level of the PSA-ROT via a certification
       website. Custom claim with a value is encoded as text string.
-     
+
     - **Boot seed**: It represents a random value created at system boot
       time that will allow differentiation of reports from different system
       sessions. The size is 32 bytes. Custom claim with a value is encoded as
       byte string.
-     
+
     - **Software components**: Optional, recommended claim. It represents
       the software state of the system. The value of the claim is an array
       of CBOR map entries, with one entry per software component within the
       device. Each map contains multiple claims that describe evidence about
       the details of the software component.
-     
+
     - **Measurement type**: Optional claim. It represents the role of the
       software component. Value is encoded as short(!) text string.
-    
+
     - **Measurement value**: It represents a hash of the invariant software
       component in memory at start-up time. The value must be a cryptographic
       hash of 256 bits or stronger. Value is encoded as byte string.
-    
+
     - **Security epoch**: Optional claim. It represents the security control
       point of the software component. Value is encoded as unsigned integer.
-    
+
     - **Version**: Optional claim. It represents the issued software
       version. Value is encoded as text string.
-    
+
     - **Signer ID**: It represents the hash of a signing authority public key.
       Value is encoded as byte string.
-    
+
     - **Measurement description**: Optional claim. It represents the way in
       which the measurement value of the software component is computed. Value
       is encoded as text string containing an abbreviated description (name)
       of the measurement method.
-    
+
     - **No software measurements**: In the event that the implementation
       does not contain any software measurements then the software components
       claim above can be omitted but instead it is mandatory to include this
@@ -149,21 +149,21 @@ Service source files
       library with available crypto library in the device.
     - ``lib/t_cose/src/t_cose_psa_crypto.c``: Implements the exposed API
       and ports ``t_cose`` to the PSA Crypto API.
-    - Initial Attestation Service:
-        - ``attestation_core.c`` : Implements core functionalities such as
-          implementation of APIs, retrieval of claims and token creation.
-        - ``attest_token.c``: Implements the token creation function such as
-          start and finish token creation and adding claims to the token.
-        - ``attestation_key.c``: Get the attestation key from platform layer
-          and register it to the TF-M Crypto service for further usage.
-        - ``tfm_attestation.c``: Implements the SPM abstraction layer, and bind
-          the attestation service to the SPM implementation in TF-M project.
-        - ``tfm_attestation_secure_api.c``: Implements the secure API layer to
-          allow other services in the secure domain to request functionalities
-          from the attestation service using the PSA API interface.
-        - ``tfm_attestation_req_mngr.c``: Includes the initialization entry of
-          attestation service and handles attestation service requests in IPC
-          model.
+- Initial Attestation Service:
+    - ``attestation_core.c`` : Implements core functionalities such as
+      implementation of APIs, retrieval of claims and token creation.
+    - ``attest_token.c``: Implements the token creation function such as
+      start and finish token creation and adding claims to the token.
+    - ``attestation_key.c``: Get the attestation key from platform layer
+      and register it to the TF-M Crypto service for further usage.
+    - ``tfm_attestation.c``: Implements the SPM abstraction layer, and bind
+      the attestation service to the SPM implementation in TF-M project.
+    - ``tfm_attestation_secure_api.c``: Implements the secure API layer to
+      allow other services in the secure domain to request functionalities
+      from the attestation service using the PSA API interface.
+    - ``tfm_attestation_req_mngr.c``: Includes the initialization entry of
+      attestation service and handles attestation service requests in IPC
+      model.
 
 Service interface definitions
 =============================
@@ -424,6 +424,57 @@ service with ``psa_import_key()`` and ``psa_destroy_key()`` API calls for
 further usage. See in ``attestation_key.c``. In other implementation if the
 attestation key is directly retrieved by the Crypto service then this key
 handling is not necessary.
+
+************
+Verification
+************
+The initial attestation token is verified by the attestation test suite in
+``test/suites/attestation``. The test suite is responsible for verifying the
+token signature and parsing the token to verify its encoding and the presence of
+the mandatory claims. This test suite can be executed on the device. It is part
+of the regression test suite. When the user builds TF-M with any of the
+``ConfigRegression*.cmake`` configurations then this test is executed
+automatically. The test suite is configurable in the
+``test/suites/attestation/attest_token_test_values.h`` header file. In this file
+there are two attributes for each claim which are configurable (more details
+in the header file):
+
+ - Requirements of presence: optional or mandatory
+ - Expected value: Value check can be disabled or expected value can be provided
+   here.
+
+There is another possibility to verify the attestation token. This addresses
+the off-device testing when the token is already retrieved from the device and
+verification is done on the requester side. There is a Python script for this
+purpose in ``tools/iat-verifier``. It does the same checking as the
+attestation test suite. The following steps describe how to simulate an
+off-device token verification on a host computer. It is described how to
+retrieve an initial attestation token when TF-M code is executed on FVP
+and how to use the iat_verifier script to check the token. This example assumes
+that user has license for DS-5 and FVP models:
+
+ - Build TF-M with any of the ``ConfigRegression*.cmake`` build configurations
+   for MPS2 AN521 platform. More info in
+   :doc:`tfm_build_instruction </docs/user_guides/tfm_build_instruction>`.
+ - Lunch FVP model in DS-5. More info in
+   :doc:`tfm_user_guide </docs/user_guides/tfm_user_guide>`.
+ - Set a breakpoint in ``test/suites/attestation/attest_token_test.c``
+   in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
+   i.e. on line 859. Execute the code in the model until the breakpoint hits
+   second time. At this point the console prints the following message:
+   ``ECDSA signature test of attest token``.
+ - At this point the token resides in the model memory and can be dumped to host
+   computer.
+ - The ADDRESS and SIZE attributes of the initial attestation token is stored in
+   the ``completed_token`` local variable. Their value can be extracted in the
+   ``(x)=Variables`` debug window.
+ - Apply this command in the ``Commands`` debug window to dump the token in
+   binary format to the host computer:
+   ``dump memory <PATH>/iat_01.cbor <ADDRESS> +<SIZE>``
+ - Execute this command on the host computer to verify the token:
+   ``check_iat -p -K -k platform/ext/common/tfm_initial_attestation_key.pem <PATH>/iat_01.cbor``
+ - Documentation of the iat-verifier can be found
+   :doc:`here </tools/iat-verifier/README>`.
 
 --------------
 
