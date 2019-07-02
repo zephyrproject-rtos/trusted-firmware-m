@@ -47,8 +47,8 @@ elseif (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
 
 	if (NOT SST_RAM_FS AND NOT (REFERENCE_PLATFORM OR ${TARGET_PLATFORM} STREQUAL "AN524"))
 		# Show flash warning message only when the RAM FS is not in use or the tests are compiled to
-		# be executed in the reference plaforms (AN519 and AN521) & AN524. The reference platforms and AN524
-		# use RAM memory to emulated a flash device as they do not have one.
+		# be executed in the reference plaforms (AN519, AN521 and AN539) & AN524. The reference platforms
+		# and AN524 use RAM memory to emulated a flash device as they do not have one.
 		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS SST_SHOW_FLASH_WARNING)
 		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS SST_SHOW_FLASH_WARNING)
 	endif()
