@@ -32,12 +32,12 @@
 #define PSA_CLOSE() psa_close(ipc_handle)
 
 #define API_DISPATCH(sfn_name, sfn_id)                          \
-    psa_call(ipc_handle, /*PSA_IPC_CALL,*/                      \
+    psa_call(ipc_handle, PSA_IPC_CALL,                          \
         in_vec, ARRAY_SIZE(in_vec),                             \
         out_vec, ARRAY_SIZE(out_vec))
 
 #define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                \
-    psa_call(ipc_handle, /*PSA_IPC_CALL,*/                      \
+    psa_call(ipc_handle, PSA_IPC_CALL,                          \
         in_vec, ARRAY_SIZE(in_vec),                             \
         (psa_outvec *)NULL, 0)
 #else
@@ -1061,7 +1061,7 @@ psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
     if (additional_data == NULL) {
         in_len--;
     }
-    status = psa_call(ipc_handle, in_vec, in_len,
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_aead_encrypt,
@@ -1131,7 +1131,7 @@ psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
     if (additional_data == NULL) {
         in_len--;
     }
-    status = psa_call(ipc_handle, in_vec, in_len,
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_aead_decrypt,
@@ -1260,7 +1260,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_handle_t handle,
     if (salt == NULL) {
         in_len--;
     }
-    status = psa_call(ipc_handle, in_vec, in_len,
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_asymmetric_encrypt,
@@ -1317,7 +1317,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_handle_t handle,
     if (salt == NULL) {
         in_len--;
     }
-    status = psa_call(ipc_handle, in_vec, in_len,
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_asymmetric_decrypt,
@@ -1503,7 +1503,7 @@ psa_status_t psa_key_derivation(psa_crypto_generator_t *generator,
             in_len--;
         }
     }
-    status = psa_call(ipc_handle, in_vec, in_len,
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, ARRAY_SIZE(out_vec));
 #else
     status = API_DISPATCH(tfm_crypto_key_derivation,
@@ -1622,7 +1622,7 @@ psa_status_t psa_generate_key(psa_key_handle_t handle,
         in_len--;
     }
 
-    status = psa_call(ipc_handle, in_vec, in_len, NULL, 0);
+    status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len, NULL, 0);
 #else
     status = API_DISPATCH_NO_OUTVEC(tfm_crypto_generate_key,
                                     TFM_CRYPTO_GENERATE_KEY);

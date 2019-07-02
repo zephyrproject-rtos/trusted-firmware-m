@@ -88,7 +88,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
      */
     connect_handle = tfm_spm_create_conn_handle(service);
     if (connect_handle == PSA_NULL_HANDLE) {
-        return PSA_CONNECTION_BUSY;
+        return PSA_ERROR_CONNECTION_BUSY;
     }
 
     /*
@@ -112,7 +112,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
                              ns_caller, NULL, 0, NULL, 0, NULL);
     if (!msg) {
         /* Have no enough resource to create message */
-        return PSA_CONNECTION_BUSY;
+        return PSA_ERROR_CONNECTION_BUSY;
     }
 
     /*
@@ -121,7 +121,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
      */
     tfm_spm_send_event(service, msg);
 
-    return PSA_CONNECTION_BUSY;
+    return PSA_ERROR_CONNECTION_BUSY;
 }
 
 psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
@@ -135,10 +135,15 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
     int i;
     struct tfm_spm_ipc_partition_t *partition = NULL;
     uint32_t privileged;
+    int32_t type;
 
     TFM_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
+    type = (int32_t)args[1];
 
+    if (type < 0) {
+        tfm_panic();
+    }
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_panic();
@@ -146,29 +151,31 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
     privileged = tfm_spm_partition_get_privileged_mode(partition->index);
 
     if (!ns_caller) {
-        inptr = (psa_invec *)args[1];
-        in_num = (size_t)args[2];
-        outptr = (psa_outvec *)args[3];
+        inptr = (psa_invec *)args[2];
+        in_num = (size_t)args[3];
         /*
-         * 5th parameter is pushed at stack top before SVC, then PE hardware
-         * stacks the execution context. The size of the context depends on
-         * various settings:
-         * - if FP is not used, 5th parameter is at 8th position counting
-         *   from SP;
-         * - if FP is used and FPCCR_S.TS is 0, 5th parameter is at 26th
+         * 5th and 6th parameter is pushed at stack top before SVC, then PE
+         * hardware stacks the execution context. The size of the context
+         * depends on various settings:
+         * - if FP is not used, 5th and 6th parameters are at 8th and 9th
          *   position counting from SP;
-         * - if FP is used and FPCCR_S.TS is 1, 5th parameter is at 42th
-         *   position counting from SP.
+         * - if FP is used and FPCCR_S.TS is 0, 5th and 6th parameters are at
+         *   26th and 27th position counting from SP;
+         * - if FP is used and FPCCR_S.TS is 1, 5th and 6th parameters are at
+         *   42th and 43th position counting from SP.
          */
-         if (lr & EXC_RETURN_FPU_FRAME_BASIC) {
-            out_num = (size_t)args[8];
+        if (lr & EXC_RETURN_FPU_FRAME_BASIC) {
+            outptr = (psa_outvec *)args[8];
+            out_num = (size_t)args[9];
 #if defined (__FPU_USED) && (__FPU_USED == 1U)
-         } else if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
-            out_num = (size_t)args[42];
+        } else if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
+            outptr = (psa_outvec *)args[42];
+            out_num = (size_t)args[43];
 #endif
-         } else {
-            out_num = (size_t)args[26];
-         }
+        } else {
+            outptr = (psa_outvec *)args[26];
+            out_num = (size_t)args[27];
+        }
     } else {
         /*
          * FixMe: From non-secure caller, vec and len are composed into a new
@@ -178,19 +185,19 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
          * Read parameters from the arguments. It is a fatal error if the
          * memory reference for buffer is invalid or not readable.
          */
-        if (tfm_memory_check((void *)args[1], sizeof(uint32_t),
-            ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-            tfm_panic();
-        }
         if (tfm_memory_check((void *)args[2], sizeof(uint32_t),
             ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
             tfm_panic();
         }
+        if (tfm_memory_check((void *)args[3], sizeof(uint32_t),
+            ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+            tfm_panic();
+        }
 
-        inptr = (psa_invec *)((psa_invec *)args[1])->base;
-        in_num = ((psa_invec *)args[1])->len;
-        outptr = (psa_outvec *)((psa_invec *)args[2])->base;
-        out_num = ((psa_invec *)args[2])->len;
+        inptr = (psa_invec *)((psa_invec *)args[2])->base;
+        in_num = ((psa_invec *)args[2])->len;
+        outptr = (psa_outvec *)((psa_invec *)args[3])->base;
+        out_num = ((psa_invec *)args[3])->len;
     }
 
     /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
@@ -372,7 +379,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
  *
  * \retval PSA_SUCCESS          Success, *msg will contain the delivered
  *                              message.
- * \retval PSA_ERR_NOMSG        Message could not be delivered.
+ * \retval PSA_ERROR_DOES_NOT_EXIST Message could not be delivered.
  * \retval "Does not return"    The call is invalid because one or more of the
  *                              following are true:
  * \arg                           signal has more than a single bit set.
@@ -445,7 +452,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
 
     tmp_msg = tfm_msg_dequeue(&service->msg_queue);
     if (!tmp_msg) {
-        return PSA_ERR_NOMSG;
+        return PSA_ERROR_DOES_NOT_EXIST;
     }
 
     tfm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
@@ -817,10 +824,10 @@ static void tfm_svcall_psa_reply(uint32_t *args)
             if (msg->msg.rhandle) {
                 tfm_spm_set_rhandle(service, msg->handle, msg->msg.rhandle);
             }
-        } else if (status == PSA_CONNECTION_REFUSED) {
-            ret = PSA_CONNECTION_REFUSED;
-        } else if (status == PSA_CONNECTION_BUSY) {
-            ret = PSA_CONNECTION_BUSY;
+        } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
+            ret = PSA_ERROR_CONNECTION_REFUSED;
+        } else if (status == PSA_ERROR_CONNECTION_BUSY) {
+            ret = PSA_ERROR_CONNECTION_BUSY;
         } else {
             tfm_panic();
         }
@@ -829,8 +836,6 @@ static void tfm_svcall_psa_reply(uint32_t *args)
         /* Reply to PSA_IPC_CALL message. Return values are based on status */
         if (status == PSA_SUCCESS) {
             ret = PSA_SUCCESS;
-        } else if (status == PSA_DROP_CONNECTION) {
-            ret = PSA_DROP_CONNECTION;
         } else if ((status >= (INT32_MIN + 1)) &&
                    (status <= (INT32_MIN + 127))) {
             tfm_panic();
@@ -1162,7 +1167,7 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 
     default:
         LOG_MSG("Unknown SVC number requested!");
-        return PSA_DROP_CONNECTION;
+        return PSA_ERROR_GENERIC_ERROR;
     }
     return PSA_SUCCESS;
 }

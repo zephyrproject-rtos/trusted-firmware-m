@@ -43,7 +43,7 @@ psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    status = psa_call(handle, in_vec, IOVEC_LEN(in_vec), out_vec,
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
                       IOVEC_LEN(out_vec));
 
     psa_close(handle);
@@ -90,7 +90,7 @@ psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    status = psa_call(handle, in_vec, IOVEC_LEN(in_vec), out_vec,
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
                       IOVEC_LEN(out_vec));
 
     psa_close(handle);
@@ -133,7 +133,7 @@ psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    status = psa_call(handle, in_vec, IOVEC_LEN(in_vec), out_vec,
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
                       IOVEC_LEN(out_vec));
 
     psa_close(handle);
@@ -176,7 +176,7 @@ psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    status = psa_call(handle, in_vec, IOVEC_LEN(in_vec), out_vec,
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
                       IOVEC_LEN(out_vec));
 
     psa_close(handle);
@@ -243,7 +243,7 @@ uint32_t psa_ps_get_support(void)
         return support_flags;
     }
 
-    (void)psa_call(handle, NULL, 0, out_vec, IOVEC_LEN(out_vec));
+    (void)psa_call(handle, PSA_IPC_CALL, NULL, 0, out_vec, IOVEC_LEN(out_vec));
 
     psa_close(handle);
 #else

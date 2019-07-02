@@ -54,7 +54,7 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    status = psa_call(handle,
+    status = psa_call(handle, PSA_IPC_CALL,
                       in_vec, IOVEC_LEN(in_vec),
                       out_vec, IOVEC_LEN(out_vec));
     psa_close(handle);
@@ -134,7 +134,7 @@ psa_initial_attest_get_token_size(uint32_t challenge_size,
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    status = psa_call(handle,
+    status = psa_call(handle, PSA_IPC_CALL,
                       in_vec, IOVEC_LEN(in_vec),
                       out_vec, IOVEC_LEN(out_vec));
     psa_close(handle);

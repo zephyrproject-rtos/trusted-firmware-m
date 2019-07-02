@@ -41,9 +41,9 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
  *                              Or from secure client.
  *
  * \retval > 0                  A handle for the connection.
- * \retval PSA_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
  *                              connection.
- * \retval PSA_CONNECTION_BUSY  The SPM or RoT Service cannot make the
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
  *                              connection at the moment.
  * \retval "Does not return"    The RoT Service ID and version are not
  *                              supported, or the caller is not permitted to
@@ -62,13 +62,12 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller);
  *
  * \retval >=0                  RoT Service-specific status value.
  * \retval <0                   RoT Service-specific error code.
- * \retval PSA_DROP_CONNECTION  The connection has been dropped by the RoT
- *                              Service. This indicates that either this or
- *                              a previous message was invalid.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The connection has been terminated by the
+ *                              RoT Service. The call is a PROGRAMMER ERROR if
+ *                              one or more of the following are true:
  * \arg                           An invalid handle was passed.
  * \arg                           The connection is already handling a request.
+ * \arg                           type < 0.
  * \arg                           An invalid memory reference was provided.
  * \arg                           in_len + out_len > PSA_MAX_IOVEC.
  * \arg                           The message is unrecognized by the RoT

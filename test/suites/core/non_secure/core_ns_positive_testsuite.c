@@ -122,7 +122,7 @@ static psa_status_t psa_test_common(uint32_t sid, uint32_t minor_version,
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    status = psa_call(handle, in_vecs, in_len, out_vecs, out_len);
+    status = psa_call(handle, PSA_IPC_CALL, in_vecs, in_len, out_vecs, out_len);
     if (status < 0) {
         status = CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
     }

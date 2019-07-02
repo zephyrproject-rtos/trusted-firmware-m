@@ -91,19 +91,18 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
 }
 
 __tfm_secure_gateway_attributes__
-psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version)
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_connect, sid,
-                                   minor_version, 0, 0);
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_connect, sid, version, 0, 0);
 }
 
 __tfm_secure_gateway_attributes__
-psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle, int32_t type,
                                  const psa_invec *in_vecs,
                                  const psa_invec *out_vecs)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_call, handle, in_vecs,
-                                   out_vecs, 0);
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_call, handle, type, in_vecs,
+                                   out_vecs);
 }
 
 __tfm_secure_gateway_attributes__

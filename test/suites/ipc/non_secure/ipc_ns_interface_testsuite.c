@@ -148,12 +148,9 @@ static void tfm_ipc_test_1004(struct test_result_t *ret)
     TEST_LOG("TFM service support minor version is %d.\r\n", min_version);
     handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID,
                          IPC_SERVICE_TEST_BASIC_VERSION);
-    status = psa_call(handle, invecs, 2, outvecs, 2);
+    status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);
     if (status >= 0) {
         TEST_LOG("psa_call is successful!\r\n");
-    } else if (status == PSA_DROP_CONNECTION) {
-        TEST_FAIL("The connection has been dropped by the RoT Service!\r\n");
-        return;
     } else {
         TEST_FAIL("psa_call is failed!\r\n");
         return;
@@ -185,7 +182,7 @@ static void tfm_ipc_test_1005(struct test_result_t *ret)
         return;
     }
 
-    status = psa_call(handle, NULL, 0, outvecs, 1);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
         TEST_LOG("Call success!");
         if (test_result > 0) {
@@ -222,7 +219,7 @@ static void tfm_ipc_test_1006(struct test_result_t *ret)
         return;
     }
 
-    status = psa_call(handle, NULL, 0, outvecs, 1);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
         TEST_LOG("Call success!");
         if (test_result > 0) {
@@ -259,7 +256,7 @@ static void tfm_ipc_test_1007(struct test_result_t *ret)
         return;
     }
 
-    psa_call(handle, NULL, 0, outvecs, 1);
+    psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
 
     /* The system should panic in psa_call. If runs here, the test fails. */
     ret->val = TEST_FAILED;
@@ -288,7 +285,7 @@ static void tfm_ipc_test_1008(struct test_result_t *ret)
         return;
     }
 
-    psa_call(handle, NULL, 0, outvecs, 1);
+    psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
 
     /* The system should panic in psa_call. If runs here, the test fails. */
     ret->val = TEST_FAILED;
@@ -317,7 +314,7 @@ static void tfm_ipc_test_1009(struct test_result_t *ret)
         return;
     }
 
-    psa_call(handle, NULL, 0, outvecs, 1);
+    psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
 
     /* The system should panic in psa_call. If runs here, the test fails. */
     ret->val = TEST_FAILED;

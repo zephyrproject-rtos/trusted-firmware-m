@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* FixMe: Use PSA_CONNECTION_REFUSED when performing parameter
+/* FixMe: Use PSA_ERROR_CONNECTION_REFUSED when performing parameter
  *        integrity checks but this will have to be revised
  *        when the full set of error codes mandated by PSA FF
  *        is available.
@@ -33,12 +33,12 @@ psa_status_t tfm_crypto_hash_setup(psa_invec in_vec[],
     psa_hash_operation_t *operation = NULL;
 
     if ((in_len != 1) || (out_len != 1)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((out_vec[0].len != sizeof(uint32_t)) ||
         (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
@@ -77,12 +77,12 @@ psa_status_t tfm_crypto_hash_update(psa_invec in_vec[],
     psa_hash_operation_t *operation = NULL;
 
     if ((in_len != 2) || (out_len != 1)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
@@ -120,12 +120,12 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
     psa_hash_operation_t *operation = NULL;
 
     if ((in_len != 1) || (out_len != 2)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
@@ -168,12 +168,12 @@ psa_status_t tfm_crypto_hash_verify(psa_invec in_vec[],
     psa_hash_operation_t *operation = NULL;
 
     if ((in_len != 2) || (out_len != 1)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
@@ -213,12 +213,12 @@ psa_status_t tfm_crypto_hash_abort(psa_invec in_vec[],
     psa_hash_operation_t *operation = NULL;
 
     if ((in_len != 1) || (out_len != 1)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
@@ -258,12 +258,12 @@ psa_status_t tfm_crypto_hash_clone(psa_invec in_vec[],
     psa_hash_operation_t *target_operation = NULL;
 
     if ((in_len != 1) || (out_len != 1)) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_CONNECTION_REFUSED;
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t source_handle = iov->op_handle;

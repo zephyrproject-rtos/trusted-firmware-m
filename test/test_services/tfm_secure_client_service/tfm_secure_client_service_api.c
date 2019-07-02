@@ -26,7 +26,7 @@ int32_t tfm_secure_client_run_tests(void)
         return TFM_ERROR_GENERIC;
     }
 
-    status = psa_call(handle, NULL, 0, NULL, 0);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
     psa_close(handle);
 
     if (status != PSA_SUCCESS) {

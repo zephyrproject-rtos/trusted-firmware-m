@@ -35,9 +35,6 @@ extern "C" {
  */
 #define TFM_CLIENT_ID_IS_NS(client_id) ((client_id)<0)
 
-/* Maximum number of input and output vectors */
-#define PSA_MAX_IOVEC    (4)
-
 /* The mask used for timeout values */
 #define PSA_TIMEOUT_MASK        PSA_BLOCK
 
@@ -102,22 +99,24 @@ uint32_t tfm_psa_version_veneer(uint32_t sid);
  * \brief Connect to secure function
  *
  * \param[in]  sid              ID of secure service
- * \param[in]  minor_version    Minor version of SF requested by client
+ * \param[in]  version          Version of SF requested by client
  *
  * \return Returns handle to connection
  */
-psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t minor_version);
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version);
 
 /**
  * \brief Call a secure function referenced by a connection handle
  *
  * \param[in]  handle   Handle to connection
+ * \param[in]  type     The reuqest type. Must be zero(PSA_IPC_CALL) or
+ *                      positive.
  * \param[in]  in_vecs  invec containing pointer/count of input vectors
  * \param[in]  out_vecs invec containing pointer/count of output vectors
  *
  * \return Returns \ref psa_status_t status code
  */
-psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle, int32_t type,
                                  const psa_invec *in_vecs,
                                  const psa_invec *out_vecs);
 

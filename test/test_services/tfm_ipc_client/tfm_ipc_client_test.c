@@ -55,7 +55,7 @@ static int ipc_isolation_2_psa_access_app_readonly_memory(void)
         return IPC_SP_TEST_FAILED;
     }
 
-    status = psa_call(handle, invecs, 1, NULL, 0);
+    status = psa_call(handle, PSA_IPC_CALL, invecs, 1, NULL, 0);
 
     /* The system should panic before here. */
     psa_close(handle);
@@ -79,7 +79,7 @@ static int ipc_isolation_2_psa_access_app_memory(void)
         return result;
     }
 
-    status = psa_call(handle, invecs, 1, NULL, 0);
+    status = psa_call(handle, PSA_IPC_CALL, invecs, 1, NULL, 0);
 
     if ((client_data == 'B') && (status >= 0)) {
         result = IPC_SP_TEST_SUCCESS;
@@ -108,7 +108,7 @@ static int ipc_client_base_test(void)
         return result;
     }
 
-    status = psa_call(handle, invecs, 2, outvecs, 2);
+    status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);
     if (status >= 0) {
         result = IPC_SP_TEST_SUCCESS;
     }
@@ -132,7 +132,7 @@ static int ipc_client_app_access_psa_mem_test(void)
         return IPC_SP_TEST_FAILED;
     }
 
-    status = psa_call(handle, NULL, 0, outvecs, 1);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
         /*
          * outvecs should contain the pointer pointed to ipc service parition
@@ -166,7 +166,7 @@ static int ipc_client_mem_check_test(void)
         return IPC_SP_TEST_FAILED;
     }
 
-    status = psa_call(handle, NULL, 0, outvecs, 1);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
         /*
          * outvecs should contain the pointer pointed to ipc service parition
@@ -178,7 +178,7 @@ static int ipc_client_mem_check_test(void)
         if (psa_data_p) {
             invecs[0].base = psa_data_p;
             invecs[0].len = sizeof(psa_data_p);
-            psa_call(handle, invecs, 1, NULL, 0);
+            psa_call(handle, PSA_IPC_CALL, invecs, 1, NULL, 0);
         }
     }
 
@@ -197,7 +197,7 @@ static void ipc_client_handle_ser_req(psa_msg_t msg, uint32_t signals,
     switch (msg.type) {
     case PSA_IPC_CONNECT:
         if (service_in_use & signals) {
-            r = PSA_CONNECTION_REFUSED;
+            r = PSA_ERROR_CONNECTION_REFUSED;
         } else {
             service_in_use |= signals;
             r = PSA_SUCCESS;
