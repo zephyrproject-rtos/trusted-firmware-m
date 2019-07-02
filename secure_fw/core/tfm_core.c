@@ -227,8 +227,8 @@ void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 int main(void)
 {
     /* set Main Stack Pointer limit */
-    __set_MSPLIM((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
-                                        $$ZI$$Base));
+    tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+                                               $$ZI$$Base));
 
     if (tfm_core_init() != TFM_SUCCESS) {
         tfm_panic();
