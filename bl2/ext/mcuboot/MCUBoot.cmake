@@ -100,6 +100,17 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 		set(IMAGE_VERSION "")
 	endif()
 
+	if (S_IMAGE_MIN_VER)
+		set(ADD_S_IMAGE_MIN_VER "-d \"(0,${S_IMAGE_MIN_VER})\"")
+	else()
+		set(ADD_S_IMAGE_MIN_VER "")
+	endif()
+	if (NS_IMAGE_MIN_VER)
+		set(ADD_NS_IMAGE_MIN_VER "-d \"(1,${NS_IMAGE_MIN_VER})\"")
+	else()
+		set(ADD_NS_IMAGE_MIN_VER "")
+	endif()
+
 	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess)
 	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed)
 
@@ -136,6 +147,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 							 -k ${KEY_FILE}
 							 --align 1
 							 -v ${IMAGE_VERSION_S}
+							 ${ADD_NS_IMAGE_MIN_VER}
 							 ${ADD_SECURITY_COUNTER_S}
 							 -H 0x400
 							 $<TARGET_FILE_DIR:${_MY_PARAMS_S_BIN}>/${_MY_PARAMS_S_BIN}.bin
@@ -148,6 +160,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 							 -k ${KEY_FILE}
 							 --align 1
 							 -v ${IMAGE_VERSION_NS}
+							 ${ADD_S_IMAGE_MIN_VER}
 							 ${ADD_SECURITY_COUNTER_NS}
 							 -H 0x400
 							 $<TARGET_FILE_DIR:${_MY_PARAMS_NS_BIN}>/${_MY_PARAMS_NS_BIN}.bin
@@ -183,6 +196,14 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 			" the IMAGE_VERSION define. The values of IMAGE_VERSION_S and/or IMAGE_VERSION_NS were ignored.")
 		set(IMAGE_VERSION_S "")
 		set(IMAGE_VERSION_NS "")
+	endif()
+
+	if (DEFINED S_IMAGE_MIN_VER OR
+		DEFINED NS_IMAGE_MIN_VER)
+		message(WARNING "WARNING: In case of a single updatable image a dependency cannot be specified between"
+			" the S and NS images. The S_IMAGE_MIN_VER and/or NS_IMAGE_MIN_VER defines were ignored.")
+		set(S_IMAGE_MIN_VER "")
+		set(NS_IMAGE_MIN_VER "")
 	endif()
 
 	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess.c)

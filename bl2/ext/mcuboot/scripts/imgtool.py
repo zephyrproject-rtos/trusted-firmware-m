@@ -112,7 +112,7 @@ def do_sign(args):
                            pad=pad_size)
     key = keys.load(args.key) if args.key else None
     ram_load_address = macro_parser.evaluate_macro(args.layout, image_load_address_re, 0, 1)
-    img.sign(key, ram_load_address)
+    img.sign(key, ram_load_address, args.dependencies)
 
     if pad_size:
         img.pad_to(pad_size, args.align)
@@ -123,6 +123,30 @@ subcmds = {
         'keygen': do_keygen,
         'getpub': do_getpub,
         'sign': do_sign, }
+
+
+def get_dependencies(text):
+    if text is not None:
+        versions = []
+        images = re.findall(r"\((\d+)", text)
+        if len(images) == 0:
+            msg = "Image dependency format is invalid: {}".format(text)
+            raise argparse.ArgumentTypeError(msg)
+        raw_versions = re.findall(r",\s*([0-9.+]+)\)", text)
+        if len(images) != len(raw_versions):
+            msg = '''There's a mismatch between the number of dependency images
+            and versions in: {}'''.format(text)
+            raise argparse.ArgumentTypeError(msg)
+        for raw_version in raw_versions:
+            try:
+                versions.append(version.decode_version(raw_version))
+            except ValueError as e:
+                print(e)
+        dependencies = dict()
+        dependencies[image.DEP_IMAGES_KEY] = images
+        dependencies[image.DEP_VERSIONS_KEY] = versions
+        return dependencies
+
 
 def alignment_value(text):
     value = int(text)
@@ -157,6 +181,9 @@ def args():
     sign.add_argument("--align", type=alignment_value, required=True)
     sign.add_argument("-v", "--version", type=version.decode_version,
                       default="0.0.0+0")
+    sign.add_argument("-d", "--dependencies", type=get_dependencies,
+                      required=False, help='''Add dependence on another image,
+                      format: "(<image_ID>,<image_version>), ... "''')
     sign.add_argument("-s", "--security-counter", type=intparse,
                       help='Specify explicitly the security counter value')
     sign.add_argument("-H", "--header-size", type=intparse, required=True)

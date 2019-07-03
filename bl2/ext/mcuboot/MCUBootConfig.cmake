@@ -61,4 +61,10 @@ else() #BL2 is turned off
 		set(IMAGE_VERSION_S "")
 		set(IMAGE_VERSION_NS "")
 	endif()
+	if (DEFINED S_IMAGE_MIN_VER OR
+		DEFINED NS_IMAGE_MIN_VER)
+		message(WARNING "Ignoring the values of *_IMAGE_MIN_VER variables as BL2 option is set to False.")
+		set(S_IMAGE_MIN_VER "")
+		set(NS_IMAGE_MIN_VER "")
+	endif()
 endif()

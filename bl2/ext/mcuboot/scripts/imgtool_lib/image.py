@@ -26,6 +26,8 @@ IMAGE_HEADER_SIZE = 32
 TLV_HEADER_SIZE = 4
 PAYLOAD_DIGEST_SIZE = 32  # SHA256 hash
 KEYHASH_SIZE = 32
+DEP_IMAGES_KEY = "images"
+DEP_VERSIONS_KEY = "versions"
 
 # Image header flags.
 IMAGE_F = {
@@ -37,6 +39,7 @@ TLV_VALUES = {
         'SHA256' : 0x10,
         'RSA2048': 0x20,
         'RSA3072': 0x23,
+        'DEPENDENCY': 0x40,
         'SEC_CNT': 0x50, }
 
 TLV_INFO_SIZE = 4
@@ -112,10 +115,18 @@ class Image():
             if any(v != 0 and v != b'\000' for v in self.payload[0:self.header_size]):
                 raise Exception("Padding requested, but image does not start with zeros")
 
-    def sign(self, key, ramLoadAddress):
+    def sign(self, key, ramLoadAddress, dependencies=None):
         # Size of the security counter TLV:
         # header ('BBH') + payload ('I') = 8 Bytes
         protected_tlv_size = TLV_INFO_SIZE + 8
+
+        if dependencies is None:
+            dependencies_num = 0
+        else:
+            # Size of a dependency TLV:
+            # header ('BBH') + payload('IBBHI') = 16 Bytes
+            dependencies_num = len(dependencies[DEP_IMAGES_KEY])
+            protected_tlv_size += (dependencies_num * 16)
 
         self.add_header(key, protected_tlv_size, ramLoadAddress)
 
@@ -123,6 +134,19 @@ class Image():
 
         payload = struct.pack('I', self.security_cnt)
         tlv.add('SEC_CNT', payload)
+
+        if dependencies_num != 0:
+            for i in range(dependencies_num):
+                payload = struct.pack(
+                                '<'+'I'+'BBHI',
+                                int(dependencies[DEP_IMAGES_KEY][i]),
+                                dependencies[DEP_VERSIONS_KEY][i].major,
+                                dependencies[DEP_VERSIONS_KEY][i].minor,
+                                dependencies[DEP_VERSIONS_KEY][i].revision,
+                                dependencies[DEP_VERSIONS_KEY][i].build
+                                )
+                tlv.add('DEPENDENCY', payload)
+
         # Full TLV size needs to be calculated in advance, because the
         # header will be protected as well
         full_size = (TLV_INFO_SIZE + len(tlv.buf) + TLV_HEADER_SIZE
@@ -179,7 +203,7 @@ class Image():
                 IMAGE_MAGIC,
                 0 if (ramLoadAddress is None) else ramLoadAddress, # LoadAddr
                 self.header_size,
-                protected_tlv_size,  # TLV info header + security counter TLV
+                protected_tlv_size,  # TLV info header + SC TLV (+ DEP. TLVs)
                 len(self.payload) - self.header_size, # ImageSz
                 flags, # Flags
                 self.version.major,
