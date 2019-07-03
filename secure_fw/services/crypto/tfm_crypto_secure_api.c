@@ -17,14 +17,10 @@
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 
-/* Macro to check for a valid PSA handle */
-/* FixMe: Here temporarily until it's added to the framework headers */
-#define PSA_IS_HANDLE_VALID(handle) ((handle) > (psa_handle_t)0)
-
 #define PSA_CONNECT(service)                                    \
     psa_handle_t ipc_handle;                                    \
     ipc_handle = psa_connect(service##_SID, service##_VERSION); \
-    if (!PSA_IS_HANDLE_VALID(ipc_handle)) {                     \
+    if (!PSA_HANDLE_IS_VALID(ipc_handle)) {                     \
         return PSA_ERROR_GENERIC_ERROR;                         \
     }                                                           \
 
