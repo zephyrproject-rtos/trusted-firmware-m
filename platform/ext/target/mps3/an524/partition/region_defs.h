@@ -34,7 +34,7 @@
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
  */
-#define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x200)
+#define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
 
 /* This configuration uses QSPI for code memory and ISRAM0-3 as data
  * memory.

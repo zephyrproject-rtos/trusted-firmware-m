@@ -303,6 +303,6 @@
 /* Attest token maximum size, there are also platform dependent values
  * defined in region_defs.h
  */
-#define ATTEST_TOKEN_MAX_SIZE  0x200
+#define ATTEST_TOKEN_MAX_SIZE  0x250
 
 #endif /* __ATTEST_TOKEN_TEST_VALUES_H__ */
