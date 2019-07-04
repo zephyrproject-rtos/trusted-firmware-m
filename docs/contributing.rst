@@ -3,7 +3,7 @@ Contributing to Trusted Firmware M
 
 Contributions to TF-M project need to follow the process below.
 
-``Note`` Please contact :doc:`maintainers` for any questions.
+``Note`` Please contact :doc:`/docs/maintainers` for any questions.
 
 -  Create an issue in http://issues.trustedfirmware.org
    to keep others informed about your ongoing work.

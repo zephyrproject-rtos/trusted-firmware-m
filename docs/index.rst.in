@@ -5,7 +5,7 @@
    before the documentation is built.
    This file will be copied to the top level and thus please use relative paths
    as if this file would be in <TFM_ROOT_DIR>.
-   
+
    The values between @ characters will be filled in by CMake.
 
 
@@ -17,10 +17,10 @@ Welcome to TF-M's documentation!
     :glob:
     :hidden:
 
-    contributing
+    docs/contributing
     docs/dco
-    glossary
-    maintainers
+    docs/glossary
+    docs/maintainers
     docs/user_guides/tfm_sw_requirement
     docs/user_guides/tfm_build_instruction
     docs/coding_guide

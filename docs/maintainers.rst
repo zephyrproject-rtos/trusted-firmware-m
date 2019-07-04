@@ -6,7 +6,7 @@ be approved and merged by the maintainers listed below.
 Sub-maintainers' approval is required for their specific areas of ownership.
 
 Contributions must follow the instructions in
-:doc:`Contributing Guidelines </contributing>`.
+:doc:`Contributing Guidelines </docs/contributing>`.
 
 Maintainers
 -----------
