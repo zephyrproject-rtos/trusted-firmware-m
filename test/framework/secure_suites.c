@@ -11,6 +11,7 @@
 
 /* Service specific includes */
 #include "test/suites/sst/secure/sst_tests.h"
+#include "test/suites/its/secure/its_s_tests.h"
 #include "test/suites/audit/secure/audit_s_tests.h"
 #include "test/suites/attestation/secure/attestation_s_tests.h"
 #include "test/suites/invert/secure/invert_s_tests.h"
@@ -27,6 +28,10 @@ static struct test_suite_t test_suites[] = {
 #ifdef SST_TEST_NV_COUNTERS
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
+
+    /* Secure ITS test cases */
+    {&register_testsuite_s_psa_its_interface, 0, 0, 0},
+    {&register_testsuite_s_psa_its_reliability, 0, 0, 0},
 
     /* Crypto test cases */
     {&register_testsuite_s_crypto_interface, 0, 0, 0},

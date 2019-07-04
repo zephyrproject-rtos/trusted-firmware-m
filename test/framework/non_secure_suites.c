@@ -11,6 +11,7 @@
 
 /* Service specific includes */
 #include "test/suites/sst/non_secure/sst_ns_tests.h"
+#include "test/suites/its/non_secure/its_ns_tests.h"
 #include "test/suites/audit/non_secure/audit_ns_tests.h"
 #include "test/suites/crypto/non_secure/crypto_ns_tests.h"
 #include "test/suites/attestation/non_secure/attestation_ns_tests.h"
@@ -24,6 +25,9 @@ static struct test_suite_t test_suites[] = {
     /* List test cases which are compliant with level 1 isolation */
 
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
+
+    /* Non-secure ITS test cases */
+    {&register_testsuite_ns_psa_its_interface, 0, 0, 0},
 
     /* Non-secure Crypto test cases */
     {&register_testsuite_ns_crypto_interface, 0, 0, 0},
