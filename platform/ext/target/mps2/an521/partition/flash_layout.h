@@ -48,6 +48,8 @@
  * above.
  */
 #define FLASH_PARTITION_SIZE            (0x80000)    /* 512 kB */
+#define SIGN_BIN_SIZE                   (FLASH_PARTITION_SIZE + \
+                                        FLASH_PARTITION_SIZE)
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)     /* 4 kB */

@@ -42,7 +42,6 @@ else()
 endif()
 set (FLASH_LAYOUT "${AN524_DIR}/partition/flash_layout.h")
 set (PLATFORM_LINK_INCLUDES "${AN524_DIR}/partition/")
-set (SIGN_BIN_SIZE 0x80000)
 
 if (BL2)
     set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})

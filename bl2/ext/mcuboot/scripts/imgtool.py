@@ -23,28 +23,10 @@ from imgtool_lib import keys
 from imgtool_lib import image
 from imgtool_lib import version
 import sys
+import macro_parser
 
-def find_load_address(args):
-    load_address_re = re.compile(r"^#define\sIMAGE_LOAD_ADDRESS\s+(0x[0-9a-fA-F]+)")
-
-    if os.path.isabs(args.layout):
-            configFile = args.layout
-    else:
-        scriptsDir = os.path.dirname(os.path.abspath(__file__))
-        configFile = os.path.join(scriptsDir, args.layout)
-
-    ramLoadAddress = None
-    with open(configFile, 'r') as flash_layout_file:
-        for line in flash_layout_file:
-            m = load_address_re.match(line)
-            if m is not None:
-                ramLoadAddress = int(m.group(1), 0)
-                print("**[INFO]** Writing load address from the macro in "
-                      "flash_layout.h to the image header.. "
-                       + hex(ramLoadAddress)
-                       + " (dec. " + str(ramLoadAddress) + ")")
-                break
-    return ramLoadAddress
+sign_bin_size_re = re.compile(r"^\s*RE_SIGN_BIN_SIZE\s*=\s*(.*)")
+image_load_address_re = re.compile(r"^\s*RE_IMAGE_LOAD_ADDRESS\s*=\s*(.*)")
 
 # Returns the last version number if present, or None if not
 def get_last_version(path):
@@ -118,17 +100,19 @@ def do_sign(args):
                                  + (version_num.minor << 16)
                                  + version_num.revision)
 
+    pad_size = macro_parser.evaluate_macro(args.layout, sign_bin_size_re, 0, 1)
     img = image.Image.load(args.infile,
                            version=version_num,
                            header_size=args.header_size,
                            security_cnt=args.security_counter,
                            included_header=args.included_header,
-                           pad=args.pad)
+                           pad=pad_size)
     key = keys.load(args.key) if args.key else None
-    img.sign(key, find_load_address(args))
+    ram_load_address = macro_parser.evaluate_macro(args.layout, image_load_address_re, 0, 1)
+    img.sign(key, ram_load_address)
 
-    if args.pad:
-        img.pad_to(args.pad, args.align)
+    if pad_size:
+        img.pad_to(pad_size, args.align)
 
     img.save(args.outfile)
 
@@ -164,8 +148,8 @@ def args():
     getpub.add_argument('-l', '--lang', metavar='lang', default='c')
 
     sign = subs.add_parser('sign', help='Sign an image with a private key')
-    sign.add_argument('--layout', required=True,
-                      help='Location of the memory layout file')
+    sign.add_argument('-l', '--layout', required=True,
+                      help='Location of the file that contains preprocessed macros')
     sign.add_argument('-k', '--key', metavar='filename')
     sign.add_argument("--align", type=alignment_value, required=True)
     sign.add_argument("-v", "--version", type=version.decode_version,
@@ -175,8 +159,6 @@ def args():
     sign.add_argument("-H", "--header-size", type=intparse, required=True)
     sign.add_argument("--included-header", default=False, action='store_true',
                       help='Image has gap for header')
-    sign.add_argument("--pad", type=intparse,
-                      help='Pad image to this many bytes, adding trailer magic')
     sign.add_argument("--rsa-pkcs1-15",
                       help='Use old PKCS#1 v1.5 signature algorithm',
                       default=False, action='store_true')

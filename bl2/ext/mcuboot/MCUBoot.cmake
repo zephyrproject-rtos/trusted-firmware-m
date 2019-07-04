@@ -64,16 +64,22 @@ function(mcuboot_create_boot_payload)
 	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess.c)
 	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed.c)
 	set(CONTENT_FOR_PREPROCESSING "#include \"${FLASH_LAYOUT}\"\n\n"
-		"/* Enumeration that is used by the assemble.py script for correct binary generation when nested macros are used */\n"
+		"/* Enumeration that is used by the assemble.py and imgtool.py scripts\n"
+		" * for correct binary generation when nested macros are used\n"
+		" */\n"
 		"enum image_attributes {\n"
 		"\tRE_SECURE_IMAGE_OFFSET = SECURE_IMAGE_OFFSET,\n"
 		"\tRE_SECURE_IMAGE_MAX_SIZE = SECURE_IMAGE_MAX_SIZE,\n"
 		"\tRE_NON_SECURE_IMAGE_OFFSET = NON_SECURE_IMAGE_OFFSET,\n"
-		"\tRE_NON_SECURE_IMAGE_MAX_SIZE = NON_SECURE_IMAGE_MAX_SIZE\n}\;"
+		"\tRE_NON_SECURE_IMAGE_MAX_SIZE = NON_SECURE_IMAGE_MAX_SIZE,\n"
+		"#ifdef IMAGE_LOAD_ADDRESS\n"
+		"\tRE_IMAGE_LOAD_ADDRESS = IMAGE_LOAD_ADDRESS,\n"
+		"#endif\n"
+		"\tRE_SIGN_BIN_SIZE = SIGN_BIN_SIZE\n}\;"
 	)
 
 	#Create a file that will be preprocessed later in order to be able to handle nested macros
-	#in the flash_layout.h file for certain macros
+	#in header files for certain macros
 	file(WRITE ${FILE_TO_PREPROCESS} ${CONTENT_FOR_PREPROCESSING})
 
 	#Preprocess the .c file that contains the image related macros
@@ -86,7 +92,7 @@ function(mcuboot_create_boot_payload)
 						POST_BUILD
 						#Create concatenated binary image from the two binary file
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
-						ARGS -l ${PREPROCESSED_FILE}
+						ARGS --layout ${PREPROCESSED_FILE}
 							 -s $<TARGET_FILE_DIR:${_MY_PARAMS_S_BIN}>/${_MY_PARAMS_S_BIN}.bin
 							 -n $<TARGET_FILE_DIR:${_MY_PARAMS_NS_BIN}>/${_MY_PARAMS_NS_BIN}.bin
 							 -o ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
@@ -94,13 +100,12 @@ function(mcuboot_create_boot_payload)
 						#Sign concatenated binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
 						ARGS sign
-							 --layout ${FLASH_LAYOUT}
+							 --layout ${PREPROCESSED_FILE}
 							 -k ${KEY_FILE}
 							 --align 1
 							 -v ${IMAGE_VERSION}
 							 ${ADD_SECURITY_COUNTER}
 							 -H 0x400
-							 --pad ${SIGN_BIN_SIZE}
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin)
 

@@ -67,6 +67,8 @@
 
 #define FLASH_AREA_S_IMAGE_SIZE         0x40000     /* 256 KB */
 #define FLASH_AREA_NS_IMAGE_SIZE        0x40000     /* 256 KB */
+#define SIGN_BIN_SIZE                   (FLASH_AREA_S_IMAGE_SIZE + \
+                                        FLASH_AREA_NS_IMAGE_SIZE)
 
 #define FLASH_AREA_IMAGE_SLOT_SIZE      (FLASH_AREA_S_IMAGE_SIZE + \
                                          FLASH_AREA_NS_IMAGE_SIZE)

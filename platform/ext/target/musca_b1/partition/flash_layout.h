@@ -50,6 +50,8 @@
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS partition: 512 KB */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE + \
                                          FLASH_NS_PARTITION_SIZE)
+#define SIGN_BIN_SIZE                   (FLASH_S_PARTITION_SIZE + \
+                                         FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the flash hardware */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4KB */
