@@ -7,7 +7,7 @@
 
 #include "psa/initial_attestation.h"
 #include "tfm_veneers.h"
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
 #include "psa/client.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
@@ -56,7 +56,8 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 
     return (enum psa_attest_err_t)status;
 #else
-    res = tfm_ns_lock_dispatch((veneer_fn)tfm_initial_attest_get_token_veneer,
+    res = tfm_ns_interface_dispatch(
+                               (veneer_fn)tfm_initial_attest_get_token_veneer,
                                (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -101,7 +102,7 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
 
     return (enum psa_attest_err_t)status;
 #else
-    return (enum psa_attest_err_t)tfm_ns_lock_dispatch(
+    return (enum psa_attest_err_t)tfm_ns_interface_dispatch(
                             (veneer_fn)tfm_initial_attest_get_token_size_veneer,
                             (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                             (uint32_t)out_vec, IOVEC_LEN(out_vec));

@@ -13,7 +13,7 @@
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
 #include "tfm_ns_svc.h"
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
 #ifdef TEST_FRAMEWORK_NS
 #include "test/framework/test_framework_integ_test.h"
 #endif
@@ -120,8 +120,8 @@ int main(void)
 
     status = osKernelInitialize();
 
-    /* Initialize the TFM NS lock */
-    tfm_ns_lock_init();
+    /* Initialize the TFM NS interface */
+    tfm_ns_interface_init();
 
 #if defined(TEST_FRAMEWORK_NS)
     thread_func = test_app;

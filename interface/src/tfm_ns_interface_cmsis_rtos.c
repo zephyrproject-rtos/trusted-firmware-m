@@ -10,7 +10,13 @@
 #include "cmsis_os2.h"
 
 #include "tfm_api.h"
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
+
+/**
+ * This file contains an example implementation of the NS interface APIs
+ * described in tfm_ns_interface.h
+ *
+ */
 
 /**
  * \brief struct ns_lock_state type
@@ -23,7 +29,7 @@ struct ns_lock_state {
 /**
  * \brief ns_lock status
  */
-static struct ns_lock_state ns_lock = {.init = false, .id = NULL};
+static struct ns_lock_state ns_lock = {.init=false, .id=NULL};
 
 /**
  * \brief Mutex properties, NS lock
@@ -35,12 +41,10 @@ static const osMutexAttr_t ns_lock_attrib = {
     .cb_size = 0U
 };
 
-/**
- * \brief NS world, NS lock based dispatcher
- */
-int32_t tfm_ns_lock_dispatch(veneer_fn fn,
-                             uint32_t arg0, uint32_t arg1,
-                             uint32_t arg2, uint32_t arg3)
+__attribute__((weak))
+uint32_t tfm_ns_interface_dispatch(veneer_fn fn,
+                                   uint32_t arg0, uint32_t arg1,
+                                   uint32_t arg2, uint32_t arg3)
 {
     int32_t result;
 
@@ -63,10 +67,8 @@ int32_t tfm_ns_lock_dispatch(veneer_fn fn,
     return result;
 }
 
-/**
- * \brief NS world, Init NS lock
- */
-enum tfm_status_e tfm_ns_lock_init(void)
+__attribute__((weak))
+enum tfm_status_e tfm_ns_interface_init()
 {
     if (ns_lock.init == false) {
         ns_lock.id = osMutexNew(&ns_lock_attrib);

@@ -8,7 +8,7 @@
 #include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
 #endif
@@ -41,14 +41,14 @@
         in_vec, ARRAY_SIZE(in_vec),                             \
         (psa_outvec *)NULL, 0)
 #else
-#define API_DISPATCH(sfn_name, sfn_id)                          \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,    \
-        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                   \
+#define API_DISPATCH(sfn_name, sfn_id)                               \
+        tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer,\
+        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                        \
         (uint32_t)out_vec, ARRAY_SIZE(out_vec))
 
-#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer,    \
-        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                   \
+#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                     \
+        tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer,\
+        (uint32_t)in_vec, ARRAY_SIZE(in_vec),                        \
         (uint32_t)NULL, 0)
 #endif
 

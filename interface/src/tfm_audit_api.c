@@ -7,23 +7,23 @@
 
 #include "psa_audit_api.h"
 #include "tfm_veneers.h"
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
-#define API_DISPATCH(sfn_name)                               \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
-        (uint32_t)in_vec, (uint32_t)ARRAY_SIZE(in_vec),      \
+#define API_DISPATCH(sfn_name)                                    \
+    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+        (uint32_t)in_vec, (uint32_t)ARRAY_SIZE(in_vec),           \
         (uint32_t)out_vec, (uint32_t)ARRAY_SIZE(out_vec))
 
-#define API_DISPATCH_NO_INVEC(sfn_name)                      \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
-        (uint32_t)NULL, 0,                                   \
+#define API_DISPATCH_NO_INVEC(sfn_name)                           \
+    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+        (uint32_t)NULL, 0,                                        \
         (uint32_t)out_vec, (uint32_t)ARRAY_SIZE(out_vec))
 
-#define API_DISPATCH_NO_OUTVEC(sfn_name)                     \
-    tfm_ns_lock_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
-        (uint32_t)in_vec, (uint32_t)ARRAY_SIZE(in_vec),      \
+#define API_DISPATCH_NO_OUTVEC(sfn_name)                          \
+    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+        (uint32_t)in_vec, (uint32_t)ARRAY_SIZE(in_vec),           \
         (uint32_t)NULL, 0)
 
 psa_status_t psa_audit_retrieve_record(const uint32_t record_index,

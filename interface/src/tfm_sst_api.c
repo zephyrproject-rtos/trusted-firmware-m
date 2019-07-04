@@ -7,7 +7,7 @@
 
 #include "psa/protected_storage.h"
 
-#include "tfm_ns_lock.h"
+#include "tfm_ns_interface.h"
 #include "tfm_veneers.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
@@ -53,7 +53,8 @@ psa_ps_status_t psa_ps_set(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 #else
-    status = tfm_ns_lock_dispatch((veneer_fn)tfm_tfm_sst_set_req_veneer,
+    status = tfm_ns_interface_dispatch(
+                                  (veneer_fn)tfm_tfm_sst_set_req_veneer,
                                   (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                   (uint32_t)out_vec, IOVEC_LEN(out_vec));
     if (status != PSA_SUCCESS) {
@@ -100,7 +101,8 @@ psa_ps_status_t psa_ps_get(psa_ps_uid_t uid,
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 #else
-    status = tfm_ns_lock_dispatch((veneer_fn)tfm_tfm_sst_get_req_veneer,
+    status = tfm_ns_interface_dispatch(
+                                  (veneer_fn)tfm_tfm_sst_get_req_veneer,
                                   (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                   (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -144,7 +146,8 @@ psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 #else
-    status = tfm_ns_lock_dispatch((veneer_fn)tfm_tfm_sst_get_info_req_veneer,
+    status = tfm_ns_interface_dispatch(
+                                  (veneer_fn)tfm_tfm_sst_get_info_req_veneer,
                                   (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                   (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -187,7 +190,8 @@ psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid)
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 #else
-    status = tfm_ns_lock_dispatch((veneer_fn)tfm_tfm_sst_remove_req_veneer,
+    status = tfm_ns_interface_dispatch(
+                                  (veneer_fn)tfm_tfm_sst_remove_req_veneer,
                                   (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                   (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -247,7 +251,8 @@ uint32_t psa_ps_get_support(void)
 
     psa_close(handle);
 #else
-    (void)tfm_ns_lock_dispatch((veneer_fn)tfm_tfm_sst_get_support_req_veneer,
+    (void)tfm_ns_interface_dispatch(
+                               (veneer_fn)tfm_tfm_sst_get_support_req_veneer,
                                (uint32_t)NULL,  0,
                                (uint32_t)out_vec, IOVEC_LEN(out_vec));
 #endif
