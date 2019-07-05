@@ -67,6 +67,9 @@ SECTIONS
         LONG (LOADADDR(.TFM_SP_STORAGE_DATA))
         LONG (ADDR(.TFM_SP_STORAGE_DATA))
         LONG (SIZEOF(.TFM_SP_STORAGE_DATA))
+        LONG (LOADADDR(.TFM_SP_ITS_DATA))
+        LONG (ADDR(.TFM_SP_ITS_DATA))
+        LONG (SIZEOF(.TFM_SP_ITS_DATA))
 #ifdef TFM_PARTITION_AUDIT_LOG
         LONG (LOADADDR(.TFM_SP_AUDIT_LOG_DATA))
         LONG (ADDR(.TFM_SP_AUDIT_LOG_DATA))
@@ -130,6 +133,12 @@ SECTIONS
 #if defined(TFM_PSA_API)
         LONG (ADDR(.TFM_SP_STORAGE_STACK))
         LONG (SIZEOF(.TFM_SP_STORAGE_STACK))
+#endif
+        LONG (ADDR(.TFM_SP_ITS_BSS))
+        LONG (SIZEOF(.TFM_SP_ITS_BSS))
+#if defined(TFM_PSA_API)
+        LONG (ADDR(.TFM_SP_ITS_STACK))
+        LONG (SIZEOF(.TFM_SP_ITS_STACK))
 #endif
 #ifdef TFM_PARTITION_AUDIT_LOG
         LONG (ADDR(.TFM_SP_AUDIT_LOG_BSS))
@@ -250,6 +259,18 @@ SECTIONS
     Image$$TFM_SP_STORAGE$$RO$$Limit = ADDR(.TFM_SP_STORAGE) + SIZEOF(.TFM_SP_STORAGE);
     Image$$TFM_SP_STORAGE$$Base = ADDR(.TFM_SP_STORAGE);
     Image$$TFM_SP_STORAGE$$Limit = ADDR(.TFM_SP_STORAGE) + SIZEOF(.TFM_SP_STORAGE);
+
+    .TFM_SP_ITS : ALIGN(32)
+    {
+        *tfm_internal_trusted_storage*:*(.text*)
+        *tfm_internal_trusted_storage*:*(.rodata*)
+        *(TFM_SP_ITS_ATTR_FN)
+        . = ALIGN(32);
+    } > FLASH
+    Image$$TFM_SP_ITS$$RO$$Base = ADDR(.TFM_SP_ITS);
+    Image$$TFM_SP_ITS$$RO$$Limit = ADDR(.TFM_SP_ITS) + SIZEOF(.TFM_SP_ITS);
+    Image$$TFM_SP_ITS$$Base = ADDR(.TFM_SP_ITS);
+    Image$$TFM_SP_ITS$$Limit = ADDR(.TFM_SP_ITS) + SIZEOF(.TFM_SP_ITS);
 
 #ifdef TFM_PARTITION_AUDIT_LOG
     .TFM_SP_AUDIT_LOG : ALIGN(32)
@@ -567,6 +588,37 @@ SECTIONS
     } > RAM
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Base = ADDR(.TFM_SP_STORAGE_STACK);
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_STACK) + SIZEOF(.TFM_SP_STORAGE_STACK);
+#endif
+
+
+    .TFM_SP_ITS_DATA : ALIGN(32)
+    {
+        *tfm_internal_trusted_storage*:*(.data*)
+        *(TFM_SP_ITS_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_SP_ITS_DATA$$RW$$Base = ADDR(.TFM_SP_ITS_DATA);
+    Image$$TFM_SP_ITS_DATA$$RW$$Limit = ADDR(.TFM_SP_ITS_DATA) + SIZEOF(.TFM_SP_ITS_DATA);
+
+    .TFM_SP_ITS_BSS : ALIGN(32)
+    {
+        start_of_TFM_SP_ITS = .;
+        *tfm_internal_trusted_storage*:*(.bss*)
+        *tfm_internal_trusted_storage*:*(COMMON)
+        *(TFM_SP_ITS_ATTR_ZI)
+        . += (. - start_of_TFM_SP_ITS) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_SP_ITS_DATA$$ZI$$Base = ADDR(.TFM_SP_ITS_BSS);
+    Image$$TFM_SP_ITS_DATA$$ZI$$Limit = ADDR(.TFM_SP_ITS_BSS) + SIZEOF(.TFM_SP_ITS_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_SP_ITS_STACK : ALIGN(128)
+    {
+        . += 0x500;
+    } > RAM
+    Image$$TFM_SP_ITS_STACK$$ZI$$Base = ADDR(.TFM_SP_ITS_STACK);
+    Image$$TFM_SP_ITS_STACK$$ZI$$Limit = ADDR(.TFM_SP_ITS_STACK) + SIZEOF(.TFM_SP_ITS_STACK);
 #endif
 
 

@@ -162,6 +162,7 @@ function(set_up_secure_fw_build)
 
 	add_dependencies(${EXE_NAME} tfm_crypto)
 	add_dependencies(${EXE_NAME} tfm_storage)
+	add_dependencies(${EXE_NAME} tfm_internal_trusted_storage)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
 	add_dependencies(${EXE_NAME} tfm_attest)
 	if (TFM_PARTITION_AUDIT_LOG)
@@ -177,12 +178,12 @@ function(set_up_secure_fw_build)
 
 	if (REGRESSION OR CORE_TEST)
 		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_attest)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest)
 		else()
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_secure_tests tfm_attest)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_secure_tests tfm_attest)
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_attest)
+		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest)
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
@@ -316,11 +317,13 @@ function(set_up_secure_fw_build)
 							${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
 							${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
 							${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
+							${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
 				DESTINATION ${EXPORT_SRC_DIR})
 	else()
 		install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
 							${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
 							${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
+							${INTERFACE_SRC_DIR}/tfm_its_func_api.c
 				DESTINATION ${EXPORT_SRC_DIR})
 	endif()
 
@@ -365,6 +368,9 @@ add_subdirectory(${SECURE_FW_DIR}/services/crypto)
 
 #Add the secure storage library target
 add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
+
+#Add the internal trusted storage library target
+add_subdirectory(${SECURE_FW_DIR}/services/internal_trusted_storage)
 
 #Add the platform service library target
 if (TFM_PARTITION_PLATFORM)

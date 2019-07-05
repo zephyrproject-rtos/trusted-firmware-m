@@ -21,6 +21,15 @@
       "version_minor": 1
     },
     {
+      "name": "TF-M Internal Trusted Storage Service",
+      "short_name": "TFM_ITS",
+      "manifest": "secure_fw/services/internal_trusted_storage/tfm_internal_trusted_storage.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "version_major": 0,
+      "version_minor": 1
+    },
+    {
       "name": "TFM Audit Log Service",
       "short_name": "TFM_Audit_Log",
       "manifest": "secure_fw/services/audit_logging/tfm_audit_logging.yaml",

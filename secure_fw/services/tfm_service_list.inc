@@ -11,6 +11,7 @@
 #define __TFM_SERVICE_LIST_INC__
 
 #include "secure_fw/services/secure_storage/psa_manifest/tfm_secure_storage.h"
+#include "secure_fw/services/internal_trusted_storage/psa_manifest/tfm_internal_trusted_storage.h"
 #include "secure_fw/services/audit_logging/psa_manifest/tfm_audit_logging.h"
 #include "secure_fw/services/crypto/psa_manifest/tfm_crypto.h"
 #include "secure_fw/services/platform/psa_manifest/tfm_platform.h"
@@ -66,6 +67,44 @@ const struct tfm_spm_service_db_t service_db[] =
         .partition_id = TFM_SP_STORAGE_ID,
         .signal = TFM_SST_GET_SUPPORT_SIG,
         .sid = 0x00000064,
+        .non_secure_client = true,
+        .minor_version = 1,
+        .minor_policy = TFM_VERSION_POLICY_STRICT
+    },
+
+    /******** TFM_SP_ITS ********/
+    {
+        .name = "TFM_ITS_SET",
+        .partition_id = TFM_SP_ITS_ID,
+        .signal = TFM_ITS_SET_SIG,
+        .sid = 0x00000070,
+        .non_secure_client = true,
+        .minor_version = 1,
+        .minor_policy = TFM_VERSION_POLICY_STRICT
+    },
+    {
+        .name = "TFM_ITS_GET",
+        .partition_id = TFM_SP_ITS_ID,
+        .signal = TFM_ITS_GET_SIG,
+        .sid = 0x00000071,
+        .non_secure_client = true,
+        .minor_version = 1,
+        .minor_policy = TFM_VERSION_POLICY_STRICT
+    },
+    {
+        .name = "TFM_ITS_GET_INFO",
+        .partition_id = TFM_SP_ITS_ID,
+        .signal = TFM_ITS_GET_INFO_SIG,
+        .sid = 0x00000072,
+        .non_secure_client = true,
+        .minor_version = 1,
+        .minor_policy = TFM_VERSION_POLICY_STRICT
+    },
+    {
+        .name = "TFM_ITS_REMOVE",
+        .partition_id = TFM_SP_ITS_ID,
+        .signal = TFM_ITS_REMOVE_SIG,
+        .sid = 0x00000073,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -411,6 +450,36 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+
+    /******** TFM_SP_ITS ********/
     {
         .service_db = NULL,
         .partition = NULL,

@@ -26,6 +26,16 @@ extern "C" {
 #define TFM_SST_GET_SUPPORT_SID                                    (0x00000064U)
 #define TFM_SST_GET_SUPPORT_VERSION                                (1U)
 
+/******** TFM_SP_ITS ********/
+#define TFM_ITS_SET_SID                                            (0x00000070U)
+#define TFM_ITS_SET_VERSION                                        (1U)
+#define TFM_ITS_GET_SID                                            (0x00000071U)
+#define TFM_ITS_GET_VERSION                                        (1U)
+#define TFM_ITS_GET_INFO_SID                                       (0x00000072U)
+#define TFM_ITS_GET_INFO_VERSION                                   (1U)
+#define TFM_ITS_REMOVE_SID                                         (0x00000073U)
+#define TFM_ITS_REMOVE_VERSION                                     (1U)
+
 /******** TFM_SP_CRYPTO ********/
 #define TFM_CRYPTO_SID                                             (0x00000080U)
 #define TFM_CRYPTO_VERSION                                         (1U)

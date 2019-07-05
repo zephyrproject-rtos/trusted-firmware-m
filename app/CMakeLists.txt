@@ -63,12 +63,14 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 if (TFM_PSA_API)
 	list(APPEND NS_APP_SRC
 		"${INTERFACE_DIR}/src/tfm_sst_ipc_api.c"
+		"${INTERFACE_DIR}/src/tfm_its_ipc_api.c"
 		"${INTERFACE_DIR}/src/tfm_crypto_ipc_api.c"
 		"${INTERFACE_DIR}/src/tfm_initial_attestation_ipc_api.c"
 	)
 else()
 	list(APPEND NS_APP_SRC
 		"${INTERFACE_DIR}/src/tfm_sst_func_api.c"
+		"${INTERFACE_DIR}/src/tfm_its_func_api.c"
 		"${INTERFACE_DIR}/src/tfm_crypto_func_api.c"
 		"${INTERFACE_DIR}/src/tfm_initial_attestation_func_api.c"
 	)

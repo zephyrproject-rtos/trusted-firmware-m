@@ -334,6 +334,23 @@ if (NOT DEFINED SST_TEST_NV_COUNTERS)
 	endif()
 endif()
 
+#Default TF-M internal trusted storage flags.
+#These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
+#Documentation about these flags can be found in the TF-M ITS integration guide
+option(ITS_CREATE_FLASH_LAYOUT "Create an empty ITS Flash Layout" OFF)
+
+if (NOT DEFINED ITS_VALIDATE_METADATA_FROM_FLASH)
+	set (ITS_VALIDATE_METADATA_FROM_FLASH ON)
+endif()
+
+if (NOT DEFINED ITS_RAM_FS)
+	if (REGRESSION)
+		set (ITS_RAM_FS ON)
+	else()
+		set (ITS_RAM_FS OFF)
+	endif()
+endif()
+
 if (NOT DEFINED MBEDTLS_DEBUG)
 	set(MBEDTLS_DEBUG OFF)
 endif()

@@ -17,6 +17,12 @@ psa_status_t tfm_sst_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
 
+/******** TFM_SP_ITS ********/
+psa_status_t tfm_its_set_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_its_get_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_its_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_its_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
+
 #ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
 psa_status_t audit_core_retrieve_record(psa_invec *, size_t, psa_outvec *, size_t);
@@ -136,6 +142,12 @@ TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_info_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_remove_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_support_req)
+
+/******** TFM_SP_ITS ********/
+TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_set_req)
+TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_get_req)
+TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_get_info_req)
+TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_remove_req)
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/

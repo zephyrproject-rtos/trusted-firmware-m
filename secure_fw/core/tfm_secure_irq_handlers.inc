@@ -8,6 +8,7 @@
 /*********** WARNING: This is an auto-generated file. Do not edit! ***********/
 
 #include "secure_fw/services/secure_storage/psa_manifest/tfm_secure_storage.h"
+#include "secure_fw/services/internal_trusted_storage/psa_manifest/tfm_internal_trusted_storage.h"
 #include "secure_fw/services/audit_logging/psa_manifest/tfm_audit_logging.h"
 #include "secure_fw/services/crypto/psa_manifest/tfm_crypto.h"
 #include "secure_fw/services/platform/psa_manifest/tfm_platform.h"

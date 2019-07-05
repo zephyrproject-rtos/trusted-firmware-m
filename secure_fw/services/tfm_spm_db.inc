@@ -17,6 +17,8 @@
 /**************************************************************************/
 #define TFM_PARTITION_TFM_SP_STORAGE_IRQ_COUNT 0
 
+#define TFM_PARTITION_TFM_SP_ITS_IRQ_COUNT 0
+
 #ifdef TFM_PARTITION_AUDIT_LOG
 #define TFM_PARTITION_TFM_SP_AUDIT_LOG_IRQ_COUNT 0
 #endif /* TFM_PARTITION_AUDIT_LOG */
@@ -61,6 +63,8 @@ extern psa_status_t tfm_nspm_thread_entry(void);
 #endif
 
 extern int32_t tfm_sst_req_mngr_init(void);
+
+extern int32_t tfm_its_req_mngr_init(void);
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 extern int32_t audit_core_init(void);
@@ -115,6 +119,17 @@ REGION_DECLARE(Image$$, TFM_SP_STORAGE, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, _STACK$$ZI$$Limit);
+
+REGION_DECLARE(Image$$, TFM_SP_ITS, $$Base);
+REGION_DECLARE(Image$$, TFM_SP_ITS, $$Limit);
+REGION_DECLARE(Image$$, TFM_SP_ITS, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_SP_ITS, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_ITS, _STACK$$ZI$$Limit);
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 REGION_DECLARE(Image$$, TFM_SP_AUDIT_LOG, $$Base);
@@ -270,6 +285,13 @@ static uint32_t ctx_stack_TFM_SP_STORAGE[
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
 
+static uint32_t ctx_stack_TFM_SP_ITS[
+        (sizeof(struct interrupted_ctx_stack_frame_t) +
+            (TFM_PARTITION_TFM_SP_ITS_IRQ_COUNT) * (
+                sizeof(struct interrupted_ctx_stack_frame_t) +
+                sizeof(struct handler_ctx_stack_frame_t)
+        )) / sizeof(uint32_t)];
+
 #ifdef TFM_PARTITION_AUDIT_LOG
 static uint32_t ctx_stack_TFM_SP_AUDIT_LOG[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
@@ -362,6 +384,7 @@ uint32_t *ctx_stack_list[] =
     ns_interrupt_ctx_stack,
     tfm_core_interrupt_ctx_stack,
     ctx_stack_TFM_SP_STORAGE,
+    ctx_stack_TFM_SP_ITS,
 #ifdef TFM_PARTITION_AUDIT_LOG
     ctx_stack_TFM_SP_AUDIT_LOG,
 #endif /* TFM_PARTITION_AUDIT_LOG */
@@ -421,6 +444,15 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_req_mngr_init,
+    },
+
+    {
+        .partition_id         = TFM_SP_ITS_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_its_req_mngr_init,
     },
 
 #ifdef TFM_PARTITION_AUDIT_LOG
@@ -544,6 +576,8 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
 
     NULL,
 
+    NULL,
+
 #ifdef TFM_PARTITION_AUDIT_LOG
     /* FIXME: Only adding the first mmio region */
 #ifdef AUDIT_UART_REDIRECTION
@@ -612,6 +646,19 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .zi_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$ZI$$Limit),
         .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Limit),
+    },
+
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_ITS, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_ITS, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_ITS, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_ITS, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_ITS, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_ITS, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_ITS, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_ITS, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_ITS, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_ITS, _STACK$$ZI$$Limit),
     },
 
 #ifdef TFM_PARTITION_AUDIT_LOG
@@ -775,6 +822,17 @@ static struct spm_partition_desc_t partition_list [] =
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_STORAGE */
+    /* -----------------------------------------------------------------------*/
+    {
+    /* Runtime data */
+        .runtime_data             = {},
+        .static_data              = NULL,
+        .platform_data            = NULL,
+
+    },
+
+    /* -----------------------------------------------------------------------*/
+    /* - Partition DB record for TFM_SP_ITS */
     /* -----------------------------------------------------------------------*/
     {
     /* Runtime data */
