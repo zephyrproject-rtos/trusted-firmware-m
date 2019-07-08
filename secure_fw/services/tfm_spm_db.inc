@@ -234,6 +234,7 @@ REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_TEST_CORE */
 
+#ifndef TFM_PSA_API
 /**************************************************************************/
 /** Context stacks for IRQ handling */
 /**************************************************************************/
@@ -339,6 +340,8 @@ static uint32_t ctx_stack_TFM_IRQ_TEST_1[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_TEST_CORE */
 
+#endif /* !defined(TFM_PSA_API) */
+
 /**************************************************************************/
 /** The partition list for the DB */
 /**************************************************************************/
@@ -363,6 +366,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -384,6 +388,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_STORAGE,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -440,6 +457,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -461,6 +479,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_AUDIT_LOG,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -523,6 +554,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -544,6 +576,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_CRYPTO,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -600,6 +645,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -621,6 +667,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_PLATFORM,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -677,6 +736,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -698,6 +758,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_INITIAL_ATTESTATION,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -754,6 +827,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -775,6 +849,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_CORE_TEST,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -834,6 +921,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -855,6 +943,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_CORE_TEST_2,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -912,6 +1013,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -933,6 +1035,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_SECURE_TEST_PARTITION,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -992,6 +1107,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -1013,6 +1129,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_IPC_SERVICE_TEST,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -1070,6 +1199,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -1091,6 +1221,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_SP_IPC_CLIENT_TEST,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -1148,6 +1291,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -1169,6 +1313,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_TFM_IRQ_TEST_1,
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         },
 
@@ -1216,7 +1373,9 @@ struct spm_partition_desc_t partition_list [] =
 struct spm_partition_db_t g_spm_partition_db = {
     .is_init = 0,
     .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
+#ifndef TFM_PSA_API
     .running_partition_idx = 0,
+#endif
     .partitions = partition_list,
 };
 

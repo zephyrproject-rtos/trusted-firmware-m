@@ -12,6 +12,10 @@
 #include "tfm_api.h"
 #include "spm_partition_defs.h"
 #include "secure_fw/core/tfm_secure_api.h"
+#ifdef TFM_PSA_API
+#include "tfm_list.h"
+#include "tfm_wait.h"
+#endif
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
@@ -40,6 +44,7 @@ enum spm_err_t {
 #define SPM_PART_FLAG_PSA_ROT 0x02
 #define SPM_PART_FLAG_IPC     0x04
 
+#ifndef TFM_PSA_API
 /**
  * \brief Holds the iovec parameters that are passed to a service
  *
@@ -53,11 +58,17 @@ struct iovec_args_t {
     size_t out_len;                    /*!< Number psa_outvec objects in out_vec
                                         */
 };
+#endif /* !define(TFM_PSA_API) */
 
 /**
  * \brief Runtime context information of a partition
  */
 struct spm_partition_runtime_data_t {
+#ifdef TFM_PSA_API
+    struct tfm_event_t signal_evnt;     /* Event signal                      */
+    uint32_t signals;                   /* Service signals had been triggered*/
+    struct tfm_list_node_t service_list;/* Service list                      */
+#else /* TFM_PSA_API */
     uint32_t partition_state;
     uint32_t caller_partition_idx;
     int32_t caller_client_id;
@@ -72,15 +83,11 @@ struct spm_partition_runtime_data_t {
     struct iovec_args_t iovec_args;
     psa_outvec *orig_outvec;
     uint32_t *ctx_stack_ptr;
-    /*
-     * FIXME: There is a 'signal_mask' defined in the structure
-     * 'tfm_spm_ipc_partition_t'. It should be eliminated, and the IPC
-     * implementation should use the 'signal_mask' define in this structure.
-     * However currently the content of 'spm_partition_runtime_data_t' structure
-     * is not maintained by the IPC implementation. This is to be fixed with the
-     * effort of restructuring common code among library and IPC model.
-     */
-    uint32_t signal_mask;
+#endif /* TFM_PSA_API */
+    uint32_t signal_mask;               /*
+                                         * Service signal mask passed by
+                                         * psa_wait()
+                                         */
 };
 
 

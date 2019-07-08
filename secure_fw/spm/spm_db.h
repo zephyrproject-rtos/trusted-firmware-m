@@ -39,6 +39,7 @@ typedef psa_status_t(*sp_init_function)(void);
  * phase.
  */
 struct spm_partition_static_data_t {
+    int32_t index;                      /* Partition index */
     uint32_t partition_id;
     uint32_t partition_flags;
     uint32_t partition_priority;
@@ -64,7 +65,9 @@ struct spm_partition_desc_t {
 struct spm_partition_db_t {
     uint32_t is_init;
     uint32_t partition_count;
+#ifndef TFM_PSA_API
     uint32_t running_partition_idx;
+#endif /* !defined(TFM_PSA_API) */
     struct spm_partition_desc_t *partitions;
 };
 

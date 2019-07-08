@@ -64,6 +64,7 @@ REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _STACK$$ZI$$Limit);
     {% endif %}
 
 {% endfor %}
+#ifndef TFM_PSA_API
 /**************************************************************************/
 /** Context stacks for IRQ handling */
 /**************************************************************************/
@@ -91,6 +92,8 @@ static uint32_t ctx_stack_{{manifest.manifest.name}}[
     {% endif %}
 
 {% endfor %}
+#endif /* !defined(TFM_PSA_API) */
+
 /**************************************************************************/
 /** The partition list for the DB */
 /**************************************************************************/
@@ -129,6 +132,7 @@ struct spm_partition_desc_t partition_list [] =
 
     /* Runtime data */
         {{'{'}}
+#ifndef TFM_PSA_API
             .partition_state      = SPM_PARTITION_STATE_UNINIT,
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
@@ -150,6 +154,19 @@ struct spm_partition_desc_t partition_list [] =
                 },
             .orig_outvec          = NULL,
             .ctx_stack_ptr        = ctx_stack_{{manifest.manifest.name}},
+#else /* !defined(TFM_PSA_API) */
+            .signal_evnt          =
+                {
+                    .magic        = 0,
+                    .owner        = NULL,
+                },
+            .signals              = 0,
+            .service_list         =
+                {
+                    .prev         = NULL,
+                    .next         = NULL,
+                },
+#endif /* !defined(TFM_PSA_API) */
             .signal_mask          = 0,
         {{'},'}}
 
@@ -216,7 +233,9 @@ struct spm_partition_desc_t partition_list [] =
 struct spm_partition_db_t g_spm_partition_db = {
     .is_init = 0,
     .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
+#ifndef TFM_PSA_API
     .running_partition_idx = 0,
+#endif
     .partitions = partition_list,
 };
 

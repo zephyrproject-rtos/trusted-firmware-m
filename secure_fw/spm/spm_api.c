@@ -23,6 +23,7 @@
 #define NON_SECURE_INTERNAL_PARTITION_DB_IDX 0
 #define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1
 
+#ifndef TFM_PSA_API
 typedef enum {
     TFM_INIT_FAILURE,
 } sp_error_type_t;
@@ -44,6 +45,7 @@ struct handler_ctx_stack_frame_t {
     uint32_t partition_state;
     uint32_t caller_partition_idx;
 };
+#endif /* !defined(TFM_PSA_API) */
 
 /* Define SPM DB structure */
 #include "secure_fw/services/tfm_spm_db.inc"
@@ -96,11 +98,13 @@ uint32_t get_partition_idx(uint32_t partition_id)
 
 enum spm_err_t tfm_spm_db_init(void)
 {
-   struct spm_partition_desc_t *part_ptr;
+    struct spm_partition_desc_t *part_ptr;
+#ifndef TFM_PSA_API
     static uint32_t ns_interrupt_ctx_stack[
            sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
     static uint32_t tfm_core_interrupt_ctx_stack[
            sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
+#endif /* !defined(TFM_PSA_API) */
 
     /* This function initialises partition db */
 
@@ -137,8 +141,11 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->memory_data.rw_start     = psp_stack_bottom;
 #endif
 
+#ifndef TFM_PSA_API
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     part_ptr->runtime_data.ctx_stack_ptr = ns_interrupt_ctx_stack;
+#endif /* !defined(TFM_PSA_API) */
+
     tfm_nspm_configure_clients();
 
     /* For the TF-M core environment itself */
@@ -147,8 +154,10 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
     part_ptr->static_data.partition_flags =
                     SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
+#ifndef TFM_PSA_API
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     part_ptr->runtime_data.ctx_stack_ptr = tfm_core_interrupt_ctx_stack;
+#endif /* !defined(TFM_PSA_API) */
 
     g_spm_partition_db.is_init = 1;
 
