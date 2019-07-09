@@ -27,7 +27,6 @@ endif()
 set (AUDIT_LOGGING_C_SRC
 	"${AUDIT_LOGGING_DIR}/tfm_audit_secure_api.c"
 	"${AUDIT_LOGGING_DIR}/audit_core.c"
-	"${AUDIT_LOGGING_DIR}/audit_wrappers.c"
 )
 
 #Append all our source files to global lists.
