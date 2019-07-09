@@ -10,6 +10,17 @@
 
 #include <stdint.h>
 
+#if defined(__GNUC__) && !defined(TFM_MULTI_CORE_TOPOLOGY)
+/*
+ * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
+ * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
+ * cannot be used in the code. As a workaround cmse_nsfptr_create is redefined
+ * here to use only standard language elements.
+ */
+#undef cmse_nsfptr_create
+#define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
+#endif
+
 /**
  * \brief initialise the NS context database
  */
@@ -32,6 +43,16 @@ int32_t tfm_nspm_get_current_client_id(void);
  * Note: This function should not return back.
  */
 psa_status_t tfm_nspm_thread_entry(void);
+#endif
+
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+/* Unnecessary to configure Non-secure side code */
+#define configure_ns_code()               do {} while (0)
+#else
+/*
+ * \brief Configure Non-secure code, such as vector table, MSP and entry point.
+ */
+void configure_ns_code(void);
 #endif
 
 #endif /* __TFM_NSPM_H__ */

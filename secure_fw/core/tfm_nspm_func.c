@@ -6,9 +6,13 @@
  */
 
 #include <stdbool.h>
+#include "cmsis_compiler.h"
+#include "platform/include/tfm_spm_hal.h"
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_api.h"
+#include "tfm_internal.h"
+#include "tfm_nspm.h"
 
 #ifndef TFM_MAX_NS_THREAD_COUNT
 #define TFM_MAX_NS_THREAD_COUNT 8
@@ -295,3 +299,22 @@ enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
     return TFM_SUCCESS;
 }
 #endif
+
+void configure_ns_code(void)
+{
+    /* SCB_NS.VTOR points to the Non-secure vector table base address */
+    SCB_NS->VTOR = tfm_spm_hal_get_ns_VTOR();
+
+    /* Setups Main stack pointer of the non-secure code */
+    uint32_t ns_msp = tfm_spm_hal_get_ns_MSP();
+
+    __TZ_set_MSP_NS(ns_msp);
+
+    /* Get the address of non-secure code entry point to jump there */
+    uint32_t entry_ptr = tfm_spm_hal_get_ns_entry_point();
+
+    /* Clears LSB of the function address to indicate the function-call
+     * will perform the switch from secure to non-secure
+     */
+    ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
+}
