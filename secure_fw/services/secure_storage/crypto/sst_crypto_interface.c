@@ -11,7 +11,7 @@
 
 #include "platform/include/tfm_plat_crypto_keys.h"
 #include "psa/crypto.h"
-#include "secure_fw/core/tfm_memory_utils.h"
+#include "secure_fw/core/include/tfm_memory_utils.h"
 
 /* FIXME: HUK management should be part of Crypto service, with keys hidden from
  *        SST.

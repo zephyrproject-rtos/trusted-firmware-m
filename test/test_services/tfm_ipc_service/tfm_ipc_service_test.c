@@ -10,8 +10,8 @@
 #include <stdbool.h>
 #include "psa/client.h"
 #include "psa/service.h"
-#include "secure_fw/core/secure_utilities.h"
-#include "secure_fw/core/tfm_secure_api.h"
+#include "secure_fw/core/include/secure_utilities.h"
+#include "secure_fw/core/include/tfm_secure_api.h"
 #include "tfm_api.h"
 #include "psa_manifest/tfm_ipc_service_partition.h"
 

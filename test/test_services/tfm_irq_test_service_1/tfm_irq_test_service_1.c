@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include "tfm_api.h"
 #include "tfm_veneers.h"
-#include "secure_fw/core/secure_utilities.h"
-#include "secure_fw/core/tfm_secure_api.h"
+#include "secure_fw/core/include/secure_utilities.h"
+#include "secure_fw/core/include/tfm_secure_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "spm_partition_defs.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"

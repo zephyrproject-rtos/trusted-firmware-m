@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #include "cmsis_compiler.h"
-#include "secure_fw/core/tfm_memory_utils.h"
+#include "secure_fw/core/include/tfm_memory_utils.h"
 #include "secure_fw/services/secure_storage/sst_object_defs.h"
 #include "secure_fw/services/secure_storage/sst_utils.h"
 

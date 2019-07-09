@@ -16,7 +16,7 @@
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "tfm_nspm.h"
-#include "secure_fw/core/tfm_core.h"
+#include "secure_fw/core/include/tfm_core.h"
 #include "tfm_peripherals_def.h"
 #include "spm_partition_defs.h"
 

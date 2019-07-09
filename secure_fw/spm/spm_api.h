@@ -11,7 +11,7 @@
 /* This file contains the apis exported by the SPM to tfm core */
 #include "tfm_api.h"
 #include "spm_partition_defs.h"
-#include "secure_fw/core/tfm_secure_api.h"
+#include "secure_fw/core/include/tfm_secure_api.h"
 #include <stdbool.h>
 #ifdef TFM_PSA_API
 #include "tfm_list.h"

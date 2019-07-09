@@ -50,7 +50,7 @@ unset(SS_CORE_C_SRC)
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/arch/include ABSOLUTE)
 
 set(BUILD_CMSIS_CORE Off)

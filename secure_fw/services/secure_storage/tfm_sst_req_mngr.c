@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "psa/protected_storage.h"
-#include "secure_fw/core/tfm_secure_api.h"
+#include "secure_fw/core/include/tfm_secure_api.h"
 #include "tfm_api.h"
 #include "tfm_protected_storage.h"
 #ifdef TFM_PSA_API
