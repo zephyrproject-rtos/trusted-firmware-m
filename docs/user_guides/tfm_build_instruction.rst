@@ -52,6 +52,13 @@ line arguments:
          - ``Minsizerel``
    * - -DMBEDTLS_DEBUG=<ON|OFF>
      - Enables debug symbols for the Mbed TLS and Mbed Crypto libraries.
+   * - -DBUILD_DWARF_VERSION=<dwarf version>
+     - Configures DWARF version.
+       The possible values are:
+
+         - 2
+         - 3
+         - 4
 
 .. Note::
     Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
