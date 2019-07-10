@@ -24,6 +24,7 @@
 #include "tfm_memory_utils.h"
 #include "spm_api.h"
 #include "tfm_peripherals_def.h"
+#include "spm_db.h"
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
                      int32_t irq_line);
@@ -133,7 +134,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
     int i;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
     uint32_t privileged;
     int32_t type;
 
@@ -148,7 +149,8 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
     if (!partition) {
         tfm_panic();
     }
-    privileged = tfm_spm_partition_get_privileged_mode(partition->index);
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->static_data.index);
 
     if (!ns_caller) {
         inptr = (psa_invec *)args[2];
@@ -335,7 +337,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
 {
     psa_signal_t signal_mask;
     uint32_t timeout;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     signal_mask = (psa_signal_t)args[0];
@@ -357,7 +359,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
      * should not be set and affect caller thread status. Save this mask for
      * further checking while signals are ready to be set.
      */
-    partition->signal_mask = signal_mask;
+    partition->runtime_data.signal_mask = signal_mask;
 
     /*
      * tfm_event_wait() blocks the caller thread if no signals are available.
@@ -365,11 +367,12 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
      * runtime context. After new signal(s) are available, the return value
      * is updated with the available signal(s) and blocked thread gets to run.
      */
-    if (timeout == PSA_BLOCK && (partition->signals & signal_mask) == 0) {
-        tfm_event_wait(&partition->signal_evnt);
+    if (timeout == PSA_BLOCK &&
+        (partition->runtime_data.signals & signal_mask) == 0) {
+        tfm_event_wait(&partition->runtime_data.signal_evnt);
     }
 
-    return partition->signals & signal_mask;
+    return partition->runtime_data.signals & signal_mask;
 }
 
 /**
@@ -395,7 +398,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     psa_msg_t *msg = NULL;
     struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *tmp_msg = NULL;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
     uint32_t privileged;
 
     TFM_ASSERT(args != NULL);
@@ -414,7 +417,8 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     if (!partition) {
         tfm_panic();
     }
-    privileged = tfm_spm_partition_get_privileged_mode(partition->index);
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->static_data.index);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -430,14 +434,14 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      * been set. The caller must call this function after a RoT Service signal
      * is returned by psa_wait().
      */
-    if (partition->signals == 0) {
+    if (partition->runtime_data.signals == 0) {
         tfm_panic();
     }
 
     /*
      * It is a fatal error if the RoT Service signal is not currently asserted.
      */
-    if ((partition->signals & signal) == 0) {
+    if ((partition->runtime_data.signals & signal) == 0) {
         tfm_panic();
     }
 
@@ -462,7 +466,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      * its mask until no remaining message.
      */
     if (tfm_msg_queue_is_empty(&service->msg_queue)) {
-        partition->signals &= ~signal;
+        partition->runtime_data.signals &= ~signal;
     }
 
     return PSA_SUCCESS;
@@ -535,7 +539,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     size_t bytes;
     struct tfm_msg_body_t *msg = NULL;
     uint32_t privileged;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -550,7 +554,8 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     }
 
     partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(partition->index);
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->static_data.index);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -691,7 +696,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
     size_t num_bytes;
     struct tfm_msg_body_t *msg = NULL;
     uint32_t privileged;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -706,7 +711,8 @@ static void tfm_svcall_psa_write(uint32_t *args)
     }
 
     partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(partition->index);
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->static_data.index);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -885,7 +891,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
  */
 static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 {
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     /*
      * The value of partition_id must be greater than zero as the target of
@@ -905,15 +911,16 @@ static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
         tfm_panic();
     }
 
-    partition->signals |= signal;
+    partition->runtime_data.signals |= signal;
 
     /*
      * The target partition may be blocked with waiting for signals after
      * called psa_wait(). Set the return value with the available signals
      * before wake it up with tfm_event_signal().
      */
-    tfm_event_wake(&partition->signal_evnt,
-                   partition->signals & partition->signal_mask);
+    tfm_event_wake(&partition->runtime_data.signal_evnt,
+                   partition->runtime_data.signals &
+                   partition->runtime_data.signal_mask);
 }
 
 /**
@@ -961,7 +968,7 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
  */
 static void tfm_svcall_psa_clear(uint32_t *args)
 {
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
@@ -972,10 +979,10 @@ static void tfm_svcall_psa_clear(uint32_t *args)
      * It is a fatal error if the Secure Partition's doorbell signal is not
      * currently asserted.
      */
-    if ((partition->signals & PSA_DOORBELL) == 0) {
+    if ((partition->runtime_data.signals & PSA_DOORBELL) == 0) {
         tfm_panic();
     }
-    partition->signals &= ~PSA_DOORBELL;
+    partition->runtime_data.signals &= ~PSA_DOORBELL;
 }
 
 /**
@@ -1031,7 +1038,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     psa_signal_t irq_signal;
     int32_t irq_line = 0;
     int32_t ret;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];
@@ -1041,7 +1048,8 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+                                  irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
         tfm_panic();
@@ -1053,11 +1061,11 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     }
 
     /* It is a fatal error if passed signal is not currently asserted */
-    if ((partition->signals & irq_signal) == 0) {
+    if ((partition->runtime_data.signals & irq_signal) == 0) {
         tfm_panic();
     }
 
-    partition->signals &= ~irq_signal;
+    partition->runtime_data.signals &= ~irq_signal;
 
     tfm_spm_hal_clear_pending_irq(irq_line);
     tfm_spm_hal_enable_irq(irq_line);
@@ -1069,7 +1077,7 @@ void tfm_svcall_enable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->R0;
     int32_t irq_line = 0;
     int32_t ret;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1081,7 +1089,8 @@ void tfm_svcall_enable_irq(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+                                  irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
         tfm_panic();
@@ -1096,7 +1105,7 @@ void tfm_svcall_disable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->R0;
     int32_t irq_line = 0;
     int32_t ret;
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1108,7 +1117,8 @@ void tfm_svcall_disable_irq(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->id, irq_signal, &irq_line);
+    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+                                  irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
         tfm_panic();

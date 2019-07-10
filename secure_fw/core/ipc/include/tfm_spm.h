@@ -39,28 +39,13 @@ struct tfm_spm_service_db_t {
 /* RoT Service data */
 struct tfm_spm_service_t {
     struct tfm_spm_service_db_t *service_db; /* Service database pointer     */
-    struct tfm_spm_ipc_partition_t *partition; /*
-                                                * Point to secure partition
-                                                * data
-                                                */
-    struct tfm_list_node_t handle_list;    /* Service handle list            */
-    struct tfm_msg_queue_t msg_queue;      /* Message queue                  */
-    struct tfm_list_node_t list;           /* For list operation             */
-};
-
-/*
- * FixMe: This structure is for IPC partition which is different with library
- * mode partition. There needs to be an alignment for IPC partition database
- * and library mode database.
- */
-/* Secure Partition data */
-struct tfm_spm_ipc_partition_t {
-    int32_t index;                      /* Partition index                   */
-    int32_t id;                         /* Secure partition ID               */
-    struct tfm_event_t signal_evnt;     /* Event signal                      */
-    uint32_t signals;                   /* Service signals had been triggered*/
-    uint32_t signal_mask;        /* Service signal mask passed by psa_wait() */
-    struct tfm_list_node_t service_list;/* Service list                      */
+    struct spm_partition_desc_t *partition;  /*
+                                              * Point to secure partition
+                                              * data
+                                              */
+    struct tfm_list_node_t handle_list;      /* Service handle list          */
+    struct tfm_msg_queue_t msg_queue;        /* Message queue                */
+    struct tfm_list_node_t list;             /* For list operation           */
 };
 
 /*************************** Extended SPM functions **************************/
@@ -147,25 +132,25 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Return the parttion context pointer
- *                          \ref spm_partition_t structures
+ *                          \ref spm_partition_desc_t structures
  */
-struct tfm_spm_ipc_partition_t *tfm_spm_get_running_partition(void);
+struct spm_partition_desc_t *tfm_spm_get_running_partition(void);
 
 /**
  * \brief                   Get the service context by signal.
  *
  * \param[in] partition     Partition context pointer
- *                          \ref spm_partition_t structures
+ *                          \ref spm_partition_desc_t structures
  * \param[in] signal        Signal associated with inputs to the Secure
  *                          Partition, \ref psa_signal_t
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
- *                          \ref spm_service_t structures
+ *                          \ref tfm_spm_service_t structures
  */
 struct tfm_spm_service_t *
-tfm_spm_get_service_by_signal(struct tfm_spm_ipc_partition_t *partition,
-                              psa_signal_t signal);
+    tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
+                                  psa_signal_t signal);
 
 /**
  * \brief                   Get the service context by service ID.
@@ -174,7 +159,7 @@ tfm_spm_get_service_by_signal(struct tfm_spm_ipc_partition_t *partition,
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
- *                          \ref spm_service_t structures
+ *                          \ref tfm_spm_service_t structures
  */
 struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
@@ -186,10 +171,10 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
- *                          \ref spm_service_t structures
+ *                          \ref tfm_spm_service_t structures
  */
 struct tfm_spm_service_t *
-        tfm_spm_get_service_by_handle(psa_handle_t conn_handle);
+    tfm_spm_get_service_by_handle(psa_handle_t conn_handle);
 
 /**
  * \brief                   Get the partition context by partition ID.
@@ -198,21 +183,21 @@ struct tfm_spm_service_t *
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target partition context pointer,
- *                          \ref spm_partition_t structures
+ *                          \ref spm_partition_desc_t structures
  */
-struct tfm_spm_ipc_partition_t *
+struct spm_partition_desc_t *
     tfm_spm_get_partition_by_id(int32_t partition_id);
 
 /************************ Message functions **********************************/
 
 /**
- *  \brief                  Get message context by message handle.
+ * \brief                   Get message context by message handle.
  *
  * \param[in] msg_handle    Message handle which is a reference generated
  *                          by the SPM to a specific message.
  *
  * \return                  The message body context pointer
- *                          \ref msg_body_t structures
+ *                          \ref tfm_msg_body_t structures
  */
 struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
 
@@ -235,7 +220,8 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  *
  * \retval NULL             Failed
- * \retval "Not NULL"       New message body pointer \ref msg_body_t structures
+ * \retval "Not NULL"       New message body pointer \ref tfm_msg_body_t
+ *                          structures
  */
 struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
                                           psa_handle_t handle,
@@ -248,7 +234,7 @@ struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
  * \brief                   Free message which unused anymore
  *
  * \param[in] msg           Message pointer which want to free
- *                          \ref msg_body_t structures
+ *                          \ref tfm_msg_body_t structures
  *
  * \retval void             Success
  * \retval "Does not return" Failed
@@ -262,8 +248,8 @@ void tfm_spm_free_msg(struct tfm_msg_body_t *msg);
  *
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
- * \param[in] msg           message created by spm_create_msg()
- *                          \ref msg_body_t structures
+ * \param[in] msg           message created by tfm_spm_create_msg()
+ *                          \ref tfm_msg_body_t structures
  *
  * \retval IPC_SUCCESS      Success
  * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input

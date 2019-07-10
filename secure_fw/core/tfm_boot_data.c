@@ -20,6 +20,8 @@
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
 #include "tfm_spm.h"
+#include "tfm_spm_hal.h"
+#include "spm_db.h"
 #endif
 
 /*!
@@ -77,7 +79,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                 tfm_spm_partition_get_running_partition_idx();
     uint32_t res;
 #else
-    struct tfm_spm_ipc_partition_t *partition = NULL;
+    struct spm_partition_desc_t *partition = NULL;
     uint32_t privileged;
 #endif
 
@@ -99,7 +101,8 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     if (!partition) {
         tfm_panic();
     }
-    privileged = tfm_spm_partition_get_privileged_mode(partition->index);
+    privileged =
+        tfm_spm_partition_get_privileged_mode(partition->static_data.index);
 
     if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
         privileged) != IPC_SUCCESS) {

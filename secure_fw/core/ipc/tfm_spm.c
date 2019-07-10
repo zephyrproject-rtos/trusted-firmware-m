@@ -25,13 +25,6 @@
 #include "tfm_nspm.h"
 #include "tfm_memory_utils.h"
 
-/*
- * IPC partitions.
- * FixMe: Need to get align with spm_partition_db_t.
- */
-static struct tfm_spm_ipc_partition_t
-                    g_spm_ipc_partition[SPM_MAX_PARTITIONS] = {};
-
 /* Extern SPM variable */
 extern struct spm_partition_db_t g_spm_partition_db;
 
@@ -74,8 +67,8 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service)
 }
 
 static struct tfm_conn_handle_t *
-tfm_spm_find_conn_handle_node(struct tfm_spm_service_t *service,
-                              psa_handle_t conn_handle)
+    tfm_spm_find_conn_handle_node(struct tfm_spm_service_t *service,
+                                  psa_handle_t conn_handle)
 {
     struct tfm_conn_handle_t *handle_node;
     struct tfm_list_node_t *node, *head;
@@ -154,7 +147,7 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 
 /* Partition management functions */
 struct tfm_spm_service_t *
-tfm_spm_get_service_by_signal(struct tfm_spm_ipc_partition_t *partition,
+tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
                               psa_signal_t signal)
 {
     struct tfm_list_node_t *node, *head;
@@ -162,11 +155,11 @@ tfm_spm_get_service_by_signal(struct tfm_spm_ipc_partition_t *partition,
 
     TFM_ASSERT(partition);
 
-    if (tfm_list_is_empty(&partition->service_list)) {
+    if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
         tfm_panic();
     }
 
-    head = &partition->service_list;
+    head = &partition->runtime_data.service_list;
     TFM_LIST_FOR_EACH(node, head) {
         service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t, list);
         if (service->service_db->signal == signal) {
@@ -181,19 +174,21 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
     uint32_t i;
     struct tfm_list_node_t *node, *head;
     struct tfm_spm_service_t *service;
+    struct spm_partition_desc_t *partition;
 
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+        partition = &g_spm_partition_db.partitions[i];
         /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(g_spm_ipc_partition[i].index) &
-            SPM_PART_FLAG_IPC) == 0) {
+        if ((tfm_spm_partition_get_flags(partition->static_data.index) &
+             SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
 
-        if (tfm_list_is_empty(&g_spm_ipc_partition[i].service_list)) {
+        if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
             continue;
         }
 
-        head = &g_spm_ipc_partition[i].service_list;
+        head = &partition->runtime_data.service_list;
         TFM_LIST_FOR_EACH(node, head) {
             service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t,
                                             list);
@@ -213,19 +208,21 @@ struct tfm_spm_service_t *
     struct tfm_list_node_t *service_node, *service_head;
     struct tfm_list_node_t *handle_node, *handle_head;
     struct tfm_spm_service_t *service;
+    struct spm_partition_desc_t *partition;
 
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+        partition = &g_spm_partition_db.partitions[i];
         /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(g_spm_ipc_partition[i].index) &
-            SPM_PART_FLAG_IPC) == 0) {
+        if ((tfm_spm_partition_get_flags(partition->static_data.index) &
+             SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
 
-        if (tfm_list_is_empty(&g_spm_ipc_partition[i].service_list)) {
+        if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
             continue;
         }
 
-        service_head = &g_spm_ipc_partition[i].service_list;
+        service_head = &partition->runtime_data.service_list;
         TFM_LIST_FOR_EACH(service_node, service_head) {
             service = TFM_GET_CONTAINER_PTR(service_node,
                                             struct tfm_spm_service_t, list);
@@ -242,20 +239,17 @@ struct tfm_spm_service_t *
     return NULL;
 }
 
-struct tfm_spm_ipc_partition_t *
-    tfm_spm_get_partition_by_id(int32_t partition_id)
+struct spm_partition_desc_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 {
-    uint32_t i;
+    uint32_t idx = get_partition_idx(partition_id);
 
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        if (g_spm_ipc_partition[i].id == partition_id) {
-            return &g_spm_ipc_partition[i];
-        }
+    if (idx != SPM_INVALID_PARTITION_IDX) {
+        return &(g_spm_partition_db.partitions[idx]);
     }
     return NULL;
 }
 
-struct tfm_spm_ipc_partition_t *tfm_spm_get_running_partition(void)
+struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
 {
     uint32_t spid;
 
@@ -314,7 +308,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 
     /* For condition 2: check if the partition ID is same */
     partition_id = tfm_spm_partition_get_running_partition_id_ext();
-    if (partition_id != msg->service->partition->id) {
+    if (partition_id != msg->service->partition->static_data.partition_id) {
         return NULL;
     }
 
@@ -393,6 +387,9 @@ void tfm_spm_free_msg(struct tfm_msg_body_t *msg)
 int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
                            struct tfm_msg_body_t *msg)
 {
+    struct spm_partition_runtime_data_t *p_runtime_data =
+                                            &service->partition->runtime_data;
+
     TFM_ASSERT(service);
     TFM_ASSERT(msg);
 
@@ -402,11 +399,10 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     }
 
     /* Messages put. Update signals */
-    service->partition->signals |= service->service_db->signal;
+    p_runtime_data->signals |= service->service_db->signal;
 
-    tfm_event_wake(&service->partition->signal_evnt,
-                   (service->partition->signals &
-                    service->partition->signal_mask));
+    tfm_event_wake(&p_runtime_data->signal_evnt, (p_runtime_data->signals &
+                                                  p_runtime_data->signal_mask));
 
     tfm_event_wait(&msg->ack_evnt);
 
@@ -425,13 +421,13 @@ uint32_t tfm_spm_partition_get_running_partition_id_ext(void)
 }
 
 static struct tfm_thrd_ctx *
-tfm_spm_partition_get_thread_info_ext(uint32_t partition_idx)
+    tfm_spm_partition_get_thread_info_ext(uint32_t partition_idx)
 {
     return &g_spm_partition_db.partitions[partition_idx].sp_thrd;
 }
 
 static tfm_thrd_func_t
-        tfm_spm_partition_get_init_func_ext(uint32_t partition_idx)
+    tfm_spm_partition_get_init_func_ext(uint32_t partition_idx)
 {
     return (tfm_thrd_func_t)(g_spm_partition_db.partitions[partition_idx].
                              static_data.partition_init);
@@ -490,10 +486,9 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_idx)
 void tfm_spm_init(void)
 {
     uint32_t i, num;
-    struct tfm_spm_ipc_partition_t *partition;
+    struct spm_partition_desc_t *partition;
     struct tfm_spm_service_t *service;
     struct tfm_thrd_ctx *pth, this_thrd;
-    struct spm_partition_desc_t *part;
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -508,16 +503,15 @@ void tfm_spm_init(void)
 
     /* Init partition first for it will be used when init service */
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        part = &g_spm_partition_db.partitions[i];
-        tfm_spm_hal_configure_default_isolation(part->platform_data);
-        g_spm_ipc_partition[i].index = i;
+        partition = &g_spm_partition_db.partitions[i];
+        tfm_spm_hal_configure_default_isolation(partition->platform_data);
+        partition->static_data.index = i;
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
-        g_spm_ipc_partition[i].id = tfm_spm_partition_get_partition_id(i);
 
-        tfm_event_init(&g_spm_ipc_partition[i].signal_evnt);
-        tfm_list_init(&g_spm_ipc_partition[i].service_list);
+        tfm_event_init(&partition->runtime_data.signal_evnt);
+        tfm_list_init(&partition->runtime_data.service_list);
 
         pth = tfm_spm_partition_get_thread_info_ext(i);
         if (!pth) {
@@ -553,7 +547,8 @@ void tfm_spm_init(void)
         service->service_db = &g_spm_service_db[i];
         service->partition = partition;
         tfm_list_init(&service->handle_list);
-        tfm_list_add_tail(&partition->service_list, &service->list);
+        tfm_list_add_tail(&partition->runtime_data.service_list,
+                          &service->list);
     }
 
     /*
