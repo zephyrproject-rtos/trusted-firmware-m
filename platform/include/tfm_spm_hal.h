@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "tfm_secure_api.h"
 #include "spm_api.h"
+#include "tfm_plat_defs.h"
 
 /**
  * \brief Holds peripheral specific data fields required to manage the
@@ -70,15 +71,19 @@ struct tfm_spm_partition_memory_data_t
  *        default configuration for them.
  *
  * This function is called during TF-M core early startup, before DB init
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void tfm_spm_hal_init_isolation_hw(void);
+enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void);
 
 /**
  * \brief This function initialises the HW used for isolation, and sets the
  *        default configuration for them.
  * This function is called during TF-M core early startup, after DB init
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void tfm_spm_hal_setup_isolation_hw(void);
+enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
 
 /**
  * \brief Configure peripherals for a partition based on the platfotm data from
@@ -102,34 +107,44 @@ void tfm_spm_hal_configure_default_isolation(
  *        option unless explicitly noted by the chip vendor.
  *        The implementation has to expect that one of those defines is going to
  *        be set. Otherwise, a compile error needs to be triggered.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void tfm_spm_hal_init_debug(void);
+enum tfm_plat_err_t tfm_spm_hal_init_debug(void);
 
 /**
  * \brief Enables the fault handlers and sets priorities.
  *
  * Secure fault (if present) must have the highest possible priority
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void enable_fault_handlers(void);
+enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void);
 
 /**
  * \brief Configures the system reset request properties
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void system_reset_cfg(void);
+enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void);
 
 /**
  * \brief Configures all external interrupts to target the
  *        NS state, apart for the ones associated to secure
  *        peripherals (plus MPC and PPC)
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void nvic_interrupt_target_state_cfg(void);
+enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void);
 
 /**
  * \brief This function enable the interrupts associated
  *        to the secure peripherals (plus the isolation boundary violation
  *        interrupts)
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void nvic_interrupt_enable(void);
+enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void);
 
 /**
  * \brief Get the VTOR value of non-secure image
@@ -162,8 +177,11 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void);
  * \details This function sets the priority for the IRQ passed in the parameter.
  *          The precision of the priority value might be adjusted to match the
  *          available priority bits in the underlying target platform.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority);
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
+                                                        uint32_t priority);
 
 /**
  * \brief Clears a pending IRQ

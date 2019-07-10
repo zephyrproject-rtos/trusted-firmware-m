@@ -86,10 +86,10 @@ int32_t tfm_core_init(void)
     size_t i;
 
     /* Enables fault handlers */
-    enable_fault_handlers();
+    tfm_spm_hal_enable_fault_handlers();
 
     /* Configures the system reset request properties */
-    system_reset_cfg();
+    tfm_spm_hal_system_reset_cfg();
 
     /* Configures debug authentication */
     tfm_spm_hal_init_debug();
@@ -112,7 +112,7 @@ int32_t tfm_core_init(void)
     /* Configures all interrupts to retarget NS state, except for
      * secure peripherals
      */
-    nvic_interrupt_target_state_cfg();
+    tfm_spm_hal_nvic_interrupt_target_state_cfg();
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         tfm_spm_hal_set_secure_irq_priority(
@@ -123,7 +123,7 @@ int32_t tfm_core_init(void)
     }
 
     /* Enable secure peripherals interrupts */
-    nvic_interrupt_enable();
+    tfm_spm_hal_nvic_interrupt_enable();
 
 #ifdef TFM_PSA_API
     /* FixMe: In case of IPC messaging, scratch area must not be referenced

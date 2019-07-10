@@ -14,6 +14,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "platform_description.h"
+#include "Driver_Common.h"
 
 /* Debug configuration flags */
 #define SPNIDEN_SEL_STATUS (0x01u << 7)
@@ -31,12 +32,20 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-void tfm_spm_hal_init_isolation_hw(void)
+enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
+    int32_t ret = ARM_DRIVER_OK;
     /* Configures non-secure memory spaces in the target */
     sau_and_idau_cfg();
-    mpc_init_cfg();
-    ppc_init_cfg();
+    ret = mpc_init_cfg();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = ppc_init_cfg();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 void tfm_spm_hal_configure_default_isolation(
@@ -332,16 +341,15 @@ enum spm_err_t tfm_spm_hal_set_share_region(
 #endif /* !defined(TFM_PSA_API) */
 #endif /* TFM_LVL != 1 */
 
-void tfm_spm_hal_setup_isolation_hw(void)
+enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 {
 #if TFM_LVL != 1
     if (tfm_spm_mpu_init() != SPM_ERR_OK) {
         ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
-        while (1) {
-            ;
-        }
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 void MPC_Handler(void)
@@ -385,7 +393,7 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
 
-void tfm_spm_hal_init_debug(void)
+enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
 {
     volatile struct sysctrl_t *sys_ctrl =
                                      (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
@@ -421,12 +429,15 @@ void tfm_spm_hal_init_debug(void)
      * input signals.
      */
 #endif
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
-void tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority)
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
+                                                        uint32_t priority)
 {
     uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
     NVIC_SetPriority(irq_line, quantized_priority);
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 void tfm_spm_hal_clear_pending_irq(int32_t irq_line)
@@ -461,4 +472,24 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     } else {
         return TFM_IRQ_TARGET_STATE_SECURE;
     }
+}
+
+enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
+{
+    return enable_fault_handlers();
+}
+
+enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
+{
+    return system_reset_cfg();
+}
+
+enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
+{
+    return nvic_interrupt_target_state_cfg();
+}
+
+enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
+{
+    return nvic_interrupt_enable();
 }
