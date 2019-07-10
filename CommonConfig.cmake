@@ -19,6 +19,16 @@ elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUA
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
+if(CORE_IPC)
+	if (TFM_LVL EQUAL 3)
+		message(FATAL_ERROR "ERROR: Invalid isolation level!")
+	endif()
+else()
+	if(NOT TFM_LVL EQUAL 1)
+		message(FATAL_ERROR "ERROR: Invalid isolation level!")
+	endif()
+endif()
+
 #BL2 bootloader (MCUBoot) related settings
 if(NOT DEFINED BL2)
 	set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")

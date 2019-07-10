@@ -37,7 +37,7 @@ set (CORE_TEST False)
 set (CORE_IPC True)
 set (PSA_API_TEST False)
 
-# TF-M isolation level: 1..3
+# TF-M isolation level: 1, 2
 set (TFM_LVL 2)
 
 include ("${TFM_ROOT_DIR}/CommonConfig.cmake")

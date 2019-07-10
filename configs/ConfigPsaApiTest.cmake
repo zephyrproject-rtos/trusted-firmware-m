@@ -37,7 +37,7 @@ set (CORE_TEST False)
 set (CORE_IPC False)
 set (PSA_API_TEST True)
 
-#TF-M isolation level: 1..3
+#TF-M isolation level: 1
 set (TFM_LVL 1)
 
 #Service specific configuration for the PSA API Compliance test requirements

@@ -46,8 +46,15 @@ __asm("  .global __ARM_use_no_argv\n");
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
 #endif
-#if (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
-#error Only TFM_LVL 1, 2 and 3 are supported!
+
+#ifdef TFM_PSA_API
+#if (TFM_LVL != 1) && (TFM_LVL != 2)
+#error Only TFM_LVL 1 and 2 are supported for IPC model!
+#endif
+#else
+#if (TFM_LVL != 1)
+#error Only TFM_LVL 1 is supported for library model!
+#endif
 #endif
 
 /* Macros to pick linker symbols and allow to form the partition data base */
