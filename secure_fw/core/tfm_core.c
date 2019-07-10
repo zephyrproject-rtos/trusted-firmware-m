@@ -17,6 +17,7 @@
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "tfm_irq_list.h"
+#include "tfm_utils.h"
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa/service.h"
@@ -84,15 +85,26 @@ void configure_ns_code(void)
 int32_t tfm_core_init(void)
 {
     size_t i;
+    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
+    enum irq_target_state_t irq_target_state = TFM_IRQ_TARGET_STATE_SECURE;
 
     /* Enables fault handlers */
-    tfm_spm_hal_enable_fault_handlers();
+    plat_err = tfm_spm_hal_enable_fault_handlers();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     /* Configures the system reset request properties */
-    tfm_spm_hal_system_reset_cfg();
+    plat_err = tfm_spm_hal_system_reset_cfg();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     /* Configures debug authentication */
-    tfm_spm_hal_init_debug();
+    plat_err = tfm_spm_hal_init_debug();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     __enable_irq();
 
@@ -105,25 +117,41 @@ int32_t tfm_core_init(void)
 
     tfm_core_validate_boot_data();
 
-    tfm_spm_hal_init_isolation_hw();
+    plat_err = tfm_spm_hal_init_isolation_hw();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     configure_ns_code();
 
     /* Configures all interrupts to retarget NS state, except for
      * secure peripherals
      */
-    tfm_spm_hal_nvic_interrupt_target_state_cfg();
+    plat_err = tfm_spm_hal_nvic_interrupt_target_state_cfg();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
-        tfm_spm_hal_set_secure_irq_priority(
+        plat_err = tfm_spm_hal_set_secure_irq_priority(
                                           tfm_core_irq_signals[i].irq_line,
                                           tfm_core_irq_signals[i].irq_priority);
-        tfm_spm_hal_set_irq_target_state(tfm_core_irq_signals[i].irq_line,
-                                         TFM_IRQ_TARGET_STATE_SECURE);
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            return TFM_ERROR_GENERIC;
+        }
+        irq_target_state = tfm_spm_hal_set_irq_target_state(
+                                          tfm_core_irq_signals[i].irq_line,
+                                          TFM_IRQ_TARGET_STATE_SECURE);
+        if (irq_target_state != TFM_IRQ_TARGET_STATE_SECURE) {
+            return TFM_ERROR_GENERIC;
+        }
     }
 
     /* Enable secure peripherals interrupts */
-    tfm_spm_hal_nvic_interrupt_enable();
+    plat_err = tfm_spm_hal_nvic_interrupt_enable();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
 #ifdef TFM_PSA_API
     /* FixMe: In case of IPC messaging, scratch area must not be referenced
@@ -139,15 +167,20 @@ int32_t tfm_core_init(void)
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit) -
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
 #endif
-    return 0;
+    return TFM_SUCCESS;
 }
 
 static void tfm_core_set_secure_exception_priorities(void)
 {
+    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
+
     tfm_arch_prioritize_secure_exception();
 
     /* Explicitly set Secure SVC priority to highest */
-    tfm_spm_hal_set_secure_irq_priority(SVCall_IRQn, 0);
+    plat_err = tfm_spm_hal_set_secure_irq_priority(SVCall_IRQn, 0);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
 
     /*
      * Set secure PendSV priority to the lowest in SECURE state.
@@ -190,24 +223,30 @@ int main(void)
     /* set Main Stack Pointer limit */
     uint32_t msp_stack_bottom =
             (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base);
+    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
+    int32_t ret = TFM_ERROR_GENERIC;
 
     __set_MSPLIM(msp_stack_bottom);
 
-    if (tfm_core_init() != 0) {
-        /* Placeholder for error handling, currently ignored. */
+    if (tfm_core_init() != TFM_SUCCESS) {
+        tfm_panic();
     }
 
     if (tfm_spm_db_init() != SPM_ERR_OK) {
-        /* Placeholder for error handling, currently ignored. */
+        tfm_panic();
     }
 
-    tfm_spm_hal_setup_isolation_hw();
+    plat_err = tfm_spm_hal_setup_isolation_hw();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        tfm_panic();
+    }
 
 #ifndef TFM_PSA_API
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
 
     REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
-    uint32_t psp_stack_bottom = (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+    uint32_t psp_stack_bottom =
+                      (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
     tfm_arch_set_psplim(psp_stack_bottom);
 
@@ -221,7 +260,10 @@ int main(void)
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
-    tfm_core_set_secure_exception_priorities();
+    ret = tfm_core_set_secure_exception_priorities();
+    if (ret != TFM_SUCCESS) {
+        tfm_panic();
+    }
 
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is
      * to be able to pass the state checks for the tests started from secure.
@@ -241,7 +283,10 @@ int main(void)
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
-    tfm_core_set_secure_exception_priorities();
+    ret = tfm_core_set_secure_exception_priorities();
+    if (ret != TFM_SUCCESS) {
+        tfm_panic();
+    }
     tfm_spm_init();
 #endif
 }
