@@ -6,11 +6,14 @@
  */
 
 {{utilities.donotedit_warning}}
+
+{% for header in utilities.manifest_header_list %}
+#include "{{header}}"
+{% endfor %}
+#include "secure_fw/services/tfm_partition_defs.inc"
 {% macro _irq_record(partition_name, signal, line, priority) -%}
 { {{ partition_name }}_ID, {{ signal }}, {{ line }}, {{ priority }} },
 {%- endmacro %}
-
-#include "secure_fw/services/tfm_partition_defs.inc"
 
 /* Definitions of the signals of the IRQs */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {

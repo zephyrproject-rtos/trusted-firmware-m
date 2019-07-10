@@ -16,7 +16,6 @@
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
-#include "tfm_irq_signal_defs.h"
 #include "tfm_irq_list.h"
 #ifdef TFM_PSA_API
 #include "psa/client.h"

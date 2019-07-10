@@ -14,8 +14,7 @@
 #include "spm_partition_defs.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "psa/service.h"
-#include "tfm_irq_test_service_1_signal.h"
-#include "tfm_irq_signal_defs.h"
+#include "psa_manifest/tfm_irq_test_service_1.h"
 #include "tfm_plat_test.h"
 
 static enum irq_test_scenario_t current_scenario = IRQ_TEST_SCENARIO_NONE;
@@ -405,4 +404,3 @@ int32_t tfm_irq_test_1_init(void)
 
     return TFM_SUCCESS;
 }
-

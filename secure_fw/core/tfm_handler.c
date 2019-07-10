@@ -17,7 +17,6 @@
 #include "tfm_internal.h"
 #include "tfm_memory_utils.h"
 #include "tfm_arch.h"
-#include "tfm_irq_signal_defs.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
 #ifdef TFM_PSA_API

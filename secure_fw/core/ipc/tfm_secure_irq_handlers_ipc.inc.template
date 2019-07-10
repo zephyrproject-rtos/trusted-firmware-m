@@ -6,12 +6,14 @@
  */
 
 {{utilities.donotedit_warning}}
+
+{% for header in utilities.manifest_header_list %}
+#include "{{header}}"
+{% endfor %}
+#include "cmsis_compiler.h"
 {% macro _irq_record(partition_name, signal, line, priority) -%}
 { {{ partition_name }}_ID, {{ signal }}, {{ line }}, {{ priority }} },
 {%- endmacro %}
-
-#include "cmsis_compiler.h"
-#include "tfm_irq_signal_defs.h"
 
 /* Definitions of the signals of the IRQs (if any) */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {

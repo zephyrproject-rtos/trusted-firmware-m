@@ -7,8 +7,18 @@
 
 /*********** WARNING: This is an auto-generated file. Do not edit! ***********/
 
+#include "secure_fw/services/secure_storage/psa_manifest/tfm_secure_storage.h"
+#include "secure_fw/services/audit_logging/psa_manifest/tfm_audit_logging.h"
+#include "secure_fw/services/crypto/psa_manifest/tfm_crypto.h"
+#include "secure_fw/services/platform/psa_manifest/tfm_platform.h"
+#include "secure_fw/services/initial_attestation/psa_manifest/tfm_initial_attestation.h"
+#include "test/test_services/tfm_core_test/psa_manifest/tfm_test_core.h"
+#include "test/test_services/tfm_core_test_2/psa_manifest/tfm_test_core_2.h"
+#include "test/test_services/tfm_secure_client_service/psa_manifest/tfm_test_client_service.h"
+#include "test/test_services/tfm_ipc_service/psa_manifest/tfm_ipc_service_partition.h"
+#include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
+#include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
 #include "cmsis_compiler.h"
-#include "tfm_irq_signal_defs.h"
 
 /* Definitions of the signals of the IRQs (if any) */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
