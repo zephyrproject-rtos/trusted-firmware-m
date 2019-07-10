@@ -16,7 +16,6 @@
 #include "tfm_utils.h"
 #include "tfm_internal_defines.h"
 #include "tfm_message_queue.h"
-#include "tfm_spm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_irq_list.h"
 #include "tfm_api.h"

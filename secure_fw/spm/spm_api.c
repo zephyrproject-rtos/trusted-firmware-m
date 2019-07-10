@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "spm_api.h"
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "tfm_memory_utils.h"
 #include "spm_db.h"
 #include "tfm_internal.h"
@@ -222,7 +222,6 @@ void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)
 #endif
     runtime_data->ctx_stack_ptr +=
             sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
-
 }
 
 void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
@@ -273,9 +272,8 @@ void tfm_spm_partition_pop_handler_ctx(uint32_t partition_idx)
     tfm_spm_partition_set_state(partition_idx, stack_frame->partition_state);
     stack_frame->partition_state = 0;
     tfm_spm_partition_set_caller_partition_idx(
-                              partition_idx, stack_frame->caller_partition_idx);
+                            partition_idx, stack_frame->caller_partition_idx);
     stack_frame->caller_partition_idx = 0;
-
 }
 
 #endif /* !defined(TFM_PSA_API) */
@@ -305,7 +303,6 @@ enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
 
     return tfm_spm_hal_partition_sandbox_config(&(part->memory_data),
                                                 part->platform_data);
-
 }
 
 enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx)

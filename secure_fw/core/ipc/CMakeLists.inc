@@ -40,7 +40,6 @@ elseif (TFM_PSA_API)
 			"${SS_IPC_DIR}/tfm_wait.c"
 			"${SS_IPC_DIR}/tfm_message_queue.c"
 			"${SS_IPC_DIR}/tfm_pools.c"
-			"${SS_IPC_DIR}/tfm_spm.c"
 			"${SS_IPC_DIR}/../tfm_core.c"
 			"${SS_IPC_DIR}/../tfm_secure_api.c"
 			"${SS_IPC_DIR}/../tfm_spm_services.c"

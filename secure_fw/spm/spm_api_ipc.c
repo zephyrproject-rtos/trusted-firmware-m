@@ -11,7 +11,7 @@
 #include "psa/client.h"
 #include "psa/service.h"
 #include "tfm_utils.h"
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "spm_api.h"
 #include "spm_db.h"
 #include "tfm_internal_defines.h"
@@ -19,7 +19,6 @@
 #include "tfm_message_queue.h"
 #include "tfm_list.h"
 #include "tfm_pools.h"
-#include "tfm_spm.h"
 #include "tfm_thread.h"
 #include "region_defs.h"
 #include "tfm_nspm.h"
@@ -30,6 +29,7 @@ extern struct spm_partition_db_t g_spm_partition_db;
 
 /* Extern secure lock variable */
 extern int32_t tfm_secure_lock;
+
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
@@ -147,8 +147,8 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 
 /* Partition management functions */
 struct tfm_spm_service_t *
-tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
-                              psa_signal_t signal)
+    tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
+                                  psa_signal_t signal)
 {
     struct tfm_list_node_t *node, *head;
     struct tfm_spm_service_t *service;
@@ -179,8 +179,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
         /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(partition->static_data.index) &
-             SPM_PART_FLAG_IPC) == 0) {
+        if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
 
@@ -213,8 +212,7 @@ struct tfm_spm_service_t *
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
         /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(partition->static_data.index) &
-             SPM_PART_FLAG_IPC) == 0) {
+        if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
 
@@ -253,7 +251,7 @@ struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
 {
     uint32_t spid;
 
-    spid = tfm_spm_partition_get_running_partition_id_ext();
+    spid = tfm_spm_partition_get_running_partition_id();
 
     return tfm_spm_get_partition_by_id(spid);
 }
@@ -307,7 +305,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
     }
 
     /* For condition 2: check if the partition ID is same */
-    partition_id = tfm_spm_partition_get_running_partition_id_ext();
+    partition_id = tfm_spm_partition_get_running_partition_id();
     if (partition_id != msg->service->partition->static_data.partition_id) {
         return NULL;
     }
@@ -350,7 +348,7 @@ struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
     if (ns_caller) {
         msg->msg.client_id = tfm_nspm_get_current_client_id();
     } else {
-        msg->msg.client_id = tfm_spm_partition_get_running_partition_id_ext();
+        msg->msg.client_id = tfm_spm_partition_get_running_partition_id();
     }
 
     /* Copy contents */
@@ -410,7 +408,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
 }
 
 /* SPM extend functions */
-uint32_t tfm_spm_partition_get_running_partition_id_ext(void)
+uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
     struct tfm_thrd_ctx *pth = tfm_thrd_curr_thread();
     struct spm_partition_desc_t *partition;
@@ -421,19 +419,19 @@ uint32_t tfm_spm_partition_get_running_partition_id_ext(void)
 }
 
 static struct tfm_thrd_ctx *
-    tfm_spm_partition_get_thread_info_ext(uint32_t partition_idx)
+    tfm_spm_partition_get_thread_info(uint32_t partition_idx)
 {
     return &g_spm_partition_db.partitions[partition_idx].sp_thrd;
 }
 
 static tfm_thrd_func_t
-    tfm_spm_partition_get_init_func_ext(uint32_t partition_idx)
+    tfm_spm_partition_get_init_func(uint32_t partition_idx)
 {
     return (tfm_thrd_func_t)(g_spm_partition_db.partitions[partition_idx].
                              static_data.partition_init);
 }
 
-static uint32_t tfm_spm_partition_get_priority_ext(uint32_t partition_idx)
+static uint32_t tfm_spm_partition_get_priority(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data.
                     partition_priority;
@@ -513,18 +511,18 @@ void tfm_spm_init(void)
         tfm_event_init(&partition->runtime_data.signal_evnt);
         tfm_list_init(&partition->runtime_data.service_list);
 
-        pth = tfm_spm_partition_get_thread_info_ext(i);
+        pth = tfm_spm_partition_get_thread_info(i);
         if (!pth) {
             tfm_panic();
         }
 
         tfm_thrd_init(pth,
-                      tfm_spm_partition_get_init_func_ext(i),
+                      tfm_spm_partition_get_init_func(i),
                       NULL,
                       (uint8_t *)tfm_spm_partition_get_stack_top(i),
                       (uint8_t *)tfm_spm_partition_get_stack_bottom(i));
 
-        pth->prior = tfm_spm_partition_get_priority_ext(i);
+        pth->prior = tfm_spm_partition_get_priority(i);
 
         /* Kick off */
         if (tfm_thrd_start(pth) != THRD_SUCCESS) {

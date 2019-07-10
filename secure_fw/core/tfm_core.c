@@ -24,7 +24,6 @@
 #include "tfm_thread.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
-#include "tfm_spm.h"
 #endif
 
 /*
