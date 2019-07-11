@@ -128,6 +128,7 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
 #ifdef EXPECTED_SIG_TLV
 #ifdef MCUBOOT_HW_KEY
 extern unsigned int pub_key_len;
+extern uint8_t current_image;
 static int
 bootutil_find_key(uint8_t *key, uint16_t key_len)
 {
@@ -141,7 +142,7 @@ bootutil_find_key(uint8_t *key, uint16_t key_len)
     bootutil_sha256_update(&sha256_ctx, key, key_len);
     bootutil_sha256_finish(&sha256_ctx, hash);
 
-    plat_err = tfm_plat_get_rotpk_hash(0, key_hash, &key_hash_size);
+    plat_err = tfm_plat_get_rotpk_hash(current_image, key_hash, &key_hash_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return -1;
     }

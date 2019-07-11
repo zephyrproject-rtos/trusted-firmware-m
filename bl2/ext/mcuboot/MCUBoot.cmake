@@ -48,9 +48,13 @@ function(mcuboot_create_boot_payload)
 	endif()
 
 	if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
-		set(KEY_FILE "${MCUBOOT_DIR}/root-rsa-3072.pem")
+		set(KEY_FILE    "${MCUBOOT_DIR}/root-rsa-3072.pem")
+		set(KEY_FILE_S  "${MCUBOOT_DIR}/root-rsa-3072.pem")
+		set(KEY_FILE_NS "${MCUBOOT_DIR}/root-rsa-3072_1.pem")
 	elseif(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
-		set(KEY_FILE "${MCUBOOT_DIR}/root-rsa-2048.pem")
+		set(KEY_FILE    "${MCUBOOT_DIR}/root-rsa-2048.pem")
+		set(KEY_FILE_S  "${MCUBOOT_DIR}/root-rsa-2048.pem")
+		set(KEY_FILE_NS "${MCUBOOT_DIR}/root-rsa-2048_1.pem")
 	else()
 		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 	endif()
@@ -159,7 +163,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
 						ARGS sign
 							 --layout ${PREPROCESSED_FILE}_s.c
-							 -k ${KEY_FILE}
+							 -k ${KEY_FILE_S}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 -v ${IMAGE_VERSION_S}
@@ -173,7 +177,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
 						ARGS sign
 							 --layout ${PREPROCESSED_FILE}_ns.c
-							 -k ${KEY_FILE}
+							 -k ${KEY_FILE_NS}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 -v ${IMAGE_VERSION_NS}
