@@ -11,7 +11,7 @@
 
 #include "tfm_nspm_api.h"
 
-#define SST_TEST_TASK_STACK_SIZE (512)
+#define SST_TEST_TASK_STACK_SIZE (768)
 
 struct test_task_t {
     test_func_t *func;
