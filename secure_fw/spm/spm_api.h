@@ -66,9 +66,6 @@ struct iovec_args_t {
  * uint32_t[] array
  */
 struct interrupted_ctx_stack_frame_t {
-#if TFM_LVL != 1
-    uint32_t stack_ptr;
-#endif
     uint32_t partition_state;
 };
 
@@ -162,110 +159,6 @@ struct tfm_spm_service_t {
  */
 uint32_t get_partition_idx(uint32_t partition_id);
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
-/**
- * \brief Get bottom of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region bottom value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
-
-/**
- * \brief Get top of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region top value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
-#endif
-
-#if (TFM_LVL != 1) && !defined(TFM_PSA_API)
-/**
- * \brief Configure isolated sandbox for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Error code \ref spm_err_t
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx);
-
-/**
- * \brief Deconfigure sandbox for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Error code \ref spm_err_t
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx);
-
-/**
- * \brief Get the start of the zero-initialised region for a partition
- *
- * \param[in] partition_idx     Partition idx
- *
- * \return Start of the zero-initialised region
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_zi_start(uint32_t partition_idx);
-
-/**
- * \brief Get the limit of the zero-initialised region for a partition
- *
- * \param[in] partition_idx     Partition idx
- *
- * \return Limit of the zero-initialised region
- *
- * \note This function doesn't check if partition_idx is valid.
- * \note The address returned is not part of the region.
- */
-uint32_t tfm_spm_partition_get_zi_limit(uint32_t partition_idx);
-
-/**
- * \brief Get the start of the read-write region for a partition
- *
- * \param[in] partition_idx     Partition idx
- *
- * \return Start of the read-write region
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_rw_start(uint32_t partition_idx);
-
-/**
- * \brief Get the limit of the read-write region for a partition
- *
- * \param[in] partition_idx     Partition idx
- *
- * \return Limit of the read-write region
- *
- * \note This function doesn't check if partition_idx is valid.
- * \note The address returned is not part of the region.
- */
-uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx);
-
-/**
- * \brief Save stack pointer for partition in database
- *
- * \param[in] partition_idx  Partition index
- * \param[in] stack_ptr      Stack pointer to be stored
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr);
-#endif /* if (TFM_LVL != 1) && !defined(TFM_PSA_API) */
-
 /**
  * \brief Get the id of the partition for its index from the db
  *
@@ -304,8 +197,7 @@ enum spm_err_t tfm_spm_db_init(void);
  *
  * \note Barrier instructions are not called by this function, and if
  *       it is called in thread mode, it might be necessary to call
- *       them after this function returns (just like it is done in
- *       jump_to_ns_code()).
+ *       them after this function returns.
  */
 void tfm_spm_partition_change_privilege(uint32_t privileged);
 
@@ -487,7 +379,28 @@ void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
 
 #ifdef TFM_PSA_API
 /*************************** IPC definitions **************************/
-/*************************** Extended SPM functions **************************/
+
+/**
+ * \brief Get bottom of stack region for a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Stack region bottom value
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
+
+/**
+ * \brief Get top of stack region for a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Stack region top value
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
 
 /**
  * \brief   Get the running partition ID.

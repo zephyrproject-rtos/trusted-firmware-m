@@ -373,12 +373,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -408,7 +403,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_STORAGE, $$Base),
@@ -422,9 +417,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -464,12 +457,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -505,7 +493,7 @@ struct spm_partition_desc_t partition_list [] =
         .platform_data            = NULL,
 #endif /* AUDIT_UART_REDIRECTION */
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$Base),
@@ -519,9 +507,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -561,12 +547,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -596,7 +577,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_CRYPTO, $$Base),
@@ -610,9 +591,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -652,12 +631,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -687,7 +661,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_PLATFORM, $$Base),
@@ -701,9 +675,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -743,12 +715,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -778,7 +745,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$Base),
@@ -792,9 +759,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -834,12 +799,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -871,7 +831,7 @@ struct spm_partition_desc_t partition_list [] =
         /* FIXME: Only adding the first mmio region */
         .platform_data            = TFM_PERIPHERAL_FPGA_IO,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$Base),
@@ -885,9 +845,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -928,12 +886,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -963,7 +916,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$Base),
@@ -977,9 +930,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -1020,12 +971,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -1057,7 +1003,7 @@ struct spm_partition_desc_t partition_list [] =
         /* FIXME: Only adding the first mmio region */
         .platform_data            = TFM_PERIPHERAL_STD_UART,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$Base),
@@ -1071,9 +1017,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -1114,12 +1058,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -1149,7 +1088,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$Base),
@@ -1163,9 +1102,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -1206,12 +1143,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -1241,7 +1173,7 @@ struct spm_partition_desc_t partition_list [] =
 
         .platform_data            = NULL,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$Base),
@@ -1255,9 +1187,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,
@@ -1298,12 +1228,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -1335,7 +1260,7 @@ struct spm_partition_desc_t partition_list [] =
         /* FIXME: Only adding the first mmio region */
         .platform_data            = TFM_PERIPHERAL_TIMER0,
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {
             .code_start           = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$Base),
@@ -1349,9 +1274,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Limit),
         },
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,

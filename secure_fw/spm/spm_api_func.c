@@ -101,15 +101,9 @@ void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)
     struct spm_partition_runtime_data_t *runtime_data =
         &g_spm_partition_db.partitions[partition_idx].runtime_data;
     struct interrupted_ctx_stack_frame_t *stack_frame =
-        (struct interrupted_ctx_stack_frame_t *)
-            runtime_data->ctx_stack_ptr;
+        (struct interrupted_ctx_stack_frame_t *)runtime_data->ctx_stack_ptr;
 
     stack_frame->partition_state = runtime_data->partition_state;
-#if TFM_LVL != 1
-    stack_frame->stack_ptr = runtime_data->stack_ptr;
-#endif
-    runtime_data->ctx_stack_ptr +=
-        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
 }
 
 void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
@@ -118,16 +112,10 @@ void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
         &g_spm_partition_db.partitions[partition_idx].runtime_data;
     struct interrupted_ctx_stack_frame_t *stack_frame;
 
-    runtime_data->ctx_stack_ptr -=
-        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
     stack_frame = (struct interrupted_ctx_stack_frame_t *)
                       runtime_data->ctx_stack_ptr;
     tfm_spm_partition_set_state(partition_idx, stack_frame->partition_state);
     stack_frame->partition_state = 0;
-#if TFM_LVL != 1
-    tfm_spm_partition_set_stack(partition_idx, stack_frame->stack_ptr);
-    stack_frame->stack_ptr = 0;
-#endif
 }
 
 void tfm_spm_partition_push_handler_ctx(uint32_t partition_idx)
@@ -163,66 +151,6 @@ void tfm_spm_partition_pop_handler_ctx(uint32_t partition_idx)
         partition_idx, stack_frame->caller_partition_idx);
     stack_frame->caller_partition_idx = 0;
 }
-
-#if (TFM_LVL != 1)
-enum spm_err_t tfm_spm_partition_sandbox_config(uint32_t partition_idx)
-{
-    struct spm_partition_desc_t *part;
-    if (!g_spm_partition_db.is_init) {
-        return SPM_ERR_PARTITION_DB_NOT_INIT;
-    }
-
-    part = &g_spm_partition_db.partitions[partition_idx];
-
-    return tfm_spm_hal_partition_sandbox_config(&(part->memory_data),
-                                                part->platform_data);
-
-}
-
-enum spm_err_t tfm_spm_partition_sandbox_deconfig(uint32_t partition_idx)
-{
-    /* This function takes a partition id and disables the
-     * SPM partition for that partition
-     */
-
-    struct spm_partition_desc_t *part;
-
-    part = &g_spm_partition_db.partitions[partition_idx];
-
-    return tfm_spm_hal_partition_sandbox_deconfig(&(part->memory_data),
-                                                  part->platform_data);
-}
-
-uint32_t tfm_spm_partition_get_zi_start(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data.zi_start;
-}
-
-uint32_t tfm_spm_partition_get_zi_limit(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data.zi_limit;
-}
-
-uint32_t tfm_spm_partition_get_rw_start(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data.rw_start;
-}
-
-uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data.rw_limit;
-}
-
-void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr)
-{
-    g_spm_partition_db.partitions[partition_idx].
-            runtime_data.stack_ptr = stack_ptr;
-}
-#endif
 
 void tfm_spm_partition_store_context(uint32_t partition_idx,
         uint32_t stack_ptr, uint32_t lr)
@@ -273,17 +201,9 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
 enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
                                            uint32_t share)
 {
-    enum spm_err_t ret = SPM_ERR_OK;
+    g_spm_partition_db.partitions[partition_idx].runtime_data.share = share;
 
-#if TFM_LVL != 1
-    /* Only need to set configuration on levels higher than 1 */
-    ret = tfm_spm_hal_set_share_region(share);
-#endif
-
-    if (ret == SPM_ERR_OK) {
-        g_spm_partition_db.partitions[partition_idx].runtime_data.share = share;
-    }
-    return ret;
+    return SPM_ERR_OK;
 }
 
 enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,

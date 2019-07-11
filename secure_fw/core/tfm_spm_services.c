@@ -20,14 +20,6 @@ nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
 {
-#if TFM_LVL == 3 || ((!defined(TFM_PSA_API)) && (TFM_LVL != 1))
-    /* Initialization is done, set thread mode to unprivileged. */
-    tfm_spm_partition_change_privilege(TFM_PARTITION_UNPRIVILEGED_MODE);
-#endif
-    /* All changes made to memory will be effective after this point */
-    __DSB();
-    __ISB();
-
     /* Calls the non-secure Reset_Handler to jump to the non-secure binary */
     ns_entry();
 }

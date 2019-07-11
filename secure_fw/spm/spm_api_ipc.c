@@ -410,7 +410,17 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     return IPC_SUCCESS;
 }
 
-/* SPM extend functions */
+uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].
+            memory_data.stack_bottom;
+}
+
+uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].memory_data.stack_top;
+}
+
 uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
     struct tfm_thrd_ctx *pth = tfm_thrd_curr_thread();

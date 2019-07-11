@@ -139,12 +139,7 @@ struct spm_partition_desc_t partition_list [] =
             .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
             .caller_client_id     = TFM_INVALID_CLIENT_ID,
             .share                = TFM_BUFFER_SHARE_DISABLE,
-#if TFM_LVL != 1
-            .stack_ptr            = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Limit) -
-                                    sizeof(struct iovec_args_t),
-#else /* TFM_LVL != 1 */
             .stack_ptr            = 0,
-#endif /* TFM_LVL != 1 */
             .lr                   = 0,
             .iovec_api            = TFM_SFN_API_IOVEC,
             .iovec_args           =
@@ -192,7 +187,7 @@ struct spm_partition_desc_t partition_list [] =
         .platform_data            = NULL,
         {% endif %}
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#ifdef TFM_PSA_API
     /* memory_data */
         .memory_data = {{'{'}}
             .code_start           = PART_REGION_ADDR({{manifest.manifest.name}}, $$Base),
@@ -206,9 +201,7 @@ struct spm_partition_desc_t partition_list [] =
             .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Base),
             .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Limit),
         {{'},'}}
-#endif
 
-#ifdef TFM_PSA_API
     /* sp_thrd */
         .sp_thrd = {
                 .pfn              = NULL,

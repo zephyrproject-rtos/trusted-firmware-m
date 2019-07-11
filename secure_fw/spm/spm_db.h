@@ -54,10 +54,8 @@ struct spm_partition_desc_t {
     struct spm_partition_static_data_t static_data;
     struct spm_partition_runtime_data_t runtime_data;
     struct tfm_spm_partition_platform_data_t *platform_data;
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#if TFM_PSA_API
     struct tfm_spm_partition_memory_data_t memory_data;
-#endif
-#ifdef TFM_PSA_API
     struct tfm_thrd_ctx sp_thrd;
 #endif
 };
@@ -74,7 +72,7 @@ struct spm_partition_db_t {
 /* Macros to pick linker symbols and allow to form the partition data base */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
-#if (TFM_LVL == 1) && !defined(TFM_PSA_API)
+#ifndef TFM_PSA_API
 #define REGION_DECLARE(a, b, c)
 #else
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)

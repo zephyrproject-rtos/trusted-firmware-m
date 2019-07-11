@@ -60,7 +60,7 @@ enum spm_err_t tfm_spm_db_init(void)
      */
 
     /* For the non secure Execution environment */
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#if TFM_PSA_API
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
     uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
@@ -79,7 +79,7 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags = 0;
 #endif
 
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+#if TFM_PSA_API
     part_ptr->memory_data.stack_bottom = psp_stack_bottom;
     part_ptr->memory_data.stack_top    = psp_stack_top;
     /* Since RW, ZI and stack are configured as one MPU region, configure
@@ -110,19 +110,6 @@ enum spm_err_t tfm_spm_db_init(void)
 
     return SPM_ERR_OK;
 }
-
-#if (TFM_LVL != 1) || defined(TFM_PSA_API)
-uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data.stack_bottom;
-}
-
-uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].memory_data.stack_top;
-}
-#endif
 
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
