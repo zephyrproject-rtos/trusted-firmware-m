@@ -110,7 +110,7 @@ def do_sign(args):
                            security_cnt=args.security_counter,
                            included_header=args.included_header,
                            pad=pad_size)
-    key = keys.load(args.key) if args.key else None
+    key = keys.load(args.key, args.public_key_format) if args.key else None
     ram_load_address = macro_parser.evaluate_macro(args.layout, image_load_address_re, 0, 1)
     img.sign(key, ram_load_address, args.dependencies)
 
@@ -178,6 +178,9 @@ def args():
     sign.add_argument('-l', '--layout', required=True,
                       help='Location of the file that contains preprocessed macros')
     sign.add_argument('-k', '--key', metavar='filename')
+    sign.add_argument("-K", "--public-key-format",
+                      help='In what format to add the public key to the image manifest: full or hash',
+                      metavar='pub_key_format', choices=['full', 'hash'], default='hash')
     sign.add_argument("--align", type=alignment_value, required=True)
     sign.add_argument("-v", "--version", type=version.decode_version,
                       default="0.0.0+0")

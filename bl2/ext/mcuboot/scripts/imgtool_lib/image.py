@@ -36,6 +36,7 @@ IMAGE_F = {
         'RAM_LOAD':              0x0000020, }
 TLV_VALUES = {
         'KEYHASH': 0x01,
+        'KEY'    : 0x02,
         'SHA256' : 0x10,
         'RSA2048': 0x20,
         'RSA3072': 0x23,
@@ -152,7 +153,13 @@ class Image():
         full_size = (TLV_INFO_SIZE + len(tlv.buf) + TLV_HEADER_SIZE
                      + PAYLOAD_DIGEST_SIZE)
         if key is not None:
-            full_size += (TLV_HEADER_SIZE + KEYHASH_SIZE
+            pub = key.get_public_bytes()
+            if key.get_public_key_format() == 'hash':
+                tlv_key_data_size = KEYHASH_SIZE
+            else:
+                tlv_key_data_size = len(pub)
+
+            full_size += (TLV_HEADER_SIZE + tlv_key_data_size
                           + TLV_HEADER_SIZE + key.sig_len())
         tlv_header = struct.pack('HH', TLV_INFO_MAGIC, full_size)
         self.payload += tlv_header + bytes(tlv.buf)
@@ -164,11 +171,13 @@ class Image():
         tlv.add('SHA256', digest)
 
         if key is not None:
-            pub = key.get_public_bytes()
-            sha = hashlib.sha256()
-            sha.update(pub)
-            pubbytes = sha.digest()
-            tlv.add('KEYHASH', pubbytes)
+            if key.get_public_key_format() == 'hash':
+                sha = hashlib.sha256()
+                sha.update(pub)
+                pubbytes = sha.digest()
+                tlv.add('KEYHASH', pubbytes)
+            else:
+                tlv.add('KEY', pub)
 
             sig = key.sign(self.payload)
             tlv.add(key.sig_tlv(), sig)
