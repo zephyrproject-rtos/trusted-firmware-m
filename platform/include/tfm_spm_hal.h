@@ -34,7 +34,7 @@ enum irq_target_state_t {
     TFM_IRQ_TARGET_STATE_NON_SECURE,
 };
 
-#if defined (TFM_PSA_API) || (TFM_LVL != 1)
+#ifdef TFM_PSA_API
 /**
  * \brief Holds SPM db fields that define the memory regions used by a
  *        partition.
@@ -218,44 +218,5 @@ void tfm_spm_hal_disable_irq(int32_t irq_line);
 enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
                                           int32_t irq_line,
                                           enum irq_target_state_t target_state);
-
-#if (TFM_LVL != 1) && !defined(TFM_PSA_API)
-/**
- * \brief Configure the sandbox for a partition.
- *
- * \param[in] memory_data      The memory ranges from the partition DB for this
- *                             partition
- * \param[in] platform_data    The platform fields of the partition DB record
- *                             for this partition. Can be NULL.
- *
- * \return Returns the result operation as per \ref spm_err_t
- */
-enum spm_err_t tfm_spm_hal_partition_sandbox_config(
-                 const struct tfm_spm_partition_memory_data_t *memory_data,
-                 const struct tfm_spm_partition_platform_data_t *platform_data);
-
-/**
- * \brief Deconfigure the sandbox for a partition.
- *
- * \param[in] memory_data      The memory ranges from the partition DB for this
- *                             partition
- * \param[in] platform_data    The platform fields of the partition DB record
- *                             for this partition. Can be NULL.
- *
- * \return Returns the result operation as per \ref spm_err_t
- */
-enum spm_err_t tfm_spm_hal_partition_sandbox_deconfig(
-                 const struct tfm_spm_partition_memory_data_t *memory_data,
-                 const struct tfm_spm_partition_platform_data_t *platform_data);
-
-/**
- * \brief Set the share region mode
- *
- * \param[in] share      The mode to set
- *
- * \return Returns the result operation as per \ref spm_err_t
- */
-enum spm_err_t tfm_spm_hal_set_share_region(uint32_t share);
-#endif
 
 #endif /* __TFM_SPM_HAL_H__ */

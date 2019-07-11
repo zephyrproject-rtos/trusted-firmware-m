@@ -64,33 +64,22 @@ void tfm_spm_hal_configure_default_isolation(
 #define MPU_REGION_VENEERS           0
 #define MPU_REGION_TFM_UNPRIV_CODE   1
 #define MPU_REGION_TFM_UNPRIV_DATA   2
+#define MPU_REGION_NS_STACK          3
 #define PARTITION_REGION_RO          4
 #define PARTITION_REGION_RW_STACK    5
 #define PARTITION_REGION_PERIPH      6
 #define PARTITION_REGION_SHARE       7
 
-#if TFM_LVL == 2
-#define MPU_REGION_NS_STACK          3
-#elif TFM_LVL == 3
-#define MPU_REGION_NS_DATA           3
-#endif
-
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
-#ifndef TFM_PSA_API
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
-#endif
-#if TFM_LVL == 2
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
-#endif
 
 static enum spm_err_t tfm_spm_mpu_init(void)
 {
@@ -138,21 +127,6 @@ static enum spm_err_t tfm_spm_mpu_init(void)
         return SPM_ERR_INVALID_CONFIG;
     }
 
-#if TFM_LVL == 3
-    /* TFM Core unprivileged non-secure data region */
-    region_cfg.region_nr = MPU_REGION_NS_DATA;
-    region_cfg.region_base = NS_DATA_START;
-    region_cfg.region_limit = NS_DATA_LIMIT;
-    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-    if (mpu_region_enable(&region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
-    }
-#endif
-
-#if TFM_LVL == 2
     /* NSPM PSP */
     region_cfg.region_nr = MPU_REGION_NS_STACK;
     region_cfg.region_base =
@@ -194,151 +168,11 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     if (mpu_region_enable(&region_cfg) != MPU_ARMV8M_OK) {
         return SPM_ERR_INVALID_CONFIG;
     }
-#endif
 
     mpu_enable(PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
 
     return SPM_ERR_OK;
 }
-
-enum spm_err_t tfm_spm_hal_partition_sandbox_config(
-              const struct tfm_spm_partition_memory_data_t *memory_data,
-              const struct tfm_spm_partition_platform_data_t *platform_data)
-{
-    /* This function takes a partition id and enables the
-     * SPM partition for that partition
-     */
-
-    struct mpu_armv8m_region_cfg_t region_cfg;
-
-    mpu_disable();
-
-    /* Configure Regions */
-    if (memory_data->ro_start) {
-        /* RO region */
-        region_cfg.region_nr = PARTITION_REGION_RO;
-        region_cfg.region_base = memory_data->ro_start;
-        region_cfg.region_limit = memory_data->ro_limit;
-        region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
-        region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
-        region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-        region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
-
-        if (mpu_region_enable(&region_cfg) != MPU_ARMV8M_OK) {
-            return SPM_ERR_INVALID_CONFIG;
-        }
-    }
-
-    /* RW, ZI and stack as one region */
-    region_cfg.region_nr = PARTITION_REGION_RW_STACK;
-    region_cfg.region_base = memory_data->rw_start;
-    region_cfg.region_limit = memory_data->stack_top;
-    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-
-    if (mpu_region_enable(&region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
-    }
-
-    if (platform_data) {
-        /* Peripheral */
-        region_cfg.region_nr = PARTITION_REGION_PERIPH;
-        region_cfg.region_base = platform_data->periph_start;
-        region_cfg.region_limit = platform_data->periph_limit;
-        region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
-        region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-        region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-        region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-        if (mpu_region_enable(&region_cfg) != MPU_ARMV8M_OK) {
-            return SPM_ERR_INVALID_CONFIG;
-        }
-
-        ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
-                             platform_data->periph_ppc_loc);
-    }
-
-    mpu_enable(PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
-
-    return SPM_ERR_OK;
-}
-
-enum spm_err_t tfm_spm_hal_partition_sandbox_deconfig(
-              const struct tfm_spm_partition_memory_data_t *memory_data,
-              const struct tfm_spm_partition_platform_data_t *platform_data)
-{
-    /* This function takes a partition id and disables the
-     * SPM partition for that partition
-     */
-
-    if (platform_data) {
-        /* Peripheral */
-        ppc_configure_to_secure_priv(platform_data->periph_ppc_bank,
-                                     platform_data->periph_ppc_loc);
-    }
-
-    mpu_disable();
-    mpu_region_disable(PARTITION_REGION_RO);
-    mpu_region_disable(PARTITION_REGION_RW_STACK);
-    mpu_region_disable(PARTITION_REGION_PERIPH);
-    mpu_region_disable(PARTITION_REGION_SHARE);
-    mpu_enable(PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
-
-    return SPM_ERR_OK;
-}
-
-#if !defined(TFM_PSA_API)
-/* Set share region to which the partition needs access */
-enum spm_err_t tfm_spm_hal_set_share_region(
-                                       enum tfm_buffer_share_region_e share)
-{
-    struct mpu_armv8m_region_cfg_t region_cfg;
-    enum spm_err_t res = SPM_ERR_INVALID_CONFIG;
-    uint32_t scratch_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-    uint32_t scratch_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
-
-    mpu_disable();
-
-    if (share == TFM_BUFFER_SHARE_DISABLE) {
-        mpu_region_disable(PARTITION_REGION_SHARE);
-    } else {
-        region_cfg.region_nr = PARTITION_REGION_SHARE;
-        region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-        region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-        region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-        region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-        switch (share) {
-        case TFM_BUFFER_SHARE_SCRATCH:
-            /* Use scratch area for SP-to-SP data sharing */
-            region_cfg.region_base = scratch_base;
-            region_cfg.region_limit = scratch_limit;
-            res = SPM_ERR_OK;
-            break;
-        case TFM_BUFFER_SHARE_NS_CODE:
-            region_cfg.region_base = memory_regions.non_secure_partition_base;
-            region_cfg.region_limit = memory_regions.non_secure_partition_limit;
-            /* Only allow read access to NS code region and keep
-             * exec.never attribute
-             */
-            region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
-            res = SPM_ERR_OK;
-            break;
-        default:
-            /* Leave res to be set to SPM_ERR_INVALID_CONFIG */
-            break;
-        }
-        if (res == SPM_ERR_OK) {
-            mpu_region_enable(&region_cfg);
-        }
-    }
-    mpu_enable(PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
-
-    return res;
-}
-#endif /* !defined(TFM_PSA_API) */
 #endif /* TFM_LVL != 1 */
 
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
