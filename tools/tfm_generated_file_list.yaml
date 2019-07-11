@@ -19,7 +19,7 @@
     {
         "name": "Secure Partition declarations",
         "short_name": "tfm_partition_list",
-        "output": "secure_fw/services/tfm_partition_list.inc"
+        "output": "secure_fw/services/tfm_spm_db.inc"
     },
     {
         "name": "Secure Service list",

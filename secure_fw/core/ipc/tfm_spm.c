@@ -14,7 +14,6 @@
 #include "platform/include/tfm_spm_hal.h"
 #include "spm_api.h"
 #include "spm_db.h"
-#include "spm_db_setup.h"
 #include "tfm_internal_defines.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
@@ -183,7 +182,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
     struct tfm_list_node_t *node, *head;
     struct tfm_spm_service_t *service;
 
-    for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         /* Skip partition without IPC flag */
         if ((tfm_spm_partition_get_flags(g_spm_ipc_partition[i].index) &
             SPM_PART_FLAG_IPC) == 0) {
@@ -215,7 +214,7 @@ struct tfm_spm_service_t *
     struct tfm_list_node_t *handle_node, *handle_head;
     struct tfm_spm_service_t *service;
 
-    for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         /* Skip partition without IPC flag */
         if ((tfm_spm_partition_get_flags(g_spm_ipc_partition[i].index) &
             SPM_PART_FLAG_IPC) == 0) {
@@ -248,7 +247,7 @@ struct tfm_spm_ipc_partition_t *
 {
     uint32_t i;
 
-    for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         if (g_spm_ipc_partition[i].id == partition_id) {
             return &g_spm_ipc_partition[i];
         }
@@ -508,7 +507,7 @@ void tfm_spm_init(void)
                   TFM_MSG_QUEUE_MAX_MSG_NUM);
 
     /* Init partition first for it will be used when init service */
-    for (i = 0; i < SPM_MAX_PARTITIONS; i++) {
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         part = &g_spm_partition_db.partitions[i];
         tfm_spm_hal_configure_default_isolation(part->platform_data);
         g_spm_ipc_partition[i].index = i;

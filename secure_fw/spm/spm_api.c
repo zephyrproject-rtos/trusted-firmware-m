@@ -12,7 +12,7 @@
 #include "spm_api.h"
 #include "platform/include/tfm_spm_hal.h"
 #include "tfm_memory_utils.h"
-#include "spm_db_setup.h"
+#include "spm_db.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "tfm_nspm.h"
@@ -20,8 +20,8 @@
 #include "tfm_peripherals_def.h"
 #include "spm_partition_defs.h"
 
-
-struct spm_partition_db_t g_spm_partition_db = {0,};
+#define NON_SECURE_INTERNAL_PARTITION_DB_IDX 0
+#define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1
 
 typedef enum {
     TFM_INIT_FAILURE,
@@ -44,6 +44,9 @@ struct handler_ctx_stack_frame_t {
     uint32_t partition_state;
     uint32_t caller_partition_idx;
 };
+
+/* Define SPM DB structure */
+#include "secure_fw/services/tfm_spm_db.inc"
 
 /*
  * This function is called when a secure partition causes an error.
@@ -74,17 +77,6 @@ static void tfm_spm_partition_err_handler(
 }
 #endif /* !defined(TFM_PSA_API) */
 
-/*
- * This function prevents name clashes between the variable names accessibles in
- * the scope of where tfm_partition_list.inc is included and the varaible names
- * defined inside tfm_partition_list.inc file.
- */
-static inline enum spm_err_t add_user_defined_partitions(void) {
-    #include "secure_fw/services/tfm_partition_list.inc"
-
-    return SPM_ERR_OK;
-}
-
 uint32_t get_partition_idx(uint32_t partition_id)
 {
     uint32_t i;
@@ -104,18 +96,13 @@ uint32_t get_partition_idx(uint32_t partition_id)
 
 enum spm_err_t tfm_spm_db_init(void)
 {
-    struct spm_partition_desc_t *part_ptr;
-    enum spm_err_t err;
+   struct spm_partition_desc_t *part_ptr;
     static uint32_t ns_interrupt_ctx_stack[
            sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
     static uint32_t tfm_core_interrupt_ctx_stack[
            sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
 
-    (void)tfm_memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
-
     /* This function initialises partition db */
-    g_spm_partition_db.running_partition_idx = SPM_INVALID_PARTITION_IDX;
-    g_spm_partition_db.partition_count = 0;
 
     /* There are a few partitions that are used by TF-M internally.
      * These are explicitly added to the partition db here.
@@ -128,11 +115,9 @@ enum spm_err_t tfm_spm_db_init(void)
     uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
     uint32_t psp_stack_top    = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Limit;
 #endif
-    if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {
-        return SPM_ERR_INVALID_CONFIG;
-    }
+
     part_ptr = &(g_spm_partition_db.partitions[
-            g_spm_partition_db.partition_count]);
+                                         NON_SECURE_INTERNAL_PARTITION_DB_IDX]);
     part_ptr->static_data.partition_id = TFM_SP_NON_SECURE_ID;
 #ifdef TFM_PSA_API
     part_ptr->static_data.partition_flags = SPM_PART_FLAG_APP_ROT |
@@ -155,25 +140,15 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     part_ptr->runtime_data.ctx_stack_ptr = ns_interrupt_ctx_stack;
     tfm_nspm_configure_clients();
-    ++g_spm_partition_db.partition_count;
 
     /* For the TF-M core environment itself */
-    if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {
-        return SPM_ERR_INVALID_CONFIG;
-    }
     part_ptr = &(g_spm_partition_db.partitions[
-            g_spm_partition_db.partition_count]);
+                                           TFM_CORE_INTERNAL_PARTITION_DB_IDX]);
     part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
     part_ptr->static_data.partition_flags =
                     SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     part_ptr->runtime_data.ctx_stack_ptr = tfm_core_interrupt_ctx_stack;
-    ++g_spm_partition_db.partition_count;
-
-    err = add_user_defined_partitions();
-    if (err != SPM_ERR_OK) {
-        return err;
-    }
 
     g_spm_partition_db.is_init = 1;
 

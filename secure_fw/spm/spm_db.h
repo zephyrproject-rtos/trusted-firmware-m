@@ -61,6 +61,13 @@ struct spm_partition_desc_t {
 #endif
 };
 
+struct spm_partition_db_t {
+    uint32_t is_init;
+    uint32_t partition_count;
+    uint32_t running_partition_idx;
+    struct spm_partition_desc_t *partitions;
+};
+
 /* Macros to pick linker symbols and allow to form the partition data base */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)

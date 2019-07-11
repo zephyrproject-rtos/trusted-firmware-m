@@ -1,0 +1,223 @@
+/*
+ * Copyright (c) 2019, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+{{utilities.donotedit_warning}}
+
+#ifndef __TFM_SPM_DB_INC__
+#define __TFM_SPM_DB_INC__
+
+#include "spm_api.h"
+
+/**************************************************************************/
+/** IRQ count per partition */
+/**************************************************************************/
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+    {% if manifest.manifest.irqs %}
+#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT {{manifest.manifest.irqs | length() }}
+    {% else %}
+#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT 0
+    {% endif %}
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+
+{% endfor %}
+/**************************************************************************/
+/** Declarations of partition init functions */
+/**************************************************************************/
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+extern int32_t {{manifest.manifest.entry_point}}(void);
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+
+{% endfor %}
+/**************************************************************************/
+/** Memory region declarations */
+/**************************************************************************/
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$RO$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$RO$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _STACK$$ZI$$Limit);
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+
+{% endfor %}
+/**************************************************************************/
+/** Context stacks for IRQ handling */
+/**************************************************************************/
+/* The max size of the context stack can be calculated as a function of the IRQ
+ * count of the secure partition:
+ *
+ * max_stack_size = intr_ctx_size + (IRQ_CNT * (intr_ctx_size + hndl_ctx_size))
+ *
+ * where:
+ *   intr_ctx: Frame pushed when the partition is interrupted
+ *   hndl_ctx: Frame pushed when the partition is handling an interrupt
+ */
+{% for manifest in manifests %}
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+static uint32_t ctx_stack_{{manifest.manifest.name}}[
+        (sizeof(struct interrupted_ctx_stack_frame_t) +
+            (TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT) * (
+                sizeof(struct interrupted_ctx_stack_frame_t) +
+                sizeof(struct handler_ctx_stack_frame_t)
+        )) / sizeof(uint32_t)];
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+
+{% endfor %}
+/**************************************************************************/
+/** The partition list for the DB */
+/**************************************************************************/
+struct spm_partition_desc_t partition_list [] =
+{
+    {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
+    {{'{{0}}'}}, /* placeholder for TF-M Core internal partition */
+
+{% for manifest in manifests %}
+    /* -----------------------------------------------------------------------*/
+    /* - Partition DB record for {{manifest.manifest.name}} */
+    /* -----------------------------------------------------------------------*/
+    {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+    {% endif %}
+    {{'{'}}
+    /* Static data */
+        {{'{'}}
+            .partition_id         = {{manifest.manifest.name}}_ID,
+        {% if manifest.attr.tfm_partition_ipc %}
+            .partition_flags      = SPM_PART_FLAG_IPC
+        {% else %}
+            .partition_flags      = 0
+        {% endif %}
+        {% if manifest.manifest.type == "APPLICATION-ROT" %}
+                                  | SPM_PART_FLAG_APP_ROT
+        {% elif manifest.manifest.type == "PSA-ROT" %}
+                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+        {% else %}
+#error "Unsupported type '{{manifest.manifest.type}}' for partition '{{manifest.manifest.name}}'!"
+        {% endif %}
+                                  ,
+            .partition_priority   = TFM_PRIORITY({{manifest.manifest.priority}}),
+            .partition_init       = {{manifest.manifest.entry_point}},
+        {{'},'}}
+
+    /* Runtime data */
+        {{'{'}}
+            .partition_state      = SPM_PARTITION_STATE_UNINIT,
+            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
+            .caller_client_id     = TFM_INVALID_CLIENT_ID,
+            .share                = TFM_BUFFER_SHARE_DISABLE,
+#if TFM_LVL != 1
+            .stack_ptr            = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Limit) -
+                                    sizeof(struct iovec_args_t),
+#else /* TFM_LVL != 1 */
+            .stack_ptr            = 0,
+#endif /* TFM_LVL != 1 */
+            .lr                   = 0,
+            .iovec_api            = TFM_SFN_API_IOVEC,
+            .iovec_args           =
+                {
+                    .in_vec       = {{'{{0}}'}},
+                    .in_len       = 0,
+                    .out_vec      = {{'{{0}}'}},
+                    .out_len      = 0,
+                },
+            .orig_outvec          = NULL,
+            .ctx_stack_ptr        = ctx_stack_{{manifest.manifest.name}},
+            .signal_mask          = 0,
+        {{'},'}}
+
+        {% if manifest.manifest.mmio_regions %}
+    /* platform data */
+        /* FIXME: Only adding the first mmio region */
+            {% for region in manifest.manifest.mmio_regions %}
+                {% if loop.first %}
+                    {% if region.conditional %}
+#ifdef {{region.conditional}}
+                    {% endif %}
+        .platform_data            = {{region.name}},
+                    {% if region.conditional %}
+#else /* {{region.conditional}} */
+        .platform_data            = NULL,
+#endif /* {{region.conditional}} */
+                    {% endif %}
+                {% else %} {# print nothing #} {% endif %}
+            {% endfor %}
+        {% else %}
+        .platform_data            = NULL,
+        {% endif %}
+
+#if (TFM_LVL != 1) || defined(TFM_PSA_API)
+    /* memory_data */
+        .memory_data = {{'{'}}
+            .code_start           = PART_REGION_ADDR({{manifest.manifest.name}}, $$Base),
+            .code_limit           = PART_REGION_ADDR({{manifest.manifest.name}}, $$Limit),
+            .ro_start             = PART_REGION_ADDR({{manifest.manifest.name}}, $$RO$$Base),
+            .ro_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, $$RO$$Limit),
+            .rw_start             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$RW$$Base),
+            .rw_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$RW$$Limit),
+            .zi_start             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$ZI$$Base),
+            .zi_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$ZI$$Limit),
+            .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Base),
+            .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Limit),
+        {{'},'}}
+#endif
+
+#ifdef TFM_PSA_API
+    /* sp_thrd */
+        .sp_thrd = {
+                .pfn              = NULL,
+                .param            = NULL,
+                .sp_base          = NULL,
+                .sp_top           = NULL,
+                .prior            = THRD_PRIOR_LOWEST,
+                .status           = THRD_STAT_INVALID,
+                .state_ctx        =
+                {
+                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
+                },
+                .next             = NULL,
+        },
+#endif /* defined(TFM_PSA_API) */
+    {{'},'}}
+    {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+    {% endif %}
+
+{% endfor %}
+};
+
+struct spm_partition_db_t g_spm_partition_db = {
+    .is_init = 0,
+    .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
+    .running_partition_idx = 0,
+    .partitions = partition_list,
+};
+
+#endif /* __TFM_SPM_DB_INC__ */
