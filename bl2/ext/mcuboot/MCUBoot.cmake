@@ -55,6 +55,21 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 	endif()
 
+	#Configure in which format (full or hash) include the public key to the image manifest
+	#
+	#|-----------------------|-----------------------|-------------------|--------------------|
+	#|                       |Key format in manifest |Key in MCUBoot code|     Key in HW      |
+	#|-----------------------|-----------------------|-------------------|--------------------|
+	#|MCUBOOT_HW_KEY ==  On  |    Full public key    |  No key embedded  | Hash of public key |
+	#|-----------------------|-----------------------|-------------------|--------------------|
+	#|MCUBOOT_HW_KEY ==  Off |   Hash of public key  |  Full public key  |   No key in HW     |
+	#|-----------------------|-----------------------|-------------------|--------------------|
+	if (MCUBOOT_HW_KEY)
+		set(PUBLIC_KEY_FORMAT "full")
+	else()
+		set(PUBLIC_KEY_FORMAT "hash")
+	endif()
+
 	set(PARTIAL_CONTENT_FOR_PREPROCESSING "#include \"${FLASH_LAYOUT}\"\n\n"
 		"/* Enumeration that is used by the assemble.py and imgtool.py scripts\n"
 		" * for correct binary generation when nested macros are used\n"
@@ -145,6 +160,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						ARGS sign
 							 --layout ${PREPROCESSED_FILE}_s.c
 							 -k ${KEY_FILE}
+							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 -v ${IMAGE_VERSION_S}
 							 ${ADD_NS_IMAGE_MIN_VER}
@@ -158,6 +174,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						ARGS sign
 							 --layout ${PREPROCESSED_FILE}_ns.c
 							 -k ${KEY_FILE}
+							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 -v ${IMAGE_VERSION_NS}
 							 ${ADD_S_IMAGE_MIN_VER}
@@ -236,6 +253,7 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 						ARGS sign
 							 --layout ${PREPROCESSED_FILE}
 							 -k ${KEY_FILE}
+							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 -v ${IMAGE_VERSION}
 							 ${ADD_SECURITY_COUNTER}

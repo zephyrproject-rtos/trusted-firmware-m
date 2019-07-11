@@ -39,13 +39,19 @@ set(BUILD_RETARGET On)
 set(BUILD_NATIVE_DRIVERS On)
 set(BUILD_STARTUP On)
 set(BUILD_TARGET_CFG Off)
-set(BUILD_TARGET_HARDWARE_KEYS Off)
 set(BUILD_TARGET_NV_COUNTERS On)
 set(BUILD_CMSIS_DRIVERS On)
 set(BUILD_TIME Off)
 set(BUILD_UART_STDOUT On)
 set(BUILD_FLASH On)
 set(BUILD_PLAT_TEST Off)
+
+if (MCUBOOT_HW_KEY)
+	set(BUILD_TARGET_HARDWARE_KEYS On)
+else()
+	set(BUILD_TARGET_HARDWARE_KEYS Off)
+endif()
+
 if(NOT DEFINED PLATFORM_CMAKE_FILE)
 	message (FATAL_ERROR "Platform specific CMake is not defined. Please set PLATFORM_CMAKE_FILE.")
 elseif(NOT EXISTS ${PLATFORM_CMAKE_FILE})
@@ -131,6 +137,7 @@ compiler_generate_binary_output(${PROJECT_NAME})
 message(STATUS "MCUBOOT_IMAGE_NUMBER is set to: '${MCUBOOT_IMAGE_NUMBER}'.")
 message(STATUS "MCUBOOT_UPGRADE_STRATEGY is set to: '${MCUBOOT_UPGRADE_STRATEGY}'.")
 message(STATUS "MCUBOOT_SIGNATURE_TYPE is set to: '${MCUBOOT_SIGNATURE_TYPE}'.")
+message(STATUS "MCUBOOT_HW_KEY is set to: '${MCUBOOT_HW_KEY}'.")
 
 #Set macro definitions for the project.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -158,6 +165,10 @@ elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP")
 else()
 	get_property(_upgrade_strategies CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
 	message(FATAL_ERROR "ERROR: MCUBoot supports the ${_upgrade_strategies} upgrade strategies only.")
+endif()
+
+if (MCUBOOT_HW_KEY)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_HW_KEY)
 endif()
 
 #Set install location. Keep original value to avoid overriding command line settings.
