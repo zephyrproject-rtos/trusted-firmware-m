@@ -26,6 +26,7 @@
 
 #include <bootutil/sign_key.h>
 
+#if !defined(MCUBOOT_HW_KEY)
 #if defined(MCUBOOT_SIGN_RSA)
 #if MCUBOOT_SIGN_RSA_LEN == 2048
 #define HAVE_KEYS
@@ -131,6 +132,16 @@ const struct bootutil_key bootutil_keys[] = {
     {
         .key = rsa_pub_key,
         .len = &rsa_pub_key_len,
+    },
+};
+const int bootutil_key_cnt = 1;
+#endif
+#else /* MCUBOOT_HW_KEY */
+unsigned int pub_key_len;
+struct bootutil_key bootutil_keys[1] = {
+    {
+        .key = 0,
+        .len = &pub_key_len,
     },
 };
 const int bootutil_key_cnt = 1;

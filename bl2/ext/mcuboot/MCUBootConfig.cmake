@@ -25,7 +25,7 @@ if (BL2)
 	set_property(CACHE MCUBOOT_SIGNATURE_TYPE PROPERTY STRINGS "RSA-3072;RSA-2048")
 	validate_cache_value(MCUBOOT_SIGNATURE_TYPE)
 
-	set(MCUBOOT_HW_KEY Off CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
+	set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
 
 	if ((${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" OR
 		 ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING") AND

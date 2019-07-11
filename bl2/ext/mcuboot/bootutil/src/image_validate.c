@@ -43,6 +43,10 @@
 
 #include "bootutil_priv.h"
 
+#ifdef MCUBOOT_HW_KEY
+#include "platform/include/tfm_plat_crypto_keys.h"
+#endif
+
 /*
  * Compute SHA256 over the image.
  */
@@ -122,6 +126,33 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
 #endif
 
 #ifdef EXPECTED_SIG_TLV
+#ifdef MCUBOOT_HW_KEY
+extern unsigned int pub_key_len;
+static int
+bootutil_find_key(uint8_t *key, uint16_t key_len)
+{
+    bootutil_sha256_context sha256_ctx;
+    uint8_t hash[32];
+    uint8_t key_hash[32];
+    uint32_t key_hash_size= sizeof(key_hash);
+    enum tfm_plat_err_t plat_err;
+
+    bootutil_sha256_init(&sha256_ctx);
+    bootutil_sha256_update(&sha256_ctx, key, key_len);
+    bootutil_sha256_finish(&sha256_ctx, hash);
+
+    plat_err = tfm_plat_get_rotpk_hash(0, key_hash, &key_hash_size);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return -1;
+    }
+    if (!memcmp(hash, key_hash, key_hash_size)) {
+        bootutil_keys[0].key = key;
+        pub_key_len = key_len;
+        return 0;
+    }
+    return -1;
+}
+#else
 static int
 bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
 {
@@ -143,6 +174,7 @@ bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
     }
     return -1;
 }
+#endif
 #endif
 
 #ifdef MCUBOOT_RAM_LOADING
@@ -328,6 +360,10 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
 #ifdef EXPECTED_SIG_TLV
     int valid_signature = 0;
     int key_id = -1;
+#ifdef MCUBOOT_HW_KEY
+    /* Few extra bytes for encoding and for public exponent */
+    uint8_t key_buf[SIG_BUF_SIZE + 24];
+#endif
 #endif
     struct image_tlv tlv;
     uint8_t buf[SIG_BUF_SIZE];
@@ -388,6 +424,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
 
             sha256_valid = 1;
 #ifdef EXPECTED_SIG_TLV
+#ifndef MCUBOOT_HW_KEY
         } else if (tlv.it_type == IMAGE_TLV_KEYHASH) {
             /*
              * Determine which key we should be checking.
@@ -404,6 +441,24 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
              * The key may not be found, which is acceptable.  There
              * can be multiple signatures, each preceded by a key.
              */
+#else
+        } else if (tlv.it_type == IMAGE_TLV_KEY) {
+            /*
+             * Determine which key we should be checking.
+             */
+            if (tlv.it_len > sizeof(key_buf)) {
+                return -1;
+            }
+            rc = flash_area_read(fap, off + sizeof(tlv), key_buf, tlv.it_len);
+            if (rc) {
+                return rc;
+            }
+            key_id = bootutil_find_key(key_buf, tlv.it_len);
+            /*
+             * The key may not be found, which is acceptable.  There
+             * can be multiple signatures, each preceded by a key.
+             */
+#endif /* MCUBOOT_HW_KEY */
         } else if (tlv.it_type == EXPECTED_SIG_TLV) {
             /* Ignore this signature if it is out of bounds. */
             if (key_id >= 0 && key_id < bootutil_key_cnt) {
