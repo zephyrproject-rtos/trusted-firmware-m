@@ -27,6 +27,7 @@ endif()
 set (LIBSPRT_C_SRC
     "${LIBSPRT_DIR}/tfm_libsprt_c_memcpy.c"
     "${LIBSPRT_DIR}/tfm_libsprt_c_memmove.c"
+    "${LIBSPRT_DIR}/tfm_libsprt_c_memcmp.c"
     "${TFM_ROOT_DIR}/interface/src/log/tfm_log_raw.c")
 
 #Append all our source files to global lists.
