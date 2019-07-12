@@ -28,6 +28,8 @@ set (SS_SPM_C_SRC "${SS_SPM_DIR}/spm_api.c")
 
 if(TFM_PSA_API)
 	list(APPEND SS_SPM_C_SRC "${SS_SPM_DIR}/spm_api_ipc.c")
+else()
+	list(APPEND SS_SPM_C_SRC "${SS_SPM_DIR}/spm_api_func.c")
 endif()
 
 #Append all our source files to global lists.

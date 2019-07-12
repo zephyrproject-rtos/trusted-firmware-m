@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+
+/* All the APIs defined in this file are used for IPC model. */
+
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>

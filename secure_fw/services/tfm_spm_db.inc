@@ -348,7 +348,9 @@ static uint32_t ctx_stack_TFM_IRQ_TEST_1[
 struct spm_partition_desc_t partition_list [] =
 {
     {{0}}, /* placeholder for Non-secure internal partition */
+#ifndef TFM_PSA_API
     {{0}}, /* placeholder for TF-M Core internal partition */
+#endif /* !ifndefined(TFM_PSA_API) */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_STORAGE */

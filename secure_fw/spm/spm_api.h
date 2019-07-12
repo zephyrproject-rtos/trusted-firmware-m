@@ -61,6 +61,24 @@ struct iovec_args_t {
     size_t out_len;                    /*!< Number psa_outvec objects in out_vec
                                         */
 };
+
+/* The size of this struct must be multiple of 4 bytes as it is stacked to an
+ * uint32_t[] array
+ */
+struct interrupted_ctx_stack_frame_t {
+#if TFM_LVL != 1
+    uint32_t stack_ptr;
+#endif
+    uint32_t partition_state;
+};
+
+/* The size of this struct must be multiple of 4 bytes as it is stacked to an
+ * uint32_t[] array
+ */
+struct handler_ctx_stack_frame_t {
+    uint32_t partition_state;
+    uint32_t caller_partition_idx;
+};
 #endif /* !define(TFM_PSA_API) */
 
 /**
@@ -93,6 +111,46 @@ struct spm_partition_runtime_data_t {
                                          */
 };
 
+#ifdef TFM_PSA_API
+
+#define TFM_SPM_MAX_ROT_SERV_NUM        48
+#define TFM_VERSION_POLICY_RELAXED      0
+#define TFM_VERSION_POLICY_STRICT       1
+
+#define TFM_CONN_HANDLE_MAX_NUM         32
+
+/* RoT connection handle list */
+struct tfm_conn_handle_t {
+    psa_handle_t handle;            /* Handle value                          */
+    void *rhandle;                  /* Reverse handle value                  */
+    struct tfm_list_node_t list;    /* list node                             */
+};
+
+/* Service database defined by manifest */
+struct tfm_spm_service_db_t {
+    char *name;                     /* Service name                          */
+    uint32_t partition_id;          /* Partition ID which service belong to  */
+    psa_signal_t signal;            /* Service signal                        */
+    uint32_t sid;                   /* Service identifier                    */
+    bool non_secure_client;         /* If can be called by non secure client */
+    uint32_t minor_version;         /* Minor version                         */
+    uint32_t minor_policy;          /* Minor version policy                  */
+};
+
+/* RoT Service data */
+struct tfm_spm_service_t {
+    struct tfm_spm_service_db_t *service_db; /* Service database pointer     */
+    struct spm_partition_desc_t *partition;  /*
+                                              * Point to secure partition
+                                              * data
+                                              */
+    struct tfm_list_node_t handle_list;      /* Service handle list          */
+    struct tfm_msg_queue_t msg_queue;        /* Message queue                */
+    struct tfm_list_node_t list;             /* For list operation           */
+};
+#endif /* ifdef(TFM_PSA_API) */
+
+/*********************** common definitions ***********************/
 
 /**
  * \brief Returns the index of the partition with the given partition ID.
@@ -206,7 +264,7 @@ uint32_t tfm_spm_partition_get_rw_limit(uint32_t partition_idx);
  * \note This function doesn't check if partition_idx is valid.
  */
 void tfm_spm_partition_set_stack(uint32_t partition_idx, uint32_t stack_ptr);
-#endif
+#endif /* if (TFM_LVL != 1) && !defined(TFM_PSA_API) */
 
 /**
  * \brief Get the id of the partition for its index from the db
@@ -229,6 +287,29 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
  * \note This function doesn't check if partition_idx is valid.
  */
 uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
+
+/**
+ * \brief Initialize partition database
+ *
+ * \return Error code \ref spm_err_t
+ */
+enum spm_err_t tfm_spm_db_init(void);
+
+/**
+ * \brief Change the privilege mode for partition thread mode.
+ *
+ * \param[in] privileged        Privileged mode,
+ *                                \ref TFM_PARTITION_PRIVILEGED_MODE
+ *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *
+ * \note Barrier instructions are not called by this function, and if
+ *       it is called in thread mode, it might be necessary to call
+ *       them after this function returns (just like it is done in
+ *       jump_to_ns_code()).
+ */
+void tfm_spm_partition_change_privilege(uint32_t privileged);
+
+/*********************** library definitions ***********************/
 
 #ifndef TFM_PSA_API
 /**
@@ -404,65 +485,8 @@ void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
                                        uint32_t signal_mask);
 #endif /* !defined(TFM_PSA_API) */
 
-/**
- * \brief Initialize partition database
- *
- * \return Error code \ref spm_err_t
- */
-enum spm_err_t tfm_spm_db_init(void);
-
-/**
- * \brief Change the privilege mode for partition thread mode.
- *
- * \param[in] privileged        Privileged mode,
- *                                \ref TFM_PARTITION_PRIVILEGED_MODE
- *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *
- * \note Barrier instructions are not called by this function, and if
- *       it is called in thread mode, it might be necessary to call
- *       them after this function returns (just like it is done in
- *       jump_to_ns_code()).
- */
-void tfm_spm_partition_change_privilege(uint32_t privileged);
-
 #ifdef TFM_PSA_API
-
-#define TFM_SPM_MAX_ROT_SERV_NUM        48
-#define TFM_VERSION_POLICY_RELAXED      0
-#define TFM_VERSION_POLICY_STRICT       1
-
-#define TFM_CONN_HANDLE_MAX_NUM         32
-
-/* RoT connection handle list */
-struct tfm_conn_handle_t {
-    psa_handle_t handle;            /* Handle value                         */
-    void *rhandle;                  /* Reverse handle value                 */
-    struct tfm_list_node_t list;    /* list node                            */
-};
-
-/* Service database defined by manifest */
-struct tfm_spm_service_db_t {
-    char *name;                     /* Service name                          */
-    uint32_t partition_id;          /* Partition ID which service belong to  */
-    psa_signal_t signal;            /* Service signal                        */
-    uint32_t sid;                   /* Service identifier                    */
-    bool non_secure_client;         /* If can be called by non secure client */
-    uint32_t minor_version;         /* Minor version                         */
-    uint32_t minor_policy;          /* Minor version policy                  */
-};
-
-/* RoT Service data */
-struct tfm_spm_service_t {
-    struct tfm_spm_service_db_t *service_db; /* Service database pointer     */
-    struct spm_partition_desc_t *partition;  /*
-                                              * Point to secure partition
-                                              * data
-                                              */
-    struct tfm_list_node_t handle_list;      /* Service handle list          */
-    struct tfm_msg_queue_t msg_queue;        /* Message queue                */
-    struct tfm_list_node_t list;             /* For list operation           */
-};
-
+/*************************** IPC definitions **************************/
 /*************************** Extended SPM functions **************************/
 
 /**
