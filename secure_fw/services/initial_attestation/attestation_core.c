@@ -513,11 +513,6 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
 {
-    /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
-     *        type is configured in the MPU to be normal, instead of device,
-     *        which prohibits unaligned access.
-     */
-    __attribute__ ((aligned(4)))
     uint8_t boot_seed[BOOT_SEED_SIZE];
     enum tfm_plat_err_t res;
     struct q_useful_buf_c claim_value = {0};
@@ -559,11 +554,6 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
 {
-    /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
-     *        type is configured in the MPU to be normal, instead of device,
-     *        which prohibits unaligned access.
-     */
-    __attribute__ ((aligned(4)))
     uint8_t instance_id[INSTANCE_ID_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(instance_id);
@@ -593,11 +583,6 @@ attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_implementation_id_claim(struct attest_token_ctx *token_ctx)
 {
-    /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
-     *        type is configured in the MPU to be normal, instead of device,
-     *        which prohibits unaligned access.
-     */
-    __attribute__ ((aligned(4)))
     uint8_t implementation_id[IMPLEMENTATION_ID_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(implementation_id);
@@ -627,11 +612,6 @@ attest_add_implementation_id_claim(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
 {
-    /* FixMe: Enforcement of 4 byte alignment can be removed as soon as memory
-     *        type is configured in the MPU to be normal, instead of device,
-     *        which prohibits unaligned access.
-     */
-    __attribute__ ((aligned(4)))
     uint8_t hw_version[HW_VERSION_MAX_SIZE];
     enum tfm_plat_err_t res_plat;
     uint32_t size = sizeof(hw_version);
