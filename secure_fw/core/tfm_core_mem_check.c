@@ -39,17 +39,7 @@ static enum tfm_status_e has_access_to_region(const void *p, size_t s,
         return TFM_SUCCESS;
     }
 
-    /* If all else fails, check whether the region is in the non-secure
-     * memory
-     */
-    if ((check_address_range(p, s, NS_CODE_START,
-                             NS_CODE_LIMIT) == TFM_SUCCESS) ||
-        (check_address_range(p, s, NS_DATA_START,
-                             NS_DATA_LIMIT) == TFM_SUCCESS)) {
-        return TFM_SUCCESS;
-    } else {
-        return TFM_ERROR_GENERIC;
-    }
+    return TFM_ERROR_GENERIC;
 }
 
 enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
