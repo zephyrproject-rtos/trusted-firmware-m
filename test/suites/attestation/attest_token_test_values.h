@@ -204,9 +204,9 @@
 */
 #define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_VAL true /* Mandatory field */
 
-/* Small unsigned integer */
-#define TOKEN_TEST_VALUE_SWC1_EPOCH INT32_MAX /* Value not checked */
-#define TOKEN_TEST_REQUIRE_SWC1_EPOCH false /* Optional field */
+
+/* Disable check of software version */
+#define TOKEN_TEST_VALUE_SWC1_VERSION NULL
 
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC1_VERSION NULL /* Value not checked */
@@ -252,9 +252,6 @@
 */
 #define TOKEN_TEST_REQUIRE_SWC2_MEASUREMENT_VAL true /* Mandatory field */
 
-/* Small unsigned integer */
-#define TOKEN_TEST_VALUE_SWC2_EPOCH INT32_MAX /* Value not checked */
-#define TOKEN_TEST_REQUIRE_SWC2_EPOCH false /* Optional field */
 
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC2_VERSION NULL /* Value not checked */

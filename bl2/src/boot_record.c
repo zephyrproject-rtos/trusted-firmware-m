@@ -146,37 +146,6 @@ boot_save_sw_measurements(uint8_t sw_module,
 }
 
 /*!
- * \brief Add the security epoch counter of SW component to the shared
- *        memory area
- *
- * \param[in]  sw_module  Identifier of the SW component
- *
- * \return Returns error code as specified in \ref boot_status_err_t
- */
-static enum boot_status_err_t
-boot_save_sw_epoch(uint8_t sw_module)
-{
-    /*FixMe: Epoch does not exist in the current MCUBoot image manifest. Use a
-     *       hard coded value for now.
-     */
-    uint32_t epoch = 0;
-    uint16_t ias_minor;
-    enum shared_memory_err_t res;
-
-    /* Add the security epoch counter of the SW components to the shared data */
-    ias_minor = SET_IAS_MINOR(sw_module, SW_EPOCH);
-    res = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                       ias_minor,
-                                       sizeof(epoch),
-                                       (const uint8_t *)&epoch);
-    if (res) {
-        return BOOT_STATUS_ERROR;
-    }
-
-    return BOOT_STATUS_OK;
-}
-
-/*!
  * \brief Add a type identifier(short test name) of SW component to the shared
  *        memory area
  *
@@ -337,11 +306,6 @@ boot_save_boot_status(uint8_t sw_module,
     }
 
     res = boot_save_sw_version(sw_module, hdr);
-    if (res) {
-        return res;
-    }
-
-    res = boot_save_sw_epoch(sw_module);
     if (res) {
         return res;
     }

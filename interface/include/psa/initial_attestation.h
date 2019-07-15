@@ -159,10 +159,6 @@ enum psa_attest_err_t {
  *                    cryptographic hash of 256 bits or stronger.Value is
  *                    encoded as byte string.
  *
- *     - Security epoch: Optional claim. It represents the security control
- *                    point of the software component. Value is encoded as
- *                    unsigned integer.
- *
  *     - Version:     Optional claim. It represents the issued software version.
  *                    Value is encoded as text string.
  *

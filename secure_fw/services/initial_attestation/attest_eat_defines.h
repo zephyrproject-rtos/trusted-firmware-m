@@ -27,7 +27,7 @@ extern "C" {
 
 #define EAT_CBOR_SW_COMPONENT_MEASUREMENT_TYPE  (1)
 #define EAT_CBOR_SW_COMPONENT_MEASUREMENT_VALUE (2)
-#define EAT_CBOR_SW_COMPONENT_SECURITY_EPOCH    (3)
+/* Reserved                                     (3) */
 #define EAT_CBOR_SW_COMPONENT_VERSION           (4)
 #define EAT_CBOR_SW_COMPONENT_SIGNER_ID         (5)
 #define EAT_CBOR_SW_COMPONENT_MEASUREMENT_DESC  (6)

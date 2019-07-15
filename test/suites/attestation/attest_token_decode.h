@@ -485,7 +485,7 @@ attest_token_decode_get_security_lifecycle(
 enum attest_token_sw_index_t {
     SW_MEASUREMENT_TYPE_FLAG = 0,
     SW_MEASURMENT_VAL_FLAG = 1,
-    SW_EPOCH_FLAG = 2,
+    /* Reserved: 2 */
     SW_VERSION_FLAG = 3,
     SW_SIGNER_ID_FLAG = 5,
     SW_MEASUREMENT_DESC_FLAG = 6,
@@ -503,7 +503,6 @@ enum attest_token_sw_index_t {
 struct attest_token_sw_component_t {
     struct q_useful_buf_c measurement_type; /* text string */
     struct q_useful_buf_c measurement_val; /* binary string */
-    uint32_t              epoch;
     struct q_useful_buf_c version; /* text string */
     struct q_useful_buf_c signer_id; /* binary string */
     struct q_useful_buf_c measurement_desc; /* text string */

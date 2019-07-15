@@ -245,9 +245,6 @@ attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
                               uint8_t tlv_id,
                               const struct q_useful_buf_c *claim_value)
 {
-    int32_t res;
-    uint32_t value;
-
     switch (tlv_id) {
     case SW_MEASURE_VALUE:
         attest_token_add_bstr(token_ctx,
@@ -268,15 +265,6 @@ attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
         attest_token_add_bstr(token_ctx,
                               EAT_CBOR_SW_COMPONENT_SIGNER_ID,
                               claim_value);
-        break;
-    case SW_EPOCH:
-        res = get_uint(claim_value->ptr, claim_value->len, &value);
-        if (res) {
-            return PSA_ATTEST_ERR_GENERAL;
-        }
-        attest_token_add_integer(token_ctx,
-                                 EAT_CBOR_SW_COMPONENT_SECURITY_EPOCH,
-                                 (int64_t)value);
         break;
     case SW_TYPE:
         attest_token_add_tstr(token_ctx,

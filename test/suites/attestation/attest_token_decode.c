@@ -615,19 +615,6 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
                     CLAIM_PRESENT_BIT(SW_MEASURMENT_VAL_FLAG);
                 break;
 
-            case EAT_CBOR_SW_COMPONENT_SECURITY_EPOCH:
-                if(claim_item.uDataType != QCBOR_TYPE_INT64) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
-                    goto Done;
-                }
-                if(claim_item.val.int64 < UINT32_MAX &&
-                   claim_item.val.int64 > 0) {
-                    sw_component->epoch = (uint32_t)claim_item.val.int64;
-                    sw_component->item_flags |=
-                        CLAIM_PRESENT_BIT(SW_EPOCH_FLAG);
-                }
-                break;
-
             case EAT_CBOR_SW_COMPONENT_VERSION:
                 if(claim_item.uDataType != QCBOR_TYPE_TEXT_STRING) {
                     return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;

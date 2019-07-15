@@ -547,25 +547,6 @@ static int_fast16_t check_sw_component_1(
         }
     }
 
-    /* -- Check first epoch -- */
-    if(!IS_ITEM_FLAG_SET(SW_EPOCH_FLAG, sw_component->item_flags)) {
-        /* Claim is not present in token */
-        if(TOKEN_TEST_REQUIRE_SWC1_EPOCH) {
-            /* It should have been present */
-            return_value = -104;
-            goto Done;
-        }
-    } else {
-        /* Claim is present */
-        /* Don't have to check if its presence is required */
-        if(TOKEN_TEST_VALUE_SWC1_EPOCH != INT32_MAX &&
-           sw_component->epoch != TOKEN_TEST_VALUE_SWC1_EPOCH) {
-            /* Check of its value was requested and failed */
-            return_value = -105;
-            goto Done;
-        }
-    }
-
     /* -- Check first version -- */
     if(!IS_ITEM_FLAG_SET(SW_VERSION_FLAG, sw_component->item_flags)) {
         /* Claim is not present in token */
@@ -708,25 +689,6 @@ static int_fast16_t check_sw_component_2(
            q_useful_buf_compare(sw_component->measurement_val, tmp)) {
             /* Check of its value was requested and failed */
             return_value = -103;
-            goto Done;
-        }
-    }
-
-    /* -- Check second epoch -- */
-    if(!IS_ITEM_FLAG_SET(SW_EPOCH_FLAG, sw_component->item_flags)) {
-        /* Claim is not present in token */
-        if(TOKEN_TEST_REQUIRE_SWC2_EPOCH) {
-            /* It should have been present */
-            return_value = -104;
-            goto Done;
-        }
-    } else {
-        /* Claim is present */
-        /* Don't have to check if its presence is required */
-        if(TOKEN_TEST_VALUE_SWC2_EPOCH != INT32_MAX &&
-           sw_component->epoch != TOKEN_TEST_VALUE_SWC2_EPOCH) {
-            /* Check of its value was requested and failed */
-            return_value = -105;
             goto Done;
         }
     }

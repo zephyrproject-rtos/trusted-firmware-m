@@ -78,7 +78,7 @@ extern "C" {
 /* Bits: 0-2 */
 #define SW_VERSION       0x00
 #define SW_SIGNER_ID     0x01
-#define SW_EPOCH         0x02
+/* Reserved              0x02 */
 #define SW_TYPE          0x03
 /* Bits: 3-5 */
 #define SW_MEASURE_VALUE 0x08
@@ -101,7 +101,6 @@ extern "C" {
 #define TLV_MINOR_IAS_BL2_MEASURE_TYPE   ((SW_BL2  << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_BL2_VERSION        ((SW_BL2  << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_BL2_SIGNER_ID      ((SW_BL2  << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_BL2_EPOCH          ((SW_BL2  << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_BL2_TYPE           ((SW_BL2  << 6) | SW_TYPE)
 
 /* PROT: PSA Root of Trust */
@@ -109,7 +108,6 @@ extern "C" {
 #define TLV_MINOR_IAS_PROT_MEASURE_TYPE  ((SW_PROT << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_PROT_VERSION       ((SW_PROT << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_PROT_SIGNER_ID     ((SW_PROT << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_PROT_EPOCH         ((SW_PROT << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_PROT_TYPE          ((SW_PROT << 6) | SW_TYPE)
 
 /* AROT: Application Root of Trust */
@@ -117,7 +115,6 @@ extern "C" {
 #define TLV_MINOR_IAS_AROT_MEASURE_TYPE  ((SW_AROT << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_AROT_VERSION       ((SW_AROT << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_AROT_SIGNER_ID     ((SW_AROT << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_AROT_EPOCH         ((SW_AROT << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_AROT_TYPE          ((SW_AROT << 6) | SW_TYPE)
 
 /* Non-secure processing environment - single non-secure image */
@@ -125,7 +122,6 @@ extern "C" {
 #define TLV_MINOR_IAS_NSPE_MEASURE_TYPE  ((SW_NSPE << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_NSPE_VERSION       ((SW_NSPE << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_NSPE_SIGNER_ID     ((SW_NSPE << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_NSPE_EPOCH         ((SW_NSPE << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_NSPE_TYPE          ((SW_NSPE << 6) | SW_TYPE)
 
 /* Secure processing environment (ARoT + PRoT) - single secure image */
@@ -133,7 +129,6 @@ extern "C" {
 #define TLV_MINOR_IAS_SPE_MEASURE_TYPE   ((SW_SPE  << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_SPE_VERSION        ((SW_SPE  << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_SPE_SIGNER_ID      ((SW_SPE  << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_SPE_EPOCH          ((SW_SPE  << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_SPE_TYPE           ((SW_SPE  << 6) | SW_TYPE)
 
 /* SPE + NSPE - combined secure and non-secure image */
@@ -141,7 +136,6 @@ extern "C" {
 #define TLV_MINOR_IAS_S_NS_MEASURE_TYPE  ((SW_S_NS << 6) | SW_MEASURE_TYPE)
 #define TLV_MINOR_IAS_S_NS_VERSION       ((SW_S_NS << 6) | SW_VERSION)
 #define TLV_MINOR_IAS_S_NS_SIGNER_ID     ((SW_S_NS << 6) | SW_SIGNER_ID)
-#define TLV_MINOR_IAS_S_NS_EPOCH         ((SW_S_NS << 6) | SW_EPOCH)
 #define TLV_MINOR_IAS_S_NS_TYPE          ((SW_S_NS << 6) | SW_TYPE)
 
 /* General macros to handle TLV type */
