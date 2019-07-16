@@ -165,6 +165,7 @@ function(set_up_secure_fw_build)
 	add_dependencies(${EXE_NAME} tfm_internal_trusted_storage)
 	add_dependencies(${EXE_NAME} tfm_secure_tests)
 	add_dependencies(${EXE_NAME} tfm_attest)
+	add_dependencies(${EXE_NAME} libtfmsprt)
 	if (TFM_PARTITION_AUDIT_LOG)
 		add_dependencies(${EXE_NAME} tfm_audit)
 	endif()
@@ -178,12 +179,12 @@ function(set_up_secure_fw_build)
 
 	if (REGRESSION OR CORE_TEST)
 		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest libtfmsprt)
 		else()
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_secure_tests tfm_attest)
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_secure_tests tfm_attest libtfmsprt)
 		endif()
 	else()
-		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest)
+		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest libtfmsprt)
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
@@ -399,6 +400,9 @@ add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
 if (TFM_PARTITION_AUDIT_LOG)
 	add_subdirectory(${SECURE_FW_DIR}/services/audit_logging)
 endif()
+
+#Add the secure runtime library target
+add_subdirectory(${SECURE_FW_DIR}/lib/sprt)
 
 if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 	#Broadcast veneer path in bundled building case
