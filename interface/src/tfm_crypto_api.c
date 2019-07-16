@@ -58,6 +58,9 @@ psa_status_t psa_crypto_init(void)
 
 psa_status_t psa_allocate_key(psa_key_handle_t *handle)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     const struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_ALLOCATE_KEY_SID,
@@ -80,38 +83,51 @@ psa_status_t psa_allocate_key(psa_key_handle_t *handle)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_open_key(psa_key_lifetime_t lifetime,
                           psa_key_id_t id,
                           psa_key_handle_t *handle)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     (void)lifetime;
     (void)id;
     (void)handle;
 
     /* TODO: Persistent key APIs are not supported yet */
     return PSA_ERROR_NOT_SUPPORTED;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
                             psa_key_id_t id,
                             psa_key_handle_t *handle)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     (void)lifetime;
     (void)id;
     (void)handle;
 
     /* TODO: Persistent key APIs are not supported yet */
     return PSA_ERROR_NOT_SUPPORTED;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_close_key(psa_key_handle_t handle)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     (void)handle;
 
     /* TODO: Persistent key APIs are not supported yet */
     return PSA_ERROR_NOT_SUPPORTED;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_import_key(psa_key_handle_t handle,
@@ -119,6 +135,9 @@ psa_status_t psa_import_key(psa_key_handle_t handle,
                             const uint8_t *data,
                             size_t data_length)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_IMPORT_KEY_SID,
@@ -141,10 +160,14 @@ psa_status_t psa_import_key(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_destroy_key(psa_key_handle_t handle)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_DESTROY_KEY_SID,
@@ -165,12 +188,16 @@ psa_status_t psa_destroy_key(psa_key_handle_t handle)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_get_key_information(psa_key_handle_t handle,
                                      psa_key_type_t *type,
                                      size_t *bits)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_INFORMATION_SID,
@@ -195,6 +222,7 @@ psa_status_t psa_get_key_information(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_export_key(psa_key_handle_t handle,
@@ -202,6 +230,9 @@ psa_status_t psa_export_key(psa_key_handle_t handle,
                             size_t data_size,
                             size_t *data_length)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_EXPORT_KEY_SID,
@@ -228,6 +259,7 @@ psa_status_t psa_export_key(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_export_public_key(psa_key_handle_t handle,
@@ -235,6 +267,9 @@ psa_status_t psa_export_public_key(psa_key_handle_t handle,
                                    size_t data_size,
                                    size_t *data_length)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID,
@@ -262,12 +297,16 @@ psa_status_t psa_export_public_key(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_copy_key(psa_key_handle_t source_handle,
                           psa_key_handle_t target_handle,
                           const psa_key_policy_t *constraint)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_COPY_KEY_SID,
@@ -291,6 +330,7 @@ psa_status_t psa_copy_key(psa_key_handle_t source_handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 void psa_key_policy_set_usage(psa_key_policy_t *policy,
@@ -314,6 +354,9 @@ psa_algorithm_t psa_key_policy_get_algorithm(const psa_key_policy_t *policy)
 psa_status_t psa_set_key_policy(psa_key_handle_t handle,
                                 const psa_key_policy_t *policy)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_SET_KEY_POLICY_SID,
@@ -336,11 +379,15 @@ psa_status_t psa_set_key_policy(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_get_key_policy(psa_key_handle_t handle,
                                 psa_key_policy_t *policy)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_POLICY_SID,
@@ -365,11 +412,15 @@ psa_status_t psa_get_key_policy(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_get_key_lifetime(psa_key_handle_t handle,
                                   psa_key_lifetime_t *lifetime)
 {
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_KEY_LIFETIME_SID,
@@ -394,6 +445,7 @@ psa_status_t psa_get_key_lifetime(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
@@ -401,6 +453,9 @@ psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
                                     size_t iv_size,
                                     size_t *iv_length)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_GENERATE_IV_SID,
@@ -429,12 +484,16 @@ psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                const unsigned char *iv,
                                size_t iv_length)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_SET_IV_SID,
@@ -460,12 +519,16 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID,
@@ -492,12 +555,16 @@ psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID,
@@ -524,6 +591,7 @@ psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
@@ -533,6 +601,9 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_UPDATE_SID,
@@ -562,10 +633,14 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ABORT_SID,
@@ -590,6 +665,7 @@ psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
@@ -597,6 +673,9 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
+#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_FINISH_SID,
@@ -625,11 +704,15 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
                             psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_SETUP_SID,
@@ -656,12 +739,16 @@ psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_update(psa_hash_operation_t *operation,
                              const uint8_t *input,
                              size_t input_length)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_UPDATE_SID,
@@ -688,6 +775,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
@@ -695,6 +783,9 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
                              size_t hash_size,
                              size_t *hash_length)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_FINISH_SID,
@@ -723,12 +814,16 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
                              const uint8_t *hash,
                              size_t hash_length)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_VERIFY_SID,
@@ -754,10 +849,14 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_ABORT_SID,
@@ -782,11 +881,15 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
                             psa_hash_operation_t *target_operation)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_HASH_CLONE_SID,
@@ -811,12 +914,16 @@ psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
                                 psa_key_handle_t handle,
                                 psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_SIGN_SETUP_SID,
@@ -843,12 +950,16 @@ psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
                                   psa_key_handle_t handle,
                                   psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_VERIFY_SETUP_SID,
@@ -875,12 +986,16 @@ psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_update(psa_mac_operation_t *operation,
                             const uint8_t *input,
                             size_t input_length)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_UPDATE_SID,
@@ -906,6 +1021,7 @@ psa_status_t psa_mac_update(psa_mac_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
@@ -913,6 +1029,9 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
                                  size_t mac_size,
                                  size_t *mac_length)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_SIGN_FINISH_SID,
@@ -941,12 +1060,16 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
                                    const uint8_t *mac,
                                    size_t mac_length)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_VERIFY_FINISH_SID,
@@ -973,10 +1096,14 @@ psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 {
+#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_MAC_ABORT_SID,
@@ -1001,6 +1128,7 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 
 psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
@@ -1015,6 +1143,9 @@ psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
                               size_t ciphertext_size,
                               size_t *ciphertext_length)
 {
+#if (TFM_CRYPTO_AEAD_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_AEAD_ENCRYPT_SID,
@@ -1071,6 +1202,7 @@ psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
 psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
@@ -1085,6 +1217,9 @@ psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
                               size_t plaintext_size,
                               size_t *plaintext_length)
 {
+#if (TFM_CRYPTO_AEAD_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_AEAD_DECRYPT_SID,
@@ -1141,6 +1276,7 @@ psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
@@ -1151,6 +1287,9 @@ psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
                                  size_t signature_size,
                                  size_t *signature_length)
 {
+#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_ASYMMETRIC_SIGN_SID,
@@ -1180,6 +1319,7 @@ psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_verify(psa_key_handle_t handle,
@@ -1189,6 +1329,9 @@ psa_status_t psa_asymmetric_verify(psa_key_handle_t handle,
                                    const uint8_t *signature,
                                    size_t signature_length)
 {
+#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_ASYMMETRIC_VERIFY_SID,
@@ -1213,6 +1356,7 @@ psa_status_t psa_asymmetric_verify(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_encrypt(psa_key_handle_t handle,
@@ -1225,6 +1369,9 @@ psa_status_t psa_asymmetric_encrypt(psa_key_handle_t handle,
                                     size_t output_size,
                                     size_t *output_length)
 {
+#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID,
@@ -1270,6 +1417,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_decrypt(psa_key_handle_t handle,
@@ -1282,6 +1430,9 @@ psa_status_t psa_asymmetric_decrypt(psa_key_handle_t handle,
                                     size_t output_size,
                                     size_t *output_length)
 {
+#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID,
@@ -1327,11 +1478,15 @@ psa_status_t psa_asymmetric_decrypt(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
 psa_status_t psa_get_generator_capacity(const psa_crypto_generator_t *generator,
                                         size_t *capacity)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GET_GENERATOR_CAPACITY_SID,
@@ -1357,12 +1512,16 @@ psa_status_t psa_get_generator_capacity(const psa_crypto_generator_t *generator,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_generator_read(psa_crypto_generator_t *generator,
                                 uint8_t *output,
                                 size_t output_length)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GENERATOR_READ_SID,
@@ -1388,6 +1547,7 @@ psa_status_t psa_generator_read(psa_crypto_generator_t *generator,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_generator_import_key(psa_key_handle_t handle,
@@ -1395,6 +1555,9 @@ psa_status_t psa_generator_import_key(psa_key_handle_t handle,
                                       size_t bits,
                                       psa_crypto_generator_t *generator)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GENERATOR_IMPORT_KEY_SID,
@@ -1419,10 +1582,14 @@ psa_status_t psa_generator_import_key(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_generator_abort(psa_crypto_generator_t *generator)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GENERATOR_ABORT_SID,
@@ -1448,6 +1615,7 @@ psa_status_t psa_generator_abort(psa_crypto_generator_t *generator)
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_key_derivation(psa_crypto_generator_t *generator,
@@ -1459,6 +1627,9 @@ psa_status_t psa_key_derivation(psa_crypto_generator_t *generator,
                                 size_t label_length,
                                 size_t capacity)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_KEY_DERIVATION_SID,
@@ -1511,6 +1682,7 @@ psa_status_t psa_key_derivation(psa_crypto_generator_t *generator,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_key_agreement(psa_crypto_generator_t *generator,
@@ -1519,6 +1691,9 @@ psa_status_t psa_key_agreement(psa_crypto_generator_t *generator,
                                size_t peer_key_length,
                                psa_algorithm_t alg)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_KEY_AGREEMENT_SID,
@@ -1548,11 +1723,15 @@ psa_status_t psa_key_agreement(psa_crypto_generator_t *generator,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_generate_random(uint8_t *output,
                                  size_t output_size)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GENERATE_RANDOM_SID,
@@ -1582,6 +1761,7 @@ psa_status_t psa_generate_random(uint8_t *output,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t psa_generate_key(psa_key_handle_t handle,
@@ -1590,6 +1770,9 @@ psa_status_t psa_generate_key(psa_key_handle_t handle,
                               const void *extra,
                               size_t extra_size)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_GENERATE_KEY_SID,
@@ -1629,4 +1812,5 @@ psa_status_t psa_generate_key(psa_key_handle_t handle,
 #endif
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }

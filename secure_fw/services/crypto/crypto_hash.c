@@ -29,6 +29,9 @@ psa_status_t tfm_crypto_hash_setup(psa_invec in_vec[],
                                    psa_outvec out_vec[],
                                    size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *operation = NULL;
 
@@ -66,6 +69,7 @@ psa_status_t tfm_crypto_hash_setup(psa_invec in_vec[],
     }
 
     return PSA_SUCCESS;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_hash_update(psa_invec in_vec[],
@@ -73,6 +77,9 @@ psa_status_t tfm_crypto_hash_update(psa_invec in_vec[],
                                     psa_outvec out_vec[],
                                     size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *operation = NULL;
 
@@ -109,6 +116,7 @@ psa_status_t tfm_crypto_hash_update(psa_invec in_vec[],
     }
 
     return PSA_SUCCESS;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
@@ -116,6 +124,9 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
                                     psa_outvec out_vec[],
                                     size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *operation = NULL;
 
@@ -157,6 +168,7 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
     status = tfm_crypto_operation_release(handle_out);
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_hash_verify(psa_invec in_vec[],
@@ -164,6 +176,9 @@ psa_status_t tfm_crypto_hash_verify(psa_invec in_vec[],
                                     psa_outvec out_vec[],
                                     size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *operation = NULL;
 
@@ -202,6 +217,7 @@ psa_status_t tfm_crypto_hash_verify(psa_invec in_vec[],
     status = tfm_crypto_operation_release(handle_out);
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_hash_abort(psa_invec in_vec[],
@@ -209,6 +225,9 @@ psa_status_t tfm_crypto_hash_abort(psa_invec in_vec[],
                                    psa_outvec out_vec[],
                                    size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *operation = NULL;
 
@@ -246,6 +265,7 @@ psa_status_t tfm_crypto_hash_abort(psa_invec in_vec[],
     status = tfm_crypto_operation_release(handle_out);
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_hash_clone(psa_invec in_vec[],
@@ -253,6 +273,9 @@ psa_status_t tfm_crypto_hash_clone(psa_invec in_vec[],
                                    psa_outvec out_vec[],
                                    size_t out_len)
 {
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_SUCCESS;
     psa_hash_operation_t *source_operation = NULL;
     psa_hash_operation_t *target_operation = NULL;
@@ -293,5 +316,6 @@ psa_status_t tfm_crypto_hash_clone(psa_invec in_vec[],
     }
 
     return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 /*!@}*/

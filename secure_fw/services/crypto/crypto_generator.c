@@ -29,6 +29,9 @@ psa_status_t tfm_crypto_get_generator_capacity(psa_invec in_vec[],
                                                psa_outvec out_vec[],
                                                size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if ((in_len != 1) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -54,6 +57,7 @@ psa_status_t tfm_crypto_get_generator_capacity(psa_invec in_vec[],
     }
 
     return psa_get_generator_capacity(generator, capacity);
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_generator_read(psa_invec in_vec[],
@@ -61,6 +65,9 @@ psa_status_t tfm_crypto_generator_read(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if ((in_len != 1) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -85,6 +92,7 @@ psa_status_t tfm_crypto_generator_read(psa_invec in_vec[],
     }
 
     return psa_generator_read(generator, output, output_length);
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_generator_import_key(psa_invec in_vec[],
@@ -92,6 +100,9 @@ psa_status_t tfm_crypto_generator_import_key(psa_invec in_vec[],
                                              psa_outvec out_vec[],
                                              size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if ((in_len != 2) || (out_len != 0)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -123,6 +134,7 @@ psa_status_t tfm_crypto_generator_import_key(psa_invec in_vec[],
     }
 
     return psa_generator_import_key(key_handle, type, bits, generator);
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_generator_abort(psa_invec in_vec[],
@@ -130,6 +142,9 @@ psa_status_t tfm_crypto_generator_abort(psa_invec in_vec[],
                                         psa_outvec out_vec[],
                                         size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if ((in_len != 1) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -169,6 +184,7 @@ psa_status_t tfm_crypto_generator_abort(psa_invec in_vec[],
     status = tfm_crypto_operation_release(handle_out);
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
@@ -176,6 +192,9 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if (!((in_len == 1) || (in_len == 2) || (in_len == 3)) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -231,6 +250,7 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
     }
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
@@ -238,6 +258,9 @@ psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
                                       psa_outvec out_vec[],
                                       size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status;
     if ((in_len != 2) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -280,6 +303,7 @@ psa_status_t tfm_crypto_key_agreement(psa_invec in_vec[],
     }
 
     return status;
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],
@@ -287,6 +311,9 @@ psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],
                                         psa_outvec out_vec[],
                                         size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     if ((in_len != 1) || (out_len != 1)) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
@@ -298,6 +325,7 @@ psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],
     size_t output_size = out_vec[0].len;
 
     return psa_generate_random(output, output_size);
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
@@ -305,6 +333,9 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
                                      psa_outvec out_vec[],
                                      size_t out_len)
 {
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     if (!((in_len == 2) || (in_len == 3)) || (out_len != 0)) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
@@ -332,5 +363,6 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     }
 
     return psa_generate_key(key_handle, type, bits, extra, extra_size);
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 }
 /*!@}*/
