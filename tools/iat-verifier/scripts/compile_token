@@ -18,13 +18,17 @@ from iatverifier.util import read_token_map, convert_map_to_token
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('source', help='Token source in YAML format')
-    parser.add_argument('-k', '--keyfile',
-                        help='''Path to the key in PEM format that should be used to
-                        sign the token. If this is not specified, the token will be
-                        unsigned.''')
     parser.add_argument('-o', '--outfile',
                         help='''Output file for the compiled token. If this is not
                         specified, the token will be written to standard output.''')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-k', '--keyfile',
+                       help='''Path to the key in PEM format that should be used to
+                       sign the token. If this is not specified, the token will be
+                       unsigned.''')
+    group.add_argument('-r', '--raw', action='store_true',
+                       help='''Generate raw CBOR and do not create a signature
+                       or COSE wrapper.''')
     args = parser.parse_args()
 
     token_map = read_token_map(args.source)
@@ -36,9 +40,9 @@ if __name__ == '__main__':
 
     if args.outfile:
         with open(args.outfile, 'wb') as wfh:
-            convert_map_to_token(token_map, signing_key, wfh)
+            convert_map_to_token(token_map, signing_key, wfh, args.raw)
     else:
         with os.fdopen(sys.stdout.fileno(), 'wb') as wfh:
-            convert_map_to_token(token_map, signing_key, wfh)
+            convert_map_to_token(token_map, signing_key, wfh, args.raw)
 
 

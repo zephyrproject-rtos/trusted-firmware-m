@@ -28,19 +28,22 @@ def sign_eat(token, key=None):
     return signed_msg.encode()
 
 
-def convert_map_to_token_files(mapfile, keyfile, outfile):
+def convert_map_to_token_files(mapfile, keyfile, outfile, raw=False):
     token_map = read_token_map(mapfile)
 
     with open(keyfile) as fh:
         signing_key = SigningKey.from_pem(fh.read())
 
     with open(outfile, 'wb') as wfh:
-        convert_map_to_token(token_map, signing_key, wfh)
+        convert_map_to_token(token_map, signing_key, wfh, raw)
 
 
-def convert_map_to_token(token_map, signing_key, wfh):
+def convert_map_to_token(token_map, signing_key, wfh, raw=False):
     token = cbor.dumps(token_map)
-    signed_token = sign_eat(token, signing_key)
+    if raw:
+        signed_token = token
+    else:
+        signed_token = sign_eat(token, signing_key)
     wfh.write(signed_token)
 
 
