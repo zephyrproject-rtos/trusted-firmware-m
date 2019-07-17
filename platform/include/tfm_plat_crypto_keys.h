@@ -106,6 +106,20 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 struct ecc_key_t *ecc_key,
                                 enum ecc_curve_t *curve_type);
 
+/**
+ * \brief Get the hash of the corresponding Root of Trust Public Key for
+ *        firmware authentication.
+ *
+ * \param[in]      image_id         The identifier of firmware image
+ * \param[out]     rotpk_hash       Buffer to store the key-hash in
+ * \param[in,out]  rotpk_hash_size  As input the size of the buffer. As output
+ *                                  the actual key-hash length.
+ */
+enum tfm_plat_err_t
+tfm_plat_get_rotpk_hash(uint8_t image_id,
+                        uint8_t *rotpk_hash,
+                        uint32_t *rotpk_hash_size);
+
 #ifdef __cplusplus
 }
 #endif
