@@ -52,10 +52,10 @@ def convert_token_to_map(raw_data):
 
 def read_token_map(f):
     if hasattr(f, 'read'):
-        raw = yaml.load(fh)
+        raw = yaml.safe_load(f)
     else:
         with open(f) as fh:
-            raw = yaml.load(fh)
+            raw = yaml.safe_load(fh)
 
     return _parse_raw_token(raw)
 
