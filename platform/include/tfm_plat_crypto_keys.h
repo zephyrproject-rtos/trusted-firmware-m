@@ -62,6 +62,20 @@ struct ecc_key_t {
 
 #define ECC_P_256_KEY_SIZE  (96u)  /* 3 x 32 = 96 bytes priv + pub-x + pub-y */
 
+#define ROTPK_HASH_LEN (32u) /* SHA256 */
+
+/**
+ * Structure to store the hard-coded (embedded in secure firmware) hash of ROTPK
+ * for firmware authentication.
+ *
+ * \note Just temporary solution, hard-coded key-hash values in firmware is not
+ *       suited for use in production!
+ */
+struct tfm_plat_rotpk_t {
+    const uint8_t *key_hash;
+    const uint8_t  hash_len;
+};
+
 /**
  * \brief Gets hardware unique key for encryption
  *
