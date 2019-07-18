@@ -31,9 +31,6 @@
 #define TFM_ERROR_STATUS(status) (TFM_PARTITION_BUSY)
 #endif
 
-#define TFM_SFN_API_LEGACY 0
-#define TFM_SFN_API_IOVEC 1
-
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
 #endif
@@ -47,7 +44,6 @@ struct tfm_sfn_req_s {
     sfn_t sfn;
     int32_t *args;
     uint32_t caller_part_idx;
-    int32_t iovec_api;
     uint32_t ns_caller;
 };
 
@@ -112,24 +108,13 @@ void tfm_disable_irq(psa_signal_t irq_signal);
             /* This point never reached */                           \
             return (int32_t)TFM_ERROR_GENERIC;                       \
         } while (0)
-#define TFM_CORE_SFN_REQUEST(id, fn, a, b, c, d)                     \
-        do {                                                         \
-            ERROR_MSG("Invalid TF-M configuration detected");        \
-            tfm_secure_api_error_handler();                          \
-            /* This point never reached */                           \
-            return (int32_t)TFM_ERROR_GENERIC;                       \
-        } while (0)
 #else
-#define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d) \
-        return tfm_core_partition_request(id, fn, TFM_SFN_API_IOVEC, \
-                (int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d)
-
-#define TFM_CORE_SFN_REQUEST(id, fn, a, b, c, d) \
-        return tfm_core_partition_request(id, fn, TFM_SFN_API_LEGACY, \
+#define TFM_CORE_IOVEC_SFN_REQUEST(id, fn, a, b, c, d)               \
+        return tfm_core_partition_request(id, fn,                    \
                 (int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d)
 
 __attribute__ ((always_inline)) __STATIC_INLINE
-int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
+int32_t tfm_core_partition_request(uint32_t id, void *fn,
             int32_t arg1, int32_t arg2, int32_t arg3, int32_t arg4)
 {
     int32_t args[4] = {arg1, arg2, arg3, arg4};
@@ -163,7 +148,6 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
      */
     desc.ns_caller = (cmse_nonsecure_caller() != 0) ? 1U : 0U;
 #endif /* Check for GCC compiler version smaller than 7.3.1 */
-    desc.iovec_api = iovec_api;
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* FixMe: Error severity TBD */
         return (int32_t)TFM_ERROR_GENERIC;

@@ -74,7 +74,6 @@ enum spm_err_t tfm_spm_partition_init(void)
 
             desc.args = args;
             desc.ns_caller = 0U;
-            desc.iovec_api = TFM_SFN_API_IOVEC;
             desc.sfn = (sfn_t)part->static_data->partition_init;
             desc.sp_id = part->static_data->partition_id;
             res = tfm_core_sfn_request(&desc);
@@ -223,7 +222,6 @@ enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
                                                  ((psa_outvec *)args[2])[i].len;
     }
     runtime_data->orig_outvec = (psa_outvec *)args[2];
-    runtime_data->iovec_api = 1;
 
     return SPM_ERR_OK;
 }
@@ -251,5 +249,4 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
         partition->runtime_data.iovec_args.out_vec[i].len = 0;
     }
     partition->runtime_data.orig_outvec = 0;
-    partition->runtime_data.iovec_api = 0;
 }

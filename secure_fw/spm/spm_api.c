@@ -62,8 +62,6 @@ enum spm_err_t tfm_spm_db_init(void)
             SPM_INVALID_PARTITION_IDX;
         g_spm_partition_db.partitions[i].runtime_data.caller_client_id =
             TFM_INVALID_CLIENT_ID;
-        g_spm_partition_db.partitions[i].runtime_data.iovec_api =
-            TFM_SFN_API_IOVEC;
         g_spm_partition_db.partitions[i].runtime_data.ctx_stack_ptr =
             ctx_stack_list[i];
 #endif /* !defined(TFM_PSA_API) */

@@ -44,39 +44,6 @@ REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 extern int32_t tfm_secure_lock;
 static int32_t tfm_secure_api_initializing = 1;
 
-static int32_t is_iovec_api_call(void)
-{
-    uint32_t current_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(current_partition_idx);
-    return curr_part_data->iovec_api;
-}
-
-static uint32_t *prepare_partition_ctx(
-            const struct tfm_state_context_t *svc_ctx,
-            const struct tfm_sfn_req_s *desc_ptr,
-            uint32_t *dst)
-{
-    /* XPSR  = as was when called, but make sure it's thread mode */
-    *(--dst) = svc_ctx->xpsr & 0xFFFFFE00U;
-    /* ReturnAddress = resume veneer in new context */
-    *(--dst) = svc_ctx->ra;
-    /* LR = sfn address */
-    *(--dst) = (uint32_t)desc_ptr->sfn;
-    /* R12 = don't care */
-    *(--dst) = 0;
-
-    /* R0-R3 = sfn arguments */
-    int32_t i = 4;
-
-    while (i > 0) {
-        i--;
-        *(--dst) = (uint32_t)desc_ptr->args[i];
-    }
-    return dst;
-}
-
 static uint32_t *prepare_partition_iovec_ctx(
                              const struct tfm_state_context_t *svc_ctx,
                              const struct tfm_sfn_req_s *desc_ptr,
@@ -423,24 +390,17 @@ static enum tfm_status_e tfm_start_partition(
      * handler mode
      */
     if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing)) {
-        if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
-            if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
-                SPM_ERR_OK) {
-                return TFM_ERROR_GENERIC;
-            }
-            iovec_args = get_iovec_args_stack_address(partition_idx);
-            tfm_copy_iovec_parameters(iovec_args,
-                                      &(curr_part_data->iovec_args));
-
-            /* Prepare the partition context, update stack ptr */
-            psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
-                                                        iovec_args,
-                                                     (uint32_t *)partition_psp);
-        } else {
-            /* Prepare the partition context, update stack ptr */
-            psp = (uint32_t)prepare_partition_ctx(svc_ctx, desc_ptr,
-                                                  (uint32_t *)partition_psp);
+        if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
+            SPM_ERR_OK) {
+            return TFM_ERROR_GENERIC;
         }
+        iovec_args = get_iovec_args_stack_address(partition_idx);
+        tfm_copy_iovec_parameters(iovec_args, &(curr_part_data->iovec_args));
+
+        /* Prepare the partition context, update stack ptr */
+        psp = (uint32_t)prepare_partition_iovec_ctx(svc_ctx, desc_ptr,
+                                                    iovec_args,
+                                                    (uint32_t *)partition_psp);
         __set_PSP(psp);
         tfm_arch_set_psplim(partition_psplim);
     }
@@ -554,23 +514,18 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
         REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
-        uint32_t psp_stack_bottom = (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+        uint32_t psp_stack_bottom =
+            (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
         tfm_arch_set_psplim(psp_stack_bottom);
 
-        /* FIXME: The condition should be removed once all the secure service
-         *        calls are done via the iovec veneers
-         */
-        if (curr_part_data->iovec_api) {
-            iovec_args = (struct iovec_args_t *)
-               ((uint8_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK,
-                                                                  $$ZI$$Limit) -
-               sizeof(struct iovec_args_t));
+        iovec_args = (struct iovec_args_t *)
+            ((uint8_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit) -
+            sizeof(struct iovec_args_t));
 
-            for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
-                curr_part_data->orig_outvec[i].len = iovec_args->out_vec[i].len;
-            }
-            tfm_clear_iovec_parameters(iovec_args);
+        for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
+            curr_part_data->orig_outvec[i].len = iovec_args->out_vec[i].len;
         }
+        tfm_clear_iovec_parameters(iovec_args);
     }
 
     tfm_spm_partition_cleanup_context(current_partition_idx);
@@ -683,13 +638,11 @@ enum tfm_status_e tfm_core_sfn_request_handler(
 
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
 
-    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
-        res = tfm_core_check_sfn_parameters(desc_ptr);
-        if (res != TFM_SUCCESS) {
-            /* The sanity check of iovecs failed. */
-            __enable_irq();
-            tfm_secure_api_error_handler();
-        }
+    res = tfm_core_check_sfn_parameters(desc_ptr);
+    if (res != TFM_SUCCESS) {
+        /* The sanity check of iovecs failed. */
+        __enable_irq();
+        tfm_secure_api_error_handler();
     }
 
     res = tfm_core_check_sfn_req_rules(desc_ptr);
@@ -721,12 +674,10 @@ int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     int32_t *args;
     int32_t retVal;
 
-    if (desc_ptr->iovec_api == TFM_SFN_API_IOVEC) {
-        res = tfm_core_check_sfn_parameters(desc_ptr);
-        if (res != TFM_SUCCESS) {
-            /* The sanity check of iovecs failed. */
-            return (int32_t)res;
-        }
+    res = tfm_core_check_sfn_parameters(desc_ptr);
+    if (res != TFM_SUCCESS) {
+        /* The sanity check of iovecs failed. */
+        return (int32_t)res;
     }
 
     /* No excReturn value is needed as no exception handling is used */
@@ -999,24 +950,6 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
          */
         ERROR_MSG("Partition return SVC called with MSP active!");
         tfm_secure_api_error_handler();
-    }
-
-    /* Store return value from secure partition */
-    int32_t retVal = *(int32_t *)__get_PSP();
-
-    if (!is_iovec_api_call()) {
-        if ((retVal > (int32_t)TFM_SUCCESS) &&
-            (retVal < (int32_t)TFM_PARTITION_SPECIFIC_ERROR_MIN)) {
-            /* Secure function returned a reserved value */
-#ifdef TFM_CORE_DEBUG
-            LOG_MSG("Invalid return value from secure partition!");
-#endif
-            /* FixMe: error can be traced to specific secure partition
-             * and Core is not compromised. Error handling flow can be
-             * refined
-             */
-            tfm_secure_api_error_handler();
-        }
     }
 
     res = tfm_return_from_partition(&lr);

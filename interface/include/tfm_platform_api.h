@@ -23,12 +23,6 @@ extern "C" {
 #define TFM_PLATFORM_API_VERSION_MAJOR (0)
 #define TFM_PLATFORM_API_VERSION_MINOR (3)
 
-/* The return value is shared with the TF-M partition status value.
- * The Platform return codes shouldn't overlap with predefined TFM status
- * values.
- */
-#define TFM_PLATFORM_ERR_OFFSET (TFM_PARTITION_SPECIFIC_ERROR_MIN)
-
 /*!
  * \enum tfm_platform_err_t
  *
@@ -37,7 +31,7 @@ extern "C" {
  */
 enum tfm_platform_err_t {
     TFM_PLATFORM_ERR_SUCCESS = 0,
-    TFM_PLATFORM_ERR_SYSTEM_ERROR = TFM_PLATFORM_ERR_OFFSET,
+    TFM_PLATFORM_ERR_SYSTEM_ERROR,
     TFM_PLATFORM_ERR_INVALID_PARAM,
     TFM_PLATFORM_ERR_NOT_SUPPORTED,
 

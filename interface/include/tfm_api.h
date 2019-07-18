@@ -40,14 +40,6 @@ extern "C" {
 
 /* FixMe: sort out DEBUG compile option and limit return value options
  * on external interfaces */
-/* For secure functions using prorietary signatures
- * TFM will only return values recognized and parsed by TFM core.
- * Service return codes are not automatically passed on to REE.
- * Any non-zero return value is interpreted as an error that may trigger
- * TEE error handling flow.
- * For secure functions using the veneers in secure_fw/ns_callable/tfm_veneers.c
- * (iovec API) this limitation does not apply.
- */
 enum tfm_status_e
 {
     TFM_SUCCESS = 0,
@@ -62,7 +54,6 @@ enum tfm_status_e
     TFM_SECURE_LOCK_FAILED,
     TFM_SECURE_UNLOCK_FAILED,
     TFM_ERROR_GENERIC = 0x1F,
-    TFM_PARTITION_SPECIFIC_ERROR_MIN,
 };
 
 //==================== Secure function declarations ==========================//

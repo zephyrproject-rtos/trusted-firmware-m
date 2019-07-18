@@ -83,11 +83,7 @@
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-/* FIXME: veneer region size is increased temporarily while both legacy veneers
- * and their iovec-based equivalents co-exist for secure partitions. To be
- * adjusted as legacy veneers are eliminated
- */
-#define CMSE_VENEER_REGION_SIZE     (0x380)
+#define CMSE_VENEER_REGION_SIZE     (0x300)
 
 /* Alias definitions for secure and non-secure areas*/
 #define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + (x))
