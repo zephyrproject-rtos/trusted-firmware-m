@@ -167,20 +167,7 @@ function(set_up_secure_fw_build)
 
 	if (REGRESSION OR CORE_TEST)
 		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
-			#The test service veneers in the tfm_secure_tests library may not be
-			#referenced in the secure binary so the veneer objects are explicitly loaded
-			#from the secure tests library. However by generating the veneer files from
-			#the manifests, all the iovec interfaced veneers are in a single file in the
-			#secure_fw directory. The core test partitions use the veneers with the
-			#iovec API, so we only need the explicit load in case the secure client test
-			#partition is present.
-			#FIXME Remove the explicit load and the above comment once the secure client
-			#test partition uses the generated veneers.
-			if((${COMPILER} STREQUAL "ARMCLANG") AND (NOT TFM_PSA_API))
-				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage $<TARGET_LINKER_FILE:tfm_secure_tests>\(*veneers.o\) tfm_attest)
-			else()
-				target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_attest)
-			endif()
+			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_attest)
 		else()
 			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_secure_tests tfm_attest)
 		endif()

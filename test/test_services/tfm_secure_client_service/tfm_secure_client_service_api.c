@@ -11,7 +11,7 @@
 #include "tfm_api.h"
 #include "psa_manifest/sid.h"
 #else /* TFM_PSA_API */
-#include "tfm_secure_client_service_veneers.h"
+#include "tfm_veneers.h"
 #endif /* TFM_PSA_API */
 
 int32_t tfm_secure_client_run_tests(void)
@@ -33,7 +33,7 @@ int32_t tfm_secure_client_run_tests(void)
         return TFM_ERROR_GENERIC;
     }
 #else
-    tfm_secure_client_service_veneer_run_tests();
+    tfm_tfm_secure_client_service_sfn_run_tests_veneer(NULL, 0, NULL, 0);
 #endif
 
     return 0;

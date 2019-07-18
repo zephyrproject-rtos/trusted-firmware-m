@@ -40,13 +40,6 @@ GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
 
 ENTRY(Reset_Handler)
 
-/*
- * The test service veneers may not be referenced in the secure binary so the
- * veneer objects are explicitly declared here as extern, so the linker includes
- * the veneers in the resulting binary.
- */
-EXTERN(tfm_secure_client_service_veneer_run_tests)
-
 SECTIONS
 {
     .TFM_VECTORS : ALIGN(4)
