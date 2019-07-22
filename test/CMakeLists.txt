@@ -107,7 +107,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/framework/test_framework_integ_test.h
-				${CMAKE_CURRENT_SOURCE_DIR}/suites/sst/non_secure/os_wrapper.h
 				${CMAKE_CURRENT_SOURCE_DIR}/test_services/tfm_secure_client_service/tfm_secure_client_service_api.h
 		DESTINATION export/tfm/test/inc)
 

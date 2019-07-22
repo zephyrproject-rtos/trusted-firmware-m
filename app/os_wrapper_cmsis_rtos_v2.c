@@ -5,14 +5,12 @@
  *
  */
 
-#include "test/suites/sst/non_secure/os_wrapper.h"
+#include "os_wrapper.h"
 
 #include <string.h>
 #include "cmsis_os2.h"
 
-/* This is an example OS abstraction layer for CMSIS-RTOS for non-secure test
- * environment
- */
+/* This is an example OS abstraction layer for CMSIS-RTOSv2 */
 
 uint32_t os_wrapper_thread_new(const char *name, int32_t stack_size,
                                os_wrapper_thread_func func, void *arg,
