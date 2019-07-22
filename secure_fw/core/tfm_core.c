@@ -170,7 +170,7 @@ int32_t tfm_core_init(void)
     return TFM_SUCCESS;
 }
 
-static int tfm_core_set_secure_exception_priorities(void)
+static int32_t tfm_core_set_secure_exception_priorities(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 
