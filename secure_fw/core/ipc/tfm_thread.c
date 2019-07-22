@@ -76,7 +76,7 @@ static void update_running_head(struct tfm_thrd_ctx **runn,
         (*runn == NULL || (node->prior < (*runn)->prior))) {
         *runn = node;
     } else {
-        *runn = find_next_running_thread(LIST_HEAD);
+        *runn = LIST_HEAD;
     }
 }
 
