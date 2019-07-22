@@ -172,8 +172,9 @@ elseif(BUILD_FLASH)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Driver_QSPI_Flash.c")
   # As the SST area is going to be in RAM, it is required to set SST_CREATE_FLASH_LAYOUT
   # to be sure the SST service knows that when it starts the SST area does not contain any
-  # valid SST flash layout and it needs to create one.
+  # valid SST flash layout and it needs to create one. The same for ITS.
   set(SST_CREATE_FLASH_LAYOUT ON)
+  set(ITS_CREATE_FLASH_LAYOUT ON)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()

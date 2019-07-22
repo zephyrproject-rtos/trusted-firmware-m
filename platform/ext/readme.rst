@@ -151,7 +151,7 @@ The SST service requires the following definitions:
 
 - ``SST_FLASH_AREA_ADDR`` - Defines the flash area address where the secure
   store area starts.
-- ``SST_SECTOR_SIZE`` - Defines the size of the flash sectors.
+- ``SST_SECTOR_SIZE`` - Defines the size of the external flash sectors.
 - ``SST_NBR_OF_SECTORS`` - Defines the number of sectors available for the
   secure area.
 - ``SST_FLASH_DEV_NAME`` - Specifies the flash device used by SST to store the
@@ -162,6 +162,28 @@ The SST service requires the following definitions:
   SST area.
 - ``SST_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
   SST area.
+
+.. Note::
+
+    The sectors must be consecutive.
+
+Internal Trusted Storage (ITS) Service definitions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ITS service requires the following definitions:
+
+- ``ITS_FLASH_AREA_ADDR`` - Defines the flash area address where the internal
+  trusted storage area starts.
+- ``ITS_SECTOR_SIZE`` - Defines the size of the internal flash sectors.
+- ``ITS_NBR_OF_SECTORS`` - Defines the number of sectors available for the
+  internal trusted storage area.
+- ``ITS_FLASH_DEV_NAME`` - Specifies the internal flash device used by ITS to
+  store the data.
+- ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
+  bytes.
+- ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
+  ITS area.
+- ``ITS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
+  ITS area.
 
 .. Note::
 

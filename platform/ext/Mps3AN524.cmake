@@ -192,9 +192,11 @@ elseif(BUILD_FLASH)
   # interface and behaviour on top of the BRAM memory.
   # As the SST area is going to be in RAM, it is required to set SST_CREATE_FLASH_LAYOUT
   # to be sure the SST service knows that when it starts the SST area does not contain any
-  # valid SST flash layout and it needs to create one.
+  # valid SST flash layout and it needs to create one. The same for ITS.
   set(SST_CREATE_FLASH_LAYOUT ON)
   set(SST_RAM_FS OFF)
+  set(ITS_CREATE_FLASH_LAYOUT ON)
+  set(ITS_RAM_FS OFF)
   embedded_include_directories(PATH "${AN524_DIR}/cmsis_drivers" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()

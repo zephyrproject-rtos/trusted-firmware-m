@@ -34,16 +34,18 @@
  *     0x0010_0000 Secure image         (512 KB)
  *     0x0018_0000 Non-secure image     (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 NV counters              (4 KB)
- * 0x001C_6000 Unused
+ * 0x001C_5000 ITS area                 (20 KB)
+ * 0x001C_A000 NV counters              (4 KB)
+ * 0x001C_B000 Unused
  *
  * Flash layout without BL2
  *
  * 0x0000_0000 Secure image             (512 KB)
  * 0x000C_0000 Non-secure image         (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 NV counters              (4 KB)
- * 0x001C_6000 Unused
+ * 0x001C_5000 ITS area                 (20 KB)
+ * 0x001C_A000 NV counters              (4 KB)
+ * 0x001C_B000 Unused
  */
 
 /* Size of a Secure and of a Non-secure image */
@@ -128,9 +130,14 @@
                                          FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
+/* Internal Trusted Storage (ITS) Service definitions */
+#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_SIZE             (0x4000)   /* 16 KB */
+
+/* NV Counters definitions */
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
+                                         FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Offset and size definition in flash area used by assemble.py */
@@ -167,6 +174,30 @@
 #define SST_MAX_ASSET_SIZE      (2048)
 /* The maximum number of assets to be stored in the SST area */
 #define SST_NUM_ASSETS          (10)
+
+/* Internal Trusted Storage (ITS) Service definitions
+ * Note: Further documentation of these definitions can be found in the
+ * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
+ * allocated in the external flash just for development platforms that don't
+ * have internal flash available.
+ */
+#define ITS_FLASH_DEV_NAME Driver_FLASH0
+
+/* In this target the CMSIS driver requires only the offset from the base
+ * address instead of the full memory address.
+ */
+#define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
+
+/* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
+#define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+/* The sectors must be in consecutive memory location */
+#define ITS_NBR_OF_SECTORS      (FLASH_ITS_AREA_SIZE / ITS_SECTOR_SIZE)
+/* Specifies the smallest flash programmable unit in bytes */
+#define ITS_FLASH_PROGRAM_UNIT  (0x1)
+/* The maximum asset size to be stored in the ITS area */
+#define ITS_MAX_ASSET_SIZE      (512)
+/* The maximum number of assets to be stored in the ITS area */
+#define ITS_NUM_ASSETS          (10)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

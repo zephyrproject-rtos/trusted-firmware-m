@@ -27,8 +27,9 @@
  *    0x0032_0000 Secure     image secondary
  *    0x003A_0000 Non-secure image secondary
  * 0x0042_0000 Secure Storage Area (8 KB)
- * 0x0042_2000 NV counters area (4 KB)
- * 0x0042_3000 Unused
+ * 0x0042_2000 Internal Trusted Storage Area (8 KB)
+ * 0x0042_4000 NV counters area (4 KB)
+ * 0x0042_5000 Unused
  */
 
 /* Code SRAM layout on Musca (with BL2, which is mandatory) after the newest
@@ -133,9 +134,14 @@
                                          FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x2000)   /* 8 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
+/* Internal Trusted Storage (ITS) Service definitions */
+#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
+
+/* NV Counters definitions */
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
+                                         FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Offset and size definition in flash area used by assemble.py */
@@ -180,6 +186,28 @@
 #define SST_MAX_ASSET_SIZE      (512)
 /* The maximum number of assets to be stored in the SST area */
 #define SST_NUM_ASSETS          (10)
+
+/* Internal Trusted Storage (ITS) Service definitions
+ * Note: Further documentation of these definitions can be found in the
+ * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
+ * allocated in the external flash just for development platforms that don't
+ * have internal flash available.
+ */
+#define ITS_FLASH_DEV_NAME Driver_FLASH0
+
+/* In this target the CMSIS driver requires only the offset from the base
+ * address instead of the full memory address.
+ */
+#define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
+#define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+/* The sectors must be in consecutive memory location */
+#define ITS_NBR_OF_SECTORS      (FLASH_ITS_AREA_SIZE / ITS_SECTOR_SIZE)
+/* Specifies the smallest flash programmable unit in bytes */
+#define ITS_FLASH_PROGRAM_UNIT  (0x1)
+/* The maximum asset size to be stored in the ITS area */
+#define ITS_MAX_ASSET_SIZE      (512)
+/* The maximum number of assets to be stored in the ITS area */
+#define ITS_NUM_ASSETS          (10)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
