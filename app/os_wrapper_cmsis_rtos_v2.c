@@ -62,7 +62,7 @@ uint32_t os_wrapper_semaphore_acquire(uint32_t semaphore_id, uint32_t timeout)
         return OS_WRAPPER_ERROR;
     }
 
-    return 0;
+    return OS_WRAPPER_SUCCESS;
 }
 
 uint32_t os_wrapper_semaphore_release(uint32_t sema)
@@ -74,7 +74,7 @@ uint32_t os_wrapper_semaphore_release(uint32_t sema)
         return OS_WRAPPER_ERROR;
     }
 
-    return 0;
+    return OS_WRAPPER_SUCCESS;
 }
 
 uint32_t os_wrapper_semaphore_delete(uint32_t sema)
@@ -86,7 +86,80 @@ uint32_t os_wrapper_semaphore_delete(uint32_t sema)
         return OS_WRAPPER_ERROR;
     }
 
-    return 0;
+    return OS_WRAPPER_SUCCESS;
+}
+
+uint32_t os_wrapper_mutex_create(void)
+{
+    osMutexId_t id;
+    const osMutexAttr_t attr = {
+        .name = NULL,
+        .attr_bits = osMutexPrioInherit, /* Priority inheritance is recommended
+                                          * to enable if it is supported.
+                                          * For recursive mutex and the ability
+                                          * of auto release when owner being
+                                          * terminated is not required.
+                                          */
+        .cb_mem = NULL,
+        .cb_size = 0U
+    };
+
+    id = osMutexNew(&attr);
+    if (!id) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return (uint32_t)id;
+}
+
+uint32_t os_wrapper_mutex_acquire(uint32_t mutex_id, uint32_t timeout)
+{
+    osStatus_t status = osOK;
+
+    if (!mutex_id) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    status = osMutexAcquire((osMutexId_t)mutex_id,
+                            (timeout == OS_WRAPPER_WAIT_FOREVER) ?
+                             osWaitForever : timeout);
+    if (status != osOK) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
+}
+
+uint32_t os_wrapper_mutex_release(uint32_t mutex_id)
+{
+    osStatus_t status = osOK;
+
+    if (!mutex_id) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    status = osMutexRelease((osMutexId_t)mutex_id);
+    if (status != osOK) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
+}
+
+uint32_t os_wrapper_mutex_delete(uint32_t mutex_id)
+{
+    osStatus_t status = osOK;
+
+    if (!mutex_id) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    status = osMutexDelete((osMutexId_t)mutex_id);
+    if (status != osOK) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
 }
 
 uint32_t os_wrapper_thread_get_id(void)
