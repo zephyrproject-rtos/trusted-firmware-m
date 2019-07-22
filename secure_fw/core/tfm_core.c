@@ -170,7 +170,7 @@ int32_t tfm_core_init(void)
     return TFM_SUCCESS;
 }
 
-static void tfm_core_set_secure_exception_priorities(void)
+static int tfm_core_set_secure_exception_priorities(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 
@@ -198,6 +198,8 @@ static void tfm_core_set_secure_exception_priorities(void)
      * priority level configurable on the platform, just below 0x80.
      */
     NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
+
+    return TFM_SUCCESS;
 }
 
 void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
