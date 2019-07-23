@@ -13,8 +13,8 @@ set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")
 if (BL2)
 	add_definitions(-DBL2)
 
-	set(MCUBOOT_IMAGE_NUMBER 1 CACHE STRING "Configure the number of separately updatable firmware images")
-	set_property(CACHE MCUBOOT_IMAGE_NUMBER PROPERTY STRINGS "1")
+	set(MCUBOOT_IMAGE_NUMBER 2 CACHE STRING "Configure the number of separately updatable firmware images")
+	set_property(CACHE MCUBOOT_IMAGE_NUMBER PROPERTY STRINGS "1;2")
 	validate_cache_value(MCUBOOT_IMAGE_NUMBER STRINGS)
 
 	set(MCUBOOT_UPGRADE_STRATEGY "OVERWRITE_ONLY" CACHE STRING "Configure BL2 which upgrade strategy to use")
