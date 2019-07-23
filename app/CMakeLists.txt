@@ -54,7 +54,7 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${INTERFACE_DIR}/src/tfm_sst_api.c"
 	"${INTERFACE_DIR}/src/tfm_crypto_api.c"
 	"${INTERFACE_DIR}/src/tfm_initial_attestation_api.c"
-	"${INTERFACE_DIR}/src/tfm_ns_interface_cmsis_rtos.c"
+	"${INTERFACE_DIR}/src/tfm_ns_interface.c"
 	)
 
 if (TFM_PARTITION_AUDIT_LOG)
