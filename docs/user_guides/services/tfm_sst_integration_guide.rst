@@ -69,8 +69,7 @@ Current SST Service Limitations
 
 - **PSA internal trusted storage API** - In the current design, the service does
   not use the PSA Internal Trusted Storage API to write the rollback protection
-  values stored in the internal storage. The PSA Internal Trusted Storage API is
-  not supported in TF-M yet.
+  values stored in the internal storage.
 
 - **Protection against physical storage medium failure** - Complete handling of
   inherent failures of storage mediums (e.g. bad blocks in a NAND based device)
