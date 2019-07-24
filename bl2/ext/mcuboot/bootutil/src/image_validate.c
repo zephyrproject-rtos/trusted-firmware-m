@@ -406,21 +406,19 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
              */
         } else if (tlv.it_type == EXPECTED_SIG_TLV) {
             /* Ignore this signature if it is out of bounds. */
-            if (key_id < 0 || key_id >= bootutil_key_cnt) {
-                key_id = -1;
-                continue;
-            }
-            if (!EXPECTED_SIG_LEN(tlv.it_len) || tlv.it_len > sizeof(buf)) {
-                return -1;
-            }
-            rc = flash_area_read(fap, off + sizeof(tlv), buf, tlv.it_len);
-            if (rc) {
-                return -1;
-            }
-            rc = bootutil_verify_sig(hash, sizeof(hash), buf, tlv.it_len,
-                                     key_id);
-            if (rc == 0) {
-                valid_signature = 1;
+            if (key_id >= 0 && key_id < bootutil_key_cnt) {
+                if (!EXPECTED_SIG_LEN(tlv.it_len) || tlv.it_len > sizeof(buf)) {
+                    return -1;
+                }
+                rc = flash_area_read(fap, off + sizeof(tlv), buf, tlv.it_len);
+                if (rc) {
+                    return -1;
+                }
+                rc = bootutil_verify_sig(hash, sizeof(hash), buf, tlv.it_len,
+                                         key_id);
+                if (rc == 0) {
+                    valid_signature = 1;
+                }
             }
             key_id = -1;
 #endif
