@@ -36,7 +36,7 @@
  */
 #define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
 
-/* MPC granularity is 128 KB on Musca_B1. Alignment
+/* eFlash MPC granularity is 4 KB on Musca_B1. Alignment
  * of partitions is defined in accordance with this constraint.
  */
 #ifdef BL2

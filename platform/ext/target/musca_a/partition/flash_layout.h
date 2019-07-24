@@ -26,9 +26,9 @@
  * 0x0032_0000 Secondary image area (1 MB):
  *    0x0032_0000 Secure     image secondary
  *    0x003A_0000 Non-secure image secondary
- * 0x0042_0000 Secure Storage Area (0.02 MB)
- * 0x0042_5000 NV counters area (4 KB)
- * 0x0042_6000 Unused
+ * 0x0042_0000 Secure Storage Area (8 KB)
+ * 0x0042_2000 NV counters area (4 KB)
+ * 0x0042_3000 Unused
  */
 
 /* Code SRAM layout on Musca (with BL2, which is mandatory) after the newest
@@ -131,7 +131,7 @@
 /* Secure Storage (SST) Service definitions */
 #define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+#define FLASH_SST_AREA_SIZE             (0x2000)   /* 8 KB */
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
@@ -177,7 +177,7 @@
 /* Specifies the smallest flash programmable unit in bytes */
 #define SST_FLASH_PROGRAM_UNIT  (0x1)
 /* The maximum asset size to be stored in the SST area */
-#define SST_MAX_ASSET_SIZE      (2048)
+#define SST_MAX_ASSET_SIZE      (512)
 /* The maximum number of assets to be stored in the SST area */
 #define SST_NUM_ASSETS          (10)
 

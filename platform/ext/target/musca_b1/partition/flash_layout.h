@@ -20,19 +20,19 @@
 /* Flash layout on Musca-B1 with BL2(single image boot, boot from eFlash 0):
  *
  * 0x0A00_0000 BL2 - MCUBoot (128 KB)
- * 0x0A02_0000 Primary image area (768 KB):
- *    0x0A02_0000 Secure     image primary (256 KB)
- *    0x0A06_0000 Non-secure image primary (512 KB)
- * 0x0A0E_0000 Secondary image area (768 KB):
- *    0x0A0E_0000 Secure     image secondary (256 KB)
- *    0x0A12_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Secure Storage Area (0.02 MB)
- * 0x0A1E_5000 NV counters area (4 KB)
- * 0x0A1E_6000 Unused
+ * 0x0A02_0000 Primary image area (832 KB):
+ *    0x0A02_0000 Secure     image primary (320 KB)
+ *    0x0A07_0000 Non-secure image primary (512 KB)
+ * 0x0A0F_0000 Secondary image area (832 KB):
+ *    0x0A0F_0000 Secure     image secondary (320 KB)
+ *    0x0A14_0000 Non-secure image secondary (512 KB)
+ * 0x0A1C_0000 Secure Storage Area (0.02 MB)
+ * 0x0A1C_5000 NV counters area (4 KB)
+ * 0x0A1C_6000 Unused
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
- * 0x0A06_0000 Non-secure image
+ * 0x0A07_0000 Non-secure image
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -43,7 +43,7 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition: 256 KB */
+#define FLASH_S_PARTITION_SIZE          (0x50000) /* S partition: 320 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS partition: 512 KB */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \

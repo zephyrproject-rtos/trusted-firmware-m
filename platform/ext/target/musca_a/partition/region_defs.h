@@ -80,11 +80,11 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
-/* Reserve 104 KB of RAM to the SPE to meet worst case scenario
+/* Reserve 96 KB of RAM to the SPE to meet worst case scenario
  * requirements which are encountered in IPC mode and regression
- * tests enabled. Leave the remaining 24 KB to the NSPE.
+ * tests enabled. Leave the remaining 32 KB to the NSPE.
  */
-#define S_DATA_SIZE     ((TOTAL_RAM_SIZE / 16) * 13)
+#define S_DATA_SIZE     ((TOTAL_RAM_SIZE / 4) * 3)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* CMSE Veneers region */
