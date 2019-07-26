@@ -46,6 +46,8 @@
  * 0x001C_5014 Unused
  */
 
+#define MAX(X,Y)                       ((X) > (Y) ? (X) : (Y))
+
 /* Size of a Secure and of a Non-secure image */
 #define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition: 256 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x40000) /* NS partition: 256 KB */
@@ -78,9 +80,14 @@
                                          FLASH_NS_PARTITION_SIZE)
 
 /* The maximum number of status entries supported by the bootloader. */
-#define BOOT_STATUS_MAX_ENTRIES         ((FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE) / \
-                                         FLASH_AREA_IMAGE_SCRATCH_SIZE)
+/* The maximum number of status entries must be at least 2. For more
+ * information see the MCUBoot issue:
+ * https://github.com/JuulLabs-OSS/mcuboot/issues/427.
+ */
+#define BOOT_STATUS_MAX_ENTRIES         MAX(2, \
+                                            (FLASH_S_PARTITION_SIZE + \
+                                             FLASH_NS_PARTITION_SIZE) / \
+                                            FLASH_AREA_IMAGE_SCRATCH_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define BOOT_MAX_IMG_SECTORS            ((FLASH_S_PARTITION_SIZE + \
