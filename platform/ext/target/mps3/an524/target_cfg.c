@@ -333,7 +333,47 @@ int32_t mpc_init_cfg(void)
     }
 #endif /* BL2 */
 
-    /* NSPE use the last 32KB(ISARM 3) */
+    /* SPE uses the first 96kB (3 ISRAM banks) for data */
+    ret = Driver_ISRAM0_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM0_MPC.ConfigRegion(
+                        MPC_ISRAM0_RANGE_BASE_S,
+                        MPC_ISRAM0_RANGE_LIMIT_S,
+                        ARM_MPC_ATTR_SECURE);
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM1_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM1_MPC.ConfigRegion(
+                        MPC_ISRAM1_RANGE_BASE_S,
+                        MPC_ISRAM1_RANGE_LIMIT_S,
+                        ARM_MPC_ATTR_SECURE);
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM2_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM2_MPC.ConfigRegion(
+                        MPC_ISRAM2_RANGE_BASE_S,
+                        MPC_ISRAM2_RANGE_LIMIT_S,
+                        ARM_MPC_ATTR_SECURE);
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    /* NSPE use the last 32KB (ISRAM 3) */
     ret = Driver_ISRAM3_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
@@ -349,6 +389,16 @@ int32_t mpc_init_cfg(void)
 
     /* Lock down the MPC configuration */
     ret = Driver_QSPI_MPC.LockDown();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM0_MPC.LockDown();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    ret = Driver_ISRAM1_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
@@ -431,6 +481,14 @@ int32_t ppc_init_cfg(void)
     ret = Driver_APB_PPC1.ConfigPeriph(CMSDK_S32K_TIMER_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    /* No peripherals are configured on APB PPC EXP0 but device needs to be
+     * initialialized so that the interrupt can be enabled later.
+     */
+    ret = Driver_APB_PPCEXP0.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
