@@ -46,23 +46,46 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
+if (NOT DEFINED TFM_PSA_API)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined.")
+endif()
+
 set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_cmsis_rtos_v2.c"
-	"${INTERFACE_DIR}/src/tfm_sst_api.c"
-	"${INTERFACE_DIR}/src/tfm_crypto_api.c"
-	"${INTERFACE_DIR}/src/tfm_initial_attestation_api.c"
 	"${INTERFACE_DIR}/src/tfm_ns_interface.c"
 	)
 
+if (TFM_PSA_API)
+	list(APPEND NS_APP_SRC
+		"${INTERFACE_DIR}/src/tfm_sst_ipc_api.c"
+		"${INTERFACE_DIR}/src/tfm_crypto_ipc_api.c"
+		"${INTERFACE_DIR}/src/tfm_initial_attestation_ipc_api.c"
+	)
+else()
+	list(APPEND NS_APP_SRC
+		"${INTERFACE_DIR}/src/tfm_sst_func_api.c"
+		"${INTERFACE_DIR}/src/tfm_crypto_func_api.c"
+		"${INTERFACE_DIR}/src/tfm_initial_attestation_func_api.c"
+	)
+endif()
+
 if (TFM_PARTITION_AUDIT_LOG)
-	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_audit_api.c")
+	if (TFM_PSA_API)
+		message(FATAL_ERROR "Audit log has not been supported in IPC model yet.")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_audit_func_api.c")
+	endif()
 endif()
 
 if (TFM_PARTITION_PLATFORM)
-	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_api.c")
+	if (TFM_PSA_API)
+		message(FATAL_ERROR "Platform service has not been supported in IPC model yet.")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_func_api.c")
+	endif()
 endif()
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
@@ -78,9 +101,7 @@ if (PSA_API_TEST_NS)
 	list(APPEND NS_APP_SRC "${APP_DIR}/psa_api_test.c")
 endif()
 
-if (NOT DEFINED TFM_PSA_API)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
-elseif (TFM_PSA_API)
+if (TFM_PSA_API)
 	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
 endif()
 

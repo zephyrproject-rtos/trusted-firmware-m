@@ -9,9 +9,7 @@
 #include "tfm_veneers.h"
 #include "tfm_ns_interface.h"
 #include "psa/client.h"
-#ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
-#endif
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
@@ -21,12 +19,9 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
                              uint8_t       *token,
                              uint32_t      *token_size)
 {
-#ifdef TFM_PSA_API
     psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
-#else
-    int32_t res;
-#endif
+
     psa_invec in_vec[] = {
         {challenge_obj, challenge_size}
     };
@@ -34,7 +29,6 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
         {token, *token_size}
     };
 
-#ifdef TFM_PSA_API
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SID,
                          TFM_ATTEST_GET_TOKEN_VERSION);
     if (handle <= 0) {
@@ -55,28 +49,14 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     }
 
     return (enum psa_attest_err_t)status;
-#else
-    res = tfm_ns_interface_dispatch(
-                               (veneer_fn)tfm_initial_attest_get_token_veneer,
-                               (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                               (uint32_t)out_vec, IOVEC_LEN(out_vec));
-
-    if (res == (int32_t)PSA_ATTEST_ERR_SUCCESS) {
-        *token_size = out_vec[0].len;
-    }
-
-    return (enum psa_attest_err_t)res;
-#endif
 }
 
 enum psa_attest_err_t
 psa_initial_attest_get_token_size(uint32_t  challenge_size,
                                   uint32_t *token_size)
 {
-#ifdef TFM_PSA_API
     psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
-#endif
     psa_invec in_vec[] = {
         {&challenge_size, sizeof(challenge_size)}
     };
@@ -84,7 +64,6 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
         {token_size, sizeof(uint32_t)}
     };
 
-#ifdef TFM_PSA_API
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SIZE_SID,
                          TFM_ATTEST_GET_TOKEN_SIZE_VERSION);
     if (handle <= 0) {
@@ -101,10 +80,4 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
     }
 
     return (enum psa_attest_err_t)status;
-#else
-    return (enum psa_attest_err_t)tfm_ns_interface_dispatch(
-                            (veneer_fn)tfm_initial_attest_get_token_size_veneer,
-                            (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                            (uint32_t)out_vec, IOVEC_LEN(out_vec));
-#endif
 }
