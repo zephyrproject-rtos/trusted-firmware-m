@@ -5,7 +5,9 @@
  *
  */
 
-#include "os_wrapper.h"
+#include "os_wrapper/thread.h"
+#include "os_wrapper/mutex.h"
+#include "os_wrapper/semaphore.h"
 
 #include <string.h>
 #include "cmsis_os2.h"

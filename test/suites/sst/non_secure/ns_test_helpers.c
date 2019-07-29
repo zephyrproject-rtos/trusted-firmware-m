@@ -7,7 +7,8 @@
 
 #include "ns_test_helpers.h"
 
-#include "os_wrapper.h"
+#include "os_wrapper/thread.h"
+#include "os_wrapper/semaphore.h"
 
 #include "tfm_nspm_api.h"
 

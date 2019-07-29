@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "os_wrapper.h"
+#include "os_wrapper/mutex.h"
 
 #include "tfm_api.h"
 #include "tfm_ns_interface.h"
