@@ -127,7 +127,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version);
  *
  * \param[in] handle            A handle to an established connection.
  * \param[in] type              The reuqest type.
- *                              Must be zero( \ ref PSA_IPC_CALL) or positive.
+ *                              Must be zero( \ref PSA_IPC_CALL) or positive.
  * \param[in] in_vec            Array of input \ref psa_invec structures.
  * \param[in] in_len            Number of input \ref psa_invec structures.
  * \param[in/out] out_vec       Array of output \ref psa_outvec structures.

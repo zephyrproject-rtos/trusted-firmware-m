@@ -263,7 +263,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
      * FixMe: Need to check if the message is unrecognized by the RoT
      * Service or incorrectly formatted.
      */
-    msg = tfm_spm_create_msg(service, handle, PSA_IPC_CALL, ns_caller, invecs,
+    msg = tfm_spm_create_msg(service, handle, type, ns_caller, invecs,
                              in_num, outvecs, out_num, outptr);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
@@ -519,8 +519,8 @@ static void tfm_svcall_psa_set_rhandle(uint32_t *args)
  * \retval "Does not return"    The call is invalid, one or more of the
  *                              following are true:
  * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a
- *                                \ref PSA_IPC_CALL message.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
  * \arg                           invec_idx is equal to or greater than
  *                                \ref PSA_MAX_IOVEC.
  * \arg                           the memory reference for buffer is invalid or
@@ -553,10 +553,10 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     privileged = tfm_spm_partition_get_privileged_mode(partition->index);
 
     /*
-     * It is a fatal error if message handle does not refer to a PSA_IPC_CALL
+     * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type != PSA_IPC_CALL) {
+    if (msg->msg.type < PSA_IPC_CALL) {
         tfm_panic();
     }
 
@@ -606,8 +606,8 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
  * \retval "Does not return"    The call is invalid, one or more of the
  *                              following are true:
  * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a
- *                                \ref PSA_IPC_CALL message.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
  * \arg                           invec_idx is equal to or greater than
  *                                \ref PSA_MAX_IOVEC.
  */
@@ -630,10 +630,10 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
     }
 
     /*
-     * It is a fatal error if message handle does not refer to a PSA_IPC_CALL
+     * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type != PSA_IPC_CALL) {
+    if (msg->msg.type < PSA_IPC_CALL) {
         tfm_panic();
     }
 
@@ -675,8 +675,8 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
  * \retval "Does not return"    The call is invalid, one or more of the
  *                              following are true:
  * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a
- *                                \ref PSA_IPC_CALL message.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
  * \arg                           outvec_idx is equal to or greater than
  *                                \ref PSA_MAX_IOVEC.
  * \arg                           The memory reference for buffer is invalid.
@@ -709,10 +709,10 @@ static void tfm_svcall_psa_write(uint32_t *args)
     privileged = tfm_spm_partition_get_privileged_mode(partition->index);
 
     /*
-     * It is a fatal error if message handle does not refer to a PSA_IPC_CALL
+     * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type != PSA_IPC_CALL) {
+    if (msg->msg.type < PSA_IPC_CALL) {
         tfm_panic();
     }
 
@@ -832,28 +832,6 @@ static void tfm_svcall_psa_reply(uint32_t *args)
             tfm_panic();
         }
         break;
-    case PSA_IPC_CALL:
-        /* Reply to PSA_IPC_CALL message. Return values are based on status */
-        if (status == PSA_SUCCESS) {
-            ret = PSA_SUCCESS;
-        } else if ((status >= (INT32_MIN + 1)) &&
-                   (status <= (INT32_MIN + 127))) {
-            tfm_panic();
-        } else if ((status >= (INT32_MIN + 128)) && (status <= -1)) {
-            ret = status;
-        } else if ((status >= 1) && (status <= INT32_MAX)) {
-            ret = status;
-        } else {
-            tfm_panic();
-        }
-
-        /*
-         * The total number of bytes written to a single parameter must be
-         * reported to the client by updating the len member of the psa_outvec
-         * structure for the parameter before returning from psa_call().
-         */
-        update_caller_outvec_len(msg);
-        break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
         tfm_spm_free_conn_handle(service, msg->handle);
@@ -864,7 +842,31 @@ static void tfm_svcall_psa_reply(uint32_t *args)
          */
         break;
     default:
-        tfm_panic();
+        if (msg->msg.type >= PSA_IPC_CALL) {
+            /* Reply to a request message. Return values are based on status */
+            if (status == PSA_SUCCESS) {
+                ret = PSA_SUCCESS;
+            } else if ((status >= (INT32_MIN + 1)) &&
+                       (status <= (INT32_MIN + 127))) {
+                tfm_panic();
+            } else if ((status >= (INT32_MIN + 128)) && (status <= -1)) {
+                ret = status;
+            } else if ((status >= 1) && (status <= INT32_MAX)) {
+                ret = status;
+            } else {
+                tfm_panic();
+            }
+
+            /*
+             * The total number of bytes written to a single parameter must be
+             * reported to the client by updating the len member of the
+             * psa_outvec structure for the parameter before returning from
+             * psa_call().
+             */
+            update_caller_outvec_len(msg);
+        } else {
+            tfm_panic();
+        }
     }
 
     tfm_event_wake(&msg->ack_evnt, ret);

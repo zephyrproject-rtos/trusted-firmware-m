@@ -222,8 +222,11 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \prarm[in] handle        Connect handle return by psa_connect().
- * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
- *                          PSA_IPC_DISCONNECT
+ * \param[in] type          Message type, one of the following values:
+ *                            \ref PSA_IPC_CONNECT
+ *                            >= 0
+ *                            \ref PSA_IPC_DISCONNECT
+ *                          positive.
  * \param[in] ns_caller     Whether from NS caller
  * \param[in] invec         Array of input \ref psa_invec structures
  * \param[in] in_len        Number of input \ref psa_invec structures
@@ -236,7 +239,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  */
 struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
                                           psa_handle_t handle,
-                                          uint32_t type, int32_t ns_caller,
+                                          int32_t type, int32_t ns_caller,
                                           psa_invec *invec, size_t in_len,
                                           psa_outvec *outvec, size_t out_len,
                                           psa_outvec *caller_outvec);
