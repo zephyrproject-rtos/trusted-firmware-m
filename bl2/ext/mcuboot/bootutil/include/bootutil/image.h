@@ -68,6 +68,7 @@ struct flash_area;
 #define IMAGE_TLV_SHA256            0x10   /* SHA256 of image hdr and body */
 #define IMAGE_TLV_RSA2048_PSS       0x20   /* RSA2048 of hash output */
 #define IMAGE_TLV_RSA3072_PSS       0x23   /* RSA3072 of hash output */
+#define IMAGE_TLV_DEPENDENCY        0x40   /* Image depends on other image */
 #define IMAGE_TLV_SEC_CNT           0x50   /* security counter */
 
 #define IMAGE_VER_MAJOR_LENGTH      8
@@ -80,6 +81,16 @@ struct image_version {
     uint8_t iv_minor;
     uint16_t iv_revision;
     uint32_t iv_build_num;
+};
+
+struct image_dependency {
+    uint8_t image_id;                       /* Image index (from 0) */
+    uint8_t _pad1;
+    uint16_t _pad2;
+    struct image_version image_min_version; /* Indicates at minimum which
+                                             * version of firmware must be
+                                             * available to satisfy compliance
+                                             */
 };
 
 /** Image header.  All fields are in little endian byte order. */

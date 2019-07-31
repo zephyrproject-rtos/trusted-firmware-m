@@ -44,14 +44,15 @@ extern "C" {
 
 struct flash_area;
 
-#define BOOT_EFLASH     1
-#define BOOT_EFILE      2
-#define BOOT_EBADIMAGE  3
-#define BOOT_EBADVECT   4
-#define BOOT_EBADSTATUS 5
-#define BOOT_ENOMEM     6
-#define BOOT_EBADARGS   7
-#define BOOT_EBADMAGIC  8
+#define BOOT_EFLASH      1
+#define BOOT_EFILE       2
+#define BOOT_EBADIMAGE   3
+#define BOOT_EBADVECT    4
+#define BOOT_EBADSTATUS  5
+#define BOOT_ENOMEM      6
+#define BOOT_EBADARGS    7
+#define BOOT_EBADMAGIC   8
+#define BOOT_EBADVERSION 9
 
 #define BOOT_TMPBUF_SZ  256
 
@@ -224,6 +225,10 @@ int boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type,
                          uint8_t image_num);
 int boot_write_swap_size(const struct flash_area *fap, uint32_t swap_size);
 int boot_read_swap_size(uint32_t *swap_size);
+#if (BOOT_IMAGE_NUMBER > 1)
+int boot_is_version_sufficient(struct image_version *req,
+                               struct image_version *ver);
+#endif
 
 /*
  * Accessors for the contents of struct boot_loader_state.

@@ -138,7 +138,7 @@ class Image():
         if dependencies_num != 0:
             for i in range(dependencies_num):
                 payload = struct.pack(
-                                '<'+'I'+'BBHI',
+                                '<'+'B3x'+'BBHI',
                                 int(dependencies[DEP_IMAGES_KEY][i]),
                                 dependencies[DEP_VERSIONS_KEY][i].major,
                                 dependencies[DEP_VERSIONS_KEY][i].minor,
