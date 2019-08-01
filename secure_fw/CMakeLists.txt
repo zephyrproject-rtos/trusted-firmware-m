@@ -281,11 +281,64 @@ function(set_up_secure_fw_build)
 	endif()
 
 	#Export files needed to interface external applications at: <build_dir>/install/export/tfm/
-	install(DIRECTORY ${TFM_ROOT_DIR}/interface/include/
-			DESTINATION export/tfm/inc)
+	set(INTERFACE_INC_DIR "${INTERFACE_DIR}/include")
+	set(INTERFACE_SRC_DIR "${INTERFACE_DIR}/src")
+	set(EXPORT_INC_DIR "export/tfm/include")
+	set(EXPORT_SRC_DIR "export/tfm/src")
+	#Headers
+	install(DIRECTORY   ${INTERFACE_INC_DIR}/psa
+			DESTINATION ${EXPORT_INC_DIR})
 
-	install(DIRECTORY ${TFM_ROOT_DIR}/interface/src/
-			DESTINATION export/tfm/src)
+	install(FILES       ${INTERFACE_INC_DIR}/os_wrapper/common.h
+						${INTERFACE_INC_DIR}/os_wrapper/mutex.h
+			DESTINATION ${EXPORT_INC_DIR}/os_wrapper)
+
+	install(FILES       ${INTERFACE_INC_DIR}/psa_manifest/sid.h
+			DESTINATION ${EXPORT_INC_DIR}/psa_manifest)
+
+	install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
+						${INTERFACE_INC_DIR}/tfm_crypto_defs.h
+						${INTERFACE_INC_DIR}/tfm_ns_interface.h
+						${INTERFACE_INC_DIR}/tfm_nspm_api.h
+						${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
+						${INTERFACE_INC_DIR}/tfm_ns_svc.h
+						${INTERFACE_INC_DIR}/tfm_sst_defs.h
+						${INTERFACE_INC_DIR}/tfm_veneers.h
+			DESTINATION ${EXPORT_INC_DIR})
+
+	#Sources
+	install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c
+						${INTERFACE_SRC_DIR}/tfm_nspm_api.c
+						${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
+			DESTINATION ${EXPORT_SRC_DIR})
+
+	if(TFM_PSA_API)
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
+							${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
+							${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
+							${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
+				DESTINATION ${EXPORT_SRC_DIR})
+	else()
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
+							${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
+							${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
+				DESTINATION ${EXPORT_SRC_DIR})
+	endif()
+
+	if(TFM_PARTITION_AUDIT_LOG)
+		install(FILES       ${INTERFACE_INC_DIR}/psa_audit_api.h
+							${INTERFACE_INC_DIR}/psa_audit_defs.h
+				DESTINATION ${EXPORT_INC_DIR})
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_audit_func_api.c
+				DESTINATION ${EXPORT_SRC_DIR})
+	endif()
+
+	if(TFM_PARTITION_PLATFORM)
+		install(FILES       ${INTERFACE_INC_DIR}/tfm_platform_api.h
+				DESTINATION ${EXPORT_INC_DIR})
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_func_api.c
+				DESTINATION ${EXPORT_SRC_DIR})
+	endif()
 
 	install(FILES ${S_VENEER_FILE} DESTINATION export/tfm/veneers)
 
