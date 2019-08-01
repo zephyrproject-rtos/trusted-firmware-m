@@ -42,8 +42,6 @@ extern int32_t tfm_secure_lock;
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
-TFM_POOL_DECLARE(msg_db_pool, sizeof(struct tfm_msg_body_t),
-                 TFM_MSG_QUEUE_MAX_MSG_NUM);
 
 /********************** SPM functions for handler mode ***********************/
 
@@ -316,28 +314,31 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
     return msg;
 }
 
-struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
-                                          psa_handle_t handle,
-                                          int32_t type, int32_t ns_caller,
-                                          psa_invec *invec, size_t in_len,
-                                          psa_outvec *outvec, size_t out_len,
-                                          psa_outvec *caller_outvec)
+struct tfm_msg_body_t *
+    tfm_spm_get_msg_buffer_from_conn_handle(psa_handle_t conn_handle)
 {
-    struct tfm_msg_body_t *msg = NULL;
+    TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
+
+    return &(((struct tfm_conn_handle_t *)conn_handle)->internal_msg);
+}
+
+void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
+                      struct tfm_spm_service_t *service,
+                      psa_handle_t handle,
+                      int32_t type, int32_t ns_caller,
+                      psa_invec *invec, size_t in_len,
+                      psa_outvec *outvec, size_t out_len,
+                      psa_outvec *caller_outvec)
+{
     uint32_t i;
 
+    TFM_ASSERT(msg);
     TFM_ASSERT(service);
     TFM_ASSERT(!(invec == NULL && in_len != 0));
     TFM_ASSERT(!(outvec == NULL && out_len != 0));
     TFM_ASSERT(in_len <= PSA_MAX_IOVEC);
     TFM_ASSERT(out_len <= PSA_MAX_IOVEC);
     TFM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
-
-    /* Get message buffer from message pool */
-    msg = (struct tfm_msg_body_t *)tfm_pool_alloc(msg_db_pool);
-    if (!msg) {
-        return NULL;
-    }
 
     /* Clear message buffer before using it */
     tfm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
@@ -376,13 +377,6 @@ struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
     if (handle != PSA_NULL_HANDLE) {
         msg->msg.rhandle = tfm_spm_get_rhandle(service, handle);
     }
-
-    return msg;
-}
-
-void tfm_spm_free_msg(struct tfm_msg_body_t *msg)
-{
-    tfm_pool_free(msg);
 }
 
 int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
@@ -505,9 +499,6 @@ void tfm_spm_init(void)
                   POOL_BUFFER_SIZE(conn_handle_pool),
                   sizeof(struct tfm_conn_handle_t),
                   TFM_CONN_HANDLE_MAX_NUM);
-    tfm_pool_init(msg_db_pool, POOL_BUFFER_SIZE(msg_db_pool),
-                  sizeof(struct tfm_msg_body_t),
-                  TFM_MSG_QUEUE_MAX_MSG_NUM);
 
     /* Init partition first for it will be used when init service */
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {

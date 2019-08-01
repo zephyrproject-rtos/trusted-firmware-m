@@ -110,16 +110,16 @@ struct spm_partition_runtime_data_t {
 
 #ifdef TFM_PSA_API
 
-#define TFM_SPM_MAX_ROT_SERV_NUM        48
 #define TFM_VERSION_POLICY_RELAXED      0
 #define TFM_VERSION_POLICY_STRICT       1
 
-#define TFM_CONN_HANDLE_MAX_NUM         32
+#define TFM_CONN_HANDLE_MAX_NUM         16
 
 /* RoT connection handle list */
 struct tfm_conn_handle_t {
     psa_handle_t handle;            /* Handle value                          */
     void *rhandle;                  /* Reverse handle value                  */
+    struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
     struct tfm_list_node_t list;    /* list node                             */
 };
 
@@ -554,8 +554,20 @@ struct spm_partition_desc_t *
 struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
 
 /**
- * \brief                   Create a message for PSA client call.
+ * \brief                   Get message context by connect handle.
  *
+ * \param[in] conn_handle   Service connect handle.
+ *
+ * \return                  The message body context pointer
+ *                          \ref msg_body_t structures
+ */
+struct tfm_msg_body_t *
+    tfm_spm_get_msg_buffer_from_conn_handle(psa_handle_t conn_handle);
+
+/**
+ * \brief                   Fill the message for PSA client call.
+ *
+ * \param[in] msg           Service Message Queue buffer pointer
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \prarm[in] handle        Connect handle return by psa_connect().
@@ -567,28 +579,14 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  * \param[in] outvec        Array of output \ref psa_outvec structures
  * \param[in] out_len       Number of output \ref psa_outvec structures
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       New message body pointer \ref tfm_msg_body_t
- *                          structures
  */
-struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
-                                          psa_handle_t handle,
-                                          int32_t type, int32_t ns_caller,
-                                          psa_invec *invec, size_t in_len,
-                                          psa_outvec *outvec, size_t out_len,
-                                          psa_outvec *caller_outvec);
-
-/**
- * \brief                   Free message which unused anymore
- *
- * \param[in] msg           Message pointer which want to free
- *                          \ref tfm_msg_body_t structures
- *
- * \retval void             Success
- * \retval "Does not return" Failed
- */
-void tfm_spm_free_msg(struct tfm_msg_body_t *msg);
+void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
+                      struct tfm_spm_service_t *service,
+                      psa_handle_t handle,
+                      int32_t type, int32_t ns_caller,
+                      psa_invec *invec, size_t in_len,
+                      psa_outvec *outvec, size_t out_len,
+                      psa_outvec *caller_outvec);
 
 /**
  * \brief                   Send message and wake up the SP who is waiting on

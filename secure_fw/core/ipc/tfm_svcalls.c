@@ -107,13 +107,15 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
         tfm_panic();
     }
 
-    /* No input or output needed for connect message */
-    msg = tfm_spm_create_msg(service, connect_handle, PSA_IPC_CONNECT,
-                             ns_caller, NULL, 0, NULL, 0, NULL);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
     if (!msg) {
         /* Have no enough resource to create message */
         return PSA_ERROR_CONNECTION_BUSY;
     }
+
+    /* No input or output needed for connect message */
+    tfm_spm_fill_msg(msg, service, connect_handle, PSA_IPC_CONNECT,
+                     ns_caller, NULL, 0, NULL, 0, NULL);
 
     /*
      * Send message and wake up the SP who is waiting on message queue,
@@ -121,7 +123,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
      */
     tfm_spm_send_event(service, msg);
 
-    return PSA_ERROR_CONNECTION_BUSY;
+    return PSA_SUCCESS;
 }
 
 psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
@@ -264,12 +266,14 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
      * FixMe: Need to check if the message is unrecognized by the RoT
      * Service or incorrectly formatted.
      */
-    msg = tfm_spm_create_msg(service, handle, type, ns_caller, invecs,
-                             in_num, outvecs, out_num, outptr);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_panic();
     }
+
+    tfm_spm_fill_msg(msg, service, handle, type, ns_caller, invecs,
+                     in_num, outvecs, out_num, outptr);
 
     /*
      * Send message and wake up the SP who is waiting on message queue,
@@ -305,13 +309,15 @@ void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller)
         tfm_panic();
     }
 
-    /* No input or output needed for close message */
-    msg = tfm_spm_create_msg(service, handle, PSA_IPC_DISCONNECT, ns_caller,
-                             NULL, 0, NULL, 0, NULL);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        return;
+        tfm_panic();
     }
+
+    /* No input or output needed for close message */
+    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, ns_caller,
+                     NULL, 0, NULL, 0, NULL);
 
     /*
      * Send message and wake up the SP who is waiting on message queue,
@@ -875,9 +881,6 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     }
 
     tfm_event_wake(&msg->ack_evnt, ret);
-
-    /* Message should not be unsed anymore */
-    tfm_spm_free_msg(msg);
 }
 
 /**
