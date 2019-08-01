@@ -18,7 +18,7 @@ To build the TF-M firmware the following tools are needed:
    "yaml",,"Firmware"
    "pyasn1",,"Firmware"
    "jinja2",,"Firmware"
-   "pycrypto",,"Firmware"
+   "cryptography",,"Firmware"
    "Doxygen",">1.8","Reference manual"
    "Sphinx",">1.4","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
@@ -33,7 +33,7 @@ To build the TF-M firmware the following tools are needed:
 Dependency chain:
 
 .. uml::
-   
+
    @startuml
     skinparam state {
       BackgroundColor #92AEE0
@@ -64,15 +64,15 @@ Dependency chain:
     fw --> c_comp
     fw --> CMake
     CMake --> gmake
-    fw --> pycrypto
+    fw --> cryptography
     fw --> pyasn1
     fw --> yaml
     fw --> jinja2
-    pycrypto --> Python3
+    cryptography --> Python3
     pyasn1 --> Python3
     yaml --> Python3
     jinja2 --> Python3
-    
+
     [*] --> u_guide
     u_guide --> Sphinx
     Sphinx --> m2r
@@ -86,7 +86,7 @@ Dependency chain:
     PlantUML --> gwiz
     Sphinx --> LaTex
     LaTex --> PdfLaTex
-    
+
     [*] --> refman
     refman --> Doxygen
     Doxygen --> PlantUML
@@ -112,7 +112,7 @@ only for these environments, but building in other environments can still be
 possible.
 
 The following environments are supported:
-    
+
     - Windows 10 x64 + Cygwin x64 (example configuration is provided for
       this Windows setup only).
     - Windows 10 x64 + msys2 x64.
@@ -181,7 +181,7 @@ thus GNU make is needed for the build. On Linux please use the version
 available from the official repository of your distribution.
 
 On Windows the following binaries are supported:
-    
+
     - GNU make v4.2.1 executable from Cygwin
     - GNU make v4.2.1 executable from msys2
     - GNU make v4.2 executable from DS5 |DS5_VERSION| (see <DS5 directory>/bin)
@@ -207,7 +207,7 @@ Ubuntu
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
 - Python3, with the following libraries:
-- pycrypto
+- cryptography
 - pyasn1
 - yaml
 - jinja2 v2.10
@@ -259,7 +259,7 @@ Windows + Cygwin
 - Python3 `(native Windows
   version) <https://www.python.org/downloads/>`__, with the following
   libraries:
-- pycryptodome (pip3 install --user pycryptodome)
+- cryptography (pip3 install --user cryptography)
 - pyasn1 (pip3 install --user pyasn1)
 - pyyaml (pip3 install --user pyyaml)
 - jinja2 (pip3 install --user jinja2)
