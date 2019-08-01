@@ -303,8 +303,16 @@ function(set_up_app_build)
 	#Ensure secure_fw is built before our executable.
 	add_dependencies(${EXE_NAME} ${S_BIN})
 
+	if (NOT DEFINED S_VENEER_PATH)
+		if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/../secure_fw)
+			set (S_VENEER_PATH "${CMAKE_CURRENT_BINARY_DIR}/../secure_fw")
+		else()
+			message(FATAL_ERROR "No valid path for S_VENEER_PATH, secure_fw is built?")
+		endif()
+	endif()
+
 	#Add the veneers to the executable.
-	set(S_VENEER_FILE "${CMAKE_CURRENT_BINARY_DIR}/${VENEER_NAME}")
+	set(S_VENEER_FILE "${S_VENEER_PATH}/${VENEER_NAME}")
 	set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
 
 	#Collect executables to common location: build/install/outputs/
@@ -316,11 +324,6 @@ function(set_up_app_build)
 				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.bin
 			DESTINATION outputs/fvp/)
 endfunction()
-
-if (NOT TARGET_TFM_S_EXISTED)
-	set(S_VENEER_FILE_LOCATION "${CMAKE_CURRENT_BINARY_DIR}")
-	add_subdirectory(../secure_fw ${CMAKE_CURRENT_BINARY_DIR}/secure_fw)
-endif()
 
 if (LINK_TO_BOTH_MEMORY_REGION)
 	#Link to primary memory region
