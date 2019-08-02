@@ -28,6 +28,11 @@
 #include "tfm_nspm.h"
 #include "tfm_memory_utils.h"
 
+#include "secure_fw/services/tfm_service_list.inc"
+
+/* Extern service variable */
+extern struct tfm_spm_service_t service[];
+
 /* Extern SPM variable */
 extern struct spm_partition_db_t g_spm_partition_db;
 
@@ -37,14 +42,8 @@ extern int32_t tfm_secure_lock;
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
-TFM_POOL_DECLARE(spm_service_pool, sizeof(struct tfm_spm_service_t),
-                 TFM_SPM_MAX_ROT_SERV_NUM);
 TFM_POOL_DECLARE(msg_db_pool, sizeof(struct tfm_msg_body_t),
                  TFM_MSG_QUEUE_MAX_MSG_NUM);
-
-static struct tfm_spm_service_db_t g_spm_service_db[] = {
-    #include "secure_fw/services/tfm_service_list.inc"
-};
 
 /********************** SPM functions for handler mode ***********************/
 
@@ -166,7 +165,7 @@ struct tfm_spm_service_t *
     head = &partition->runtime_data.service_list;
     TFM_LIST_FOR_EACH(node, head) {
         service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t, list);
-        if (service->service_db->signal == signal) {
+        if (service->service_db.signal == signal) {
             return service;
         }
     }
@@ -195,7 +194,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
         TFM_LIST_FOR_EACH(node, head) {
             service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t,
                                             list);
-            if (service->service_db->sid == sid) {
+            if (service->service_db.sid == sid) {
                 return service;
             }
         }
@@ -265,14 +264,14 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
 {
     TFM_ASSERT(service);
 
-    switch (service->service_db->minor_policy) {
+    switch (service->service_db.minor_policy) {
     case TFM_VERSION_POLICY_RELAXED:
-        if (minor_version > service->service_db->minor_version) {
+        if (minor_version > service->service_db.minor_version) {
             return IPC_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
-        if (minor_version != service->service_db->minor_version) {
+        if (minor_version != service->service_db.minor_version) {
             return IPC_ERROR_VERSION;
         }
         break;
@@ -401,7 +400,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     }
 
     /* Messages put. Update signals */
-    p_runtime_data->signals |= service->service_db->signal;
+    p_runtime_data->signals |= service->service_db.signal;
 
     tfm_event_wake(&p_runtime_data->signal_evnt, (p_runtime_data->signals &
                                                   p_runtime_data->signal_mask));
@@ -499,16 +498,13 @@ void tfm_spm_init(void)
 {
     uint32_t i, num;
     struct spm_partition_desc_t *partition;
-    struct tfm_spm_service_t *service;
+    /*struct tfm_spm_service_t *service;*/
     struct tfm_thrd_ctx *pth, this_thrd;
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
                   sizeof(struct tfm_conn_handle_t),
                   TFM_CONN_HANDLE_MAX_NUM);
-    tfm_pool_init(spm_service_pool, POOL_BUFFER_SIZE(spm_service_pool),
-                  sizeof(struct tfm_spm_service_t),
-                  TFM_SPM_MAX_ROT_SERV_NUM);
     tfm_pool_init(msg_db_pool, POOL_BUFFER_SIZE(msg_db_pool),
                   sizeof(struct tfm_msg_body_t),
                   TFM_MSG_QUEUE_MAX_MSG_NUM);
@@ -545,22 +541,17 @@ void tfm_spm_init(void)
     }
 
     /* Init Service */
-    num = sizeof(g_spm_service_db) / sizeof(struct tfm_spm_service_db_t);
+    num = sizeof(service) / sizeof(struct tfm_spm_service_t);
     for (i = 0; i < num; i++) {
         partition =
-            tfm_spm_get_partition_by_id(g_spm_service_db[i].partition_id);
+            tfm_spm_get_partition_by_id(service[i].service_db.partition_id);
         if (!partition) {
             tfm_panic();
         }
-        service = (struct tfm_spm_service_t *)tfm_pool_alloc(spm_service_pool);
-        if (!service) {
-            tfm_panic();
-        }
-        service->service_db = &g_spm_service_db[i];
-        service->partition = partition;
-        tfm_list_init(&service->handle_list);
+        service[i].partition = partition;
+        tfm_list_init(&service[i].handle_list);
         tfm_list_add_tail(&partition->runtime_data.service_list,
-                          &service->list);
+                          &service[i].list);
     }
 
     /*

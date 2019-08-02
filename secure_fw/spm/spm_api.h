@@ -136,7 +136,7 @@ struct tfm_spm_service_db_t {
 
 /* RoT Service data */
 struct tfm_spm_service_t {
-    struct tfm_spm_service_db_t *service_db; /* Service database pointer     */
+    struct tfm_spm_service_db_t service_db;  /* Service database pointer     */
     struct spm_partition_desc_t *partition;  /*
                                               * Point to secure partition
                                               * data

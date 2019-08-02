@@ -57,11 +57,11 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller)
      * It should return PSA_VERSION_NONE if the caller is not authorized
      * to access the RoT Service.
      */
-    if (ns_caller && !service->service_db->non_secure_client) {
+    if (ns_caller && !service->service_db.non_secure_client) {
         return PSA_VERSION_NONE;
     }
 
-    return service->service_db->minor_version;
+    return service->service_db.minor_version;
 }
 
 psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
@@ -95,7 +95,7 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
      * It is a fatal error if the caller is not authorized to access the RoT
      * Service.
      */
-    if (ns_caller && !service->service_db->non_secure_client) {
+    if (ns_caller && !service->service_db.non_secure_client) {
         tfm_panic();
     }
 
