@@ -293,6 +293,11 @@ int32_t mpc_init_cfg(void)
     ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
     ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
 
+    ret = Driver_QSPI_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
     ret = Driver_CODE_SRAM_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
@@ -360,6 +365,10 @@ int32_t mpc_init_cfg(void)
     }
 
     /* Lock down the MPC configuration */
+    ret = Driver_QSPI_MPC.LockDown();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
     ret = Driver_CODE_SRAM_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
         return ret;
