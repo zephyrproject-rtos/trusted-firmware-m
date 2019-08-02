@@ -244,7 +244,11 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
      */
     Driver_APB_PPC0.ClearInterrupt();
 
-    /* Enable PPC interrupts for APB PPC */
+    /* Enable PPC interrupts */
+    ret = Driver_AHB_PPCEXP0.EnableInterrupt();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
     ret = Driver_APB_PPC0.EnableInterrupt();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
@@ -345,6 +349,14 @@ int32_t mpc_init_cfg(void)
     }
 #endif /* BL2 */
 
+    /* SRAM MPC device needs to be initialialized so that the interrupt can be
+     * enabled later. The default (secure only) config is used.
+     */
+    ret = Driver_CODE_SRAM_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
     ret = mpc_data_region0->Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
@@ -429,6 +441,14 @@ int32_t ppc_init_cfg(void)
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     int32_t ret = ARM_DRIVER_OK;
 
+    /* No peripherals are configured on AHB PPCEXP0, but device needs to be
+     * initialialized so that the interrupt can be enabled later.
+     */
+    ret = Driver_AHB_PPCEXP0.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
     /* Grant non-secure access to peripherals in the APB PPC0
      * (timer0 and 1, dualtimer, mhu 0 and 1)
      */
@@ -463,6 +483,22 @@ int32_t ppc_init_cfg(void)
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_MHU1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    /* No peripherals are configured on APB PPC1, but device needs to be
+     * initialialized so that the interrupt can be enabled later.
+     */
+    ret = Driver_APB_PPC1.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+
+    /* No peripherals are configured on APB PPC EXP0, but device needs to be
+     * initialialized so that the interrupt can be enabled later.
+     */
+    ret = Driver_APB_PPCEXP0.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }

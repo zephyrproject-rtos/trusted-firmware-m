@@ -18,6 +18,7 @@
 #include "secure_utilities.h"
 
 /* Import MPC driver */
+extern ARM_DRIVER_MPC Driver_EFLASH0_MPC;
 extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
 
 /* Get address of memory regions to configure MPU */
@@ -182,7 +183,8 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 
 void MPC_Handler(void)
 {
-    /* Clear MPC interrupt flag and pending MPC IRQ */
+    /* Clear MPC interrupt flags and pending MPC IRQ */
+    Driver_EFLASH0_MPC.ClearInterrupt();
     Driver_CODE_SRAM_MPC.ClearInterrupt();
     NVIC_ClearPendingIRQ(S_MPC_COMBINED_IRQn);
 
