@@ -28,27 +28,28 @@ typedef void (*os_wrapper_thread_func) (void *argument);
  * \param[in] arg         Argument to pass to the function invoked by thread
  * \param[in] priority    Initial thread priority
  *
- * \return Returns thread ID, or \ref OS_WRAPPER_ERROR in case of error
+ * \return Returns the thread handle created, or NULL in case of error
  */
-uint32_t os_wrapper_thread_new(const char *name, int32_t stack_size,
-                               os_wrapper_thread_func func, void *arg,
-                               uint32_t priority);
+void *os_wrapper_thread_new(const char *name, int32_t stack_size,
+                            os_wrapper_thread_func func, void *arg,
+                            uint32_t priority);
 /**
- * \brief Gets current thread ID
+ * \brief Gets current thread handle
  *
- * \return Returns thread ID, or \ref OS_WRAPPER_ERROR in case of error
+ * \return Returns the thread handle, or NULL in case of error
  */
-uint32_t os_wrapper_thread_get_id(void);
+void *os_wrapper_thread_get_handle(void);
 
 /**
  * \brief Gets thread priority
  *
- * \param[in] id Thread ID
+ * \param[in]  handle   Thread handle
+ * \param[out] priority The priority of the thread
  *
- * \return Returns thread priority value, or \ref OS_WRAPPER_ERROR in case of
- *         error
+ * \return Returns \ref OS_WRAPPER_SUCCESS on success, or \ref OS_WRAPPER_ERROR
+ *                 in case of error
  */
-uint32_t os_wrapper_thread_get_priority(uint32_t id);
+uint32_t os_wrapper_thread_get_priority(void *handle, uint32_t *priority);
 
 /**
  * \brief Exits the calling thread

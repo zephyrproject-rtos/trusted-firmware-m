@@ -15,7 +15,7 @@
 /**
  * \brief the ns_lock ID
  */
-static uint32_t ns_lock_id = (uint32_t)NULL;
+static void *ns_lock_handle = NULL;
 
 __attribute__((weak))
 int32_t tfm_ns_interface_dispatch(veneer_fn fn,
@@ -25,14 +25,14 @@ int32_t tfm_ns_interface_dispatch(veneer_fn fn,
     int32_t result;
 
     /* TFM request protected by NS lock */
-    if (os_wrapper_mutex_acquire(ns_lock_id, OS_WRAPPER_WAIT_FOREVER)
+    if (os_wrapper_mutex_acquire(ns_lock_handle, OS_WRAPPER_WAIT_FOREVER)
             != OS_WRAPPER_SUCCESS) {
         return (int32_t)TFM_ERROR_GENERIC;
     }
 
     result = fn(arg0, arg1, arg2, arg3);
 
-    if (os_wrapper_mutex_release(ns_lock_id) != OS_WRAPPER_SUCCESS) {
+    if (os_wrapper_mutex_release(ns_lock_handle) != OS_WRAPPER_SUCCESS) {
         return (int32_t)TFM_ERROR_GENERIC;
     }
 
@@ -42,13 +42,13 @@ int32_t tfm_ns_interface_dispatch(veneer_fn fn,
 __attribute__((weak))
 enum tfm_status_e tfm_ns_interface_init(void)
 {
-    uint32_t id;
+    void *handle;
 
-    id = os_wrapper_mutex_create();
-    if (id == OS_WRAPPER_ERROR) {
+    handle = os_wrapper_mutex_create();
+    if (!handle) {
         return TFM_ERROR_GENERIC;
     }
 
-    ns_lock_id = id;
+    ns_lock_handle = handle;
     return TFM_SUCCESS;
 }

@@ -19,7 +19,7 @@ struct test_task_t {
     struct test_result_t *ret;
 };
 
-static uint32_t test_semaphore;
+static void *test_semaphore;
 
 /**
  * \brief Executes the supplied test task and then releases the test semaphore.
@@ -48,28 +48,29 @@ static void test_task_runner(void *arg)
 void tfm_sst_run_test(const char *thread_name, struct test_result_t *ret,
                       test_func_t *test_func)
 {
-    uint32_t current_thread_id;
+    void *current_thread_handle;
     uint32_t current_thread_priority;
     uint32_t err;
-    uint32_t thread;
+    void *thread;
     struct test_task_t test_task = { .func = test_func, .ret = ret };
 
     /* Create a binary semaphore with initial count of 0 tokens available */
     test_semaphore = os_wrapper_semaphore_create(1, 0, "sst_tests_sema");
-    if (test_semaphore == OS_WRAPPER_ERROR) {
+    if (!test_semaphore) {
         TEST_FAIL("Semaphore creation failed");
         return;
     }
 
-    current_thread_id = os_wrapper_thread_get_id();
-    if (current_thread_id == OS_WRAPPER_ERROR) {
+    current_thread_handle = os_wrapper_thread_get_handle();
+    if (!current_thread_handle) {
         os_wrapper_semaphore_delete(test_semaphore);
         TEST_FAIL("Failed to get current thread ID");
         return;
     }
 
-    current_thread_priority = os_wrapper_thread_get_priority(current_thread_id);
-    if (current_thread_priority == OS_WRAPPER_ERROR) {
+    err = os_wrapper_thread_get_priority(current_thread_handle,
+                                         &current_thread_priority);
+    if (err == OS_WRAPPER_ERROR) {
         os_wrapper_semaphore_delete(test_semaphore);
         TEST_FAIL("Failed to get current thread priority");
         return;
@@ -79,7 +80,7 @@ void tfm_sst_run_test(const char *thread_name, struct test_result_t *ret,
     thread = os_wrapper_thread_new(thread_name, SST_TEST_TASK_STACK_SIZE,
                                    test_task_runner, &test_task,
                                    current_thread_priority);
-    if (thread == OS_WRAPPER_ERROR) {
+    if (!thread) {
         os_wrapper_semaphore_delete(test_semaphore);
         TEST_FAIL("Failed to create test thread");
         return;

@@ -14,12 +14,11 @@
 
 /* This is an example OS abstraction layer for CMSIS-RTOSv2 */
 
-uint32_t os_wrapper_thread_new(const char *name, int32_t stack_size,
-                               os_wrapper_thread_func func, void *arg,
-                               uint32_t priority)
+void *os_wrapper_thread_new(const char *name, int32_t stack_size,
+                            os_wrapper_thread_func func, void *arg,
+                            uint32_t priority)
 {
     osThreadAttr_t task_attribs = {.tz_module = 1};
-    osThreadId_t thread_id;
 
     /* By default, the thread starts as osThreadDetached */
     if (stack_size != OS_WRAPPER_DEFAULT_STACK_SIZE) {
@@ -28,36 +27,24 @@ uint32_t os_wrapper_thread_new(const char *name, int32_t stack_size,
     task_attribs.name = name;
     task_attribs.priority = (osPriority_t) priority;
 
-    thread_id = osThreadNew(func, arg, &task_attribs);
-    if (thread_id == NULL) {
-        return OS_WRAPPER_ERROR;
-    }
-
-    return (uint32_t)thread_id;
+    return (void *)osThreadNew(func, arg, &task_attribs);
 }
 
-
-uint32_t os_wrapper_semaphore_create(uint32_t max_count, uint32_t initial_count,
-                                     const char *name)
+void *os_wrapper_semaphore_create(uint32_t max_count, uint32_t initial_count,
+                                  const char *name)
 {
     osSemaphoreAttr_t sema_attrib = {0};
-    osSemaphoreId_t semaphore;
 
     sema_attrib.name = name;
 
-    semaphore = osSemaphoreNew(max_count, initial_count, &sema_attrib);
-    if (semaphore == NULL) {
-        return OS_WRAPPER_ERROR;
-    }
-
-    return (uint32_t)semaphore;
+    return (void *)osSemaphoreNew(max_count, initial_count, &sema_attrib);
 }
 
-uint32_t os_wrapper_semaphore_acquire(uint32_t semaphore_id, uint32_t timeout)
+uint32_t os_wrapper_semaphore_acquire(void *handle, uint32_t timeout)
 {
     osStatus_t status;
 
-    status = osSemaphoreAcquire((osSemaphoreId_t)semaphore_id,
+    status = osSemaphoreAcquire((osSemaphoreId_t)handle,
                                 (timeout == OS_WRAPPER_WAIT_FOREVER) ?
                                 osWaitForever : timeout);
     if (status != osOK) {
@@ -67,11 +54,11 @@ uint32_t os_wrapper_semaphore_acquire(uint32_t semaphore_id, uint32_t timeout)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_semaphore_release(uint32_t sema)
+uint32_t os_wrapper_semaphore_release(void *handle)
 {
     osStatus_t status;
 
-    status = osSemaphoreRelease((osSemaphoreId_t)sema);
+    status = osSemaphoreRelease((osSemaphoreId_t)handle);
     if (status != osOK) {
         return OS_WRAPPER_ERROR;
     }
@@ -79,11 +66,11 @@ uint32_t os_wrapper_semaphore_release(uint32_t sema)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_semaphore_delete(uint32_t sema)
+uint32_t os_wrapper_semaphore_delete(void *handle)
 {
     osStatus_t status;
 
-    status = osSemaphoreDelete((osSemaphoreId_t)sema);
+    status = osSemaphoreDelete((osSemaphoreId_t)handle);
     if (status != osOK) {
         return OS_WRAPPER_ERROR;
     }
@@ -91,9 +78,8 @@ uint32_t os_wrapper_semaphore_delete(uint32_t sema)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_mutex_create(void)
+void *os_wrapper_mutex_create(void)
 {
-    osMutexId_t id;
     const osMutexAttr_t attr = {
         .name = NULL,
         .attr_bits = osMutexPrioInherit, /* Priority inheritance is recommended
@@ -106,23 +92,18 @@ uint32_t os_wrapper_mutex_create(void)
         .cb_size = 0U
     };
 
-    id = osMutexNew(&attr);
-    if (!id) {
-        return OS_WRAPPER_ERROR;
-    }
-
-    return (uint32_t)id;
+    return (void *)osMutexNew(&attr);
 }
 
-uint32_t os_wrapper_mutex_acquire(uint32_t mutex_id, uint32_t timeout)
+uint32_t os_wrapper_mutex_acquire(void *handle, uint32_t timeout)
 {
     osStatus_t status = osOK;
 
-    if (!mutex_id) {
+    if (!handle) {
         return OS_WRAPPER_ERROR;
     }
 
-    status = osMutexAcquire((osMutexId_t)mutex_id,
+    status = osMutexAcquire((osMutexId_t)handle,
                             (timeout == OS_WRAPPER_WAIT_FOREVER) ?
                              osWaitForever : timeout);
     if (status != osOK) {
@@ -132,15 +113,15 @@ uint32_t os_wrapper_mutex_acquire(uint32_t mutex_id, uint32_t timeout)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_mutex_release(uint32_t mutex_id)
+uint32_t os_wrapper_mutex_release(void *handle)
 {
     osStatus_t status = osOK;
 
-    if (!mutex_id) {
+    if (!handle) {
         return OS_WRAPPER_ERROR;
     }
 
-    status = osMutexRelease((osMutexId_t)mutex_id);
+    status = osMutexRelease((osMutexId_t)handle);
     if (status != osOK) {
         return OS_WRAPPER_ERROR;
     }
@@ -148,15 +129,15 @@ uint32_t os_wrapper_mutex_release(uint32_t mutex_id)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_mutex_delete(uint32_t mutex_id)
+uint32_t os_wrapper_mutex_delete(void *handle)
 {
     osStatus_t status = osOK;
 
-    if (!mutex_id) {
+    if (!handle) {
         return OS_WRAPPER_ERROR;
     }
 
-    status = osMutexDelete((osMutexId_t)mutex_id);
+    status = osMutexDelete((osMutexId_t)handle);
     if (status != osOK) {
         return OS_WRAPPER_ERROR;
     }
@@ -164,28 +145,23 @@ uint32_t os_wrapper_mutex_delete(uint32_t mutex_id)
     return OS_WRAPPER_SUCCESS;
 }
 
-uint32_t os_wrapper_thread_get_id(void)
+void *os_wrapper_thread_get_handle(void)
 {
-    osThreadId_t thread_id;
-
-    thread_id = osThreadGetId();
-    if (thread_id == NULL) {
-        return OS_WRAPPER_ERROR;
-    }
-
-    return (uint32_t)thread_id;
+    return (void *)osThreadGetId();
 }
 
-uint32_t os_wrapper_thread_get_priority(uint32_t id)
+uint32_t os_wrapper_thread_get_priority(void *handle, uint32_t *priority)
 {
     osPriority_t prio;
 
-    prio = osThreadGetPriority((osThreadId_t)id);
+    prio = osThreadGetPriority((osThreadId_t)handle);
     if (prio == osPriorityError) {
         return OS_WRAPPER_ERROR;
     }
 
-    return prio;
+    *priority = (uint32_t)prio;
+
+    return OS_WRAPPER_SUCCESS;
 }
 
 void os_wrapper_thread_exit(void)
