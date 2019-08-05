@@ -55,7 +55,7 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 	endif()
 
-	if (DEFINED SECURITY_COUNTER)
+	if (SECURITY_COUNTER)
 		set (ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
 	else()
 		set (ADD_SECURITY_COUNTER "")

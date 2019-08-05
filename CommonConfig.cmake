@@ -30,15 +30,7 @@ else()
 endif()
 
 #BL2 bootloader (MCUBoot) related settings
-if(NOT DEFINED BL2)
-	set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")
-endif()
-if (BL2)
-	if (NOT DEFINED MCUBOOT_UPGRADE_STRATEGY)
-		set (MCUBOOT_UPGRADE_STRATEGY "OVERWRITE_ONLY" CACHE STRING "Configure BL2 which upgrade strategy to use")
-		set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;NO_SWAP;RAM_LOADING")
-	endif()
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/MCUBootConfig.cmake)
 
 set(BUILD_CMSIS_CORE Off)
 set(BUILD_RETARGET Off)
@@ -266,26 +258,8 @@ if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 endif()
 
 if (BL2)
-	add_definitions(-DBL2)
-	if (NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "RSA-2048" AND NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "RSA-3072")
-		message(FATAL_ERROR "MCUBoot only supports RSA-2048 and RSA-3072 signature")
-	endif()
-	if (NOT DEFINED MCUBOOT_SIGNATURE_TYPE)
-		set(MCUBOOT_SIGNATURE_TYPE "RSA-3072")
-	endif()
-	if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY" AND
-		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP" AND
-		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" AND
-		NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
-		message(FATAL_ERROR "ERROR: MCUBoot supports OVERWRITE_ONLY, SWAP, NO_SWAP and RAM_LOADING upgrade strategies only.")
-	endif()
 	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
 		set(LINK_TO_BOTH_MEMORY_REGION ON)
-	endif()
-else() #BL2 is turned off
-	if (DEFINED MCUBOOT_UPGRADE_STRATEGY)
-		message (WARNING "Ignoring value of MCUBOOT_UPGRADE_STRATEGY as BL2 option is set to False.")
-		unset (MCUBOOT_UPGRADE_STRATEGY)
 	endif()
 endif()
 

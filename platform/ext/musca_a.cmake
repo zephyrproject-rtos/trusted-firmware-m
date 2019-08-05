@@ -35,10 +35,6 @@ endif()
 set (FLASH_LAYOUT          "${PLATFORM_DIR}/target/musca_a/partition/flash_layout.h")
 set (PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_a/partition")
 
-if (BL2)
-  set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
-endif()
-
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver/Config" ABSOLUTE)
@@ -177,13 +173,21 @@ endif()
 
 if (NOT BL2)
     message(WARNING "BL2 is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
+    add_definitions(-DBL2)
     set(BL2 True)
     set(MCUBOOT_UPGRADE_STRATEGY "RAM_LOADING")
+    message(STATUS "MCUBOOT_UPGRADE_STRATEGY was not set, using the mandatory value for '${TARGET_PLATFORM}': ${MCUBOOT_UPGRADE_STRATEGY}.")
+    set(MCUBOOT_SIGNATURE_TYPE "RSA-3072")
+    message(STATUS "MCUBOOT_SIGNATURE_TYPE was not set, using default value: ${MCUBOOT_SIGNATURE_TYPE}.")
 else() #BL2 is True
     if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
         message(WARNING "RAM_LOADING upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
         set(MCUBOOT_UPGRADE_STRATEGY "RAM_LOADING")
     endif()
+endif()
+
+if (BL2)
+    set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
 endif()
 
 if (NOT DEFINED BUILD_BOOT_SEED)

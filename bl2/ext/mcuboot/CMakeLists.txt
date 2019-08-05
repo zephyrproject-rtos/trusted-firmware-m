@@ -129,6 +129,9 @@ add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
+message(STATUS "MCUBOOT_UPGRADE_STRATEGY is set to: '${MCUBOOT_UPGRADE_STRATEGY}'.")
+message(STATUS "MCUBOOT_SIGNATURE_TYPE is set to: '${MCUBOOT_SIGNATURE_TYPE}'.")
+
 #Set macro definitions for the project.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
 							MCUBOOT_VALIDATE_SLOT0
@@ -153,7 +156,8 @@ elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
 elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP")
 	#No compile definition needs to be specified for this upgrade strategy
 else()
-	message(FATAL_ERROR "ERROR: MCUBoot supports OVERWRITE_ONLY, SWAP, NO_SWAP and RAM_LOADING upgrade strategies only.")
+	get_property(_upgrade_strategies CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
+	message(FATAL_ERROR "ERROR: MCUBoot supports the ${_upgrade_strategies} upgrade strategies only.")
 endif()
 
 #Set install location. Keep original value to avoid overriding command line settings.
