@@ -117,10 +117,10 @@ struct spm_partition_runtime_data_t {
 
 /* RoT connection handle list */
 struct tfm_conn_handle_t {
-    psa_handle_t handle;            /* Handle value                          */
-    void *rhandle;                  /* Reverse handle value                  */
+    void *rhandle;                      /* Reverse handle value              */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct tfm_list_node_t list;    /* list node                             */
+    struct tfm_spm_service_t *service;  /* RoT service pointer               */
+    struct tfm_list_node_t list;        /* list node                         */
 };
 
 /* Service database defined by manifest */

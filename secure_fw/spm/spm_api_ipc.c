@@ -48,63 +48,51 @@ TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
 /* Service handle management functions */
 psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service)
 {
-    struct tfm_conn_handle_t *node;
+    struct tfm_conn_handle_t *p_handle;
 
     TFM_ASSERT(service);
 
     /* Get buffer for handle list structure from handle pool */
-    node = (struct tfm_conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
-    if (!node) {
+    p_handle = (struct tfm_conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
+    if (!p_handle) {
         return PSA_NULL_HANDLE;
     }
 
-    /* Global unique handle, use handle buffer address directly */
-    node->handle = (psa_handle_t)node;
+    p_handle->service = service;
 
     /* Add handle node to list for next psa functions */
-    tfm_list_add_tail(&service->handle_list, &node->list);
+    tfm_list_add_tail(&service->handle_list, &p_handle->list);
 
-    return node->handle;
+    return (psa_handle_t)p_handle;
 }
 
 static struct tfm_conn_handle_t *
     tfm_spm_find_conn_handle_node(struct tfm_spm_service_t *service,
                                   psa_handle_t conn_handle)
 {
-    struct tfm_conn_handle_t *handle_node;
-    struct tfm_list_node_t *node, *head;
-
     TFM_ASSERT(service);
 
-    head = &service->handle_list;
-    TFM_LIST_FOR_EACH(node, head) {
-        handle_node = TFM_GET_CONTAINER_PTR(node, struct tfm_conn_handle_t,
-                                            list);
-        if (handle_node->handle == conn_handle) {
-            return handle_node;
-        }
-    }
-    return NULL;
+    return (struct tfm_conn_handle_t *)conn_handle;
 }
 
 int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
                                  psa_handle_t conn_handle)
 {
-    struct tfm_conn_handle_t *node;
+    struct tfm_conn_handle_t *p_handle;
 
     TFM_ASSERT(service);
 
     /* There are many handles for each RoT Service */
-    node = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!node) {
+    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
+    if (!p_handle) {
         tfm_panic();
     }
 
     /* Remove node from handle list */
-    tfm_list_del_node(&node->list);
+    tfm_list_del_node(&p_handle->list);
 
     /* Back handle buffer to pool */
-    tfm_pool_free(node);
+    tfm_pool_free(p_handle);
     return IPC_SUCCESS;
 }
 
@@ -112,38 +100,38 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
                             psa_handle_t conn_handle,
                             void *rhandle)
 {
-    struct tfm_conn_handle_t *node;
+    struct tfm_conn_handle_t *p_handle;
 
     TFM_ASSERT(service);
     /* Set reverse handle value only be allowed for a connected handle */
     TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
 
     /* There are many handles for each RoT Service */
-    node = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!node) {
+    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
+    if (!p_handle) {
         tfm_panic();
     }
 
-    node->rhandle = rhandle;
+    p_handle->rhandle = rhandle;
     return IPC_SUCCESS;
 }
 
 void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
                           psa_handle_t conn_handle)
 {
-    struct tfm_conn_handle_t *node;
+    struct tfm_conn_handle_t *p_handle;
 
     TFM_ASSERT(service);
     /* Get reverse handle value only be allowed for a connected handle */
     TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
 
     /* There are many handles for each RoT Service */
-    node = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!node) {
+    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
+    if (!p_handle) {
         tfm_panic();
     }
 
-    return node->rhandle;
+    return p_handle->rhandle;
 }
 
 /* Partition management functions */
@@ -203,39 +191,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 struct tfm_spm_service_t *
     tfm_spm_get_service_by_handle(psa_handle_t conn_handle)
 {
-    uint32_t i;
-    struct tfm_conn_handle_t *handle;
-    struct tfm_list_node_t *service_node, *service_head;
-    struct tfm_list_node_t *handle_node, *handle_head;
-    struct tfm_spm_service_t *service;
-    struct spm_partition_desc_t *partition;
-
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        partition = &g_spm_partition_db.partitions[i];
-        /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
-            continue;
-        }
-
-        if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
-            continue;
-        }
-
-        service_head = &partition->runtime_data.service_list;
-        TFM_LIST_FOR_EACH(service_node, service_head) {
-            service = TFM_GET_CONTAINER_PTR(service_node,
-                                            struct tfm_spm_service_t, list);
-            handle_head = &service->handle_list;
-            TFM_LIST_FOR_EACH(handle_node, handle_head) {
-                handle = TFM_GET_CONTAINER_PTR(handle_node,
-                                               struct tfm_conn_handle_t, list);
-                if (handle->handle == conn_handle) {
-                    return service;
-                }
-            }
-        }
-    }
-    return NULL;
+    return ((struct tfm_conn_handle_t *)conn_handle)->service;
 }
 
 struct spm_partition_desc_t *tfm_spm_get_partition_by_id(int32_t partition_id)
