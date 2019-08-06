@@ -126,7 +126,7 @@ enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
  * \return TFM_SUCCESS if the partition has access to the memory range,
  *         TFM_ERROR_GENERIC otherwise.
  */
-enum tfm_status_e tfm_core_has_write_access_to_region(void *p, size_t s,
+enum tfm_status_e tfm_core_has_write_access_to_region(const void *p, size_t s,
                                                       uint32_t ns_caller,
                                                       uint32_t privileged);
 

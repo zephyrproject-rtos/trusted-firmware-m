@@ -638,7 +638,7 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
  * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval IPC_ERROR_MEMORY_CHECK    Check failed
  */
-int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller,
+int32_t tfm_memory_check(const void *buffer, size_t len, int32_t ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged);
 

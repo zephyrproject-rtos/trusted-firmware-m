@@ -186,11 +186,11 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
          * Read parameters from the arguments. It is a fatal error if the
          * memory reference for buffer is invalid or not readable.
          */
-        if (tfm_memory_check((void *)args[2], sizeof(uint32_t),
+        if (tfm_memory_check((const void *)args[2], sizeof(uint32_t),
             ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
             tfm_panic();
         }
-        if (tfm_memory_check((void *)args[3], sizeof(uint32_t),
+        if (tfm_memory_check((const void *)args[3], sizeof(uint32_t),
             ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
             tfm_panic();
         }
@@ -218,8 +218,8 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
      * if the memory reference for the wrap input vector is invalid or not
      * readable.
      */
-    if (tfm_memory_check((void *)inptr, in_num * sizeof(psa_invec),
-        ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+    if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
+        TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
         tfm_panic();
     }
     /*
@@ -227,8 +227,8 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
      * actual length later. It is a fatal error if the memory reference for
      * the wrap output vector is invalid or not read-write.
      */
-    if (tfm_memory_check((void *)outptr, out_num * sizeof(psa_outvec),
-        ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+    if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
+        TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
         tfm_panic();
     }
 
@@ -244,8 +244,8 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
      * memory reference was invalid or not readable.
      */
     for (i = 0; i < in_num; i++) {
-        if (tfm_memory_check((void *)invecs[i].base, invecs[i].len,
-            ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+        if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
+            TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
             tfm_panic();
         }
     }
@@ -423,8 +423,8 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      * Write the message to the service buffer. It is a fatal error if the
      * input msg pointer is not a valid memory reference or not read-write.
      */
-    if (tfm_memory_check((void *)msg, sizeof(psa_msg_t),
-        false, TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+    if (tfm_memory_check(msg, sizeof(psa_msg_t), false, TFM_MEMORY_ACCESS_RW,
+        privileged) != IPC_SUCCESS) {
         tfm_panic();
     }
 
