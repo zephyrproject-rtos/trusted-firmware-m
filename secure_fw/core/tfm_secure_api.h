@@ -91,44 +91,21 @@ int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr);
 int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
 
 /**
- * \brief Check whether the current partition has read access to a memory range
+ * \brief Check whether a memory range is inside a memory region.
  *
- * This function assumes, that the current MPU configuration is set for the
- * partition to be checked.
+ * \param[in] p             The start address of the range to check
+ * \param[in] s             The size of the range to check
+ * \param[in] region_start  The start address of the region, which should
+ *                          contain the range
+ * \param[in] region_limit  The end address of the region, which should contain
+ *                          the range
  *
- * \param[in] p                The start address of the range to check
- * \param[in] s                The size of the range to check
- * \param[in] ns_caller        Whether the current partition is a non-secure one
- * \param[in] privileged       Privileged mode or unprivileged mode:
- *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                             \ref TFM_PARTITION_PRIVILEGED_MODE
- *
- * \return TFM_SUCCESS if the partition has access to the memory range,
+ * \return TFM_SUCCESS if the region contains the range,
  *         TFM_ERROR_GENERIC otherwise.
  */
-enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                                     uint32_t ns_caller,
-                                                     uint32_t privileged);
-
-/**
- * \brief Check whether the current partition has write access to a memory range
- *
- * This function assumes, that the current MPU configuration is set for the
- * partition to be checked.
- *
- * \param[in] p                The start address of the range to check
- * \param[in] s                The size of the range to check
- * \param[in] ns_caller        Whether the current partition is a non-secure one
- * \param[in] privileged       Privileged mode or unprivileged mode:
- *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                             \ref TFM_PARTITION_PRIVILEGED_MODE
- *
- * \return TFM_SUCCESS if the partition has access to the memory range,
- *         TFM_ERROR_GENERIC otherwise.
- */
-enum tfm_status_e tfm_core_has_write_access_to_region(const void *p, size_t s,
-                                                      uint32_t ns_caller,
-                                                      uint32_t privileged);
+enum tfm_status_e check_address_range(const void *p, size_t s,
+                                      uintptr_t region_start,
+                                      uintptr_t region_limit);
 
 void tfm_enable_irq(psa_signal_t irq_signal);
 void tfm_disable_irq(psa_signal_t irq_signal);

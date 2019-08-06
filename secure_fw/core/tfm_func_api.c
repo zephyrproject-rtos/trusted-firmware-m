@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <arm_cmse.h>
-#include "tfm_secure_api.h"
 #include "tfm_nspm.h"
 #include "secure_utilities.h"
 #include "uart_stdout.h"
@@ -21,6 +20,7 @@
 #include "platform/include/tfm_spm_hal.h"
 #include "tfm_irq_list.h"
 #include "psa/service.h"
+#include "tfm_core_mem_check.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1

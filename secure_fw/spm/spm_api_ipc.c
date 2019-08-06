@@ -17,6 +17,7 @@
 #include "tfm_spm_hal.h"
 #include "spm_api.h"
 #include "spm_db.h"
+#include "tfm_core_mem_check.h"
 #include "tfm_internal_defines.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"

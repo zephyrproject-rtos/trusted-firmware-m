@@ -39,6 +39,7 @@ set (SS_CORE_C_SRC
 		"${SS_CORE_DIR}/tfm_nspm.c"
 		"${SS_CORE_DIR}/tfm_boot_data.c"
 		"${SS_CORE_DIR}/tfm_utils.c"
+		"${SS_CORE_DIR}/tfm_core_mem_check.c"
 	)
 
 #Append all our source files to global lists.
