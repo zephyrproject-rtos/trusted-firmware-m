@@ -18,6 +18,7 @@
 #include "sst_object_defs.h"
 #include "sst_object_table.h"
 #include "sst_utils.h"
+#include "tfm_sst_req_mngr.h"
 
 #define SST_SYSTEM_READY     1
 #define SST_SYSTEM_NOT_READY 0
@@ -195,7 +196,7 @@ release_sst_lock_and_return:
 }
 
 psa_ps_status_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
-                                uint32_t offset, uint32_t size, uint8_t *data)
+                                uint32_t offset, uint32_t size)
 {
     psa_ps_status_t err = PSA_PS_ERROR_OPERATION_FAILED;
 
@@ -231,7 +232,7 @@ psa_ps_status_t sst_object_read(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Copy the decrypted object data to the output buffer */
-        (void)tfm_memcpy(data, g_sst_object.data + offset, size);
+        sst_req_mngr_write_asset_data(g_sst_object.data + offset, size);
 
 release_sst_lock_and_return:
         /* Remove data stored in the object before leaving the function */
@@ -246,7 +247,7 @@ release_sst_lock_and_return:
 
 psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
                                   psa_ps_create_flags_t create_flags,
-                                  uint32_t size, const uint8_t *data)
+                                  uint32_t size)
 {
     psa_ps_status_t err = PSA_PS_ERROR_OPERATION_FAILED;
     uint32_t old_fid = SST_INVALID_FID;
@@ -306,7 +307,10 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Update the object data */
-        (void)tfm_memcpy(g_sst_object.data, data, size);
+        err = sst_req_mngr_read_asset_data(g_sst_object.data, size);
+        if (err != PSA_PS_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
 
         /* Update the current object size */
         g_sst_object.header.info.current_size = size;
@@ -363,8 +367,7 @@ release_sst_lock_and_return:
 }
 
 psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
-                                 uint32_t offset, uint32_t size,
-                                 const uint8_t *data)
+                                 uint32_t offset, uint32_t size)
 {
     psa_ps_status_t err = PSA_PS_ERROR_OPERATION_FAILED;
     uint32_t old_fid;
@@ -419,7 +422,10 @@ psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
         }
 
         /* Update the object data */
-        (void)tfm_memcpy(g_sst_object.data + offset, data, size);
+        err = sst_req_mngr_read_asset_data(g_sst_object.data + offset, size);
+        if (err != PSA_PS_SUCCESS) {
+            goto release_sst_lock_and_return;
+        }
 
         /* Update the current object size if necessary */
         if ((offset + size) > g_sst_object.header.info.current_size) {

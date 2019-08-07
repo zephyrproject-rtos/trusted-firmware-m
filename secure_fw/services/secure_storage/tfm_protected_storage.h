@@ -37,7 +37,6 @@ psa_ps_status_t tfm_sst_init(void);
  * \param[in] client_id     Identifier of the asset's owner (client)
  * \param[in] uid           Unique identifier for the data
  * \param[in] data_length   The size in bytes of the data in `p_data`
- * \param[in] p_data        A buffer containing the data
  * \param[in] create_flags  The flags indicating the properties of the data
  *
  * \return A status indicating the success/failure of the operation as specified
@@ -66,7 +65,6 @@ psa_ps_status_t tfm_sst_init(void);
 psa_ps_status_t tfm_sst_set(int32_t client_id,
                             psa_ps_uid_t uid,
                             uint32_t data_length,
-                            const void *p_data,
                             psa_ps_create_flags_t create_flags);
 /**
  * \brief Gets the asset data for the provided uid.
@@ -77,8 +75,6 @@ psa_ps_status_t tfm_sst_set(int32_t client_id,
  *                          to start retrieving data
  * \param[in]  data_length  The amount of data to read (and the minimum
  *                          allocated size of the `p_data` buffer)
- * \param[out] p_data       The buffer where the data will be placed upon
- *                          successful completion
  *
  * \return A status indicating the success/failure of the operation as specified
  *         in \ref psa_ps_status_t
@@ -107,8 +103,7 @@ psa_ps_status_t tfm_sst_set(int32_t client_id,
 psa_ps_status_t tfm_sst_get(int32_t client_id,
                             psa_ps_uid_t uid,
                             uint32_t data_offset,
-                            uint32_t data_length,
-                            void *p_data);
+                            uint32_t data_length);
 
 /**
  * \brief Gets the metadata for the provided uid.

@@ -46,7 +46,6 @@ psa_ps_status_t tfm_sst_init(void)
 psa_ps_status_t tfm_sst_set(int32_t client_id,
                             psa_ps_uid_t uid,
                             uint32_t data_length,
-                            const void *p_data,
                             psa_ps_create_flags_t create_flags)
 {
     /* Check that the UID is valid */
@@ -60,14 +59,13 @@ psa_ps_status_t tfm_sst_set(int32_t client_id,
     }
 
     /* Create the object in the object system */
-    return sst_object_create(uid, client_id, create_flags, data_length, p_data);
+    return sst_object_create(uid, client_id, create_flags, data_length);
 }
 
 psa_ps_status_t tfm_sst_get(int32_t client_id,
                             psa_ps_uid_t uid,
                             uint32_t data_offset,
-                            uint32_t data_length,
-                            void *p_data)
+                            uint32_t data_length)
 {
     /* Check that the UID is valid */
     if (uid == TFM_SST_INVALID_UID) {
@@ -75,7 +73,7 @@ psa_ps_status_t tfm_sst_get(int32_t client_id,
     }
 
     /* Read the object data from the object system */
-    return sst_object_read(uid, client_id, data_offset, data_length, p_data);
+    return sst_object_read(uid, client_id, data_offset, data_length);
 }
 
 psa_ps_status_t tfm_sst_get_info(int32_t client_id, psa_ps_uid_t uid,
