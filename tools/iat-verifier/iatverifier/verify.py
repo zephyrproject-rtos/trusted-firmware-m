@@ -50,14 +50,14 @@ def decode(value, key, keep_going=False):
 # ----------------------------------------------------------------------------
 # Validation functions
 #
-def validate_instance_id(value, keep_going=False):
+def validate_instance_id(value, keep_going=False, strict=False):
     _validate_bytestring_length(value, 'INSTANCE_ID', 33, keep_going)
     if value[0] != 0x01:
         msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
         error(msg.format(value[0]), keep_going)
 
 
-def validate_challege(value, keep_going=False):
+def validate_challege(value, keep_going=False, strict=False):
     if not isinstance(value, bytes):
         msg = 'Invalid CHALLENGE; must be a bytes string.'
         error(msg, keep_going)
@@ -68,19 +68,19 @@ def validate_challege(value, keep_going=False):
         error(msg.format(const.HASH_SIZES, value_len), keep_going)
 
 
-def validate_implementation_id(value, keep_going=False):
+def validate_implementation_id(value, keep_going=False, strict=False):
     pass
 
 
-def validate_hardware_id(value, keep_going=False):
+def validate_hardware_id(value, keep_going=False, strict=False):
     pass
 
 
-def validate_originator(value, keep_going=False):
+def validate_originator(value, keep_going=False, strict=False):
     pass
 
 
-def validate_sw_components(value, keep_going=False):
+def validate_sw_components(value, keep_going=False, strict=False):
     if not isinstance(value, list):
         msg = 'Invalid SW_COMPONENTS value (must be an array): {}'
         error(msg.format(value), keep_going)
@@ -94,8 +94,11 @@ def validate_sw_components(value, keep_going=False):
 
         for k, v in sw_component.items():
             if k not in const.ALLOWED_SW_COMPONENT_CLAIMS:
-                msg = 'Uexpected SW_COMPONENT claim: {}'
-                error(msg.format(k), keep_going)
+                if strict:
+                    msg = 'Unexpected SW_COMPONENT claim: {}'
+                    error(msg.format(k), keep_going)
+                else:
+                    continue
             try:
                 validation_funcs[k](v, keep_going)
             except Exception:
@@ -103,59 +106,59 @@ def validate_sw_components(value, keep_going=False):
                     raise
 
 
-def validate_sw_component_type(value, keep_going=False):
+def validate_sw_component_type(value, keep_going=False, strict=False):
     pass
 
 
-def validate_no_measurements(vlaue, keep_going=False):
+def validate_no_measurements(vlaue, keep_going=False, strict=False):
     pass
 
 
-def validate_client_id(value, keep_going=False):
+def validate_client_id(value, keep_going=False, strict=False):
     if not isinstance(value, int):
         msg = 'Invalid CLIENT_ID, must be an int: {}'
         error(msg.format(value), keep_going)
 
 
-def validate_security_lifecycle(value, keep_going=False):
+def validate_security_lifecycle(value, keep_going=False, strict=False):
     if not isinstance(value, int):
         msg = 'Invalid SECURITY_LIFECYCLE, must be an int: {}'
         error(msg.format(value), keep_going)
 
 
-def validate_profile_id(value, keep_going=False):
+def validate_profile_id(value, keep_going=False, strict=False):
     if not isinstance(value, str):
         msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
         error(msg.format(value), keep_going)
 
 
-def validate_boot_seed(value, keep_going=False):
+def validate_boot_seed(value, keep_going=False, strict=False):
     _validate_bytestring_length(value, 'BOOT_SEED', 32, keep_going)
 
 
-def validate_signer_id(value, keep_going=False):
+def validate_signer_id(value, keep_going=False, strict=False):
     _validate_bytestring_length(value, 'SIGNER_ID', 32, keep_going)
 
 
-def validate_sw_component_version(value, keep_going=False):
+def validate_sw_component_version(value, keep_going=False, strict=False):
     pass
 
 
-def validate_epoch(value, keep_going=False):
+def validate_epoch(value, keep_going=False, strict=False):
     if not (isinstance(value, int) and value >= 0):
         msg = 'Invalid EPOCH, must be an unsigned integer: {}'
         error(msg.format(value), keep_going)
 
 
-def validate_measurement_value(value, keep_going=False):
+def validate_measurement_value(value, keep_going=False, strict=False):
     _validate_bytestring_length(value, 'MEASUREMENT', 32, keep_going)
 
 
-def validate_measurement_description(value, keep_going=False):
+def validate_measurement_description(value, keep_going=False, strict=False):
     pass
 
 
-def validate_challenge(value, keep_going=False):
+def validate_challenge(value, keep_going=False, strict=False):
     pass
 
 
@@ -202,7 +205,7 @@ def _validate_bytestring_length(value, name, expected_len, keep_going=False):
 # ----------------------------------------------------------------------------
 
 
-def decode_sw_component(raw_sw_component, keep_going=True):
+def decode_sw_component(raw_sw_component, keep_going=True, strict=False):
     sw_component = {}
     for k, v in raw_sw_component.items():
         if isinstance(v, bytes):
@@ -210,12 +213,15 @@ def decode_sw_component(raw_sw_component, keep_going=True):
         try:
             sw_component[const.NAMES[k]] = v
         except KeyError:
-            if not keep_going:
-                raise
+            if strict:
+                if not keep_going:
+                    raise
+            else:
+                sw_component[k] = v
     return sw_component
 
 
-def decode_and_validate_iat(encoded_iat, keep_going=False):
+def decode_and_validate_iat(encoded_iat, keep_going=False, strict=False):
     try:
         raw_token = cbor.loads(encoded_iat)
     except Exception as e:
@@ -229,14 +235,15 @@ def decode_and_validate_iat(encoded_iat, keep_going=False):
         try:
             entry_name = const.NAMES[entry]
         except KeyError:
-            error('Invalid IAT identifier: {}'.format(entry), keep_going)
+            if strict:
+                error('Invalid IAT claim: {}'.format(entry), keep_going)
             if isinstance(value, bytes):
                 value = decode(value, entry, keep_going)
             token[entry] = value
             continue
 
         value = raw_token[entry]
-        validation_funcs[entry](value, keep_going)
+        validation_funcs[entry](value, keep_going, strict)
         if entry_name == 'SW_COMPONENTS':
             try:
                 token[entry_name] = []
@@ -284,6 +291,10 @@ def main():
                         help='''
                         Print the decoded token in JSON format.
                         ''')
+    parser.add_argument('-s', '--strict', action='store_true',
+                        help='''
+                        Report failure if unknown claim is encountered.
+                        ''')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
@@ -298,7 +309,7 @@ def main():
         sys.exit(1)
 
     try:
-        token = decode_and_validate_iat(raw_iat, args.keep_going)
+        token = decode_and_validate_iat(raw_iat, args.keep_going, args.strict)
         if not seen_errors:
             print('Token format OK')
     except ValueError as e:
