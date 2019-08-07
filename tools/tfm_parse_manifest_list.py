@@ -7,6 +7,8 @@
 
 import os
 import io
+import sys
+import argparse
 from jinja2 import Environment, BaseLoader, select_autoescape
 
 try:
@@ -65,7 +67,7 @@ def load_manifest_list(file):
     db = []
     manifest_list = yaml.safe_load(file)
     for item in manifest_list["manifest_list"]:
-        manifest_path = item['manifest']
+        manifest_path = os.path.expandvars(item['manifest'])
         try:
             file = open(manifest_path)
             manifest = yaml.safe_load(file)
@@ -75,7 +77,7 @@ def load_manifest_list(file):
 
     return db
 
-def generate_manifestfilename(env):
+def generate_manifestfilename(env, out_dir):
     """
     Generate manifestfilename header file.
 
@@ -83,7 +85,10 @@ def generate_manifestfilename(env):
     ----------
     env :
         The instance of Environment.
+    out_dir:
+        The root directory that files are generated to.
     """
+
     manifest_header_list = []
     with open(manifest_list_yaml_file_path) as manifest_list_yaml_file:
         manifest_list = yaml.safe_load(manifest_list_yaml_file)
@@ -91,7 +96,7 @@ def generate_manifestfilename(env):
         template = env.get_template(templatefile_name)
 
         for manifest_file in manifest_list["manifest_list"]:
-            manifest_path = manifest_file['manifest']
+            manifest_path = os.path.expandvars(manifest_file['manifest'])
             file = open(manifest_path)
             manifest = yaml.safe_load(file)
 
@@ -103,23 +108,23 @@ def generate_manifestfilename(env):
             context['attr'] = manifest_file
             context['utilities'] = utilities
 
-            manifest_dir, sep, manifest_name = manifest_path.rpartition('/')
+            manifest_dir, manifest_name = os.path.split(manifest_path)
             outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
-            outfile_path = manifest_dir + sep + "psa_manifest/" + outfile_name
-
             context['file_name'] = outfile_name.replace('.h', '')
+            outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name)
 
-            manifest_header_list.append(outfile_path)
+            manifest_header_list.append(outfile_name)
 
-            print ("Generating " + outfile_path)
+            if out_dir is not None:
+                outfile_name = os.path.join(out_dir, outfile_name)
 
-            if not os.path.exists(os.path.dirname(outfile_path)):
-                try:
-                    os.makedirs(os.path.dirname(outfile_path))
-                except OSError:
-                        raise Exception ("Failed to create folder" + os.path.dirname(outfile_path))
+            outfile_path = os.path.dirname(outfile_name)
+            if not os.path.exists(outfile_path):
+                os.makedirs(outfile_path)
 
-            outfile = io.open(outfile_path, "w", newline='\n')
+            print ("Generating " + outfile_name)
+
+            outfile = io.open(outfile_name, "w", newline='\n')
             outfile.write(template.render(context))
             outfile.close()
     return manifest_header_list
@@ -130,6 +135,32 @@ def main():
 
     Generates the output files based on the templates and the manifests.
     """
+
+    parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list')
+    parser.add_argument('-o', '--outdir'
+                        , dest='outdir'
+                        , required=False
+                        , default=None
+                        , metavar='out_dir'
+                        , help='The root directory for generated files, the default is TF-M base folder.')
+
+    args = parser.parse_args()
+
+    out_dir = args.outdir
+
+    # Arguments could be relative path.
+    # Convert to absolute path as we are going to change directory later
+    if out_dir is not None:
+        out_dir = os.path.abspath(out_dir)
+    """
+    Relative path to TF-M base folder is supported in the manifests
+    and default value of manifest list and generated file list are relative to TF-M base folder as well,
+    so first change directory to TF-M base folder.
+    By doing this, the script can be executed anywhere
+    The script is located in <TF-M base folder>/tools, so sys.path[0]<location of the script>/.. is TF-M base folder.
+    """
+    os.chdir(os.path.join(sys.path[0], ".."))
+
     env = Environment(
         loader = TemplateLoader(),
         autoescape = select_autoescape(['html', 'xml']),
@@ -139,7 +170,7 @@ def main():
     )
 
     # Generate manifestfilename
-    manifest_header_list = generate_manifestfilename(env)
+    manifest_header_list = generate_manifestfilename(env, out_dir)
     utilities = {}
     context = {}
 
@@ -159,8 +190,15 @@ def main():
         file_list_yaml = yaml.safe_load(file_list_yaml_file)
         file_list = file_list_yaml["file_list"]
         for file in file_list:
-            outfile_name = file["output"]
+            outfile_name = os.path.expandvars(file["output"])
             templatefile_name = outfile_name + '.template'
+
+            if out_dir is not None:
+                outfile_name = os.path.join(out_dir, outfile_name)
+
+            outfile_path = os.path.dirname(outfile_name)
+            if not os.path.exists(outfile_path):
+                os.makedirs(outfile_path)
 
             print ("Generating " + outfile_name)
 
