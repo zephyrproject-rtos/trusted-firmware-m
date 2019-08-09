@@ -13,6 +13,7 @@
 #include "tfm_internal_trusted_storage.h"
 #include "its_utils.h"
 #include "flash_layout.h"
+#include "secure_fw/services/secure_storage/sst_object_defs.h"
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"
@@ -26,7 +27,8 @@
 
 /* FIXME: Duplicated from flash info */
 #define ITS_MAX_FILE_SIZE \
-    ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, ITS_FLASH_PROGRAM_UNIT)
+    ITS_UTILS_MAX(ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, ITS_FLASH_PROGRAM_UNIT), \
+                  ITS_UTILS_ALIGN(SST_MAX_OBJECT_SIZE, SST_FLASH_PROGRAM_UNIT))
 
 static uint8_t asset_data[ITS_MAX_FILE_SIZE] = {0};
 

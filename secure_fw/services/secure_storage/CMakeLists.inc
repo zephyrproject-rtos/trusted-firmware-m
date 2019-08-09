@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -56,10 +56,6 @@ set (SECURE_STORAGE_C_SRC
 	"${SECURE_STORAGE_DIR}/sst_object_system.c"
 	"${SECURE_STORAGE_DIR}/sst_object_table.c"
 	"${SECURE_STORAGE_DIR}/sst_utils.c"
-	"${SECURE_STORAGE_DIR}/flash/sst_flash.c"
-	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs.c"
-	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_dblock.c"
-	"${SECURE_STORAGE_DIR}/flash_fs/sst_flash_fs_mblock.c"
 )
 
 if (SST_ENCRYPTION)

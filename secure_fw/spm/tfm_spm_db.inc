@@ -528,6 +528,10 @@ uint32_t *ctx_stack_list[] =
 static int32_t dependencies_TFM_SP_STORAGE[] =
 {
     TFM_CRYPTO_SID,
+    TFM_ITS_SET_SID,
+    TFM_ITS_GET_SID,
+    TFM_ITS_GET_INFO_SID,
+    TFM_ITS_REMOVE_SID,
 };
 #endif /* TFM_PARTITION_SECURE_STORAGE */
 
@@ -584,6 +588,8 @@ static int32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
 static int32_t dependencies_TFM_SP_SST_TEST[] =
 {
     TFM_CRYPTO_SID,
+    TFM_ITS_GET_SID,
+    TFM_ITS_REMOVE_SID,
 };
 #endif /* TFM_PARTITION_TEST_SST */
 
@@ -636,7 +642,7 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_req_mngr_init,
-        .dependencies_num     = 1,
+        .dependencies_num     = 5,
         .p_dependencies       = dependencies_TFM_SP_STORAGE,
     },
 #endif /* TFM_PARTITION_SECURE_STORAGE */
@@ -828,7 +834,7 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_test_init,
-        .dependencies_num     = 1,
+        .dependencies_num     = 3,
         .p_dependencies       = dependencies_TFM_SP_SST_TEST,
     },
 #endif /* TFM_PARTITION_TEST_SST */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +12,6 @@
 
 #include "flash_layout.h"
 #include "psa/protected_storage.h"
-#include "sst_utils.h"
 
 #ifdef SST_ENCRYPTION
 #include "crypto/sst_crypto_interface.h"
@@ -45,7 +44,7 @@ struct sst_obj_header_t {
 };
 
 
-#define SST_MAX_OBJECT_DATA_SIZE  GET_ALIGNED_FLASH_BYTES(SST_MAX_ASSET_SIZE)
+#define SST_MAX_OBJECT_DATA_SIZE  SST_MAX_ASSET_SIZE
 
 /*!
  * \struct sst_object_t

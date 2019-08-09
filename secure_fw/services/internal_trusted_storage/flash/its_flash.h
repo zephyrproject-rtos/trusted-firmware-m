@@ -26,7 +26,8 @@ extern "C" {
  * \brief Provides a compile-time constant for the maximum program unit required
  *        by any flash device that can be accessed through this interface.
  */
-#define ITS_FLASH_MAX_PROGRAM_UNIT ITS_FLASH_PROGRAM_UNIT
+#define ITS_FLASH_MAX_PROGRAM_UNIT ITS_UTILS_MAX(ITS_FLASH_PROGRAM_UNIT, \
+                                                 SST_FLASH_PROGRAM_UNIT)
 
 /**
  * \brief Enumerates the available flash devices.
@@ -36,6 +37,7 @@ extern "C" {
  */
 enum its_flash_id_t {
     ITS_FLASH_ID_INTERNAL = 0,
+    ITS_FLASH_ID_EXTERNAL,
 };
 
 /**

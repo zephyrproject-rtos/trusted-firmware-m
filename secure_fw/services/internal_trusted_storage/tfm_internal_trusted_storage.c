@@ -9,6 +9,7 @@
 
 #include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
+#include "psa_manifest/pid.h"
 #include "tfm_memory_utils.h"
 #include "tfm_its_defs.h"
 #include "its_utils.h"
@@ -16,7 +17,13 @@
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
 
-static its_flash_fs_ctx_t fs_ctx;
+static its_flash_fs_ctx_t fs_ctx_its;
+static its_flash_fs_ctx_t fs_ctx_sst;
+
+static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
+{
+    return (client_id == TFM_SP_STORAGE) ? &fs_ctx_sst : &fs_ctx_its;
+}
 
 /**
  * \brief Maps a pair of client id and uid to a file id.
@@ -37,7 +44,8 @@ psa_status_t tfm_its_init(void)
 {
     psa_status_t status;
 
-    status = its_flash_fs_prepare(&fs_ctx,
+    /* Initialise the ITS context */
+    status = its_flash_fs_prepare(&fs_ctx_its,
                                   its_flash_get_info(ITS_FLASH_ID_INTERNAL));
 #ifdef ITS_CREATE_FLASH_LAYOUT
     /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
@@ -55,16 +63,46 @@ psa_status_t tfm_its_init(void)
         /* Remove all data in the ITS memory area and create a valid ITS flash
          * layout in that area.
          */
-        status = its_flash_fs_wipe_all(&fs_ctx);
+        status = its_flash_fs_wipe_all(&fs_ctx_its);
         if (status != PSA_SUCCESS) {
             return status;
         }
 
         /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx,
+        status = its_flash_fs_prepare(&fs_ctx_its,
                                      its_flash_get_info(ITS_FLASH_ID_INTERNAL));
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
+
+    /* Initialise the SST context */
+    status = its_flash_fs_prepare(&fs_ctx_sst,
+                                  its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
+#ifdef SST_CREATE_FLASH_LAYOUT
+    /* If SST_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+     * create a SST flash layout. SST service will generate an empty and valid
+     * SST flash layout to store assets. It will erase all data located in the
+     * assigned SST memory area before generating the SST layout.
+     * This flag is required to be set if the SST memory area is located in
+     * non-persistent memory.
+     * This flag can be set if the SST memory area is located in persistent
+     * memory without a previous valid SST flash layout in it. That is the case
+     * when it is the first time in the device life that the SST service is
+     * executed.
+     */
+     if (status != PSA_SUCCESS) {
+        /* Remove all data in the SST memory area and create a valid SST flash
+         * layout in that area.
+         */
+        status = its_flash_fs_wipe_all(&fs_ctx_sst);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+
+        /* Attempt to initialise again */
+        status = its_flash_fs_prepare(&fs_ctx_sst,
+                                     its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
+    }
+#endif /* SST_CREATE_FLASH_LAYOUT */
 
     return status;
 }
@@ -93,7 +131,8 @@ psa_status_t tfm_its_set(int32_t client_id,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                        &g_file_info);
     if (status == PSA_SUCCESS) {
         /* If the object exists and has the write once flag set, then it
          * cannot be modified. Otherwise it needs to be removed.
@@ -101,7 +140,7 @@ psa_status_t tfm_its_set(int32_t client_id,
         if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
             return PSA_ERROR_NOT_PERMITTED;
         } else {
-            status = its_flash_fs_file_delete(&fs_ctx, g_fid);
+            status = its_flash_fs_file_delete(get_fs_ctx(client_id), g_fid);
             if (status != PSA_SUCCESS) {
                 return status;
             }
@@ -114,7 +153,7 @@ psa_status_t tfm_its_set(int32_t client_id,
     }
 
     /* Create the file in the file system */
-    return its_flash_fs_file_create(&fs_ctx,
+    return its_flash_fs_file_create(get_fs_ctx(client_id),
                                     g_fid,
                                     data_length,
                                     data_length,
@@ -131,6 +170,15 @@ psa_status_t tfm_its_get(int32_t client_id,
 {
     psa_status_t status;
 
+#ifdef TFM_PARTITION_TEST_SST
+    /* The SST test partiton can call tfm_its_get() through SST code. Treat it
+     * as if it were SST.
+     */
+    if (client_id == TFM_SP_SST_TEST) {
+        client_id = TFM_SP_STORAGE;
+    }
+#endif
+
     /* Check that the UID is valid */
     if (uid == TFM_ITS_INVALID_UID) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -140,7 +188,8 @@ psa_status_t tfm_its_get(int32_t client_id,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                        &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -155,8 +204,8 @@ psa_status_t tfm_its_get(int32_t client_id,
                               g_file_info.size_current - data_offset);
 
     /* Read object data if any */
-    status = its_flash_fs_file_read(&fs_ctx, g_fid, data_size, data_offset,
-                                    p_data);
+    status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, data_size,
+                                    data_offset, p_data);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -181,7 +230,8 @@ psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                        &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -198,6 +248,15 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
 {
     psa_status_t status;
 
+#ifdef TFM_PARTITION_TEST_SST
+    /* The SST test partiton can call tfm_its_remove() through SST code. Treat
+     * it as if it were SST.
+     */
+    if (client_id == TFM_SP_SST_TEST) {
+        client_id = TFM_SP_STORAGE;
+    }
+#endif
+
     /* Check that the UID is valid */
     if (uid == TFM_ITS_INVALID_UID) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -206,7 +265,8 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     /* Set file id */
     tfm_its_get_fid(client_id, uid, g_fid);
 
-    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                        &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -219,5 +279,5 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     }
 
     /* Delete old file from the persistent area */
-    return its_flash_fs_file_delete(&fs_ctx, g_fid);
+    return its_flash_fs_file_delete(get_fs_ctx(client_id), g_fid);
 }

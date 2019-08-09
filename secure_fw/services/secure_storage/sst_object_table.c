@@ -11,12 +11,15 @@
 
 #include "cmsis_compiler.h"
 #include "crypto/sst_crypto_interface.h"
-#include "flash/sst_flash.h"
-#include "flash_fs/sst_flash_fs.h"
+#include "flash_layout.h"
 #include "nv_counters/sst_nv_counters.h"
+#include "psa/internal_trusted_storage.h"
 #include "tfm_memory_utils.h"
 #include "sst_utils.h"
 #include "tfm_sst_defs.h"
+
+/* FIXME: Duplicated from flash info */
+#define SST_FLASH_DEFAULT_VAL 0xFFU
 
 /*!
  * \def SST_OBJECT_SYSTEM_VERSION
@@ -51,7 +54,7 @@ struct sst_obj_table_entry_t {
  *
  * \brief Object table structure.
  */
-struct __attribute__((__aligned__(SST_FLASH_PROGRAM_UNIT))) sst_obj_table_t {
+struct sst_obj_table_t {
 #ifdef SST_ENCRYPTION
   union sst_crypto_t crypto;     /*!< Crypto metadata. */
 #endif
@@ -216,22 +219,26 @@ __STATIC_INLINE void sst_object_table_fs_read_table(
                                       struct sst_obj_table_init_ctx_t *init_ctx)
 {
     psa_ps_status_t err;
-    /* FIXME: Read table from a persistent memory (flash location or FS) */
+    size_t data_length;
 
     /* Read file with the table 0 data */
-    err = sst_flash_fs_file_read(SST_TABLE_FS_ID(SST_OBJ_TABLE_IDX_0),
-                             SST_OBJ_TABLE_SIZE,
-                             SST_OBJECT_TABLE_OBJECT_OFFSET,
-                             (uint8_t *)init_ctx->p_table[SST_OBJ_TABLE_IDX_0]);
+    err = psa_status_to_psa_ps_status(
+                     psa_its_get(SST_TABLE_FS_ID(SST_OBJ_TABLE_IDX_0),
+                                 SST_OBJECT_TABLE_OBJECT_OFFSET,
+                                 SST_OBJ_TABLE_SIZE,
+                                 (void *)init_ctx->p_table[SST_OBJ_TABLE_IDX_0],
+                                 &data_length));
     if (err != PSA_PS_SUCCESS) {
         init_ctx->table_state[SST_OBJ_TABLE_IDX_0] = SST_OBJ_TABLE_INVALID;
     }
 
     /* Read file with the table 1 data */
-    err = sst_flash_fs_file_read(SST_TABLE_FS_ID(SST_OBJ_TABLE_IDX_1),
-                             SST_OBJ_TABLE_SIZE,
-                             SST_OBJECT_TABLE_OBJECT_OFFSET,
-                             (uint8_t *)init_ctx->p_table[SST_OBJ_TABLE_IDX_1]);
+    err = psa_status_to_psa_ps_status(
+                     psa_its_get(SST_TABLE_FS_ID(SST_OBJ_TABLE_IDX_1),
+                                 SST_OBJECT_TABLE_OBJECT_OFFSET,
+                                 SST_OBJ_TABLE_SIZE,
+                                 (void *)init_ctx->p_table[SST_OBJ_TABLE_IDX_1],
+                                 &data_length));
     if (err != PSA_PS_SUCCESS) {
         init_ctx->table_state[SST_OBJ_TABLE_IDX_1] = SST_OBJ_TABLE_INVALID;
     }
@@ -253,12 +260,12 @@ __STATIC_INLINE psa_ps_status_t sst_object_table_fs_write_table(
     uint32_t obj_table_id = SST_TABLE_FS_ID(sst_obj_table_ctx.scratch_table);
     uint8_t swap_table_idxs = sst_obj_table_ctx.scratch_table;
 
-
     /* Create file to store object table in the FS */
-    err = sst_flash_fs_file_create(obj_table_id,
-                                   SST_OBJ_TABLE_SIZE,
-                                   SST_OBJ_TABLE_SIZE,
-                                   (const uint8_t *)obj_table);
+    err = psa_status_to_psa_ps_status(psa_its_set(obj_table_id,
+                                                  SST_OBJ_TABLE_SIZE,
+                                                  (const void *)obj_table,
+                                                  PSA_STORAGE_FLAG_NONE));
+
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -888,8 +895,8 @@ psa_ps_status_t sst_object_table_init(uint8_t *obj_data)
     }
 
     /* Remove the old object table file */
-    err = sst_flash_fs_file_delete(SST_TABLE_FS_ID(
-                                              sst_obj_table_ctx.scratch_table));
+    err = psa_status_to_psa_ps_status(
+              psa_its_remove(SST_TABLE_FS_ID(sst_obj_table_ctx.scratch_table)));
     if (err != PSA_PS_SUCCESS && err != PSA_PS_ERROR_UID_NOT_FOUND) {
         return err;
     }
@@ -933,18 +940,13 @@ psa_ps_status_t sst_object_table_get_free_fid(uint32_t fid_num,
      */
     fid = SST_OBJECT_FS_ID(idx);
 
-    /* Check if there is a file in the persistent area with that ID. That
-     * can happened when the system is rebooted (e.g. power cut, ...) in the
+    /* If there is a file in the persistent area with that ID then remove it.
+     * That can happen when the system is rebooted (e.g. power cut, ...) in the
      * middle of a create, write or delete operation.
      */
-    if (sst_flash_fs_file_exist(fid) == PSA_PS_SUCCESS) {
-        /* Remove old file from the persistent area, to keep it consistent
-         * with the table content.
-         */
-        err = sst_flash_fs_file_delete(fid);
-        if (err != PSA_PS_SUCCESS) {
-            return err;
-        }
+    err = psa_status_to_psa_ps_status(psa_its_remove(fid));
+    if (err != PSA_PS_SUCCESS && err != PSA_PS_ERROR_UID_NOT_FOUND) {
+        return err;
     }
 
     *p_fid = fid;
@@ -1073,5 +1075,5 @@ psa_ps_status_t sst_object_table_delete_old_table(void)
 {
     uint32_t table_id = SST_TABLE_FS_ID(sst_obj_table_ctx.scratch_table);
 
-    return sst_flash_fs_file_delete(table_id);
+    return psa_status_to_psa_ps_status(psa_its_remove(table_id));
 }

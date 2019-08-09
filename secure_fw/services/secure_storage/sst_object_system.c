@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #include "cmsis_compiler.h"
-#include "flash_fs/sst_flash_fs.h"
+#include "psa/internal_trusted_storage.h"
 #include "tfm_memory_utils.h"
 #ifdef SST_ENCRYPTION
 #include "sst_encrypted_object.h"
@@ -74,9 +74,7 @@ static psa_ps_status_t sst_remove_old_data(uint32_t old_fid)
     }
 
     /* Delete old file from the persistent area */
-    err = sst_flash_fs_file_delete(old_fid);
-
-    return err;
+    return psa_status_to_psa_ps_status(psa_its_remove(old_fid));
 }
 
 #ifndef SST_ENCRYPTION
@@ -96,11 +94,14 @@ enum read_type_t {
 static psa_ps_status_t sst_read_object(enum read_type_t type)
 {
     psa_ps_status_t err;
+    size_t data_length;
 
     /* Read object header */
-    err = sst_flash_fs_file_read(g_obj_tbl_info.fid, SST_OBJECT_HEADER_SIZE,
-                                 SST_OBJECT_START_POSITION,
-                                 (uint8_t *)&g_sst_object.header);
+    err = psa_status_to_psa_ps_status(psa_its_get(g_obj_tbl_info.fid,
+                                                  SST_OBJECT_START_POSITION,
+                                                  SST_OBJECT_HEADER_SIZE,
+                                                  (void *)&g_sst_object.header,
+                                                  &data_length));
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -110,23 +111,23 @@ static psa_ps_status_t sst_read_object(enum read_type_t type)
      */
     if (g_sst_object.header.fid != g_obj_tbl_info.fid ||
         g_sst_object.header.version != g_obj_tbl_info.version) {
-        err = PSA_PS_ERROR_DATA_CORRUPT;
+        return PSA_PS_ERROR_DATA_CORRUPT;
     }
 
-    if (type == READ_ALL_OBJECT) {
-        /* Read object data if any */
-        if (g_sst_object.header.info.current_size > 0) {
-            err = sst_flash_fs_file_read(g_obj_tbl_info.fid,
-                                         g_sst_object.header.info.current_size,
-                                         SST_OBJECT_HEADER_SIZE,
-                                         g_sst_object.data);
-            if (err != PSA_PS_SUCCESS) {
-                return err;
-            }
+    /* Read object data if any */
+    if (type == READ_ALL_OBJECT && g_sst_object.header.info.current_size > 0) {
+        err = psa_status_to_psa_ps_status(
+                              psa_its_get(g_obj_tbl_info.fid,
+                                          SST_OBJECT_HEADER_SIZE,
+                                          g_sst_object.header.info.current_size,
+                                          (void *)g_sst_object.data,
+                                          &data_length));
+        if (err != PSA_PS_SUCCESS) {
+            return err;
         }
     }
 
-    return err;
+    return PSA_PS_SUCCESS;
 }
 
 /**
@@ -139,9 +140,6 @@ static psa_ps_status_t sst_read_object(enum read_type_t type)
  */
 static psa_ps_status_t sst_write_object(uint32_t wrt_size)
 {
-    psa_ps_status_t err;
-    uint32_t max_size = SST_OBJECT_SIZE(g_sst_object.header.info.max_size);
-
     /* Add object identification and increase object version */
     g_sst_object.header.fid = g_obj_tbl_info.fid;
     g_sst_object.header.version++;
@@ -149,11 +147,9 @@ static psa_ps_status_t sst_write_object(uint32_t wrt_size)
     /* Save object version to be stored in the object table */
     g_obj_tbl_info.version = g_sst_object.header.version;
 
-    err = sst_flash_fs_file_create(g_obj_tbl_info.fid,
-                                   GET_ALIGNED_FLASH_BYTES(max_size),
-                                   GET_ALIGNED_FLASH_BYTES(wrt_size),
-                                   (const uint8_t *)&g_sst_object);
-    return err;
+    return psa_status_to_psa_ps_status(psa_its_set(g_obj_tbl_info.fid, wrt_size,
+                                                   (const void *)&g_sst_object,
+                                                   PSA_STORAGE_FLAG_NONE));
 }
 
 #endif /* !SST_ENCRYPTION */
@@ -161,11 +157,6 @@ static psa_ps_status_t sst_write_object(uint32_t wrt_size)
 psa_ps_status_t sst_system_prepare(void)
 {
     psa_ps_status_t err;
-
-    err = sst_flash_fs_prepare();
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
 
     /* Reuse the allocated g_sst_object.data to store a temporary object table
      * data to be validate inside the function.
@@ -317,7 +308,7 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
         /* Remove new object as object table is not persistent and propagate
          * object table manipulation error.
          */
-        (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
+        (void)psa_its_remove(g_obj_tbl_info.fid);
 
         goto clear_data_and_return;
     }
@@ -427,7 +418,7 @@ psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
         /* Remove new object as object table is not persistent and propagate
          * object table manipulation error.
          */
-        (void)sst_flash_fs_file_delete(g_obj_tbl_info.fid);
+        (void)psa_its_remove(g_obj_tbl_info.fid);
 
         goto clear_data_and_return;
     }
@@ -525,8 +516,6 @@ clear_data_and_return:
 
 psa_ps_status_t sst_system_wipe_all(void)
 {
-    psa_ps_status_t err;
-
     /* This function may get called as a corrective action
      * if a system level security violation is detected.
      * This could be asynchronous to normal system operation
@@ -534,15 +523,5 @@ psa_ps_status_t sst_system_wipe_all(void)
      * this function doesn't block on the lock and directly
      * moves to erasing the flash instead.
      */
-    err = sst_flash_fs_wipe_all();
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
-    err = sst_flash_fs_prepare();
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
     return sst_object_table_create();
 }

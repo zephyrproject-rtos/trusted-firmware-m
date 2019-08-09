@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +11,7 @@
   "type": "PSA-ROT",
   "priority": "NORMAL",
   "entry_point": "tfm_sst_req_mngr_init",
-  "stack_size": "0xA00",
+  "stack_size": "0x600",
   "secure_functions": [
     {
       "name": "TFM_SST_SET",
@@ -86,7 +86,11 @@
    }
   ],
   "dependencies": [
-    "TFM_CRYPTO"
+    "TFM_CRYPTO",
+    "TFM_ITS_SET",
+    "TFM_ITS_GET",
+    "TFM_ITS_GET_INFO",
+    "TFM_ITS_REMOVE"
   ],
   "linker_pattern": {
     "library_list": [

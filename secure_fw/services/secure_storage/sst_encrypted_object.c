@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 #include "crypto/sst_crypto_interface.h"
-#include "flash_fs/sst_flash_fs.h"
+#include "psa/internal_trusted_storage.h"
 #include "tfm_memory_utils.h"
 #include "sst_object_defs.h"
 #include "sst_utils.h"
@@ -19,14 +19,11 @@
 #define SST_ENCRYPT_SIZE(plaintext_size) \
     ((plaintext_size) + SST_OBJECT_HEADER_SIZE - sizeof(union sst_crypto_t))
 
-#define SST_CRYPTO_CLEAR_BUF_VALUE 0
 #define SST_OBJECT_START_POSITION  0
-#define SST_EMPTY_OBJECT_SIZE      0
 
 /* Buffer to store the maximum encrypted object */
 /* FIXME: Do partial encrypt/decrypt to reduce the size of internal buffer */
-#define SST_MAX_ENCRYPTED_OBJ_SIZE GET_ALIGNED_FLASH_BYTES( \
-                                     SST_ENCRYPT_SIZE(SST_MAX_OBJECT_DATA_SIZE))
+#define SST_MAX_ENCRYPTED_OBJ_SIZE SST_ENCRYPT_SIZE(SST_MAX_OBJECT_DATA_SIZE)
 
 /* FIXME: add the tag length to the crypto buffer size to account for the tag
  * being appended to the ciphertext by the crypto layer.
@@ -139,26 +136,21 @@ psa_ps_status_t sst_encrypted_object_read(uint32_t fid,
                                           struct sst_object_t *obj)
 {
     psa_ps_status_t err;
-    struct sst_file_info_t file_info;
     uint32_t decrypt_size;
-
-    /* Get the current size of the encrypted object */
-    err = sst_flash_fs_file_get_info(fid, &file_info);
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
+    size_t data_length;
 
     /* Read the encrypted object from the the persistent area */
-    err = sst_flash_fs_file_read(fid, file_info.size_current,
-                                 SST_OBJECT_START_POSITION,
-                                 obj->header.crypto.ref.iv);
+    err = psa_status_to_psa_ps_status(
+                                  psa_its_get(fid, SST_OBJECT_START_POSITION,
+                                              SST_MAX_OBJECT_SIZE,
+                                              (void *)obj->header.crypto.ref.iv,
+                                              &data_length));
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
 
     /* Get the decrypt size */
-    decrypt_size = file_info.size_current -
-                     GET_ALIGNED_FLASH_BYTES(sizeof(obj->header.crypto.ref.iv));
+    decrypt_size = data_length - sizeof(obj->header.crypto.ref.iv);
 
     /* Decrypt the object data */
     err = sst_object_auth_decrypt(fid, decrypt_size, obj);
@@ -175,27 +167,7 @@ psa_ps_status_t sst_encrypted_object_write(uint32_t fid,
     psa_ps_status_t err;
     uint32_t wrt_size;
 
-    wrt_size = SST_ENCRYPT_SIZE(obj->header.info.max_size) +
-               sizeof(obj->header.crypto.ref.iv);
-
-    wrt_size = GET_ALIGNED_FLASH_BYTES(wrt_size);
-
-#if (SST_FLASH_PROGRAM_UNIT!=1)
-    /* FIX ME
-     * As GET_ALIGNED_FLASH_BYTES is called twice
-     * to align  IV ,and header + payload
-     */
-    wrt_size +=SST_FLASH_PROGRAM_UNIT;
-#endif
-
-    /* Create an object in the object system */
-    err = sst_flash_fs_file_create(fid, wrt_size, SST_EMPTY_OBJECT_SIZE, NULL);
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
-    wrt_size = GET_ALIGNED_FLASH_BYTES(
-                               SST_ENCRYPT_SIZE(obj->header.info.current_size));
+    wrt_size = SST_ENCRYPT_SIZE(obj->header.info.current_size);
 
     /* Authenticate and encrypt the object */
     err = sst_object_auth_encrypt(fid, wrt_size, obj);
@@ -205,13 +177,11 @@ psa_ps_status_t sst_encrypted_object_write(uint32_t fid,
 
     wrt_size += sizeof(obj->header.crypto.ref.iv);
 
-    wrt_size = GET_ALIGNED_FLASH_BYTES(wrt_size);
-
     /* Write the encrypted object to the persistent area. The tag values is not
      * copied as it is stored in the object table.
      */
-    err = sst_flash_fs_file_write(fid, wrt_size, SST_OBJECT_START_POSITION,
-                                  obj->header.crypto.ref.iv);
-
-    return err;
+    return psa_status_to_psa_ps_status(
+                            psa_its_set(fid, wrt_size,
+                                        (const void *)obj->header.crypto.ref.iv,
+                                        PSA_STORAGE_FLAG_NONE));
 }

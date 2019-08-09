@@ -14,9 +14,11 @@
 #define MAX_BLOCK_DATA_COPY 256
 
 extern const struct its_flash_info_t its_flash_info_internal;
+extern const struct its_flash_info_t its_flash_info_external;
 
 static const struct its_flash_info_t *const flash_infos[] = {
     [ITS_FLASH_ID_INTERNAL] = &its_flash_info_internal,
+    [ITS_FLASH_ID_EXTERNAL] = &its_flash_info_external,
 };
 
 /**

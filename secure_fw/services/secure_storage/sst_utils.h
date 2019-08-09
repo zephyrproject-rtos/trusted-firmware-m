@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "flash_layout.h"
+#include "psa/error.h"
 #include "psa/protected_storage.h"
 
 #ifdef __cplusplus
@@ -19,12 +19,6 @@ extern "C" {
 
 #define SST_INVALID_FID  0
 #define SST_DEFAULT_EMPTY_BUFF_VAL 0
-
-/* FIXME: Support other flash program units.*/
-#if ((SST_FLASH_PROGRAM_UNIT != 1) && (SST_FLASH_PROGRAM_UNIT != 2) \
-      && (SST_FLASH_PROGRAM_UNIT != 4) && (SST_FLASH_PROGRAM_UNIT != 8))
-#error "The supported SST_FLASH_PROGRAM_UNIT values are 1, 2 or 4, 8 bytes"
-#endif
 
 /**
  * \brief Macro to check, at compilation time, if data fits in data buffer
@@ -40,17 +34,6 @@ extern "C" {
  */
 #define SST_UTILS_BOUND_CHECK(err_msg, data_size, data_buf_size) \
 typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
-
-/**
- * \brief Macro to get the number of bytes aligned with the
- *        SST_FLASH_PROGRAM_UNIT.
- *
- * \param[in] nbr_bytes  Number of bytes
- *
- * \return Return number of bytes aligned with SST_FLASH_PROGRAM_UNIT
- */
-#define GET_ALIGNED_FLASH_BYTES(nbr_bytes) \
- ((nbr_bytes + (SST_FLASH_PROGRAM_UNIT - 1)) & ~((SST_FLASH_PROGRAM_UNIT - 1)))
 
 /**
  * \brief Checks if a subset region is fully contained within a superset region.
@@ -75,13 +58,9 @@ psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
                                              uint32_t subset_size);
 
 /**
- * \brief Validates file ID
- *
- * \param[in] fid  File ID
- *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \brief Converts from psa_status_t to psa_ps_status_t
  */
-psa_ps_status_t sst_utils_validate_fid(uint32_t fid);
+psa_ps_status_t psa_status_to_psa_ps_status(psa_status_t status);
 
 #ifdef __cplusplus
 }
