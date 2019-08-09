@@ -106,8 +106,8 @@ add_executable(${PROJECT_NAME} ${ALL_SRC_ASM_BL2} ${ALL_SRC_C} ${ALL_SRC_CXX})
 config_setting_shared_compiler_flags(${PROJECT_NAME})
 config_setting_shared_linker_flags(${PROJECT_NAME})
 
-#Add BL2 define to linker to resolve symbols in region_defs.h
-embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2")
+#Add BL2 and MCUBOOT_IMAGE_NUMBER defines to linker to resolve symbols in region_defs.h and flash_layout.h
+embedded_set_target_link_defines(TARGET ${PROJECT_NAME} DEFINES "BL2" "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
 
 if(NOT DEFINED TEST_FRAMEWORK_S)
 	message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_S is undefined.")
@@ -128,6 +128,7 @@ add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
+message(STATUS "MCUBOOT_IMAGE_NUMBER is set to: '${MCUBOOT_IMAGE_NUMBER}'.")
 message(STATUS "MCUBOOT_UPGRADE_STRATEGY is set to: '${MCUBOOT_UPGRADE_STRATEGY}'.")
 message(STATUS "MCUBOOT_SIGNATURE_TYPE is set to: '${MCUBOOT_SIGNATURE_TYPE}'.")
 

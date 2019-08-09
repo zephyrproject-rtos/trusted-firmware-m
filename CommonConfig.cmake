@@ -258,6 +258,9 @@ if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 endif()
 
 if (BL2)
+	# Add MCUBOOT_IMAGE_NUMBER definition to the compiler command line.
+	add_definitions(-DMCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER})
+
 	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
 		set(LINK_TO_BOTH_MEMORY_REGION ON)
 	endif()

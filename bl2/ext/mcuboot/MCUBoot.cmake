@@ -86,7 +86,8 @@ function(mcuboot_create_boot_payload)
 	compiler_preprocess_file(SRC ${FILE_TO_PREPROCESS}
 							DST ${PREPROCESSED_FILE}
 							BEFORE_TARGET ${_MY_PARAMS_NS_BIN}
-							TARGET_PREFIX ${_MY_PARAMS_NS_BIN})
+							TARGET_PREFIX ${_MY_PARAMS_NS_BIN}
+							DEFINES "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
 
 	add_custom_command(TARGET ${_MY_PARAMS_NS_BIN}
 						POST_BUILD
@@ -132,4 +133,38 @@ function(mcuboot_create_boot_payload)
 	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin
 			RENAME ${TFM_SIGN_NAME}${_MY_PARAMS_POSTFIX}.bin
 			DESTINATION outputs/fvp/)
+endfunction()
+
+#Validate and override the upgrade strategy to be used by the bootloader.
+#
+# If the given upgrade strategy is not supported with the current value
+# of the MCUBOOT_IMAGE_NUMBER variable then the function will override its
+# previously set value.
+#
+#Examples:
+#  mcuboot_override_upgrade_strategy("SWAP")
+#
+#INPUTS:
+#  strategy - (mandatory) - Upgrade strategy to be used.
+#
+#OUTPUTS:
+#  MCUBOOT_UPGRADE_STRATEGY variable is set to the new strategy.
+#
+function(mcuboot_override_upgrade_strategy strategy)
+	if ((${strategy} STREQUAL "NO_SWAP" OR
+		 ${strategy} STREQUAL "RAM_LOADING") AND
+		NOT (MCUBOOT_IMAGE_NUMBER EQUAL 1))
+		message(WARNING "The number of separately updatable images with the NO_SWAP or the RAM_LOADING"
+			" upgrade strategy can be only '1'. Your choice was overriden.")
+		set(MCUBOOT_IMAGE_NUMBER 1 PARENT_SCOPE)
+	endif()
+	get_property(_validation_list CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
+	#Check if validation list is set.
+	if (NOT _validation_list)
+		#Set the default upgrade strategy if the CACHE variable has not been set yet.
+		set(MCUBOOT_UPGRADE_STRATEGY "OVERWRITE_ONLY" CACHE STRING "Configure BL2 which upgrade strategy to use")
+		set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;NO_SWAP;RAM_LOADING")
+	endif()
+	set(MCUBOOT_UPGRADE_STRATEGY ${strategy} PARENT_SCOPE)
+	validate_cache_value(MCUBOOT_UPGRADE_STRATEGY STRINGS)
 endfunction()

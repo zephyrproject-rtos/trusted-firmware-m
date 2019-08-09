@@ -289,7 +289,8 @@ function(set_up_app_build)
 
 	#Set BL2 specific settings.
 	if (BL2)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2")
+		#Add BL2 and MCUBOOT_IMAGE_NUMBER defines to linker to resolve symbols in region_defs.h and flash_layout.h
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2" "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
 	endif()
 
 	#We depend on the non secure tests. See if the library target is available.

@@ -239,7 +239,8 @@ function(set_up_secure_fw_build)
 	if (NOT DEFINED BL2)
 		message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
 	elseif (BL2)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2")
+		#Add BL2 and MCUBOOT_IMAGE_NUMBER defines to linker to resolve symbols in region_defs.h and flash_layout.h
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2" "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
 	endif()
 
 	if (NOT DEFINED TFM_PSA_API)

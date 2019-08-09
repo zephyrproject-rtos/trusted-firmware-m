@@ -39,7 +39,7 @@ if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
     if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
         message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
-        set(MCUBOOT_UPGRADE_STRATEGY "NO_SWAP")
+        mcuboot_override_upgrade_strategy("NO_SWAP")
     endif()
 endif()
 
