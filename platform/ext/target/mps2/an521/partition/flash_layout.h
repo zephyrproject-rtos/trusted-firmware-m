@@ -166,10 +166,6 @@
                                          SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
-/* Concatenated binary size used by imgtool.py */
-#define SIGN_BIN_SIZE                   (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
-
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */

@@ -54,10 +54,6 @@ else()
 	include(${PLATFORM_CMAKE_FILE})
 endif()
 
-if (NOT DEFINED IMAGE_VERSION)
-	set(IMAGE_VERSION 0.0.0+0)
-endif()
-
 if(${COMPILER} STREQUAL "ARMCLANG")
 	#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
 	#build system will work. A file cmake/Common/CompilerArmClangXY.cmake

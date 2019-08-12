@@ -139,10 +139,8 @@ to a single binary blob. It requires the following definitions:
 Image tool
 ^^^^^^^^^^^^^
 The ``imgtool.py`` tool is used to handle the tasks related to signing the
-binary. It requires the following definitions:
+binary. It requires the following definition:
 
-- ``SIGN_BIN_SIZE`` - Defines the size of the concatenated binary that is to
-  be signed.
 - ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded
   and is executed from. Only used in case the ``MCUBOOT_UPGRADE_STRATEGY``
   is configured to be ``RAM_LOADING``.

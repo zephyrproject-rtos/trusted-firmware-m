@@ -146,9 +146,7 @@
                                          SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
-/* Concatenated binary size and image load address used by imgtool.py */
-#define SIGN_BIN_SIZE                   (FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE)
+/* Image load address used by imgtool.py */
 #define IMAGE_LOAD_ADDRESS              (S_SRAM_ALIAS_BASE + \
                                          FLASH_AREA_BL2_SIZE)
 

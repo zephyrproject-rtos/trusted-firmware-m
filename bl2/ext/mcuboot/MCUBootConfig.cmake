@@ -44,8 +44,21 @@ else() #BL2 is turned off
 		set(MCUBOOT_SIGNATURE_TYPE "")
 	endif()
 
-	if (DEFINED SECURITY_COUNTER)
-		message(WARNING "Ignoring the value of SECURITY_COUNTER variable as BL2 option is set to False.")
+	if (DEFINED SECURITY_COUNTER OR
+		DEFINED SECURITY_COUNTER_S OR
+		DEFINED SECURITY_COUNTER_NS)
+		message(WARNING "Ignoring the values of SECURITY_COUNTER and/or SECURITY_COUNTER_* variables as BL2 option is set to False.")
 		set(SECURITY_COUNTER "")
+		set(SECURITY_COUNTER_S "")
+		set(SECURITY_COUNTER_NS "")
+	endif()
+
+	if (DEFINED IMAGE_VERSION OR
+		DEFINED IMAGE_VERSION_S OR
+		DEFINED IMAGE_VERSION_NS)
+		message(WARNING "Ignoring the values of IMAGE_VERSION and/or IMAGE_VERSION_* variables as BL2 option is set to False.")
+		set(IMAGE_VERSION "")
+		set(IMAGE_VERSION_S "")
+		set(IMAGE_VERSION_NS "")
 	endif()
 endif()

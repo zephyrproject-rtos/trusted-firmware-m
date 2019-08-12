@@ -42,6 +42,7 @@ def get_last_version(path):
 
 def next_version_number(args, defaultVersion, path):
     newVersion = None
+    versionProvided = False
     if (version.compare(args.version, defaultVersion) == 0): # Default version
         lastVersion = get_last_version(path)
         if (lastVersion is not None):
@@ -49,6 +50,7 @@ def next_version_number(args, defaultVersion, path):
         else:
             newVersion = version.increment_build_num(defaultVersion)
     else: # Version number has been explicitly provided (not using the default)
+        versionProvided = True
         newVersion = args.version
     versionString = "{a}.{b}.{c}+{d}".format(
                     a=str(newVersion.major),
@@ -56,8 +58,9 @@ def next_version_number(args, defaultVersion, path):
                     c=str(newVersion.revision),
                     d=str(newVersion.build)
     )
-    with open(path, "w") as newFile:
-        newFile.write(versionString)
+    if not versionProvided:
+        with open(path, "w") as newFile:
+            newFile.write(versionString)
     print("**[INFO]** Image version number set to " + versionString)
     return newVersion
 

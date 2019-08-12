@@ -8,9 +8,9 @@
 cmake_minimum_required(VERSION 3.7)
 
 function(mcuboot_create_boot_payload)
-	set( _OPTIONS_ARGS)                                          #Option (on/off) arguments (e.g. IGNORE_CASE)
+	set( _OPTIONS_ARGS)										  #Option (on/off) arguments (e.g. IGNORE_CASE)
 	set( _ONE_VALUE_ARGS S_BIN NS_BIN FULL_BIN SIGN_BIN POSTFIX) #Single option arguments (e.g. PATH "./foo/bar")
-	set( _MULTI_VALUE_ARGS)                                      #List arguments (e.g. LANGUAGES C ASM CXX)
+	set( _MULTI_VALUE_ARGS)									  #List arguments (e.g. LANGUAGES C ASM CXX)
 	cmake_parse_arguments(_MY_PARAMS "${_OPTIONS_ARGS}" "${_ONE_VALUE_ARGS}" "${_MULTI_VALUE_ARGS}" ${ARGN})
 
 	if (NOT DEFINED _MY_PARAMS_S_BIN)
@@ -55,15 +55,7 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 	endif()
 
-	if (SECURITY_COUNTER)
-		set (ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
-	else()
-		set (ADD_SECURITY_COUNTER "")
-	endif()
-
-	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess.c)
-	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed.c)
-	set(CONTENT_FOR_PREPROCESSING "#include \"${FLASH_LAYOUT}\"\n\n"
+	set(PARTIAL_CONTENT_FOR_PREPROCESSING "#include \"${FLASH_LAYOUT}\"\n\n"
 		"/* Enumeration that is used by the assemble.py and imgtool.py scripts\n"
 		" * for correct binary generation when nested macros are used\n"
 		" */\n"
@@ -75,8 +67,128 @@ function(mcuboot_create_boot_payload)
 		"#ifdef IMAGE_LOAD_ADDRESS\n"
 		"\tRE_IMAGE_LOAD_ADDRESS = IMAGE_LOAD_ADDRESS,\n"
 		"#endif\n"
-		"\tRE_SIGN_BIN_SIZE = SIGN_BIN_SIZE\n}\;"
 	)
+
+if (MCUBOOT_IMAGE_NUMBER GREATER 1)
+	if (SECURITY_COUNTER_S)
+		set(ADD_SECURITY_COUNTER_S "-s ${SECURITY_COUNTER_S}")
+	else()
+		set(ADD_SECURITY_COUNTER_S "")
+	endif()
+	if (SECURITY_COUNTER_NS)
+		set(ADD_SECURITY_COUNTER_NS "-s ${SECURITY_COUNTER_NS}")
+	else()
+		set(ADD_SECURITY_COUNTER_NS "")
+	endif()
+	if (DEFINED SECURITY_COUNTER)
+		message(WARNING "In case of multiple updatable images the security counter value can be specified"
+			" for the Secure and Non-secure images separately with the SECURITY_COUNTER_S and SECURITY_COUNTER_NS"
+			" defines. The value of SECURITY_COUNTER was ignored.")
+		set(SECURITY_COUNTER "")
+	endif()
+
+	if (NOT IMAGE_VERSION_S)
+		set(IMAGE_VERSION_S 0.0.0+0)
+	endif()
+	if (NOT IMAGE_VERSION_NS)
+		set(IMAGE_VERSION_NS 0.0.0+0)
+	endif()
+	if (DEFINED IMAGE_VERSION)
+		message(WARNING "In case of multiple updatable images the image version can be specified"
+			" for the Secure and Non-secure images separately with the IMAGE_VERSION_S and IMAGE_VERSION_NS"
+			" defines. The value of IMAGE_VERSION was ignored.")
+		set(IMAGE_VERSION "")
+	endif()
+
+	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess)
+	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed)
+
+	#Create files that will be preprocessed later in order to be able to handle
+	# nested macros in header files for certain macros
+	string(CONCAT CONTENT_FOR_PREPROCESSING ${PARTIAL_CONTENT_FOR_PREPROCESSING}
+			"\tRE_SIGN_BIN_SIZE = FLASH_AREA_0_SIZE,\n}\;")
+	file(WRITE ${FILE_TO_PREPROCESS}_s.c ${CONTENT_FOR_PREPROCESSING})
+	string(CONCAT CONTENT_FOR_PREPROCESSING ${PARTIAL_CONTENT_FOR_PREPROCESSING}
+			"\tRE_SIGN_BIN_SIZE = FLASH_AREA_1_SIZE,\n}\;")
+	file(WRITE ${FILE_TO_PREPROCESS}_ns.c ${CONTENT_FOR_PREPROCESSING})
+
+	#Preprocess the _s.c file that contains the secure image related macros
+	compiler_preprocess_file(SRC ${FILE_TO_PREPROCESS}_s.c
+							DST ${PREPROCESSED_FILE}_s.c
+							BEFORE_TARGET ${_MY_PARAMS_S_BIN}
+							TARGET_PREFIX ${_MY_PARAMS_S_BIN}
+							DEFINES "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
+
+	#Preprocess the _ns.c file that contains the non-secure image related macros
+	compiler_preprocess_file(SRC ${FILE_TO_PREPROCESS}_ns.c
+							DST ${PREPROCESSED_FILE}_ns.c
+							BEFORE_TARGET ${_MY_PARAMS_NS_BIN}
+							TARGET_PREFIX ${_MY_PARAMS_NS_BIN}
+							DEFINES "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
+
+	add_custom_command(TARGET ${_MY_PARAMS_NS_BIN}
+						POST_BUILD
+
+						#Sign secure binary image with default public key in mcuboot folder
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
+						ARGS sign
+							 --layout ${PREPROCESSED_FILE}_s.c
+							 -k ${KEY_FILE}
+							 --align 1
+							 -v ${IMAGE_VERSION_S}
+							 ${ADD_SECURITY_COUNTER_S}
+							 -H 0x400
+							 $<TARGET_FILE_DIR:${_MY_PARAMS_S_BIN}>/${_MY_PARAMS_S_BIN}.bin
+							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
+
+						#Sign non-secure binary image with default public key in mcuboot folder
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
+						ARGS sign
+							 --layout ${PREPROCESSED_FILE}_ns.c
+							 -k ${KEY_FILE}
+							 --align 1
+							 -v ${IMAGE_VERSION_NS}
+							 ${ADD_SECURITY_COUNTER_NS}
+							 -H 0x400
+							 $<TARGET_FILE_DIR:${_MY_PARAMS_NS_BIN}>/${_MY_PARAMS_NS_BIN}.bin
+							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_NS_BIN}_signed.bin
+
+						#Create concatenated binary image from the two independently signed binary file
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/assemble.py
+						ARGS --layout ${PREPROCESSED_FILE}_s.c
+							 -s ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
+							 -n ${CMAKE_BINARY_DIR}/${_MY_PARAMS_NS_BIN}_signed.bin
+							 -o ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin)
+
+else() # MCUBOOT_IMAGE_NUMBER = 1
+	if (SECURITY_COUNTER)
+		set(ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
+	else()
+		set(ADD_SECURITY_COUNTER "")
+	endif()
+	if (DEFINED SECURITY_COUNTER_S OR
+		DEFINED SECURITY_COUNTER_NS)
+		message(WARNING "In case of a single updatable image the security counter value can be specified with"
+			" the SECURITY_COUNTER define. The values of SECURITY_COUNTER_S and/or SECURITY_COUNTER_NS were ignored.")
+		set(SECURITY_COUNTER_S "")
+		set(SECURITY_COUNTER_NS "")
+	endif()
+
+	if (NOT IMAGE_VERSION)
+		set(IMAGE_VERSION 0.0.0+0)
+	endif()
+	if (DEFINED IMAGE_VERSION_S OR
+		DEFINED IMAGE_VERSION_NS)
+		message(WARNING "In case of a single updatable image the image version can be specified with"
+			" the IMAGE_VERSION define. The values of IMAGE_VERSION_S and/or IMAGE_VERSION_NS were ignored.")
+		set(IMAGE_VERSION_S "")
+		set(IMAGE_VERSION_NS "")
+	endif()
+
+	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess.c)
+	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed.c)
+	string(CONCAT CONTENT_FOR_PREPROCESSING ${PARTIAL_CONTENT_FOR_PREPROCESSING}
+			"\tRE_SIGN_BIN_SIZE = FLASH_AREA_0_SIZE,\n}\;")
 
 	#Create a file that will be preprocessed later in order to be able to handle nested macros
 	#in header files for certain macros
@@ -109,9 +221,9 @@ function(mcuboot_create_boot_payload)
 							 -H 0x400
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin)
+endif()
 
 	#Collect executables to common location: build/install/outputs/
-	set(TFM_FULL_NAME tfm_s_ns_concatenated)
 	set(TFM_SIGN_NAME tfm_s_ns_signed)
 
 	if (DEFINED MY_POSTFIX)
@@ -123,16 +235,27 @@ function(mcuboot_create_boot_payload)
 				DESTINATION outputs/${TARGET_PLATFORM}/)
 	endif()
 
-	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
-			DESTINATION outputs/${TARGET_PLATFORM}/)
-
-	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
-			RENAME ${TFM_FULL_NAME}${_MY_PARAMS_POSTFIX}.bin
-			DESTINATION outputs/fvp/)
-
 	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin
 			RENAME ${TFM_SIGN_NAME}${_MY_PARAMS_POSTFIX}.bin
 			DESTINATION outputs/fvp/)
+
+if (MCUBOOT_IMAGE_NUMBER GREATER 1)
+	install(FILES ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
+			${CMAKE_BINARY_DIR}/${_MY_PARAMS_NS_BIN}_signed.bin
+			DESTINATION outputs/${TARGET_PLATFORM}/)
+	install(FILES ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
+			${CMAKE_BINARY_DIR}/${_MY_PARAMS_NS_BIN}_signed.bin
+			DESTINATION outputs/fvp/)
+
+else() # MCUBOOT_IMAGE_NUMBER = 1
+	set(TFM_FULL_NAME tfm_s_ns_concatenated)
+
+	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
+			DESTINATION outputs/${TARGET_PLATFORM}/)
+	install(FILES  ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
+			RENAME ${TFM_FULL_NAME}${_MY_PARAMS_POSTFIX}.bin
+			DESTINATION outputs/fvp/)
+endif()
 endfunction()
 
 #Validate and override the upgrade strategy to be used by the bootloader.
