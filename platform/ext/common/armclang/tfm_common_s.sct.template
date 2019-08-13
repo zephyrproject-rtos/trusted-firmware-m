@@ -25,7 +25,7 @@ LR_CODE S_CODE_START {
     /****  This initial section contains common code for secure binary */
     ER_TFM_CODE S_CODE_START S_CODE_SIZE {
         *.o (RESET +First)
-        .ANY (+RO)
+        * (+RO)
     }
 
     /**** Unprivileged Secure code start here */
@@ -135,7 +135,7 @@ LR_CODE S_CODE_START {
     }
 
     ER_TFM_DATA +0 {
-        .ANY (+RW +ZI)
+        * (+RW +ZI)
     }
 
 #if !defined(TFM_PSA_API)
