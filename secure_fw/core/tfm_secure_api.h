@@ -200,16 +200,11 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn, int32_t iovec_api,
         /* FixMe: Error severity TBD */
         return (int32_t)TFM_ERROR_GENERIC;
     } else {
-#if TFM_LVL == 1
         if (desc.ns_caller) {
             return tfm_core_sfn_request(desc_ptr);
         } else {
             return tfm_core_sfn_request_thread_mode(desc_ptr);
         }
-#else
-        return (int32_t)TFM_ERROR_GENERIC;
-#endif
-
     }
 }
 #endif
