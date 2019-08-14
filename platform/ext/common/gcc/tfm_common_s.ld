@@ -568,7 +568,7 @@ SECTIONS
 #if defined (TFM_PSA_API)
     .TFM_SP_STORAGE_STACK : ALIGN(128)
     {
-        . += 0x1800;
+        . += 0xA00;
     } > RAM
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Base = ADDR(.TFM_SP_STORAGE_STACK);
     Image$$TFM_SP_STORAGE_STACK$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_STACK) + SIZEOF(.TFM_SP_STORAGE_STACK);
