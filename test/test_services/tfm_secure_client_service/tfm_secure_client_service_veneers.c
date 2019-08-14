@@ -8,7 +8,7 @@
 #include "tfm_secure_client_service_veneers.h"
 
 #include "tfm_secure_client_service.h"
-#include "secure_fw/core/include/tfm_secure_api.h"
+#include "tfm_secure_api.h"
 #include "secure_fw/spm/spm_partition_defs.h"
 
 __tfm_secure_gateway_attributes__

@@ -66,6 +66,7 @@ endif()
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
 
 set(BUILD_CMSIS_CORE Off)
 set(BUILD_RETARGET Off)

@@ -23,7 +23,7 @@
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_crypto.h"
-#include "secure_fw/core/include/tfm_memory_utils.h"
+#include "tfm_memory_utils.h"
 
 /**
  * \brief Table containing all the Uniform Signature API exposed

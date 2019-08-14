@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "psa/protected_storage.h"
-#include "secure_fw/core/include/tfm_memory_utils.h"
+#include "tfm_memory_utils.h"
 #include "s_test_helpers.h"
 #include "test/framework/test_framework_helpers.h"
 
