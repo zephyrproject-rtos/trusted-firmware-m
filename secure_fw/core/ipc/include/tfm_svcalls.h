@@ -95,13 +95,23 @@ void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller);
 /**
  * \brief SVC handler for IPC functions
  *
- * \param[in] svc_num           SVC number
- * \param[in] ctx               Argument context
+ * \param[in] svc_num           SVC number.
+ * \param[in] ctx               Argument context.
  * \param[in] lr                EXC_RETURN value of the SVC.
  *
  * \returns                     Return values from those who has,
  *                              or PSA_SUCCESS.
  */
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr);
+
+/**
+ * \brief The C source of SVCall handlers
+ *
+ * \param[in] svc_args          The arguments list.
+ * \param[in] exc_return        EXC_RETURN value of the SVC.
+ *
+ * \returns                     EXC_RETURN value indicates where to return.
+ */
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
 
 #endif

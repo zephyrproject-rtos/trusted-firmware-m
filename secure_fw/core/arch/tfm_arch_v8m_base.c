@@ -17,8 +17,6 @@
 #error "Unsupported ARM Architecture."
 #endif
 
-extern uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr);
-
 #ifdef TFM_PSA_API
 /*
  * Stack status at PendSV entry:
@@ -203,7 +201,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, PSP                        \n"
     "handler:                               \n"
     "MOV     r1, lr                         \n"
-    "BL      SVCHandler_main                \n"
+    "BL      tfm_core_svc_handler           \n"
     "BX      r0                             \n"
     );
 }

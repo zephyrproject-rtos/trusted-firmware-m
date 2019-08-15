@@ -32,7 +32,7 @@ endif()
 
 set (SS_CORE_C_SRC
 		"${SS_CORE_DIR}/tfm_core.c"
-		"${SS_CORE_DIR}/tfm_handler.c"
+		"${SS_CORE_DIR}/tfm_core_svcalls_func.c"
 		"${SS_CORE_DIR}/tfm_secure_api.c"
 		"${SS_CORE_DIR}/tfm_func_api.c"
 		"${SS_CORE_DIR}/tfm_spm_services.c"

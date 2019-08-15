@@ -19,28 +19,18 @@
 #include "tfm_arch.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
-#ifdef TFM_PSA_API
-#include <stdbool.h>
-#include "tfm_svcalls.h"
-#endif
 
 /* This SVC handler is called when a secure partition requests access to a
  * buffer area
  */
 extern void tfm_core_set_buffer_area_handler(const uint32_t args[]);
-#ifdef TFM_PSA_API
-extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
-#endif
-
 
 /* Include the definitions of the privileged IRQ handlers in case of library
  * model
  */
-#ifndef TFM_PSA_API
 #include "tfm_secure_irq_handlers.inc"
-#endif
 
-uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
 {
     uint8_t svc_number;
     /*
@@ -61,11 +51,6 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         return lr;
     }
     switch (svc_number) {
-#ifdef TFM_PSA_API
-    case TFM_SVC_IPC_REQUEST:
-        tfm_psa_ipc_request_handler(svc_args);
-        break;
-#else
     case TFM_SVC_SFN_REQUEST:
         lr = tfm_core_partition_request_svc_handler(svc_args, lr);
         break;
@@ -105,7 +90,6 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
     case TFM_SVC_DISABLE_IRQ:
         tfm_core_disable_irq_handler(svc_args);
         break;
-#endif
     case TFM_SVC_PRINT:
         printf("\033[1;34m[Sec Thread] %s\033[0m\r\n", (char *)svc_args[0]);
         break;
@@ -113,9 +97,6 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_core_get_boot_data_handler(svc_args);
         break;
     default:
-#ifdef TFM_PSA_API
-        svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, lr);
-#endif
         break;
     }
 

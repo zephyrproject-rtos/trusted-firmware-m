@@ -30,8 +30,6 @@ struct tfm_fault_context_s {
     uint32_t RETPSR;
 } tfm_fault_context;
 
-extern uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr);
-
 #ifdef TFM_PSA_API
 /*
  * Stack status at PendSV entry:
@@ -192,7 +190,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOVEQ   r0, r2                         \n"
     "MRSNE   r0, PSP                        \n"
     "MOV     r1, lr                         \n"
-    "BL      SVCHandler_main                \n"
+    "BL      tfm_core_svc_handler           \n"
     "BX      r0                             \n"
     );
 }
