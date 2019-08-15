@@ -208,7 +208,6 @@ SecureFault_Handler\
 
 SVC_Handler     PROC
                 EXPORT  SVC_Handler               [WEAK]
-                IMPORT  SVCHandler_main
                 B       .
                 ENDP
 DebugMon_Handler\
