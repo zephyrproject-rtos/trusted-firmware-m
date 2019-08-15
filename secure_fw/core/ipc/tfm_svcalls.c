@@ -1064,8 +1064,8 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
 
 void tfm_svcall_enable_irq(uint32_t *args)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)args;
-    psa_signal_t irq_signal = svc_ctx->R0;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
+    psa_signal_t irq_signal = svc_ctx->r0;
     int32_t irq_line = 0;
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;
@@ -1092,8 +1092,8 @@ void tfm_svcall_enable_irq(uint32_t *args)
 
 void tfm_svcall_disable_irq(uint32_t *args)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)args;
-    psa_signal_t irq_signal = svc_ctx->R0;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
+    psa_signal_t irq_signal = svc_ctx->r0;
     int32_t irq_line = 0;
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;

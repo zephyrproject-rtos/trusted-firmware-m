@@ -208,13 +208,13 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
     return TFM_SUCCESS;
 }
 
-void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx)
+void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 {
-    uint32_t *res_ptr = (uint32_t *)&svc_ctx->R0;
+    uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
 
     /* FixMe: check if caller partition is permitted to make an SPM request */
 
-    switch (svc_ctx->R0) {
+    switch (svc_ctx->r0) {
     case TFM_SPM_REQUEST_RESET_VOTE:
         /* FixMe: this is a placeholder for checks to be performed before
          * allowing execution of reset

@@ -79,7 +79,7 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_core_get_caller_client_id_handler(svc_args);
         break;
     case TFM_SVC_SPM_REQUEST:
-        tfm_core_spm_request_handler((struct tfm_exc_stack_t *)svc_args);
+        tfm_core_spm_request_handler((struct tfm_state_context_t *)svc_args);
         break;
     case TFM_SVC_MEMORY_CHECK:
         tfm_core_memory_permission_check_handler(svc_args);

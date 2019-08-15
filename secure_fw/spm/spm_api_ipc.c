@@ -476,8 +476,8 @@ void tfm_spm_init(void)
         tfm_thrd_init(pth,
                       tfm_spm_partition_get_init_func(i),
                       NULL,
-                      (uint8_t *)tfm_spm_partition_get_stack_top(i),
-                      (uint8_t *)tfm_spm_partition_get_stack_bottom(i));
+                      (uintptr_t)tfm_spm_partition_get_stack_top(i),
+                      (uintptr_t)tfm_spm_partition_get_stack_bottom(i));
 
         pth->prior = tfm_spm_partition_get_priority(i);
 

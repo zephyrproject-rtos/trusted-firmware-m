@@ -55,14 +55,14 @@ static int32_t is_iovec_api_call(void)
 }
 
 static uint32_t *prepare_partition_ctx(
-            const struct tfm_exc_stack_t *svc_ctx,
+            const struct tfm_state_context_t *svc_ctx,
             const struct tfm_sfn_req_s *desc_ptr,
             uint32_t *dst)
 {
     /* XPSR  = as was when called, but make sure it's thread mode */
-    *(--dst) = svc_ctx->XPSR & 0xFFFFFE00U;
+    *(--dst) = svc_ctx->xpsr & 0xFFFFFE00U;
     /* ReturnAddress = resume veneer in new context */
-    *(--dst) = svc_ctx->RetAddr;
+    *(--dst) = svc_ctx->ra;
     /* LR = sfn address */
     *(--dst) = (uint32_t)desc_ptr->sfn;
     /* R12 = don't care */
@@ -79,15 +79,15 @@ static uint32_t *prepare_partition_ctx(
 }
 
 static uint32_t *prepare_partition_iovec_ctx(
-                             const struct tfm_exc_stack_t *svc_ctx,
+                             const struct tfm_state_context_t *svc_ctx,
                              const struct tfm_sfn_req_s *desc_ptr,
                              const struct iovec_args_t *iovec_args,
                              uint32_t *dst)
 {
     /* XPSR  = as was when called, but make sure it's thread mode */
-    *(--dst) = svc_ctx->XPSR & 0xFFFFFE00U;
+    *(--dst) = svc_ctx->xpsr & 0xFFFFFE00U;
     /* ReturnAddress = resume veneer in new context */
-    *(--dst) = svc_ctx->RetAddr;
+    *(--dst) = svc_ctx->ra;
     /* LR = sfn address */
     *(--dst) = (uint32_t)desc_ptr->sfn;
     /* R12 = don't care */
@@ -115,18 +115,18 @@ static uint32_t *prepare_partition_iovec_ctx(
  * \return A pointer pointing at the created stack frame.
  */
 static int32_t *prepare_partition_irq_ctx(
-                             const struct tfm_exc_stack_t *svc_ctx,
+                             const struct tfm_state_context_t *svc_ctx,
                              sfn_t unpriv_handler,
                              int32_t *dst)
 {
     int i;
 
     /* XPSR  = as was when called, but make sure it's thread mode */
-    *(--dst) = svc_ctx->XPSR & 0xFFFFFE00;
+    *(--dst) = svc_ctx->xpsr & 0xFFFFFE00;
     /* ReturnAddress = resume to the privileged handler code, but execute it
      * unprivileged.
      */
-    *(--dst) = svc_ctx->RetAddr;
+    *(--dst) = svc_ctx->ra;
     /* LR = start address */
     *(--dst) = (int32_t)unpriv_handler;
 
@@ -139,14 +139,14 @@ static int32_t *prepare_partition_irq_ctx(
 }
 
 static void restore_caller_ctx(
-            const struct tfm_exc_stack_t *svc_ctx,
-            struct tfm_exc_stack_t *target_ctx)
+            const struct tfm_state_context_t *svc_ctx,
+            struct tfm_state_context_t *target_ctx)
 {
     /* ReturnAddress = resume veneer after second SVC */
-    target_ctx->RetAddr = svc_ctx->RetAddr;
+    target_ctx->ra = svc_ctx->ra;
 
     /* R0 = function return value */
-    target_ctx->R0 = svc_ctx->R0;
+    target_ctx->r0 = svc_ctx->r0;
 
     return;
 }
@@ -360,13 +360,13 @@ static enum tfm_status_e tfm_start_partition(
     uint32_t partition_state;
     uint32_t caller_partition_state;
     uint32_t partition_flags;
-    struct tfm_exc_stack_t *svc_ctx;
+    struct tfm_state_context_t *svc_ctx;
     uint32_t caller_partition_id;
     int32_t client_id;
     struct iovec_args_t *iovec_args;
 
     psp = __get_PSP();
-    svc_ctx = (struct tfm_exc_stack_t *)psp;
+    svc_ctx = (struct tfm_state_context_t *)psp;
     caller_flags = tfm_spm_partition_get_flags(caller_partition_idx);
 
     /* Check partition state consistency */
@@ -465,12 +465,12 @@ static enum tfm_status_e tfm_start_partition(
 
 static enum tfm_status_e tfm_start_partition_for_irq_handling(
                                                 uint32_t excReturn,
-                                                struct tfm_exc_stack_t *svc_ctx)
+                                                struct tfm_state_context_t *svc_ctx)
 {
-    uint32_t handler_partition_id = svc_ctx->R0;
-    sfn_t unpriv_handler = (sfn_t)svc_ctx->R1;
-    uint32_t irq_signal = svc_ctx->R2;
-    uint32_t irq_line = svc_ctx->R3;
+    uint32_t handler_partition_id = svc_ctx->r0;
+    sfn_t unpriv_handler = (sfn_t)svc_ctx->r1;
+    uint32_t irq_signal = svc_ctx->r2;
+    uint32_t irq_line = svc_ctx->r3;
     enum tfm_status_e res;
     uint32_t psp = __get_PSP();
     uint32_t handler_partition_psp;
@@ -531,7 +531,7 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
     uint32_t return_partition_flags;
     uint32_t psp = __get_PSP();
     size_t i;
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)psp;
     struct iovec_args_t *iovec_args;
 
     if (current_partition_idx == SPM_INVALID_PARTITION_IDX) {
@@ -560,7 +560,7 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
          */
         /* Restore caller context */
         restore_caller_ctx(svc_ctx,
-            (struct tfm_exc_stack_t *)ret_part_data->stack_ptr);
+            (struct tfm_state_context_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
         REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
@@ -601,7 +601,7 @@ static enum tfm_status_e tfm_return_from_partition_irq_handling(
     const struct spm_partition_runtime_data_t *handler_part_data;
     uint32_t interrupted_partition_idx;
     uint32_t psp = __get_PSP();
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)psp;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)psp;
 
     if (handler_partition_idx == SPM_INVALID_PARTITION_IDX) {
         return TFM_SECURE_UNLOCK_FAILED;
@@ -619,8 +619,8 @@ static enum tfm_status_e tfm_return_from_partition_irq_handling(
      * and return to the privileged handler using the stack frame still on the
      * MSP stack.
      */
-    *excReturn = svc_ctx->RetAddr;
-    psp += sizeof(struct tfm_exc_stack_t);
+    *excReturn = svc_ctx->ra;
+    psp += sizeof(struct tfm_state_context_t);
 
     tfm_spm_partition_pop_handler_ctx(handler_partition_idx);
     tfm_spm_partition_pop_interrupted_ctx(interrupted_partition_idx);
@@ -967,7 +967,7 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 
 /* This SVC handler is called if veneer is running in thread mode */
 uint32_t tfm_core_partition_request_svc_handler(
-        const struct tfm_exc_stack_t *svc_ctx, uint32_t excReturn)
+        const struct tfm_state_context_t *svc_ctx, uint32_t excReturn)
 {
     struct tfm_sfn_req_s *desc_ptr;
 
@@ -981,7 +981,7 @@ uint32_t tfm_core_partition_request_svc_handler(
         tfm_secure_api_error_handler();
     }
 
-    desc_ptr = (struct tfm_sfn_req_s *)svc_ctx->R0;
+    desc_ptr = (struct tfm_sfn_req_s *)svc_ctx->r0;
 
     if (tfm_core_sfn_request_handler(desc_ptr, excReturn) != TFM_SUCCESS) {
         tfm_secure_api_error_handler();
@@ -995,7 +995,7 @@ uint32_t tfm_core_partition_request_svc_handler(
  */
 uint32_t tfm_core_depriv_req_handler(uint32_t *svc_args, uint32_t excReturn)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)svc_args;
 
     enum tfm_status_e res;
 
@@ -1061,8 +1061,8 @@ uint32_t tfm_core_partition_return_handler(uint32_t lr)
  */
 uint32_t tfm_core_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
 {
-    struct tfm_exc_stack_t *irq_svc_ctx =
-                                         (struct tfm_exc_stack_t *)irq_svc_args;
+    struct tfm_state_context_t *irq_svc_ctx =
+                                         (struct tfm_state_context_t *)irq_svc_args;
 
     if (!(lr & EXC_RETURN_STACK_PROCESS)) {
         /* Partition request SVC called with MSP active.
@@ -1083,7 +1083,7 @@ uint32_t tfm_core_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
         tfm_secure_api_error_handler();
     }
 
-    irq_svc_ctx->RetAddr = lr;
+    irq_svc_ctx->ra = lr;
 
     return EXC_RETURN_SECURE_HANDLER;
 }
@@ -1175,8 +1175,8 @@ static int32_t get_irq_line_for_signal(int32_t partition_id,
  */
 void tfm_core_enable_irq_handler(uint32_t *svc_args)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
-    psa_signal_t irq_signal = svc_ctx->R0;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)svc_args;
+    psa_signal_t irq_signal = svc_ctx->r0;
     uint32_t running_partition_idx =
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
@@ -1201,8 +1201,8 @@ void tfm_core_enable_irq_handler(uint32_t *svc_args)
 
 void tfm_core_disable_irq_handler(uint32_t *svc_args)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
-    psa_signal_t irq_signal = svc_ctx->R0;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)svc_args;
+    psa_signal_t irq_signal = svc_ctx->r0;
     uint32_t running_partition_idx =
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
@@ -1228,12 +1228,12 @@ void tfm_core_disable_irq_handler(uint32_t *svc_args)
 void tfm_core_psa_wait(uint32_t *svc_args)
 {
     /* Look for partition that is ready for run */
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)svc_args;
     uint32_t running_partition_idx;
     const struct spm_partition_runtime_data_t *curr_part_data;
 
-    psa_signal_t signal_mask = svc_ctx->R0;
-    uint32_t timeout = svc_ctx->R1;
+    psa_signal_t signal_mask = svc_ctx->r0;
+    uint32_t timeout = svc_ctx->r1;
 
     /*
      * Timeout[30:0] are reserved for future use.
@@ -1252,13 +1252,13 @@ void tfm_core_psa_wait(uint32_t *svc_args)
         (void) signal_mask;
     }
 
-    svc_ctx->R0 = curr_part_data->signal_mask;
+    svc_ctx->r0 = curr_part_data->signal_mask;
 }
 
 void tfm_core_psa_eoi(uint32_t *svc_args)
 {
-    struct tfm_exc_stack_t *svc_ctx = (struct tfm_exc_stack_t *)svc_args;
-    psa_signal_t irq_signal =  svc_ctx->R0;
+    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)svc_args;
+    psa_signal_t irq_signal =  svc_ctx->r0;
     uint32_t signal_mask;
     uint32_t running_partition_idx;
     uint32_t running_partition_id;

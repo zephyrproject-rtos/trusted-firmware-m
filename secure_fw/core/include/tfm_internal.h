@@ -6,6 +6,7 @@
  */
 
 #include "secure_utilities.h"
+#include "tfm_arch.h"
 
 #ifndef __TFM_INTERNAL_H__
 #define __TFM_INTERNAL_H__
@@ -60,7 +61,7 @@ void tfm_core_memory_permission_check_handler(const uint32_t svc_args[]);
 /**
  * \brief Handle an SPM request by a secure service
  */
-void tfm_core_spm_request_handler(const struct tfm_exc_stack_t *svc_ctx);
+void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
 
 /**
  * \brief Check whether a buffer is ok for writing to by the privileged API
