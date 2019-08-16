@@ -32,6 +32,7 @@
 
 /* Extern service variable */
 extern struct tfm_spm_service_t service[];
+extern const struct tfm_spm_service_db_t service_db[];
 
 /* Extern SPM variable */
 extern struct spm_partition_db_t g_spm_partition_db;
@@ -151,7 +152,7 @@ struct tfm_spm_service_t *
     head = &partition->runtime_data.service_list;
     TFM_LIST_FOR_EACH(node, head) {
         service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t, list);
-        if (service->service_db.signal == signal) {
+        if (service->service_db->signal == signal) {
             return service;
         }
     }
@@ -180,7 +181,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
         TFM_LIST_FOR_EACH(node, head) {
             service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t,
                                             list);
-            if (service->service_db.sid == sid) {
+            if (service->service_db->sid == sid) {
                 return service;
             }
         }
@@ -218,14 +219,14 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
 {
     TFM_ASSERT(service);
 
-    switch (service->service_db.minor_policy) {
+    switch (service->service_db->minor_policy) {
     case TFM_VERSION_POLICY_RELAXED:
-        if (minor_version > service->service_db.minor_version) {
+        if (minor_version > service->service_db->minor_version) {
             return IPC_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
-        if (minor_version != service->service_db.minor_version) {
+        if (minor_version != service->service_db->minor_version) {
             return IPC_ERROR_VERSION;
         }
         break;
@@ -350,7 +351,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     }
 
     /* Messages put. Update signals */
-    p_runtime_data->signals |= service->service_db.signal;
+    p_runtime_data->signals |= service->service_db->signal;
 
     tfm_event_wake(&p_runtime_data->signal_evnt, (p_runtime_data->signals &
                                                   p_runtime_data->signal_mask));
@@ -448,7 +449,6 @@ void tfm_spm_init(void)
 {
     uint32_t i, num;
     struct spm_partition_desc_t *partition;
-    /*struct tfm_spm_service_t *service;*/
     struct tfm_thrd_ctx *pth, this_thrd;
 
     tfm_pool_init(conn_handle_pool,
@@ -490,8 +490,9 @@ void tfm_spm_init(void)
     /* Init Service */
     num = sizeof(service) / sizeof(struct tfm_spm_service_t);
     for (i = 0; i < num; i++) {
+        service[i].service_db = &service_db[i];
         partition =
-            tfm_spm_get_partition_by_id(service[i].service_db.partition_id);
+            tfm_spm_get_partition_by_id(service[i].service_db->partition_id);
         if (!partition) {
             tfm_panic();
         }
