@@ -9,13 +9,9 @@
 
 #include <stdbool.h>
 
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 #include "tfm_memory_utils.h"
-
-/* FIXME: HUK management should be part of Crypto service, with keys hidden from
- *        SST.
- */
 
 /* The PSA key type used by this implementation */
 #define SST_KEY_TYPE PSA_KEY_TYPE_AES
@@ -25,6 +21,7 @@
 #define SST_CRYPTO_ALG \
     PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, SST_TAG_LEN_BYTES)
 
+static const uint8_t sst_key_label[] = "storage_key";
 static psa_key_handle_t sst_key_handle;
 static uint8_t sst_crypto_iv_buf[SST_IV_LEN_BYTES];
 
@@ -36,50 +33,77 @@ psa_ps_status_t sst_crypto_init(void)
     return PSA_PS_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key)
-{
-    enum tfm_plat_err_t err;
-
-    /* FIXME: if key diversification is desired, the client ID
-     * can be used to derive a key from the HUK derived key.
-     * However, this is tricky for shared resources which can
-     * be accessed by multiple clients (i.e. multiple client ID)
-     *
-     * To be fixed in later revisions. Currently, just use the
-     * same HUK (derived) key for all the crypto operations.
-     */
-    err = tfm_plat_get_crypto_huk(key, key_len);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
-    }
-
-    return PSA_PS_SUCCESS;
-}
-
-psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key)
+psa_ps_status_t sst_crypto_setkey(void)
 {
     psa_status_t status;
+    psa_key_handle_t huk_key_handle;
     psa_key_policy_t key_policy = PSA_KEY_POLICY_INIT;
+    psa_crypto_generator_t sst_key_generator = PSA_CRYPTO_GENERATOR_INIT;
 
-    /* Allocate a transient key handle for SST */
+    /* Allocate a transient key handle for the storage key */
     status = psa_allocate_key(&sst_key_handle);
     if (status != PSA_SUCCESS) {
         return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
-    /* Set the key policy */
+    /* Set the key policy for the storage key */
     psa_key_policy_set_usage(&key_policy, SST_KEY_USAGE, SST_CRYPTO_ALG);
     status = psa_set_key_policy(sst_key_handle, &key_policy);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        goto release_sst_key;
     }
 
-    status = psa_import_key(sst_key_handle, SST_KEY_TYPE, key, key_len);
+    /* Open a handle to the HUK */
+    status = psa_open_key(PSA_KEY_LIFETIME_PERSISTENT, TFM_CRYPTO_KEY_ID_HUK,
+                          &huk_key_handle);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        goto release_sst_key;
+    }
+
+    /* Set up a key derivation operation with the HUK as the input key */
+    status = psa_key_derivation(&sst_key_generator,
+                                huk_key_handle,
+                                TFM_CRYPTO_ALG_HUK_DERIVATION,
+                                NULL, 0,
+                                sst_key_label, sizeof(sst_key_label),
+                                SST_KEY_LEN_BYTES);
+    if (status != PSA_SUCCESS) {
+        goto release_huk;
+    }
+
+    /* Create the storage key from the key generator */
+    status = psa_generator_import_key(sst_key_handle,
+                                      SST_KEY_TYPE,
+                                      PSA_BYTES_TO_BITS(SST_KEY_LEN_BYTES),
+                                      &sst_key_generator);
+    if (status != PSA_SUCCESS) {
+        goto release_generator;
+    }
+
+    /* Free resources allocated by the generator */
+    status = psa_generator_abort(&sst_key_generator);
+    if (status != PSA_SUCCESS) {
+        goto release_huk;
+    }
+
+    /* Close the handle to the HUK */
+    status = psa_close_key(huk_key_handle);
+    if (status != PSA_SUCCESS) {
+        goto release_sst_key;
     }
 
     return PSA_PS_SUCCESS;
+
+release_generator:
+    (void)psa_generator_abort(&sst_key_generator);
+
+release_huk:
+    (void)psa_close_key(huk_key_handle);
+
+release_sst_key:
+    (void)psa_destroy_key(sst_key_handle);
+
+    return PSA_PS_ERROR_OPERATION_FAILED;
 }
 
 psa_ps_status_t sst_crypto_destroykey(void)

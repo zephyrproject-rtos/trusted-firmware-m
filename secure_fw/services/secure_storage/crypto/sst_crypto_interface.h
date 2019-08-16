@@ -40,14 +40,11 @@ union sst_crypto_t {
 psa_ps_status_t sst_crypto_init(void);
 
 /**
- * \brief Gets a key for specific client id.
- *
- * \param[in]  key_len  Key length
- * \param[out] key      Output buffer for the key
+ * \brief Sets the key to use for crypto operations for the current client.
  *
  * \return Returns values as described in \ref psa_ps_status_t
  */
-psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key);
+psa_ps_status_t sst_crypto_setkey(void);
 
 /**
  * \brief Destroys the transient key used for crypto operations.
@@ -55,16 +52,6 @@ psa_ps_status_t sst_crypto_getkey(uint32_t key_len, uint8_t *key);
  * \return Returns values as described in \ref psa_ps_status_t
  */
 psa_ps_status_t sst_crypto_destroykey(void);
-
-/**
- * \brief Sets the key to use for crypto operations.
- *
- * \param[in] key_len  Key length
- * \param[in] key      Cryptographic key
- *
- * \return Returns values as described in \ref psa_ps_status_t
- */
-psa_ps_status_t sst_crypto_setkey(uint32_t key_len, const uint8_t *key);
 
 /**
  * \brief Encrypts and tags the given plaintext data.

@@ -36,34 +36,6 @@
 static uint8_t sst_crypto_buf[SST_CRYPTO_BUF_LEN];
 
 /**
- * \brief Gets the encryption key and sets it as the key to be used for
- *        cryptographic operations.
- *
- * \return Returns error code as specified in \ref psa_ps_status_t
- */
-static psa_ps_status_t sst_object_set_encryption_key(void)
-{
-    psa_ps_status_t err;
-
-    /* SST object key. Aligned to a 32-bit boundary so that crypto
-     * implementations can copy key material with 32-bit accesses.
-     */
-    __attribute__ ((aligned(4)))
-    static uint8_t sst_encryption_key[SST_KEY_LEN_BYTES];
-
-    /* Get the encryption key */
-    err = sst_crypto_getkey(SST_KEY_LEN_BYTES, sst_encryption_key);
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
-    /* Set the key to be used for crypto operations */
-    err = sst_crypto_setkey(SST_KEY_LEN_BYTES, sst_encryption_key);
-
-    return err;
-}
-
-/**
  * \brief Performs authenticated decryption on object data, with the header as
  *        the associated data.
  *
@@ -84,7 +56,7 @@ static psa_ps_status_t sst_object_auth_decrypt(uint32_t fid,
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
-    err = sst_object_set_encryption_key();
+    err = sst_crypto_setkey();
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -106,7 +78,7 @@ static psa_ps_status_t sst_object_auth_decrypt(uint32_t fid,
                                       &out_len);
     if (err != PSA_PS_SUCCESS || out_len != cur_size) {
         (void)sst_crypto_destroykey();
-        return err;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     return sst_crypto_destroykey();
@@ -131,7 +103,7 @@ static psa_ps_status_t sst_object_auth_encrypt(uint32_t fid,
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
-    err = sst_object_set_encryption_key();
+    err = sst_crypto_setkey();
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -155,7 +127,7 @@ static psa_ps_status_t sst_object_auth_encrypt(uint32_t fid,
                                      &out_len);
     if (err != PSA_PS_SUCCESS || out_len != cur_size) {
         (void)sst_crypto_destroykey();
-        return err;
+        return PSA_PS_ERROR_OPERATION_FAILED;
     }
 
     (void)tfm_memcpy(p_obj_data, sst_crypto_buf, cur_size);

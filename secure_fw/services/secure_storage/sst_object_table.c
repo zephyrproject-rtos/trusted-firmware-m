@@ -271,34 +271,6 @@ __STATIC_INLINE psa_ps_status_t sst_object_table_fs_write_table(
 }
 
 #ifdef SST_ENCRYPTION
-/**
- * \brief Sets crypto key for object table.
- *
- * \return Returns error code as specified in \ref psa_ps_status_t
- */
-static psa_ps_status_t sst_object_table_set_crypto_key(void)
-{
-    psa_ps_status_t err;
-
-    /* Secure storage system key. Aligned to a 32-bit boundary so that crypto
-     * implementations can copy key material with 32-bit accesses.
-     */
-    __attribute__ ((aligned(4)))
-    static uint8_t sst_key[SST_KEY_LEN_BYTES];
-
-    err = sst_crypto_getkey(SST_KEY_LEN_BYTES, sst_key);
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
-    err = sst_crypto_setkey(SST_KEY_LEN_BYTES, sst_key);
-    if (err != PSA_PS_SUCCESS) {
-        return err;
-    }
-
-    return err;
-}
-
 #ifdef SST_ROLLBACK_PROTECTION
 /**
  * \brief Aligns all SST non-volatile counters.
@@ -569,7 +541,7 @@ static psa_ps_status_t sst_object_table_save_table(
 
 #ifdef SST_ENCRYPTION
     /* Set object table key */
-    err = sst_object_table_set_crypto_key();
+    err = sst_crypto_setkey();
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
@@ -885,7 +857,7 @@ psa_ps_status_t sst_object_table_init(uint8_t *obj_data)
 
 #ifdef SST_ENCRYPTION
     /* Set object table key */
-    err = sst_object_table_set_crypto_key();
+    err = sst_crypto_setkey();
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
