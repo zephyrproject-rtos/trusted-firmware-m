@@ -180,6 +180,20 @@ if (CORE_TEST_POSITIVE)
 	set(TFM_PARTITION_TEST_CORE ON)
 endif()
 
+if (TFM_PARTITION_TEST_CORE)
+	# If the platform or the topology doesn't specify whether IRQ test is
+	# supported, enable it by default.
+	if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
+		set(TFM_ENABLE_IRQ_TEST ON)
+	endif()
+
+	if (TFM_ENABLE_IRQ_TEST)
+		add_definitions(-DTFM_ENABLE_IRQ_TEST)
+	endif()
+else()
+	set(TFM_ENABLE_IRQ_TEST OFF)
+endif()
+
 if (CORE_TEST_IPC)
 	add_definitions(-DCORE_TEST_IPC)
 	set(TEST_FRAMEWORK_NS ON)

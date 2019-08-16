@@ -22,16 +22,16 @@
 
 /* Definitions of the signals of the IRQs (if any) */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     { TFM_IRQ_TEST_1_ID, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 };
 
 const size_t tfm_core_irq_signals_count = sizeof(tfm_core_irq_signals) /
                                           sizeof(*tfm_core_irq_signals);
 
 /* Definitions of privileged IRQ handlers (if any) */
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 void TFM_TIMER0_IRQ_Handler(void)
 {
     __disable_irq();
@@ -42,5 +42,5 @@ void TFM_TIMER0_IRQ_Handler(void)
     __enable_irq();
 }
 
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 

@@ -22,9 +22,9 @@
 
 /* Definitions of the signals of the IRQs */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     { TFM_IRQ_TEST_1_ID, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 };
 
 const size_t tfm_core_irq_signals_count = sizeof(tfm_core_irq_signals) /
@@ -36,13 +36,13 @@ extern void priv_irq_handler_main(uint32_t partition_id,
                                   uint32_t irq_line);
 
 /* Forward declarations of unpriv IRQ handlers*/
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 extern void SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ_isr(void);
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 
 /* Definitions of privileged IRQ handlers */
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 void TFM_TIMER0_IRQ_Handler(void)
 {
     priv_irq_handler_main(TFM_IRQ_TEST_1_ID,
@@ -51,5 +51,5 @@ void TFM_TIMER0_IRQ_Handler(void)
                           TFM_TIMER0_IRQ);
 }
 
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 

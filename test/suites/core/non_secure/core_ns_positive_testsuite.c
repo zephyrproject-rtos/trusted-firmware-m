@@ -13,12 +13,14 @@
 #include "tfm_plat_test.h"
 #include "test/suites/core/non_secure/core_test_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
-#include "platform_irq.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
 #else  /* TFM_PSA_API */
 #include "tfm_veneers.h"
 #endif /* TFM_PSA_API */
+#ifdef TFM_ENABLE_IRQ_TEST
+#include "platform_irq.h"
+#endif
 
 /* Define test suite for core tests */
 /* List of tests */
@@ -44,10 +46,12 @@ static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
 static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 static void tfm_core_test_outvec_write(struct test_result_t *ret);
+#ifdef TFM_ENABLE_IRQ_TEST
 static void tfm_core_test_irq(struct test_result_t *ret);
 
 static enum irq_test_scenario_t executing_irq_test_scenario = IRQ_TEST_SCENARIO_NONE;
 static struct irq_test_execution_data_t irq_test_execution_data = {0};
+#endif
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -61,9 +65,11 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_MEMORY_PERMISSIONS,
     tfm_core_test_permissions,
     "Test secure service memory access permissions"),
 #endif /* TFM_PSA_API */
+#ifdef TFM_ENABLE_IRQ_TEST
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SECURE_IRQ,
     tfm_core_test_irq,
     "Test secure irq"),
+#endif
 #ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_MPU_ACCESS, tfm_core_test_mpu_access,
     "Test secure service MPU accesses"),
@@ -433,6 +439,7 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifdef TFM_ENABLE_IRQ_TEST
 static int32_t prepare_test_scenario_ns(
                                enum irq_test_scenario_t test_scenario,
                                struct irq_test_execution_data_t *execution_data)
@@ -617,6 +624,7 @@ static void tfm_core_test_irq(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#endif
 
 /*
  * \brief Tests whether the initialisation of the service was successful.

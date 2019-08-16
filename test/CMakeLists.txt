@@ -42,15 +42,23 @@ if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
 endif()
 
+if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_ENABLE_IRQ_TEST is undefined.")
+endif()
+
 #Configure our options as needed.
 if (CORE_TEST_INTERACTIVE OR CORE_TEST_POSITIVE)
 	set(ENABLE_CORE_TESTS True)
 	set(ENABLE_CORE_TESTS_2 True)
-	set(ENABLE_IRQ_TEST_SERVICES True)
 else()
 	set(ENABLE_CORE_TESTS False)
 	set(ENABLE_CORE_TESTS_2 False)
-	set(ENABLE_IRQ_TEST_SERVICES False)
+endif()
+
+if (TFM_ENABLE_IRQ_TEST)
+	set(ENABLE_IRQ_TEST_SERVICES ON)
+else()
+	set(ENABLE_IRQ_TEST_SERVICES OFF)
 endif()
 
 set(ENABLE_SECURE_STORAGE_SERVICE_TESTS TRUE)

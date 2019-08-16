@@ -49,9 +49,9 @@
 #define TFM_PARTITION_TFM_SP_IPC_CLIENT_TEST_IRQ_COUNT 0
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 #define TFM_PARTITION_TFM_IRQ_TEST_1_IRQ_COUNT 1
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 /**************************************************************************/
 /** Declarations of partition init functions */
@@ -90,9 +90,9 @@ extern int32_t ipc_service_test_main(void);
 extern int32_t ipc_client_test_main(void);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 extern int32_t tfm_irq_test_1_init(void);
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 /**************************************************************************/
 /** Memory region declarations */
@@ -221,7 +221,7 @@ REGION_DECLARE(Image$$, TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, $$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, $$Limit);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, $$RO$$Base);
@@ -232,7 +232,7 @@ REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Limit);
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 #ifndef TFM_PSA_API
 /**************************************************************************/
@@ -331,14 +331,14 @@ static uint32_t ctx_stack_TFM_SP_IPC_CLIENT_TEST[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 static uint32_t ctx_stack_TFM_IRQ_TEST_1[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_IRQ_TEST_1_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 #endif /* !defined(TFM_PSA_API) */
 
@@ -1209,7 +1209,7 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_IRQ_TEST_1 */
     /* -----------------------------------------------------------------------*/
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     {
     /* Static data */
         {
@@ -1291,7 +1291,7 @@ struct spm_partition_desc_t partition_list [] =
         },
 #endif /* defined(TFM_PSA_API) */
     },
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 };
 

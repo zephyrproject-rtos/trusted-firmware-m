@@ -263,6 +263,12 @@ function(set_up_secure_fw_build)
 	endif()
 	embedded_set_target_link_includes(TARGET ${EXE_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
+	if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
+		message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_ENABLE_IRQ_TEST is not defined.")
+	elseif (TFM_ENABLE_IRQ_TEST)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_ENABLE_IRQ_TEST")
+	endif()
+
 	#Generate binary file from executable
 	compiler_generate_binary_output(${EXE_NAME})
 

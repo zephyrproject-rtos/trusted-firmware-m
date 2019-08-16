@@ -608,7 +608,7 @@ struct tfm_spm_service_t service[] =
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     /******** TFM_IRQ_TEST_1 ********/
     {
         .service_db = {
@@ -640,7 +640,7 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 };
 #endif /* __TFM_SERVICE_LIST_INC__ */

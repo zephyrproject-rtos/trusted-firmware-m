@@ -114,13 +114,13 @@ extern "C" {
 #define IPC_CLIENT_TEST_MEM_CHECK_VERSION                          (1U)
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
 /******** TFM_IRQ_TEST_1 ********/
 #define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SID              (0x0000F0A0U)
 #define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_VERSION          (1U)
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SID              (0x0000F0A1U)
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_VERSION          (1U)
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 #ifdef __cplusplus
 }

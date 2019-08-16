@@ -113,11 +113,11 @@ SECTIONS
         LONG (ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA))
         LONG (SIZEOF(.TFM_SP_IPC_CLIENT_TEST_DATA))
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
         LONG (LOADADDR(.TFM_IRQ_TEST_1_DATA))
         LONG (ADDR(.TFM_IRQ_TEST_1_DATA))
         LONG (SIZEOF(.TFM_IRQ_TEST_1_DATA))
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
         __copy_table_end__ = .;
     } > FLASH
 
@@ -204,14 +204,14 @@ SECTIONS
         LONG (SIZEOF(.TFM_SP_IPC_CLIENT_TEST_STACK))
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
         LONG (ADDR(.TFM_IRQ_TEST_1_BSS))
         LONG (SIZEOF(.TFM_IRQ_TEST_1_BSS))
 #if defined(TFM_PSA_API)
         LONG (ADDR(.TFM_IRQ_TEST_1_STACK))
         LONG (SIZEOF(.TFM_IRQ_TEST_1_STACK))
 #endif
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 #if !defined(TFM_PSA_API)
         LONG (ADDR(.TFM_UNPRIV_SCRATCH))
         LONG (SIZEOF(.TFM_UNPRIV_SCRATCH))
@@ -406,7 +406,7 @@ SECTIONS
     Image$$TFM_SP_IPC_CLIENT_TEST$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     .TFM_IRQ_TEST_1 : ALIGN(32)
     {
         *tfm_irq_test_service_1.*(.text*)
@@ -420,7 +420,7 @@ SECTIONS
     Image$$TFM_IRQ_TEST_1$$RO$$Limit = ADDR(.TFM_IRQ_TEST_1) + SIZEOF(.TFM_IRQ_TEST_1);
     Image$$TFM_IRQ_TEST_1$$Base = ADDR(.TFM_IRQ_TEST_1);
     Image$$TFM_IRQ_TEST_1$$Limit = ADDR(.TFM_IRQ_TEST_1) + SIZEOF(.TFM_IRQ_TEST_1);
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
     /**** APPLICATION RoT RO part (CODE + RODATA) end here */
     Image$$TFM_APP_CODE_END$$Base = .;
@@ -897,7 +897,7 @@ SECTIONS
 
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     .TFM_IRQ_TEST_1_DATA : ALIGN(32)
     {
         *tfm_irq_test_service_1.*(.data*)
@@ -931,7 +931,7 @@ SECTIONS
     Image$$TFM_IRQ_TEST_1_STACK$$ZI$$Limit = ADDR(.TFM_IRQ_TEST_1_STACK) + SIZEOF(.TFM_IRQ_TEST_1_STACK);
 #endif
 
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
