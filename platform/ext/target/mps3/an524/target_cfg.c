@@ -133,6 +133,9 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
 
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
+    /* Explicitly set secure fault priority to the highest */
+    NVIC_SetPriority(SecureFault_IRQn, 0);
+
     /* Enables BUS, MEM, USG and Secure faults */
     SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
                    SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_SECUREFAULTENA_Msk);
