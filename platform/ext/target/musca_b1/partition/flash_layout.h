@@ -17,21 +17,20 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on Musca-B1 with BL2(boot from eFlash 0):
+/* Flash layout on Musca-B1 with BL2(single image boot, boot from eFlash 0):
  *
- * 0x0A00_0000 BL2 - MCUBoot(128 KB)
- * 0x0A02_0000 Flash_area_image_primary(768 KB)
+ * 0x0A00_0000 BL2 - MCUBoot (128 KB)
+ * 0x0A02_0000 Primary image area (768 KB):
  *    0x0A02_0000 Secure     image primary (256 KB)
  *    0x0A06_0000 Non-secure image primary (512 KB)
- * 0x0A0E_0000 Flash_area_image_secondary(768 KB)
+ * 0x0A0E_0000 Secondary image area (768 KB):
  *    0x0A0E_0000 Secure     image secondary (256 KB)
  *    0x0A12_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Secure Storage Area(0.02 MB)
- * 0x0A1E_5000 NV counters area(20 Bytes)
+ * 0x0A1E_0000 Secure Storage Area (0.02 MB)
+ * 0x0A1E_5000 NV counters area (20 Bytes)
  * 0x0A1E_5014 Unused
- */
-
-/* Flash layout on Musca-B1 without BL2:
+ *
+ * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
  * 0x0A06_0000 Non-secure image
  */
@@ -46,6 +45,10 @@
 /* Size of a Secure and of a Non-secure image */
 #define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition: 256 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS partition: 512 KB */
+#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
+                                          FLASH_NS_PARTITION_SIZE) ? \
+                                         FLASH_S_PARTITION_SIZE :    \
+                                         FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the flash hardware */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4 KB */
@@ -60,25 +63,59 @@
  * IMAGE_SECONDARY, SCRATCH is used as a temporary storage during image
  * swapping.
  */
-#define FLASH_AREA_BL2_OFFSET             (0x0)
-#define FLASH_AREA_BL2_SIZE               (0x20000) /* 128 KB */
+#define FLASH_AREA_BL2_OFFSET      (0x0)
+#define FLASH_AREA_BL2_SIZE        (0x20000) /* 128 KB */
 
-#define FLASH_AREA_IMAGE_PRIMARY_OFFSET   (FLASH_AREA_BL2_OFFSET + \
-                                           FLASH_AREA_BL2_SIZE)
-#define FLASH_AREA_IMAGE_PRIMARY_SIZE     (FLASH_S_PARTITION_SIZE + \
-                                           FLASH_NS_PARTITION_SIZE)
-
-#define FLASH_AREA_IMAGE_SECONDARY_OFFSET (FLASH_AREA_IMAGE_PRIMARY_OFFSET + \
-                                           FLASH_AREA_IMAGE_PRIMARY_SIZE)
-#define FLASH_AREA_IMAGE_SECONDARY_SIZE   (FLASH_S_PARTITION_SIZE + \
-                                           FLASH_NS_PARTITION_SIZE)
-
+#if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
+/* Secure + Non-secure image primary slot */
+#define FLASH_AREA_0_ID            (1)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_OFFSET + FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
+                                    FLASH_NS_PARTITION_SIZE)
+/* Secure + Non-secure secondary slot */
+#define FLASH_AREA_2_ID            (FLASH_AREA_0_ID + 1)
+#define FLASH_AREA_2_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
+                                    FLASH_NS_PARTITION_SIZE)
 /* Not used, only the Non-swapping firmware upgrade operation
  * is supported on Musca-B1.
  */
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET   (FLASH_AREA_IMAGE_SECONDARY_OFFSET + \
-                                           FLASH_AREA_IMAGE_SECONDARY_SIZE)
-#define FLASH_AREA_IMAGE_SCRATCH_SIZE     (0)
+#define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (0)
+/* Maximum number of image sectors supported by the bootloader. */
+#define BOOT_MAX_IMG_SECTORS       ((FLASH_S_PARTITION_SIZE + \
+                                     FLASH_NS_PARTITION_SIZE) / \
+                                    FLASH_AREA_IMAGE_SECTOR_SIZE)
+#elif (MCUBOOT_IMAGE_NUMBER == 2)
+/* Secure image primary slot */
+#define FLASH_AREA_0_ID            (1)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_OFFSET + FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE)
+/* Non-secure image primary slot */
+#define FLASH_AREA_1_ID            (FLASH_AREA_0_ID + 1)
+#define FLASH_AREA_1_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_1_SIZE          (FLASH_NS_PARTITION_SIZE)
+/* Secure image secondary slot */
+#define FLASH_AREA_2_ID            (FLASH_AREA_1_ID + 1)
+#define FLASH_AREA_2_OFFSET        (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
+/* Non-secure image secondary slot */
+#define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
+/* Not used, only the Non-swapping firmware upgrade operation
+ * is supported on Musca-B1.
+ */
+#define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (0)
+/* Maximum number of image sectors supported by the bootloader. */
+#define BOOT_MAX_IMG_SECTORS       (FLASH_MAX_PARTITION_SIZE / \
+                                    FLASH_AREA_IMAGE_SECTOR_SIZE)
+#else /* MCUBOOT_IMAGE_NUMBER > 2 */
+#error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
+#endif /* MCUBOOT_IMAGE_NUMBER */
 
 /* Not used, only the Non-swapping firmware upgrade operation
  * is supported on Musca-B1. The maximum number of status entries
@@ -86,17 +123,12 @@
  */
 #define BOOT_STATUS_MAX_ENTRIES         (0)
 
-/* Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS            ((FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE) / \
-                                         FLASH_AREA_IMAGE_SECTOR_SIZE)
-
 /* Note: FLASH_SST_AREA_OFFSET and FLASH_NV_COUNTERS_AREA_OFFSET point to
  * offsets in flash, but reads and writes to these addresses are redirected to
  * Code SRAM by Driver_Flash.c.
  */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_IMAGE_SCRATCH_OFFSET + \
-                                         FLASH_AREA_IMAGE_SCRATCH_SIZE)
+#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+                                         FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
 /* NV Counters definitions */

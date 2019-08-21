@@ -24,13 +24,13 @@
  */
 
 /* The addresses used in the following layout are all NS alias
- * Flash layout on MPS3 AN524 with BL2:
+ * Flash layout on MPS3 AN524 with BL2 (single image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot            (256 KB)
- * Flash_area_image_primary:
+ * Primary image area:
  *     0x0004_0000 Secure image         (256 KB)
  *     0x0008_0000 Non-secure image     (256 KB)
- * Flash_area_image_secondary:
+ * Secondary image area:
  *     0x000C_0000 Secure image         (256 KB)
  *     0x0010_0000 Non-secure image     (256 KB)
  * 0x0014_0000 Scratch area             (512 KB)
@@ -39,6 +39,7 @@
  * 0x001C_5014 Unused
  *
  * Flash layout without BL2
+ *
  * 0x0000_0000 Secure image             (256 KB)
  * 0x0008_0000 Non-secure image         (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
@@ -46,11 +47,13 @@
  * 0x001C_5014 Unused
  */
 
-#define MAX(X,Y)                       ((X) > (Y) ? (X) : (Y))
-
 /* Size of a Secure and of a Non-secure image */
 #define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition: 256 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x40000) /* NS partition: 256 KB */
+#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
+                                          FLASH_NS_PARTITION_SIZE) ? \
+                                         FLASH_S_PARTITION_SIZE :    \
+                                         FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4 KB */
@@ -61,42 +64,69 @@
 #define FLASH_BASE_ADDRESS              (0x10000000)
 
 /* Offset to QSPI base */
-#define FLASH_AREA_BL2_OFFSET             (0x0)
-#define FLASH_AREA_BL2_SIZE               (0x40000)     /* 256 KB */
+#define FLASH_AREA_BL2_OFFSET      (0x0)
+#define FLASH_AREA_BL2_SIZE        (0x40000)     /* 256 KB */
 
-#define FLASH_AREA_IMAGE_PRIMARY_OFFSET   (FLASH_AREA_BL2_OFFSET + \
-                                           FLASH_AREA_BL2_SIZE)
-#define FLASH_AREA_IMAGE_PRIMARY_SIZE     (FLASH_S_PARTITION_SIZE + \
-                                           FLASH_NS_PARTITION_SIZE)
-
-#define FLASH_AREA_IMAGE_SECONDARY_OFFSET (FLASH_AREA_IMAGE_PRIMARY_OFFSET + \
-                                           FLASH_AREA_IMAGE_PRIMARY_SIZE)
-#define FLASH_AREA_IMAGE_SECONDARY_SIZE   (FLASH_S_PARTITION_SIZE + \
-                                           FLASH_NS_PARTITION_SIZE)
-
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET   (FLASH_AREA_IMAGE_SECONDARY_OFFSET + \
-                                           FLASH_AREA_IMAGE_SECONDARY_SIZE)
-#define FLASH_AREA_IMAGE_SCRATCH_SIZE     (FLASH_S_PARTITION_SIZE + \
-                                           FLASH_NS_PARTITION_SIZE)
-
-/* The maximum number of status entries supported by the bootloader. */
-/* The maximum number of status entries must be at least 2. For more
- * information see the MCUBoot issue:
- * https://github.com/JuulLabs-OSS/mcuboot/issues/427.
+#if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
+/* Secure + Non-secure image primary slot */
+#define FLASH_AREA_0_ID            (1)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_OFFSET + FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
+                                    FLASH_NS_PARTITION_SIZE)
+/* Secure + Non-secure secondary slot */
+#define FLASH_AREA_2_ID            (FLASH_AREA_0_ID + 1)
+#define FLASH_AREA_2_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
+                                    FLASH_NS_PARTITION_SIZE)
+/* Not used, only the Non-swapping firmware upgrade operation
+ * is supported on AN524.
  */
-#define BOOT_STATUS_MAX_ENTRIES         MAX(2, \
-                                            (FLASH_S_PARTITION_SIZE + \
-                                             FLASH_NS_PARTITION_SIZE) / \
-                                            FLASH_AREA_IMAGE_SCRATCH_SIZE)
-
+#define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (0)
 /* Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS            ((FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE) / \
-                                         FLASH_AREA_IMAGE_SECTOR_SIZE)
+#define BOOT_MAX_IMG_SECTORS       ((FLASH_S_PARTITION_SIZE + \
+                                     FLASH_NS_PARTITION_SIZE) / \
+                                    FLASH_AREA_IMAGE_SECTOR_SIZE)
+#elif (MCUBOOT_IMAGE_NUMBER == 2)
+/* Secure image primary slot */
+#define FLASH_AREA_0_ID            (1)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_OFFSET + FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE)
+/* Non-secure image primary slot */
+#define FLASH_AREA_1_ID            (FLASH_AREA_0_ID + 1)
+#define FLASH_AREA_1_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_1_SIZE          (FLASH_NS_PARTITION_SIZE)
+/* Secure image secondary slot */
+#define FLASH_AREA_2_ID            (FLASH_AREA_1_ID + 1)
+#define FLASH_AREA_2_OFFSET        (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
+/* Non-secure image secondary slot */
+#define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
+/* Not used, only the Non-swapping firmware upgrade operation
+ * is supported on AN524.
+ */
+#define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (0)
+/* Maximum number of image sectors supported by the bootloader. */
+#define BOOT_MAX_IMG_SECTORS       (FLASH_MAX_PARTITION_SIZE / \
+                                    FLASH_AREA_IMAGE_SECTOR_SIZE)
+#else /* MCUBOOT_IMAGE_NUMBER > 2 */
+#error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
+#endif /* MCUBOOT_IMAGE_NUMBER */
+
+/* Not used, only the Non-swapping firmware upgrade operation
+ * is supported on AN524. The maximum number of status entries
+ * supported by the bootloader.
+ */
+#define BOOT_STATUS_MAX_ENTRIES         (0)
 
 /* Secure Storage (SST) Service definitions */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_IMAGE_SCRATCH_OFFSET + \
-                                         FLASH_AREA_IMAGE_SCRATCH_SIZE)
+#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+                                         FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
 /* NV Counters definitions */

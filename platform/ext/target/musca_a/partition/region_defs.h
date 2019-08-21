@@ -39,10 +39,10 @@
 /* MPC granularity is 128 KB on Musca_A. Alignment
  * of partitions is defined in accordance with this constraint.
  */
-#define S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_IMAGE_PRIMARY_OFFSET)
-#define S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_SECONDARY_OFFSET)
+#define S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_0_OFFSET)
+#define S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_2_OFFSET)
 
-#define NS_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_IMAGE_PRIMARY_OFFSET \
+#define NS_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_0_OFFSET \
                                            + FLASH_S_PARTITION_SIZE)
 
 /* Boot partition structure if MCUBoot is used:
@@ -114,7 +114,8 @@
 /* Secondary partition for new images in case of firmware upgrade */
 #define SECONDARY_PARTITION_START \
             (NS_ROM_ALIAS(S_IMAGE_SECONDARY_PARTITION_OFFSET))
-#define SECONDARY_PARTITION_SIZE (FLASH_AREA_IMAGE_SECONDARY_SIZE)
+#define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
+                                  FLASH_NS_PARTITION_SIZE)
 
 /* Code SRAM area */
 #define TOTAL_CODE_SRAM_SIZE     (TOTAL_ROM_SIZE)

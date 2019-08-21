@@ -64,28 +64,48 @@ static struct flash_map_entry part_map[] = {
     {
         .magic = FLASH_MAP_ENTRY_MAGIC,
         .area = {
-            .fa_id = FLASH_AREA_IMAGE_PRIMARY,
+            .fa_id = FLASH_AREA_0_ID,
             .fa_device_id = FLASH_DEVICE_ID,
-            .fa_off = FLASH_AREA_IMAGE_PRIMARY_OFFSET,
-            .fa_size = FLASH_AREA_IMAGE_PRIMARY_SIZE,
+            .fa_off = FLASH_AREA_0_OFFSET,
+            .fa_size = FLASH_AREA_0_SIZE,
         },
     },
     {
         .magic = FLASH_MAP_ENTRY_MAGIC,
         .area = {
-            .fa_id = FLASH_AREA_IMAGE_SECONDARY,
+            .fa_id = FLASH_AREA_2_ID,
             .fa_device_id = FLASH_DEVICE_ID,
-            .fa_off = FLASH_AREA_IMAGE_SECONDARY_OFFSET,
-            .fa_size = FLASH_AREA_IMAGE_SECONDARY_SIZE,
+            .fa_off = FLASH_AREA_2_OFFSET,
+            .fa_size = FLASH_AREA_2_SIZE,
+        },
+    },
+#if (MCUBOOT_IMAGE_NUMBER == 2)
+    {
+        .magic = FLASH_MAP_ENTRY_MAGIC,
+        .area = {
+            .fa_id = FLASH_AREA_1_ID,
+            .fa_device_id = FLASH_DEVICE_ID,
+            .fa_off = FLASH_AREA_1_OFFSET,
+            .fa_size = FLASH_AREA_1_SIZE,
         },
     },
     {
         .magic = FLASH_MAP_ENTRY_MAGIC,
         .area = {
-            .fa_id = FLASH_AREA_IMAGE_SCRATCH,
+            .fa_id = FLASH_AREA_3_ID,
             .fa_device_id = FLASH_DEVICE_ID,
-            .fa_off = FLASH_AREA_IMAGE_SCRATCH_OFFSET,
-            .fa_size = FLASH_AREA_IMAGE_SCRATCH_SIZE,
+            .fa_off = FLASH_AREA_3_OFFSET,
+            .fa_size = FLASH_AREA_3_SIZE,
+        },
+    },
+#endif
+    {
+        .magic = FLASH_MAP_ENTRY_MAGIC,
+        .area = {
+            .fa_id = FLASH_AREA_SCRATCH_ID,
+            .fa_device_id = FLASH_DEVICE_ID,
+            .fa_off = FLASH_AREA_SCRATCH_OFFSET,
+            .fa_size = FLASH_AREA_SCRATCH_SIZE,
         },
     }
 };
@@ -251,9 +271,12 @@ uint8_t flash_area_align(const struct flash_area *area)
  */
 int flash_area_id_from_image_slot(int slot)
 {
-    static const int area_id_tab[] = {FLASH_AREA_IMAGE_PRIMARY,
-                                      FLASH_AREA_IMAGE_SECONDARY,
-                                      FLASH_AREA_IMAGE_SCRATCH};
+#if (MCUBOOT_IMAGE_NUMBER == 1)
+    static
+#endif
+    const int area_id_tab[] = {FLASH_AREA_IMAGE_PRIMARY,
+                               FLASH_AREA_IMAGE_SECONDARY,
+                               FLASH_AREA_IMAGE_SCRATCH};
 
     if (slot >= 0 && slot < ARRAY_SIZE(area_id_tab)) {
         return area_id_tab[slot];
@@ -264,15 +287,15 @@ int flash_area_id_from_image_slot(int slot)
 
 int flash_area_id_to_image_slot(int area_id)
 {
-    switch (area_id) {
-    case FLASH_AREA_IMAGE_PRIMARY:
+    if (area_id == FLASH_AREA_IMAGE_PRIMARY) {
         return 0;
-    case FLASH_AREA_IMAGE_SECONDARY:
-        return 1;
-    default:
-        BOOT_LOG_ERR("invalid flash area ID");
-        return -1;
     }
+    if (area_id == FLASH_AREA_IMAGE_SECONDARY) {
+        return 1;
+    }
+
+    BOOT_LOG_ERR("invalid flash area ID");
+    return -1;
 }
 
 static int validate_idx(int idx, uint32_t *off, uint32_t *len)
@@ -283,17 +306,27 @@ static int validate_idx(int idx, uint32_t *off, uint32_t *len)
      */
 
     switch (idx) {
-    case FLASH_AREA_IMAGE_PRIMARY:
-        *off = FLASH_AREA_IMAGE_PRIMARY_OFFSET;
-        *len = FLASH_AREA_IMAGE_PRIMARY_SIZE;
+    case FLASH_AREA_0_ID:
+        *off = FLASH_AREA_0_OFFSET;
+        *len = FLASH_AREA_0_SIZE;
         break;
-    case FLASH_AREA_IMAGE_SECONDARY:
-        *off = FLASH_AREA_IMAGE_SECONDARY_OFFSET;
-        *len = FLASH_AREA_IMAGE_SECONDARY_SIZE;
+    case FLASH_AREA_2_ID:
+        *off = FLASH_AREA_2_OFFSET;
+        *len = FLASH_AREA_2_SIZE;
         break;
-    case FLASH_AREA_IMAGE_SCRATCH:
-        *off = FLASH_AREA_IMAGE_SCRATCH_OFFSET;
-        *len = FLASH_AREA_IMAGE_SCRATCH_SIZE;
+#if (MCUBOOT_IMAGE_NUMBER == 2)
+    case FLASH_AREA_1_ID:
+        *off = FLASH_AREA_1_OFFSET;
+        *len = FLASH_AREA_1_SIZE;
+        break;
+    case FLASH_AREA_3_ID:
+        *off = FLASH_AREA_3_OFFSET;
+        *len = FLASH_AREA_3_SIZE;
+        break;
+#endif
+    case FLASH_AREA_SCRATCH_ID:
+        *off = FLASH_AREA_SCRATCH_OFFSET;
+        *len = FLASH_AREA_SCRATCH_SIZE;
         break;
     default:
         BOOT_LOG_ERR("unknown flash area %d", idx);
