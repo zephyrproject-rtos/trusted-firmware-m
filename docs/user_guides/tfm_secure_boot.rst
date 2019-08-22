@@ -20,11 +20,12 @@ integrated to TF-M.
 
 Bootloader is started when CPU is released from reset. It runs in secure mode.
 It authenticates the firmware image by hash (SHA-256) and digital signature
-(RSA-3072) validation. Public key, that the checks happens against, is built
-into the bootloader image. Metadata of the image is delivered together with the
-image itself in a header and trailer section. In case of successful
-authentication, bootloader passes execution to the secure image. Execution never
-returns to bootloader until next reset.
+(RSA-3072) validation. Public key, that the checks happens against, can be built
+into the bootloader image or can be provisioned to the SoC during manufacturing.
+Metadata of the image is delivered together with the image itself in a header
+and trailer section. In case of successful authentication, bootloader passes
+execution to the secure image. Execution never returns to bootloader until
+next reset.
 
 A default RSA key pair is stored in the repository, public key is in ``keys.c``
 and private key is in ``root-rsa-3072.pem``.
@@ -35,19 +36,26 @@ and private key is in ``root-rsa-3072.pem``.
 Private key must be stored in a safe place outside of the repository.
 ``Imgtool.py`` can be used to generate new key pairs.
 
-The bootloader handles the secure and non-secure images as a single blob which
-is contiguous in the device memory. At compile time these images are
-concatenated and signed with RSA-3072 digital signature. Preparation of payload
-is done by Python scripts: ``bl2/ext/mcuboot/scripts/``. At the end of a
-successful build signed TF-M payload can be found in:
-``<build_dir>/install/outputs/fvp/tfm_sign.bin``
+The bootloader can handle the secure and non-secure images independently
+(multiple image boot) or together (single image boot). In case of multiple image
+boot they are signed independently with different keys and they can be updated
+separately. In case of single image boot the secure and non-secure image is
+handled as a single blob, therefore they must be contiguous in the device
+memory. In this case they are signed together and also they can be updated only
+together. In order to have the same artefacts at the end of the build regardless
+of how the images are handled (independently or together) the images are always
+concatenated. In case of single image boot they are concatenated first and then
+signed. In case of multiple image boot they are separately signed first and then
+concatenated. Preparation of payload is done by Python scripts:
+``bl2/ext/mcuboot/scripts/``. At the end of a successful build the signed TF-M
+payload can be found in: ``<build_dir>/install/outputs/fvp/tfm_sign.bin``
 
 *********************
 Integration with TF-M
 *********************
 MCUBoot assumes a predefined memory layout which is described below (applicable
 for AN521). It is mandatory to define the primary slot and the secondary slot
-partitions, but their size can be changed::
+partitions, but their size and location can be changed::
 
     - 0x0000_0000 - 0x0007_FFFF:    BL2 bootloader - MCUBoot
     - 0x0008_0000 - 0x000F_FFFF:    Primary slot : Single binary blob:
@@ -57,13 +65,36 @@ partitions, but their size can be changed::
       - 0x0008_0400 - 0x0008_xxxx:  Secure image
       - 0x0008_xxxx - 0x0010_03FF:  Padding (with 0xFF)
       - 0x0010_0400 - 0x0010_xxxx:  Non-secure image
-      - 0x0010_xxxx - 0x0010_xxxx:  Hash value(SHA256) and RSA signature
-                                    of combined image
+      - 0x0010_xxxx - 0x0010_xxxx:  Hash value(SHA256), RSA signature and other
+                                    metadata of combined image
 
     - 0x0018_0000 - 0x0027_FFFF:    Secondary slot : Secure + Non-Secure image;
                                     Secondary memory partition, structured
                                     identically to the primary slot
-    - 0x0028_0000 - 0x0037_FFFF:    Scratch area, only used during image swapping
+    - 0x0028_0000 - 0x0037_FFFF:    Scratch area, only used during image
+                                    swapping
+
+Multiple image boot requires a slightly different layout::
+
+    - 0x0000_0000 - 0x0007_FFFF:    BL2 bootloader - MCUBoot
+    - 0x0008_0000 - 0x000F_FFFF:    Primary slot : Secure image
+      - 0x0008_0000 - 0x0008_03FF:  Secure image header
+      - 0x0008_0400 - 0x000x_xxxx:  Secure image
+      - 0x000x_xxxx - 0x000x_xxxx:  Hash value(SHA256), RSA signature and other
+                                    metadata of secure image
+
+    - 0x0010_0000 - 0x0017_FFFF:    Primary slot : Non-secure image
+      - 0x0010_0000 - 0x0010_03FF:  Non-secure image header
+      - 0x0010_0400 - 0x001x_xxxx:  Non-secure image
+      - 0x001x_xxxx - 0x001x_xxxx:  Hash value(SHA256), RSA signature and other
+                                    metadata of non-secure image
+
+    - 0x0018_0000 - 0x001F_FFFF:    Secondary slot : Secure image
+    - 0x0020_0000 - 0x0027_FFFF:    Secondary slot : Non-secure image
+
+    - 0x0028_0000 - 0x002F_FFFF:    Scratch area, only used during image
+                                    swapping, used for secure and non-secure
+                                    image as well
 
 **************************
 Firmware upgrade operation
@@ -93,7 +124,7 @@ upgrade, then the content of the primary slot will be simply overwritten with
 the content of the secondary slot, before starting the new image from the
 primary slot. After the content of the primary slot has been successfully
 overwritten, the header and trailer of the new image in the secondary slot is
-erased to prevent the triggering of another unncessary image uprade after a
+erased to prevent the triggering of another unnecessary image upgrade after a
 restart. The overwrite operation is fail-safe and resistant to power-cut
 failures. For more details please refer to the MCUBoot
 `documentation <https://www.mcuboot.com/mcuboot/design.html>`__.
@@ -146,6 +177,10 @@ At build time automatically two binaries are generated::
 
     <build_dir>/install/outputs/fvp/tfm_s_ns_signed_1.bin : Image linked for the secondary slot memory partition
 
+.. Note::
+
+    Only single image boot is supported with non-swapping upgrade mode.
+
 RAM Loading firmware upgrade
 ============================
 Musca-A supports an image upgrade mode that is separate to the other (overwrite,
@@ -155,6 +190,10 @@ by reading the image version numbers in the image headers, but instead of
 executing it in place, the newest image is copied to RAM for execution. The load
 address, the location in RAM where the image is copied to, is stored in the
 image header.
+
+.. Note::
+
+    Only single image boot is supported with RAM loading upgrade mode.
 
 Summary of different modes for image upgrade
 ============================================
@@ -182,7 +221,8 @@ modes are supported by which platforms:
 +----------+-----------------+---------------+----------+-------------+-----------------+
 
 .. [1] To disable BL2, please turn off the ``BL2`` compiler switch in the
-    top-level configuration file or in the command line
+    build configuration file (``bl2/ext/mcuboot/MCUBootConfig.cmake``) or
+    in the command line
 
 .. [2] BL2 is enabled by default
 
@@ -190,16 +230,49 @@ modes are supported by which platforms:
     update by default
 
 .. [4] To enable XIP Swap mode, assign the "SWAP" string to the
-    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the top-level
+    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
 .. [5] To enable XIP No-swap, assign the "NO_SWAP" string to the
-    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the top-level
+    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
 .. [6] To enable RAM loading, assign the "RAM_LOADING" string to the
-    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the top-level
+    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
+
+*******************
+Multiple image boot
+*******************
+It is possible to update the firmware images independently to support the
+scenario when secure and non-secure images are provided by different vendors.
+Multiple image boot is supported only together with the overwrite and swap
+firmware upgrade modes.
+
+It is possible to describe the dependencies of the images on each other in
+order to avoid a faulty upgrade when incompatible versions would be installed.
+These dependencies are part of the image manifest area.
+The dependencies are composed from two parts:
+
+ - **Image identifier:** The number of the image which the current image (whose
+   manifest area contains the dependency entry) depends on. The image identifier
+   starts from 0.
+
+ - **Minimum version:** The minimum version of other image must be present on
+   the device by the end of the upgrade (both images might be updated at the
+   same time).
+
+Dependencies can be added to the images at compile time with the following
+compile time switches:
+
+ - ``S_IMAGE_MIN_VER`` It is added to the non-secure image and specifies the
+   minimum required version of the secure image.
+ - ``NS_IMAGE_MIN_VER`` It is added to the secure image and specifies the
+   minimum required version of the non-secure image.
+
+Example of how to provide the secure image minimum version::
+
+    cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DS_IMAGE_MIN_VER=1.2.3+4 ../
 
 ********************
 Signature algorithms
@@ -210,15 +283,24 @@ algorithms:
   - `RSA-2048`
   - `RSA-3072`: default
 
-Example keys stored in ``root-rsa-2048.pem`` and ``root-rsa-3072.pem``.
+Example keys stored in:
+
+ - ``root-rsa-2048.pem``   : Used to sign single image (S+NS) or secure image
+   in case of multiple image boot
+ - ``root-rsa-2048_1.pem`` : Used to sign non-secure image in case of multiple
+   image boot
+ - ``root-rsa-3072.pem``   : Used to sign single image (S+NS) or secure image
+   in case of multiple image boot
+ - ``root-rsa-3072_1.pem`` : Used to sign non-secure image in case of multiple
+   image boot
 
 ************************
 Build time configuration
 ************************
-MCUBoot related compile time switches can be set in the high level build
-configuration file::
+MCUBoot related compile time switches can be set in the build configuration
+file::
 
-    CommonConfig.cmake
+    bl2/ext/mcuboot/MCUBootConfig.cmake
 
 Compile time switches:
 
@@ -227,26 +309,48 @@ Compile time switches:
       reset and it authenticates TF-M and starts secure code.
     - **False:** TF-M built without bootloader. Secure image linked to the
       beginning of the device memory and executed after reset. If it is false
-      then using any of the further compile time switches are invalid.
+      then using any of the further compile time switches is invalid.
 - MCUBOOT_UPGRADE_STRATEGY (default: "OVERWRITE_ONLY"):
     - **"OVERWRITE_ONLY":** Default firmware upgrade operation with overwrite.
     - **"SWAP":** Activate swapping firmware upgrade operation.
     - **"NO_SWAP":** Activate non-swapping firmware upgrade operation.
     - **"RAM_LOADING":** Activate RAM loading firmware upgrade operation, where
-      latest image is copied to RAM and runs from there instead of being
+      the latest image is copied to RAM and runs from there instead of being
       executed in-place.
 - MCUBOOT_SIGNATURE_TYPE (default: RSA-3072):
-    - **RSA-3072** Image is signed with RSA-3072 algorithm
-    - **RSA-2048** Image is signed with RSA-2048 algorithm
+    - **RSA-3072:** Image is signed with RSA-3072 algorithm
+    - **RSA-2048:** Image is signed with RSA-2048 algorithm
+- MCUBOOT_IMAGE_NUMBER (default: 2):
+    - **1:** Single image boot, secure and non-secure images are signed and
+      updated together.
+    - **2:** Multiple image boot, secure and non-secure images are signed and
+      updatable independently.
+- MCUBOOT_HW_KEY (default: True):
+    - **True:** The hash of public key is provisioned to the SoC and the image
+      manifest contains the whole public key. MCUBoot validates the key before
+      using it for firmware authentication, it calculates the hash of public key
+      from the manifest and compare against the retrieved key-hash from the
+      hardware. This way MCUBoot is independent from the public key(s).
+      Key(s) can be provisioned any time and by different parties.
+    - **False:** The whole public key is embedded to the bootloader code and the
+      image manifest contains only the hash of the public key. MCUBoot validates
+      the key before using it for firmware authentication, it calculates the
+      hash of built-in public key and compare against the retrieved key-hash
+      from the image manifest. After this the bootloader can verify that the
+      image was signed with a private key that corresponds to the retrieved
+      key-hash (it can have more public keys embedded in and it may have to look
+      for the matching one). All the public key(s) must be known at MCUBoot
+      build time.
 
 Image versioning
 ================
-An image version number is written to its header by one of the python scripts,
+An image version number is written to its header by one of the Python scripts,
 and this number is used by the bootloader when the non-swapping or RAM loading
-mode is enabled.
+mode is enabled. It is also used in case of multiple image boot when the
+bootloader checks the image dependencies if any have been added to the images.
 
-The version number of the image can manually be passed in through the command
-line in the cmake configuration step::
+The version number of the image (single image boot) can manually be passed in
+through the command line in the cmake configuration step::
 
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DIMAGE_VERSION=1.2.3+4 ../
 
@@ -263,7 +367,9 @@ then set to the last number that has been specified, and the build number would
 stop incrementing. Any new version numbers that are provided will overwrite
 the previous one: 0.0.0+1 -> 0.0.0+2. Note: To re-apply automatic image
 versioning, please start a clean build without specifying the image version
-number at all.
+number at all. In case of multiple image boot there are separate compile time
+switches for both images to provide their version: ``IMAGE_VERSION_S`` and
+``IMAGE_VERSION_NS``. These must be used instead of ``IMAGE_VERSION``.
 
 Security counter
 ================
@@ -272,21 +378,59 @@ bootloader and its aim is to have an independent (from the image version)
 counter to ensure rollback protection by comparing the new image's security
 counter against the original (currently active) image's security counter during
 the image upgrade process. It is added to the manifest (to the TLV area that is
-appended to the end of the image) by one of the python scripts when signing the
+appended to the end of the image) by one of the Python scripts when signing the
 image. The value of the security counter is security critical data and it is in
-the integrity protected part of the image. The last valid security counter is
-always stored in a non-volatile and trusted component of the device and its
-value should always be increased if a security flaw was fixed in the current
-image version. The value of the security counter can be specified at build time
-in the cmake configuration step::
+the integrity protected part of the image. The last valid security counter
+should always be stored in a non-volatile and trusted component of the device
+and its value should always be increased if a security flaw was fixed in the
+current image version. The value of the security counter (single image boot) can
+be specified at build time in the cmake configuration step::
 
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DSECURITY_COUNTER=42 ../
 
 The security counter can be independent from the image version, but not
 necessarily. Alternatively, if it is not specified at build time with the
-``SECURITY_COUNTER`` option the python script will automatically generate it
+``SECURITY_COUNTER`` option the Python script will automatically generate it
 from the image version number (not including the build number) and this value
-will be added to the signed image.
+will be added to the signed image. In case of multiple image boot there are
+separate compile time switches for both images to provide their security counter
+value: ``SECURITY_COUNTER_S`` and ``SECURITY_COUNTER_NS``. These must be used
+instead of ``SECURITY_COUNTER``. If these are not defined then the security
+counter values will be derived from the corresponding image version similar to
+the single image boot.
+
+***************************
+Signing the images manually
+***************************
+Normally the build system handles the signing (computing hash over the image
+and security critical manifest data and then signing the hash) of the firmware
+images. However, the images also can be signed manually by using the ``imgtool``
+Python program which is located in the ``bl2/ext/mcuboot/scripts`` directory.
+Issue the ``python3 imgtool.py sign --help`` command in the directory for more
+information about the mandatory and optional arguments. The tool takes an image
+in binary or Intel Hex format and adds a header and trailer that MCUBoot is
+expecting. In case of single image boot after a successful build the
+``tfm_full.bin`` build artifact (contains the concatenated secure and non-secure
+images) must be passed to the script and in case of multiple image boot the
+``tfm_s.bin`` and ``tfm_ns.bin`` binaries can be passed to prepare the signed
+images.
+
+Signing the secure image manually in case of multiple image boot
+================================================================
+
+::
+
+    python3 bl2/ext/mcuboot/scripts/imgtool.py sign \
+        --layout <build_dir>/image_macros_preprocessed_s.c \
+        -k <tfm_dir>/bl2/ext/mcuboot/root-rsa-3072.pem \
+        --public-key-format full \
+        --align 1 \
+        -v 1.2.3+4 \
+        -d "(1,1.2.3+0)" \
+        -s 42 \
+        -H 0x400 \
+        <build_dir>/install/outputs/AN521/tfm_s.bin \
+        <build_dir>/tfm_s_signed.bin
 
 ************************
 Testing firmware upgrade
@@ -298,7 +442,8 @@ firmware package, TF-M is built twice with different build configurations.
 
 Overwriting firmware upgrade
 ============================
-Run TF-M build twice with two different build configuration: default and
+Run TF-M build twice with ``MCUBOOT_IMAGE_NUMBER`` set to "1" in both cases
+(single image boot), but with two different build configurations: default and
 regression. Save the artifacts between builds, because second run can overwrite
 original binaries. Download default build to the primary slot and regression
 build to the secondary slot.
@@ -355,15 +500,68 @@ The following message will be shown in case of successful firmware upgrade:
     Running Test Suite PSA protected storage S interface tests (TFM_SST_TEST_2XXX)...
     ...
 
+To update the secure and non-secure images separately (multiple image boot),
+set the ``MCUBOOT_IMAGE_NUMBER`` switch to "2" (this is the default
+configuration value) and follow the same instructions as in case of single image
+boot.
+
+Executing multiple firmware upgrades on SSE 200 FPGA on MPS2 board
+------------------------------------------------------------------
+
+::
+
+    TITLE: Versatile Express Images Configuration File
+    [IMAGES]
+    TOTALIMAGES: 4                     ;Number of Images (Max: 32)
+    IMAGE0ADDRESS: 0x00000000
+    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE1ADDRESS: 0x10080000
+    IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
+    IMAGE2ADDRESS: 0x10180000
+    IMAGE2FILE: \Software\tfm_ss1.bin  ; TF-M regression test secure (signed) image
+    IMAGE3ADDRESS: 0x10200000
+    IMAGE3FILE: \Software\tfm_nss1.bin ; TF-M regression test non-secure (signed) image
+
+Note that both the concatenated binary blob (the images are signed separately
+and then concatenated) and the separate signed images can be downloaded to the
+device because on this platform (AN521) both the primary slots and the secondary
+slots are contiguous areas in the Flash (see `Integration with TF-M`_). The
+following message will be shown in case of successful firmware upgrades:
+
+::
+
+    [INF] Starting bootloader
+    [INF] Swap type: test
+    [INF] Swap type: test
+    [INF] Image upgrade secondary slot -> primary slot
+    [INF] Erasing the primary slot
+    [INF] Copying the secondary slot to the primary slot: 0x80000 bytes
+    [INF] Image upgrade secondary slot -> primary slot
+    [INF] Erasing the primary slot
+    [INF] Copying the secondary slot to the primary slot: 0x80000 bytes
+    [INF] Bootloader chainload address offset: 0x80000
+    [INF] Jumping to the first image slot
+    [Sec Thread] Secure image initializing!
+    TFM level is: 1
+    [Sec Thread] Jumping to non-secure code...
+
+    #### Execute test suites for the Secure area ####
+    Running Test Suite PSA protected storage S interface tests (TFM_SST_TEST_2XXX)...
+    ...
+
 Swapping firmware upgrade
 =============================
 Follow the same instructions and platform related configurations as in case of
 overwriting build including these changes:
 
-- Set MCUBOOT\_SWAP compile time switch to true before build.
+- Set the ``MCUBOOT_UPGRADE_STRATEGY`` compile time switch to "SWAP"
+  before build.
+- Set the ``MCUBOOT_IMAGE_NUMBER`` compile time switch to "1" (single image
+  boot) or "2" (multiple image boot) before build.
 
-The following message will be shown in case of successful firmware upgrade,
-``Swap type: test`` indicates that images were swapped:
+During single image boot the following message will be shown in case of
+successful firmware upgrade, ``Swap type: test`` indicates that images were
+swapped:
 
 ::
 
@@ -382,12 +580,14 @@ The following message will be shown in case of successful firmware upgrade,
 
 Non-swapping firmware upgrade
 =============================
-Follow the same instructions as in case of overwriting build including these
-changes:
+Follow the same instructions and platform related configurations as in case of
+overwriting build including these changes:
 
 - Set the ``MCUBOOT_UPGRADE_STRATEGY`` compile time switch to "NO_SWAP"
   before build.
-- Increase the image version number between the two build run.
+- Make sure the image version number was increased between the two build runs
+  either by specifying it manually or by checking in the build log that it was
+  incremented automatically.
 
 Executing firmware upgrade on FVP_MPS2_AEMv8M
 ---------------------------------------------
@@ -427,7 +627,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
 
 Executing firmware upgrade on Musca-B1 board
 --------------------------------------------
-After two images have been built, they can be concatenated to create the
+After the two images have been built, they can be concatenated to create the
 combined image using ``srec_cat``:
 
 - Linux::
@@ -495,7 +695,7 @@ combined image using ``srec_cat``:
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin-Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade when,
 RAM loading is enabled, notice that image with higher version number
