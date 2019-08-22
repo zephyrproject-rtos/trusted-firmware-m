@@ -264,7 +264,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 
     /* For condition 2: check if the partition ID is same */
     partition_id = tfm_spm_partition_get_running_partition_id();
-    if (partition_id != msg->service->partition->static_data.partition_id) {
+    if (partition_id != msg->service->partition->static_data->partition_id) {
         return NULL;
     }
 
@@ -364,12 +364,12 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
 uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].
-            memory_data.stack_bottom;
+            memory_data->stack_bottom;
 }
 
 uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].memory_data.stack_top;
+    return g_spm_partition_db.partitions[partition_idx].memory_data->stack_top;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
@@ -379,7 +379,7 @@ uint32_t tfm_spm_partition_get_running_partition_id(void)
 
     partition = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_desc_t,
                                       sp_thrd);
-    return partition->static_data.partition_id;
+    return partition->static_data->partition_id;
 }
 
 static struct tfm_thrd_ctx *
@@ -392,12 +392,12 @@ static tfm_thrd_func_t
     tfm_spm_partition_get_init_func(uint32_t partition_idx)
 {
     return (tfm_thrd_func_t)(g_spm_partition_db.partitions[partition_idx].
-                             static_data.partition_init);
+                             static_data->partition_init);
 }
 
 static uint32_t tfm_spm_partition_get_priority(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].static_data.
+    return g_spm_partition_db.partitions[partition_idx].static_data->
                     partition_priority;
 }
 
@@ -460,7 +460,7 @@ void tfm_spm_init(void)
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
         tfm_spm_hal_configure_default_isolation(partition->platform_data);
-        partition->static_data.index = i;
+        partition->runtime_data.index = i;
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
@@ -536,7 +536,7 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
                                                  struct spm_partition_desc_t,
                                                  sp_thrd);
 
-        if (p_next_partition->static_data.partition_flags &
+        if (p_next_partition->static_data->partition_flags &
             SPM_PART_FLAG_PSA_ROT) {
             is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
         } else {

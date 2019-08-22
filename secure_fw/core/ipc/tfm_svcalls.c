@@ -151,7 +151,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
         tfm_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data.index);
+        partition->runtime_data.index);
 
     if (!ns_caller) {
         inptr = (psa_invec *)args[2];
@@ -423,7 +423,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
         tfm_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data.index);
+        partition->runtime_data.index);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -554,7 +554,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data.index);
+        partition->runtime_data.index);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -711,7 +711,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data.index);
+        partition->runtime_data.index);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -1039,7 +1039,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+    ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
@@ -1080,7 +1080,7 @@ void tfm_svcall_enable_irq(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+    ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
@@ -1108,7 +1108,7 @@ void tfm_svcall_disable_irq(uint32_t *args)
         tfm_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->static_data.partition_id,
+    ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {

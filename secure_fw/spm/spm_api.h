@@ -106,6 +106,7 @@ struct spm_partition_runtime_data_t {
                                          * Service signal mask passed by
                                          * psa_wait()
                                          */
+    uint32_t index;                     /* Partition index */
 };
 
 #ifdef TFM_PSA_API

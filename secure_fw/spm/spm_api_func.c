@@ -39,17 +39,17 @@ static void tfm_spm_partition_err_handler(
 #ifdef TFM_CORE_DEBUG
     if (err_type == TFM_INIT_FAILURE) {
         printf("Partition init failed for partition id 0x%08X\r\n",
-               partition->static_data.partition_id);
+               partition->static_data->partition_id);
     } else {
         printf(
             "Unknown partition error %d (code: %d) for partition id 0x%08X\r\n",
-            err_type, err_code, partition->static_data.partition_id);
+            err_type, err_code, partition->static_data->partition_id);
     }
 #else
     (void)err_type;
     (void)err_code;
 #endif
-    tfm_spm_partition_set_state(partition->static_data.partition_id,
+    tfm_spm_partition_set_state(partition->static_data->partition_id,
                                 SPM_PARTITION_STATE_CLOSED);
 }
 
@@ -65,7 +65,7 @@ enum spm_err_t tfm_spm_partition_init(void)
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
         tfm_spm_hal_configure_default_isolation(part->platform_data);
-        if (part->static_data.partition_init == NULL) {
+        if (part->static_data->partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             tfm_spm_partition_set_caller_partition_idx(idx,
                                                        SPM_INVALID_PARTITION_IDX);
@@ -75,8 +75,8 @@ enum spm_err_t tfm_spm_partition_init(void)
             desc.args = args;
             desc.ns_caller = 0U;
             desc.iovec_api = TFM_SFN_API_IOVEC;
-            desc.sfn = (sfn_t)part->static_data.partition_init;
-            desc.sp_id = part->static_data.partition_id;
+            desc.sfn = (sfn_t)part->static_data->partition_init;
+            desc.sp_id = part->static_data->partition_id;
             res = tfm_core_sfn_request(&desc);
             if (res == TFM_SUCCESS) {
                 tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);

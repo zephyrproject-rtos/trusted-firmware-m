@@ -56,6 +56,10 @@
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
+#ifdef TFM_PSA_API
+extern psa_status_t tfm_nspm_thread_entry(void);
+#endif
+
 extern int32_t tfm_sst_req_mngr_init(void);
 
 #ifdef TFM_PARTITION_AUDIT_LOG
@@ -97,6 +101,10 @@ extern int32_t tfm_irq_test_1_init(void);
 /**************************************************************************/
 /** Memory region declarations */
 /**************************************************************************/
+#ifdef TFM_PSA_API
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, $$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, $$Limit);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE, $$RO$$Base);
@@ -234,6 +242,8 @@ REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Limit);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+#endif /* defined(TFM_PSA_API) */
+
 #ifndef TFM_PSA_API
 /**************************************************************************/
 /** Context stacks for IRQ handling */
@@ -247,6 +257,12 @@ REGION_DECLARE(Image$$, TFM_IRQ_TEST_1, _STACK$$ZI$$Limit);
  *   intr_ctx: Frame pushed when the partition is interrupted
  *   hndl_ctx: Frame pushed when the partition is handling an interrupt
  */
+static uint32_t ns_interrupt_ctx_stack[
+        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
+
+static uint32_t tfm_core_interrupt_ctx_stack[
+        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
+
 static uint32_t ctx_stack_TFM_SP_STORAGE[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_SP_STORAGE_IRQ_COUNT) * (
@@ -340,99 +356,432 @@ static uint32_t ctx_stack_TFM_IRQ_TEST_1[
         )) / sizeof(uint32_t)];
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+
+uint32_t *ctx_stack_list[] =
+{
+    ns_interrupt_ctx_stack,
+    tfm_core_interrupt_ctx_stack,
+    ctx_stack_TFM_SP_STORAGE,
+#ifdef TFM_PARTITION_AUDIT_LOG
+    ctx_stack_TFM_SP_AUDIT_LOG,
+#endif /* TFM_PARTITION_AUDIT_LOG */
+    ctx_stack_TFM_SP_CRYPTO,
+#ifdef TFM_PARTITION_PLATFORM
+    ctx_stack_TFM_SP_PLATFORM,
+#endif /* TFM_PARTITION_PLATFORM */
+    ctx_stack_TFM_SP_INITIAL_ATTESTATION,
+#ifdef TFM_PARTITION_TEST_CORE
+    ctx_stack_TFM_SP_CORE_TEST,
+#endif /* TFM_PARTITION_TEST_CORE */
+#ifdef TFM_PARTITION_TEST_CORE
+    ctx_stack_TFM_SP_CORE_TEST_2,
+#endif /* TFM_PARTITION_TEST_CORE */
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    ctx_stack_TFM_SP_SECURE_TEST_PARTITION,
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    ctx_stack_TFM_SP_IPC_SERVICE_TEST,
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    ctx_stack_TFM_SP_IPC_CLIENT_TEST,
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+#ifdef TFM_ENABLE_IRQ_TEST
+    ctx_stack_TFM_IRQ_TEST_1,
+#endif /* TFM_ENABLE_IRQ_TEST */
+};
 #endif /* !defined(TFM_PSA_API) */
+
+/**************************************************************************/
+/** The static data of the partition list */
+/**************************************************************************/
+const struct spm_partition_static_data_t static_data_list[] =
+{
+    {
+        .partition_id         = TFM_SP_NON_SECURE_ID,
+#ifdef TFM_PSA_API
+        .partition_flags      = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_IPC,
+        .partition_priority   = TFM_PRIORITY_LOW,
+        .partition_init       = tfm_nspm_thread_entry,
+#else
+        .partition_flags      = 0,
+#endif
+    },
+
+#ifndef TFM_PSA_API
+    {
+        .partition_id         = TFM_SP_CORE_ID,
+        .partition_flags      = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT,
+    },
+#endif
+
+    {
+        .partition_id         = TFM_SP_STORAGE_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_sst_req_mngr_init,
+    },
+
+#ifdef TFM_PARTITION_AUDIT_LOG
+    {
+        .partition_id         = TFM_SP_AUDIT_LOG_ID,
+        .partition_flags      = 0
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = audit_core_init,
+    },
+#endif /* TFM_PARTITION_AUDIT_LOG */
+
+    {
+        .partition_id         = TFM_SP_CRYPTO_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_crypto_init,
+    },
+
+#ifdef TFM_PARTITION_PLATFORM
+    {
+        .partition_id         = TFM_SP_PLATFORM_ID,
+        .partition_flags      = 0
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = platform_sp_init,
+    },
+#endif /* TFM_PARTITION_PLATFORM */
+
+    {
+        .partition_id         = TFM_SP_INITIAL_ATTESTATION_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = attest_partition_init,
+    },
+
+#ifdef TFM_PARTITION_TEST_CORE
+    {
+        .partition_id         = TFM_SP_CORE_TEST_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = core_test_init,
+    },
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    {
+        .partition_id         = TFM_SP_CORE_TEST_2_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = core_test_2_init,
+    },
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    {
+        .partition_id         = TFM_SP_SECURE_TEST_PARTITION_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_secure_client_service_init,
+    },
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    {
+        .partition_id         = TFM_SP_IPC_SERVICE_TEST_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(HIGH),
+        .partition_init       = ipc_service_test_main,
+    },
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    {
+        .partition_id         = TFM_SP_IPC_CLIENT_TEST_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = ipc_client_test_main,
+    },
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_ENABLE_IRQ_TEST
+    {
+        .partition_id         = TFM_IRQ_TEST_1_ID,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_irq_test_1_init,
+    },
+#endif /* TFM_ENABLE_IRQ_TEST */
+
+};
+
+/**************************************************************************/
+/** The platform data of the partition list */
+/**************************************************************************/
+const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
+{
+    NULL,
+
+#ifndef TFM_PSA_API
+    NULL,
+#endif
+
+    NULL,
+
+#ifdef TFM_PARTITION_AUDIT_LOG
+    /* FIXME: Only adding the first mmio region */
+#ifdef AUDIT_UART_REDIRECTION
+    TFM_PERIPHERAL_UART1,
+#else /* AUDIT_UART_REDIRECTION */
+    NULL,
+#endif /* AUDIT_UART_REDIRECTION */
+#endif /* TFM_PARTITION_AUDIT_LOG */
+
+    NULL,
+
+#ifdef TFM_PARTITION_PLATFORM
+    NULL,
+#endif /* TFM_PARTITION_PLATFORM */
+
+    NULL,
+
+#ifdef TFM_PARTITION_TEST_CORE
+    /* FIXME: Only adding the first mmio region */
+    TFM_PERIPHERAL_FPGA_IO,
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    NULL,
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    /* FIXME: Only adding the first mmio region */
+    TFM_PERIPHERAL_STD_UART,
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    NULL,
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    NULL,
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_ENABLE_IRQ_TEST
+    /* FIXME: Only adding the first mmio region */
+    TFM_PERIPHERAL_TIMER0,
+#endif /* TFM_ENABLE_IRQ_TEST */
+
+};
+
+/**************************************************************************/
+/** The memory data of the partition list */
+/**************************************************************************/
+#ifdef TFM_PSA_API
+const struct tfm_spm_partition_memory_data_t memory_data_list[] =
+{
+    {
+        .stack_bottom         = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
+        .rw_start             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+    },
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_STORAGE, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_STORAGE, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_STORAGE, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Limit),
+    },
+
+#ifdef TFM_PARTITION_AUDIT_LOG
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_AUDIT_LOG */
+
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_CRYPTO, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_CRYPTO, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Limit),
+    },
+
+#ifdef TFM_PARTITION_PLATFORM
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_PLATFORM, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_PLATFORM, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_PLATFORM */
+
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Limit),
+    },
+
+#ifdef TFM_PARTITION_TEST_CORE
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_ENABLE_IRQ_TEST
+    {
+        .code_start           = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_ENABLE_IRQ_TEST */
+
+};
+#endif /* defined(TFM_PSA_API) */
 
 /**************************************************************************/
 /** The partition list for the DB */
 /**************************************************************************/
-struct spm_partition_desc_t partition_list [] =
+static struct spm_partition_desc_t partition_list [] =
 {
-    {{0}}, /* placeholder for Non-secure internal partition */
+    {{}}, /* placeholder for Non-secure internal partition */
 #ifndef TFM_PSA_API
-    {{0}}, /* placeholder for TF-M Core internal partition */
+    {{}}, /* placeholder for TF-M Core internal partition */
 #endif /* !ifndefined(TFM_PSA_API) */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_STORAGE */
     /* -----------------------------------------------------------------------*/
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_STORAGE_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = tfm_sst_req_mngr_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_STORAGE,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_STORAGE, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_STORAGE, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_STORAGE, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_STORAGE, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 
     /* -----------------------------------------------------------------------*/
@@ -440,89 +789,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_AUDIT_LOG
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_AUDIT_LOG_ID,
-            .partition_flags      = 0
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = audit_core_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_AUDIT_LOG,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
-    /* platform data */
-        /* FIXME: Only adding the first mmio region */
-#ifdef AUDIT_UART_REDIRECTION
-        .platform_data            = TFM_PERIPHERAL_UART1,
-#else /* AUDIT_UART_REDIRECTION */
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
-#endif /* AUDIT_UART_REDIRECTION */
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_AUDIT_LOG, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
@@ -530,83 +801,11 @@ struct spm_partition_desc_t partition_list [] =
     /* - Partition DB record for TFM_SP_CRYPTO */
     /* -----------------------------------------------------------------------*/
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_CRYPTO_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = tfm_crypto_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_CRYPTO,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_CRYPTO, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_CRYPTO, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_CRYPTO, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_CRYPTO, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 
     /* -----------------------------------------------------------------------*/
@@ -614,83 +813,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_PLATFORM
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_PLATFORM_ID,
-            .partition_flags      = 0
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = platform_sp_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_PLATFORM,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_PLATFORM, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_PLATFORM, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_PLATFORM, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_PLATFORM, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
@@ -698,83 +825,11 @@ struct spm_partition_desc_t partition_list [] =
     /* - Partition DB record for TFM_SP_INITIAL_ATTESTATION */
     /* -----------------------------------------------------------------------*/
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_INITIAL_ATTESTATION_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = attest_partition_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_INITIAL_ATTESTATION,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 
     /* -----------------------------------------------------------------------*/
@@ -782,85 +837,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_CORE_TEST_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = core_test_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_CORE_TEST,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
+        .runtime_data             = {},
+        .static_data              = NULL,
+        .platform_data            = NULL,
 
-    /* platform data */
-        /* FIXME: Only adding the first mmio region */
-        .platform_data            = TFM_PERIPHERAL_FPGA_IO,
-
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -869,83 +850,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_CORE_TEST_2_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = core_test_2_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_CORE_TEST_2,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_CORE_TEST_2, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -954,85 +863,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_SECURE_TEST_PARTITION_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = tfm_secure_client_service_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_SECURE_TEST_PARTITION,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
+        .runtime_data             = {},
+        .static_data              = NULL,
+        .platform_data            = NULL,
 
-    /* platform data */
-        /* FIXME: Only adding the first mmio region */
-        .platform_data            = TFM_PERIPHERAL_STD_UART,
-
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_SECURE_TEST_PARTITION, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
@@ -1041,83 +876,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_IPC_SERVICE_TEST_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(HIGH),
-            .partition_init       = ipc_service_test_main,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_IPC_SERVICE_TEST,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_SERVICE_TEST, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -1126,83 +889,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_SP_IPC_CLIENT_TEST_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = ipc_client_test_main,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_SP_IPC_CLIENT_TEST,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
-
+        .runtime_data             = {},
+        .static_data              = NULL,
         .platform_data            = NULL,
 
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_SP_IPC_CLIENT_TEST, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -1211,85 +902,11 @@ struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_ENABLE_IRQ_TEST
     {
-    /* Static data */
-        {
-            .partition_id         = TFM_IRQ_TEST_1_ID,
-            .partition_flags      = SPM_PART_FLAG_IPC
-                                  | SPM_PART_FLAG_APP_ROT
-                                  ,
-            .partition_priority   = TFM_PRIORITY(NORMAL),
-            .partition_init       = tfm_irq_test_1_init,
-        },
-
     /* Runtime data */
-        {
-#ifndef TFM_PSA_API
-            .partition_state      = SPM_PARTITION_STATE_UNINIT,
-            .caller_partition_idx = SPM_INVALID_PARTITION_IDX,
-            .caller_client_id     = TFM_INVALID_CLIENT_ID,
-            .share                = TFM_BUFFER_SHARE_DISABLE,
-            .stack_ptr            = 0,
-            .lr                   = 0,
-            .iovec_api            = TFM_SFN_API_IOVEC,
-            .iovec_args           =
-                {
-                    .in_vec       = {{0}},
-                    .in_len       = 0,
-                    .out_vec      = {{0}},
-                    .out_len      = 0,
-                },
-            .orig_outvec          = NULL,
-            .ctx_stack_ptr        = ctx_stack_TFM_IRQ_TEST_1,
-#else /* !defined(TFM_PSA_API) */
-            .signal_evnt          =
-                {
-                    .magic        = 0,
-                    .owner        = NULL,
-                },
-            .signals              = 0,
-            .service_list         =
-                {
-                    .prev         = NULL,
-                    .next         = NULL,
-                },
-#endif /* !defined(TFM_PSA_API) */
-            .signal_mask          = 0,
-        },
+        .runtime_data             = {},
+        .static_data              = NULL,
+        .platform_data            = NULL,
 
-    /* platform data */
-        /* FIXME: Only adding the first mmio region */
-        .platform_data            = TFM_PERIPHERAL_TIMER0,
-
-#ifdef TFM_PSA_API
-    /* memory_data */
-        .memory_data = {
-            .code_start           = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$Base),
-            .code_limit           = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$Limit),
-            .ro_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$RO$$Base),
-            .ro_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, $$RO$$Limit),
-            .rw_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$RW$$Base),
-            .rw_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$RW$$Limit),
-            .zi_start             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$ZI$$Base),
-            .zi_limit             = PART_REGION_ADDR(TFM_IRQ_TEST_1, _DATA$$ZI$$Limit),
-            .stack_bottom         = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Base),
-            .stack_top            = PART_REGION_ADDR(TFM_IRQ_TEST_1, _STACK$$ZI$$Limit),
-        },
-
-    /* sp_thrd */
-        .sp_thrd = {
-                .pfn              = NULL,
-                .param            = NULL,
-                .sp_btm           = 0,
-                .sp_top           = 0,
-                .prior            = THRD_PRIOR_LOWEST,
-                .status           = THRD_STAT_INVALID,
-                .state_ctx        =
-                {
-                    .ctxb         = {0}, /* Fields are not detailed as they are architecture dependent*/
-                },
-                .next             = NULL,
-        },
-#endif /* defined(TFM_PSA_API) */
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 

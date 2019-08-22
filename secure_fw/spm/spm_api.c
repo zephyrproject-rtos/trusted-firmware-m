@@ -35,7 +35,7 @@ uint32_t get_partition_idx(uint32_t partition_id)
     }
 
     for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
-        if (g_spm_partition_db.partitions[i].static_data.partition_id ==
+        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
                 partition_id) {
             return i;
         }
@@ -45,65 +45,36 @@ uint32_t get_partition_idx(uint32_t partition_id)
 
 enum spm_err_t tfm_spm_db_init(void)
 {
-    struct spm_partition_desc_t *part_ptr;
-#ifndef TFM_PSA_API
-    static uint32_t ns_interrupt_ctx_stack[
-           sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
-    static uint32_t tfm_core_interrupt_ctx_stack[
-           sizeof(struct interrupted_ctx_stack_frame_t)/sizeof(uint32_t)] = {0};
-#endif /* !defined(TFM_PSA_API) */
+    uint32_t i;
 
     /* This function initialises partition db */
 
-    /* There are a few partitions that are used by TF-M internally.
-     * These are explicitly added to the partition db here.
-     */
-
     /* For the non secure Execution environment */
-#ifdef TFM_PSA_API
-    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
-    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
-    uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
-    uint32_t psp_stack_top    = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Limit;
-#endif
-
-    part_ptr = &(g_spm_partition_db.partitions[
-                                         NON_SECURE_INTERNAL_PARTITION_DB_IDX]);
-    part_ptr->static_data.partition_id = TFM_SP_NON_SECURE_ID;
-#ifdef TFM_PSA_API
-    part_ptr->static_data.partition_flags = SPM_PART_FLAG_APP_ROT |
-                                            SPM_PART_FLAG_IPC;
-    part_ptr->static_data.partition_priority = TFM_PRIORITY_LOW;
-    part_ptr->static_data.partition_init = tfm_nspm_thread_entry;
-#else
-    part_ptr->static_data.partition_flags = 0;
-#endif
-
-#ifdef TFM_PSA_API
-    part_ptr->memory_data.stack_bottom = psp_stack_bottom;
-    part_ptr->memory_data.stack_top    = psp_stack_top;
-    /* Since RW, ZI and stack are configured as one MPU region, configure
-     * RW start address to psp_stack_bottom to get RW access to stack
-     */
-    part_ptr->memory_data.rw_start     = psp_stack_bottom;
-#endif
-
 #ifndef TFM_PSA_API
-    part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
-    part_ptr->runtime_data.ctx_stack_ptr = ns_interrupt_ctx_stack;
-
     tfm_nspm_configure_clients();
+#endif
 
-    /* For the TF-M core environment itself */
-    part_ptr = &(g_spm_partition_db.partitions[
-                                           TFM_CORE_INTERNAL_PARTITION_DB_IDX]);
-    part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
-    part_ptr->static_data.partition_flags =
-                    SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
-    part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
-    part_ptr->runtime_data.ctx_stack_ptr = tfm_core_interrupt_ctx_stack;
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+#ifndef TFM_PSA_API
+        g_spm_partition_db.partitions[i].runtime_data.partition_state =
+            SPM_PARTITION_STATE_UNINIT;
+        g_spm_partition_db.partitions[i].runtime_data.caller_partition_idx =
+            SPM_INVALID_PARTITION_IDX;
+        g_spm_partition_db.partitions[i].runtime_data.caller_client_id =
+            TFM_INVALID_CLIENT_ID;
+        g_spm_partition_db.partitions[i].runtime_data.share =
+            TFM_BUFFER_SHARE_DISABLE;
+        g_spm_partition_db.partitions[i].runtime_data.iovec_api =
+            TFM_SFN_API_IOVEC;
+        g_spm_partition_db.partitions[i].runtime_data.ctx_stack_ptr =
+            ctx_stack_list[i];
 #endif /* !defined(TFM_PSA_API) */
-
+        g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
+        g_spm_partition_db.partitions[i].platform_data = platform_data_list[i];
+#ifdef TFM_PSA_API
+        g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
+#endif
+    }
     g_spm_partition_db.is_init = 1;
 
     return SPM_ERR_OK;
@@ -111,13 +82,13 @@ enum spm_err_t tfm_spm_db_init(void)
 
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].static_data.
+    return g_spm_partition_db.partitions[partition_idx].static_data->
             partition_id;
 }
 
 uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].static_data.
+    return g_spm_partition_db.partitions[partition_idx].static_data->
             partition_flags;
 }
 
