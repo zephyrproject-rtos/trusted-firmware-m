@@ -205,19 +205,6 @@ static psa_status_t test_memory_permissions(
 
 static psa_status_t test_share_redirection(void)
 {
-    uint32_t tmp;
-
-#ifndef TFM_PSA_API
-    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    }
-#endif /* !defined(TFM_PSA_API) */
-
-    /* Read from scratch */
-    tmp = tfm_scratch_area[0];
-    /* Write to scratch */
-    tfm_scratch_area[1] = tmp;
-
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
@@ -252,16 +239,9 @@ static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
     int32_t i;
     /* Service internal buffer */
     uint32_t ss_buffer[SS_BUFFER_LEN] = {0};
-    /* Slave service has to use scratch area */
-#ifdef TFM_PSA_API
     uint32_t slave_buffer [len];
     int32_t result;
     int32_t *result_ptr = &result;
-#else
-    uint32_t *slave_buffer = (uint32_t *)tfm_scratch_area;
-    int32_t *result_ptr = (int32_t *)&tfm_scratch_area[tfm_scratch_area_size-4];
-#endif /* TFM_PSA_API */
-    /* Store result at end of scratch area to test entire range for RW access */
     int32_t res;
     psa_invec in_vec[] = { {slave_buffer, len*sizeof(uint32_t)} };
     psa_outvec outvec[] = { {slave_buffer, len*sizeof(uint32_t)},
@@ -284,12 +264,6 @@ static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
     for (i = 0; i < len; i++) {
         ss_buffer[i] = in_ptr[i];
     }
-
-#ifndef TFM_PSA_API
-    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     for (i = 0; i < len; i++) {
         slave_buffer[i] = ss_buffer[i];
@@ -333,24 +307,14 @@ static psa_status_t test_outvec_write(void)
 {
     int32_t err;
     int i;
-#ifdef TFM_PSA_API
     uint8_t data_buf [36]; /* (6 + 12) * 2 = 36 plus some alignment */
     uint8_t *data_buf_ptr = data_buf;
-#else
-    uint8_t *data_buf_ptr = (uint8_t *)tfm_scratch_area;
-#endif
     psa_invec in_vec [2];
     psa_outvec out_vec [2];
     uint8_t *in_buf_0;
     uint8_t *in_buf_1;
     uint8_t *out_buf_0;
     uint8_t *out_buf_1;
-
-#ifndef TFM_PSA_API
-    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_SCRATCH) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     in_buf_0 = data_buf_ptr;
     for (i = 0; i < 5; ++i, ++data_buf_ptr)
