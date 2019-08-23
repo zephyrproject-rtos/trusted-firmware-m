@@ -60,7 +60,6 @@ void tfm_spm_hal_configure_default_isolation(
 #define PARTITION_REGION_RO          4
 #define PARTITION_REGION_RW_STACK    5
 #define PARTITION_REGION_PERIPH      6
-#define PARTITION_REGION_SHARE       7
 
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);

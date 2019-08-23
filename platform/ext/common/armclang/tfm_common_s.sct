@@ -185,11 +185,6 @@ LR_CODE S_CODE_START {
         device_definition.o (+RW +ZI)
     }
 
-#if !defined(TFM_PSA_API)
-    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
-    }
-#endif /* TFM_PSA_API */
-
     /**** PSA RoT DATA start here */
     /*
      * This empty, zero long execution region is here to mark the start address

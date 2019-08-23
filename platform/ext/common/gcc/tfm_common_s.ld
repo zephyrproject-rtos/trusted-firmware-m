@@ -212,10 +212,6 @@ SECTIONS
         LONG (SIZEOF(.TFM_IRQ_TEST_1_STACK))
 #endif
 #endif /* TFM_ENABLE_IRQ_TEST */
-#if !defined(TFM_PSA_API)
-        LONG (ADDR(.TFM_UNPRIV_SCRATCH))
-        LONG (SIZEOF(.TFM_UNPRIV_SCRATCH))
-#endif /* !defined(TFM_PSA_API) */
         __zero_table_end__ = .;
     } > FLASH
 
@@ -544,15 +540,6 @@ SECTIONS
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 #endif /* TFM_LVL == 1 */
-
-#if !defined(TFM_PSA_API)
-    .TFM_UNPRIV_SCRATCH : ALIGN(32)
-    {
-        . += 0x400;
-    } > RAM
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
-#endif /* !defined(TFM_PSA_API) */
 
     /**** PSA RoT DATA start here */
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
