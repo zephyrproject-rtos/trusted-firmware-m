@@ -198,14 +198,6 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
             caller_client_id = caller_client_id;
 }
 
-enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
-                                           uint32_t share)
-{
-    g_spm_partition_db.partitions[partition_idx].runtime_data.share = share;
-
-    return SPM_ERR_OK;
-}
-
 enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
                                            const int32_t *args)
 {
@@ -248,7 +240,6 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
     int32_t i;
 
     partition->runtime_data.caller_partition_idx = SPM_INVALID_PARTITION_IDX;
-    partition->runtime_data.share = 0;
     partition->runtime_data.iovec_args.in_len = 0;
     for (i = 0; i < PSA_MAX_IOVEC; ++i) {
         partition->runtime_data.iovec_args.in_vec[i].base = 0;

@@ -12,7 +12,4 @@
 #include "tfm_svc.h"
 #include "secure_utilities.h"
 
-extern uint32_t tfm_scratch_area_size;
-extern uint8_t *tfm_scratch_area;
-
 #endif /* __TFM_CORE_H__ */

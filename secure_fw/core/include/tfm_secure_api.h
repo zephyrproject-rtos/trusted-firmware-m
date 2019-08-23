@@ -51,13 +51,6 @@ struct tfm_sfn_req_s {
     uint32_t ns_caller;
 };
 
-#define TFM_BUFFER_SHARE_DISABLE 0U
-#define TFM_BUFFER_SHARE_NS_CODE 1U
-#define TFM_BUFFER_SHARE_SCRATCH 2U
-/* only for TCB in level 2, all in level 1 */
-#define TFM_BUFFER_SHARE_PRIV    3U
-#define TFM_BUFFER_SHARE_DEFAULT 4U
-
 enum tfm_ns_region_e {
     TFM_NS_REGION_CODE = 0,
     TFM_NS_REGION_DATA,
@@ -71,8 +64,6 @@ enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RO = 1,
     TFM_MEMORY_ACCESS_RW = 2,
 };
-
-extern int32_t tfm_core_set_buffer_area(uint32_t share);
 
 extern int32_t tfm_core_validate_secure_caller(void);
 

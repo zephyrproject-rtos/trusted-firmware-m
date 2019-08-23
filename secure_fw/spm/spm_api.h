@@ -92,7 +92,6 @@ struct spm_partition_runtime_data_t {
     uint32_t partition_state;
     uint32_t caller_partition_idx;
     int32_t caller_client_id;
-    uint32_t share;
     uint32_t stack_ptr;
     uint32_t lr;
     int32_t iovec_api;               /*!< Whether the function in the partition
@@ -311,24 +310,6 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
 void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
                                             int32_t caller_client_id);
 
-/**
- * \brief Set the buffer share region of the partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] share          The buffer share region to be set
- *
- * \return Error code \ref spm_err_t
- *
- * \note This function doesn't check if partition_idx is valid.
- * \note share has to have one of the buffer share values:
- *           - TFM_BUFFER_SHARE_DISABLE
- *           - TFM_BUFFER_SHARE_NS_CODE
- *           - TFM_BUFFER_SHARE_SCRATCH
- *           - TFM_BUFFER_SHARE_PRIV
- *           - TFM_BUFFER_SHARE_DEFAULT
- */
-enum spm_err_t tfm_spm_partition_set_share(uint32_t partition_idx,
-                                           uint32_t share);
 
 /**
  * \brief Set the iovec parameters for the partition

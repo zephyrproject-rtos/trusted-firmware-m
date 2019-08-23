@@ -14,8 +14,6 @@
 #include "spm_api.h"
 #include "psa/service.h"
 
-uint8_t *tfm_scratch_area;
-uint32_t tfm_scratch_area_size;
 nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
@@ -72,14 +70,6 @@ int32_t tfm_core_validate_secure_caller(void)
         : : "I" (TFM_SVC_VALIDATE_SECURE_CALLER));
 }
 
-__attribute__((naked))
-int32_t tfm_core_set_buffer_area(uint32_t share)
-{
-    __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_SET_SHARE_AREA));
-}
 #endif
 
 __attribute__((naked))

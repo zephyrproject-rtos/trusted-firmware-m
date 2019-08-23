@@ -20,11 +20,6 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
 
-/* This SVC handler is called when a secure partition requests access to a
- * buffer area
- */
-extern void tfm_core_set_buffer_area_handler(const uint32_t args[]);
-
 /* Include the definitions of the privileged IRQ handlers in case of library
  * model
  */
@@ -68,9 +63,6 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         break;
     case TFM_SVC_MEMORY_CHECK:
         tfm_core_memory_permission_check_handler(svc_args);
-        break;
-    case TFM_SVC_SET_SHARE_AREA:
-        tfm_core_set_buffer_area_handler(svc_args);
         break;
     case TFM_SVC_DEPRIV_REQ:
         lr = tfm_core_depriv_req_handler(svc_args, lr);

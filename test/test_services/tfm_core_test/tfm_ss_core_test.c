@@ -285,12 +285,6 @@ static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
         ss_buffer[i] = slave_buffer[i];
     }
 
-#ifndef TFM_PSA_API
-    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_DEFAULT) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    }
-#endif /* !defined(TFM_PSA_API) */
-
     for (i = 0; i < len; i++) {
         out_ptr[i] = ss_buffer[i];
     }
@@ -366,12 +360,6 @@ static psa_status_t test_outvec_write(void)
             return CORE_TEST_ERRNO_TEST_FAULT;
         }
     }
-
-#ifndef TFM_PSA_API
-    if (tfm_core_set_buffer_area(TFM_BUFFER_SHARE_DEFAULT) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR;
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     return CORE_TEST_ERRNO_SUCCESS;
 }

@@ -10,16 +10,6 @@
 #include "secure_fw/spm/spm_api.h"
 #include "tfm_api.h"
 
-#ifndef TFM_PSA_API /* Only use scratch if using veneer functions, not IPC */
-/* Macros to pick linker symbols and allow references to sections */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
-
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
-#endif /* !defined(TFM_PSA_API) */
-
 /**
  * \brief Check whether the current partition has access to a memory range
  *
@@ -41,13 +31,6 @@ static enum tfm_status_e has_access_to_region(const void *p, size_t s,
 {
     int32_t range_access_allowed_by_mpu;
 
-#ifndef TFM_PSA_API /* Only use scratch if using veneer functions, not IPC */
-    uint32_t scratch_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-    uint32_t scratch_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
-#endif /* !defined(TFM_PSA_API) */
-
     /* Use the TT instruction to check access to the partition's regions*/
     range_access_allowed_by_mpu =
                           cmse_check_address_range((void *)p, s, flags) != NULL;
@@ -55,18 +38,6 @@ static enum tfm_status_e has_access_to_region(const void *p, size_t s,
     if (range_access_allowed_by_mpu) {
         return TFM_SUCCESS;
     }
-
-#ifndef TFM_PSA_API /* Only use scratch if using veneer functions, not IPC */
-    /* If the check for the current MPU settings fails, check for the share
-     * region, only if the partition is secure
-     */
-    if ((flags & CMSE_NONSECURE) == 0) {
-        if (check_address_range(p, s, scratch_base,
-                                scratch_limit) == TFM_SUCCESS) {
-            return TFM_SUCCESS;
-        }
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     /* If all else fails, check whether the region is in the non-secure
      * memory

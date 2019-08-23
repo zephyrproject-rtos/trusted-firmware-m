@@ -35,8 +35,6 @@
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
 
@@ -420,15 +418,6 @@ static enum tfm_status_e tfm_start_partition(
         }
         tfm_spm_partition_set_caller_client_id(partition_idx, client_id);
     }
-
-    /* Default share to scratch area in case of partition to partition calls
-     * this way partitions always get default access to input buffers
-     */
-    /* FixMe: return value/error handling TBD */
-    (void)tfm_spm_partition_set_share(
-               partition_idx,
-               desc_ptr->ns_caller ?
-                           TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH);
 
     /* In level one, only switch context and return from exception if in
      * handler mode
@@ -882,8 +871,6 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     enum tfm_status_e res;
     uint32_t running_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_idx);
     uint32_t running_partition_flags =
             tfm_spm_partition_get_flags(running_partition_idx);
     int32_t flags = 0;
@@ -892,10 +879,6 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
         /* This handler should only be called from a secure partition. */
         svc_args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
-    }
-
-    if (curr_part_data->share != TFM_BUFFER_SHARE_PRIV) {
-        flags |= CMSE_MPU_UNPRIV;
     }
 
     if (access == (int32_t)TFM_MEMORY_ACCESS_RW) {
@@ -1078,60 +1061,6 @@ uint32_t tfm_core_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
     irq_svc_ctx->ra = lr;
 
     return EXC_RETURN_SECURE_HANDLER;
-}
-
-void tfm_core_set_buffer_area_handler(uint32_t *args)
-{
-    /* r0 is stored in args[0] in exception stack frame
-     * Store input parameter before writing return value to that address
-     */
-    uint32_t share;
-    uint32_t running_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_idx);
-    uint32_t caller_partition_idx = curr_part_data->caller_partition_idx;
-    uint32_t running_partition_flags =
-            tfm_spm_partition_get_flags(running_partition_idx);
-    uint32_t caller_partition_flags =
-            tfm_spm_partition_get_flags(caller_partition_idx);
-
-     /* tfm_core_set_buffer_area() returns int32_t */
-    int32_t *res_ptr = (int32_t *)&args[0];
-
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED) {
-        /* This handler shouldn't be called from outside partition context.
-         * Also if the current partition is handling IRQ, the caller partition
-         * index might not be valid;
-         */
-        *res_ptr = (int32_t)TFM_ERROR_INVALID_PARAMETER;
-        return;
-    }
-
-    switch (args[0]) {
-    case TFM_BUFFER_SHARE_DEFAULT:
-        share = (!(caller_partition_flags & SPM_PART_FLAG_APP_ROT)) ?
-                            TFM_BUFFER_SHARE_NS_CODE : TFM_BUFFER_SHARE_SCRATCH;
-        break;
-    case TFM_BUFFER_SHARE_SCRATCH:
-    case TFM_BUFFER_SHARE_NS_CODE:
-        share = args[0];
-        break;
-    default:
-        *res_ptr = (int32_t)TFM_ERROR_INVALID_PARAMETER;
-        return;
-    }
-
-    if (tfm_spm_partition_set_share(running_partition_idx, share) ==
-            SPM_ERR_OK) {
-        *res_ptr = (int32_t)TFM_SUCCESS;
-    } else {
-        *res_ptr = (int32_t)TFM_ERROR_INVALID_PARAMETER;
-    }
-
-    return;
 }
 
 /* FIXME: get_irq_line_for_signal is also implemented in the ipc folder. */

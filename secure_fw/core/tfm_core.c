@@ -62,11 +62,6 @@ __asm("  .global __ARM_use_no_argv\n");
 #define REGION_NAME(a, b, c) REGION(a, b, c)
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
-#ifndef TFM_PSA_API
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit);
-#endif
-
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
 
 void configure_ns_code(void)
@@ -159,20 +154,6 @@ int32_t tfm_core_init(void)
         return TFM_ERROR_GENERIC;
     }
 
-#ifdef TFM_PSA_API
-    /* FixMe: In case of IPC messaging, scratch area must not be referenced
-     * These variables should be removed when all obsolete references are
-     * removed from the codebase
-     */
-    tfm_scratch_area = NULL;
-    tfm_scratch_area_size = 0;
-#else
-    tfm_scratch_area =
-        (uint8_t *)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-    tfm_scratch_area_size =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Limit) -
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
-#endif
     return TFM_SUCCESS;
 }
 
