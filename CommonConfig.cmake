@@ -250,9 +250,13 @@ if (PSA_API_TEST)
 endif()
 
 # This flag indicates if the non-secure OS is capable of identify the non-secure clients
-# which call the secure services
+# which call the secure services. It is diabled in IPC model.
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
-	set (TFM_NS_CLIENT_IDENTIFICATION ON)
+	if (TFM_PSA_API)
+		set(TFM_NS_CLIENT_IDENTIFICATION OFF)
+	else()
+		set(TFM_NS_CLIENT_IDENTIFICATION ON)
+	endif()
 endif()
 
 if (BL2)

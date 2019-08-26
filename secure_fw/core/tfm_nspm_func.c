@@ -9,10 +9,6 @@
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_api.h"
-#ifdef TFM_PSA_API
-#include "tfm_utils.h"
-#include "tfm_internal.h"
-#endif
 
 #ifndef TFM_MAX_NS_THREAD_COUNT
 #define TFM_MAX_NS_THREAD_COUNT 8
@@ -40,8 +36,7 @@ static int get_next_ns_client_id()
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
     static int32_t next_ns_client_id = DEFAULT_NS_CLIENT_ID;
 
-    if (next_ns_client_id > 0)
-    {
+    if (next_ns_client_id > 0) {
         next_ns_client_id = DEFAULT_NS_CLIENT_ID;
     }
     return next_ns_client_id--;
@@ -65,8 +60,7 @@ void tfm_nspm_configure_clients(void)
 
 int32_t tfm_nspm_get_current_client_id()
 {
-    if (active_ns_client_idx == INVALID_NS_CLIENT_IDX)
-    {
+    if (active_ns_client_idx == INVALID_NS_CLIENT_IDX) {
         return 0;
     } else {
         return NsClientIdList[active_ns_client_idx].ns_client_id;
@@ -103,7 +97,6 @@ uint32_t TZ_InitContextSystem_S(void)
     return 1U;
 }
 
-
 /// Allocate context memory for calling secure software modules in TrustZone
 /// \param[in]  module   identifies software modules called from non-secure mode
 /// \return value != 0 id TrustZone memory slot identifier
@@ -136,7 +129,6 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 
     return tz_id;
 }
-
 
 /// Free context memory that was previously allocated with \ref TZ_AllocModuleContext_S
 /// \param[in]  id  TrustZone memory slot identifier
@@ -182,7 +174,6 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
     return 1U;    // Success
 }
 
-
 /// Load secure context (called on RTOS thread context switch)
 /// \param[in]  id  TrustZone memory slot identifier
 /// \return execution status (1: success, 0: error)
@@ -220,7 +211,6 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
 
     return 1U;    // Success
 }
-
 
 /// Store secure context (called on RTOS thread context switch)
 /// \param[in]  id  TrustZone memory slot identifier
@@ -303,22 +293,5 @@ enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
 #endif /* PRINT_NSPM_DEBUG */
 
     return TFM_SUCCESS;
-}
-#endif
-
-#ifdef TFM_PSA_API
-__attribute__((section("SFN")))
-psa_status_t tfm_nspm_thread_entry(void)
-{
-#ifdef TFM_CORE_DEBUG
-    /* Jumps to non-secure code */
-    LOG_MSG("Jumping to non-secure code...");
-#endif
-
-    jump_to_ns_code();
-
-    /* Should not run here */
-    TFM_ASSERT(false);
-    return PSA_SUCCESS;
 }
 #endif
