@@ -300,7 +300,7 @@ set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
-#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.md
+#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.rst
 if (NOT DEFINED SST_ENCRYPTION)
 	set (SST_ENCRYPTION ON)
 endif()
@@ -335,6 +335,12 @@ endif()
 
 if (NOT DEFINED MBEDTLS_DEBUG)
 	set(MBEDTLS_DEBUG OFF)
+endif()
+
+#Default TF-M initial-attestation service flags.
+#Documentation about these flags can be found in docs/user_guides/services/tfm_attestation_integration_guide.rst
+if (NOT DEFINED ATTEST_INCLUDE_OPTIONAL_CLAIMS)
+	set(ATTEST_INCLUDE_OPTIONAL_CLAIMS ON)
 endif()
 
 ##Set mbedTLS compiler flags for BL2 bootloader

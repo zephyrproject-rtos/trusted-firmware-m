@@ -591,50 +591,6 @@ attest_add_implementation_id_claim(struct attest_token_ctx *token_ctx)
 }
 
 /*!
- * \brief Static function to add hardware version claim to attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
-{
-    uint8_t hw_version[HW_VERSION_MAX_SIZE];
-    enum tfm_plat_err_t res_plat;
-    uint32_t size = sizeof(hw_version);
-    struct q_useful_buf_c claim_value = {0};
-    uint16_t tlv_len;
-    uint8_t *tlv_ptr = NULL;
-    int32_t found = 0;
-
-    /* First look up HW version in boot status, it might comes
-     * from bootloader
-     */
-    found = attest_get_tlv_by_id(HW_VERSION, &tlv_len, &tlv_ptr);
-    if (found == 1) {
-        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
-        claim_value.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
-    } else {
-        /* If not found in boot status then use callback function to get it
-         * from runtime SW
-         */
-        res_plat = tfm_plat_get_hw_version(&size, hw_version);
-        if (res_plat != TFM_PLAT_ERR_SUCCESS) {
-            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-        }
-        claim_value.ptr = hw_version;
-        claim_value.len = size;
-    }
-
-    attest_token_add_tstr(token_ctx,
-                          EAT_CBOR_ARM_LABEL_HW_VERSION,
-                          &claim_value);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
  * \brief Static function to add caller id claim to attestation token.
  *
  * \param[in]  token_ctx  Token encoding context
@@ -727,6 +683,7 @@ attest_add_challenge_claim(struct attest_token_ctx   *token_ctx,
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
+#ifdef INCLUDE_OPTIONAL_CLAIMS /* Remove them from release build */
 /*!
  * \brief Static function to add the verification service indicator claim
  *        to the attestation token.
@@ -777,6 +734,51 @@ attest_add_profile_definition(struct attest_token_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+
+/*!
+ * \brief Static function to add hardware version claim to attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_hw_version_claim(struct attest_token_ctx *token_ctx)
+{
+    uint8_t hw_version[HW_VERSION_MAX_SIZE];
+    enum tfm_plat_err_t res_plat;
+    uint32_t size = sizeof(hw_version);
+    struct q_useful_buf_c claim_value = {0};
+    uint16_t tlv_len;
+    uint8_t *tlv_ptr = NULL;
+    int32_t found = 0;
+
+    /* First look up HW version in boot status, it might comes
+     * from bootloader
+     */
+    found = attest_get_tlv_by_id(HW_VERSION, &tlv_len, &tlv_ptr);
+    if (found == 1) {
+        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
+        claim_value.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
+    } else {
+        /* If not found in boot status then use callback function to get it
+         * from runtime SW
+         */
+        res_plat = tfm_plat_get_hw_version(&size, hw_version);
+        if (res_plat != TFM_PLAT_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+        }
+        claim_value.ptr = hw_version;
+        claim_value.len = size;
+    }
+
+    attest_token_add_tstr(token_ctx,
+                          EAT_CBOR_ARM_LABEL_HW_VERSION,
+                          &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#endif /* INCLUDE_OPTIONAL_CLAIMS */
 
 /*!
  * \brief Static function to verify the input challenge size
@@ -898,27 +900,13 @@ attest_create_token(struct q_useful_buf_c *challenge,
     }
 
     if (!(option_flags & TOKEN_OPT_OMIT_CLAIMS)) {
+        /* Mandatory claims in IAT token */
         attest_err = attest_add_boot_seed_claim(&attest_token_ctx);
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
         }
 
-        attest_err = attest_add_verification_service(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_profile_definition(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
         attest_err = attest_add_instance_id_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_hw_version_claim(&attest_token_ctx);
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
         }
@@ -942,6 +930,24 @@ attest_create_token(struct q_useful_buf_c *challenge,
         if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
             goto error;
         }
+
+#ifdef INCLUDE_OPTIONAL_CLAIMS
+        /* Optional claims in IAT token, remove them from release build */
+        attest_err = attest_add_verification_service(&attest_token_ctx);
+        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+            goto error;
+        }
+
+        attest_err = attest_add_profile_definition(&attest_token_ctx);
+        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+            goto error;
+        }
+
+        attest_err = attest_add_hw_version_claim(&attest_token_ctx);
+        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+            goto error;
+        }
+#endif /* INCLUDE_OPTIONAL_CLAIMS */
     }
 
     /* Finish up creating the token. This is where the actual signature

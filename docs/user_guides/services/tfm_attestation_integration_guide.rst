@@ -422,6 +422,15 @@ further usage. See in ``attestation_key.c``. In other implementation if the
 attestation key is directly retrieved by the Crypto service then this key
 handling is not necessary.
 
+Initial Attestation Service compile time options
+================================================
+There is a defined set of flags that can be used to compile in/out certain
+service features. The ``CommonConfig.cmake`` file sets the default values of
+those flags. The list of flags are:
+
+- ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
+  attestation token. Default value: True.
+
 ************
 Verification
 ************

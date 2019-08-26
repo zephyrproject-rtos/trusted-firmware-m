@@ -23,7 +23,6 @@ project(tfm_attest LANGUAGES ASM C)
 embedded_project_fixup()
 
 #Get the definition of what files we need to build
-set (ENABLE_INITIAL_ATTESTATION ON)
 include(CMakeLists.inc)
 
 if (NOT DEFINED TFM_LVL)
