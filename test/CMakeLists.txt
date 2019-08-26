@@ -61,6 +61,20 @@ else()
 	set(ENABLE_IRQ_TEST_SERVICES OFF)
 endif()
 
+if (ENABLE_CORE_TESTS)
+	# If the platform doesn't specify whether the peripheral test is enabled
+	# or not, select it by default.
+	if (NOT DEFINED TFM_ENABLE_PERIPH_ACCESS_TEST)
+		set(TFM_ENABLE_PERIPH_ACCESS_TEST TRUE)
+	endif()
+
+	if (TFM_ENABLE_PERIPH_ACCESS_TEST)
+		add_definitions(-DTFM_ENABLE_PERIPH_ACCESS_TEST)
+	endif()
+else()
+	set(TFM_ENABLE_PERIPH_ACCESS_TEST FALSE)
+endif()
+
 set(ENABLE_SECURE_STORAGE_SERVICE_TESTS TRUE)
 set(ENABLE_AUDIT_LOGGING_SERVICE_TESTS TRUE)
 set(ENABLE_CRYPTO_SERVICE_TESTS TRUE)

@@ -223,6 +223,7 @@ static psa_status_t test_share_redirection(void)
 
 static psa_status_t test_peripheral_access(void)
 {
+#ifdef TFM_ENABLE_PERIPH_ACCESS_TEST
     uint32_t leds;
     uint32_t invleds;
     uint32_t userled_mask;
@@ -238,6 +239,9 @@ static psa_status_t test_peripheral_access(void)
     }
 
     return CORE_TEST_ERRNO_SUCCESS;
+#else
+    return CORE_TEST_ERRNO_TEST_NOT_SUPPORTED;
+#endif
 }
 
 #define SS_BUFFER_LEN 16
