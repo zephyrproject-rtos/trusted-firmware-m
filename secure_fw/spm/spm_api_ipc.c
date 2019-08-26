@@ -376,16 +376,19 @@ uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
     struct tfm_thrd_ctx *pth = tfm_thrd_curr_thread();
     struct spm_partition_desc_t *partition;
+    struct spm_partition_runtime_data_t *r_data;
 
-    partition = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_desc_t,
-                                      sp_thrd);
+    r_data = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_runtime_data_t,
+                                   sp_thrd);
+    partition = TFM_GET_CONTAINER_PTR(r_data, struct spm_partition_desc_t,
+                                      runtime_data);
     return partition->static_data->partition_id;
 }
 
 static struct tfm_thrd_ctx *
     tfm_spm_partition_get_thread_info(uint32_t partition_idx)
 {
-    return &g_spm_partition_db.partitions[partition_idx].sp_thrd;
+    return &g_spm_partition_db.partitions[partition_idx].runtime_data.sp_thrd;
 }
 
 static tfm_thrd_func_t
@@ -525,6 +528,7 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
 {
 #if TFM_LVL == 2
     struct spm_partition_desc_t *p_next_partition;
+    struct spm_partition_runtime_data_t *r_data;
     uint32_t is_privileged;
 #endif
     struct tfm_thrd_ctx *pth_next = tfm_thrd_next_thread();
@@ -532,9 +536,12 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL == 2
-        p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
+        r_data = TFM_GET_CONTAINER_PTR(pth_next,
+                                       struct spm_partition_runtime_data_t,
+                                       sp_thrd);
+        p_next_partition = TFM_GET_CONTAINER_PTR(r_data,
                                                  struct spm_partition_desc_t,
-                                                 sp_thrd);
+                                                 runtime_data);
 
         if (p_next_partition->static_data->partition_flags &
             SPM_PART_FLAG_PSA_ROT) {

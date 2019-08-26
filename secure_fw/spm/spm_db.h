@@ -8,11 +8,6 @@
 #ifndef __SPM_DB_H__
 #define __SPM_DB_H__
 
-
-#ifdef TFM_PSA_API
-#include "tfm_thread.h"
-#endif
-
 struct spm_partition_desc_t;
 struct spm_partition_db_t;
 
@@ -55,7 +50,6 @@ struct spm_partition_desc_t {
     const struct tfm_spm_partition_platform_data_t *platform_data;
 #if TFM_PSA_API
     const struct tfm_spm_partition_memory_data_t *memory_data;
-    struct tfm_thrd_ctx sp_thrd;
 #endif
 };
 
