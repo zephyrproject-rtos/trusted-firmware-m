@@ -229,12 +229,8 @@ void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 int main(void)
 {
     /* set Main Stack Pointer limit */
-    uint32_t msp_stack_bottom =
-            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base);
-    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-    int32_t ret = TFM_ERROR_GENERIC;
-
-    __set_MSPLIM(msp_stack_bottom);
+    __set_MSPLIM((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+                                        $$ZI$$Base));
 
     if (tfm_core_init() != TFM_SUCCESS) {
         tfm_panic();
@@ -244,10 +240,11 @@ int main(void)
         tfm_panic();
     }
 
-    plat_err = tfm_spm_hal_setup_isolation_hw();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+#if TFM_LVL != 1
+    if (tfm_spm_hal_setup_isolation_hw() != TFM_PLAT_ERR_SUCCESS) {
         tfm_panic();
     }
+#endif /* TFM_LVL != 1 */
 
 #ifndef TFM_PSA_API
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
@@ -268,8 +265,7 @@ int main(void)
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
-    ret = tfm_core_set_secure_exception_priorities();
-    if (ret != TFM_SUCCESS) {
+    if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
         tfm_panic();
     }
 
@@ -286,15 +282,14 @@ int main(void)
 #endif
 
     jump_to_ns_code();
-#else
+#else /* !defined(TFM_PSA_API) */
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
-    ret = tfm_core_set_secure_exception_priorities();
-    if (ret != TFM_SUCCESS) {
+    if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
         tfm_panic();
     }
     tfm_spm_init();
-#endif
+#endif /* !defined(TFM_PSA_API) */
 }

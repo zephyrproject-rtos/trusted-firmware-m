@@ -60,7 +60,7 @@ enum spm_err_t tfm_spm_db_init(void)
      */
 
     /* For the non secure Execution environment */
-#if TFM_PSA_API
+#ifdef TFM_PSA_API
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
     extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
     uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
@@ -79,7 +79,7 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags = 0;
 #endif
 
-#if TFM_PSA_API
+#ifdef TFM_PSA_API
     part_ptr->memory_data.stack_bottom = psp_stack_bottom;
     part_ptr->memory_data.stack_top    = psp_stack_top;
     /* Since RW, ZI and stack are configured as one MPU region, configure
@@ -91,11 +91,9 @@ enum spm_err_t tfm_spm_db_init(void)
 #ifndef TFM_PSA_API
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     part_ptr->runtime_data.ctx_stack_ptr = ns_interrupt_ctx_stack;
-#endif /* !defined(TFM_PSA_API) */
 
     tfm_nspm_configure_clients();
 
-#ifndef TFM_PSA_API
     /* For the TF-M core environment itself */
     part_ptr = &(g_spm_partition_db.partitions[
                                            TFM_CORE_INTERNAL_PARTITION_DB_IDX]);

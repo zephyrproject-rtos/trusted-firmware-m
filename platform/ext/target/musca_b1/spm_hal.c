@@ -168,18 +168,16 @@ static enum spm_err_t tfm_spm_mpu_init(void)
 
     return SPM_ERR_OK;
 }
-#endif /* TFM_LVL != 1 */
 
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 {
-#if TFM_LVL != 1
     if (tfm_spm_mpu_init() != SPM_ERR_OK) {
         ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-#endif
     return TFM_PLAT_ERR_SUCCESS;
 }
+#endif /* TFM_LVL != 1 */
 
 void MPC_Handler(void)
 {
