@@ -52,7 +52,7 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_invert_interface, 0, 0, 0},
 #endif /* TFM_PARTITION_TEST_CORE*/
 
-#ifdef CORE_TEST_IPC
+#ifdef ENABLE_IPC_TEST
     /* Secure IPC test cases */
     {&register_testsuite_s_ipc_interface, 0, 0, 0},
 #endif
