@@ -23,6 +23,10 @@ project(tfm_t_cose_sign   LANGUAGES C)
 project(tfm_t_cose_verify LANGUAGES C)
 embedded_project_fixup()
 
+if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID is undefined. ")
+endif()
+
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C_SIGN
 	"${T_COSE_DIR}/src/t_cose_sign1_sign.c"
@@ -47,6 +51,11 @@ embedded_target_include_directories(TARGET tfm_t_cose_sign   PATH ${TFM_ROOT_DIR
 #Specify what we build (t_cose_sign and t_cose_verify build as an object library)
 add_library(tfm_t_cose_sign   OBJECT ${ALL_SRC_C_SIGN})
 add_library(tfm_t_cose_verify OBJECT ${ALL_SRC_C_VERIFY})
+
+if (ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+	embedded_set_target_compile_defines(TARGET tfm_t_cose_sign   LANGUAGE C DEFINES INCLUDE_TEST_CODE_AND_KEY_ID APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_t_cose_verify LANGUAGE C DEFINES INCLUDE_TEST_CODE_AND_KEY_ID APPEND)
+endif()
 
 #Set common compiler flags
 config_setting_shared_compiler_flags(tfm_t_cose_sign)

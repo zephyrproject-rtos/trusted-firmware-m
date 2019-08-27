@@ -14,6 +14,7 @@
 #include "attest_token_decode.h"
 #include "attest_token_test_values.h"
 
+
 /**
  * \file attest_token_test.c
  *
@@ -78,6 +79,7 @@ int token_main_alt(uint32_t option_flags,
     return return_value;
 }
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /**
  * This is the expected output for the minimal test. It is the result
  * of creating a token with \ref TOKEN_OPT_SHORT_CIRCUIT_SIGN and \ref
@@ -228,6 +230,7 @@ int_fast16_t buffer_too_small_test()
 
     return return_value;
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
 
 
 /**

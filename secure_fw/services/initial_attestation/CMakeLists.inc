@@ -22,11 +22,11 @@
 set(INITIAL_ATTESTATION_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 if (NOT DEFINED ATTEST_INCLUDE_OPTIONAL_CLAIMS)
-	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_OPTIONAL_CLAIMS is undefined. ")
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_OPTIONAL_CLAIMS is undefined.")
 endif()
 
-if (NOT DEFINED TFM_ROOT_DIR)
-	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
+if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID is undefined.")
 endif()
 
 list(APPEND ATTEST_C_SRC
@@ -42,9 +42,14 @@ if (ATTEST_INCLUDE_OPTIONAL_CLAIMS)
 	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_OPTIONAL_CLAIMS)
 endif()
 
+if (ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE_AND_KEY_ID)
+endif()
+
 #Inform the user about attestation service features selected based on the cmake flags
 message("The Initial Attestation service compile configuration is as follows:")
 message("- ATTEST_INCLUDE_OPTIONAL_CLAIMS: ${ATTEST_INCLUDE_OPTIONAL_CLAIMS}")
+message("- ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID: ${ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID}")
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)

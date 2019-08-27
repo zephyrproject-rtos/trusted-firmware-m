@@ -25,7 +25,7 @@
  * \brief \c COSE_Sign1 verification implementation.
  */
 
-
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /**
  *  \brief Verify a short-circuit signature
  *
@@ -64,7 +64,7 @@ t_cose_crypto_short_circuit_verify(int32_t cose_alg_id,
 Done:
     return return_value;
 }
-
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
 
 
 
@@ -181,9 +181,11 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
                                       T_COSE_CRYPTO_SHA256_SIZE);
     struct q_useful_buf_c         tbs_hash;
     struct q_useful_buf_c         signature;
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     Q_USEFUL_BUF_MAKE_STACK_UB   (buf_for_short_circuit_kid,
                                       T_COSE_SHORT_CIRCUIT_KID_SIZE);
     struct q_useful_buf_c         short_circuit_kid;
+#endif
 
     *payload = NULL_Q_USEFUL_BUF_C;
 
@@ -256,7 +258,7 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
         goto Done;
     }
 
-
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     /* -- Check for short-circuit signature and verify if it exists -- */
     return_value = get_short_circuit_kid(buf_for_short_circuit_kid,
                                            &short_circuit_kid);
@@ -271,6 +273,7 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
                                                           signature);
         goto Done;
     }
+#endif
 
 
     /* -- Verify the signature -- */

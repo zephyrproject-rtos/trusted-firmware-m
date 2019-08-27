@@ -21,7 +21,7 @@
  * \brief This implements t_cose signing
  */
 
-
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /**
  * \brief Create a short-circuit signature
  *
@@ -82,6 +82,7 @@ short_circuit_sign(int32_t cose_alg_id,
 Done:
     return return_value;
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
 
 
 
@@ -382,11 +383,15 @@ enum t_cose_err_t t_cose_sign1_init(struct t_cose_sign1_ctx *me,
 
     /* Get the key id because it goes into the headers that are about
      to be made. */
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     if(short_circuit_sign) {
         return_value = get_short_circuit_kid(buffer_for_kid, &kid);
     } else {
+#endif
         return_value = get_keyid(key_select, buffer_for_kid, &kid);
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     }
+#endif
     if(return_value) {
         goto Done;
     }
@@ -483,18 +488,22 @@ enum t_cose_err_t t_cose_sign1_finish(struct t_cose_sign1_ctx *me,
          * public key operation and requires no key. It is just a test
          * mode that always works.
          */
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
         if (me->short_circuit_sign) {
             return_value = short_circuit_sign(me->cose_algorithm_id,
                                               tbs_hash,
                                               buffer_for_signature,
                                               &signature);
         } else {
+#endif
             return_value = t_cose_crypto_pub_key_sign(me->cose_algorithm_id,
                                                       me->key_select,
                                                       tbs_hash,
                                                       buffer_for_signature,
                                                       &signature);
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
         }
+#endif
         if (return_value) {
             goto Done;
         }

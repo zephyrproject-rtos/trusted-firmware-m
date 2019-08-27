@@ -197,6 +197,7 @@ Done:
 }
 
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /*
  * Public function. See t_cose_util.h
  */
@@ -231,3 +232,4 @@ get_short_circuit_kid(struct q_useful_buf buffer_for_kid,
               T_COSE_ERR_KEY_BUFFER_SIZE :
               T_COSE_SUCCESS;
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */

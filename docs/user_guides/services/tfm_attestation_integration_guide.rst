@@ -430,6 +430,10 @@ those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
   attestation token. Default value: True.
+- ``ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID``: Test code and COSE key-id from
+  unprotected token header is removed if it is False. Its value depends on the
+  build type. It is True if build type is ``Debug``, otherwise False (different
+  kind of ``Release`` builds).
 
 ************
 Verification

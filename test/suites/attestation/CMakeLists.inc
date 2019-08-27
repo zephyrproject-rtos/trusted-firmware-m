@@ -24,10 +24,14 @@ if(NOT DEFINED TFM_ROOT_DIR)
 	message(FATAL_ERROR "Please set TFM_ROOT_DIR before including this file.")
 endif()
 
+if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID is undefined. ")
+endif()
+
 if (NOT DEFINED ENABLE_ATTESTATION_SERVICE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_ATTESTATION_SERVICE_TESTS is undefined. ")
 elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
-	list(APPEND ALL_SRC_C_S
+	list(APPEND ATTEST_TEST_SRC_S
 		"${ATTESTATION_TEST_DIR}/secure/attestation_s_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
@@ -35,13 +39,18 @@ elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"
 	)
 
-	list(APPEND ALL_SRC_C_NS
+	list(APPEND ATTEST_TEST_SRC_NS
 		"${ATTESTATION_TEST_DIR}/non_secure/attestation_ns_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
 		"${ATTESTATION_TEST_DIR}/attest_public_key.c"
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"
 	)
+
+	if (ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+		set_property(SOURCE ${ATTEST_TEST_SRC_S}  APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE_AND_KEY_ID)
+		set_property(SOURCE ${ATTEST_TEST_SRC_NS} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE_AND_KEY_ID)
+	endif()
 
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
@@ -50,4 +59,10 @@ elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/util ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/inc ABSOLUTE)
+
+	#Append all our source files to global lists.
+	list(APPEND ALL_SRC_C_S  ${ATTEST_TEST_SRC_S})
+	list(APPEND ALL_SRC_C_NS ${ATTEST_TEST_SRC_NS})
+	unset(ATTEST_TEST_SRC_S)
+	unset(ATTEST_TEST_SRC_NS)
 endif()

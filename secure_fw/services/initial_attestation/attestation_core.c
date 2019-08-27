@@ -803,6 +803,7 @@ static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
     return PSA_ATTEST_ERR_INVALID_INPUT;
 }
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /*!
  * \brief Static function to get the option flags from challenge object
  *
@@ -853,6 +854,7 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
         *key_select = 0;
     }
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
 
 /*!
  * \brief Static function to create the initial attestation token
@@ -874,10 +876,12 @@ attest_create_token(struct q_useful_buf_c *challenge,
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     enum attest_token_err_t token_err;
     struct attest_token_ctx attest_token_ctx;
-    int32_t key_select;
-    uint32_t option_flags;
+    int32_t key_select = 0;
+    uint32_t option_flags = 0;
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     attest_get_option_flags(challenge, &option_flags, &key_select);
+#endif
 
     /* Get started creating the token. This sets up the CBOR and COSE contexts
      * which causes the COSE headers to be constructed.
