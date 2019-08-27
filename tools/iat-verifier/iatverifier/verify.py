@@ -144,12 +144,6 @@ def validate_sw_component_version(value, keep_going=False, strict=False):
     pass
 
 
-def validate_epoch(value, keep_going=False, strict=False):
-    if not (isinstance(value, int) and value >= 0):
-        msg = 'Invalid EPOCH, must be an unsigned integer: {}'
-        error(msg.format(value), keep_going)
-
-
 def validate_measurement_value(value, keep_going=False, strict=False):
     _validate_bytestring_length(value, 'MEASUREMENT', 32, keep_going)
 

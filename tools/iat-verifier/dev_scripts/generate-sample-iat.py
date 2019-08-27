@@ -45,7 +45,6 @@ token_map = {
             const.SW_COMPONENT_TYPE: 'BL',
             const.SIGNER_ID: SIGNER_ID,
             const.SW_COMPONENT_VERSION: '3.4.2',
-            const.EPOCH: 1,
             const.MEASUREMENT_VALUE: MEASUREMENT,
             const.MEASUREMENT_DESCRIPTION: 'TF-M_SHA256MemPreXIP',
         },
@@ -54,7 +53,6 @@ token_map = {
             const.SW_COMPONENT_TYPE: 'M1',
             const.SIGNER_ID: SIGNER_ID,
             const.SW_COMPONENT_VERSION: '3.4.2',
-            const.EPOCH: 1,
             const.MEASUREMENT_VALUE: MEASUREMENT,
         },
         {
@@ -62,7 +60,6 @@ token_map = {
             const.SW_COMPONENT_TYPE: 'M2',
             const.SIGNER_ID: SIGNER_ID,
             const.SW_COMPONENT_VERSION: '3.4.2',
-            const.EPOCH: 1,
             const.MEASUREMENT_VALUE: MEASUREMENT,
         },
         {
@@ -70,7 +67,6 @@ token_map = {
             const.SW_COMPONENT_TYPE: 'M3',
             const.SIGNER_ID: SIGNER_ID,
             const.SW_COMPONENT_VERSION: '3.4.2',
-            const.EPOCH: 1,
             const.MEASUREMENT_VALUE: MEASUREMENT,
         },
     ],
