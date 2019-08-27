@@ -437,9 +437,9 @@ int32_t tfm_memory_check(const void *buffer, size_t len, int32_t ns_caller,
     return IPC_ERROR_MEMORY_CHECK;
 }
 
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_idx)
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 {
-    if (tfm_spm_partition_get_flags(partition_idx) & SPM_PART_FLAG_PSA_ROT) {
+    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
         return TFM_PARTITION_PRIVILEGED_MODE;
     } else {
         return TFM_PARTITION_UNPRIVILEGED_MODE;
@@ -463,7 +463,6 @@ void tfm_spm_init(void)
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
         tfm_spm_hal_configure_default_isolation(partition->platform_data);
-        partition->runtime_data.index = i;
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }

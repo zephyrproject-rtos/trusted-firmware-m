@@ -151,7 +151,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
         tfm_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->runtime_data.index);
+        partition->static_data->partition_flags);
 
     if (!ns_caller) {
         inptr = (psa_invec *)args[2];
@@ -423,7 +423,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
         tfm_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->runtime_data.index);
+        partition->static_data->partition_flags);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -554,7 +554,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->runtime_data.index);
+        partition->static_data->partition_flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -711,7 +711,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->runtime_data.index);
+        partition->static_data->partition_flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request

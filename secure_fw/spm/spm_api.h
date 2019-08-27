@@ -108,7 +108,6 @@ struct spm_partition_runtime_data_t {
                                          * Service signal mask passed by
                                          * psa_wait()
                                          */
-    uint32_t index;                     /* Partition index */
 };
 
 #ifdef TFM_PSA_API
@@ -415,12 +414,12 @@ uint32_t tfm_spm_partition_get_running_partition_id(void);
 /**
  * \brief                   Get the current partition mode.
  *
- * \param[in] partition_idx                 Index of current partition
+ * \param[in] partition_flags               Flags of current partition
  *
  * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
  * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode
  */
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_idx);
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
 
 /******************** Service handle management functions ********************/
 
