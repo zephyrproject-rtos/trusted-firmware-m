@@ -383,7 +383,7 @@ const struct tfm_spm_service_db_t service_db[] =
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE
+#ifdef TFM_ENABLE_IRQ_TEST
     /******** TFM_IRQ_TEST_1 ********/
     {
         .name = "SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO",
@@ -403,7 +403,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
     },
-#endif /* TFM_PARTITION_TEST_CORE */
+#endif /* TFM_ENABLE_IRQ_TEST */
 
 };
 
