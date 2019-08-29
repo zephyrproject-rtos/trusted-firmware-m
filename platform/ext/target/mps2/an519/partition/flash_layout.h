@@ -26,8 +26,8 @@
  * 0x0020_0000 Non-secure image secondary slot (0.5 MB)
  * 0x0028_0000 Scratch area (0.5 MB)
  * 0x0030_0000 Secure Storage Area (0.02 MB)
- * 0x0030_5000 NV counters area (24 Bytes)
- * 0x0030_5018 Unused (0.980 MB)
+ * 0x0030_5000 NV counters area (4 KB)
+ * 0x0030_6000 Unused (1000 KB)
  *
  * Flash layout on MPS2 AN519 with BL2 (single image boot):
  *
@@ -40,8 +40,8 @@
  *    0x0020_0000 Non-secure image secondary
  * 0x0028_0000 Scratch area (1 MB)
  * 0x0038_0000 Secure Storage Area (0.02 MB)
- * 0x0038_5000 NV counters area (24 Bytes)
- * 0x0038_5018 Unused (0.480 MB)
+ * 0x0038_5000 NV counters area (4 KB)
+ * 0x0038_6000 Unused (488 KB)
  *
  * Flash layout on MPS2 AN519, if BL2 not defined:
  *
@@ -156,7 +156,7 @@
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (0x18)     /* 24 Bytes */
+#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -193,7 +193,7 @@
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
+#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
 #define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 

@@ -11,6 +11,10 @@
  * programmable (MTP) non-volatile counters or use a One-time Programmable (OTP)
  * non-volatile counters solution.
  *
+ * This dummy implementation assumes that the NV counters are the only data in
+ * the flash sector. To use it, one flash sector should be allocated exclusively
+ * for the NV counters.
+ *
  * Musca-A does not have any available MTP or OTP non-volatile counters, so a
  * software dummy implementation has been implemented in this case. The current
  * implementation is not resistant to asynchronous power failures and should
@@ -45,53 +49,58 @@
 #endif
 /* End of compilation time checks to be sure the defines are well defined */
 
-#define SECTOR_OFFSET    0
 #define NV_COUNTER_SIZE  sizeof(uint32_t)
 #define INIT_VALUE_SIZE  NV_COUNTER_SIZE
-#define NV_COUNTERS_AREA_OFFSET (TFM_NV_COUNTERS_AREA_ADDR - \
-                                 TFM_NV_COUNTERS_SECTOR_ADDR)
+#define NUM_NV_COUNTERS  ((TFM_NV_COUNTERS_AREA_SIZE - INIT_VALUE_SIZE) \
+                          / NV_COUNTER_SIZE)
 
-#define NV_COUNTERS_INITIALIZED 0xC0DE0042
+#define NV_COUNTERS_INITIALIZED 0xC0DE0042U
+
+/**
+ * \brief Struct representing the NV counter data in flash.
+ */
+struct nv_counters_t {
+    uint32_t counters[NUM_NV_COUNTERS]; /**< Array of NV counters */
+    uint32_t init_value; /**< Watermark to indicate if the NV counters have been
+                          *   initialised
+                          */
+};
 
 /* Import the CMSIS flash device driver */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
 {
-    int32_t  err;
+    int32_t err;
     uint32_t i;
-    uint32_t nbr_counters = ((TFM_NV_COUNTERS_AREA_SIZE - INIT_VALUE_SIZE)
-                             / NV_COUNTER_SIZE);
-    uint32_t *p_nv_counter;
-    uint8_t sector_data[TFM_NV_COUNTERS_SECTOR_SIZE] = {0};
+    struct nv_counters_t nv_counters = {{0}};
 
     err = FLASH_DEV_NAME.Initialize(NULL);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Read the whole sector to be able to erase and write later in the flash */
-    err = FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_SECTOR_ADDR, sector_data,
-                                  TFM_NV_COUNTERS_SECTOR_SIZE);
+    /* Read the NV counter area to be able to erase the sector and write later
+     * in the flash.
+     */
+    err = FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_AREA_ADDR, &nv_counters,
+                                  TFM_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Set the pointer to nv counters position */
-    p_nv_counter = (uint32_t *)(sector_data + NV_COUNTERS_AREA_OFFSET);
-
-    if (p_nv_counter[nbr_counters] == NV_COUNTERS_INITIALIZED) {
+    if (nv_counters.init_value == NV_COUNTERS_INITIALIZED) {
         return TFM_PLAT_ERR_SUCCESS;
     }
 
     /* Add watermark, at the end of the NV counters area, to indicate that NV
      * counters have been initialized.
      */
-    p_nv_counter[nbr_counters] = NV_COUNTERS_INITIALIZED;
+    nv_counters.init_value = NV_COUNTERS_INITIALIZED;
 
     /* Initialize all counters to 0 */
-    for (i = 0; i < nbr_counters; i++) {
-        p_nv_counter[i] = 0;
+    for (i = 0; i < NUM_NV_COUNTERS; i++) {
+        nv_counters.counters[i] = 0;
     }
 
     /* Erase sector before write in it */
@@ -100,9 +109,9 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Write in flash the in-memory block content after modification */
-    err = FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_SECTOR_ADDR, sector_data,
-                                     TFM_NV_COUNTERS_SECTOR_SIZE);
+    /* Write in flash the in-memory NV counter content after modification */
+    err = FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_AREA_ADDR, &nv_counters,
+                                     TFM_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -133,25 +142,22 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value)
 {
-    int32_t  err;
-    uint32_t *p_nv_counter;
-    uint8_t  sector_data[TFM_NV_COUNTERS_SECTOR_SIZE];
+    int32_t err;
+    struct nv_counters_t nv_counters = {{0}};
 
-    /* Read the whole sector to be able to erase and write later in the flash */
-    err = FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_SECTOR_ADDR, sector_data,
-                                  TFM_NV_COUNTERS_SECTOR_SIZE);
+    /* Read the NV counter area to be able to erase the sector and write later
+     * in the flash.
+     */
+    err = FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_AREA_ADDR, &nv_counters,
+                                  TFM_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Set the pointer to nv counter position */
-    p_nv_counter = (uint32_t *)(sector_data + NV_COUNTERS_AREA_OFFSET +
-                                (counter_id * NV_COUNTER_SIZE));
+    if (value != nv_counters.counters[counter_id]) {
 
-    if (value != *p_nv_counter) {
-
-        if (value > *p_nv_counter) {
-            *p_nv_counter = value;
+        if (value > nv_counters.counters[counter_id]) {
+            nv_counters.counters[counter_id] = value;
         } else {
             return TFM_PLAT_ERR_INVALID_INPUT;
         }
@@ -162,10 +168,10 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
-        /* Write in flash the in-memory block content after modification */
-        err = FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_SECTOR_ADDR,
-                                         sector_data,
-                                         TFM_NV_COUNTERS_SECTOR_SIZE);
+        /* Write in flash the in-memory NV counter content after modification */
+        err = FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_AREA_ADDR,
+                                         &nv_counters,
+                                         TFM_NV_COUNTERS_AREA_SIZE);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
