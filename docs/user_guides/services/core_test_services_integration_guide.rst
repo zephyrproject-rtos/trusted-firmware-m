@@ -20,9 +20,11 @@ CORE_TEST_INTERACTIVE to ON in the following block in ``CommonConfig.cmake``:
 	if (CORE_TEST)
 		set(CORE_TEST_POSITIVE ON)
 		set(CORE_TEST_INTERACTIVE OFF)
-		set(TFM_PARTITION_TEST_SECURE_SERVICES ON)
-		add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
 	endif()
+
+A platform can skip Core Test by setting ``CORE_TEST`` to ``OFF`` in its cmake
+configuration file, even though ``CORE_TEST`` is enabled by default in current
+configuration.
 
 After making the change, the tests can be run by building using
 ``ConfigCoreTest.cmake`` as cmake config file.
@@ -52,7 +54,10 @@ macros are available in the header file.
 
 It is possible that a platform implementation mocks the implementation of some
 or all of the functions, by returning the values expected by the test cases,
-without actually executing the action expected by the test.
+without actually executing the action expected by the test. A platform can also
+set the corresponding control flag to ``OFF`` to skip a test case. For example,
+A platform can skip peripheral access test case by setting
+``TFM_ENABLE_PERIPH_ACCESS_TEST`` to ``OFF`` in its cmake configuration file.
 
 ******************
 IRQ handling tests
@@ -99,6 +104,9 @@ non-secure memory location.
 
 For scenario 5 a Non-secure timer is set up and ``TFM_SP_CORE_TEST_2`` waits for
 it to be triggered
+
+A platform can skip IRQ handling test by setting ``TFM_ENABLE_IRQ_TEST`` to
+``OFF`` in its cmake configuration file.
 
 --------------
 
