@@ -18,14 +18,14 @@ set(INTERFACE_DIR "${TFM_ROOT_DIR}/interface")
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
-#Include functionality to enable building the documentation.
-include("Common/BuildDoxygenDoc")
-include("Common/BuildSphinxDoc")
-
 #Start an embedded project.
 embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(tfm_s LANGUAGES ASM C)
 embedded_project_fixup()
+
+#Include functionality to enable building the documentation.
+include("Common/BuildDoxygenDoc")
+include("Common/BuildSphinxDoc")
 
 if (NOT DEFINED TFM_LVL)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")

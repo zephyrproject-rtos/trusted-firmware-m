@@ -39,7 +39,7 @@ if(Java_Runtime_FOUND)
 	#Prefer the cmake variable to the environment setting.
 	if (NOT DEFINED PLANTUML_JAR_PATH)
 		if (DEFINED ENV{PLANTUML_JAR_PATH})
-			set(PLANTUML_JAR_PATH "$ENV{PLANTUML_JAR_PATH}")
+			set(PLANTUML_JAR_PATH "$ENV{PLANTUML_JAR_PATH}" CACHE STRING "PLANTUML location." )
 		endif()
 	endif()
 
