@@ -33,7 +33,6 @@
 #ifndef TFM_PSA_API
 static void tfm_core_test_permissions(struct test_result_t *ret);
 static void tfm_core_test_mpu_access(struct test_result_t *ret);
-static void tfm_core_test_share_change(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
 static void tfm_core_test_spm_request(struct test_result_t *ret);
 #endif /* TFM_PSA_API */
@@ -80,11 +79,6 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_BUFFER_CHECK, tfm_core_test_buffer_check,
     "Test secure service buffer accesses"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SS_TO_SS, tfm_core_test_ss_to_ss,
     "Test secure service to service call"),
-#ifndef TFM_PSA_API
-CORE_TEST_DESCRIPTION(CORE_TEST_ID_SHARE_REDIRECTION,
-    tfm_core_test_share_change,
-    "Test secure service share change request"),
-#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SS_TO_SS_BUFFER,
     tfm_core_test_ss_to_ss_buffer,
     "Test secure service to service call with buffer handling"),
@@ -798,25 +792,6 @@ static void tfm_core_test_ss_to_ss(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
-
-#ifndef TFM_PSA_API
-static void tfm_core_test_share_change(struct test_result_t *ret)
-{
-    int32_t err;
-    int32_t test_case_id = CORE_TEST_ID_SHARE_REDIRECTION;
-    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)} };
-    struct tfm_core_test_call_args_t args = {in_vec, 1, NULL, 0};
-
-    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to redirect share region in service.");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-#endif /* TFM_PSA_API */
 
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret)
 {

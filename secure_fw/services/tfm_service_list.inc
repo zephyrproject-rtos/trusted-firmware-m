@@ -141,19 +141,10 @@ const struct tfm_spm_service_db_t service_db[] =
         .minor_policy = TFM_VERSION_POLICY_STRICT
     },
     {
-        .name = "SPM_CORE_TEST_SHARE_REDIRECTION",
-        .partition_id = TFM_SP_CORE_TEST_ID,
-        .signal = SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL,
-        .sid = 0x0000F024,
-        .non_secure_client = true,
-        .minor_version = 1,
-        .minor_policy = TFM_VERSION_POLICY_STRICT
-    },
-    {
         .name = "SPM_CORE_TEST_SS_TO_SS",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_SS_TO_SS_SIGNAL,
-        .sid = 0x0000F025,
+        .sid = 0x0000F024,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -162,7 +153,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_SS_TO_SS_BUFFER",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_SS_TO_SS_BUFFER_SIGNAL,
-        .sid = 0x0000F026,
+        .sid = 0x0000F025,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -171,7 +162,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_OUTVEC_WRITE",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_OUTVEC_WRITE_SIGNAL,
-        .sid = 0x0000F027,
+        .sid = 0x0000F026,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -180,7 +171,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_PERIPHERAL_ACCESS",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_PERIPHERAL_ACCESS_SIGNAL,
-        .sid = 0x0000F028,
+        .sid = 0x0000F027,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -189,7 +180,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_GET_CALLER_CLIENT_ID",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_GET_CALLER_CLIENT_ID_SIGNAL,
-        .sid = 0x0000F029,
+        .sid = 0x0000F028,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -198,7 +189,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_SPM_REQUEST",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_SPM_REQUEST_SIGNAL,
-        .sid = 0x0000F02A,
+        .sid = 0x0000F029,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -207,7 +198,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_BLOCK",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_BLOCK_SIGNAL,
-        .sid = 0x0000F02B,
+        .sid = 0x0000F02A,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -216,7 +207,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .name = "SPM_CORE_TEST_NS_THREAD",
         .partition_id = TFM_SP_CORE_TEST_ID,
         .signal = SPM_CORE_TEST_NS_THREAD_SIGNAL,
-        .sid = 0x0000F02C,
+        .sid = 0x0000F02B,
         .non_secure_client = true,
         .minor_version = 1,
         .minor_policy = TFM_VERSION_POLICY_STRICT
@@ -476,13 +467,6 @@ struct tfm_spm_service_t service[] =
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
-    {
-        .service_db = NULL,
-        .partition = NULL,
-        .handle_list = {0},
-        .msg_queue = {0},
-        .list = {0},
-    },
     {
         .service_db = NULL,
         .partition = NULL,

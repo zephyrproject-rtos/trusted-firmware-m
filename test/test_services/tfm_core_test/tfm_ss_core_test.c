@@ -203,11 +203,6 @@ static psa_status_t test_memory_permissions(
 }
 #endif /* !defined(TFM_PSA_API) */
 
-static psa_status_t test_share_redirection(void)
-{
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
 static psa_status_t test_peripheral_access(void)
 {
 #ifdef TFM_ENABLE_PERIPH_ACCESS_TEST
@@ -528,8 +523,6 @@ psa_status_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
         arg3 = (int32_t)out_vec[0].base;
         return test_memory_permissions(
             (uint32_t *)arg1, (uint32_t *)arg2, (uint32_t *)arg3);
-    case CORE_TEST_ID_SHARE_REDIRECTION:
-        return test_share_redirection();
     case CORE_TEST_ID_SS_TO_SS:
         return test_ss_to_ss();
     case CORE_TEST_ID_SS_TO_SS_BUFFER:
@@ -587,11 +580,6 @@ static psa_status_t tfm_core_test_sfn_wrap_mpu_access(psa_msg_t *msg)
 static psa_status_t tfm_core_test_sfn_wrap_memory_permissions(psa_msg_t *msg)
 {
     return CORE_TEST_ERRNO_TEST_NOT_SUPPORTED;
-}
-
-static psa_status_t tfm_core_test_sfn_wrap_share_redirection(psa_msg_t *msg)
-{
-    return test_share_redirection();
 }
 
 static psa_status_t tfm_core_test_sfn_wrap_ss_to_ss(psa_msg_t *msg)
@@ -717,9 +705,6 @@ psa_status_t core_test_init(void)
         } else if (signals & SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL) {
             core_test_signal_handle(SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL,
                                     tfm_core_test_sfn_wrap_memory_permissions);
-        } else if (signals & SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL) {
-            core_test_signal_handle(SPM_CORE_TEST_SHARE_REDIRECTION_SIGNAL,
-                                    tfm_core_test_sfn_wrap_share_redirection);
         } else if (signals & SPM_CORE_TEST_SS_TO_SS_SIGNAL) {
             core_test_signal_handle(SPM_CORE_TEST_SS_TO_SS_SIGNAL,
                                     tfm_core_test_sfn_wrap_ss_to_ss);
