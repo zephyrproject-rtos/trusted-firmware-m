@@ -113,7 +113,6 @@ SECTIONS
         __zero_table_end__ = .;
     } > FLASH
 
-#if TFM_LVL != 1
     .TFM_UNPRIV_CODE : ALIGN(32)
     {
         *libc_nano*:*(.text*)
@@ -139,7 +138,6 @@ SECTIONS
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
-#endif /* TFM_LVL != 1 */
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
     Image$$TFM_PSA_CODE_START$$Base = .;
