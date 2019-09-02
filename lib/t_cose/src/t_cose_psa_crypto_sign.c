@@ -65,6 +65,7 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
     return cose_ret;
 }
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 enum t_cose_err_t
 t_cose_crypto_get_ec_pub_key(int32_t key_select,
                              struct q_useful_buf_c kid,
@@ -108,3 +109,4 @@ t_cose_crypto_get_ec_pub_key(int32_t key_select,
 
     return T_COSE_SUCCESS;
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */

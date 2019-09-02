@@ -103,6 +103,7 @@ Done:
         (T_COSE_CRYPTO_EC_P256_COORD_SIZE + 1 + 2)
 
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
 /**
  * \brief CBOR encode a public key as a \c COSE_Key
  *
@@ -274,6 +275,7 @@ static inline enum t_cose_err_t get_keyid(int32_t key_select,
 Done:
     return return_value;
 }
+#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
 
 
 /**
@@ -342,10 +344,11 @@ static inline void add_unprotected_headers(QCBOREncodeContext *cbor_encode_ctx,
                                            struct q_useful_buf_c kid)
 {
     QCBOREncode_OpenMap(cbor_encode_ctx);
-    QCBOREncode_AddBytesToMapN(cbor_encode_ctx, COSE_HEADER_PARAM_KID, kid);
+    if(!q_useful_buf_c_is_null_or_empty(kid)) {
+        QCBOREncode_AddBytesToMapN(cbor_encode_ctx, COSE_HEADER_PARAM_KID, kid);
+    }
     QCBOREncode_CloseMap(cbor_encode_ctx);
 }
-
 
 /*
  * Public function. See t_cose_sign1_sign.h
@@ -364,9 +367,13 @@ enum t_cose_err_t t_cose_sign1_init(struct t_cose_sign1_ctx *me,
 
     int32_t                       hash_alg;
     enum t_cose_err_t             return_value;
-    Q_USEFUL_BUF_MAKE_STACK_UB(   buffer_for_kid, T_COSE_CRYPTO_SHA256_SIZE);
-    struct q_useful_buf_c         kid;
     struct q_useful_buf           buffer_for_protected_header;
+
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+    Q_USEFUL_BUF_MAKE_STACK_UB(   buffer_for_kid, T_COSE_CRYPTO_SHA256_SIZE);
+#endif
+    struct q_useful_buf_c         kid = NULLUsefulBufC;
+
 
     /* Check the cose_alg_id now by getting the hash alg as an early
      error check even though it is not used until later. */
@@ -387,14 +394,12 @@ enum t_cose_err_t t_cose_sign1_init(struct t_cose_sign1_ctx *me,
     if(short_circuit_sign) {
         return_value = get_short_circuit_kid(buffer_for_kid, &kid);
     } else {
-#endif
         return_value = get_keyid(key_select, buffer_for_kid, &kid);
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     }
-#endif
     if(return_value) {
         goto Done;
     }
+#endif
 
     /* Get started with the tagged array that holds the four parts of
      a cose single signed message */

@@ -166,7 +166,7 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
     QCBORItem                     item;
     struct q_useful_buf_c         protected_headers;
     int32_t                       cose_algorithm_id;
-    struct q_useful_buf_c         kid;
+    struct q_useful_buf_c         kid = NULL_Q_USEFUL_BUF_C;
     enum t_cose_err_t             return_value;
     int                           result;
     /* Buffer for the tbs hash. Only big enough for SHA256 */
@@ -220,7 +220,6 @@ enum t_cose_err_t t_cose_sign1_verify(int32_t option_flags,
         return_value = T_COSE_ERR_NO_KID;
         goto Done;
     }
-
 
     /* -- Get the payload -- */
     QCBORDecode_GetNext(&decode_context, &item);
