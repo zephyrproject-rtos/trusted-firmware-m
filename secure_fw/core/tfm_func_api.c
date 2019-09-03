@@ -21,6 +21,7 @@
 #include "tfm_irq_list.h"
 #include "psa/service.h"
 #include "tfm_core_mem_check.h"
+#include "tfm_secure_api.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1
@@ -874,11 +875,10 @@ void tfm_core_get_caller_client_id_handler(uint32_t *svc_args)
 
 void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
 {
-    uint32_t ptr = svc_args[0];
+    void *ptr = (void *)svc_args[0];
     uint32_t size = svc_args[1];
     int32_t access = svc_args[2];
 
-    uint32_t max_buf_size, ptr_start, range_limit, range_check = false;
     enum tfm_status_e res;
     uint32_t running_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
@@ -905,22 +905,23 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
     }
 
     /* Check if partition access to address would fail */
-    if (cmse_check_address_range((void *)ptr, size, flags) == NULL) {
+    if (cmse_check_address_range(ptr, size, flags) == NULL) {
         svc_args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
     }
 
     /* Get regions associated with address */
-    cmse_address_info_t addr_info = cmse_TT((void *)ptr);
+    cmse_address_info_t addr_info = cmse_TT(ptr);
 
     if (addr_info.flags.secure) {
-        /* For privileged partition execution, all secure data memory is
-         * accessible
+        /* For privileged partition execution, all secure data and code memory
+         * are accessible
          */
-        max_buf_size = S_DATA_SIZE;
-        ptr_start = S_DATA_START;
-        range_limit = S_DATA_LIMIT;
-        range_check = true;
+        res = check_address_range(ptr, size, S_DATA_START, S_DATA_LIMIT);
+
+        if ((res != TFM_SUCCESS) && (access == (int32_t)TFM_MEMORY_ACCESS_RO)) {
+            res = check_address_range(ptr, size, S_CODE_START, S_CODE_LIMIT);
+        }
     } else {
         if (!addr_info.flags.sau_region_valid) {
             /* If address is NS, TF-M expects SAU to be configured
@@ -949,15 +950,6 @@ void tfm_core_memory_permission_check_handler(uint32_t *svc_args)
             /* Only NS data and code regions can be accessed as buffers */
             res = TFM_ERROR_INVALID_PARAMETER;
             break;
-        }
-    }
-
-    if (range_check == true) {
-        if ((size <= max_buf_size) && (ptr >= ptr_start)
-            && (ptr <= range_limit + 1 - size)) {
-            res = TFM_SUCCESS;
-        } else {
-            res = TFM_ERROR_INVALID_PARAMETER;
         }
     }
 
