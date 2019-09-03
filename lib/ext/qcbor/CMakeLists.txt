@@ -23,10 +23,16 @@ project(tfm_qcbor LANGUAGES C)
 embedded_project_fixup()
 
 #Append all our source files to global lists.
-list(APPEND ALL_SRC_C
+list(APPEND ALL_SRC_C_ENCODE
+	"${QCBOR_DIR}/src/ieee754.c"
+	"${QCBOR_DIR}/src/qcbor_encode.c"
+	"${QCBOR_DIR}/src/UsefulBuf.c"
+	)
+
+#Append all our source files to global lists.
+list(APPEND ALL_SRC_C_DECODE
 	"${QCBOR_DIR}/src/ieee754.c"
 	"${QCBOR_DIR}/src/qcbor_decode.c"
-	"${QCBOR_DIR}/src/qcbor_encode.c"
 	"${QCBOR_DIR}/src/UsefulBuf.c"
 	)
 
@@ -34,9 +40,12 @@ list(APPEND ALL_SRC_C
 embedded_include_directories(PATH ${QCBOR_DIR}/inc ABSOLUTE)
 
 #Specify what we build (for the QCBOR, build as an object library)
-add_library(${PROJECT_NAME} OBJECT ${ALL_SRC_C})
+add_library(tfm_qcbor_encode OBJECT ${ALL_SRC_C_ENCODE})
+add_library(tfm_qcbor_decode OBJECT ${ALL_SRC_C_DECODE})
 
 #Set common compiler flags
-config_setting_shared_compiler_flags(${PROJECT_NAME})
+config_setting_shared_compiler_flags(tfm_qcbor_encode)
+config_setting_shared_compiler_flags(tfm_qcbor_decode)
 
-embedded_project_end(${PROJECT_NAME})
+embedded_project_end(tfm_qcbor_encode)
+embedded_project_end(tfm_qcbor_decode)
