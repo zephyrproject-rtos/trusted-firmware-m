@@ -53,12 +53,20 @@ psa_status_t psa_open_key(psa_key_lifetime_t lifetime,
                           psa_key_id_t id,
                           psa_key_handle_t *handle)
 {
-    (void)lifetime;
-    (void)id;
-    (void)handle;
+    const struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_OPEN_KEY_SID,
+        .lifetime = lifetime,
+    };
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = &id, .len = sizeof(psa_key_id_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = handle, .len = sizeof(psa_key_handle_t)},
+    };
 
-    /* TODO: Persistent key APIs are not supported yet */
-    return PSA_ERROR_NOT_SUPPORTED;
+    return API_DISPATCH(tfm_crypto_open_key,
+                        TFM_CRYPTO_OPEN_KEY);
 }
 
 psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
@@ -75,10 +83,16 @@ psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
 
 psa_status_t psa_close_key(psa_key_handle_t handle)
 {
-    (void)handle;
+    const struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_CLOSE_KEY_SID,
+        .key_handle = handle,
+    };
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+    };
 
-    /* TODO: Persistent key APIs are not supported yet */
-    return PSA_ERROR_NOT_SUPPORTED;
+    return API_DISPATCH_NO_OUTVEC(tfm_crypto_close_key,
+                                  TFM_CRYPTO_CLOSE_KEY);
 }
 
 psa_status_t psa_import_key(psa_key_handle_t handle,

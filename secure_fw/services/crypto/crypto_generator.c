@@ -15,8 +15,101 @@
  */
 #include "tfm_mbedcrypto_include.h"
 
+/* Required for mbedtls_calloc in tfm_crypto_huk_derivation */
+#include "mbedtls/platform.h"
+
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
+#include "tfm_memory_utils.h"
+
+#include "platform/include/tfm_plat_crypto_keys.h"
+
+/**
+ * \brief Perform a key derivation operation from the hardware unique key (HUK).
+ *
+ * \note This function allows key derivation from the HUK to be implemented in
+ *       a platform-defined way by calling the TF-M platform function
+ *       tfm_plat_get_huk_derived_key.
+ *
+ * \param[in,out] generator     Generator object to set up
+ * \param[in]     key_handle    Handle to the secret key
+ * \param[in]     salt          Salt to use
+ * \param[in]     salt_length   Size of the salt buffer in bytes
+ * \param[in]     label         Label to use
+ * \param[in]     label_length  Size of the label buffer in bytes
+ * \param[in]     capacity      Maximum number of bytes that the generator will
+ *                              be able to provide
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+static psa_status_t tfm_crypto_huk_derivation(psa_crypto_generator_t *generator,
+                                              psa_key_handle_t key_handle,
+                                              const uint8_t *salt,
+                                              size_t salt_length,
+                                              const uint8_t *label,
+                                              size_t label_length,
+                                              size_t capacity)
+{
+    psa_status_t status;
+    enum tfm_plat_err_t plat_err;
+    int32_t partition_id;
+    uint8_t *partition_label;
+    psa_key_policy_t key_policy;
+
+    status = psa_get_key_policy(key_handle, &key_policy);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Check that the input key has the correct policy */
+    if (key_policy.usage != PSA_KEY_USAGE_DERIVE ||
+        key_policy.alg != TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Concatenate the caller's partition ID with the supplied label to prevent
+     * two different partitions from deriving the same key.
+     */
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+    partition_label = mbedtls_calloc(1, sizeof(partition_id) + label_length);
+    if (partition_label == NULL) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+    (void)tfm_memcpy(partition_label, &partition_id, sizeof(partition_id));
+    (void)tfm_memcpy(partition_label + sizeof(partition_id), label,
+                     label_length);
+
+    /* Set up the generator object to contain the raw derived key material, so
+     * that it can be directly extracted in psa_generator_import_key or
+     * psa_generator_read.
+     */
+    generator->alg = PSA_ALG_SELECT_RAW;
+    generator->ctx.buffer.data = mbedtls_calloc(1, capacity);
+    if (generator->ctx.buffer.data == NULL) {
+        mbedtls_free(partition_label);
+        (void)psa_generator_abort(generator);
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+    generator->ctx.buffer.size = capacity;
+    generator->capacity = capacity;
+
+    /* Derive key material from the HUK and output it to the generator buffer */
+    plat_err = tfm_plat_get_huk_derived_key(partition_label,
+                                            sizeof(partition_id) + label_length,
+                                            salt, salt_length,
+                                            generator->ctx.buffer.data,
+                                            generator->ctx.buffer.size);
+    mbedtls_free(partition_label);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        (void)psa_generator_abort(generator);
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
+
+    return PSA_SUCCESS;
+}
 
 /*!
  * \defgroup public_psa Public functions, PSA
@@ -242,8 +335,21 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    status = psa_key_derivation(generator, key_handle, alg, salt, salt_length,
-                                label, label_length, capacity);
+    /* If the caller requests that the TFM_CRYPTO_ALG_HUK_DERIVATION algorithm
+     * is used for key derivation, then redirect the request to the TF-M HUK
+     * derivation function, so that key derivation from the HUK can be
+     * implemented in a platform-defined way.
+     * FIXME: In the future, this should be replaced by the Mbed Crypto driver
+     * model.
+     */
+    if (alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        status = tfm_crypto_huk_derivation(generator, key_handle, salt,
+                                           salt_length, label, label_length,
+                                           capacity);
+    } else {
+        status = psa_key_derivation(generator, key_handle, alg, salt,
+                                    salt_length, label, label_length, capacity);
+    }
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);

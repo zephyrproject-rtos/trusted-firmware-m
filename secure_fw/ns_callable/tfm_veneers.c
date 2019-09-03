@@ -34,6 +34,8 @@ psa_status_t audit_core_delete_record(psa_invec *, size_t, psa_outvec *, size_t)
 
 /******** TFM_SP_CRYPTO ********/
 psa_status_t tfm_crypto_allocate_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_open_key(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_crypto_close_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_import_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_destroy_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_get_key_information(psa_invec *, size_t, psa_outvec *, size_t);
@@ -160,6 +162,8 @@ TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_delete_record)
 
 /******** TFM_SP_CRYPTO ********/
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_allocate_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_open_key)
+TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_close_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_import_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_destroy_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_get_key_information)

@@ -32,6 +32,72 @@ struct tfm_crypto_handle_owner_s {
 static struct tfm_crypto_handle_owner_s
                                  handle_owner[TFM_CRYPTO_MAX_KEY_HANDLES] = {0};
 #endif
+
+/**
+ * \brief Open a handle to the hardware unique key (HUK).
+ *
+ * \note As persistent keys are not yet supported by TF-M Crypto, this function
+ *       allocates an empty volatile key to get a valid key handle.
+ *
+ * \param[in]  lifetime  The lifetime of the key
+ * \param[out] handle    On success, a handle to the HUK
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+static psa_status_t tfm_crypto_open_huk(psa_key_lifetime_t lifetime,
+                                        psa_key_handle_t *key_handle)
+{
+    psa_status_t status;
+    int32_t partition_id;
+    uint32_t i;
+    psa_key_policy_t huk_policy = PSA_KEY_POLICY_INIT;
+
+    /* The HUK has a persistent lifetime */
+    if (lifetime != PSA_KEY_LIFETIME_PERSISTENT) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
+            break;
+        }
+    }
+
+    if (i == TFM_CRYPTO_MAX_KEY_HANDLES) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Allocate a transient key to get a valid key handle */
+    status = psa_allocate_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* The HUK can only be used to derive other keys */
+    huk_policy.usage = PSA_KEY_USAGE_DERIVE;
+    huk_policy.alg = TFM_CRYPTO_ALG_HUK_DERIVATION;
+    status = psa_set_key_policy(*key_handle, &huk_policy);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Import zero data to the HUK handle to prevent further modification */
+    status = psa_import_key(*key_handle, PSA_KEY_TYPE_RAW_DATA, NULL, 0);
+
+    if (status == PSA_SUCCESS) {
+        handle_owner[i].owner = partition_id;
+        handle_owner[i].handle = *key_handle;
+        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+    }
+
+    return status;
+}
+
 /*!
  * \defgroup public Public functions
  *
@@ -115,6 +181,79 @@ psa_status_t tfm_crypto_allocate_key(psa_invec in_vec[],
         handle_owner[i].owner = partition_id;
         handle_owner[i].handle = *key_handle;
         handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+    }
+
+    return status;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
+}
+
+psa_status_t tfm_crypto_open_key(psa_invec in_vec[],
+                                 size_t in_len,
+                                 psa_outvec out_vec[],
+                                 size_t out_len)
+{
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    if ((in_len != 2) || (out_len != 1)) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
+        (in_vec[1].len != sizeof(psa_key_id_t)) ||
+        (out_vec[0].len != sizeof(psa_key_handle_t))) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_key_lifetime_t lifetime = iov->lifetime;
+    psa_key_id_t id = *((psa_key_id_t *)in_vec[1].base);
+    psa_key_handle_t *key_handle = out_vec[0].base;
+
+    /* FIXME: Persistent key APIs are not supported in general, so use a
+     * specific implementation to open a handle to the HUK.
+     */
+    if (id == TFM_CRYPTO_KEY_ID_HUK) {
+        return tfm_crypto_open_huk(lifetime, key_handle);
+    } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
+}
+
+psa_status_t tfm_crypto_close_key(psa_invec in_vec[],
+                                  size_t in_len,
+                                  psa_outvec out_vec[],
+                                  size_t out_len)
+{
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    (void)out_vec;
+
+    if ((in_len != 1) || (out_len != 0)) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+
+    psa_key_handle_t key = iov->key_handle;
+    uint32_t index;
+    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
+
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_close_key(key);
+
+    if (status == PSA_SUCCESS) {
+        handle_owner[index].owner = 0;
+        handle_owner[index].handle = 0;
+        handle_owner[index].in_use = TFM_CRYPTO_NOT_IN_USE;
     }
 
     return status;

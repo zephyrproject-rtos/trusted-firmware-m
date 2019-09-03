@@ -59,6 +59,8 @@ struct tfm_crypto_pack_iovec {
  */
 enum {
     TFM_CRYPTO_ALLOCATE_KEY_SID = (0u),
+    TFM_CRYPTO_OPEN_KEY_SID,
+    TFM_CRYPTO_CLOSE_KEY_SID,
     TFM_CRYPTO_IMPORT_KEY_SID,
     TFM_CRYPTO_DESTROY_KEY_SID,
     TFM_CRYPTO_GET_KEY_INFORMATION_SID,
@@ -115,6 +117,19 @@ enum {
  *
  */
 #define TFM_CRYPTO_INVALID_HANDLE (0x0u)
+
+/**
+ * \brief The persistent key identifier that refers to the hardware unique key.
+ *
+ */
+#define TFM_CRYPTO_KEY_ID_HUK (0xFFFF815Bu)
+
+/**
+ * \brief The algorithm identifier that refers to key derivation from the
+ *        hardware unique key.
+ *
+ */
+#define TFM_CRYPTO_ALG_HUK_DERIVATION ((psa_algorithm_t)0xB0000F00)
 
 /**
  * \brief Define miscellaneous literal constants that are used in the service

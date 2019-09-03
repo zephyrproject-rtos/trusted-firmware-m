@@ -40,6 +40,8 @@ psa_status_t tfm_audit_core_delete_record_veneer(psa_invec *in_vec, size_t in_le
 
 /******** TFM_SP_CRYPTO ********/
 psa_status_t tfm_tfm_crypto_allocate_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_open_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_tfm_crypto_close_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_import_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_destroy_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_get_key_information_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);

@@ -22,6 +22,20 @@
       "minor_policy": "STRICT"
     },
     {
+      "name": "TFM_CRYPTO_OPEN_KEY",
+      "signal": "TFM_CRYPTO_OPEN_KEY",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "TFM_CRYPTO_CLOSE_KEY",
+      "signal": "TFM_CRYPTO_CLOSE_KEY",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
       "name": "TFM_CRYPTO_IMPORT_KEY",
       "signal": "TFM_CRYPTO_IMPORT_KEY",
       "non_secure_clients": true,
