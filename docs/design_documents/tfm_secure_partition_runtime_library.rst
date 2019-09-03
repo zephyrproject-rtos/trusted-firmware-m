@@ -41,7 +41,7 @@ following requirements are mandatory for SPRTL implementation:
   implementation.
 - **Thread safe** - All functions are designed with thread-safe consideration.
   These APIs access caller stack and caller provided memory reference only.
-- **Isolation** - Runtime API is set as executable and read-only in high
+- **Isolation** - Runtime APIs are set as executable and read-only in high
   isolation levels.
 - **Security first** - SPRTL is designed for security purpose and it may come
   with performance loss.
@@ -50,12 +50,12 @@ API Catagories
 ==============
 Several known types of functions are included in SPRTL:
 
-- PSA Firmware Framework defined C runtime APIs
-- Developer APIs of services
-- [Future expansion] other secure APIs
+- PSA Firmware Framework defined C runtime API
+- RoT Service API
+- [Future expansion] other secure API
 
-C Runtime APIs
---------------
+C Runtime API
+-------------
 PSA Firmware Framework proposes a full set of C Runtime. Besides the 'types' and
 'header files', the following APIs are necessary:
 
@@ -85,15 +85,84 @@ Most of the APIs are straight and have no requirement of global data. Below APIs
 have special requirements on design:
 
 - 'printf', which needs to access privileged STDIO driver.
-- Heap APIs, which needs caller to provide extra impiled parameters for instance.
+- Heap APIs, which need caller to provide extra implied parameters for instance.
+- The comparison APIs ('memcmp' e.g.), they should not return immediately when
+  the fault case is detected. The implementation should execute in linear time
+  based on input to avoid execution timing side channel attack.
+
+The pointer validation needs to be considerate. In general, at least a
+'non-NULL' checking is mandatory. A detected invalid pointer leads to a
+psa_panic().
 
 The implementation detail of these APIs are introduced in the `Implementation`_
 chapters.
 
-Developer APIs
---------------
-The implementation of these APIs is under secure service design scope. They must
-follow the requirements at the start of `Design`_ chapter.
+RoT Service API
+---------------
+The description of RoT Service API in PSA FF:
+
+- Arm recommends that the RoT Service developer also defines an RoT Service API
+  and implementation to encapsulate the use of the IPC protocol, and improve the
+  usability of the service for client firmware.
+
+Part of the RoT Service APIs have proposed specifications, such as PSA
+Cryptography API, PSA Storage API, and PSA Attestation API. It is suggested that
+the service provider create documents of RoT Service APIs.
+
+The RoT Service API has a large amount and it is the main part of SPRTL. This
+chapter describes the general implementation of the RoT Service API and the
+reason for putting them into SPRTL.
+
+In general, a client needs to call PSA Client APIs to access a secure service
+in the following sequence:
+
+.. code-block:: c
+
+  /* Example, not real implementation */
+  caller_status_t psa_example_service(void)
+  {
+    ...
+    handle = psa_connect(SERVICE_SID, SERVICE_VERSION);
+    if (INVALID_HANDLE(handle)) {
+      return INVALID_RETURN;
+    }
+
+    status = psa_call(handle, type, invecs, inlen, outvecs, outlen);
+
+    psa_close(handle);
+
+    return TO_CALLER_STATUS(status);
+  }
+
+This API encapsulates call of PSA Client APIs, can be named as a generic API for
+clients call. It is not applicable to link this API to each Secure Partition
+statically to fulfil isolation requirements because of the limited storage size.
+The ideal solution is to put it inside SPRTL and share it to all Secure
+Partitions. This would simplify the caller logic into this:
+
+.. code-block:: c
+
+  if (psa_example_service() != STATUS_SUCCESS) {
+    /* do something */
+  }
+
+This is the simplest case of encapsulating PSA Client APIs. There are RoT
+Service APIs working under context-based manner, in this case, the encapsulating
+can be changed a bit to keep a connection handle in API context data structure.
+This context data structure type is defined in RoT Service headers and the
+instance is allocated by API caller since API implementation does not have
+private data.
+
+.. note::
+
+  - Even the RoT Service APIs are provided in SPRTL for all clients, the SPM
+    performs the access check eventually and decides if the access to service
+    can be processed.
+  - For those RoT Service APIs only get called by a specific client, they can be
+    implemented inside the caller client, instead of putting it into SPRTL.
+
+The implementation of RoT Service APIs must follow the requirements at the start
+of `Design`_ chapter.
 
 Privileged Access Supporting
 ============================
@@ -179,17 +248,17 @@ tooling result:
 Implementation
 **************
 The SPRTL C Runtime sources are put under:
-'$TFM_ROOT/secure_fw/services/sprtl/'
+'$TFM_ROOT/secure_fw/lib/sprt/'
 
 All sources with fixed prefix for easy symbol collectinig:
-'tfm_sprt\_'
+'tfm\_libsprt\_c\_'
 
-The output of this folder is a static library named as 'libsprtl.a'. The code
-of 'libsprtl.a' is put into dedicated section 'SFN' for the MPU region
-initialization.
+The output of this folder is a static library named as 'libtfmsprt.a'. The code
+of 'libtfmsprt.a' is put into a dedicated section so that a hardware protected
+region can be applied to contain it.
 
-The Developer APIs are put under each service folder. These APIs are marked with
-section 'SFN' attribute and they are put in the same section with 'libsprtl.a'.
+The Rot service APIs are put under service interface folder. These APIs are
+marked with the same section attribute where 'libtfmsprt.a' is put.
 
 Privileged Accessing API - 'printf'
 ===================================
