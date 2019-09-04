@@ -204,7 +204,9 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
     }
 
     /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
-    if (in_num + out_num > PSA_MAX_IOVEC) {
+    if ((in_num > PSA_MAX_IOVEC) ||
+        (out_num > PSA_MAX_IOVEC) ||
+        (in_num + out_num > PSA_MAX_IOVEC)) {
         tfm_panic();
     }
 
