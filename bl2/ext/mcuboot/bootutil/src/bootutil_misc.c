@@ -172,7 +172,7 @@ boot_magic_compatible_check(uint8_t tbl_val, uint8_t val)
 }
 
 uint32_t
-boot_trailer_sz(uint8_t min_write_sz)
+boot_trailer_sz(uint32_t min_write_sz)
 {
     return /* state for all sectors */
            BOOT_STATUS_MAX_ENTRIES * BOOT_STATUS_STATE_COUNT * min_write_sz +
@@ -204,7 +204,7 @@ uint32_t
 boot_status_off(const struct flash_area *fap)
 {
     uint32_t off_from_end;
-    uint8_t elem_sz;
+    uint32_t elem_sz;
 
     elem_sz = flash_area_align(fap);
 
@@ -410,7 +410,7 @@ boot_write_trailer_byte(const struct flash_area *fap, uint32_t off,
                         uint8_t val)
 {
     uint8_t buf[BOOT_MAX_ALIGN];
-    uint8_t align;
+    uint32_t align;
     uint8_t erased_val;
     int rc;
 
@@ -478,7 +478,7 @@ boot_write_swap_size(const struct flash_area *fap, uint32_t swap_size)
     uint32_t off;
     int rc;
     uint8_t buf[BOOT_MAX_ALIGN];
-    uint8_t align;
+    uint32_t align;
     uint8_t erased_val;
 
     off = boot_swap_size_off(fap);

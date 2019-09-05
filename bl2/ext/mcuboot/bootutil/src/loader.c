@@ -209,11 +209,11 @@ boot_read_image_headers(bool require_all)
     return 0;
 }
 
-static uint8_t
+static uint32_t
 boot_write_sz(void)
 {
-    uint8_t elem_sz;
-    uint8_t align;
+    uint32_t elem_sz;
+    uint32_t align;
 
     /* Figure out what size to write update status update as.  The size depends
      * on what the minimum write size is for scratch area, active image slot.
@@ -763,7 +763,7 @@ boot_write_status(struct boot_status *bs)
     int area_id;
     int rc;
     uint8_t buf[BOOT_MAX_ALIGN];
-    uint8_t align;
+    uint32_t align;
     uint8_t erased_val;
 
     /* NOTE: The first sector copied (that is the last sector on slot) contains

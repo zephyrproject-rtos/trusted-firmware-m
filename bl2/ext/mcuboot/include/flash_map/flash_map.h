@@ -166,7 +166,7 @@ uint8_t flash_area_erased_val(const struct flash_area *area);
 /*
  * Alignment restriction for flash writes.
  */
-uint8_t flash_area_align(const struct flash_area *area);
+uint32_t flash_area_align(const struct flash_area *area);
 
 /*
  * Given flash area ID, return info about sectors within the area.

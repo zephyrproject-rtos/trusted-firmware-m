@@ -257,7 +257,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     return rc;
 }
 
-uint8_t flash_area_align(const struct flash_area *area)
+uint32_t flash_area_align(const struct flash_area *area)
 {
     ARM_FLASH_INFO *flash_info;
 
