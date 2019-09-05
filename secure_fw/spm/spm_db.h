@@ -48,7 +48,7 @@ struct spm_partition_desc_t {
     struct spm_partition_runtime_data_t runtime_data;
     const struct spm_partition_static_data_t *static_data;
     const struct tfm_spm_partition_platform_data_t *platform_data;
-#if TFM_PSA_API
+#ifdef TFM_PSA_API
     const struct tfm_spm_partition_memory_data_t *memory_data;
 #endif
 };
