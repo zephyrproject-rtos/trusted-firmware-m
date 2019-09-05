@@ -229,6 +229,7 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
 {
     psa_ps_status_t err;
     uint32_t old_fid = SST_INVALID_FID;
+    uint32_t fid_am_reserved = 1;
 
 #ifndef SST_ENCRYPTION
     uint32_t wrt_size;
@@ -272,8 +273,9 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
         old_fid = g_obj_tbl_info.fid;
     } else if (err == PSA_PS_ERROR_UID_NOT_FOUND) {
         /* If the object does not exist, then initialize it based on the input
-         * arguments and empty content.
+         * arguments and empty content. Requests 2 FIDs to prevent exhaustion.
          */
+        fid_am_reserved = 2;
         sst_init_empty_object(create_flags, size, &g_sst_object);
     } else {
         goto clear_data_and_return;
@@ -289,7 +291,8 @@ psa_ps_status_t sst_object_create(psa_ps_uid_t uid, int32_t client_id,
     g_sst_object.header.info.current_size = size;
 
     /* Get new file ID */
-    err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
+    err = sst_object_table_get_free_fid(fid_am_reserved,
+                                        &g_obj_tbl_info.fid);
     if (err != PSA_PS_SUCCESS) {
         goto clear_data_and_return;
     }
@@ -399,7 +402,7 @@ psa_ps_status_t sst_object_write(psa_ps_uid_t uid, int32_t client_id,
     old_fid = g_obj_tbl_info.fid;
 
     /* Get new file ID */
-    err = sst_object_table_get_free_fid(&g_obj_tbl_info.fid);
+    err = sst_object_table_get_free_fid(1, &g_obj_tbl_info.fid);
     if (err != PSA_PS_SUCCESS) {
         goto clear_data_and_return;
     }

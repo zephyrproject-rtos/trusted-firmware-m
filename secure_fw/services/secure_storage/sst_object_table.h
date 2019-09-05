@@ -66,12 +66,18 @@ psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid,
 /**
  * \brief Gets a not in use file ID.
  *
+ * \param[in] fid_num Amount of file IDs that the function will check are
+ *                    free before returning one. 0 is an invalid input and
+ *                    will error. Note that this function will only ever
+ *                    return 1 file ID.
  * \param[out] p_fid  Pointer to the location to store the file ID
  *
- * \return Returns PSA_PS_SUCCESS if the fid is valid. Otherwise, it
- *         returns an error code as specified in \ref psa_ps_status_t
+ * \return Returns PSA_PS_SUCCESS if the fid is valid and fid_num - 1 entries
+ *         are still free in the table. Otherwise, it returns an error code as
+ *         specified in \ref psa_ps_status_t
  */
-psa_ps_status_t sst_object_table_get_free_fid(uint32_t *p_fid);
+psa_ps_status_t sst_object_table_get_free_fid(uint32_t fid_num,
+                                              uint32_t *p_fid);
 
 /**
  * \brief Sets object table information in the object table and stores it

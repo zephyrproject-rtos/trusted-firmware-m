@@ -777,27 +777,42 @@ static psa_ps_status_t sst_get_object_entry_idx(psa_ps_uid_t uid,
 /**
  * \brief Gets free index in the table
  *
- * \param[out] idx  Pointer to store the free index
+ * \param[in] idx_num  The number of indices required to be free before one can
+ *                     be allocated. Primarily used to prevent index
+ *                     exhaustion.Note that this function will only ever return
+ *                     1 index.
+ * \param[out] idx     Pointer to store the free index
  *
  * \note The table is dimensioned to fit SST_NUM_ASSETS + 1
  *
- * \return Returns PSA_PS_SUCCESS and a table index if a free index is
+ * \return Returns PSA_PS_SUCCESS and a table index if idx_num free indices are
  *         available. Otherwise, it returns PSA_PS_ERROR_INSUFFICIENT_SPACE.
  */
 __attribute__ ((always_inline))
-__STATIC_INLINE psa_ps_status_t sst_table_free_idx(uint32_t *idx)
+__STATIC_INLINE psa_ps_status_t sst_table_free_idx(uint32_t idx_num,
+                                                   uint32_t *idx)
 {
     uint32_t i;
+    uint32_t last_free = 0;
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
-    for (i = 0; i < SST_OBJ_TABLE_ENTRIES; i++) {
+    if (idx_num == 0) {
+        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    }
+
+    for (i = 0; i < SST_OBJ_TABLE_ENTRIES && idx_num > 0; i++) {
         if (p_table->obj_db[i].uid == TFM_SST_INVALID_UID) {
-            *idx = i;
-            return PSA_PS_SUCCESS;
+            last_free = i;
+            idx_num--;
         }
     }
 
-    return PSA_PS_ERROR_INSUFFICIENT_SPACE;
+    if (idx_num != 0) {
+        return PSA_PS_ERROR_INSUFFICIENT_SPACE;
+    } else {
+        *idx = last_free;
+        return PSA_PS_SUCCESS;
+    }
 }
 
 /**
@@ -937,13 +952,14 @@ psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid, int32_t client_id)
     return sst_get_object_entry_idx(uid, client_id, &idx);
 }
 
-psa_ps_status_t sst_object_table_get_free_fid(uint32_t *p_fid)
+psa_ps_status_t sst_object_table_get_free_fid(uint32_t fid_num,
+                                              uint32_t *p_fid)
 {
     psa_ps_status_t err;
     uint32_t fid;
     uint32_t idx;
 
-    err = sst_table_free_idx(&idx);
+    err = sst_table_free_idx(fid_num, &idx);
     if (err != PSA_PS_SUCCESS) {
         return err;
     }
