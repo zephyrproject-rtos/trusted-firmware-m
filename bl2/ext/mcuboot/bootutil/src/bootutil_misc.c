@@ -101,10 +101,36 @@ static const struct boot_swap_table boot_swap_tables[] = {
 #define BOOT_SWAP_TABLES_COUNT \
     (sizeof(boot_swap_tables) / sizeof(boot_swap_tables[0]))
 
+/**
+ * @brief Determine if the data at two memory addresses is equal
+ *
+ * @param s1    The first memory region to compare.
+ * @param s2    The second memory region to compare.
+ * @param n     The amount of bytes to compare.
+ *
+ * @note        This function does not comply with the specification of memcmp,
+ *              so should not be considered a drop-in replacement.
+ *
+ * @return      0 if memory regions are equal.
+ */
+uint32_t boot_secure_memequal(const void *s1, const void *s2, size_t n)
+{
+    size_t i;
+    uint8_t *s1_p = (uint8_t*) s1;
+    uint8_t *s2_p = (uint8_t*) s2;
+    uint32_t ret = 0;
+
+    for (i = 0; i < n; i++) {
+        ret |= (s1_p[i] ^ s2_p[i]);
+    }
+
+    return ret;
+}
+
 static int
 boot_magic_decode(const uint32_t *magic)
 {
-    if (memcmp(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) {
+    if (boot_secure_memequal(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) {
         return BOOT_MAGIC_GOOD;
     }
     return BOOT_MAGIC_BAD;
@@ -327,7 +353,7 @@ boot_read_swap_size(uint32_t *swap_size)
         goto out;
     }
 
-    if (memcmp(magic, boot_img_magic, BOOT_MAGIC_SZ) != 0) {
+    if (boot_secure_memequal(magic, boot_img_magic, BOOT_MAGIC_SZ) != 0) {
         /*
          * If the primary slot's magic is not valid, try scratch...
          */
@@ -346,7 +372,7 @@ boot_read_swap_size(uint32_t *swap_size)
             goto out;
         }
 
-        assert(memcmp(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0);
+        assert(boot_secure_memequal(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0);
     }
 
     off = boot_swap_size_off(fap);

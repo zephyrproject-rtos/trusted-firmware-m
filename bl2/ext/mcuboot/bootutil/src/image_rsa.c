@@ -263,7 +263,7 @@ bootutil_cmp_rsasig(mbedtls_rsa_context *ctx, uint8_t *hash, uint32_t hlen,
 
     /* Step 14.  If H = H', output "consistent".  Otherwise, output
      * "inconsistent". */
-    if (memcmp(h2, &em[PSS_HASH_OFFSET], PSS_HLEN) != 0) {
+    if (boot_secure_memequal(h2, &em[PSS_HASH_OFFSET], PSS_HLEN) != 0) {
         return -1;
     }
 

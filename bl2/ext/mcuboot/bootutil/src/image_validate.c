@@ -146,7 +146,7 @@ bootutil_find_key(uint8_t *key, uint16_t key_len)
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return -1;
     }
-    if (!memcmp(hash, key_hash, key_hash_size)) {
+    if (!boot_secure_memequal(hash, key_hash, key_hash_size)) {
         bootutil_keys[0].key = key;
         pub_key_len = key_len;
         return 0;
@@ -169,7 +169,7 @@ bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
         bootutil_sha256_init(&sha256_ctx);
         bootutil_sha256_update(&sha256_ctx, key->key, *key->len);
         bootutil_sha256_finish(&sha256_ctx, hash);
-        if (!memcmp(hash, keyhash, keyhash_len)) {
+        if (!boot_secure_memequal(hash, keyhash, keyhash_len)) {
             return i;
         }
     }
@@ -229,7 +229,7 @@ bootutil_check_hash_after_loading(struct image_header *hdr)
                 return -1;
             }
 
-            if (memcmp(hash, (uint32_t *)(load_address + off + tlv_sz),
+            if (boot_secure_memequal(hash, (uint32_t *)(load_address + off + tlv_sz),
                        sizeof(hash))) {
                 return -1;
             }
@@ -419,7 +419,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (rc) {
                 return rc;
             }
-            if (memcmp(hash, buf, sizeof(hash))) {
+            if (boot_secure_memequal(hash, buf, sizeof(hash))) {
                 return -1;
             }
 

@@ -204,6 +204,7 @@ struct boot_loader_state {
     uint8_t write_sz;
 };
 
+uint32_t boot_secure_memequal(const void *s1, const void *s2, size_t n);
 int bootutil_verify_sig(uint8_t *hash, uint32_t hlen, uint8_t *sig,
                         size_t slen, uint8_t key_id);
 
