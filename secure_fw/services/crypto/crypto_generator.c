@@ -218,13 +218,13 @@ psa_status_t tfm_crypto_key_derivation(psa_invec in_vec[],
     psa_crypto_generator_t *generator = NULL;
 
     if (in_len > 1) {
-        salt = in_vec[2].base;
-        salt_length = in_vec[2].len;
+        salt = in_vec[1].base;
+        salt_length = in_vec[1].len;
     }
 
     if (in_len > 2) {
-        label = in_vec[3].base;
-        label_length = in_vec[3].len;
+        label = in_vec[2].base;
+        label_length = in_vec[2].len;
     }
 
     status = tfm_crypto_check_handle_owner(key_handle, NULL);
