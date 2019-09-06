@@ -129,6 +129,12 @@ elseif(BUILD_PLAT_TEST)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/plat_test.c")
 endif()
 
+if (NOT DEFINED BUILD_BOOT_HAL)
+  message(FATAL_ERROR "Configuration variable BUILD_BOOT_HAL (true|false) is undefined!")
+elseif(BUILD_BOOT_HAL)
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/boot_hal.c")
+endif()
+
 if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)

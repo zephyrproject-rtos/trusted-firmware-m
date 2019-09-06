@@ -154,6 +154,7 @@ SECTIONS
         __data_end__ = .;
 
     } > RAM
+    Image$$ER_DATA$$Base = ADDR(.data);
 
     .bss :
     {
@@ -184,6 +185,7 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
+    Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }

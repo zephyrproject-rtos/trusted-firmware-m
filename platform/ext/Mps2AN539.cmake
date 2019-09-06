@@ -175,6 +175,12 @@ elseif(BUILD_PLAT_TEST)
   list(APPEND ALL_SRC_C "${AN539_DIR}/plat_test.c")
 endif()
 
+if (NOT DEFINED BUILD_BOOT_HAL)
+  message(FATAL_ERROR "Configuration variable BUILD_BOOT_HAL (true|false) is undefined!")
+elseif(BUILD_BOOT_HAL)
+  list(APPEND ALL_SRC_C "${AN539_DIR}/boot_hal.c")
+endif()
+
 if (NOT DEFINED BUILD_FLASH)
   message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif(BUILD_FLASH)

@@ -29,6 +29,7 @@
 #include "flash_map/flash_map.h"
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
+#include "bl2/include/boot_hal.h"
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -55,6 +56,41 @@ struct arm_vector_table {
     uint32_t msp;
     uint32_t reset;
 };
+
+/*!
+ * \brief Chain-loading the next image in the boot sequence.
+ *
+ * This function calls the Reset_Handler of the next image in the boot sequence,
+ * usually it is the secure firmware. Before passing the execution to next image
+ * there is conditional rule to remove the secrets from the memory. This must be
+ * done if the following conditions are satisfied:
+ *  - Memory is shared between SW components at different stages of the trusted
+ *    boot process.
+ *  - There are secrets in the memory: KDF parameter, symmetric key,
+ *    manufacturer sensitive code/data, etc.
+ */
+__attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
+{
+    __ASM volatile(
+        ".syntax unified                 \n"
+        "mov     r7, r0                  \n"
+        "bl      boot_clear_bl2_ram_area \n" /* Clear RAM before jump */
+        "movs    r0, #0                  \n" /* Clear registers: R0-R12, */
+        "mov     r1, r0                  \n" /* except R7 */
+        "mov     r2, r0                  \n"
+        "mov     r3, r0                  \n"
+        "mov     r4, r0                  \n"
+        "mov     r5, r0                  \n"
+        "mov     r6, r0                  \n"
+        "mov     r8, r0                  \n"
+        "mov     r9, r0                  \n"
+        "mov     r10, r0                 \n"
+        "mov     r11, r0                 \n"
+        "mov     r12, r0                 \n"
+        "mov     lr,  r0                 \n"
+        "bx      r7                      \n" /* Jump to Reset_handler */
+    );
+}
 
 static void do_boot(struct boot_rsp *rsp)
 {
@@ -107,7 +143,7 @@ static void do_boot(struct boot_rsp *rsp)
     __DSB();
     __ISB();
 
-    ((void (*)(void))vt->reset)();
+    boot_jump_to_next_image(vt->reset);
 }
 
 int main(void)
