@@ -19,8 +19,7 @@ include("Common/BuildSys")
 
 #Start an embedded project.
 embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
-project(tfm_t_cose_sign   LANGUAGES C)
-project(tfm_t_cose_verify LANGUAGES C)
+project(tfm_t_cose LANGUAGES C)
 embedded_project_fixup()
 
 if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
