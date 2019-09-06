@@ -206,11 +206,4 @@
 
 #define TOTAL_RAM_SIZE                  (0x00200000) /* 2MiB - SSRAM2 */
 
-/* Shared data area between bootloader and runtime firmware.
- * Shared data area is allocated at the beginning of the RAM, it is overlapping
- * with TF-M Secure code's MSP stack
- */
-#define BOOT_TFM_SHARED_DATA_BASE       S_RAM_ALIAS_BASE
-#define BOOT_TFM_SHARED_DATA_SIZE       (0x400)
-
 #endif /* __FLASH_LAYOUT_H__ */
