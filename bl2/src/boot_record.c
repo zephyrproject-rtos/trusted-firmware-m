@@ -95,6 +95,10 @@ boot_save_sw_measurements(uint8_t sw_module,
 
         if (tlv_entry.it_type == IMAGE_TLV_SHA256) {
             /* Get the image's hash value from the manifest section */
+            if (tlv_entry.it_len != sizeof(buf)) { /* SHA256 - 32 bytes */
+                return BOOT_STATUS_ERROR;
+            }
+
             res = flash_area_read(fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
@@ -124,6 +128,10 @@ boot_save_sw_measurements(uint8_t sw_module,
 #ifdef MCUBOOT_SIGN_RSA
         } else if (tlv_entry.it_type == IMAGE_TLV_KEYHASH) {
             /* Get the hash of the public key from the manifest section */
+            if (tlv_entry.it_len != sizeof(buf)) { /* SHA256 - 32 bytes */
+                return BOOT_STATUS_ERROR;
+            }
+
             res = flash_area_read(fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
