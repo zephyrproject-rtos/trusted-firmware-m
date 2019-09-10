@@ -24,6 +24,8 @@
 #include "tfm_thread.h"
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
+#else
+#include "spm_api.h"
 #endif
 
 /*
@@ -189,14 +191,29 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
     return TFM_SUCCESS;
 }
 
+#ifndef TFM_PSA_API
 void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 {
     uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
+    uint32_t running_partition_flags = 0;
+    uint32_t running_partition_idx;
 
-    /* FixMe: check if caller partition is permitted to make an SPM request */
+    /* Check permissions on request type basis */
 
     switch (svc_ctx->r0) {
     case TFM_SPM_REQUEST_RESET_VOTE:
+        running_partition_idx =
+        tfm_spm_partition_get_running_partition_idx();
+        running_partition_flags = tfm_spm_partition_get_flags(
+                                                         running_partition_idx);
+
+        /* Currently only PSA Root of Trust services are allowed to make Reset
+         * vote request
+         */
+        if ((running_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
+            *res_ptr = (uint32_t)TFM_ERROR_GENERIC;
+        }
+
         /* FixMe: this is a placeholder for checks to be performed before
          * allowing execution of reset
          */
@@ -206,6 +223,7 @@ void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
         *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
 }
+#endif /* TFM_PSA_API */
 
 int main(void)
 {

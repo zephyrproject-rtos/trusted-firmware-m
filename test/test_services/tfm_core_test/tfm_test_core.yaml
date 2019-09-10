@@ -7,7 +7,7 @@
 
 {
   "name": "TFM_SP_CORE_TEST",
-  "type": "APPLICATION-ROT",
+  "type": "PSA-ROT",
   "priority": "NORMAL",
   "id": "0x00000002",
   "entry_point": "core_test_init",
