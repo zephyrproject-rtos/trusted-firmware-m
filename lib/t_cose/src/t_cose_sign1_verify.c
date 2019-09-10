@@ -127,14 +127,14 @@ static int parse_protected_headers(struct q_useful_buf_c protected_headers,
  *         CBOR was not well-formed
  * \retval 0
  *         Success
- * \retval 1
- *         Was not a CBOR map or no kid was found
  *
  * This will consume the entire map containing the unprotected
  * headers. Any headers except the kid will be ignored.
+ *
+ * If no kid exists, NULL_Q_USEFUL_BUF_C will be returned in \c kid.
  */
-static int parse_unprotected_headers(QCBORDecodeContext *decode_context,
-                                     struct q_useful_buf_c *kid)
+int parse_unprotected_headers(QCBORDecodeContext *decode_context,
+                              struct q_useful_buf_c *kid)
 {
     struct qcbor_util_items_to_get_t   items[2];
     int                     return_value;
@@ -147,17 +147,10 @@ static int parse_unprotected_headers(QCBORDecodeContext *decode_context,
         goto Done;
     }
 
-    /* did we get a proper kid */
-    if(items[0].item.uDataType != QCBOR_TYPE_BYTE_STRING) {
-        /* have to get a kid, or is it fail */
-        return_value = 1;
-        goto Done;
-    }
-
     *kid = items[0].item.val.string;
 
 Done:
-    return return_value; /* have to get a kid, or is it fail */
+    return return_value;
 }
 
 

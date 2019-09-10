@@ -80,13 +80,20 @@ qcbor_util_get_items_in_map(QCBORDecodeContext *decode_context,
         goto Done;
     }
 
-    /* Loop over all the items in the map. They could be
-     * deeply nested and this should handle both definite
-     * and indefinite length maps and arrays, so this
-     * adds some complexity. */
-    map_nest_level = item.uNextNestLevel;
+    /* Loop over all the items in the map. The map may contain further
+     * maps and arrays. This also needs to handle definite and
+     * indefinite length maps and array.
+     *
+     * map_nest_level is the nesting level of the data item opening
+     * the map that is being scanned. All data items inside this map
+     * have a nesting level greater than it. The data item following
+     * the map being scanned has a nesting level that is equal to or
+     * higher than map_nest_level.
+     */
+    map_nest_level  = item.uNestingLevel;
+    next_nest_level = item.uNextNestLevel;
 
-    while(1) {
+    while(next_nest_level > map_nest_level) {
         if(QCBORDecode_GetNext(decode_context, &item) != QCBOR_SUCCESS) {
             /* Got non-well-formed CBOR */
             return_value = ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED;
@@ -111,13 +118,8 @@ qcbor_util_get_items_in_map(QCBORDecodeContext *decode_context,
             return_value = ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED;
             goto Done;
         }
-        if(next_nest_level < map_nest_level) {
-            return_value = ATTEST_TOKEN_ERR_SUCCESS;
-            /* Got all the items in the map. This is the non-error exit
-             * from the loop. */
-            break;
-        }
     }
+    return_value = ATTEST_TOKEN_ERR_SUCCESS;
 
 Done:
     return return_value;
