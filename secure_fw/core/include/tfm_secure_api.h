@@ -13,6 +13,7 @@
 #include "tfm_svc.h"
 #include "tfm_core.h"
 #include "tfm_api.h"
+#include "tfm_utils.h"
 #include "bl2/include/tfm_boot_status.h"
 #include "psa/service.h"
 
@@ -149,8 +150,11 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
     desc.ns_caller = (cmse_nonsecure_caller() != 0) ? 1U : 0U;
 #endif /* Check for GCC compiler version smaller than 7.3.1 */
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
-        /* FixMe: Error severity TBD */
-        return (int32_t)TFM_ERROR_GENERIC;
+        /* The veneer of a secure service had been called from Handler mode.
+         * This violates TF-M's programming model, and is considered an
+         * unrecoverable error.
+         */
+        tfm_panic();
     } else {
         if (desc.ns_caller) {
             return tfm_core_sfn_request(desc_ptr);
@@ -158,6 +162,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
             return tfm_core_sfn_request_thread_mode(desc_ptr);
         }
     }
+    return TFM_ERROR_GENERIC;
 }
 #endif
 

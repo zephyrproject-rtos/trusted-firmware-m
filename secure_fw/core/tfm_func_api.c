@@ -598,8 +598,9 @@ static enum tfm_status_e tfm_core_check_sfn_req_rules(
     if ((desc_ptr->ns_caller) && (tfm_secure_lock != 0)) {
         /* Secure domain is already locked!
          * This should only happen if caller is secure partition!
-         * FixMe: This scenario is a potential security breach
-         * Take appropriate action!
+         */
+        /* This scenario is a potential security breach.
+         * Error is handled in caller.
          */
         return TFM_ERROR_SECURE_DOMAIN_LOCKED;
     }
@@ -933,8 +934,14 @@ uint32_t tfm_core_depriv_req_handler(uint32_t *svc_args, uint32_t excReturn)
 
     res = tfm_start_partition_for_irq_handling(excReturn, svc_ctx);
     if (res != TFM_SUCCESS) {
-        /* FixMe: consider possible fault scenarios */
-        return excReturn;
+        /* The partition is in an invalid state (UNINIT or CLOSED), so none of
+         * its code can be run
+         */
+        /* FixMe: For now this case is handled with TF-M panic, however it would
+         * be possible to skip the execution of the interrupt handler, and
+         * resume the execution of the interrupted code.
+         */
+        tfm_secure_api_error_handler();
     }
     return EXC_RETURN_SECURE_FUNCTION;
 }
