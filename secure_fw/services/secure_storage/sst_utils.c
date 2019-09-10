@@ -7,20 +7,6 @@
 
 #include "sst_utils.h"
 
-#include <stdint.h>
-
-void sst_global_lock(void)
-{
-    /* FIXME: a system call to be added for acquiring lock */
-    return;
-}
-
-void sst_global_unlock(void)
-{
-    /* FIXME: a system call to be added for releasing lock */
-    return;
-}
-
 psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
                                              uint32_t subset_offset,
                                              uint32_t subset_size)

@@ -53,16 +53,6 @@ typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
  ((nbr_bytes + (SST_FLASH_PROGRAM_UNIT - 1)) & ~((SST_FLASH_PROGRAM_UNIT - 1)))
 
 /**
- * \brief Acquires sst system lock. This lock is used for serializing accesses
- */
-void sst_global_lock(void);
-
-/**
- * \brief Releases sst system lock
- */
-void sst_global_unlock(void);
-
-/**
  * \brief Checks if a subset region is fully contained within a superset region.
  *
  * \param[in] superset_size  Size of superset region
