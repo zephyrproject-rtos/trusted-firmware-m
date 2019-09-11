@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2019 ARM Limited
  *
  * Licensed under the Apace License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include <string.h>
 #include "Driver_USART.h"
 #include "target_cfg.h"
+#include "device_cfg.h"
 
 #define ASSERT_HIGH(X)  assert(X == ARM_DRIVER_OK)
 
@@ -82,7 +83,8 @@ void stdio_init(void)
     ret = TFM_DRIVER_STDIO.Initialize(NULL);
     ASSERT_HIGH(ret);
 
-    ret = TFM_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
+    ret = TFM_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                                   DEFAULT_UART_BAUDRATE);
     ASSERT_HIGH(ret);
 }
 

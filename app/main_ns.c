@@ -22,6 +22,7 @@
 #endif
 #include "target_cfg.h"
 #include "Driver_USART.h"
+#include "device_cfg.h"
 
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
@@ -116,7 +117,8 @@ __attribute__((noreturn))
 int main(void)
 {
     (void)NS_DRIVER_STDIO.Initialize(NULL);
-    NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
+    NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                            DEFAULT_UART_BAUDRATE);
 
     status = osKernelInitialize();
 

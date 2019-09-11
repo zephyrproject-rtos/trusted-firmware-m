@@ -36,10 +36,10 @@ extern ARM_DRIVER_USART LOG_UART_NAME;
  * \def LOG_UART_BAUD_RATE
  *
  * \brief The baud rate used when redirecting the log entry on the secure UART.
- *        Default value is 115200.
+ *        The define DEFAULT_UART_BAUDRATE is used.
  */
 #ifndef LOG_UART_BAUD_RATE
-#define LOG_UART_BAUD_RATE (115200)
+#define LOG_UART_BAUD_RATE (DEFAULT_UART_BAUDRATE)
 #endif
 
 /*!

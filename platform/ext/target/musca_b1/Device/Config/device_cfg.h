@@ -67,6 +67,6 @@
 #define CMSDK_TIMER1_NS
 
 /* Default UART baud rate */
-#define UART_DEFAULT_BAUD_RATE 115200
+#define DEFAULT_UART_BAUDRATE 115200
 
 #endif  /* __MUSCA_B1_DEVICE_CFG_H__ */

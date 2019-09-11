@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited
+ * Copyright (c) 2016-2019 ARM Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 #define APB_PPCEXP2_S
 
 /* ARM UART */
-#define DEFAULT_UART_BAUDRATE  9600
+#define DEFAULT_UART_BAUDRATE  115200
 #define ARM_UART0_S
 #define ARM_UART0_NS
 #define ARM_UART1_S

@@ -495,7 +495,7 @@ struct rtc_pl031_dev_t RTC_PL031_DEV_NS = {&(RTC_PL031_DEV_CFG_NS)};
 #ifdef UART0_PL011_S
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
     .base = MUSCA_UART0_S_BASE,
-    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
@@ -510,7 +510,7 @@ struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
 #ifdef UART0_PL011_NS
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
     .base = MUSCA_UART0_NS_BASE,
-    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
@@ -525,7 +525,7 @@ struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
 #ifdef UART1_PL011_S
 static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_S = {
     .base = MUSCA_UART1_S_BASE,
-    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
@@ -540,7 +540,7 @@ struct uart_pl011_dev_t UART1_PL011_DEV_S = {&(UART1_PL011_DEV_CFG_S),
 #ifdef UART1_PL011_NS
 static const struct uart_pl011_dev_cfg_t UART1_PL011_DEV_CFG_NS = {
     .base = MUSCA_UART1_NS_BASE,
-    .def_baudrate = UART_DEFAULT_BAUD_RATE,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
     .def_stopbit = UART_PL011_STOPBIT_1};
