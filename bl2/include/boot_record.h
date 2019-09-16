@@ -27,6 +27,7 @@ enum shared_memory_err_t {
     SHARED_MEMORY_OK = 0,
     SHARED_MEMORY_OVERFLOW = 1,
     SHARED_MEMORY_OVERWRITE = 2,
+    SHARED_MEMORY_GEN_ERROR = 3,
 
     /* This is used to force the maximum size */
     TLV_TYPE_MAX = INT_MAX

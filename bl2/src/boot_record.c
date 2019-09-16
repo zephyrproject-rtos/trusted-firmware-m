@@ -9,6 +9,7 @@
 #include "region_defs.h"
 #include "tfm_boot_status.h"
 #include "target.h"
+#include "../ext/mcuboot/bootutil/src/bootutil_priv.h"
 #include "../ext/mcuboot/bootutil/include/bootutil/image.h"
 #include "../ext/mcuboot/include/flash_map/flash_map.h"
 #include <stdint.h>
@@ -283,6 +284,12 @@ boot_add_data_to_shared_area(uint8_t        major_type,
     /* Add TLV entry */
     tlv_entry.tlv_type = SET_TLV_TYPE(major_type, minor_type);
     tlv_entry.tlv_len  = SHARED_DATA_ENTRY_SIZE(size);
+
+    /* Verify integer overflow */
+    if (boot_add_uint16_overflow_check(boot_data->header.tlv_tot_len,
+                                       tlv_entry.tlv_len)) {
+        return SHARED_MEMORY_GEN_ERROR;
+    }
 
     /* Verify overflow of shared area */
     if ((boot_data->header.tlv_tot_len + tlv_entry.tlv_len) >

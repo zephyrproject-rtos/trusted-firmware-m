@@ -27,6 +27,7 @@
 #ifndef H_BOOTUTIL_PRIV_
 #define H_BOOTUTIL_PRIV_
 
+#include <stdbool.h>
 #include "flash_map/flash_map.h"
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
@@ -192,6 +193,7 @@ struct boot_loader_state {
         const struct flash_area *area;
         boot_sector_t *sectors;
         size_t num_sectors;
+        bool is_hdr_valid;
     } imgs[BOOT_IMAGE_NUMBER][BOOT_NUM_SLOTS];
 
     struct {
@@ -230,6 +232,8 @@ int boot_read_swap_size(uint32_t *swap_size);
 int boot_is_version_sufficient(struct image_version *req,
                                struct image_version *ver);
 #endif
+bool boot_add_uint32_overflow_check(uint32_t a, uint32_t b);
+bool boot_add_uint16_overflow_check(uint16_t a, uint16_t b);
 
 /*
  * Accessors for the contents of struct boot_loader_state.
@@ -238,6 +242,7 @@ int boot_is_version_sufficient(struct image_version *req,
 /* These are macros so they can be used as lvalues. */
 #define BOOT_IMG(state, slot) ((state)->imgs[current_image][(slot)])
 #define BOOT_IMG_AREA(state, slot) (BOOT_IMG(state, slot).area)
+#define BOOT_IMG_HDR_IS_VALID(state, slot) (BOOT_IMG(state, slot).is_hdr_valid)
 #define BOOT_SCRATCH_AREA(state) ((state)->scratch.area)
 #define BOOT_WRITE_SZ(state) ((state)->write_sz)
 #define BOOT_SWAP_TYPE(state) ((state)->swap_type[current_image])

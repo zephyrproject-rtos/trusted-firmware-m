@@ -155,6 +155,45 @@ static const struct boot_status_table boot_status_tables[] = {
                  (state)->image_ok)
 #endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING */
 
+/*
+ * \brief Verifies the image header: magic value, flags, integer overflow.
+ *
+ * \retval 0
+ * \retval BOOT_EBADIMAGE
+ */
+static int
+boot_verify_image_header(struct image_header *hdr)
+{
+    uint32_t image_end;
+
+    if (hdr->ih_magic != IMAGE_MAGIC) {
+        return BOOT_EBADIMAGE;
+    }
+
+    /* Check input parameters against integer overflow */
+    if (boot_add_uint32_overflow_check(hdr->ih_hdr_size, hdr->ih_img_size)) {
+        return BOOT_EBADIMAGE;
+    }
+
+    image_end = hdr->ih_hdr_size + hdr->ih_img_size;
+    if (boot_add_uint32_overflow_check(image_end, hdr->ih_protect_tlv_size)) {
+        return BOOT_EBADIMAGE;
+    }
+
+
+#if MCUBOOT_RAM_LOADING
+    if (!(hdr->ih_flags & IMAGE_F_RAM_LOAD)) {
+        return BOOT_EBADIMAGE;
+    }
+
+    /* Check input parameters against integer overflow */
+    if (boot_add_uint32_overflow_check(image_end, hdr->ih_load_addr)) {
+        return BOOT_EBADIMAGE;
+    }
+#endif
+
+    return 0;
+}
 
 static int
 boot_read_image_header(int slot, struct image_header *out_hdr)
@@ -176,7 +215,8 @@ boot_read_image_header(int slot, struct image_header *out_hdr)
         goto done;
     }
 
-    rc = 0;
+    rc = boot_verify_image_header(out_hdr);
+    BOOT_IMG_HDR_IS_VALID(&boot_data, slot) = (rc == 0);
 
 done:
     flash_area_close(fap);
@@ -338,8 +378,8 @@ boot_validate_slot(int slot, struct boot_status *bs)
         goto out;
     }
 
-    if ((hdr->ih_magic != IMAGE_MAGIC ||
-        boot_image_check(hdr, fap, bs) != 0)) {
+    if ((!BOOT_IMG_HDR_IS_VALID(&boot_data, slot)) ||
+         (boot_image_check(hdr, fap, bs) != 0)) {
         if (slot != BOOT_PRIMARY_SLOT) {
             rc = flash_area_erase(fap, 0, fap->fa_size);
             if(rc != 0) {
@@ -1340,16 +1380,13 @@ boot_swap_image(struct boot_status *bs)
          * will be used to determine the amount of sectors to swap.
          */
         hdr = boot_img_hdr(&boot_data, BOOT_PRIMARY_SLOT);
-        if (hdr->ih_magic == IMAGE_MAGIC) {
-            rc = boot_read_image_size(BOOT_PRIMARY_SLOT, hdr, &copy_size);
-            assert(rc == 0);
-        }
+        rc = boot_read_image_size(BOOT_PRIMARY_SLOT, hdr, &copy_size);
+        assert(rc == 0);
 
         hdr = boot_img_hdr(&boot_data, BOOT_SECONDARY_SLOT);
-        if (hdr->ih_magic == IMAGE_MAGIC) {
-            rc = boot_read_image_size(BOOT_SECONDARY_SLOT, hdr, &size);
-            assert(rc == 0);
-        }
+        rc = boot_read_image_size(BOOT_SECONDARY_SLOT, hdr, &size);
+        assert(rc == 0);
+
 
         if (size > copy_size) {
             copy_size = size;
@@ -1569,11 +1606,14 @@ boot_verify_all_dependency(uint32_t slot)
         rc = BOOT_EBADIMAGE;
         goto done;
     }
+    if (boot_add_uint32_overflow_check(off, (info.it_tlv_tot + sizeof(info)))) {
+        return -1;
+    }
     end = off + info.it_tlv_tot;
     off += sizeof(info);
 
     /* Traverse through all of the TLVs to find the dependency TLVs. */
-    for (; off < end; off += sizeof(tlv) + tlv.it_len) {
+    while(off < end) {
         rc = flash_area_read(fap, off, &tlv, sizeof(tlv));
         if (rc != 0) {
              rc = BOOT_EFLASH;
@@ -1613,6 +1653,13 @@ boot_verify_all_dependency(uint32_t slot)
              * The search can be finished.
              */
             break;
+        }
+        /* Avoid integer overflow. */
+        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len))) {
+            /* Potential overflow. */
+            return BOOT_EBADIMAGE;
+        } else {
+            off += sizeof(tlv) + tlv.it_len;
         }
     }
 
@@ -2095,11 +2142,8 @@ boot_go(struct boot_rsp *rsp)
          * onto an empty flash chip. At least do a basic sanity check that
          * the magic number on the image is OK.
          */
-        if (BOOT_IMG(&boot_data, BOOT_PRIMARY_SLOT).hdr.ih_magic !=
-                IMAGE_MAGIC) {
-            BOOT_LOG_ERR("bad image magic 0x%lx; Image=%u", (unsigned long)
-                         &boot_img_hdr(&boot_data,BOOT_PRIMARY_SLOT)->ih_magic,
-                         current_image);
+        if (!BOOT_IMG_HDR_IS_VALID(&boot_data, slot)) {
+            BOOT_LOG_ERR("Invalid image header Image=%u", current_image);
             rc = BOOT_EBADIMAGE;
             goto out;
         }
@@ -2265,7 +2309,7 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
             continue;
         }
 
-        if (hdr->ih_magic == IMAGE_MAGIC) {
+        if (BOOT_IMG_HDR_IS_VALID(&boot_data, slot)) {
             if (slot_state.magic    == BOOT_MAGIC_GOOD ||
                 slot_state.image_ok == BOOT_FLAG_SET) {
                 /* Valid cases:

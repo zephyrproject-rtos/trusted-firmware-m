@@ -210,6 +210,9 @@ bootutil_check_hash_after_loading(struct image_header *hdr)
     if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
         return BOOT_EBADMAGIC;
     }
+    if (boot_add_uint32_overflow_check(off, (info.it_tlv_tot + sizeof(info)))) {
+        return -1;
+    }
     end = off + info.it_tlv_tot;
     off += sizeof(info);
 
@@ -217,6 +220,9 @@ bootutil_check_hash_after_loading(struct image_header *hdr)
      * Traverse through all of the TLVs, performing any checks we know
      * and are able to do.
      */
+    if (boot_add_uint32_overflow_check(load_address, end)) {
+        return -1;
+    }
     while (off < end) {
         tlv = *((struct image_tlv *)(load_address + off));
         tlv_sz = sizeof(tlv);
@@ -239,7 +245,7 @@ bootutil_check_hash_after_loading(struct image_header *hdr)
         }
 
         /* Avoid integer overflow. */
-        if ((UINT32_MAX - off) < (sizeof(tlv) + tlv.it_len)) {
+        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len))) {
             /* Potential overflow. */
             break;
         } else {
@@ -330,7 +336,8 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
             }
 
             /* Avoid integer overflow. */
-            if ((UINT32_MAX - off) < (sizeof(tlv) + tlv.it_len)) {
+            if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len)))
+            {
                 /* Potential overflow. */
                 break;
             } else {
@@ -394,6 +401,9 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
     }
     if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
         return BOOT_EBADMAGIC;
+    }
+    if (boot_add_uint32_overflow_check(off, (info.it_tlv_tot + sizeof(info)))) {
+        return -1;
     }
     end = off + info.it_tlv_tot;
     off += sizeof(info);
@@ -513,7 +523,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
         }
 
         /* Avoid integer overflow. */
-        if ((UINT32_MAX - off) < (sizeof(tlv) + tlv.it_len)) {
+        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len))) {
             /* Potential overflow. */
             break;
         } else {

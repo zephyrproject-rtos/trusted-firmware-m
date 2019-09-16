@@ -28,6 +28,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "flash_map/flash_map.h"
 #include "bootutil/image.h"
@@ -721,3 +722,33 @@ boot_is_version_sufficient(struct image_version *req,
     return 0;
 }
 #endif /* BOOT_IMAGE_NUMBER > 1 */
+
+/**
+ * Checks whether on overflow can happen during a summation operation
+ *
+ * @param  a  First operand of summation
+ *
+ * @param  b  Second operand of summation
+ *
+ * @return    True in case of overflow, false otherwise
+ */
+bool
+boot_add_uint32_overflow_check(uint32_t a, uint32_t b)
+{
+    return (a > UINT32_MAX - b);
+}
+
+/**
+ * Checks whether on overflow can happen during a summation operation
+ *
+ * @param  a  First operand of summation
+ *
+ * @param  b  Second operand of summation
+ *
+ * @return    True in case of overflow, false otherwise
+ */
+bool
+boot_add_uint16_overflow_check(uint16_t a, uint16_t b)
+{
+    return (a > UINT16_MAX - b);
+}
