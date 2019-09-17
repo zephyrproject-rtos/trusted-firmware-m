@@ -370,7 +370,7 @@ else()
 	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID OFF)
 endif()
 
-set(ATTEST_BOOT_INTERFACE "INDIVIDUAL_CLAIMS" CACHE STRING "Set the format in which to pass the claims to the initial-attestation service.")
+set(ATTEST_BOOT_INTERFACE "CBOR_ENCODED_CLAIMS" CACHE STRING "Set the format in which to pass the claims to the initial-attestation service.")
 set_property(CACHE ATTEST_BOOT_INTERFACE PROPERTY STRINGS "INDIVIDUAL_CLAIMS;CBOR_ENCODED_CLAIMS")
 validate_cache_value(ATTEST_BOOT_INTERFACE)
 

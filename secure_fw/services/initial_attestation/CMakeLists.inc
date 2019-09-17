@@ -46,10 +46,15 @@ if (ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
 	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE_AND_KEY_ID)
 endif()
 
+if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
+	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INDIVIDUAL_SW_COMPONENTS)
+endif()
+
 #Inform the user about attestation service features selected based on the cmake flags
 message("The Initial Attestation service compile configuration is as follows:")
 message("- ATTEST_INCLUDE_OPTIONAL_CLAIMS: ${ATTEST_INCLUDE_OPTIONAL_CLAIMS}")
 message("- ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID: ${ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID}")
+message("- ATTEST_BOOT_INTERFACE: ${ATTEST_BOOT_INTERFACE}")
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)

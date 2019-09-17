@@ -227,6 +227,7 @@ static int32_t attest_get_tlv_by_id(uint8_t    claim,
     return found;
 }
 
+#ifdef INDIVIDUAL_SW_COMPONENTS /* DEPRECATED */
 /*!
  * \brief Static function to add SW component related claims to attestation
  *        token in CBOR format.
@@ -237,6 +238,9 @@ static int32_t attest_get_tlv_by_id(uint8_t    claim,
  * \param[in]  tlv_id       The ID of claim
  * \param[in]  claim_value  A structure which carries a pointer and size about
  *                          the data item to be added to the token
+ *
+ * \deprecated This function is deprecated and will probably be removed
+ *             in the future.
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
@@ -288,6 +292,8 @@ attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
  *                          which belongs to this SW component.
  * \param[in]  nested_map   Flag to indicate that how to encode the SW component
  *                          measurement data: nested map or non-nested map.
+ * \deprecated This function is deprecated and will probably be removed
+ *             in the future.
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
@@ -357,6 +363,9 @@ attest_add_single_sw_measurment(struct attest_token_ctx *token_ctx,
  * \param[in]  tlv_address  Address of the first TLV entry in the boot status,
  *                          which belongs to this SW component.
  *
+ * \deprecated This function is deprecated and will probably be removed
+ *             in the future.
+ *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static enum psa_attest_err_t
@@ -424,6 +433,7 @@ attest_add_single_sw_component(struct attest_token_ctx *token_ctx,
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+#endif /* INDIVIDUAL_SW_COMPONENTS */
 
 /*!
  * \brief Static function to add the claims of all SW components to the
@@ -442,8 +452,12 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
     int32_t found;
     uint32_t cnt = 0;
     uint32_t module;
-    QCBOREncodeContext *cbor_encode_ctx;
+    QCBOREncodeContext *cbor_encode_ctx = NULL;
+#ifdef INDIVIDUAL_SW_COMPONENTS
     enum psa_attest_err_t res;
+#else
+    UsefulBufC encoded = NULLUsefulBufC;
+#endif
 
     /* Starting from module 1, because module 0 contains general claims which
      * are not related to SW module(i.e: boot_seed, etc.)
@@ -469,10 +483,17 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
                 QCBOREncode_OpenArrayInMapN(cbor_encode_ctx,
                                             EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
             }
+
+#ifdef INDIVIDUAL_SW_COMPONENTS
             res = attest_add_single_sw_component(token_ctx, module, tlv_ptr);
             if (res != PSA_ATTEST_ERR_SUCCESS) {
                 return res;
             }
+#else
+            encoded.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
+            encoded.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
+            QCBOREncode_AddEncoded(cbor_encode_ctx, encoded);
+#endif /* INDIVIDUAL_SW_COMPONENTS */
         }
     }
 
@@ -622,7 +643,6 @@ attest_add_caller_id_claim(struct attest_token_ctx *token_ctx)
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
-
 static enum psa_attest_err_t
 attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
 {
