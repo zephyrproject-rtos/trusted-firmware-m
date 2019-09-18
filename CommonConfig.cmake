@@ -21,6 +21,9 @@ elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUA
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
+#Configure the default build type
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (i.e. Debug)")
+
 if(CORE_IPC)
 	if (TFM_LVL EQUAL 3)
 		message(FATAL_ERROR "ERROR: Invalid isolation level!")
