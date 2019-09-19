@@ -11,6 +11,9 @@
 #ifndef __TFM_INTERNAL_H__
 #define __TFM_INTERNAL_H__
 
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+typedef void (*nsfptr_t) (void);
+#else
 /*
  * This function pointer is meant to only hold non secure function pointers.
  * It will be turned into a non-secure one (LSB cleared) before being called
@@ -19,6 +22,7 @@
  * from secure to non-secure world.
  */
 typedef void (*nsfptr_t) (void) __attribute__((cmse_nonsecure_call));
+#endif
 
 extern nsfptr_t ns_entry;
 
