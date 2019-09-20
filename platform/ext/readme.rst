@@ -21,7 +21,7 @@ This folder contains core and compiler specific header files imported from the
 common
 ======
 This folder contains stdout redirection to UART, a temporary memory mapped flash
-implementation for the bootloader and tfm\_mbedtls\_config.h for all the
+implementation for the bootloader and ``tfm_mbedcrypto_config.h`` for all the
 targets.
 
 drivers
