@@ -17,6 +17,7 @@
 #include "tfm_list.h"
 #include "tfm_pools.h"
 #include "tfm_memory_utils.h"
+#include "tfm_core_utils.h"
 
 int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
                       size_t chunksz, size_t num)
@@ -35,7 +36,7 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     }
 
     /* Buffer should be BSS cleared but clear it again */
-    tfm_memset(pool, 0, poolsz);
+    tfm_core_util_memset(pool, 0, poolsz);
 
     /* Chain pool chunks */
     tfm_list_init(&pool->chunks_list);

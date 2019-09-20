@@ -11,6 +11,7 @@
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_memory_utils.h"
+#include "tfm_core_utils.h"
 #include "tfm_secure_api.h"
 #include "spm_api.h"
 #include "tfm_svc.h"
@@ -169,9 +170,9 @@ void SecureFault_Handler(void)
          sp <=  (S_DATA_LIMIT - sizeof(tfm_fault_context)) + 1) ||
         (sp >= NS_DATA_START &&
          sp <= (NS_DATA_LIMIT - sizeof(tfm_fault_context)) + 1)) {
-        tfm_memcpy(&tfm_fault_context,
-                   (const void *)sp,
-                   sizeof(tfm_fault_context));
+        tfm_core_util_memcpy(&tfm_fault_context,
+                             (const void *)sp,
+                             sizeof(tfm_fault_context));
     }
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");

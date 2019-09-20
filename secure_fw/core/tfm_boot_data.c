@@ -12,6 +12,7 @@
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "secure_fw/spm/spm_api.h"
+#include "tfm_core_utils.h"
 #ifdef TFM_PSA_API
 #include "tfm_internal_defines.h"
 #include "tfm_utils.h"
@@ -140,9 +141,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
      */
     for (; offset < tlv_end; offset += tlv_entry.tlv_len) {
         /* Create local copy to avoid unaligned access */
-        (void)tfm_memcpy(&tlv_entry,
-                         (const void *)offset,
-                         SHARED_DATA_ENTRY_HEADER_SIZE);
+        (void)tfm_core_util_memcpy(&tlv_entry,
+                                   (const void *)offset,
+                                   SHARED_DATA_ENTRY_HEADER_SIZE);
         if (GET_MAJOR(tlv_entry.tlv_type) == tlv_major) {
             /* Check buffer overflow */
             if (((ptr - buf_start) + tlv_entry.tlv_len) > buf_size) {
@@ -150,7 +151,8 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                 return;
             }
 
-            (void)tfm_memcpy(ptr, (const void *)offset, tlv_entry.tlv_len);
+            (void)tfm_core_util_memcpy(ptr, (const void *)offset,
+                                       tlv_entry.tlv_len);
 
             ptr += tlv_entry.tlv_len;
             boot_data->header.tlv_tot_len += tlv_entry.tlv_len;

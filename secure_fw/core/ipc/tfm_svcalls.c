@@ -24,6 +24,7 @@
 #include "spm_api.h"
 #include "tfm_peripherals_def.h"
 #include "spm_db.h"
+#include "tfm_core_utils.h"
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
                      int32_t irq_line);
@@ -236,12 +237,12 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
         tfm_panic();
     }
 
-    tfm_memset(invecs, 0, sizeof(invecs));
-    tfm_memset(outvecs, 0, sizeof(outvecs));
+    tfm_core_util_memset(invecs, 0, sizeof(invecs));
+    tfm_core_util_memset(outvecs, 0, sizeof(outvecs));
 
     /* Copy the address out to avoid TOCTOU attacks. */
-    tfm_memcpy(invecs, inptr, in_num * sizeof(psa_invec));
-    tfm_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
+    tfm_core_util_memcpy(invecs, inptr, in_num * sizeof(psa_invec));
+    tfm_core_util_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
 
     /*
      * For client input vector, it is a fatal error if the provided payload
@@ -466,7 +467,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    tfm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
+    tfm_core_util_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
     /*
      * There may be mutiple messages for this RoT Service signal, do not clear
@@ -591,7 +592,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     bytes = num_bytes > msg->msg.in_size[invec_idx] ?
                         msg->msg.in_size[invec_idx] : num_bytes;
 
-    tfm_memcpy(buffer, msg->invec[invec_idx].base, bytes);
+    tfm_core_util_memcpy(buffer, msg->invec[invec_idx].base, bytes);
 
     /* There maybe some remaining data */
     msg->invec[invec_idx].base += bytes;
@@ -749,8 +750,8 @@ static void tfm_svcall_psa_write(uint32_t *args)
         tfm_panic();
     }
 
-    tfm_memcpy(msg->outvec[outvec_idx].base + msg->outvec[outvec_idx].len,
-               buffer, num_bytes);
+    tfm_core_util_memcpy(msg->outvec[outvec_idx].base +
+                         msg->outvec[outvec_idx].len, buffer, num_bytes);
 
     /* Update the write number */
     msg->outvec[outvec_idx].len += num_bytes;

@@ -27,6 +27,7 @@
 #include "region_defs.h"
 #include "tfm_nspm.h"
 #include "tfm_memory_utils.h"
+#include "tfm_core_utils.h"
 
 #include "secure_fw/services/tfm_service_list.inc"
 
@@ -298,7 +299,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     TFM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    tfm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
+    tfm_core_util_memset(msg, 0, sizeof(struct tfm_msg_body_t));
 
     tfm_event_init(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;

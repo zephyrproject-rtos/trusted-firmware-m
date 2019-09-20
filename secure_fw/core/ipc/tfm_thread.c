@@ -11,6 +11,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_svc.h"
 #include "spm_api.h"
+#include "tfm_core_utils.h"
 
 /* Force ZERO in case ZI(bss) clear is missing */
 static struct tfm_thrd_ctx *p_thrd_head = NULL;
@@ -117,13 +118,13 @@ static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
     p_ctxa--;
 
     /* Basic context is considerate at thread start.*/
-    tfm_memset(p_ctxa, 0, sizeof(*p_ctxa));
+    tfm_core_util_memset(p_ctxa, 0, sizeof(*p_ctxa));
     p_ctxa->r0 = (uint32_t)param;
     p_ctxa->ra = (uint32_t)pfn;
     p_ctxa->lr = (uint32_t)exit_zone;
     p_ctxa->xpsr = XPSR_T32;
 
-    tfm_memset(ctx, 0, sizeof(*ctx));
+    tfm_core_util_memset(ctx, 0, sizeof(*ctx));
 
     tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa, (uint32_t)sp_top);
 }
@@ -207,8 +208,9 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
      * First, update latest context into the current thread context.
      * Then, update background context with next thread's context.
      */
-    tfm_memcpy(&prev->state_ctx.ctxb, ctxb, sizeof(*ctxb));
-    tfm_memcpy(ctxb, &next->state_ctx.ctxb, sizeof(next->state_ctx.ctxb));
+    tfm_core_util_memcpy(&prev->state_ctx.ctxb, ctxb, sizeof(*ctxb));
+    tfm_core_util_memcpy(ctxb, &next->state_ctx.ctxb,
+                         sizeof(next->state_ctx.ctxb));
 
     /* Update current thread indicator */
     CURR_THRD = next;
