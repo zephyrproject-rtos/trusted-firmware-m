@@ -52,6 +52,11 @@ elseif (TFM_PSA_API)
 			"${SS_IPC_DIR}/../tfm_core_log.c"
 			"${SS_IPC_DIR}/../tfm_core_utils.c"
 			)
+
+	# Add multi-core topology support
+	if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
+		list(APPEND SS_IPC_C_SRC "${SS_IPC_DIR}/tfm_rpc.c")
+	endif ()
 endif()
 
 #Append all our source files to global lists.
