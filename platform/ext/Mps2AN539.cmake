@@ -128,6 +128,7 @@ elseif(BUILD_TARGET_CFG)
   if (TFM_PARTITION_PLATFORM)
     list(APPEND ALL_SRC_C_S "${AN539_DIR}/services/src/tfm_platform_system.c")
   endif()
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()
 
