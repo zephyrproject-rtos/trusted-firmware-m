@@ -422,7 +422,11 @@ const struct spm_partition_static_data_t static_data_list[] =
     {
         .partition_id         = TFM_SP_NON_SECURE_ID,
 #ifdef TFM_PSA_API
+#if TFM_MULTI_CORE_TOPOLOGY
+        .partition_flags      = SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_IPC,
+#else
         .partition_flags      = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_IPC,
+#endif
         .partition_priority   = TFM_PRIORITY_LOW,
         .partition_init       = tfm_nspm_thread_entry,
 #else
