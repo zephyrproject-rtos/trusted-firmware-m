@@ -28,6 +28,7 @@
 #include "tfm_nspm.h"
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"
+#include "tfm_rpc.h"
 
 #include "secure_fw/services/tfm_service_list.inc"
 
@@ -375,7 +376,13 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     tfm_event_wake(&p_runtime_data->signal_evnt, (p_runtime_data->signals &
                                                   p_runtime_data->signal_mask));
 
-    tfm_event_wait(&msg->ack_evnt);
+    /*
+     * If it is a NS request via RPC, it is unnecessary to block current
+     * thread.
+     */
+    if (!is_tfm_rpc_msg(msg)) {
+        tfm_event_wait(&msg->ack_evnt);
+    }
 
     return IPC_SUCCESS;
 }
@@ -581,4 +588,10 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
 
         tfm_thrd_context_switch(ctxb, pth_curr, pth_next);
     }
+
+    /*
+     * Handle pending mailbox message from NS in multi-core topology.
+     * Empty operation on single Armv8-M platform.
+     */
+    tfm_rpc_client_call_handler();
 }
