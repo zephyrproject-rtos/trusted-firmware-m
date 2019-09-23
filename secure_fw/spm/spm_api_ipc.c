@@ -90,6 +90,9 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
         tfm_panic();
     }
 
+    /* Clear magic as the handler is not used anymore */
+    p_handle->internal_msg.magic = 0;
+
     /* Remove node from handle list */
     tfm_list_del_node(&p_handle->list);
 
@@ -241,33 +244,48 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
 struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 {
     /*
-     * There may be one error handle passed by the caller in two conditions:
-     *   1. Not a valid message handle.
-     *   2. Handle between different Partitions. Partition A passes one handle
-     *   belong to other Partitions and tries to access other's data.
-     * So, need do necessary checking to prevent those conditions.
+     * The message handler passed by the caller is considered invalid in the
+     * following cases:
+     *   1. Not a valid message handle. (The address of a message is not the
+     *      address of a possible handle from the pool
+     *   2. Handle not belongs to the caller partition (The handle is either
+     *      unused, or owned by anither partition)
+     * Check the conditions above
      */
+    struct tfm_conn_handle_t *connection_handle_address;
     struct tfm_msg_body_t *msg;
     uint32_t partition_id;
 
     msg = (struct tfm_msg_body_t *)msg_handle;
-    if (!msg) {
+
+    connection_handle_address =
+        TFM_GET_CONTAINER_PTR(msg, struct tfm_conn_handle_t, internal_msg);
+
+    if (is_valid_chunk_data_in_pool(
+        conn_handle_pool, (uint8_t *)connection_handle_address) != 1) {
         return NULL;
     }
 
     /*
-     * FixMe: For condition 1: using a magic number to define it's a message.
-     * It needs to be an enhancement to check the handle belong to service.
+     * Check that the magic number is correct. This proves that the message
+     * structure contains an active message.
      */
     if (msg->magic != TFM_MSG_MAGIC) {
         return NULL;
     }
 
-    /* For condition 2: check if the partition ID is same */
+    /* Check that the running partition owns the message */
     partition_id = tfm_spm_partition_get_running_partition_id();
     if (partition_id != msg->service->partition->static_data->partition_id) {
         return NULL;
     }
+
+    /*
+     * FixMe: For condition 1 it should be checked whether the message belongs
+     * to the service. Skipping this check isn't a security risk as even if the
+     * message belongs to another service, the handle belongs to the calling
+     * partition.
+     */
 
     return msg;
 }

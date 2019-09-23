@@ -7,6 +7,12 @@
 #ifndef __TFM_POOLS_H__
 #define __TFM_POOLS_H__
 
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Resource pool - few known size resources allocation/free is required,
  * so pool is more applicable than heap.
@@ -17,15 +23,16 @@
  *  [ Pool Instance ] + N * [ Pool Chunks ]
  */
 struct tfm_pool_chunk_t {
-    struct tfm_list_node_t list;        /* Chunk list                  */
-    void *pool;                         /* Point to the parent pool    */
-    uint8_t data[0];                    /* Data indicator              */
+    struct tfm_list_node_t list;        /* Chunk list                     */
+    void *pool;                         /* Point to the parent pool       */
+    uint8_t data[0];                    /* Data indicator                 */
 };
 
 struct tfm_pool_instance_t {
-    size_t chunksz;                     /* Chunks size of pool member   */
-    struct tfm_list_node_t chunks_list; /* Chunk list head in pool      */
-    struct tfm_pool_chunk_t chunks[0];  /* Data indicator               */
+    size_t chunksz;                     /* Chunks size of pool member     */
+    size_t chunk_count;                 /* A number of chunks in the pool */
+    struct tfm_list_node_t chunks_list; /* Chunk list head in pool        */
+    struct tfm_pool_chunk_t chunks[0];  /* Data indicator                 */
 };
 
 /*
@@ -82,4 +89,21 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool);
  */
 void tfm_pool_free(void *ptr);
 
+/**
+ * \brief Checks whether a pointer points to a chunk data in the pool.
+ *
+ * \param[in] pool              Pointer to memory pool declared by
+ *                              \ref TFM_POOL_DECLARE.
+ * \param[in] data              The pointer to check.
+ *
+ * \retval true                 Data is a chunk data in the pool.
+ * \retval false                Data is not a chunk data in the pool.
+ */
+bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
+                                 uint8_t *data);
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __TFM_POOLS_H__ */
