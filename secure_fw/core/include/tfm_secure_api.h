@@ -8,7 +8,9 @@
 #ifndef __TFM_SECURE_API_H__
 #define __TFM_SECURE_API_H__
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
 #include <arm_cmse.h>
+#endif
 #include "tfm_arch.h"
 #include "tfm_svc.h"
 #include "tfm_core.h"
@@ -17,6 +19,7 @@
 #include "bl2/include/tfm_boot_status.h"
 #include "psa/service.h"
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
 /*!
  * \def __tfm_secure_gateway_attributes__
  *
@@ -24,6 +27,7 @@
  */
 #define __tfm_secure_gateway_attributes__ \
         __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
+#endif
 
 /* Hide specific errors if not debugging */
 #ifdef TFM_CORE_DEBUG
