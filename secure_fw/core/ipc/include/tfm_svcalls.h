@@ -40,7 +40,7 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
  * \param[in] ns_caller         If 'non-zero', call from non-secure client.
  *                              Or from secure client.
  *
- * \retval > 0                  A handle for the connection.
+ * \retval PSA_SUCCESS          Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
  *                              connection.
  * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
@@ -49,7 +49,7 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller);
+psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller);
 
 /**
  * \brief SVC handler for \ref psa_call.
