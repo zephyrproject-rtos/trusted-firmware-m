@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,7 +16,7 @@
 #include "spm_api.h"
 #include "core/tfm_core_svc.h"
 
-#if !defined(__ARM_ARCH_8M_MAIN__)
+#if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
 #error "Unsupported ARM Architecture."
 #endif
 

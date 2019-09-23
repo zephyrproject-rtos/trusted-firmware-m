@@ -30,6 +30,8 @@ endif()
 
 if (NOT DEFINED ARM_CPU_ARCHITECTURE)
 	message(FATAL_ERROR "Incomplete build configuration: architecture is not specified.")
+elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8.1-M.MAIN")
+	set(TFM_ARCH_C_SRC "${TFM_ARCH_DIR}/tfm_arch_v8m_main.c")
 elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.MAIN")
 	set(TFM_ARCH_C_SRC "${TFM_ARCH_DIR}/tfm_arch_v8m_main.c")
 elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.BASE")

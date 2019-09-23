@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +14,8 @@
 #include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
 
-#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
+#if defined(__ARM_ARCH_8_1M_MAIN__) || \
+    defined(__ARM_ARCH_8M_MAIN__)  || defined(__ARM_ARCH_8M_BASE__)
 #include "tfm_arch_v8m.h"
 #elif defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
       defined(__ARM_ARCH_7EM__)

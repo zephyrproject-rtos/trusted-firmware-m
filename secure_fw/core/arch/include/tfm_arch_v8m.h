@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,7 +23,7 @@
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
 #define INIT_LR_UNPRIVILEGED                    0xFFFFFFFD
 
-#ifdef __ARM_ARCH_8M_MAIN__
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
 struct tfm_state_context_ext {
     uint32_t    r4;
     uint32_t    r5;
