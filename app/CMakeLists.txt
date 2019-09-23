@@ -106,7 +106,11 @@ if (PSA_API_TEST_NS)
 endif()
 
 if (TFM_PSA_API)
-	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
+	if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ns_mailbox.c")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
+	endif()
 endif()
 
 set(BUILD_CMSIS_CORE On)
