@@ -47,6 +47,7 @@ versions are:
     - Arm Compiler v6.10
     - Arm Compiler v6.11
     - Arm Compiler v6.12
+    - Arm Compiler v6.13
     - GNU Arm compiler v6.3.1
     - GNU Arm compiler v7.3
 
@@ -524,4 +525,4 @@ Dependency chain:
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
