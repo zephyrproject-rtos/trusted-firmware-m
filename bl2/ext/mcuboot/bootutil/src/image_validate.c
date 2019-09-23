@@ -235,6 +235,7 @@ bootutil_check_hash_after_loading(struct image_header *hdr)
             }
 
             sha256_valid = 1;
+            break;
         }
 
         /* Avoid integer overflow. */
