@@ -107,7 +107,10 @@ endif()
 
 if (TFM_PSA_API)
 	if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
-		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ns_mailbox.c")
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ns_mailbox.c"
+			"${INTERFACE_DIR}/src/tfm_multi_core_api.c"
+			"${INTERFACE_DIR}/src/tfm_multi_core_psa_ns_api.c"
+			)
 	else()
 		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
 	endif()
