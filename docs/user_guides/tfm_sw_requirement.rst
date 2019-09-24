@@ -113,12 +113,17 @@ possible.
 
 The following environments are supported:
 
-    - Windows 10 x64 + Cygwin x64 (example configuration is provided for
-      this Windows setup only).
-    - Windows 10 x64 + msys2 x64.
-    - Windows 10 x65 + git-bash (MinGW) + gnumake from DS-5 or msys2.
     - Ubuntu 16.04 x64
     - Ubuntu 18.04 x64
+    - Windows 10 x64 + msys2 x64.
+    - Windows 10 x64 + git-bash (MinGW) + gnumake from DS-5 or msys2.
+    - Windows 10 x64 + Cygwin x64 (example configuration is provided for
+      this Windows setup only).
+
+.. note::
+    Some tools (i.e. python3 and CMake) must NOT be installed from
+    Cygwin and instead a native windows version is needed. Please see the
+    chapter `Windows + Cygwin setup`_ below.
 
 *********************
 Supported C compilers
@@ -171,6 +176,8 @@ The build-system is CMake based and supports the following versions:
     - Recent versions of CMake can be downloaded from
       https://cmake.org/download/, and older releases are available from
       https://cmake.org/files.
+    - For Cygwin users, please use a native windows CMake version
+      instead of the version installed with Cygwin.
 
 ***************************
 Supported GNU make versions
@@ -199,8 +206,8 @@ Example setups
 This section lists dependencies and some exact and tested steps to set-up a
 TF-M-m build environment under various OSes.
 
-Ubuntu
-======
+Ubuntu setup
+============
 
 - DS-5 |DS5_VERSION|.
 - Git tools v2.10.0
@@ -244,13 +251,14 @@ To import GNU Arm in your bash shell console:
 
     export PATH=/bin:$PATH
 
-Windows + Cygwin
-================
+Windows + Cygwin setup
+======================
 
 - uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition) which
   provides the Arm Compiler v6.10 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
-- CMake (see the "Supported CMake versions" chapter)
+- CMake (`native Windows version <https://cmake.org/download/>`__,
+  see the `Supported CMake versions`_ chapter)
 - `Cygwin <https://www.cygwin.com/>`__. Tests done with version 2.877
   (64 bits)
 - GNU make should be installed by selecting appropriate package during
