@@ -23,6 +23,10 @@
 #include "target_cfg.h"
 #include "Driver_USART.h"
 #include "device_cfg.h"
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+#include "tfm_multi_core_api.h"
+#include "tfm_ns_mailbox.h"
+#endif
 
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
@@ -108,6 +112,34 @@ static osStatus_t     status;
 static osThreadId_t   thread_id;
 static osThreadFunc_t thread_func;
 
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+static struct ns_mailbox_queue_t ns_mailbox_queue;
+
+static void tfm_ns_multi_core_boot(void)
+{
+    int32_t ret;
+
+    LOG_MSG("Non-secure code running on non-secure core.");
+
+    if (tfm_ns_wait_for_s_cpu_ready()) {
+        LOG_MSG("Error sync'ing with secure core.");
+
+        /* Avoid undefined behavior after multi-core sync-up failed */
+        for (;;) {
+        }
+    }
+
+    ret = tfm_ns_mailbox_init(&ns_mailbox_queue);
+    if (ret != MAILBOX_SUCCESS) {
+        LOG_MSG("Non-secure mailbox initialization failed.");
+
+        /* Avoid undefined behavior after NS mailbox initialization failed */
+        for (;;) {
+        }
+    }
+}
+#endif
+
 /**
  * \brief main() function
  */
@@ -119,6 +151,10 @@ int main(void)
     (void)NS_DRIVER_STDIO.Initialize(NULL);
     NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
                             DEFAULT_UART_BAUDRATE);
+
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+    tfm_ns_multi_core_boot();
+#endif
 
     status = osKernelInitialize();
 
