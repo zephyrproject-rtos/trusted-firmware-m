@@ -57,8 +57,11 @@ set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_cmsis_rtos_v2.c"
-	"${INTERFACE_DIR}/src/tfm_ns_interface.c"
 	)
+
+if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
+	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ns_interface.c")
+endif()
 
 if (TFM_PSA_API)
 	list(APPEND NS_APP_SRC
@@ -320,17 +323,19 @@ function(set_up_app_build)
 	#Ensure secure_fw is built before our executable.
 	add_dependencies(${EXE_NAME} ${S_BIN})
 
-	if (NOT DEFINED S_VENEER_PATH)
-		if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/../secure_fw)
-			set (S_VENEER_PATH "${CMAKE_CURRENT_BINARY_DIR}/../secure_fw")
-		else()
-			message(FATAL_ERROR "No valid path for S_VENEER_PATH, secure_fw is built?")
+	if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
+		if (NOT DEFINED S_VENEER_PATH)
+			if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/../secure_fw)
+				set (S_VENEER_PATH "${CMAKE_CURRENT_BINARY_DIR}/../secure_fw")
+			else()
+				message(FATAL_ERROR "No valid path for S_VENEER_PATH, secure_fw is built?")
+			endif()
 		endif()
-	endif()
 
-	#Add the veneers to the executable.
-	set(S_VENEER_FILE "${S_VENEER_PATH}/${VENEER_NAME}")
-	set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
+		#Add the veneers to the executable.
+		set(S_VENEER_FILE "${S_VENEER_PATH}/${VENEER_NAME}")
+		set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_LIBRARIES ${S_VENEER_FILE})
+	endif()
 
 	#Collect executables to common location: build/install/outputs/
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.axf
