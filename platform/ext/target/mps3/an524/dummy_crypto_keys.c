@@ -66,6 +66,28 @@ enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
+                                                 size_t label_size,
+                                                 const uint8_t *context,
+                                                 size_t context_size,
+                                                 uint8_t *key,
+                                                 size_t key_size)
+{
+    (void)label;
+    (void)label_size;
+    (void)context;
+    (void)context_size;
+
+    if (key_size > TFM_KEY_LEN_BYTES) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* FIXME: Do key derivation */
+    copy_key(key, sample_tfm_key, key_size);
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,

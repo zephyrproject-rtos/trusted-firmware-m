@@ -12,6 +12,7 @@
  *       SoC.
  */
 
+#include <stddef.h>
 #include <stdint.h>
 #include "tfm_plat_defs.h"
 #include "psa/crypto.h"
@@ -86,6 +87,26 @@ struct tfm_plat_rotpk_t {
  * \return Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
+
+/**
+ * \brief Gets key material derived from the hardware unique key.
+ *
+ * \param[in]  label         Label for KDF
+ * \param[in]  label_size    Size of the label
+ * \param[in]  context       Context for KDF
+ * \param[in]  context_size  Size of the context
+ * \param[out] key           Buffer to output the derived key material
+ * \param[in]  key_size      Requested size of the derived key material and
+ *                           minimum size of the key buffer
+ *
+ * \return Returns error code specified in \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
+                                                 size_t label_size,
+                                                 const uint8_t *context,
+                                                 size_t context_size,
+                                                 uint8_t *key,
+                                                 size_t key_size);
 
 /**
  * \brief Get the initial attestation key
