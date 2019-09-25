@@ -129,9 +129,9 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
  *
  * \param[in] handle            Handle to connection
  *
- * \return Returns \ref psa_status_t status code.
+ * \return void
  */
-psa_status_t tfm_psa_close_veneer(psa_handle_t handle);
+void tfm_psa_close_veneer(psa_handle_t handle);
 
 /***************** End Secure function declarations ***************************/
 

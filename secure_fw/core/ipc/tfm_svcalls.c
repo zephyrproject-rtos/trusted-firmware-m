@@ -28,6 +28,7 @@
 #include "tfm_psa_client_call.h"
 #include "tfm_rpc.h"
 #include "tfm_internal.h"
+#include "tfm_core_trustzone.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
@@ -979,8 +980,75 @@ void tfm_svcall_disable_irq(uint32_t *args)
     tfm_spm_hal_disable_irq(irq_line);
 }
 
+/**
+ * \brief Validate the whether NS caller re-enter.
+ *
+ * \param[in] p_cur_sp          Pointer to current partition.
+ * \param[in] p_ctx             Pointer to current stack context.
+ * \param[in] exc_return        EXC_RETURN value.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ *
+ * \retval void                 Success.
+ */
+static void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
+                                     uint32_t *p_ctx, uint32_t exc_return,
+                                     bool ns_caller)
+{
+    uintptr_t stacked_ctx_pos;
+
+    if (ns_caller) {
+        /*
+         * The background IRQ can't be supported, since if SP is executing,
+         * the preempted context of SP can be different with the one who
+         * preempts veneer.
+         */
+        if (p_cur_sp->static_data->partition_id != TFM_SP_NON_SECURE_ID) {
+            tfm_core_panic();
+        }
+
+        /*
+         * It is non-secure caller, check if veneer stack contains
+         * multiple contexts.
+         */
+        stacked_ctx_pos = (uintptr_t)p_ctx +
+                          sizeof(struct tfm_state_context_t) +
+                          TFM_VENEER_STACK_GUARD_SIZE;
+
+        if (is_stack_alloc_fp_space(exc_return)) {
+#if defined (__FPU_USED) && (__FPU_USED == 1U)
+            if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
+                stacked_ctx_pos += TFM_ADDTIONAL_FP_CONTEXT_WORDS *
+                                   sizeof(uint32_t);
+            }
+#endif
+            stacked_ctx_pos += TFM_BASIC_FP_CONTEXT_WORDS * sizeof(uint32_t);
+        }
+
+        if (stacked_ctx_pos != p_cur_sp->runtime_data.sp_thrd.sp_btm) {
+            tfm_core_panic();
+        }
+    } else if (p_cur_sp->static_data->partition_id <= 0) {
+        tfm_core_panic();
+    }
+}
+
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 {
+    bool ns_caller = true;
+    struct spm_partition_desc_t *partition = NULL;
+
+    if (ctx[5] & TFM_VENEER_LR_BIT0_MASK) {
+        ns_caller = false;
+    }
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    tfm_core_validate_caller(partition, ctx, lr, ns_caller);
+
     switch (svc_num) {
     case TFM_SVC_EXIT_THRD:
         tfm_svcall_thrd_exit();
@@ -988,13 +1056,13 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
-        return tfm_svcall_psa_version(ctx, false);
+        return tfm_svcall_psa_version(ctx, ns_caller);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_svcall_psa_connect(ctx, false);
+        return tfm_svcall_psa_connect(ctx, ns_caller);
     case TFM_SVC_PSA_CALL:
-        return tfm_svcall_psa_call(ctx, false, lr);
+        return tfm_svcall_psa_call(ctx, ns_caller, lr);
     case TFM_SVC_PSA_CLOSE:
-        tfm_svcall_psa_close(ctx, false);
+        tfm_svcall_psa_close(ctx, ns_caller);
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_svcall_psa_wait(ctx);

@@ -27,6 +27,14 @@
  */
 #define __tfm_secure_gateway_attributes__ \
         __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
+
+/*!
+ * \def __tfm_psa_secure_gateway_attributes__
+ *
+ * \brief Attributes for psa api secure gateway functions
+ */
+#define __tfm_psa_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry, noinline, naked, section("SFN")))
 #endif
 
 /* Hide specific errors if not debugging */

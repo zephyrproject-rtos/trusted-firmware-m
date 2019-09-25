@@ -13,8 +13,6 @@
 #include "tfm_svcalls.h"
 #include "spm_api.h"
 
-extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
-
 uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
 {
     uint8_t svc_number = 0;
@@ -38,9 +36,6 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
     switch (svc_number) {
     case TFM_SVC_HANDLER_MODE:
         tfm_spm_init();
-        break;
-    case TFM_SVC_IPC_REQUEST:
-        tfm_psa_ipc_request_handler(svc_args);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
