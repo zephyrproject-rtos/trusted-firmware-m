@@ -216,6 +216,12 @@ LR_CODE S_CODE_START {
     }
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
+#ifdef S_DATA_PRIV_START
+    /**** Privileged data area base address specified by multi-core platform */
+    TFM_SECURE_PRIV_DATA_BOUNDARY S_DATA_PRIV_START {
+    }
+#endif
+
     /*
      * Move BL2 shared area and MSP stack to the beginning of privileged data
      * area in multi-core topology.

@@ -729,6 +729,14 @@ SECTIONS
 #endif /* TFM_LVL != 1 */
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
+#ifdef S_DATA_PRIV_START
+    /**** Privileged data area base address specified by multi-core platform */
+    .tfm_secure_priv_data_boundary :
+    {
+        . = ABSOLUTE(S_DATA_PRIV_START) ;
+    } > RAM
+#endif
+
     /*
      * Move BL2 shared area and MSP stack to the beginning of privileged data
      * area in multi-core topology.
