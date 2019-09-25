@@ -70,7 +70,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     uint32_t limit_cfg;
 
     /*FIXME : Add complete error checking*/
-    if ((region_cfg->region_base & ~MPU_RBAR_ADDR_Msk) != 0) {
+    if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
         return MPU_ARMV8M_ERROR;
     }
     /* region_limit doesn't need to be aligned but the scatter
@@ -83,7 +83,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     mpu->RNR  = region_cfg->region_nr & MPU_RNR_REGION_Msk;
 
     /* This 0s the lower bits of the base address */
-    base_cfg = region_cfg->region_base & MPU_RBAR_ADDR_Msk;
+    base_cfg = region_cfg->region_base & MPU_RBAR_BASE_Msk;
     base_cfg |= (region_cfg->attr_sh << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk;
     base_cfg |= (region_cfg->attr_access << MPU_RBAR_AP_Pos) & MPU_RBAR_AP_Msk;
     base_cfg |= (region_cfg->attr_exec << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk;
