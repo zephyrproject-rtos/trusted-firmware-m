@@ -375,6 +375,14 @@ boot_initialize_area(struct boot_loader_state *state, int flash_area)
 
 #endif  /* !defined(MCUBOOT_USE_FLASH_AREA_GET_SECTORS) */
 
+#ifdef MCUBOOT_RAM_LOADING
+#define LOAD_IMAGE_DATA(fap, start, output, size)\
+    (memcpy((output),(void*)(hdr->ih_load_addr + (start)), (size)) != (output))
+#else
+#define LOAD_IMAGE_DATA(fap, start, output, size)\
+    (flash_area_read((fap), (start), (output), (size)))
+#endif /* MCUBOOT_RAM_LOADING */
+
 #ifdef __cplusplus
 }
 #endif

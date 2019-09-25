@@ -83,7 +83,7 @@ boot_save_sw_measurements(uint8_t sw_module,
      */
     offset = hdr->ih_img_size + hdr->ih_hdr_size;
 
-    res = flash_area_read(fap, offset, &tlv_header, sizeof(tlv_header));
+    res = LOAD_IMAGE_DATA(fap, offset, &tlv_header, sizeof(tlv_header));
     if (res) {
         return BOOT_STATUS_ERROR;
     }
@@ -99,7 +99,7 @@ boot_save_sw_measurements(uint8_t sw_module,
      *  - public key hash: Signer ID
      */
     for (; offset < tlv_end; offset += sizeof(tlv_entry) + tlv_entry.it_len) {
-        res = flash_area_read(fap, offset, &tlv_entry, sizeof(tlv_entry));
+        res = LOAD_IMAGE_DATA(fap, offset, &tlv_entry, sizeof(tlv_entry));
         if (res) {
             return BOOT_STATUS_ERROR;
         }
@@ -110,7 +110,7 @@ boot_save_sw_measurements(uint8_t sw_module,
                 return BOOT_STATUS_ERROR;
             }
 
-            res = flash_area_read(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;
@@ -143,7 +143,7 @@ boot_save_sw_measurements(uint8_t sw_module,
                 return BOOT_STATUS_ERROR;
             }
 
-            res = flash_area_read(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;

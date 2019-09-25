@@ -2350,7 +2350,7 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
  * @param slot            The flash slot of the image to be copied to SRAM.
  *
  * @param hdr             Pointer to the image header structure of the image
- *                        that needs to be copid to SRAM
+ *                        that needs to be copied to SRAM
  *
  * @return                0 on success; nonzero on failure.
  */
@@ -2406,6 +2406,34 @@ boot_copy_image_to_sram(int slot, struct image_header *hdr)
     }
     return rc;
 }
+
+/**
+ * Removes an image from SRAM, by overwriting it with zeros.
+ *
+ * @param slot            The flash slot of the image to be removed from SRAM.
+ *
+ * @param hdr             Pointer to the image header structure of the image
+ *                        that needs to be removed from SRAM
+ *
+ * @return                0 on success; nonzero on failure.
+ */
+static int
+boot_remove_image_from_sram(int slot, struct image_header *hdr)
+{
+    uint32_t dst = (uint32_t) hdr->ih_load_addr;
+    int rc;
+    uint32_t img_sz;
+
+    rc = boot_read_image_size(slot, hdr, &img_sz);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    BOOT_LOG_INF("Removing image from SRAM at address 0x%x", dst);
+    memset((void*)dst, 0, img_sz);
+
+    return 0;
+}
 #endif /* MCUBOOT_RAM_LOADING */
 
 /**
@@ -2425,7 +2453,10 @@ boot_go(struct boot_rsp *rsp)
     int fa_id;
     uint32_t boot_sequence[BOOT_NUM_SLOTS];
     uint32_t img_cnt;
-    struct image_header *newest_image_header;
+    struct image_header *selected_image_header;
+#ifdef MCUBOOT_RAM_LOADING
+    int image_copied = 0;
+#endif /* MCUBOOT_RAM_LOADING */
 
     static boot_sector_t primary_slot_sectors[BOOT_MAX_IMG_SECTORS];
     static boot_sector_t secondary_slot_sectors[BOOT_MAX_IMG_SECTORS];
@@ -2460,11 +2491,57 @@ boot_go(struct boot_rsp *rsp)
     if (img_cnt) {
         /* Authenticate images */
         for (i = 0; i < img_cnt; i++) {
-            rc = boot_validate_slot(boot_sequence[i], NULL);
+
+            slot = boot_sequence[i];
+            selected_image_header = boot_img_hdr(&boot_data, slot);
+
+#ifdef MCUBOOT_RAM_LOADING
+            if (selected_image_header->ih_flags & IMAGE_F_RAM_LOAD) {
+                /* Copy image to the load address from where it
+                 * currently resides in flash
+                 */
+                rc = boot_copy_image_to_sram(slot, selected_image_header);
+                if (rc != 0) {
+                    rc = BOOT_EBADIMAGE;
+                    BOOT_LOG_INF("Could not copy image from the %s slot in "
+                                 "the Flash to load address 0x%x in SRAM, "
+                                 "aborting..", (slot == BOOT_PRIMARY_SLOT) ?
+                                 "primary" : "secondary",
+                                 selected_image_header->ih_load_addr);
+                    continue;
+                } else {
+                    BOOT_LOG_INF("Image has been copied from the %s slot in "
+                                 "the flash to SRAM address 0x%x",
+                                 (slot == BOOT_PRIMARY_SLOT) ?
+                                 "primary" : "secondary",
+                                 selected_image_header->ih_load_addr);
+                    image_copied = 1;
+                }
+            } else {
+                /* Only images that support IMAGE_F_RAM_LOAD are allowed if
+                 * MCUBOOT_RAM_LOADING is set.
+                 */
+                rc = BOOT_EBADIMAGE;
+                continue;
+            }
+#endif /* MCUBOOT_RAM_LOADING */
+            rc = boot_validate_slot(slot, NULL);
             if (rc == 0) {
-                slot = boot_sequence[i];
+                /* If a valid image is found then there is no reason to check
+                 * the rest of the images, as they were already ordered by
+                 * preference.
+                 */
                 break;
             }
+#ifdef MCUBOOT_RAM_LOADING
+            else if (image_copied) {
+                /* If an image is found to be invalid then it is removed from
+                 * RAM to prevent it being a shellcode vector.
+                 */
+                boot_remove_image_from_sram(slot, selected_image_header);
+                image_copied = 0;
+            }
+#endif /* MCUBOOT_RAM_LOADING */
         }
         if (rc) {
             /* If there was no valid image at all */
@@ -2472,60 +2549,26 @@ boot_go(struct boot_rsp *rsp)
             goto out;
         }
 
-        /* The slot variable now refers to the newest image's slot in flash */
-        newest_image_header = boot_img_hdr(&boot_data, slot);
-
         /* Update the security counter with the newest image's security
          * counter value.
          */
-        rc = boot_update_security_counter(slot, newest_image_header);
+        rc = boot_update_security_counter(slot, selected_image_header);
         if (rc != 0) {
             BOOT_LOG_ERR("Security counter update failed after image "
                          "validation.");
             goto out;
         }
 
-        #ifdef MCUBOOT_RAM_LOADING
-        if (newest_image_header->ih_flags & IMAGE_F_RAM_LOAD) {
-            /* Copy image to the load address from where it
-             * currently resides in flash */
-            rc = boot_copy_image_to_sram(slot, newest_image_header);
-            if (rc != 0) {
-                rc = BOOT_EBADIMAGE;
-                BOOT_LOG_INF("Could not copy image from the %s slot in "
-                             "the Flash to load address 0x%x in SRAM, "
-                             "aborting..", (slot == BOOT_PRIMARY_SLOT) ?
-                             "primary" : "secondary",
-                             newest_image_header->ih_load_addr);
-                goto out;
-            } else {
-                BOOT_LOG_INF("Image has been copied from the %s slot in "
-                             "the flash to SRAM address 0x%x",
-                             (slot == BOOT_PRIMARY_SLOT) ?
-                             "primary" : "secondary",
-                             newest_image_header->ih_load_addr);
-            }
 
-            /* Validate the image hash in SRAM after the copy was successful */
-            rc = bootutil_check_hash_after_loading(newest_image_header);
-            if (rc != 0) {
-                rc = BOOT_EBADIMAGE;
-                BOOT_LOG_INF("Cannot validate the hash of the image that was "
-                             "copied to SRAM, aborting..");
-                goto out;
-            }
-
-            BOOT_LOG_INF("Booting image from SRAM at address 0x%x",
-                         newest_image_header->ih_load_addr);
-        } else {
-#endif /* MCUBOOT_RAM_LOADING */
-            BOOT_LOG_INF("Booting image from the %s slot",
-                         (slot == BOOT_PRIMARY_SLOT) ? "primary" : "secondary");
 #ifdef MCUBOOT_RAM_LOADING
-        }
-#endif
+        BOOT_LOG_INF("Booting image from SRAM at address 0x%x",
+                     selected_image_header->ih_load_addr);
+#else
+        BOOT_LOG_INF("Booting image from the %s slot",
+                    (slot == BOOT_PRIMARY_SLOT) ? "primary" : "secondary");
+#endif /* MCUBOOT_RAM_LOADING */
 
-        rsp->br_hdr = newest_image_header;
+        rsp->br_hdr = selected_image_header;
         rsp->br_image_off = boot_img_slot_off(&boot_data, slot);
         rsp->br_flash_dev_id = BOOT_IMG_AREA(&boot_data, slot)->fa_device_id;
     } else {

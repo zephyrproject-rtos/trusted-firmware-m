@@ -56,9 +56,11 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
                   uint8_t *hash_result, uint8_t *seed, int seed_len)
 {
     bootutil_sha256_context sha256_ctx;
-    uint32_t blk_sz;
     uint32_t size;
+#ifndef MCUBOOT_RAM_LOADING
+    uint32_t blk_sz;
     uint32_t off;
+#endif /* MCUBOOT_RAM_LOADING */
 
     bootutil_sha256_init(&sha256_ctx);
 
@@ -79,26 +81,20 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
         size += hdr->ih_protect_tlv_size;
     }
 
+#ifdef MCUBOOT_RAM_LOADING
+    bootutil_sha256_update(&sha256_ctx,(void*)(hdr->ih_load_addr), size);
+#else
     for (off = 0; off < size; off += blk_sz) {
         blk_sz = size - off;
         if (blk_sz > tmp_buf_sz) {
             blk_sz = tmp_buf_sz;
         }
-
-#ifdef MCUBOOT_RAM_LOADING
-        if (fap == NULL) { /* The image is in SRAM */
-            memcpy(tmp_buf, (uint32_t *)(hdr->ih_load_addr + off), blk_sz);
-        } else { /* The image is in flash */
-#endif
-            if(flash_area_read(fap, off, tmp_buf, blk_sz)) {
-                return -1;
-            }
-#ifdef MCUBOOT_RAM_LOADING
+        if(flash_area_read(fap, off, tmp_buf, blk_sz)) {
+            return -1;
         }
-#endif
-
         bootutil_sha256_update(&sha256_ctx, tmp_buf, blk_sz);
     }
+#endif
     bootutil_sha256_finish(&sha256_ctx, hash_result);
 
     return 0;
@@ -178,89 +174,6 @@ bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
 #endif
 #endif
 
-#ifdef MCUBOOT_RAM_LOADING
-/* Check the hash of an image after it has been copied to SRAM */
-int
-bootutil_check_hash_after_loading(struct image_header *hdr)
-{
-    uint32_t off;
-    uint32_t end;
-    int sha256_valid = 0;
-    struct image_tlv_info info;
-    struct image_tlv tlv;
-    uint8_t tmp_buf[BOOT_TMPBUF_SZ];
-    uint8_t hash[32] = {0};
-    int rc;
-    uint32_t load_address;
-    uint32_t tlv_sz;
-
-    rc = bootutil_img_hash(hdr, NULL, tmp_buf, BOOT_TMPBUF_SZ, hash, NULL, 0);
-
-    if (rc) {
-        return rc;
-    }
-
-    load_address = (uint32_t) hdr->ih_load_addr;
-
-    /* The TLVs come after the image. */
-    off = hdr->ih_img_size + hdr->ih_hdr_size;
-
-    info = *((struct image_tlv_info *)(load_address + off));
-
-    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_EBADMAGIC;
-    }
-    if (boot_add_uint32_overflow_check(off, (info.it_tlv_tot + sizeof(info)))) {
-        return -1;
-    }
-    end = off + info.it_tlv_tot;
-    off += sizeof(info);
-
-    /*
-     * Traverse through all of the TLVs, performing any checks we know
-     * and are able to do.
-     */
-    if (boot_add_uint32_overflow_check(load_address, end)) {
-        return -1;
-    }
-    while (off < end) {
-        tlv = *((struct image_tlv *)(load_address + off));
-        tlv_sz = sizeof(tlv);
-
-        if (tlv.it_type == IMAGE_TLV_SHA256) {
-            /*
-             * Verify the SHA256 image hash. This must always be present.
-             */
-            if (tlv.it_len != sizeof(hash)) {
-                return -1;
-            }
-
-            if (boot_secure_memequal(hash, (uint32_t *)(load_address + off + tlv_sz),
-                       sizeof(hash))) {
-                return -1;
-            }
-
-            sha256_valid = 1;
-            break;
-        }
-
-        /* Avoid integer overflow. */
-        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len))) {
-            /* Potential overflow. */
-            break;
-        } else {
-            off += sizeof(tlv) + tlv.it_len;
-        }
-    }
-
-    if (!sha256_valid) {
-        return -1;
-    }
-
-    return 0;
-}
-#endif /* MCUBOOT_RAM_LOADING */
-
 /**
  * Reads the value of an image's security counter.
  *
@@ -294,7 +207,7 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
     off = hdr->ih_hdr_size + hdr->ih_img_size;
 
     /* The TLV area always starts with an image_tlv_info structure. */
-    rc = flash_area_read(fap, off, &info, sizeof(info));
+    rc = LOAD_IMAGE_DATA(fap, off, &info, sizeof(info));
     if (rc != 0) {
         return BOOT_EFLASH;
     }
@@ -312,7 +225,7 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
          * security counter TLV.
          */
         while (off < end) {
-            rc = flash_area_read(fap, off, &tlv, sizeof(tlv));
+            rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
             if (rc != 0) {
                 return BOOT_EFLASH;
             }
@@ -324,7 +237,7 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
                     break;
                 }
 
-                rc = flash_area_read(fap, off + sizeof(tlv),
+                rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
                                      img_security_cnt, tlv.it_len);
                 if (rc != 0) {
                     return BOOT_EFLASH;
@@ -395,7 +308,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
     /* The TLVs come after the image. */
     off = hdr->ih_img_size + hdr->ih_hdr_size;
 
-    rc = flash_area_read(fap, off, &info, sizeof(info));
+    rc = LOAD_IMAGE_DATA(fap, off, &info, sizeof(info));
     if (rc) {
         return rc;
     }
@@ -413,7 +326,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
      * and are able to do.
      */
     while (off < end) {
-        rc = flash_area_read(fap, off, &tlv, sizeof(tlv));
+        rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
         if (rc) {
             return rc;
         }
@@ -426,7 +339,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (tlv.it_len != sizeof(hash)) {
                 return -1;
             }
-            rc = flash_area_read(fap, off + sizeof(tlv), buf, sizeof(hash));
+            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, sizeof(hash));
             if (rc) {
                 return rc;
             }
@@ -444,7 +357,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (tlv.it_len > 32) {
                 return -1;
             }
-            rc = flash_area_read(fap, off + sizeof(tlv), buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, tlv.it_len);
             if (rc) {
                 return rc;
             }
@@ -461,7 +374,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (tlv.it_len > sizeof(key_buf)) {
                 return -1;
             }
-            rc = flash_area_read(fap, off + sizeof(tlv), key_buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), key_buf, tlv.it_len);
             if (rc) {
                 return rc;
             }
@@ -477,7 +390,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
                 if (!EXPECTED_SIG_LEN(tlv.it_len) || tlv.it_len > sizeof(buf)) {
                     return -1;
                 }
-                rc = flash_area_read(fap, off + sizeof(tlv), buf, tlv.it_len);
+                rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, tlv.it_len);
                 if (rc) {
                     return -1;
                 }
@@ -499,7 +412,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
                 return -1;
             }
 
-            rc = flash_area_read(fap, off + sizeof(tlv),
+            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
                                  &img_security_cnt, tlv.it_len);
             if (rc) {
                 return rc;

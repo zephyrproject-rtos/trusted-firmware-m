@@ -131,9 +131,6 @@ int32_t bootutil_get_img_security_cnt(struct image_header *hdr,
                                       const struct flash_area *fap,
                                       uint32_t *security_cnt);
 
-#ifdef MCUBOOT_RAM_LOADING
-int bootutil_check_hash_after_loading(struct image_header *hdr);
-#endif
 
 #ifdef __cplusplus
 }
