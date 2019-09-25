@@ -13,6 +13,7 @@
 #include "tfm_api.h"
 #include "secure_fw/spm/spm_api.h"
 #include "tfm_core_utils.h"
+#include "spm_partition_defs.h"
 #ifdef TFM_PSA_API
 #include "tfm_internal_defines.h"
 #include "tfm_utils.h"
@@ -22,6 +23,7 @@
 #include "tfm_message_queue.h"
 #include "tfm_spm_hal.h"
 #include "spm_db.h"
+#include "spm_api.h"
 #endif
 
 /*!
@@ -47,6 +49,64 @@
  *        firmware
  */
 static uint32_t is_boot_data_valid = BOOT_DATA_INVALID;
+
+/*!
+ * \struct boot_data_access_policy
+ *
+ * \brief Defines the access policy of secure partitions to data items in shared
+ *        data area (between bootloader and runtime firmware).
+ */
+struct boot_data_access_policy {
+    uint32_t partition_id;
+    uint32_t major_type;
+};
+
+/*!
+ * \var access_policy_table
+ *
+ * \brief Contains the partition_id and major_type assignments. This describes
+ *        which secure partition is allowed to access which data item
+ *        (identified by major_type).
+ */
+static const struct boot_data_access_policy access_policy_table[] = {
+    {TFM_SP_INITIAL_ATTESTATION_ID, TLV_MAJOR_IAS},
+};
+
+/*!
+ * \brief Verify the access right of the active secure partition to the
+ *        specified data type in the shared data area.
+ *
+ * \param[in]  major_type  Data type identifier.
+ *
+ * \return  Returns 0 in case of success, otherwise -1.
+ */
+static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
+{
+    uint32_t partition_id;
+    uint32_t i;
+    int32_t rc = -1;
+    const uint32_t array_size =
+            sizeof(access_policy_table) / sizeof(access_policy_table[0]);
+
+#ifndef TFM_PSA_API
+    uint32_t partition_idx = tfm_spm_partition_get_running_partition_idx();
+
+    partition_id = tfm_spm_partition_get_partition_id(partition_idx);
+#else
+    partition_id = tfm_spm_partition_get_running_partition_id();
+#endif
+
+    for (i = 0; i < array_size; ++i) {
+        if (partition_id == access_policy_table[i].partition_id) {
+            if (major_type == access_policy_table[i].major_type) {
+                rc = 0;
+                break;
+            }
+        }
+    }
+
+    return rc;
+}
 
 void tfm_core_validate_boot_data(void)
 {
@@ -113,9 +173,13 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     }
 #endif
 
-    /* FixMe: Check whether caller has access right to given tlv_major_type */
-
     if (is_boot_data_valid != BOOT_DATA_VALID) {
+        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        return;
+    }
+
+    /* Check whether caller has access right to given tlv_major_type */
+    if (tfm_core_check_boot_data_access_policy(tlv_major)) {
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
     }
