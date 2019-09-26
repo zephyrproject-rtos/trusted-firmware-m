@@ -28,7 +28,7 @@ MEMORY
 {
   FLASH   (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
   RAM     (rwx) : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
-#if !TFM_MULTI_CORE_TOPOLOGY
+#ifndef TFM_MULTI_CORE_TOPOLOGY
   VENEERS (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 #endif
 }
@@ -477,6 +477,24 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > FLASH
 
+    /**** Base address of secure data area */
+    .tfm_secure_data_start :
+    {
+        . = ABSOLUTE(S_DATA_START) ;
+    } > RAM
+
+    /*
+     * MPU on Armv6-M/v7-M core in multi-core topology may require more strict
+     * alignment that MPU region base address must align with the MPU region
+     * size.
+     * As a result, in multi-core topology, to save memory resource and MPU
+     * regions, unprivileged data sections and privileged data sections are
+     * separated and gathered in unprivileged/privileged data area respectively.
+     * Keep BL2 shared data and MSP stack at the beginning of the secure data
+     * area in single Armv8-M topology, while move the two areas to the
+     * beginning of privileged data region in multi-core topology.
+     */
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
@@ -493,12 +511,14 @@ SECTIONS
     Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
+    /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
         . += __psp_stack_size__;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+#endif
 
 #if TFM_LVL == 1
 
@@ -556,6 +576,188 @@ SECTIONS
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
 #endif /* TFM_LVL == 1 */
+
+    /**** APPLICATION RoT DATA start here */
+    Image$$TFM_APP_RW_STACK_START$$Base = .;
+
+#ifdef TFM_PARTITION_TEST_CORE
+    .TFM_SP_CORE_TEST_2_DATA : ALIGN(32)
+    {
+        *tfm_ss_core_test_2.*(.data*)
+        *(TFM_SP_CORE_TEST_2_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_SP_CORE_TEST_2_DATA$$RW$$Base = ADDR(.TFM_SP_CORE_TEST_2_DATA);
+    Image$$TFM_SP_CORE_TEST_2_DATA$$RW$$Limit = ADDR(.TFM_SP_CORE_TEST_2_DATA) + SIZEOF(.TFM_SP_CORE_TEST_2_DATA);
+
+    .TFM_SP_CORE_TEST_2_BSS : ALIGN(32)
+    {
+        start_of_TFM_SP_CORE_TEST_2 = .;
+        *tfm_ss_core_test_2.*(.bss*)
+        *tfm_ss_core_test_2.*(COMMON)
+        *(TFM_SP_CORE_TEST_2_ATTR_ZI)
+        . += (. - start_of_TFM_SP_CORE_TEST_2) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_BSS);
+    Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_BSS) + SIZEOF(.TFM_SP_CORE_TEST_2_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_SP_CORE_TEST_2_STACK : ALIGN(128)
+    {
+        . += 0x0200;
+    } > RAM
+    Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_STACK);
+    Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_STACK) + SIZEOF(.TFM_SP_CORE_TEST_2_STACK);
+#endif
+
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+    .TFM_SP_IPC_CLIENT_TEST_DATA : ALIGN(32)
+    {
+        *ipc_client_test.*(.data*)
+        *(TFM_SP_IPC_CLIENT_TEST_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$RW$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA);
+    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$RW$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_DATA);
+
+    .TFM_SP_IPC_CLIENT_TEST_BSS : ALIGN(32)
+    {
+        start_of_TFM_SP_IPC_CLIENT_TEST = .;
+        *ipc_client_test.*(.bss*)
+        *ipc_client_test.*(COMMON)
+        *(TFM_SP_IPC_CLIENT_TEST_ATTR_ZI)
+        . += (. - start_of_TFM_SP_IPC_CLIENT_TEST) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS);
+    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_SP_IPC_CLIENT_TEST_STACK : ALIGN(128)
+    {
+        . += 0x0220;
+    } > RAM
+    Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK);
+    Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_STACK);
+#endif
+
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_ENABLE_IRQ_TEST
+    .TFM_IRQ_TEST_1_DATA : ALIGN(32)
+    {
+        *tfm_irq_test_service_1.*(.data*)
+        *timer_cmsdk*(.data*)
+        *(TFM_IRQ_TEST_1_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_IRQ_TEST_1_DATA$$RW$$Base = ADDR(.TFM_IRQ_TEST_1_DATA);
+    Image$$TFM_IRQ_TEST_1_DATA$$RW$$Limit = ADDR(.TFM_IRQ_TEST_1_DATA) + SIZEOF(.TFM_IRQ_TEST_1_DATA);
+
+    .TFM_IRQ_TEST_1_BSS : ALIGN(32)
+    {
+        start_of_TFM_IRQ_TEST_1 = .;
+        *tfm_irq_test_service_1.*(.bss*)
+        *tfm_irq_test_service_1.*(COMMON)
+        *timer_cmsdk*(.bss*)
+        *timer_cmsdk*(COMMON)
+        *(TFM_IRQ_TEST_1_ATTR_ZI)
+        . += (. - start_of_TFM_IRQ_TEST_1) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_IRQ_TEST_1_DATA$$ZI$$Base = ADDR(.TFM_IRQ_TEST_1_BSS);
+    Image$$TFM_IRQ_TEST_1_DATA$$ZI$$Limit = ADDR(.TFM_IRQ_TEST_1_BSS) + SIZEOF(.TFM_IRQ_TEST_1_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_IRQ_TEST_1_STACK : ALIGN(128)
+    {
+        . += 0x0400;
+    } > RAM
+    Image$$TFM_IRQ_TEST_1_STACK$$ZI$$Base = ADDR(.TFM_IRQ_TEST_1_STACK);
+    Image$$TFM_IRQ_TEST_1_STACK$$ZI$$Limit = ADDR(.TFM_IRQ_TEST_1_STACK) + SIZEOF(.TFM_IRQ_TEST_1_STACK);
+#endif
+
+#endif /* TFM_ENABLE_IRQ_TEST */
+
+    /**** APPLICATION RoT DATA end here */
+    Image$$TFM_APP_RW_STACK_END$$Base = .;
+
+#if TFM_LVL != 1
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
+    {
+        *libc_nano*:*(.data*)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+
+    .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
+    {
+        /* FixMe:
+         * Test framework use printf to print out test result. Implementation of
+         * printf in GCC libc use static data and heap as well. To be able to
+         * execute test suites with TFM_LVL=3 this workaround is needed to
+         * allocate libc static data and heap within the data section of secure
+         * test partition. This can be removed if test service will be executed
+         * in privileged mode.
+         */
+        *libc_nano*:*(.bss*)
+        *libc_nano*:*(COMMON)
+
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+
+        . = ALIGN(32);
+    } > RAM AT> RAM
+#else /* TFM_PARTITION_TEST_SECURE_SERVICES */
+    .heap : ALIGN(8)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+    } > RAM AT> RAM
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+#endif /* TFM_LVL != 1 */
+
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+    /*
+     * Move BL2 shared area and MSP stack to the beginning of privileged data
+     * area in multi-core topology.
+     */
+
+    /* shared_data and msp_stack are overlapping on purpose when
+     * msp_stack is extended until the beginning of RAM, when shared_date
+     * was read out by partitions
+     */
+    .tfm_bl2_shared_data : ALIGN(32)
+    {
+        . += BOOT_TFM_SHARED_DATA_SIZE;
+    } > RAM AT> RAM
+
+    .msp_stack : ALIGN(32)
+    {
+        . += __msp_init_stack_size__;
+    } > RAM
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
+    /* PSP is privileged in multi-core topology */
+    .psp_stack : ALIGN(32)
+    {
+        . += __psp_stack_size__;
+    } > RAM
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+#endif
 
     /**** PSA RoT DATA start here */
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
@@ -860,157 +1062,6 @@ SECTIONS
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    /**** APPLICATION RoT DATA start here */
-    Image$$TFM_APP_RW_STACK_START$$Base = .;
-
-#ifdef TFM_PARTITION_TEST_CORE
-    .TFM_SP_CORE_TEST_2_DATA : ALIGN(32)
-    {
-        *tfm_ss_core_test_2.*(.data*)
-        *(TFM_SP_CORE_TEST_2_ATTR_RW)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-    Image$$TFM_SP_CORE_TEST_2_DATA$$RW$$Base = ADDR(.TFM_SP_CORE_TEST_2_DATA);
-    Image$$TFM_SP_CORE_TEST_2_DATA$$RW$$Limit = ADDR(.TFM_SP_CORE_TEST_2_DATA) + SIZEOF(.TFM_SP_CORE_TEST_2_DATA);
-
-    .TFM_SP_CORE_TEST_2_BSS : ALIGN(32)
-    {
-        start_of_TFM_SP_CORE_TEST_2 = .;
-        *tfm_ss_core_test_2.*(.bss*)
-        *tfm_ss_core_test_2.*(COMMON)
-        *(TFM_SP_CORE_TEST_2_ATTR_ZI)
-        . += (. - start_of_TFM_SP_CORE_TEST_2) ? 0 : 4;
-        . = ALIGN(32);
-    } > RAM AT> RAM
-    Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_BSS);
-    Image$$TFM_SP_CORE_TEST_2_DATA$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_BSS) + SIZEOF(.TFM_SP_CORE_TEST_2_BSS);
-
-#if defined (TFM_PSA_API)
-    .TFM_SP_CORE_TEST_2_STACK : ALIGN(128)
-    {
-        . += 0x0200;
-    } > RAM
-    Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Base = ADDR(.TFM_SP_CORE_TEST_2_STACK);
-    Image$$TFM_SP_CORE_TEST_2_STACK$$ZI$$Limit = ADDR(.TFM_SP_CORE_TEST_2_STACK) + SIZEOF(.TFM_SP_CORE_TEST_2_STACK);
-#endif
-
-#endif /* TFM_PARTITION_TEST_CORE */
-
-#ifdef TFM_PARTITION_TEST_CORE_IPC
-    .TFM_SP_IPC_CLIENT_TEST_DATA : ALIGN(32)
-    {
-        *ipc_client_test.*(.data*)
-        *(TFM_SP_IPC_CLIENT_TEST_ATTR_RW)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$RW$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA);
-    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$RW$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_DATA) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_DATA);
-
-    .TFM_SP_IPC_CLIENT_TEST_BSS : ALIGN(32)
-    {
-        start_of_TFM_SP_IPC_CLIENT_TEST = .;
-        *ipc_client_test.*(.bss*)
-        *ipc_client_test.*(COMMON)
-        *(TFM_SP_IPC_CLIENT_TEST_ATTR_ZI)
-        . += (. - start_of_TFM_SP_IPC_CLIENT_TEST) ? 0 : 4;
-        . = ALIGN(32);
-    } > RAM AT> RAM
-    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS);
-    Image$$TFM_SP_IPC_CLIENT_TEST_DATA$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_BSS) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_BSS);
-
-#if defined (TFM_PSA_API)
-    .TFM_SP_IPC_CLIENT_TEST_STACK : ALIGN(128)
-    {
-        . += 0x0220;
-    } > RAM
-    Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK);
-    Image$$TFM_SP_IPC_CLIENT_TEST_STACK$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_STACK) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_STACK);
-#endif
-
-#endif /* TFM_PARTITION_TEST_CORE_IPC */
-
-#ifdef TFM_ENABLE_IRQ_TEST
-    .TFM_IRQ_TEST_1_DATA : ALIGN(32)
-    {
-        *tfm_irq_test_service_1.*(.data*)
-        *timer_cmsdk*(.data*)
-        *(TFM_IRQ_TEST_1_ATTR_RW)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-    Image$$TFM_IRQ_TEST_1_DATA$$RW$$Base = ADDR(.TFM_IRQ_TEST_1_DATA);
-    Image$$TFM_IRQ_TEST_1_DATA$$RW$$Limit = ADDR(.TFM_IRQ_TEST_1_DATA) + SIZEOF(.TFM_IRQ_TEST_1_DATA);
-
-    .TFM_IRQ_TEST_1_BSS : ALIGN(32)
-    {
-        start_of_TFM_IRQ_TEST_1 = .;
-        *tfm_irq_test_service_1.*(.bss*)
-        *tfm_irq_test_service_1.*(COMMON)
-        *timer_cmsdk*(.bss*)
-        *timer_cmsdk*(COMMON)
-        *(TFM_IRQ_TEST_1_ATTR_ZI)
-        . += (. - start_of_TFM_IRQ_TEST_1) ? 0 : 4;
-        . = ALIGN(32);
-    } > RAM AT> RAM
-    Image$$TFM_IRQ_TEST_1_DATA$$ZI$$Base = ADDR(.TFM_IRQ_TEST_1_BSS);
-    Image$$TFM_IRQ_TEST_1_DATA$$ZI$$Limit = ADDR(.TFM_IRQ_TEST_1_BSS) + SIZEOF(.TFM_IRQ_TEST_1_BSS);
-
-#if defined (TFM_PSA_API)
-    .TFM_IRQ_TEST_1_STACK : ALIGN(128)
-    {
-        . += 0x0400;
-    } > RAM
-    Image$$TFM_IRQ_TEST_1_STACK$$ZI$$Base = ADDR(.TFM_IRQ_TEST_1_STACK);
-    Image$$TFM_IRQ_TEST_1_STACK$$ZI$$Limit = ADDR(.TFM_IRQ_TEST_1_STACK) + SIZEOF(.TFM_IRQ_TEST_1_STACK);
-#endif
-
-#endif /* TFM_ENABLE_IRQ_TEST */
-
-    /**** APPLICATION RoT DATA end here */
-    Image$$TFM_APP_RW_STACK_END$$Base = .;
-
-#if TFM_LVL != 1
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
-    {
-        *libc_nano*:*(.data*)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-
-    .TFM_SP_SECURE_TEST_PARTITION_BSS : ALIGN(32)
-    {
-        /* FixMe:
-         * Test framework use printf to print out test result. Implementation of
-         * printf in GCC libc use static data and heap as well. To be able to
-         * execute test suites with TFM_LVL=3 this workaround is needed to
-         * allocate libc static data and heap within the data section of secure
-         * test partition. This can be removed if test service will be executed
-         * in privileged mode.
-         */
-        *libc_nano*:*(.bss*)
-        *libc_nano*:*(COMMON)
-
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-
-        . = ALIGN(32);
-    } > RAM AT> RAM
-#else /* TFM_PARTITION_TEST_SECURE_SERVICES */
-    .heap : ALIGN(8)
-    {
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> RAM
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-#endif /* TFM_LVL != 1 */
-
     .TFM_DATA : ALIGN(4)
     {
         *(.data*)
@@ -1056,7 +1107,7 @@ SECTIONS
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
 
-#if !TFM_MULTI_CORE_TOPOLOGY
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a
      * separate 32 bytes aligned region so that the SAU can programmed to just set
