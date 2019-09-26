@@ -79,16 +79,6 @@ struct tfm_plat_rotpk_t {
 };
 
 /**
- * \brief Gets hardware unique key for encryption
- *
- * \param[out] key   Buf to store the key in
- * \param[in]  size  Size of the buffer
- *
- * \return Returns error code specified in \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
-
-/**
  * \brief Gets key material derived from the hardware unique key.
  *
  * \param[in]  label         Label for KDF

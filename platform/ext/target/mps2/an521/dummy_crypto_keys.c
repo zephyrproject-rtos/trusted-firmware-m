@@ -58,17 +58,6 @@ static inline void copy_key(uint8_t *p_dst, const uint8_t *p_src, size_t size)
     }
 }
 
-enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size)
-{
-    if(size > TFM_KEY_LEN_BYTES) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    copy_key(key, sample_tfm_key, size);
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  size_t label_size,
                                                  const uint8_t *context,
