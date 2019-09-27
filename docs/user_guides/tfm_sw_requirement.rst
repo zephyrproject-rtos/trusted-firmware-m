@@ -19,6 +19,7 @@ To build the TF-M firmware the following tools are needed:
    "pyasn1",,"Firmware"
    "jinja2",,"Firmware"
    "cryptography",,"Firmware"
+   "cbor",,"Firmware"
    "Doxygen",">1.8","Reference manual"
    "Sphinx",">1.4","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
@@ -68,10 +69,12 @@ Dependency chain:
     fw --> pyasn1
     fw --> yaml
     fw --> jinja2
+    fw --> cbor
     cryptography --> Python3
     pyasn1 --> Python3
     yaml --> Python3
     jinja2 --> Python3
+    cbor --> Python3
 
     [*] --> u_guide
     u_guide --> Sphinx
@@ -217,6 +220,7 @@ Ubuntu setup
 - cryptography
 - pyasn1
 - yaml
+- cbor
 - jinja2 v2.10
 - sudo apt-get install python3-crypto python3-pyasn1 python3-yaml
   python3-jinja2
@@ -270,6 +274,7 @@ Windows + Cygwin setup
 - cryptography (pip3 install --user cryptography)
 - pyasn1 (pip3 install --user pyasn1)
 - pyyaml (pip3 install --user pyyaml)
+- cbor (pip3 install --user cbor)
 - jinja2 (pip3 install --user jinja2)
 - Python3 pip
 - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test

@@ -18,6 +18,7 @@ Image signing and management.
 """
 
 from . import version as versmod
+from . import boot_record as br
 import hashlib
 import struct
 
@@ -41,7 +42,8 @@ TLV_VALUES = {
         'RSA2048': 0x20,
         'RSA3072': 0x23,
         'DEPENDENCY': 0x40,
-        'SEC_CNT': 0x50, }
+        'SEC_CNT': 0x50,
+        'BOOT_RECORD': 0x60, }
 
 TLV_INFO_SIZE = 4
 TLV_INFO_MAGIC = 0x6907
@@ -116,10 +118,39 @@ class Image():
             if any(v != 0 and v != b'\000' for v in self.payload[0:self.header_size]):
                 raise Exception("Padding requested, but image does not start with zeros")
 
-    def sign(self, key, ramLoadAddress, dependencies=None):
-        # Size of the security counter TLV:
-        # header ('BBH') + payload ('I') = 8 Bytes
-        protected_tlv_size = TLV_INFO_SIZE + 8
+    def sign(self, sw_type, key, ramLoadAddress, dependencies=None):
+        image_version = (str(self.version.major) + '.'
+                      + str(self.version.minor) + '.'
+                      + str(self.version.revision))
+
+        # Calculate the hash of the public key
+        if key is not None:
+            pub = key.get_public_bytes()
+            sha = hashlib.sha256()
+            sha.update(pub)
+            pubbytes = sha.digest()
+        else:
+            pubbytes = bytes(KEYHASH_SIZE)
+
+        # The image hash is computed over the image header, the image itself
+        # and the protected TLV area. However, the boot record TLV (which is
+        # part of the protected area) should contain this hash before it is
+        # even calculated. For this reason the script fills this field with
+        # zeros and the bootloader will insert the right value later.
+        image_hash = bytes(PAYLOAD_DIGEST_SIZE)
+
+        # Create CBOR encoded boot record
+        boot_record = br.create_sw_component_data(sw_type, image_version,
+                                                  "SHA256", image_hash,
+                                                  pubbytes)
+
+        # Mandatory protected TLV area: TLV info header
+        #                               + security counter TLV
+        #                               + boot record TLV
+        # Size of the security counter TLV: header ('BBH') + payload ('I')
+        #                                   = 8 Bytes
+        protected_tlv_size = TLV_INFO_SIZE + 8 + TLV_HEADER_SIZE \
+                           + len(boot_record)
 
         if dependencies is None:
             dependencies_num = 0
@@ -135,6 +166,7 @@ class Image():
 
         payload = struct.pack('I', self.security_cnt)
         tlv.add('SEC_CNT', payload)
+        tlv.add('BOOT_RECORD', boot_record)
 
         if dependencies_num != 0:
             for i in range(dependencies_num):
@@ -153,7 +185,6 @@ class Image():
         full_size = (TLV_INFO_SIZE + len(tlv.buf) + TLV_HEADER_SIZE
                      + PAYLOAD_DIGEST_SIZE)
         if key is not None:
-            pub = key.get_public_bytes()
             if key.get_public_key_format() == 'hash':
                 tlv_key_data_size = KEYHASH_SIZE
             else:
@@ -166,15 +197,12 @@ class Image():
 
         sha = hashlib.sha256()
         sha.update(self.payload)
-        digest = sha.digest()
+        image_hash = sha.digest()
 
-        tlv.add('SHA256', digest)
+        tlv.add('SHA256', image_hash)
 
         if key is not None:
             if key.get_public_key_format() == 'hash':
-                sha = hashlib.sha256()
-                sha.update(pub)
-                pubbytes = sha.digest()
                 tlv.add('KEYHASH', pubbytes)
             else:
                 tlv.add('KEY', pub)
