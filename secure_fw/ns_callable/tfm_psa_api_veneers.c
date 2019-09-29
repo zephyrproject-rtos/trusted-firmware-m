@@ -97,12 +97,13 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 }
 
 __tfm_secure_gateway_attributes__
-psa_status_t tfm_psa_call_veneer(psa_handle_t handle, int32_t type,
-                                 const psa_invec *in_vec,
-                                 const psa_invec *out_vec)
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+                               const struct tfm_control_parameter_t *ctrl_param,
+                               const psa_invec *in_vec,
+                               psa_outvec *out_vec)
 {
-    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_call, handle, type, in_vec,
-                                   out_vec);
+    TFM_CORE_NS_IPC_REQUEST_VENEER(tfm_svcall_psa_call, handle, ctrl_param,
+                                   in_vec, out_vec);
 }
 
 __tfm_secure_gateway_attributes__

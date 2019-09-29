@@ -58,6 +58,16 @@ enum tfm_status_e
     TFM_ERROR_GENERIC = 0x1F,
 };
 
+/*
+ * Structure to package type, in_len and out_len, it is mainly used for
+ * psa_call.
+ */
+struct tfm_control_parameter_t {
+   int32_t type;
+   size_t in_len;
+   size_t out_len;
+};
+
 /********************* Secure function declarations ***************************/
 
 /**
@@ -102,16 +112,17 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version);
  * \brief Call a secure function referenced by a connection handle.
  *
  * \param[in] handle            Handle to connection.
- * \param[in] type              The reuqest type. Must be zero(PSA_IPC_CALL) or
- *                              positive.
+ * \param[in] ctrl_param        Parameter structure, includes reuqest type,
+ *                              in_num and out_num.
  * \param[in] in_vec            Array of input \ref psa_invec structures.
- * \param[in] out_vec           Array of output \ref psa_invec structures.
+ * \param[in/out] out_vec       Array of output \ref psa_outvec structures.
  *
  * \return Returns \ref psa_status_t status code.
  */
-psa_status_t tfm_psa_call_veneer(psa_handle_t handle, int32_t type,
-                                 const psa_invec *in_vec,
-                                 const psa_invec *out_vec);
+psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
+                               const struct tfm_control_parameter_t *ctrl_param,
+                               const psa_invec *in_vec,
+                               psa_outvec *out_vec);
 
 /**
  * \brief Close connection to secure function referenced by a connection handle.

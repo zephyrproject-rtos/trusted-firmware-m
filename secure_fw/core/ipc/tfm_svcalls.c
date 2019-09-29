@@ -80,11 +80,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
 
     TFM_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
-    type = (int32_t)args[1];
 
-    if (type < 0) {
-        tfm_panic();
-    }
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_panic();
@@ -93,6 +89,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
         partition->static_data->partition_flags);
 
     if (!ns_caller) {
+        type = (int32_t)args[1];
         inptr = (psa_invec *)args[2];
         in_num = (size_t)args[3];
         /*
@@ -120,26 +117,28 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
         }
     } else {
         /*
-         * FixMe: From non-secure caller, vec and len are composed into a new
-         * struct parameter. Need to extract them.
+         * FixMe: From non-secure caller, type, in_len and out_len are composed
+         * into a new struct parameter. Need to extract them.
          */
         /*
          * Read parameters from the arguments. It is a fatal error if the
          * memory reference for buffer is invalid or not readable.
          */
-        if (tfm_memory_check((const void *)args[2], sizeof(uint32_t),
-            ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+        if (tfm_memory_check((const void *)args[1],
+            sizeof(struct tfm_control_parameter_t), ns_caller,
+            TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
             tfm_panic();
         }
-        if (tfm_memory_check((const void *)args[3], sizeof(uint32_t),
-            ns_caller, TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-            tfm_panic();
-        }
+        type = ((struct tfm_control_parameter_t *)args[1])->type;
+        in_num = ((struct tfm_control_parameter_t *)args[1])->in_len;
+        out_num = ((struct tfm_control_parameter_t *)args[1])->out_len;
+        inptr = (psa_invec *)args[2];
+        outptr = (psa_outvec *)args[3];
+    }
 
-        inptr = (psa_invec *)((psa_invec *)args[2])->base;
-        in_num = ((psa_invec *)args[2])->len;
-        outptr = (psa_outvec *)((psa_invec *)args[3])->base;
-        out_num = ((psa_invec *)args[3])->len;
+    /* The request type must be zero or positive. */
+    if (type < 0) {
+        tfm_panic();
     }
 
     return tfm_psa_call(handle, type, inptr, in_num, outptr, out_num, ns_caller,
