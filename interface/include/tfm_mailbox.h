@@ -108,8 +108,7 @@ struct mailbox_reply_t {
 struct ns_mailbox_slot_t {
     struct mailbox_msg_t   msg;
     struct mailbox_reply_t reply;
-
-    void                   *owner;     /* Identification of the owner of this
+    const void             *owner;     /* Handle of the owner task of this
                                         * slot
                                         */
 };

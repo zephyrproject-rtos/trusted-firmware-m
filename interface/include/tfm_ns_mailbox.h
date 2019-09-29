@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -66,6 +66,26 @@ bool tfm_ns_mailbox_is_msg_replied(mailbox_msg_handle_t handle);
  * \retval Other return code    Operation failed with an error code.
  */
 int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue);
+
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+/**
+ * \brief Get the handle of the current non-secure task executing mailbox
+ *        functionalities
+ *
+ * \note This function should be implemented according to platform, NS OS
+ *       and actual use scenario.
+ *       This function can be ignored or return NULL if sleep/wake-up mechanism
+ *       is not required in PSA Client API implementation.
+ *
+ * \return Return the handle of task.
+ */
+const void *tfm_ns_mailbox_get_task_handle(void);
+#else
+static inline const void *tfm_ns_mailbox_get_task_handle(void)
+{
+    return NULL;
+}
+#endif
 
 /**
  * \brief Platform specific NSPE mailbox initialization.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "tfm_ns_mailbox.h"
+#include "tfm_plat_ns.h"
 
 /* The pointer to NSPE mailbox queue */
 static struct ns_mailbox_queue_t *mailbox_queue_ptr = NULL;
@@ -90,6 +91,13 @@ static uint8_t acquire_empty_slot(const struct ns_mailbox_queue_t *queue)
     return idx;
 }
 
+static void set_msg_owner(uint8_t idx, const void *owner)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        mailbox_queue_ptr->queue[idx].owner = owner;
+    }
+}
+
 mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
                                        const struct psa_client_params_t *params,
                                        int32_t client_id)
@@ -97,6 +105,7 @@ mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
     uint8_t idx;
     struct mailbox_msg_t *msg_ptr;
     mailbox_msg_handle_t handle;
+    const void *task_handle;
 
     if (!mailbox_queue_ptr) {
         return MAILBOX_MSG_NULL_HANDLE;
@@ -117,6 +126,13 @@ mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
     msg_ptr->call_type = call_type;
     memcpy(&msg_ptr->params, params, sizeof(msg_ptr->params));
     msg_ptr->client_id = client_id;
+
+    /*
+     * Fetch the current task handle. The task will be woken up according the
+     * handle value set in the owner field.
+     */
+    task_handle = tfm_ns_mailbox_get_task_handle();
+    set_msg_owner(idx, task_handle);
 
     get_mailbox_msg_handle(idx, &handle);
 
@@ -149,6 +165,9 @@ int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
     }
 
     *reply = mailbox_queue_ptr->queue[idx].reply.return_val;
+
+    /* Clear up the owner field */
+    set_msg_owner(idx, NULL);
 
     tfm_ns_mailbox_hal_enter_critical();
     set_queue_slot_empty(idx);
