@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -167,4 +167,46 @@ uint32_t os_wrapper_thread_get_priority(void *handle, uint32_t *priority)
 void os_wrapper_thread_exit(void)
 {
     osThreadExit();
+}
+
+uint32_t os_wrapper_thread_set_flag(void *handle, uint32_t flags)
+{
+    uint32_t ret;
+
+    ret = osThreadFlagsSet((osThreadId_t)handle, flags);
+    if (ret & osFlagsError) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
+}
+
+/*
+ * According to the description of CMSIS-RTOS v2 Thread Flags,
+ * osThreadFlagsSet() can be called inside Interrupt Service Routine.
+ */
+uint32_t os_wrapper_thread_set_flag_isr(void *handle, uint32_t flags)
+{
+    uint32_t ret;
+
+    ret = osThreadFlagsSet((osThreadId_t)handle, flags);
+    if (ret & osFlagsError) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
+}
+
+uint32_t os_wrapper_thread_wait_flag(uint32_t flags, uint32_t timeout)
+{
+    uint32_t ret;
+
+    ret = osThreadFlagsWait(flags, osFlagsWaitAll,
+                            (timeout == OS_WRAPPER_WAIT_FOREVER) ?
+                            osWaitForever : timeout);
+    if (ret & osFlagsError) {
+        return OS_WRAPPER_ERROR;
+    }
+
+    return OS_WRAPPER_SUCCESS;
 }
