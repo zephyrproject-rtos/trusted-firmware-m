@@ -1,12 +1,12 @@
-##############################
-Trusted Firmware M - v1.0-beta
-##############################
+#############################
+Trusted Firmware M - v1.0-RC1
+#############################
 Trusted Firmware M provides a reference implementation of secure world software
 for ARMv8-M.
 
 .. Note::
     The software implementation contained in this project is designed to be a
-    reference implementation of the Arm Platform Security Architecture (PSA).
+    reference implementation of the Platform Security Architecture (PSA).
     It currently does not implement all the features of that architecture,
     however we expect the code to evolve along with the specifications.
 
@@ -41,43 +41,23 @@ This Release
 ############
 This release includes:
 
-    - A Secure FW with support for PSA Level 1 isolation on ARMv8M.
+    - A Secure FW with support for PSA Level 1 and 2 isolation on Armv8-M.
     - The Interfaces exposed by the Secure FW to NS side.
-    - A blocking secure fw model with NS application example.
+    - A secure fw model with NS application example.
     - Secure services running within this SPE:
-      
-        - Secure Storage Service
-        - Attestation
-        - Crypto Service
+
+        - Secure Storage Service (PSA Protected Storage API - 1.0-beta-2)
+        - Attestation (PSA API 1.0-beta-0)
+        - Crypto Service (PSA API 1.0-beta-1)
         - TF-M Audit Log
         - Platform Service
-        - Secure Storage Service
-      
-    - Support for ARMv8-M mainline and baseline
+
+    - PSA IPC support
+    - Support for Armv8-M mainline and baseline
     - Testcases running baremetal and with RTX to test the functionality.
-    - Basic support for higher level isolation but it is
-      ``in progress with limited testing``.
-    - BL2 bootloader for image authentication based on SHA256 and RSA-2048
+    - BL2 bootloader for image authentication based on SHA256 and RSA-3072
       digital signature.
     - Build system based on cmake, supporting armclang and GNU Arm.
-
-***********
-In progress
-***********
-- Ongoing and incremental support for PSA features:
-
-    - Level 2 and 3 PSA isolation
-    - PSA IPC support
-    - Bootloader enhancements
-    - ...
-
-- OS support and use case examples:
-
-    - mbed OS upstream support
-    - mbed cloud client examples
-    - ...
-
-- Ongoing security hardening, optimization and quality improvements.
 
 *********
 Platforms
@@ -158,6 +138,8 @@ Version history
 | Version     | Date         | Description        |
 +=============+==============+====================+
 | v1.0-beta   | 2019-02-15   | 1.0-beta release   |
++-------------+--------------+--------------------+
+| v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    |
 +-------------+--------------+--------------------+
 
 --------------
