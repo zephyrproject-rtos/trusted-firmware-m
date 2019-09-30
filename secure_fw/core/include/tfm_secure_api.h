@@ -12,7 +12,7 @@
 #include <arm_cmse.h>
 #endif
 #include "tfm_arch.h"
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 #include "tfm_core.h"
 #include "tfm_api.h"
 #include "tfm_utils.h"

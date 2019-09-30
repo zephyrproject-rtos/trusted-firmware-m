@@ -9,8 +9,8 @@
 #define __SECURE_UTILITIES_H__
 
 #include <stdbool.h>
+#include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
-#include "tfm_svc.h"
 #include "tfm_core_log.h"
 
 #define EXC_NUM_THREAD_MODE     (0)

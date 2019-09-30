@@ -8,7 +8,7 @@
 #include <string.h>
 #include "tfm_api.h"
 #include "tfm_internal.h"
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 #include "tfm_utils.h"
 #include "tfm_svcalls.h"
 

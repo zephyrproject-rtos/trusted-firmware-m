@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __TFM_SVC_H__
-#define __TFM_SVC_H__
+#ifndef __TFM_CORE_SVC_H__
+#define __TFM_CORE_SVC_H__
 
 #include "tfm_hal_device_header.h"
 
@@ -48,4 +48,4 @@ typedef enum {
 
 #define SVC(code) __ASM volatile("svc %0" : : "I" (code))
 
-#endif /* __TFM_SVC_H__ */
+#endif /* __TFM_CORE_SVC_H__ */

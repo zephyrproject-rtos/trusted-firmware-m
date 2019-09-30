@@ -11,7 +11,7 @@
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"
 #include "spm_api.h"
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
 #error "Unsupported ARM Architecture."

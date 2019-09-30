@@ -9,7 +9,7 @@
 #include "tfm_thread.h"
 #include "tfm_utils.h"
 #include "tfm_memory_utils.h"
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 #include "spm_api.h"
 #include "tfm_core_utils.h"
 

@@ -6,8 +6,7 @@
  */
 
 #include <inttypes.h>
-#include <stdio.h>
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 #include "psa/client.h"
 
 __attribute__((naked, section("SFN")))

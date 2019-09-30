@@ -7,7 +7,7 @@
 
 #include <arm_cmse.h>
 
-#include "tfm_svc.h"
+#include "core/tfm_core_svc.h"
 #include "tfm_secure_api.h"
 #include "tfm_internal.h"
 #include "secure_fw/include/tfm_spm_services_api.h"

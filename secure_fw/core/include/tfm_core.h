@@ -9,7 +9,6 @@
 #define __TFM_CORE_H__
 
 #include <arm_cmse.h>
-#include "tfm_svc.h"
 #include "secure_utilities.h"
 
 #endif /* __TFM_CORE_H__ */

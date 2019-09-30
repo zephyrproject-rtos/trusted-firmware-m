@@ -7,9 +7,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "core/tfm_core_svc.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_svc.h"
 #include "tfm_svcalls.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
