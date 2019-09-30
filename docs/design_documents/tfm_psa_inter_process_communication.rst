@@ -55,7 +55,7 @@ Modifications in Core:
 - More SVC calls need to be added into list since PSA API are implemented as
   SVC calls in TF-M.
 - New PendSV handler for thread scheduling.
-- arch-related context stacking and switching.
+- Arch-related context stacking and switching.
 
 Memory pool
 ===========
@@ -80,7 +80,7 @@ message contains below information:
 - Message sender and destination
 - Message status
 - IO vectors for service
-- ‘psa_msg_t’ for service
+- 'psa_msg_t' for service
 
 A checking needs to be performed in SPM before creating a message to detect if
 a message with the same sender and destination is ongoing. This avoids repeat
