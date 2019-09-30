@@ -15,6 +15,10 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls_cc_mng_int.h"
 #include "arm_cmse.h"
+#include "mbedtls_cc_util_key_derivation.h"
+#include "tfm_attest_hal.h"
+
+#define CC312_NULL_CONTEXT "NO SALT!"
 
 CCRndContext_t*           CC312_pRndCtx         = NULL;
 CCRndWorkBuff_t*          CC312_pRndWorkBuff    = NULL;
@@ -101,4 +105,27 @@ int crypto_hw_accelerator_finish(void)
 int crypto_hw_accelerator_get_lcs(uint32_t *lcs)
 {
     return mbedtls_mng_lcsGet(lcs);
+}
+
+int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
+                                         size_t label_size,
+                                         const uint8_t *context,
+                                         size_t context_size,
+                                         uint8_t *key,
+                                         size_t key_size)
+{
+
+    if (context == NULL || context_size == 0) {
+        /* The CC312 requires the context to not be null, so a default
+         * is given.
+         */
+        context = (const uint8_t *)CC312_NULL_CONTEXT;
+        context_size = sizeof(CC312_NULL_CONTEXT);
+    }
+
+    return mbedtls_util_key_derivation_cmac(CC_UTIL_ROOT_KEY, NULL,
+                                            label, label_size,
+                                            context, context_size,
+                                            key, key_size);
+
 }

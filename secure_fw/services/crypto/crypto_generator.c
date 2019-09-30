@@ -24,6 +24,10 @@
 
 #include "platform/include/tfm_plat_crypto_keys.h"
 
+#ifdef TFM_PARTITION_TEST_SST
+#include "psa_manifest/pid.h"
+#endif /* TFM_PARTITION_TEST_SST */
+
 /**
  * \brief Perform a key derivation operation from the hardware unique key (HUK).
  *
@@ -74,6 +78,16 @@ static psa_status_t tfm_crypto_huk_derivation(psa_crypto_generator_t *generator,
     if (status != PSA_SUCCESS) {
         return status;
     }
+
+#ifdef TFM_PARTITION_TEST_SST
+    /* The SST tests run some operations under the wrong partition ID - this
+     * causes the key derivation to change.
+     */
+    if (partition_id == TFM_SP_SST_TEST) {
+        partition_id = TFM_SP_STORAGE;
+    }
+#endif /* TFM_PARTITION_TEST_SST */
+
     partition_label = mbedtls_calloc(1, sizeof(partition_id) + label_length);
     if (partition_label == NULL) {
         return PSA_ERROR_INSUFFICIENT_MEMORY;

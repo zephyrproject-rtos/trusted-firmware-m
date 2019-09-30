@@ -15,8 +15,14 @@
  */
 
 #include "platform/include/tfm_plat_crypto_keys.h"
+#include "platform/include/tfm_attest_hal.h"
 #include <stddef.h>
 #include "psa/crypto_types.h"
+
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+#include "crypto_hw.h"
+#include "mbedtls_cc_mng_int.h"
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
 
 /* FIXME: Functions in this file should be implemented by platform vendor. For
  * the security of the storage system, it is critical to use a hardware unique
@@ -26,9 +32,11 @@
 
 #define TFM_KEY_LEN_BYTES  16
 
+#ifndef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
 static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
              {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+#endif /* !CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
 
 extern const psa_ecc_curve_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
@@ -67,12 +75,31 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
     (void)context;
     (void)context_size;
 
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+    int rc;
+    uint32_t lcs;
+
+    rc = crypto_hw_accelerator_get_lcs(&lcs);
+    if (rc) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    if (lcs != CC_MNG_LCS_SEC_ENABLED) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+
+    rc = crypto_hw_accelerator_huk_derive_key(label, label_size, context,
+                                              context_size, key, key_size);
+    if (rc) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+#else
     if (key_size > TFM_KEY_LEN_BYTES) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* FIXME: Do key derivation */
     copy_key(key, sample_tfm_key, key_size);
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
 
     return TFM_PLAT_ERR_SUCCESS;
 }

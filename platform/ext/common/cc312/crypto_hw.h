@@ -9,6 +9,7 @@
 #define __CRYPTO_HW_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,26 @@ int crypto_hw_accelerator_init(void);
  * \return 0 on success, non-zero otherwise
  */
 int crypto_hw_accelerator_finish(void);
+
+/*
+ * \brief  This function performs key derivation
+ *
+ * \param[in]  label         Label for KDF
+ * \param[in]  label_size    Size of the label
+ * \param[in]  context       Context for KDF
+ * \param[in]  context_size  Size of the context
+ * \param[out] key           Buffer to output the derived key material
+ * \param[in]  key_size      Requested size of the derived key material and
+ *                           minimum size of the key buffer
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
+                                         size_t label_size,
+                                         const uint8_t *context,
+                                         size_t context_size,
+                                         uint8_t *key,
+                                         size_t key_size);
 
 /**
  * \brief Write the crypto keys to One-Time-Programmable memory
