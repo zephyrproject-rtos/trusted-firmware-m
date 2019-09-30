@@ -1,6 +1,6 @@
-############################################
-TF-M Audit Logging Service Integration Guide
-############################################
+#######################################
+Audit Logging Service Integration Guide
+#######################################
 
 ************
 Introduction

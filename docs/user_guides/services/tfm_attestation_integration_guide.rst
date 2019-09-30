@@ -1,6 +1,6 @@
-##################################################
-TF-M Initial Attestation Service Integration Guide
-##################################################
+#############################################
+Initial Attestation Service Integration Guide
+#############################################
 
 ************
 Introduction

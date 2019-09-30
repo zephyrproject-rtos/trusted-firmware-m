@@ -1,6 +1,6 @@
-#############################
-Trusted Firmware M user guide
-#############################
+##########
+User guide
+##########
 How to compile and run TF-M and example test application for CoreLink
 SSE-200 subsystem on the MPS2 board and on the Fast Model(FVP).
 

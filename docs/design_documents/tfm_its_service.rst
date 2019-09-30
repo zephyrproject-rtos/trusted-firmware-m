@@ -1,6 +1,6 @@
-===========================================
-TF-M Internal Trusted Storage (ITS) Service
-===========================================
+======================================
+Internal Trusted Storage (ITS) Service
+======================================
 
 :Author: Jamie Fox
 :Organization: Arm Limited

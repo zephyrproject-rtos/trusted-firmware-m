@@ -1,6 +1,6 @@
-################################
-TF-M Inter-Process Communication
-################################
+###########################
+Inter-Process Communication
+###########################
 
 :Authors: Ken Liu, Mingyang Sun
 :Organization: Arm Limited

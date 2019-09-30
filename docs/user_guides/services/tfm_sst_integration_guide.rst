@@ -1,6 +1,6 @@
-#############################################
-TF-M Secure Storage Service Integration Guide
-#############################################
+########################################
+Secure Storage Service Integration Guide
+########################################
 
 ************
 Introduction

@@ -1,6 +1,6 @@
-#####################################
-TF-M Crypto Service Integration Guide
-#####################################
+################################
+Crypto Service Integration Guide
+################################
 
 ************
 Introduction

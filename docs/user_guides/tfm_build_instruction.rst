@@ -1,6 +1,6 @@
-######################
-TF-M build instruction
-######################
+##################
+Build instructions
+##################
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements <tfm_sw_requirement>`.
 

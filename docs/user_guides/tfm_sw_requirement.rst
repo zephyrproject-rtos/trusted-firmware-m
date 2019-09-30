@@ -1,6 +1,6 @@
-##########################
-TF-M Software requirements
-##########################
+#####################
+Software requirements
+#####################
 
 .. |DS5_VERSION| replace:: v5.29.1
 .. |KEIL_VERSION| replace:: v5.25.2

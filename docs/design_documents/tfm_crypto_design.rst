@@ -1,5 +1,5 @@
-TF-M Crypto Service design
-==========================
+Crypto Service design
+=====================
 
 :Author: Antonio de Angelis
 :Organization: Arm Limited

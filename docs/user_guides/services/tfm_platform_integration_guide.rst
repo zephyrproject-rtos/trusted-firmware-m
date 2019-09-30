@@ -1,6 +1,6 @@
-#######################################
-TF-M Platform Service Integration Guide
-#######################################
+##################################
+Platform Service Integration Guide
+##################################
 
 ************
 Introduction

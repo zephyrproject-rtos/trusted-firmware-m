@@ -1,6 +1,6 @@
-######################
-TF-M integration guide
-######################
+#################
+Integration guide
+#################
 The purpose of this document is to provide a guide on how to integrate TF-M
 with other hardware platforms and operating systems.
 

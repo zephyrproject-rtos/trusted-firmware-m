@@ -1,5 +1,5 @@
-Trusted Firmware M - Maintainers
-================================
+Maintainers
+===========
 
 Trusted Firmware M is a community maintained project. Contributions can only
 be approved and merged by the maintainers listed below.

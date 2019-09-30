@@ -1,6 +1,6 @@
-################
-TF-M secure boot
-################
+###########
+Secure boot
+###########
 For secure devices it is security critical to enforce firmware authenticity to
 protect against execution of malicious software. This is implemented by building
 a trust chain where each step in the execution chain authenticates the next

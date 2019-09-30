@@ -1,6 +1,6 @@
-#####################################
-TF-M Secure Partition Runtime Library
-#####################################
+################################
+Secure Partition Runtime Library
+################################
 
 :Authors: Ken Liu
 :Organization: Arm Limited

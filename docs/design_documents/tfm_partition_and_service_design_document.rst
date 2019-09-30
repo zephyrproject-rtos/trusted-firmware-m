@@ -1,6 +1,6 @@
-##########################################
-TF-M Partition and Service Design Document
-##########################################
+#####################################
+Partition and Service Design Document
+#####################################
 
 :Authors: Summer Qin
 :Organization: Arm Limited

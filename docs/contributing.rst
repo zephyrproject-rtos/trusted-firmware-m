@@ -1,5 +1,5 @@
-Contributing to Trusted Firmware M
-==================================
+Contributing
+============
 
 Contributions to TF-M project need to follow the process below.
 
