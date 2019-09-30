@@ -134,14 +134,18 @@ Regression Tests for the AN521 target platform
 Build for PSA API compliance tests
 ==================================
 The build system provides the support for linking with prebuilt PSA API
-compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``
-config file. The build system assumes that the PSA API compliance test suite
-is checked out at the same level of the TF-M root folder and the default
-name for the build folder has been used when compiling the PSA API compliance
-tests. Each set of tests for the Secure Storage, Crypto and Attestation services
-needs to be enabled at the build configuration step by defining::
+compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``,
+``ConfigPsaApiTestIPC.cmake`` or ``ConfigPsaApiTestIPCTfmLevel2.cmake`` config
+file. The build system assumes that the PSA API compliance test suite is checked
+out at the same level of the TF-M root folder and the default name for the build
+folder has been used when compiling the PSA API compliance tests. Each set of
+tests for the Internal Trusted Storage, Secure Storage, Crypto and Attestation
+services needs to be enabled at the build configuration step by defining::
 
-    -DPSA_API_TEST_SECURE_STORAGE -DPSA_API_TEST_CRYPTO -DPSA_API_TEST_ATTESTATION
+    -DPSA_API_TEST_INTERNAL_TRUSTED_STORAGE=ON
+    -DPSA_API_TEST_SECURE_STORAGE=ON
+    -DPSA_API_TEST_CRYPTO=ON
+    -DPSA_API_TEST_ATTESTATION=ON
 
 respectively for the corresponding service. For example, to enable the PSA API
 tests for the Crypto service only:
