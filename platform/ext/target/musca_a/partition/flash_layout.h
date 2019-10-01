@@ -156,6 +156,12 @@
 #define IMAGE_LOAD_ADDRESS              (S_SRAM_ALIAS_BASE + \
                                          FLASH_AREA_BL2_SIZE)
 
+/* Define where executable memory for the images starts and ends */
+#define IMAGE_EXECUTABLE_RAM_START      (IMAGE_LOAD_ADDRESS)
+#define IMAGE_EXECUTABLE_RAM_SIZE       (FLASH_S_PARTITION_SIZE + \
+                                         FLASH_NS_PARTITION_SIZE)
+
+
 #define S_QSPI_ALIAS_BASE               (0x10200000)
 #define NS_QSPI_ALIAS_BASE              (0x00200000)
 

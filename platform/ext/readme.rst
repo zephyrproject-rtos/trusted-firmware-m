@@ -123,6 +123,14 @@ updatable images with the related flash areas that hold the firmware images:
 | FLASH_AREA_SCRATCH    | Scratch area       | FLASH_AREA_SCRATCH    | Scratch area                |
 +-----------------------+--------------------+-----------------------+-----------------------------+
 
+- ``IMAGE_EXECUTABLE_RAM_START`` - Defines the start of the region to which
+  images are allowed to be loaded. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is
+  configured to be ``RAM_LOADING``.
+
+- ``IMAGE_EXECUTABLE_RAM_SIZE`` - Defines the size of the region to which images
+  are allowed to be loaded. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is
+  configured to be ``RAM_LOADING``.
+
 Assemble tool
 ^^^^^^^^^^^^^
 The ``assemble.py`` tool is used to concatenate secure and non-secure binary
@@ -141,9 +149,9 @@ Image tool
 The ``imgtool.py`` tool is used to handle the tasks related to signing the
 binary. It requires the following definition:
 
-- ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded
-  and is executed from. Only used in case the ``MCUBOOT_UPGRADE_STRATEGY``
-  is configured to be ``RAM_LOADING``.
+- ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded and
+  is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to
+  be ``RAM_LOADING``.
 
 Secure Storage (SST) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
