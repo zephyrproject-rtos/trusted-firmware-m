@@ -2342,6 +2342,36 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
 }
 
 #ifdef MCUBOOT_RAM_LOADING
+
+/**
+ * Verifies that the image in a slot lies within the predefined bounds that are
+ * allowed to be used by executable images.
+ *
+ * @param img_dst         The address to which the image is going to be copied.
+ *
+ * @param img_sz          The size of the image.
+ *
+ * @return                0 on success; nonzero on failure.
+ */
+static int
+boot_verify_ram_loading_address(uint32_t img_dst, uint32_t img_sz)
+{
+    if (img_dst < IMAGE_EXECUTABLE_RAM_START) {
+        return BOOT_EBADIMAGE;
+    }
+
+    if (boot_add_uint32_overflow_check(img_dst, img_sz)) {
+        return BOOT_EBADIMAGE;
+    }
+
+    if (img_dst + img_sz > IMAGE_EXECUTABLE_RAM_START +
+                           IMAGE_EXECUTABLE_RAM_SIZE) {
+        return BOOT_EBADIMAGE;
+    }
+
+    return 0;
+}
+
 /**
  * Copies an image from a slot in the flash to an SRAM address, where the load
  * address has already been inserted into the image header by this point and is
@@ -2350,34 +2380,32 @@ boot_get_boot_sequence(uint32_t *boot_sequence, uint32_t slot_cnt)
  * @param slot            The flash slot of the image to be copied to SRAM.
  *
  * @param hdr             Pointer to the image header structure of the image
- *                        that needs to be copied to SRAM
+ *
+ * @param img_dst         The address at which the image needs to be copied to
+ *                        SRAM.
+ *
+ * @param img_sz          The size of the image that needs to be copied to SRAM.
  *
  * @return                0 on success; nonzero on failure.
  */
 static int
-boot_copy_image_to_sram(int slot, struct image_header *hdr)
+boot_copy_image_to_sram(int slot, struct image_header *hdr,
+                        uint32_t img_dst, uint32_t img_sz)
 {
     int rc;
     uint32_t sect_sz;
     uint32_t sect = 0;
     uint32_t bytes_copied = 0;
     const struct flash_area *fap_src = NULL;
-    uint32_t dst = (uint32_t) hdr->ih_load_addr;
-    uint32_t img_sz;
 
-    if (dst % 4 != 0) {
+    if (img_dst % 4 != 0) {
         BOOT_LOG_INF("Cannot copy the image to the SRAM address 0x%x "
         "- the load address must be aligned with 4 bytes due to SRAM "
-        "restrictions", dst);
+        "restrictions", img_dst);
         return BOOT_EBADARGS;
     }
 
     rc = flash_area_open(flash_area_id_from_image_slot(slot), &fap_src);
-    if (rc != 0) {
-        return BOOT_EFLASH;
-    }
-
-    rc = boot_read_image_size(slot, hdr, &img_sz);
     if (rc != 0) {
         return BOOT_EFLASH;
     }
@@ -2390,7 +2418,7 @@ boot_copy_image_to_sram(int slot, struct image_header *hdr)
          */
         rc = flash_area_read(fap_src,
                              bytes_copied,
-                             (void *)(dst + bytes_copied),
+                             (void *)(img_dst + bytes_copied),
                              sect_sz);
         if (rc != 0) {
             BOOT_LOG_INF("Error whilst copying image from Flash to SRAM");
@@ -2410,27 +2438,19 @@ boot_copy_image_to_sram(int slot, struct image_header *hdr)
 /**
  * Removes an image from SRAM, by overwriting it with zeros.
  *
- * @param slot            The flash slot of the image to be removed from SRAM.
+ * @param img_dst         The address of the image that needs to be removed from
+ *                        SRAM.
  *
- * @param hdr             Pointer to the image header structure of the image
- *                        that needs to be removed from SRAM
+ * @param img_sz          The size of the image that needs to be removed from
+ *                        SRAM.
  *
  * @return                0 on success; nonzero on failure.
  */
 static int
-boot_remove_image_from_sram(int slot, struct image_header *hdr)
+boot_remove_image_from_sram(uint32_t img_dst, uint32_t img_sz)
 {
-    uint32_t dst = (uint32_t) hdr->ih_load_addr;
-    int rc;
-    uint32_t img_sz;
-
-    rc = boot_read_image_size(slot, hdr, &img_sz);
-    if (rc != 0) {
-        return BOOT_EFLASH;
-    }
-
-    BOOT_LOG_INF("Removing image from SRAM at address 0x%x", dst);
-    memset((void*)dst, 0, img_sz);
+    BOOT_LOG_INF("Removing image from SRAM at address 0x%x", img_dst);
+    memset((void*)img_dst, 0, img_sz);
 
     return 0;
 }
@@ -2456,6 +2476,8 @@ boot_go(struct boot_rsp *rsp)
     struct image_header *selected_image_header;
 #ifdef MCUBOOT_RAM_LOADING
     int image_copied = 0;
+    uint32_t img_dst = 0;
+    uint32_t img_sz  = 0;
 #endif /* MCUBOOT_RAM_LOADING */
 
     static boot_sector_t primary_slot_sectors[BOOT_MAX_IMG_SECTORS];
@@ -2497,10 +2519,36 @@ boot_go(struct boot_rsp *rsp)
 
 #ifdef MCUBOOT_RAM_LOADING
             if (selected_image_header->ih_flags & IMAGE_F_RAM_LOAD) {
+
+                img_dst = selected_image_header->ih_load_addr;
+
+                rc = boot_read_image_size(slot, selected_image_header, &img_sz);
+                if (rc != 0) {
+                    rc = BOOT_EFLASH;
+                    BOOT_LOG_INF("Could not load image headers from the image"
+                                 "in the %s slot.",
+                                 (slot == BOOT_PRIMARY_SLOT) ?
+                                 "primary" : "secondary");
+                    continue;
+                }
+
+                rc = boot_verify_ram_loading_address(img_dst, img_sz);
+                if (rc != 0) {
+                    BOOT_LOG_INF("Could not copy image from the %s slot in "
+                                 "the Flash to load address 0x%x in SRAM as"
+                                 " the image would overlap memory outside"
+                                 " the defined executable region.",
+                                 (slot == BOOT_PRIMARY_SLOT) ?
+                                 "primary" : "secondary",
+                                 selected_image_header->ih_load_addr);
+                    continue;
+                }
+
                 /* Copy image to the load address from where it
                  * currently resides in flash
                  */
-                rc = boot_copy_image_to_sram(slot, selected_image_header);
+                rc = boot_copy_image_to_sram(slot, selected_image_header,
+                                             img_dst, img_sz);
                 if (rc != 0) {
                     rc = BOOT_EBADIMAGE;
                     BOOT_LOG_INF("Could not copy image from the %s slot in "
@@ -2538,7 +2586,7 @@ boot_go(struct boot_rsp *rsp)
                 /* If an image is found to be invalid then it is removed from
                  * RAM to prevent it being a shellcode vector.
                  */
-                boot_remove_image_from_sram(slot, selected_image_header);
+                boot_remove_image_from_sram(img_dst, img_sz);
                 image_copied = 0;
             }
 #endif /* MCUBOOT_RAM_LOADING */
