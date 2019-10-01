@@ -9,55 +9,61 @@
    The values between @ characters will be filled in by CMake.
 
 
-Welcome to TF-M's documentation!
+Trusted Firmware-M Documentation
 ================================
 
 .. toctree::
     :maxdepth: 2
-    :glob:
     :hidden:
 
-    docs/contributing
+    docs/lic
     docs/dco
-    docs/glossary
     docs/maintainers
+    docs/glossary
+    docs/contributing
     docs/user_guides/tfm_sw_requirement
     docs/user_guides/tfm_build_instruction
-    docs/coding_guide
     docs/user_guides/tfm_user_guide
-    docs/user_guides/os_migration_guide_armv8m
     docs/user_guides/tfm_integration_guide
+    docs/coding_guide
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Guides Contd
+    :hidden:
+
+    docs/user_guides/os_migration_guide_armv8m
     docs/user_guides/tfm_ns_client_identification
     docs/user_guides/tfm_secure_boot
     docs/user_guides/tfm_secure_irq_handling
 
 .. toctree::
-    :maxdepth: 2
     :caption: Processes
+    :maxdepth: 2
     :glob:
     :hidden:
 
     docs/processes/**
 
 .. toctree::
-    :maxdepth: 2
     :caption: Secure services
+    :maxdepth: 2
     :glob:
     :hidden:
 
     docs/user_guides/services/*
 
 .. toctree::
-    :maxdepth: 2
     :caption: Components
+    :maxdepth: 2
     :glob:
     :hidden:
 
     lib/**
 
 .. toctree::
-    :maxdepth: 2
     :caption: Target platforms
+    :maxdepth: 2
     :glob:
     :hidden:
 
@@ -88,10 +94,11 @@ Welcome to TF-M's documentation!
     @REJECTED_DD_LIST@
 
 .. toctree::
-    :maxdepth: 2
     :caption: Tools
+    :maxdepth: 2
     :glob:
     :hidden:
+
     tools/iat-verifier/*
 
 .. include:: readme.rst

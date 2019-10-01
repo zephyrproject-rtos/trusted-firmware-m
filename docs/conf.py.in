@@ -25,10 +25,10 @@ sys.path.insert(0, os.path.abspath('../docs'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'TF-M'
+project = 'Trusted Firmware-M'
 copyright = '2017-2019, ARM CE-OSS'
 author = 'ARM CE-OSS'
-title = 'TF-M user Guide'
+title = 'User Guide'
 
 # The short X.Y version
 version = '@SPHINXCFG_TFM_VERSION@'
@@ -98,12 +98,15 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {'collapse_navigation': False}
 #
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['@TFM_ROOT_DIR@/docs/_static']
+
+# Set the documentation logo
+html_logo = '@TFM_ROOT_DIR@/docs/_static/images/tf_logo_white.png'
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

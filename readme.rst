@@ -17,7 +17,7 @@ of terms and abbreviations.
 #######
 License
 #######
-The software is provided under a BSD-3-Clause :doc:`License </license>`.
+The software is provided under a BSD-3-Clause :doc:`License <docs/lic>`.
 Contributions to this project are accepted under the same license with developer
 sign-off as described in the :doc:`Contributing Guidelines </docs/contributing>`.
 
