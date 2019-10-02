@@ -205,12 +205,12 @@
 #define TOKEN_TEST_REQUIRE_SWC1_MEASUREMENT_VAL true /* Mandatory field */
 
 
-/* Disable check of software version */
-#define TOKEN_TEST_VALUE_SWC1_VERSION NULL
-
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC1_VERSION NULL /* Value not checked */
-#define TOKEN_TEST_REQUIRE_SWC1_VERSION false /* Optional field */
+/* This field must be mandatory to ensure PSA compliance -
+ * based on PSA Security Model document.
+ */
+#define TOKEN_TEST_REQUIRE_SWC1_VERSION true /* Mandatory field */
 
 /* A 32 byte mostly random value. Binary. Value not checked */
 #define TOKEN_TEST_VALUE_SWC1_SIGNER_ID NULL_Q_USEFUL_BUF_C
@@ -226,7 +226,10 @@
         32\
     }
 */
-#define TOKEN_TEST_REQUIRE_SWC1_SIGNER_ID false /* Optional field */
+/* This field must be mandatory to ensure PSA compliance -
+ * based on PSA Security Model document.
+ */
+#define TOKEN_TEST_REQUIRE_SWC1_SIGNER_ID true /* Mandatory field */
 
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC1_MEASUREMENT_DESC "SHA256" /* Hard-coded value */
@@ -255,7 +258,10 @@
 
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC2_VERSION NULL /* Value not checked */
-#define TOKEN_TEST_REQUIRE_SWC2_VERSION false /* Optional field */
+/* This field must be mandatory to ensure PSA compliance -
+ * based on PSA Security Model document.
+ */
+#define TOKEN_TEST_REQUIRE_SWC2_VERSION true /* Mandatory field */
 
 /* A 32 byte mostly random value. Binary. Value not checked */
 #define TOKEN_TEST_VALUE_SWC2_SIGNER_ID NULL_Q_USEFUL_BUF_C
@@ -271,7 +277,10 @@
         32\
     }
 */
-#define TOKEN_TEST_REQUIRE_SWC2_SIGNER_ID false /* Optional field */
+/* This field must be mandatory to ensure PSA compliance -
+ * based on PSA Security Model document.
+ */
+#define TOKEN_TEST_REQUIRE_SWC2_SIGNER_ID true /* Mandatory field */
 
 /* Text string */
 #define TOKEN_TEST_VALUE_SWC2_MEASUREMENT_DESC "SHA256" /* Hard-coded value */
