@@ -13,6 +13,7 @@
 #include "ns_test_helpers.h"
 #include "psa/protected_storage.h"
 #include "test/framework/test_framework_helpers.h"
+#include "flash_layout.h"
 
 /* Test UIDs */
 #define WRITE_ONCE_UID  1U /* Cannot be modified or deleted once created */
@@ -37,6 +38,11 @@
 #define WRITE_DATA_SIZE          (sizeof(WRITE_DATA) - 1)
 #define READ_DATA                "_________________________________________"
 #define RESULT_DATA              ("____" WRITE_DATA "____")
+
+#define TEST_1027_CYCLES         3U
+
+static const uint8_t write_asset_data[SST_MAX_ASSET_SIZE] = {0xAF};
+static uint8_t read_asset_data[SST_MAX_ASSET_SIZE] = {0};
 
 /* List of tests */
 static void tfm_sst_test_1001(struct test_result_t *ret);
@@ -67,6 +73,7 @@ static void tfm_sst_test_1023(struct test_result_t *ret);
 static void tfm_sst_test_1024(struct test_result_t *ret);
 static void tfm_sst_test_1025(struct test_result_t *ret);
 static void tfm_sst_test_1026(struct test_result_t *ret);
+static void tfm_sst_test_1027(struct test_result_t *ret);
 
 static struct test_t psa_ps_ns_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -123,6 +130,8 @@ static struct test_t psa_ps_ns_tests[] = {
      "Multiple sets to same UID from same thread"},
     {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
      "Get support interface"},
+    {&tfm_sst_test_1027, "TFM_SST_TEST_1027",
+     "Set, get and remove interface with different asset sizes"},
 };
 
 void register_testsuite_ns_psa_ps_interface(struct test_suite_t *p_test_suite)
@@ -1660,6 +1669,85 @@ TFM_SST_NS_TEST(1026, "Thread_A")
     if (support_flags != 0) {
         TEST_FAIL("Support flags should be 0");
         return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Tests set, get_info, get and remove function with:
+ * - Valid UID's
+ * - Data length of different asset sizes
+ * - No flags
+ */
+TFM_SST_NS_TEST(1027, "Thread_A")
+{
+    uint8_t cycle;
+    psa_ps_status_t status;
+    const psa_ps_uid_t test_uid[TEST_1027_CYCLES] = {
+        TEST_UID_1,
+        TEST_UID_2,
+        TEST_UID_3};
+    const uint32_t test_asset_sizes[TEST_1027_CYCLES] = {
+        SST_MAX_ASSET_SIZE >> 2,
+        SST_MAX_ASSET_SIZE >> 1,
+        SST_MAX_ASSET_SIZE};
+
+    /* Loop to test different asset sizes and UID's*/
+    for (cycle = 0; cycle < TEST_1027_CYCLES; cycle++) {
+        uint32_t data_size = test_asset_sizes[cycle];
+        psa_ps_uid_t uid = test_uid[cycle];
+        struct psa_ps_info_t info = {0};
+
+        memset(read_asset_data, 0x00, sizeof(read_asset_data));
+
+        /* Set with data and no flags and a valid UID */
+        status = psa_ps_set(uid,
+                            data_size,
+                            write_asset_data,
+                            PSA_PS_FLAG_NONE);
+        if (status != PSA_PS_SUCCESS) {
+            TEST_FAIL("Set should not fail with valid UID");
+            return;
+        }
+
+        /* Get info for valid UID */
+        status = psa_ps_get_info(uid, &info);
+        if (status != PSA_PS_SUCCESS) {
+            TEST_FAIL("Get info should not fail with valid UID");
+            return;
+        }
+
+        /* Check that the info struct contains the correct values */
+        if (info.size != data_size) {
+            TEST_FAIL("Size incorrect for valid UID");
+            return;
+        }
+
+        if (info.flags != PSA_PS_FLAG_NONE) {
+            TEST_FAIL("Flags incorrect for valid UID");
+            return;
+        }
+
+        /* Check that thread can still get UID */
+        status = psa_ps_get(uid, 0, data_size, read_asset_data);
+        if (status != PSA_PS_SUCCESS) {
+            TEST_FAIL("Get should not fail with valid UID");
+            return;
+        }
+
+        /* Check that thread's UID data has not been modified */
+        if (memcmp(read_asset_data, write_asset_data, data_size) != 0) {
+            TEST_FAIL("Read data should be equal to original write data");
+            return;
+        }
+
+        /* Call remove to clean up storage for the next test */
+        status = psa_ps_remove(uid);
+        if (status != PSA_PS_SUCCESS) {
+            TEST_FAIL("Remove should not fail with valid UID");
+            return;
+        }
     }
 
     ret->val = TEST_PASSED;
