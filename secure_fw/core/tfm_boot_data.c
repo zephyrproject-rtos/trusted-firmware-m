@@ -124,11 +124,6 @@ void tfm_core_validate_boot_data(void)
 
     boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
 
-    /* FixMe: Enhance sanity check of shared memory area, it might be invalid:
-     *        - mismatched addresses
-     *        - version mismatch between bootloader and runtime binary
-     *        - etc.
-     */
     if (boot_data->header.tlv_magic == SHARED_DATA_TLV_INFO_MAGIC) {
         is_boot_data_valid = BOOT_DATA_VALID;
     }
