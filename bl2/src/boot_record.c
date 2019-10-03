@@ -11,10 +11,16 @@
 #include "target.h"
 #include "../ext/mcuboot/bootutil/src/bootutil_priv.h"
 #include "../ext/mcuboot/bootutil/include/bootutil/image.h"
+#include "../ext/mcuboot/bootutil/include/bootutil/sha256.h"
 #include "../ext/mcuboot/include/flash_map/flash_map.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+
+#define SHA256_HASH_SIZE (32u)
+#if defined(MCUBOOT_SIGN_RSA) && defined(MCUBOOT_HW_KEY)
+#define SIG_BUF_SIZE (MCUBOOT_SIGN_RSA_LEN / 8)
+#endif
 
 /*!
  * \var shared_memory_init_done
@@ -77,6 +83,11 @@ boot_save_sw_measurements(uint8_t sw_module,
     uint16_t ias_minor;
     enum shared_memory_err_t res2;
     char measure_type[] = "SHA256";
+#if defined(MCUBOOT_SIGN_RSA) && defined(MCUBOOT_HW_KEY)
+    /* Few extra bytes for encoding and for public exponent */
+    uint8_t key_buf[SIG_BUF_SIZE + 24];
+    bootutil_sha256_context sha256_ctx;
+#endif
 
     /* Manifest data is concatenated to the end of the image. It is encoded in
      * TLV format.
@@ -137,6 +148,7 @@ boot_save_sw_measurements(uint8_t sw_module,
             }
 
 #ifdef MCUBOOT_SIGN_RSA
+#ifndef MCUBOOT_HW_KEY
         } else if (tlv_entry.it_type == IMAGE_TLV_KEYHASH) {
             /* Get the hash of the public key from the manifest section */
             if (tlv_entry.it_len != sizeof(buf)) { /* SHA256 - 32 bytes */
@@ -148,12 +160,29 @@ boot_save_sw_measurements(uint8_t sw_module,
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
+#else /* MCUBOOT_HW_KEY */
+        } else if (tlv_entry.it_type == IMAGE_TLV_KEY) {
+            /* Get the public key from the manifest section. */
+            if (tlv_entry.it_len > sizeof(key_buf)) {
+                return BOOT_STATUS_ERROR;
+            }
+            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+                                  key_buf, tlv_entry.it_len);
+            if (res) {
+                return BOOT_STATUS_ERROR;
+            }
+
+            /* Calculate the hash of the public key. */
+            bootutil_sha256_init(&sha256_ctx);
+            bootutil_sha256_update(&sha256_ctx, key_buf, tlv_entry.it_len);
+            bootutil_sha256_finish(&sha256_ctx, buf);
+#endif /* MCUBOOT_HW_KEY */
 
             /* Add the hash of the public key to the shared data area */
             ias_minor = SET_IAS_MINOR(sw_module, SW_SIGNER_ID);
             res2 = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
                                                 ias_minor,
-                                                tlv_entry.it_len,
+                                                SHA256_HASH_SIZE,
                                                 buf);
             if (res2) {
                 return BOOT_STATUS_ERROR;
