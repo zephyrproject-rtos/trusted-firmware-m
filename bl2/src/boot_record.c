@@ -38,6 +38,16 @@ static uint32_t shared_memory_init_done;
  */
 #define SHARED_MEMORY_INITIALZED   (1u)
 
+/* Compile time check to verify that shared data region is not overlapping with
+ * non-secure data area.
+ */
+#if ((BOOT_TFM_SHARED_DATA_BASE  >= NS_DATA_START && \
+      BOOT_TFM_SHARED_DATA_BASE  <= NS_DATA_LIMIT) || \
+     (BOOT_TFM_SHARED_DATA_LIMIT >= NS_DATA_START && \
+      BOOT_TFM_SHARED_DATA_LIMIT <= NS_DATA_LIMIT))
+#error "Shared data area and non-secure data area is overlapping"
+#endif
+
 /*!
  * \brief Add the measurement data of SW component to the shared memory area
  *

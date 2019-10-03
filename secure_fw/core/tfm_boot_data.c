@@ -108,6 +108,16 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
     return rc;
 }
 
+/* Compile time check to verify that shared data region is not overlapping with
+ * non-secure data area.
+ */
+#if ((BOOT_TFM_SHARED_DATA_BASE  >= NS_DATA_START && \
+      BOOT_TFM_SHARED_DATA_BASE  <= NS_DATA_LIMIT) || \
+     (BOOT_TFM_SHARED_DATA_LIMIT >= NS_DATA_START && \
+      BOOT_TFM_SHARED_DATA_LIMIT <= NS_DATA_LIMIT))
+#error "Shared data area and non-secure data area is overlapping"
+#endif
+
 void tfm_core_validate_boot_data(void)
 {
     struct tfm_boot_data *boot_data;
@@ -115,7 +125,6 @@ void tfm_core_validate_boot_data(void)
     boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
 
     /* FixMe: Enhance sanity check of shared memory area, it might be invalid:
-     *        - temporal exposure of RAM to non-secure actors
      *        - mismatched addresses
      *        - version mismatch between bootloader and runtime binary
      *        - etc.
