@@ -195,7 +195,7 @@
 /* Number of ITS_SECTOR_SIZE per block */
 #define ITS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
-#define ITS_FLASH_PROGRAM_UNIT  (0x1)
+#define ITS_FLASH_PROGRAM_UNIT  (0x4)
 /* The maximum asset size to be stored in the ITS area */
 #define ITS_MAX_ASSET_SIZE      (512)
 /* The maximum number of assets to be stored in the ITS area */
