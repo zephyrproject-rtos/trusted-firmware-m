@@ -128,7 +128,7 @@ members:
 
 - Service database contains service name, partition id, service signal, service
   identifier, non-secure client(if it can be called by non-secure client),
-  minor_version and minor_policy.
+  version and version_policy.
 - Partition points to the secure partition data.
 - Handle list contains the handle connected to the service.
 - Message queue contains the message for the service.

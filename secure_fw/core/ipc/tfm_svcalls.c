@@ -53,13 +53,13 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller)
 psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
 {
     uint32_t sid;
-    uint32_t minor_version;
+    uint32_t version;
 
     TFM_ASSERT(args != NULL);
     sid = (uint32_t)args[0];
-    minor_version = (uint32_t)args[1];
+    version = (uint32_t)args[1];
 
-    return tfm_psa_connect(sid, minor_version, ns_caller);
+    return tfm_psa_connect(sid, version, ns_caller);
 }
 
 psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)

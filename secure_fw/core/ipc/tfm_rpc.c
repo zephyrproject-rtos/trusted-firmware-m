@@ -43,7 +43,7 @@ psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
 {
     TFM_ASSERT(params != NULL);
 
-    return tfm_psa_connect(params->sid, params->minor_version, ns_caller);
+    return tfm_psa_connect(params->sid, params->version, ns_caller);
 }
 
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,

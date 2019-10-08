@@ -34,15 +34,15 @@ const struct tfm_spm_service_db_t service_db[] =
             {% else %}
         .non_secure_client = false,
             {% endif %}
-            {% if service.minor_version %}
-        .minor_version = {{service.minor_version}},
+            {% if service.version %}
+        .version = {{service.version}},
             {% else %}
-        .minor_version = 1,
+        .version = 1,
             {% endif %}
-            {% if service.minor_policy %}
-        .minor_policy = TFM_VERSION_POLICY_{{service.minor_policy}}
+            {% if service.version_policy %}
+        .version_policy = TFM_VERSION_POLICY_{{service.version_policy}}
             {% else %}
-        .minor_policy = TFM_VERSION_POLICY_STRICT
+        .version_policy = TFM_VERSION_POLICY_STRICT
             {% endif %}
     {{'}'}},
             {% endfor %}

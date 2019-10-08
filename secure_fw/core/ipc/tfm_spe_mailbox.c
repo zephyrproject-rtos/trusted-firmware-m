@@ -38,7 +38,7 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CONNECT:
         spm_params.sid = params->psa_connect_params.sid;
-        spm_params.minor_version = params->psa_connect_params.minor_version;
+        spm_params.version = params->psa_connect_params.version;
         *psa_ret = (uint32_t)tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CALL:

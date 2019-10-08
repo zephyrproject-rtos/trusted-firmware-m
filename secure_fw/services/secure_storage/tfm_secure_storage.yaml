@@ -18,36 +18,36 @@
       "name": "TFM_SST_SET",
       "signal": "TFM_SST_SET_REQ",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_SST_GET",
       "signal": "TFM_SST_GET_REQ",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_SST_GET_INFO",
       "signal": "TFM_SST_GET_INFO_REQ",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_SST_REMOVE",
       "signal": "TFM_SST_REMOVE_REQ",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_SST_GET_SUPPORT",
       "signal": "TFM_SST_GET_SUPPORT_REQ",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "services" : [{
@@ -55,40 +55,40 @@
     "sid": "0x00000060",
     "signal": "TFM_SST_SET_SIG",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
    },
    {
     "name": "TFM_SST_GET",
     "sid": "0x00000061",
     "signal": "TFM_SST_GET_SIG",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
    },
    {
     "name": "TFM_SST_GET_INFO",
     "sid": "0x00000062",
     "signal": "TFM_SST_GET_INFO_SIG",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
    },
    {
     "name": "TFM_SST_REMOVE",
     "sid": "0x00000063",
     "signal": "TFM_SST_REMOVE_SIG",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
    },
    {
     "name": "TFM_SST_GET_SUPPORT",
     "sid": "0x00000064",
     "signal": "TFM_SST_GET_SUPPORT_SIG",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
    }
   ],
   "linker_pattern": {

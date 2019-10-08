@@ -54,7 +54,7 @@ struct psa_client_params_t {
 
         struct {
             uint32_t        sid;
-            uint32_t        minor_version;
+            uint32_t        version;
         } psa_connect_params;
 
         struct {

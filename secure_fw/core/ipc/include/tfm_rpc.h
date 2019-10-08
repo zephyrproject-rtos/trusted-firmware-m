@@ -40,7 +40,7 @@ struct client_call_params_t {
     size_t          in_len;
     psa_outvec      *out_vec;
     size_t          out_len;
-    uint32_t        minor_version;
+    uint32_t        version;
 };
 
 /*
@@ -74,8 +74,7 @@ uint32_t tfm_rpc_psa_framework_version(void);
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
- * \retval > 0                  The minor version of the implemented RoT
- *                              Service.
+ * \retval > 0                  The version of the implemented RoT Service.
  */
 uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
                              int32_t ns_caller);

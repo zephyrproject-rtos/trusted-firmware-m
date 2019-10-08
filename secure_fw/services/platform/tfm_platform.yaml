@@ -19,16 +19,16 @@
       "signal": "PLATFORM_SP_SYSTEM_RESET",
       "sid": "0x00000040",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_SP_PLATFORM_IOCTL",
       "signal": "PLATFORM_SP_IOCTL",
       "sid": "0x00000041",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
      }
   ],
   "linker_pattern": {

@@ -37,7 +37,7 @@ static struct test_t ipc_veneers_tests[] = {
     {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
      "Get PSA framework version", {0}},
     {&tfm_ipc_test_1002, "TFM_IPC_TEST_1002",
-     "Get minor version of a RoT Service", {0}},
+     "Get version of a RoT Service", {0}},
     {&tfm_ipc_test_1003, "TFM_IPC_TEST_1003",
      "Connect to a RoT Service", {0}},
     {&tfm_ipc_test_1004, "TFM_IPC_TEST_1004",
@@ -91,7 +91,7 @@ static void tfm_ipc_test_1001(struct test_result_t *ret)
 }
 
 /**
- * \brief Retrieve the minor version of a RoT Service.
+ * \brief Retrieve the version of a RoT Service.
  */
 static void tfm_ipc_test_1002(struct test_result_t *ret)
 {
@@ -104,7 +104,7 @@ static void tfm_ipc_test_1002(struct test_result_t *ret)
         return;
     } else {
         /* Valid version number */
-        TEST_LOG("The minor version is %d.\r\n", version);
+        TEST_LOG("The service version is %d.\r\n", version);
     }
     ret->val = TEST_PASSED;
 }
@@ -142,10 +142,10 @@ static void tfm_ipc_test_1004(struct test_result_t *ret)
                                     {str4, sizeof(str4)/sizeof(char)}};
     psa_handle_t handle;
     psa_status_t status;
-    uint32_t min_version;
+    uint32_t version;
 
-    min_version = psa_version(IPC_SERVICE_TEST_BASIC_SID);
-    TEST_LOG("TFM service support minor version is %d.\r\n", min_version);
+    version = psa_version(IPC_SERVICE_TEST_BASIC_SID);
+    TEST_LOG("TFM service support version is %d.\r\n", version);
     handle = psa_connect(IPC_SERVICE_TEST_BASIC_SID,
                          IPC_SERVICE_TEST_BASIC_VERSION);
     status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);

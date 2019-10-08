@@ -24,8 +24,8 @@
       "name": "TFM_SECURE_CLIENT_SFN_RUN_TESTS",
       "signal": "TFM_SECURE_CLIENT_SERVICE_SFN_RUN_TESTS",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
   ],
   "services": [
@@ -34,8 +34,8 @@
       "sid": "0x0000F000",
       "signal": "TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
 # Currently there is no platform dependent section of the manifest file,

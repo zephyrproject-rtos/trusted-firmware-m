@@ -114,14 +114,14 @@ void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
 }
 
 #ifdef TFM_PSA_API
-static psa_status_t psa_test_common(uint32_t sid, uint32_t minor_version,
+static psa_status_t psa_test_common(uint32_t sid, uint32_t version,
                                     const psa_invec *in_vecs, size_t in_len,
                                     psa_outvec *out_vecs, size_t out_len)
 {
     psa_handle_t handle;
     psa_status_t status;
 
-    handle = psa_connect(sid, minor_version);
+    handle = psa_connect(sid, version);
     if (handle <= 0) {
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }

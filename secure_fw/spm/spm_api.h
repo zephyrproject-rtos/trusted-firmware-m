@@ -126,8 +126,8 @@ struct tfm_spm_service_db_t {
     psa_signal_t signal;            /* Service signal                        */
     uint32_t sid;                   /* Service identifier                    */
     bool non_secure_client;         /* If can be called by non secure client */
-    uint32_t minor_version;         /* Minor version                         */
-    uint32_t minor_policy;          /* Minor version policy                  */
+    uint32_t version;               /* Service version                         */
+    uint32_t version_policy;        /* Service version policy                  */
 };
 
 /* RoT Service data */
@@ -584,19 +584,19 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
                            struct tfm_msg_body_t *msg);
 
 /**
- * \brief                   Check the client minor version according to
+ * \brief                   Check the client version according to
  *                          version policy
  *
  * \param[in] service       Target service context pointer, which can be get
  *                          by partition management functions
- * \param[in] minor_version Client support minor version
+ * \param[in] version       Client support version
  *
  * \retval IPC_SUCCESS      Success
  * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval IPC_ERROR_VERSION Check failed
  */
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
-                                     uint32_t minor_version);
+                                     uint32_t version);
 
 /**
  * \brief                      Check the memory reference is valid.

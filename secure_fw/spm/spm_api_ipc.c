@@ -220,18 +220,18 @@ struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
 }
 
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
-                                     uint32_t minor_version)
+                                     uint32_t version)
 {
     TFM_ASSERT(service);
 
-    switch (service->service_db->minor_policy) {
+    switch (service->service_db->version_policy) {
     case TFM_VERSION_POLICY_RELAXED:
-        if (minor_version > service->service_db->minor_version) {
+        if (version > service->service_db->version) {
             return IPC_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
-        if (minor_version != service->service_db->minor_version) {
+        if (version != service->service_db->version) {
             return IPC_ERROR_VERSION;
         }
         break;

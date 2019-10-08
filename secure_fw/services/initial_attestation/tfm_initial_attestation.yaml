@@ -19,16 +19,16 @@
       "signal": "INITIAL_ATTEST_GET_TOKEN",
       "sid": "0x00000020",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "signal": "INITIAL_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "linker_pattern": {
@@ -42,16 +42,16 @@
       "sid": "0x00000020",
       "signal": "PSA_ATTEST_GET_TOKEN_SIG",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
       "signal": "PSA_ATTEST_GET_TOKEN_SIZE_SIG",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ]
 }

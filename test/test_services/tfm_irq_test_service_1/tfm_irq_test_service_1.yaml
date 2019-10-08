@@ -24,15 +24,15 @@
       "name": "SPM_IRQ_TEST_1_PREPARE_TEST_SCENARIO",
       "signal": "SPM_IRQ_TEST_1_PREPARE_TEST_SCENARIO",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "SPM_IRQ_TEST_1_EXECUTE_TEST_SCENARIO",
       "signal": "SPM_IRQ_TEST_1_EXECUTE_TEST_SCENARIO",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "irqs": [
@@ -54,16 +54,16 @@
     "sid": "0x0000F0A0",
     "signal": "SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
     },
     {
     "name": "SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO",
     "sid": "0x0000F0A1",
     "signal": "SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
-    "minor_version": 1,
-    "minor_policy": "STRICT"
+    "version": 1,
+    "version_policy": "STRICT"
     },
   ]
 }

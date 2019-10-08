@@ -26,40 +26,40 @@
       "signal": "AUDIT_CORE_RETRIEVE_RECORD",
       "sid": "0x00000000",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_AUDIT_ADD_RECORD",
       "signal": "AUDIT_CORE_ADD_RECORD",
       "sid": "0x00000001",
       "non_secure_clients": false,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_AUDIT_GET_INFO",
       "signal": "AUDIT_CORE_GET_INFO",
       "sid": "0x00000002",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_AUDIT_GET_RECORD_INFO",
       "signal": "AUDIT_CORE_GET_RECORD_INFO",
       "sid": "0x00000003",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     },
     {
       "name": "TFM_AUDIT_DELETE_RECORD",
       "signal": "AUDIT_CORE_DELETE_RECORD",
       "sid": "0x00000004",
       "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "linker_pattern": {

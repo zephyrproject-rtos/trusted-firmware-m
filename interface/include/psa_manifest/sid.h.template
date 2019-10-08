@@ -25,7 +25,7 @@ extern "C" {
                 {% set str = service.name + "_SID" %}
 #define {{"%-58s"|format(str)}} ({{"%10s"|format(service.sid)}}U)
                 {% set str = service.name + "_VERSION" %}
-#define {{"%-58s"|format(str)}} ({{"%d"|format(service.minor_version)}}U)
+#define {{"%-58s"|format(str)}} ({{"%d"|format(service.version)}}U)
             {% endfor %}
         {% endif %}
         {% if manifest.attr.conditional %}

@@ -42,10 +42,10 @@ uint32_t tfm_psa_version(uint32_t sid, int32_t ns_caller)
         return PSA_VERSION_NONE;
     }
 
-    return service->service_db->minor_version;
+    return service->service_db->version;
 }
 
-psa_status_t tfm_psa_connect(uint32_t sid, uint32_t minor_version,
+psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
                              int32_t ns_caller)
 {
     struct tfm_spm_service_t *service;
@@ -79,7 +79,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t minor_version,
      * It is a fatal error if the version of the RoT Service requested is not
      * supported on the platform.
      */
-    if (tfm_spm_check_client_version(service, minor_version) != IPC_SUCCESS) {
+    if (tfm_spm_check_client_version(service, version) != IPC_SUCCESS) {
         tfm_panic();
     }
 

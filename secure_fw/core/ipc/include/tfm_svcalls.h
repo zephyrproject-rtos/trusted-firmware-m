@@ -27,8 +27,7 @@ uint32_t tfm_svcall_psa_framework_version(void);
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
- * \retval > 0                  The minor version of the implemented RoT
- *                              Service.
+ * \retval > 0                  The version of the implemented RoT Service.
  */
 uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
 
@@ -36,7 +35,7 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
  * \brief SVC handler for \ref psa_connect.
  *
  * \param[in] args              Include all input arguments:
- *                              sid, minor_version.
+ *                              sid, version.
  * \param[in] ns_caller         If 'non-zero', call from non-secure client.
  *                              Or from secure client.
  *

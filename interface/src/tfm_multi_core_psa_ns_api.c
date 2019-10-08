@@ -112,7 +112,7 @@ uint32_t psa_version(uint32_t sid)
     return version;
 }
 
-psa_handle_t psa_connect(uint32_t sid, uint32_t minor_version)
+psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 {
     struct psa_client_params_t params;
     mailbox_msg_handle_t handle;
@@ -120,7 +120,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t minor_version)
     int32_t ret;
 
     params.psa_connect_params.sid = sid;
-    params.psa_connect_params.minor_version = minor_version;
+    params.psa_connect_params.version = version;
 
     if (tfm_ns_multi_core_lock_acquire() != OS_WRAPPER_SUCCESS) {
         return PSA_NULL_HANDLE;
