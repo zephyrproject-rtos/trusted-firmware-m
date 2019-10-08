@@ -20,6 +20,8 @@
 #include "attest_eat_defines.h"
 #include "t_cose_defines.h"
 #include "tfm_memory_utils.h"
+#include "attestation_key.h"
+#include "platform/include/tfm_plat_crypto_keys.h"
 
 #define MAX_BOOT_STATUS 512
 
@@ -564,18 +566,47 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
 static enum psa_attest_err_t
 attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
 {
+    psa_status_t crypto_res;
+    enum psa_attest_err_t attest_res;
     uint8_t instance_id[INSTANCE_ID_MAX_SIZE];
-    enum tfm_plat_err_t res_plat;
-    uint32_t size = sizeof(instance_id);
+    size_t instance_id_len;
     struct q_useful_buf_c claim_value;
+    uint8_t *public_key;
+    size_t key_len;
+    psa_ecc_curve_t psa_curve;
+    psa_hash_operation_t hash = psa_hash_operation_init();
 
-    res_plat = tfm_plat_get_instance_id(&size, instance_id);
-    if (res_plat != TFM_PLAT_ERR_SUCCESS) {
+    attest_res = attest_get_initial_attestation_public_key(&public_key,
+                                                           &key_len,
+                                                           &psa_curve);
+    if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }
 
+    crypto_res = psa_hash_setup(&hash, PSA_ALG_SHA_256);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    crypto_res = psa_hash_update(&hash, public_key, key_len);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    /* The hash starts from the second byte, leaving the first free. */
+    crypto_res = psa_hash_finish(&hash, instance_id + 1,
+                                 INSTANCE_ID_MAX_SIZE - 1,
+                                 &instance_id_len);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    /* First byte indicates the type: 0x01 indicates GUID */
+    instance_id[0] = 0x01;
+    instance_id_len += 1;
+
     claim_value.ptr = instance_id;
-    claim_value.len  = size;
+    claim_value.len = instance_id_len;
     attest_token_add_bstr(token_ctx,
                           EAT_CBOR_ARM_LABEL_UEID,
                           &claim_value);
