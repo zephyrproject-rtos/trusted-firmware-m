@@ -37,7 +37,7 @@
   ],
   "irqs": [
     {
-      "line_name": "TFM_TIMER0_IRQ",
+      "source": "TFM_TIMER0_IRQ",
       "signal": "SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ",
       "tfm_irq_priority": 64,
     }

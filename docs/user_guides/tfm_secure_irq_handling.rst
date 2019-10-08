@@ -26,11 +26,11 @@ See the following example:
 
       "irqs": [
         {
-          "line_num": "5",
+          "source": "5",
           "signal": "DUAL_TIMER"
         },
         {
-          "line_name": "TFM_IRQ_LINE_TIMER_1",
+          "source": "TFM_IRQ_LINE_TIMER_1",
           "signal": "TIMER_1"
           "tfm_irq_priority": 64,
         }
@@ -46,10 +46,9 @@ the list ``irqs`` has multiple elements in it.
 
 An IRQ handler is defined by the following nodes:
 
-- ``line_num``: The number of the IRQ.
-- ``line_name``: The name of the IRQ line. With the name of the IRQ line there
-  must be defined a macro in ``tfm_peripherals_def.h`` which is substituted to
-  the IRQ line num.
+- ``source``: The IRQ number or the name IRQ line. With the name of the IRQ
+  line, there must be defined a macro in ``tfm_peripherals_def.h`` which is
+  substituted to the IRQ line num.
 - ``signal`` The name of the signal for this IRQ
 - ``tfm_irq_priority``: The priority of the IRQ. This number must be in the
   range [0-255] inclusive. Please note that some of the less significant bits of
@@ -61,27 +60,26 @@ An IRQ handler is defined by the following nodes:
   The name of the privileged interrupt handler is derived from the node
   specifying the IRQ line number.
 
-  - In case ``line_num`` is provided, the name of the handler becomes
-    ``void irq_<line_num>_Handler(void)``.
-  - In case ``line_name`` is provided, the name of the handler becomes
-    ``void <line_name>_Handler(void)``.
+  - In case ``source`` is IRQ number, the name of the handler becomes
+    ``void irq_<number>_Handler(void)``.
+  - In case ``source`` is defined IRQ macro, the name of the handler becomes
+    ``void <macro>_Handler(void)``.
 
   This is important, because the derived name have to be present in the vector
   table as the handler of the IRQ.
 
 .. Note::
 
-  ``signal`` is mandatory. Specifying the IRQ line is also mandatory, so exactly
-  one of ``line_num`` and ``line_name`` must be defined.
+  ``signal`` and ``source`` are mandatory.
 
   ``tfm_irq_priority`` is optional. If ``tfm_irq_priority`` is not set for an
   IRQ, the default is value is ``TFM_DEFAULT_SECURE_IRQ_PRIOTITY``.
 
 If an IRQ handler is registered, TF-M will:
 
-- Set the IRQ with number ``line_num`` or ``line_name`` to target secure state
-- Set the priority of IRQ with number ``line_num`` or ``line_name`` to
-  ``tfm_irq_priority`` or to the default.
+- Set the IRQ with number or macro to target secure state
+- Set the priority of IRQ with number or macro to ``tfm_irq_priority`` or to
+  the default.
 
 TF-M configures the interrupt lines to be disabled by default. Interrupts for a
 service can be enabled by the secure service by calling
@@ -93,11 +91,11 @@ Library model
 *************
 
 In Library model a function with the name derived from the value of the
-``line_num`` or ``line_name`` property is generated. This function will be put
-in the vector table by the linker (as the handlers in the startup assembly are
-defined as weak symbols). The code generated for this function will forward the
-call to the function with the name of the value of the ``signal`` property
-post-fixed with ``_isr``.
+``source`` property is generated. This function will be put in the vector table
+by the linker (as the handlers in the startup assembly are defined as weak
+symbols). The code generated for this function will forward the call to the
+function with the name of the value of the ``signal`` property post-fixed with
+``_isr``.
 
 .. hint::
 
