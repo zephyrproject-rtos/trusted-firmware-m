@@ -14,9 +14,7 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_PLATFORM
 
-#endif /* TFM_PARTITION_PLATFORM */
 #ifdef __cplusplus
 }
 #endif

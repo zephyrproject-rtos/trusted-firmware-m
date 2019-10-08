@@ -14,13 +14,11 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_TEST_CORE_IPC
 #define IPC_SERVICE_TEST_BASIC_SIGNAL                           (1U << ( 0 + 4))
 #define IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SIGNAL              (1U << ( 1 + 4))
 #define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SIGNAL    (1U << ( 2 + 4))
 #define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SIGNAL              (1U << ( 3 + 4))
 
-#endif /* TFM_PARTITION_TEST_CORE_IPC */
 #ifdef __cplusplus
 }
 #endif

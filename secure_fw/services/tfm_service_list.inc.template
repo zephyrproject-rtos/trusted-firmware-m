@@ -27,7 +27,11 @@ const struct tfm_spm_service_db_t service_db[] =
     {{'{'}}
         .name = "{{service.name}}",
         .partition_id = {{manifest.manifest.name}}_ID,
+            {% if service.signal %}
         .signal = {{service.signal}},
+            {% else %}
+        .signal = {{service.name}}_SIGNAL,
+            {% endif %}
         .sid = {{service.sid}},
             {% if service.non_secure_clients is sameas true %}
         .non_secure_client = true,

@@ -16,20 +16,18 @@ extern "C" {
 
 {% for manifest in manifests %}
     {% if manifest.attr.tfm_partition_ipc %}
-        {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-        {% endif %}
 /******** {{manifest.manifest.name}} ********/
         {% if manifest.manifest.services %}
             {% for service in manifest.manifest.services %}
                 {% set str = service.name + "_SID" %}
 #define {{"%-58s"|format(str)}} ({{"%10s"|format(service.sid)}}U)
                 {% set str = service.name + "_VERSION" %}
+                {% if service.version %}
 #define {{"%-58s"|format(str)}} ({{"%d"|format(service.version)}}U)
+                {% else %}
+#define {{"%-58s"|format(str)}} (1U)
+                {% endif %}
             {% endfor %}
-        {% endif %}
-        {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
         {% endif %}
 
     {% endif %}

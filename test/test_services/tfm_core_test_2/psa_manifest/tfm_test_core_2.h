@@ -14,7 +14,6 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_TEST_CORE
 #define SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL                    (1U << ( 0 + 4))
 #define SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL           (1U << ( 1 + 4))
 #define SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL            (1U << ( 2 + 4))
@@ -22,7 +21,6 @@ extern "C" {
 #define SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SIGNAL            (1U << ( 4 + 4))
 #define SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SIGNAL            (1U << ( 5 + 4))
 
-#endif /* TFM_PARTITION_TEST_CORE */
 #ifdef __cplusplus
 }
 #endif

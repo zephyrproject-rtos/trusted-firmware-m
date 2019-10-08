@@ -14,9 +14,7 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_AUDIT_LOG
 
-#endif /* TFM_PARTITION_AUDIT_LOG */
 #ifdef __cplusplus
 }
 #endif

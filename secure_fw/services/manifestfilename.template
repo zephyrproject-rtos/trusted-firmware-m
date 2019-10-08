@@ -14,14 +14,15 @@
 extern "C" {
 #endif
 
-{% if attr.conditional %}
-#ifdef {{attr.conditional}}
-{% endif %}
 {% if attr.tfm_partition_ipc %}
     {% set ns = namespace(iterator_counter=0) %}
     {% if manifest.services %}
         {% for service in manifest.services %}
+            {% if service.signal %}
 #define {{"%-55s"|format(service.signal)}} (1U << ({{"%2d"|format(ns.iterator_counter)}} + 4))
+            {% else %}
+#define {{"%-55s"|format(service.name+'_SIGNAL')}} (1U << ({{"%2d"|format(ns.iterator_counter)}} + 4))
+            {% endif %}
             {% set ns.iterator_counter = ns.iterator_counter + 1 %}
         {% endfor %}
     {% endif %}
@@ -50,9 +51,6 @@ extern "C" {
     {% endif %}
 {% endif %}
 
-{% if attr.conditional %}
-#endif /* {{attr.conditional}} */
-{% endif %}
 #ifdef __cplusplus
 }
 #endif

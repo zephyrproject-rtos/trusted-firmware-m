@@ -46,7 +46,6 @@ extern "C" {
 #define TFM_ATTEST_GET_TOKEN_SIZE_SID                              (0x00000021U)
 #define TFM_ATTEST_GET_TOKEN_SIZE_VERSION                          (1U)
 
-#ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
 #define SPM_CORE_TEST_INIT_SUCCESS_SID                             (0x0000F020U)
 #define SPM_CORE_TEST_INIT_SUCCESS_VERSION                         (1U)
@@ -72,9 +71,7 @@ extern "C" {
 #define SPM_CORE_TEST_BLOCK_VERSION                                (1U)
 #define SPM_CORE_TEST_NS_THREAD_SID                                (0x0000F02BU)
 #define SPM_CORE_TEST_NS_THREAD_VERSION                            (1U)
-#endif /* TFM_PARTITION_TEST_CORE */
 
-#ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST_2 ********/
 #define SPM_CORE_TEST_2_SLAVE_SERVICE_SID                          (0x0000F040U)
 #define SPM_CORE_TEST_2_SLAVE_SERVICE_VERSION                      (1U)
@@ -88,15 +85,11 @@ extern "C" {
 #define SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_VERSION              (1U)
 #define SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SID                  (0x0000F045U)
 #define SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_VERSION              (1U)
-#endif /* TFM_PARTITION_TEST_CORE */
 
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_TEST_PARTITION ********/
 #define TFM_SECURE_CLIENT_SFN_RUN_TESTS_SID                        (0x0000F000U)
 #define TFM_SECURE_CLIENT_SFN_RUN_TESTS_VERSION                    (1U)
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_SERVICE_TEST ********/
 #define IPC_SERVICE_TEST_BASIC_SID                                 (0x0000F080U)
 #define IPC_SERVICE_TEST_BASIC_VERSION                             (1U)
@@ -106,9 +99,7 @@ extern "C" {
 #define IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_VERSION      (1U)
 #define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID                    (0x0000F083U)
 #define IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_VERSION                (1U)
-#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_CORE_IPC
 /******** TFM_SP_IPC_CLIENT_TEST ********/
 #define IPC_CLIENT_TEST_BASIC_SID                                  (0x0000F060U)
 #define IPC_CLIENT_TEST_BASIC_VERSION                              (1U)
@@ -120,15 +111,12 @@ extern "C" {
 #define IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_VERSION                 (1U)
 #define IPC_CLIENT_TEST_MEM_CHECK_SID                              (0x0000F064U)
 #define IPC_CLIENT_TEST_MEM_CHECK_VERSION                          (1U)
-#endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_ENABLE_IRQ_TEST
 /******** TFM_IRQ_TEST_1 ********/
 #define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SID              (0x0000F0A0U)
 #define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_VERSION          (1U)
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SID              (0x0000F0A1U)
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_VERSION          (1U)
-#endif /* TFM_ENABLE_IRQ_TEST */
 
 #ifdef __cplusplus
 }

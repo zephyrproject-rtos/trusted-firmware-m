@@ -14,7 +14,6 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_TEST_CORE
 #define SPM_CORE_TEST_INIT_SUCCESS_SIGNAL                       (1U << ( 0 + 4))
 #define SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL                   (1U << ( 1 + 4))
 #define SPM_CORE_TEST_MPU_ACCESS_SIGNAL                         (1U << ( 2 + 4))
@@ -28,7 +27,6 @@ extern "C" {
 #define SPM_CORE_TEST_BLOCK_SIGNAL                              (1U << (10 + 4))
 #define SPM_CORE_TEST_NS_THREAD_SIGNAL                          (1U << (11 + 4))
 
-#endif /* TFM_PARTITION_TEST_CORE */
 #ifdef __cplusplus
 }
 #endif

@@ -14,10 +14,8 @@
 extern "C" {
 #endif
 
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 #define TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG                     (1U << ( 0 + 4))
 
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 #ifdef __cplusplus
 }
 #endif
