@@ -151,12 +151,14 @@ static void tfm_attest_test_1004(struct test_result_t *ret)
 static void tfm_attest_test_1005(struct test_result_t *ret)
 {
     psa_status_t err;
-    uint32_t token_size = TEST_TOKEN_SIZE;
+    size_t token_buf_size = TEST_TOKEN_SIZE;
+    size_t token_size;
 
     /* Call with with bigger challenge object than allowed */
     err = psa_initial_attest_get_token(challenge_buffer,
                                        INVALID_CHALLENGE_OBJECT_SIZE,
                                        token_buffer,
+                                       token_buf_size,
                                        &token_size);
 
     if (err != PSA_ERROR_INVALID_ARGUMENT) {
@@ -165,10 +167,11 @@ static void tfm_attest_test_1005(struct test_result_t *ret)
     }
 
     /* Call with smaller buffer size than size of test token */
-    token_size = TOO_SMALL_TOKEN_BUFFER;
+    token_buf_size = TOO_SMALL_TOKEN_BUFFER;
     err = psa_initial_attest_get_token(challenge_buffer,
                                        TEST_CHALLENGE_OBJ_SIZE,
                                        token_buffer,
+                                       token_buf_size,
                                        &token_size);
 
     if (err != PSA_ERROR_BUFFER_TOO_SMALL) {

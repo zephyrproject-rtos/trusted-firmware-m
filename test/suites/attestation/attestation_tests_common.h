@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -39,7 +39,7 @@ extern "C" {
 /*!
  * \def INVALID_CHALLENGE_OBJECT_SIZE
  *
- * \brief Size of challenge object that is
+ * \brief Size of challenge object that is invalid.
  */
 #define INVALID_CHALLENGE_OBJECT_SIZE (PSA_INITIAL_ATTEST_CHALLENGE_SIZE_32 + 1)
 

@@ -19,17 +19,18 @@
 
 __attribute__((section("SFN")))
 psa_status_t
-psa_initial_attest_get_token(const uint8_t *challenge_obj,
-                             uint32_t       challenge_size,
-                             uint8_t       *token,
-                             uint32_t      *token_size)
+psa_initial_attest_get_token(const uint8_t *auth_challenge,
+                             size_t         challenge_size,
+                             uint8_t       *token_buf,
+                             size_t         token_buf_size,
+                             size_t        *token_size)
 {
     psa_status_t status;
     psa_invec in_vec[] = {
-        {challenge_obj, challenge_size}
+        {auth_challenge, challenge_size}
     };
     psa_outvec out_vec[] = {
-        {token, *token_size}
+        {token_buf, token_buf_size}
     };
 
 #ifdef TFM_PSA_API
@@ -48,7 +49,6 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     status = tfm_initial_attest_get_token_veneer(in_vec, IOVEC_LEN(in_vec),
                                                  out_vec, IOVEC_LEN(out_vec));
 #endif
-
     if (status == PSA_SUCCESS) {
         *token_size = out_vec[0].len;
     }
@@ -58,15 +58,15 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 
 __attribute__((section("SFN")))
 psa_status_t
-psa_initial_attest_get_token_size(uint32_t challenge_size,
-                                  uint32_t *token_size)
+psa_initial_attest_get_token_size(size_t challenge_size,
+                                  size_t *token_size)
 {
     psa_status_t status;
     psa_invec in_vec[] = {
         {&challenge_size, sizeof(challenge_size) }
     };
     psa_outvec out_vec[] = {
-        {token_size, sizeof(uint32_t)}
+        {token_size, sizeof(size_t)}
     };
 
 #ifdef TFM_PSA_API

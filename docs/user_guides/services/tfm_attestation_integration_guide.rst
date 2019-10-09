@@ -197,14 +197,15 @@ interface:
 .. code-block:: c
 
     psa_status_t
-    psa_initial_attest_get_token(const uint8_t *challenge_obj,
-        uint32_t challenge_size,
-        uint8_t  *token,
-        uint32_t *token_size);
+    psa_initial_attest_get_token(const uint8_t *auth_challenge,
+                                 size_t         challenge_size,
+                                 uint8_t       *token_buf,
+                                 size_t         token_buf_size,
+                                 size_t        *token_size);
 
     psa_status_t
-    psa_initial_attest_get_token_size(uint32_t challenge_size,
-        uint32_t *token_size);
+    psa_initial_attest_get_token_size(size_t challenge_size,
+                                      size_t *token_size);
 
     psa_status_t
     tfm_initial_attest_get_public_key(uint8_t         *public_key,

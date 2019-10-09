@@ -55,7 +55,8 @@ int token_main_alt(uint32_t option_flags,
                    struct q_useful_buf_c *completed_token)
 {
     psa_status_t                 return_value;
-    uint32_t                     completed_token_len;
+    size_t                       token_buf_size;
+    size_t                       completed_token_size;
     struct q_useful_buf_c        actual_nonce;
     Q_USEFUL_BUF_MAKE_STACK_UB(  actual_nonce_storage, 64);
 
@@ -70,13 +71,15 @@ int token_main_alt(uint32_t option_flags,
         actual_nonce = nonce;
     }
 
-    completed_token_len = (uint32_t)buffer.len;
+    token_buf_size = buffer.len;
     return_value = psa_initial_attest_get_token(actual_nonce.ptr,
-                                                (uint32_t)actual_nonce.len,
+                                                actual_nonce.len,
                                                 buffer.ptr,
-                                                &completed_token_len);
+                                                token_buf_size,
+                                                &completed_token_size);
 
-    *completed_token = (struct q_useful_buf_c){buffer.ptr, completed_token_len};
+    *completed_token =
+        (struct q_useful_buf_c){buffer.ptr, completed_token_size};
 
     if (return_value != PSA_SUCCESS) {
         return (int)return_value;
@@ -180,7 +183,7 @@ Done:
 int_fast16_t minimal_get_size_test()
 {
     int_fast16_t          return_value = 0;
-    uint32_t              length;
+    size_t                length;
     struct q_useful_buf_c expected_token;
     struct q_useful_buf_c nonce;
 
@@ -189,7 +192,7 @@ int_fast16_t minimal_get_size_test()
         Q_USEFUL_BUF_FROM_BYTE_ARRAY_LITERAL(expected_minimal_token_bytes);
 
 
-    return_value = psa_initial_attest_get_token_size((uint32_t)nonce.len,
+    return_value = psa_initial_attest_get_token_size(nonce.len,
                                                      &length);
 
     /*

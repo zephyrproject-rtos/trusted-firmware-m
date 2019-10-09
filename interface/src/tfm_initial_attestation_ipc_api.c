@@ -15,19 +15,20 @@
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 psa_status_t
-psa_initial_attest_get_token(const uint8_t *challenge_obj,
-                             uint32_t       challenge_size,
-                             uint8_t       *token,
-                             uint32_t      *token_size)
+psa_initial_attest_get_token(const uint8_t *auth_challenge,
+                             size_t         challenge_size,
+                             uint8_t       *token_buf,
+                             size_t         token_buf_size,
+                             size_t        *token_size)
 {
     psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
 
     psa_invec in_vec[] = {
-        {challenge_obj, challenge_size}
+        {auth_challenge, challenge_size}
     };
     psa_outvec out_vec[] = {
-        {token, *token_size}
+        {token_buf, token_buf_size}
     };
 
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SID,
@@ -49,8 +50,8 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 }
 
 psa_status_t
-psa_initial_attest_get_token_size(uint32_t  challenge_size,
-                                  uint32_t *token_size)
+psa_initial_attest_get_token_size(size_t  challenge_size,
+                                  size_t *token_size)
 {
     psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
@@ -58,7 +59,7 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
         {&challenge_size, sizeof(challenge_size)}
     };
     psa_outvec out_vec[] = {
-        {token_size, sizeof(uint32_t)}
+        {token_size, sizeof(size_t)}
     };
 
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SIZE_SID,

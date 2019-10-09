@@ -66,9 +66,9 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
 {
     psa_status_t status = PSA_SUCCESS;
-    uint32_t challenge_size;
-    uint32_t token_size;
-    uint32_t bytes_read = 0;
+    size_t challenge_size;
+    size_t token_size;
+    size_t bytes_read = 0;
     psa_invec in_vec[] = {
         {&challenge_size, msg->in_size[0]}
     };

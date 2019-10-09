@@ -14,19 +14,20 @@
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 psa_status_t
-psa_initial_attest_get_token(const uint8_t *challenge_obj,
-                             uint32_t       challenge_size,
-                             uint8_t       *token,
-                             uint32_t      *token_size)
+psa_initial_attest_get_token(const uint8_t *auth_challenge,
+                             size_t         challenge_size,
+                             uint8_t       *token_buf,
+                             size_t         token_buf_size,
+                             size_t        *token_size)
 {
 
     int32_t res;
 
     psa_invec in_vec[] = {
-        {challenge_obj, challenge_size}
+        {auth_challenge, challenge_size}
     };
     psa_outvec out_vec[] = {
-        {token, *token_size}
+        {token_buf, token_buf_size}
     };
 
     res = tfm_ns_interface_dispatch(
@@ -42,14 +43,14 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 }
 
 psa_status_t
-psa_initial_attest_get_token_size(uint32_t  challenge_size,
-                                  uint32_t *token_size)
+psa_initial_attest_get_token_size(size_t  challenge_size,
+                                  size_t *token_size)
 {
     psa_invec in_vec[] = {
         {&challenge_size, sizeof(challenge_size)}
     };
     psa_outvec out_vec[] = {
-        {token_size, sizeof(uint32_t)}
+        {token_size, sizeof(size_t)}
     };
 
     return tfm_ns_interface_dispatch(
