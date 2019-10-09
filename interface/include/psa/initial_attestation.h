@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,35 +31,6 @@ extern "C" {
  */
 #define PSA_INITIAL_ATTEST_API_VERSION_MAJOR (1)
 #define PSA_INITIAL_ATTEST_API_VERSION_MINOR (0)
-
-/**
- * \enum psa_attest_err_t
- *
- * \brief Initial attestation service error types
- *
- */
-enum psa_attest_err_t {
-    /** Action was performed successfully */
-    PSA_ATTEST_ERR_SUCCESS = 0,
-    /** Boot status data is unavailable or malformed */
-    PSA_ATTEST_ERR_INIT_FAILED,
-    /** Token buffer is too small to store the created token there */
-    PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW,
-    /** Attestation key buffer is too small to store the obtained key there */
-    PSA_ATTEST_ERR_KEY_BUFFER_OVERFLOW,
-    /** Some of the mandatory claims are unavailable */
-    PSA_ATTEST_ERR_CLAIM_UNAVAILABLE,
-    /** Some parameter or combination of parameters are recognised as invalid:
-     * - challenge size is not allowed
-     * - challenge object is unavailable
-     * - token buffer is unavailable
-     */
-    PSA_ATTEST_ERR_INVALID_INPUT,
-    /** Unexpected error happened during operation */
-    PSA_ATTEST_ERR_GENERAL,
-    /** Following entry is only to ensure the error code of integer size */
-    PSA_ATTEST_ERR_FORCE_INT_SIZE = INT_MAX
-};
 
 /**
  * The allowed size of input challenge in bytes: 32, 48, 64
@@ -197,9 +168,9 @@ enum psa_attest_err_t {
  *                                updated by initial attestation service with
  *                                final token size.
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token(const uint8_t *challenge_obj,
                              uint32_t       challenge_size,
                              uint8_t       *token,
@@ -215,9 +186,9 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
  * \param[out]  token_size      Size of the token in bytes, which is created by
  *                              initial attestation service.
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token_size(uint32_t  challenge_size,
                                   uint32_t *token_size);
 
@@ -233,9 +204,9 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
  *
  * \note Currently only the ECDSA P-256 over SHA-256 algorithm is supported.
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 tfm_initial_attest_get_public_key(uint8_t         *public_key,
                                   size_t           public_key_buf_size,
                                   size_t          *public_key_len,

@@ -196,17 +196,17 @@ interface:
 
 .. code-block:: c
 
-    enum psa_attest_err_t
+    psa_status_t
     psa_initial_attest_get_token(const uint8_t *challenge_obj,
         uint32_t challenge_size,
         uint8_t  *token,
         uint32_t *token_size);
 
-    enum psa_attest_err_t
+    psa_status_t
     psa_initial_attest_get_token_size(uint32_t challenge_size,
         uint32_t *token_size);
 
-    enum psa_attest_err_t
+    psa_status_t
     tfm_initial_attest_get_public_key(uint8_t         *public_key,
                                       size_t           public_key_buf_size,
                                       size_t          *public_key_len,

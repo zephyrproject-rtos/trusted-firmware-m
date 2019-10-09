@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token(const uint8_t *challenge_obj,
                              uint32_t       challenge_size,
                              uint8_t       *token,
@@ -34,14 +34,14 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
                                (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                                (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
-    if (res == (int32_t)PSA_ATTEST_ERR_SUCCESS) {
+    if (res == (int32_t)PSA_SUCCESS) {
         *token_size = out_vec[0].len;
     }
 
-    return (enum psa_attest_err_t)res;
+    return res;
 }
 
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token_size(uint32_t  challenge_size,
                                   uint32_t *token_size)
 {
@@ -52,13 +52,13 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
         {token_size, sizeof(uint32_t)}
     };
 
-    return (enum psa_attest_err_t)tfm_ns_interface_dispatch(
+    return tfm_ns_interface_dispatch(
                             (veneer_fn)tfm_initial_attest_get_token_size_veneer,
                             (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                             (uint32_t)out_vec, IOVEC_LEN(out_vec));
 }
 
-enum psa_attest_err_t
+psa_status_t
 tfm_initial_attest_get_public_key(uint8_t         *public_key,
                                   size_t           public_key_buf_size,
                                   size_t          *public_key_len,
@@ -77,5 +77,5 @@ tfm_initial_attest_get_public_key(uint8_t         *public_key,
                         (uint32_t)NULL,  0,
                         (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
-    return (enum psa_attest_err_t)res;
+    return (psa_status_t) res;
 }

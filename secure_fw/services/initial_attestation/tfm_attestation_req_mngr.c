@@ -19,13 +19,13 @@
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-typedef enum psa_attest_err_t (*attest_func_t)(const psa_msg_t *msg);
+typedef psa_status_t (*attest_func_t)(const psa_msg_t *msg);
 
 int32_t g_attest_caller_id;
 
-static enum psa_attest_err_t psa_attest_get_token(const psa_msg_t *msg)
+static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 {
-    enum psa_attest_err_t status = PSA_ATTEST_ERR_SUCCESS;
+    psa_status_t status = PSA_SUCCESS;
     uint8_t challenge_buff[PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64];
     uint8_t token_buff[PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE];
     uint32_t bytes_read = 0;
@@ -39,7 +39,7 @@ static enum psa_attest_err_t psa_attest_get_token(const psa_msg_t *msg)
     };
 
     if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* store the client ID here for later use in service */
@@ -48,7 +48,7 @@ static enum psa_attest_err_t psa_attest_get_token(const psa_msg_t *msg)
     bytes_read = psa_read(msg->handle, 0,
                           challenge_buff, challenge_size);
     if (bytes_read != challenge_size) {
-        return PSA_ATTEST_ERR_GENERAL;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     token_size = (token_size < PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE) ?
@@ -56,16 +56,16 @@ static enum psa_attest_err_t psa_attest_get_token(const psa_msg_t *msg)
 
     status = initial_attest_get_token(in_vec, IOVEC_LEN(in_vec),
                                       out_vec, IOVEC_LEN(out_vec));
-    if (status == PSA_ATTEST_ERR_SUCCESS) {
+    if (status == PSA_SUCCESS) {
         psa_write(msg->handle, 0, out_vec[0].base, out_vec[0].len);
     }
 
     return status;
 }
 
-static enum psa_attest_err_t psa_attest_get_token_size(const psa_msg_t *msg)
+static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
 {
-    enum psa_attest_err_t status = PSA_ATTEST_ERR_SUCCESS;
+    psa_status_t status = PSA_SUCCESS;
     uint32_t challenge_size;
     uint32_t token_size;
     uint32_t bytes_read = 0;
@@ -78,7 +78,7 @@ static enum psa_attest_err_t psa_attest_get_token_size(const psa_msg_t *msg)
 
     if (msg->in_size[0] != sizeof(challenge_size)
         || msg->out_size[0] != sizeof(token_size)) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* store the client ID here for later use in service */
@@ -87,21 +87,21 @@ static enum psa_attest_err_t psa_attest_get_token_size(const psa_msg_t *msg)
     bytes_read = psa_read(msg->handle, 0,
                           &challenge_size, msg->in_size[0]);
     if (bytes_read != msg->in_size[0]) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     status = initial_attest_get_token_size(in_vec, IOVEC_LEN(in_vec),
                                            out_vec, IOVEC_LEN(out_vec));
-    if (status == PSA_ATTEST_ERR_SUCCESS) {
+    if (status == PSA_SUCCESS) {
         psa_write(msg->handle, 0, out_vec[0].base, out_vec[0].len);
     }
 
     return status;
 }
 
-static enum psa_attest_err_t tfm_attest_get_public_key(const psa_msg_t *msg)
+static psa_status_t tfm_attest_get_public_key(const psa_msg_t *msg)
 {
-    enum psa_attest_err_t status = PSA_ATTEST_ERR_SUCCESS;
+    psa_status_t status = PSA_SUCCESS;
     uint8_t key_buf[ECC_P256_PUBLIC_KEY_SIZE];
     size_t key_len;
     psa_ecc_curve_t curve_type;
@@ -114,7 +114,7 @@ static enum psa_attest_err_t tfm_attest_get_public_key(const psa_msg_t *msg)
 
     if (msg->out_size[1] != out_vec[1].len ||
         msg->out_size[2] != out_vec[2].len) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Store the client ID here for later use in service. */
@@ -124,10 +124,10 @@ static enum psa_attest_err_t tfm_attest_get_public_key(const psa_msg_t *msg)
                                            out_vec, IOVEC_LEN(out_vec));
 
     if (msg->out_size[0] < key_len) {
-        return PSA_ATTEST_ERR_KEY_BUFFER_OVERFLOW;
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (status == PSA_ATTEST_ERR_SUCCESS) {
+    if (status == PSA_SUCCESS) {
         psa_write(msg->handle, 0, key_buf, key_len);
         psa_write(msg->handle, 1, &curve_type, out_vec[1].len);
         psa_write(msg->handle, 2, &key_len, out_vec[2].len);
@@ -169,16 +169,16 @@ static void attest_signal_handle(psa_signal_t signal, attest_func_t pfn)
 }
 #endif
 
-enum psa_attest_err_t attest_partition_init(void)
+psa_status_t attest_partition_init(void)
 {
-    enum psa_attest_err_t err = PSA_ATTEST_ERR_SUCCESS;
+    psa_status_t err = PSA_SUCCESS;
 #ifdef TFM_PSA_API
     psa_signal_t signals;
 #endif
 
     err = attest_init();
 #ifdef TFM_PSA_API
-    if (err != PSA_ATTEST_ERR_SUCCESS) {
+    if (err != PSA_SUCCESS) {
         tfm_abort();
     }
 

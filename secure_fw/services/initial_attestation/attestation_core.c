@@ -54,7 +54,42 @@ struct attest_boot_data {
 __attribute__ ((aligned(4)))
 static struct attest_boot_data boot_data;
 
-enum psa_attest_err_t attest_init(void)
+/*!
+ * \brief Static function to map return values between \ref psa_attest_err_t
+ *        and \ref psa_status_t
+ *
+ * \param[in]  attest_err  Attestation error code
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+static inline psa_status_t
+error_mapping_to_psa_status_t(enum psa_attest_err_t attest_err)
+{
+    switch (attest_err) {
+    case PSA_ATTEST_ERR_SUCCESS:
+        return PSA_SUCCESS;
+        break;
+    case PSA_ATTEST_ERR_INIT_FAILED:
+        return PSA_ERROR_SERVICE_FAILURE;
+        break;
+    case PSA_ATTEST_ERR_BUFFER_OVERFLOW:
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+        break;
+    case PSA_ATTEST_ERR_CLAIM_UNAVAILABLE:
+        return PSA_ERROR_GENERIC_ERROR;
+        break;
+    case PSA_ATTEST_ERR_INVALID_INPUT:
+        return PSA_ERROR_INVALID_ARGUMENT;
+        break;
+    case PSA_ATTEST_ERR_GENERAL:
+        return PSA_ERROR_GENERIC_ERROR;
+        break;
+    default:
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+}
+
+psa_status_t attest_init(void)
 {
     enum psa_attest_err_t res;
 
@@ -62,7 +97,7 @@ enum psa_attest_err_t attest_init(void)
                                (struct tfm_boot_data *)&boot_data,
                                MAX_BOOT_STATUS);
 
-    return res;
+    return error_mapping_to_psa_status_t(res);
 }
 
 /*!
@@ -74,14 +109,14 @@ enum psa_attest_err_t attest_init(void)
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static inline enum psa_attest_err_t
-error_mapping(enum attest_token_err_t token_err)
+error_mapping_to_psa_attest_err_t(enum attest_token_err_t token_err)
 {
     switch (token_err) {
     case ATTEST_TOKEN_ERR_SUCCESS:
         return PSA_ATTEST_ERR_SUCCESS;
         break;
     case ATTEST_TOKEN_ERR_TOO_SMALL:
-        return PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW;
+        return PSA_ATTEST_ERR_BUFFER_OVERFLOW;
         break;
     default:
         return PSA_ATTEST_ERR_GENERAL;
@@ -956,7 +991,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
                                    token);
 
     if (token_err != ATTEST_TOKEN_ERR_SUCCESS) {
-        attest_err = error_mapping(token_err);
+        attest_err = error_mapping_to_psa_attest_err_t(token_err);
         goto error;
     }
 
@@ -1022,7 +1057,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
      */
     token_err = attest_token_finish(&attest_token_ctx, completed_token);
     if (token_err) {
-        attest_err = error_mapping(token_err);
+        attest_err = error_mapping_to_psa_attest_err_t(token_err);
         goto error;
     }
 
@@ -1043,7 +1078,7 @@ error:
  *    token due to lack of psa_asymmetric_sign() implementation in crypto
  *    service.
  */
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
                                psa_outvec *out_vec, uint32_t num_outvec)
 {
@@ -1090,11 +1125,11 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
     out_vec[0].len  = completed_token.len;
 
 error:
-    return attest_err;
+    return error_mapping_to_psa_status_t(attest_err);
 }
 
 /* Initial implementation, just returns with hard coded value */
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec)
 {
@@ -1131,10 +1166,10 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
     *token_buf_size = completed_token.len;
 
 error:
-    return attest_err;
+    return error_mapping_to_psa_status_t(attest_err);
 }
 
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec)
 {
@@ -1182,7 +1217,7 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
     }
 
     if (key_buffer.len < key_len) {
-        attest_err = PSA_ATTEST_ERR_KEY_BUFFER_OVERFLOW;
+        attest_err = PSA_ATTEST_ERR_BUFFER_OVERFLOW;
         goto error;
     }
 
@@ -1193,5 +1228,5 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
     *(size_t *)out_vec[2].base = key_len;
 
 error:
-    return attest_err;
+    return error_mapping_to_psa_status_t(attest_err);
 }

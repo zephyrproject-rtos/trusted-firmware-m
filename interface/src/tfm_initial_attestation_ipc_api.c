@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +14,7 @@
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token(const uint8_t *challenge_obj,
                              uint32_t       challenge_size,
                              uint8_t       *token,
@@ -32,8 +32,8 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
 
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SID,
                          TFM_ATTEST_GET_TOKEN_VERSION);
-    if (handle <= 0) {
-        return PSA_ATTEST_ERR_GENERAL;
+    if (!PSA_HANDLE_IS_VALID(handle)) {
+        return PSA_HANDLE_TO_ERROR(handle);
     }
 
     status = psa_call(handle, PSA_IPC_CALL,
@@ -41,18 +41,14 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
                       out_vec, IOVEC_LEN(out_vec));
     psa_close(handle);
 
-    if (status < PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
     if (status == PSA_SUCCESS) {
         *token_size = out_vec[0].len;
     }
 
-    return (enum psa_attest_err_t)status;
+    return status;
 }
 
-enum psa_attest_err_t
+psa_status_t
 psa_initial_attest_get_token_size(uint32_t  challenge_size,
                                   uint32_t *token_size)
 {
@@ -67,8 +63,8 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
 
     handle = psa_connect(TFM_ATTEST_GET_TOKEN_SIZE_SID,
                          TFM_ATTEST_GET_TOKEN_SIZE_VERSION);
-    if (handle <= 0) {
-        return PSA_ATTEST_ERR_GENERAL;
+    if (!PSA_HANDLE_IS_VALID(handle)) {
+        return PSA_HANDLE_TO_ERROR(handle);
     }
 
     status = psa_call(handle, PSA_IPC_CALL,
@@ -76,14 +72,10 @@ psa_initial_attest_get_token_size(uint32_t  challenge_size,
                       out_vec, IOVEC_LEN(out_vec));
     psa_close(handle);
 
-    if (status < PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    return (enum psa_attest_err_t)status;
+    return status;
 }
 
-enum psa_attest_err_t
+psa_status_t
 tfm_initial_attest_get_public_key(uint8_t         *public_key,
                                   size_t           public_key_buf_size,
                                   size_t          *public_key_len,
@@ -101,7 +93,7 @@ tfm_initial_attest_get_public_key(uint8_t         *public_key,
     handle = psa_connect(TFM_ATTEST_GET_PUBLIC_KEY_SID,
                          TFM_ATTEST_GET_PUBLIC_KEY_VERSION);
     if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ATTEST_ERR_GENERAL;
+        return PSA_HANDLE_TO_ERROR(handle);
     }
 
     status = psa_call(handle, PSA_IPC_CALL,
@@ -109,5 +101,5 @@ tfm_initial_attest_get_public_key(uint8_t         *public_key,
                       out_vec, IOVEC_LEN(out_vec));
     psa_close(handle);
 
-    return (enum psa_attest_err_t)status;
+    return status;
 }

@@ -14,6 +14,7 @@
 #include "psa/initial_attestation.h"
 #include "attest_token_decode.h"
 #include "attest_token_test_values.h"
+#include "psa/crypto.h"
 
 
 /**
@@ -45,7 +46,7 @@
  * \param[out] completed_token  Place to put pointer and length
  *                              of completed token.
  *
- * \return various errors. See \ref attest_token_err_t.
+ * \return various errors. See \ref psa_status_t.
  *
  */
 int token_main_alt(uint32_t option_flags,
@@ -53,7 +54,7 @@ int token_main_alt(uint32_t option_flags,
                    struct q_useful_buf buffer,
                    struct q_useful_buf_c *completed_token)
 {
-    int                          return_value;
+    psa_status_t                 return_value;
     uint32_t                     completed_token_len;
     struct q_useful_buf_c        actual_nonce;
     Q_USEFUL_BUF_MAKE_STACK_UB(  actual_nonce_storage, 64);
@@ -77,7 +78,11 @@ int token_main_alt(uint32_t option_flags,
 
     *completed_token = (struct q_useful_buf_c){buffer.ptr, completed_token_len};
 
-    return return_value;
+    if (return_value != PSA_SUCCESS) {
+        return (int)return_value;
+    }
+
+    return 0;
 }
 
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */

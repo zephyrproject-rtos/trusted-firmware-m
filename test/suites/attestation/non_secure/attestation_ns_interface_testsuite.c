@@ -150,7 +150,7 @@ static void tfm_attest_test_2004(struct test_result_t *ret)
  */
 static void tfm_attest_test_2005(struct test_result_t *ret)
 {
-    enum psa_attest_err_t err;
+    psa_status_t err;
     uint32_t token_size = TEST_TOKEN_SIZE;
 
     /* Call with with bigger challenge object than allowed */
@@ -159,7 +159,7 @@ static void tfm_attest_test_2005(struct test_result_t *ret)
                                        token_buffer,
                                        &token_size);
 
-    if (err != PSA_ATTEST_ERR_INVALID_INPUT) {
+    if (err != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Attestation should fail with too big challenge object");
         return;
     }
@@ -171,7 +171,7 @@ static void tfm_attest_test_2005(struct test_result_t *ret)
                                        token_buffer,
                                        &token_size);
 
-    if (err != PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW) {
+    if (err != PSA_ERROR_BUFFER_TOO_SMALL) {
         TEST_FAIL("Attestation should fail with too small token buffer");
         return;
     }

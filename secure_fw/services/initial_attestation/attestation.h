@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,6 +22,33 @@ extern "C" {
 enum attest_memory_access_t {
     TFM_ATTEST_ACCESS_RO = 1,
     TFM_ATTEST_ACCESS_RW = 2,
+};
+
+/**
+ * \enum psa_attest_err_t
+ *
+ * \brief Initial attestation service error types
+ *
+ */
+enum psa_attest_err_t {
+    /** Action was performed successfully */
+    PSA_ATTEST_ERR_SUCCESS = 0,
+    /** Boot status data is unavailable or malformed */
+    PSA_ATTEST_ERR_INIT_FAILED,
+    /** Buffer is too small to store required data */
+    PSA_ATTEST_ERR_BUFFER_OVERFLOW,
+    /** Some of the mandatory claims are unavailable*/
+    PSA_ATTEST_ERR_CLAIM_UNAVAILABLE,
+    /** Some parameter or combination of parameters are recognised as invalid:
+     * - challenge size is not allowed
+     * - challenge object is unavailable
+     * - token buffer is unavailable
+     */
+    PSA_ATTEST_ERR_INVALID_INPUT,
+    /** Unexpected error happened during operation */
+    PSA_ATTEST_ERR_GENERAL,
+    /** Following entry is only to ensure the error code of integer size */
+    PSA_ATTEST_ERR_FORCE_INT_SIZE = INT_MAX
 };
 
 /*!
@@ -68,10 +95,10 @@ attest_check_memory_access(void *addr,
  * \brief Initialise the initial attestation service during the TF-M boot up
  *        process.
  *
- * \return Returns PSA_ATTEST_ERR_SUCCESS if init has been completed,
- *         otherwise error as specified in \ref psa_attest_err_t
+ * \return Returns PSA_SUCCESS if init has been completed,
+ *         otherwise error as specified in \ref psa_status_t
  */
-enum psa_attest_err_t attest_init(void);
+psa_status_t attest_init(void);
 
 /*!
  * \brief Get initial attestation token
@@ -83,9 +110,9 @@ enum psa_attest_err_t attest_init(void);
  *                           to attestation service
  * \param[in]     num_outvec Number of elements in out_vec array
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
                                psa_outvec *out_vec, uint32_t num_outvec);
 
@@ -99,9 +126,9 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
  *                           where to store the output data
  * \param[in]     num_outvec Number of elements in out_vec array
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec);
 
@@ -115,9 +142,9 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
  *                           where to store the output data
  * \param[in]     num_outvec Number of elements in out_vec array
  *
- * \return Returns error code as specified in \ref psa_attest_err_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-enum psa_attest_err_t
+psa_status_t
 initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec);
 

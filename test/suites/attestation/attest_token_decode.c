@@ -15,7 +15,7 @@
 #include "qcbor_util.h"
 #include "psa/crypto.h"
 #include "attest_public_key.h"
-
+#include "attestation.h"
 
 /**
  * \file attest_token_decode.c
