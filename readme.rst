@@ -1,5 +1,5 @@
 #############################
-Trusted Firmware M - v1.0-RC1
+Trusted Firmware M - v1.0-RC2
 #############################
 Trusted Firmware M provides a reference implementation of secure world software
 for ARMv8-M.
@@ -51,6 +51,7 @@ This release includes:
         - Crypto Service (PSA API 1.0-beta-1)
         - TF-M Audit Log
         - Platform Service
+        - Internal Trusted Storage (PSA API 1.0.0)
 
     - PSA IPC support
     - Support for Armv8-M mainline and baseline
@@ -140,6 +141,8 @@ Version history
 | v1.0-beta   | 2019-02-15   | 1.0-beta release   |
 +-------------+--------------+--------------------+
 | v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    |
++-------------+--------------+--------------------+
+| v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    |
 +-------------+--------------+--------------------+
 
 --------------
