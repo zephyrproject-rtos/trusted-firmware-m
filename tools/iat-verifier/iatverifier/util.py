@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import cbor
 import yaml
-from ecdsa import SigningKey
+from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 
 from iatverifier import const
@@ -64,32 +64,25 @@ def read_token_map(f):
 
 
 def extract_iat_from_cose(keyfile, tokenfile, keep_going=False):
-    if keyfile:
-        try:
-            sk = SigningKey.from_pem(open(keyfile, 'rb').read())
-        except Exception as e:
-            msg = 'Bad key file "{}": {}'
-            raise ValueError(msg.format(keyfile, e))
-    else:  # no keyfile
-        sk = None
+    key = read_keyfile(keyfile)
 
     try:
         with open(tokenfile, 'rb') as wfh:
-            return get_cose_payload(wfh.read(), sk)
+            return get_cose_payload(wfh.read(), key)
     except Exception as e:
         msg = 'Bad COSE file "{}": {}'
         raise ValueError(msg.format(tokenfile, e))
 
 
-def get_cose_payload(cose, sk=None):
+def get_cose_payload(cose, key=None):
     msg = Sign1Message.decode(cose)
-    if sk:
-        msg.key = sk
+    if key:
+        msg.key = key
         msg.signature = msg.signers
         try:
             msg.verify_signature(alg='ES256')
-        except Exception:
-            raise ValueError('Bad signature')
+        except Exception as e:
+            raise ValueError('Bad signature ({})'.format(e))
     return msg.payload
 
 
@@ -112,6 +105,26 @@ def recursive_bytes_to_strings(d, in_place=False):
     return result
 
 
+def read_keyfile(keyfile):
+    if keyfile:
+        try:
+            key = SigningKey.from_pem(open(keyfile, 'rb').read())
+        except Exception as e:
+            signing_key_error = str(e)
+
+            try:
+                key = VerifyingKey.from_pem(open(keyfile, 'rb').read())
+            except Exception as e:
+                verifying_key_error = str(e)
+
+                msg = 'Bad key file "{}":\n\tpubkey error: {}\n\tprikey error: {}'
+                raise ValueError(msg.format(keyfile, verifying_key_error, signing_key_error))
+    else:  # no keyfile
+        key = None
+
+    return key
+
+
 def _parse_raw_token(raw):
     result = {}
     for raw_key, raw_value in raw.items():
@@ -122,7 +135,7 @@ def _parse_raw_token(raw):
             try:
                 key = FIELD_NAMES[field_name]
             except KeyError:
-                mag = 'Unknown field "{}" in token.'.format(field_name)
+                msg = 'Unknown field "{}" in token.'.format(field_name)
                 raise ValueError(msg)
 
         if key == const.SECURITY_LIFECYCLE:
