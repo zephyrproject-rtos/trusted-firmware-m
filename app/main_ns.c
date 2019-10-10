@@ -21,6 +21,7 @@
 #include "psa_api_test.h"
 #endif
 #include "target_cfg.h"
+#include "tfm_plat_ns.h"
 #include "Driver_USART.h"
 #include "device_cfg.h"
 #ifdef TFM_MULTI_CORE_TOPOLOGY
@@ -141,6 +142,24 @@ static void tfm_ns_multi_core_boot(void)
 #endif
 
 /**
+ * \brief Platform peripherals and devices initialization.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \return  ARM_DRIVER_OK if the initialization succeeds
+*/
+__WEAK int32_t tfm_ns_platform_init(void)
+{
+    int32_t status;
+
+    status = NS_DRIVER_STDIO.Initialize(NULL);
+    if (status == ARM_DRIVER_OK) {
+        status = NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                                         DEFAULT_UART_BAUDRATE);
+    }
+    return status;
+}
+
+/**
  * \brief main() function
  */
 #ifndef __GNUC__
@@ -148,9 +167,11 @@ __attribute__((noreturn))
 #endif
 int main(void)
 {
-    (void)NS_DRIVER_STDIO.Initialize(NULL);
-    NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
-                            DEFAULT_UART_BAUDRATE);
+
+    if (tfm_ns_platform_init() != ARM_DRIVER_OK) {
+        /* Avoid undefined behavior if platform init failed */
+        while(1);
+    }
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
     tfm_ns_multi_core_boot();
