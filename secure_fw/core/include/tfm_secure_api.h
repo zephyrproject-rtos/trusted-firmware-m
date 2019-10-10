@@ -49,7 +49,7 @@ struct tfm_sfn_req_s {
     sfn_t sfn;
     int32_t *args;
     uint32_t caller_part_idx;
-    uint32_t ns_caller;
+    bool ns_caller;
 };
 
 enum tfm_ns_region_e {
@@ -143,15 +143,15 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
      * Use the fact that, if called from Non-Secure, the LSB of the return
      * address is set to 0.
      */
-    desc.ns_caller = (uint32_t)!(
+    desc.ns_caller = !(
            (intptr_t)__builtin_extract_return_addr(__builtin_return_address(0U))
            & 1);
 #else
     /*
-     * Convert the result of cmse_nonsecure_caller from an int to a uint32_t
+     * Convert the result of cmse_nonsecure_caller from an int to a bool
      * to prevent using an int in the tfm_sfn_req_s structure.
      */
-    desc.ns_caller = (cmse_nonsecure_caller() != 0) ? 1U : 0U;
+    desc.ns_caller = (cmse_nonsecure_caller() != 0) ? true : false;
 #endif /* Check for GCC compiler version smaller than 7.3.1 */
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* The veneer of a secure service had been called from Handler mode.

@@ -22,21 +22,21 @@ uint32_t tfm_svcall_psa_framework_version(void);
  * \brief SVC handler for \ref psa_version.
  *
  * \param[in] args              Include all input arguments: sid.
- * \param[in] ns_caller         If 'non-zero', call from non-secure client.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
  *                              Or from secure client.
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
+uint32_t tfm_svcall_psa_version(uint32_t *args, bool ns_caller);
 
 /**
  * \brief SVC handler for \ref psa_connect.
  *
  * \param[in] args              Include all input arguments:
  *                              sid, version.
- * \param[in] ns_caller         If 'non-zero', call from non-secure client.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
  *                              Or from secure client.
  *
  * \retval PSA_SUCCESS          Success.
@@ -48,14 +48,14 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller);
+psa_status_t tfm_svcall_psa_connect(uint32_t *args, bool ns_caller);
 
 /**
  * \brief SVC handler for \ref psa_call.
  *
  * \param[in] args              Include all input arguments:
  *                              handle, in_vec, in_len, out_vec, out_len.
- * \param[in] ns_caller         If 'non-zero', call from non-secure client.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
  *                              Or from secure client.
  * \param[in] lr                EXC_RETURN value of the SVC.
  *
@@ -72,14 +72,13 @@ psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller);
  * \arg                           The message is unrecognized by the RoT
  *                                Service or incorrectly formatted.
  */
-psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller,
-                                 uint32_t lr);
+psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
 
 /**
  * \brief SVC handler for \ref psa_close.
  *
  * \param[in] args              Include all input arguments: handle.
- * \param[in] ns_caller         If 'non-zero', call from non-secure client.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
  *                              Or from secure client.
  *
  * \retval void                 Success.
@@ -89,7 +88,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller,
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller);
+void tfm_svcall_psa_close(uint32_t *args, bool ns_caller);
 
 /**
  * \brief SVC handler for IPC functions

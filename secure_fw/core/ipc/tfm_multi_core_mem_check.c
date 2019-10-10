@@ -442,7 +442,7 @@ static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
 }
 
 int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           uint32_t ns_caller,
+                                           bool ns_caller,
                                            uint32_t privileged)
 {
     uint8_t flags = MEM_CHECK_MPU_READ;
@@ -461,7 +461,7 @@ int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
 }
 
 int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            uint32_t ns_caller,
+                                            bool ns_caller,
                                             uint32_t privileged)
 {
     uint8_t flags = MEM_CHECK_MPU_READWRITE;

@@ -478,7 +478,7 @@ static uint32_t tfm_spm_partition_get_priority(uint32_t partition_idx)
                     partition_priority;
 }
 
-int32_t tfm_memory_check(const void *buffer, size_t len, int32_t ns_caller,
+int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged)
 {

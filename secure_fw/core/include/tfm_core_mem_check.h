@@ -27,7 +27,7 @@
  *         TFM_ERROR_GENERIC otherwise.
  */
 enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                                     uint32_t ns_caller,
+                                                     bool ns_caller,
                                                      uint32_t privileged);
 
 /**
@@ -47,7 +47,7 @@ enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
  *         TFM_ERROR_GENERIC otherwise.
  */
 enum tfm_status_e tfm_core_has_write_access_to_region(const void *p, size_t s,
-                                                      uint32_t ns_caller,
+                                                      bool ns_caller,
                                                       uint32_t privileged);
 
 #endif /* __TFM_CORE_MEM_CHECK_H__ */

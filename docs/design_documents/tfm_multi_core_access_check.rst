@@ -87,7 +87,7 @@ shown below.
 .. code-block:: c
 
     int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                               uint32_t ns_caller,
+                                               bool ns_caller,
                                                uint32_t privileged)
     {
         uint8_t flags = MEM_CHECK_MPU_READ;
@@ -110,7 +110,7 @@ shown below.
 .. code-block:: c
 
     int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                                uint32_t ns_caller,
+                                                bool ns_caller,
                                                 uint32_t privileged)
     {
         uint8_t flags = MEM_CHECK_MPU_READWRITE;

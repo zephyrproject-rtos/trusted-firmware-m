@@ -13,7 +13,7 @@
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
 
-#define NS_CALLER_FLAG          (0x1)
+#define NS_CALLER_FLAG          (true)
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 

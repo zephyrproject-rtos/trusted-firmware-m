@@ -22,7 +22,7 @@ uint32_t tfm_psa_framework_version(void)
     return PSA_FRAMEWORK_VERSION;
 }
 
-uint32_t tfm_psa_version(uint32_t sid, int32_t ns_caller)
+uint32_t tfm_psa_version(uint32_t sid, bool ns_caller)
 {
     struct tfm_spm_service_t *service;
 
@@ -46,8 +46,7 @@ uint32_t tfm_psa_version(uint32_t sid, int32_t ns_caller)
     return service->service_db->version;
 }
 
-psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
-                             int32_t ns_caller)
+psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller)
 {
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
@@ -113,7 +112,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
 psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
                           const psa_invec *inptr, size_t in_num,
                           psa_outvec *outptr, size_t out_num,
-                          int32_t ns_caller, uint32_t privileged)
+                          bool ns_caller, uint32_t privileged)
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
@@ -216,7 +215,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     return PSA_SUCCESS;
 }
 
-void tfm_psa_close(psa_handle_t handle, int32_t ns_caller)
+void tfm_psa_close(psa_handle_t handle, bool ns_caller)
 {
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;

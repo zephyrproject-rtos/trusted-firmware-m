@@ -46,7 +46,7 @@ uint32_t tfm_svcall_psa_framework_version(void)
     return tfm_psa_framework_version();
 }
 
-uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller)
+uint32_t tfm_svcall_psa_version(uint32_t *args, bool ns_caller)
 {
     uint32_t sid;
 
@@ -56,7 +56,7 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, int32_t ns_caller)
     return tfm_psa_version(sid, ns_caller);
 }
 
-psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
+psa_status_t tfm_svcall_psa_connect(uint32_t *args, bool ns_caller)
 {
     uint32_t sid;
     uint32_t version;
@@ -68,7 +68,7 @@ psa_status_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
     return tfm_psa_connect(sid, version, ns_caller);
 }
 
-psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
+psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
 {
     psa_handle_t handle;
     psa_invec *inptr;
@@ -145,7 +145,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller, uint32_t lr)
                         privileged);
 }
 
-void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller)
+void tfm_svcall_psa_close(uint32_t *args, bool ns_caller)
 {
     psa_handle_t handle;
 
@@ -977,13 +977,13 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
-        return tfm_svcall_psa_version(ctx, 0);
+        return tfm_svcall_psa_version(ctx, false);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_svcall_psa_connect(ctx, 0);
+        return tfm_svcall_psa_connect(ctx, false);
     case TFM_SVC_PSA_CALL:
-        return tfm_svcall_psa_call(ctx, 0, lr);
+        return tfm_svcall_psa_call(ctx, false, lr);
     case TFM_SVC_PSA_CLOSE:
-        tfm_svcall_psa_close(ctx, 0);
+        tfm_svcall_psa_close(ctx, false);
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_svcall_psa_wait(ctx);

@@ -61,7 +61,7 @@ int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
 
     desc.sfn = (sfn_t)fn;
     desc.args = args;
-    desc.ns_caller = cmse_nonsecure_caller();
+    desc.ns_caller = (cmse_nonsecure_caller() != 0) ? true : false;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE)
     {

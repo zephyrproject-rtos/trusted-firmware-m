@@ -73,7 +73,7 @@ enum spm_err_t tfm_spm_partition_init(void)
             int32_t res;
 
             desc.args = args;
-            desc.ns_caller = 0U;
+            desc.ns_caller = false;
             desc.sfn = (sfn_t)part->static_data->partition_init;
             desc.sp_id = part->static_data->partition_id;
             res = tfm_core_sfn_request(&desc);
