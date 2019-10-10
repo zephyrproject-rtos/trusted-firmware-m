@@ -52,6 +52,9 @@ endif()
 if (ENABLE_PLATFORM_SERVICE_TESTS)
 	include(${CMAKE_CURRENT_LIST_DIR}/suites/platform/CMakeLists.inc)
 endif()
+if (TFM_MULTI_CORE_TEST)
+	include(${CMAKE_CURRENT_LIST_DIR}/suites/multi_core/CMakeLists.inc)
+endif()
 
 # Include the test partitions
 include(${CMAKE_CURRENT_LIST_DIR}/test_services/CMakeLists.inc)

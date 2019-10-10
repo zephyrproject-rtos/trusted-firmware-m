@@ -20,6 +20,7 @@
 #include "test/suites/core/non_secure/core_ns_tests.h"
 #include "test/suites/ipc/non_secure/ipc_ns_tests.h"
 #include "test/suites/platform/non_secure/platform_ns_tests.h"
+#include "test/suites/multi_core/non_secure/multi_core_ns_test.h"
 
 static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
@@ -82,6 +83,12 @@ static struct test_suite_t test_suites[] = {
     /* Non-secure IPC test cases */
     {&register_testsuite_ns_ipc_interface, 0, 0, 0},
 #endif
+
+#ifdef TFM_MULTI_CORE_TEST
+    /* Multi-core topology test cases */
+    {&register_testsuite_multi_core_ns_interface, 0, 0, 0},
+#endif
+
     /* End of test suites */
     {0, 0, 0, 0}
 };

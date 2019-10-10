@@ -133,6 +133,10 @@ if (ENABLE_AUDIT_LOGGING_SERVICE_TESTS)
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_AUDIT_LOGGING_SERVICE_TESTS APPEND)
 endif()
 
+if (TFM_MULTI_CORE_TEST)
+	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES TFM_MULTI_CORE_TEST APPEND)
+endif()
+
 if (NOT DEFINED TFM_BUILD_IN_SPE)
 	message(FATAL_ERROR "TFM_BUILD_IN_SPE is not set. Cannot specify current building status")
 endif()
