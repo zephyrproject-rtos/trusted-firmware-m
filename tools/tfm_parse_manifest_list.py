@@ -104,7 +104,7 @@ def generate_manifestfilename(env):
             context['utilities'] = utilities
 
             manifest_dir, sep, manifest_name = manifest_path.rpartition('/')
-            outfile_name = manifest_name.replace('yaml', 'h')
+            outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
             outfile_path = manifest_dir + sep + "psa_manifest/" + outfile_name
 
             context['file_name'] = outfile_name.replace('.h', '')
