@@ -136,6 +136,10 @@ extern "C" {
 #define TFM_SECURE_CLIENT_2_SID                                    (0x0000F0E0U)
 #define TFM_SECURE_CLIENT_2_VERSION                                (1U)
 
+/******** TFM_SP_MULTI_CORE_TEST ********/
+#define MULTI_CORE_TEST_DUMMY_SID                                  (0x0000F100U)
+#define MULTI_CORE_TEST_DUMMY_VERSION                              (1U)
+
 #ifdef __cplusplus
 }
 #endif

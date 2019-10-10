@@ -164,6 +164,17 @@
       "version_major": 0,
       "version_minor": 1,
       "pid": 269
+    },
+    {
+      "name": "TFM Multi-core Test",
+      "short_name": "TFM_MULTI_CORE_TEST",
+      "manifest": "test/test_services/tfm_multi_core_test/tfm_multi_core_test.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_MULTI_CORE_TEST",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 270
     }
   ]
 }

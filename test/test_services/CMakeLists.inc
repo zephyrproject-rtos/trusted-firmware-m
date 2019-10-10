@@ -70,6 +70,12 @@ elseif (TFM_PARTITION_TEST_SST)
 		"${CORE_TEST_DIR}/tfm_sst_test_service/tfm_sst_test_service_api.c")
 endif()
 
+if (NOT DEFINED TFM_MULTI_CORE_TEST)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_MULTI_CORE_TEST is undefined.")
+elseif (TFM_MULTI_CORE_TEST)
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_multi_core_test/tfm_multi_core_test.c")
+endif()
+
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/include ABSOLUTE)

@@ -150,6 +150,10 @@ psa_status_t tfm_tfm_sst_test_prepare_veneer(psa_invec *in_vec, size_t in_len, p
 psa_status_t tfm_tfm_secure_client_2_call_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
+#ifdef TFM_MULTI_CORE_TEST
+/******** TFM_SP_MULTI_CORE_TEST ********/
+#endif /* TFM_MULTI_CORE_TEST */
+
 #ifdef __cplusplus
 }
 #endif

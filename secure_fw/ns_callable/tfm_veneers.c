@@ -144,6 +144,10 @@ psa_status_t tfm_sst_test_prepare(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_secure_client_2_call(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
+#ifdef TFM_MULTI_CORE_TEST
+/******** TFM_SP_MULTI_CORE_TEST ********/
+#endif /* TFM_MULTI_CORE_TEST */
+
 
 #define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
     __tfm_secure_gateway_attributes__ \
@@ -290,4 +294,8 @@ TFM_VENEER_FUNCTION(TFM_SP_SST_TEST, tfm_sst_test_prepare)
 /******** TFM_SP_SECURE_CLIENT_2 ********/
 TFM_VENEER_FUNCTION(TFM_SP_SECURE_CLIENT_2, tfm_secure_client_2_call)
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_MULTI_CORE_TEST
+/******** TFM_SP_MULTI_CORE_TEST ********/
+#endif /* TFM_MULTI_CORE_TEST */
 
