@@ -85,6 +85,9 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 else()
 	set (CMSE_FLAGS "-mcmse")
 	set (ARM_FEATURE_CMSE 3)
+
+	# Clear multi-core test setting
+	set (TFM_MULTI_CORE_TEST OFF)
 endif()
 
 if(${COMPILER} STREQUAL "ARMCLANG")
@@ -191,6 +194,11 @@ endif()
 
 if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	add_definitions(-DTFM_MULTI_CORE_TOPOLOGY)
+
+	# Skip multi-core test cases if regression test is disabled
+	if (NOT REGRESSION)
+		set(TFM_MULTI_CORE_TEST OFF)
+	endif()
 endif()
 
 if (TFM_LEGACY_API)

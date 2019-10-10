@@ -310,6 +310,11 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_ENABLE_IRQ_TEST")
 	endif()
 
+	if (TFM_MULTI_CORE_TEST)
+		add_definitions(-DTFM_MULTI_CORE_TEST)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_MULTI_CORE_TEST")
+	endif()
+
 	#Generate binary file from executable
 	compiler_generate_binary_output(${EXE_NAME})
 
