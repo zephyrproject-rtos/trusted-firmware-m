@@ -32,8 +32,6 @@
 #include "Driver_Flash.h"
 
 #include <flash_map/flash_map.h>
-
-#define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
 
 /* Flash device name must be specified by target */

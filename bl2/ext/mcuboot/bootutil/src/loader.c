@@ -39,12 +39,10 @@
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "bootutil_priv.h"
+#include "bootutil/bootutil_log.h"
 #include "bl2/include/tfm_boot_status.h"
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
-
-#define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
-#include "bootutil/bootutil_log.h"
 
 static struct boot_loader_state boot_data;
 uint8_t current_image = 0;

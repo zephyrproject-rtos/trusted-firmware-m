@@ -143,10 +143,11 @@ add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
-message(STATUS "MCUBOOT_IMAGE_NUMBER is set to: '${MCUBOOT_IMAGE_NUMBER}'.")
-message(STATUS "MCUBOOT_UPGRADE_STRATEGY is set to: '${MCUBOOT_UPGRADE_STRATEGY}'.")
-message(STATUS "MCUBOOT_SIGNATURE_TYPE is set to: '${MCUBOOT_SIGNATURE_TYPE}'.")
-message(STATUS "MCUBOOT_HW_KEY is set to: '${MCUBOOT_HW_KEY}'.")
+message("- MCUBOOT_IMAGE_NUMBER: '${MCUBOOT_IMAGE_NUMBER}'.")
+message("- MCUBOOT_UPGRADE_STRATEGY: '${MCUBOOT_UPGRADE_STRATEGY}'.")
+message("- MCUBOOT_SIGNATURE_TYPE: '${MCUBOOT_SIGNATURE_TYPE}'.")
+message("- MCUBOOT_HW_KEY: '${MCUBOOT_HW_KEY}'.")
+message("- MCUBOOT_LOG_LEVEL: '${MCUBOOT_LOG_LEVEL}'.")
 
 #Set macro definitions for the project.
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -185,6 +186,11 @@ if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
 	message(WARNING "ATTEST_BOOT_INTERFACE was set to ${ATTEST_BOOT_INTERFACE}. This configuration is "
 			"deprecated and this feature will probably be removed from MCUBoot in the future.")
 endif()
+
+#Configure log level for MCUBoot.
+get_property(_log_levels CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS)
+list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
+target_compile_definitions(${PROJECT_NAME} PRIVATE BOOT_LOG_LEVEL=${LOG_LEVEL_ID})
 
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

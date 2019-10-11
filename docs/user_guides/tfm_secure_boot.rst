@@ -359,6 +359,23 @@ Compile time switches:
       key-hash (it can have more public keys embedded in and it may have to look
       for the matching one). All the public key(s) must be known at MCUBoot
       build time.
+- MCUBOOT_LOG_LEVEL:
+    Can be used to configure the level of logging in MCUBoot. The possible
+    values are the following:
+
+    - **LOG_LEVEL_OFF**
+    - **LOG_LEVEL_ERROR**
+    - **LOG_LEVEL_WARNING**
+    - **LOG_LEVEL_INFO**
+    - **LOG_LEVEL_DEBUG**
+
+    The logging in MCUBoot can be disabled and thus the code size can be reduced
+    by setting it to ``LOG_LEVEL_OFF``. Its value depends on the build type. If
+    the build type is ``Debug`` and a value has been provided (e.g. through the
+    command line or the CMake GUI) then that value will be used, otherwise it is
+    ``LOG_LEVEL_INFO`` by default. In case of different kinds of ``Release``
+    builds its value is set to ``LOG_LEVEL_OFF`` (any other value will be
+    overridden).
 
 Image versioning
 ================

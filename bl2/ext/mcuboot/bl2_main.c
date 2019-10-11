@@ -19,10 +19,8 @@
 #include "bl2_util.h"
 #include "target.h"
 #include "cmsis.h"
-#include "uart_stdout.h"
 #include "Driver_Flash.h"
 #include "mbedtls/memory_buffer_alloc.h"
-#define BOOT_LOG_LEVEL BOOT_LOG_LEVEL_INFO
 #include "bootutil/bootutil_log.h"
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
@@ -30,6 +28,9 @@
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
 #include "bl2/include/boot_hal.h"
+#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
+#include "uart_stdout.h"
+#endif
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -129,7 +130,9 @@ static void do_boot(struct boot_rsp *rsp)
         BOOT_LOG_ERR("Error while uninitializing Flash Interface");
     }
 
+#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
     stdio_uninit();
+#endif
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     /* Restore the Main Stack Pointer Limit register's reset value
@@ -159,7 +162,9 @@ int main(void)
     __set_MSPLIM(msp_stack_bottom);
 #endif
 
+#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
     stdio_init();
+#endif
 
     BOOT_LOG_INF("Starting bootloader");
 
