@@ -420,6 +420,9 @@ uint32_t *ctx_stack_list[] =
 const struct spm_partition_static_data_t static_data_list[] =
 {
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_NON_SECURE_ID,
 #ifdef TFM_PSA_API
 #if TFM_MULTI_CORE_TOPOLOGY
@@ -442,6 +445,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 #endif
 
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_STORAGE_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -451,6 +457,9 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_ITS_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -461,6 +470,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_AUDIT_LOG
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_AUDIT_LOG_ID,
         .partition_flags      = 0
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -471,6 +483,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_CRYPTO_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -481,6 +496,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_PLATFORM
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_PLATFORM_ID,
         .partition_flags      = 0
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -491,6 +509,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 #endif /* TFM_PARTITION_PLATFORM */
 
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_INITIAL_ATTESTATION_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -501,6 +522,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_TEST_CORE
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_CORE_TEST_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -512,6 +536,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_TEST_CORE
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_CORE_TEST_2_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_APP_ROT
@@ -523,6 +550,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_SECURE_TEST_PARTITION_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -534,6 +564,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_IPC_SERVICE_TEST_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
@@ -545,6 +578,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_IPC_CLIENT_TEST_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_APP_ROT
@@ -556,6 +592,9 @@ const struct spm_partition_static_data_t static_data_list[] =
 
 #ifdef TFM_ENABLE_IRQ_TEST
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_IRQ_TEST_1_ID,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_APP_ROT

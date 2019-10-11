@@ -489,6 +489,14 @@ void tfm_spm_init(void)
     /* Init partition first for it will be used when init service */
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
+
+        /* Check if the PSA framework version matches. */
+        if (partition->static_data->psa_framework_version !=
+            PSA_FRAMEWORK_VERSION) {
+            ERROR_MSG("Warning: PSA Framework Verison is not matched!");
+            continue;
+        }
+
         tfm_spm_hal_configure_default_isolation(partition->platform_data);
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;

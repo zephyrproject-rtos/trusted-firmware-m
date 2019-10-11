@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 {
+  "psa_framework_version": 1.0,
   "name": "TFM_IRQ_TEST_1",
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",

@@ -131,6 +131,9 @@ uint32_t *ctx_stack_list[] =
 const struct spm_partition_static_data_t static_data_list[] =
 {
     {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_NON_SECURE_ID,
 #ifdef TFM_PSA_API
 #if TFM_MULTI_CORE_TOPOLOGY
@@ -157,6 +160,13 @@ const struct spm_partition_static_data_t static_data_list[] =
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{'{'}}
+#ifdef TFM_PSA_API
+    {% if manifest.manifest.psa_framework_version == 1.0 %}
+        .psa_framework_version = 0x0100,
+    {% else %}
+        .psa_framework_version = 0,
+    {% endif %}
+#endif /* defined(TFM_PSA_API) */
         .partition_id         = {{manifest.manifest.name}}_ID,
     {% if manifest.attr.tfm_partition_ipc %}
         .partition_flags      = SPM_PART_FLAG_IPC
