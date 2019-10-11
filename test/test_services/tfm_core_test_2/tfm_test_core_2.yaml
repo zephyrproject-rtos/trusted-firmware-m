@@ -10,7 +10,6 @@
   "name": "TFM_SP_CORE_TEST_2",
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
-  "id": "0x00000003",
   "entry_point": "core_test_2_init",
   "stack_size": "0x0200",
   "heap_size": "0",

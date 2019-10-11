@@ -26,7 +26,7 @@ const struct tfm_spm_service_db_t service_db[] =
             {% for service in manifest.manifest.services %}
     {{'{'}}
         .name = "{{service.name}}",
-        .partition_id = {{manifest.manifest.name}}_ID,
+        .partition_id = {{manifest.manifest.name}},
             {% if service.signal %}
         .signal = {{service.signal}},
             {% else %}

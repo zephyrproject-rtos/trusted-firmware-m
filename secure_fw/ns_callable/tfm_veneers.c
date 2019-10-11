@@ -133,7 +133,7 @@ psa_status_t spm_irq_test_1_execute_test_scenario(psa_invec *, size_t, psa_outve
                                          psa_outvec *out_vec, \
                                          size_t out_len) \
     { \
-        TFM_CORE_IOVEC_SFN_REQUEST(partition_name##_ID, \
+        TFM_CORE_IOVEC_SFN_REQUEST(partition_name, \
                                    (void *) sfn_name, \
                                    in_vec, in_len, out_vec, out_len); \
     }

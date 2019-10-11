@@ -10,7 +10,6 @@
   "name": "TFM_SP_ITS",
   "type": "PSA-ROT",
   "priority": "NORMAL",
-  "id": "0x00000104",
   "entry_point": "tfm_its_req_mngr_init",
   "stack_size": "0x500",
   "heap_size": "0",

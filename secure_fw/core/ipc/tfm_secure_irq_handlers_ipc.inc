@@ -24,7 +24,7 @@
 /* Definitions of the signals of the IRQs (if any) */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
 #ifdef TFM_ENABLE_IRQ_TEST
-    { TFM_IRQ_TEST_1_ID, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
+    { TFM_IRQ_TEST_1, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
 #endif /* TFM_ENABLE_IRQ_TEST */
 };
 
@@ -39,7 +39,7 @@ void TFM_TIMER0_IRQ_Handler(void)
     /* It is OK to call tfm_irq_handler directly from here, as we are already
      * in handler mode, and we will not be pre-empted as we disabled interrupts
      */
-    tfm_irq_handler(TFM_IRQ_TEST_1_ID, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ);
+    tfm_irq_handler(TFM_IRQ_TEST_1, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ);
     __enable_irq();
 }
 

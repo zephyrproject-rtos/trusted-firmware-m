@@ -73,18 +73,18 @@ psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
 
     /* test with valid output pointers */
     ret = tfm_core_get_caller_client_id(&caller_client_id_zi);
-    if (ret != TFM_SUCCESS || caller_client_id_zi != TFM_SP_CORE_TEST_ID) {
+    if (ret != TFM_SUCCESS || caller_client_id_zi != TFM_SP_CORE_TEST) {
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
     ret = tfm_core_get_caller_client_id(&caller_client_id_rw);
-    if (ret != TFM_SUCCESS || caller_client_id_rw != TFM_SP_CORE_TEST_ID) {
+    if (ret != TFM_SUCCESS || caller_client_id_rw != TFM_SP_CORE_TEST) {
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 
     ret = tfm_core_get_caller_client_id(&caller_client_id_stack);
     if (ret != TFM_SUCCESS ||
-            caller_client_id_stack != TFM_SP_CORE_TEST_ID) {
+            caller_client_id_stack != TFM_SP_CORE_TEST) {
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
 

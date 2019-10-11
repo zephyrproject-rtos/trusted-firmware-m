@@ -12,7 +12,7 @@
 {% endfor %}
 #include "cmsis_compiler.h"
 {% macro _irq_record(partition_name, signal, line, priority) -%}
-{ {{ partition_name }}_ID, {{ signal }}, {{ line }}, {{ priority }} },
+{ {{ partition_name }}, {{ signal }}, {{ line }}, {{ priority }} },
 {%- endmacro %}
 
 /* Definitions of the signals of the IRQs (if any) */
@@ -66,7 +66,7 @@ void {{handler.source}}_Handler(void)
      * in handler mode, and we will not be pre-empted as we disabled interrupts
      */
             {% if handler.source %}
-    tfm_irq_handler({{manifest.manifest.name}}_ID, {{handler.signal}}, {{handler.source}});
+    tfm_irq_handler({{manifest.manifest.name}}, {{handler.signal}}, {{handler.source}});
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{manifest.manifest.name}}"
             {% endif %}

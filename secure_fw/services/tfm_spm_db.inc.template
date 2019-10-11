@@ -57,16 +57,16 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$RO$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, $$RO$$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$RW$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$RW$$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$ZI$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _DATA$$ZI$$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _STACK$$ZI$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}, _STACK$$ZI$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$RO$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$RO$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit);
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -167,7 +167,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         .psa_framework_version = 0,
     {% endif %}
 #endif /* defined(TFM_PSA_API) */
-        .partition_id         = {{manifest.manifest.name}}_ID,
+        .partition_id         = {{manifest.manifest.name}},
     {% if manifest.attr.tfm_partition_ipc %}
         .partition_flags      = SPM_PART_FLAG_IPC
     {% else %}
@@ -247,16 +247,16 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{'{'}}
-        .code_start           = PART_REGION_ADDR({{manifest.manifest.name}}, $$Base),
-        .code_limit           = PART_REGION_ADDR({{manifest.manifest.name}}, $$Limit),
-        .ro_start             = PART_REGION_ADDR({{manifest.manifest.name}}, $$RO$$Base),
-        .ro_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, $$RO$$Limit),
-        .rw_start             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$RW$$Base),
-        .rw_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$RW$$Limit),
-        .zi_start             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$ZI$$Base),
-        .zi_limit             = PART_REGION_ADDR({{manifest.manifest.name}}, _DATA$$ZI$$Limit),
-        .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Base),
-        .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}, _STACK$$ZI$$Limit),
+        .code_start           = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$Base),
+        .code_limit           = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$Limit),
+        .ro_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit),
     {{'},'}}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */

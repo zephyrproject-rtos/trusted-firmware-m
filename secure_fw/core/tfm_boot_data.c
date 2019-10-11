@@ -69,7 +69,7 @@ struct boot_data_access_policy {
  *        (identified by major_type).
  */
 static const struct boot_data_access_policy access_policy_table[] = {
-    {TFM_SP_INITIAL_ATTESTATION_ID, TLV_MAJOR_IAS},
+    {TFM_SP_INITIAL_ATTESTATION, TLV_MAJOR_IAS},
 };
 
 /*!

@@ -12,11 +12,6 @@
   "version_minor": 1,
   "file_list": [
     {
-        "name": "Secure Partition ID definitions",
-        "short_name": "tfm_partition_defs",
-        "output": "secure_fw/services/tfm_partition_defs.inc"
-    },
-    {
         "name": "Secure Partition declarations",
         "short_name": "tfm_partition_list",
         "output": "secure_fw/services/tfm_spm_db.inc"

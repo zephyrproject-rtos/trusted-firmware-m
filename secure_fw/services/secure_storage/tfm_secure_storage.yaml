@@ -10,7 +10,6 @@
   "name": "TFM_SP_STORAGE",
   "type": "PSA-ROT",
   "priority": "NORMAL",
-  "id": "0x00000100",
   "entry_point": "tfm_sst_req_mngr_init",
   "stack_size": "0xA00",
   "heap_size": "0",

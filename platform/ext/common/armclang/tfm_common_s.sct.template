@@ -54,7 +54,7 @@ LR_CODE S_CODE_START {
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-    {{manifest.manifest.name}} +0 ALIGN 32 {
+    {{manifest.manifest.name}}_LINKER +0 ALIGN 32 {
     {% if manifest.manifest.linker_pattern.library_list %}
         {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RO)
@@ -93,7 +93,7 @@ LR_CODE S_CODE_START {
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-    {{manifest.manifest.name}} +0 ALIGN 32 {
+    {{manifest.manifest.name}}_LINKER +0 ALIGN 32 {
     {% if manifest.manifest.linker_pattern.library_list %}
         {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RO)
@@ -176,7 +176,7 @@ LR_CODE S_CODE_START {
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-    {{manifest.manifest.name}}_DATA +0 ALIGN 32 {
+    {{manifest.manifest.name}}_LINKER_DATA +0 ALIGN 32 {
     {% if manifest.manifest.linker_pattern.library_list %}
         {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
@@ -193,12 +193,12 @@ LR_CODE S_CODE_START {
 
     {% if manifest.attr.tfm_partition_ipc %}
 #if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
+    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
     }
 #endif
     {% else %}
 #if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY 0 {
+    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
     }
 #endif
     {% endif %}
@@ -259,7 +259,7 @@ LR_CODE S_CODE_START {
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-    {{manifest.manifest.name}}_DATA +0 ALIGN 32 {
+    {{manifest.manifest.name}}_LINKER_DATA +0 ALIGN 32 {
     {% if manifest.manifest.linker_pattern.library_list %}
         {% for pattern in manifest.manifest.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
@@ -276,12 +276,12 @@ LR_CODE S_CODE_START {
 
     {% if manifest.attr.tfm_partition_ipc %}
 #if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
+    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
     }
 #endif
     {% else %}
 #if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_STACK +0 ALIGN 128 EMPTY 0 {
+    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
     }
 #endif
     {% endif %}

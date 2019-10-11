@@ -19,12 +19,12 @@
 #include "test/test_services/tfm_ipc_service/psa_manifest/tfm_ipc_service_partition.h"
 #include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
-#include "secure_fw/services/tfm_partition_defs.inc"
+#include "psa_manifest/pid.h"
 
 /* Definitions of the signals of the IRQs */
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
 #ifdef TFM_ENABLE_IRQ_TEST
-    { TFM_IRQ_TEST_1_ID, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
+    { TFM_IRQ_TEST_1, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
 #endif /* TFM_ENABLE_IRQ_TEST */
 };
 
@@ -46,7 +46,7 @@ extern void SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ_isr(void);
 #ifdef TFM_ENABLE_IRQ_TEST
 void TFM_TIMER0_IRQ_Handler(void)
 {
-    priv_irq_handler_main(TFM_IRQ_TEST_1_ID,
+    priv_irq_handler_main(TFM_IRQ_TEST_1,
                           (uint32_t)SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ_isr,
                           SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ,
                           TFM_TIMER0_IRQ);

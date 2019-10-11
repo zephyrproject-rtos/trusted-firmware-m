@@ -10,9 +10,9 @@
 {% for header in utilities.manifest_header_list %}
 #include "{{header}}"
 {% endfor %}
-#include "secure_fw/services/tfm_partition_defs.inc"
+#include "psa_manifest/pid.h"
 {% macro _irq_record(partition_name, signal, line, priority) -%}
-{ {{ partition_name }}_ID, {{ signal }}, {{ line }}, {{ priority }} },
+{ {{ partition_name }}, {{ signal }}, {{ line }}, {{ priority }} },
 {%- endmacro %}
 
 /* Definitions of the signals of the IRQs */
@@ -83,7 +83,7 @@ void {{handler.source}}_Handler(void)
             {% endif %}
 {
             {% if handler.source %}
-    priv_irq_handler_main({{manifest.manifest.name}}_ID,
+    priv_irq_handler_main({{manifest.manifest.name}},
                           (uint32_t){{handler.signal}}_isr,
                           {{handler.signal}},
                           {{handler.source}});
