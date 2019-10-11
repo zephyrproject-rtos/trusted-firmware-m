@@ -13,119 +13,131 @@
   "manifest_list": [
     {
       "name": "Secure Storage Service",
-      "short_name": "SST",
+      "short_name": "TFM_SP_STORAGE",
       "manifest": "secure_fw/services/secure_storage/tfm_secure_storage.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 256
     },
     {
       "name": "TF-M Internal Trusted Storage Service",
-      "short_name": "TFM_ITS",
+      "short_name": "TFM_SP_ITS",
       "manifest": "secure_fw/services/internal_trusted_storage/tfm_internal_trusted_storage.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 257
     },
     {
       "name": "TFM Audit Log Service",
-      "short_name": "TFM_Audit_Log",
+      "short_name": "TFM_SP_AUDIT_LOG",
       "manifest": "secure_fw/services/audit_logging/tfm_audit_logging.yaml",
       "conditional": "TFM_PARTITION_AUDIT_LOG",
       "tfm_extensions": true,
       "tfm_partition_ipc": false,
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 258
     },
     {
       "name": "TFM Crypto Service",
-      "short_name": "TFM_Crypto",
+      "short_name": "TFM_SP_CRYPTO",
       "manifest": "secure_fw/services/crypto/tfm_crypto.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 259
     },
     {
       "name": "TFM Platform Service",
-      "short_name": "TFM_SP_Platform",
+      "short_name": "TFM_SP_PLATFORM",
       "manifest": "secure_fw/services/platform/tfm_platform.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": false,
       "conditional": "TFM_PARTITION_PLATFORM",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 260
     },
     {
       "name": "TFM Initial Attestation Service",
-      "short_name": "TFM_Init_Attest",
+      "short_name": "TFM_SP_INITIAL_ATTESTATION",
       "manifest": "secure_fw/services/initial_attestation/tfm_initial_attestation.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 261
     },
     {
       "name": "TFM Core Test Service",
-      "short_name": "TFM_Core_Test",
+      "short_name": "TFM_SP_CORE_TEST",
       "manifest": "test/test_services/tfm_core_test/tfm_test_core.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 262
     },
     {
       "name": "TFM Core Test Service 2",
-      "short_name": "TFM_Core_Test_2",
+      "short_name": "TFM_SP_CORE_TEST_2",
       "manifest": "test/test_services/tfm_core_test_2/tfm_test_core_2.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 263
     },
     {
       "name": "TFM Secure Client Service",
-      "short_name": "TFM_Secure_Client",
+      "short_name": "TFM_SP_SECURE_TEST_PARTITION",
       "manifest": "test/test_services/tfm_secure_client_service/tfm_test_client_service.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 264
     },
     {
       "name": "TFM IPC Service Test",
-      "short_name": "TFM_IPC_Service",
+      "short_name": "TFM_SP_IPC_SERVICE_TEST",
       "manifest": "test/test_services/tfm_ipc_service/tfm_ipc_service_partition.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 265
     },
     {
       "name": "TFM IPC Client Service",
-      "short_name": "TFM_IPC_Client",
+      "short_name": "TFM_SP_IPC_CLIENT_TEST",
       "manifest": "test/test_services/tfm_ipc_client/tfm_ipc_client_partition.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 266
     },
     {
       "name": "TFM IRQ Test Service 1",
-      "short_name": "TFM_IRQ_Test_1",
+      "short_name": "TFM_IRQ_TEST_1",
       "manifest": "test/test_services/tfm_irq_test_service_1/tfm_irq_test_service_1.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_ENABLE_IRQ_TEST",
       "version_major": 0,
-      "version_minor": 1
+      "version_minor": 1,
+      "pid": 267
     }
   ]
 }
