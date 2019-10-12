@@ -86,7 +86,7 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
 }
 
 __attribute__((section("SFN")))
-psa_status_t tfm_nspm_thread_entry(void)
+void tfm_nspm_thread_entry(void)
 {
 #ifdef TFM_CORE_DEBUG
     /* Jumps to non-secure code */
@@ -97,7 +97,6 @@ psa_status_t tfm_nspm_thread_entry(void)
 
     /* Should not run here */
     TFM_ASSERT(false);
-    return PSA_SUCCESS;
 }
 
 void configure_ns_code(void)

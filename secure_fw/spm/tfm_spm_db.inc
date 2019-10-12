@@ -59,47 +59,47 @@
 /** Declarations of partition init functions */
 /**************************************************************************/
 #ifdef TFM_PSA_API
-extern psa_status_t tfm_nspm_thread_entry(void);
+extern void tfm_nspm_thread_entry(void);
 #endif
 
-extern int32_t tfm_sst_req_mngr_init(void);
+extern void tfm_sst_req_mngr_init(void);
 
-extern int32_t tfm_its_req_mngr_init(void);
+extern void tfm_its_req_mngr_init(void);
 
 #ifdef TFM_PARTITION_AUDIT_LOG
-extern int32_t audit_core_init(void);
+extern void audit_core_init(void);
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
-extern int32_t tfm_crypto_init(void);
+extern void tfm_crypto_init(void);
 
 #ifdef TFM_PARTITION_PLATFORM
-extern int32_t platform_sp_init(void);
+extern void platform_sp_init(void);
 #endif /* TFM_PARTITION_PLATFORM */
 
-extern int32_t attest_partition_init(void);
+extern void attest_partition_init(void);
 
 #ifdef TFM_PARTITION_TEST_CORE
-extern int32_t core_test_init(void);
+extern void core_test_init(void);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_CORE
-extern int32_t core_test_2_init(void);
+extern void core_test_2_init(void);
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-extern int32_t tfm_secure_client_service_init(void);
+extern void tfm_secure_client_service_init(void);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
-extern int32_t ipc_service_test_main(void);
+extern void ipc_service_test_main(void);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
-extern int32_t ipc_client_test_main(void);
+extern void ipc_client_test_main(void);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef TFM_ENABLE_IRQ_TEST
-extern int32_t tfm_irq_test_1_init(void);
+extern void tfm_irq_test_1_init(void);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
 /**************************************************************************/

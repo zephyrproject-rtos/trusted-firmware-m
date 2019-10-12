@@ -33,14 +33,14 @@
 /** Declarations of partition init functions */
 /**************************************************************************/
 #ifdef TFM_PSA_API
-extern psa_status_t tfm_nspm_thread_entry(void);
+extern void tfm_nspm_thread_entry(void);
 #endif
 
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-extern int32_t {{manifest.manifest.entry_point}}(void);
+extern void {{manifest.manifest.entry_point}}(void);
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}

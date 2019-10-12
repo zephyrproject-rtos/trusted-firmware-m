@@ -38,11 +38,9 @@ int32_t tfm_nspm_get_current_client_id(void);
 /**
  * \brief NSPM thread main entry function
  *
- * \return  PSA_SUCCESS indicates failed.
- *
  * Note: This function should not return back.
  */
-psa_status_t tfm_nspm_thread_entry(void);
+void tfm_nspm_thread_entry(void);
 #endif
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY

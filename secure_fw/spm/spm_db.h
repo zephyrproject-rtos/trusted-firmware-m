@@ -11,7 +11,7 @@
 struct spm_partition_desc_t;
 struct spm_partition_db_t;
 
-typedef psa_status_t(*sp_init_function)(void);
+typedef void(*sp_entry_point)(void);
 
 #define TFM_PARTITION_TYPE_APP   "APPLICATION-ROT"
 #define TFM_PARTITION_TYPE_PSA   "PSA-ROT"
@@ -40,7 +40,7 @@ struct spm_partition_static_data_t {
     uint32_t partition_id;
     uint32_t partition_flags;
     uint32_t partition_priority;
-    sp_init_function partition_init;
+    sp_entry_point partition_init;
 };
 
 /**
