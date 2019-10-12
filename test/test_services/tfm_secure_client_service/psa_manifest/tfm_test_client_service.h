@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG                     (1U << ( 0 + 4))
+#define TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIGNAL                  (1U << (0 + 4))
 
 #ifdef __cplusplus
 }

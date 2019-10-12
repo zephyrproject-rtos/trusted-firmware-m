@@ -472,16 +472,17 @@ psa_ps_status_t tfm_sst_req_mngr_init(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_SST_SET_SIG) {
-            ps_signal_handle(TFM_SST_SET_SIG, tfm_sst_set_ipc);
-        } else if (signals & TFM_SST_GET_SIG) {
-            ps_signal_handle(TFM_SST_GET_SIG, tfm_sst_get_ipc);
-        } else if (signals & TFM_SST_GET_INFO_SIG) {
-            ps_signal_handle(TFM_SST_GET_INFO_SIG, tfm_sst_get_info_ipc);
-        } else if (signals & TFM_SST_REMOVE_SIG) {
-            ps_signal_handle(TFM_SST_REMOVE_SIG, tfm_sst_remove_ipc);
-        } else if (signals & TFM_SST_GET_SUPPORT_SIG) {
-            ps_signal_handle(TFM_SST_GET_SUPPORT_SIG, tfm_sst_get_support_ipc);
+        if (signals & TFM_SST_SET_SIGNAL) {
+            ps_signal_handle(TFM_SST_SET_SIGNAL, tfm_sst_set_ipc);
+        } else if (signals & TFM_SST_GET_SIGNAL) {
+            ps_signal_handle(TFM_SST_GET_SIGNAL, tfm_sst_get_ipc);
+        } else if (signals & TFM_SST_GET_INFO_SIGNAL) {
+            ps_signal_handle(TFM_SST_GET_INFO_SIGNAL, tfm_sst_get_info_ipc);
+        } else if (signals & TFM_SST_REMOVE_SIGNAL) {
+            ps_signal_handle(TFM_SST_REMOVE_SIGNAL, tfm_sst_remove_ipc);
+        } else if (signals & TFM_SST_GET_SUPPORT_SIGNAL) {
+            ps_signal_handle(TFM_SST_GET_SUPPORT_SIGNAL,
+                             tfm_sst_get_support_ipc);
         } else {
             tfm_abort();
         }

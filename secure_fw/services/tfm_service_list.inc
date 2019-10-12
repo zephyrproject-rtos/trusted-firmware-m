@@ -29,7 +29,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SST_SET",
         .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_SET_SIG,
+        .signal = TFM_SST_SET_SIGNAL,
         .sid = 0x00000060,
         .non_secure_client = true,
         .version = 1,
@@ -38,7 +38,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SST_GET",
         .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_SIG,
+        .signal = TFM_SST_GET_SIGNAL,
         .sid = 0x00000061,
         .non_secure_client = true,
         .version = 1,
@@ -47,7 +47,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SST_GET_INFO",
         .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_INFO_SIG,
+        .signal = TFM_SST_GET_INFO_SIGNAL,
         .sid = 0x00000062,
         .non_secure_client = true,
         .version = 1,
@@ -56,7 +56,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SST_REMOVE",
         .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_REMOVE_SIG,
+        .signal = TFM_SST_REMOVE_SIGNAL,
         .sid = 0x00000063,
         .non_secure_client = true,
         .version = 1,
@@ -65,7 +65,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SST_GET_SUPPORT",
         .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_SUPPORT_SIG,
+        .signal = TFM_SST_GET_SUPPORT_SIGNAL,
         .sid = 0x00000064,
         .non_secure_client = true,
         .version = 1,
@@ -76,7 +76,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ITS_SET",
         .partition_id = TFM_SP_ITS,
-        .signal = TFM_ITS_SET_SIG,
+        .signal = TFM_ITS_SET_SIGNAL,
         .sid = 0x00000070,
         .non_secure_client = true,
         .version = 1,
@@ -85,7 +85,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ITS_GET",
         .partition_id = TFM_SP_ITS,
-        .signal = TFM_ITS_GET_SIG,
+        .signal = TFM_ITS_GET_SIGNAL,
         .sid = 0x00000071,
         .non_secure_client = true,
         .version = 1,
@@ -94,7 +94,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ITS_GET_INFO",
         .partition_id = TFM_SP_ITS,
-        .signal = TFM_ITS_GET_INFO_SIG,
+        .signal = TFM_ITS_GET_INFO_SIGNAL,
         .sid = 0x00000072,
         .non_secure_client = true,
         .version = 1,
@@ -103,7 +103,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ITS_REMOVE",
         .partition_id = TFM_SP_ITS,
-        .signal = TFM_ITS_REMOVE_SIG,
+        .signal = TFM_ITS_REMOVE_SIGNAL,
         .sid = 0x00000073,
         .non_secure_client = true,
         .version = 1,
@@ -114,7 +114,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_CRYPTO",
         .partition_id = TFM_SP_CRYPTO,
-        .signal = TFM_CRYPTO_SIG,
+        .signal = TFM_CRYPTO_SIGNAL,
         .sid = 0x00000080,
         .non_secure_client = true,
         .version = 1,
@@ -125,7 +125,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ATTEST_GET_TOKEN",
         .partition_id = TFM_SP_INITIAL_ATTESTATION,
-        .signal = PSA_ATTEST_GET_TOKEN_SIG,
+        .signal = TFM_ATTEST_GET_TOKEN_SIGNAL,
         .sid = 0x00000020,
         .non_secure_client = true,
         .version = 1,
@@ -134,7 +134,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_ATTEST_GET_TOKEN_SIZE",
         .partition_id = TFM_SP_INITIAL_ATTESTATION,
-        .signal = PSA_ATTEST_GET_TOKEN_SIZE_SIG,
+        .signal = TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL,
         .sid = 0x00000021,
         .non_secure_client = true,
         .version = 1,
@@ -316,7 +316,7 @@ const struct tfm_spm_service_db_t service_db[] =
     {
         .name = "TFM_SECURE_CLIENT_SFN_RUN_TESTS",
         .partition_id = TFM_SP_SECURE_TEST_PARTITION,
-        .signal = TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG,
+        .signal = TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIGNAL,
         .sid = 0x0000F000,
         .non_secure_client = true,
         .version = 1,

@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-#define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SIGNAL        (1U << ( 0 + 4))
-#define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SIGNAL        (1U << ( 1 + 4))
+#define SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SIGNAL        (1U << (0 + 4))
+#define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SIGNAL        (1U << (1 + 4))
 
 #define SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ                  (1U << (27 + 4))
 

@@ -14,10 +14,10 @@
 extern "C" {
 #endif
 
-#define TFM_ITS_SET_SIG                                         (1U << ( 0 + 4))
-#define TFM_ITS_GET_SIG                                         (1U << ( 1 + 4))
-#define TFM_ITS_GET_INFO_SIG                                    (1U << ( 2 + 4))
-#define TFM_ITS_REMOVE_SIG                                      (1U << ( 3 + 4))
+#define TFM_ITS_SET_SIGNAL                                      (1U << (0 + 4))
+#define TFM_ITS_GET_SIGNAL                                      (1U << (1 + 4))
+#define TFM_ITS_GET_INFO_SIGNAL                                 (1U << (2 + 4))
+#define TFM_ITS_REMOVE_SIGNAL                                   (1U << (3 + 4))
 
 #ifdef __cplusplus
 }

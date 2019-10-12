@@ -145,11 +145,11 @@ enum psa_attest_err_t attest_partition_init(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & PSA_ATTEST_GET_TOKEN_SIG) {
-            attest_signal_handle(PSA_ATTEST_GET_TOKEN_SIG,
+        if (signals & TFM_ATTEST_GET_TOKEN_SIGNAL) {
+            attest_signal_handle(TFM_ATTEST_GET_TOKEN_SIGNAL,
                                  psa_attest_get_token);
-        } else if (signals & PSA_ATTEST_GET_TOKEN_SIZE_SIG) {
-            attest_signal_handle(PSA_ATTEST_GET_TOKEN_SIZE_SIG,
+        } else if (signals & TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL) {
+            attest_signal_handle(TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL,
                                  psa_attest_get_token_size);
         } else {
             tfm_abort();

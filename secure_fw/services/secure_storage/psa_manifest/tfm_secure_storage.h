@@ -14,11 +14,11 @@
 extern "C" {
 #endif
 
-#define TFM_SST_SET_SIG                                         (1U << ( 0 + 4))
-#define TFM_SST_GET_SIG                                         (1U << ( 1 + 4))
-#define TFM_SST_GET_INFO_SIG                                    (1U << ( 2 + 4))
-#define TFM_SST_REMOVE_SIG                                      (1U << ( 3 + 4))
-#define TFM_SST_GET_SUPPORT_SIG                                 (1U << ( 4 + 4))
+#define TFM_SST_SET_SIGNAL                                      (1U << (0 + 4))
+#define TFM_SST_GET_SIGNAL                                      (1U << (1 + 4))
+#define TFM_SST_GET_INFO_SIGNAL                                 (1U << (2 + 4))
+#define TFM_SST_REMOVE_SIGNAL                                   (1U << (3 + 4))
+#define TFM_SST_GET_SUPPORT_SIGNAL                              (1U << (4 + 4))
 
 #ifdef __cplusplus
 }

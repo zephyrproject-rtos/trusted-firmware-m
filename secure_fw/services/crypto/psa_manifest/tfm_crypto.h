@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define TFM_CRYPTO_SIG                                          (1U << ( 0 + 4))
+#define TFM_CRYPTO_SIGNAL                                       (1U << (0 + 4))
 
 #ifdef __cplusplus
 }

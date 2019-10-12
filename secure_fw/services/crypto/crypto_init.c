@@ -214,9 +214,9 @@ static void tfm_crypto_ipc_handler(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_CRYPTO_SIG) {
+        if (signals & TFM_CRYPTO_SIGNAL) {
             /* Extract the message */
-            if (psa_get(TFM_CRYPTO_SIG, &msg) != PSA_SUCCESS) {
+            if (psa_get(TFM_CRYPTO_SIGNAL, &msg) != PSA_SUCCESS) {
                 /* FIXME: Should be replaced by TF-M error handling */
                 while (1) {
                     ;

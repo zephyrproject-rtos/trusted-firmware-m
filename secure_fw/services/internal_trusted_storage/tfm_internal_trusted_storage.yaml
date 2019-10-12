@@ -46,7 +46,6 @@
   "services" : [{
     "name": "TFM_ITS_SET",
     "sid": "0x00000070",
-    "signal": "TFM_ITS_SET_SIG",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"
@@ -54,7 +53,6 @@
    {
     "name": "TFM_ITS_GET",
     "sid": "0x00000071",
-    "signal": "TFM_ITS_GET_SIG",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"
@@ -62,7 +60,6 @@
    {
     "name": "TFM_ITS_GET_INFO",
     "sid": "0x00000072",
-    "signal": "TFM_ITS_GET_INFO_SIG",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"
@@ -70,7 +67,6 @@
    {
     "name": "TFM_ITS_REMOVE",
     "sid": "0x00000073",
-    "signal": "TFM_ITS_REMOVE_SIG",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"

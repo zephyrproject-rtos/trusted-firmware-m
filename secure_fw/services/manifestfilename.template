@@ -18,11 +18,7 @@ extern "C" {
     {% set ns = namespace(iterator_counter=0) %}
     {% if manifest.services %}
         {% for service in manifest.services %}
-            {% if service.signal %}
-#define {{"%-55s"|format(service.signal)}} (1U << ({{"%2d"|format(ns.iterator_counter)}} + 4))
-            {% else %}
-#define {{"%-55s"|format(service.name+'_SIGNAL')}} (1U << ({{"%2d"|format(ns.iterator_counter)}} + 4))
-            {% endif %}
+#define {{"%-55s"|format(service.name + "_SIGNAL")}} (1U << ({{"%d"|format(ns.iterator_counter)}} + 4))
             {% set ns.iterator_counter = ns.iterator_counter + 1 %}
         {% endfor %}
     {% endif %}
@@ -35,7 +31,7 @@ extern "C" {
 
     {% set irq_ns = namespace(irq_iterator_counter=27) %}
     {% for irq in manifest.irqs %}
-#define {{"%-55s"|format(irq.signal)}} (1U << ({{"%2d"|format(irq_ns.irq_iterator_counter)}} + 4))
+#define {{"%-55s"|format(irq.signal)}} (1U << ({{"%d"|format(irq_ns.irq_iterator_counter)}} + 4))
         {% set irq_ns.irq_iterator_counter = irq_ns.irq_iterator_counter - 1 %}
     {% endfor %}
     {% if attr.tfm_partition_ipc %}

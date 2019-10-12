@@ -25,8 +25,8 @@ int32_t tfm_secure_client_service_init(void)
     psa_msg_t msg;
 
     while (1) {
-        psa_wait(TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG, PSA_BLOCK);
-        psa_get(TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIG, &msg);
+        psa_wait(TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIGNAL, PSA_BLOCK);
+        psa_get(TFM_SECURE_CLIENT_SFN_RUN_TESTS_SIGNAL, &msg);
         switch (msg.type) {
         case PSA_IPC_CONNECT:
             psa_reply(msg.handle, PSA_SUCCESS);

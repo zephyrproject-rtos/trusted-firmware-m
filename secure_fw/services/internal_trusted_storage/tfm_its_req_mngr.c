@@ -362,14 +362,14 @@ psa_status_t tfm_its_req_mngr_init(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_ITS_SET_SIG) {
-            its_signal_handle(TFM_ITS_SET_SIG, tfm_its_set_ipc);
-        } else if (signals & TFM_ITS_GET_SIG) {
-            its_signal_handle(TFM_ITS_GET_SIG, tfm_its_get_ipc);
-        } else if (signals & TFM_ITS_GET_INFO_SIG) {
-            its_signal_handle(TFM_ITS_GET_INFO_SIG, tfm_its_get_info_ipc);
-        } else if (signals & TFM_ITS_REMOVE_SIG) {
-            its_signal_handle(TFM_ITS_REMOVE_SIG, tfm_its_remove_ipc);
+        if (signals & TFM_ITS_SET_SIGNAL) {
+            its_signal_handle(TFM_ITS_SET_SIGNAL, tfm_its_set_ipc);
+        } else if (signals & TFM_ITS_GET_SIGNAL) {
+            its_signal_handle(TFM_ITS_GET_SIGNAL, tfm_its_get_ipc);
+        } else if (signals & TFM_ITS_GET_INFO_SIGNAL) {
+            its_signal_handle(TFM_ITS_GET_INFO_SIGNAL, tfm_its_get_info_ipc);
+        } else if (signals & TFM_ITS_REMOVE_SIGNAL) {
+            its_signal_handle(TFM_ITS_REMOVE_SIGNAL, tfm_its_remove_ipc);
         } else {
             tfm_abort();
         }

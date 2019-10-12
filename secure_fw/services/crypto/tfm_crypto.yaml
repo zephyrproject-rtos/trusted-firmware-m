@@ -334,7 +334,6 @@
     {
       "name": "TFM_CRYPTO",
       "sid": "0x00000080",
-      "signal": "TFM_CRYPTO_SIG",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"

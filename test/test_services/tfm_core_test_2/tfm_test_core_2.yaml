@@ -66,7 +66,6 @@
     {
       "name": "SPM_CORE_TEST_2_SLAVE_SERVICE",
       "sid": "0x0000F040",
-      "signal": "SPM_CORE_TEST_2_SLAVE_SERVICE_SIGNAL",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
@@ -74,7 +73,6 @@
     {
       "name": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID",
       "sid": "0x0000F041",
-      "signal": "SPM_CORE_TEST_2_CHECK_CALLER_CLIENT_ID_SIGNAL",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
@@ -82,7 +80,6 @@
     {
       "name": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE",
       "sid": "0x0000F042",
-      "signal": "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SIGNAL",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
@@ -90,7 +87,6 @@
     {
       "name": "SPM_CORE_TEST_2_INVERT",
       "sid": "0x0000F043",
-      "signal": "SPM_CORE_TEST_2_INVERT_SIGNAL",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
@@ -98,7 +94,6 @@
     {
     "name": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO",
     "sid": "0x0000F044",
-    "signal": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"
@@ -106,7 +101,6 @@
     {
     "name": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO",
     "sid": "0x0000F045",
-    "signal": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SIGNAL",
     "non_secure_clients": true,
     "version": 1,
     "version_policy": "STRICT"
