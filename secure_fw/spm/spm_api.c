@@ -24,7 +24,7 @@
 #define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1
 
 /* Define SPM DB structure */
-#include "secure_fw/services/tfm_spm_db.inc"
+#include "tfm_spm_db.inc"
 
 uint32_t get_partition_idx(uint32_t partition_id)
 {
