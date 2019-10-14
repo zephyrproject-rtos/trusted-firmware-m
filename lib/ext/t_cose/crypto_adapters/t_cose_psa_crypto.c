@@ -143,21 +143,12 @@ t_cose_crypto_pub_key_verify(int32_t               cose_algorithm_id,
 
     verification_key_psa = (psa_key_handle_t)verification_key.k.key_handle;
 
-
-    /* The official PSA Crypto API expected to be formally set in 2020
-     * uses psa_verify_hash() instead of psa_asymmetric_verify().
-     * This older API is used because Mbed Crypto 2.0 provides
-     * backwards compatibility to this with crypto_compat.h and there
-     * is no forward compatibility in the other direction. If Mbed
-     * Crypto ceases providing backwards compatibility then this code
-     * has to be changed to use psa_verify_hash().
-     */
-    psa_result = psa_asymmetric_verify(verification_key_psa,
-                                       psa_alg_id,
-                                       hash_to_verify.ptr,
-                                       hash_to_verify.len,
-                                       signature.ptr,
-                                       signature.len);
+    psa_result = psa_verify_hash(verification_key_psa,
+                                 psa_alg_id,
+                                 hash_to_verify.ptr,
+                                 hash_to_verify.len,
+                                 signature.ptr,
+                                 signature.len);
 
     return_value = psa_status_to_t_cose_error_signing(psa_result);
 
@@ -204,21 +195,13 @@ t_cose_crypto_pub_key_sign(int32_t                cose_algorithm_id,
     /* It is assumed that this call is checking the signature_buffer
      * length and won't write off the end of it.
      */
-    /* The official PSA Crypto API expected to be formally set in 2020
-     * uses psa_sign_hash() instead of psa_asymmetric_sign().  This
-     * older API is used because Mbed Crypto 2.0 provides backwards
-     * compatibility to this crypto_compat.h and there is no forward
-     * compatibility in the other direction. If Mbed Crypto ceases
-     * providing backwards compatibility then this code has to be
-     * changed to use psa_sign_hash().
-     */
-    psa_result = psa_asymmetric_sign(signing_key_psa,
-                                     psa_alg_id,
-                                     hash_to_sign.ptr,
-                                     hash_to_sign.len,
-                                     signature_buffer.ptr, /* Sig buf */
-                                     signature_buffer.len, /* Sig buf size */
-                                    &signature_len);       /* Sig length */
+    psa_result = psa_sign_hash(signing_key_psa,
+                               psa_alg_id,
+                               hash_to_sign.ptr,
+                               hash_to_sign.len,
+                               signature_buffer.ptr, /* Sig buf */
+                               signature_buffer.len, /* Sig buf size */
+                               &signature_len);      /* Sig length */
 
     return_value = psa_status_to_t_cose_error_signing(psa_result);
 

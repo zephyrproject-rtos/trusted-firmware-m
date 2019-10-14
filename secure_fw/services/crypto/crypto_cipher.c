@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -375,5 +375,23 @@ psa_status_t tfm_crypto_cipher_abort(psa_invec in_vec[],
 
     return status;
 #endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
+}
+
+psa_status_t tfm_crypto_cipher_encrypt(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_cipher_decrypt(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
 }
 /*!@}*/

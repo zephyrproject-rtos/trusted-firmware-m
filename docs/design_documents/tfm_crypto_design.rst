@@ -62,10 +62,10 @@ components, which are listed below:
    | Alloc module                | This module handles the allocation of contexts for multipart  | ``./secure_fw/services/crypto/crypto_alloc.c``                       |
    |                             | operations in the Secure world.                               |                                                                      |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | Service modules             | These modules (AEAD, Asymmetric, Cipher, Generator, Hash, Key,| ``./secure_fw/services/crypto/crypto_aead.c``                        |
+   | Service modules             | These modules (AEAD, Asymmetric, Cipher, Key Deriv, Hash, Key,| ``./secure_fw/services/crypto/crypto_aead.c``                        |
    |                             | MAC) represent a thin layer which is in charge of servicing   | ``./secure_fw/services/crypto/crypto_asymmetric.c``                  |
    |                             | the calls from the SPE/NSPE client API interfaces.            | ``./secure_fw/services/crypto/crypto_cipher.c``                      |
-   |                             | They provide parameter sanitation and context retrieval for   | ``./secure_fw/services/crypto/crypto_generator.c``                   |
+   |                             | They provide parameter sanitation and context retrieval for   | ``./secure_fw/services/crypto/crypto_key_derivation.c``              |
    |                             | multipart operations, and dispatching to the corresponding    | ``./secure_fw/services/crypto/crypto_hash.c``                        |
    |                             | library function exposed by Mbed Crypto for the desired       | ``./secure_fw/services/crypto/crypto_key.c``                         |
    |                             | functionality.                                                | ``./secure_fw/services/crypto/crypto_mac.c``                         |
@@ -170,7 +170,7 @@ configuration of the Mbed Crypto library.
    |                               | configuration parameter   | This is a buffer allocated in static memory.                   | use case and application requirements.  |                                                    |
    +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
    | ``CRYPTO_CONC_OPER_NUM``      | CMake build               | This parameter defines the maximum number of possible          | To be configured based on the desire    | 8                                                  |
-   |                               | configuration parameter   | concurrent operation contexts (cipher, MAC, hash and generator)| use case and platform requirements.     |                                                    |
+   |                               | configuration parameter   | concurrent operation contexts (cipher, MAC, hash and key deriv)| use case and platform requirements.     |                                                    |
    |                               |                           | for multi-part operations, that can be allocated simultaneously|                                         |                                                    |
    |                               |                           | at any time.                                                   |                                         |                                                    |
    +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
@@ -195,4 +195,4 @@ References
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

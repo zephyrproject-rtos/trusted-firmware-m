@@ -74,7 +74,7 @@ allocated by the application and then to be passed as a pointer during the
 following API calls. These operation contexts are of four main types described
 below:
 
-- ``psa_crypto_generator_t`` - Operation context for generator operations
+- ``psa_key_derivation_operation_t`` - Operation context for key derivation
 - ``psa_hash_operation_t`` - Operation context for multipart hash operations
 - ``psa_mac_operation_t`` - Operation context for multipart MAC operations
 - ``psa_cipher_operation_t`` - Operation context for multipart cipher operations
@@ -87,4 +87,4 @@ Secure world.
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*

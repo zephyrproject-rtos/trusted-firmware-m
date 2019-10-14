@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -126,5 +126,95 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
 
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
+}
+
+psa_status_t tfm_crypto_aead_encrypt_setup(psa_invec in_vec[],
+                                           size_t in_len,
+                                           psa_outvec out_vec[],
+                                           size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_decrypt_setup(psa_invec in_vec[],
+                                           size_t in_len,
+                                           psa_outvec out_vec[],
+                                           size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_abort(psa_invec in_vec[],
+                                   size_t in_len,
+                                   psa_outvec out_vec[],
+                                   size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_finish(psa_invec in_vec[],
+                                    size_t in_len,
+                                    psa_outvec out_vec[],
+                                    size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_generate_nonce(psa_invec in_vec[],
+                                            size_t in_len,
+                                            psa_outvec out_vec[],
+                                            size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_set_nonce(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_set_lengths(psa_invec in_vec[],
+                                         size_t in_len,
+                                         psa_outvec out_vec[],
+                                         size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_update(psa_invec in_vec[],
+                                    size_t in_len,
+                                    psa_outvec out_vec[],
+                                    size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_update_ad(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t tfm_crypto_aead_verify(psa_invec in_vec[],
+                                    size_t in_len,
+                                    psa_outvec out_vec[],
+                                    size_t out_len)
+{
+    /* FixMe: To be implemented */
+    return PSA_ERROR_NOT_SUPPORTED;
 }
 /*!@}*/

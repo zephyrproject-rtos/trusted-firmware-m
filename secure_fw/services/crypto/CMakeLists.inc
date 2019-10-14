@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -49,7 +49,7 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/crypto_key.c"
                     "${CRYPTO_DIR}/crypto_aead.c"
                     "${CRYPTO_DIR}/crypto_asymmetric.c"
-                    "${CRYPTO_DIR}/crypto_generator.c"
+                    "${CRYPTO_DIR}/crypto_key_derivation.c"
                     "${CRYPTO_DIR}/tfm_crypto_secure_api.c"
       )
 
@@ -107,11 +107,11 @@ if (ENABLE_CRYPTO)
   else()
     message("- CRYPTO_CIPHER_MODULE_DISABLED: " ${CRYPTO_CIPHER_MODULE_DISABLED})
   endif()
-  if (NOT DEFINED CRYPTO_GENERATOR_MODULE_DISABLED)
-    message("- GENERATOR module enabled")
-    set(CRYPTO_GENERATOR_MODULE_DISABLED 0)
+  if (NOT DEFINED CRYPTO_KEY_DERIVATION_MODULE_DISABLED)
+    message("- KEY_DERIVATION module enabled")
+    set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED 0)
   else()
-    message("- CRYPTO_GENERATOR_MODULE_DISABLED: " ${CRYPTO_GENERATOR_MODULE_DISABLED})
+    message("- CRYPTO_KEY_DERIVATION_MODULE_DISABLED: " ${CRYPTO_KEY_DERIVATION_MODULE_DISABLED})
   endif()
   if (NOT DEFINED CRYPTO_ASYMMETRIC_MODULE_DISABLED)
     message("- ASYMMETRIC module enabled")

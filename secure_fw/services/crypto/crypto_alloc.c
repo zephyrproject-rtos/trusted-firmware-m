@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,7 +35,7 @@ struct tfm_crypto_operation_s {
         psa_cipher_operation_t cipher;    /*!< Cipher operation context */
         psa_mac_operation_t mac;          /*!< MAC operation context */
         psa_hash_operation_t hash;        /*!< Hash operation context */
-        psa_crypto_generator_t generator; /*!< Generator operation context */
+        psa_key_derivation_operation_t key_deriv; /*!< Key derivation operation context */
     } operation;
 };
 
@@ -65,8 +65,8 @@ static void memset_operation_context(uint32_t index)
     case TFM_CRYPTO_HASH_OPERATION:
         mem_size = sizeof(psa_hash_operation_t);
         break;
-    case TFM_CRYPTO_GENERATOR_OPERATION:
-        mem_size = sizeof(psa_crypto_generator_t);
+    case TFM_CRYPTO_KEY_DERIVATION_OPERATION:
+        mem_size = sizeof(psa_key_derivation_operation_t);
         break;
     case TFM_CRYPTO_OPERATION_NONE:
     default:

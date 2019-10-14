@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,10 +24,10 @@
  */
 
 /*!@{*/
-psa_status_t tfm_crypto_asymmetric_sign(psa_invec in_vec[],
-                                        size_t in_len,
-                                        psa_outvec out_vec[],
-                                        size_t out_len)
+psa_status_t tfm_crypto_sign_hash(psa_invec in_vec[],
+                                  size_t in_len,
+                                  psa_outvec out_vec[],
+                                  size_t out_len)
 {
 #ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
@@ -53,15 +53,15 @@ psa_status_t tfm_crypto_asymmetric_sign(psa_invec in_vec[],
         return status;
     }
 
-    return psa_asymmetric_sign(handle, alg, hash, hash_length,
-                               signature, signature_size, &(out_vec[0].len));
+    return psa_sign_hash(handle, alg, hash, hash_length,
+                         signature, signature_size, &(out_vec[0].len));
 #endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
-psa_status_t tfm_crypto_asymmetric_verify(psa_invec in_vec[],
-                                          size_t in_len,
-                                          psa_outvec out_vec[],
-                                          size_t out_len)
+psa_status_t tfm_crypto_verify_hash(psa_invec in_vec[],
+                                    size_t in_len,
+                                    psa_outvec out_vec[],
+                                    size_t out_len)
 {
 #ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
@@ -87,8 +87,8 @@ psa_status_t tfm_crypto_asymmetric_verify(psa_invec in_vec[],
         return status;
     }
 
-    return psa_asymmetric_verify(handle, alg, hash, hash_length,
-                                 signature, signature_length);
+    return psa_verify_hash(handle, alg, hash, hash_length,
+                           signature, signature_length);
 #endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
 }
 
@@ -121,6 +121,7 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
     size_t output_size = out_vec[0].len;
     psa_key_type_t type;
     size_t key_bits;
+    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
 
     if (in_len == 3) {
         salt = in_vec[2].base;
@@ -132,10 +133,15 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_get_key_information(handle, &type, &key_bits);
+    status = psa_get_key_attributes(handle, &key_attributes);
     if (status != PSA_SUCCESS) {
         return status;
     }
+
+    key_bits = psa_get_key_bits(&key_attributes);
+    type = psa_get_key_type(&key_attributes);
+
+    psa_reset_key_attributes(&key_attributes);
 
     /* Check that the output buffer is large enough */
     if (output_size < PSA_ASYMMETRIC_ENCRYPT_OUTPUT_SIZE(type, key_bits, alg)) {

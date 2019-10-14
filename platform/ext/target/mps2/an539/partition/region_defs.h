@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x300)
+#define CMSE_VENEER_REGION_SIZE     (0x340)
 
 /* Alias definitions for secure and non-secure areas*/
 #define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + (x))

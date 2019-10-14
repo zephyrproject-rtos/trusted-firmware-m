@@ -214,20 +214,17 @@ static void tfm_crypto_test_5034(struct test_result_t *ret)
 {
     psa_status_t status;
     psa_key_handle_t key_handle;
-    psa_key_policy_t policy = PSA_KEY_POLICY_INIT;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    psa_key_attributes_t key_attributes = psa_key_attributes_init();
 
-    /* Allocate a transient key */
-    status = psa_allocate_key(&key_handle);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to allocate key");
-        return;
-    }
+    /* Set key sage and type */
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_EXPORT);
+    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
 
-    /* Setup the key policy */
-    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, PSA_ALG_CTR);
-    status = psa_set_key_policy(key_handle, &policy);
+    status = psa_import_key(&key_attributes, data, sizeof(data),
+                            &key_handle);
     if (status != PSA_SUCCESS) {
-        TEST_FAIL("Failed to set key policy");
+        TEST_FAIL("Failed to import key");
         return;
     }
 
@@ -245,4 +242,5 @@ static void tfm_crypto_test_5034(struct test_result_t *ret)
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error destroying a key");
     }
+    return;
 }

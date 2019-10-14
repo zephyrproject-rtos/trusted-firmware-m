@@ -58,18 +58,11 @@ attest_register_initial_attestation_key()
     psa_ecc_curve_t psa_curve;
     struct ecc_key_t attest_key = {0};
     uint8_t key_buf[3 * ECC_P256_COORD_SIZE]; /* priv + x_coord + y_coord */
-    psa_key_type_t attest_key_type;
-    psa_key_handle_t key_handle;
+    psa_key_handle_t key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
     psa_status_t crypto_res;
-    psa_key_policy_t policy = psa_key_policy_init();
+    psa_key_attributes_t key_attributes = psa_key_attributes_init();
 
     if (attestation_key_handle != ATTEST_KEY_HANDLE_NOT_LOADED) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Allocate a transient key for the private key in the Crypto service */
-    crypto_res = psa_allocate_key(&key_handle);
-    if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
@@ -83,22 +76,16 @@ attest_register_initial_attestation_key()
     }
 
     /* Setup the key policy for private key */
-    psa_key_policy_set_usage(&policy,
-                             PSA_KEY_USAGE_SIGN,
-                             PSA_ALG_ECDSA(PSA_ALG_SHA_256));
-    crypto_res = psa_set_key_policy(key_handle, &policy);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Set key type for private key */
-    attest_key_type = PSA_KEY_TYPE_ECC_KEYPAIR((psa_key_type_t)psa_curve);
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN);
+    psa_set_key_algorithm(&key_attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
+    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(psa_curve));
 
     /* Register private key to Crypto service */
-    crypto_res = psa_import_key(key_handle,
-                                attest_key_type,
+    crypto_res = psa_import_key(&key_attributes,
                                 attest_key.priv_key,
-                                attest_key.priv_key_size);
+                                attest_key.priv_key_size,
+                                &key_handle);
+
 
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
