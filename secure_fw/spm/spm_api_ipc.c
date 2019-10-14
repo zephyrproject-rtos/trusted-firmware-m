@@ -50,7 +50,8 @@ TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
 /********************** SPM functions for handler mode ***********************/
 
 /* Service handle management functions */
-psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service)
+psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
+                                        int32_t client_id)
 {
     struct tfm_conn_handle_t *p_handle;
 
@@ -64,11 +65,29 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service)
 
     p_handle->service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
+    p_handle->client_id = client_id;
 
     /* Add handle node to list for next psa functions */
     tfm_list_add_tail(&service->handle_list, &p_handle->list);
 
     return (psa_handle_t)p_handle;
+}
+
+int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
+                                     int32_t client_id)
+{
+    /* Check the handle address is validated */
+    if (is_valid_chunk_data_in_pool(conn_handle_pool,
+                                    (uint8_t *)conn_handle) != true) {
+        return IPC_ERROR_GENERIC;
+    }
+
+    /* Check the handle caller is correct */
+    if (((struct tfm_conn_handle_t *)conn_handle)->client_id != client_id) {
+        return IPC_ERROR_GENERIC;
+    }
+
+    return IPC_SUCCESS;
 }
 
 static struct tfm_conn_handle_t *
@@ -304,7 +323,7 @@ struct tfm_msg_body_t *
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
                       psa_handle_t handle,
-                      int32_t type, int32_t ns_caller,
+                      int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,
                       psa_outvec *caller_outvec)
@@ -327,12 +346,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     msg->service = service;
     msg->handle = handle;
     msg->caller_outvec = caller_outvec;
-    /* Get current partition id */
-    if (ns_caller) {
-        msg->msg.client_id = tfm_nspm_get_current_client_id();
-    } else {
-        msg->msg.client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    msg->msg.client_id = client_id;
 
     /* Copy contents */
     msg->msg.type = type;

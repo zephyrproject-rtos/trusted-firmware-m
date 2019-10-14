@@ -15,6 +15,7 @@
 #include "tfm_psa_client_call.h"
 #include "tfm_utils.h"
 #include "tfm_wait.h"
+#include "tfm_nspm.h"
 
 uint32_t tfm_psa_framework_version(void)
 {
@@ -51,6 +52,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
     psa_handle_t connect_handle;
+    int32_t client_id;
 
     /* It is a fatal error if the RoT Service does not exist on the platform */
     service = tfm_spm_get_service_by_sid(sid);
@@ -58,11 +60,17 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
         tfm_panic();
     }
 
+    if (ns_caller) {
+        client_id = tfm_nspm_get_current_client_id();
+    } else {
+        client_id = tfm_spm_partition_get_running_partition_id();
+    }
+
     /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
      */
-    connect_handle = tfm_spm_create_conn_handle(service);
+    connect_handle = tfm_spm_create_conn_handle(service, client_id);
     if (connect_handle == PSA_NULL_HANDLE) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
@@ -91,7 +99,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
 
     /* No input or output needed for connect message */
     tfm_spm_fill_msg(msg, service, connect_handle, PSA_IPC_CONNECT,
-                     ns_caller, NULL, 0, NULL, 0, NULL);
+                     client_id, NULL, 0, NULL, 0, NULL);
 
     /*
      * Send message and wake up the SP who is waiting on message queue,
@@ -112,6 +120,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
     int i;
+    int32_t client_id;
 
     /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
     if ((in_num > PSA_MAX_IOVEC) ||
@@ -120,7 +129,16 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
         tfm_panic();
     }
 
+    if (ns_caller) {
+        client_id = tfm_nspm_get_current_client_id();
+    } else {
+        client_id = tfm_spm_partition_get_running_partition_id();
+    }
+
     /* It is a fatal error if an invalid handle was passed. */
+    if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
+        tfm_panic();
+    }
     service = tfm_spm_get_service_by_handle(handle);
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
@@ -184,7 +202,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
         tfm_panic();
     }
 
-    tfm_spm_fill_msg(msg, service, handle, type, ns_caller, invecs,
+    tfm_spm_fill_msg(msg, service, handle, type, client_id, invecs,
                      in_num, outvecs, out_num, outptr);
 
     /*
@@ -202,16 +220,26 @@ void tfm_psa_close(psa_handle_t handle, int32_t ns_caller)
 {
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
+    int32_t client_id;
 
     /* It will have no effect if called with the NULL handle */
     if (handle == PSA_NULL_HANDLE) {
         return;
     }
 
+    if (ns_caller) {
+        client_id = tfm_nspm_get_current_client_id();
+    } else {
+        client_id = tfm_spm_partition_get_running_partition_id();
+    }
+
     /*
      * It is a fatal error if an invalid handle was provided that is not the
      * null handle.
      */
+    if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
+        tfm_panic();
+    }
     service = tfm_spm_get_service_by_handle(handle);
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
@@ -231,7 +259,7 @@ void tfm_psa_close(psa_handle_t handle, int32_t ns_caller)
     }
 
     /* No input or output needed for close message */
-    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, ns_caller,
+    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, client_id,
                      NULL, 0, NULL, 0, NULL);
 
     /*

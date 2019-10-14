@@ -123,6 +123,12 @@ struct tfm_conn_handle_t {
                                          * TFM_HANDLE_STATUS_ACTIVE and
                                          * TFM_HANDLE_STATUS_IDLE
                                          */
+    int32_t client_id;                  /*
+                                         * Partition ID of the sender of the
+                                         * message:
+                                         *  - secure partition id;
+                                         *  - non secure client endpoint id.
+                                         */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
     struct tfm_spm_service_t *service;  /* RoT service pointer               */
     struct tfm_list_node_t list;        /* list node                         */
@@ -412,11 +418,25 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
  * \brief                   Create connection handle for client connect
  *
  * \param[in] service       Target service context pointer
+ * \param[in] client_id     Partition ID of the sender of the message
  *
  * \retval PSA_NULL_HANDLE  Create failed \ref PSA_NULL_HANDLE
  * \retval >0               Service handle created, \ref psa_handle_t
  */
-psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service);
+psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
+                                        int32_t client_id);
+
+/**
+ * \brief                   Validate connection handle for client connect
+ *
+ * \param[in] conn_handle   Handle to be validated
+ * \param[in] client_id     Partition ID of the sender of the message
+ *
+ * \retval IPC_SUCCESS        Success
+ * \retval IPC_ERROR_GENERIC  Invalid handle
+ */
+int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
+                                     int32_t client_id);
 
 /**
  * \brief                   Free connection handle which not used anymore.
@@ -560,7 +580,7 @@ struct tfm_msg_body_t *
  * \prarm[in] handle        Connect handle return by psa_connect().
  * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
  *                          PSA_IPC_DISCONNECT
- * \param[in] ns_caller     Whether from NS caller
+ * \param[in] client_id     Partition ID of the sender of the message
  * \param[in] invec         Array of input \ref psa_invec structures
  * \param[in] in_len        Number of input \ref psa_invec structures
  * \param[in] outvec        Array of output \ref psa_outvec structures
@@ -570,7 +590,7 @@ struct tfm_msg_body_t *
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
                       psa_handle_t handle,
-                      int32_t type, int32_t ns_caller,
+                      int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,
                       psa_outvec *caller_outvec);
