@@ -130,6 +130,8 @@ SECTIONS
         *(SFN)
         *libgcc*:*(.text*)
         *libgcc*:*(.rodata*)
+        *libtfmsprt*:*(.text*)
+        *libtfmsprt*:*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);

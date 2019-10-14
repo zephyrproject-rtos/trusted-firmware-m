@@ -39,6 +39,7 @@ LR_CODE S_CODE_START {
         device_definition.o (+RO)
         *(SFN)
         *armlib*
+        *libtfmsprt.a (+RO)
     }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
