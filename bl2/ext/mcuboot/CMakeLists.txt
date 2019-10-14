@@ -180,6 +180,12 @@ if (MCUBOOT_HW_KEY)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_HW_KEY)
 endif()
 
+if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_INDIVIDUAL_CLAIMS)
+	message(WARNING "ATTEST_BOOT_INTERFACE was set to ${ATTEST_BOOT_INTERFACE}. This configuration is "
+			"deprecated and this feature will probably be removed from MCUBoot in the future.")
+endif()
+
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install location for MCUBoot." FORCE)

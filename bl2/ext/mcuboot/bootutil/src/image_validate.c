@@ -73,9 +73,8 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
     /* Hash is computed over image header and image itself. */
     size = hdr->ih_img_size + hdr->ih_hdr_size;
 
-    /* If a security counter TLV and/or a dependency TLV(s) are present then the
-     * TLV info header, the security counter TLV and/or the dependency TLV(s)
-     * are also protected and must be included in the hash calculation.
+    /* If protected TLVs are present (e.g. security counter TLV) then the
+     * TLV info header and these TLVs must be included in the hash calculation.
      */
     if (hdr->ih_protect_tlv_size != 0) {
         size += hdr->ih_protect_tlv_size;

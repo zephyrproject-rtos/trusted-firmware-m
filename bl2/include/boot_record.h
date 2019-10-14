@@ -36,7 +36,7 @@ enum shared_memory_err_t {
 /*!
  * \enum boot_status_err_t
  *
- * \brief Return values for saving boot status information to shared memory are
+ * \brief Return values for saving boot status information to shared memory area
  */
 enum boot_status_err_t {
     BOOT_STATUS_OK,

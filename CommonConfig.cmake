@@ -370,6 +370,10 @@ else()
 	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID OFF)
 endif()
 
+set(ATTEST_BOOT_INTERFACE "INDIVIDUAL_CLAIMS" CACHE STRING "Set the format in which to pass the claims to the initial-attestation service.")
+set_property(CACHE ATTEST_BOOT_INTERFACE PROPERTY STRINGS "INDIVIDUAL_CLAIMS;CBOR_ENCODED_CLAIMS")
+validate_cache_value(ATTEST_BOOT_INTERFACE)
+
 ##Set mbedTLS compiler flags for BL2 bootloader
 set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
