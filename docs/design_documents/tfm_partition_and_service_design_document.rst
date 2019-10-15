@@ -37,7 +37,7 @@ Partition's code and private date are put into dedicated regions, while
 Partition Database are put in TF-M SPM region. There is a defined structure for
 partition information:
 
-.. codebase :: c
+.. code-block:: c
 
     struct spm_partition_desc_t {
         struct spm_partition_runtime_data_t runtime_data;
@@ -93,7 +93,7 @@ Partition Database Initialization
 The dedicated partition information file will be added into spm initialization
 file to initialize the global spm data array g_spm_partition_db.
 
-.. codebase :: c
+.. code-block:: c
 
     #include "secure_fw/services/tfm_spm_db.inc"
 
@@ -113,7 +113,7 @@ the same Secure Partition.
 All the services are registered in every partition's manifest. There is a
 defined structure for service information:
 
-.. codebase :: c
+.. code-block:: c
 
     struct tfm_spm_service_t {
         const struct tfm_spm_service_db_t *service_db;
