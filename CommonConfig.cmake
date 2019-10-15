@@ -24,6 +24,9 @@ endif()
 #Configure the default build type
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (i.e. Debug)")
 
+#Ignore case on the cmake build types
+string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+
 if(CORE_IPC)
 	if (TFM_LVL EQUAL 3)
 		message(FATAL_ERROR "ERROR: Invalid isolation level!")
@@ -364,7 +367,7 @@ if (NOT DEFINED ATTEST_INCLUDE_OPTIONAL_CLAIMS)
 	set(ATTEST_INCLUDE_OPTIONAL_CLAIMS ON)
 endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "debug")
 	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID ON)
 else()
 	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID OFF)
