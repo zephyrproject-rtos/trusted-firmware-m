@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include "tfm_plat_defs.h"
+#include "psa/crypto.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +24,7 @@ extern "C" {
  * Elliptic curve key type identifiers according to RFC8152 (COSE encoding)
  * https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves
  */
-enum ecc_curve_t {
+enum cose_ecc_curve_t {
     P_256        = 1,  /* NIST P-256 also known as secp256r1 */
     P_384        = 2,  /* NIST P-384 also known as secp384r1 */
     P_521        = 3,  /* NIST P-521 also known as secp521r1 */
@@ -110,7 +111,7 @@ enum tfm_plat_err_t tfm_plat_get_crypto_huk(uint8_t *key, uint32_t size);
  *                             about the initial attestation key, which is
  *                             stored in key_buf.
  * \param[out]     curve_type  The type of the EC curve, which the key belongs
- *                             to according to \ref ecc_curve_t
+ *                             to according to \ref psa_ecc_curve_t
  *
  * \return Returns error code specified in \ref tfm_plat_err_t
  */
@@ -118,7 +119,7 @@ enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
-                                enum ecc_curve_t *curve_type);
+                                psa_ecc_curve_t  *curve_type);
 
 /**
  * \brief Get the hash of the corresponding Root of Trust Public Key for

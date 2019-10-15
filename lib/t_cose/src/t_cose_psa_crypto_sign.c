@@ -68,15 +68,13 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
  *
  * \param[in] psa_curve PSA curve type definition \ref psa_ecc_curve_t.
  *
- * \note      Sibling function to \ref attest_map_elliptic_curve_type.
- *
- * \return    Return COSE curve type according to \ref ecc_curve_t. If
+ * \return    Return COSE curve type according to \ref cose_ecc_curve_t. If
  *            mapping is not possible then return with -1.
  */
-static inline enum ecc_curve_t
+static inline enum cose_ecc_curve_t
 cose_map_psa_elliptic_curve_type(psa_ecc_curve_t psa_curve)
 {
-    enum ecc_curve_t cose_curve;
+    enum cose_ecc_curve_t cose_curve;
 
     /* FixMe: Mapping is not complete, missing ones: ED25519, ED448 */
     switch (psa_curve) {

@@ -31,50 +31,11 @@ static uint8_t  attestation_public_key[ECC_P_256_KEY_SIZE];
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_curve_t attestation_key_curve;
 
-/**
- * \brief     Map the curve type definition by RFC8152 (COSE) to PSA curve
- *            types.
- *
- * \param[in] cose_curve  COSE curve type definition \ref ecc_curve_t.
- *
- * \return    Return PSA curve type according to \ref psa_ecc_curve_t. If
- *            mapping is not possible then return with USHRT_MAX.
- */
-static inline psa_ecc_curve_t
-attest_map_elliptic_curve_type(enum ecc_curve_t cose_curve)
-{
-    psa_ecc_curve_t psa_curve;
-
-    /*FixMe: Mapping is not complete, missing ones: ED25519, ED448 */
-    switch (cose_curve) {
-    case P_256:
-        psa_curve = PSA_ECC_CURVE_SECP256R1;
-        break;
-    case P_384:
-        psa_curve = PSA_ECC_CURVE_SECP384R1;
-        break;
-    case P_521:
-        psa_curve = PSA_ECC_CURVE_SECP521R1;
-        break;
-    case X25519:
-        psa_curve = PSA_ECC_CURVE_CURVE25519;
-        break;
-    case X448:
-        psa_curve = PSA_ECC_CURVE_CURVE448;
-        break;
-    default:
-        psa_curve = USHRT_MAX;
-    }
-
-    return psa_curve;
-}
-
 enum psa_attest_err_t
 attest_register_initial_attestation_key()
 {
     enum tfm_plat_err_t plat_res;
     psa_ecc_curve_t psa_curve;
-    enum ecc_curve_t cose_curve;
     struct ecc_key_t attest_key = {0};
     uint8_t  key_buf[ECC_P_256_KEY_SIZE];
     psa_key_type_t attest_key_type;
@@ -94,16 +55,10 @@ attest_register_initial_attestation_key()
 
     /* Get the initial attestation key */
     plat_res = tfm_plat_get_initial_attest_key(key_buf, sizeof(key_buf),
-                                               &attest_key, &cose_curve);
+                                               &attest_key, &psa_curve);
 
     /* Check the availability of the private key */
     if (plat_res != TFM_PLAT_ERR_SUCCESS || attest_key.priv_key == NULL) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Mapping of COSE curve type to PSA curve types */
-    psa_curve = attest_map_elliptic_curve_type(cose_curve);
-    if (psa_curve == USHRT_MAX) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 

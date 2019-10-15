@@ -99,6 +99,7 @@ include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
 
 #Setting include directories
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)

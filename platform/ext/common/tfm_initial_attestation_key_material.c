@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include "platform/include/tfm_plat_defs.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
+#include "psa/crypto_types.h"
+#include "psa/crypto_values.h"
 
 /*
  * This file contains the hard coded version of the ECDSA P-256 secret key in:
@@ -23,7 +25,7 @@
 
 /* Type of the EC curve which the key belongs to, in PSA curve ID form */
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
-const enum ecc_curve_t initial_attestation_curve_type = P_256;
+const psa_ecc_curve_t initial_attestation_curve_type = PSA_ECC_CURVE_SECP256R1;
 
 /* Initial attestation private key in raw format, without any encoding.
  * It belongs to the ECDSA P-256 curve.
