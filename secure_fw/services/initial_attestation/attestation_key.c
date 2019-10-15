@@ -32,7 +32,8 @@ static size_t   attestation_public_key_len = 0;
 static psa_ecc_curve_t attestation_key_curve;
 
 /**
- * \brief Map the curve type definition by RFC8152 (COSE) to PSA curve types
+ * \brief     Map the curve type definition by RFC8152 (COSE) to PSA curve
+ *            types.
  *
  * \param[in] cose_curve  COSE curve type definition \ref ecc_curve_t.
  *
