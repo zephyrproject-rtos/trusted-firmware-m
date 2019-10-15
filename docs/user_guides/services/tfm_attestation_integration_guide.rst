@@ -290,7 +290,6 @@ in the claims in the initial attestation token paragraph.
   definition document for initial attestation.
 - ``tfm_plat_get_boot_seed()``: Get the boot seed, which is a constant random
   number during a boot cycle.
-- ``tfm_plat_get_instance_id()``: Get the UEID of the device.
 - ``tfm_plat_get_implementation_id``: Get the implementation ID of the
   device.
 - ``tfm_plat_get_hw_version``: Get the hardware version of the device.

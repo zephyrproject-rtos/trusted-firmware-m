@@ -561,6 +561,13 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
  *
  * \param[in]  token_ctx  Token encoding context
  *
+ * \note This mandatory claim represents the unique identifier of the instance.
+ *       In the PSA definition it is a hash of the public attestation key of the
+ *       instance. The claim will be represented by the EAT standard claim UEID
+ *       of type GUID. The EAT definition of a GUID type is that it will be
+ *       between 128 & 256 bits but this implementation will use the full 256
+ *       bits to accommodate a hash result.
+ *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */
 static enum psa_attest_err_t

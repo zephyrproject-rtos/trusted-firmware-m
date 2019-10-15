@@ -32,10 +32,6 @@ static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
 extern const enum ecc_curve_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
 extern const uint32_t initial_attestation_private_key_size;
-extern const uint8_t  initial_attestation_public_x_key[];
-extern const uint32_t initial_attestation_public_x_key_size;
-extern const uint8_t  initial_attestation_public_y_key[];
-extern const uint32_t initial_attestation_public_y_key_size;
 
 extern const struct tfm_plat_rotpk_t device_rotpk[];
 extern const uint32_t rotpk_key_cnt;
@@ -78,9 +74,7 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
     uint8_t *key_dst;
     const uint8_t *key_src;
     uint32_t key_size;
-    uint32_t full_key_size = initial_attestation_private_key_size  +
-                             initial_attestation_public_x_key_size +
-                             initial_attestation_public_y_key_size;
+    uint32_t full_key_size = initial_attestation_private_key_size;
 
     if (size < full_key_size) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
@@ -97,31 +91,10 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
     ecc_key->priv_key = key_dst;
     ecc_key->priv_key_size = key_size;
 
-    /* Copy the x-coordinate of public key to the buffer, it MIGHT be present */
-    if (initial_attestation_public_x_key_size != 0) {
-        key_dst  = key_dst + key_size;
-        key_src  = initial_attestation_public_x_key;
-        key_size = initial_attestation_public_x_key_size;
-        copy_key(key_dst, key_src, key_size);
-        ecc_key->pubx_key = key_dst;
-        ecc_key->pubx_key_size = key_size;
-    } else {
-        ecc_key->pubx_key = NULL;
-        ecc_key->pubx_key_size = 0;
-    }
-
-    /* Copy the y-coordinate of public key to the buffer, it MIGHT be present */
-    if (initial_attestation_public_y_key_size != 0) {
-        key_dst  = key_dst + key_size;
-        key_src  = initial_attestation_public_y_key;
-        key_size = initial_attestation_public_y_key_size;
-        copy_key(key_dst, key_src, key_size);
-        ecc_key->puby_key = key_dst;
-        ecc_key->puby_key_size = key_size;
-    } else {
-        ecc_key->puby_key = NULL;
-        ecc_key->puby_key_size = 0;
-    }
+    ecc_key->pubx_key = NULL;
+    ecc_key->pubx_key_size = 0;
+    ecc_key->puby_key = NULL;
+    ecc_key->puby_key_size = 0;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
