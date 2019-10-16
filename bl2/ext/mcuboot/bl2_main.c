@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "bl2_util.h"
 #include "target.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Flash.h"
 #include "mbedtls/memory_buffer_alloc.h"
 #include "bootutil/bootutil_log.h"

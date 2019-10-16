@@ -8,7 +8,7 @@
 #ifndef __TFM_SVC_H__
 #define __TFM_SVC_H__
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 typedef enum {
     TFM_SVC_SFN_REQUEST = 0,

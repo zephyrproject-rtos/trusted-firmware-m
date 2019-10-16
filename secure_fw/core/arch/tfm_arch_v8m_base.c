@@ -6,7 +6,7 @@
  */
 
 #include <inttypes.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"

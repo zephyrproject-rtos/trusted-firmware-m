@@ -10,7 +10,7 @@
 /* This header file collects the architecture related operations. */
 
 #include <inttypes.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)

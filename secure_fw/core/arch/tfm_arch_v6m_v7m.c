@@ -6,7 +6,7 @@
  */
 
 #include <inttypes.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
 
 #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && \

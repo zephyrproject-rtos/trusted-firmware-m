@@ -8,7 +8,7 @@
 #ifndef _TFM_CORE_TOPOLOGY_H_
 #define _TFM_CORE_TOPOLOGY_H_
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
