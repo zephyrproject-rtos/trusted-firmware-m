@@ -307,8 +307,8 @@ if (BL2)
 	endif()
 endif()
 
-##Set Mbed TLS compiler flags and variables for audit log and crypto
-set(MBEDTLS_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+##Set Mbed Crypto compiler flags and variables for crypto service
+set(MBEDCRYPTO_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
@@ -369,8 +369,8 @@ if (NOT DEFINED ITS_RAM_FS)
 	endif()
 endif()
 
-if (NOT DEFINED MBEDTLS_DEBUG)
-	set(MBEDTLS_DEBUG OFF)
+if (NOT DEFINED MBEDCRYPTO_DEBUG)
+	set(MBEDCRYPTO_DEBUG OFF)
 endif()
 
 #Default TF-M initial-attestation service flags.
@@ -390,7 +390,7 @@ set_property(CACHE ATTEST_BOOT_INTERFACE PROPERTY STRINGS "INDIVIDUAL_CLAIMS;CBO
 validate_cache_value(ATTEST_BOOT_INTERFACE)
 
 ##Set mbedTLS compiler flags for BL2 bootloader
-set(MBEDTLS_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
+set(MBEDCRYPTO_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-boot.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
-	string(APPEND MBEDTLS_C_FLAGS_BL2 " -DMCUBOOT_SIGN_RSA_LEN=3072")
+	string(APPEND MBEDCRYPTO_C_FLAGS_BL2 " -DMCUBOOT_SIGN_RSA_LEN=3072")
 endif()

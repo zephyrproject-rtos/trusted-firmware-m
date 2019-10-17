@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,6 @@
 #This file assumes it will be included from a project specific cmakefile, and
 #will not create a library or executable.
 #Inputs:
-#	MBEDTLS_INSTALL_DIR - directory where mbedtls headers and libraries can be found.
 #	TFM_ROOT_DIR	    - root directory of the TF-M repository.
 #Outputs:
 #	Will modify include directories to make the source compile.

@@ -32,8 +32,8 @@ elseif(NOT BL2)
     return()
 endif()
 
-if (NOT DEFINED MBEDTLS_C_FLAGS_BL2)
-	message(FATAL_ERROR "Incomplete build configuration: MBEDTLS_C_FLAGS_BL2 is undefined.")
+if (NOT DEFINED MBEDCRYPTO_C_FLAGS_BL2)
+	message(FATAL_ERROR "Incomplete build configuration: MBEDCRYPTO_C_FLAGS_BL2 is undefined.")
 endif()
 
 set(BUILD_CMSIS_CORE On)
@@ -82,20 +82,20 @@ list(APPEND ALL_SRC_C
 		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 	)
 
-#Define location of mbedtls source, build, and installation directory.
-get_filename_component(MBEDTLS_SOURCE_DIR "${TFM_ROOT_DIR}/../mbedtls" ABSOLUTE)
-if(NOT EXISTS ${MBEDTLS_SOURCE_DIR})
-	message(FATAL_ERROR "Missing mbedtls. Please clone the mbedtls repo to directory \"${MBEDTLS_SOURCE_DIR}\".")
+#Define location of Mbed Crypto source, build, and installation directory.
+get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
+if(NOT EXISTS ${MBEDCRYPTO_SOURCE_DIR})
+    message(FATAL_ERROR "Missing mbed-crypto. Please clone the mbed-crypto repo to directory \"${MBEDCRYPTO_SOURCE_DIR}\".")
 endif()
-set (MBEDTLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbedtls")
-set (MBEDTLS_INSTALL_DIR ${MBEDTLS_BINARY_DIR}/mbedtls_install)
+set (MBEDCRYPTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbed-crypto/build")
+set (MBEDCRYPTO_INSTALL_DIR ${MBEDCRYPTO_BINARY_DIR}/../install)
 
-#Build mbedtls as external project.
-#This ensures mbedtls is built with exactly defined settings.
-#mbedtls will be used from is't install location
-set(MBEDTLS_C_FLAGS ${MBEDTLS_C_FLAGS_BL2})
-set(MBEDTLS_TARGET_NAME "mbedtls_mcuboot_lib")
-include(${TFM_ROOT_DIR}/BuildMbedtls.cmake)
+#Build Mbed Crypto as external project.
+#This ensures Mbed Crypto is built with exactly defined settings.
+#Mbed Crypto will be used from is't install location
+set(MBEDCRYPTO_C_FLAGS ${MBEDCRYPTO_C_FLAGS_BL2})
+set(MBEDCRYPTO_TARGET_NAME "mbedcrypto_mcuboot_lib")
+include(${TFM_ROOT_DIR}/BuildMbedCrypto.cmake)
 
 #Setting include directories
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
@@ -103,7 +103,7 @@ embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDCRYPTO_INSTALL_DIR}/include ABSOLUTE APPEND)
 
 #Define linker file
 if(NOT DEFINED BL2_LINKER_CONFIG)
@@ -138,8 +138,8 @@ elseif(TEST_FRAMEWORK_NS)
 endif()
 
 #Link mbedcrypto library to project
-target_link_libraries(${PROJECT_NAME} "${MBEDTLS_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
-add_dependencies(${PROJECT_NAME} ${MBEDTLS_TARGET_NAME}_install)
+target_link_libraries(${PROJECT_NAME} "${MBEDCRYPTO_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
+add_dependencies(${PROJECT_NAME} ${MBEDCRYPTO_TARGET_NAME}_install)
 
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})

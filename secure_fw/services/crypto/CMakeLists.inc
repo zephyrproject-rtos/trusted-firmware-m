@@ -9,7 +9,7 @@
 #This file assumes it will be included from a project specific cmakefile, and
 #will not create a library or executable.
 #Inputs:
-#       MBEDTLS_INSTALL_DIR - directory where Mbed Crypto headers and libraries can be found. Needed only when using CRYPTO_ENGINE_MBEDTLS ON.
+#       MBEDCRYPTO_INSTALL_DIR - directory where mbed-crypto headers and libraries can be found. Needed only when using CRYPTO_ENGINE_MBEDCRYPTO ON.
 #       TFM_ROOT_DIR        - root directory of the TF-M repository.
 #Outputs:
 #       Will modify include directories to make the source compile.
@@ -32,8 +32,8 @@ endif()
 
 if (ENABLE_CRYPTO)
   if (CRYPTO_ENGINE_MBEDTLS)
-    if (NOT DEFINED MBEDTLS_INSTALL_DIR)
-      message(FATAL_ERROR "Please set MBEDTLS_INSTALL_DIR before including this file.")
+    if (NOT DEFINED MBEDCRYPTO_INSTALL_DIR)
+      message(FATAL_ERROR "Please set MBEDCRYPTO_INSTALL_DIR before including this file.")
     endif()
   endif()
 
@@ -62,7 +62,7 @@ if (ENABLE_CRYPTO)
   embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
   embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
   if (CRYPTO_ENGINE_MBEDTLS)
-    embedded_include_directories(PATH ${MBEDTLS_INSTALL_DIR}/include ABSOLUTE)
+    embedded_include_directories(PATH ${MBEDCRYPTO_INSTALL_DIR}/include ABSOLUTE)
   endif()
 
   #Inform the user about Crypto service features selected based on the Crypto service cmake flags
