@@ -54,15 +54,19 @@
 
 /* Save RAM by adjusting to our exact needs */
 #if MCUBOOT_SIGN_RSA_LEN == 3072
-#define MBEDTLS_MPI_MAX_SIZE              384
+#define MBEDTLS_MPI_MAX_SIZE 384
 #else /* RSA2048 */
-#define MBEDTLS_MPI_MAX_SIZE              256
+#define MBEDTLS_MPI_MAX_SIZE 256
 #endif
 
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 1024
 
 /* Save ROM and a few bytes of RAM by specifying our own ciphersuite list */
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
+
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "mbedtls_accelerator_config.h"
+#endif
 
 #include "mbedtls/check_config.h"
 

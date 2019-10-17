@@ -83,6 +83,8 @@ list(APPEND ALL_SRC_C
 	)
 
 #Define location of Mbed Crypto source, build, and installation directory.
+set(MBEDTLS_CONFIG_FILE "config-boot.h")
+set(MBEDTLS_CONFIG_PATH "${TFM_ROOT_DIR}/bl2/ext/mcuboot/include")
 get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
 if(NOT EXISTS ${MBEDCRYPTO_SOURCE_DIR})
     message(FATAL_ERROR "Missing mbed-crypto. Please clone the mbed-crypto repo to directory \"${MBEDCRYPTO_SOURCE_DIR}\".")
@@ -90,10 +92,17 @@ endif()
 set (MBEDCRYPTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbed-crypto/build")
 set (MBEDCRYPTO_INSTALL_DIR ${MBEDCRYPTO_BINARY_DIR}/../install)
 
+if (CRYPTO_HW_ACCELERATOR)
+	if(NOT DEFINED CRYPTO_HW_ACCELERATOR_CMAKE_BUILD)
+		message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_CMAKE_BUILD not defined.")
+	endif()
+	include(${CRYPTO_HW_ACCELERATOR_CMAKE_BUILD})
+endif()
+
 #Build Mbed Crypto as external project.
 #This ensures Mbed Crypto is built with exactly defined settings.
-#Mbed Crypto will be used from is't install location
-set(MBEDCRYPTO_C_FLAGS ${MBEDCRYPTO_C_FLAGS_BL2})
+#Mbed Crypto will be used from its install location
+string(APPEND MBEDCRYPTO_C_FLAGS " ${MBEDCRYPTO_C_FLAGS_BL2}")
 set(MBEDCRYPTO_TARGET_NAME "mbedcrypto_mcuboot_lib")
 include(${TFM_ROOT_DIR}/BuildMbedCrypto.cmake)
 
@@ -141,6 +150,14 @@ endif()
 target_link_libraries(${PROJECT_NAME} "${MBEDCRYPTO_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}")
 add_dependencies(${PROJECT_NAME} ${MBEDCRYPTO_TARGET_NAME}_install)
 
+#Link crypto accelerator libraries if applicable
+if (CRYPTO_HW_ACCELERATOR)
+	if(NOT DEFINED CRYPTO_HW_ACCELERATOR_CMAKE_LINK)
+		message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_CMAKE_LINK not defined.")
+	endif()
+	include(${CRYPTO_HW_ACCELERATOR_CMAKE_LINK})
+endif()
+
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
@@ -154,7 +171,7 @@ message("- MCUBOOT_LOG_LEVEL: '${MCUBOOT_LOG_LEVEL}'.")
 target_compile_definitions(${PROJECT_NAME} PRIVATE
 							MCUBOOT_VALIDATE_PRIMARY_SLOT
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
-							MBEDTLS_CONFIG_FILE="config-boot.h"
+							MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}"
 							MCUBOOT_TARGET_CONFIG="flash_layout.h")
 
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")

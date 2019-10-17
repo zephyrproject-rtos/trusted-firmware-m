@@ -31,6 +31,9 @@
 #if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
 #include "uart_stdout.h"
 #endif
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "crypto_hw.h"
+#endif /* CRYPTO_HW_ACCELERATOR */
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -173,6 +176,14 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
+#ifdef CRYPTO_HW_ACCELERATOR
+    rc = crypto_hw_accelerator_init();
+    if (rc) {
+        BOOT_LOG_ERR("Error while initializing cryptographic accelerator.");
+        while (1);
+    }
+#endif /* CRYPTO_HW_ACCELERATOR */
+
     rc = FLASH_DEV_NAME.Initialize(NULL);
     if(rc != ARM_DRIVER_OK) {
         BOOT_LOG_ERR("Error while initializing Flash Interface");
@@ -193,6 +204,14 @@ int main(void)
         while (1)
             ;
     }
+
+#ifdef CRYPTO_HW_ACCELERATOR
+    rc = crypto_hw_accelerator_finish();
+    if (rc) {
+        BOOT_LOG_ERR("Error while uninitializing cryptographic accelerator.");
+        while (1);
+    }
+#endif /* CRYPTO_HW_ACCELERATOR */
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
                  rsp.br_image_off);
