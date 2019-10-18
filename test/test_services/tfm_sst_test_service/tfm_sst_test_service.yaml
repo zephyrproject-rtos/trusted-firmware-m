@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +11,7 @@
   "type": "PSA-ROT",
   "priority": "NORMAL",
   "entry_point": "tfm_sst_test_init",
-  "stack_size": "0x400",
+  "stack_size": "0x440",
   "secure_functions": [
     {
       "name": "TFM_SST_TEST_PREPARE",

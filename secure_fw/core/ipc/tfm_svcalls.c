@@ -78,6 +78,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     struct spm_partition_desc_t *partition = NULL;
     uint32_t privileged;
     int32_t type;
+    struct tfm_control_parameter_t ctrl_param;
 
     TFM_CORE_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
@@ -89,53 +90,25 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     privileged = tfm_spm_partition_get_privileged_mode(
         partition->static_data->partition_flags);
 
-    if (!ns_caller) {
-        type = (int32_t)args[1];
-        inptr = (psa_invec *)args[2];
-        in_num = (size_t)args[3];
-        /*
-         * 5th and 6th parameter is pushed at stack top before SVC, then PE
-         * hardware stacks the execution context. The size of the context
-         * depends on various settings:
-         * - if FP is not used, 5th and 6th parameters are at 8th and 9th
-         *   position counting from SP;
-         * - if FP is used and FPCCR_S.TS is 0, 5th and 6th parameters are at
-         *   26th and 27th position counting from SP;
-         * - if FP is used and FPCCR_S.TS is 1, 5th and 6th parameters are at
-         *   42th and 43th position counting from SP.
-         */
-         if (!is_stack_alloc_fp_space(lr)) {
-            outptr = (psa_outvec *)args[8];
-            out_num = (size_t)args[9];
-#if defined (__FPU_USED) && (__FPU_USED == 1U)
-        } else if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
-            outptr = (psa_outvec *)args[42];
-            out_num = (size_t)args[43];
-#endif
-        } else {
-            outptr = (psa_outvec *)args[26];
-            out_num = (size_t)args[27];
-        }
-    } else {
-        /*
-         * FixMe: From non-secure caller, type, in_len and out_len are composed
-         * into a new struct parameter. Need to extract them.
-         */
-        /*
-         * Read parameters from the arguments. It is a fatal error if the
-         * memory reference for buffer is invalid or not readable.
-         */
-        if (tfm_memory_check((const void *)args[1],
-            sizeof(struct tfm_control_parameter_t), ns_caller,
-            TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-            tfm_core_panic();
-        }
-        type = ((struct tfm_control_parameter_t *)args[1])->type;
-        in_num = ((struct tfm_control_parameter_t *)args[1])->in_len;
-        out_num = ((struct tfm_control_parameter_t *)args[1])->out_len;
-        inptr = (psa_invec *)args[2];
-        outptr = (psa_outvec *)args[3];
+    /*
+     * Read parameters from the arguments. It is a fatal error if the
+     * memory reference for buffer is invalid or not readable.
+     */
+    if (tfm_memory_check((const void *)args[1],
+        sizeof(struct tfm_control_parameter_t), ns_caller,
+        TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+        tfm_core_panic();
     }
+
+    tfm_core_util_memcpy(&ctrl_param,
+                         (const void *)args[1],
+                         sizeof(ctrl_param));
+
+    type = ctrl_param.type;
+    in_num = ctrl_param.in_len;
+    out_num = ctrl_param.out_len;
+    inptr = (psa_invec *)args[2];
+    outptr = (psa_outvec *)args[3];
 
     /* The request type must be zero or positive. */
     if (type < 0) {

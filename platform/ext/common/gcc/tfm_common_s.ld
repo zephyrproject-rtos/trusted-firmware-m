@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2019 Arm Limited
+; * Copyright (c) 2009-2020 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -703,7 +703,7 @@ SECTIONS
 #if defined (TFM_PSA_API)
     .TFM_SP_IPC_CLIENT_TEST_LINKER_STACK : ALIGN(128)
     {
-        . += 0x0220;
+        . += 0x0240;
     } > RAM
     Image$$TFM_SP_IPC_CLIENT_TEST_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_IPC_CLIENT_TEST_LINKER_STACK);
     Image$$TFM_SP_IPC_CLIENT_TEST_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_IPC_CLIENT_TEST_LINKER_STACK) + SIZEOF(.TFM_SP_IPC_CLIENT_TEST_LINKER_STACK);
@@ -772,7 +772,7 @@ SECTIONS
 #if defined (TFM_PSA_API)
     .TFM_SP_SECURE_CLIENT_2_LINKER_STACK : ALIGN(128)
     {
-        . += 0x180;
+        . += 0x200;
     } > RAM
     Image$$TFM_SP_SECURE_CLIENT_2_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_SECURE_CLIENT_2_LINKER_STACK);
     Image$$TFM_SP_SECURE_CLIENT_2_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_SECURE_CLIENT_2_LINKER_STACK) + SIZEOF(.TFM_SP_SECURE_CLIENT_2_LINKER_STACK);
@@ -1206,7 +1206,7 @@ SECTIONS
 #if defined (TFM_PSA_API)
     .TFM_SP_SST_TEST_LINKER_STACK : ALIGN(128)
     {
-        . += 0x400;
+        . += 0x440;
     } > RAM
     Image$$TFM_SP_SST_TEST_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_SST_TEST_LINKER_STACK);
     Image$$TFM_SP_SST_TEST_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER_STACK) + SIZEOF(.TFM_SP_SST_TEST_LINKER_STACK);

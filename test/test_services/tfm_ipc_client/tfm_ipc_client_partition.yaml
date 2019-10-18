@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +11,7 @@
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
   "entry_point": "ipc_client_test_main",
-  "stack_size": "0x0220",
+  "stack_size": "0x0240",
   "secure_functions": [
   ],
   "services" : [
