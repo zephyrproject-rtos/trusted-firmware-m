@@ -34,8 +34,6 @@ if (NOT DEFINED TFM_PSA_API)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
 elseif (TFM_PSA_API)
 	set (SS_IPC_C_SRC "${SS_IPC_DIR}/tfm_svcalls.c"
-			"${SS_IPC_DIR}/psa_service.c"
-			"${SS_IPC_DIR}/psa_client.c"
 			"${SS_IPC_DIR}/tfm_thread.c"
 			"${SS_IPC_DIR}/tfm_wait.c"
 			"${SS_IPC_DIR}/tfm_message_queue.c"

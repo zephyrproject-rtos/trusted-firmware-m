@@ -30,6 +30,13 @@ set (LIBSPRT_C_SRC
     "${LIBSPRT_DIR}/tfm_libsprt_c_memcmp.c"
     "${TFM_ROOT_DIR}/interface/src/log/tfm_log_raw.c")
 
+if (TFM_PSA_API)
+    list(APPEND LIBSPRT_C_SRC
+        "${TFM_ROOT_DIR}/interface/src/psa/psa_client.c"
+        "${TFM_ROOT_DIR}/interface/src/psa/psa_service.c"
+    )
+endif()
+
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C_S ${LIBSPRT_C_SRC})
 unset(LIBSPRT_C_SRC)
