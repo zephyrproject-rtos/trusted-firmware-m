@@ -48,6 +48,20 @@ enum tfm_status_e tfm_core_has_read_access_to_region(const void *p, size_t s,
 {
     int flags = CMSE_MPU_READ;
 
+    /* In case of NS caller, only force unprivileged check, if the non secure
+     * Thread mode is unprivileged
+     */
+    if (ns_caller) {
+        CONTROL_Type ctrl;
+
+        ctrl.w = __TZ_get_CONTROL_NS();
+        if (ctrl.b.nPRIV == 1) {
+            privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
+        } else {
+            privileged = TFM_PARTITION_PRIVILEGED_MODE;
+        }
+    }
+
     if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
         flags |= CMSE_MPU_UNPRIV;
     }
@@ -64,6 +78,20 @@ enum tfm_status_e tfm_core_has_write_access_to_region(const void *p, size_t s,
                                                       uint32_t privileged)
 {
     int flags = CMSE_MPU_READWRITE;
+
+    /* In case of NS caller, only force unprivileged check, if the non secure
+     * Thread mode is unprivileged
+     */
+    if (ns_caller) {
+        CONTROL_Type ctrl;
+
+        ctrl.w = __TZ_get_CONTROL_NS();
+        if (ctrl.b.nPRIV == 1) {
+            privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
+        } else {
+            privileged = TFM_PARTITION_PRIVILEGED_MODE;
+        }
+    }
 
     if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
         flags |= CMSE_MPU_UNPRIV;
