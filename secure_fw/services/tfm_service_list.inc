@@ -515,10 +515,19 @@ const struct tfm_spm_service_db_t service_db[] =
 #ifdef TFM_MULTI_CORE_TEST
     /******** TFM_SP_MULTI_CORE_TEST ********/
     {
-        .name = "MULTI_CORE_TEST_DUMMY",
+        .name = "MULTI_CORE_MULTI_CLIENT_CALL_TEST_0",
         .partition_id = TFM_SP_MULTI_CORE_TEST,
-        .signal = MULTI_CORE_TEST_DUMMY_SIGNAL,
+        .signal = MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_SIGNAL,
         .sid = 0x0000F100,
+        .non_secure_client = true,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
+    {
+        .name = "MULTI_CORE_MULTI_CLIENT_CALL_TEST_1",
+        .partition_id = TFM_SP_MULTI_CORE_TEST,
+        .signal = MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_SIGNAL,
+        .sid = 0x0000F101,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
@@ -922,6 +931,13 @@ struct tfm_spm_service_t service[] =
 
 #ifdef TFM_MULTI_CORE_TEST
     /******** TFM_SP_MULTI_CORE_TEST ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
     {
         .service_db = NULL,
         .partition = NULL,

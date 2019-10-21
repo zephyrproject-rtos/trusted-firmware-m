@@ -17,9 +17,17 @@
   ],
   "services" : [
     {
-      "name": "MULTI_CORE_TEST_DUMMY",
+      "name": "MULTI_CORE_MULTI_CLIENT_CALL_TEST_0",
       "sid": "0x0000F100",
-      "signal": "MULTI_CORE_TEST_DUMMY_SIGNAL",
+      "signal": "MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_SIGNAL",
+      "non_secure_clients": true,
+      "minor_version": 1,
+      "minor_policy": "STRICT"
+    },
+    {
+      "name": "MULTI_CORE_MULTI_CLIENT_CALL_TEST_1",
+      "sid": "0x0000F101",
+      "signal": "MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_SIGNAL",
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"

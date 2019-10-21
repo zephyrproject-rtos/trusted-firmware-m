@@ -14,7 +14,8 @@
 extern "C" {
 #endif
 
-#define MULTI_CORE_TEST_DUMMY_SIGNAL                            (1U << (0 + 4))
+#define MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_SIGNAL              (1U << (0 + 4))
+#define MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_SIGNAL              (1U << (1 + 4))
 
 #ifdef __cplusplus
 }
