@@ -63,12 +63,12 @@ def load_manifest_list(file):
         parser.
         """
     db = []
-    manifest_list = yaml.load(file)
+    manifest_list = yaml.safe_load(file)
     for item in manifest_list["manifest_list"]:
         manifest_path = item['manifest']
         try:
             file = open(manifest_path)
-            manifest = yaml.load(file)
+            manifest = yaml.safe_load(file)
             db.append({"manifest": manifest, "attr": item})
         except IOError:
             raise Exception ("Manifest for "+item['name']+" cannot be opened at path "+item['manifest'])
@@ -86,14 +86,14 @@ def generate_manifestfilename(env):
     """
     manifest_header_list = []
     with open(manifest_list_yaml_file_path) as manifest_list_yaml_file:
-        manifest_list = yaml.load(manifest_list_yaml_file)
+        manifest_list = yaml.safe_load(manifest_list_yaml_file)
         templatefile_name = 'secure_fw/services/manifestfilename.template'
         template = env.get_template(templatefile_name)
 
         for manifest_file in manifest_list["manifest_list"]:
             manifest_path = manifest_file['manifest']
             file = open(manifest_path)
-            manifest = yaml.load(file)
+            manifest = yaml.safe_load(file)
 
             utilities = {}
             utilities['donotedit_warning']=donotedit_warning
@@ -156,7 +156,7 @@ def main():
     with open(os.path.join('tools', 'tfm_generated_file_list.yaml')) \
                                                     as file_list_yaml_file:
         # read list of files that need to be generated from templates using db
-        file_list_yaml = yaml.load(file_list_yaml_file)
+        file_list_yaml = yaml.safe_load(file_list_yaml_file)
         file_list = file_list_yaml["file_list"]
         for file in file_list:
             outfile_name = file["output"]
