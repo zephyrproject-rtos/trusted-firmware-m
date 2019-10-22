@@ -188,6 +188,14 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
     }
 
     /*
+     * It is a PROGRAMMER ERROR if the signal_mask does not include any assigned
+     * signals.
+     */
+    if ((partition->runtime_data.assigned_signals & signal_mask) == 0) {
+        tfm_panic();
+    }
+
+    /*
      * Expected signals are included in signal wait mask, ignored signals
      * should not be set and affect caller thread status. Save this mask for
      * further checking while signals are ready to be set.

@@ -29,6 +29,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
+#include "tfm_irq_list.h"
 
 #include "secure_fw/services/tfm_service_list.inc"
 
@@ -476,7 +477,7 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 
 void tfm_spm_init(void)
 {
-    uint32_t i, num;
+    uint32_t i, j, num;
     struct spm_partition_desc_t *partition;
     struct tfm_thrd_ctx *pth, this_thrd;
 
@@ -491,6 +492,17 @@ void tfm_spm_init(void)
         tfm_spm_hal_configure_default_isolation(partition->platform_data);
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
+        }
+
+        /* TODO: This can be optimized by generating the assigned signal
+         *       in code generation time.
+         */
+        for (j = 0; j < tfm_core_irq_signals_count; ++j) {
+            if (tfm_core_irq_signals[j].partition_id ==
+                                        partition->static_data->partition_id) {
+                partition->runtime_data.assigned_signals |=
+                                        tfm_core_irq_signals[j].signal_value;
+            }
         }
 
         tfm_event_init(&partition->runtime_data.signal_evnt);
@@ -525,6 +537,8 @@ void tfm_spm_init(void)
             tfm_panic();
         }
         service[i].partition = partition;
+        partition->runtime_data.assigned_signals |= service->service_db->signal;
+
         tfm_list_init(&service[i].handle_list);
         tfm_list_add_tail(&partition->runtime_data.service_list,
                           &service[i].list);
