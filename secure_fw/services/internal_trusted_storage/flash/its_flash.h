@@ -20,18 +20,18 @@ extern "C" {
 
 /* Adjust to match your system's block size */
 #ifndef ITS_SECTOR_SIZE
-#error "ITS_SECTOR_SIZE must be defined by the target in flash_layout.h file"
+#error "ITS_SECTOR_SIZE must be defined by the target in flash_layout.h"
 #define ITS_BLOCK_SIZE 0
 #else
-#define ITS_BLOCK_SIZE ITS_SECTOR_SIZE
+#define ITS_BLOCK_SIZE (ITS_SECTOR_SIZE * ITS_SECTORS_PER_BLOCK)
 #endif
 
 /* Adjust to a size that will allow all assets to fit */
-#ifndef ITS_NBR_OF_SECTORS
-#error "ITS_NBR_OF_SECTORS must be defined by the target in flash_layout.h file"
+#ifndef FLASH_ITS_AREA_SIZE
+#error "FLASH_ITS_AREA_SIZE must be defined by the target in flash_layout.h"
 #define ITS_TOTAL_NUM_OF_BLOCKS 0
 #else
-#define ITS_TOTAL_NUM_OF_BLOCKS ITS_NBR_OF_SECTORS
+#define ITS_TOTAL_NUM_OF_BLOCKS (FLASH_ITS_AREA_SIZE / ITS_BLOCK_SIZE)
 #endif
 
 #ifndef ITS_FLASH_PROGRAM_UNIT

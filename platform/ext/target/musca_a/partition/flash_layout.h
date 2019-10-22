@@ -207,9 +207,11 @@
  * address instead of the full memory address.
  */
 #define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
+/* Dedicated flash area for ITS */
+#define ITS_FLASH_AREA_SIZE     FLASH_ITS_AREA_SIZE
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
-/* The sectors must be in consecutive memory location */
-#define ITS_NBR_OF_SECTORS      (FLASH_ITS_AREA_SIZE / ITS_SECTOR_SIZE)
+/* Number of ITS_SECTOR_SIZE per block */
+#define ITS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  (0x1)
 /* The maximum asset size to be stored in the ITS area */
