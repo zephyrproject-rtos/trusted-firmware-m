@@ -183,9 +183,11 @@ The ITS service requires the following definitions:
 
 - ``ITS_FLASH_AREA_ADDR`` - Defines the flash area address where the internal
   trusted storage area starts.
+- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for the
+  internal trusted storage.
 - ``ITS_SECTOR_SIZE`` - Defines the size of the internal flash sectors.
-- ``ITS_NBR_OF_SECTORS`` - Defines the number of sectors available for the
-  internal trusted storage area.
+- ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
+  to form an ITS_BLOCK_SIZE.
 - ``ITS_FLASH_DEV_NAME`` - Specifies the internal flash device used by ITS to
   store the data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in

@@ -149,15 +149,10 @@ Flash Interface
   The CMSIS flash interface **must** be implemented for each target based on
   its flash controller.
 
-The block size (``ITS_SECTOR_SIZE``) and number of blocks
-(``ITS_NBR_OF_SECTORS``) used by the internal trusted storage area, are defined
-in ``flash_layout.h`` located in ``platform/ext/target/<TARGET_NAME>/partition``.
-Those values **must** be defined in that header file based on internal flash
-specifications and vendor specific considerations.
-It is also required to define the ``ITS_FLASH_AREA_ADDR`` which defines the
-address of the first sector to be used as internal trusted storage. The sectors
-reserved to be used as internal trusted storage **must** be contiguous sectors
-starting at ``ITS_FLASH_AREA_ADDR``.
+The ITS flash interface depends on target-specific definitions from
+``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``.
+Please see the `Internal Trusted Storage Service Definitions` section for
+details.
 
 *****************************
 ITS Service Integration Guide
@@ -178,9 +173,11 @@ The ITS service requires the following platform definitions:
 
 - ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
   storage area starts.
+- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
+  internal trusted storage.
 - ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors.
-- ``ITS_NBR_OF_SECTORS`` - Defines the number of sectors available for the
-  internal trusted storage area. The sectors must be consecutive.
+- ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
+  to form an ITS_BLOCK_SIZE.
 - ``ITS_FLASH_DEV_NAME`` - Specifies the flash device used by ITS to store the
   data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
@@ -194,6 +191,9 @@ The ITS service requires the following platform definitions:
   tables in RAM (fast access) and flash (persistent storage). The memory used by
   the filesystem metadata tables is allocated statically as ITS does not use
   dynamic memory allocation.
+
+The sectors reserved to be used as internal trusted storage **must** be
+contiguous sectors starting at ``ITS_FLASH_AREA_ADDR``.
 
 Target must provide a header file, called ``flash_layout.h``, which defines the
 information explained above. The defines must be named as they are specified
