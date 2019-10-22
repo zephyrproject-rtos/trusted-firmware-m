@@ -155,6 +155,10 @@ endif()
 # Option to demonstrate usage of secure-only peripheral
 set (SECURE_UART1 OFF)
 
+if (PLATFORM_SVC_HANDLERS)
+	add_definitions(-DPLATFORM_SVC_HANDLERS)
+endif()
+
 if (REGRESSION)
 	set(SERVICES_TEST_ENABLED ON)
 endif()

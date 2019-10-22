@@ -19,6 +19,11 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
 
+#ifdef PLATFORM_SVC_HANDLERS
+extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
+				     uint32_t *svc_args, uint32_t lr);
+#endif
+
 /* Include the definitions of the privileged IRQ handlers in case of library
  * model
  */
@@ -88,6 +93,9 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_core_get_boot_data_handler(svc_args);
         break;
     default:
+#ifdef PLATFORM_SVC_HANDLERS
+        svc_args[0] = platform_svc_handlers(svc_num, svc_args, lr);
+#endif
         break;
     }
 

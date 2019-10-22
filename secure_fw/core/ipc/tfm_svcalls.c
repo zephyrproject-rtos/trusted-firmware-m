@@ -28,6 +28,11 @@
 #include "tfm_psa_client_call.h"
 #include "tfm_rpc.h"
 
+#ifdef PLATFORM_SVC_HANDLERS
+extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
+				     uint32_t *ctx, uint32_t lr);
+#endif
+
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
                      int32_t irq_line);
 
@@ -1012,8 +1017,12 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
         break;
 
     default:
+#ifdef PLATFORM_SVC_HANDLERS
+        return (platform_svc_handlers(svc_num, ctx, lr));
+#else
         LOG_MSG("Unknown SVC number requested!");
         return PSA_ERROR_GENERIC_ERROR;
+#endif
     }
     return PSA_SUCCESS;
 }

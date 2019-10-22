@@ -44,6 +44,7 @@ typedef enum {
     TFM_SVC_PSA_NOTIFY,
     TFM_SVC_PSA_CLEAR,
 #endif
+    TFM_SVC_PLATFORM_BASE = 50 /* leave room for additional Core handlers */
 } tfm_svc_number_t;
 
 #define SVC(code) __ASM volatile("svc %0" : : "I" (code))
