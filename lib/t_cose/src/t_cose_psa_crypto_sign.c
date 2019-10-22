@@ -38,7 +38,8 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
      *        Later Crypto service is going to get the attestation key from
      *        platform layer.
      */
-    attest_ret = attest_register_initial_attestation_private_key(&private_key);
+    attest_ret =
+        attest_get_initial_attestation_private_key_handle(&private_key);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
         return T_COSE_ERR_FAIL;
     }
@@ -55,11 +56,6 @@ t_cose_crypto_pub_key_sign(int32_t cose_alg_id,
         cose_ret = T_COSE_ERR_FAIL;
     } else {
         signature->ptr = signature_buffer.ptr;
-    }
-
-    attest_ret = attest_unregister_initial_attestation_private_key(private_key);
-    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        cose_ret =  T_COSE_ERR_FAIL;
     }
 
     return cose_ret;

@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include "tfm_client.h"
 #include "attestation.h"
+#include "attestation_key.h"
 #include "tfm_boot_status.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
@@ -899,6 +900,11 @@ attest_create_token(struct q_useful_buf_c *challenge,
     int32_t key_select = 0;
     uint32_t option_flags = 0;
 
+    attest_err = attest_register_initial_attestation_key();
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        goto error;
+    }
+
 #ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
     attest_get_option_flags(challenge, &option_flags, &key_select);
 #endif
@@ -984,6 +990,14 @@ attest_create_token(struct q_useful_buf_c *challenge,
     }
 
 error:
+    if (attest_err == PSA_ATTEST_ERR_SUCCESS) {
+        /* We got here normally and therefore care about error codes. */
+        attest_err = attest_unregister_initial_attestation_key();
+    }
+    else {
+        /* Error handler: just remove they key and preserve error. */
+        (void)attest_unregister_initial_attestation_key();
+    }
     return attest_err;
 }
 
