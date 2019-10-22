@@ -148,6 +148,15 @@ set (TFM_LEGACY_API ON)
 
 option(TFM_PARTITION_AUDIT_LOG "Enable the TF-M Audit Log partition" ON)
 option(TFM_PARTITION_PLATFORM "Enable the TF-M Platform partition" ON)
+option(TFM_PARTITION_SECURE_STORAGE "Enable the TF-M secure storage partition" ON)
+option(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE "Enable the TF-M internal trusted storage partition" ON)
+option(TFM_PARTITION_CRYPTO "Enable the TF-M crypto partition" ON)
+option(TFM_PARTITION_INITIAL_ATTESTATION "Enable the TF-M initial attestation partition" ON)
+
+if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_SECURE_STORAGE)
+	#PSA Initial Attestation and Protected storage rely on Cryptography API
+	set(TFM_PARTITION_CRYPTO ON)
+endif()
 
 if(${TARGET_PLATFORM} STREQUAL "AN521" OR ${TARGET_PLATFORM} STREQUAL "AN519" OR ${TARGET_PLATFORM} STREQUAL "AN539")
 	set (REFERENCE_PLATFORM ON)
@@ -262,6 +271,22 @@ endif()
 
 if (TFM_PARTITION_PLATFORM)
 	add_definitions(-DTFM_PARTITION_PLATFORM)
+endif()
+
+if (TFM_PARTITION_SECURE_STORAGE)
+	add_definitions(-DTFM_PARTITION_SECURE_STORAGE)
+endif()
+
+if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	add_definitions(-DTFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+endif()
+
+if (TFM_PARTITION_CRYPTO)
+	add_definitions(-DTFM_PARTITION_CRYPTO)
+endif()
+
+if (TFM_PARTITION_INITIAL_ATTESTATION)
+	add_definitions(-DTFM_PARTITION_INITIAL_ATTESTATION)
 endif()
 
 if (TFM_PARTITION_TEST_CORE)

@@ -10,18 +10,22 @@
 #include "tfm_secure_api.h"
 #include "secure_fw/spm/spm_partition_defs.h"
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 /******** TFM_SP_STORAGE ********/
 psa_status_t tfm_sst_set_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_get_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_sst_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /******** TFM_SP_ITS ********/
 psa_status_t tfm_its_set_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_its_get_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_its_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_its_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
@@ -32,6 +36,7 @@ psa_status_t audit_core_get_record_info(psa_invec *, size_t, psa_outvec *, size_
 psa_status_t audit_core_delete_record(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 /******** TFM_SP_CRYPTO ********/
 psa_status_t tfm_crypto_allocate_key(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_open_key(psa_invec *, size_t, psa_outvec *, size_t);
@@ -78,6 +83,7 @@ psa_status_t tfm_crypto_key_derivation(psa_invec *, size_t, psa_outvec *, size_t
 psa_status_t tfm_crypto_key_agreement(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_generate_random(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t tfm_crypto_generate_key(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
@@ -85,10 +91,12 @@ psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t)
 psa_status_t platform_sp_ioctl(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t initial_attest_get_token(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t initial_attest_get_token_size(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t initial_attest_get_public_key(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
@@ -149,18 +157,22 @@ psa_status_t tfm_secure_client_2_call(psa_invec *, size_t, psa_outvec *, size_t)
                                    in_vec, in_len, out_vec, out_len); \
     }
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 /******** TFM_SP_STORAGE ********/
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_set_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_info_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_remove_req)
 TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_support_req)
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /******** TFM_SP_ITS ********/
 TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_set_req)
 TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_get_req)
 TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_get_info_req)
 TFM_VENEER_FUNCTION(TFM_SP_ITS, tfm_its_remove_req)
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
@@ -171,6 +183,7 @@ TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_get_record_info)
 TFM_VENEER_FUNCTION(TFM_SP_AUDIT_LOG, audit_core_delete_record)
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 /******** TFM_SP_CRYPTO ********/
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_allocate_key)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_open_key)
@@ -217,6 +230,7 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_derivation)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_key_agreement)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_random)
 TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_key)
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
@@ -224,10 +238,12 @@ TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_ioctl)
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token)
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token_size)
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_public_key)
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/

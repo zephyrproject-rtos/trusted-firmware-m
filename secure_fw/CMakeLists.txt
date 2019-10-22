@@ -41,6 +41,62 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
+if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INTERNAL_TRUSTED_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_CRYPTO)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_CRYPTO is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INITIAL_ATTESTATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INITIAL_ATTESTATION is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_TEST_CORE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_TEST_CORE_IPC)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE_IPC is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_TEST_SST)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
+endif()
+
+if (NOT DEFINED TEST_FRAMEWORK_S)
+	message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_S is undefined.")
+endif()
+
+if (NOT DEFINED TEST_FRAMEWORK_NS)
+	message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_NS is undefined.")
+endif()
+
+if (NOT DEFINED BL2)
+	message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
+endif()
+
+if (NOT DEFINED TFM_PSA_API)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
+endif()
+
+if(NOT DEFINED PLATFORM_LINK_INCLUDES)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
+endif()
+
+if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_ENABLE_IRQ_TEST is not defined.")
+endif()
+
 include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
 if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 	include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
@@ -158,97 +214,80 @@ function(set_up_secure_fw_build)
 
 	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${S_SCATTER_FILE_NAME}")
 
-	add_dependencies(${EXE_NAME} tfm_crypto)
-	add_dependencies(${EXE_NAME} tfm_storage)
-	add_dependencies(${EXE_NAME} tfm_internal_trusted_storage)
-	add_dependencies(${EXE_NAME} tfm_secure_tests)
-	add_dependencies(${EXE_NAME} tfm_attest)
-	add_dependencies(${EXE_NAME} libtfmsprt)
-	if (TFM_PARTITION_AUDIT_LOG)
-		add_dependencies(${EXE_NAME} tfm_audit)
-	endif()
-	if (TFM_PARTITION_PLATFORM)
-		add_dependencies(${EXE_NAME} tfm_platform)
-	endif()
-
 	#Set macro definitions for the project.
 	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
-	if (REGRESSION OR CORE_TEST)
-		if (DEFINED TFM_PARTITION_TEST_SECURE_SERVICES AND TFM_PARTITION_TEST_SECURE_SERVICES)
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_secure_tests tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest libtfmsprt)
-		else()
-			target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_secure_tests tfm_attest libtfmsprt)
-		endif()
-	else()
-		target_link_libraries(${EXE_NAME} tfm_attest tfm_crypto tfm_storage tfm_internal_trusted_storage tfm_attest libtfmsprt)
+	target_link_libraries(${EXE_NAME} libtfmsprt)
+
+	# The order of the libraries linked below is important for GCC
+	# Because the GCC linker will search an archive only once.
+	# If the a library has some symbols that are defined in the library which is linked before it,
+	# it will not cause the linker to search again.
+	# So please put a library before what it relies on.
+	if (CORE_TEST OR TFM_PARTITION_TEST_SECURE_SERVICES)
+		target_link_libraries(${EXE_NAME} tfm_secure_tests)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
+	endif()
+
+	if (TFM_PARTITION_INITIAL_ATTESTATION)
+		target_link_libraries(${EXE_NAME} tfm_attest)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INITIAL_ATTESTATION")
+	endif()
+
+	if (TFM_PARTITION_SECURE_STORAGE)
+		target_link_libraries(${EXE_NAME} tfm_storage)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_SECURE_STORAGE")
+	endif()
+
+	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
+	endif()
+
+	if (TFM_PARTITION_CRYPTO)
+		target_link_libraries(${EXE_NAME} tfm_crypto)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_CRYPTO")
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
 		target_link_libraries(${EXE_NAME} tfm_audit)
-	endif()
-
-	if (TFM_PARTITION_PLATFORM)
-		target_link_libraries(${EXE_NAME} tfm_platform)
-	endif()
-
-	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
-
-	if (TFM_PARTITION_AUDIT_LOG)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_AUDIT_LOG")
 	endif()
 
 	if (TFM_PARTITION_PLATFORM)
+		target_link_libraries(${EXE_NAME} tfm_platform)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PLATFORM")
 	endif()
 
-	if (NOT DEFINED TFM_PARTITION_TEST_CORE)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE is undefined. ")
-	elseif (TFM_PARTITION_TEST_CORE)
+	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
+
+	if (TFM_PARTITION_TEST_CORE)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 	endif()
 
-	if (NOT DEFINED TFM_PARTITION_TEST_CORE_IPC)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_CORE_IPC is undefined.")
-	elseif (TFM_PARTITION_TEST_CORE_IPC)
+	if (TFM_PARTITION_TEST_CORE_IPC)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE_IPC")
 	endif()
 
-	if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
-	elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
-	endif()
-
-	if (NOT DEFINED TFM_PARTITION_TEST_SST)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
-	elseif (TFM_PARTITION_TEST_SST)
+	if (TFM_PARTITION_TEST_SST)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SST")
 	endif()
 
-	if (NOT DEFINED TEST_FRAMEWORK_S)
-		message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_S is undefined.")
-	elseif (TEST_FRAMEWORK_S)
+	if (TEST_FRAMEWORK_S)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TEST_FRAMEWORK_S")
 	endif()
 
-	if (NOT DEFINED TEST_FRAMEWORK_NS)
-		message(FATAL_ERROR "Incomplete build configuration: TEST_FRAMEWORK_NS is undefined.")
-	elseif (TEST_FRAMEWORK_NS)
+	if (TEST_FRAMEWORK_NS)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TEST_FRAMEWORK_NS")
 	endif()
 
-	if (NOT DEFINED BL2)
-		message(FATAL_ERROR "Incomplete build configuration: BL2 is undefined. ")
-	elseif (BL2)
+	if (BL2)
 		#Add BL2 and MCUBOOT_IMAGE_NUMBER defines to linker to resolve symbols in region_defs.h and flash_layout.h
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "BL2" "MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}")
 	endif()
 
-	if (NOT DEFINED TFM_PSA_API)
-		message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
-	elseif (TFM_PSA_API)
+	if (TFM_PSA_API)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PSA_API")
 		if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 			embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_MULTI_CORE_TOPOLOGY")
@@ -261,14 +300,9 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE")
 	endif()
 
-	if(NOT DEFINED PLATFORM_LINK_INCLUDES)
-		message(FATAL_ERROR "ERROR: Incomplete Configuration: PLATFORM_LINK_INCLUDES is not defined.")
-	endif()
 	embedded_set_target_link_includes(TARGET ${EXE_NAME} INCLUDES "${PLATFORM_LINK_INCLUDES}")
 
-	if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
-		message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_ENABLE_IRQ_TEST is not defined.")
-	elseif (TFM_ENABLE_IRQ_TEST)
+	if (TFM_ENABLE_IRQ_TEST)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_ENABLE_IRQ_TEST")
 	endif()
 
@@ -293,8 +327,9 @@ function(set_up_secure_fw_build)
 	set(EXPORT_INC_DIR "export/tfm/include")
 	set(EXPORT_SRC_DIR "export/tfm/src")
 	#Headers
-	install(DIRECTORY   ${INTERFACE_INC_DIR}/psa
-			DESTINATION ${EXPORT_INC_DIR})
+	install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
+						${INTERFACE_INC_DIR}/psa/error.h
+			DESTINATION ${EXPORT_INC_DIR}/psa)
 
 	install(FILES       ${INTERFACE_INC_DIR}/os_wrapper/common.h
 						${INTERFACE_INC_DIR}/os_wrapper/mutex.h
@@ -304,12 +339,10 @@ function(set_up_secure_fw_build)
 			DESTINATION ${EXPORT_INC_DIR}/psa_manifest)
 
 	install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
-						${INTERFACE_INC_DIR}/tfm_crypto_defs.h
 						${INTERFACE_INC_DIR}/tfm_ns_interface.h
 						${INTERFACE_INC_DIR}/tfm_nspm_api.h
 						${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
 						${INTERFACE_INC_DIR}/tfm_ns_svc.h
-						${INTERFACE_INC_DIR}/tfm_sst_defs.h
 						${INTERFACE_INC_DIR}/tfm_veneers.h
 			DESTINATION ${EXPORT_INC_DIR})
 
@@ -321,17 +354,63 @@ function(set_up_secure_fw_build)
 
 	if(TFM_PSA_API)
 		install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
-							${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
-							${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
-							${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
-							${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
 				DESTINATION ${EXPORT_SRC_DIR})
-	else()
-		install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
-							${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
-							${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
-							${INTERFACE_SRC_DIR}/tfm_its_func_api.c
-				DESTINATION ${EXPORT_SRC_DIR})
+	endif()
+
+	if (TFM_PARTITION_SECURE_STORAGE)
+		install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
+				DESTINATION ${EXPORT_INC_DIR}/psa)
+		if (TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		else()
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
+	endif()
+
+	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+		install(FILES       ${INTERFACE_INC_DIR}/psa/internal_trusted_storage.h
+							${INTERFACE_INC_DIR}/psa/storage_common.h
+				DESTINATION ${EXPORT_INC_DIR}/psa)
+		if (TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		else()
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_func_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
+	endif()
+
+	if (TFM_PARTITION_CRYPTO)
+		install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
+							${INTERFACE_INC_DIR}/psa/crypto.h
+							${INTERFACE_INC_DIR}/psa/crypto_platform.h
+							${INTERFACE_INC_DIR}/psa/crypto_sizes.h
+							${INTERFACE_INC_DIR}/psa/crypto_struct.h
+							${INTERFACE_INC_DIR}/psa/crypto_types.h
+							${INTERFACE_INC_DIR}/psa/crypto_values.h
+							${INTERFACE_INC_DIR}/tfm_crypto_defs.h
+				DESTINATION ${EXPORT_INC_DIR}/psa)
+		if (TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		else()
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
+	endif()
+
+	if (TFM_PARTITION_INITIAL_ATTESTATION)
+		install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
+				DESTINATION ${EXPORT_INC_DIR}/psa)
+		if (TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		else()
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
 	endif()
 
 	if(TFM_PARTITION_AUDIT_LOG)
@@ -378,13 +457,19 @@ endfunction()
 add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/secure_test)
 
 #Add the crypto library target
-add_subdirectory(${SECURE_FW_DIR}/services/crypto)
+if (TFM_PARTITION_CRYPTO)
+	add_subdirectory(${SECURE_FW_DIR}/services/crypto)
+endif()
 
 #Add the secure storage library target
-add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
+if (TFM_PARTITION_SECURE_STORAGE)
+	add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
+endif()
 
 #Add the internal trusted storage library target
-add_subdirectory(${SECURE_FW_DIR}/services/internal_trusted_storage)
+if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	add_subdirectory(${SECURE_FW_DIR}/services/internal_trusted_storage)
+endif()
 
 #Add the platform service library target
 if (TFM_PARTITION_PLATFORM)
@@ -392,7 +477,9 @@ if (TFM_PARTITION_PLATFORM)
 endif()
 
 #Add the initial attestation service library target
-add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
+if (TFM_PARTITION_INITIAL_ATTESTATION)
+	add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
+endif()
 
 #Add the audit logging library target
 if (TFM_PARTITION_AUDIT_LOG)

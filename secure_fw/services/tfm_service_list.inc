@@ -27,6 +27,7 @@
 
 const struct tfm_spm_service_db_t service_db[] =
 {
+#ifdef TFM_PARTITION_SECURE_STORAGE
     /******** TFM_SP_STORAGE ********/
     {
         .name = "TFM_SST_SET",
@@ -73,7 +74,9 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     /******** TFM_SP_ITS ********/
     {
         .name = "TFM_ITS_SET",
@@ -111,7 +114,9 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
+#ifdef TFM_PARTITION_CRYPTO
     /******** TFM_SP_CRYPTO ********/
     {
         .name = "TFM_CRYPTO",
@@ -122,6 +127,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
     /******** TFM_SP_PLATFORM ********/
@@ -145,6 +151,7 @@ const struct tfm_spm_service_db_t service_db[] =
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     /******** TFM_SP_INITIAL_ATTESTATION ********/
     {
         .name = "TFM_ATTEST_GET_TOKEN",
@@ -173,6 +180,7 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
@@ -501,6 +509,7 @@ const struct tfm_spm_service_db_t service_db[] =
 /**************************************************************************/
 struct tfm_spm_service_t service[] =
 {
+#ifdef TFM_PARTITION_SECURE_STORAGE
     /******** TFM_SP_STORAGE ********/
     {
         .service_db = NULL,
@@ -537,7 +546,9 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     /******** TFM_SP_ITS ********/
     {
         .service_db = NULL,
@@ -567,7 +578,9 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
+#ifdef TFM_PARTITION_CRYPTO
     /******** TFM_SP_CRYPTO ********/
     {
         .service_db = NULL,
@@ -576,6 +589,7 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
     /******** TFM_SP_PLATFORM ********/
@@ -595,6 +609,7 @@ struct tfm_spm_service_t service[] =
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     /******** TFM_SP_INITIAL_ATTESTATION ********/
     {
         .service_db = NULL,
@@ -617,6 +632,7 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/

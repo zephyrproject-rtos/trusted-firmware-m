@@ -42,6 +42,22 @@ if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
 endif()
 
+if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INTERNAL_TRUSTED_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_CRYPTO)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_CRYPTO is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INITIAL_ATTESTATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INITIAL_ATTESTATION is undefined.")
+endif()
+
 if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_ENABLE_IRQ_TEST is undefined.")
 endif()
@@ -106,10 +122,6 @@ endif()
 if (ENABLE_QCBOR_TESTS)
 	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_QCBOR_TESTS APPEND)
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_QCBOR_TESTS APPEND)
-endif()
-
-if (NOT TFM_PARTITION_AUDIT_LOG)
-	set(ENABLE_AUDIT_LOGGING_SERVICE_TESTS FALSE)
 endif()
 
 if (ENABLE_AUDIT_LOGGING_SERVICE_TESTS)

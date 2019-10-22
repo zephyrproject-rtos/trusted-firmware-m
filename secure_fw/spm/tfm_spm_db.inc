@@ -16,21 +16,29 @@
 /**************************************************************************/
 /** IRQ count per partition */
 /**************************************************************************/
+#ifdef TFM_PARTITION_SECURE_STORAGE
 #define TFM_PARTITION_TFM_SP_STORAGE_IRQ_COUNT 0
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 #define TFM_PARTITION_TFM_SP_ITS_IRQ_COUNT 0
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 #define TFM_PARTITION_TFM_SP_AUDIT_LOG_IRQ_COUNT 0
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 #define TFM_PARTITION_TFM_SP_CRYPTO_IRQ_COUNT 0
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 #define TFM_PARTITION_TFM_SP_PLATFORM_IRQ_COUNT 0
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 #define TFM_PARTITION_TFM_SP_INITIAL_ATTESTATION_IRQ_COUNT 0
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 #define TFM_PARTITION_TFM_SP_CORE_TEST_IRQ_COUNT 0
@@ -71,21 +79,29 @@
 extern void tfm_nspm_thread_entry(void);
 #endif
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 extern void tfm_sst_req_mngr_init(void);
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 extern void tfm_its_req_mngr_init(void);
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 extern void audit_core_init(void);
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 extern void tfm_crypto_init(void);
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 extern void platform_sp_init(void);
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 extern void attest_partition_init(void);
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 extern void core_test_init(void);
@@ -126,6 +142,7 @@ extern void tfm_secure_client_2_init(void);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$Limit);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$RO$$Base);
@@ -136,7 +153,9 @@ REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, $$Base);
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, $$Limit);
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, $$RO$$Base);
@@ -147,6 +166,7 @@ REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 REGION_DECLARE(Image$$, TFM_SP_AUDIT_LOG_LINKER, $$Base);
@@ -161,6 +181,7 @@ REGION_DECLARE(Image$$, TFM_SP_AUDIT_LOG_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_AUDIT_LOG_LINKER, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, $$Base);
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, $$Limit);
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, $$RO$$Base);
@@ -171,6 +192,7 @@ REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_CRYPTO_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 REGION_DECLARE(Image$$, TFM_SP_PLATFORM_LINKER, $$Base);
@@ -185,6 +207,7 @@ REGION_DECLARE(Image$$, TFM_SP_PLATFORM_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_PLATFORM_LINKER, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, $$Base);
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, $$Limit);
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, $$RO$$Base);
@@ -195,6 +218,7 @@ REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, _DATA$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_INITIAL_ATTESTATION_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 REGION_DECLARE(Image$$, TFM_SP_CORE_TEST_LINKER, $$Base);
@@ -321,19 +345,23 @@ static uint32_t ns_interrupt_ctx_stack[
 static uint32_t tfm_core_interrupt_ctx_stack[
         sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 static uint32_t ctx_stack_TFM_SP_STORAGE[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_SP_STORAGE_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 static uint32_t ctx_stack_TFM_SP_ITS[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_SP_ITS_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 static uint32_t ctx_stack_TFM_SP_AUDIT_LOG[
@@ -344,12 +372,14 @@ static uint32_t ctx_stack_TFM_SP_AUDIT_LOG[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 static uint32_t ctx_stack_TFM_SP_CRYPTO[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_SP_CRYPTO_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 static uint32_t ctx_stack_TFM_SP_PLATFORM[
@@ -360,12 +390,14 @@ static uint32_t ctx_stack_TFM_SP_PLATFORM[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 static uint32_t ctx_stack_TFM_SP_INITIAL_ATTESTATION[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
             (TFM_PARTITION_TFM_SP_INITIAL_ATTESTATION_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 static uint32_t ctx_stack_TFM_SP_CORE_TEST[
@@ -444,16 +476,24 @@ uint32_t *ctx_stack_list[] =
 {
     ns_interrupt_ctx_stack,
     tfm_core_interrupt_ctx_stack,
+#ifdef TFM_PARTITION_SECURE_STORAGE
     ctx_stack_TFM_SP_STORAGE,
+#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     ctx_stack_TFM_SP_ITS,
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 #ifdef TFM_PARTITION_AUDIT_LOG
     ctx_stack_TFM_SP_AUDIT_LOG,
 #endif /* TFM_PARTITION_AUDIT_LOG */
+#ifdef TFM_PARTITION_CRYPTO
     ctx_stack_TFM_SP_CRYPTO,
+#endif /* TFM_PARTITION_CRYPTO */
 #ifdef TFM_PARTITION_PLATFORM
     ctx_stack_TFM_SP_PLATFORM,
 #endif /* TFM_PARTITION_PLATFORM */
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     ctx_stack_TFM_SP_INITIAL_ATTESTATION,
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 #ifdef TFM_PARTITION_TEST_CORE
     ctx_stack_TFM_SP_CORE_TEST,
 #endif /* TFM_PARTITION_TEST_CORE */
@@ -484,15 +524,19 @@ uint32_t *ctx_stack_list[] =
 /**************************************************************************/
 /** Dependencies array for Secure Partition */
 /**************************************************************************/
+#ifdef TFM_PARTITION_SECURE_STORAGE
 static int32_t dependencies_TFM_SP_STORAGE[] =
 {
     TFM_CRYPTO_SID,
 };
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 static int32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
 {
     TFM_CRYPTO_SID,
 };
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 static int32_t dependencies_TFM_SP_CORE_TEST[] =
@@ -580,6 +624,7 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 #endif
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
     {
 #ifdef TFM_PSA_API
         .psa_framework_version = 0x0100,
@@ -593,7 +638,9 @@ const struct spm_partition_static_data_t static_data_list[] =
         .dependencies_num     = 1,
         .p_dependencies       = dependencies_TFM_SP_STORAGE,
     },
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
 #ifdef TFM_PSA_API
         .psa_framework_version = 0x0100,
@@ -607,6 +654,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         .dependencies_num     = 0,
         .p_dependencies       = NULL,
     },
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
     {
@@ -624,6 +672,7 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
     {
 #ifdef TFM_PSA_API
         .psa_framework_version = 0x0100,
@@ -637,6 +686,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         .dependencies_num     = 0,
         .p_dependencies       = NULL,
     },
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
     {
@@ -654,6 +704,7 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {
 #ifdef TFM_PSA_API
         .psa_framework_version = 0x0100,
@@ -667,6 +718,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         .dependencies_num     = 1,
         .p_dependencies       = dependencies_TFM_SP_INITIAL_ATTESTATION,
     },
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
     {
@@ -847,21 +899,29 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
     NULL,
 #endif
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
     NULL,
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     NULL,
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
     platform_data_list_TFM_SP_AUDIT_LOG,
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
     NULL,
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
     NULL,
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     NULL,
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
     platform_data_list_TFM_SP_CORE_TEST,
@@ -908,6 +968,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_top            = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
         .rw_start             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
     },
+#ifdef TFM_PARTITION_SECURE_STORAGE
     {
         .code_start           = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$Base),
         .code_limit           = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$Limit),
@@ -920,7 +981,9 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Limit),
     },
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
         .code_start           = PART_REGION_ADDR(TFM_SP_ITS_LINKER, $$Base),
         .code_limit           = PART_REGION_ADDR(TFM_SP_ITS_LINKER, $$Limit),
@@ -933,6 +996,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_bottom         = PART_REGION_ADDR(TFM_SP_ITS_LINKER, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(TFM_SP_ITS_LINKER, _STACK$$ZI$$Limit),
     },
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
     {
@@ -949,6 +1013,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
     },
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
     {
         .code_start           = PART_REGION_ADDR(TFM_SP_CRYPTO_LINKER, $$Base),
         .code_limit           = PART_REGION_ADDR(TFM_SP_CRYPTO_LINKER, $$Limit),
@@ -961,6 +1026,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_bottom         = PART_REGION_ADDR(TFM_SP_CRYPTO_LINKER, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(TFM_SP_CRYPTO_LINKER, _STACK$$ZI$$Limit),
     },
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
     {
@@ -977,6 +1043,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {
         .code_start           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION_LINKER, $$Base),
         .code_limit           = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION_LINKER, $$Limit),
@@ -989,6 +1056,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_bottom         = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION_LINKER, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(TFM_SP_INITIAL_ATTESTATION_LINKER, _STACK$$ZI$$Limit),
     },
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
     {
@@ -1126,22 +1194,26 @@ static struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_STORAGE */
     /* -----------------------------------------------------------------------*/
+#ifdef TFM_PARTITION_SECURE_STORAGE
     {
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_ITS */
     /* -----------------------------------------------------------------------*/
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_AUDIT_LOG */
@@ -1158,12 +1230,14 @@ static struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_CRYPTO */
     /* -----------------------------------------------------------------------*/
+#ifdef TFM_PARTITION_CRYPTO
     {
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
+#endif /* TFM_PARTITION_CRYPTO */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_PLATFORM */
@@ -1180,12 +1254,14 @@ static struct spm_partition_desc_t partition_list [] =
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_INITIAL_ATTESTATION */
     /* -----------------------------------------------------------------------*/
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_CORE_TEST */

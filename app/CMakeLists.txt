@@ -48,6 +48,22 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
+if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INTERNAL_TRUSTED_STORAGE is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_CRYPTO)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_CRYPTO is undefined.")
+endif()
+
+if (NOT DEFINED TFM_PARTITION_INITIAL_ATTESTATION)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_INITIAL_ATTESTATION is undefined.")
+endif()
+
 if (NOT DEFINED TFM_PSA_API)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined.")
 endif()
@@ -63,22 +79,6 @@ if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 	list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ns_interface.c")
 endif()
 
-if (TFM_PSA_API)
-	list(APPEND NS_APP_SRC
-		"${INTERFACE_DIR}/src/tfm_sst_ipc_api.c"
-		"${INTERFACE_DIR}/src/tfm_its_ipc_api.c"
-		"${INTERFACE_DIR}/src/tfm_crypto_ipc_api.c"
-		"${INTERFACE_DIR}/src/tfm_initial_attestation_ipc_api.c"
-	)
-else()
-	list(APPEND NS_APP_SRC
-		"${INTERFACE_DIR}/src/tfm_sst_func_api.c"
-		"${INTERFACE_DIR}/src/tfm_its_func_api.c"
-		"${INTERFACE_DIR}/src/tfm_crypto_func_api.c"
-		"${INTERFACE_DIR}/src/tfm_initial_attestation_func_api.c"
-	)
-endif()
-
 if (TFM_PARTITION_AUDIT_LOG)
 	if (TFM_PSA_API)
 		message(FATAL_ERROR "Audit log has not been supported in IPC model yet.")
@@ -92,6 +92,38 @@ if (TFM_PARTITION_PLATFORM)
 		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_ipc_api.c")
 	else()
 		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_func_api.c")
+	endif()
+endif()
+
+if (TFM_PARTITION_SECURE_STORAGE)
+	if (TFM_PSA_API)
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_sst_ipc_api.c")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_sst_func_api.c")
+	endif()
+endif()
+
+if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	if (TFM_PSA_API)
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_its_ipc_api.c")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_its_func_api.c")
+	endif()
+endif()
+
+if (TFM_PARTITION_CRYPTO)
+	if (TFM_PSA_API)
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_crypto_ipc_api.c")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_crypto_func_api.c")
+	endif()
+endif()
+
+if (TFM_PARTITION_INITIAL_ATTESTATION)
+	if (TFM_PSA_API)
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_initial_attestation_ipc_api.c")
+	else()
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_initial_attestation_func_api.c")
 	endif()
 endif()
 

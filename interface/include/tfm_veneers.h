@@ -16,18 +16,22 @@
 extern "C" {
 #endif
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
 /******** TFM_SP_STORAGE ********/
 psa_status_t tfm_tfm_sst_set_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_sst_get_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_sst_get_info_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_sst_remove_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_sst_get_support_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /******** TFM_SP_ITS ********/
 psa_status_t tfm_tfm_its_set_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_its_get_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_its_get_info_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_its_remove_req_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_AUDIT_LOG
 /******** TFM_SP_AUDIT_LOG ********/
@@ -38,6 +42,7 @@ psa_status_t tfm_audit_core_get_record_info_veneer(psa_invec *in_vec, size_t in_
 psa_status_t tfm_audit_core_delete_record_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
+#ifdef TFM_PARTITION_CRYPTO
 /******** TFM_SP_CRYPTO ********/
 psa_status_t tfm_tfm_crypto_allocate_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_open_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
@@ -84,6 +89,7 @@ psa_status_t tfm_tfm_crypto_key_derivation_veneer(psa_invec *in_vec, size_t in_l
 psa_status_t tfm_tfm_crypto_key_agreement_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_generate_random_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_tfm_crypto_generate_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_PLATFORM
 /******** TFM_SP_PLATFORM ********/
@@ -91,10 +97,12 @@ psa_status_t tfm_platform_sp_system_reset_veneer(psa_invec *in_vec, size_t in_le
 psa_status_t tfm_platform_sp_ioctl_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_PLATFORM */
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t tfm_initial_attest_get_token_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_initial_attest_get_token_size_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_initial_attest_get_public_key_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
