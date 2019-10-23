@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,83 +8,76 @@
 #include "its_flash.h"
 
 #include "Driver_Flash.h"
-#include "secure_fw/services/internal_trusted_storage/its_utils.h"
 #include "tfm_memory_utils.h"
-
-#ifndef ITS_FLASH_AREA_ADDR
-#error "ITS_FLASH_AREA_ADDR must be defined in flash_layout.h file"
-#endif
-
-#ifndef ITS_FLASH_DEV_NAME
-#error "ITS_FLASH_DEV_NAME must be defined in flash_layout.h file"
-#endif
-
-/* Import the CMSIS flash device driver */
-extern ARM_DRIVER_FLASH ITS_FLASH_DEV_NAME;
 
 #define BLOCK_START_OFFSET  0
 #define MAX_BLOCK_DATA_COPY 256
 
-#ifdef ITS_RAM_FS
-#define BLOCK_DATA_SIZE (ITS_BLOCK_SIZE * ITS_TOTAL_NUM_OF_BLOCKS)
+extern const struct its_flash_info_t its_flash_info_internal;
 
-static uint8_t block_data[BLOCK_DATA_SIZE] = {0};
-#endif
+static const struct its_flash_info_t *const flash_infos[] = {
+    [ITS_FLASH_ID_INTERNAL] = &its_flash_info_internal,
+};
 
 /**
  * \brief Gets physical address of the given block ID.
  *
+ * \param[in] info      Flash device information
  * \param[in] block_id  Block ID
  * \param[in] offset    Offset position from the init of the block
  *
  * \returns Returns physical address for the given block ID.
  */
-__attribute__((always_inline))
-static inline uint32_t get_phys_address(uint32_t block_id, size_t offset)
+static uint32_t get_phys_address(const struct its_flash_info_t *info,
+                                 uint32_t block_id, size_t offset)
 {
-    return (ITS_FLASH_AREA_ADDR + (block_id * ITS_BLOCK_SIZE) + offset);
+    return info->flash_area_addr + (block_id * info->block_size) + offset;
 }
 
 #ifdef ITS_RAM_FS
-static psa_status_t flash_init(void)
+static psa_status_t flash_init(const struct its_flash_info_t *info)
 {
     /* Nothing needs to be done in case of flash emulated in RAM */
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_read(uint32_t flash_addr, size_t size, uint8_t *buff)
+static psa_status_t flash_read(const struct its_flash_info_t *info,
+                               uint32_t flash_addr, size_t size, uint8_t *buff)
 {
-    uint32_t idx = flash_addr - ITS_FLASH_AREA_ADDR;
+    uint32_t idx = flash_addr - info->flash_area_addr;
 
-    (void)tfm_memcpy(buff, &block_data[idx], size);
+    (void)tfm_memcpy(buff, (uint8_t *)info->flash_dev + idx, size);
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_write(uint32_t flash_addr, size_t size,
+static psa_status_t flash_write(const struct its_flash_info_t *info,
+                                uint32_t flash_addr, size_t size,
                                 const uint8_t *buff)
 {
-    uint32_t idx = flash_addr - ITS_FLASH_AREA_ADDR;
+    uint32_t idx = flash_addr - info->flash_area_addr;
 
-    (void)tfm_memcpy(&block_data[idx], buff, size);
+    (void)tfm_memcpy((uint8_t *)info->flash_dev + idx, buff, size);
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_erase(uint32_t flash_addr)
+static psa_status_t flash_erase(const struct its_flash_info_t *info,
+                                uint32_t flash_addr)
 {
-    uint32_t idx = flash_addr - ITS_FLASH_AREA_ADDR;
+    uint32_t idx = flash_addr - info->flash_area_addr;
 
-    (void)tfm_memset(&block_data[idx], ITS_FLASH_DEFAULT_VAL, ITS_SECTOR_SIZE);
+    (void)tfm_memset((uint8_t *)info->flash_dev + idx, info->erase_val,
+                     info->sector_size);
 
     return PSA_SUCCESS;
 }
 #else /* ITS_RAM_FS */
-static psa_status_t flash_init(void)
+static psa_status_t flash_init(const struct its_flash_info_t *info)
 {
     int32_t err;
 
-    err = ITS_FLASH_DEV_NAME.Initialize(NULL);
+    err = ((ARM_DRIVER_FLASH *)info->flash_dev)->Initialize(NULL);
     if (err != ARM_DRIVER_OK) {
         return PSA_ERROR_STORAGE_FAILURE;
     }
@@ -92,11 +85,13 @@ static psa_status_t flash_init(void)
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_read(uint32_t flash_addr, size_t size, uint8_t *buff)
+static psa_status_t flash_read(const struct its_flash_info_t *info,
+                               uint32_t flash_addr, size_t size, uint8_t *buff)
 {
     int32_t err;
 
-    err = ITS_FLASH_DEV_NAME.ReadData(flash_addr, buff, size);
+    err = ((ARM_DRIVER_FLASH *)info->flash_dev)->ReadData(flash_addr, buff,
+                                                          size);
     if (err != ARM_DRIVER_OK) {
         return PSA_ERROR_STORAGE_FAILURE;
     }
@@ -104,12 +99,14 @@ static psa_status_t flash_read(uint32_t flash_addr, size_t size, uint8_t *buff)
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_write(uint32_t flash_addr, size_t size,
+static psa_status_t flash_write(const struct its_flash_info_t *info,
+                                uint32_t flash_addr, size_t size,
                                 const uint8_t *buff)
 {
     int32_t err;
 
-    err = ITS_FLASH_DEV_NAME.ProgramData(flash_addr, buff, size);
+    err = ((ARM_DRIVER_FLASH *)info->flash_dev)->ProgramData(flash_addr, buff,
+                                                             size);
     if (err != ARM_DRIVER_OK) {
         return PSA_ERROR_STORAGE_FAILURE;
     }
@@ -117,11 +114,12 @@ static psa_status_t flash_write(uint32_t flash_addr, size_t size,
     return PSA_SUCCESS;
 }
 
-static psa_status_t flash_erase(uint32_t flash_addr)
+static psa_status_t flash_erase(const struct its_flash_info_t *info,
+                                uint32_t flash_addr)
 {
     int32_t err;
 
-    err = ITS_FLASH_DEV_NAME.EraseSector(flash_addr);
+    err = ((ARM_DRIVER_FLASH *)info->flash_dev)->EraseSector(flash_addr);
     if (err != ARM_DRIVER_OK) {
         return PSA_ERROR_STORAGE_FAILURE;
     }
@@ -130,12 +128,18 @@ static psa_status_t flash_erase(uint32_t flash_addr)
 }
 #endif /* ITS_RAM_FS */
 
-psa_status_t its_flash_init(void)
+const struct its_flash_info_t *its_flash_get_info(enum its_flash_id_t id)
 {
-    return flash_init();
+    return flash_infos[id];
 }
 
-psa_status_t its_flash_read(uint32_t block_id, uint8_t *buff,
+psa_status_t its_flash_init(const struct its_flash_info_t *info)
+{
+    return flash_init(info);
+}
+
+psa_status_t its_flash_read(const struct its_flash_info_t *info,
+                            uint32_t block_id, uint8_t *buff,
                             size_t offset, size_t size)
 {
     uint32_t flash_addr;
@@ -143,12 +147,13 @@ psa_status_t its_flash_read(uint32_t block_id, uint8_t *buff,
     /* Gets flash address location defined by block ID and offset
      * parameters.
      */
-    flash_addr = get_phys_address(block_id, offset);
+    flash_addr = get_phys_address(info, block_id, offset);
 
-    return flash_read(flash_addr, size, buff);
+    return flash_read(info, flash_addr, size, buff);
 }
 
-psa_status_t its_flash_write(uint32_t block_id, const uint8_t *buff,
+psa_status_t its_flash_write(const struct its_flash_info_t *info,
+                             uint32_t block_id, const uint8_t *buff,
                              size_t offset, size_t size)
 {
     uint32_t flash_addr;
@@ -156,12 +161,13 @@ psa_status_t its_flash_write(uint32_t block_id, const uint8_t *buff,
     /* Gets flash address location defined by block ID and offset
      * parameters.
      */
-    flash_addr = get_phys_address(block_id, offset);
+    flash_addr = get_phys_address(info, block_id, offset);
 
-    return flash_write(flash_addr, size, buff);
+    return flash_write(info, flash_addr, size, buff);
 }
 
-psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
+psa_status_t its_flash_block_to_block_move(const struct its_flash_info_t *info,
+                                           uint32_t dst_block,
                                            size_t dst_offset,
                                            uint32_t src_block,
                                            size_t src_offset,
@@ -174,8 +180,8 @@ psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
     size_t bytes_to_move;
 
     /* Gets flash addresses defined by block ID and offset parameters */
-    src_flash_addr = get_phys_address(src_block, src_offset);
-    dst_flash_addr = get_phys_address(dst_block, dst_offset);
+    src_flash_addr = get_phys_address(info, src_block, src_offset);
+    dst_flash_addr = get_phys_address(info, dst_block, dst_offset);
 
     while (size > 0) {
         /* Calculates the number of bytes to move */
@@ -184,13 +190,15 @@ psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
         /* Reads data from source block and store it in the in-memory copy of
          * destination content.
          */
-        err = flash_read(src_flash_addr, bytes_to_move, dst_block_data_copy);
+        err = flash_read(info, src_flash_addr, bytes_to_move,
+                         dst_block_data_copy);
         if (err != PSA_SUCCESS) {
             return err;
         }
 
         /* Writes in flash the in-memory block content after modification */
-        err = flash_write(dst_flash_addr, bytes_to_move, dst_block_data_copy);
+        err = flash_write(info, dst_flash_addr, bytes_to_move,
+                          dst_block_data_copy);
         if (err != PSA_SUCCESS) {
             return err;
         }
@@ -206,29 +214,25 @@ psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
     return PSA_SUCCESS;
 }
 
-psa_status_t its_flash_erase_block(uint32_t block_id)
+psa_status_t its_flash_erase_block(const struct its_flash_info_t *info,
+                                   uint32_t block_id)
 {
+    psa_status_t status;
     uint32_t flash_addr;
-    uint32_t offset = BLOCK_START_OFFSET;
-    uint32_t sectors_to_erase = ITS_SECTORS_PER_BLOCK;
-    psa_status_t status = PSA_ERROR_STORAGE_FAILURE;
+    size_t offset = BLOCK_START_OFFSET;
 
-    while (sectors_to_erase > 0) {
-        /* Get the flash address defined by block ID and BLOCK_START_OFFSET
-         * parameters.
-         */
-        flash_addr = get_phys_address(block_id, offset);
+    while (offset < info->block_size) {
+        /* Gets the flash address defined by block ID and offset parameters */
+        flash_addr = get_phys_address(info, block_id, offset);
 
-        status = flash_erase(flash_addr);
+        status = flash_erase(info, flash_addr);
         if (status != PSA_SUCCESS) {
-            break;
+            return status;
         }
 
-        sectors_to_erase--;
-
         /* Move to next sector */
-        offset += ITS_SECTOR_SIZE;
+        offset += info->sector_size;
     }
 
-    return status;
+    return PSA_SUCCESS;
 }

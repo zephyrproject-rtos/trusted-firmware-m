@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +24,11 @@
 #include "tfm_api.h"
 #endif
 
-static uint8_t asset_data[GET_ALIGNED_FLASH_BYTES(ITS_MAX_ASSET_SIZE)] = {0};
+/* FIXME: Duplicated from flash info */
+#define ITS_MAX_FILE_SIZE \
+    ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, ITS_FLASH_PROGRAM_UNIT)
+
+static uint8_t asset_data[ITS_MAX_FILE_SIZE] = {0};
 
 #ifndef TFM_PSA_API
 /**

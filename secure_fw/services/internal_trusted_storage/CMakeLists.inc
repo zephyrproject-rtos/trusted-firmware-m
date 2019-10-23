@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -43,6 +43,7 @@ set(INTERNAL_TRUSTED_STORAGE_C_SRC
     "${INTERNAL_TRUSTED_STORAGE_DIR}/tfm_internal_trusted_storage.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/its_utils.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash.c"
+    "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_info_internal.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash_fs/its_flash_fs.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash_fs/its_flash_fs_dblock.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash_fs/its_flash_fs_mblock.c"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "flash_layout.h"
 #include "psa/error.h"
 
 #ifdef __cplusplus
@@ -42,15 +41,29 @@ typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
 #define ITS_UTILS_MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 /**
- * \brief Macro to get the number of bytes aligned with the
- *        ITS_FLASH_PROGRAM_UNIT.
- *
- * \param[in] nbr_bytes  Number of bytes
- *
- * \return Return number of bytes aligned with ITS_FLASH_PROGRAM_UNIT
+ * \brief Evaluates to the maximum of the two parameters.
  */
-#define GET_ALIGNED_FLASH_BYTES(nbr_bytes) \
- ((nbr_bytes + (ITS_FLASH_PROGRAM_UNIT - 1)) & ~((ITS_FLASH_PROGRAM_UNIT - 1)))
+#define ITS_UTILS_MAX(x, y) (((x) > (y)) ? (x) : (y))
+
+/**
+ * \brief Aligns a value up to the provided alignment.
+ *
+ * \param[in] x  Value to be aligned
+ * \param[in] a  Alignment (must be a power of two)
+ *
+ * \return The least value not less than \p x that is aligned to \p a.
+ */
+#define ITS_UTILS_ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
+
+/**
+ * \brief Checks that a value is aligned to the provided alignment.
+ *
+ * \param[in] x  Value to check for alignment
+ * \param[in] a  Alignment (must be a power of two)
+ *
+ * \return 1 if \p x is aligned to \p a, 0 otherwise.
+ */
+#define ITS_UTILS_IS_ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
 
 /**
  * \brief Checks if a subset region is fully contained within a superset region.

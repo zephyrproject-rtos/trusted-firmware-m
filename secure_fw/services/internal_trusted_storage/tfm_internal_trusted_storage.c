@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "tfm_internal_trusted_storage.h"
+
+#include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
 #include "tfm_memory_utils.h"
 #include "tfm_its_defs.h"
@@ -13,6 +15,8 @@
 
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
+
+static its_flash_fs_ctx_t fs_ctx;
 
 /**
  * \brief Maps a pair of client id and uid to a file id.
@@ -33,7 +37,8 @@ psa_status_t tfm_its_init(void)
 {
     psa_status_t status;
 
-    status = its_flash_fs_prepare();
+    status = its_flash_fs_prepare(&fs_ctx,
+                                  its_flash_get_info(ITS_FLASH_ID_INTERNAL));
 #ifdef ITS_CREATE_FLASH_LAYOUT
     /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
      * create a ITS flash layout. ITS service will generate an empty and valid
@@ -50,13 +55,14 @@ psa_status_t tfm_its_init(void)
         /* Remove all data in the ITS memory area and create a valid ITS flash
          * layout in that area.
          */
-        status = its_flash_fs_wipe_all();
+        status = its_flash_fs_wipe_all(&fs_ctx);
         if (status != PSA_SUCCESS) {
             return status;
         }
 
         /* Attempt to initialise again */
-        status = its_flash_fs_prepare();
+        status = its_flash_fs_prepare(&fs_ctx,
+                                     its_flash_get_info(ITS_FLASH_ID_INTERNAL));
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
@@ -87,7 +93,7 @@ psa_status_t tfm_its_set(int32_t client_id,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
     if (status == PSA_SUCCESS) {
         /* If the object exists and has the write once flag set, then it
          * cannot be modified. Otherwise it needs to be removed.
@@ -95,7 +101,7 @@ psa_status_t tfm_its_set(int32_t client_id,
         if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
             return PSA_ERROR_NOT_PERMITTED;
         } else {
-            status = its_flash_fs_file_delete(g_fid);
+            status = its_flash_fs_file_delete(&fs_ctx, g_fid);
             if (status != PSA_SUCCESS) {
                 return status;
             }
@@ -108,7 +114,8 @@ psa_status_t tfm_its_set(int32_t client_id,
     }
 
     /* Create the file in the file system */
-    return its_flash_fs_file_create(g_fid,
+    return its_flash_fs_file_create(&fs_ctx,
+                                    g_fid,
                                     data_length,
                                     data_length,
                                     (uint32_t)create_flags,
@@ -133,7 +140,7 @@ psa_status_t tfm_its_get(int32_t client_id,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -148,7 +155,8 @@ psa_status_t tfm_its_get(int32_t client_id,
                               g_file_info.size_current - data_offset);
 
     /* Read object data if any */
-    status = its_flash_fs_file_read(g_fid, data_size, data_offset, p_data);
+    status = its_flash_fs_file_read(&fs_ctx, g_fid, data_size, data_offset,
+                                    p_data);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -173,7 +181,7 @@ psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -198,7 +206,7 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     /* Set file id */
     tfm_its_get_fid(client_id, uid, g_fid);
 
-    status = its_flash_fs_file_get_info(g_fid, &g_file_info);
+    status = its_flash_fs_file_get_info(&fs_ctx, g_fid, &g_file_info);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -211,5 +219,5 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     }
 
     /* Delete old file from the persistent area */
-    return its_flash_fs_file_delete(g_fid);
+    return its_flash_fs_file_delete(&fs_ctx, g_fid);
 }

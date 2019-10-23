@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,54 +13,76 @@
 
 #include "flash_layout.h"
 #include "psa/error.h"
+#include "secure_fw/services/internal_trusted_storage/its_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Adjust to match your system's block size */
-#ifndef ITS_SECTOR_SIZE
-#error "ITS_SECTOR_SIZE must be defined by the target in flash_layout.h"
-#define ITS_BLOCK_SIZE 0
-#else
-#define ITS_BLOCK_SIZE (ITS_SECTOR_SIZE * ITS_SECTORS_PER_BLOCK)
-#endif
-
-/* Adjust to a size that will allow all assets to fit */
-#ifndef FLASH_ITS_AREA_SIZE
-#error "FLASH_ITS_AREA_SIZE must be defined by the target in flash_layout.h"
-#define ITS_TOTAL_NUM_OF_BLOCKS 0
-#else
-#define ITS_TOTAL_NUM_OF_BLOCKS (FLASH_ITS_AREA_SIZE / ITS_BLOCK_SIZE)
-#endif
-
-#ifndef ITS_FLASH_PROGRAM_UNIT
-#error "ITS_FLASH_PROGRAM_UNIT must be defined in flash_layout.h"
-#endif
-
-/* FIXME: Support other flash program units.*/
-#if ((ITS_FLASH_PROGRAM_UNIT != 1) && (ITS_FLASH_PROGRAM_UNIT != 2) \
-     && (ITS_FLASH_PROGRAM_UNIT != 4) && (ITS_FLASH_PROGRAM_UNIT != 8))
-#error "The supported ITS_FLASH_PROGRAM_UNIT values are 1, 2, 4 or 8 bytes"
-#endif
-
-/* Default value of flash when erased */
-#define ITS_FLASH_DEFAULT_VAL 0xFF
-
 /* Invalid block index */
-#define ITS_BLOCK_INVALID_ID 0xFFFFFFFF
+#define ITS_BLOCK_INVALID_ID 0xFFFFFFFFU
+
+/**
+ * \brief Provides a compile-time constant for the maximum program unit required
+ *        by any flash device that can be accessed through this interface.
+ */
+#define ITS_FLASH_MAX_PROGRAM_UNIT ITS_FLASH_PROGRAM_UNIT
+
+/**
+ * \brief Enumerates the available flash devices.
+ *
+ * \note The enumeration constants are used as array indexes. They should be
+ *       sequential starting from zero to minimise the array size.
+ */
+enum its_flash_id_t {
+    ITS_FLASH_ID_INTERNAL = 0,
+};
+
+/**
+ * \struct its_flash_info_t
+ *
+ * \brief Structure containing the required information about a flash device to
+ *        be used by the ITS Flash FS.
+ */
+struct its_flash_info_t {
+    void *flash_dev;          /**< Pointer to the flash device */
+    uint32_t flash_area_addr; /**< Start address of the flash area */
+    uint16_t sector_size;     /**< Size of the flash device's physical erase
+                               *   unit
+                               */
+    uint16_t block_size;      /**< Size of a logical erase unit presented by the
+                               *   flash interface, a multiple of sector_size.
+                               */
+    uint16_t num_blocks;      /**< Number of logical erase blocks */
+    uint16_t program_unit;    /**< Minimum size of a program operation */
+    uint16_t max_file_size;   /**< Maximum file size */
+    uint16_t max_num_files;   /**< Maximum number of files */
+    uint8_t erase_val;        /**< Value of a byte after erase (usually 0xFF) */
+};
+
+/**
+ * \brief Gets the flash info structure for the provided flash device.
+ *
+ * \param[in] id  Identifier of the flash device.
+ *
+ * \return Pointer to the flash info struct.
+ */
+const struct its_flash_info_t *its_flash_get_info(enum its_flash_id_t id);
 
 /**
  * \brief Initialize the Flash Interface.
  *
+ * \param[in] info  Flash device information
+ *
  * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
  *         it returns PSA_ERROR_STORAGE_FAILURE.
  */
-psa_status_t its_flash_init(void);
+psa_status_t its_flash_init(const struct its_flash_info_t *info);
 
 /**
  * \brief Reads block data from the position specified by block ID and offset.
  *
+ * \param[in]  info      Flash device information
  * \param[in]  block_id  Block ID
  * \param[out] buff      Buffer pointer to store the data read
  * \param[in]  offset    Offset position from the init of the block
@@ -72,12 +94,14 @@ psa_status_t its_flash_init(void);
  * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
  *         it returns PSA_ERROR_STORAGE_FAILURE.
  */
-psa_status_t its_flash_read(uint32_t block_id, uint8_t *buff,
+psa_status_t its_flash_read(const struct its_flash_info_t *info,
+                            uint32_t block_id, uint8_t *buff,
                             size_t offset, size_t size);
 
 /**
  * \brief Writes block data to the position specified by block ID and offset.
  *
+ * \param[in] info      Flash device information
  * \param[in] block_id  Block ID
  * \param[in] buff      Buffer pointer to the write data
  * \param[in] offset    Offset position from the init of the block
@@ -89,12 +113,14 @@ psa_status_t its_flash_read(uint32_t block_id, uint8_t *buff,
  * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
  *         it returns PSA_ERROR_STORAGE_FAILURE.
  */
-psa_status_t its_flash_write(uint32_t block_id, const uint8_t *buff,
+psa_status_t its_flash_write(const struct its_flash_info_t *info,
+                             uint32_t block_id, const uint8_t *buff,
                              size_t offset, size_t size);
 
 /**
  * \brief Moves data from src block ID to destination block ID.
  *
+ * \param[in] info        Flash device information
  * \param[in] dst_block   Destination block ID
  * \param[in] dst_offset  Destination offset position from the init of the
  *                        destination block
@@ -111,7 +137,8 @@ psa_status_t its_flash_write(uint32_t block_id, const uint8_t *buff,
  * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
  *         it returns PSA_ERROR_STORAGE_FAILURE.
  */
-psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
+psa_status_t its_flash_block_to_block_move(const struct its_flash_info_t *info,
+                                           uint32_t dst_block,
                                            size_t dst_offset,
                                            uint32_t src_block,
                                            size_t src_offset,
@@ -120,6 +147,7 @@ psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
 /**
  * \brief Erases block ID data.
  *
+ * \param[in] info      Flash device information
  * \param[in] block_id  Block ID
  *
  * \note This function assumes the input value is valid.
@@ -127,7 +155,8 @@ psa_status_t its_flash_block_to_block_move(uint32_t dst_block,
  * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
  *         it returns PSA_ERROR_STORAGE_FAILURE.
  */
-psa_status_t its_flash_erase_block(uint32_t block_id);
+psa_status_t its_flash_erase_block(const struct its_flash_info_t *info,
+                                   uint32_t block_id);
 
 #ifdef __cplusplus
 }
