@@ -24,34 +24,40 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
     /* List test cases which are compliant with level 1 isolation */
 
+#ifdef ENABLE_SECURE_STORAGE_SERVICE_TESTS
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
     /* Non-secure ITS test cases */
     {&register_testsuite_ns_psa_its_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_CRYPTO_SERVICE_TESTS
     /* Non-secure Crypto test cases */
     {&register_testsuite_ns_crypto_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_ATTESTATION_SERVICE_TESTS
     /* Non-secure initial attestation service test cases */
     {&register_testsuite_ns_attestation_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_PLATFORM_SERVICE_TESTS
     /* Non-secure platform service test cases */
     {&register_testsuite_ns_platform_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_QCBOR_TESTS
     /* Non-secure QCBOR library test cases */
     {&register_testsuite_ns_qcbor, 0, 0, 0},
+#endif
 
-#ifndef TFM_PSA_API
-    /*
-     * FixMe: skip below test cases temporary since target service is not
-     * IPC compatible yet.
-     */
 #ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
 #endif
 
-#endif
 #endif /* SERVICES_TEST_NS */
 
 #ifdef CORE_TEST_POSITIVE

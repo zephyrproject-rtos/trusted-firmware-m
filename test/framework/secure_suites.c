@@ -22,25 +22,35 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_S
     /* List test cases which are compliant with level 1 isolation */
 
+#ifdef ENABLE_SECURE_STORAGE_SERVICE_TESTS
     {&register_testsuite_s_psa_ps_interface, 0, 0, 0},
     {&register_testsuite_s_psa_ps_reliability, 0, 0, 0},
 
 #ifdef SST_TEST_NV_COUNTERS
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
+#endif
 
+#ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
     /* Secure ITS test cases */
     {&register_testsuite_s_psa_its_interface, 0, 0, 0},
     {&register_testsuite_s_psa_its_reliability, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_CRYPTO_SERVICE_TESTS
     /* Crypto test cases */
     {&register_testsuite_s_crypto_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_ATTESTATION_SERVICE_TESTS
     /* Secure initial attestation service test cases */
     {&register_testsuite_s_attestation_interface, 0, 0, 0},
+#endif
 
+#ifdef ENABLE_PLATFORM_SERVICE_TESTS
     /* Secure platform service test cases */
     {&register_testsuite_s_platform_interface, 0, 0, 0},
+#endif
 
 #ifndef TFM_PSA_API
     /*
