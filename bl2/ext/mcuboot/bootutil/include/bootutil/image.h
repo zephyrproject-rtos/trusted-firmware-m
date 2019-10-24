@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 61fd888a7f4d741714553f36839dd49fb0065731
+ * Git SHA of the original version: 510fddb8e06d76e2442b2a4603d3e1cbefe28be4
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -40,6 +40,7 @@ struct flash_area;
 #define IMAGE_MAGIC_V1              0x96f3b83c
 #define IMAGE_MAGIC_NONE            0xffffffff
 #define IMAGE_TLV_INFO_MAGIC        0x6907
+#define IMAGE_TLV_PROT_INFO_MAGIC   0x6908
 
 #define IMAGE_HEADER_SIZE           32
 
@@ -136,7 +137,7 @@ struct image_tlv_iter {
     const struct flash_area *fap;
     uint8_t type;
     bool prot;
-    uint32_t prot_len;
+    uint32_t prot_end;
     uint32_t tlv_off;
     uint32_t tlv_end;
 };

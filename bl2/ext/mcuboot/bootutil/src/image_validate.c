@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 61fd888a7f4d741714553f36839dd49fb0065731
+ * Git SHA of the original version: 510fddb8e06d76e2442b2a4603d3e1cbefe28be4
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -77,12 +77,8 @@ bootutil_img_hash(int image_index,
     /* Hash is computed over image header and image itself. */
     size = BOOT_TLV_OFF(hdr);
 
-    /* If protected TLVs are present (e.g. security counter TLV) then the
-     * TLV info header and these TLVs must be included in the hash calculation.
-     */
-    if (hdr->ih_protect_tlv_size != 0) {
-        size += hdr->ih_protect_tlv_size;
-    }
+    /* If protected TLVs are present they are also hashed. */
+    size += hdr->ih_protect_tlv_size;
 
 #ifdef MCUBOOT_RAM_LOADING
     bootutil_sha256_update(&sha256_ctx,(void*)(hdr->ih_load_addr), size);
