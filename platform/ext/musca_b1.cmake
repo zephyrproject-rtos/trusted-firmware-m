@@ -211,3 +211,24 @@ if (NOT DEFINED BUILD_DEVICE_ID)
 elseif(BUILD_DEVICE_ID)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/dummy_device_id.c")
 endif()
+
+#Default for Musca-B1 is to disable the CC312 due to Windows build not being
+#supported.
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
+    set (CRYPTO_HW_ACCELERATOR OFF)
+endif()
+
+#Enable CryptoCell-312 HW accelerator
+if (CRYPTO_HW_ACCELERATOR)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR")
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_CC312")
+
+    add_definitions("-DCC_IOT")
+    string(APPEND CC312_C_FLAGS " -I ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+endif()

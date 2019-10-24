@@ -224,7 +224,9 @@ line arguments:
          - ``Relwithdebinfo``
          - ``Minsizerel``
    * - -DMBEDCRYPTO_DEBUG=<ON|OFF>
-     - Enables debug symbols for Mbed Crypto library.
+     - Enables debug symbols for Mbed Crypto library. If a cryptographic
+       accelerator is enabled then this will also enable debug symbols and
+       logging for any accelerator libraries.
    * - -DBUILD_DWARF_VERSION=<dwarf version>
      - Configures DWARF version.
        The possible values are:

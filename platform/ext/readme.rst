@@ -20,9 +20,51 @@ This folder contains core and compiler specific header files imported from the
 
 common
 ======
-This folder contains stdout redirection to UART, a temporary memory mapped flash
-implementation for the bootloader and ``tfm_mbedcrypto_config.h`` for all the
-targets.
+
+armclang and gcc
+----------------
+These contain the linker scripts used to configure the memory regions in TF-M
+regions.
+
+cc312
+-----
+This folder contains cmake and code files to interact with the CC312
+cryptographic accelerator. Integrating a platform with the CC312 requires some
+configuration, of which an example can be seen in the
+``platform/ext/musca_b1.cmake`` file.
+
+To configure the CC312 at build time, a few cmake arguments can be specified.
+
+- ``CRYPTO_HW_ACCELERATOR``
+   - ``ON`` All possible mbedtls cryptographic operations will be offloaded to
+     the CC312 accelerator.
+   - ``OFF`` The cryptographic accelerator will be ignored and software
+     cryptography will be used.
+
+- ``CRYPTO_HW_ACCELERATOR_OTP_STATE``
+   - ``DISABLED`` The HW accelerator will not use any data from its onboard OTP
+     (One Time Programmable) memory.
+   - ``PROVISIONING`` This special mode is used to program cryptographic
+     material into the OTP memory. When the flag is set TF-M will not boot, but
+     will instead program the hardware unique key, the root of trust private key
+     and the attestation private key into the OTP memory. This mode is not
+     compatible with
+     ``CRYPTO_HW_ACCELERATOR=ON``.
+   - ``ENABLED`` The HW accelerator will use the previously programmed data as
+     the hardware unique key, the root of trust private key and the attestation
+     private key. This mode requires ``CRYPTO_HW_ACCELERATOR=ON``.
+
+
+.. Warning::
+
+   Provisioning **can not** be reversed, and data in the OTP memory **can not**
+   be changed once set.
+
+other
+-----
+This folder also contains stdout redirection to UART, a temporary memory mapped
+flash implementation for the bootloader and ``tfm_mbedcrypto_config.h`` for all
+the targets.
 
 drivers
 =======
