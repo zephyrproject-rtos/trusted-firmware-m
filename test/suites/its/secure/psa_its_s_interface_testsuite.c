@@ -12,9 +12,9 @@
 #include "tfm_memory_utils.h"
 
 /* List of tests */
-static void tfm_its_test_2019(struct test_result_t *ret);
 static void tfm_its_test_2020(struct test_result_t *ret);
 static void tfm_its_test_2021(struct test_result_t *ret);
+static void tfm_its_test_2022(struct test_result_t *ret);
 
 static struct test_t psa_its_s_tests[] = {
     {&tfm_its_test_common_001, "TFM_ITS_TEST_2001",
@@ -53,11 +53,13 @@ static struct test_t psa_its_s_tests[] = {
      "Multiple partial gets"},
     {&tfm_its_test_common_018, "TFM_ITS_TEST_2018",
      "Multiple sets to same UID from same thread"},
-    {&tfm_its_test_2019, "TFM_ITS_TEST_2019",
-     "Set interface with invalid data length"},
+    {&tfm_its_test_common_019, "TFM_ITS_TEST_2019",
+     "Set, get and remove interface with different asset sizes"},
     {&tfm_its_test_2020, "TFM_ITS_TEST_2020",
-     "Get interface with invalid data lengths and offsets"},
+     "Set interface with invalid data length"},
     {&tfm_its_test_2021, "TFM_ITS_TEST_2021",
+     "Get interface with invalid data lengths and offsets"},
+    {&tfm_its_test_2022, "TFM_ITS_TEST_2022",
      "Get info interface with NULL info pointer"},
 };
 
@@ -85,7 +87,7 @@ void register_testsuite_s_psa_its_interface(struct test_suite_t *p_test_suite)
  *
  * \param[out] ret  Test result
  */
-static void tfm_its_test_2019(struct test_result_t *ret)
+static void tfm_its_test_2020(struct test_result_t *ret)
 {
 #ifndef TFM_PSA_API
     psa_status_t status;
@@ -119,7 +121,7 @@ static void tfm_its_test_2019(struct test_result_t *ret)
  *
  * \param[out] ret  Test result
  */
-static void tfm_its_test_2020(struct test_result_t *ret)
+static void tfm_its_test_2021(struct test_result_t *ret)
 {
 #ifndef TFM_PSA_API
     psa_status_t status;
@@ -195,7 +197,7 @@ static void tfm_its_test_2020(struct test_result_t *ret)
  *
  * \param[out] ret  Test result
  */
-static void tfm_its_test_2021(struct test_result_t *ret)
+static void tfm_its_test_2022(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_3;

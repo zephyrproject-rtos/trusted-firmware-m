@@ -46,6 +46,8 @@ static struct test_t psa_its_ns_tests[] = {
      "Multiple partial gets"},
     {&tfm_its_test_common_018, "TFM_ITS_TEST_1018",
      "Multiple sets to same UID from same thread"},
+    {&tfm_its_test_common_019, "TFM_ITS_TEST_1019",
+     "Set, get and remove interface with different asset sizes"},
 };
 
 void register_testsuite_ns_psa_its_interface(struct test_suite_t *p_test_suite)

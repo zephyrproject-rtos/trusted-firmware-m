@@ -221,6 +221,15 @@ void tfm_its_test_common_017(struct test_result_t *ret);
  */
 void tfm_its_test_common_018(struct test_result_t *ret);
 
+/**
+ * \brief Tests set, get_info, get and remove function with:
+ *        - Valid UID's, No Flags
+ *        - Data length of different asset sizes
+ *
+ * \param[out] ret  Test result
+ */
+void tfm_its_test_common_019(struct test_result_t *ret);
+
 #ifdef __cplusplus
 }
 #endif
