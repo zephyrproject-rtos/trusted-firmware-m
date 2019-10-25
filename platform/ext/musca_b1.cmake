@@ -258,4 +258,7 @@ if (CRYPTO_HW_ACCELERATOR)
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
     embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+
+    #Compiling this file requires to disable warning: -Wunused-local-typedefs
+    set_source_files_properties("${PLATFORM_DIR}/target/musca_b1/dummy_crypto_keys.c" PROPERTIES COMPILE_FLAGS -Wno-unused-local-typedefs)
 endif()

@@ -141,7 +141,7 @@
 /* A small unsigned integer
  *    platform/ext/target/<TARGET>/attest_hal.c
  */
-#define TOKEN_TEST_VALUE_SECURITY_LIFECYCLE  0x3000u /* Hard-coded value */
+#define TOKEN_TEST_VALUE_SECURITY_LIFECYCLE  INT32_MAX /* Value not checked */
 #define TOKEN_TEST_REQUIRE_SECURITY_LIFECYCLE true /* Mandatory claim */
 
 /* An integer (can be positive or negative */

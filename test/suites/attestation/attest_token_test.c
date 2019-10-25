@@ -387,8 +387,7 @@ static int_fast16_t check_simple_claims(
     }
 
     /* -- check value of the security lifecycle claim -- */
-    if(simple_claims->security_lifecycle !=
-       TOKEN_TEST_VALUE_SECURITY_LIFECYCLE) {
+    if(!IS_ITEM_FLAG_SET(SECURITY_LIFECYCLE_FLAG,simple_claims->item_flags)) {
         /* Claim is not present in token */
         if(TOKEN_TEST_REQUIRE_SECURITY_LIFECYCLE) {
             /* It should have been present */

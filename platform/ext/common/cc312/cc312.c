@@ -13,6 +13,7 @@
 #include "mbedtls/platform.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
+#include "mbedtls_cc_mng_int.h"
 #include "arm_cmse.h"
 
 CCRndContext_t*           CC312_pRndCtx         = NULL;
@@ -95,4 +96,9 @@ int crypto_hw_accelerator_finish(void)
     mbedtls_free(CC312_pMbedtlsEntropy);
 
     return 0;
+}
+
+int crypto_hw_accelerator_get_lcs(uint32_t *lcs)
+{
+    return mbedtls_mng_lcsGet(lcs);
 }

@@ -8,6 +8,8 @@
 #ifndef __CRYPTO_HW_H__
 #define __CRYPTO_HW_H__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -43,6 +45,14 @@ int crypto_hw_accelerator_finish(void);
  * \return 0 on success, non-zero otherwise
  */
 int crypto_hw_accelerator_otp_provisioning(void);
+
+/** \brief Retrieve the device lifecycle
+ *
+ * \param[out]  lcs  Pointer to store lifecycle state
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_accelerator_get_lcs(uint32_t *lcs);
 
 #ifdef __cplusplus
 }
