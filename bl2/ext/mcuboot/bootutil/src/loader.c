@@ -1202,7 +1202,6 @@ boot_erase_trailer_sectors(const struct boot_loader_state *state,
 
     return rc;
 }
-#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 /**
  * Swaps the contents of two flash regions within the two image slots.
@@ -1215,7 +1214,6 @@ boot_erase_trailer_sectors(const struct boot_loader_state *state,
  *
  * @return                      0 on success; nonzero on failure.
  */
-#ifndef MCUBOOT_OVERWRITE_ONLY
 static void
 boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
         struct boot_status *bs)
@@ -1613,10 +1611,10 @@ boot_swap_image(struct boot_loader_state *state, struct boot_status *bs)
 }
 #endif
 
+#ifndef MCUBOOT_OVERWRITE_ONLY
 /**
  * Marks the image in the primary slot as fully copied.
  */
-#ifndef MCUBOOT_OVERWRITE_ONLY
 static int
 boot_set_copy_done(uint8_t image_index)
 {
@@ -1633,7 +1631,6 @@ boot_set_copy_done(uint8_t image_index)
     flash_area_close(fap);
     return rc;
 }
-#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 /**
  * Marks a reverted image in the primary slot as confirmed. This is necessary to
@@ -1644,7 +1641,6 @@ boot_set_copy_done(uint8_t image_index)
  * image installed on the primary slot and the new image to be upgrade to has a
  * bad sig, image_ok would be overwritten.
  */
-#ifndef MCUBOOT_OVERWRITE_ONLY
 static int
 boot_set_image_ok(uint8_t image_index)
 {
