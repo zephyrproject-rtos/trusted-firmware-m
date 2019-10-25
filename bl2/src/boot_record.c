@@ -90,7 +90,6 @@ boot_save_sw_measurements(uint8_t sw_module,
                           const struct image_header *hdr,
                           const struct flash_area *fap)
 {
-    struct image_tlv_info tlv_header;
     struct image_tlv tlv_entry;
     uintptr_t tlv_end, offset;
     uint8_t buf[32];
@@ -107,17 +106,10 @@ boot_save_sw_measurements(uint8_t sw_module,
     /* Manifest data is concatenated to the end of the image. It is encoded in
      * TLV format.
      */
-    offset = hdr->ih_img_size + hdr->ih_hdr_size;
-
-    res = LOAD_IMAGE_DATA(fap, offset, &tlv_header, sizeof(tlv_header));
+    res = boot_find_tlv_offs(hdr, fap, &offset, &tlv_end);
     if (res) {
         return BOOT_STATUS_ERROR;
     }
-    if (tlv_header.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_STATUS_ERROR;
-    }
-    tlv_end = offset + tlv_header.it_tlv_tot;
-    offset += sizeof(tlv_header);
 
     /* Iterates over the manifest data and copy the relevant attributes to the
      * shared data area:
@@ -395,9 +387,8 @@ boot_save_boot_status(uint8_t sw_module,
 
 #else /* MCUBOOT_INDIVIDUAL_CLAIMS */
 
-    struct image_tlv_info tlv_header;
     struct image_tlv tlv_entry;
-    uintptr_t tlv_end, offset;
+    uint32_t tlv_end, offset;
     size_t record_len = 0;
     uint8_t image_hash[32]; /* SHA256 - 32 Bytes */
     uint8_t buf[MAX_BOOT_RECORD_SZ];
@@ -410,18 +401,11 @@ boot_save_boot_status(uint8_t sw_module,
     /* Manifest data is concatenated to the end of the image.
      * It is encoded in TLV format.
      */
-    offset = hdr->ih_hdr_size + hdr->ih_img_size;
 
-    /* The TLV area always starts with an image_tlv_info structure. */
-    res = LOAD_IMAGE_DATA(fap, offset, &tlv_header, sizeof(tlv_header));
+    res = boot_find_tlv_offs(hdr, fap, &offset, &tlv_end);
     if (res) {
         return BOOT_STATUS_ERROR;
     }
-    if (tlv_header.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_STATUS_ERROR;
-    }
-    tlv_end = offset + (uintptr_t)tlv_header.it_tlv_tot;
-    offset += sizeof(tlv_header);
 
     /* Traverse through the TLV area to find the boot record
      * and image hash TLVs.

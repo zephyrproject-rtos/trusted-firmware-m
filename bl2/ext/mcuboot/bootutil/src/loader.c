@@ -170,7 +170,7 @@ static const struct boot_status_table boot_status_tables[] = {
  */
 int
 boot_find_tlv_offs(const struct image_header *hdr, const struct flash_area *fap,
-        uint32_t *off, uint32_t *end)
+                   uint32_t *off, uint32_t *end)
 {
     struct image_tlv_info info;
     uint32_t off_;
@@ -183,6 +183,11 @@ boot_find_tlv_offs(const struct image_header *hdr, const struct flash_area *fap,
 
     if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
         return BOOT_EBADIMAGE;
+    }
+
+    if (boot_add_uint32_overflow_check(off_, info.it_tlv_tot))
+    {
+        return -1;
     }
 
     *end = off_ + info.it_tlv_tot;

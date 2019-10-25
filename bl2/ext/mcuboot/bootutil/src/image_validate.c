@@ -194,7 +194,6 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
                               const struct flash_area *fap,
                               uint32_t *img_security_cnt)
 {
-    struct image_tlv_info info;
     struct image_tlv tlv;
     uint32_t off;
     uint32_t end;
@@ -208,59 +207,54 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
         return BOOT_EBADARGS;
     }
 
-    /* The TLVs come after the image. */
-    off = hdr->ih_hdr_size + hdr->ih_img_size;
-
-    /* The TLV area always starts with an image_tlv_info structure. */
-    rc = LOAD_IMAGE_DATA(fap, off, &info, sizeof(info));
-    if (rc != 0) {
-        return BOOT_EFLASH;
-    }
-
-    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_EBADMAGIC;
-    }
-
     /* The security counter TLV is in the protected part of the TLV area. */
-    if (hdr->ih_protect_tlv_size != 0) {
-        end = off + (uint32_t)hdr->ih_protect_tlv_size;
-        off += sizeof(info);
+    if (hdr->ih_protect_tlv_size == 0) {
+        return BOOT_EBADIMAGE;
+    }
 
-        /* Traverse through the protected TLV area to find the
-         * security counter TLV.
-         */
-        while (off < end) {
-            rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
+    rc = boot_find_tlv_offs(hdr, fap, &off, &end);
+    if (rc) {
+        return rc;
+    }
+
+    /* Calculate the end of the protected TLV area. */
+    end = off - sizeof(struct image_tlv_info) +
+          (uint32_t)hdr->ih_protect_tlv_size;
+
+    /* Traverse through the protected TLV area to find
+     * the security counter TLV.
+     */
+    while (off < end) {
+        rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
+        if (rc != 0) {
+            return BOOT_EFLASH;
+        }
+
+        if (tlv.it_type == IMAGE_TLV_SEC_CNT) {
+
+            if (tlv.it_len != sizeof(*img_security_cnt)) {
+                /* Security counter is not valid. */
+                break;
+            }
+
+            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
+                                 img_security_cnt, tlv.it_len);
             if (rc != 0) {
                 return BOOT_EFLASH;
             }
 
-            if (tlv.it_type == IMAGE_TLV_SEC_CNT) {
+            /* Security counter has been found. */
+            found = 1;
+            break;
+        }
 
-                if (tlv.it_len != sizeof(*img_security_cnt)) {
-                    /* Security counter is not valid. */
-                    break;
-                }
-
-                rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
-                                     img_security_cnt, tlv.it_len);
-                if (rc != 0) {
-                    return BOOT_EFLASH;
-                }
-
-                /* Security counter has been found. */
-                found = 1;
-                break;
-            }
-
-            /* Avoid integer overflow. */
-            if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len)))
-            {
-                /* Potential overflow. */
-                break;
-            } else {
-                off += sizeof(tlv) + tlv.it_len;
-            }
+        /* Avoid integer overflow. */
+        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len)))
+        {
+            /* Potential overflow. */
+            break;
+        } else {
+            off += sizeof(tlv) + tlv.it_len;
         }
     }
 
