@@ -159,43 +159,6 @@ static const struct boot_status_table boot_status_tables[] = {
 #endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING */
 
 /*
- * Locate the TLVs in an image.
- *
- * @param hdr The image_header struct of the image being checked
- * @param fap flash_area struct of the slot storing the image being checked
- * @param off Address of the first TLV (after TLV info)
- * @param end Address where TLV area ends
- *
- * Returns 0 on success.
- */
-int
-boot_find_tlv_offs(const struct image_header *hdr, const struct flash_area *fap,
-                   uint32_t *off, uint32_t *end)
-{
-    struct image_tlv_info info;
-    uint32_t off_;
-
-    off_ = BOOT_TLV_OFF(hdr);
-
-    if (LOAD_IMAGE_DATA(hdr, fap, off_, &info, sizeof(info))) {
-        return BOOT_EFLASH;
-    }
-
-    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_EBADIMAGE;
-    }
-
-    if (boot_add_uint32_overflow_check(off_, info.it_tlv_tot))
-    {
-        return -1;
-    }
-
-    *end = off_ + info.it_tlv_tot;
-    *off = off_ + sizeof(info);
-    return 0;
-}
-
-/*
  * \brief Verifies the image header: magic value, flags, integer overflow.
  *
  * \retval 0

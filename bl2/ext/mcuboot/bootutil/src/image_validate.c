@@ -194,9 +194,9 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
                               const struct flash_area *fap,
                               uint32_t *img_security_cnt)
 {
-    struct image_tlv tlv;
+    struct image_tlv_iter it;
     uint32_t off;
-    uint32_t end;
+    uint16_t len;
     uint32_t found = 0;
     int32_t rc;
 
@@ -212,50 +212,35 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
         return BOOT_EBADIMAGE;
     }
 
-    rc = boot_find_tlv_offs(hdr, fap, &off, &end);
+    rc = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_SEC_CNT, true);
     if (rc) {
         return rc;
     }
 
-    /* Calculate the end of the protected TLV area. */
-    end = off - sizeof(struct image_tlv_info) +
-          (uint32_t)hdr->ih_protect_tlv_size;
-
     /* Traverse through the protected TLV area to find
      * the security counter TLV.
      */
-    while (off < end) {
-        rc = LOAD_IMAGE_DATA(hdr, fap, off, &tlv, sizeof(tlv));
+    while (true) {
+        rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
+        if (rc < 0) {
+            return -1;
+        } else if (rc > 0) {
+            break;
+        }
+
+        if (len != sizeof(*img_security_cnt)) {
+            /* Security counter is not valid. */
+            return BOOT_EBADIMAGE;
+        }
+
+        rc = LOAD_IMAGE_DATA(hdr, fap, off, img_security_cnt, len);
         if (rc != 0) {
             return BOOT_EFLASH;
         }
 
-        if (tlv.it_type == IMAGE_TLV_SEC_CNT) {
-
-            if (tlv.it_len != sizeof(*img_security_cnt)) {
-                /* Security counter is not valid. */
-                break;
-            }
-
-            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
-                                 img_security_cnt, tlv.it_len);
-            if (rc != 0) {
-                return BOOT_EFLASH;
-            }
-
-            /* Security counter has been found. */
-            found = 1;
-            break;
-        }
-
-        /* Avoid integer overflow. */
-        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len)))
-        {
-            /* Potential overflow. */
-            break;
-        } else {
-            off += sizeof(tlv) + tlv.it_len;
-        }
+        /* Security counter has been found. */
+        found = 1;
+        break;
     }
 
     if (found) {

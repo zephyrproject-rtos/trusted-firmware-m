@@ -90,8 +90,10 @@ boot_save_sw_measurements(uint8_t sw_module,
                           const struct image_header *hdr,
                           const struct flash_area *fap)
 {
-    struct image_tlv tlv_entry;
-    uintptr_t tlv_end, offset;
+    struct image_tlv_iter it;
+    uint32_t offset;
+    uint16_t len;
+    uint8_t type;
     uint8_t buf[32];
     int32_t res;
     uint16_t ias_minor;
@@ -106,7 +108,8 @@ boot_save_sw_measurements(uint8_t sw_module,
     /* Manifest data is concatenated to the end of the image. It is encoded in
      * TLV format.
      */
-    res = boot_find_tlv_offs(hdr, fap, &offset, &tlv_end);
+
+    res = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_ANY, false);
     if (res) {
         return BOOT_STATUS_ERROR;
     }
@@ -116,20 +119,21 @@ boot_save_sw_measurements(uint8_t sw_module,
      *  - image hash:      SW component measurement value
      *  - public key hash: Signer ID
      */
-    for (; offset < tlv_end; offset += sizeof(tlv_entry) + tlv_entry.it_len) {
-        res = LOAD_IMAGE_DATA(hdr, fap, offset, &tlv_entry, sizeof(tlv_entry));
-        if (res) {
+    while (true) {
+        res = bootutil_tlv_iter_next(&it, &offset, &len, &type);
+        if (res < 0) {
             return BOOT_STATUS_ERROR;
+        } else if (res > 0) {
+            break;
         }
 
-        if (tlv_entry.it_type == IMAGE_TLV_SHA256) {
+        if (type == IMAGE_TLV_SHA256) {
             /* Get the image's hash value from the manifest section */
-            if (tlv_entry.it_len != sizeof(buf)) { /* SHA256 - 32 bytes */
+            if (len != sizeof(buf)) { /* SHA256 - 32 bytes */
                 return BOOT_STATUS_ERROR;
             }
 
-            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
-                                  buf, tlv_entry.it_len);
+            res = LOAD_IMAGE_DATA(hdr, fap, offset, buf, len);
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
@@ -138,7 +142,7 @@ boot_save_sw_measurements(uint8_t sw_module,
             ias_minor = SET_IAS_MINOR(sw_module, SW_MEASURE_VALUE);
             res2 = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
                                                 ias_minor,
-                                                tlv_entry.it_len,
+                                                len,
                                                 buf);
             if (res2) {
                 return BOOT_STATUS_ERROR;
@@ -156,32 +160,30 @@ boot_save_sw_measurements(uint8_t sw_module,
 
 #ifdef MCUBOOT_SIGN_RSA
 #ifndef MCUBOOT_HW_KEY
-        } else if (tlv_entry.it_type == IMAGE_TLV_KEYHASH) {
+        } else if (type == IMAGE_TLV_KEYHASH) {
             /* Get the hash of the public key from the manifest section */
-            if (tlv_entry.it_len != sizeof(buf)) { /* SHA256 - 32 bytes */
+            if (len != sizeof(buf)) { /* SHA256 - 32 bytes */
                 return BOOT_STATUS_ERROR;
             }
 
-            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
-                                  buf, tlv_entry.it_len);
+            res = LOAD_IMAGE_DATA(hdr, fap, offset, buf, len);
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
 #else /* MCUBOOT_HW_KEY */
-        } else if (tlv_entry.it_type == IMAGE_TLV_KEY) {
+        } else if (type == IMAGE_TLV_KEY) {
             /* Get the public key from the manifest section. */
-            if (tlv_entry.it_len > sizeof(key_buf)) {
+            if (len > sizeof(key_buf)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
-                                  key_buf, tlv_entry.it_len);
+            res = LOAD_IMAGE_DATA(hdr, fap, offset, key_buf, len);
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
 
             /* Calculate the hash of the public key. */
             bootutil_sha256_init(&sha256_ctx);
-            bootutil_sha256_update(&sha256_ctx, key_buf, tlv_entry.it_len);
+            bootutil_sha256_update(&sha256_ctx, key_buf, len);
             bootutil_sha256_finish(&sha256_ctx, buf);
 #endif /* MCUBOOT_HW_KEY */
 
@@ -387,8 +389,10 @@ boot_save_boot_status(uint8_t sw_module,
 
 #else /* MCUBOOT_INDIVIDUAL_CLAIMS */
 
-    struct image_tlv tlv_entry;
-    uint32_t tlv_end, offset;
+    struct image_tlv_iter it;
+    uint32_t offset;
+    uint16_t len;
+    uint8_t type;
     size_t record_len = 0;
     uint8_t image_hash[32]; /* SHA256 - 32 Bytes */
     uint8_t buf[MAX_BOOT_RECORD_SZ];
@@ -402,7 +406,7 @@ boot_save_boot_status(uint8_t sw_module,
      * It is encoded in TLV format.
      */
 
-    res = boot_find_tlv_offs(hdr, fap, &offset, &tlv_end);
+    res = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_ANY, false);
     if (res) {
         return BOOT_STATUS_ERROR;
     }
@@ -410,32 +414,32 @@ boot_save_boot_status(uint8_t sw_module,
     /* Traverse through the TLV area to find the boot record
      * and image hash TLVs.
      */
-    while (offset < tlv_end) {
-        res = LOAD_IMAGE_DATA(hdr, fap, offset, &tlv_entry, sizeof(tlv_entry));
-        if (res) {
+    while (true) {
+        res = bootutil_tlv_iter_next(&it, &offset, &len, &type);
+        if (res < 0) {
             return BOOT_STATUS_ERROR;
+        } else if (res > 0) {
+            break;
         }
 
-        if (tlv_entry.it_type == IMAGE_TLV_BOOT_RECORD) {
-            if (tlv_entry.it_len > sizeof(buf)) {
+        if (type == IMAGE_TLV_BOOT_RECORD) {
+            if (len > sizeof(buf)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
-                                  buf, tlv_entry.it_len);
+            res = LOAD_IMAGE_DATA(hdr, fap, offset, buf, len);
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
 
-            record_len = tlv_entry.it_len;
+            record_len = len;
             boot_record_found = 1;
 
-        } else if (tlv_entry.it_type == IMAGE_TLV_SHA256) {
+        } else if (type == IMAGE_TLV_SHA256) {
             /* Get the image's hash value from the manifest section. */
-            if (tlv_entry.it_len > sizeof(image_hash)) {
+            if (len > sizeof(image_hash)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
-                                  image_hash, tlv_entry.it_len);
+            res = LOAD_IMAGE_DATA(hdr, fap, offset, image_hash, len);
             if (res) {
                 return BOOT_STATUS_ERROR;
             }
@@ -448,15 +452,6 @@ boot_save_boot_status(uint8_t sw_module,
              * as the boot record TLV should have already been found.
              */
             break;
-        }
-
-        /* Avoid integer overflow. */
-        if ((UINTPTR_MAX - offset) <
-            (sizeof(tlv_entry) + tlv_entry.it_len)) {
-            /* Potential overflow. */
-            break;
-        } else {
-            offset += sizeof(tlv_entry) + tlv_entry.it_len;
         }
     }
 
