@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 510fddb8e06d76e2442b2a4603d3e1cbefe28be4
+ * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
  * Modifications are Copyright (c) 2019 Arm Limited.
  */
 
@@ -48,9 +48,6 @@ const uint32_t boot_img_magic[] = {
 
 #define BOOT_MAGIC_ARR_SZ \
     (sizeof boot_img_magic / sizeof boot_img_magic[0])
-
-const uint32_t BOOT_MAGIC_SZ = sizeof(boot_img_magic);
-const uint32_t BOOT_MAX_ALIGN = MAX_FLASH_ALIGN;
 
 struct boot_swap_table {
     uint8_t magic_primary_slot;
