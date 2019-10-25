@@ -218,6 +218,29 @@ if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
     set (CRYPTO_HW_ACCELERATOR OFF)
 endif()
 
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR_OTP_STATE)
+    set (CRYPTO_HW_ACCELERATOR_OTP_STATE "DISABLED")
+endif()
+
+if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
+    set(CRYPTO_HW_ACCELERATOR OFF)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312Provisioning.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_PROVISIONING")
+
+    add_definitions("-DCC_IOT")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
+elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    set(CRYPTO_HW_ACCELERATOR ON)
+
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_ENABLED")
+elseif(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "DISABLED")
+else()
+    message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_OTP_STATE invalid. expected (DISABLED|PROVISIONING|ENABLED)")
+endif()
+
 #Enable CryptoCell-312 HW accelerator
 if (CRYPTO_HW_ACCELERATOR)
     set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
@@ -228,7 +251,11 @@ if (CRYPTO_HW_ACCELERATOR)
     add_definitions("-DCRYPTO_HW_ACCELERATOR_CC312")
 
     add_definitions("-DCC_IOT")
+    #The CC312 uses GNU make as a build system so does not use the cmake flag
+    #system. As such any flags that need to be set for both CC312 and TF-M
+    #require setting multiple times.
     string(APPEND CC312_C_FLAGS " -I ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
     embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
 endif()

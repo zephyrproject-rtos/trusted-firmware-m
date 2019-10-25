@@ -64,6 +64,12 @@
 /* Save ROM and a few bytes of RAM by specifying our own ciphersuite list */
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
 
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
+#define MBEDTLS_CIPHER_C
+#define MBEDTLS_AES_C
+#define MBEDTLS_CCM_C
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
+
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "mbedtls_accelerator_config.h"
 #endif

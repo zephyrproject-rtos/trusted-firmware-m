@@ -33,6 +33,17 @@ int crypto_hw_accelerator_init(void);
  */
 int crypto_hw_accelerator_finish(void);
 
+/**
+ * \brief Write the crypto keys to One-Time-Programmable memory
+ *
+ * The following keys will be provisioned:
+ *  - Hardware Unique Key (HUK)
+ *  - Hash of ROTPK
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_accelerator_otp_provisioning(void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

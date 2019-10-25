@@ -31,9 +31,10 @@
 #if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
 #include "uart_stdout.h"
 #endif
-#ifdef CRYPTO_HW_ACCELERATOR
+#if defined(CRYPTO_HW_ACCELERATOR) || \
+    defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
 #include "crypto_hw.h"
-#endif /* CRYPTO_HW_ACCELERATOR */
+#endif
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -212,6 +213,24 @@ int main(void)
         while (1);
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+/* This is a workaround to program the TF-M related cryptographic keys
+ * to CC312 OTP memory. This functionality is independent from secure boot,
+ * this is usually done in the factory floor during chip manufacturing.
+ */
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
+    BOOT_LOG_INF("OTP provisioning started.");
+    rc = crypto_hw_accelerator_otp_provisioning();
+    if (rc) {
+        BOOT_LOG_ERR("OTP provisioning FAILED: 0x%X", rc);
+        while (1);
+    } else {
+        BOOT_LOG_INF("OTP provisioning succeeded. TF-M won't be loaded.");
+
+        /* We don't need to boot - the only aim is provisioning. */
+        while (1);
+    }
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
                  rsp.br_image_off);
