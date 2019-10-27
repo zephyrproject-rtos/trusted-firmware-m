@@ -129,3 +129,40 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
                                             key, key_size);
 
 }
+
+int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,
+                                         uint8_t *rotpk_hash,
+                                         uint32_t *rotpk_hash_size)
+{
+    int32_t ret;
+    mbedtls_mng_pubKeyType_t key_index;
+    uint32_t rotpk_hash_size_in_words;
+
+    if (image_id == 0) {
+#if (MCUBOOT_IMAGE_NUMBER == 1)
+        key_index = CC_MNG_HASH_BOOT_KEY_256B;
+        rotpk_hash_size_in_words = 8;
+#elif (MCUBOOT_IMAGE_NUMBER == 2)
+        key_index = CC_MNG_HASH_BOOT_KEY_0_128B;
+        rotpk_hash_size_in_words = 4;
+    } else if (image_id == 1) {
+        key_index = CC_MNG_HASH_BOOT_KEY_1_128B;
+        rotpk_hash_size_in_words = 4;
+#endif /* MCUBOOT_IMAGE_NUMBER == 1 */
+    } else {
+        return -1;
+    }
+
+    if (*rotpk_hash_size < rotpk_hash_size_in_words * sizeof(uint32_t)) {
+        return -1;
+    }
+    *rotpk_hash_size = rotpk_hash_size_in_words * sizeof(uint32_t);
+
+    ret = mbedtls_mng_pubKeyHashGet(key_index, (uint32_t *)rotpk_hash,
+                                    rotpk_hash_size_in_words);
+    if (ret) {
+        return ret;
+    }
+
+    return 0;
+}

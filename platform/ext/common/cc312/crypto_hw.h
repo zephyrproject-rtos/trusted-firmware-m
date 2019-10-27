@@ -67,7 +67,22 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
  */
 int crypto_hw_accelerator_otp_provisioning(void);
 
-/** \brief Retrieve the device lifecycle
+/**
+ * \brief Retrieve the hash of ROTPK from OTP
+ *
+ * \param[in]      image_id         The identifier of firmware image
+ * \param[out]     rotpk_hash       Buffer to store the key-hash in
+ * \param[in,out]  rotpk_hash_size  As input the size of the buffer. As output
+ *                                  the actual key-hash length.
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,
+                                         uint8_t *rotpk_hash,
+                                         uint32_t *rotpk_hash_size);
+
+/**
+ * \brief Retrieve the device lifecycle
  *
  * \param[out]  lcs  Pointer to store lifecycle state
  *

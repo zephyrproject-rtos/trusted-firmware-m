@@ -144,7 +144,13 @@ tfm_plat_get_rotpk_hash(uint8_t image_id,
                         uint8_t *rotpk_hash,
                         uint32_t *rotpk_hash_size)
 {
-    if(*rotpk_hash_size < ROTPK_HASH_LEN) {
+    int rc = 0;
+
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+    rc = crypto_hw_accelerator_get_rotpk_hash(image_id, rotpk_hash,
+                                              rotpk_hash_size);
+#else
+    if (*rotpk_hash_size < ROTPK_HASH_LEN) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -153,8 +159,14 @@ tfm_plat_get_rotpk_hash(uint8_t image_id,
     }
 
     *rotpk_hash_size = ROTPK_HASH_LEN;
+
     copy_key(rotpk_hash, device_rotpk[image_id].key_hash, *rotpk_hash_size);
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
+
+    if (rc) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif
+#endif /* BL2 */
