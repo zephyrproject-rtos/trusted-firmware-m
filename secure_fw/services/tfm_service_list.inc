@@ -22,6 +22,7 @@
 #include "test/test_services/tfm_ipc_service/psa_manifest/tfm_ipc_service_partition.h"
 #include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
+#include "test/test_services/tfm_sst_test_service/psa_manifest/tfm_sst_test_service.h"
 
 const struct tfm_spm_service_db_t service_db[] =
 {
@@ -435,6 +436,19 @@ const struct tfm_spm_service_db_t service_db[] =
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+#ifdef TFM_PARTITION_TEST_SST
+    /******** TFM_SP_SST_TEST ********/
+    {
+        .name = "TFM_SST_TEST_PREPARE",
+        .partition_id = TFM_SP_SST_TEST,
+        .signal = TFM_SST_TEST_PREPARE_SIGNAL,
+        .sid = 0x0000F0C0,
+        .non_secure_client = false,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
+#endif /* TFM_PARTITION_TEST_SST */
+
 };
 
 /**************************************************************************/
@@ -767,6 +781,17 @@ struct tfm_spm_service_t service[] =
         .list = {0},
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
+
+#ifdef TFM_PARTITION_TEST_SST
+    /******** TFM_SP_SST_TEST ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+#endif /* TFM_PARTITION_TEST_SST */
 
 };
 

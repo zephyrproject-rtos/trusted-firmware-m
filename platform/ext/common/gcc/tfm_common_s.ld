@@ -116,6 +116,11 @@ SECTIONS
         LONG (ADDR(.TFM_IRQ_TEST_1_LINKER_DATA))
         LONG (SIZEOF(.TFM_IRQ_TEST_1_LINKER_DATA))
 #endif /* TFM_ENABLE_IRQ_TEST */
+#ifdef TFM_PARTITION_TEST_SST
+        LONG (LOADADDR(.TFM_SP_SST_TEST_LINKER_DATA))
+        LONG (ADDR(.TFM_SP_SST_TEST_LINKER_DATA))
+        LONG (SIZEOF(.TFM_SP_SST_TEST_LINKER_DATA))
+#endif /* TFM_PARTITION_TEST_SST */
 #if defined (S_RAM_CODE_START)
         LONG (LOADADDR(.TFM_RAM_CODE))
         LONG (ADDR(.TFM_RAM_CODE))
@@ -221,6 +226,14 @@ SECTIONS
         LONG (SIZEOF(.TFM_IRQ_TEST_1_LINKER_STACK))
 #endif
 #endif /* TFM_ENABLE_IRQ_TEST */
+#ifdef TFM_PARTITION_TEST_SST
+        LONG (ADDR(.TFM_SP_SST_TEST_LINKER_BSS))
+        LONG (SIZEOF(.TFM_SP_SST_TEST_LINKER_BSS))
+#if defined(TFM_PSA_API)
+        LONG (ADDR(.TFM_SP_SST_TEST_LINKER_STACK))
+        LONG (SIZEOF(.TFM_SP_SST_TEST_LINKER_STACK))
+#endif
+#endif /* TFM_PARTITION_TEST_SST */
         __zero_table_end__ = .;
     } > FLASH
 
@@ -386,6 +399,20 @@ SECTIONS
     Image$$TFM_SP_IPC_SERVICE_TEST_LINKER$$Base = ADDR(.TFM_SP_IPC_SERVICE_TEST_LINKER);
     Image$$TFM_SP_IPC_SERVICE_TEST_LINKER$$Limit = ADDR(.TFM_SP_IPC_SERVICE_TEST_LINKER) + SIZEOF(.TFM_SP_IPC_SERVICE_TEST_LINKER);
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_SST
+    .TFM_SP_SST_TEST_LINKER : ALIGN(32)
+    {
+        *tfm_sst_test_service.*(.text*)
+        *tfm_sst_test_service.*(.rodata*)
+        *(TFM_SP_SST_TEST_LD_ATTR_FN)
+        . = ALIGN(32);
+    } > FLASH
+    Image$$TFM_SP_SST_TEST_LINKER$$RO$$Base = ADDR(.TFM_SP_SST_TEST_LINKER);
+    Image$$TFM_SP_SST_TEST_LINKER$$RO$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER) + SIZEOF(.TFM_SP_SST_TEST_LINKER);
+    Image$$TFM_SP_SST_TEST_LINKER$$Base = ADDR(.TFM_SP_SST_TEST_LINKER);
+    Image$$TFM_SP_SST_TEST_LINKER$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER) + SIZEOF(.TFM_SP_SST_TEST_LINKER);
+#endif /* TFM_PARTITION_TEST_SST */
 
     /**** PSA RoT RO part (CODE + RODATA) end here */
     Image$$TFM_PSA_CODE_END$$Base = .;
@@ -1071,6 +1098,39 @@ SECTIONS
 #endif
 
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_SST
+    .TFM_SP_SST_TEST_LINKER_DATA : ALIGN(32)
+    {
+        *tfm_sst_test_service.*(.data*)
+        *(TFM_SP_SST_TEST_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_SP_SST_TEST_LINKER_DATA$$RW$$Base = ADDR(.TFM_SP_SST_TEST_LINKER_DATA);
+    Image$$TFM_SP_SST_TEST_LINKER_DATA$$RW$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER_DATA) + SIZEOF(.TFM_SP_SST_TEST_LINKER_DATA);
+
+    .TFM_SP_SST_TEST_LINKER_BSS : ALIGN(32)
+    {
+        start_of_TFM_SP_SST_TEST_LINKER = .;
+        *tfm_sst_test_service.*(.bss*)
+        *tfm_sst_test_service.*(COMMON)
+        *(TFM_SP_SST_TEST_ATTR_ZI)
+        . += (. - start_of_TFM_SP_SST_TEST_LINKER) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_SP_SST_TEST_LINKER_DATA$$ZI$$Base = ADDR(.TFM_SP_SST_TEST_LINKER_BSS);
+    Image$$TFM_SP_SST_TEST_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER_BSS) + SIZEOF(.TFM_SP_SST_TEST_LINKER_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_SP_SST_TEST_LINKER_STACK : ALIGN(128)
+    {
+        . += 0x400;
+    } > RAM
+    Image$$TFM_SP_SST_TEST_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_SST_TEST_LINKER_STACK);
+    Image$$TFM_SP_SST_TEST_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_SST_TEST_LINKER_STACK) + SIZEOF(.TFM_SP_SST_TEST_LINKER_STACK);
+#endif
+
+#endif /* TFM_PARTITION_TEST_SST */
 
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;

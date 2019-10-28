@@ -131,6 +131,11 @@ psa_status_t tfm_spm_irq_test_1_prepare_test_scenario_veneer(psa_invec *in_vec, 
 psa_status_t tfm_spm_irq_test_1_execute_test_scenario_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+#ifdef TFM_PARTITION_TEST_SST
+/******** TFM_SP_SST_TEST ********/
+psa_status_t tfm_tfm_sst_test_prepare_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_TEST_SST */
+
 #ifdef __cplusplus
 }
 #endif

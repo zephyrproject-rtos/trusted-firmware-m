@@ -118,6 +118,10 @@ extern "C" {
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SID              (0x0000F0A1U)
 #define SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_VERSION          (1U)
 
+/******** TFM_SP_SST_TEST ********/
+#define TFM_SST_TEST_PREPARE_SID                                   (0x0000F0C0U)
+#define TFM_SST_TEST_PREPARE_VERSION                               (1U)
+
 #ifdef __cplusplus
 }
 #endif

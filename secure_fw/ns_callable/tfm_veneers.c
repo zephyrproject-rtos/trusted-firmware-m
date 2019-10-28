@@ -125,6 +125,11 @@ psa_status_t spm_irq_test_1_prepare_test_scenario(psa_invec *, size_t, psa_outve
 psa_status_t spm_irq_test_1_execute_test_scenario(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+#ifdef TFM_PARTITION_TEST_SST
+/******** TFM_SP_SST_TEST ********/
+psa_status_t tfm_sst_test_prepare(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_SST */
+
 
 #define TFM_VENEER_FUNCTION(partition_name, sfn_name) \
     __tfm_secure_gateway_attributes__ \
@@ -252,4 +257,9 @@ TFM_VENEER_FUNCTION(TFM_SP_SECURE_TEST_PARTITION, tfm_secure_client_service_sfn_
 TFM_VENEER_FUNCTION(TFM_IRQ_TEST_1, spm_irq_test_1_prepare_test_scenario)
 TFM_VENEER_FUNCTION(TFM_IRQ_TEST_1, spm_irq_test_1_execute_test_scenario)
 #endif /* TFM_ENABLE_IRQ_TEST */
+
+#ifdef TFM_PARTITION_TEST_SST
+/******** TFM_SP_SST_TEST ********/
+TFM_VENEER_FUNCTION(TFM_SP_SST_TEST, tfm_sst_test_prepare)
+#endif /* TFM_PARTITION_TEST_SST */
 

@@ -15,11 +15,11 @@
 #include "tfm_memory_utils.h"
 #include "s_test_helpers.h"
 
-/* This include is required to expose the sst_system_prepare function to
- * simulate a reboot in the system by calling sst_system_prepare().
+/* This include is required to expose the sst_system_prepare function, via the
+ * tfm_sst_test_system_prepare API, to simulate a reboot in the system.
  * sst_system_prepare is called when the SST service is initialized.
  */
-#include "secure_fw/services/secure_storage/sst_object_system.h"
+#include "test/test_services/tfm_sst_test_service/tfm_sst_test_service_api.h"
 
 #include "test/framework/test_framework_helpers.h"
 
@@ -184,7 +184,7 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
      * Prepare should not fail as the NV counters has the same values and
      * the SST area authentication is aligned with those values.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("AM prepare should not fail");
         return;
@@ -258,7 +258,7 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
      * Prepare should fail as the SST area version does not match the
      * NV counters values.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("SST system prepare should fail as version is old");
         return;
@@ -294,7 +294,7 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -348,7 +348,7 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match NV counters 1 and
      * 2 values.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -417,7 +417,7 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match the NV counter 2
      * and 3 values.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -491,7 +491,7 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
      *
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -568,7 +568,7 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
      *
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -638,7 +638,7 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
      * Prepare should fail as the SST area version match the NV counter 2 and
      * the other counters are different.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("SST system prepare should fail");
         return;
@@ -668,7 +668,7 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
@@ -730,7 +730,7 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
      * Prepare should fail as the SST area version match the NV counter 2 and
      * the other counters are different.
      */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_ERROR_OPERATION_FAILED) {
         TEST_FAIL("AM prepare should fail");
         return;
@@ -766,7 +766,7 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
-    status = sst_system_prepare();
+    status = tfm_sst_test_system_prepare();
     if (status != PSA_PS_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;

@@ -112,6 +112,13 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
+#ifdef TFM_PARTITION_TEST_SST
+    TFM_SP_SST_TEST_LINKER +0 ALIGN 32 {
+        *tfm_sst_test_service.* (+RO)
+        *(TFM_SP_SST_TEST_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_TEST_SST */
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT code.
@@ -410,6 +417,19 @@ LR_CODE S_CODE_START {
     }
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_SST
+    TFM_SP_SST_TEST_LINKER_DATA +0 ALIGN 32 {
+        *tfm_sst_test_service.* (+RW +ZI)
+        *(TFM_SP_SST_TEST_ATTR_RW)
+        *(TFM_SP_SST_TEST_ATTR_ZI)
+    }
+
+#if defined (TFM_PSA_API)
+    TFM_SP_SST_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x400 {
+    }
+#endif
+#endif /* TFM_PARTITION_TEST_SST */
 
     /*
      * This empty, zero long execution region is here to mark the end address

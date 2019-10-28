@@ -139,6 +139,7 @@ set (CORE_TEST_POSITIVE OFF)
 set (CORE_TEST_INTERACTIVE OFF)
 set (REFERENCE_PLATFORM OFF)
 set (TFM_PARTITION_TEST_SECURE_SERVICES OFF)
+set (TFM_PARTITION_TEST_SST OFF)
 set (SERVICES_TEST_ENABLED OFF)
 set (TEST_FRAMEWORK_S  OFF)
 set (TEST_FRAMEWORK_NS OFF)
@@ -342,6 +343,13 @@ if (NOT DEFINED SST_TEST_NV_COUNTERS)
 	else()
 		set(SST_TEST_NV_COUNTERS OFF)
 	endif()
+endif()
+
+# The SST NV counter tests depend on the SST test partition to call
+# sst_system_prepare().
+if (SST_TEST_NV_COUNTERS)
+	set(TFM_PARTITION_TEST_SST ON)
+	add_definitions(-DTFM_PARTITION_TEST_SST)
 endif()
 
 #Default TF-M internal trusted storage flags.
