@@ -117,7 +117,7 @@ boot_save_sw_measurements(uint8_t sw_module,
      *  - public key hash: Signer ID
      */
     for (; offset < tlv_end; offset += sizeof(tlv_entry) + tlv_entry.it_len) {
-        res = LOAD_IMAGE_DATA(fap, offset, &tlv_entry, sizeof(tlv_entry));
+        res = LOAD_IMAGE_DATA(hdr, fap, offset, &tlv_entry, sizeof(tlv_entry));
         if (res) {
             return BOOT_STATUS_ERROR;
         }
@@ -128,7 +128,7 @@ boot_save_sw_measurements(uint8_t sw_module,
                 return BOOT_STATUS_ERROR;
             }
 
-            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;
@@ -162,7 +162,7 @@ boot_save_sw_measurements(uint8_t sw_module,
                 return BOOT_STATUS_ERROR;
             }
 
-            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;
@@ -173,7 +173,7 @@ boot_save_sw_measurements(uint8_t sw_module,
             if (tlv_entry.it_len > sizeof(key_buf)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
                                   key_buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;
@@ -411,7 +411,7 @@ boot_save_boot_status(uint8_t sw_module,
      * and image hash TLVs.
      */
     while (offset < tlv_end) {
-        res = LOAD_IMAGE_DATA(fap, offset, &tlv_entry, sizeof(tlv_entry));
+        res = LOAD_IMAGE_DATA(hdr, fap, offset, &tlv_entry, sizeof(tlv_entry));
         if (res) {
             return BOOT_STATUS_ERROR;
         }
@@ -420,7 +420,7 @@ boot_save_boot_status(uint8_t sw_module,
             if (tlv_entry.it_len > sizeof(buf)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
                                   buf, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;
@@ -434,7 +434,7 @@ boot_save_boot_status(uint8_t sw_module,
             if (tlv_entry.it_len > sizeof(image_hash)) {
                 return BOOT_STATUS_ERROR;
             }
-            res = LOAD_IMAGE_DATA(fap, offset + sizeof(tlv_entry),
+            res = LOAD_IMAGE_DATA(hdr, fap, offset + sizeof(tlv_entry),
                                   image_hash, tlv_entry.it_len);
             if (res) {
                 return BOOT_STATUS_ERROR;

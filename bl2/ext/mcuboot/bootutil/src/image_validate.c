@@ -225,7 +225,7 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
      * the security counter TLV.
      */
     while (off < end) {
-        rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
+        rc = LOAD_IMAGE_DATA(hdr, fap, off, &tlv, sizeof(tlv));
         if (rc != 0) {
             return BOOT_EFLASH;
         }
@@ -237,7 +237,7 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
                 break;
             }
 
-            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
+            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
                                  img_security_cnt, tlv.it_len);
             if (rc != 0) {
                 return BOOT_EFLASH;
@@ -314,7 +314,7 @@ bootutil_img_validate(int image_index,
      * and are able to do.
      */
     while (off < end) {
-        rc = LOAD_IMAGE_DATA(fap, off, &tlv, sizeof(tlv));
+        rc = LOAD_IMAGE_DATA(hdr, fap, off, &tlv, sizeof(tlv));
         if (rc) {
             return rc;
         }
@@ -327,7 +327,8 @@ bootutil_img_validate(int image_index,
             if (tlv.it_len != sizeof(hash)) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, sizeof(hash));
+            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
+                                 buf, sizeof(hash));
             if (rc) {
                 return rc;
             }
@@ -345,7 +346,7 @@ bootutil_img_validate(int image_index,
             if (tlv.it_len > 32) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv), buf, tlv.it_len);
             if (rc) {
                 return rc;
             }
@@ -362,7 +363,8 @@ bootutil_img_validate(int image_index,
             if (tlv.it_len > sizeof(key_buf)) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), key_buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
+                                 key_buf, tlv.it_len);
             if (rc) {
                 return rc;
             }
@@ -378,7 +380,8 @@ bootutil_img_validate(int image_index,
                 if (!EXPECTED_SIG_LEN(tlv.it_len) || tlv.it_len > sizeof(buf)) {
                     return -1;
                 }
-                rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv), buf, tlv.it_len);
+                rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
+                                     buf, tlv.it_len);
                 if (rc) {
                     return -1;
                 }
@@ -400,7 +403,7 @@ bootutil_img_validate(int image_index,
                 return -1;
             }
 
-            rc = LOAD_IMAGE_DATA(fap, off + sizeof(tlv),
+            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
                                  &img_security_cnt, tlv.it_len);
             if (rc) {
                 return rc;

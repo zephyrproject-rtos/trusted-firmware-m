@@ -177,7 +177,7 @@ boot_find_tlv_offs(const struct image_header *hdr, const struct flash_area *fap,
 
     off_ = BOOT_TLV_OFF(hdr);
 
-    if (LOAD_IMAGE_DATA(fap, off_, &info, sizeof(info))) {
+    if (LOAD_IMAGE_DATA(hdr, fap, off_, &info, sizeof(info))) {
         return BOOT_EFLASH;
     }
 

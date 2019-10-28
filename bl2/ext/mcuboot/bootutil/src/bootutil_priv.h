@@ -335,10 +335,11 @@ boot_img_sector_off(const struct boot_loader_state *state, size_t slot,
 #endif  /* !defined(MCUBOOT_USE_FLASH_AREA_GET_SECTORS) */
 
 #ifdef MCUBOOT_RAM_LOADING
-#define LOAD_IMAGE_DATA(fap, start, output, size)\
-    (memcpy((output),(void*)(hdr->ih_load_addr + (start)), (size)) != (output))
+#define LOAD_IMAGE_DATA(hdr, fap, start, output, size)       \
+    (memcpy((output),(void*)((hdr)->ih_load_addr + (start)), \
+    (size)) != (output))
 #else
-#define LOAD_IMAGE_DATA(fap, start, output, size)\
+#define LOAD_IMAGE_DATA(hdr, fap, start, output, size)       \
     (flash_area_read((fap), (start), (output), (size)))
 #endif /* MCUBOOT_RAM_LOADING */
 
