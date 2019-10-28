@@ -168,21 +168,20 @@ static int
 boot_verify_image_header(struct image_header *hdr)
 {
     uint32_t image_end;
+    uint32_t x;
 
     if (hdr->ih_magic != IMAGE_MAGIC) {
         return BOOT_EBADIMAGE;
     }
 
     /* Check input parameters against integer overflow */
-    if (boot_add_uint32_overflow_check(hdr->ih_hdr_size, hdr->ih_img_size)) {
+    if (!boot_u32_safe_add(&image_end, hdr->ih_hdr_size, hdr->ih_img_size)) {
         return BOOT_EBADIMAGE;
     }
 
-    image_end = hdr->ih_hdr_size + hdr->ih_img_size;
-    if (boot_add_uint32_overflow_check(image_end, hdr->ih_protect_tlv_size)) {
+    if (!boot_u32_safe_add(&x, image_end, hdr->ih_protect_tlv_size)) {
         return BOOT_EBADIMAGE;
     }
-
 
 #if MCUBOOT_RAM_LOADING
     if (!(hdr->ih_flags & IMAGE_F_RAM_LOAD)) {
@@ -190,7 +189,7 @@ boot_verify_image_header(struct image_header *hdr)
     }
 
     /* Check input parameters against integer overflow */
-    if (boot_add_uint32_overflow_check(image_end, hdr->ih_load_addr)) {
+    if (!boot_u32_safe_add(&x, image_end, hdr->ih_load_addr)) {
         return BOOT_EBADIMAGE;
     }
 #endif
@@ -2538,16 +2537,18 @@ boot_get_boot_sequence(struct boot_loader_state *state,
 static int
 boot_verify_ram_loading_address(uint32_t img_dst, uint32_t img_sz)
 {
+    uint32_t img_end_addr;
+
     if (img_dst < IMAGE_EXECUTABLE_RAM_START) {
         return BOOT_EBADIMAGE;
     }
 
-    if (boot_add_uint32_overflow_check(img_dst, img_sz)) {
+    if (!boot_u32_safe_add(&img_end_addr, img_dst, img_sz)) {
         return BOOT_EBADIMAGE;
     }
 
-    if (img_dst + img_sz > IMAGE_EXECUTABLE_RAM_START +
-                           IMAGE_EXECUTABLE_RAM_SIZE) {
+    if (img_end_addr > (IMAGE_EXECUTABLE_RAM_START +
+                        IMAGE_EXECUTABLE_RAM_SIZE)) {
         return BOOT_EBADIMAGE;
     }
 

@@ -298,6 +298,7 @@ boot_add_data_to_shared_area(uint8_t        major_type,
     struct shared_data_tlv_entry tlv_entry = {0};
     struct tfm_boot_data *boot_data;
     uint8_t *next_tlv;
+    uint16_t boot_data_size;
     uintptr_t tlv_end, offset;
 
     boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
@@ -334,15 +335,13 @@ boot_add_data_to_shared_area(uint8_t        major_type,
     tlv_entry.tlv_type = SET_TLV_TYPE(major_type, minor_type);
     tlv_entry.tlv_len  = SHARED_DATA_ENTRY_SIZE(size);
 
-    /* Verify integer overflow */
-    if (boot_add_uint16_overflow_check(boot_data->header.tlv_tot_len,
-                                       tlv_entry.tlv_len)) {
+    if (!boot_u16_safe_add(&boot_data_size, boot_data->header.tlv_tot_len,
+                           tlv_entry.tlv_len)) {
         return SHARED_MEMORY_GEN_ERROR;
     }
 
     /* Verify overflow of shared area */
-    if ((boot_data->header.tlv_tot_len + tlv_entry.tlv_len) >
-         BOOT_TFM_SHARED_DATA_SIZE){
+    if (boot_data_size > BOOT_TFM_SHARED_DATA_SIZE) {
         return SHARED_MEMORY_OVERFLOW;
     }
 

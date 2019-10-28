@@ -696,33 +696,3 @@ done:
     flash_area_close(fap);
     return rc;
 }
-
-/**
- * Checks whether on overflow can happen during a summation operation
- *
- * @param  a  First operand of summation
- *
- * @param  b  Second operand of summation
- *
- * @return    True in case of overflow, false otherwise
- */
-bool
-boot_add_uint32_overflow_check(uint32_t a, uint32_t b)
-{
-    return (a > UINT32_MAX - b);
-}
-
-/**
- * Checks whether on overflow can happen during a summation operation
- *
- * @param  a  First operand of summation
- *
- * @param  b  Second operand of summation
- *
- * @return    True in case of overflow, false otherwise
- */
-bool
-boot_add_uint16_overflow_check(uint16_t a, uint16_t b)
-{
-    return (a > UINT16_MAX - b);
-}

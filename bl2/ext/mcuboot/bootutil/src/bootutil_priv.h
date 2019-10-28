@@ -233,8 +233,6 @@ int boot_write_swap_info(const struct flash_area *fap, uint8_t swap_type,
                          uint8_t image_num);
 int boot_write_swap_size(const struct flash_area *fap, uint32_t swap_size);
 int boot_read_swap_size(int image_index, uint32_t *swap_size);
-bool boot_add_uint32_overflow_check(uint32_t a, uint32_t b);
-bool boot_add_uint16_overflow_check(uint16_t a, uint16_t b);
 
 /**
  * Safe (non-overflowing) uint32_t addition.  Returns true, and stores

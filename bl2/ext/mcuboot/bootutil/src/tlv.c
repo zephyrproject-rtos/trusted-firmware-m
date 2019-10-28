@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019 JUUL Labs
+ * Copyright (c) 2019 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/*
+ * Original code taken from mcuboot project at:
+ * https://github.com/JuulLabs-OSS/mcuboot
+ * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
  */
 
 #include <stddef.h>
@@ -71,7 +78,9 @@ bootutil_tlv_iter_begin(struct image_tlv_iter *it, const struct image_header *hd
     it->type = type;
     it->prot = prot;
     it->prot_end = off_ + it->hdr->ih_protect_tlv_size;
-    it->tlv_end = off_ + it->hdr->ih_protect_tlv_size + info.it_tlv_tot;
+    if (!boot_u32_safe_add(&(it->tlv_end), it->prot_end, info.it_tlv_tot)) {
+        return -1;
+    }
     // position on first TLV
     it->tlv_off = off_ + sizeof(info);
     return 0;
@@ -121,11 +130,18 @@ bootutil_tlv_iter_next(struct image_tlv_iter *it, uint32_t *off, uint16_t *len,
             }
             *off = it->tlv_off + sizeof(tlv);
             *len = tlv.it_len;
-            it->tlv_off += sizeof(tlv) + tlv.it_len;
+
+            if (!boot_u32_safe_add(&(it->tlv_off), *off, *len)) {
+                return -1;
+            }
+
             return 0;
         }
 
-        it->tlv_off += sizeof(tlv) + tlv.it_len;
+        if (!boot_u32_safe_add(&(it->tlv_off), it->tlv_off,
+                               sizeof(tlv) + tlv.it_len)) {
+            return -1;
+        }
     }
 
     return 1;
