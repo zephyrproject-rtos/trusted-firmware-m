@@ -129,15 +129,22 @@ objects and variables should be implemented.
 When a core accesses shared mailbox objects or variables, proper mechanisms
 should protect concurrent operations from the other core.
 
-Support of multiple ongoing PSA client call requests in TF-M (informative)
-==========================================================================
+Support of multiple ongoing NS PSA client calls (informative)
+=============================================================
 
 Current TF-M implementation (commit-id 8aea0c0a) only supports single
-outstanding PSA client call requests from NSPE.
+outstanding NS PSA client calls from NSPE.
 
-If the support of multiple ongoing PSA client call requests in TF-M is required
-in future, an optional queue can be maintained in TF-M core to store multiple
-mailbox objects copied from NSPE, such as mailbox messages.
+If the support of multiple ongoing NS PSA client calls in TF-M is required
+in dual-core systems, an optional queue can be maintained in TF-M core to store
+multiple mailbox objects received from NSPE.
+To identify NS PSA client calls, additional fields can be added in TF-M SPM
+objects to store the NS PSA Client request identification.
+
+Note that when just a single outstanding PSA client call is allowed, multiple
+NSPE OS threads can run concurrently and call PSA client functions. The first
+PSA client call will be processed first, and any other OS threads will be
+blocked from submitting PSA client calls until the first is completed.
 
 *************************************
 PSA client call handling flow in TF-M
@@ -270,14 +277,13 @@ design document
 The handling process in mailbox operation consists of the following steps.
 
 1. If copy operations are not done in Inter-Processor Communication interrupt
-   handler, the mailbox handling should copy the mailbox message(s) containing
+   handler, the mailbox handling should fetch the mailbox message(s) containing
    PSA client call request from NSPE. Proper protection and synchronization
-   should be implemented in mailbox to guarantee that copy operations are not
+   should be implemented in mailbox to guarantee that the operations are not
    interfered by NSPE mailbox operations or Inter-Processor Communication
-   interrupt handler. If a queue is maintained inside TF-M core to support
-   multiple outstanding PSA client call requests, mailbox handling can copy
-   multiple mailbox messages together into the queue, to save the time of
-   synchronization between two cores.
+   interrupt handler. If a queue is maintained inside TF-M core, mailbox
+   handling can fetch multiple mailbox messages together into the queue, to save
+   the time of synchronization between two cores.
 
 2. Mailbox handling parses the mailbox message copied in SPE and fetches the
    information of the PSA client call, including the PSA client call type.
