@@ -51,8 +51,6 @@
  * 0x0010_0000 Non-secure image (0.5 MB)
  */
 
-#define MAX(X,Y)                       ((X) > (Y) ? (X) : (Y))
-
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
  * here the platform_retarget.h to access flash related defines. To resolve this
@@ -100,14 +98,9 @@
 #define FLASH_AREA_SCRATCH_SIZE    (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
-/* The maximum number of status entries must be at least 2. For more
- * information see the MCUBoot issue:
- * https://github.com/JuulLabs-OSS/mcuboot/issues/427.
- */
-#define BOOT_STATUS_MAX_ENTRIES    MAX(2, \
-                                       ((FLASH_S_PARTITION_SIZE + \
-                                         FLASH_NS_PARTITION_SIZE) / \
-                                        FLASH_AREA_SCRATCH_SIZE))
+#define BOOT_STATUS_MAX_ENTRIES    ((FLASH_S_PARTITION_SIZE + \
+                                     FLASH_NS_PARTITION_SIZE) / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define BOOT_MAX_IMG_SECTORS       ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -134,13 +127,8 @@
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
-/* The maximum number of status entries must be at least 2. For more
- * information see the MCUBoot issue:
- * https://github.com/JuulLabs-OSS/mcuboot/issues/427.
- */
-#define BOOT_STATUS_MAX_ENTRIES    MAX(2, \
-                                       (FLASH_MAX_PARTITION_SIZE / \
-                                        FLASH_AREA_SCRATCH_SIZE))
+#define BOOT_STATUS_MAX_ENTRIES    (FLASH_MAX_PARTITION_SIZE / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define BOOT_MAX_IMG_SECTORS       (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
