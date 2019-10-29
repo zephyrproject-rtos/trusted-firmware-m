@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 3c469bc698a9767859ed73cd0201c44161204d5c
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -50,27 +50,41 @@ extern "C" {
  */
 #include <inttypes.h>
 
-extern uint8_t current_image;
-
 #if (MCUBOOT_IMAGE_NUMBER == 1)
-#define FLASH_AREA_IMAGE_PRIMARY     FLASH_AREA_0_ID
-#define FLASH_AREA_IMAGE_SECONDARY   FLASH_AREA_2_ID
+/*
+ * NOTE: the definition below returns the same values for true/false on
+ * purpose, to avoid having to mark x as non-used by all callers when
+ * running in single image mode.
+ */
+#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
+                                                      FLASH_AREA_0_ID)
+#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_2_ID : \
+                                                      FLASH_AREA_2_ID)
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
 /* MCUBoot currently supports only up to 2 updatable firmware images.
  * If the number of the current image is greater than MCUBOOT_IMAGE_NUMBER - 1
  * then a dummy value will be assigned to the flash area macros.
  */
-#define FLASH_AREA_IMAGE_PRIMARY     ((current_image == 0) ? FLASH_AREA_0_ID : \
-                                      (current_image == 1) ? FLASH_AREA_1_ID : \
-                                                             255 )
-#define FLASH_AREA_IMAGE_SECONDARY   ((current_image == 0) ? FLASH_AREA_2_ID : \
-                                      (current_image == 1) ? FLASH_AREA_3_ID : \
-                                                             255 )
+#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
+                                         ((x) == 1) ? FLASH_AREA_1_ID : \
+                                                      255 )
+#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_2_ID : \
+                                         ((x) == 1) ? FLASH_AREA_3_ID : \
+                                                      255 )
 #else
 #error "Image slot and flash area mapping is not defined"
 #endif
 
-#define FLASH_AREA_IMAGE_SCRATCH     FLASH_AREA_SCRATCH_ID
+#define FLASH_AREA_IMAGE_SCRATCH        FLASH_AREA_SCRATCH_ID
+
+/*
+ * For now, we only support one flash device.
+ *
+ * Pick a random device ID for it that's unlikely to collide with
+ * anything "real".
+ */
+#define FLASH_DEVICE_ID                 100
+#define FLASH_DEVICE_BASE               FLASH_BASE_ADDRESS
 
 /**
  * @brief Structure describing an area on a flash device.
@@ -146,16 +160,15 @@ void flash_area_close(const struct flash_area *area);
 int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
                     uint32_t len);
 
-/*
- * Returns 1 if read data is erased, 0 if non-erased, and -1 on failure.
- */
-int flash_area_read_is_empty(const struct flash_area *area, uint32_t off,
-                             void *dst, uint32_t len);
-
 int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len);
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len);
+
+/*
+ * Alignment restriction for flash writes.
+ */
+uint32_t flash_area_align(const struct flash_area *area);
 
 /*
  * Returns the value expected to be read when accessing any erased
@@ -164,9 +177,12 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len);
 uint8_t flash_area_erased_val(const struct flash_area *area);
 
 /*
- * Alignment restriction for flash writes.
+ * Reads len bytes from off, and checks if the read data is erased.
+ *
+ * Returns 1 if erased, 0 if non-erased, and -1 on failure.
  */
-uint32_t flash_area_align(const struct flash_area *area);
+int flash_area_read_is_empty(const struct flash_area *area, uint32_t off,
+                             void *dst, uint32_t len);
 
 /*
  * Given flash area ID, return info about sectors within the area.
@@ -182,8 +198,9 @@ __attribute__((deprecated))
 int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
 
 int flash_area_id_from_image_slot(int slot);
+int flash_area_id_from_multi_image_slot(int image_index, int slot);
 int flash_area_id_to_image_slot(int area_id);
-void flash_area_warn_on_open(void);
+int flash_area_id_to_multi_image_slot(int image_index, int area_id);
 
 #ifdef __cplusplus
 }

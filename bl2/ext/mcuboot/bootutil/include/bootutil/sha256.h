@@ -27,7 +27,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 3c469bc698a9767859ed73cd0201c44161204d5c
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
  * Modifications are Copyright (c) 2019 Arm Limited.
  */
 
@@ -47,20 +47,20 @@ typedef mbedtls_sha256_context bootutil_sha256_context;
 static inline void bootutil_sha256_init(bootutil_sha256_context *ctx)
 {
     mbedtls_sha256_init(ctx);
-    mbedtls_sha256_starts_ret(ctx, 0);
+    (void)mbedtls_sha256_starts_ret(ctx, 0);
 }
 
 static inline void bootutil_sha256_update(bootutil_sha256_context *ctx,
                                           const void *data,
                                           uint32_t data_len)
 {
-    mbedtls_sha256_update_ret(ctx, data, data_len);
+    (void)mbedtls_sha256_update_ret(ctx, data, data_len);
 }
 
 static inline void bootutil_sha256_finish(bootutil_sha256_context *ctx,
                                           uint8_t *output)
 {
-    mbedtls_sha256_finish_ret(ctx, output);
+    (void)mbedtls_sha256_finish_ret(ctx, output);
 }
 
 #ifdef __cplusplus

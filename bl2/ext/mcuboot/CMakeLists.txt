@@ -72,18 +72,20 @@ endif()
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C
 		"${MCUBOOT_DIR}/bl2_main.c"
-		"${MCUBOOT_DIR}/flash_map.c"
+		"${MCUBOOT_DIR}/flash_map_extended.c"
+		"${MCUBOOT_DIR}/flash_map_legacy.c"
 		"${MCUBOOT_DIR}/keys.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_rsa.c"
+		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
 		"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
 		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 	)
 
 #Define location of Mbed Crypto source, build, and installation directory.
-set(MBEDTLS_CONFIG_FILE "config-boot.h")
+set(MBEDTLS_CONFIG_FILE "config-rsa.h")
 set(MBEDTLS_CONFIG_PATH "${TFM_ROOT_DIR}/bl2/ext/mcuboot/include")
 get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
 if(NOT EXISTS ${MBEDCRYPTO_SOURCE_DIR})

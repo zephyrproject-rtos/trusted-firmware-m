@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 3c469bc698a9767859ed73cd0201c44161204d5c
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -99,10 +99,10 @@ struct image_dependency {
 struct image_header {
     uint32_t ih_magic;
     uint32_t ih_load_addr;
-    uint16_t ih_hdr_size;            /* Size of image header (bytes). */
-    uint16_t ih_protect_tlv_size;    /* Size of protected TLV area (bytes). */
-    uint32_t ih_img_size;            /* Does not include header. */
-    uint32_t ih_flags;               /* IMAGE_F_[...]. */
+    uint16_t ih_hdr_size;           /* Size of image header (bytes). */
+    uint16_t ih_protect_tlv_size;   /* Size of protected TLV area (bytes). */
+    uint32_t ih_img_size;           /* Does not include header. */
+    uint32_t ih_flags;              /* IMAGE_F_[...]. */
     struct image_version ih_ver;
     uint32_t _pad1;
 };
@@ -123,7 +123,8 @@ struct image_tlv {
 _Static_assert(sizeof(struct image_header) == IMAGE_HEADER_SIZE,
                "struct image_header not required size");
 
-int bootutil_img_validate(struct image_header *hdr,
+int bootutil_img_validate(int image_index,
+                          struct image_header *hdr,
                           const struct flash_area *fap,
                           uint8_t *tmp_buf, uint32_t tmp_buf_sz,
                           uint8_t *seed, int seed_len, uint8_t *out_hash);

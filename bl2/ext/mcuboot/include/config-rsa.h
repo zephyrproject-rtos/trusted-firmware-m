@@ -1,9 +1,8 @@
 /*
  *  Minimal configuration for using TLS in the bootloader
  *
- *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2019, Arm Limited. All rights reserved.
  *  Copyright (C) 2016, Linaro Ltd
- *  Copyright (c) 2019, Arm Limited.
  *
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -23,13 +22,19 @@
  */
 
 /*
+ * Original code taken from mcuboot project at:
+ * https://github.com/JuulLabs-OSS/mcuboot
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
+ */
+
+/*
  * Minimal configuration for using TLS in the bootloader
  *
  * - RSA signature verification
  */
 
-#ifndef MBEDTLS_CONFIG_BOOT_H
-#define MBEDTLS_CONFIG_BOOT_H
+#ifndef MCUBOOT_MBEDTLS_CONFIG_RSA
+#define MCUBOOT_MBEDTLS_CONFIG_RSA
 
 /* System support */
 #define MBEDTLS_PLATFORM_C
@@ -80,4 +85,4 @@
 
 #include "mbedtls/check_config.h"
 
-#endif /* MBEDTLS_CONFIG_BOOT_H */
+#endif /* MCUBOOT_MBEDTLS_CONFIG_RSA */

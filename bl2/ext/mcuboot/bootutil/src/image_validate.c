@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 3c469bc698a9767859ed73cd0201c44161204d5c
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -35,7 +35,7 @@
 #include "bootutil/sign_key.h"
 #include "security_cnt.h"
 
-#ifdef MCUBOOT_SIGN_RSA
+#if defined(MCUBOOT_SIGN_RSA)
 #include "mbedtls/rsa.h"
 #endif
 
@@ -51,16 +51,20 @@
  * Compute SHA256 over the image.
  */
 static int
-bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
-                  uint8_t *tmp_buf, uint32_t tmp_buf_sz,
-                  uint8_t *hash_result, uint8_t *seed, int seed_len)
+bootutil_img_hash(int image_index,
+                  struct image_header *hdr, const struct flash_area *fap,
+                  uint8_t *tmp_buf, uint32_t tmp_buf_sz, uint8_t *hash_result,
+                  uint8_t *seed, int seed_len)
 {
     bootutil_sha256_context sha256_ctx;
     uint32_t size;
 #ifndef MCUBOOT_RAM_LOADING
     uint32_t blk_sz;
     uint32_t off;
+    int rc;
 #endif /* MCUBOOT_RAM_LOADING */
+
+    (void)image_index;
 
     bootutil_sha256_init(&sha256_ctx);
 
@@ -71,7 +75,7 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
     }
 
     /* Hash is computed over image header and image itself. */
-    size = hdr->ih_img_size + hdr->ih_hdr_size;
+    size = BOOT_TLV_OFF(hdr);
 
     /* If protected TLVs are present (e.g. security counter TLV) then the
      * TLV info header and these TLVs must be included in the hash calculation.
@@ -88,8 +92,9 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
         if (blk_sz > tmp_buf_sz) {
             blk_sz = tmp_buf_sz;
         }
-        if(flash_area_read(fap, off, tmp_buf, blk_sz)) {
-            return -1;
+        rc = flash_area_read(fap, off, tmp_buf, blk_sz);
+        if (rc) {
+            return rc;
         }
         bootutil_sha256_update(&sha256_ctx, tmp_buf, blk_sz);
     }
@@ -123,9 +128,8 @@ bootutil_img_hash(struct image_header *hdr, const struct flash_area *fap,
 #ifdef EXPECTED_SIG_TLV
 #ifdef MCUBOOT_HW_KEY
 extern unsigned int pub_key_len;
-extern uint8_t current_image;
 static int
-bootutil_find_key(uint8_t *key, uint16_t key_len)
+bootutil_find_key(uint8_t image_id, uint8_t *key, uint16_t key_len)
 {
     bootutil_sha256_context sha256_ctx;
     uint8_t hash[32];
@@ -137,7 +141,7 @@ bootutil_find_key(uint8_t *key, uint16_t key_len)
     bootutil_sha256_update(&sha256_ctx, key, key_len);
     bootutil_sha256_finish(&sha256_ctx, hash);
 
-    plat_err = tfm_plat_get_rotpk_hash(current_image, key_hash, &key_hash_size);
+    plat_err = tfm_plat_get_rotpk_hash(image_id, key_hash, &key_hash_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return -1;
     }
@@ -148,7 +152,7 @@ bootutil_find_key(uint8_t *key, uint16_t key_len)
     }
     return -1;
 }
-#else
+#else /* !MCUBOOT_HW_KEY */
 static int
 bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
 {
@@ -157,7 +161,9 @@ bootutil_find_key(uint8_t *keyhash, uint8_t keyhash_len)
     const struct bootutil_key *key;
     uint8_t hash[32];
 
-    assert(keyhash_len <= 32);
+    if (keyhash_len > 32) {
+        return -1;
+    }
 
     for (i = 0; i < bootutil_key_cnt; i++) {
         key = &bootutil_keys[i];
@@ -270,14 +276,14 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
  * Return non-zero if image could not be validated/does not validate.
  */
 int
-bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
-                      uint8_t *tmp_buf, uint32_t tmp_buf_sz,
-                      uint8_t *seed, int seed_len, uint8_t *out_hash)
+bootutil_img_validate(int image_index,
+                      struct image_header *hdr, const struct flash_area *fap,
+                      uint8_t *tmp_buf, uint32_t tmp_buf_sz, uint8_t *seed,
+                      int seed_len, uint8_t *out_hash)
 {
     uint32_t off;
     uint32_t end;
     int sha256_valid = 0;
-    struct image_tlv_info info;
 #ifdef EXPECTED_SIG_TLV
     int valid_signature = 0;
     int key_id = -1;
@@ -294,8 +300,8 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
     int32_t security_counter_valid = 0;
     int rc;
 
-    rc = bootutil_img_hash(hdr, fap, tmp_buf, tmp_buf_sz, hash,
-                           seed, seed_len);
+    rc = bootutil_img_hash(image_index, hdr, fap, tmp_buf,
+            tmp_buf_sz, hash, seed, seed_len);
     if (rc) {
         return rc;
     }
@@ -304,21 +310,10 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
         memcpy(out_hash, hash, 32);
     }
 
-    /* The TLVs come after the image. */
-    off = hdr->ih_img_size + hdr->ih_hdr_size;
-
-    rc = LOAD_IMAGE_DATA(fap, off, &info, sizeof(info));
+    rc = boot_find_tlv_offs(hdr, fap, &off, &end);
     if (rc) {
         return rc;
     }
-    if (info.it_magic != IMAGE_TLV_INFO_MAGIC) {
-        return BOOT_EBADMAGIC;
-    }
-    if (boot_add_uint32_overflow_check(off, (info.it_tlv_tot + sizeof(info)))) {
-        return -1;
-    }
-    end = off + info.it_tlv_tot;
-    off += sizeof(info);
 
     /*
      * Traverse through all of the TLVs, performing any checks we know
@@ -365,7 +360,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
              * The key may not be found, which is acceptable.  There
              * can be multiple signatures, each preceded by a key.
              */
-#else
+#else /* MCUBOOT_HW_KEY */
         } else if (tlv.it_type == IMAGE_TLV_KEY) {
             /*
              * Determine which key we should be checking.
@@ -377,7 +372,7 @@ bootutil_img_validate(struct image_header *hdr, const struct flash_area *fap,
             if (rc) {
                 return rc;
             }
-            key_id = bootutil_find_key(key_buf, tlv.it_len);
+            key_id = bootutil_find_key(image_index, key_buf, tlv.it_len);
             /*
              * The key may not be found, which is acceptable.  There
              * can be multiple signatures, each preceded by a key.

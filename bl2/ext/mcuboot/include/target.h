@@ -5,6 +5,12 @@
  *  SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Original code taken from mcuboot project at:
+ * https://github.com/JuulLabs-OSS/mcuboot
+ * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
+ */
+
 #ifndef H_TARGETS_TARGET_
 #define H_TARGETS_TARGET_
 
