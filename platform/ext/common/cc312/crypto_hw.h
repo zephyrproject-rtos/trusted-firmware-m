@@ -12,6 +12,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* The CC312 uses some the MBEDTLS heap buffer, so it needs increasing in size
+ * to allow attest crypto operations to still function.
+ */
+#ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
+#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x4000) /* 16KB for EC signing in attest */
+#endif
+
 /**
  * \brief Initialize the CC312 crypto accelerator
  *

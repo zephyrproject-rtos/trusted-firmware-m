@@ -130,6 +130,17 @@ void psa_cipher_test(const psa_key_type_t key_type,
 
     ret->val = TEST_PASSED;
 
+    /* FIXME: Special override for the CC312 accelerator. Implemented because
+     * there is not yet a generic way to override tests.
+     */
+#ifdef CRYPTO_HW_ACCELERATOR_CC312
+    if (alg == PSA_ALG_CFB) {
+        TEST_LOG("%s %s", "The CC312 does not support CFB mode.",
+                 "The test execution was SKIPPED.\r\n");
+        return;
+    }
+#endif /* CRYPTO_HW_ACCELERATOR_CC312 */
+
     /* Allocate a transient key */
     status = psa_allocate_key(&key_handle);
     if (status != PSA_SUCCESS) {

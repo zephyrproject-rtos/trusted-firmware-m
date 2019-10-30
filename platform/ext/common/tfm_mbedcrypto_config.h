@@ -3364,6 +3364,10 @@
  */
 //#define MBEDTLS_PLATFORM_GMTIME_R_ALT
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "mbedtls_accelerator_config.h"
+#endif
+
 /* \} name SECTION: Customisation configuration options */
 
 /* Target and application specific configurations

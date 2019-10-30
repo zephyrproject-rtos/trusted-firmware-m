@@ -20,6 +20,10 @@
 #include "tfm_secure_api.h"
 #endif
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "crypto_hw.h"
+#endif /* CRYPTO_HW_ACCLERATOR */
+
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_crypto.h"
@@ -281,6 +285,13 @@ static psa_status_t tfm_crypto_engine_init(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
                                      TFM_CRYPTO_ENGINE_BUF_SIZE);
+
+    /* Initialise the crypto accelerator if one is enabled */
+#ifdef CRYPTO_HW_ACCELERATOR
+    if (crypto_hw_accelerator_init() != 0) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
+#endif /* CRYPTO_HW_ACCELERATOR */
 
     /* Previous function does not return any value, so just call the
      * initialisation function of the Mbed Crypto layer
