@@ -869,6 +869,11 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     TFM_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];
 
+    /* It is a fatal error if passed signal indicates more than one signals. */
+    if (!tfm_is_one_bit_set(irq_signal)) {
+        tfm_panic();
+    }
+
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_panic();
@@ -878,11 +883,6 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
-        tfm_panic();
-    }
-
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
         tfm_panic();
     }
 
