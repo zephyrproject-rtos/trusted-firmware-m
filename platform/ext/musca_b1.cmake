@@ -232,6 +232,8 @@ if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
 
     add_definitions("-DCC_IOT")
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
 elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
     set(CRYPTO_HW_ACCELERATOR ON)
 

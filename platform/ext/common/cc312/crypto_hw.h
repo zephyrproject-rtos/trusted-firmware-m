@@ -22,6 +22,11 @@ extern "C" {
 #define TFM_CRYPTO_ENGINE_BUF_SIZE (0x4000) /* 16KB for EC signing in attest */
 #endif
 
+/* Offsets are specified in 32-bit words */
+#define CC_OTP_ATTESTATION_KEY_OFFSET               (0x30UL)
+#define CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS        (8)
+#define CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET    (0x2FUL)
+
 /**
  * \brief Initialize the CC312 crypto accelerator
  *
@@ -62,6 +67,7 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
  * The following keys will be provisioned:
  *  - Hardware Unique Key (HUK)
  *  - Hash of ROTPK
+ *  - Attestation private key
  *
  * \return 0 on success, non-zero otherwise
  */

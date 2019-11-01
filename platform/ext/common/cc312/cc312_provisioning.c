@@ -15,7 +15,13 @@
 #include "cc_dmpu.h"
 #include "cc_pal_types.h"
 #include "dx_reg_base_host.h"
+#include "mbedtls/ecdsa.h"
+#include "cc_rnd_common.h"
+#include "cmpu_derivation.h"
+#include "cmpu_llf_rnd.h"
 #include "mbedtls_cc_mng_int.h"
+#include "cc_prod_error.h"
+#include "prod_util.h"
 
 extern uint8_t rotpk_hash_0[];
 extern uint8_t rotpk_hash_1[];
@@ -26,6 +32,139 @@ extern uint8_t rotpk_hash_1[];
          CMPU_WORKSPACE_MINIMUM_SIZE : DMPU_WORKSPACE_MINIMUM_SIZE
 __attribute__((aligned(CC_32BIT_WORD_SIZE)))
 static uint8_t provisioning_mem_buf[PROVISIONING_MEM_BUF_LEN];
+
+/*
+ * Extract private key
+ */
+static int extract_private_key(mbedtls_ecdsa_context *key, uint8_t *buf)
+{
+    size_t len;
+
+    len = mbedtls_mpi_size(&key->d);
+    if (mbedtls_mpi_write_binary(&key->d, buf, len) != 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Generate ECC P256 keypair
+ */
+static int cc312_generate_ecc_p256_keypair(void *rng_state, uint8_t *output,
+                                           size_t len)
+{
+    uint32_t error = 0;
+    uint32_t *pEntrSrc;
+    uint32_t sourceSize;
+    uint8_t  pKey[32] = { 0 };
+    uint8_t  pIv[16] = { 0 };
+    uint32_t *pRndWorkBuff = (uint32_t *)provisioning_mem_buf;
+
+    error = CC_PROD_LLF_RND_GetTrngSource((uint32_t **)&pEntrSrc,
+                                          &sourceSize,
+                                          pRndWorkBuff);
+    if (error != CC_OK) {
+        return error;
+    }
+
+    error = CC_PROD_Derivation_Instantiate(pEntrSrc,
+                                           sourceSize,
+                                           pKey,
+                                           pIv);
+    if (error != CC_OK) {
+        return error;
+    }
+
+    if (len <= 32) {
+        memcpy(output, pKey, len);
+    } else if (len > 32 && len <= 48) {
+        memcpy(output, pKey, 32);
+        memcpy(output + 32, pIv, len - 32);
+    } else {
+        memcpy(output, pKey, 32);
+        memcpy(output + 32, pIv, 16);
+        memset(output + 48, 0, len - 48);
+    }
+
+    return 0;
+}
+
+static int cc312_generate_attestation_key(mbedtls_ecp_group_id curve_type,
+                                          uint8_t *private_key)
+{
+    int rc;
+    mbedtls_ecdsa_context ecdsa;
+
+    if (!private_key || curve_type == MBEDTLS_ECP_DP_NONE) {
+        return -1;
+    }
+
+    mbedtls_ecdsa_init(&ecdsa);
+
+    rc = mbedtls_ecdsa_genkey(&ecdsa, curve_type,
+         cc312_generate_ecc_p256_keypair, NULL);
+    if (rc) {
+        goto exit;
+    }
+
+    rc = extract_private_key(&ecdsa, private_key);
+    if (rc) {
+        goto exit;
+    }
+
+    rc = 0;
+
+exit:
+    mbedtls_ecdsa_free(&ecdsa);
+
+    return rc;
+}
+
+static int cc312_program_attestation_private_key(
+                                    mbedtls_ecp_group_id curve_type)
+{
+    uint32_t private_key[8];
+    uint32_t error;
+    uint32_t zero_count;
+    int ret;
+
+    /* Check if the attestation key area has been programmed */
+    CC_PROD_OTP_READ(zero_count, CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET);
+    if (zero_count) {
+        return -1;
+    }
+
+    ret = cc312_generate_attestation_key(curve_type,
+                                        (uint8_t *)private_key);
+    if (ret) {
+        return -1;
+    }
+
+    /* Program private key to OTP */
+    CC_PROD_OTP_WRITE_VERIFY_WORD_BUFF(CC_OTP_ATTESTATION_KEY_OFFSET,
+                                       private_key,
+                                       CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS,
+                                       error);
+    if (error != CC_OK) {
+        return -1;
+     }
+
+    CC_PROD_GetZeroCount(private_key,
+                         CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS,
+                         &zero_count);
+    /* Program the number of zero bits in the private key. This is used to
+     * detect whether the private key is overwritten or tampered.
+     */
+    CC_PROD_OTP_WRITE_VERIFY_WORD(CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET,
+                                  zero_count,
+                                  error);
+    if (error != CC_OK) {
+        return -1;
+    }
+
+    return 0;
+}
 
 static int cc312_cmpu_provision(void)
 {
@@ -105,13 +244,20 @@ int crypto_hw_accelerator_otp_provisioning(void)
         return rc;
     }
 
+    /* First cycle - program the attestation key and HUK */
     if (lcs == CC_MNG_LCS_CM) {
+        rc = cc312_program_attestation_private_key(MBEDTLS_ECP_DP_SECP256R1);
+        if (rc) {
+            return rc;
+        }
+        printf("First cycle: Attestation key is provisioned successfully\r\n");
         rc = cc312_cmpu_provision();
         if (rc) {
             return rc;
         }
         printf("First cycle: HUK is provisioned successfully\r\n");
         printf("Please reset the board to program ROTPK\r\n");
+    /* Second cycle - program the ROTPK */
     } else if (lcs == CC_MNG_LCS_DM) {
         rc = cc312_dmpu_provision();
         if (rc) {
