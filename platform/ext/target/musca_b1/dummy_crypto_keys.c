@@ -45,6 +45,7 @@ extern const uint32_t initial_attestation_private_key_size;
 extern const struct tfm_plat_rotpk_t device_rotpk[];
 extern const uint32_t rotpk_key_cnt;
 
+#ifndef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
 /**
  * \brief Copy the key to the destination buffer
  *
@@ -62,6 +63,7 @@ static inline void copy_key(uint8_t *p_dst, const uint8_t *p_src, size_t size)
         p_dst++;
     }
 }
+#endif /* !CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
 
 enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  size_t label_size,
@@ -110,12 +112,10 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 struct ecc_key_t *ecc_key,
                                 psa_ecc_curve_t  *curve_type)
 {
-    uint8_t *key_dst;
-    const uint8_t *key_src;
-    uint32_t key_size;
-    uint32_t full_key_size = initial_attestation_private_key_size;
+    uint32_t key_size = initial_attestation_private_key_size;
+    int rc;
 
-    if (size < full_key_size) {
+    if (size < key_size) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -123,11 +123,19 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
     *curve_type = initial_attestation_curve_type;
 
     /* Copy the private key to the buffer, it MUST be present */
-    key_dst  = key_buf;
-    key_src  = initial_attestation_private_key;
-    key_size = initial_attestation_private_key_size;
-    copy_key(key_dst, key_src, key_size);
-    ecc_key->priv_key = key_dst;
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+    rc = crypto_hw_accelerator_get_attestation_private_key(key_buf, &size);
+    key_size = size;
+#else
+    copy_key(key_buf, initial_attestation_private_key, key_size);
+    rc = 0;
+#endif /* CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
+
+    if (rc) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    ecc_key->priv_key = key_buf;
     ecc_key->priv_key_size = key_size;
 
     ecc_key->pubx_key = NULL;

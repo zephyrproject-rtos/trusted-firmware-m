@@ -17,6 +17,8 @@
 #include "arm_cmse.h"
 #include "mbedtls_cc_util_key_derivation.h"
 #include "tfm_attest_hal.h"
+#include "prod_hw_defs.h"
+#include "cc_otp_defs.h"
 
 #define CC312_NULL_CONTEXT "NO SALT!"
 
@@ -127,7 +129,79 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
                                             label, label_size,
                                             context, context_size,
                                             key, key_size);
+}
 
+/*
+ * Count number of zero bits in 32-bit word.
+ * Copied from:
+ * lib/ext/cryptocell-312-runtime/host/src/ \
+ * cc3x_productionlib/common/prod_util.c: CC_PROD_GetZeroCount(..)
+ */
+static int get_zero_bits_count(uint32_t *buf,
+                               uint32_t  buf_word_size,
+                               uint32_t *zero_count)
+{
+    uint32_t val;
+    uint32_t index = 0;
+
+    *zero_count = 0;
+    for (index = 0; index < buf_word_size; index++) {
+        val = buf[index];
+        val = val - ((val >> 1) & 0x55555555);
+        val = (val & 0x33333333) + ((val >> 2) & 0x33333333);
+        val = ((((val + (val >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24);
+        *zero_count += (32 - val);
+    }
+    /* All 0's and all 1's is forbidden */
+    if ((*zero_count == 0)
+        || (*zero_count == buf_word_size*CC_BITS_IN_32BIT_WORD)) {
+        *zero_count = 0;
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Get attestation private key from CC312 OTP
+ */
+int crypto_hw_accelerator_get_attestation_private_key(uint8_t  *buf,
+                                                      uint32_t *size)
+{
+    uint32_t *key = (uint32_t *)buf;
+    uint32_t otp_val;
+    uint32_t otp_zero_count;
+    uint32_t zero_count;
+    int i;
+    int rc;
+
+    if (key == NULL ||
+        *size < CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS * sizeof(uint32_t)) {
+        return -1;
+    }
+    *size = CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS * sizeof(uint32_t);
+
+    /* Get provisioned key from OTP, 8 words */
+    for (i = 0; i < CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS; i++) {
+        CC_PROD_OTP_READ(otp_val, CC_OTP_ATTESTATION_KEY_OFFSET + i);
+        *key = otp_val;
+        key++;
+    }
+
+    /* Verify the zero number of private key */
+    rc = get_zero_bits_count((uint32_t *)buf,
+                             CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS,
+                             &zero_count);
+    if (rc) {
+        return -1;
+    }
+
+    CC_PROD_OTP_READ(otp_zero_count, CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET);
+    if (otp_zero_count != zero_count) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,

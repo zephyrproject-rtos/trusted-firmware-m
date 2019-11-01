@@ -88,6 +88,18 @@ int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,
                                          uint32_t *rotpk_hash_size);
 
 /**
+ * \brief Retrieve the attestation private key from OTP
+ *
+ * \param[out]     buf   Buffer to store the key in
+ * \param[in,out]  size  As input the size of the buffer. As output the actual
+ *                       size of the key in bytes.
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_accelerator_get_attestation_private_key(uint8_t *buf,
+                                                      uint32_t *size);
+
+/**
  * \brief Retrieve the device lifecycle
  *
  * \param[out]  lcs  Pointer to store lifecycle state
