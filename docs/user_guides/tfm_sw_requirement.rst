@@ -212,18 +212,19 @@ TF-M-m build environment under various OSes.
 Ubuntu setup
 ============
 
+Install the following tools:
+
 - DS-5 |DS5_VERSION|.
 - Git tools v2.10.0
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
-- Python3, with the following libraries:
-- cryptography
-- pyasn1
-- yaml
-- cbor
-- jinja2 v2.10
-- sudo apt-get install python3-crypto python3-pyasn1 python3-yaml
-  python3-jinja2
+- Python3 and the pip package manager (from Python 3.4 it's included)
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0*
+
+  .. code-block:: bash
+
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor
+
 - SRecord v1.58 (for Musca test chip boards)
 
 Setup a shell to enable compiler toolchain and CMake after installation.
@@ -258,6 +259,8 @@ To import GNU Arm in your bash shell console:
 Windows + Cygwin setup
 ======================
 
+Install the following tools:
+
 - uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition) which
   provides the Arm Compiler v6.10 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
@@ -268,15 +271,14 @@ Windows + Cygwin setup
 - GNU make should be installed by selecting appropriate package during
   cygwin
   installation.
-- Python3 `(native Windows
-  version) <https://www.python.org/downloads/>`__, with the following
-  libraries:
-- cryptography (pip3 install --user cryptography)
-- pyasn1 (pip3 install --user pyasn1)
-- pyyaml (pip3 install --user pyyaml)
-- cbor (pip3 install --user cbor)
-- jinja2 (pip3 install --user jinja2)
-- Python3 pip
+- Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
+  the pip package manager (from Python 3.4 it's included)
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0*
+
+  .. code-block:: bash
+
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor
+
 - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
   chip boards)
 
