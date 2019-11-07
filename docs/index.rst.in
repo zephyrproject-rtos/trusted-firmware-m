@@ -16,6 +16,7 @@ Trusted Firmware-M Documentation
     :maxdepth: 2
     :hidden:
 
+    Home<docs/readme>
     docs/lic
     docs/dco
     docs/maintainers
@@ -101,7 +102,7 @@ Trusted Firmware-M Documentation
 
     tools/iat-verifier/*
 
-.. include:: readme.rst
+.. include:: docs/readme.rst
 
 -----------
 
