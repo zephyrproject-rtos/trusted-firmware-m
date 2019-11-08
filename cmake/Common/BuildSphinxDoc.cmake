@@ -76,9 +76,10 @@ if (NOT SPHINX_NODOC)
 	set(SPHINXCFG_TEMPLATE_FILE "${TFM_ROOT_DIR}/docs/conf.py.in")
 	set(SPHINXCFG_CONFIGURED_FILE "${SPHINXCFG_OUTPUT_PATH}/conf.py")
 
-	set(SPHINX_TEMPLATE_INDEX_FILE "${TFM_ROOT_DIR}/docs/index.rst.in")
-	set(SPHINX_CONFIGURED_INDEX_FILE "${SPHINX_TMP_DOC_DIR}/index.rst")
 	set(SPHINX_DESIGN_DOC_ROOT "${TFM_ROOT_DIR}/docs/design_documents")
+	set(SPHINX_TEMPLATE_INDEX_FILE "${SPHINX_DESIGN_DOC_ROOT}/index.rst.in")
+	set(SPHINX_CONFIGURED_INDEX_FILE "${SPHINX_TMP_DOC_DIR}/docs/design_documents/index.rst")
+	set(SPHINX_MAIN_INDEX_FILE "docs/index.rst")
 
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. We need a process to define the
@@ -111,6 +112,7 @@ if (NOT SPHINX_NODOC)
 		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR}
 				-D DST_DIR=${SPHINX_TMP_DOC_DIR}
 				-D BINARY_DIR=${CMAKE_BINARY_DIR}
+				-D MASTER_IDX=${SPHINX_MAIN_INDEX_FILE}
 				-P "${TFM_ROOT_DIR}/cmake/SphinxCopyDoc.cmake"
 		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
 		DEPENDS run-allways

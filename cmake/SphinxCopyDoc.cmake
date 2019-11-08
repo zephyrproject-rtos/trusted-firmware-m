@@ -26,10 +26,11 @@
 #
 #Usage:
 #   cmake -DDST_DIR=<path to destination> -DTFM_ROOT_DIR=<path to tf-m root> \
-#          -DBINARY_DIR=${CMAKE_BINARY_DIR} -P SphinxCopyDoc.cmake
+#          -DBINARY_DIR=${CMAKE_BINARY_DIR}
+#          -DMASTER_IDX=<path to master index.rst> -P SphinxCopyDoc.cmake
 
 #Check input parameters
-foreach(_PARAM IN ITEMS TFM_ROOT_DIR DST_DIR BINARY_DIR)
+foreach(_PARAM IN ITEMS TFM_ROOT_DIR DST_DIR BINARY_DIR MASTER_IDX)
 	if (NOT DEFINED ${_PARAM})
 		message(FATAL_ERROR "Variable ${_PARAM} is undefined. Please add -D${_PARAM}=<...> when calling this script.")
 	endif()
@@ -56,5 +57,9 @@ endforeach()
 #Copy files with directory tree.
 foreach(_FILE ${_COPY_FILES})
 	get_filename_component(_DIR ${_FILE} DIRECTORY)
-	file(COPY ${_FILE} DESTINATION "${DST_DIR}/${_DIR}")
+	if (_FILE STREQUAL MASTER_IDX)
+		file(COPY ${_FILE} DESTINATION "${DST_DIR}")
+	else()
+		file(COPY ${_FILE} DESTINATION "${DST_DIR}/${_DIR}")
+	endif()
 endforeach()

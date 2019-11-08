@@ -19,7 +19,7 @@ License
 #######
 The software is provided under a BSD-3-Clause :doc:`License </docs/lic>`.
 Contributions to this project are accepted under the same license with developer
-sign-off as described in the :doc:`Contributing Guidelines </docs/contributing>`.
+sign-off as described in the :doc:`Contributing Guidelines </docs/processes/contributing>`.
 
 This project contains code from other projects as listed below. The code from
 external projects is limited to ``app`` and ``platform`` folders.
@@ -120,7 +120,7 @@ To port TF-M to a another system or OS, follow the
 
 Please also see the :doc:`glossary </docs/glossary>` of terms used in the project.
 
-:doc:`Contributing Guidelines </docs/contributing>` contains guidance on how to
+:doc:`Contributing Guidelines </docs/processes/contributing>` contains guidance on how to
 contribute to this project.
 
 Further documents can be found in the ``docs`` folder.

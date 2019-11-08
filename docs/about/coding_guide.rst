@@ -18,8 +18,9 @@ remain within clear scope.
 The guidance below is provided as a help. It isn't meant to be a definitive
 list.
 
-As implied in the :doc:`contributing guide </docs/contributing>` maintainers
-have the right to decide on what's acceptable in case of any divergence.
+As implied in the :doc:`contributing guide </docs/processes/contributing>`
+maintainers have the right to decide on what's acceptable in case of any
+divergence.
 
 .. Warning::
 

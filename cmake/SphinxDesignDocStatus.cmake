@@ -20,7 +20,7 @@
 Include(CMakeParseArguments)
 
 #This function will search for .rst files in a given directory, read them and
-#check if the “:Status:” field is defined in them. Then will add each file to a
+#check if the ":Status:" field is defined in them. Then will add each file to a
 #list with a name matching the status value.
 #See the definition of _STATE_VALUES below for a list of valid state values.
 #Files with missing or invalid state value will be placed on the "unknown" list.
@@ -174,15 +174,16 @@ function(sphinx_configure_index)
 
 		#Loop over files on the list of this status
 		foreach(_FILE IN LISTS _DD_${_STATUS})
-			#Get the path of the file relative to the document root
-			file(RELATIVE_PATH _REL_FILE ${_MY_PARAMS_DOC_ROOT} ${_FILE})
+
+			# Strip path from the filesince index is placed in same location
+			get_filename_component(_FILE ${_FILE} NAME)
 			#Detailed and Draft files go to the same section
 			if (_STATUS STREQUAL "DETAILED")
 				set(_STATUS "DRAFT")
 			endif()
 
 			#Append the file to the output string
-			string(APPEND ${_STATUS}_DD_LIST "\n    ${_REL_FILE}")
+			string(APPEND ${_STATUS}_DD_LIST "\n    ${_FILE}")
 		endforeach()
 	endforeach()
 
