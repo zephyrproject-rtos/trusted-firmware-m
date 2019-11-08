@@ -73,6 +73,8 @@ VPATH += $(HOST_SRCDIR)/cc_mng
 
 PUBLIC_INCLUDES += $(SHARED_DIR)/include/crypto_api/cc_error.h
 PUBLIC_INCLUDES += cc_cmpu.h ../common/cc_prod.h ../common/cc_prod_error.h
+PUBLIC_INCLUDES += cmpu_derivation.h cmpu_llf_rnd.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_mng/mbedtls_cc_mng.h
 
 INCDIRS_EXTRA +=  $(HOST_SRCDIR)/pal/$(OS)
 INCDIRS_EXTRA += $(SHARED_DIR)/$(CC_TEE_HW_INC_DIR)
@@ -87,6 +89,7 @@ INCDIRS_EXTRA +=  $(SHARED_DIR)/../mbedtls/include/mbedtls
 INCDIRS_EXTRA += $(HOST_SRCDIR)/cc3x_lib
 INCDIRS_EXTRA += $(HOST_SRCDIR)/hal
 INCDIRS_EXTRA += $(HOST_SRCDIR)/cc_mng
+INCDIRS_EXTRA += $(SHARED_INCDIR)/cc_mng
 INCDIRS_EXTRA += $(SHARED_INCDIR)/trng
 INCDIRS_EXTRA += $(CODESAFE_SRCDIR)/crypto_api/rnd_dma/local/
 INCDIRS_EXTRA += $(CODESAFE_SRCDIR)/crypto_api/rnd_dma

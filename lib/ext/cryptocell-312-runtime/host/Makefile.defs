@@ -181,7 +181,7 @@ AR = armar
 endif
 
 # subfolder for compilation/generation outcome/objects/binaries
-BUILDDIR = build-$(CROSS_COMPILE:%-=%)
+BUILDDIR = $(PWD)/build-$(CROSS_COMPILE:%-=%)
 
 # Object file suffix
 OBJEXT = .o

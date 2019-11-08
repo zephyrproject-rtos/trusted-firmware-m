@@ -19,6 +19,13 @@ SOURCES_pal_$(PLAT_OS) += cc_pal_abort_plat.c
 SOURCES_pal_$(PLAT_OS) += cc_pal_trng.c
 SOURCES_pal_$(PLAT_OS) += cc_pal_apbc.c
 
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/cc_pal_types.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/cc_pal_log.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/cc_log_mask.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/$(PLAT_OS)/cc_pal_log_plat.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/$(PLAT_OS)/cc_pal_types_plat.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/pal/cc_pal_buff_attr.h
+
 INCDIRS_EXTRA += $(SHARED_INCDIR)/pal
 INCDIRS_EXTRA += $(SHARED_INCDIR)/pal/$(PLAT_OS)
 

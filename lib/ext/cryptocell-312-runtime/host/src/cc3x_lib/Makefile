@@ -57,12 +57,16 @@ PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_bitops.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_host.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_nvm.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_reg_common.h
-PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/musca_b1/dx_reg_base_host.h
 PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/cc_mng/mbedtls_cc_mng_int.h
 PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/hal/cc_hal_plat.h
 
+PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/cc3x_productionlib/common/prod_hw_defs.h
+PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/cc3x_productionlib/common/prod_util.h
+
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_general_defs.h $(SHARED_INCDIR)/proj/cc3x/cc_ecpki_domains_defs.h $(SHARED_INCDIR)/proj/cc3x/cc_sram_map.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_pka_hw_plat_defs.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_otp_defs.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_production_asset.h
 
 #FFCDH
 PUBLIC_INCLUDES += $(CC_API)/cc_ffcdh.h $(CC_API)/cc_ffc_domain.h $(CC_API)/cc_ffcdh_error.h $(CC_API)/cc_ffc_domain_error.h

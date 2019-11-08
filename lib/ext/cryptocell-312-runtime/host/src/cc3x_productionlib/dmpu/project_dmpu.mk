@@ -42,6 +42,7 @@ ifeq ($(CC_CONFIG_MNG_MIN_BACKUP_SIZE_IN_BYTES),)
 endif
 
 VPATH +=  ../common
+VPATH +=  $(HOST_SRCDIR)/cc3x_productionlib/cmpu
 VPATH +=  $(HOST_SRCDIR)/pal/$(OS)
 VPATH +=  $(HOST_SRCDIR)/hal/cc3x
 VPATH += $(CODESAFE_SRCDIR)/crypto_api/cc3x_sym/driver
@@ -56,6 +57,7 @@ PUBLIC_INCLUDES += cc_dmpu.h ../common/cc_prod.h ../common/cc_prod_error.h
 
 INCDIRS_EXTRA += $(SHARED_DIR)/$(CC_TEE_HW_INC_DIR)
 INCDIRS_EXTRA +=  ../common
+INCDIRS_EXTRA +=  ../cmpu
 INCDIRS_EXTRA +=  $(SHARED_DIR)/include/pal
 INCDIRS_EXTRA +=  $(SHARED_DIR)/include/crypto_api
 INCDIRS_EXTRA += $(HOST_SRCDIR)/pal/$(OS)
@@ -67,6 +69,7 @@ INCDIRS_EXTRA +=  $(SHARED_DIR)/../mbedtls/include/mbedtls
 INCDIRS_EXTRA += $(HOST_SRCDIR)/cc3x_lib
 INCDIRS_EXTRA += $(HOST_SRCDIR)/hal
 INCDIRS_EXTRA += $(HOST_SRCDIR)/cc_mng
+INCDIRS_EXTRA += $(SHARED_INCDIR)/cc_mng
 INCDIRS_EXTRA += $(CODESAFE_SRCDIR)/crypto_api/
 INCDIRS_EXTRA +=  $(CODESAFE_SRCDIR)/crypto_api/common
 INCDIRS_EXTRA += $(SHARED_INCDIR)/crypto_api/$(PROJ_PRD)

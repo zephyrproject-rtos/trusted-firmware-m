@@ -159,7 +159,7 @@ clean: clean_intermediate
 .PHONY: default release test clean
 
 # Directory creation rule
-$(PWD)/$(BUILDDIR) $(RELEASE_INCDIR) $(RELEASE_LIBDIR) $(RELEASE_EXEDIR) $(RELEASE_DATDIR):
+$(BUILDDIR) $(RELEASE_INCDIR) $(RELEASE_LIBDIR) $(RELEASE_EXEDIR) $(RELEASE_DATDIR):
 	@if [ ! -d $@ ] ; then $(ECHO) [MKDIR] $@ ; fi
 	@if [ ! -d $@ ] ; then $(call exec_logged,$(MKDIR) $@ ) ; fi
 
@@ -279,31 +279,31 @@ $(foreach exe,$(TARGET_EXES), $(eval $(call EXE_LINK_RULE,$(exe))))
 
 ifneq ($(OBJECTS_FROM_C),)
 # Default implicit compile rule assuming C source code (+dependency generation)
-$(OBJECTS_FROM_C): $(BUILDDIR)/%$(OBJEXT): %.c $(call DEPENDENCY_ON_EXISTENCE_OF,$(PWD)/$(BUILDDIR))
+$(OBJECTS_FROM_C): $(BUILDDIR)/%$(OBJEXT): %.c $(call DEPENDENCY_ON_EXISTENCE_OF,$(BUILDDIR)) $(addprefix $(RELEASE_INCDIR)/,$(notdir ${PUBLIC_INCLUDES}))
 	@$(ECHO) [CC] $< --\> $@  # Compilation
 	@$(call exec_logged,$(CC) $(CFLAGS) $< -o $@ )
 	@#$(ECHO) [MM] $(@:.o=.dep) \<-- $@   # Generate dependency of object when generated
-	@$(call exec_logged,$(CC) $(MM) $(CFLAGS) $< | sed 's/.*\.o:/$(BUILDDIR)\/&/' > $(BUILDDIR)/$*.dep )
+	@$(call exec_logged,$(CC) $(MM) $(CFLAGS) $< | sed 's~.*\.o:~$(BUILDDIR)/&~' > $(BUILDDIR)/$*.dep )
 
 #	$(call exec_logged,$(SHELL) -ec '$(CC) -M $(CFLAGS) $< | sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; [ -s $@ ] || rm -f $@' )
 endif
 
 ifneq ($(OBJECTS_FROM_CPP),)
 # Default implicit compile rule assuming C++ source code (+dependency generation)
-$(OBJECTS_FROM_CPP): $(BUILDDIR)/%$(OBJEXT): %.cpp $(call DEPENDENCY_ON_EXISTENCE_OF,$(PWD)/$(BUILDDIR))
+$(OBJECTS_FROM_CPP): $(BUILDDIR)/%$(OBJEXT): %.cpp $(call DEPENDENCY_ON_EXISTENCE_OF,$(BUILDDIR)) $(addprefix $(RELEASE_INCDIR)/,$(notdir ${PUBLIC_INCLUDES}))
 	@$(ECHO) [CPP] $< --\> $@  # Compilation
 	@$(call exec_logged,$(CPP) $(CPPFLAGS) $< -o $@ )
 	@#$(ECHO) [MM] $(@:.o=.dep) \<-- $@   # Generate dependency of object when generated
-	@$(call exec_logged,$(CP) -MM $(CPPFLAGS) $< | sed 's/.*\.o:/$(BUILDDIR)\/&/' > $(BUILDDIR)/$*.dep )
+	@$(call exec_logged,$(CP) -MM $(CPPFLAGS) $< | sed 's~.*\.o:~$(BUILDDIR)/&~' > $(BUILDDIR)/$*.dep )
 endif
 
 ifneq ($(OBJECTS_FROM_GENERATED_C),)
 # Default implicit compile rule assuming generated C stub source code (+dependency generation)
-$(OBJECTS_FROM_GENERATED_C): $(BUILDDIR)/%$(OBJEXT): $(PWD)/$(BUILDDIR)/%.c
+$(OBJECTS_FROM_GENERATED_C): $(BUILDDIR)/%$(OBJEXT): $(PWD)/$(BUILDDIR)/%.c $(addprefix $(RELEASE_INCDIR)/,$(notdir ${PUBLIC_INCLUDES}))
 	@$(ECHO) [CC4GEN] $< --\> $@  # Compilation
 	@$(call exec_logged,$(CC) $(CFLAGS) $< -o $@ )
 	@#$(ECHO) [MM] $(@:.o=.dep) \<-- $@   # Generate dependency of object when generated
-	@$(call exec_logged,$(CC) -MM $(CFLAGS) $< | sed 's/.*\.o:/$(BUILDDIR)\/&/' > $(BUILDDIR)/$*.dep )
+	@$(call exec_logged,$(CC) -MM $(CFLAGS) $< | sed 's~.*\.o:~$(BUILDDIR)/&~' > $(BUILDDIR)/$*.dep )
 endif
 
 
