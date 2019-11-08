@@ -68,10 +68,8 @@ struct spm_partition_db_t {
 /* Macros to pick linker symbols and allow to form the partition data base */
 #define REGION(a, b, c) a##b##c
 #define REGION_NAME(a, b, c) REGION(a, b, c)
-#ifndef TFM_PSA_API
-#define REGION_DECLARE(a, b, c)
-#else
 #define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+#ifdef TFM_PSA_API
 #define PART_REGION_ADDR(partition, region) \
     (uint32_t)&REGION_NAME(Image$$, partition, region)
 #endif

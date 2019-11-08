@@ -122,6 +122,28 @@ const struct tfm_spm_service_db_t service_db[] =
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
 
+#ifdef TFM_PARTITION_PLATFORM
+    /******** TFM_SP_PLATFORM ********/
+    {
+        .name = "TFM_SP_PLATFORM_SYSTEM_RESET",
+        .partition_id = TFM_SP_PLATFORM,
+        .signal = TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL,
+        .sid = 0x00000040,
+        .non_secure_client = true,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
+    {
+        .name = "TFM_SP_PLATFORM_IOCTL",
+        .partition_id = TFM_SP_PLATFORM,
+        .signal = TFM_SP_PLATFORM_IOCTL_SIGNAL,
+        .sid = 0x00000041,
+        .non_secure_client = true,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
+#endif /* TFM_PARTITION_PLATFORM */
+
     /******** TFM_SP_INITIAL_ATTESTATION ********/
     {
         .name = "TFM_ATTEST_GET_TOKEN",
@@ -540,6 +562,24 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
+
+#ifdef TFM_PARTITION_PLATFORM
+    /******** TFM_SP_PLATFORM ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
+#endif /* TFM_PARTITION_PLATFORM */
 
     /******** TFM_SP_INITIAL_ATTESTATION ********/
     {

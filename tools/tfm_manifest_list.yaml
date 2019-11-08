@@ -57,7 +57,7 @@
       "short_name": "TFM_SP_PLATFORM",
       "manifest": "secure_fw/services/platform/tfm_platform.yaml",
       "tfm_extensions": true,
-      "tfm_partition_ipc": false,
+      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_PLATFORM",
       "version_major": 0,
       "version_minor": 1,

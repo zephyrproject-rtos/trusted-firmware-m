@@ -27,6 +27,7 @@
 #include "tfm_core_utils.h"
 #include "tfm_psa_client_call.h"
 #include "tfm_rpc.h"
+#include "tfm_internal.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
@@ -1016,6 +1017,9 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
         break;
     case TFM_SVC_DISABLE_IRQ:
         tfm_svcall_disable_irq(ctx);
+        break;
+    case TFM_SVC_SPM_REQUEST:
+        tfm_core_spm_request_handler((const struct tfm_state_context_t *)ctx);
         break;
 
     default:

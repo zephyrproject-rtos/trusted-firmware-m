@@ -344,8 +344,13 @@ function(set_up_secure_fw_build)
 	if(TFM_PARTITION_PLATFORM)
 		install(FILES       ${INTERFACE_INC_DIR}/tfm_platform_api.h
 				DESTINATION ${EXPORT_INC_DIR})
-		install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_func_api.c
-				DESTINATION ${EXPORT_SRC_DIR})
+		if(TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		else()
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_func_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
 	endif()
 
 	install(FILES ${S_VENEER_FILE} DESTINATION export/tfm/veneers)

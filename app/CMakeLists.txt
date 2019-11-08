@@ -89,7 +89,7 @@ endif()
 
 if (TFM_PARTITION_PLATFORM)
 	if (TFM_PSA_API)
-		message(FATAL_ERROR "Platform service has not been supported in IPC model yet.")
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_ipc_api.c")
 	else()
 		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_platform_func_api.c")
 	endif()

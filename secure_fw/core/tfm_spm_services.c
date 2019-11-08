@@ -44,13 +44,15 @@ int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
 }
 
 __attribute__((naked))
-int32_t tfm_spm_request_reset_vote(void)
+int32_t tfm_core_validate_secure_caller(void)
 {
     __ASM volatile(
-        "MOVS   R0, %0\n"
-        "B      tfm_spm_request\n"
-        : : "I" (TFM_SPM_REQUEST_RESET_VOTE));
+        "SVC    %0\n"
+        "BX     lr\n"
+        : : "I" (TFM_SVC_VALIDATE_SECURE_CALLER));
 }
+
+#endif
 
 __attribute__((naked))
 int32_t tfm_spm_request(void)
@@ -62,15 +64,13 @@ int32_t tfm_spm_request(void)
 }
 
 __attribute__((naked))
-int32_t tfm_core_validate_secure_caller(void)
+int32_t tfm_spm_request_reset_vote(void)
 {
     __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_VALIDATE_SECURE_CALLER));
+        "MOVS   R0, %0\n"
+        "B      tfm_spm_request\n"
+        : : "I" (TFM_SPM_REQUEST_RESET_VOTE));
 }
-
-#endif
 
 __attribute__((naked))
 int32_t tfm_core_get_boot_data(uint8_t major_type,

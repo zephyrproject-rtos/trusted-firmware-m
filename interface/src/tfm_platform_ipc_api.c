@@ -1,20 +1,16 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include <stdbool.h>
 #include "tfm_platform_api.h"
-#include "tfm_veneers.h"
-#ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
-#endif
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t tfm_platform_system_reset(void)
 {
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
     psa_handle_t handle = PSA_NULL_HANDLE;
 
@@ -33,24 +29,18 @@ enum tfm_platform_err_t tfm_platform_system_reset(void)
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return (enum tfm_platform_err_t) tfm_platform_sp_system_reset_veneer(
-                                                              NULL, 0, NULL, 0);
-#endif /* TFM_PSA_API */
+
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
                    psa_invec *input, psa_outvec *output)
 {
     tfm_platform_ioctl_req_t req = request;
-    struct psa_invec in_vec[2];
+    struct psa_invec in_vec[2] = { {0} };
     size_t inlen, outlen;
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
     psa_handle_t handle = PSA_NULL_HANDLE;
-#endif /* TFM_PSA_API */
 
     in_vec[0].base = &req;
     in_vec[0].len = sizeof(req);
@@ -67,7 +57,7 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     } else {
         outlen = 0;
     }
-#ifdef TFM_PSA_API
+
     handle = psa_connect(TFM_SP_PLATFORM_IOCTL_SID,
                          TFM_SP_PLATFORM_IOCTL_VERSION);
     if (handle <= 0) {
@@ -84,9 +74,5 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return (enum tfm_platform_err_t) tfm_platform_sp_ioctl_veneer(
-                                                in_vec, inlen, output, outlen);
-#endif /* TFM_PSA_API */
 }
 

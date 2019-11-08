@@ -14,6 +14,7 @@
 #include "tfm_secure_api.h"
 #include "services/include/tfm_ioctl_api.h"
 
+#ifndef TFM_PSA_API
 /*!
  * \brief Verify access rights for memory addresses sent in io vectors
  *
@@ -38,6 +39,7 @@ static bool memory_addr_check(const psa_invec *in_vec,
         return false;
     }
 }
+#endif /* TFM_PSA_API */
 
 void tfm_platform_hal_system_reset(void)
 {
@@ -65,9 +67,12 @@ musca_b1_pin_service(const psa_invec  *in_vec,
     enum gpio_altfunc_t altfunc;
     enum pinmode_select_t pin_mode;
 
+#ifndef TFM_PSA_API
     if (memory_addr_check(in_vec, out_vec) == false) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
+#endif /* TFM_PSA_API */
+
     if (in_vec->len != sizeof(struct tfm_pin_service_args_t) ||
                                          out_vec->len != sizeof(uint32_t)) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;

@@ -14,6 +14,8 @@
 extern "C" {
 #endif
 
+#define TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL                     (1U << (0 + 4))
+#define TFM_SP_PLATFORM_IOCTL_SIGNAL                            (1U << (1 + 4))
 
 #ifdef __cplusplus
 }

@@ -40,6 +40,12 @@ extern "C" {
 #define TFM_CRYPTO_SID                                             (0x00000080U)
 #define TFM_CRYPTO_VERSION                                         (1U)
 
+/******** TFM_SP_PLATFORM ********/
+#define TFM_SP_PLATFORM_SYSTEM_RESET_SID                           (0x00000040U)
+#define TFM_SP_PLATFORM_SYSTEM_RESET_VERSION                       (1U)
+#define TFM_SP_PLATFORM_IOCTL_SID                                  (0x00000041U)
+#define TFM_SP_PLATFORM_IOCTL_VERSION                              (1U)
+
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 #define TFM_ATTEST_GET_TOKEN_SID                                   (0x00000020U)
 #define TFM_ATTEST_GET_TOKEN_VERSION                               (1U)

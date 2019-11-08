@@ -533,7 +533,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         .psa_framework_version = 0x0100,
 #endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_PLATFORM,
-        .partition_flags      = 0
+        .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
