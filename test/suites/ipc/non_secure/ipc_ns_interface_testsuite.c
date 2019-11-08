@@ -37,11 +37,11 @@ static struct test_t ipc_veneers_tests[] = {
     {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
      "Get PSA framework version", {0}},
     {&tfm_ipc_test_1002, "TFM_IPC_TEST_1002",
-     "Get version of a RoT Service", {0}},
+     "Get version of an RoT Service", {0}},
     {&tfm_ipc_test_1003, "TFM_IPC_TEST_1003",
-     "Connect to a RoT Service", {0}},
+     "Connect to an RoT Service", {0}},
     {&tfm_ipc_test_1004, "TFM_IPC_TEST_1004",
-     "Call a RoT Service", {0}},
+     "Call an RoT Service", {0}},
     {&tfm_ipc_test_1005, "TFM_IPC_TEST_1005",
      "Call IPC_INIT_BASIC_TEST service", {0}},
     {&tfm_ipc_test_1006, "TFM_IPC_TEST_1006",
@@ -91,7 +91,7 @@ static void tfm_ipc_test_1001(struct test_result_t *ret)
 }
 
 /**
- * \brief Retrieve the version of a RoT Service.
+ * \brief Retrieve the version of an RoT Service.
  */
 static void tfm_ipc_test_1002(struct test_result_t *ret)
 {
@@ -110,7 +110,7 @@ static void tfm_ipc_test_1002(struct test_result_t *ret)
 }
 
 /**
- * \brief Connect to a RoT Service by its SID.
+ * \brief Connect to an RoT Service by its SID.
  */
 static void tfm_ipc_test_1003(struct test_result_t *ret)
 {
@@ -129,7 +129,7 @@ static void tfm_ipc_test_1003(struct test_result_t *ret)
 }
 
 /**
- * \brief Call a RoT Service.
+ * \brief Call an RoT Service.
  */
 static void tfm_ipc_test_1004(struct test_result_t *ret)
 {

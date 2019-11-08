@@ -30,7 +30,7 @@
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
-				     uint32_t *ctx, uint32_t lr);
+                                     uint32_t *ctx, uint32_t lr);
 #endif
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
@@ -151,10 +151,6 @@ void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller)
 
     TFM_ASSERT(args != NULL);
     handle = args[0];
-    /* It will have no effect if called with the NULL handle */
-    if (handle == PSA_NULL_HANDLE) {
-        return;
-    }
 
     return tfm_psa_close(handle, ns_caller);
 }
@@ -232,7 +228,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
  * \retval "Does not return"    The call is invalid because one or more of the
  *                              following are true:
  * \arg                           signal has more than a single bit set.
- * \arg                           signal does not correspond to a RoT Service.
+ * \arg                           signal does not correspond to an RoT Service.
  * \arg                           The RoT Service signal is not currently
  *                                asserted.
  * \arg                           The msg pointer provided is not a valid memory
@@ -277,7 +273,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
 
     /*
      * It is a fatal error if the caller call psa_get() when no message has
-     * been set. The caller must call this function after a RoT Service signal
+     * been set. The caller must call this function after an RoT Service signal
      * is returned by psa_wait().
      */
     if (partition->runtime_data.signals == 0) {
@@ -292,8 +288,8 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     }
 
     /*
-     * Get Rot service by signal from partition. It is a fatal error if geting
-     * failed which mean the input signal is not correspond to a RoT service.
+     * Get RoT service by signal from partition. It is a fatal error if getting
+     * failed, which means the input signal is not correspond to an RoT service.
      */
     service = tfm_spm_get_service_by_signal(partition, signal);
     if (!service) {
@@ -308,7 +304,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     tfm_core_util_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
     /*
-     * There may be mutiple messages for this RoT Service signal, do not clear
+     * There may be multiple messages for this RoT Service signal, do not clear
      * its mask until no remaining message.
      */
     if (tfm_msg_queue_is_empty(&service->msg_queue)) {
