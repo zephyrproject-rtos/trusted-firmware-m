@@ -86,9 +86,8 @@ service can be enabled by the secure service by calling
 ``void tfm_enable_irq(psa_signal_t irq_signal)``. The function can be called in
 the service init function.
 
-*************
 Library model
-*************
+=============
 
 In Library model a function with the name derived from the value of the
 ``source`` property is generated. This function will be put in the vector table
@@ -112,21 +111,19 @@ The detailed description on how secure interrupt handling works in the Library
 model see
 `Secure Partition Interrupt Handling design document <https://developer.trustedfirmware.org/w/tf_m/design/secure_partition_interrupt_handling/>`_.
 
-*********
 IPC model
-*********
+=========
 
 The detailed description on how secure interrupt handling works in the IPC
 model, see the
 `PSA Firmware Framework and RoT Services specification <https://pages.arm.com/psa-resources-ff.html>`_.
 
-######################
+**********************
 Implementation details
-######################
+**********************
 
-****************************
 Library model implementation
-****************************
+============================
 
 As a result of the function call like behaviour of secure services in library
 model, some information that is critical for the SPM to keep track of partition
