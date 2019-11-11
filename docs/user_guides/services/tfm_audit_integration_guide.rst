@@ -77,9 +77,9 @@ Service source files
 - ``audit_wrappers.c`` : This file implements TF-M compatible wrappers in case
   they are needed by the functions exported by the core.
 
-***************************************
-Audit logging service integration guide
-***************************************
+*********************************
+Audit logging service integration
+*********************************
 In this section, a brief description of each field of a log record is given,
 with an example on how to perform a logging request from a secure service.
 The secure service that requests the addition of a record to the log has to

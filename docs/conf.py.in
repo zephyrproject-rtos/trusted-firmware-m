@@ -57,8 +57,8 @@ plantuml = '@Java_JAVA_EXECUTABLE@ -jar @PLANTUML_JAR_PATH@'
 
 #Make auso section labals generated be prefixed with file name.
 autosectionlabel_prefix_document=True
-#Add auso section label for level 1 headers only.
-autosectionlabel_maxdepth=1
+#Add auso section label for level 2 headers only.
+autosectionlabel_maxdepth=2
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

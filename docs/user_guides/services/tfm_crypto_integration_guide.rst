@@ -60,9 +60,9 @@ Service source files
   implements the PSA Crypto API client interface exposed to the  Non-Secure
   Processing Environment.
 
-********************************
-Crypto service integration guide
-********************************
+**************************
+Crypto service integration
+**************************
 In this section, a brief description of the required flow of operation for the
 functionalities exported by the PSA Crypto interface is given, with particular
 focus on the TF-M Crypto service specific operations. For the details of the

@@ -124,9 +124,9 @@ model, see the
 Implementation details
 ######################
 
-*************
-Library model
-*************
+****************************
+Library model implementation
+****************************
 
 As a result of the function call like behaviour of secure services in library
 model, some information that is critical for the SPM to keep track of partition

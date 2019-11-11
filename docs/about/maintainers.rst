@@ -8,8 +8,8 @@ Sub-maintainers' approval is required for their specific areas of ownership.
 Contributions must follow the instructions in
 :doc:`Contributing Guidelines </docs/processes/contributing>`.
 
-Maintainers
------------
+Main maintainers
+----------------
 
 Abhishek Pandit
     :email: `abhishek.pandit@arm.com <abhishek.pandit@arm.com>`__
