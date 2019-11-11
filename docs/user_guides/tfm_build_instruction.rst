@@ -215,6 +215,8 @@ line arguments:
           - Cypress CYS0644ABZI-S2D44 board (PSoC64 platform)
             ``-DTARGET_PLATFORM=psoc64``
             See :doc:`Cypress PSoC 64 platform specifics </platform/ext/target/cypress/psoc64/cypress_psoc_64_spec>`
+          - DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS platform)
+            ``-DTARGET_PLATFORM=SSE-200_AWS``
 
    * - -DCOMPILER=<compiler name>
      - Specifies the compiler toolchain

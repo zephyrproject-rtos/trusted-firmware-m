@@ -26,6 +26,7 @@ The hardware platforms currently supported are:
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
+- DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
@@ -47,6 +48,9 @@ More information about the Musca-S1 test chip board can be found in:
 
 More information about subsystems supported by the MPS3 board can be found in:
 `MPS3 homepage <https://www.arm.com/products/development-tools/development-boards/mps3>`__
+
+More information about the SSE-200_AWS platform can be found in:
+`SSE-200_AWS product page <https://aws.amazon.com/marketplace/pp/ARM-DesignStart-FPGA-on-Cloud-Cortex-M33-based-pla/B082DMMTLW>`__
 
 Generic drivers and startup/scatter files
 =========================================
