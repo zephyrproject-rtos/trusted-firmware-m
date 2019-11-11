@@ -201,11 +201,17 @@ interface:
         uint32_t challenge_size,
         uint8_t  *token,
         uint32_t *token_size);
-    
+
     enum psa_attest_err_t
     psa_initial_attest_get_token_size(uint32_t challenge_size,
         uint32_t *token_size);
- 
+
+    enum psa_attest_err_t
+    tfm_initial_attest_get_public_key(uint8_t         *public_key,
+                                      size_t           public_key_buf_size,
+                                      size_t          *public_key_len,
+                                      psa_ecc_curve_t *elliptic_curve_type);
+
 The caller must allocate a large enough buffer, where the token is going to be
 created by Initial Attestation Service. The size of the created token is highly
 dependent on the number of software components in the system and the provided
@@ -213,11 +219,13 @@ attributes of these. The ``psa_initial_attest_get_token_size()`` function can be
 called to get the exact size of the created token.
 
 System integrators might need to port these interfaces to a custom secure
-partition manager implementation (SPM). Implementation in TF-M project can be
+partition manager implementation (SPM). Implementations in TF-M project can be
 found here:
 
--  ``interface/src/tfm_initial_attestation_api.c``: non-secure interface
-   implementation
+-  ``interface/src/tfm_initial_attestation_func_api.c``: non-secure interface
+   implementation for library model
+-  ``interface/src/tfm_initial_attestation_ipc_api.c``: non-secure interface
+   implementation for IPC model
 -  ``secure_fw/services/initial_attestation/tfm_attestation_secure_api.c``:
    secure interface implementation
 
@@ -250,9 +258,9 @@ according to their SPM implementation.
   this area during execution. If boot loader is not available in the system to
   provide attributes of software components then this function must be
   implemented in a way that just initialize service's memory buffer to:
-  
+
   .. code-block:: c
-  
+
       struct shared_data_tlv_header *tlv_header = (struct shared_data_tlv_header *)ptr;
       tlv_header->tlv_magic   = 2016;
       tlv_header->tlv_tot_len = sizeof(struct shared_data_tlv_header *tlv_header);
@@ -262,14 +270,14 @@ according to their SPM implementation.
   of memory regions received as input data: challenge object, token buffer, etc.
 - ``tfm_client.h``: Service relies on the following external definitions, which
   must be present or included in this header file:
-  
+
   .. code-block:: c
-  
+
       typedef struct psa_invec {
           const void *base;
           size_t len;
       } psa_invec;
-      
+
       typedef struct psa_outvec {
           void *base;
           size_t len;
@@ -310,28 +318,28 @@ The structure of shared data must be the following:
 -  At the beginning there must be a header: ``struct shared_data_tlv_header``
    This contains a magic number and a size field which covers the entire size
    of the shared data area including this header.
-   
+
    .. code-block:: c
-   
+
        struct shared_data_tlv_header {
            uint16_t tlv_magic;
            uint16_t tlv_tot_len;
        };
-   
+
 -  After the header there come the entries which are composed from an
    entry header structure: ``struct shared_data_tlv_entry`` and the data. In
    the entry header is a type field ``tlv_type`` which identify the consumer of
    the entry in the runtime software and specify the subtype of that data item.
    There is a size field ``tlv_len`` which covers the size of the entry header
    and the data. After this structure comes the actual data.
-   
+
    .. code-block:: c
-   
+
        struct shared_data_tlv_entry {
            uint16_t tlv_type;
            uint16_t tlv_len;
        };
-   
+
 -  Arbitrary number and size of data entry can be in the shared memory
    area.
 
