@@ -4,71 +4,12 @@ Build instructions
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements <tfm_sw_requirement>`.
 
-*********************
-Configuring the build
-*********************
-The build configuration for TF-M is provided to the build system using command
-line arguments:
+The external dependecies are briefly listed in the
+:ref:`docs/user_guides/tfm_build_instruction:External dependencies` section.
 
-.. list-table::
-   :widths: 20 80
-
-   * - -DPROJ_CONFIG=<file>
-     - Specifies the way the application is built.
-
-       | <file> is the absolute path to configurations file
-         named as ``Config<APP_NAME>.cmake``.
-       | i.e. On Linux:
-         ``-DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake```
-
-   * - -DTARGET_PLATFORM=<target platform name>
-     - Specifies the target platform.
-       Supported platforms:
-
-          - Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
-            ``-DTARGET_PLATFORM=AN521``
-          - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-            ``-DTARGET_PLATFORM=AN519``
-          - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
-            ``-DTARGET_PLATFORM=MUSCA_A``
-          - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
-            ``-DTARGET_PLATFORM=MUSCA_B1``
-          - Cortex-M33 SSE-200 subsystem for MPS3 (AN524)
-            ``-DTARGET_PLATFORM=AN524``
-
-   * - -DCOMPILER=<compiler name>
-     - Specifies the compiler toolchain
-       The possible values are:
-
-         - ``ARMCLANG``
-         - ``GNUARM``
-   * - -DCMAKE_BUILD_TYPE=<build type>
-     - Configures debugging support.
-       The possible values are:
-
-         - ``Debug``
-         - ``Release``
-         - ``Relwithdebinfo``
-         - ``Minsizerel``
-   * - -DMBEDTLS_DEBUG=<ON|OFF>
-     - Enables debug symbols for the Mbed TLS and Mbed Crypto libraries.
-   * - -DBUILD_DWARF_VERSION=<dwarf version>
-     - Configures DWARF version.
-       The possible values are:
-
-         - 2
-         - 3
-         - 4
-
-.. Note::
-    Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
-    without BL2 bootloader.
-
-*******************
-External dependency
-*******************
-- `CMSIS_5` is used to import RTX for the example non-secure app
-- Mbed TLS and Mbed Crypto are used as crypto libraries on the secure side
+The configuration-table
+:ref:`docs/user_guides/tfm_build_instruction:Configuring the build` section
+explains all the supported build parameters:
 
 ****************
 TF-M build steps
@@ -230,6 +171,72 @@ Building the User Guide
 The documentation files will be available under the directory::
 
     cmake_doc/install/doc/user_guide
+
+*********************
+External dependencies
+*********************
+- `CMSIS_5` is used to import RTX for the example non-secure app
+- `Mbed Crypto` is used as crypto library on the secure side
+
+*********************
+Configuring the build
+*********************
+The build configuration for TF-M is provided to the build system using command
+line arguments:
+
+.. list-table::
+   :widths: 20 80
+
+   * - -DPROJ_CONFIG=<file>
+     - Specifies the way the application is built.
+
+       | <file> is the absolute path to configurations file
+         named as ``Config<APP_NAME>.cmake``.
+       | i.e. On Linux:
+         ``-DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake```
+
+   * - -DTARGET_PLATFORM=<target platform name>
+     - Specifies the target platform.
+       Supported platforms:
+
+          - Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
+            ``-DTARGET_PLATFORM=AN521``
+          - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
+            ``-DTARGET_PLATFORM=AN519``
+          - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
+            ``-DTARGET_PLATFORM=MUSCA_A``
+          - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
+            ``-DTARGET_PLATFORM=MUSCA_B1``
+          - Cortex-M33 SSE-200 subsystem for MPS3 (AN524)
+            ``-DTARGET_PLATFORM=AN524``
+
+   * - -DCOMPILER=<compiler name>
+     - Specifies the compiler toolchain
+       The possible values are:
+
+         - ``ARMCLANG``
+         - ``GNUARM``
+   * - -DCMAKE_BUILD_TYPE=<build type>
+     - Configures debugging support.
+       The possible values are:
+
+         - ``Debug``
+         - ``Release``
+         - ``Relwithdebinfo``
+         - ``Minsizerel``
+   * - -DMBEDTLS_DEBUG=<ON|OFF>
+     - Enables debug symbols for the Mbed TLS and Mbed Crypto libraries.
+   * - -DBUILD_DWARF_VERSION=<dwarf version>
+     - Configures DWARF version.
+       The possible values are:
+
+         - 2
+         - 3
+         - 4
+
+.. Note::
+    Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
+    without BL2 bootloader.
 
 --------------
 

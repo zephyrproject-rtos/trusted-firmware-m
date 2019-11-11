@@ -6,101 +6,9 @@ Software requirements
 .. |KEIL_VERSION| replace:: v5.25.2
 .. |DEV_STUDIO_VERSION| replace:: 2018.0
 
-To build the TF-M firmware the following tools are needed:
-
-.. csv-table:: Tool dependencies
-   :header: "Name", "Version", "Component"
-
-   "C compiler",See `Supported C compilers`_,"Firmware"
-   "CMake",See `Supported CMake versions`_,
-   "GNU Make",See `Supported GNU make versions`_,
-   "Python",3.x,"Firmware, User Guide"
-   "yaml",,"Firmware"
-   "pyasn1",,"Firmware"
-   "jinja2",,"Firmware"
-   "cryptography",,"Firmware"
-   "cbor",,"Firmware"
-   "Doxygen",">1.8","Reference manual"
-   "Sphinx",">1.4","User Guide"
-   "sphinxcontrib-plantuml",,"User Guide"
-   "sphinx-trd-theme",,"User Guide"
-   "Git",,
-   "PlantUML",">v1.2018.11","Reference Manual, User Guide"
-   "Graphviz dot",">v2.38.0","Reference manual"
-   "Java runtime environment (JRE)",">1.8","Reference Manual, User Guide"
-   "LaTex",,"pdf version of Reference Manual and User Guide"
-   "PdfLaTex",,"pdf version of Reference Manual and User Guide"
-
-Dependency chain:
-
-.. uml::
-
-   @startuml
-    skinparam state {
-      BackgroundColor #92AEE0
-      FontColor black
-      FontSize 16
-      AttributeFontColor black
-      AttributeFontSize 16
-      BackgroundColor<<pdf>> #A293E2
-      BackgroundColor<<doc>> #90DED6
-    }
-    state fw as "Firmware" : TF-M binary
-    state c_comp as "C Compiler" : C99
-    state gmake as "GNU make"
-    state u_guide as "User Guide" <<doc>>
-    state refman as "Reference Manual" <<doc>>
-    state rtd_theme as "sphinx-rtd-theme" <<doc>>
-    state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
-    state JRE as "JRE" <<doc>> : Java Runtime Environment
-    state gwiz as "Graphwiz dot" <<doc>>
-    state Sphinx as "Sphinx" <<doc>>
-    state m2r as "m2r" <<doc>>
-    state PlantUML as "PlantUML" <<doc>>
-    state LaTex as "LaTex" <<pdf>>
-    state PdfLaTex as "PdfLaTex" <<<<pdf>>>>
-    state Doxygen as "Doxygen" <<doc>>
-
-    [*] --> fw
-    fw --> c_comp
-    fw --> CMake
-    CMake --> gmake
-    fw --> cryptography
-    fw --> pyasn1
-    fw --> yaml
-    fw --> jinja2
-    fw --> cbor
-    cryptography --> Python3
-    pyasn1 --> Python3
-    yaml --> Python3
-    jinja2 --> Python3
-    cbor --> Python3
-
-    [*] --> u_guide
-    u_guide --> Sphinx
-    Sphinx --> m2r
-    Sphinx --> rtd_theme
-    Sphinx --> sphnix_puml
-    m2r --> Python3
-    rtd_theme --> Python3
-    sphnix_puml --> Python3
-    Sphinx --> PlantUML
-    PlantUML --> JRE
-    PlantUML --> gwiz
-    Sphinx --> LaTex
-    LaTex --> PdfLaTex
-
-    [*] --> refman
-    refman --> Doxygen
-    Doxygen --> PlantUML
-    Doxygen --> LaTex
-    state Legend {
-      state x as "For PDF generation only" <<pdf>>
-      state y as "For document generation only" <<doc>>
-      state z as "Mandatory"
-    }
-
-   @enduml
+A quick reference table is included in the
+:ref:`docs/user_guides/tfm_sw_requirement:Tool & Dependency overview` section
+of this document.
 
 ****************************
 Supported build environments
@@ -513,6 +421,106 @@ Assumptions for the settings below:
 
     export PLANTUML_JAR_PATH=c:/plantuml/plantuml.jar
     export PATH=$PATH:/cygdrive/c/<DS-5 path>/sw/java/bin
+
+**************************
+Tool & Dependency overview
+**************************
+
+To build the TF-M firmware the following tools are needed:
+
+.. csv-table:: Tool dependencies
+   :header: "Name", "Version", "Component"
+
+   "C compiler",See `Supported C compilers`_,"Firmware"
+   "CMake",See `Supported CMake versions`_,
+   "GNU Make",See `Supported GNU make versions`_,
+   "Python",3.x,"Firmware, User Guide"
+   "yaml",,"Firmware"
+   "pyasn1",,"Firmware"
+   "jinja2",,"Firmware"
+   "cryptography",,"Firmware"
+   "cbor",,"Firmware"
+   "Doxygen",">1.8","Reference manual"
+   "Sphinx",">1.4","User Guide"
+   "sphinxcontrib-plantuml",,"User Guide"
+   "sphinx-trd-theme",,"User Guide"
+   "Git",,
+   "PlantUML",">v1.2018.11","Reference Manual, User Guide"
+   "Graphviz dot",">v2.38.0","Reference manual"
+   "Java runtime environment (JRE)",">1.8","Reference Manual, User Guide"
+   "LaTex",,"pdf version of Reference Manual and User Guide"
+   "PdfLaTex",,"pdf version of Reference Manual and User Guide"
+
+Dependency chain:
+
+.. uml::
+
+   @startuml
+    skinparam state {
+      BackgroundColor #92AEE0
+      FontColor black
+      FontSize 16
+      AttributeFontColor black
+      AttributeFontSize 16
+      BackgroundColor<<pdf>> #A293E2
+      BackgroundColor<<doc>> #90DED6
+    }
+    state fw as "Firmware" : TF-M binary
+    state c_comp as "C Compiler" : C99
+    state gmake as "GNU make"
+    state u_guide as "User Guide" <<doc>>
+    state refman as "Reference Manual" <<doc>>
+    state rtd_theme as "sphinx-rtd-theme" <<doc>>
+    state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
+    state JRE as "JRE" <<doc>> : Java Runtime Environment
+    state gwiz as "Graphwiz dot" <<doc>>
+    state Sphinx as "Sphinx" <<doc>>
+    state m2r as "m2r" <<doc>>
+    state PlantUML as "PlantUML" <<doc>>
+    state LaTex as "LaTex" <<pdf>>
+    state PdfLaTex as "PdfLaTex" <<<<pdf>>>>
+    state Doxygen as "Doxygen" <<doc>>
+
+    [*] --> fw
+    fw --> c_comp
+    fw --> CMake
+    CMake --> gmake
+    fw --> cryptography
+    fw --> pyasn1
+    fw --> yaml
+    fw --> jinja2
+    fw --> cbor
+    cryptography --> Python3
+    pyasn1 --> Python3
+    yaml --> Python3
+    jinja2 --> Python3
+    cbor --> Python3
+
+    [*] --> u_guide
+    u_guide --> Sphinx
+    Sphinx --> m2r
+    Sphinx --> rtd_theme
+    Sphinx --> sphnix_puml
+    m2r --> Python3
+    rtd_theme --> Python3
+    sphnix_puml --> Python3
+    Sphinx --> PlantUML
+    PlantUML --> JRE
+    PlantUML --> gwiz
+    Sphinx --> LaTex
+    LaTex --> PdfLaTex
+
+    [*] --> refman
+    refman --> Doxygen
+    Doxygen --> PlantUML
+    Doxygen --> LaTex
+    state Legend {
+      state x as "For PDF generation only" <<pdf>>
+      state y as "For document generation only" <<doc>>
+      state z as "Mandatory"
+    }
+
+   @enduml
 
 --------------
 
