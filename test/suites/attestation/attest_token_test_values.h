@@ -86,9 +86,13 @@
     }
 #define TOKEN_TEST_REQUIRE_NONCE true /* Mandatory claim */
 
+/* A 32 byte mostly random value. Binary. Value not checked */
+#define TOKEN_TEST_VALUE_UEID NULL_Q_USEFUL_BUF_C
+
 /* A 32 byte mostly random value. Binary.
  *    platform/ext/common/tfm_initial_attestation_key_material.c
  */
+/*
 #define TOKEN_TEST_VALUE_UEID \
     (struct q_useful_buf_c) {\
         (uint8_t[]){ \
@@ -100,6 +104,7 @@
         },\
         33\
     }
+*/
 #define TOKEN_TEST_REQUIRE_UEID true /* Mandatory claim */
 
 /* A 32 byte mostly random value. Binary.
