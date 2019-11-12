@@ -10,7 +10,7 @@
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_sec_client_ser_sig.h"
+#include "psa_manifest/tfm_test_client_service.h"
 #endif
 
 /**
