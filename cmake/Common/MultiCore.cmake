@@ -14,6 +14,13 @@ function(enable_multi_core_topology_config)
 	set(TFM_MULTI_CORE_TOPOLOGY ON PARENT_SCOPE)
 endfunction(enable_multi_core_topology_config)
 
+# Enable multiple outstanding NS PSA Client calls feature.
+# It requires the multi-core platform implement the configuration and support
+# of the multiple outstanding NS PSA Client calls feature.
+function(enable_multi_core_multi_client_call)
+	add_definitions(-DTFM_MULTI_CORE_MULTI_CLIENT_CALL)
+endfunction(enable_multi_core_multi_client_call)
+
 # Platform specific cmake script calls this function to set secure core cpu type
 # Argument CPU_TYPE_CMAKE represents the CMake file of the corresponding secure
 # CPU type.
