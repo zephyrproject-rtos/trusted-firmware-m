@@ -15,6 +15,7 @@
 #ifndef __TFM_MAILBOX_H__
 #define __TFM_MAILBOX_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include "psa/client.h"
@@ -108,9 +109,13 @@ struct mailbox_reply_t {
 struct ns_mailbox_slot_t {
     struct mailbox_msg_t   msg;
     struct mailbox_reply_t reply;
-    const void             *owner;     /* Handle of the owner task of this
-                                        * slot
-                                        */
+    const void             *owner;          /* Handle of the owner task of this
+                                             * slot
+                                             */
+    bool                   is_woken;        /* Indicate that owner task has been
+                                             * or should be woken up, after the
+                                             * replied is received.
+                                             */
 };
 
 typedef uint32_t   mailbox_queue_status_t;

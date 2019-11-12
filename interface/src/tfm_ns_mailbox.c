@@ -64,6 +64,13 @@ static inline void clear_queue_slot_replied(uint8_t idx)
     }
 }
 
+static inline void set_queue_slot_woken(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        mailbox_queue_ptr->queue[idx].is_woken = true;
+    }
+}
+
 static uint8_t acquire_empty_slot(const struct ns_mailbox_queue_t *queue)
 {
     uint8_t idx;
@@ -170,8 +177,13 @@ int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
     set_msg_owner(idx, NULL);
 
     tfm_ns_mailbox_hal_enter_critical();
-    set_queue_slot_empty(idx);
     clear_queue_slot_replied(idx);
+    clear_queue_slot_woken(idx);
+    /*
+     * Make sure that the empty flag is set after all the other status flags are
+     * re-initialized.
+     */
+    set_queue_slot_empty(idx);
     tfm_ns_mailbox_hal_exit_critical();
 
     return MAILBOX_SUCCESS;
@@ -205,6 +217,56 @@ bool tfm_ns_mailbox_is_msg_replied(mailbox_msg_handle_t handle)
     }
 
     return false;
+}
+
+mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void)
+{
+    uint8_t idx;
+    mailbox_msg_handle_t handle;
+    mailbox_queue_status_t replied_status;
+
+    if (!mailbox_queue_ptr) {
+        return MAILBOX_MSG_NULL_HANDLE;
+    }
+
+    tfm_ns_mailbox_hal_enter_critical_isr();
+    replied_status = mailbox_queue_ptr->replied_slots;
+    tfm_ns_mailbox_hal_exit_critical_isr();
+
+    if (!replied_status) {
+        return MAILBOX_MSG_NULL_HANDLE;
+    }
+
+    for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
+        /* Find the first replied message in queue */
+        if (replied_status & (0x1UL << idx)) {
+            tfm_ns_mailbox_hal_enter_critical_isr();
+            clear_queue_slot_replied(idx);
+            set_queue_slot_woken(idx);
+            tfm_ns_mailbox_hal_exit_critical_isr();
+
+            if (get_mailbox_msg_handle(idx, &handle) == MAILBOX_SUCCESS) {
+                return handle;
+            }
+       }
+    }
+
+    return MAILBOX_MSG_NULL_HANDLE;
+}
+
+const void *tfm_ns_mailbox_get_msg_owner(mailbox_msg_handle_t handle)
+{
+    uint8_t idx;
+
+    if (get_mailbox_msg_idx(handle, &idx) != MAILBOX_SUCCESS) {
+        return NULL;
+    }
+
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        return mailbox_queue_ptr->queue[idx].owner;
+    }
+
+    return NULL;
 }
 
 int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)

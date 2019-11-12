@@ -88,6 +88,32 @@ static inline const void *tfm_ns_mailbox_get_task_handle(void)
 #endif
 
 /**
+ * \brief Fetch the handle to the first replied mailbox message in the NSPE
+ *        mailbox queue.
+ *        This function is intended to be called inside platform specific
+ *        notification IRQ handler.
+ *
+ * \note The replied status of the fetched mailbox message will be cleaned after
+ *       the message is fetched. When this function is called again, it fetches
+ *       the next replied mailbox message from the NSPE mailbox queue.
+ *
+ * \return Return the handle to the first replied mailbox message in the
+ *         queue.
+ *         Return \ref MAILBOX_MSG_NULL_HANDLE if no mailbox message is replied.
+ */
+mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void);
+
+/**
+ * \brief Return the handle of owner task of a mailbox message according to the
+ *        \ref mailbox_msg_handle_t
+ *
+ * \param[in] handle            The handle of mailbox message.
+ *
+ * \return Return the handle value of the owner task.
+ */
+const void *tfm_ns_mailbox_get_msg_owner(mailbox_msg_handle_t handle);
+
+/**
  * \brief Platform specific NSPE mailbox initialization.
  *        Invoked by \ref tfm_ns_mailbox_init().
  *
