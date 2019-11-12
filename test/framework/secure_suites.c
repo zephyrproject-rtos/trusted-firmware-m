@@ -17,6 +17,7 @@
 #include "test/suites/invert/secure/invert_s_tests.h"
 #include "test/suites/crypto/secure/crypto_s_tests.h"
 #include "test/suites/ipc/secure/ipc_s_tests.h"
+#include "test/suites/platform/secure/platform_s_tests.h"
 
 static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_S
@@ -38,6 +39,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Secure initial attestation service test cases */
     {&register_testsuite_s_attestation_interface, 0, 0, 0},
+
+    /* Secure platform service test cases */
+    {&register_testsuite_s_platform_interface, 0, 0, 0},
 
 #ifndef TFM_PSA_API
     /*

@@ -19,6 +19,7 @@
 #include "test/suites/invert/non_secure/invert_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
 #include "test/suites/ipc/non_secure/ipc_ns_tests.h"
+#include "test/suites/platform/non_secure/platform_ns_tests.h"
 
 static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
@@ -34,6 +35,9 @@ static struct test_suite_t test_suites[] = {
 
     /* Non-secure initial attestation service test cases */
     {&register_testsuite_ns_attestation_interface, 0, 0, 0},
+
+    /* Non-secure platform service test cases */
+    {&register_testsuite_ns_platform_interface, 0, 0, 0},
 
     /* Non-secure QCBOR library test cases */
     {&register_testsuite_ns_qcbor, 0, 0, 0},
