@@ -206,9 +206,9 @@ static void full_iovecs(psa_invec invec[], psa_outvec outvec[])
     int i = 0;
 
     for (i = 0; i < PSA_MAX_IOVEC; ++i) {
-        invec[i].len = PSA_MAX_IOVEC*sizeof(psa_invec);
-        invec[i].base = invec;
-        outvec[i].len = PSA_MAX_IOVEC*sizeof(psa_outvec);
+        invec[i].len = sizeof(psa_invec);
+        invec[i].base = invec + i;
+        outvec[i].len = PSA_MAX_IOVEC * sizeof(psa_outvec);
         outvec[i].base = outvec;
     }
 }

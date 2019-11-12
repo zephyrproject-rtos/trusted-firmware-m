@@ -118,7 +118,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     psa_outvec outvecs[PSA_MAX_IOVEC];
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
-    int i;
+    int i, j;
     int32_t client_id;
 
     /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
@@ -153,6 +153,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
         TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
         tfm_panic();
     }
+
     /*
      * Read client outvecs from the wrap output vector and will update the
      * actual length later. It is a fatal error if the memory reference for
@@ -180,6 +181,21 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
             tfm_panic();
         }
     }
+
+    /*
+     * Clients must never overlap input parameters because of the risk of a
+     * double-fetch inconsistency.
+     * Overflow is checked in tfm_memory_check functions.
+     */
+    for (i = 0; i + 1 < in_num; i++) {
+        for (j = i+1; j < in_num; j++) {
+            if (!(invecs[j].base + invecs[j].len <= invecs[i].base ||
+                  invecs[j].base >= invecs[i].base + invecs[i].len)) {
+                tfm_panic();
+            }
+        }
+    }
+
     /*
      * For client output vector, it is a fatal error if the provided payload
      * memory reference was invalid or not read-write.
