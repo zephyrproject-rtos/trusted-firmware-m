@@ -48,6 +48,9 @@ enum spm_err_t {
 #define SPM_PART_FLAG_PSA_ROT 0x02
 #define SPM_PART_FLAG_IPC     0x04
 
+#define TFM_HANDLE_STATUS_IDLE          0
+#define TFM_HANDLE_STATUS_ACTIVE        1
+
 #ifndef TFM_PSA_API
 /**
  * \brief Holds the iovec parameters that are passed to a service
@@ -115,6 +118,11 @@ struct spm_partition_runtime_data_t {
 /* RoT connection handle list */
 struct tfm_conn_handle_t {
     void *rhandle;                      /* Reverse handle value              */
+    uint32_t status;                    /*
+                                         * Status of handle, two valid options:
+                                         * TFM_HANDLE_STATUS_ACTIVE and
+                                         * TFM_HANDLE_STATUS_IDLE
+                                         */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
     struct tfm_spm_service_t *service;  /* RoT service pointer               */
     struct tfm_list_node_t list;        /* list node                         */
@@ -127,8 +135,8 @@ struct tfm_spm_service_db_t {
     psa_signal_t signal;            /* Service signal                        */
     uint32_t sid;                   /* Service identifier                    */
     bool non_secure_client;         /* If can be called by non secure client */
-    uint32_t version;               /* Service version                         */
-    uint32_t version_policy;        /* Service version policy                  */
+    uint32_t version;               /* Service version                       */
+    uint32_t version_policy;        /* Service version policy                */
 };
 
 /* RoT Service data */

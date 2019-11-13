@@ -301,6 +301,9 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
+    ((struct tfm_conn_handle_t *)(tmp_msg->handle))->status =
+                                                       TFM_HANDLE_STATUS_ACTIVE;
+
     tfm_core_util_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
     /*
@@ -708,6 +711,9 @@ static void tfm_svcall_psa_reply(uint32_t *args)
             tfm_panic();
         }
     }
+
+    ((struct tfm_conn_handle_t *)(msg->handle))->status =
+                                                         TFM_HANDLE_STATUS_IDLE;
 
     if (is_tfm_rpc_msg(msg)) {
         tfm_rpc_client_call_reply(NULL, ret);

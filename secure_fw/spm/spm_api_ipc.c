@@ -63,6 +63,7 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service)
     }
 
     p_handle->service = service;
+    p_handle->status = TFM_HANDLE_STATUS_IDLE;
 
     /* Add handle node to list for next psa functions */
     tfm_list_add_tail(&service->handle_list, &p_handle->list);

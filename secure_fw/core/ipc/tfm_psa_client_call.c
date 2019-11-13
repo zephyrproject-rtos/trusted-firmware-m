@@ -210,7 +210,7 @@ void tfm_psa_close(psa_handle_t handle, int32_t ns_caller)
 
     /*
      * It is a fatal error if an invalid handle was provided that is not the
-     * null handle..
+     * null handle.
      */
     service = tfm_spm_get_service_by_handle(handle);
     if (!service) {
@@ -221,6 +221,12 @@ void tfm_psa_close(psa_handle_t handle, int32_t ns_caller)
     msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
+        tfm_panic();
+    }
+
+    /* It is a fatal error if the connection is currently handling a request. */
+    if(((struct tfm_conn_handle_t *)handle)->status ==
+                                                     TFM_HANDLE_STATUS_ACTIVE) {
         tfm_panic();
     }
 
