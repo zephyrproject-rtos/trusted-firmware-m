@@ -71,6 +71,22 @@ static inline void set_queue_slot_woken(uint8_t idx)
     }
 }
 
+static inline bool is_queue_slot_woken(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        return mailbox_queue_ptr->queue[idx].is_woken;
+    }
+
+    return false;
+}
+
+static inline void clear_queue_slot_woken(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        mailbox_queue_ptr->queue[idx].is_woken = false;
+    }
+}
+
 static uint8_t acquire_empty_slot(const struct ns_mailbox_queue_t *queue)
 {
     uint8_t idx;
@@ -295,3 +311,42 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 
     return ret;
 }
+
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+int32_t tfm_ns_mailbox_wait_reply(mailbox_msg_handle_t handle)
+{
+    uint8_t idx;
+    int32_t ret;
+
+    if (!mailbox_queue_ptr) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    if (handle == MAILBOX_MSG_NULL_HANDLE) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    ret = get_mailbox_msg_idx(handle, &idx);
+    if (ret != MAILBOX_SUCCESS) {
+        return ret;
+    }
+
+    while (1) {
+        tfm_ns_mailbox_hal_wait_reply(handle);
+
+        /*
+         * Woken up from sleep
+         * Check the completed flag to make sure that the current thread is
+         * woken up by reply event, rather than other events.
+         */
+        tfm_ns_mailbox_hal_enter_critical();
+        if (is_queue_slot_woken(idx)) {
+            tfm_ns_mailbox_hal_exit_critical();
+            break;
+        }
+        tfm_ns_mailbox_hal_exit_critical();
+    }
+
+    return MAILBOX_SUCCESS;
+}
+#endif

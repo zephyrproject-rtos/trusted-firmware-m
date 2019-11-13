@@ -113,6 +113,19 @@ mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void);
  */
 const void *tfm_ns_mailbox_get_msg_owner(mailbox_msg_handle_t handle);
 
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+/**
+ * \brief Wait for the reply returned from SPE to the mailbox message specified
+ *        by handle
+ *
+ * \param[in] handle            The handle of mailbox message.
+ *
+ * \retval MAILBOX_SUCCESS      Return from waiting successfully.
+ * \retval Other return code    Failed to wait with an error code.
+ */
+int32_t tfm_ns_mailbox_wait_reply(mailbox_msg_handle_t handle);
+#endif
+
 /**
  * \brief Platform specific NSPE mailbox initialization.
  *        Invoked by \ref tfm_ns_mailbox_init().
@@ -162,6 +175,19 @@ void tfm_ns_mailbox_hal_enter_critical_isr(void);
  * \note The implementation depends on platform specific hardware and use case.
  */
 void tfm_ns_mailbox_hal_exit_critical_isr(void);
+
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+/**
+ * \brief Performs platform and NS OS specific waiting mechanism to wait for
+ *        the reply of the specified mailbox message to be returned from SPE.
+ *
+ * \note This function is implemented by platform and NS OS specific waiting
+ *       mechanism accroding to use scenario.
+ *
+ * \param[in] handle            The handle of mailbox message.
+ */
+void tfm_ns_mailbox_hal_wait_reply(mailbox_msg_handle_t handle);
+#endif
 
 #ifdef __cplusplus
 }
