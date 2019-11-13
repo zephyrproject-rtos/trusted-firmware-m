@@ -31,6 +31,9 @@
       "version_policy": "STRICT"
     }
   ],
+  "dependencies": [
+    "TFM_CRYPTO",
+  ],
   "linker_pattern": {
     "object_list": [
       "*tfm_sst_test_service.*",

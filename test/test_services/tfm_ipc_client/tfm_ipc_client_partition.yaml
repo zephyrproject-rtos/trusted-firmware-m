@@ -52,6 +52,12 @@
       "version_policy": "STRICT"
     }
   ],
+  "dependencies": [
+    "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM",
+    "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM",
+    "IPC_SERVICE_TEST_BASIC",
+    "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM"
+  ],
   "linker_pattern": {
     "object_list": [
       "*ipc_client_test.*"

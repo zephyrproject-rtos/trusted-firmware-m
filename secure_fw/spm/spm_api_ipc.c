@@ -262,6 +262,38 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
     return IPC_SUCCESS;
 }
 
+int32_t tfm_spm_check_authorization(uint32_t sid,
+                                    struct tfm_spm_service_t *service,
+                                    int32_t ns_caller)
+{
+    struct spm_partition_desc_t *partition = NULL;
+    int32_t i;
+
+    TFM_ASSERT(service);
+
+    if (ns_caller) {
+        if (!service->service_db->non_secure_client) {
+            return IPC_ERROR_GENERIC;
+        }
+    } else {
+        partition = tfm_spm_get_running_partition();
+        if (!partition) {
+            tfm_panic();
+        }
+
+        for (i = 0; i < partition->static_data->dependencies_num; i++) {
+            if (partition->static_data->p_dependencies[i] == sid) {
+                break;
+            }
+        }
+
+        if (i == partition->static_data->dependencies_num) {
+            return IPC_ERROR_GENERIC;
+        }
+    }
+    return IPC_SUCCESS;
+}
+
 /* Message functions */
 struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 {

@@ -132,5 +132,10 @@
       "version": 1,
       "version_policy": "STRICT"
     }
+  ],
+  "dependencies": [
+    "SPM_CORE_TEST_2_INVERT",
+    "SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE",
+    "SPM_CORE_TEST_2_SLAVE_SERVICE"
   ]
 }

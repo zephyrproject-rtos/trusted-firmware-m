@@ -41,6 +41,8 @@ struct spm_partition_static_data_t {
     uint32_t partition_flags;
     uint32_t partition_priority;
     sp_entry_point partition_init;
+    uint32_t dependencies_num;
+    int32_t *p_dependencies;
 };
 
 /**

@@ -66,5 +66,8 @@
       "version": 1,
       "version_policy": "STRICT"
     }
+  ],
+  "dependencies": [
+    "TFM_CRYPTO"
   ]
 }

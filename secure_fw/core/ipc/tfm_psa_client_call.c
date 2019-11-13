@@ -36,11 +36,11 @@ uint32_t tfm_psa_version(uint32_t sid, int32_t ns_caller)
     }
 
     /*
-     * It should return PSA_VERSION_NONE if the caller is not authorized
-     * to access the RoT Service.
+     * It is a fatal error if the caller is not authorized to access the RoT
+     * Service.
      */
-    if (ns_caller && !service->service_db->non_secure_client) {
-        return PSA_VERSION_NONE;
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
+        tfm_panic();
     }
 
     return service->service_db->version;
@@ -67,20 +67,20 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version,
     }
 
     /*
+     * It is a fatal error if the caller is not authorized to access the RoT
+     * Service.
+     */
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
+        tfm_panic();
+    }
+
+    /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
      */
     connect_handle = tfm_spm_create_conn_handle(service, client_id);
     if (connect_handle == PSA_NULL_HANDLE) {
         return PSA_ERROR_CONNECTION_BUSY;
-    }
-
-    /*
-     * It is a fatal error if the caller is not authorized to access the RoT
-     * Service.
-     */
-    if (ns_caller && !service->service_db->non_secure_client) {
-        tfm_panic();
     }
 
     /*

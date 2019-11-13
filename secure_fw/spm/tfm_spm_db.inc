@@ -11,6 +11,7 @@
 #define __TFM_SPM_DB_INC__
 
 #include "spm_api.h"
+#include "psa_manifest/sid.h"
 
 /**************************************************************************/
 /** IRQ count per partition */
@@ -448,6 +449,65 @@ uint32_t *ctx_stack_list[] =
 #endif /* !defined(TFM_PSA_API) */
 
 /**************************************************************************/
+/** Dependencies array for Secure Partition */
+/**************************************************************************/
+static int32_t dependencies_TFM_SP_STORAGE[] =
+{
+    TFM_CRYPTO_SID,
+};
+
+static int32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
+{
+    TFM_CRYPTO_SID,
+};
+
+#ifdef TFM_PARTITION_TEST_CORE
+static int32_t dependencies_TFM_SP_CORE_TEST[] =
+{
+    SPM_CORE_TEST_2_INVERT_SID,
+    SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
+    SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
+};
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
+{
+    TFM_CRYPTO_SID,
+    TFM_SST_SET_SID,
+    TFM_SST_GET_SID,
+    TFM_SST_GET_INFO_SID,
+    TFM_SST_REMOVE_SID,
+    TFM_SST_GET_SUPPORT_SID,
+    TFM_ITS_SET_SID,
+    TFM_ITS_GET_SID,
+    TFM_ITS_GET_INFO_SID,
+    TFM_ITS_REMOVE_SID,
+    TFM_ATTEST_GET_TOKEN_SID,
+    TFM_ATTEST_GET_TOKEN_SIZE_SID,
+    TFM_ATTEST_GET_PUBLIC_KEY_SID,
+    TFM_SST_TEST_PREPARE_SID,
+};
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_PARTITION_TEST_CORE_IPC
+static int32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
+{
+    IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID,
+    IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID,
+    IPC_SERVICE_TEST_BASIC_SID,
+    IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SID,
+};
+#endif /* TFM_PARTITION_TEST_CORE_IPC */
+
+#ifdef TFM_PARTITION_TEST_SST
+static int32_t dependencies_TFM_SP_SST_TEST[] =
+{
+    TFM_CRYPTO_SID,
+};
+#endif /* TFM_PARTITION_TEST_SST */
+
+/**************************************************************************/
 /** The static data of the partition list */
 /**************************************************************************/
 const struct spm_partition_static_data_t static_data_list[] =
@@ -487,6 +547,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_req_mngr_init,
+        .dependencies_num     = 1,
+        .p_dependencies       = dependencies_TFM_SP_STORAGE,
     },
 
     {
@@ -499,6 +561,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_its_req_mngr_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 
 #ifdef TFM_PARTITION_AUDIT_LOG
@@ -512,6 +576,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = audit_core_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
@@ -525,6 +591,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_crypto_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 
 #ifdef TFM_PARTITION_PLATFORM
@@ -538,6 +606,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = platform_sp_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
@@ -551,6 +621,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = attest_partition_init,
+        .dependencies_num     = 1,
+        .p_dependencies       = dependencies_TFM_SP_INITIAL_ATTESTATION,
     },
 
 #ifdef TFM_PARTITION_TEST_CORE
@@ -564,6 +636,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = core_test_init,
+        .dependencies_num     = 3,
+        .p_dependencies       = dependencies_TFM_SP_CORE_TEST,
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -578,6 +652,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = core_test_2_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -592,6 +668,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_secure_client_service_init,
+        .dependencies_num     = 14,
+        .p_dependencies       = dependencies_TFM_SP_SECURE_TEST_PARTITION,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
@@ -606,6 +684,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(HIGH),
         .partition_init       = ipc_service_test_main,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -620,6 +700,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = ipc_client_test_main,
+        .dependencies_num     = 4,
+        .p_dependencies       = dependencies_TFM_SP_IPC_CLIENT_TEST,
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -634,6 +716,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_irq_test_1_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
@@ -648,6 +732,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_test_init,
+        .dependencies_num     = 1,
+        .p_dependencies       = dependencies_TFM_SP_SST_TEST,
     },
 #endif /* TFM_PARTITION_TEST_SST */
 

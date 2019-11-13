@@ -628,6 +628,21 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
                                      uint32_t version);
 
 /**
+ * \brief                   Check the client access authorization
+ *
+ * \param[in] sid           Target RoT Service identity
+ * \param[in] service       Target service context pointer, which can be get
+ *                          by partition management functions
+ * \param[in] ns_caller     Whether from NS caller
+ *
+ * \retval IPC_SUCCESS      Success
+ * \retval IPC_ERROR_GENERIC Authorization check failed
+ */
+int32_t tfm_spm_check_authorization(uint32_t sid,
+                                    struct tfm_spm_service_t *service,
+                                    int32_t ns_caller);
+
+/**
  * \brief                      Check the memory reference is valid.
  *
  * \param[in] buffer           Pointer of memory reference
