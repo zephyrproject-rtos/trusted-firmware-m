@@ -12,7 +12,6 @@
   "priority": "NORMAL",
   "entry_point": "tfm_irq_test_1_init",
   "stack_size": "0x0400",
-  "heap_size": "0x0400",
   "mmio_regions": [
     {
       "name": "TFM_PERIPHERAL_TIMER0",

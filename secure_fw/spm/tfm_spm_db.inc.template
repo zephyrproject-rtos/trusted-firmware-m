@@ -13,6 +13,12 @@
 #include "spm_api.h"
 #include "psa_manifest/sid.h"
 
+{# Produce a build error if heap_size is presented in the manifest, because of the dynamic memory allocation is not supported now. #}
+{% for manifest in manifests %}
+    {% if manifest.manifest.heap_size %}
+#error "Please do not add 'heap_size' for partition '{{manifest.manifest.name}}', the dynamic memory allocation is not supported now!"
+    {% endif %}
+{% endfor %}
 /**************************************************************************/
 /** IRQ count per partition */
 /**************************************************************************/

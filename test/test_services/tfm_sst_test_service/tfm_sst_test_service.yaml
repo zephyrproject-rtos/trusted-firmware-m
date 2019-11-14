@@ -12,7 +12,6 @@
   "priority": "NORMAL",
   "entry_point": "tfm_sst_test_init",
   "stack_size": "0x400",
-  "heap_size": "0",
   "secure_functions": [
     {
       "name": "TFM_SST_TEST_PREPARE",

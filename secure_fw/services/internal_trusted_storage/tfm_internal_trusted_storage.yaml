@@ -12,7 +12,6 @@
   "priority": "NORMAL",
   "entry_point": "tfm_its_req_mngr_init",
   "stack_size": "0x500",
-  "heap_size": "0",
   "secure_functions": [
     {
       "sfid": "TFM_ITS_SET",

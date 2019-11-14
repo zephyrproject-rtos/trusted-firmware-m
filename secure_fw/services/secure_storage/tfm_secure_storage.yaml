@@ -12,7 +12,6 @@
   "priority": "NORMAL",
   "entry_point": "tfm_sst_req_mngr_init",
   "stack_size": "0xA00",
-  "heap_size": "0",
   "secure_functions": [
     {
       "name": "TFM_SST_SET",

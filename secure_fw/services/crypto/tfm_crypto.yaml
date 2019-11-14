@@ -12,7 +12,6 @@
   "priority": "NORMAL",
   "entry_point": "tfm_crypto_init",
   "stack_size": "0x2000",
-  "heap_size": "0x0400",
   "secure_functions": [
     {
       "name": "TFM_CRYPTO_ALLOCATE_KEY",
