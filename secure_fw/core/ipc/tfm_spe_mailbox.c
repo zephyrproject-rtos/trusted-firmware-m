@@ -380,7 +380,9 @@ int32_t tfm_mailbox_init(void)
     tfm_core_util_memset(&spe_mailbox_queue, 0, sizeof(spe_mailbox_queue));
 
     spe_mailbox_queue.empty_slots =
-                    (mailbox_queue_status_t)((1 << NUM_MAILBOX_QUEUE_SLOT) - 1);
+            (mailbox_queue_status_t)((1UL << (NUM_MAILBOX_QUEUE_SLOT - 1)) - 1);
+    spe_mailbox_queue.empty_slots +=
+            (mailbox_queue_status_t)(1UL << (NUM_MAILBOX_QUEUE_SLOT - 1));
 
     /* Register RPC callbacks */
     ret = tfm_rpc_register_ops(&mailbox_rpc_ops);

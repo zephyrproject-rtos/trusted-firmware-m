@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+#include "device_cfg.h"
+#endif
 #include "psa/client.h"
 
 #ifdef __cplusplus
@@ -25,11 +28,34 @@ extern "C" {
 #endif
 
 /*
- * The number of slots in NSPE mailbox queue and SPE mailbox queue.
- * So far only one slot is supported in either NSPE mailbox queue or
- * SPE mailbox queue.
+ * If multiple outstanding NS PSA Client calls is enabled, multi-core platform
+ * should define the number of mailbox queue slots NUM_MAILBOX_QUEUE_SLOT in
+ * platform device_cfg.h.
+ * Otherwise, NUM_MAILBOX_QUEUE_SLOT is defined as 1.
  */
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+#ifndef NUM_MAILBOX_QUEUE_SLOT
+#error "Error: Platform doesn't define NUM_MAILBOX_QUEUE_SLOT for mailbox queue"
+#endif
+
+#if (NUM_MAILBOX_QUEUE_SLOT < 2)
+#error "Error: Invalid NUM_MAILBOX_QUEUE_SLOT. The value should be more than 1"
+#endif
+
+/*
+ * The number of slots should be no more than the number of bits in
+ * mailbox_queue_status_t.
+ * Here the value is hardcoded. A better way is to define a sizeof() to
+ * calculate the bits in mailbox_queue_status_t and dump it with pragma message.
+ */
+#if (NUM_MAILBOX_QUEUE_SLOT > 32)
+#error "Error: Invalid NUM_MAILBOX_QUEUE_SLOT. The value should be no more than 32"
+#endif
+#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+/* Force the number of mailbox queue slots as 1. */
+#undef NUM_MAILBOX_QUEUE_SLOT
 #define NUM_MAILBOX_QUEUE_SLOT              (1)
+#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
 
 /* PSA client call type value */
 #define MAILBOX_PSA_FRAMEWORK_VERSION       (0x1)
