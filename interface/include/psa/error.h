@@ -19,7 +19,13 @@
 extern "C" {
 #endif
 
+/* If #PSA_SUCCESS is already defined, it means that #psa_status_t
+ * is also defined in an external header, so prevent its multiple
+ * definition.
+ */
+#ifndef PSA_SUCCESS
 typedef int32_t psa_status_t;
+#endif
 
 #define PSA_SUCCESS                     ((psa_status_t)0)
 
