@@ -2978,8 +2978,7 @@ static int mbedtls_alt_rsa_deduce_crt( const mbedtls_mpi *P, const mbedtls_mpi *
     /* QP = Q^{-1} mod P */
     PKA_ADD_IM(MOD_LEN_ID, rP, rP, 1);
     PKA_ADD_IM(MOD_LEN_ID, rQ, rQ, 1);
-    PKA_SUB_IM(MOD_LEN_ID, rD, rP, 2); // temporary rD = P-2
-    PKA_MOD_EXP(PLEN_ID, rT3/*res*/, rQ, rD);  // QP = rT3 = 1/Q mod P
+    PKA_MOD_INV(PLEN_ID, rT3/*res*/, rQ);  // rT3 = Q^-1 mod P
     PkaCopyDataFromPkaReg(pTempBuf, P->n, rT1);
     MBEDTLS_MPI_CHK(mbedtls_rsa_uint32_buf_to_mpi( DP, pTempBuf, P->n ));
 
