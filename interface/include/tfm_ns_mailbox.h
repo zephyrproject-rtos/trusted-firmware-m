@@ -123,6 +123,20 @@ void tfm_ns_mailbox_hal_enter_critical(void);
  */
 void tfm_ns_mailbox_hal_exit_critical(void);
 
+/**
+ * \brief Enter critical section of NSPE mailbox in IRQ handler.
+ *
+ * \note The implementation depends on platform specific hardware and use case.
+ */
+void tfm_ns_mailbox_hal_enter_critical_isr(void);
+
+/**
+ * \brief Enter critical section of NSPE mailbox in IRQ handler
+ *
+ * \note The implementation depends on platform specific hardware and use case.
+ */
+void tfm_ns_mailbox_hal_exit_critical_isr(void);
+
 #ifdef __cplusplus
 }
 #endif
