@@ -158,6 +158,19 @@ struct ns_mailbox_queue_t {
                                                  */
 
     struct ns_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
+
+#ifdef TFM_MULTI_CORE_TEST
+    uint32_t                 nr_tx;             /* The total number of
+                                                 * submission of NS PSA Client
+                                                 * calls from NS task via
+                                                 * mailbox.
+                                                 */
+    uint32_t                 nr_used_slots;     /* The total number of used
+                                                 * mailbox queue slots each time
+                                                 * NS thread requests a mailbox
+                                                 * queue slot.
+                                                 */
+#endif
 };
 
 #ifdef __cplusplus

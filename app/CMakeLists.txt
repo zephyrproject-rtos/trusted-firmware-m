@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -149,6 +149,10 @@ if (TFM_PSA_API)
 			"${INTERFACE_DIR}/src/tfm_multi_core_api.c"
 			"${INTERFACE_DIR}/src/tfm_multi_core_psa_ns_api.c"
 			)
+
+		if (TFM_MULTI_CORE_TEST)
+			add_definitions(-DTFM_MULTI_CORE_TEST)
+		endif()
 	else()
 		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_psa_ns_api.c")
 	endif()

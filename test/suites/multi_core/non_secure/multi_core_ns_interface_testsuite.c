@@ -104,7 +104,10 @@ static void multi_client_call_test(struct test_result_t *ret,
     uint32_t current_thread_priority, err;
     void *mutex_handle;
     void *child_ids[NR_MULTI_CALL_CHILD];
+    struct ns_mailbox_stats_res_t stats_res;
     struct test_params parent_params, params[NR_MULTI_CALL_CHILD];
+
+    tfm_ns_mailbox_tx_stats_init();
 
     current_thread_handle = os_wrapper_thread_get_handle();
     if (!current_thread_handle) {
@@ -190,6 +193,11 @@ static void multi_client_call_test(struct test_result_t *ret,
             return;
         }
     }
+
+    tfm_ns_mailbox_stats_avg_slot(&stats_res);
+    TEST_LOG("Totally %d NS mailbox queue slots\r\n", NUM_MAILBOX_QUEUE_SLOT);
+    TEST_LOG("%d.%d NS mailbox queue slots are occupied each time in average.\r\n",
+             stats_res.avg_nr_slots, stats_res.avg_nr_slots_tenths);
 
     ret->val = TEST_PASSED;
 }

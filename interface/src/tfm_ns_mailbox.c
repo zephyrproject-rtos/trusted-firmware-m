@@ -121,6 +121,70 @@ static void set_msg_owner(uint8_t idx, const void *owner)
     }
 }
 
+#ifdef TFM_MULTI_CORE_TEST
+void tfm_ns_mailbox_tx_stats_init(void)
+{
+    if (!mailbox_queue_ptr) {
+        return;
+    }
+
+    tfm_ns_mailbox_hal_enter_critical();
+
+    mailbox_queue_ptr->nr_tx = 0;
+    mailbox_queue_ptr->nr_used_slots = 0;
+
+    tfm_ns_mailbox_hal_exit_critical();
+}
+
+static void mailbox_tx_stats_update(struct ns_mailbox_queue_t *ns_queue)
+{
+    mailbox_queue_status_t empty_status;
+    uint8_t idx, nr_empty = 0;
+
+    if (!ns_queue) {
+        return;
+    }
+
+    tfm_ns_mailbox_hal_enter_critical();
+
+    ns_queue->nr_tx++;
+
+    /* Count the number of used slots when this tx arrives */
+    empty_status = ns_queue->empty_slots;
+    tfm_ns_mailbox_hal_exit_critical();
+
+    if (empty_status) {
+        for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
+            if (empty_status & (0x1UL << idx)) {
+                nr_empty++;
+            }
+        }
+    }
+
+    tfm_ns_mailbox_hal_enter_critical();
+    ns_queue->nr_used_slots += (NUM_MAILBOX_QUEUE_SLOT - nr_empty);
+    tfm_ns_mailbox_hal_exit_critical();
+}
+
+void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res)
+{
+    uint32_t nr_used_slots, nr_tx;
+
+    if (!mailbox_queue_ptr || !stats_res) {
+        return;
+    }
+
+    tfm_ns_mailbox_hal_enter_critical();
+    nr_used_slots = mailbox_queue_ptr->nr_used_slots;
+    nr_tx = mailbox_queue_ptr->nr_tx;
+    tfm_ns_mailbox_hal_exit_critical();
+
+    stats_res->avg_nr_slots = nr_used_slots / nr_tx;
+    nr_used_slots %= nr_tx;
+    stats_res->avg_nr_slots_tenths = nr_used_slots * 10 / nr_tx;
+}
+#endif
+
 mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
                                        const struct psa_client_params_t *params,
                                        int32_t client_id)
@@ -142,6 +206,10 @@ mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
     if (idx >= NUM_MAILBOX_QUEUE_SLOT) {
         return MAILBOX_QUEUE_FULL;
     }
+
+#ifdef TFM_MULTI_CORE_TEST
+    mailbox_tx_stats_update(mailbox_queue_ptr);
+#endif
 
     /* Fill the mailbox message */
     msg_ptr = &mailbox_queue_ptr->queue[idx].msg;
@@ -310,6 +378,10 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 
     /* Platform specific initialization. */
     ret = tfm_ns_mailbox_hal_init(queue);
+
+#ifdef TFM_MULTI_CORE_TEST
+    tfm_ns_mailbox_tx_stats_init();
+#endif
 
     return ret;
 }
