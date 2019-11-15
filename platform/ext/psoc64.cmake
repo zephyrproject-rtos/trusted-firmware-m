@@ -28,6 +28,10 @@ remove_definitions(-DBL2)
 
 # Skip peripheral access test
 set(TFM_ENABLE_PERIPH_ACCESS_TEST OFF)
+if (REGRESSION)
+    # Enable multi-core specific test cases
+    set(TFM_MULTI_CORE_TEST ON)
+endif()
 
 # Set Cortex-M0plus as secure core
 set_secure_cpu_type("CpuM0p")
