@@ -51,9 +51,9 @@ SECTIONS
     {
         __vectors_start__ = .;
         KEEP(*(.vectors))
+        __vectors_end__ = .;
         *startup*(.text*)
         . = ALIGN(4);
-        __vectors_end__ = .;
     } > FLASH
 
     .copy.table : ALIGN(4)
