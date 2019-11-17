@@ -49,10 +49,6 @@ extern struct musca_a1_scc_dev_t MUSCA_A1_SCC_DEV_NS;
 #include "gpio_cmsdk_drv.h"
 extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_S;
 #endif
-#ifdef GPIO0_CMSDK_NS
-#include "gpio_cmsdk_drv.h"
-extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_NS;
-#endif
 
 /* ARM MPC SIE 200 driver structures */
 #ifdef MPC_ISRAM0_S

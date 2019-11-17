@@ -30,6 +30,9 @@
 /* ARM SCC */
 #define MUSCA_B1_SCC_S
 
+/* CMSDK GPIO */
+#define GPIO0_CMSDK_S
+
 /* ARM Memory Protection Controller (MPC) SIE 200 */
 #define MPC_ISRAM0_S
 #define MPC_ISRAM1_S

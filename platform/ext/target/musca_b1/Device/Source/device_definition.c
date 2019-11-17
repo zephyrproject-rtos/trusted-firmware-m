@@ -302,11 +302,6 @@ static const struct gpio_cmsdk_dev_cfg_t GPIO0_CMSDK_DEV_CFG_S = {
     .base = MUSCA_B1_GPIO_S_BASE};
 struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_S = {&(GPIO0_CMSDK_DEV_CFG_S)};
 #endif
-#ifdef GPIO0_CMSDK_NS
-static const struct gpio_cmsdk_dev_cfg_t GPIO0_CMSDK_DEV_CFG_NS = {
-    .base = MUSCA_B1_GPIO_NS_BASE};
-struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_NS = {&(GPIO0_CMSDK_DEV_CFG_NS)};
-#endif
 
 /** Arm UART PL011 driver structures */
 #ifdef UART0_PL011_S

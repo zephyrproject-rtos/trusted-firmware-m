@@ -135,10 +135,6 @@ extern struct mpc_sie200_dev_t MPC_EFLASH1_DEV_S;
 #include "gpio_cmsdk_drv.h"
 extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_S;
 #endif
-#ifdef GPIO0_CMSDK_NS
-#include "gpio_cmsdk_drv.h"
-extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_NS;
-#endif
 
 /** CMSDK Timer driver structures */
 #ifdef CMSDK_TIMER0_S

@@ -42,10 +42,15 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Config"
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Device/Include" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Native_Driver" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/partition" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/services/include" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/Libraries" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 #Gather all source files we need.
+if (TFM_PARTITION_PLATFORM)
+    list(APPEND ALL_SRC_C_NS "${PLATFORM_DIR}/target/musca_a/services/src/tfm_ioctl_ns_api.c")
+endif()
+
 if (NOT DEFINED BUILD_CMSIS_CORE)
   message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif(BUILD_CMSIS_CORE)
@@ -78,6 +83,7 @@ elseif(BUILD_NATIVE_DRIVERS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/uart_pl011_drv.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/musca_a1_scc_drv.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/qspi_ip6514e_drv.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/Native_Driver/gpio_cmsdk_drv.c")
 
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/Native_Driver/mpc_sie200_drv.c"
               "${PLATFORM_DIR}/target/musca_a/Native_Driver/ppc_sse200_drv.c")
@@ -120,6 +126,7 @@ elseif(BUILD_TARGET_CFG)
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
   if (TFM_PARTITION_PLATFORM)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/services/src/tfm_platform_system.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/services/src/tfm_ioctl_s_api.c")
   endif()
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()
