@@ -19,6 +19,10 @@
 #include <stddef.h>
 #include "psa/client.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * The number of slots in NSPE mailbox queue and SPE mailbox queue.
  * So far only one slot is supported in either NSPE mailbox queue or
@@ -125,5 +129,9 @@ struct ns_mailbox_queue_t {
 
     struct ns_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TFM_MAILBOX_H__ */
