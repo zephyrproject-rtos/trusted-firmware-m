@@ -67,6 +67,10 @@ endif()
 # building status in multi-core scenario.
 # The updated configuration will be used in following compiler setting.
 if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
+	if (NOT CORE_IPC)
+		message(FATAL_ERROR "CORE_IPC is OFF. Multi-core topology should work in IPC model.")
+	endif()
+
 	include("Common/MultiCore")
 
 	if (NOT DEFINED TFM_BUILD_IN_SPE)
@@ -74,9 +78,7 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	else()
 		select_arm_cpu_type(${TFM_BUILD_IN_SPE})
 	endif()
-endif()
 
-if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	# CMSE is unnecessary in multi-core scenarios.
 	# TODO: Need further discussion about if CMSE is required when an Armv8-M
 	# core acts as secure core in multi-core scenario.
@@ -178,6 +180,10 @@ endif()
 
 if (TFM_PSA_API)
 	add_definitions(-DTFM_PSA_API)
+endif()
+
+if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
+	add_definitions(-DTFM_MULTI_CORE_TOPOLOGY)
 endif()
 
 if (TFM_LEGACY_API)
