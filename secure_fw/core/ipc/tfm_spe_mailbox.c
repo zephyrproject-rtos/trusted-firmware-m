@@ -8,7 +8,7 @@
 #include "cmsis_compiler.h"
 
 #include "psa/error.h"
-#include "tfm_memory_utils.h"
+#include "tfm_core_utils.h"
 #include "tfm_utils.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
@@ -133,8 +133,8 @@ static void mailbox_clean_queue_slot(uint8_t idx)
         return;
     }
 
-    tfm_memset(&spe_mailbox_queue.queue[idx], 0,
-               sizeof(spe_mailbox_queue.queue[idx]));
+    tfm_core_util_memset(&spe_mailbox_queue.queue[idx], 0,
+                         sizeof(spe_mailbox_queue.queue[idx]));
     set_spe_queue_empty_status(idx);
 }
 
@@ -158,8 +158,8 @@ static void mailbox_direct_reply(uint8_t idx, uint32_t result)
 
     /* Get reply address */
     reply_ptr = get_nspe_reply_addr(idx);
-    tfm_memcpy(&reply_ptr->return_val, &ret_result,
-               sizeof(reply_ptr->return_val));
+    tfm_core_util_memcpy(&reply_ptr->return_val, &ret_result,
+                         sizeof(reply_ptr->return_val));
 
     mailbox_clean_queue_slot(idx);
 
@@ -220,7 +220,8 @@ int32_t tfm_mailbox_handle_msg(void)
         spe_mailbox_queue.queue[idx].ns_slot_idx = idx;
 
         msg_ptr = &spe_mailbox_queue.queue[idx].msg;
-        tfm_memcpy(msg_ptr, &ns_queue->queue[idx].msg, sizeof(*msg_ptr));
+        tfm_core_util_memcpy(msg_ptr, &ns_queue->queue[idx].msg,
+                             sizeof(*msg_ptr));
 
         if (check_mailbox_msg(msg_ptr) != MAILBOX_SUCCESS) {
             mailbox_clean_queue_slot(idx);
@@ -354,7 +355,7 @@ int32_t tfm_ns_mailbox_init(void)
 {
     int32_t ret;
 
-    tfm_memset(&spe_mailbox_queue, 0, sizeof(spe_mailbox_queue));
+    tfm_core_util_memset(&spe_mailbox_queue, 0, sizeof(spe_mailbox_queue));
 
     spe_mailbox_queue.empty_slots =
                     (mailbox_queue_status_t)((1 << NUM_MAILBOX_QUEUE_SLOT) - 1);
