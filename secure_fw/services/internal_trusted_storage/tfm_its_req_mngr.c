@@ -12,7 +12,6 @@
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
 #include "its_utils.h"
-#include "flash_layout.h"
 #include "secure_fw/services/secure_storage/sst_object_defs.h"
 
 #ifdef TFM_PSA_API
@@ -25,14 +24,9 @@
 #include "tfm_api.h"
 #endif
 
-/* FIXME: Duplicated from flash info */
-#define ITS_MAX_FILE_SIZE \
-    ITS_UTILS_MAX(ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, ITS_FLASH_PROGRAM_UNIT), \
-                  ITS_UTILS_ALIGN(SST_MAX_OBJECT_SIZE, SST_FLASH_PROGRAM_UNIT))
-
-static uint8_t asset_data[ITS_MAX_FILE_SIZE] = {0};
-
 #ifndef TFM_PSA_API
+static uint8_t *p_data;
+
 /**
  * \brief Indicates whether ITS has been initialised.
  */
@@ -43,7 +37,6 @@ psa_status_t tfm_its_set_req(psa_invec *in_vec, size_t in_len,
 {
     psa_storage_uid_t uid;
     size_t data_length;
-    const void *p_data;
     psa_storage_create_flags_t create_flags;
     int32_t client_id;
 
@@ -66,14 +59,8 @@ psa_status_t tfm_its_set_req(psa_invec *in_vec, size_t in_len,
 
     uid = *((psa_storage_uid_t *)in_vec[0].base);
 
-    p_data = in_vec[1].base;
+    p_data = (uint8_t *)in_vec[1].base;
     data_length = in_vec[1].len;
-
-    /* Boundary check the incoming request */
-    if (data_length > sizeof(asset_data)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-    tfm_memcpy(asset_data, p_data, data_length);
 
     create_flags = *(psa_storage_create_flags_t *)in_vec[2].base;
 
@@ -82,17 +69,15 @@ psa_status_t tfm_its_set_req(psa_invec *in_vec, size_t in_len,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    return tfm_its_set(client_id, uid, data_length, asset_data, create_flags);
+    return tfm_its_set(client_id, uid, data_length, create_flags);
 }
 
 psa_status_t tfm_its_get_req(psa_invec *in_vec, size_t in_len,
                              psa_outvec *out_vec, size_t out_len)
 {
-    psa_status_t status;
     psa_storage_uid_t uid;
     size_t data_offset;
     size_t data_size;
-    void *p_data;
     size_t *p_data_length;
     int32_t client_id;
 
@@ -115,7 +100,7 @@ psa_status_t tfm_its_get_req(psa_invec *in_vec, size_t in_len,
 
     data_offset = *(size_t *)in_vec[1].base;
 
-    p_data = out_vec[0].base;
+    p_data = (uint8_t *)out_vec[0].base;
     data_size = out_vec[0].len;
 
     p_data_length = &out_vec[0].len;
@@ -125,13 +110,7 @@ psa_status_t tfm_its_get_req(psa_invec *in_vec, size_t in_len,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    status =  tfm_its_get(client_id, uid, data_offset, data_size, asset_data,
-                          p_data_length);
-    if (status == PSA_SUCCESS) {
-        tfm_memcpy(p_data, asset_data, *p_data_length);
-    }
-
-    return status;
+    return tfm_its_get(client_id, uid, data_offset, data_size, p_data_length);
 }
 
 psa_status_t tfm_its_get_info_req(psa_invec *in_vec, size_t in_len,
@@ -201,123 +180,109 @@ psa_status_t tfm_its_remove_req(psa_invec *in_vec, size_t in_len,
 }
 
 #else /* !defined(TFM_PSA_API) */
-typedef psa_status_t (*its_func_t)(const psa_msg_t *msg);
+typedef psa_status_t (*its_func_t)(void);
+static psa_msg_t msg;
 
-static psa_status_t tfm_its_set_ipc(const psa_msg_t *msg)
+static psa_status_t tfm_its_set_ipc(void)
 {
     psa_storage_uid_t uid;
     size_t data_length;
     psa_storage_create_flags_t create_flags;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->in_size[2] != sizeof(create_flags)) {
+    if (msg.in_size[0] != sizeof(uid) ||
+        msg.in_size[2] != sizeof(create_flags)) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    data_length = msg->in_size[1];
-    if (data_length > sizeof(asset_data)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
+    data_length = msg.in_size[1];
 
-    num = psa_read(msg->handle, 0, &uid, sizeof(uid));
+    num = psa_read(msg.handle, 0, &uid, sizeof(uid));
     if (num != sizeof(uid)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg->handle, 1, &asset_data, data_length);
-    if (num != data_length) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    num = psa_read(msg->handle, 2, &create_flags, sizeof(create_flags));
+    num = psa_read(msg.handle, 2, &create_flags, sizeof(create_flags));
     if (num != sizeof(create_flags)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    return tfm_its_set(msg->client_id, uid, data_length, asset_data,
-                       create_flags);
+    return tfm_its_set(msg.client_id, uid, data_length, create_flags);
 }
 
-static psa_status_t tfm_its_get_ipc(const psa_msg_t *msg)
+static psa_status_t tfm_its_get_ipc(void)
 {
-    psa_status_t status;
     psa_storage_uid_t uid;
     size_t data_offset;
     size_t data_size;
     size_t data_length;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->in_size[1] != sizeof(data_offset)) {
+    if (msg.in_size[0] != sizeof(uid) ||
+        msg.in_size[1] != sizeof(data_offset)) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg->handle, 0, &uid, sizeof(uid));
+    data_size = msg.out_size[0];
+
+    num = psa_read(msg.handle, 0, &uid, sizeof(uid));
     if (num != sizeof(uid)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg->handle, 1, &data_offset, sizeof(data_offset));
+    num = psa_read(msg.handle, 1, &data_offset, sizeof(data_offset));
     if (num != sizeof(data_offset)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    data_size = msg->out_size[0];
-
-    status = tfm_its_get(msg->client_id, uid, data_offset, data_size,
-                         asset_data, &data_length);
-    if (status == PSA_SUCCESS) {
-        psa_write(msg->handle, 0, asset_data, data_length);
-    }
-
-    return status;
+    return tfm_its_get(msg.client_id, uid, data_offset, data_size,
+                       &data_length);
 }
 
-static psa_status_t tfm_its_get_info_ipc(const psa_msg_t *msg)
+static psa_status_t tfm_its_get_info_ipc(void)
 {
     psa_status_t status;
     psa_storage_uid_t uid;
     struct psa_storage_info_t info;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->out_size[0] != sizeof(info)) {
+    if (msg.in_size[0] != sizeof(uid) ||
+        msg.out_size[0] != sizeof(info)) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg->handle, 0, &uid, sizeof(uid));
+    num = psa_read(msg.handle, 0, &uid, sizeof(uid));
     if (num != sizeof(uid)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    status = tfm_its_get_info(msg->client_id, uid, &info);
+    status = tfm_its_get_info(msg.client_id, uid, &info);
     if (status == PSA_SUCCESS) {
-        psa_write(msg->handle, 0, &info, sizeof(info));
+        psa_write(msg.handle, 0, &info, sizeof(info));
     }
 
     return status;
 }
 
-static psa_status_t tfm_its_remove_ipc(const psa_msg_t *msg)
+static psa_status_t tfm_its_remove_ipc(void)
 {
     psa_storage_uid_t uid;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid)) {
+    if (msg.in_size[0] != sizeof(uid)) {
         /* The input argument size is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg->handle, 0, &uid, sizeof(uid));
+    num = psa_read(msg.handle, 0, &uid, sizeof(uid));
     if (num != sizeof(uid)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    return tfm_its_remove(msg->client_id, uid);
+    return tfm_its_remove(msg.client_id, uid);
 }
 
 /*
@@ -332,7 +297,6 @@ static void tfm_abort(void)
 
 static void its_signal_handle(psa_signal_t signal, its_func_t pfn)
 {
-    psa_msg_t msg;
     psa_status_t status;
 
     status = psa_get(signal, &msg);
@@ -345,7 +309,7 @@ static void its_signal_handle(psa_signal_t signal, its_func_t pfn)
         psa_reply(msg.handle, PSA_SUCCESS);
         break;
     case PSA_IPC_CALL:
-        status = pfn(&msg);
+        status = pfn();
         psa_reply(msg.handle, status);
         break;
     case PSA_IPC_DISCONNECT:
@@ -387,4 +351,25 @@ psa_status_t tfm_its_req_mngr_init(void)
     its_is_init = true;
 #endif
     return PSA_SUCCESS;
+}
+
+size_t its_req_mngr_read(uint8_t *buf, size_t num_bytes)
+{
+#ifdef TFM_PSA_API
+    return psa_read(msg.handle, 1, buf, num_bytes);
+#else
+    (void)tfm_memcpy(buf, p_data, num_bytes);
+    p_data += num_bytes;
+    return num_bytes;
+#endif
+}
+
+void its_req_mngr_write(const uint8_t *buf, size_t num_bytes)
+{
+#ifdef TFM_PSA_API
+    psa_write(msg.handle, 0, buf, num_bytes);
+#else
+    (void)tfm_memcpy(p_data, buf, num_bytes);
+    p_data += num_bytes;
+#endif
 }

@@ -216,6 +216,17 @@ More information about the ``flash_layout.h`` content, not ITS related, is
 available in :doc:`platform readme </platform/ext/readme>` along with other
 platform information.
 
+The following optional platform definitions may also be defined in
+``flash_layout.h`` or set at build time in ``platform/ext/<TARGET_NAME>.cmake``:
+
+- ``ITS_BUF_SIZE``- Defines the size of the partition's internal data transfer
+  buffer. If not provided, then ``ITS_MAX_ASSET_SIZE`` is used to allow asset
+  data to be copied between the client and the filesystem in one iteration.
+  Reducing the buffer size will decrease the RAM usage of the partition at the
+  expense of latency, as data will be copied in multiple iterations. *Note:*
+  when data is copied in multiple iterations, the atomicity property of the
+  filesystem is lost in the case of an asynchronous power failure.
+
 Flash Interface
 ===============
 For ITS service operations, a contiguous set of blocks must be earmarked for

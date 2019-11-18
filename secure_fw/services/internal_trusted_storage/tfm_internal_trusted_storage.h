@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -41,7 +41,6 @@ psa_status_t tfm_its_init(void);
  * \param[in] client_id     Identifier of the asset's owner (client)
  * \param[in] uid           The identifier for the data
  * \param[in] data_length   The size in bytes of the data in `p_data`
- * \param[in] p_data        A buffer containing the data
  * \param[in] create_flags  The flags that the data will be stored with
  *
  * \return A status indicating the success/failure of the operation
@@ -70,7 +69,6 @@ psa_status_t tfm_its_init(void);
 psa_status_t tfm_its_set(int32_t client_id,
                          psa_storage_uid_t uid,
                          size_t data_length,
-                         const void *p_data,
                          psa_storage_create_flags_t create_flags);
 
 /**
@@ -87,8 +85,6 @@ psa_status_t tfm_its_set(int32_t client_id,
  * \param[in]  uid            The uid value
  * \param[in]  data_offset    The starting offset of the data requested
  * \param[in]  data_size      The amount of data requested
- * \param[out] p_data         On success, the buffer where the data will
- *                            be placed
  * \param[out] p_data_length  On success, this will contain size of the data
  *                            placed in `p_data`.
  *
@@ -114,7 +110,6 @@ psa_status_t tfm_its_get(int32_t client_id,
                          psa_storage_uid_t uid,
                          size_t data_offset,
                          size_t data_size,
-                         void *p_data,
                          size_t *p_data_length);
 
 /**

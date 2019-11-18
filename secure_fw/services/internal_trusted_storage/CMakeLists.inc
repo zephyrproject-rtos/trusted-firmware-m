@@ -66,6 +66,10 @@ if (ITS_RAM_FS AND SST_RAM_FS)
     set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
 endif()
 
+if (DEFINED ITS_BUF_SIZE)
+    set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS ITS_BUF_SIZE=${ITS_BUF_SIZE})
+endif()
+
 # Also set SST definitions
 if (SST_ENCRYPTION)
     set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_ENCRYPTION)
@@ -87,6 +91,11 @@ message("The ITS service compile configuration is as follows:")
 message("- ITS_VALIDATE_METADATA_FROM_FLASH: " ${ITS_VALIDATE_METADATA_FROM_FLASH})
 message("- ITS_CREATE_FLASH_LAYOUT: " ${ITS_CREATE_FLASH_LAYOUT})
 message("- ITS_RAM_FS: " ${ITS_RAM_FS})
+if (DEFINED ITS_BUF_SIZE)
+    message("- ITS_BUF_SIZE: " ${ITS_BUF_SIZE})
+else()
+    message("- ITS_BUF_SIZE using default value")
+endif()
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)

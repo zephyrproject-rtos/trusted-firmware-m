@@ -12,7 +12,22 @@
 #include "psa_manifest/pid.h"
 #include "tfm_memory_utils.h"
 #include "tfm_its_defs.h"
+#include "tfm_its_req_mngr.h"
 #include "its_utils.h"
+
+#ifndef ITS_BUF_SIZE
+/* By default, set the ITS buffer size to the max asset size so that all
+ * requests can be handled in one iteration.
+ */
+#define ITS_BUF_SIZE ITS_MAX_ASSET_SIZE
+#endif
+
+/* Buffer to store asset data from the caller.
+ * Note: size must be aligned to the max flash program unit to meet the
+ * alignment requirement of the filesystem.
+ */
+static uint8_t asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
+                                          ITS_FLASH_MAX_PROGRAM_UNIT)];
 
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
@@ -110,10 +125,11 @@ psa_status_t tfm_its_init(void)
 psa_status_t tfm_its_set(int32_t client_id,
                          psa_storage_uid_t uid,
                          size_t data_length,
-                         const void *p_data,
                          psa_storage_create_flags_t create_flags)
 {
     psa_status_t status;
+    size_t write_size;
+    size_t offset;
 
     /* Check that the UID is valid */
     if (uid == TFM_ITS_INVALID_UID) {
@@ -152,23 +168,56 @@ psa_status_t tfm_its_set(int32_t client_id,
         return status;
     }
 
+    /* Write as much of the data as will fit in the asset_data buffer */
+    write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
+
+    /* Read asset data from the caller */
+    (void)its_req_mngr_read(asset_data, write_size);
+
     /* Create the file in the file system */
-    return its_flash_fs_file_create(get_fs_ctx(client_id),
-                                    g_fid,
-                                    data_length,
-                                    data_length,
-                                    (uint32_t)create_flags,
-                                    (const uint8_t *)p_data);
+    status = its_flash_fs_file_create(get_fs_ctx(client_id), g_fid, data_length,
+                                      write_size, (uint32_t)create_flags,
+                                      asset_data);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    offset = write_size;
+    data_length -= write_size;
+
+    /* Iteratively read data from the caller and write it to the filesystem, in
+     * chunks no larger than the size of the asset_data buffer.
+     */
+    while (data_length > 0) {
+        write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
+
+        /* Read asset data from the caller */
+        (void)its_req_mngr_read(asset_data, write_size);
+
+        /* Write to the file in the file system */
+        status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid,
+                                         write_size, offset, asset_data);
+        if (status != PSA_SUCCESS) {
+            /* Delete the file to avoid leaving partial data */
+            (void)its_flash_fs_file_delete(get_fs_ctx(client_id), g_fid);
+            return status;
+        }
+
+        offset += write_size;
+        data_length -= write_size;
+    }
+
+    return PSA_SUCCESS;
 }
 
 psa_status_t tfm_its_get(int32_t client_id,
                          psa_storage_uid_t uid,
                          size_t data_offset,
                          size_t data_size,
-                         void *p_data,
                          size_t *p_data_length)
 {
     psa_status_t status;
+    size_t read_size;
 
 #ifdef TFM_PARTITION_TEST_SST
     /* The SST test partiton can call tfm_its_get() through SST code. Treat it
@@ -203,15 +252,30 @@ psa_status_t tfm_its_get(int32_t client_id,
     data_size = ITS_UTILS_MIN(data_size,
                               g_file_info.size_current - data_offset);
 
-    /* Read object data if any */
-    status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, data_size,
-                                    data_offset, p_data);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Update the size of the data placed in p_data */
+    /* Update the size of the output data */
     *p_data_length = data_size;
+
+    /* Iteratively read data from the filesystem and write it to the caller, in
+     * chunks no larger than the size of the asset_data buffer.
+     */
+    do {
+        /* Read as much of the data as will fit in the asset_data buffer */
+        read_size = ITS_UTILS_MIN(data_size, sizeof(asset_data));
+
+        /* Read file data from the filesystem */
+        status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, read_size,
+                                        data_offset, asset_data);
+        if (status != PSA_SUCCESS) {
+            *p_data_length = 0;
+            return status;
+        }
+
+        /* Write asset data to the caller */
+        its_req_mngr_write(asset_data, read_size);
+
+        data_offset += read_size;
+        data_size -= read_size;
+    } while (data_size > 0);
 
     return PSA_SUCCESS;
 }
