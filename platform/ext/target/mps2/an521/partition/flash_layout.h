@@ -25,10 +25,10 @@
  * 0x0018_0000 Secure image     secondary slot (0.5 MB)
  * 0x0020_0000 Non-secure image secondary slot (0.5 MB)
  * 0x0028_0000 Scratch area (0.5 MB)
- * 0x0030_0000 Secure Storage Area (0.02 MB)
- * 0x0030_5000 Internal Trusted Storage Area (0.02 MB)
- * 0x0030_A000 NV counters area (4 KB)
- * 0x0030_B000 Unused (980 KB)
+ * 0x0030_0000 Secure Storage Area (20 KB)
+ * 0x0030_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0030_9000 NV counters area (4 KB)
+ * 0x0030_A000 Unused (984 KB)
  *
  * Flash layout on MPS2 AN521 with BL2 (single image boot):
  *
@@ -40,10 +40,10 @@
  *    0x0018_0000 Secure     image secondary
  *    0x0020_0000 Non-secure image secondary
  * 0x0028_0000 Scratch area (1 MB)
- * 0x0038_0000 Secure Storage Area (0.02 MB)
- * 0x0038_5000 Internal Trusted Storage Area (0.02 MB)
- * 0x0038_A000 NV counters area (4 KB)
- * 0x0038_B000 Unused (468 MB)
+ * 0x0038_0000 Secure Storage Area (20 KB)
+ * 0x0038_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0038_9000 NV counters area (4 KB)
+ * 0x0038_A000 Unused (472 KB)
  *
  * Flash layout on MPS2 AN521, if BL2 not defined:
  *

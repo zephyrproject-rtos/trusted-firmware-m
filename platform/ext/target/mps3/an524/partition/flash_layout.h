@@ -34,18 +34,18 @@
  *     0x0010_0000 Secure image         (512 KB)
  *     0x0018_0000 Non-secure image     (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 ITS area                 (20 KB)
- * 0x001C_A000 NV counters              (4 KB)
- * 0x001C_B000 Unused
+ * 0x001C_5000 ITS area                 (16 KB)
+ * 0x001C_9000 NV counters              (4 KB)
+ * 0x001C_A000 Unused
  *
  * Flash layout without BL2
  *
  * 0x0000_0000 Secure image             (512 KB)
  * 0x000C_0000 Non-secure image         (256 KB)
  * 0x001C_0000 SST area                 (20 KB)
- * 0x001C_5000 ITS area                 (20 KB)
- * 0x001C_A000 NV counters              (4 KB)
- * 0x001C_B000 Unused
+ * 0x001C_5000 ITS area                 (16 KB)
+ * 0x001C_9000 NV counters              (4 KB)
+ * 0x001C_A000 Unused
  */
 
 /* Size of a Secure and of a Non-secure image */

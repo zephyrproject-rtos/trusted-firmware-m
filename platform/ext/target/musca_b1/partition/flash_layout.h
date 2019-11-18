@@ -26,10 +26,10 @@
  * 0x0A0F_0000 Secondary image area (832 KB):
  *    0x0A0F_0000 Secure     image secondary (320 KB)
  *    0x0A14_0000 Non-secure image secondary (512 KB)
- * 0x0A1C_0000 Secure Storage Area (0.02 MB)
- * 0x0A1C_5000 Internal Trusted Storage Area (0.02 MB)
- * 0x0A1C_A000 NV counters area (4 KB)
- * 0x0A1C_B000 Unused
+ * 0x0A1C_0000 Secure Storage Area (20 KB)
+ * 0x0A1C_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0A1C_9000 NV counters area (4 KB)
+ * 0x0A1C_A000 Unused
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
