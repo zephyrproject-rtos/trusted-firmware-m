@@ -190,17 +190,17 @@ int32_t tfm_mailbox_handle_msg(void)
 
     TFM_ASSERT(ns_queue != NULL);
 
-    tfm_ns_mailbox_hal_enter_critical();
+    tfm_mailbox_hal_enter_critical();
 
     /* Check if NSPE mailbox did assert a PSA client call request */
     if (!ns_queue->pend_slots) {
-        tfm_ns_mailbox_hal_exit_critical();
+        tfm_mailbox_hal_exit_critical();
         return MAILBOX_NO_PEND_EVENT;
     }
 
     pend_slots = get_nspe_queue_pend_status(ns_queue);
 
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical();
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
         mask_bits = (1 << idx);
@@ -268,7 +268,7 @@ int32_t tfm_mailbox_handle_msg(void)
          */
     }
 
-    tfm_ns_mailbox_hal_enter_critical();
+    tfm_mailbox_hal_enter_critical();
 
     /* Clean the NSPE mailbox pending status. */
     clear_nspe_queue_pend_status(ns_queue, pend_slots);
@@ -276,10 +276,10 @@ int32_t tfm_mailbox_handle_msg(void)
     /* Set the NSPE mailbox replied status */
     set_nspe_queue_replied_status(ns_queue, reply_slots);
 
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical();
 
     if (reply_slots) {
-        tfm_ns_mailbox_hal_notify_peer();
+        tfm_mailbox_hal_notify_peer();
     }
 
     return MAILBOX_SUCCESS;
@@ -314,14 +314,14 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
 
     mailbox_direct_reply(idx, (uint32_t)reply);
 
-    tfm_ns_mailbox_hal_enter_critical();
+    tfm_mailbox_hal_enter_critical();
 
     /* Set the NSPE mailbox replied status */
     set_nspe_queue_replied_status(ns_queue, (1 << idx));
 
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical();
 
-    tfm_mailbox_notify_peer();
+    tfm_mailbox_hal_notify_peer();
 
     return MAILBOX_SUCCESS;
 }
@@ -351,7 +351,7 @@ static const struct tfm_rpc_ops_t mailbox_rpc_ops = {
     .reply      = mailbox_reply,
 };
 
-int32_t tfm_ns_mailbox_init(void)
+int32_t tfm_mailbox_init(void)
 {
     int32_t ret;
 
@@ -371,7 +371,7 @@ int32_t tfm_ns_mailbox_init(void)
      * Initialize Inter-Processor Communication and achieve the base address of
      * NSPE mailbox queue
      */
-    ret = tfm_ns_mailbox_hal_init(&spe_mailbox_queue);
+    ret = tfm_mailbox_hal_init(&spe_mailbox_queue);
     if (ret != MAILBOX_SUCCESS) {
         tfm_rpc_unregister_ops();
 

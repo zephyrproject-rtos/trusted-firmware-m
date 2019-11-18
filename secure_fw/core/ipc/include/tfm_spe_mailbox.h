@@ -46,14 +46,6 @@ int32_t tfm_mailbox_handle_msg(void);
 int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply);
 
 /**
- * \brief Notify NSPE that a PSA client call return result is replied
- *
- * \retval MAILBOX_SUCCESS      The notification is successfully sent out.
- * \retval Other return code    Operation failed with an error code.
- */
-int32_t tfm_mailbox_notify_peer(void);
-
-/**
  * \brief SPE mailbox initialization
  *
  * \retval MAILBOX_SUCCESS      Operation succeeded.
@@ -72,13 +64,22 @@ int32_t tfm_mailbox_init(void);
 int32_t tfm_mailbox_hal_init(struct secure_mailbox_queue_t *s_queue);
 
 /**
+ * \brief Notify NSPE that a PSA client call return result is replied.
+ *        Implemented by platform specific inter-processor communication driver.
+ *
+ * \retval MAILBOX_SUCCESS      The notification is successfully sent out.
+ * \retval Other return code    Operation failed with an error code.
+ */
+int32_t tfm_mailbox_hal_notify_peer(void);
+
+/**
  * \brief Enter critical section of NSPE mailbox
  */
-void tfm_mailbox_enter_critical(void);
+void tfm_mailbox_hal_enter_critical(void);
 
 /**
  * \brief Exit critical section of NSPE mailbox
  */
-void tfm_mailbox_exit_critical(void);
+void tfm_mailbox_hal_exit_critical(void);
 
-#endif /* __TFM_NS_MAILBOX_H__ */
+#endif /* __TFM_SPE_MAILBOX_H__ */
