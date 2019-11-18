@@ -8,6 +8,7 @@
 #ifndef __TFM_CORE_UTILS_H__
 #define __TFM_CORE_UTILS_H__
 
+#include <stddef.h>
 #include <stdint.h>
 
 /**
