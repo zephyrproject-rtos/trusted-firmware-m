@@ -655,8 +655,8 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     }
 
     /*
-     * Three type of message are passed in this function: CONNECT, CALL,
-     * DISCONNECT. It needs to process differently for each type.
+     * Three type of message are passed in this function: CONNECTION, REQUEST,
+     * DISCONNECTION. It needs to process differently for each type.
      */
     switch (msg->msg.type) {
     case PSA_IPC_CONNECT:
@@ -668,8 +668,11 @@ static void tfm_svcall_psa_reply(uint32_t *args)
         if (status == PSA_SUCCESS) {
             ret = msg->handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
+            /* Refuse the client connection, indicating a permanent error. */
+            tfm_spm_free_conn_handle(service, msg->handle);
             ret = PSA_ERROR_CONNECTION_REFUSED;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
+            /* Fail the client connection, indicating a transient error. */
             ret = PSA_ERROR_CONNECTION_BUSY;
         } else {
             tfm_panic();
@@ -687,18 +690,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     default:
         if (msg->msg.type >= PSA_IPC_CALL) {
             /* Reply to a request message. Return values are based on status */
-            if (status == PSA_SUCCESS) {
-                ret = PSA_SUCCESS;
-            } else if ((status >= (INT32_MIN + 1)) &&
-                       (status <= (INT32_MIN + 127))) {
-                tfm_panic();
-            } else if ((status >= (INT32_MIN + 128)) && (status <= -1)) {
-                ret = status;
-            } else if ((status >= 1) && (status <= INT32_MAX)) {
-                ret = status;
-            } else {
-                tfm_panic();
-            }
+            ret = status;
 
             /*
              * The total number of bytes written to a single parameter must be
