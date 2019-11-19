@@ -30,12 +30,8 @@
 #include "RTE_Device.h"
 #include "target_cfg.h"
 #include "tfm_plat_defs.h"
+#include "region.h"
 
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);

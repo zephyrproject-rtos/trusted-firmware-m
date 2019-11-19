@@ -21,17 +21,13 @@
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
+#include "region.h"
 
 #ifdef PSA_API_TEST_IPC
 #define PSA_FF_TEST_SECURE_UART2
 #endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);

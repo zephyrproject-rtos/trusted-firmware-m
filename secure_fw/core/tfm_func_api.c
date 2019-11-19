@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,6 +22,7 @@
 #include "psa/service.h"
 #include "tfm_core_mem_check.h"
 #include "tfm_secure_api.h"
+#include "region.h"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1
@@ -30,13 +31,8 @@
 #error TFM_LVL is not defined!
 #endif
 
-/* Macros to pick linker symbols and allow references to sections */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
-
-REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SECURE_STACK, $$ZI$$Limit);
+REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Base, uint32_t);
+REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
 
 /* This is the "Big Lock" on the secure side, to guarantee single entry
  * to SPE

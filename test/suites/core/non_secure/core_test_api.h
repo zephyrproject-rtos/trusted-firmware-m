@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,7 +34,7 @@ struct tfm_core_test_call_args_t {
  *
  * \return Returns value depending on fn_ptr.
  */
-int32_t tfm_core_test_call(void *fn_ptr,
+int32_t tfm_core_test_call(int32_t (*fn_ptr)(),
                                         struct tfm_core_test_call_args_t *args);
 
 #ifdef __cplusplus

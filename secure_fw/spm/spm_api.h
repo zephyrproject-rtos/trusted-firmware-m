@@ -88,8 +88,8 @@ struct handler_ctx_stack_frame_t {
  */
 struct spm_partition_runtime_data_t {
 #ifdef TFM_PSA_API
-    struct tfm_event_t signal_evnt;     /* Event signal                      */
     uint32_t signals;                   /* Service signals had been triggered*/
+    struct tfm_event_t signal_evnt;     /* Event signal                      */
     struct tfm_list_node_t service_list;/* Service list                      */
     struct tfm_core_thread_t sp_thrd;   /* Thread object                     */
     uint32_t assigned_signals;          /* All assigned signals              */

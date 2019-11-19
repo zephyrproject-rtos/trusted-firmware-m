@@ -29,6 +29,7 @@
 #include "cy_prot.h"
 #include "pc_config.h"
 #include "driver_dap.h"
+#include "region.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;

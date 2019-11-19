@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -44,7 +44,7 @@ enum tfm_status_e check_address_range(const void *p, size_t s,
 
     /* Calculate the result */
     range_in_region = ((uintptr_t)p >= region_start) &&
-                      ((uintptr_t)(p + s - 1) <= region_limit);
+                      ((uintptr_t)((char *) p + s - 1) <= region_limit);
     if (range_in_region) {
         return TFM_SUCCESS;
     } else {

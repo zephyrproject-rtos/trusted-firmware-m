@@ -28,6 +28,7 @@
 #include "boot_record.h"
 #include "security_cnt.h"
 #include "boot_hal.h"
+#include "region.h"
 #if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
 #include "uart_stdout.h"
 #endif
@@ -42,11 +43,6 @@ __asm("  .global __ARM_use_no_argv\n");
 #endif
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
-
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif
 

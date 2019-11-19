@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -204,8 +204,10 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
      */
     for (i = 0; i + 1 < in_num; i++) {
         for (j = i+1; j < in_num; j++) {
-            if (!(invecs[j].base + invecs[j].len <= invecs[i].base ||
-                  invecs[j].base >= invecs[i].base + invecs[i].len)) {
+            if (!((char *) invecs[j].base + invecs[j].len <=
+                  (char *) invecs[i].base ||
+                  (char *) invecs[j].base >=
+                  (char *) invecs[i].base + invecs[i].len)) {
                 tfm_core_panic();
             }
         }

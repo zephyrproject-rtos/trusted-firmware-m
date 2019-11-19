@@ -20,6 +20,7 @@
 #include "tfm_peripherals_def.h"
 #include "spm_partition_defs.h"
 #include "psa/lifecycle.h"
+#include "region.h"
 
 #define NON_SECURE_INTERNAL_PARTITION_DB_IDX 0
 #define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1

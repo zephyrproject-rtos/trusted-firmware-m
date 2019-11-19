@@ -16,6 +16,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "secure_utilities.h"
+#include "region.h"
 
 /* Import MPC driver */
 extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -321,10 +321,10 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 static struct spm_partition_desc_t partition_list [] =
 {
-    {{'{{}}'}}, /* placeholder for Non-secure internal partition */
+    {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
 #ifndef TFM_PSA_API
-    {{'{{}}'}}, /* placeholder for TF-M Core internal partition */
-#endif /* !ifndefined(TFM_PSA_API) */
+    {{'{{0}}'}},   /* placeholder for TF-M Core internal partition */
+#endif
 
 {% for manifest in manifests %}
     /* -----------------------------------------------------------------------*/
@@ -335,7 +335,7 @@ static struct spm_partition_desc_t partition_list [] =
     {% endif %}
     {{'{'}}
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     {{'},'}}

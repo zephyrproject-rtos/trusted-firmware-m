@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -68,10 +68,6 @@ struct spm_partition_db_t {
     struct spm_partition_desc_t *partitions;
 };
 
-/* Macros to pick linker symbols and allow to form the partition data base */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 #ifdef TFM_PSA_API
 #define PART_REGION_ADDR(partition, region) \
     (uint32_t)&REGION_NAME(Image$$, partition, region)

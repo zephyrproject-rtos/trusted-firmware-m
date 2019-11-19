@@ -13,6 +13,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "platform_description.h"
+#include "region.h"
 
 /* Debug configuration flags */
 #define SPNIDEN_SEL_STATUS (0x01u << 7)

@@ -29,6 +29,7 @@
 #include "tfm_rpc.h"
 #include "tfm_internal.h"
 #include "tfm_core_trustzone.h"
+#include "region.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
@@ -130,7 +131,7 @@ void tfm_svcall_psa_close(uint32_t *args, bool ns_caller)
     TFM_CORE_ASSERT(args != NULL);
     handle = args[0];
 
-    return tfm_psa_close(handle, ns_caller);
+    tfm_psa_close(handle, ns_caller);
 }
 
 uint32_t tfm_svcall_get_lifecycle_state(void)
@@ -415,7 +416,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     tfm_core_util_memcpy(buffer, msg->invec[invec_idx].base, bytes);
 
     /* There maybe some remaining data */
-    msg->invec[invec_idx].base += bytes;
+    msg->invec[invec_idx].base = (char *) msg->invec[invec_idx].base + bytes;
     msg->msg.in_size[invec_idx] -= bytes;
 
     return bytes;
@@ -486,7 +487,8 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
     }
 
     /* There maybe some remaining data */
-    msg->invec[invec_idx].base += num_bytes;
+    msg->invec[invec_idx].base = (char *) msg->invec[invec_idx].base +
+                                 num_bytes;
     msg->msg.in_size[invec_idx] -= num_bytes;
 
     return num_bytes;
@@ -570,7 +572,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
         tfm_core_panic();
     }
 
-    tfm_core_util_memcpy(msg->outvec[outvec_idx].base +
+    tfm_core_util_memcpy((char *) msg->outvec[outvec_idx].base +
                          msg->outvec[outvec_idx].len, buffer, num_bytes);
 
     /* Update the write number */
@@ -771,7 +773,7 @@ static void tfm_svcall_psa_notify(uint32_t *args)
     TFM_CORE_ASSERT(args != NULL);
     partition_id = (int32_t)args[0];
 
-    return notify_with_signal(partition_id, PSA_DOORBELL);
+    notify_with_signal(partition_id, PSA_DOORBELL);
 }
 
 /**
