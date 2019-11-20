@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -120,7 +120,7 @@ void sst_req_mngr_write_asset_data(const uint8_t *in_data,
  *         in \ref psa_status_t
  *
  */
-psa_ps_status_t sst_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size);
+psa_status_t sst_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size);
 
 #ifdef __cplusplus
 }

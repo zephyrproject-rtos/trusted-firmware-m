@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,15 +25,15 @@ static const uint8_t sst_key_label[] = "storage_key";
 static psa_key_handle_t sst_key_handle;
 static uint8_t sst_crypto_iv_buf[SST_IV_LEN_BYTES];
 
-psa_ps_status_t sst_crypto_init(void)
+psa_status_t sst_crypto_init(void)
 {
     /* Currently, no initialisation is required. This may change if key
      * handling is changed.
      */
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_setkey(void)
+psa_status_t sst_crypto_setkey(void)
 {
     psa_status_t status;
     psa_key_handle_t huk_key_handle;
@@ -43,7 +43,7 @@ psa_ps_status_t sst_crypto_setkey(void)
     /* Allocate a transient key handle for the storage key */
     status = psa_allocate_key(&sst_key_handle);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     /* Set the key policy for the storage key */
@@ -92,7 +92,7 @@ psa_ps_status_t sst_crypto_setkey(void)
         goto release_sst_key;
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 
 release_generator:
     (void)psa_generator_abort(&sst_key_generator);
@@ -103,20 +103,20 @@ release_huk:
 release_sst_key:
     (void)psa_destroy_key(sst_key_handle);
 
-    return PSA_PS_ERROR_OPERATION_FAILED;
+    return PSA_ERROR_GENERIC_ERROR;
 }
 
-psa_ps_status_t sst_crypto_destroykey(void)
+psa_status_t sst_crypto_destroykey(void)
 {
     psa_status_t status;
 
     /* Destroy the transient key */
     status = psa_destroy_key(sst_key_handle);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
 void sst_crypto_set_iv(const union sst_crypto_t *crypto)
@@ -166,14 +166,14 @@ void sst_crypto_get_iv(union sst_crypto_t *crypto)
     (void)tfm_memcpy(crypto->ref.iv, sst_crypto_iv_buf, SST_IV_LEN_BYTES);
 }
 
-psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
-                                           const uint8_t *add,
-                                           size_t add_len,
-                                           const uint8_t *in,
-                                           size_t in_len,
-                                           uint8_t *out,
-                                           size_t out_size,
-                                           size_t *out_len)
+psa_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
+                                        const uint8_t *add,
+                                        size_t add_len,
+                                        const uint8_t *in,
+                                        size_t in_len,
+                                        uint8_t *out,
+                                        size_t out_size,
+                                        size_t *out_len)
 {
     psa_status_t status;
 
@@ -183,24 +183,24 @@ psa_ps_status_t sst_crypto_encrypt_and_tag(union sst_crypto_t *crypto,
                               in, in_len,
                               out, out_size, out_len);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     /* Copy the tag out of the output buffer */
     *out_len -= SST_TAG_LEN_BYTES;
     (void)tfm_memcpy(crypto->ref.tag, (out + *out_len), SST_TAG_LEN_BYTES);
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
-                                            const uint8_t *add,
-                                            size_t add_len,
-                                            uint8_t *in,
-                                            size_t in_len,
-                                            uint8_t *out,
-                                            size_t out_size,
-                                            size_t *out_len)
+psa_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
+                                         const uint8_t *add,
+                                         size_t add_len,
+                                         uint8_t *in,
+                                         size_t in_len,
+                                         uint8_t *out,
+                                         size_t out_size,
+                                         size_t *out_len)
 {
     psa_status_t status;
 
@@ -214,15 +214,15 @@ psa_ps_status_t sst_crypto_auth_and_decrypt(const union sst_crypto_t *crypto,
                               in, in_len,
                               out, out_size, out_len);
     if (status != PSA_SUCCESS) {
-        return PSA_PS_ERROR_AUTH_FAILED;
+        return PSA_ERROR_INVALID_SIGNATURE;
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
-                                             const uint8_t *add,
-                                             uint32_t add_len)
+psa_status_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
+                                          const uint8_t *add,
+                                          uint32_t add_len)
 {
     psa_status_t status;
     size_t out_len;
@@ -233,15 +233,15 @@ psa_ps_status_t sst_crypto_generate_auth_tag(union sst_crypto_t *crypto,
                               0, 0,
                               crypto->ref.tag, SST_TAG_LEN_BYTES, &out_len);
     if (status != PSA_SUCCESS || out_len != SST_TAG_LEN_BYTES) {
-        return PSA_PS_ERROR_OPERATION_FAILED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-psa_ps_status_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
-                                        const uint8_t *add,
-                                        uint32_t add_len)
+psa_status_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
+                                     const uint8_t *add,
+                                     uint32_t add_len)
 {
     psa_status_t status;
     size_t out_len;
@@ -252,8 +252,8 @@ psa_ps_status_t sst_crypto_authenticate(const union sst_crypto_t *crypto,
                               crypto->ref.tag, SST_TAG_LEN_BYTES,
                               0, 0, &out_len);
     if (status != PSA_SUCCESS || out_len != 0) {
-        return PSA_PS_ERROR_AUTH_FAILED;
+        return PSA_ERROR_INVALID_SIGNATURE;
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }

@@ -25,7 +25,7 @@
 struct sst_object_info_t {
     uint32_t current_size; /*!< Current size of the object content in bytes */
     uint32_t max_size;     /*!< Maximum size of the object content in bytes */
-    psa_ps_create_flags_t create_flags; /*!< Object creation flags */
+    psa_storage_create_flags_t create_flags; /*!< Object creation flags */
 };
 
 /*!

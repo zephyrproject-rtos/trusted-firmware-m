@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -37,14 +37,14 @@ static bool sst_is_init = false;
  *       function call, as calls to the Crypto service are required for
  *       initialisation.
  *
- * \return PSA_SUCCESS if SST is initialised, PSA_ERROR_CONNECTION_REFUSED
+ * \return PSA_SUCCESS if SST is initialised, PSA_ERROR_GENERIC_ERROR
  *         otherwise.
  */
 static psa_status_t sst_check_init(void)
 {
     if (!sst_is_init) {
-        if (tfm_sst_init() != PSA_PS_SUCCESS) {
-            return PSA_ERROR_CONNECTION_REFUSED;
+        if (tfm_sst_init() != PSA_SUCCESS) {
+            return PSA_ERROR_GENERIC_ERROR;
         }
         sst_is_init = true;
     }
@@ -55,109 +55,91 @@ static psa_status_t sst_check_init(void)
 psa_status_t tfm_sst_set_req(psa_invec *in_vec, size_t in_len,
                              psa_outvec *out_vec, size_t out_len)
 {
-    psa_ps_uid_t uid;
+    psa_storage_uid_t uid;
     uint32_t data_length;
     int32_t client_id;
     int32_t status;
-    psa_ps_create_flags_t create_flags;
-    psa_ps_status_t *err;
+    psa_storage_create_flags_t create_flags;
 
     if (sst_check_init() != PSA_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if ((in_len != 3) || (out_len != 1)) {
+    if ((in_len != 3) || (out_len != 0)) {
         /* The number of arguments are incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    if (in_vec[0].len != sizeof(psa_ps_uid_t)) {
+    if (in_vec[0].len != sizeof(psa_storage_uid_t)) {
         /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    uid = *((psa_ps_uid_t *)in_vec[0].base);
+    uid = *((psa_storage_uid_t *)in_vec[0].base);
 
     p_data = (void *)in_vec[1].base;
     data_length = in_vec[1].len;
 
-    if (in_vec[2].len != sizeof(psa_ps_create_flags_t)) {
+    if (in_vec[2].len != sizeof(psa_storage_create_flags_t)) {
         /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    create_flags = *(psa_ps_create_flags_t *)in_vec[2].base;
-
-    if (out_vec[0].len != sizeof(psa_ps_status_t)) {
-        /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    err = (psa_ps_status_t *)out_vec[0].base;
+    create_flags = *(psa_storage_create_flags_t *)in_vec[2].base;
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
     if (status != (int32_t)TFM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    *err = tfm_sst_set(client_id, uid, data_length, create_flags);
-
-    return PSA_SUCCESS;
+    return tfm_sst_set(client_id, uid, data_length, create_flags);
 }
 
 psa_status_t tfm_sst_get_req(psa_invec *in_vec, size_t in_len,
                              psa_outvec *out_vec, size_t out_len)
 {
     uint32_t data_offset;
-    uint32_t data_length;
+    uint32_t data_size;
     int32_t client_id;
-    psa_ps_uid_t uid;
+    psa_storage_uid_t uid;
     int32_t status;
-    psa_ps_status_t *err;
+    size_t *p_data_length;
 
     if (sst_check_init() != PSA_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if ((in_len != 2) || (out_len != 2)) {
+    if ((in_len != 2) || (out_len != 1)) {
         /* The number of arguments are incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    if (in_vec[0].len != sizeof(psa_ps_uid_t)) {
+    if (in_vec[0].len != sizeof(psa_storage_uid_t)) {
         /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    uid = *((psa_ps_uid_t *)in_vec[0].base);
+    uid = *((psa_storage_uid_t *)in_vec[0].base);
 
     if (in_vec[1].len != sizeof(data_offset)) {
         /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     data_offset = *(uint32_t *)in_vec[1].base;
 
-    if (out_vec[0].len != sizeof(psa_ps_status_t)) {
-        /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    err = (psa_ps_status_t *)out_vec[0].base;
-
-    p_data = (void *)out_vec[1].base;
-    data_length = out_vec[1].len;
+    p_data = (void *)out_vec[0].base;
+    data_size = out_vec[0].len;
+    p_data_length = &out_vec[0].len;
 
     /* Get the caller's client ID */
     status = tfm_core_get_caller_client_id(&client_id);
     if (status != (int32_t)TFM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    *err = tfm_sst_get(client_id, uid, data_offset, data_length);
-
-    return PSA_SUCCESS;
+    return tfm_sst_get(client_id, uid, data_offset, data_size, p_data_length);
 
 }
 
@@ -165,92 +147,69 @@ psa_status_t tfm_sst_get_info_req(psa_invec *in_vec, size_t in_len,
                                   psa_outvec *out_vec, size_t out_len)
 {
     int32_t client_id;
-    psa_ps_uid_t uid;
-    struct psa_ps_info_t *p_info;
-    int32_t status;
-    psa_ps_status_t *err;
+    psa_storage_uid_t uid;
+    struct psa_storage_info_t *p_info;
+    int32_t tfm_status;
 
     if (sst_check_init() != PSA_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if ((in_len != 1) || (out_len != 2)) {
+    if ((in_len != 1) || (out_len != 1)) {
         /* The number of arguments are incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    if (in_vec[0].len != sizeof(psa_ps_uid_t)) {
+    if (in_vec[0].len != sizeof(psa_storage_uid_t)) {
         /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    uid = *((psa_ps_uid_t *)in_vec[0].base);
+    uid = *((psa_storage_uid_t *)in_vec[0].base);
 
-    if (out_vec[0].len != sizeof(psa_ps_status_t)) {
+    if (out_vec[0].len != sizeof(struct psa_storage_info_t)) {
         /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    err = (psa_ps_status_t *)out_vec[0].base;
-
-    if (out_vec[1].len != sizeof(struct psa_ps_info_t)) {
-        /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    p_info = (struct psa_ps_info_t *)out_vec[1].base;
+    p_info = (struct psa_storage_info_t *)out_vec[0].base;
 
     /* Get the caller's client ID */
-    status = tfm_core_get_caller_client_id(&client_id);
-    if (status != (int32_t)TFM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+    tfm_status = tfm_core_get_caller_client_id(&client_id);
+    if (tfm_status != (int32_t)TFM_SUCCESS) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    *err = tfm_sst_get_info(client_id, uid, p_info);
-
-    return PSA_SUCCESS;
+    return tfm_sst_get_info(client_id, uid, p_info);
 }
 
 psa_status_t tfm_sst_remove_req(psa_invec *in_vec, size_t in_len,
                                 psa_outvec *out_vec, size_t out_len)
 {
     int32_t client_id;
-    psa_ps_uid_t uid;
-    int32_t status;
-    psa_ps_status_t *err;
+    psa_storage_uid_t uid;
+    int32_t tfm_status;
 
     if (sst_check_init() != PSA_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if ((in_len != 1) || (out_len != 1)) {
-        /* The number of arguments are incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+    if ((in_len != 1) ||
+        (in_vec[0].len != sizeof(psa_storage_uid_t)) ||
+        (out_len != 0)) {
+        /* The number of arguments/output argument size are incorrect */
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    if (in_vec[0].len != sizeof(psa_ps_uid_t)) {
-        /* The input argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    uid = *((psa_ps_uid_t *)in_vec[0].base);
-
-    if (out_vec[0].len != sizeof(psa_ps_status_t)) {
-        /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    err = (psa_ps_status_t *)out_vec[0].base;
+    uid = *((psa_storage_uid_t *)in_vec[0].base);
 
     /* Get the caller's client ID */
-    status = tfm_core_get_caller_client_id(&client_id);
-    if (status != (int32_t)TFM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+    tfm_status = tfm_core_get_caller_client_id(&client_id);
+    if (tfm_status != (int32_t)TFM_SUCCESS) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    *err = tfm_sst_remove(client_id, uid);
-
-    return PSA_SUCCESS;
+    return tfm_sst_remove(client_id, uid);;
 }
 
 psa_status_t tfm_sst_get_support_req(psa_invec *in_vec, size_t in_len,
@@ -261,17 +220,17 @@ psa_status_t tfm_sst_get_support_req(psa_invec *in_vec, size_t in_len,
     (void)in_vec;
 
     if (sst_check_init() != PSA_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_GENERIC_ERROR;
     }
 
     if ((in_len != 0) || (out_len != 1)) {
         /* The number of arguments are incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     if (out_vec[0].len != sizeof(*support_flags)) {
         /* The output argument size is incorrect */
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     support_flags = (uint32_t *)out_vec[0].base;
@@ -287,130 +246,102 @@ static psa_msg_t msg;
 
 static psa_status_t tfm_sst_set_ipc(void)
 {
-    psa_ps_uid_t uid;
+    psa_storage_uid_t uid;
     int32_t client_id;
-    psa_ps_create_flags_t create_flags;
-    size_t in_size[3], out_size, num = 0;
-    psa_ps_status_t err;
+    psa_storage_create_flags_t create_flags;
+    size_t num = 0;
 
     client_id = msg.client_id;
-    in_size[0] = msg.in_size[0];
-    in_size[1] = msg.in_size[1];
-    in_size[2] = msg.in_size[2];
-    out_size = msg.out_size[0];
-    if (in_size[0] != sizeof(psa_ps_uid_t) ||
-        in_size[2] != sizeof(psa_ps_create_flags_t) ||
-        out_size != sizeof(psa_ps_status_t)) {
+
+    if (msg.in_size[0] != sizeof(psa_storage_uid_t) ||
+        msg.in_size[2] != sizeof(psa_storage_create_flags_t)) {
         /* The size of one of the arguments is incorrect */
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 0, &uid, in_size[0]);
-    if (num != in_size[0]) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 0, &uid, msg.in_size[0]);
+    if (num != msg.in_size[0]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 2, &create_flags, in_size[2]);
-    if (num != in_size[2]) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 2, &create_flags, msg.in_size[2]);
+    if (num != msg.in_size[2]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    err = tfm_sst_set(client_id, uid, in_size[1], create_flags);
-    psa_write(msg.handle, 0, &err, out_size);
-    return PSA_SUCCESS;
+    return tfm_sst_set(client_id, uid, msg.in_size[1], create_flags);
 }
 
 static psa_status_t tfm_sst_get_ipc(void)
 {
-    psa_ps_uid_t uid;
-    int32_t client_id;
+    psa_storage_uid_t uid;
     uint32_t data_offset;
-    size_t in_size[2], out_size[2], num = 0;
-    psa_ps_status_t err;
+    size_t num = 0;
+    size_t p_data_length;
 
-    client_id = msg.client_id;
-    in_size[0] = msg.in_size[0];
-    in_size[1] = msg.in_size[1];
-    out_size[0] = msg.out_size[0];
-    out_size[1] = msg.out_size[1];
-    if (in_size[0] != sizeof(psa_ps_uid_t) ||
-        in_size[1] != sizeof(uint32_t) ||
-        out_size[0] != sizeof(psa_ps_status_t)) {
+    if (msg.in_size[0] != sizeof(psa_storage_uid_t) ||
+        msg.in_size[1] != sizeof(uint32_t)) {
         /* The size of one of the arguments is incorrect */
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 0, &uid, in_size[0]);
-    if (num != in_size[0]) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 0, &uid,  msg.in_size[0]);
+    if (num != msg.in_size[0]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 1, &data_offset, in_size[1]);
-    if (num != in_size[1]) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 1, &data_offset, msg.in_size[1]);
+    if (num !=  msg.in_size[1]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    err = tfm_sst_get(client_id, uid, data_offset, out_size[1]);
-    psa_write(msg.handle, 0, &err, out_size[0]);
-    return PSA_SUCCESS;
+    return tfm_sst_get(msg.client_id, uid, data_offset,  msg.out_size[0],
+                       &p_data_length);
 }
 
 static psa_status_t tfm_sst_get_info_ipc(void)
 {
-    psa_ps_uid_t uid;
-    int32_t client_id;
-    struct psa_ps_info_t info;
-    size_t in_size, out_size[2], num = 0;
-    psa_ps_status_t err;
+    psa_storage_uid_t uid;
 
-    client_id = msg.client_id;
-    in_size = msg.in_size[0];
-    out_size[0] = msg.out_size[0];
-    out_size[1] = msg.out_size[1];
-    if (in_size != sizeof(psa_ps_uid_t) ||
-        out_size[0] != sizeof(psa_ps_status_t) ||
-        out_size[1] != sizeof(struct psa_ps_info_t)) {
+    struct psa_storage_info_t info;
+    size_t num = 0;
+    psa_status_t status;
+
+    if (msg.in_size[0] != sizeof(psa_storage_uid_t) ||
+        msg.out_size[0] != sizeof(struct psa_storage_info_t)) {
         /* The size of one of the arguments is incorrect */
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 0, &uid, in_size);
-    if (num != in_size) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 0, &uid, msg.in_size[0]);
+    if (num != msg.in_size[0]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    err = tfm_sst_get_info(client_id, uid, &info);
-    psa_write(msg.handle, 0, &err, out_size[0]);
-    if (err == PSA_PS_SUCCESS) {
-        psa_write(msg.handle, 1, &info, out_size[1]);
+    status = tfm_sst_get_info(msg.client_id, uid, &info);
+
+    if (status == PSA_SUCCESS) {
+        psa_write(msg.handle, 0, &info, msg.out_size[0]);
     }
-    return PSA_SUCCESS;
+    return status;
 }
 
 static psa_status_t tfm_sst_remove_ipc(void)
 {
-    psa_ps_uid_t uid;
-    int32_t client_id;
-    size_t in_size, out_size, num = 0;
-    psa_ps_status_t err;
+    psa_storage_uid_t uid;
+    size_t num = 0;
 
-    client_id = msg.client_id;
-    in_size = msg.in_size[0];
-    out_size = msg.out_size[0];
-    if (in_size != sizeof(psa_ps_uid_t) ||
-        out_size != sizeof(psa_ps_status_t)) {
+    if (msg.in_size[0] != sizeof(psa_storage_uid_t)) {
         /* The size of one of the arguments is incorrect */
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 0, &uid, in_size);
-    if (num != in_size) {
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+    num = psa_read(msg.handle, 0, &uid, msg.in_size[0]);
+    if (num != msg.in_size[0]) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    err = tfm_sst_remove(client_id, uid);
-    psa_write(msg.handle, 0, &err, out_size);
-    return PSA_SUCCESS;
+    return tfm_sst_remove(msg.client_id, uid);
 }
 
 static psa_status_t tfm_sst_get_support_ipc(void)
@@ -421,7 +352,7 @@ static psa_status_t tfm_sst_get_support_ipc(void)
     out_size = msg.out_size[0];
     if (out_size != sizeof(support_flags)) {
         /* The output argument size is incorrect */
-        return PSA_PS_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     support_flags = tfm_sst_get_support();
@@ -461,12 +392,12 @@ static void ps_signal_handle(psa_signal_t signal, sst_func_t pfn)
 }
 #endif /* !defined(TFM_PSA_API) */
 
-psa_ps_status_t tfm_sst_req_mngr_init(void)
+psa_status_t tfm_sst_req_mngr_init(void)
 {
 #ifdef TFM_PSA_API
     psa_signal_t signals = 0;
 
-    if (tfm_sst_init() != PSA_PS_SUCCESS) {
+    if (tfm_sst_init() != PSA_SUCCESS) {
         tfm_abort();
     }
 
@@ -492,28 +423,28 @@ psa_ps_status_t tfm_sst_req_mngr_init(void)
      * function call, as calls to the Crypto service are required for
      * initialisation.
      */
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-psa_ps_status_t sst_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size)
+psa_status_t sst_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size)
 {
 #ifdef TFM_PSA_API
   size_t num = 0;
   num = psa_read(msg.handle, 1, out_data, size);
   if (num != size) {
-      return PSA_PS_ERROR_INVALID_ARGUMENT;
+      return PSA_ERROR_PROGRAMMER_ERROR;
   }
 #else /* TFM_PSA_API */
   (void)tfm_memcpy(out_data, p_data, size);
 #endif
-  return PSA_PS_SUCCESS;
+  return PSA_SUCCESS;
 }
 
 void sst_req_mngr_write_asset_data(const uint8_t *in_data,
                                    uint32_t size)
 {
 #ifdef TFM_PSA_API
-  psa_write(msg.handle, 1, in_data, size);
+  psa_write(msg.handle, 0, in_data, size);
 #else /* TFM_PSA_API */
   (void)tfm_memcpy(p_data, in_data, size);
 #endif

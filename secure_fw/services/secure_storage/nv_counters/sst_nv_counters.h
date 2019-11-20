@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,10 +33,10 @@ extern "C" {
 /**
  * \brief Initializes all non-volatile (NV) counters.
  *
- * \return  PSA_PS_SUCCESS if the initialization succeeds, otherwise
- *          PSA_PS_ERROR_OPERATION_FAILED
+ * \return  PSA_SUCCESS if the initialization succeeds, otherwise
+ *          PSA_ERROR_GENERIC_ERROR
  */
-psa_ps_status_t sst_init_nv_counter(void);
+psa_status_t sst_init_nv_counter(void);
 
 /**
  * \brief Reads the given non-volatile (NV) counter.
@@ -44,11 +44,11 @@ psa_ps_status_t sst_init_nv_counter(void);
  * \param[in]  counter_id  NV counter ID.
  * \param[out] val         Pointer to store the current NV counter value.
  *
- * \return  PSA_PS_SUCCESS if the value is read correctly, otherwise
- *          PSA_PS_ERROR_OPERATION_FAILED
+ * \return  PSA_SUCCESS if the value is read correctly, otherwise
+ *          PSA_ERROR_GENERIC_ERROR
  */
-psa_ps_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
-                                    uint32_t *val);
+psa_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
+                                 uint32_t *val);
 
 /**
  * \brief Increments the given non-volatile (NV) counter.
@@ -56,9 +56,9 @@ psa_ps_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,
  * \param[in] counter_id  NV counter ID.
  *
  * \return  If the counter is incremented correctly, it returns
- *          PSA_PS_SUCCESS. Otherwise, PSA_PS_ERROR_OPERATION_FAILED.
+ *          PSA_SUCCESS. Otherwise, PSA_ERROR_GENERIC_ERROR.
  */
-psa_ps_status_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
+psa_status_t sst_increment_nv_counter(enum tfm_nv_counter_t counter_id);
 
 #ifdef __cplusplus
 }

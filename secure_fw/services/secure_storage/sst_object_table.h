@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,9 +33,9 @@ struct sst_obj_table_info_t {
 /**
  * \brief Creates object table.
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_create(void);
+psa_status_t sst_object_table_create(void);
 
 /**
  * \brief Initializes object table.
@@ -44,9 +44,9 @@ psa_ps_status_t sst_object_table_create(void);
  *                          in other to reuse that memory to allocated a
  *                          temporary object table.
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_init(uint8_t *obj_data);
+psa_status_t sst_object_table_init(uint8_t *obj_data);
 
 /**
  * \brief Checks if there is an entry in the table for the provided UID and
@@ -55,13 +55,13 @@ psa_ps_status_t sst_object_table_init(uint8_t *obj_data);
  * \param[in] uid        Identifier for the data
  * \param[in] client_id  Identifier of the asset’s owner (client)
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  *
- * \retval PSA_PS_SUCCESS              If there is a table entry for the object
- * \retval PSA_PS_ERROR_UID_NOT_FOUND  If no table entry exists for the object
+ * \retval PSA_SUCCESS                 If there is a table entry for the object
+ * \retval PSA_ERROR_DOES_NOT_EXIST    If no table entry exists for the object
  */
-psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid,
-                                           int32_t client_id);
+psa_status_t sst_object_table_obj_exist(psa_storage_uid_t uid,
+                                        int32_t client_id);
 
 /**
  * \brief Gets a not in use file ID.
@@ -72,12 +72,12 @@ psa_ps_status_t sst_object_table_obj_exist(psa_ps_uid_t uid,
  *                    return 1 file ID.
  * \param[out] p_fid  Pointer to the location to store the file ID
  *
- * \return Returns PSA_PS_SUCCESS if the fid is valid and fid_num - 1 entries
+ * \return Returns PSA_SUCCESS if the fid is valid and fid_num - 1 entries
  *         are still free in the table. Otherwise, it returns an error code as
- *         specified in \ref psa_ps_status_t
+ *         specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_get_free_fid(uint32_t fid_num,
-                                              uint32_t *p_fid);
+psa_status_t sst_object_table_get_free_fid(uint32_t fid_num,
+                                           uint32_t *p_fid);
 
 /**
  * \brief Sets object table information in the object table and stores it
@@ -91,10 +91,10 @@ psa_ps_status_t sst_object_table_get_free_fid(uint32_t fid_num,
  * \note  A call to this function results in writing the table to the
  *        file system.
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
-                                                  int32_t client_id,
+psa_status_t sst_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
+                                               int32_t client_id,
                                const struct sst_obj_table_info_t *obj_tbl_info);
 
 /**
@@ -106,11 +106,11 @@ psa_ps_status_t sst_object_table_set_obj_tbl_info(psa_ps_uid_t uid,
  * \param[out] obj_tbl_info  Pointer to the location to store object table
  *                           information
  *
- * \return Returns PSA_PS_SUCCESS if the object exists. Otherwise, it
- *         returns PSA_PS_ERROR_UID_NOT_FOUND.
+ * \return Returns PSA_SUCCESS if the object exists. Otherwise, it
+ *         returns PSA_ERROR_DOES_NOT_EXIST.
  */
-psa_ps_status_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
-                                                  int32_t client_id,
+psa_status_t sst_object_table_get_obj_tbl_info(psa_storage_uid_t uid,
+                                               int32_t client_id,
                                      struct sst_obj_table_info_t *obj_tbl_info);
 
 /**
@@ -119,17 +119,17 @@ psa_ps_status_t sst_object_table_get_obj_tbl_info(psa_ps_uid_t uid,
  * \param[in]  uid        Identifier for the data.
  * \param[in]  client_id  Identifier of the asset’s owner (client)
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_delete_object(psa_ps_uid_t uid,
-                                               int32_t client_id);
+psa_status_t sst_object_table_delete_object(psa_storage_uid_t uid,
+                                            int32_t client_id);
 
 /**
  * \brief Deletes old object table from the persistent area.
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  */
-psa_ps_status_t sst_object_table_delete_old_table(void);
+psa_status_t sst_object_table_delete_old_table(void);
 
 #ifdef __cplusplus
 }

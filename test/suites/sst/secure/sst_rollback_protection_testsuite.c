@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -105,32 +105,33 @@ void register_testsuite_s_rollback_protection(struct test_suite_t *p_test_suite)
  */
 static void tfm_sst_test_4001(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     uint32_t old_nvc_1, nvc_1, nvc_2, nvc_3;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
 
     /* Reads NV counter 1 to get the saved value to compare it later */
     status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &old_nvc_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
 
     /* Sets new data in the asset to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -141,7 +142,7 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
 
     /* Reads NV counter 1 to get the current value */
     status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_1, &nvc_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -156,7 +157,7 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
 
     /* Reads NV counter 2 to get the current value */
     status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_2, &nvc_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -168,7 +169,7 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
 
     /* Reads NV counter 3 to get the current value */
     status = test_sst_read_nv_counter(TFM_SST_NV_COUNTER_3, &nvc_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Read should not fail");
         return;
     }
@@ -185,15 +186,15 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
      * the SST area authentication is aligned with those values.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("AM prepare should not fail");
         return;
     }
 
     /* Gets data from the asset */
-    status = psa_ps_get(uid, offset, data_len, (read_data +
-                                                HALF_PADDING_SIZE));
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, (read_data + HALF_PADDING_SIZE),
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -206,7 +207,7 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -220,34 +221,34 @@ static void tfm_sst_test_4001(struct test_result_t *ret)
  */
 static void tfm_sst_test_4002(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
 
     /* Increments all counters to make that SST area version old/invalid */
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -259,7 +260,7 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
      * NV counters values.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_GENERIC_ERROR) {
         TEST_FAIL("SST system prepare should fail as version is old");
         return;
     }
@@ -276,33 +277,33 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
 
     /* Aligns NV counters with the SST area version */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -318,17 +319,18 @@ static void tfm_sst_test_4002(struct test_result_t *ret)
  */
 static void tfm_sst_test_4003(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -337,7 +339,7 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
      * and make the current SST area version match NV counter 1 and 2 values.
      */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -349,15 +351,15 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
      * 2 values.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Gets the data from the asset */
-    status = psa_ps_get(uid, offset, data_len, (read_data +
-                                                HALF_PADDING_SIZE));
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, (read_data + HALF_PADDING_SIZE),
+                                                &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -370,7 +372,7 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -387,17 +389,18 @@ static void tfm_sst_test_4003(struct test_result_t *ret)
  */
 static void tfm_sst_test_4004(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -406,7 +409,7 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
      * and make the current SST area version match NV counter 2 and 3 values.
      */
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -418,15 +421,15 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
      * and 3 values.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Gets the data from the asset */
-    status = psa_ps_get(uid, offset, data_len, (read_data +
-                                                HALF_PADDING_SIZE));
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, (read_data + HALF_PADDING_SIZE),
+                                                &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -439,7 +442,7 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -456,17 +459,18 @@ static void tfm_sst_test_4004(struct test_result_t *ret)
  */
 static void tfm_sst_test_4005(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -475,13 +479,13 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
      * counter 1 only.
      */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -492,15 +496,15 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Gets the data from the asset */
-    status = psa_ps_get(uid, offset, data_len, (read_data +
-                                                HALF_PADDING_SIZE));
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, (read_data + HALF_PADDING_SIZE),
+                                                &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -513,7 +517,7 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -527,17 +531,18 @@ static void tfm_sst_test_4005(struct test_result_t *ret)
  */
 static void tfm_sst_test_4006(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -546,19 +551,19 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
      * version match NV counter 1 only.
      */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -569,15 +574,15 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
      * Prepare should not fail as the SST area version match the NV counter 1.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Gets data from the asset */
-    status = psa_ps_get(uid, offset, data_len, (read_data +
-                                                HALF_PADDING_SIZE));
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, (read_data + HALF_PADDING_SIZE),
+                                                &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -590,7 +595,7 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -604,15 +609,15 @@ static void tfm_sst_test_4006(struct test_result_t *ret)
  */
 static void tfm_sst_test_4007(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -621,13 +626,13 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
      * version match NV counter 2 only.
      */
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
@@ -639,7 +644,7 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
      * the other counters are different.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_GENERIC_ERROR) {
         TEST_FAIL("SST system prepare should fail");
         return;
     }
@@ -656,27 +661,27 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
 
     /* Aligns NV counters with the SST area version */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_3);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -690,15 +695,15 @@ static void tfm_sst_test_4007(struct test_result_t *ret)
  */
 static void tfm_sst_test_4008(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
@@ -707,19 +712,19 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
      * version match NV counter 3 only.
      */
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
 
     status = test_sst_increment_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Increment should not fail");
         return;
     }
@@ -731,7 +736,7 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
      * the other counters are different.
      */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_GENERIC_ERROR) {
         TEST_FAIL("AM prepare should fail");
         return;
     }
@@ -748,33 +753,33 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
 
     /* Align NV counters with the SST area version */
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     status = test_sst_decrement_nv_counter(TFM_SST_NV_COUNTER_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Decrement should not fail");
         return;
     }
 
     /* Calls sst_system_prepare to mark the SST area as a valid image */
     status = tfm_sst_test_system_prepare();
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("SST system prepare should not fail");
         return;
     }
 
     /* Removes the asset to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -788,9 +793,9 @@ static void tfm_sst_test_4008(struct test_result_t *ret)
  */
 static void tfm_sst_test_4009(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
@@ -801,7 +806,7 @@ static void tfm_sst_test_4009(struct test_result_t *ret)
 
     /* Creates an asset in the SST area to generate a new SST area version */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_GENERIC_ERROR) {
         TEST_FAIL("Set should fail as the non-volatile counters can not be"
                   " increased");
         return;

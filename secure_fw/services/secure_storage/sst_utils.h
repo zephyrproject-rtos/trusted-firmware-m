@@ -36,6 +36,11 @@ extern "C" {
 typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
 
 /**
+ * \brief Evaluates to the minimum of the two parameters.
+ */
+#define SST_UTILS_MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+/**
  * \brief Checks if a subset region is fully contained within a superset region.
  *
  * \param[in] superset_size  Size of superset region
@@ -43,24 +48,19 @@ typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
  *                           superset region
  * \param[in] subset_size    Size of subset region
  *
- * \return Returns error code as specified in \ref psa_ps_status_t
+ * \return Returns error code as specified in \ref psa_status_t
  *
- * \retval PSA_PS_SUCCESS               The subset is contained within the
+ * \retval PSA_SUCCESS                  The subset is contained within the
  *                                      superset
- * \retval PSA_PS_ERROR_OFFSET_INVALID  The subset offset is greater than the
- *                                      size of the superset
- * \retval PSA_PS_ERROR_INCORRECT_SIZE  The subset offset is valid, but the
+ * \retval PSA_ERROR_INVALID_ARGUMENT   The subset offset is greater than the
+ *                                      size of the superset or when
+ *                                      the subset offset is valid, but the
  *                                      subset offset + size is greater than the
  *                                      size of the superset
  */
-psa_ps_status_t sst_utils_check_contained_in(uint32_t superset_size,
-                                             uint32_t subset_offset,
-                                             uint32_t subset_size);
-
-/**
- * \brief Converts from psa_status_t to psa_ps_status_t
- */
-psa_ps_status_t psa_status_to_psa_ps_status(psa_status_t status);
+psa_status_t sst_utils_check_contained_in(uint32_t superset_size,
+                                          uint32_t subset_offset,
+                                          uint32_t subset_size);
 
 #ifdef __cplusplus
 }

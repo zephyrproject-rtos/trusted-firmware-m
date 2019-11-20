@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,11 +38,14 @@
 #define WRITE_DATA_SIZE          (sizeof(WRITE_DATA) - 1)
 #define READ_DATA                "_________________________________________"
 #define RESULT_DATA              ("____" WRITE_DATA "____")
+#define OFFSET_READ_DATA         "HEQUICKBROWNFOXJUMPSOVERALAZYDOG"
+#define OFFSET_RESULT_DATA       ("____" OFFSET_READ_DATA "_____")
 
 #define TEST_1022_CYCLES         3U
 
 static const uint8_t write_asset_data[SST_MAX_ASSET_SIZE] = {0xBF};
 static uint8_t read_asset_data[SST_MAX_ASSET_SIZE] = {0};
+static size_t read_asset_datal_len = 0;
 
 /* List of tests */
 static void tfm_sst_test_2001(struct test_result_t *ret);
@@ -139,36 +142,36 @@ void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite)
  */
 static void tfm_sst_test_2001(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_1;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = 0;
     const uint8_t write_data[] = {0};
 
     /* Set with no data and no flags and a valid UID */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid UID");
         return;
     }
 
     /* Attempt to set a second time */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail the second time with valid UID");
         return;
     }
 
     /* Set with an invalid UID */
     status = psa_ps_set(INVALID_UID, data_len, write_data, flags);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Set should not succeed with an invalid UID");
         return;
     }
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -184,33 +187,34 @@ static void tfm_sst_test_2001(struct test_result_t *ret)
  */
 static void tfm_sst_test_2002(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_2;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_2;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     /* Set with no flags */
     status = psa_ps_set(WRITE_ONCE_UID, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with no flags");
         return;
     }
 
-    /* Set with valid flag: PSA_PS_FLAG_WRITE_ONCE (with previously created UID)
+    /* Set with valid flag: PSA_STORAGE_FLAG_WRITE_ONCE
+     * (with previously created UID)
      * Note: Once created, WRITE_ONCE_UID cannot be deleted. It is reused across
      * multiple tests.
      */
     status = psa_ps_set(WRITE_ONCE_UID, WRITE_ONCE_DATA_SIZE, WRITE_ONCE_DATA,
-                        PSA_PS_FLAG_WRITE_ONCE);
-    if (status != PSA_PS_SUCCESS) {
+                        PSA_STORAGE_FLAG_WRITE_ONCE);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail with valid flags (and existing UID)");
         return;
     }
 
     /* Set with invalid flags */
     status = psa_ps_set(uid, data_len, write_data, INVALID_FLAG);
-    if (status != PSA_PS_ERROR_FLAGS_NOT_SUPPORTED) {
+    if (status != PSA_ERROR_NOT_SUPPORTED) {
         TEST_FAIL("Set should not succeed with invalid flags");
         return;
     }
@@ -229,14 +233,14 @@ static void tfm_sst_test_2002(struct test_result_t *ret)
  */
 static void tfm_sst_test_2003(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_3;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = 0;
 
     /* Set with NULL data pointer */
     status = psa_ps_set(uid, data_len, NULL, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should succeed with NULL data pointer and zero length");
         return;
     }
@@ -251,9 +255,9 @@ static void tfm_sst_test_2003(struct test_result_t *ret)
 static void tfm_sst_test_2004(struct test_result_t *ret)
 {
 #ifndef TFM_PSA_API
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_1;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = INVALID_DATA_LEN;
     const uint8_t write_data[] = WRITE_DATA;
 
@@ -261,12 +265,12 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
      * maximum permitted, it is treated as a secure violation.
      * TF-M framework rejects the request with a proper error code.
      * The SST secure PSA PS implementation returns
-     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     * PSA_ERROR_INVALID_ARGUMENT in that case.
      */
 
     /* Set with data length longer than the maximum supported */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Set should not succeed with invalid data length");
         return;
     }
@@ -281,25 +285,27 @@ static void tfm_sst_test_2004(struct test_result_t *ret)
  */
 static void tfm_sst_test_2005(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = WRITE_ONCE_UID;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = WRITE_ONCE_UID;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t write_len = WRITE_DATA_SIZE;
     const uint32_t read_len = WRITE_ONCE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = WRITE_ONCE_READ_DATA;
+    size_t read_data_len = 0;
 
     /* Set a write once UID a second time */
     status = psa_ps_set(uid, write_len, write_data, flags);
-    if (status != PSA_PS_ERROR_WRITE_ONCE) {
+    if (status != PSA_ERROR_NOT_PERMITTED) {
         TEST_FAIL("Set should not rewrite a write once UID");
         return;
     }
 
     /* Get write once data */
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -320,24 +326,26 @@ static void tfm_sst_test_2005(struct test_result_t *ret)
  */
 static void tfm_sst_test_2006(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_2;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_2;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     uint32_t data_len = WRITE_DATA_SIZE;
     uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
     const uint8_t *p_read_data = read_data;
+    size_t read_data_len = 0;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
 
     /* Get the entire data */
-    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -355,8 +363,9 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
     offset = 2;
     data_len -= offset + 2;
 
-    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -383,7 +392,7 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -398,24 +407,26 @@ static void tfm_sst_test_2006(struct test_result_t *ret)
  */
 static void tfm_sst_test_2007(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_3;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t write_len = WRITE_DATA_SIZE;
     const uint32_t read_len = 0;
     uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     status = psa_ps_set(uid, write_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
 
     /* Get zero data from zero offset */
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail with zero data len");
         return;
     }
@@ -429,8 +440,9 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
     offset = 5;
 
     /* Get zero data from non-zero offset */
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -443,7 +455,7 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -458,15 +470,17 @@ static void tfm_sst_test_2007(struct test_result_t *ret)
  */
 static void tfm_sst_test_2008(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_1;
     const uint32_t data_len = 1;
     const uint32_t offset = 0;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Get with UID that has not yet been set */
-    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_UID_NOT_FOUND) {
+    status = psa_ps_get(uid, offset, data_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("Get succeeded with non-existant UID");
         return;
     }
@@ -479,8 +493,8 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
 
     /* Get with invalid UID */
     status = psa_ps_get(INVALID_UID, offset, data_len,
-                        read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+                        read_data + HALF_PADDING_SIZE, &read_data_len);
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get succeeded with invalid UID");
         return;
     }
@@ -503,17 +517,18 @@ static void tfm_sst_test_2008(struct test_result_t *ret)
  */
 static void tfm_sst_test_2009(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_2;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_2;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t write_len = WRITE_DATA_SIZE;
     uint32_t read_len;
     uint32_t offset;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     status = psa_ps_set(uid, write_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
@@ -522,8 +537,9 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     read_len = 1;
     offset = write_len + 1;
 
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_OFFSET_INVALID) {
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get should not succeed with offset too large");
         return;
     }
@@ -538,14 +554,21 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     read_len = write_len + 1;
     offset = 0;
 
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_INCORRECT_SIZE) {
-        TEST_FAIL("Get should not succeed with data length too large");
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Get should succeed with data length larger than UID's "
+                  "length");
+        return;
+    }
+
+    if (read_data_len != write_len) {
+        TEST_FAIL("Read data length should be equal to UID's length");
         return;
     }
 
     /* Check that the read data is unchanged */
-    if (tfm_memcmp(read_data, READ_DATA, sizeof(read_data)) != 0) {
+    if (tfm_memcmp(read_data, RESULT_DATA, sizeof(read_data)) != 0) {
         TEST_FAIL("Read data should be equal to original read data");
         return;
     }
@@ -556,14 +579,25 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     read_len = write_len;
     offset = 1;
 
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_INCORRECT_SIZE) {
-        TEST_FAIL("Get should not succeed with offset + data length too large");
+    /* Reset read_data to original READ_DATA */
+    tfm_memcpy(read_data, READ_DATA, sizeof(read_data));
+
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Get should succeed with offset + data length too large, "
+                  "but individually valid");
+        return;
+    }
+
+    if (read_data_len != write_len - offset) {
+        TEST_FAIL("Read data length should be equal to the UID's remaining "
+                  "size starting from offset");
         return;
     }
 
     /* Check that the read data is unchanged */
-    if (tfm_memcmp(read_data, READ_DATA, sizeof(read_data)) != 0) {
+    if (tfm_memcmp(read_data, OFFSET_RESULT_DATA, sizeof(read_data)) != 0) {
         TEST_FAIL("Read data should be equal to original read data");
         return;
     }
@@ -573,15 +607,19 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
     read_len = INVALID_DATA_LEN;
     offset = INVALID_OFFSET;
 
+    /* Reset read_data to original READ_DATA */
+    tfm_memcpy(read_data, READ_DATA, sizeof(read_data));
+
     /* A parameter with a buffer pointer where its data length is longer than
      * maximum permitted, it is treated as a secure violation.
      * TF-M framework rejects the request with a proper error code.
      * The SST secure PSA PS implementation returns
-     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     * PSA_ERROR_INVALID_ARGUMENT in that case.
      */
 
-    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    status = psa_ps_get(uid, offset, read_len, read_data + HALF_PADDING_SIZE,
+                        &read_data_len);
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get should not succeed with invalid arguments");
         return;
     }
@@ -595,7 +633,7 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -614,29 +652,30 @@ static void tfm_sst_test_2009(struct test_result_t *ret)
  */
 static void tfm_sst_test_2010(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_3;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
+    size_t read_data_len = 0;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
 
     /* Get with NULL data pointer */
-    status = psa_ps_get(uid, offset, 0, NULL);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, 0, NULL, &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should succeed with NULL data pointer and zero length");
         return;
     }
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -650,13 +689,13 @@ static void tfm_sst_test_2010(struct test_result_t *ret)
  */
 static void tfm_sst_test_2011(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = WRITE_ONCE_UID;
-    struct psa_ps_info_t info = {0};
+    psa_status_t status;
+    const psa_storage_uid_t uid = WRITE_ONCE_UID;
+    struct psa_storage_info_t info = {0};
 
     /* Get info for write once UID */
     status = psa_ps_get_info(uid, &info);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get info should not fail for write once UID");
         return;
     }
@@ -667,7 +706,7 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
         return;
     }
 
-    if (info.flags != PSA_PS_FLAG_WRITE_ONCE) {
+    if (info.flags != PSA_STORAGE_FLAG_WRITE_ONCE) {
         TEST_FAIL("Flags incorrect for write once UID");
         return;
     }
@@ -681,22 +720,22 @@ static void tfm_sst_test_2011(struct test_result_t *ret)
  */
 static void tfm_sst_test_2012(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    struct psa_ps_info_t info = {0};
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_1;
+    struct psa_storage_info_t info = {0};
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
 
     /* Get info for valid UID */
     status = psa_ps_get_info(uid, &info);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get info should not fail with valid UID");
         return;
     }
@@ -714,7 +753,7 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -729,13 +768,13 @@ static void tfm_sst_test_2012(struct test_result_t *ret)
  */
 static void tfm_sst_test_2013(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_2;
-    struct psa_ps_info_t info = {0};
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_2;
+    struct psa_storage_info_t info = {0};
 
     /* Get info with UID that has not yet been set */
     status = psa_ps_get_info(uid, &info);
-    if (status != PSA_PS_ERROR_UID_NOT_FOUND) {
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("Get info should not succeed with unset UID");
         return;
     }
@@ -753,7 +792,7 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
 
     /* Get info with invalid UID */
     status = psa_ps_get_info(INVALID_UID, &info);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get info should not succeed with invalid UID");
         return;
     }
@@ -778,14 +817,14 @@ static void tfm_sst_test_2013(struct test_result_t *ret)
  */
 static void tfm_sst_test_2014(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_3;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint8_t write_data[] = WRITE_DATA;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
@@ -793,13 +832,13 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
     /* A parameter with a null pointer is treated as a secure violation.
      * TF-M framework rejects the request with a proper error code.
      * The SST secure PSA PS implementation returns
-     * PSA_PS_ERROR_OPERATION_FAILED in that case.
+     * PSA_ERROR_GENERIC_ERROR in that case.
      */
 
     /* Get info with NULL info pointer */
 #ifndef TFM_PSA_API
     status = psa_ps_get_info(uid, NULL);
-    if (status != PSA_PS_ERROR_OPERATION_FAILED) {
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Get info should not succeed with NULL info pointer");
         return;
     }
@@ -807,7 +846,7 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
 
     /* Call remove to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
@@ -821,45 +860,46 @@ static void tfm_sst_test_2014(struct test_result_t *ret)
  */
 static void tfm_sst_test_2015(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    struct psa_ps_info_t info = {0};
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_1;
+    struct psa_storage_info_t info = {0};
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
 
     /* Call remove with valid ID */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail with valid UID");
         return;
     }
 
     /* Check that get info fails for removed UID */
     status = psa_ps_get_info(uid, &info);
-    if (status != PSA_PS_ERROR_UID_NOT_FOUND) {
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("Get info should not succeed with removed UID");
         return;
     }
 
     /* Check that get fails for removed UID */
-    status = psa_ps_get(uid, offset, data_len, read_data);
-    if (status != PSA_PS_ERROR_UID_NOT_FOUND) {
+    status = psa_ps_get(uid, offset, data_len, read_data, &read_data_len);
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("Get should not succeed with removed UID");
         return;
     }
 
     /* Check that remove fails for removed UID */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_ERROR_UID_NOT_FOUND) {
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("Remove should not succeed with removed UID");
         return;
     }
@@ -873,12 +913,12 @@ static void tfm_sst_test_2015(struct test_result_t *ret)
  */
 static void tfm_sst_test_2016(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = WRITE_ONCE_UID;
+    psa_status_t status;
+    const psa_storage_uid_t uid = WRITE_ONCE_UID;
 
     /* Call remove with write once UID */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_ERROR_WRITE_ONCE) {
+    if (status != PSA_ERROR_NOT_PERMITTED) {
         TEST_FAIL("Remove should not succeed with write once UID");
         return;
     }
@@ -892,12 +932,12 @@ static void tfm_sst_test_2016(struct test_result_t *ret)
  */
 static void tfm_sst_test_2017(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = INVALID_UID;
+    psa_status_t status;
+    const psa_storage_uid_t uid = INVALID_UID;
 
     /* Call remove with an invalid UID */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
+    if (status != PSA_ERROR_INVALID_ARGUMENT) {
         TEST_FAIL("Remove should not succeed with invalid UID");
         return;
     }
@@ -914,26 +954,27 @@ static void tfm_sst_test_2017(struct test_result_t *ret)
  */
 static void tfm_sst_test_2018(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid_1 = TEST_UID_2;
-    const psa_ps_uid_t uid_2 = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid_1 = TEST_UID_2;
+    const psa_storage_uid_t uid_2 = TEST_UID_3;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len_2 = WRITE_DATA_SIZE;
     const uint32_t offset = 0;
     const uint8_t write_data_1[] = "UID 1 DATA";
     const uint8_t write_data_2[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Set UID 1 */
     status = psa_ps_set(uid_1, sizeof(write_data_1), write_data_1, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail for UID 1");
         return;
     }
 
     /* Set UID 2 */
     status = psa_ps_set(uid_2, data_len_2, write_data_2, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail for UID 2");
         return;
     }
@@ -942,7 +983,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
      * the block.
      */
     status = psa_ps_remove(uid_1);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail for UID 1");
         return;
     }
@@ -951,8 +992,8 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
      * the data from UID 2 correctly.
      */
     status = psa_ps_get(uid_2, offset, data_len_2,
-                        read_data + HALF_PADDING_SIZE);
-    if (status != PSA_PS_SUCCESS) {
+                        read_data + HALF_PADDING_SIZE, &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail for UID 2");
         return;
     }
@@ -964,7 +1005,7 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
 
     /* Remove UID 2 to clean up storage for the next test */
     status = psa_ps_remove(uid_2);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail for UID 2");
         return;
     }
@@ -977,18 +1018,19 @@ static void tfm_sst_test_2018(struct test_result_t *ret)
  */
 static void tfm_sst_test_2019(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
+    psa_status_t status;
     uint32_t i;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    const psa_storage_uid_t uid = TEST_UID_1;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t data_len = WRITE_DATA_SIZE;
     uint32_t offset = 0;
     const uint8_t write_data[] = WRITE_DATA;
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Set the entire data into UID */
     status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Set should not fail");
         return;
     }
@@ -996,8 +1038,9 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
     /* Get the data from UID one byte at a time */
     for (i = 0; i < data_len; ++i) {
         status = psa_ps_get(uid, offset, 1,
-                            (read_data + HALF_PADDING_SIZE + i));
-        if (status != PSA_PS_SUCCESS) {
+                            (read_data + HALF_PADDING_SIZE + i),
+                             &read_data_len);
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("Get should not fail for partial read");
             return;
         }
@@ -1012,7 +1055,7 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
 
     /* Remove UID to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail");
         return;
     }
@@ -1025,38 +1068,40 @@ static void tfm_sst_test_2019(struct test_result_t *ret)
  */
 static void tfm_sst_test_2020(struct test_result_t *ret)
 {
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_2;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_2;
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
     const uint32_t offset = 0;
     const uint8_t write_data_1[] = "ONE";
     const uint8_t write_data_2[] = "TWO";
     const uint8_t write_data_3[] = "THREE";
     uint8_t read_data[] = READ_DATA;
+    size_t read_data_len = 0;
 
     /* Set write data 1 into UID */
     status = psa_ps_set(uid, sizeof(write_data_1), write_data_1, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("First set should not fail");
         return;
     }
 
     /* Set write data 2 into UID */
     status = psa_ps_set(uid, sizeof(write_data_2), write_data_2, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Second set should not fail");
         return;
     }
 
     /* Set write data 3 into UID */
     status = psa_ps_set(uid, sizeof(write_data_3), write_data_3, flags);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Third set should not fail");
         return;
     }
 
-    status = psa_ps_get(uid, offset, sizeof(write_data_3), read_data);
-    if (status != PSA_PS_SUCCESS) {
+    status = psa_ps_get(uid, offset, sizeof(write_data_3), read_data,
+                        &read_data_len);
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Get should not fail");
         return;
     }
@@ -1069,7 +1114,7 @@ static void tfm_sst_test_2020(struct test_result_t *ret)
 
     /* Remove UID to clean up storage for the next test */
     status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
+    if (status != PSA_SUCCESS) {
         TEST_FAIL("Remove should not fail");
         return;
     }
@@ -1102,8 +1147,8 @@ static void tfm_sst_test_2021(struct test_result_t *ret)
 static void tfm_sst_test_2022(struct test_result_t *ret)
 {
     uint8_t cycle;
-    psa_ps_status_t status;
-    const psa_ps_uid_t test_uid[TEST_1022_CYCLES] = {
+    psa_status_t status;
+    const psa_storage_uid_t test_uid[TEST_1022_CYCLES] = {
         TEST_UID_1,
         TEST_UID_2,
         TEST_UID_3};
@@ -1115,8 +1160,8 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
     /* Loop to test different asset sizes and UID's*/
     for (cycle = 0; cycle < TEST_1022_CYCLES; cycle++) {
         uint32_t data_size = test_asset_sizes[cycle];
-        psa_ps_uid_t uid = test_uid[cycle];
-        struct psa_ps_info_t info = {0};
+        psa_storage_uid_t uid = test_uid[cycle];
+        struct psa_storage_info_t info = {0};
 
         tfm_memset(read_asset_data, 0x00, sizeof(read_asset_data));
 
@@ -1124,15 +1169,15 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
         status = psa_ps_set(uid,
                             data_size,
                             write_asset_data,
-                            PSA_PS_FLAG_NONE);
-        if (status != PSA_PS_SUCCESS) {
+                            PSA_STORAGE_FLAG_NONE);
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("Set should not fail with valid UID");
             return;
         }
 
         /* Get info for valid UID */
         status = psa_ps_get_info(uid, &info);
-        if (status != PSA_PS_SUCCESS) {
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("Get info should not fail with valid UID");
             return;
         }
@@ -1143,14 +1188,15 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
             return;
         }
 
-        if (info.flags != PSA_PS_FLAG_NONE) {
+        if (info.flags != PSA_STORAGE_FLAG_NONE) {
             TEST_FAIL("Flags incorrect for valid UID");
             return;
         }
 
         /* Check that thread can still get UID */
-        status = psa_ps_get(uid, 0, data_size, read_asset_data);
-        if (status != PSA_PS_SUCCESS) {
+        status = psa_ps_get(uid, 0, data_size, read_asset_data,
+                            &read_asset_datal_len);
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("Get should not fail with valid UID");
             return;
         }
@@ -1163,7 +1209,7 @@ static void tfm_sst_test_2022(struct test_result_t *ret)
 
         /* Call remove to clean up storage for the next test */
         status = psa_ps_remove(uid);
-        if (status != PSA_PS_SUCCESS) {
+        if (status != PSA_SUCCESS) {
             TEST_FAIL("Remove should not fail with valid UID");
             return;
         }
