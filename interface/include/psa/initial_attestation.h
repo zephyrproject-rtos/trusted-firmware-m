@@ -45,7 +45,9 @@ enum psa_attest_err_t {
     PSA_ATTEST_ERR_INIT_FAILED,
     /** Token buffer is too small to store the created token there */
     PSA_ATTEST_ERR_TOKEN_BUFFER_OVERFLOW,
-    /** Some of the mandatory claims are unavailable*/
+    /** Attestation key buffer is too small to store the obtained key there */
+    PSA_ATTEST_ERR_KEY_BUFFER_OVERFLOW,
+    /** Some of the mandatory claims are unavailable */
     PSA_ATTEST_ERR_CLAIM_UNAVAILABLE,
     /** Some parameter or combination of parameters are recognised as invalid:
      * - challenge size is not allowed

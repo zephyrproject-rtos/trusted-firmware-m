@@ -45,6 +45,8 @@ extern "C" {
 #define TFM_ATTEST_GET_TOKEN_VERSION                               (1U)
 #define TFM_ATTEST_GET_TOKEN_SIZE_SID                              (0x00000021U)
 #define TFM_ATTEST_GET_TOKEN_SIZE_VERSION                          (1U)
+#define TFM_ATTEST_GET_PUBLIC_KEY_SID                              (0x00000022U)
+#define TFM_ATTEST_GET_PUBLIC_KEY_VERSION                          (1U)
 
 /******** TFM_SP_CORE_TEST ********/
 #define SPM_CORE_TEST_INIT_SUCCESS_SID                             (0x0000F020U)

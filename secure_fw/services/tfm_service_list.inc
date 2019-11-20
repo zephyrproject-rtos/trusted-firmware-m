@@ -141,6 +141,15 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+    {
+        .name = "TFM_ATTEST_GET_PUBLIC_KEY",
+        .partition_id = TFM_SP_INITIAL_ATTESTATION,
+        .signal = TFM_ATTEST_GET_PUBLIC_KEY_SIGNAL,
+        .sid = 0x00000022,
+        .non_secure_client = true,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
 
 #ifdef TFM_PARTITION_TEST_CORE
     /******** TFM_SP_CORE_TEST ********/
@@ -533,6 +542,13 @@ struct tfm_spm_service_t service[] =
     },
 
     /******** TFM_SP_INITIAL_ATTESTATION ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
     {
         .service_db = NULL,
         .partition = NULL,

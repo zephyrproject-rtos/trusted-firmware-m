@@ -29,6 +29,14 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
+    },
+    {
+      "name": "TFM_ATTEST_GET_PUBLIC_KEY",
+      "signal": "INITIAL_ATTEST_GET_PUBLIC_KEY",
+      "sid": "0x00000022",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "linker_pattern": {
@@ -47,6 +55,13 @@
     {
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    {
+      "name": "TFM_ATTEST_GET_PUBLIC_KEY",
+      "sid": "0x00000022",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"

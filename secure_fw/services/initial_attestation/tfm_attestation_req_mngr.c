@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "psa/initial_attestation.h"
+#include "psa/crypto_types.h"
 #include "attestation.h"
 
 #ifdef TFM_PSA_API
@@ -14,6 +15,7 @@
 #include "tfm_client.h"
 #include "psa/service.h"
 #include "region_defs.h"
+#include "tfm_plat_crypto_keys.h"
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
@@ -97,6 +99,43 @@ static enum psa_attest_err_t psa_attest_get_token_size(const psa_msg_t *msg)
     return status;
 }
 
+static enum psa_attest_err_t tfm_attest_get_public_key(const psa_msg_t *msg)
+{
+    enum psa_attest_err_t status = PSA_ATTEST_ERR_SUCCESS;
+    uint8_t key_buf[ECC_P_256_KEY_SIZE];
+    size_t key_len;
+    psa_ecc_curve_t curve_type;
+
+    psa_outvec out_vec[] = {
+        {.base = key_buf,     .len = sizeof(key_buf)},
+        {.base = &curve_type, .len = sizeof(curve_type)},
+        {.base = &key_len,    .len = sizeof(key_len)}
+    };
+
+    if (msg->out_size[1] != out_vec[1].len ||
+        msg->out_size[2] != out_vec[2].len) {
+        return PSA_ATTEST_ERR_INVALID_INPUT;
+    }
+
+    /* Store the client ID here for later use in service. */
+    g_attest_caller_id = msg->client_id;
+
+    status = initial_attest_get_public_key(NULL, 0,
+                                           out_vec, IOVEC_LEN(out_vec));
+
+    if (msg->out_size[0] < key_len) {
+        return PSA_ATTEST_ERR_KEY_BUFFER_OVERFLOW;
+    }
+
+    if (status == PSA_ATTEST_ERR_SUCCESS) {
+        psa_write(msg->handle, 0, key_buf, key_len);
+        psa_write(msg->handle, 1, &curve_type, out_vec[1].len);
+        psa_write(msg->handle, 2, &key_len, out_vec[2].len);
+    }
+
+    return status;
+}
+
 /*
  * Fixme: Temporarily implement abort as infinite loop,
  * will replace it later.
@@ -151,6 +190,9 @@ enum psa_attest_err_t attest_partition_init(void)
         } else if (signals & TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL) {
             attest_signal_handle(TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL,
                                  psa_attest_get_token_size);
+        } else if (signals & TFM_ATTEST_GET_PUBLIC_KEY_SIGNAL) {
+            attest_signal_handle(TFM_ATTEST_GET_PUBLIC_KEY_SIGNAL,
+                                 tfm_attest_get_public_key);
         } else {
             tfm_abort();
         }

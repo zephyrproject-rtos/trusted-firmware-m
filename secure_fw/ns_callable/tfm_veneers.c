@@ -88,6 +88,7 @@ psa_status_t platform_sp_ioctl(psa_invec *, size_t, psa_outvec *, size_t);
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 psa_status_t initial_attest_get_token(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t initial_attest_get_token_size(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t initial_attest_get_public_key(psa_invec *, size_t, psa_outvec *, size_t);
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
@@ -221,6 +222,7 @@ TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_ioctl)
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token)
 TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_token_size)
+TFM_VENEER_FUNCTION(TFM_SP_INITIAL_ATTESTATION, initial_attest_get_public_key)
 
 #ifdef TFM_PARTITION_TEST_CORE
 /******** TFM_SP_CORE_TEST ********/
