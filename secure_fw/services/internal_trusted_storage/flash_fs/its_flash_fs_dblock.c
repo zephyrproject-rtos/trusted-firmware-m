@@ -103,30 +103,6 @@ psa_status_t its_flash_fs_dblock_compact_block(
     return err;
 }
 
-psa_status_t its_flash_fs_dblock_cp_data_to_scratch(
-                                              struct its_flash_fs_ctx_t *fs_ctx,
-                                              uint32_t lblock,
-                                              size_t offset,
-                                              size_t size)
-{
-    uint32_t phys_block;
-    uint32_t scratch_id;
-
-    /* Get physical block ID from where to read the data */
-    phys_block = its_dblock_lo_to_phy(fs_ctx, lblock);
-    if (phys_block == ITS_BLOCK_INVALID_ID) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    /* Get the scratch data block ID to write the data */
-    scratch_id = its_flash_fs_mblock_cur_data_scratch_id(fs_ctx, lblock);
-
-    /* Data after updated content */
-    return its_flash_block_to_block_move(fs_ctx->flash_info, scratch_id, offset,
-                                         phys_block, offset,
-                                         size);
-}
-
 psa_status_t its_flash_fs_dblock_read_file(struct its_flash_fs_ctx_t *fs_ctx,
                                            struct its_file_meta_t *file_meta,
                                            size_t offset,

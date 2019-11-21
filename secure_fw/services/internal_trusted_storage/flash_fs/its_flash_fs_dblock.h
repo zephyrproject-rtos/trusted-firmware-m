@@ -41,24 +41,6 @@ psa_status_t its_flash_fs_dblock_compact_block(
                                               size_t size);
 
 /**
- * \brief Copies data from logical block to scratch data block.
- *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     lblock  Logical data block to compact
- * \param[in]     offset  Offset in the logical block which points to the
- *                        start position to copy
- * \param[in]     size    Number of bytes to be copied from logical block to
- *                        scratch data block
- *
- * \return Returns error code as specified in \ref psa_status_t
- */
-psa_status_t its_flash_fs_dblock_cp_data_to_scratch(
-                                              struct its_flash_fs_ctx_t *fs_ctx,
-                                              uint32_t lblock,
-                                              size_t offset,
-                                              size_t size);
-
-/**
  * \brief Reads the file content.
  *
  * \param[in,out] fs_ctx     Filesystem context
