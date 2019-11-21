@@ -66,7 +66,8 @@ enum spm_err_t tfm_spm_db_init(void)
             ctx_stack_list[i];
 #endif /* !defined(TFM_PSA_API) */
         g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
-        g_spm_partition_db.partitions[i].platform_data = platform_data_list[i];
+        g_spm_partition_db.partitions[i].platform_data_list =
+                                                     platform_data_list_list[i];
 #ifdef TFM_PSA_API
         g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
 #endif

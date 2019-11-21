@@ -60,11 +60,18 @@ enum spm_err_t tfm_spm_partition_init(void)
     int32_t args[4] = {0};
     int32_t fail_cnt = 0;
     uint32_t idx;
+    const struct tfm_spm_partition_platform_data_t **platform_data_p;
 
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
-        tfm_spm_hal_configure_default_isolation(part->platform_data);
+        platform_data_p = part->platform_data_list;
+        if (platform_data_p != NULL) {
+            while ((*platform_data_p) != NULL) {
+                tfm_spm_hal_configure_default_isolation(*platform_data_p);
+                ++platform_data_p;
+            }
+        }
         if (part->static_data->partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             tfm_spm_partition_set_caller_partition_idx(idx,

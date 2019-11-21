@@ -227,7 +227,32 @@ const struct spm_partition_static_data_t static_data_list[] =
 /**************************************************************************/
 /** The platform data of the partition list */
 /**************************************************************************/
-const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
+{% for manifest in manifests %}
+    {% if manifest.manifest.mmio_regions %}
+        {% if manifest.attr.conditional %}
+#ifdef {{manifest.attr.conditional}}
+        {% endif %}
+const struct tfm_spm_partition_platform_data_t *
+    platform_data_list_{{manifest.manifest.name}}[] =
+{
+        {% for region in manifest.manifest.mmio_regions %}
+            {% if region.conditional %}
+#ifdef {{region.conditional}}
+            {% endif %}
+    {{region.name}},
+            {% if region.conditional %}
+#endif /* {{region.conditional}} */
+            {% endif %}
+        {% endfor %}
+    NULL
+};
+        {% if manifest.attr.conditional %}
+#endif /* {{manifest.attr.conditional}} */
+        {% endif %}
+
+    {% endif %}
+{% endfor %}
+const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 {
     NULL,
 
@@ -240,23 +265,10 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {% if manifest.manifest.mmio_regions %}
-    /* FIXME: Only adding the first mmio region */
-        {% for region in manifest.manifest.mmio_regions %}
-            {% if loop.first %}
-                {% if region.conditional %}
-#ifdef {{region.conditional}}
-                {% endif %}
-    {{region.name}},
-                {% if region.conditional %}
-#else /* {{region.conditional}} */
+    platform_data_list_{{manifest.manifest.name}},
+    {% else %}{# if manifest.manifest.mmio_regions #}
     NULL,
-#endif /* {{region.conditional}} */
-                {% endif %}
-            {% else %} {# print nothing #} {% endif %}
-        {% endfor %}
-    {% else %}
-    NULL,
-    {% endif %}
+    {% endif %}{# if manifest.manifest.mmio_regions #}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -320,8 +332,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     {{'},'}}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */

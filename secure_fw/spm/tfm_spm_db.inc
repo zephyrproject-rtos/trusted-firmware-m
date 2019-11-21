@@ -744,7 +744,45 @@ const struct spm_partition_static_data_t static_data_list[] =
 /**************************************************************************/
 /** The platform data of the partition list */
 /**************************************************************************/
-const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
+#ifdef TFM_PARTITION_AUDIT_LOG
+const struct tfm_spm_partition_platform_data_t *
+    platform_data_list_TFM_SP_AUDIT_LOG[] =
+{
+#ifdef AUDIT_UART_REDIRECTION
+    TFM_PERIPHERAL_UART1,
+#endif /* AUDIT_UART_REDIRECTION */
+    NULL
+};
+#endif /* TFM_PARTITION_AUDIT_LOG */
+
+#ifdef TFM_PARTITION_TEST_CORE
+const struct tfm_spm_partition_platform_data_t *
+    platform_data_list_TFM_SP_CORE_TEST[] =
+{
+    TFM_PERIPHERAL_FPGA_IO,
+    NULL
+};
+#endif /* TFM_PARTITION_TEST_CORE */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+const struct tfm_spm_partition_platform_data_t *
+    platform_data_list_TFM_SP_SECURE_TEST_PARTITION[] =
+{
+    TFM_PERIPHERAL_STD_UART,
+    NULL
+};
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
+#ifdef TFM_ENABLE_IRQ_TEST
+const struct tfm_spm_partition_platform_data_t *
+    platform_data_list_TFM_IRQ_TEST_1[] =
+{
+    TFM_PERIPHERAL_TIMER0,
+    NULL
+};
+#endif /* TFM_ENABLE_IRQ_TEST */
+
+const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 {
     NULL,
 
@@ -757,12 +795,7 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
     NULL,
 
 #ifdef TFM_PARTITION_AUDIT_LOG
-    /* FIXME: Only adding the first mmio region */
-#ifdef AUDIT_UART_REDIRECTION
-    TFM_PERIPHERAL_UART1,
-#else /* AUDIT_UART_REDIRECTION */
-    NULL,
-#endif /* AUDIT_UART_REDIRECTION */
+    platform_data_list_TFM_SP_AUDIT_LOG,
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
     NULL,
@@ -774,8 +807,7 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
     NULL,
 
 #ifdef TFM_PARTITION_TEST_CORE
-    /* FIXME: Only adding the first mmio region */
-    TFM_PERIPHERAL_FPGA_IO,
+    platform_data_list_TFM_SP_CORE_TEST,
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_CORE
@@ -783,8 +815,7 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    /* FIXME: Only adding the first mmio region */
-    TFM_PERIPHERAL_STD_UART,
+    platform_data_list_TFM_SP_SECURE_TEST_PARTITION,
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
@@ -796,8 +827,7 @@ const struct tfm_spm_partition_platform_data_t *platform_data_list[] =
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef TFM_ENABLE_IRQ_TEST
-    /* FIXME: Only adding the first mmio region */
-    TFM_PERIPHERAL_TIMER0,
+    platform_data_list_TFM_IRQ_TEST_1,
 #endif /* TFM_ENABLE_IRQ_TEST */
 
 #ifdef TFM_PARTITION_TEST_SST
@@ -1024,8 +1054,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 
     /* -----------------------------------------------------------------------*/
@@ -1035,8 +1064,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 
     /* -----------------------------------------------------------------------*/
@@ -1047,8 +1075,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
@@ -1059,8 +1086,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 
     /* -----------------------------------------------------------------------*/
@@ -1071,8 +1097,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_PLATFORM */
 
@@ -1083,8 +1108,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 
     /* -----------------------------------------------------------------------*/
@@ -1095,8 +1119,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -1108,8 +1131,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE */
 
@@ -1121,8 +1143,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
@@ -1134,8 +1155,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -1147,8 +1167,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
@@ -1160,8 +1179,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
@@ -1173,8 +1191,7 @@ static struct spm_partition_desc_t partition_list [] =
     /* Runtime data */
         .runtime_data             = {},
         .static_data              = NULL,
-        .platform_data            = NULL,
-
+        .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_SST */
 

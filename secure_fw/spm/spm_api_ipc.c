@@ -527,6 +527,7 @@ void tfm_spm_init(void)
     uint32_t i, j, num;
     struct spm_partition_desc_t *partition;
     struct tfm_thrd_ctx *pth, this_thrd;
+    const struct tfm_spm_partition_platform_data_t **platform_data_p;
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -544,7 +545,14 @@ void tfm_spm_init(void)
             continue;
         }
 
-        tfm_spm_hal_configure_default_isolation(partition->platform_data);
+        platform_data_p = partition->platform_data_list;
+        if (platform_data_p != NULL) {
+            while ((*platform_data_p) != NULL) {
+                tfm_spm_hal_configure_default_isolation(*platform_data_p);
+                ++platform_data_p;
+            }
+        }
+
         if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
             continue;
         }
