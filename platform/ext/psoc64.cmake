@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2020, Arm Limited. All rights reserved.
-# Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -132,6 +132,7 @@ elseif(BUILD_NATIVE_DRIVERS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_syslib.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_syspm.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_systick.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_tcpwm_counter.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_trigmux.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/source/cy_wdt.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/Native_Driver/generated_source/cycfg.c")
