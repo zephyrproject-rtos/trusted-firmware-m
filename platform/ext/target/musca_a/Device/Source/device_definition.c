@@ -620,6 +620,7 @@ struct mt25ql_dev_t MT25QL_DEV_S = {
      * more.
      */
     .size = 0x00800000U, /* 8 MiB */
+    .config_state = { 0 },
 };
 #endif
 
@@ -636,5 +637,6 @@ struct mt25ql_dev_t MT25QL_DEV_NS
      * more.
      */
     .size = 0x00800000U, /* 8 MiB */
+    .config_state = { 0 },
 };
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #ifndef __MT25QL_H__
 #define __MT25QL_H__
 
-#include "Native_Driver/qspi_ip6514e_drv.h"
+#include "qspi_ip6514e_drv.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,6 +44,7 @@ enum mt25ql_error_t {
     MT25QL_ERR_READ_IN_PROGRESS   = QSPI_IP6514E_ERR_READ_IN_PROGRESS,
     MT25QL_ERR_WRITE_IN_PROGRESS  = QSPI_IP6514E_ERR_WRITE_IN_PROGRESS,
     MT25QL_ERR_ADDR_NOT_ALIGNED,
+    MT25QL_ERR_NOT_INITED,
     MT25QL_ERR_ADDR_TOO_BIG,
 };
 
@@ -55,20 +56,39 @@ enum mt25ql_erase_t {
 };
 
 enum mt25ql_functional_state_t {
-    MT25QL_FUNC_STATE_DEFAULT   = 0U,
-        /*!< The QSPI Flash controller and memory is in default state,
-         *   in the same state as after reset.
+    MT25QL_FUNC_STATE_NOT_INITED    = 0U,
+        /*!< QSPI Flash controller is not initialized, only direct read
+         * is guaranteed to be working
          */
-    MT25QL_FUNC_STATE_FAST      = 1U,
+    MT25QL_FUNC_STATE_DEFAULT       = 1U,
+        /*!< The QSPI Flash controller and memory is in default state,
+         *   using basic read/write commands
+         */
+    MT25QL_FUNC_STATE_FAST          = 2U,
         /*!< The QSPI Flash controller and memory is configured to operate in
          *   single SPI mode and fast Flash commands could be used for read and
          *   program operations.
          */
-    MT25QL_FUNC_STATE_QUAD_FAST = 2U,
+    MT25QL_FUNC_STATE_QUAD_FAST     = 3U,
         /*!< The QSPI Flash controller and memory is configured to operate in
          *   Quad SPI mode and fast Flash commands could be used for read and
          *   program operations.
          */
+};
+
+struct mt25ql_config_state_t {
+    enum mt25ql_functional_state_t func_state;
+    /*!< Functional state id */
+    enum qspi_ip6514e_spi_mode_t spi_mode;
+    /*!< SPI mode for the current functional state */
+    uint8_t opcode_read;
+    /*!< Read opcode for the current functional state */
+    uint8_t opcode_write;
+    /*!< Write opcode for the current functional state */
+    uint32_t dummy_cycles_read;
+    /*!< Dummy cycles for the read command for the current functional state */
+    uint32_t dummy_cycles_write;
+    /*!< Dummy cycles for the write command for the current functional state */
 };
 
 struct mt25ql_dev_t {
@@ -87,10 +107,11 @@ struct mt25ql_dev_t {
          *   dummy cycles and the Quad Input Fast Program with 0 dummy cycles.
          */
     uint32_t size; /*!< Total size of the MT25QL Flash memory */
-    enum mt25ql_functional_state_t func_state;
-        /*!< Functional state (operational parameter settings) of the
+    struct mt25ql_config_state_t config_state;
+        /*!< Configured functional state (with parameter settings) of the
          *   QSPI Flash controller and memory.
          */
+
 };
 
 /**
@@ -105,7 +126,7 @@ struct mt25ql_dev_t {
  *          + The number of address bytes to 3
  *
  * \param[in] dev       Pointer to MT25QL device structure \ref mt25ql_dev_t
- * \param[in] config    Operational configuration to be set on flash controller
+ * \param[in] f_state   Functional state to be set on flash controller
  *                      and device \ref mt25ql_functional_state_t
  *
  * \return Return error code as specified in \ref mt25ql_error_t
@@ -115,10 +136,10 @@ struct mt25ql_dev_t {
  *       if the Flash device is in a different configuration.
  */
 enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
-                                       enum mt25ql_functional_state_t config);
+                                       enum mt25ql_functional_state_t f_state);
 
 /**
- * \brief Restore the QSPI Flash controller and MT25QL to default state.
+ * \brief Restore the QSPI Flash controller and MT25QL to reset state.
  *
  * \param[in] dev     Pointer to MT25QL device structure \ref mt25ql_dev_t
  *
@@ -128,7 +149,7 @@ enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
  *       controller operates with the same SPI protocol. This function will fail
  *       if the Flash device is in a different configuration.
  */
-enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev);
+enum mt25ql_error_t mt25ql_restore_reset_state(struct mt25ql_dev_t* dev);
 
 /**
  * \brief Read bytes from the flash memory (direct access)

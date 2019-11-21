@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,8 +126,8 @@ struct _qspi_ip6514e_reg_map_t {
 #define FLASH_CMD_CTRL_OPCODE_POS         24U
 
 /** Default register values of the QSPI Flash controller */
-#define QSPI_CFG_REG_RESET_VALUE              (0x80780081U)
-#define DEVICE_READ_INSTR_REG_RESET_VALUE     (0x00000003U)
+#define QSPI_CFG_REG_RESET_VALUE              (0x80080080U)
+#define DEVICE_READ_INSTR_REG_RESET_VALUE     (0x080220EBU)
 #define DEVICE_WRITE_INSTR_REG_RESET_VALUE    (0x00000002U)
 #define DEVICE_SIZE_CFG_REG_RESET_VALUE       (0x00101002U)
 #define REMAP_ADDR_REG_RESET_VALUE            (0x00000000U)

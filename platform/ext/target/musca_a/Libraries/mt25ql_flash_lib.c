@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2019 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "mt25ql_flash_lib.h"
-#include "Native_Driver/qspi_ip6514e_drv.h"
+#include "qspi_ip6514e_drv.h"
 
 /** Setter bit manipulation macro */
 #define SET_BIT(WORD, BIT_INDEX) ((WORD) |= (1U << (BIT_INDEX)))
@@ -70,11 +70,12 @@
 #define FLAG_STATUS_REG_READY_POS 7U
 
 /*
- * 8 is the minimal number of dummy clock cycles needed to reach the maximal
+ * 10 is the minimal number of dummy clock cycles needed to reach the maximal
  * frequency of the Quad Output Fast Read Command.
  */
-#define QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES    8U
+#define QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES    10U
 #define FAST_READ_DUMMY_CYCLES                8U
+#define RESET_STATE_DUMMY_CYCLES              8U
 #define DEFAULT_READ_DUMMY_CYCLES             0U
 #define QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES  0U
 #define PAGE_PROGRAM_DUMMY_CYCLES             0U
@@ -356,12 +357,9 @@ static enum mt25ql_error_t send_boundary_cross_write_cmd(
     uint32_t page_remainder = FLASH_PAGE_SIZE - (addr % FLASH_PAGE_SIZE);
 
     /* First write up to the end of the current page. */
-    controller_error = qspi_ip6514e_send_write_cmd(dev->controller,
-                                                   opcode,
-                                                   write_data,
-                                                   page_remainder,
-                                                   addr,
-                                                   addr_bytes_number,
+    controller_error = qspi_ip6514e_send_write_cmd(dev->controller, opcode,
+                                                   write_data, page_remainder,
+                                                   addr, addr_bytes_number,
                                                    dummy_cycles);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
@@ -378,12 +376,10 @@ static enum mt25ql_error_t send_boundary_cross_write_cmd(
 
     /* Then write the remaining data of the write_len bytes. */
     send_write_enable(dev);
-    controller_error = qspi_ip6514e_send_write_cmd(dev->controller,
-                                                   opcode,
+    controller_error = qspi_ip6514e_send_write_cmd(dev->controller, opcode,
                                                    write_data,
                                                    write_len - page_remainder,
-                                                   addr,
-                                                   addr_bytes_number,
+                                                   addr, addr_bytes_number,
                                                    dummy_cycles);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
@@ -393,53 +389,53 @@ static enum mt25ql_error_t send_boundary_cross_write_cmd(
 }
 
 enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
-                                       enum mt25ql_functional_state_t config)
+                                       enum mt25ql_functional_state_t f_state)
 {
-    enum qspi_ip6514e_spi_mode_t spi_mode;
     enum qspi_ip6514e_error_t controller_error;
     enum mt25ql_error_t library_error;
-    uint8_t opcode_read;
-    uint8_t opcode_write;
-    uint32_t dummy_cycles_read;
-    uint32_t dummy_cycles_write;
 
-    switch(config) {
+    switch(f_state) {
     case MT25QL_FUNC_STATE_DEFAULT:
-        spi_mode            = QSPI_IP6514E_SPI_MODE;
-        opcode_read         = READ_CMD;
-        dummy_cycles_read   = DEFAULT_READ_DUMMY_CYCLES;
-        opcode_write        = PAGE_PROGRAM_CMD;
-        dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
+        dev->config_state.spi_mode            = QSPI_IP6514E_SPI_MODE;
+        dev->config_state.opcode_read         = READ_CMD;
+        dev->config_state.dummy_cycles_read   = DEFAULT_READ_DUMMY_CYCLES;
+        dev->config_state.opcode_write        = PAGE_PROGRAM_CMD;
+        dev->config_state.dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
         break;
     case MT25QL_FUNC_STATE_FAST:
-        spi_mode            = QSPI_IP6514E_SPI_MODE;
-        opcode_read         = FAST_READ_CMD;
-        dummy_cycles_read   = FAST_READ_DUMMY_CYCLES;
-        opcode_write        = PAGE_PROGRAM_CMD;
-        dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
+        dev->config_state.spi_mode            = QSPI_IP6514E_SPI_MODE;
+        dev->config_state.opcode_read         = FAST_READ_CMD;
+        dev->config_state.dummy_cycles_read   = FAST_READ_DUMMY_CYCLES;
+        dev->config_state.opcode_write        = PAGE_PROGRAM_CMD;
+        dev->config_state.dummy_cycles_write  = PAGE_PROGRAM_DUMMY_CYCLES;
         break;
     case MT25QL_FUNC_STATE_QUAD_FAST:
-        spi_mode            = QSPI_IP6514E_QSPI_MODE;
-        opcode_read         = QUAD_OUTPUT_FAST_READ_CMD;
-        dummy_cycles_read   = QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES;
-        opcode_write        = QUAD_INPUT_FAST_PROGRAM_CMD;
-        dummy_cycles_write  = QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES;
+        dev->config_state.spi_mode            = QSPI_IP6514E_QSPI_MODE;
+        dev->config_state.opcode_read         = QUAD_OUTPUT_FAST_READ_CMD;
+        dev->config_state.dummy_cycles_read   =
+                                             QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES;
+        dev->config_state.opcode_write        = QUAD_INPUT_FAST_PROGRAM_CMD;
+        dev->config_state.dummy_cycles_write  =
+                                           QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES;
         break;
     default:
         return MT25QL_ERR_WRONG_ARGUMENT;
     }
 
+    dev->config_state.func_state = f_state;
+
     /* This function will first set the Flash memory SPI mode and then set
      * the controller's SPI mode. It will fail if the two sides do not have
      * the same mode when this function is called.
      */
-    library_error = set_spi_mode(dev, spi_mode);
+    library_error = set_spi_mode(dev, dev->config_state.spi_mode);
     if (library_error != MT25QL_ERR_NONE) {
         return library_error;
     }
 
     /* Set the number of dummy cycles for read commands. */
-    library_error = change_dummy_cycles(dev, dummy_cycles_read);
+    library_error = change_dummy_cycles(
+                                      dev, dev->config_state.dummy_cycles_read);
     if (library_error != MT25QL_ERR_NONE) {
         return library_error;
     }
@@ -456,17 +452,17 @@ enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
     }
 
     /* Set opcode and dummy cycles needed for read commands. */
-    controller_error = qspi_ip6514e_cfg_reads(dev->controller,
-                                              opcode_read,
-                                              dummy_cycles_read);
+    controller_error = qspi_ip6514e_cfg_reads(
+                                 dev->controller, dev->config_state.opcode_read,
+                                 dev->config_state.dummy_cycles_read);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
     }
 
     /* Set opcode and dummy cycles needed for write commands. */
-    controller_error = qspi_ip6514e_cfg_writes(dev->controller,
-                                               opcode_write,
-                                               dummy_cycles_write);
+    controller_error = qspi_ip6514e_cfg_writes(
+                                dev->controller, dev->config_state.opcode_write,
+                                dev->config_state.dummy_cycles_write);
     if (controller_error != QSPI_IP6514E_ERR_NONE) {
         return (enum mt25ql_error_t)controller_error;
     }
@@ -486,12 +482,10 @@ enum mt25ql_error_t mt25ql_config_mode(struct mt25ql_dev_t* dev,
 
     qspi_ip6514e_enable(dev->controller);
 
-    dev->func_state = config;
-
     return MT25QL_ERR_NONE;
 }
 
-enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev)
+enum mt25ql_error_t mt25ql_restore_reset_state(struct mt25ql_dev_t* dev)
 {
     enum mt25ql_error_t library_error;
 
@@ -505,8 +499,8 @@ enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev)
         return library_error;
     }
 
-    /* Set the default number of dummy cycles for read commands. */
-    library_error = change_dummy_cycles(dev, DEFAULT_READ_DUMMY_CYCLES);
+    /* Set the default number of dummy cycles for direct read commands. */
+    library_error = change_dummy_cycles(dev, RESET_STATE_DUMMY_CYCLES);
     if (library_error != MT25QL_ERR_NONE) {
         return library_error;
     }
@@ -520,7 +514,8 @@ enum mt25ql_error_t mt25ql_restore_default_state(struct mt25ql_dev_t* dev)
 
     qspi_ip6514e_enable(dev->controller);
 
-    dev->func_state = MT25QL_FUNC_STATE_DEFAULT;
+    dev->config_state = (struct mt25ql_config_state_t){ 0 };
+    dev->config_state.func_state = MT25QL_FUNC_STATE_NOT_INITED;
 
     return MT25QL_ERR_NONE;
 }
@@ -698,34 +693,18 @@ enum mt25ql_error_t mt25ql_command_read(struct mt25ql_dev_t* dev,
     /* With one single command only 8 bytes can be read. */
     uint32_t cmd_number = len / CMD_DATA_MAX_SIZE;
     enum qspi_ip6514e_error_t controller_error;
-    uint8_t opcode;
-    uint32_t dummy_cycles;
 
-    switch (dev->func_state) {
-    case MT25QL_FUNC_STATE_QUAD_FAST:
-        opcode = QUAD_OUTPUT_FAST_READ_CMD;
-        dummy_cycles = QUAD_OUTPUT_FAST_READ_DUMMY_CYCLES;
-        break;
-    case MT25QL_FUNC_STATE_FAST:
-        opcode = FAST_READ_CMD;
-        dummy_cycles = FAST_READ_DUMMY_CYCLES;
-        break;
-    case MT25QL_FUNC_STATE_DEFAULT:
-    default:
-        opcode = READ_CMD;
-        dummy_cycles = DEFAULT_READ_DUMMY_CYCLES;
-        break;
+    if (dev->config_state.func_state == MT25QL_FUNC_STATE_NOT_INITED) {
+        return MT25QL_ERR_NOT_INITED;
     }
 
     for (uint32_t cmd_index = 0; cmd_index < cmd_number; cmd_index++) {
         controller_error = qspi_ip6514e_send_read_cmd(
-                                                    dev->controller,
-                                                    opcode,
-                                                    data,
-                                                    CMD_DATA_MAX_SIZE,
-                                                    addr,
-                                                    ADDR_BYTES,
-                                                    dummy_cycles);
+                                           dev->controller,
+                                           dev->config_state.opcode_read,
+                                           data, CMD_DATA_MAX_SIZE, addr,
+                                           ADDR_BYTES,
+                                           dev->config_state.dummy_cycles_read);
         if (controller_error != QSPI_IP6514E_ERR_NONE) {
             return (enum mt25ql_error_t)controller_error;
         }
@@ -738,19 +717,17 @@ enum mt25ql_error_t mt25ql_command_read(struct mt25ql_dev_t* dev,
     if (len) {
         /* Read the remainder. */
         controller_error = qspi_ip6514e_send_read_cmd(
-                                                     dev->controller,
-                                                     opcode,
-                                                     data,
-                                                     len,
-                                                     addr,
-                                                     ADDR_BYTES,
-                                                     dummy_cycles);
+                                           dev->controller,
+                                           dev->config_state.opcode_read,
+                                           data, len, addr, ADDR_BYTES,
+                                           dev->config_state.dummy_cycles_read);
         if (controller_error != QSPI_IP6514E_ERR_NONE) {
             return (enum mt25ql_error_t)controller_error;
         }
     }
 
     return MT25QL_ERR_NONE;
+
 }
 
 enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
@@ -762,20 +739,9 @@ enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
     uint32_t cmd_number = len / CMD_DATA_MAX_SIZE;
     enum qspi_ip6514e_error_t controller_error;
     enum mt25ql_error_t library_error;
-    uint8_t opcode;
-    uint32_t dummy_cycles;
 
-    switch (dev->func_state) {
-    case MT25QL_FUNC_STATE_QUAD_FAST:
-        opcode = QUAD_INPUT_FAST_PROGRAM_CMD;
-        dummy_cycles = QUAD_INPUT_FAST_PROGRAM_DUMMY_CYCLES;
-        break;
-    case MT25QL_FUNC_STATE_FAST:
-    case MT25QL_FUNC_STATE_DEFAULT:
-    default:
-        opcode = PAGE_PROGRAM_CMD;
-        dummy_cycles = PAGE_PROGRAM_DUMMY_CYCLES;
-        break;
+    if (dev->config_state.func_state == MT25QL_FUNC_STATE_NOT_INITED) {
+        return MT25QL_ERR_NOT_INITED;
     }
 
     for (uint32_t cmd_index = 0; cmd_index < cmd_number; cmd_index++) {
@@ -789,26 +755,21 @@ enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
             ((addr + CMD_DATA_MAX_SIZE - 1) / FLASH_PAGE_SIZE)) {
             /* The CMD_DATA_MAX_SIZE bytes written are crossing the boundary. */
             library_error = send_boundary_cross_write_cmd(
-                                                    dev,
-                                                    opcode,
-                                                    data,
-                                                    CMD_DATA_MAX_SIZE,
-                                                    addr,
-                                                    ADDR_BYTES,
-                                                    dummy_cycles);
+                                          dev, dev->config_state.opcode_write,
+                                          data, CMD_DATA_MAX_SIZE, addr,
+                                          ADDR_BYTES,
+                                          dev->config_state.dummy_cycles_write);
             if (library_error != MT25QL_ERR_NONE) {
                 return library_error;
             }
         } else {
             /* Normal case: not crossing the boundary. */
             controller_error = qspi_ip6514e_send_write_cmd(
-                                                    dev->controller,
-                                                    opcode,
-                                                    data,
-                                                    CMD_DATA_MAX_SIZE,
-                                                    addr,
-                                                    ADDR_BYTES,
-                                                    dummy_cycles);
+                                          dev->controller,
+                                          dev->config_state.opcode_write,
+                                          data, CMD_DATA_MAX_SIZE, addr,
+                                          ADDR_BYTES,
+                                          dev->config_state.dummy_cycles_write);
             if (controller_error != QSPI_IP6514E_ERR_NONE) {
                 return (enum mt25ql_error_t)controller_error;
             }
@@ -835,26 +796,19 @@ enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
         if ((addr / FLASH_PAGE_SIZE) != ((addr + len - 1) / FLASH_PAGE_SIZE)) {
             /* The CMD_DATA_MAX_SIZE bytes written are crossing the boundary. */
             library_error = send_boundary_cross_write_cmd(
-                                                    dev,
-                                                    opcode,
-                                                    data,
-                                                    len,
-                                                    addr,
-                                                    ADDR_BYTES,
-                                                    dummy_cycles);
+                                          dev, dev->config_state.opcode_write,
+                                          data, len, addr, ADDR_BYTES,
+                                          dev->config_state.dummy_cycles_write);
             if (library_error != MT25QL_ERR_NONE) {
                 return library_error;
             }
         } else {
             /* Normal case: not crossing the boundary. */
             controller_error = qspi_ip6514e_send_write_cmd(
-                                                    dev->controller,
-                                                    opcode,
-                                                    data,
-                                                    len,
-                                                    addr,
-                                                    ADDR_BYTES,
-                                                    dummy_cycles);
+                                          dev->controller,
+                                          dev->config_state.opcode_write,
+                                          data, len, addr, ADDR_BYTES,
+                                          dev->config_state.dummy_cycles_write);
             if (controller_error != QSPI_IP6514E_ERR_NONE) {
                 return (enum mt25ql_error_t)controller_error;
             }
@@ -867,8 +821,8 @@ enum mt25ql_error_t mt25ql_command_write(struct mt25ql_dev_t* dev,
         }
     }
 
-
     return MT25QL_ERR_NONE;
+
 }
 
 enum mt25ql_error_t mt25ql_erase(struct mt25ql_dev_t* dev,
@@ -879,6 +833,10 @@ enum mt25ql_error_t mt25ql_erase(struct mt25ql_dev_t* dev,
     enum mt25ql_error_t library_error;
     uint8_t erase_cmd;
     uint32_t addr_bytes;
+
+    if (dev->config_state.func_state == MT25QL_FUNC_STATE_NOT_INITED) {
+        return MT25QL_ERR_NOT_INITED;
+    }
 
     send_write_enable(dev);
 

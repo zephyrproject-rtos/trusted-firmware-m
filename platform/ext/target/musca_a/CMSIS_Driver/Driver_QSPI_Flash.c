@@ -156,8 +156,8 @@ static int32_t ARM_Flash_Uninitialize(void)
 {
     enum mt25ql_error_t err = MT25QL_ERR_NONE;
 
-    /* Restores the QSPI Flash controller and MT25QL to default state */
-    err = mt25ql_restore_default_state(ARM_FLASH0_DEV.dev);
+    /* Restores the QSPI Flash controller and MT25QL to reset state */
+    err = mt25ql_restore_reset_state(ARM_FLASH0_DEV.dev);
     if(err != MT25QL_ERR_NONE) {
         return ARM_DRIVER_ERROR;
     }
