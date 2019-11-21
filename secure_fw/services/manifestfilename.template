@@ -45,6 +45,13 @@ extern "C" {
 #error "Too many IRQ signals!"
         {% endif %}
     {% endif %}
+{% else %}
+    {# If no RoT Service is defined in the services attribute, then at least one IRQ must be declared. #}
+    {% if attr.tfm_partition_ipc %}
+        {% if (manifest.services is not defined) or ((manifest.services | length()) == 0) %}
+#error "At least one IRQ must be declared!"
+        {% endif %}
+    {% endif %}
 {% endif %}
 
 #ifdef __cplusplus
