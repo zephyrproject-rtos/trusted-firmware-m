@@ -52,6 +52,14 @@ PUBLIC_INCLUDES += $(MBEDTLS_ALT_API)/cc_ecc_internal.h $(CC_API_3x)/mbedtls_cc_
 PUBLIC_INCLUDES += $(MANAGEMENT_INCLUDES)/mbedtls_cc_mng.h $(MANAGEMENT_INCLUDES)/mbedtls_cc_mng_error.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_util/mbedtls_cc_util_key_derivation.h $(SHARED_INCDIR)/cc_util/mbedtls_cc_util_key_derivation_defs.h $(SHARED_INCDIR)/cc_util/mbedtls_cc_util_defs.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_util/cc_util_error.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_regs.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/cc_bitops.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_host.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_nvm.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/dx_reg_common.h
+PUBLIC_INCLUDES += $(SHARED_INCDIR)/../hw/include/musca_b1/dx_reg_base_host.h
+PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/cc_mng/mbedtls_cc_mng_int.h
+PUBLIC_INCLUDES += $(HOST_PROJ_ROOT)/src/hal/cc_hal_plat.h
 
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_general_defs.h $(SHARED_INCDIR)/proj/cc3x/cc_ecpki_domains_defs.h $(SHARED_INCDIR)/proj/cc3x/cc_sram_map.h
 PUBLIC_INCLUDES += $(SHARED_INCDIR)/proj/cc3x/cc_pka_hw_plat_defs.h

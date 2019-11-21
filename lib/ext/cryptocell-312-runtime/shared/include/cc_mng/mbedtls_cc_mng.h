@@ -34,16 +34,6 @@ extern "C"
 
 
 /* *********************** Defines ***************************** */
-/* LCS. */
-/*! Chip manufacturer (CM LCS). */
-#define CC_MNG_LCS_CM       0x0
-/*! Device manufacturer (DM LCS). */
-#define CC_MNG_LCS_DM       0x1
-/*! Security enabled (Secure LCS). */
-#define CC_MNG_LCS_SEC_ENABLED  0x5
-/*! RMA (RMA LCS). */
-#define CC_MNG_LCS_RMA      0x7
-
 /* *********************** Macros ***************************** */
 
 

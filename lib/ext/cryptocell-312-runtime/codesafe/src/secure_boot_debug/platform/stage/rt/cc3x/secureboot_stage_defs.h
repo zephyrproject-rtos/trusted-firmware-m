@@ -26,7 +26,7 @@ extern "C"
 #include "crypto_driver.h"
 #include "bsv_hw_defs.h"
 #include "sbrt_int_func.h"
-#include "mbedtls_cc_mng.h"
+#include "mbedtls_cc_mng_int.h"
 #include "pka_hw_defs.h"
 
 extern unsigned long gCcRegBase;
