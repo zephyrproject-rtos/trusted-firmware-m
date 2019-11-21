@@ -14,14 +14,13 @@
 #define ITS_FLASH_FS_INIT_FILE 0
 
 static psa_status_t its_flash_fs_file_write_aligned_data(
-                                        struct its_flash_fs_ctx_t *fs_ctx,
-                                        const struct its_file_meta_t *file_meta,
-                                        size_t offset,
-                                        size_t size,
-                                        const uint8_t *data)
+                                      struct its_flash_fs_ctx_t *fs_ctx,
+                                      const struct its_block_meta_t *block_meta,
+                                      const struct its_file_meta_t *file_meta,
+                                      size_t offset,
+                                      size_t size,
+                                      const uint8_t *data)
 {
-    size_t f_offset;
-
 #if (ITS_FLASH_MAX_PROGRAM_UNIT != 1)
     /* Check that the offset is aligned with the flash program unit */
     if (!ITS_UTILS_IS_ALIGNED(offset, fs_ctx->flash_info->program_unit)) {
@@ -32,10 +31,18 @@ static psa_status_t its_flash_fs_file_write_aligned_data(
     size = ITS_UTILS_ALIGN(size, fs_ctx->flash_info->program_unit);
 #endif
 
-    /* Set offset inside the file where to start to write the content */
-    f_offset = (file_meta->data_idx + offset);
+    /* It is not permitted to create gaps in the file */
+    if (offset > file_meta->cur_size) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-    return its_flash_fs_dblock_write_file(fs_ctx, file_meta->lblock, f_offset,
+    /* Check that the new data is contained within the file's max size */
+    if (its_utils_check_contained_in(file_meta->max_size, offset, size)
+        != PSA_SUCCESS) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    return its_flash_fs_dblock_write_file(fs_ctx, block_meta, file_meta, offset,
                                           size, data);
 }
 
@@ -108,12 +115,9 @@ psa_status_t its_flash_fs_file_create(struct its_flash_fs_ctx_t *fs_ctx,
 
     /* Check if data needs to be stored in the new file */
     if (data_size != 0) {
-        if ((data_size > max_size) || (data == NULL)) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
-
         /* Write the content into scratch data block */
-        err = its_flash_fs_file_write_aligned_data(fs_ctx, &file_meta,
+        err = its_flash_fs_file_write_aligned_data(fs_ctx, &block_meta,
+                                                   &file_meta,
                                                    ITS_FLASH_FS_INIT_FILE,
                                                    data_size,
                                                    data);
@@ -124,12 +128,6 @@ psa_status_t its_flash_fs_file_create(struct its_flash_fs_ctx_t *fs_ctx,
         /* Add current size to the file metadata */
         file_meta.cur_size = data_size;
 
-        err = its_flash_fs_dblock_cp_remaining_data(fs_ctx, &block_meta,
-                                                    &file_meta);
-        if (err != PSA_SUCCESS) {
-            return PSA_ERROR_GENERIC_ERROR;
-        }
-
         cur_phys_block = block_meta.phy_id;
 
         /* Cur scratch block become the active datablock */
@@ -139,7 +137,6 @@ psa_status_t its_flash_fs_file_create(struct its_flash_fs_ctx_t *fs_ctx,
         /* Swap the scratch data block */
         its_flash_fs_mblock_set_data_scratch(fs_ctx, cur_phys_block,
                                              file_meta.lblock);
-
     }
 
     /* Update metadata block information */
@@ -245,21 +242,16 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Write the content into scratch data block */
-    err = its_flash_fs_file_write_aligned_data(fs_ctx, &file_meta, offset, size,
-                                               data);
+    err = its_flash_fs_file_write_aligned_data(fs_ctx, &block_meta, &file_meta,
+                                               offset, size, data);
     if (err != PSA_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if (size > file_meta.cur_size) {
+    /* Update the file's current size if required */
+    if (offset + size > file_meta.cur_size) {
         /* Update the file metadata */
-        file_meta.cur_size = size;
-    }
-
-    err = its_flash_fs_dblock_cp_remaining_data(fs_ctx, &block_meta,
-                                                &file_meta);
-    if (err != PSA_SUCCESS) {
-        return PSA_ERROR_GENERIC_ERROR;
+        file_meta.cur_size = offset + size;
     }
 
     cur_phys_block = block_meta.phy_id;

@@ -103,11 +103,12 @@ psa_status_t its_flash_fs_dblock_compact_block(
     return err;
 }
 
-psa_status_t its_flash_fs_dblock_read_file(struct its_flash_fs_ctx_t *fs_ctx,
-                                           struct its_file_meta_t *file_meta,
-                                           size_t offset,
-                                           size_t size,
-                                           uint8_t *buf)
+psa_status_t its_flash_fs_dblock_read_file(
+                                        struct its_flash_fs_ctx_t *fs_ctx,
+                                        const struct its_file_meta_t *file_meta,
+                                        size_t offset,
+                                        size_t size,
+                                        uint8_t *buf)
 {
     uint32_t phys_block;
     size_t pos;
@@ -122,59 +123,49 @@ psa_status_t its_flash_fs_dblock_read_file(struct its_flash_fs_ctx_t *fs_ctx,
     return its_flash_read(fs_ctx->flash_info, phys_block, buf, pos, size);
 }
 
-psa_status_t its_flash_fs_dblock_write_file(struct its_flash_fs_ctx_t *fs_ctx,
-                                            uint32_t lblock,
-                                            size_t offset,
-                                            size_t size,
-                                            const uint8_t *data)
-{
-    uint32_t scratch_id;
-
-    scratch_id = its_flash_fs_mblock_cur_data_scratch_id(fs_ctx, lblock);
-
-    return its_flash_write(fs_ctx->flash_info, scratch_id, data, offset, size);
-}
-
-psa_status_t its_flash_fs_dblock_cp_remaining_data(
+psa_status_t its_flash_fs_dblock_write_file(
                                       struct its_flash_fs_ctx_t *fs_ctx,
                                       const struct its_block_meta_t *block_meta,
-                                      const struct its_file_meta_t *file_meta)
+                                      const struct its_file_meta_t *file_meta,
+                                      size_t offset,
+                                      size_t size,
+                                      const uint8_t *data)
 {
-    size_t after_file_offset;
     psa_status_t err;
     uint32_t scratch_id;
-    size_t wrt_bytes;
+    size_t pos;
+    size_t num_bytes;
 
     scratch_id = its_flash_fs_mblock_cur_data_scratch_id(fs_ctx,
                                                          file_meta->lblock);
 
-    if (file_meta->data_idx > block_meta->data_start) {
-        /* Move data before the referenced file */
-        wrt_bytes = (file_meta->data_idx - block_meta->data_start);
+    /* Calculate the position of the new file data in the block */
+    pos = file_meta->data_idx + offset;
 
-        err = its_flash_block_to_block_move(fs_ctx->flash_info,
-                                            scratch_id,
-                                            block_meta->data_start,
-                                            block_meta->phy_id,
-                                            block_meta->data_start,
-                                            wrt_bytes);
-        if (err != PSA_SUCCESS) {
-            return err;
-        }
-
+    /* Move data up to the new file data position */
+    err = its_flash_block_to_block_move(fs_ctx->flash_info,
+                                        scratch_id,
+                                        block_meta->data_start,
+                                        block_meta->phy_id,
+                                        block_meta->data_start,
+                                        pos - block_meta->data_start);
+    if (err != PSA_SUCCESS) {
+        return err;
     }
 
-    /* The referenced file data is already in the scratch block, as it is
-     * processed before calling of this function.
-     */
-    after_file_offset = file_meta->data_idx + file_meta->max_size;
+    /* Write the new file data */
+    err = its_flash_write(fs_ctx->flash_info, scratch_id, data, pos, size);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
-    /* Calculate amount of bytes after the manipulated file */
-    wrt_bytes = fs_ctx->flash_info->block_size
-                - (after_file_offset + block_meta->free_size);
+    /* Calculate the position of the end of the file */
+    pos = file_meta->data_idx + file_meta->max_size;
 
-    /* Data after updated content */
-    return its_flash_block_to_block_move(fs_ctx->flash_info, scratch_id,
-                                         after_file_offset, block_meta->phy_id,
-                                         after_file_offset, wrt_bytes);
+    /* Calculate the size of the data in the block after the end of the file */
+    num_bytes = (fs_ctx->flash_info->block_size - block_meta->free_size) - pos;
+
+    /* Move data between the end of the file and the end of the block data */
+    return its_flash_block_to_block_move(fs_ctx->flash_info, scratch_id, pos,
+                                         block_meta->phy_id, pos, num_bytes);
 }
