@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,6 +12,7 @@
 
 #include "platform/include/tfm_spm_hal.h"
 
+#include "device_definition.h"
 #include "region_defs.h"
 #include "secure_utilities.h"
 #include "spe_ipc_config.h"
@@ -26,7 +27,6 @@
 #include "cy_device_headers.h"
 #include "cy_ipc_drv.h"
 #include "cy_prot.h"
-#include "cy_sysint.h"
 #include "pc_config.h"
 
 /* Get address of memory regions to configure MPU */
@@ -332,17 +332,17 @@ enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
 
 void tfm_spm_hal_clear_pending_irq(int32_t irq_line)
 {
-       (void)irq_line;
+    NVIC_ClearPendingIRQ(irq_line);
 }
 
 void tfm_spm_hal_enable_irq(int32_t irq_line)
 {
-    (void)irq_line;
+    NVIC_EnableIRQ(irq_line);
 }
 
 void tfm_spm_hal_disable_irq(int32_t irq_line)
 {
-    (void)irq_line;
+    NVIC_DisableIRQ(irq_line);
 }
 
 enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
