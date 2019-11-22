@@ -7,6 +7,7 @@
 
 #include "target_cfg.h"
 #include "platform/include/tfm_spm_hal.h"
+#include "uart_stdout.h"
 
 /* platform-specific hw initialization */
 __WEAK enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void)

@@ -13,7 +13,6 @@
 #include "tfm_core_topology.h"
 #include "tfm_nspm.h"
 #include "platform/include/tfm_spm_hal.h"
-#include "uart_stdout.h"
 #include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
