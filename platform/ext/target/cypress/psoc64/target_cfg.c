@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Arm Limited
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,13 @@ REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
         SCB5_BASE,
         SCB5_BASE + 0xFFF,
+        -1,
+        -1
+};
+
+struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+        TCPWM0_BASE,
+        TCPWM0_BASE + (sizeof(TCPWM_Type) - 1),
         -1,
         -1
 };
