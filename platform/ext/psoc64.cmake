@@ -23,8 +23,6 @@ add_definitions(-DTFM_CORE_DEBUG)
 set(BL2 False)
 remove_definitions(-DBL2)
 
-# Skip Core Test temporarily
-set(CORE_TEST OFF)
 # Skip peripheral access test
 set(TFM_ENABLE_PERIPH_ACCESS_TEST OFF)
 
