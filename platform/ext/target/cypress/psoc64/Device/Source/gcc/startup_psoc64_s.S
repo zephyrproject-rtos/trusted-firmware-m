@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -56,7 +56,7 @@ __Vectors:
     .long    NvicMux0_IRQHandler                     /* CM0 + NVIC Mux input 0 */
     .long    Cy_SysIpcPipeIsrCm0
     .long    NvicMux2_IRQHandler                     /* CM0 + NVIC Mux input 2 */
-    .long    NvicMux3_IRQHandler                     /* CM0 + NVIC Mux input 3 */
+    .long    TFM_TIMER0_IRQ_Handler                  /* Secure IRQ */
     .long    NvicMux4_IRQHandler                     /* CM0 + NVIC Mux input 4 */
     .long    NvicMux5_IRQHandler                     /* CM0 + NVIC Mux input 5 */
     .long    NvicMux6_IRQHandler                     /* CM0 + NVIC Mux input 6 */
@@ -335,7 +335,7 @@ Fault_Handler:
 
     def_irq_handler  NvicMux0_IRQHandler                     /* CPU User Interrupt #0 */
     def_irq_handler  NvicMux2_IRQHandler                     /* CPU User Interrupt #2 */
-    def_irq_handler  NvicMux3_IRQHandler                     /* CPU User Interrupt #3 */
+    def_irq_handler  TFM_TIMER0_IRQ_Handler                  /* CPU User Interrupt #3 */
     def_irq_handler  NvicMux4_IRQHandler                     /* CPU User Interrupt #4 */
     def_irq_handler  NvicMux5_IRQHandler                     /* CPU User Interrupt #5 */
     def_irq_handler  NvicMux6_IRQHandler                     /* CPU User Interrupt #6 */

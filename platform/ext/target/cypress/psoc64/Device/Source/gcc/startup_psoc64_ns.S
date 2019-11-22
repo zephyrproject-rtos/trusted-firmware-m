@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -174,7 +174,7 @@ __Vectors:
     .long    cpuss_interrupts_cm4_cti_0_IRQHandler   /* CM4 CTI #0 */
     .long    cpuss_interrupts_cm4_cti_1_IRQHandler   /* CM4 CTI #1 */
     .long    tcpwm_0_interrupts_0_IRQHandler         /* TCPWM #0, Counter #0 */
-    .long    tcpwm_0_interrupts_1_IRQHandler         /* TCPWM #0, Counter #1 */
+    .long    TIMER1_Handler                          /* TCPWM #0, Counter #1 */
     .long    tcpwm_0_interrupts_2_IRQHandler         /* TCPWM #0, Counter #2 */
     .long    tcpwm_0_interrupts_3_IRQHandler         /* TCPWM #0, Counter #3 */
     .long    tcpwm_0_interrupts_4_IRQHandler         /* TCPWM #0, Counter #4 */
@@ -611,7 +611,7 @@ Fault_Handler:
     def_irq_handler  cpuss_interrupts_cm4_cti_0_IRQHandler   /* CM4 CTI #0 */
     def_irq_handler  cpuss_interrupts_cm4_cti_1_IRQHandler   /* CM4 CTI #1 */
     def_irq_handler  tcpwm_0_interrupts_0_IRQHandler         /* TCPWM #0, Counter #0 */
-    def_irq_handler  tcpwm_0_interrupts_1_IRQHandler         /* TCPWM #0, Counter #1 */
+    def_irq_handler  TIMER1_Handler                          /* TCPWM #0, Counter #1 */
     def_irq_handler  tcpwm_0_interrupts_2_IRQHandler         /* TCPWM #0, Counter #2 */
     def_irq_handler  tcpwm_0_interrupts_3_IRQHandler         /* TCPWM #0, Counter #3 */
     def_irq_handler  tcpwm_0_interrupts_4_IRQHandler         /* TCPWM #0, Counter #4 */

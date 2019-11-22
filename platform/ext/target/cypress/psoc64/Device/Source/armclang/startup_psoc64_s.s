@@ -1,6 +1,6 @@
 ;/*
 ; * Copyright (c) 2017-2018 ARM Limited
-; * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ CY_NMI_HANLDER_ADDR    EQU    0x0000000D
                 IMPORT  PendSV_Handler
                 IMPORT  NvicMux7_IRQHandler
                 IMPORT  Cy_SysIpcPipeIsrCm0
+                IMPORT  TFM_TIMER0_IRQ_Handler
 
 __Vectors       ;Core Interrupts
                 DCD     |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|  ; Top of Stack
@@ -70,7 +71,7 @@ __Vectors       ;Core Interrupts
                 DCD     NvicMux0_IRQHandler                   ; CPU User Interrupt #0
                 DCD     Cy_SysIpcPipeIsrCm0
                 DCD     NvicMux2_IRQHandler                   ; CPU User Interrupt #2
-                DCD     NvicMux3_IRQHandler                   ; CPU User Interrupt #3
+                DCD     TFM_TIMER0_IRQ_Handler                ; Secure Timer IRQ
                 DCD     NvicMux4_IRQHandler                   ; CPU User Interrupt #4
                 DCD     NvicMux5_IRQHandler                   ; CPU User Interrupt #5
                 DCD     NvicMux6_IRQHandler                   ; CPU User Interrupt #6
@@ -127,7 +128,7 @@ $handler_name   PROC
                 Default_Handler SysTick_Handler
                 Default_Handler NvicMux0_IRQHandler
                 Default_Handler NvicMux2_IRQHandler
-                Default_Handler NvicMux3_IRQHandler
+                Default_Handler TFM_TIMER0_IRQ_Handler
                 Default_Handler NvicMux4_IRQHandler
                 Default_Handler NvicMux5_IRQHandler
                 Default_Handler NvicMux6_IRQHandler

@@ -1,6 +1,6 @@
 ;/*
 ; * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
-; * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
@@ -61,6 +61,7 @@ __heap_limit
                 EXPORT  __ramVectors
                 IMPORT  Cy_SysIpcPipeIsrCm4
                 IMPORT  Cy_Flash_ResumeIrqHandler
+                IMPORT  TIMER1_Handler
 
 __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
@@ -204,7 +205,7 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     cpuss_interrupts_cm4_cti_0_IRQHandler ; CM4 CTI #0
                 DCD     cpuss_interrupts_cm4_cti_1_IRQHandler ; CM4 CTI #1
                 DCD     tcpwm_0_interrupts_0_IRQHandler       ; TCPWM #0, Counter #0
-                DCD     tcpwm_0_interrupts_1_IRQHandler       ; TCPWM #0, Counter #1
+                DCD     TIMER1_Handler                        ; TCPWM #0, Counter #1
                 DCD     tcpwm_0_interrupts_2_IRQHandler       ; TCPWM #0, Counter #2
                 DCD     tcpwm_0_interrupts_3_IRQHandler       ; TCPWM #0, Counter #3
                 DCD     tcpwm_0_interrupts_4_IRQHandler       ; TCPWM #0, Counter #4
@@ -459,7 +460,7 @@ Default_Handler     PROC
                     EXPORT  cpuss_interrupts_cm4_cti_0_IRQHandler [WEAK]
                     EXPORT  cpuss_interrupts_cm4_cti_1_IRQHandler [WEAK]
                     EXPORT  tcpwm_0_interrupts_0_IRQHandler       [WEAK]
-                    EXPORT  tcpwm_0_interrupts_1_IRQHandler       [WEAK]
+                    EXPORT  TIMER1_Handler                        [WEAK]
                     EXPORT  tcpwm_0_interrupts_2_IRQHandler       [WEAK]
                     EXPORT  tcpwm_0_interrupts_3_IRQHandler       [WEAK]
                     EXPORT  tcpwm_0_interrupts_4_IRQHandler       [WEAK]
@@ -626,7 +627,7 @@ cpuss_interrupts_cm0_cti_1_IRQHandler
 cpuss_interrupts_cm4_cti_0_IRQHandler
 cpuss_interrupts_cm4_cti_1_IRQHandler
 tcpwm_0_interrupts_0_IRQHandler
-tcpwm_0_interrupts_1_IRQHandler
+TIMER1_Handler
 tcpwm_0_interrupts_2_IRQHandler
 tcpwm_0_interrupts_3_IRQHandler
 tcpwm_0_interrupts_4_IRQHandler
