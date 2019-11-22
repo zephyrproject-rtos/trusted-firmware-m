@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -42,8 +42,10 @@ enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 }
 
 void tfm_spm_hal_configure_default_isolation(
+        uint32_t partition_idx,
         const struct tfm_spm_partition_platform_data_t *platform_data)
 {
+    (void) partition_idx; /* Unused parameter */
     printf("In %s()\n", __func__);
     if (platform_data) {
         /* TBD */

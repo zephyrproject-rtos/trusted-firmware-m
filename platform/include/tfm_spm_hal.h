@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -117,16 +117,19 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
 #endif
 
 /**
- * \brief Configure peripherals for a partition based on the platfotm data from
- *        the DB
+ * \brief Configure peripherals for a partition based on the platform data and
+ *        partition index from the DB
  *
  * This function is called during partition initialisation (before calling the
  * init function for the partition)
  *
+ * \param[in] partition_idx    The index of the partition that this peripheral
+ *                             is assigned to.
  * \param[in] platform_data    The platform fields of the partition DB record to
  *                             be used for configuration. Can be NULL.
  */
 void tfm_spm_hal_configure_default_isolation(
+                 uint32_t partition_idx,
                  const struct tfm_spm_partition_platform_data_t *platform_data);
 /**
  * \brief Configures the system debug properties.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -215,6 +215,16 @@ enum spm_err_t tfm_spm_db_init(void);
  */
 void tfm_spm_partition_change_privilege(uint32_t privileged);
 
+/**
+ * \brief                   Get the current partition mode.
+ *
+ * \param[in] partition_flags               Flags of current partition
+ *
+ * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
+ * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode
+ */
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
+
 /*********************** library definitions ***********************/
 
 #ifndef TFM_PSA_API
@@ -404,16 +414,6 @@ uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
  * \return  Returns the partition ID
  */
 uint32_t tfm_spm_partition_get_running_partition_id(void);
-
-/**
- * \brief                   Get the current partition mode.
- *
- * \param[in] partition_flags               Flags of current partition
- *
- * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
- * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode
- */
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
 
 /******************** Service handle management functions ********************/
 

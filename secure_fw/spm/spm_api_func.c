@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -58,7 +58,7 @@ enum spm_err_t tfm_spm_partition_init(void)
         platform_data_p = part->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
-                tfm_spm_hal_configure_default_isolation(*platform_data_p);
+                tfm_spm_hal_configure_default_isolation(idx, *platform_data_p);
                 ++platform_data_p;
             }
         }

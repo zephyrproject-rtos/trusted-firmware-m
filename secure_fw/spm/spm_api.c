@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -87,6 +87,23 @@ uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data->
             partition_flags;
+}
+
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
+{
+    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
+        return TFM_PARTITION_PRIVILEGED_MODE;
+    } else {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
+}
+
+bool tfm_is_partition_privileged(uint32_t partition_idx)
+{
+    uint32_t flags = tfm_spm_partition_get_flags(partition_idx);
+
+    return tfm_spm_partition_get_privileged_mode(flags) ==
+        TFM_PARTITION_PRIVILEGED_MODE;
 }
 
 __attribute__((section("SFN")))

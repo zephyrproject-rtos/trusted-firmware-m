@@ -508,15 +508,6 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     return IPC_ERROR_MEMORY_CHECK;
 }
 
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
-{
-    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
-        return TFM_PARTITION_PRIVILEGED_MODE;
-    } else {
-        return TFM_PARTITION_UNPRIVILEGED_MODE;
-    }
-}
-
 /********************** SPM functions for thread mode ************************/
 
 void tfm_spm_init(void)
@@ -545,7 +536,7 @@ void tfm_spm_init(void)
         platform_data_p = partition->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
-                tfm_spm_hal_configure_default_isolation(*platform_data_p);
+                tfm_spm_hal_configure_default_isolation(i, *platform_data_p);
                 ++platform_data_p;
             }
         }

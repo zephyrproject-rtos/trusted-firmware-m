@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #ifndef __TFM_PLATFORM_CORE_API_H__
 #define __TFM_PLATFORM_CORE_API_H__
+
+#include <stdbool.h>
 
 /**
  * \brief Should be called in case of access violation.
@@ -20,5 +22,14 @@
  * code have to call this function, if a violation happens.
  */
 void tfm_access_violation_handler(void);
+
+/**
+ * \brief Return whether a secure partition is privileged.
+ *
+ * \param[in] partition_idx  The index of the partition in the partition_db.
+ *
+ * \return True if the partition is privileged, false otherwise.
+ */
+bool tfm_is_partition_privileged(uint32_t partition_idx);
 
 #endif /* __TFM_PLATFORM_CORE_API_H__ */

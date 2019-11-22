@@ -49,12 +49,19 @@ enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 }
 
 void tfm_spm_hal_configure_default_isolation(
-              const struct tfm_spm_partition_platform_data_t *platform_data)
+                  uint32_t partition_idx,
+                  const struct tfm_spm_partition_platform_data_t *platform_data)
 {
+    bool privileged = tfm_is_partition_privileged(partition_idx);
     if (platform_data) {
         if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
-            ppc_configure_to_secure_priv(platform_data->periph_ppc_bank,
-                                         platform_data->periph_ppc_loc);
+            if (privileged) {
+                ppc_configure_to_secure_priv(platform_data->periph_ppc_bank,
+                                             platform_data->periph_ppc_loc);
+            } else {
+                ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
+                                     platform_data->periph_ppc_loc);
+            }
         }
     }
 }
