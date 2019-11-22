@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +27,10 @@
  *
  * This is a default device configuration file with all peripherals enabled.
  */
+
+/* TCPWM0 Timers (IRQ test) */
+#define CY_TCPWM0_TIMER0_S
+#define CY_TCPWM0_TIMER1_NS
 
 #define DEFAULT_UART_BAUDRATE  115200
 

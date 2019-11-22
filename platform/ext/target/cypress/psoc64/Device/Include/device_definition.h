@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2018 Arm Limited
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +49,28 @@ extern struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_S;
 #ifdef CMSDK_TIMER1_NS
 #include "timer_cmsdk_drv.h"
 extern struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS;
+#endif
+
+#if defined(CY_TCPWM0_TIMER0_S) || defined(CY_TCPWM0_TIMER1_NS)
+#include "cy_tcpwm_counter.h"
+typedef struct tfm_timer_irq_test_dev {
+    bool        is_initialized;
+    TCPWM_Type *tcpwm_base;
+    uint32_t    tcpwm_counter_num;
+    uint32_t    timer_match_value;
+    cy_stc_tcpwm_counter_config_t   *tcpwm_config;
+} tfm_timer_irq_test_dev_t;
+#endif
+#ifdef CY_TCPWM0_TIMER0_S
+#include "cy_sysint.h"
+extern cy_stc_sysint_t CY_TCPWM_NVIC_CFG_S;
+extern void TFM_TIMER0_IRQ_Handler(void);
+extern tfm_timer_irq_test_dev_t CY_TCPWM0_TIMER0_DEV_S;
+#define TIMER0_MATCH (1000000 / 8)  /* About 1 seconds (CM0+: 50MHz) */
+#endif
+#ifdef CY_TCPWM0_TIMER1_NS
+extern tfm_timer_irq_test_dev_t CY_TCPWM0_TIMER1_DEV_NS;
+#define TIMER1_MATCH (1000000 / 8)  /* About 2 seconds (CM4: 100MHz) */
 #endif
 
 #endif  /* __DEVICE_DEFINITION_H__ */
