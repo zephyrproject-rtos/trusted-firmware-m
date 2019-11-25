@@ -243,6 +243,16 @@ Example application with BL2 bootloader
 
             srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
+    - For Musca-S1
+
+        - Windows::
+
+            srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+
+        - Linux::
+
+            srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+
 #. Power up the Musca board by connecting it to a computer with a USB lead.
    Press the ``PBON`` button if the green ``ON`` LED does not immediately turn
    on. The board should appear as a USB drive.

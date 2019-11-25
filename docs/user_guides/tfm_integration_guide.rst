@@ -21,8 +21,10 @@ The hardware platforms currently supported are:
 
 - Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
+- Arm SSE-123 Example Subsystem for MPS2+ (AN539)
 - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
+- Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
 
 The files related to the supported platforms are contained under the
@@ -39,6 +41,9 @@ More information about the Musca-A test chip board can be found in:
 
 More information about the Musca-B1 test chip board can be found in:
 `Musca-B1 homepage <https://www.arm.com/products/development-tools/development-boards/musca-b1-iot>`__
+
+More information about the Musca-S1 test chip board can be found in:
+`Musca-S1 homepage <https://www.arm.com/company/news/2019/05/arm-demonstrates-new-iot-test-chip-and-board>`__
 
 More information about subsystems supported by the MPS3 board can be found in:
 `MPS3 homepage <https://www.arm.com/products/development-tools/development-boards/mps3>`__
