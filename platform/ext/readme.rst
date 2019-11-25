@@ -206,13 +206,14 @@ Secure Storage (SST) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The SST service requires the following definitions:
 
-- ``SST_FLASH_AREA_ADDR`` - Defines the flash area address where the secure
-  store area starts.
+- ``SST_FLASH_AREA_ADDR`` - Defines the flash address where the secure storage
+  area starts.
 - ``SST_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for secure storage.
-- ``SST_SECTOR_SIZE`` - Defines the size of the external flash sectors.
+  for secure storage in bytes.
+- ``SST_SECTOR_SIZE`` - Defines the size of the external flash sectors (the
+  smallest erasable unit) in bytes.
 - ``SST_SECTORS_PER_BLOCK`` - Defines the number of contiguous SST_SECTOR_SIZE
-  to form an SST_BLOCK_SIZE.
+  to form a logical block in the filesystem.
 - ``SST_FLASH_DEV_NAME`` - Specifies the flash device used by SST to store the
   data.
 - ``SST_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
@@ -230,13 +231,14 @@ Internal Trusted Storage (ITS) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ITS service requires the following definitions:
 
-- ``ITS_FLASH_AREA_ADDR`` - Defines the flash area address where the internal
-  trusted storage area starts.
-- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for the
-  internal trusted storage.
-- ``ITS_SECTOR_SIZE`` - Defines the size of the internal flash sectors.
+- ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
+  storage area starts.
+- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
+  internal trusted storage in bytes.
+- ``ITS_SECTOR_SIZE`` - Defines the size of the internal flash sectors (the
+  smallest erasable unit) in bytes.
 - ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
-  to form an ITS_BLOCK_SIZE.
+  to form a logical block in the filesystem.
 - ``ITS_FLASH_DEV_NAME`` - Specifies the internal flash device used by ITS to
   store the data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
@@ -263,4 +265,4 @@ HW components:
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

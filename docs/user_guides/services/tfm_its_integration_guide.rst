@@ -9,8 +9,9 @@ TF-M Internal Trusted Storage (ITS) service implements PSA Internal Trusted
 Storage APIs.
 
 The service is backed by hardware isolation of the flash access domain and
-relies on hardware to isolate the flash area from non-secure access and App RoT
-at higher levels of isolation .
+relies on hardware to isolate the flash area from access by the Non-secure
+Processing Environment, as well as the Application Root of Trust at higher
+levels of isolation.
 
 The current ITS service design relies on hardware abstraction provided by TF-M.
 The ITS service provides a non-hierarchical storage model, as a filesystem,
@@ -113,6 +114,8 @@ Core Files
 
 - ``tfm_internal_trusted_storage.c`` - Contains the TF-M internal trusted
   storage API implementations which are the entry points to the ITS service.
+  Allocates a filesystem context for ITS and makes appropriate fs calls. Also
+  handles requests from the SST partition with a separate fs context.
 
 - ``its_utils.c`` - Contains common and basic functionalities used across the
   ITS service code.
@@ -121,7 +124,7 @@ Flash Filesystem Interface
 ==========================
 - ``flash_fs/its_flash_fs.h`` - Abstracts the flash filesystem operations used
   by the internal trusted storage service. The purpose of this abstraction is to
-  have the ability to plug-in other filesystems or filesystem proxys
+  have the ability to plug-in other filesystems or filesystem proxies
   (supplicant).
 
 - ``flash_fs/its_flash_fs.c`` - Contains the ``its_flash_fs`` implementation for
@@ -141,13 +144,22 @@ flash filesystem implementation or filesystem proxy (supplicant).
 Flash Interface
 ===============
 - ``flash/its_flash.h`` - Abstracts the flash operations for the internal
-  trusted storage service. It also defines the block size and number of blocks
-  used by the ITS service.
+  trusted storage service. Defines the ``struct its_flash_info_t`` type, which
+  is used as a parameter to the filesystem to provide information about the
+  flash device in use, such as the block size and number of blocks available.
 
 - ``flash/its_flash.c`` - Contains the ``its_flash`` implementation which sits
   on top of CMSIS flash interface implemented by the target.
   The CMSIS flash interface **must** be implemented for each target based on
   its flash controller.
+
+- ``flash/its_flash_info_internal.c`` - Defines an instance of the
+  ``struct its_flash_info_t`` type for the internal flash device based on
+  target-specific definitions.
+
+- ``flash/its_flash_info_external.c`` - Defines an instance of the
+  ``struct its_flash_info_t`` type for the external flash device, used only to
+  handle requests from the SST partition.
 
 The ITS flash interface depends on target-specific definitions from
 ``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``.
@@ -174,10 +186,11 @@ The ITS service requires the following platform definitions:
 - ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
   storage area starts.
 - ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
-  internal trusted storage.
-- ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors.
+  internal trusted storage in bytes.
+- ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
+  erasable unit) in bytes.
 - ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
-  to form an ITS_BLOCK_SIZE.
+  to form a logical block in the filesystem.
 - ``ITS_FLASH_DEV_NAME`` - Specifies the flash device used by ITS to store the
   data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
@@ -243,4 +256,4 @@ needs. The list of ITS services flags are:
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

@@ -5,20 +5,19 @@ Secure Storage Service Integration Guide
 ************
 Introduction
 ************
-TF-M secure storage (SST) service implements PSA Protected Storage APIs.
+TF-M Secure Storage (SST) service implements PSA Protected Storage APIs.
 
 The service is backed by hardware isolation of the flash access domain and, in
 the current version, relies on hardware to isolate the flash area from
 non-secure access. In absence of hardware level isolation, the secrecy and
 integrity of data is still maintained.
 
-The current SST service design relies on hardware abstraction level provided
-by TF-M. The SST service provides a non-hierarchical storage model, as a
-filesystem, where all the assets are managed by linearly indexed list of
-metadata.
-
 The SST service implements an AES-GCM based AEAD encryption policy, as a
 reference, to protect data integrity and authenticity.
+
+SST reuses the non-hierarchical filesystem provided by the TF-M Internal Trusted
+Storage service to store encrypted, authenticated objects on the external flash
+device.
 
 The design addresses the following high level requirements as well:
 
@@ -96,18 +95,16 @@ Secure storage service code is located in ``secure_fw/services/secure_storage/``
 and is divided as follows:
 
     - Core files
-    - Flash filesystem interfaces
-    - Flash interfaces
     - Cryptographic interfaces
     - Non-volatile (NV) counters interfaces
 
-The PSA PS interfaces for SST service are located in ``interface/include``
+The PSA PS interfaces for SST service are located in ``interface/include/psa``
 
 PSA Protected Storage Interfaces
 ================================
 
-The SST service exposes the following mandatory PSA PS interfaces
-version 1.0:
+The SST service exposes the following mandatory PSA PS interfaces, version
+1.0-beta-2:
 
 .. code-block:: c
 
@@ -147,40 +144,28 @@ Core Files
 - ``sst_utils.c`` - Contains common and basic functionalities used across the
   SST service code.
 
-Flash Filesystem Interface
-==========================
-- ``flash_fs/sst_flash_fs.h`` - Abstracts the flash filesystem operations used
-  by the secure storage service. The purpose of this abstraction is to have the
-  ability to plug-in other filesystems or filesystem proxys (supplicant).
+Flash Filesystem and Flash Interfaces
+=====================================
+The SST service reuses the non-hierarchical filesystem and flash interfaces
+provided by the TF-M Internal Trusted Storage service. It stores encrypted,
+authenticated objects on the external flash device by making service calls to
+the ITS service. When the ITS service receives requests from the SST partition,
+it handles the request by using a separate filesystem context initialised to use
+the external flash device.
 
-- ``flash_fs/sst_flash_fs.c`` - Contains the ``sst_flash_fs`` implementation for
-  the required interfaces.
+The ITS filesystem and flash interfaces and their implementation can be found in
+``secure_fw/services/internal_trusted_storage/flash_fs`` and
+``secure_fw/services/internal_trusted_storage/flash`` respectively. More
+information about the filesystem and flash interfaces can be found in the
+:doc:`ITS integration guide
+</docs/user_guides/services/tfm_its_integration_guide>`.
 
-- ``flash_fs/sst_flash_fs_mbloc.c`` - Contains the metadata block manipulation
-  functions required to implement the ``sst_flash_fs`` interfaces in
-  ``flash_fs/sst_flash_fs.c``.
-
-- ``flash_fs/sst_flash_fs_dbloc.c`` - Contains the data block manipulation
-  functions required to implement the ``sst_flash_fs`` interfaces in
-  ``flash_fs/sst_flash_fs.c``.
-
-The system integrator **may** replace this implementation with its own
-flash filesystem implementation or filesystem proxy (supplicant).
-
-Flash Interface
-===============
-- ``flash/sst_flash.h`` - Abstracts the flash operations for the secure storage
-  service. It also defines the block size and number of blocks used by the SST
-  service.
-
-- ``flash/sst_flash.c`` - Contains the ``sst_flash`` implementation which sits
-  on top of CMSIS flash interface implemented by the target.
-  The CMSIS flash interface **must** be implemented for each target based on
-  its flash controller.
-
-The SST flash interface depends on target-specific definitions from
-``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``.
-Please see the `Secure Storage Service Definitions` section for details.
+The structure containing info about the external flash device, used by the ITS
+service to handle requests from the SST partition, is defined in
+``secure_fw/services/internal_trusted_storage/flash/its_flash_info_external.c``,
+which depends on target-specific definitions from
+``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``. Please see the
+`Secure Storage Service Definitions` section for details.
 
 Cryptographic Interface
 =======================
@@ -226,13 +211,14 @@ Secure Storage Service Definitions
 ==================================
 The SST service requires the following platform definitions:
 
-- ``SST_FLASH_AREA_ADDR`` - Defines the flash address where the secure store
+- ``SST_FLASH_AREA_ADDR`` - Defines the flash address where the secure storage
   area starts.
 - ``SST_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for secure storage.
-- ``SST_SECTOR_SIZE`` - Defines the size of the flash sectors.
+  for secure storage in bytes.
+- ``SST_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
+  erasable unit) in bytes.
 - ``SST_SECTORS_PER_BLOCK`` - Defines the number of contiguous SST_SECTOR_SIZE
-  to form an SST_BLOCK_SIZE.
+  to form a logical block in the filesystem.
 - ``SST_FLASH_DEV_NAME`` - Specifies the flash device used by SST to store the
   data.
 - ``SST_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
@@ -247,8 +233,12 @@ The SST service requires the following platform definitions:
   object table is allocated statically as SST does not use dynamic memory
   allocation.
 
-The sectors reserved to be used as secure storage **must** be contiguous
-sectors starting at ``SST_FLASH_AREA_ADDR``.
+The sectors reserved to be used as secure storage **must** be contiguous sectors
+starting at ``SST_FLASH_AREA_ADDR``.
+
+The design requires either 2 blocks, or any number of blocks greater than or
+equal to 4. Total number of blocks can not be 0, 1 or 3. This is a design choice
+limitation to provide power failure safe update operations.
 
 Target must provide a header file, called ``flash_layout.h``, which defines the
 information explained above. The defines must be named as they are specified
@@ -278,17 +268,6 @@ For API specification, please check:
 
 A stub implementation is provided in
 ``platform/ext/common/template/crypto_keys.c``
-
-Flash Interface
-===============
-For SST service operations, a contiguous set of blocks must be earmarked for
-the secure storage area. The design requires either 2 blocks, or any number of
-blocks greater than or equal to 4. Total number of blocks can not be 0, 1 or 3.
-This is a design choice limitation to provide power failure safe update
-operations.
-
-For API specification, please check:
-``secure_fw/services/secure_storage/flash/sst_flash.h``
 
 Non-Secure Identity Manager
 ===========================
@@ -370,4 +349,4 @@ needs. The list of SST services flags are:
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
