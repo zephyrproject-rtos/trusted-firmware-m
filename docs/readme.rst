@@ -59,6 +59,8 @@ This release includes:
     - BL2 bootloader for image authentication based on SHA256 and RSA-3072
       digital signature.
     - Build system based on cmake, supporting armclang and GNU Arm.
+    - Support for integrated CryptoCell-312 cryptographic hardware accelerator
+      on Musca-B1 platform.
 
 *********
 Platforms
@@ -75,6 +77,7 @@ Current release has been tested on:
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
         - `Musca-B1 test chip board.
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`__
+        - `Musca-S1 test chip board.`
         - `FPGA image loaded on MPS3 board.
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`__
 
@@ -143,6 +146,8 @@ Version history
 | v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    |
 +-------------+--------------+--------------------+
 | v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    |
++-------------+--------------+--------------------+
+| v1.0-RC3    | 2019-11-29   | 1.0-RC3 release    |
 +-------------+--------------+--------------------+
 
 --------------
