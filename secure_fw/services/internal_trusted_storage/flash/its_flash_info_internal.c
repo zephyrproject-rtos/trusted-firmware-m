@@ -6,6 +6,11 @@
  */
 
 #include "its_flash.h"
+#ifdef ITS_RAM_FS
+#include "its_flash_ram.h"
+#else
+#include "its_flash_nor.h"
+#endif
 
 #include "Driver_Flash.h"
 #include "flash_layout.h"
@@ -70,6 +75,19 @@ extern ARM_DRIVER_FLASH ITS_FLASH_DEV_NAME;
 #endif
 
 const struct its_flash_info_t its_flash_info_internal = {
+#ifdef ITS_RAM_FS
+    .init = its_flash_ram_init,
+    .read = its_flash_ram_read,
+    .write = its_flash_ram_write,
+    .flush = its_flash_ram_flush,
+    .erase = its_flash_ram_erase,
+#else
+    .init = its_flash_nor_init,
+    .read = its_flash_nor_read,
+    .write = its_flash_nor_write,
+    .flush = its_flash_nor_flush,
+    .erase = its_flash_nor_erase,
+#endif
     .flash_dev = (void *)FLASH_INFO_DEV,
     .flash_area_addr = ITS_FLASH_AREA_ADDR,
     .sector_size = ITS_SECTOR_SIZE,

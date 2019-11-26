@@ -148,10 +148,15 @@ Flash Interface
   is used as a parameter to the filesystem to provide information about the
   flash device in use, such as the block size and number of blocks available.
 
-- ``flash/its_flash.c`` - Contains the ``its_flash`` implementation which sits
-  on top of CMSIS flash interface implemented by the target.
-  The CMSIS flash interface **must** be implemented for each target based on
-  its flash controller.
+- ``flash/its_flash.c`` - Contains the ``its_flash`` implementations common to
+  all flash types.
+
+- ``flash/its_flash_nor.c`` - Implements the ITS flash interface for a NOR flash
+  device, on top of the CMSIS flash interface implemented by the target.
+
+- ``flash/its_flash_ram.c`` - Implements the ITS flash interface for an emulated
+  flash device using RAM, on top of the CMSIS flash interface implemented by the
+  target.
 
 - ``flash/its_flash_info_internal.c`` - Defines an instance of the
   ``struct its_flash_info_t`` type for the internal flash device based on
@@ -160,6 +165,9 @@ Flash Interface
 - ``flash/its_flash_info_external.c`` - Defines an instance of the
   ``struct its_flash_info_t`` type for the external flash device, used only to
   handle requests from the SST partition.
+
+The CMSIS flash interface **must** be implemented for each target based on its
+flash controller.
 
 The ITS flash interface depends on target-specific definitions from
 ``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``.

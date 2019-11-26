@@ -47,6 +47,87 @@ enum its_flash_id_t {
  *        be used by the ITS Flash FS.
  */
 struct its_flash_info_t {
+    /**
+     * \brief Initialize the Flash Interface.
+     *
+     * \param[in] info  Flash device information
+     *
+     * \return Returns PSA_SUCCESS if the function is executed correctly.
+     *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
+     */
+    psa_status_t (*init)(const struct its_flash_info_t *info);
+
+    /**
+     * \brief Reads block data from the position specified by block ID and
+     *        offset.
+     *
+     * \param[in]  info      Flash device information
+     * \param[in]  block_id  Block ID
+     * \param[out] buff      Buffer pointer to store the data read
+     * \param[in]  offset    Offset position from the init of the block
+     * \param[in]  size      Number of bytes to read
+     *
+     * \note This function assumes all input values are valid. That is, the
+     *       address range, based on block_id, offset and size, is a valid range
+     *       in flash.
+     *
+     * \return Returns PSA_SUCCESS if the function is executed correctly.
+     *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
+     */
+    psa_status_t (*read)(const struct its_flash_info_t *info, uint32_t block_id,
+                         uint8_t *buff, size_t offset, size_t size);
+
+    /**
+     * \brief Writes block data to the position specified by block ID and
+     *        offset.
+     *
+     * \param[in] info      Flash device information
+     * \param[in] block_id  Block ID
+     * \param[in] buff      Buffer pointer to the write data
+     * \param[in] offset    Offset position from the init of the block
+     * \param[in] size      Number of bytes to write
+     *
+     * \note This function assumes all input values are valid. That is, the
+     *       address range, based on block_id, offset and size, is a valid range
+     *       in flash.
+     *
+     * \return Returns PSA_SUCCESS if the function is executed correctly.
+     *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
+     */
+    psa_status_t (*write)(const struct its_flash_info_t *info,
+                          uint32_t block_id, const uint8_t *buff, size_t offset,
+                          size_t size);
+
+    /**
+     * \brief Flushes modifications to a block to flash. Must be called after a
+     *        sequence of calls to write() (including via
+     *        its_flash_block_to_block_move()) for one block ID, before any call
+     *        to the same functions for a different block ID.
+     *
+     * \param[in] info  Flash device information
+     *
+     * \note It is permitted for write() to commit block updates immediately, in
+     *       which case this function is a no-op.
+     *
+     * \return Returns PSA_SUCCESS if the function is executed correctly.
+     *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
+     */
+    psa_status_t (*flush)(const struct its_flash_info_t *info);
+
+    /**
+     * \brief Erases block ID data.
+     *
+     * \param[in] info      Flash device information
+     * \param[in] block_id  Block ID
+     *
+     * \note This function assumes the input value is valid.
+     *
+     * \return Returns PSA_SUCCESS if the function is executed correctly.
+     *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
+     */
+    psa_status_t (*erase)(const struct its_flash_info_t *info,
+                          uint32_t block_id);
+
     void *flash_dev;          /**< Pointer to the flash device */
     uint32_t flash_area_addr; /**< Start address of the flash area */
     uint16_t sector_size;     /**< Size of the flash device's physical erase
@@ -72,55 +153,7 @@ struct its_flash_info_t {
 const struct its_flash_info_t *its_flash_get_info(enum its_flash_id_t id);
 
 /**
- * \brief Initialize the Flash Interface.
- *
- * \param[in] info  Flash device information
- *
- * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
- *         it returns PSA_ERROR_STORAGE_FAILURE.
- */
-psa_status_t its_flash_init(const struct its_flash_info_t *info);
-
-/**
- * \brief Reads block data from the position specified by block ID and offset.
- *
- * \param[in]  info      Flash device information
- * \param[in]  block_id  Block ID
- * \param[out] buff      Buffer pointer to store the data read
- * \param[in]  offset    Offset position from the init of the block
- * \param[in]  size      Number of bytes to read
- *
- * \note This function assumes all input values are valid. That is, the address
- *       range, based on blockid, offset and size, is a valid range in flash.
- *
- * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
- *         it returns PSA_ERROR_STORAGE_FAILURE.
- */
-psa_status_t its_flash_read(const struct its_flash_info_t *info,
-                            uint32_t block_id, uint8_t *buff,
-                            size_t offset, size_t size);
-
-/**
- * \brief Writes block data to the position specified by block ID and offset.
- *
- * \param[in] info      Flash device information
- * \param[in] block_id  Block ID
- * \param[in] buff      Buffer pointer to the write data
- * \param[in] offset    Offset position from the init of the block
- * \param[in] size      Number of bytes to write
- *
- * \note This function assumes all input values are valid. That is, the address
- *       range, based on blockid, offset and size, is a valid range in flash.
- *
- * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
- *         it returns PSA_ERROR_STORAGE_FAILURE.
- */
-psa_status_t its_flash_write(const struct its_flash_info_t *info,
-                             uint32_t block_id, const uint8_t *buff,
-                             size_t offset, size_t size);
-
-/**
- * \brief Moves data from src block ID to destination block ID.
+ * \brief Moves data from source block ID to destination block ID.
  *
  * \param[in] info        Flash device information
  * \param[in] dst_block   Destination block ID
@@ -145,20 +178,6 @@ psa_status_t its_flash_block_to_block_move(const struct its_flash_info_t *info,
                                            uint32_t src_block,
                                            size_t src_offset,
                                            size_t size);
-
-/**
- * \brief Erases block ID data.
- *
- * \param[in] info      Flash device information
- * \param[in] block_id  Block ID
- *
- * \note This function assumes the input value is valid.
- *
- * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
- *         it returns PSA_ERROR_STORAGE_FAILURE.
- */
-psa_status_t its_flash_erase_block(const struct its_flash_info_t *info,
-                                   uint32_t block_id);
 
 #ifdef __cplusplus
 }

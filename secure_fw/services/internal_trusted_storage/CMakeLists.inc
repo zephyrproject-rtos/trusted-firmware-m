@@ -43,6 +43,8 @@ set(INTERNAL_TRUSTED_STORAGE_C_SRC
     "${INTERNAL_TRUSTED_STORAGE_DIR}/tfm_internal_trusted_storage.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/its_utils.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash.c"
+    "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_nor.c"
+    "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_ram.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_info_internal.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_info_external.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash_fs/its_flash_fs.c"
@@ -60,10 +62,8 @@ if (ITS_CREATE_FLASH_LAYOUT)
     set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS ITS_CREATE_FLASH_LAYOUT)
 endif()
 
-# FIXME: RAM FS can only be compiled if both ITS and SST have it enabled
-if (ITS_RAM_FS AND SST_RAM_FS)
+if (ITS_RAM_FS)
     set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS ITS_RAM_FS)
-    set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
 endif()
 
 if (DEFINED ITS_BUF_SIZE)
@@ -80,6 +80,10 @@ endif()
 
 if (SST_CREATE_FLASH_LAYOUT)
     set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_CREATE_FLASH_LAYOUT)
+endif()
+
+if (SST_RAM_FS)
+    set_property(SOURCE ${INTERNAL_TRUSTED_STORAGE_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS SST_RAM_FS)
 endif()
 
 #Append all our source files to global lists.

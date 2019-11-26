@@ -100,6 +100,14 @@ psa_status_t its_flash_fs_dblock_compact_block(
         return err;
     }
 
+    /* Commit data block modifications to flash, unless the data is in logical
+     * data block 0, in which case it will be flushed at the end of the metadata
+     * block update.
+     */
+    if (lblock != ITS_LOGICAL_DBLOCK0) {
+        err = fs_ctx->flash_info->flush(fs_ctx->flash_info);
+    }
+
     return err;
 }
 
@@ -120,7 +128,8 @@ psa_status_t its_flash_fs_dblock_read_file(
 
     pos = (file_meta->data_idx + offset);
 
-    return its_flash_read(fs_ctx->flash_info, phys_block, buf, pos, size);
+    return fs_ctx->flash_info->read(fs_ctx->flash_info, phys_block, buf, pos,
+                                    size);
 }
 
 psa_status_t its_flash_fs_dblock_write_file(
@@ -154,7 +163,8 @@ psa_status_t its_flash_fs_dblock_write_file(
     }
 
     /* Write the new file data */
-    err = its_flash_write(fs_ctx->flash_info, scratch_id, data, pos, size);
+    err = fs_ctx->flash_info->write(fs_ctx->flash_info, scratch_id, data, pos,
+                                    size);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -166,6 +176,19 @@ psa_status_t its_flash_fs_dblock_write_file(
     num_bytes = (fs_ctx->flash_info->block_size - block_meta->free_size) - pos;
 
     /* Move data between the end of the file and the end of the block data */
-    return its_flash_block_to_block_move(fs_ctx->flash_info, scratch_id, pos,
-                                         block_meta->phy_id, pos, num_bytes);
+    err = its_flash_block_to_block_move(fs_ctx->flash_info, scratch_id, pos,
+                                        block_meta->phy_id, pos, num_bytes);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
+    /* Commit data block modifications to flash, unless the data is in logical
+     * data block 0, in which case it will be flushed at the end of the metadata
+     * block update.
+     */
+    if (file_meta->lblock != ITS_LOGICAL_DBLOCK0) {
+        err = fs_ctx->flash_info->flush(fs_ctx->flash_info);
+    }
+
+    return err;
 }
