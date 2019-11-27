@@ -10,7 +10,7 @@ SH_LIB_NAME = libutil_crypto.so
 
 LIB_SRC_O = main.o common_crypto_asym.o  common_crypto_sym.o common_rsa_keypair_util.o common_rsa_keypair.o common_util_files.o
 
-UTILS_ROOT = $(shell pwd)/../../..
+UTILS_ROOT = $(PWD)/../../..
 SHARED_DIR = $(UTILS_ROOT)/../shared
 HOST_DIR = $(UTILS_ROOT)/../host
 UTILS_LIB_PATH = $(UTILS_ROOT)/lib

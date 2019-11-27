@@ -8,7 +8,7 @@
 # "Root" Makefile for Host domain
 # This makefile invokes the relevant target specific makefile to build it (e.g., cclib)
 
-HOST_PROJ_ROOT ?= $(shell pwd)/..
+HOST_PROJ_ROOT ?= ../
 include $(HOST_PROJ_ROOT)/Makefile.defs
 
 # List of known modules in host and shared domains

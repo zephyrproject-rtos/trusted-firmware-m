@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-HOST_PROJ_ROOT ?= $(shell pwd)/../..
+HOST_PROJ_ROOT ?= ../..
 include $(HOST_PROJ_ROOT)/Makefile.defs
 
 API_DIR = $(CODESAFE_SRCDIR)/crypto_api/cc3x_sym/api

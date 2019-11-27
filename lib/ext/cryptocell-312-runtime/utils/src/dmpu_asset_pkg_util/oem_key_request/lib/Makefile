@@ -10,7 +10,7 @@ SH_LIB_NAME = lib_oem_key_request.so
 
 LIB_SRC_O = main.o common_sb_ops.o common_rsa_keypair_util.o common_rsa_keypair.o common_util_files.o common_crypto_sym.o #common_crypto_asym.o
 
-UTILS_ROOT = $(shell pwd)/../../../..
+UTILS_ROOT = $(PWD)/../../../..
 SHARED_DIR = $(UTILS_ROOT)/../shared
 HOSTSRC_DIR = $(UTILS_ROOT)/../host/src
 UTILS_LIB_PATH = $(UTILS_ROOT)/lib

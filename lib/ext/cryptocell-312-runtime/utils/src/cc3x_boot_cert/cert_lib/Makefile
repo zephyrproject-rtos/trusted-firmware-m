@@ -10,7 +10,7 @@ SH_LIB_NAME = libsbu_crypto.so
 
 LIB_SRC_O = main.o common_rsa_keypair.o common_rsa_keypair_util.o common_crypto_sym.o common_util_files.o common_sb_ops.o
 
-UTILS_ROOT = $(shell pwd)/../../..
+UTILS_ROOT = $(PWD)/../../..
 SHARED_DIR = $(UTILS_ROOT)/../shared
 UTILS_LIB_PATH = $(UTILS_ROOT)/lib
 UTILS_INC_PATH = $(UTILS_ROOT)/include $(UTILS_ROOT)/src/common  $(SHARED_DIR)/include/proj/$(PROJ_PRD) $(SHARED_DIR)/include

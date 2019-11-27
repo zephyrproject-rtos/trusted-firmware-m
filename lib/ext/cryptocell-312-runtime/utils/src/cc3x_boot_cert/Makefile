@@ -15,7 +15,7 @@ endif
 $(info $$SUB_DIRS_PREFIX is [${SUB_DIRS_PREFIX}])
 
 # shared library to build
-SBU_ROOT = $(shell pwd)
+SBU_ROOT = $(PWD)
 UTIL_ROOT = $(SBU_ROOT)/../..
 SBU_CRYP_LIB_PATH = $(SUB_DIRS_PREFIX)_lib
 SBU_CRYP_LIB_NAME = libsbu_crypto.so

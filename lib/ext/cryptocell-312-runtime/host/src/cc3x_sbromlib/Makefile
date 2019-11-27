@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-HOST_PROJ_ROOT ?= $(shell pwd)/../..
+HOST_PROJ_ROOT ?= ../..
 include $(HOST_PROJ_ROOT)/Makefile.defs
 
 CFLAGS_EXTRA += -DCC_TEE -DCC_SB_SUPPORT_IOT

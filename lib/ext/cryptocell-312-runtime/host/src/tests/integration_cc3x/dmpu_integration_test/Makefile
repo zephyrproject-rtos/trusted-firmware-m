@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-HOST_PROJ_ROOT ?= $(shell pwd)/../../../..
+HOST_PROJ_ROOT ?= ../../../..
 
 ifneq (,$(findstring gnu,$(CROSS_COMPILE)))
 TEE_OS = linux

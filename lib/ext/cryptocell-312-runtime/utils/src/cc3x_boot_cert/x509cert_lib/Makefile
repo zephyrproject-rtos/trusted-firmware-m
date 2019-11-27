@@ -11,7 +11,7 @@ SH_LIB_NAME = libsbu_crypto.so
 LIB_SRC_O = main.o common_rsa_keypair.o  common_crypto_x509.o
 LIB_SRC_O += common_crypto_sym.o common_crypto_asym.o common_util_files.o common_rsa_keypair_util.o
 
-UTILS_ROOT = $(shell pwd)/../../..
+UTILS_ROOT = $(PWD)/../../..
 SHARED_DIR = $(UTILS_ROOT)/../shared
 HOST_DIR = $(UTILS_ROOT)/../host
 CODESAFE_DIR = $(UTILS_ROOT)/../codesafe

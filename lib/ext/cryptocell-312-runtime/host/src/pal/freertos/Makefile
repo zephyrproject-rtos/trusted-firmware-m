@@ -7,7 +7,7 @@
 
 # Makefile for PAL for freertos
 
-HOST_PROJ_ROOT ?= $(shell pwd)/../../..
+HOST_PROJ_ROOT ?= ../../..
 include $(HOST_PROJ_ROOT)/Makefile.defs
 TARGET_LIBS = pal_freertos
 PLAT_OS = freertos

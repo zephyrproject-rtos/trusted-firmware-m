@@ -231,6 +231,7 @@ if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
     add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_PROVISIONING")
 
     add_definitions("-DCC_IOT")
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
     embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
@@ -256,7 +257,7 @@ if (CRYPTO_HW_ACCELERATOR)
     #The CC312 uses GNU make as a build system so does not use the cmake flag
     #system. As such any flags that need to be set for both CC312 and TF-M
     #require setting multiple times.
-    string(APPEND CC312_C_FLAGS " -I ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
     embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)

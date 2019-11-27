@@ -15,6 +15,24 @@
 
 # LOGFILE = log file name. Default is makelog.txt in the current dir.
 
+### Determine host environment
+_UNAME_OS=$(shell uname -o)
+
+ifeq (Cygwin,$(_UNAME_OS))
+  HOST=WINDOWS
+  HOST_OS=CYGWIN
+else ifeq (Msys,$(_UNAME_OS))
+  HOST=WINDOWS
+  HOST_OS=MSYS
+else ifeq (GNU/Linux,$(_UNAME_OS))
+  HOST=LINUX
+  HOST_OS=LINUX
+else
+  HOST=UNKNOWN
+  HOST_OS=UNKNOWN
+endif
+
+
 ### Build platform commands (Currently assumes Linux/Unix/Cygwin machine)
 SHELL = /bin/bash -o pipefail
 RM = rm -f
@@ -30,14 +48,35 @@ LOGFILE ?= ./makelog.txt
 
 ### Build environment setup ###
 
-PWD = $(shell pwd)
+#On windows when running from an emulated POSIX environment we have
+#to deal with three different kind of paths. The native windows path
+#i.e. c:\foo\bar, the POSIX path i.e. /c/foo/bar or
+#/cygdrive/c/foo/bar and the mixed path which is the native path but
+#with forward slashes (i.e. c:/foo/bar).
+#Executables compiled in the POSIX environment understand the
+#POSIX and the mixed path. Native windows executables (i.e. compilers
+#understand the native and the mixed path.
+#To avoid path issues the best is to use the mixed path. Use the
+#cygpath tool to do the conversion.
+#Note: the pwd command provided by the shell must not be used in the
+#      makefiles!
+
+ifneq (,$(filter ${HOST_OS},CYGWIN MSYS))
+	PWD := $(shell cygpath -am . |  tr -d '\r\n')
+else
+	PWD := $(shell readlink -f .)
+endif
 
 ifndef HOST_PROJ_ROOT
 $(error HOST_PROJ_ROOT is undefined)
 endif
 
 # Host domain root converted to absolut path
-HOST_PROJ_ROOT := $(shell cd $(HOST_PROJ_ROOT); pwd)
+ifneq (,$(filter ${HOST_OS},CYGWIN MSYS))
+	HOST_PROJ_ROOT := $(shell cygpath -am $(HOST_PROJ_ROOT) |  tr -d '\r\n')
+else
+	HOST_PROJ_ROOT := $(shell readlink -f $(HOST_PROJ_ROOT))
+endif
 HOST_SRCDIR := $(HOST_PROJ_ROOT)/src
 SHARED_DIR := $(HOST_PROJ_ROOT)/../shared
 SHARED_INCDIR := $(SHARED_DIR)/include
@@ -46,11 +85,13 @@ CODESAFE_DIR := $(HOST_PROJ_ROOT)/../codesafe
 CODESAFE_SRCDIR := $(CODESAFE_DIR)/src
 UTILS_DIR := $(HOST_PROJ_ROOT)/../utils
 UTILS_SRCDIR := $(UTILS_DIR)/src
-INCDIRS = ./ $(INCDIRS_EXTRA)
+#Note: on windows GCC seems to ignore ./ as an include path with:
+#  ignoring nonexistent directory. Using . seems to work.
+INCDIRS = . $(INCDIRS_EXTRA)
 INCDIRS += $(SHARED_INCDIR) $(SHARED_INCDIR)/proj/$(PROJ_PRD)
 # $(SHARED_INCDIR)/pal $(SHARED_INCDIR)/pal/$(TEE_OS) $(SHARED_INCDIR)/pal/$(TEE_OS)/include
 INCDIRS +=  $(HOST_PROJ_ROOT)/include
-LIBDIRS = ./ $(LIBDIRS_EXTRA) $(HOST_PROJ_ROOT)/lib
+LIBDIRS = . $(LIBDIRS_EXTRA) $(HOST_PROJ_ROOT)/lib
 
 HOST_LIBDIR = $(HOST_SRCDIR)/$(HOST_LIBNAME)
 
@@ -212,7 +253,7 @@ comma := ,
 # This complexity is required because of pipe's nature which prevents appending while piping into the log file.
 ifeq ($(LOGFILE),-)
 	exec_logged = $(1)
-	#exec_logged_evaled = $(1)
+	exec_logged_evaled = $(1)
 else
 	exec_logged = ( $(ECHO) $(shell date): "$(1)"  >> $(LOGFILE) ; ( $(1) ) >>$(LOGFILE) 2>logerr.tmp ; err=$$? ; cat logerr.tmp ; cat logerr.tmp >> $(LOGFILE) ; rm logerr.tmp ; exit $$err)
 	# nested version is to be $(call)ed from within another $(eval)

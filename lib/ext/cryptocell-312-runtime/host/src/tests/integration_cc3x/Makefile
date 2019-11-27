@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 # Makefile for integration tests
-HOST_PROJ_ROOT ?= $(shell pwd)/../../..
+HOST_PROJ_ROOT ?= ../../..
 
 TEST_AL_PATH = ../TestAL
 TEST_AL_GIT =

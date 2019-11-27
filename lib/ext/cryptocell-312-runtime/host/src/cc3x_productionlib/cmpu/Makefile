@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 # Makefile for cmpu utility
-HOST_PROJ_ROOT ?= $(shell pwd)/../../..
+HOST_PROJ_ROOT ?= ../../..
 include $(HOST_PROJ_ROOT)/Makefile.defs
 #overwriting the OS defined in the config
 OS = no_os

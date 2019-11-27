@@ -7,7 +7,7 @@
 
 # Utils top level Makefile
 
-UTILS_ROOT = $(shell pwd)/..
+UTILS_ROOT = $(PWD)/..
 
 all:
 

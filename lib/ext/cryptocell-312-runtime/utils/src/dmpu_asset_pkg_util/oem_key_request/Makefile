@@ -8,7 +8,7 @@
 # Makefile for managing build and installation
 
 # shared library to build
-UTIL_ROOT = $(shell pwd)
+UTIL_ROOT = $(PWD)
 UTILS_DIR_ROOT = $(UTIL_ROOT)/../../..
 HOST_DIR_ROOT = $(UTILS_DIR_ROOT)/../host
 UTILS_LIB_PATH = ./lib
