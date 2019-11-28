@@ -16,6 +16,7 @@
 #include "cy_ipc_sema.h"
 
 #include "ns_ipc_config.h"
+#include "os_wrapper/thread.h"
 #include "tfm_ns_mailbox.h"
 #include "platform_multicore.h"
 
@@ -27,6 +28,13 @@ static void mailbox_ipc_init(void)
 {
     Cy_IPC_Drv_SetInterruptMask(Cy_IPC_Drv_GetIntrBaseAddr(IPC_RX_INTR_STRUCT),
                                 0, IPC_RX_INT_MASK);
+}
+
+static void mailbox_ipc_config(void)
+{
+    NVIC_SetPriority(PSA_CLIENT_REPLY_NVIC_IRQn, PSA_CLIENT_REPLY_IRQ_PRIORITY);
+
+    NVIC_EnableIRQ(PSA_CLIENT_REPLY_NVIC_IRQn);
 }
 
 int32_t tfm_ns_mailbox_hal_notify_peer(void)
@@ -105,7 +113,19 @@ int32_t tfm_ns_mailbox_hal_init(struct ns_mailbox_queue_t *queue)
         }
     }
 
+    mailbox_ipc_config();
+
     return MAILBOX_SUCCESS;
+}
+
+const void *tfm_ns_mailbox_get_task_handle(void)
+{
+    return os_wrapper_thread_get_handle();
+}
+
+void tfm_ns_mailbox_hal_wait_reply(mailbox_msg_handle_t handle)
+{
+    os_wrapper_thread_wait_flag((uint32_t)handle, OS_WRAPPER_WAIT_FOREVER);
 }
 
 static cy_en_ipcsema_status_t mailbox_raw_spin_lock(uint32_t ipc_channel,
@@ -235,4 +255,46 @@ void tfm_ns_mailbox_hal_enter_critical_isr(void)
 void tfm_ns_mailbox_hal_exit_critical_isr(void)
 {
     mailbox_raw_spin_unlock(CY_IPC_CHAN_SEMA, MAILBOX_SEMAPHORE_NUM);
+}
+
+static bool mailbox_clear_intr(void)
+{
+    uint32_t status;
+
+    status = Cy_IPC_Drv_GetInterruptStatusMasked(
+                            Cy_IPC_Drv_GetIntrBaseAddr(IPC_RX_INTR_STRUCT));
+    status >>= CY_IPC_NOTIFY_SHIFT;
+    if ((status & IPC_RX_INT_MASK) == 0) {
+        return false;
+    }
+
+    Cy_IPC_Drv_ClearInterrupt(Cy_IPC_Drv_GetIntrBaseAddr(IPC_RX_INTR_STRUCT),
+                              0, IPC_RX_INT_MASK);
+    return true;
+}
+
+void cpuss_interrupts_ipc_5_IRQHandler(void)
+{
+    uint32_t magic;
+    mailbox_msg_handle_t handle;
+    void *task_handle;
+
+    if (!mailbox_clear_intr())
+        return;
+
+    platform_mailbox_fetch_msg_data(&magic);
+    if (magic == PSA_CLIENT_CALL_REPLY_MAGIC) {
+        /* Handle all the pending replies */
+        while (1) {
+            handle = tfm_ns_mailbox_fetch_reply_msg_isr();
+            if (handle == MAILBOX_MSG_NULL_HANDLE) {
+                break;
+            }
+
+            task_handle = (void *)tfm_ns_mailbox_get_msg_owner(handle);
+            if (task_handle) {
+                os_wrapper_thread_set_flag_isr(task_handle, (uint32_t)handle);
+            }
+        }
+    }
 }

@@ -34,4 +34,8 @@
 
 #define DEFAULT_UART_BAUDRATE  115200
 
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+#define NUM_MAILBOX_QUEUE_SLOT      4
+#endif
+
 #endif  /* __ARM_LTD_DEVICE_CFG_H__ */

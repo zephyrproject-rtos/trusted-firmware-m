@@ -13,6 +13,9 @@ include("Common/MultiCore")
 # Select configuration of multi-core topology
 enable_multi_core_topology_config()
 
+# Enable multiple outstanding NS PSA Client calls
+enable_multi_core_multi_client_call()
+
 set(TFM_NS_CLIENT_IDENTIFICATION OFF)
 
 add_definitions(-DCYB0644ABZI_S2D44=1)

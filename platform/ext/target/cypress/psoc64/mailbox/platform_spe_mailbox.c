@@ -23,7 +23,17 @@
 
 int32_t tfm_mailbox_hal_notify_peer(void)
 {
-    return MAILBOX_SUCCESS;
+    cy_en_ipcdrv_status_t status;
+
+    status = Cy_IPC_Drv_SendMsgWord(Cy_IPC_Drv_GetIpcBaseAddress(IPC_TX_CHAN),
+                                    IPC_TX_NOTIFY_MASK,
+                                    PSA_CLIENT_CALL_REPLY_MAGIC);
+
+    if (status == CY_IPC_DRV_SUCCESS) {
+        return MAILBOX_SUCCESS;
+    } else {
+        return MAILBOX_CHAN_BUSY;
+    }
 }
 
 static void mailbox_ipc_config(void)
