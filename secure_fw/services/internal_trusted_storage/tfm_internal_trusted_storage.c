@@ -27,7 +27,7 @@
  * alignment requirement of the filesystem.
  */
 static uint8_t asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
-                                          ITS_FLASH_MAX_PROGRAM_UNIT)];
+                                          ITS_FLASH_MAX_ALIGNMENT)];
 
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;

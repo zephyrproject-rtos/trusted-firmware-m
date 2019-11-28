@@ -43,6 +43,7 @@ set(INTERNAL_TRUSTED_STORAGE_C_SRC
     "${INTERNAL_TRUSTED_STORAGE_DIR}/tfm_internal_trusted_storage.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/its_utils.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash.c"
+    "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_nand.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_nor.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_ram.c"
     "${INTERNAL_TRUSTED_STORAGE_DIR}/flash/its_flash_info_internal.c"

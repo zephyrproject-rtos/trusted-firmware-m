@@ -51,7 +51,7 @@ extern "C" {
  * \note This structure is programmed to flash, so it must be aligned to the
  *       maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_PROGRAM_UNIT)))
+struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
 its_metadata_block_header_t {
     uint32_t scratch_dblock;    /*!< Physical block ID of the data
                                  *   section's scratch block
@@ -68,7 +68,7 @@ its_metadata_block_header_t {
  * \note This structure is programmed to flash, so it must be aligned to the
  *       maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_PROGRAM_UNIT)))
+struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
 its_block_meta_t {
     uint32_t phy_id;    /*!< Physical ID of this logical block */
     size_t data_start;  /*!< Offset from the beginning of the block to the
@@ -87,7 +87,7 @@ its_block_meta_t {
  * \note This structure is programmed to flash, so it must be aligned to the
  *       maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_PROGRAM_UNIT)))
+struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
 its_file_meta_t {
     uint32_t lblock;               /*!< Logical datablock where file is
                                     *   stored

@@ -151,6 +151,12 @@ Flash Interface
 - ``flash/its_flash.c`` - Contains the ``its_flash`` implementations common to
   all flash types.
 
+- ``flash/its_flash_nand.c`` - Implements the ITS flash interface for a NAND
+  flash device, on top of the CMSIS flash interface implemented by the target.
+  This implementation writes entire block updates in one-shot, so the CMSIS
+  flash implementation **must** be able to detect incomplete writes and return
+  an error the next time the block is read.
+
 - ``flash/its_flash_nor.c`` - Implements the ITS flash interface for a NOR flash
   device, on top of the CMSIS flash interface implemented by the target.
 
@@ -202,7 +208,8 @@ The ITS service requires the following platform definitions:
 - ``ITS_FLASH_DEV_NAME`` - Specifies the flash device used by ITS to store the
   data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes. Currently, ITS supports 1, 2, 4 and 8.
+  bytes. Valid values are powers of two between 1 and ``ITS_SECTOR_SIZE``
+  inclusive.
 - ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
   ITS area. This size is used to define the temporary buffers used by ITS to
   read/write the asset content from/to flash. The memory used by the temporary

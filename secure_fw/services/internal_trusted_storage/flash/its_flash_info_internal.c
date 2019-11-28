@@ -6,11 +6,6 @@
  */
 
 #include "its_flash.h"
-#ifdef ITS_RAM_FS
-#include "its_flash_ram.h"
-#else
-#include "its_flash_nor.h"
-#endif
 
 #include "Driver_Flash.h"
 #include "flash_layout.h"
@@ -42,12 +37,44 @@
 /* Adjust to match the size of the flash device's physical program unit */
 #ifndef ITS_FLASH_PROGRAM_UNIT
 #error "ITS_FLASH_PROGRAM_UNIT must be defined by the target in flash_layout.h"
+#elif (ITS_FLASH_PROGRAM_UNIT < 1 || ITS_FLASH_PROGRAM_UNIT > ITS_SECTOR_SIZE)
+#error "ITS_FLASH_PROGRAM_UNIT must be between 1 and ITS_SECTOR_SIZE inclusive"
+#elif (ITS_FLASH_PROGRAM_UNIT & (ITS_FLASH_PROGRAM_UNIT - 1) != 0)
+#error "ITS_FLASH_PROGRAM_UNIT must be a power of two"
 #endif
 
-/* FIXME: Support other flash program units */
-#if ((ITS_FLASH_PROGRAM_UNIT != 1) && (ITS_FLASH_PROGRAM_UNIT != 2) \
-     && (ITS_FLASH_PROGRAM_UNIT != 4) && (ITS_FLASH_PROGRAM_UNIT != 8))
-#error "The supported ITS_FLASH_PROGRAM_UNIT values are 1, 2, 4 or 8 bytes"
+/* Include the correct flash interface implementation */
+#ifdef ITS_RAM_FS
+#include "its_flash_ram.h"
+#define FLASH_INFO_INIT its_flash_ram_init
+#define FLASH_INFO_READ its_flash_ram_read
+#define FLASH_INFO_WRITE its_flash_ram_write
+#define FLASH_INFO_FLUSH its_flash_ram_flush
+#define FLASH_INFO_ERASE its_flash_ram_erase
+
+#elif (ITS_FLASH_PROGRAM_UNIT <= 16)
+#include "its_flash_nor.h"
+#define FLASH_INFO_INIT its_flash_nor_init
+#define FLASH_INFO_READ its_flash_nor_read
+#define FLASH_INFO_WRITE its_flash_nor_write
+#define FLASH_INFO_FLUSH its_flash_nor_flush
+#define FLASH_INFO_ERASE its_flash_nor_erase
+
+/* Require each file in the filesystem to be aligned to the program unit */
+#define ITS_FLASH_ALIGNMENT ITS_FLASH_PROGRAM_UNIT
+
+#else
+#include "its_flash_nand.h"
+#define FLASH_INFO_INIT its_flash_nand_init
+#define FLASH_INFO_READ its_flash_nand_read
+#define FLASH_INFO_WRITE its_flash_nand_write
+#define FLASH_INFO_FLUSH its_flash_nand_flush
+#define FLASH_INFO_ERASE its_flash_nand_erase
+
+/* The flash block is programmed in one shot, so no filesystem alignment is
+ * required.
+ */
+#define ITS_FLASH_ALIGNMENT 1
 #endif
 
 /* Calculate the block layout */
@@ -56,7 +83,7 @@
 
 /* Maximum file size */
 #define FLASH_INFO_MAX_FILE_SIZE ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, \
-                                                 ITS_FLASH_PROGRAM_UNIT)
+                                                 ITS_FLASH_ALIGNMENT)
 
 /* Maximum number of files */
 #define FLASH_INFO_MAX_NUM_FILES ITS_NUM_ASSETS
@@ -75,25 +102,17 @@ extern ARM_DRIVER_FLASH ITS_FLASH_DEV_NAME;
 #endif
 
 const struct its_flash_info_t its_flash_info_internal = {
-#ifdef ITS_RAM_FS
-    .init = its_flash_ram_init,
-    .read = its_flash_ram_read,
-    .write = its_flash_ram_write,
-    .flush = its_flash_ram_flush,
-    .erase = its_flash_ram_erase,
-#else
-    .init = its_flash_nor_init,
-    .read = its_flash_nor_read,
-    .write = its_flash_nor_write,
-    .flush = its_flash_nor_flush,
-    .erase = its_flash_nor_erase,
-#endif
+    .init = FLASH_INFO_INIT,
+    .read = FLASH_INFO_READ,
+    .write = FLASH_INFO_WRITE,
+    .flush = FLASH_INFO_FLUSH,
+    .erase = FLASH_INFO_ERASE,
     .flash_dev = (void *)FLASH_INFO_DEV,
     .flash_area_addr = ITS_FLASH_AREA_ADDR,
     .sector_size = ITS_SECTOR_SIZE,
     .block_size = FLASH_INFO_BLOCK_SIZE,
     .num_blocks = FLASH_INFO_NUM_BLOCKS,
-    .program_unit = ITS_FLASH_PROGRAM_UNIT,
+    .program_unit = ITS_FLASH_ALIGNMENT,
     .max_file_size = FLASH_INFO_MAX_FILE_SIZE,
     .max_num_files = FLASH_INFO_MAX_NUM_FILES,
     .erase_val = FLASH_INFO_ERASE_VAL,

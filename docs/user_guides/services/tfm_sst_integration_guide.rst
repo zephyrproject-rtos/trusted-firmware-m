@@ -222,7 +222,8 @@ The SST service requires the following platform definitions:
 - ``SST_FLASH_DEV_NAME`` - Specifies the flash device used by SST to store the
   data.
 - ``SST_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes. Currently, SST supports 1, 2, 4 and 8.
+  bytes. Valid values are powers of two between 1 and ``SST_SECTOR_SIZE``
+  inclusive.
 - ``SST_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
   SST area. This size is used to define the temporary buffers used by SST to
   read/write the asset content from/to flash. The memory used by the temporary

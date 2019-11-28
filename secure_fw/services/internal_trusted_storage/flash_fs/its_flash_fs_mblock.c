@@ -663,34 +663,28 @@ static psa_status_t its_init_get_active_metablock(
 
     /* First two blocks are reserved for metadata */
 
-    /* Read the header of both the metdata blocks */
+    /* Read the header of both the metdata blocks. If the read succeeds, then
+     * attempt to validate the metadata header, otherwise assume that the block
+     * update was incomplete
+     */
     err = fs_ctx->flash_info->read(fs_ctx->flash_info, ITS_METADATA_BLOCK0,
                                    (uint8_t *)&h_meta0, 0,
                                    ITS_BLOCK_META_HEADER_SIZE);
-    if (err != PSA_SUCCESS) {
-        return err;
+    if (err == PSA_SUCCESS) {
+        if (its_mblock_validate_header_meta(fs_ctx, &h_meta0) == PSA_SUCCESS) {
+            num_valid_meta_blocks++;
+            cur_meta_block = ITS_METADATA_BLOCK0;
+        }
     }
 
     err = fs_ctx->flash_info->read(fs_ctx->flash_info, ITS_METADATA_BLOCK1,
                                    (uint8_t *)&h_meta1, 0,
                                    ITS_BLOCK_META_HEADER_SIZE);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    /* If there are two potential active metadata blocks,
-     * an out of turn power down sequence didn't allow previous
-     * update operation to complete. Need to find out the valid
-     * metadata block now.
-     */
-    if (its_mblock_validate_header_meta(fs_ctx, &h_meta0) == PSA_SUCCESS) {
-        num_valid_meta_blocks++;
-        cur_meta_block = ITS_METADATA_BLOCK0;
-    }
-
-    if (its_mblock_validate_header_meta(fs_ctx, &h_meta1) == PSA_SUCCESS) {
-        num_valid_meta_blocks++;
-        cur_meta_block = ITS_METADATA_BLOCK1;
+    if (err == PSA_SUCCESS) {
+        if (its_mblock_validate_header_meta(fs_ctx, &h_meta1) == PSA_SUCCESS) {
+            num_valid_meta_blocks++;
+            cur_meta_block = ITS_METADATA_BLOCK1;
+        }
     }
 
     /* If there are more than 1 potential metablocks, the previous

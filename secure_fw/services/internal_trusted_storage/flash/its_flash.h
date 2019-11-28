@@ -22,12 +22,25 @@ extern "C" {
 /* Invalid block index */
 #define ITS_BLOCK_INVALID_ID 0xFFFFFFFFU
 
+/* FIXME: Duplicated from flash info */
+#if (ITS_FLASH_PROGRAM_UNIT <= 16)
+#define ITS_FLASH_ALIGNMENT ITS_FLASH_PROGRAM_UNIT
+#else
+#define ITS_FLASH_ALIGNMENT 1
+#endif
+
+#if (SST_FLASH_PROGRAM_UNIT <= 16)
+#define SST_FLASH_ALIGNMENT SST_FLASH_PROGRAM_UNIT
+#else
+#define SST_FLASH_ALIGNMENT 1
+#endif
+
 /**
  * \brief Provides a compile-time constant for the maximum program unit required
  *        by any flash device that can be accessed through this interface.
  */
-#define ITS_FLASH_MAX_PROGRAM_UNIT ITS_UTILS_MAX(ITS_FLASH_PROGRAM_UNIT, \
-                                                 SST_FLASH_PROGRAM_UNIT)
+#define ITS_FLASH_MAX_ALIGNMENT ITS_UTILS_MAX(ITS_FLASH_ALIGNMENT, \
+                                              SST_FLASH_ALIGNMENT)
 
 /**
  * \brief Enumerates the available flash devices.

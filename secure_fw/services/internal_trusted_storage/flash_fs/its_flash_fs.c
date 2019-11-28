@@ -21,7 +21,7 @@ static psa_status_t its_flash_fs_file_write_aligned_data(
                                       size_t size,
                                       const uint8_t *data)
 {
-#if (ITS_FLASH_MAX_PROGRAM_UNIT != 1)
+#if (ITS_FLASH_MAX_ALIGNMENT != 1)
     /* Check that the offset is aligned with the flash program unit */
     if (!ITS_UTILS_IS_ALIGNED(offset, fs_ctx->flash_info->program_unit)) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -89,7 +89,7 @@ psa_status_t its_flash_fs_file_create(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t idx;
     struct its_file_meta_t file_meta;
 
-#if (ITS_FLASH_MAX_PROGRAM_UNIT != 1)
+#if (ITS_FLASH_MAX_ALIGNMENT != 1)
     /* Set the max_size to be aligned with the flash program unit */
     max_size = ITS_UTILS_ALIGN(max_size, fs_ctx->flash_info->program_unit);
 #endif
