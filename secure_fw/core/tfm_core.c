@@ -162,7 +162,7 @@ void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 #ifdef TFM_PSA_API
         partition = tfm_spm_get_running_partition();
         if (!partition) {
-            tfm_panic();
+            tfm_core_panic();
         }
         running_partition_flags = partition->static_data->partition_flags;
 #else /* TFM_PSA_API */
@@ -197,16 +197,16 @@ int main(void)
                                                $$ZI$$Base));
 
     if (tfm_core_init() != TFM_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     if (tfm_spm_db_init() != SPM_ERR_OK) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
 #if TFM_LVL != 1
     if (tfm_spm_hal_setup_isolation_hw() != TFM_PLAT_ERR_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 #endif /* TFM_LVL != 1 */
 
@@ -230,7 +230,7 @@ int main(void)
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
     if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is
@@ -252,7 +252,7 @@ int main(void)
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
     if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
     tfm_spm_init();
 #endif /* !defined(TFM_PSA_API) */

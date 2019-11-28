@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 /* CPU spin here */
-void tfm_panic(void);
+void tfm_core_panic(void);
 
 /* Assert and spin */
 #define TFM_ASSERT(cond)                                            \
@@ -26,4 +26,4 @@ void tfm_panic(void);
 #define TFM_GET_CONTAINER_PTR(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
 
-#endif
+#endif /* __TFM_UTILS_H__ */

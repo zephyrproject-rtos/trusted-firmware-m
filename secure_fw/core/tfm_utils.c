@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include "tfm_utils.h"
 
-void tfm_panic(void)
+void tfm_core_panic(void)
 {
     while (1)
         ;

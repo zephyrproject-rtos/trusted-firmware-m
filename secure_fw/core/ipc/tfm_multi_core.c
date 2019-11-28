@@ -53,5 +53,5 @@ void tfm_psa_ipc_request_handler(const uint32_t svc_args[])
     (void)svc_args;
 
     /* Should not receive any request from ns-callable in multi-core topology */
-    tfm_panic();
+    tfm_core_panic();
 }

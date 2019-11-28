@@ -409,7 +409,7 @@ static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
 
     /* Abort if not in Handler mode */
     if (!__get_IPSR()) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     security_attr_init(&security_attr);
@@ -430,7 +430,7 @@ static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
 #if TFM_LVL != 1
         /* Secure MPU must be enabled in Isolation Level 2 and 3 */
         if (!mem_attr.is_mpu_enabled) {
-            tfm_panic();
+            tfm_core_panic();
         }
 #endif
     } else {

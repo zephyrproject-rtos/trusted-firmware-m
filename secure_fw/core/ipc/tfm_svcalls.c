@@ -83,7 +83,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
         partition->static_data->partition_flags);
@@ -127,7 +127,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
         if (tfm_memory_check((const void *)args[1],
             sizeof(struct tfm_control_parameter_t), ns_caller,
             TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-            tfm_panic();
+            tfm_core_panic();
         }
         type = ((struct tfm_control_parameter_t *)args[1])->type;
         in_num = ((struct tfm_control_parameter_t *)args[1])->in_len;
@@ -138,7 +138,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
 
     /* The request type must be zero or positive. */
     if (type < 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     return tfm_psa_call(handle, type, inptr, in_num, outptr, out_num, ns_caller,
@@ -185,7 +185,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -193,7 +193,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
      * signals.
      */
     if ((partition->runtime_data.assigned_signals & signal_mask) == 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -252,12 +252,12 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      * fatal error if the input signal has more than a signal bit set.
      */
     if (tfm_bitcount(signal) != 1) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
         partition->static_data->partition_flags);
@@ -268,7 +268,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      */
     if (tfm_memory_check(msg, sizeof(psa_msg_t), false, TFM_MEMORY_ACCESS_RW,
         privileged) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -277,14 +277,14 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      * is returned by psa_wait().
      */
     if (partition->runtime_data.signals == 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
      * It is a fatal error if the RoT Service signal is not currently asserted.
      */
     if ((partition->runtime_data.signals & signal) == 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -293,7 +293,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
      */
     service = tfm_spm_get_service_by_signal(partition, signal);
     if (!service) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tmp_msg = tfm_msg_dequeue(&service->msg_queue);
@@ -341,7 +341,7 @@ static void tfm_svcall_psa_set_rhandle(uint32_t *args)
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
     if (!msg) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     msg->msg.rhandle = rhandle;
@@ -389,7 +389,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
     if (!msg) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = msg->service->partition;
@@ -401,7 +401,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
      * message
      */
     if (msg->msg.type < PSA_IPC_CALL) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -409,7 +409,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
      * PSA_MAX_IOVEC
      */
     if (invec_idx >= PSA_MAX_IOVEC) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* There was no remaining data in this input vector */
@@ -423,7 +423,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
      */
     if (tfm_memory_check(buffer, num_bytes, false,
         TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     bytes = num_bytes > msg->msg.in_size[invec_idx] ?
@@ -470,7 +470,7 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
     if (!msg) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -478,7 +478,7 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
      * message
      */
     if (msg->msg.type < PSA_IPC_CALL) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -486,7 +486,7 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
      * PSA_MAX_IOVEC
      */
     if (invec_idx >= PSA_MAX_IOVEC) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* There was no remaining data in this input vector */
@@ -546,7 +546,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
     if (!msg) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = msg->service->partition;
@@ -558,7 +558,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
      * message
      */
     if (msg->msg.type < PSA_IPC_CALL) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -566,7 +566,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
      * PSA_MAX_IOVEC
      */
     if (outvec_idx >= PSA_MAX_IOVEC) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -575,7 +575,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
      */
     if (num_bytes > msg->msg.out_size[outvec_idx] -
         msg->outvec[outvec_idx].len) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -584,7 +584,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
      */
     if (tfm_memory_check(buffer, num_bytes, false,
         TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tfm_core_util_memcpy(msg->outvec[outvec_idx].base +
@@ -641,7 +641,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
     if (!msg) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -651,7 +651,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
      */
     service = msg->service;
     if (!service) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -675,7 +675,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
             /* Fail the client connection, indicating a transient error. */
             ret = PSA_ERROR_CONNECTION_BUSY;
         } else {
-            tfm_panic();
+            tfm_core_panic();
         }
         break;
     case PSA_IPC_DISCONNECT:
@@ -700,7 +700,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
              */
             update_caller_outvec_len(msg);
         } else {
-            tfm_panic();
+            tfm_core_panic();
         }
     }
 
@@ -732,7 +732,7 @@ static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
      * Partition ID is a fatal error.
      */
     if (!TFM_CLIENT_ID_IS_S(partition_id)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -741,7 +741,7 @@ static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
      */
     partition = tfm_spm_get_partition_by_id(partition_id);
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition->runtime_data.signals |= signal;
@@ -805,7 +805,7 @@ static void tfm_svcall_psa_clear(uint32_t *args)
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -813,7 +813,7 @@ static void tfm_svcall_psa_clear(uint32_t *args)
      * currently asserted.
      */
     if ((partition->runtime_data.signals & PSA_DOORBELL) == 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
     partition->runtime_data.signals &= ~PSA_DOORBELL;
 }
@@ -878,24 +878,24 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* It is a fatal error if passed signal is not currently asserted */
     if ((partition->runtime_data.signals & irq_signal) == 0) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition->runtime_data.signals &= ~irq_signal;
@@ -914,19 +914,19 @@ void tfm_svcall_enable_irq(uint32_t *args)
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tfm_spm_hal_enable_irq(irq_line);
@@ -942,19 +942,19 @@ void tfm_svcall_disable_irq(uint32_t *args)
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     ret = get_irq_line_for_signal(partition->static_data->partition_id,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tfm_spm_hal_disable_irq(irq_line);

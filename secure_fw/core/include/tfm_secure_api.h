@@ -158,7 +158,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
          * This violates TF-M's programming model, and is considered an
          * unrecoverable error.
          */
-        tfm_panic();
+        tfm_core_panic();
     } else {
         if (desc.ns_caller) {
             return tfm_core_sfn_request(desc_ptr);

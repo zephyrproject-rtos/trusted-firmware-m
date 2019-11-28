@@ -163,7 +163,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
 #else
     partition = tfm_spm_get_running_partition();
     if (!partition) {
-        tfm_panic();
+        tfm_core_panic();
     }
     privileged =
         tfm_spm_partition_get_privileged_mode(partition->static_data->

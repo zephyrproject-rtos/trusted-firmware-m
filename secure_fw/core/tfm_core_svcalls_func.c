@@ -47,7 +47,7 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
          * NS cannot directly trigger S SVC so this should not happen. This is
          * an unrecoverable error.
          */
-        tfm_panic();
+        tfm_core_panic();
     }
     switch (svc_number) {
     case TFM_SVC_SFN_REQUEST:

@@ -56,7 +56,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller)
     /* It is a fatal error if the RoT Service does not exist on the platform */
     service = tfm_spm_get_service_by_sid(sid);
     if (!service) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     if (ns_caller) {
@@ -70,7 +70,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller)
      * Service.
      */
     if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -87,7 +87,7 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller)
      * supported on the platform.
      */
     if (tfm_spm_check_client_version(service, version) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
@@ -125,7 +125,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     if ((in_num > PSA_MAX_IOVEC) ||
         (out_num > PSA_MAX_IOVEC) ||
         (in_num + out_num > PSA_MAX_IOVEC)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     if (ns_caller) {
@@ -136,12 +136,12 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
 
     /* It is a fatal error if an invalid handle was passed. */
     if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
     service = tfm_spm_get_service_by_handle(handle);
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -151,7 +151,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
      */
     if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
         TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /*
@@ -161,7 +161,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
      */
     if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
         TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tfm_core_util_memset(invecs, 0, sizeof(invecs));
@@ -178,7 +178,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     for (i = 0; i < in_num; i++) {
         if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
             TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-            tfm_panic();
+            tfm_core_panic();
         }
     }
 
@@ -191,7 +191,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
         for (j = i+1; j < in_num; j++) {
             if (!(invecs[j].base + invecs[j].len <= invecs[i].base ||
                   invecs[j].base >= invecs[i].base + invecs[i].len)) {
-                tfm_panic();
+                tfm_core_panic();
             }
         }
     }
@@ -203,7 +203,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     for (i = 0; i < out_num; i++) {
         if (tfm_memory_check(outvecs[i].base, outvecs[i].len,
             ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-            tfm_panic();
+            tfm_core_panic();
         }
     }
 
@@ -214,7 +214,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_panic();
+        tfm_core_panic();
     }
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id, invecs,
@@ -226,7 +226,7 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
      */
     if (tfm_spm_send_event(service, msg) != IPC_SUCCESS) {
         /* FixMe: Need to refine failure process here. */
-        tfm_panic();
+        tfm_core_panic();
     }
     return PSA_SUCCESS;
 }
@@ -253,24 +253,24 @@ void tfm_psa_close(psa_handle_t handle, bool ns_caller)
      * null handle.
      */
     if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
-        tfm_panic();
+        tfm_core_panic();
     }
     service = tfm_spm_get_service_by_handle(handle);
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_panic();
+        tfm_core_panic();
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* It is a fatal error if the connection is currently handling a request. */
     if(((struct tfm_conn_handle_t *)handle)->status ==
                                                      TFM_HANDLE_STATUS_ACTIVE) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* No input or output needed for close message */

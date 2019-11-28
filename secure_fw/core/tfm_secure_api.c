@@ -55,5 +55,5 @@ enum tfm_status_e check_address_range(const void *p, size_t s,
 void tfm_secure_api_error_handler(void)
 {
     ERROR_MSG("Security violation when calling secure API");
-    tfm_panic();
+    tfm_core_panic();
 }

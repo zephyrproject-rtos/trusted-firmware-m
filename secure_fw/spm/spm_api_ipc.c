@@ -109,7 +109,7 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
     if (!p_handle) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     /* Clear magic as the handler is not used anymore */
@@ -136,7 +136,7 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
     if (!p_handle) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     p_handle->rhandle = rhandle;
@@ -155,7 +155,7 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
     if (!p_handle) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     return p_handle->rhandle;
@@ -172,7 +172,7 @@ struct tfm_spm_service_t *
     TFM_ASSERT(partition);
 
     if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
-        tfm_panic();
+        tfm_core_panic();
     }
 
     head = &partition->runtime_data.service_list;
@@ -278,7 +278,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
     } else {
         partition = tfm_spm_get_running_partition();
         if (!partition) {
-            tfm_panic();
+            tfm_core_panic();
         }
 
         for (i = 0; i < partition->static_data->dependencies_num; i++) {
@@ -573,7 +573,7 @@ void tfm_spm_init(void)
 
         pth = tfm_spm_partition_get_thread_info(i);
         if (!pth) {
-            tfm_panic();
+            tfm_core_panic();
         }
 
         tfm_thrd_init(pth,
@@ -586,7 +586,7 @@ void tfm_spm_init(void)
 
         /* Kick off */
         if (tfm_thrd_start(pth) != THRD_SUCCESS) {
-            tfm_panic();
+            tfm_core_panic();
         }
     }
 
@@ -597,7 +597,7 @@ void tfm_spm_init(void)
         partition =
             tfm_spm_get_partition_by_id(service[i].service_db->partition_id);
         if (!partition) {
-            tfm_panic();
+            tfm_core_panic();
         }
         service[i].partition = partition;
         partition->runtime_data.assigned_signals |= service->service_db->signal;
