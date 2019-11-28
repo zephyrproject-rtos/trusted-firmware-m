@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -18,6 +18,8 @@
 #include "ns_ipc_config.h"
 #include "tfm_ns_mailbox.h"
 #include "platform_multicore.h"
+
+static uint8_t saved_irq_state = 1;
 
 /* -------------------------------------- HAL API ------------------------------------ */
 
@@ -106,16 +108,131 @@ int32_t tfm_ns_mailbox_hal_init(struct ns_mailbox_queue_t *queue)
     return MAILBOX_SUCCESS;
 }
 
+static cy_en_ipcsema_status_t mailbox_raw_spin_lock(uint32_t ipc_channel,
+                                                    uint32_t sema_num)
+{
+    uint32_t semaIndex;
+    uint32_t semaMask;
+    cy_stc_ipc_sema_t *semaStruct;
+    cy_en_ipcdrv_status_t acqStatus;
+    cy_en_ipcsema_status_t ret = CY_IPC_SEMA_BAD_PARAM;
+    bool is_lock = false;
+    IPC_STRUCT_Type *semaIpcStruct;
+
+    /* Get IPC register structure */
+    semaIpcStruct = Cy_IPC_Drv_GetIpcBaseAddress(ipc_channel);
+    /* Get pointer to structure */
+    semaStruct = (cy_stc_ipc_sema_t *)Cy_IPC_Drv_ReadDataValue(semaIpcStruct);
+
+    if (sema_num < semaStruct->maxSema) {
+        semaIndex = sema_num / CY_IPC_SEMA_PER_WORD;
+        semaMask = (uint32_t)(1ul << (sema_num - \
+                                      (semaIndex * CY_IPC_SEMA_PER_WORD)));
+
+        while (!is_lock) {
+            /* Check to make sure the IPC channel is released
+               If so, check if specific channel can be locked. */
+            do {
+                acqStatus = Cy_IPC_Drv_LockAcquire(semaIpcStruct);
+            } while (acqStatus != CY_IPC_DRV_SUCCESS);
+
+            if ((semaStruct->arrayPtr[semaIndex] & semaMask) == 0ul) {
+                semaStruct->arrayPtr[semaIndex] |= semaMask;
+                is_lock = true;
+            }
+
+            /* Release, but do not trigger a release event */
+            (void)Cy_IPC_Drv_LockRelease(semaIpcStruct,
+                                         CY_IPC_NO_NOTIFICATION);
+
+            if (!is_lock) {
+                /*
+                 * The secure core is occupying this lock. Insert a small delay
+                 * to give the secure core a chance to acquire the IPC channel
+                 * and release the lock.
+                 * Otherwise, the secure core may not be able to release the
+                 * lock if non-secure core has higher CPU frequency. It will
+                 * generate a deadlock.
+                 * This delay won't harm performance too much since non-secure
+                 * core has to busy wait here anyway.
+                 * Alternatively, non-secure core can wait for release
+                 * notification event from secure core. However, it is more
+                 * complex and requires more code and more modifications.
+                 */
+                Cy_IPC_Sema_Status(sema_num);
+            }
+        }
+
+        ret = CY_IPC_SEMA_SUCCESS;
+    }
+
+    return ret;
+}
+
+static cy_en_ipcsema_status_t mailbox_raw_spin_unlock(uint32_t ipc_channel,
+                                                      uint32_t sema_num)
+{
+    uint32_t semaIndex;
+    uint32_t semaMask;
+    cy_stc_ipc_sema_t *semaStruct;
+    cy_en_ipcdrv_status_t acqStatus;
+    cy_en_ipcsema_status_t ret = CY_IPC_SEMA_BAD_PARAM;
+    bool is_unlock = false;
+    IPC_STRUCT_Type *semaIpcStruct;
+
+    /* Get IPC register structure */
+    semaIpcStruct = Cy_IPC_Drv_GetIpcBaseAddress(ipc_channel);
+    /* Get pointer to structure */
+    semaStruct = (cy_stc_ipc_sema_t *)Cy_IPC_Drv_ReadDataValue(semaIpcStruct);
+
+    if (sema_num < semaStruct->maxSema) {
+        semaIndex = sema_num / CY_IPC_SEMA_PER_WORD;
+        semaMask = (uint32_t)(1ul << (sema_num - \
+                                      (semaIndex * CY_IPC_SEMA_PER_WORD)));
+
+        while (!is_unlock) {
+            /* Check to make sure the IPC channel is released
+               If so, check if specific channel can be locked. */
+            do {
+                acqStatus = Cy_IPC_Drv_LockAcquire(semaIpcStruct);
+            } while (acqStatus != CY_IPC_DRV_SUCCESS);
+
+            if ((semaStruct->arrayPtr[semaIndex] & semaMask) != 0ul) {
+                semaStruct->arrayPtr[semaIndex] &= ~semaMask;
+                is_unlock = true;
+            }
+
+            /* Release, but do not trigger a release event */
+            (void)Cy_IPC_Drv_LockRelease(semaIpcStruct,
+                                         CY_IPC_NO_NOTIFICATION);
+        }
+
+        ret = CY_IPC_SEMA_SUCCESS;
+    }
+
+    return ret;
+}
+
 void tfm_ns_mailbox_hal_enter_critical(void)
 {
-    while (Cy_IPC_Sema_Set(MAILBOX_SEMAPHORE_NUM, false) !=
-           CY_IPC_SEMA_SUCCESS) {
-    }
+    saved_irq_state = Cy_SysLib_EnterCriticalSection();
+
+    mailbox_raw_spin_lock(CY_IPC_CHAN_SEMA, MAILBOX_SEMAPHORE_NUM);
 }
 
 void tfm_ns_mailbox_hal_exit_critical(void)
 {
-    while (Cy_IPC_Sema_Clear(MAILBOX_SEMAPHORE_NUM, false) !=
-           CY_IPC_SEMA_SUCCESS) {
-    }
+    mailbox_raw_spin_unlock(CY_IPC_CHAN_SEMA, MAILBOX_SEMAPHORE_NUM);
+
+    Cy_SysLib_ExitCriticalSection(saved_irq_state);
+}
+
+void tfm_ns_mailbox_hal_enter_critical_isr(void)
+{
+    mailbox_raw_spin_lock(CY_IPC_CHAN_SEMA, MAILBOX_SEMAPHORE_NUM);
+}
+
+void tfm_ns_mailbox_hal_exit_critical_isr(void)
+{
+    mailbox_raw_spin_unlock(CY_IPC_CHAN_SEMA, MAILBOX_SEMAPHORE_NUM);
 }
