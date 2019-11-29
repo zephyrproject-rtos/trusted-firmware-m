@@ -150,7 +150,7 @@ def gen_files(context, gen_file_list, append):
 
     for file in file_list:
         outfile_name = os.path.expandvars(file["output"])
-        templatefile_name = outfile_name + '.template'
+        templatefile_name = os.path.expandvars(file["template"])
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
