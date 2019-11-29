@@ -88,6 +88,11 @@ Further documents can be found in the ``docs`` folder.
 ###################
 Platforms supported
 ###################
+    - Cortex-M55 system:
+
+        - `Fast model FVP_SSE300_MPS2.
+          <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
+
     - Cortex-M33 system:
 
         - `FPGA image loaded on MPS2 board.

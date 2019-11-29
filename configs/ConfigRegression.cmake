@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -21,6 +21,8 @@ elseif(${TARGET_PLATFORM} STREQUAL "AN519")
 	set (PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps2AN519.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "AN539")
 	set (PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps2AN539.cmake")
+elseif(${TARGET_PLATFORM} STREQUAL "FVP_SSE300_MPS2")
+	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/fvp_sse300_mps2.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "AN524")
 	set (PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps3AN524.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "LPC55S69")

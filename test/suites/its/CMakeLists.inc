@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -34,10 +34,13 @@ elseif (ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS)
                 "${ITS_TEST_DIR}/secure/psa_its_s_reliability_testsuite.c"
                 "${ITS_TEST_DIR}/its_tests_common.c")
 
-    if (NOT ITS_RAM_FS AND NOT (REFERENCE_PLATFORM OR ${TARGET_PLATFORM} STREQUAL "AN524"))
-        # Show flash warning message only when the RAM FS is not in use or the tests are compiled to
-        # be executed in the reference plaforms (AN519 and AN521) & AN524. The reference platforms and AN524
-        # use RAM memory to emulated a flash device as they do not have one.
+    if (NOT ITS_RAM_FS
+        AND
+        NOT (REFERENCE_PLATFORM
+             OR ${TARGET_PLATFORM} STREQUAL "AN524"
+             OR ${TARGET_PLATFORM} STREQUAL "FVP_SSE300_MPS2"))
+        # Show flash warning message only when the RAM FS is not in use and the target platform contains a flash device.
+        # The reference platforms, AN524 and FVP_SSE300_MPS2 use RAM memory to emulate the flash.
         set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS ITS_SHOW_FLASH_WARNING)
         set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS ITS_SHOW_FLASH_WARNING)
     endif()
