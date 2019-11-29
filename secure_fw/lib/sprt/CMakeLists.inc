@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -34,6 +34,7 @@ if (TFM_PSA_API)
     list(APPEND LIBSPRT_C_SRC
         "${TFM_ROOT_DIR}/interface/src/psa/psa_client.c"
         "${TFM_ROOT_DIR}/interface/src/psa/psa_service.c"
+        "${TFM_ROOT_DIR}/interface/src/psa/psa_lifecycle.c"
     )
 endif()
 

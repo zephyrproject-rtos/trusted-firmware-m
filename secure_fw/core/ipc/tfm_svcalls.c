@@ -133,6 +133,11 @@ void tfm_svcall_psa_close(uint32_t *args, bool ns_caller)
     return tfm_psa_close(handle, ns_caller);
 }
 
+uint32_t tfm_svcall_get_lifecycle_state(void)
+{
+    return tfm_spm_get_lifecycle_state();
+}
+
 /*********************** SVC handler for PSA Service APIs ********************/
 
 /**
@@ -1096,6 +1101,8 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_SPM_REQUEST:
         tfm_core_spm_request_handler((const struct tfm_state_context_t *)ctx);
         break;
+    case TFM_SVC_PSA_LIFECYCLE:
+        return tfm_svcall_get_lifecycle_state();
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));

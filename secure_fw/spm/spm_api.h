@@ -687,6 +687,18 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  */
 uint32_t tfm_spm_init(void);
 
+
+/*
+ * \brief This function get the current PSA RoT lifecycle state.
+ *
+ * \return state                The current security lifecycle state of the PSA
+ *                              RoT. The PSA state and implementation state are
+ *                              encoded as follows:
+ * \arg                           state[15:8] – PSA lifecycle state
+ * \arg                           state[7:0] – IMPLEMENTATION DEFINED state
+ */
+uint32_t tfm_spm_get_lifecycle_state(void);
+
 #endif /* ifdef(TFM_PSA_API) */
 
 #endif /*__SPM_API_H__ */

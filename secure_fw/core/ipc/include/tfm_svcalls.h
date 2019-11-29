@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -89,6 +89,14 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
  * \arg                           The connection is handling a request.
  */
 void tfm_svcall_psa_close(uint32_t *args, bool ns_caller);
+
+/**
+ * \brief SVC handler for \ref psa_rot_lifecycle_state.
+ *
+ * \return state                The current security lifecycle state of the PSA
+ *                              RoT.
+ */
+uint32_t tfm_svcall_get_lifecycle_state(void);
 
 /**
  * \brief SVC handler for IPC functions
