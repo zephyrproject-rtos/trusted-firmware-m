@@ -10,6 +10,7 @@
 #include "os_wrapper/mutex.h"
 #include "os_wrapper/thread.h"
 #include "psa/client.h"
+#include "psa/internal_trusted_storage.h"
 #include "psa_manifest/sid.h"
 #include "test/framework/test_framework_helpers.h"
 #include "tfm_ns_mailbox.h"
@@ -22,9 +23,17 @@
 
 /* Max number of test rounds */
 #define MAX_NR_LIGHT_TEST_ROUND               0x200
+#define MAX_NR_HEAVY_TEST_ROUND               0x20
 
 /* Default stack size for child thread */
 #define MULTI_CALL_LIGHT_TEST_STACK_SIZE      0x200
+#define MULTI_CALL_HEAVY_TEST_STACK_SIZE      0x300
+
+/* Test UID copied from ITS test cases */
+#define TEST_UID_1                            2U
+/* ITS data for multiple PSA client call heavy tests */
+#define ITS_DATA                               "ITSDataForMultiCore"
+#define ITS_DATA_LEN                           sizeof(ITS_DATA)
 
 /* Structure passed to test threads */
 struct test_params {
@@ -56,11 +65,15 @@ const static struct multi_call_service_info multi_call_service_list[] = {
 
 /* List of tests */
 static void multi_client_call_light_test(struct test_result_t *ret);
+static void multi_client_call_heavy_test(struct test_result_t *ret);
 
 static struct test_t multi_core_tests[] = {
     {&multi_client_call_light_test,
      "MULTI_CLIENT_CALL_LIGHT_TEST",
      "Multiple outstanding NS PSA client calls lightweight test", {0}},
+    {&multi_client_call_heavy_test,
+     "MULTI_CLIENT_CALL_HEAVY_TEST",
+     "Multiple outstanding NS PSA client calls heavyweight test", {0}},
 };
 
 void register_testsuite_multi_core_ns_interface(
@@ -265,4 +278,72 @@ static void multi_client_call_light_test(struct test_result_t *ret)
     multi_client_call_test(ret, multi_client_call_light_runner,
                            MULTI_CALL_LIGHT_TEST_STACK_SIZE,
                            MAX_NR_LIGHT_TEST_ROUND);
+}
+
+static inline enum test_status_t multi_client_call_heavy_loop(
+                                                    const psa_storage_uid_t uid,
+                                                    uint32_t rounds)
+{
+    uint32_t i;
+    psa_status_t status;
+    size_t rd_data_len;
+    char rd_data[ITS_DATA_LEN];
+    const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
+
+    for (i = 0; i < rounds; i++) {
+        /* Set a data in the asset */
+        status = psa_its_set(uid, ITS_DATA_LEN, ITS_DATA, flags);
+        if (status != PSA_SUCCESS) {
+            TEST_LOG("Fail to write ITS asset\r\n");
+            return TEST_FAILED;
+        }
+
+        /* Get data from the asset */
+        status = psa_its_get(uid, 0, ITS_DATA_LEN, rd_data, &rd_data_len);
+        if (status != PSA_SUCCESS) {
+            TEST_LOG("Fail to read ITS asset\r\n");
+            return TEST_FAILED;
+        }
+
+        /* Remove the asset to clean up storage */
+        status = psa_its_remove(uid);
+        if (status != PSA_SUCCESS) {
+            TEST_LOG("Fail to remove ITS asset\r\n");
+            return TEST_FAILED;
+        }
+    }
+
+    return TEST_PASSED;
+}
+
+static void multi_client_call_heavy_runner(void *argument)
+{
+    struct test_params *params = (struct test_params *)argument;
+    const psa_storage_uid_t uid = TEST_UID_1 + params->child_idx;
+
+    if (!params->is_parent) {
+        /* Wait for the signal to kick-off the test */
+        os_wrapper_thread_wait_flag(TEST_CHILD_EVENT_FLAG(params->child_idx),
+                                    OS_WRAPPER_WAIT_FOREVER);
+    }
+
+    params->ret = multi_client_call_heavy_loop(uid, params->nr_rounds);
+
+    if (!params->is_parent) {
+        /* Mark this child thread has completed */
+        os_wrapper_mutex_acquire(params->mutex_handle, OS_WRAPPER_WAIT_FOREVER);
+        params->is_complete = true;
+        os_wrapper_mutex_release(params->mutex_handle);
+    }
+}
+
+/**
+ * \brief NS interface to verify multiple outstanding PSA client calls feature
+ *        by calling heavyweight secure services.
+ */
+static void multi_client_call_heavy_test(struct test_result_t *ret)
+{
+    multi_client_call_test(ret, multi_client_call_heavy_runner,
+                           MULTI_CALL_HEAVY_TEST_STACK_SIZE,
+                           MAX_NR_HEAVY_TEST_ROUND);
 }
