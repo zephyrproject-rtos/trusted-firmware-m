@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,13 +25,13 @@
 
 #include "test_i066.h"
 
-client_test_t test_i066_client_tests_list[] = {
+const client_test_t test_i066_client_tests_list[] = {
     NULL,
     client_test_psa_eoi_with_multiple_signals,
     NULL,
 };
 
-int32_t client_test_psa_eoi_with_multiple_signals(caller_security_t caller)
+int32_t client_test_psa_eoi_with_multiple_signals(caller_security_t caller __UNUSED)
 {
    psa_handle_t           handle;
    driver_test_fn_id_t    driver_test_fn_id = TEST_PSA_EOI_WITH_MULTIPLE_SIGNALS;

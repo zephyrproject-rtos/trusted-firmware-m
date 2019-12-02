@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@
 #define DATA_VALUE     0x12
 #define BUFFER_SIZE    0x4
 
-client_test_t test_i074_client_tests_list[] = {
+const client_test_t test_i074_client_tests_list[] = {
     NULL,
     client_test_nspe_read_app_rot_heap,
     client_test_nspe_write_app_rot_heap,
@@ -62,7 +62,7 @@ static int32_t get_secure_partition_address(addr_t *addr)
    return VAL_STATUS_SUCCESS;
 }
 
-int32_t client_test_nspe_read_app_rot_heap(caller_security_t caller)
+int32_t client_test_nspe_read_app_rot_heap(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint8_t  data = DATA_VALUE;
@@ -100,7 +100,7 @@ int32_t client_test_nspe_read_app_rot_heap(caller_security_t caller)
    return VAL_STATUS_SPM_FAILED;
 }
 
-int32_t client_test_nspe_write_app_rot_heap(caller_security_t caller)
+int32_t client_test_nspe_write_app_rot_heap(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint8_t  data = DATA_VALUE;
@@ -131,14 +131,14 @@ int32_t client_test_nspe_write_app_rot_heap(caller_security_t caller)
    return VAL_STATUS_SUCCESS;
 }
 #else
-int32_t client_test_nspe_read_app_rot_heap(caller_security_t caller)
+int32_t client_test_nspe_read_app_rot_heap(caller_security_t caller __UNUSED)
 {
    val->print(PRINT_TEST, "[Check 1] Test NSPE reading APP-RoT heap\n", 0);
    val->print(PRINT_ERROR, "\tSkipping test as heap memory not supported\n", 0);
    return RESULT_SKIP(VAL_STATUS_HEAP_NOT_AVAILABLE);
 }
 
-int32_t client_test_nspe_write_app_rot_heap(caller_security_t caller)
+int32_t client_test_nspe_write_app_rot_heap(caller_security_t caller __UNUSED)
 {
    val->print(PRINT_TEST, "[Check 2] Test NSPE writing APP-RoT heap\n", 0);
    val->print(PRINT_ERROR, "\tSkipping test as heap memory not supported\n", 0);
