@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +21,7 @@
 #endif /* TFM_PSA_API */
 #ifdef TFM_ENABLE_IRQ_TEST
 #include "platform_irq.h"
+#include "tfm_peripherals_def.h"
 #endif
 
 /* Define test suite for core tests */
@@ -595,7 +597,7 @@ static void tfm_core_test_irq(struct test_result_t *ret)
 {
     int32_t err;
 
-    NVIC_EnableIRQ(4);
+    NVIC_EnableIRQ(TFM_TIMER1_IRQ);
 
     err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_1);
     if (err != CORE_TEST_ERRNO_SUCCESS) {
