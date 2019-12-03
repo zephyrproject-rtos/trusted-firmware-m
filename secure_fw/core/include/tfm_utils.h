@@ -7,7 +7,12 @@
 #ifndef __TFM_UTILS_H__
 #define __TFM_UTILS_H__
 
-/* CPU spin here */
+#include <stdio.h>
+
+/*
+ * CPU spin here.
+ * Note: this function is used to handle PROGRAMMER ERROR.
+ */
 void tfm_core_panic(void);
 
 /* Core assert and spin */
