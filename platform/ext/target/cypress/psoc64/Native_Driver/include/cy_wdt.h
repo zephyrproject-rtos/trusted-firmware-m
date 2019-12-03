@@ -320,6 +320,7 @@ extern "C" {
 void Cy_WDT_Init(void);
 __STATIC_INLINE void Cy_WDT_Enable(void);
 __STATIC_INLINE void Cy_WDT_Disable(void);
+__STATIC_INLINE bool Cy_WDT_IsEnabled(void);
 void Cy_WDT_Lock(void);
 void Cy_WDT_Unlock(void);
 __STATIC_INLINE uint32_t Cy_WDT_GetCount(void);
@@ -361,6 +362,22 @@ __STATIC_INLINE void Cy_WDT_Enable(void)
 __STATIC_INLINE void Cy_WDT_Disable(void)
 {
     SRSS_WDT_CTL &= ((uint32_t) ~(_VAL2FLD(SRSS_WDT_CTL_WDT_EN, 1U)));
+}
+
+
+/*******************************************************************************
+* Function Name: Cy_WDT_IsEnabled
+****************************************************************************//**
+*
+* Detect if the Watchdog timer is enabled.
+*
+* \return
+* Enabled state: true - enabled, false - disabled
+*
+*******************************************************************************/
+__STATIC_INLINE bool Cy_WDT_IsEnabled(void)
+{
+    return ((SRSS_WDT_CTL & _VAL2FLD(SRSS_WDT_CTL_WDT_EN, 1U)) ? 1 : 0);
 }
 
 

@@ -802,7 +802,7 @@ cy_en_prot_status_t Cy_Prot_GetSmpuStruct(PROT_SMPU_SMPU_STRUCT_Type** base,
 * CY_PROT_INVALID_STATE | The function was called on the device with an unsupported PERI HW version.
 *
 *******************************************************************************/
-static cy_en_prot_status_t Prot_ConfigPpuAtt(volatile uint32_t * reg, uint16_t pcMask, 
+static cy_en_prot_status_t Prot_ConfigPpuAtt(volatile uint32_t * reg, uint16_t pcMask,
                                        cy_en_prot_perm_t userPermission, cy_en_prot_perm_t privPermission, bool secure)
 {
     cy_en_prot_status_t status = CY_PROT_INVALID_STATE;
@@ -810,50 +810,50 @@ static cy_en_prot_status_t Prot_ConfigPpuAtt(volatile uint32_t * reg, uint16_t p
     if (!CY_PERI_V1)
     {
         uint32_t tmpMask = (uint32_t)pcMask << CY_PROT_PCMASK_CHECK;
+        uint32_t tmpMask2;
         uint32_t attReg;
-        uint32_t regIdx;
+        int32_t regIdx;
         uint32_t fldIdx;
-        
+
         status = CY_PROT_SUCCESS;
-        
+
         /* Populate the ATT values */
-        for(regIdx = 0U; regIdx < CY_PROT_ATT_REGS_MAX; regIdx++)
+        for(regIdx = CY_PROT_ATT_REGS_MAX - 1; regIdx >= 0; regIdx--)
         {
-            if (0UL == tmpMask)
-            {
-                break;
-            }
-            
+            tmpMask2 = (tmpMask >> (CY_PROT_ATT_PC_MAX * regIdx)) & 0xf;
+
             /* Get the attributes register value */
             attReg = reg[regIdx];
 
             for(fldIdx = 0UL; fldIdx < CY_PROT_ATT_PC_MAX; fldIdx++)
             {
-                if((tmpMask & CY_PROT_PCMASK_CHECK) == CY_PROT_STRUCT_ENABLE)
+                /* Reset the bitfield for the PCx attributes */
+                attReg &= ~((_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, CY_PROT_PERM_RW) |
+                             _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, CY_PROT_PERM_RW) |
+                             _BOOL2FLD(PERI_MS_PPU_PR_V2_MS_ATT0_PC0_NS, true)) <<
+                            (PERI_MS_PPU_PR_V2_MS_ATT0_PC1_UR_Pos * fldIdx));
+
+                if((tmpMask2 & CY_PROT_PCMASK_CHECK) == CY_PROT_STRUCT_ENABLE)
                 {
-                    /* Reset the bitfield for the PCx attributes */
-                    attReg &= ~((_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, CY_PROT_PERM_RW) |
-                                 _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, CY_PROT_PERM_RW) |
-                                 _BOOL2FLD(PERI_MS_PPU_PR_V2_MS_ATT0_PC0_NS, true)) <<
-                                (PERI_MS_PPU_PR_V2_MS_ATT0_PC1_UR_Pos * fldIdx)); 
-                    
                     /* Set the bitfield for the PCx attributes */
                     attReg |= (_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, userPermission) |
                                _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, privPermission) |
                               _BOOL2FLD(PERI_MS_PPU_PR_V2_MS_ATT0_PC0_NS, !secure)) <<
                                (PERI_MS_PPU_PR_V2_MS_ATT0_PC1_UR_Pos * fldIdx);
                 }
-                tmpMask = tmpMask >> CY_PROT_PCMASK_CHECK;
+                tmpMask2 = tmpMask2 >> CY_PROT_PCMASK_CHECK;
             }
-            
+
             /* Update the attributes register */
             reg[regIdx] = attReg;
 
             /* Check the result */
-            if ((0UL == regIdx) && 
-                ((reg[regIdx] & PROT_PERI_PPU_PROG_PC1_PC3_MASK) != (attReg & PROT_PERI_PPU_PROG_PC1_PC3_MASK)))
+            if (0UL == regIdx)
             {
-                status = CY_PROT_FAILURE;
+                if ((reg[regIdx] & PROT_PERI_PPU_PROG_PC1_PC3_MASK) != (attReg & PROT_PERI_PPU_PROG_PC1_PC3_MASK))
+                {
+                    status = CY_PROT_FAILURE;
+                }
             }
             else if (reg[regIdx] != attReg)
             {

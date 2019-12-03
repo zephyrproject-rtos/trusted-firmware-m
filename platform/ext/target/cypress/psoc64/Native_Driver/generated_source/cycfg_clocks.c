@@ -41,6 +41,11 @@ void init_cycfg_clocks(void)
 	Cy_SysClk_PeriphDisableDivider(CY_SYSCLK_DIV_8_BIT, 0U);
 	Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 0U, 0U);
 	Cy_SysClk_PeriphEnableDivider(CY_SYSCLK_DIV_8_BIT, 0U);
+
+	Cy_SysClk_PeriphDisableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
+	Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 54U);
+	Cy_SysClk_PeriphEnableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
+
 #if defined (CY_USING_HAL)
 	cyhal_hwmgr_reserve(&CYBSP_CSD_CLK_DIV_obj);
 #endif //defined (CY_USING_HAL)

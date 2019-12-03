@@ -239,6 +239,8 @@ modes are supported by which platforms:
 +----------+-----------------+---------------+----------+-------------+-----------------+
 | AN524    | Yes             | No            | No       | Yes         | No              |
 +----------+-----------------+---------------+----------+-------------+-----------------+
+| PSoC64   | Yes             | No            | No       | No          | No              |
++----------+-----------------+---------------+----------+-------------+-----------------+
 
 .. [1] To disable BL2, please turn off the ``BL2`` compiler switch in the
     build configuration file (``bl2/ext/mcuboot/MCUBootConfig.cmake``) or
