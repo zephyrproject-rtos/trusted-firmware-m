@@ -94,3 +94,11 @@ void psa_eoi(psa_signal_t irq_signal)
                    "BX LR            \n"
                    : : "I" (TFM_SVC_PSA_EOI));
 }
+
+__attribute__((naked, section("SFN")))
+void psa_panic(void)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_PSA_PANIC));
+}

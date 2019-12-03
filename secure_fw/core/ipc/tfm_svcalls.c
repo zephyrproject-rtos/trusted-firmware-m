@@ -823,6 +823,21 @@ static void tfm_svcall_psa_clear(uint32_t *args)
 }
 
 /**
+ * \brief Terminate execution within the calling Secure Partition and will not
+ *        return.
+ *
+ * \retval "Does not return"
+ */
+static void tfm_svcall_psa_panic(void)
+{
+    /*
+     * PSA FF recommends that the SPM causes the system to restart when a secure
+     * partition panics.
+     */
+    tfm_spm_hal_system_reset();
+}
+
+/**
  * \brief Return the IRQ line number associated with a signal
  *
  * \param[in]      partition_id    The ID of the partition in which we look for
@@ -1013,10 +1028,12 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     case TFM_SVC_DISABLE_IRQ:
         tfm_svcall_disable_irq(ctx);
         break;
+    case TFM_SVC_PSA_PANIC:
+        tfm_svcall_psa_panic();
+        break;
     case TFM_SVC_SPM_REQUEST:
         tfm_core_spm_request_handler((const struct tfm_state_context_t *)ctx);
         break;
-
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));

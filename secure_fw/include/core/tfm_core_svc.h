@@ -42,6 +42,7 @@ typedef enum {
     TFM_SVC_PSA_REPLY,
     TFM_SVC_PSA_NOTIFY,
     TFM_SVC_PSA_CLEAR,
+    TFM_SVC_PSA_PANIC,
 #endif
     TFM_SVC_PLATFORM_BASE = 50 /* leave room for additional Core handlers */
 } tfm_svc_number_t;
