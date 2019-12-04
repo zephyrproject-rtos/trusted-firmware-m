@@ -23,7 +23,7 @@ int32_t tfm_nspm_get_current_client_id(void)
     return DEFAULT_NS_CLIENT_ID;
 }
 
-psa_status_t tfm_nspm_thread_entry(void)
+void tfm_nspm_thread_entry(void)
 {
 #ifdef TFM_CORE_DEBUG
     /* Boot up non-secure core */
@@ -45,7 +45,7 @@ psa_status_t tfm_nspm_thread_entry(void)
     }
 
     /* Should not run here */
-    return PSA_SUCCESS;
+    TFM_ASSERT(false);
 }
 
 void tfm_psa_ipc_request_handler(const uint32_t svc_args[])
