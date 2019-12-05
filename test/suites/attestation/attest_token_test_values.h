@@ -108,7 +108,7 @@
 #define TOKEN_TEST_REQUIRE_UEID true /* Mandatory claim */
 
 /* A 32 byte mostly random value. Binary.
- *    platform/ext/target/<TARGET>/dummy_boot_seed.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_BOOT_SEED \
     (struct q_useful_buf_c) {\

@@ -216,12 +216,6 @@ if (BL2)
     endif()
 endif()
 
-if (NOT DEFINED BUILD_BOOT_SEED)
-  message(FATAL_ERROR "Configuration variable BUILD_BOOT_SEED (true|false) is undefined!")
-elseif(BUILD_BOOT_SEED)
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_a/dummy_boot_seed.c")
-endif()
-
 if (NOT DEFINED BUILD_DEVICE_ID)
   message(FATAL_ERROR "Configuration variable BUILD_DEVICE_ID (true|false) is undefined!")
 elseif(BUILD_DEVICE_ID)

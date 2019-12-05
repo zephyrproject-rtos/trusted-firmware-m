@@ -206,12 +206,6 @@ if (MCUBOOT_RAM_LOADING)
         message (FATAL_ERROR "MCUBOOT_RAM_LOADING is not supported on " ${TARGET_PLATFORM})
 endif()
 
-if (NOT DEFINED BUILD_BOOT_SEED)
-  message(FATAL_ERROR "Configuration variable BUILD_BOOT_SEED (true|false) is undefined!")
-elseif(BUILD_BOOT_SEED)
-  list(APPEND ALL_SRC_C "${AN524_DIR}/dummy_boot_seed.c")
-endif()
-
 if (NOT DEFINED BUILD_DEVICE_ID)
   message(FATAL_ERROR "Configuration variable BUILD_DEVICE_ID (true|false) is undefined!")
 elseif(BUILD_DEVICE_ID)
