@@ -144,6 +144,12 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
         tfm_core_panic();
     }
 
+    /* It is a fatal error if the connection is currently handling a request. */
+    if (((struct tfm_conn_handle_t *)handle)->status ==
+                                                     TFM_HANDLE_STATUS_ACTIVE) {
+        tfm_core_panic();
+    }
+
     /*
      * Read client invecs from the wrap input vector. It is a fatal error
      * if the memory reference for the wrap input vector is invalid or not
