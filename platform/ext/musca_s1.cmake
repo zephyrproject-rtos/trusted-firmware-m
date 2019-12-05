@@ -153,7 +153,7 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/tfm_rotpk.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)

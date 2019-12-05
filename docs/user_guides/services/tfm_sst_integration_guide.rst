@@ -277,7 +277,7 @@ For API specification, please check:
 ``platform/include/tfm_plat_crypto_keys.h``
 
 A stub implementation is provided in
-``platform/ext/<target>/dummy_crypto_keys.c``
+``platform/ext/common/template/crypto_keys.c``
 
 Flash Interface
 ===============
