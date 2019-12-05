@@ -123,13 +123,13 @@
 #define TOKEN_TEST_REQUIRE_BOOT_SEED true /* Mandatory claim */
 
 /* A text string in EAN 13 format
- *    platform/ext/target/<TARGET>/dummy_device_id.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_HW_VERSION "060456527282910010" /* Hard-coded value */
 #define TOKEN_TEST_REQUIRE_HW_VERSION false /* Optional claim */
 
 /* A 32 byte mostly random value. Binary.
- *    platform/ext/target/<TARGET>/dummy_device_id.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_IMPLEMENTATION_ID \
     (struct q_useful_buf_c) {\

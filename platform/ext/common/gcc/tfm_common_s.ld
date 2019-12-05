@@ -245,8 +245,6 @@ SECTIONS
         *tfm_spm_services.o(.rodata*)
         *dummy_nv_counters.o(.text*)
         *dummy_nv_counters.o(.rodata*)
-        *dummy_device_id.o(.text*)
-        *dummy_device_id.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
         *device_definition.o(.text*)
@@ -575,7 +573,6 @@ SECTIONS
     {
         */tfm_spm_services.o(.data*)
         */dummy_nv_counters.o(.data*)
-        */dummy_device_id.o(.data*)
         */platform_retarget_dev.o(.data*)
         */device_definition.o(.data*)
         . = ALIGN(32);
@@ -589,12 +586,10 @@ SECTIONS
         */platform_retarget_dev.o(.bss*)
         */device_definition.o(.bss*)
         */dummy_nv_counters.o(.bss*)
-        */dummy_device_id.o(.bss*)
         */tfm_spm_services.o(COMMON)
         */platform_retarget_dev.o(COMMON)
         */device_definition.o(COMMON)
         */dummy_nv_counters.o(COMMON)
-        */dummy_device_id.o(COMMON)
         . = ALIGN(32);
     } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
