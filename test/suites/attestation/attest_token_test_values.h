@@ -144,7 +144,7 @@
 #define TOKEN_TEST_REQUIRE_IMPLEMENTATION_ID true /* Mandatory claim */
 
 /* A small unsigned integer
- *    platform/ext/target/<TARGET>/attest_hal.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_SECURITY_LIFECYCLE  INT32_MAX /* Value not checked */
 #define TOKEN_TEST_REQUIRE_SECURITY_LIFECYCLE true /* Mandatory claim */
@@ -154,13 +154,13 @@
 #define TOKEN_TEST_REQUIRE_CLIENT_ID true /* Mandatory claim */
 
 /* Text string naming the profile definition:
- *    platform/ext/target/<TARGET>/attest_hal.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_PROFILE_DEFINITION  "PSA_IOT_PROFILE_1"
 #define TOKEN_TEST_REQUIRE_PROFILE_DEFINITION false /* Optional field */
 
 /* Text string with verification URL or similar
- *    platform/ext/target/<TARGET>/attest_hal.c
+ *    platform/ext/common/template/attest_hal.c
  */
 #define TOKEN_TEST_VALUE_ORIGINATION "www.trustedfirmware.org"
 #define TOKEN_TEST_REQUIRE_ORIGINATION false /* Optional field */
