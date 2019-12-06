@@ -90,7 +90,7 @@
 #define TOKEN_TEST_VALUE_UEID NULL_Q_USEFUL_BUF_C
 
 /* A 32 byte mostly random value. Binary.
- *    platform/ext/common/tfm_initial_attestation_key_material.c
+ *    platform/ext/common/template/tfm_initial_attestation_key_material.c
  */
 /*
 #define TOKEN_TEST_VALUE_UEID \
