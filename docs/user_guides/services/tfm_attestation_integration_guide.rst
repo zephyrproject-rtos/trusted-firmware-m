@@ -489,7 +489,7 @@ that user has license for DS-5 and FVP models:
    binary format to the host computer:
    ``dump memory <PATH>/iat_01.cbor <ADDRESS> +<SIZE>``
  - Execute this command on the host computer to verify the token:
-   ``check_iat -p -K -k platform/ext/common/tfm_initial_attestation_key.pem <PATH>/iat_01.cbor``
+   ``check_iat -p -K -k platform/ext/common/template/tfm_initial_attestation_key.pem <PATH>/iat_01.cbor``
  - Documentation of the iat-verifier can be found
    :doc:`here </tools/iat-verifier/README>`.
 

@@ -13,7 +13,7 @@
 
 /*
  * This file contains the hard coded version of the ECDSA P-256 secret key in:
- * platform/ext/common/tfm_initial_attestation_key.pem
+ * platform/ext/common/template/tfm_initial_attestation_key.pem
  *
  * As a P-256 key, the private key is 32 bytes long.
  *
