@@ -38,7 +38,9 @@ static void tfm_core_test_spm_request(struct test_result_t *ret);
 #endif /* TFM_PSA_API */
 static void tfm_core_test_ns_thread(struct test_result_t *ret);
 static void tfm_core_test_check_init(struct test_result_t *ret);
+#ifdef ENABLE_TFM_CORE_RECURSION_TESTS
 static void tfm_core_test_recursion(struct test_result_t *ret);
+#endif
 static void tfm_core_test_buffer_check(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss(struct test_result_t *ret);
 static void tfm_core_test_ss_to_ss_buffer(struct test_result_t *ret);
@@ -59,8 +61,10 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
     "Test service request from NS thread mode"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_CHECK_INIT, tfm_core_test_check_init,
     "Test the success of service init"),
+#ifdef ENABLE_TFM_CORE_RECURSION_TESTS
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_RECURSION, tfm_core_test_recursion,
-    "Test direct recursion of secure services (DEPRECATED)"),
+    "Test direct recursion of secure services"),
+#endif
 #ifndef TFM_PSA_API
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_MEMORY_PERMISSIONS,
     tfm_core_test_permissions,
@@ -652,15 +656,21 @@ static void tfm_core_test_check_init(struct test_result_t *ret)
     ret->val = TEST_PASSED;
 }
 
+#ifdef ENABLE_TFM_CORE_RECURSION_TESTS
 /**
  * \brief Tests what happens when a service calls itself directly
  */
 static void tfm_core_test_recursion(struct test_result_t *ret)
 {
-    /* This test triggers a non-recoverable security violation. Don't run */
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-    ret->val = TEST_PASSED;
+    /*
+     * TODO
+     * Recursive calls will trigger a fatal error. Current test framework cannot
+     * recover from that error.
+     * Leave a test case stub here for further implementation.
+     */
+    TEST_FAIL("The test case is not implemented yet.");
 }
+#endif
 
 #ifndef TFM_PSA_API
 static char *error_to_string(const char *desc, int32_t err)

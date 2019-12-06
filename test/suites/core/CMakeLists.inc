@@ -42,6 +42,11 @@ elseif (CORE_TEST_INTERACTIVE)
 	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/non_secure/core_ns_interactive_testsuite.c")
 endif()
 
+# Disable recursion test from core test by default
+if (ENABLE_TFM_CORE_RECURSION_TESTS)
+	add_definitions(-DENABLE_TFM_CORE_RECURSION_TESTS)
+endif()
+
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/test/interface/include ABSOLUTE)
