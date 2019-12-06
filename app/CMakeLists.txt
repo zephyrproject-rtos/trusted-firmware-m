@@ -374,7 +374,6 @@ endif()
 if(NOT TARGET tfm_non_secure_tests)
 	#Add the test source to the build.
 	#As of today since secure_fw is built as a sub-project this code will never execute.
-	option(ENABLE_INVERT_SERVICE_TESTS "" TRUE)
 	option(ENABLE_SECURE_STORAGE_SERVICE_TESTS "" TRUE)
 	include(../test/CMakeLists.inc)
 	target_sources(${PROJECT_OBJ_LIB} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})

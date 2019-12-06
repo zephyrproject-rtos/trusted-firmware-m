@@ -14,7 +14,6 @@
 #include "test/suites/its/secure/its_s_tests.h"
 #include "test/suites/audit/secure/audit_s_tests.h"
 #include "test/suites/attestation/secure/attestation_s_tests.h"
-#include "test/suites/invert/secure/invert_s_tests.h"
 #include "test/suites/crypto/secure/crypto_s_tests.h"
 #include "test/suites/ipc/secure/ipc_s_tests.h"
 #include "test/suites/platform/secure/platform_s_tests.h"
@@ -54,12 +53,6 @@ static struct test_suite_t test_suites[] = {
 #endif
 
 #endif
-
-#ifdef TFM_PARTITION_TEST_CORE
-    /* Secure invert test cases */
-    /* Note: since this is sample code, only run if test services are enabled */
-    {&register_testsuite_s_invert_interface, 0, 0, 0},
-#endif /* TFM_PARTITION_TEST_CORE*/
 
 #ifdef ENABLE_IPC_TEST
     /* Secure IPC test cases */

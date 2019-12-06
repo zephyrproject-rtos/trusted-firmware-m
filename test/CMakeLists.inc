@@ -39,7 +39,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/framework/CMakeLists.inc)
 
 # Include the test suites
 include(${CMAKE_CURRENT_LIST_DIR}/suites/core/CMakeLists.inc)
-include(${CMAKE_CURRENT_LIST_DIR}/suites/invert/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/sst/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/its/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/crypto/CMakeLists.inc)
