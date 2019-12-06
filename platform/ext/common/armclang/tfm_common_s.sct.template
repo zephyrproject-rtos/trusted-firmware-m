@@ -31,7 +31,6 @@ LR_CODE S_CODE_START {
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
         tfm_spm_services.o (+RO)
-        dummy_nv_counters.o (+RO)
         platform_retarget_dev.o (+RO)
         device_definition.o (+RO)
         *(SFN)
@@ -153,7 +152,6 @@ LR_CODE S_CODE_START {
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
         tfm_spm_services.o (+RW +ZI)
-        dummy_nv_counters.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
         device_definition.o (+RW +ZI)
     }
