@@ -39,7 +39,7 @@
 #define READ_DATA                "_________________________________________"
 #define RESULT_DATA              ("____" WRITE_DATA "____")
 
-#define TEST_1027_CYCLES         3U
+#define TEST_1025_CYCLES         3U
 
 static const uint8_t write_asset_data[SST_MAX_ASSET_SIZE] = {0xAF};
 static uint8_t read_asset_data[SST_MAX_ASSET_SIZE] = {0};
@@ -60,20 +60,18 @@ static void tfm_sst_test_1012(struct test_result_t *ret);
 static void tfm_sst_test_1013(struct test_result_t *ret);
 static void tfm_sst_test_1014(struct test_result_t *ret);
 static void tfm_sst_test_1015(struct test_result_t *ret);
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1016(struct test_result_t *ret);
 static void tfm_sst_test_1017(struct test_result_t *ret);
-#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static void tfm_sst_test_1018(struct test_result_t *ret);
 static void tfm_sst_test_1019(struct test_result_t *ret);
 static void tfm_sst_test_1020(struct test_result_t *ret);
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 static void tfm_sst_test_1021(struct test_result_t *ret);
 static void tfm_sst_test_1022(struct test_result_t *ret);
-#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 static void tfm_sst_test_1023(struct test_result_t *ret);
 static void tfm_sst_test_1024(struct test_result_t *ret);
 static void tfm_sst_test_1025(struct test_result_t *ret);
-static void tfm_sst_test_1026(struct test_result_t *ret);
-static void tfm_sst_test_1027(struct test_result_t *ret);
 
 static struct test_t psa_ps_ns_tests[] = {
     {&tfm_sst_test_1001, "TFM_SST_TEST_1001",
@@ -83,54 +81,50 @@ static struct test_t psa_ps_ns_tests[] = {
     {&tfm_sst_test_1003, "TFM_SST_TEST_1003",
      "Set interface with NULL data pointer"},
     {&tfm_sst_test_1004, "TFM_SST_TEST_1004",
-     "Set interface with invalid data length (DEPRECATED)"},
-    {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
      "Set interface with write once UID"},
-    {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
+    {&tfm_sst_test_1005, "TFM_SST_TEST_1005",
      "Get interface with valid data"},
-    {&tfm_sst_test_1007, "TFM_SST_TEST_1007",
+    {&tfm_sst_test_1006, "TFM_SST_TEST_1006",
      "Get interface with zero data length"},
-    {&tfm_sst_test_1008, "TFM_SST_TEST_1008",
+    {&tfm_sst_test_1007, "TFM_SST_TEST_1007",
      "Get interface with invalid UIDs"},
-    {&tfm_sst_test_1009, "TFM_SST_TEST_1009",
+    {&tfm_sst_test_1008, "TFM_SST_TEST_1008",
      "Get interface with invalid data lengths and offsets"},
-    {&tfm_sst_test_1010, "TFM_SST_TEST_1010",
+    {&tfm_sst_test_1009, "TFM_SST_TEST_1009",
      "Get interface with NULL data pointer"},
-    {&tfm_sst_test_1011, "TFM_SST_TEST_1011",
+    {&tfm_sst_test_1010, "TFM_SST_TEST_1010",
      "Get info interface with write once UID"},
-    {&tfm_sst_test_1012, "TFM_SST_TEST_1012",
+    {&tfm_sst_test_1011, "TFM_SST_TEST_1011",
      "Get info interface with valid UID"},
-    {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
+    {&tfm_sst_test_1012, "TFM_SST_TEST_1012",
      "Get info interface with invalid UIDs"},
-    {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
-     "Get info interface with NULL info pointer (DEPRECATED)"},
-    {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
+    {&tfm_sst_test_1013, "TFM_SST_TEST_1013",
      "Remove interface with valid UID"},
-    {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
+    {&tfm_sst_test_1014, "TFM_SST_TEST_1014",
      "Remove interface with write once UID"},
-    {&tfm_sst_test_1017, "TFM_SST_TEST_1017",
+    {&tfm_sst_test_1015, "TFM_SST_TEST_1015",
      "Remove interface with invalid UID"},
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
-    {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
+    {&tfm_sst_test_1016, "TFM_SST_TEST_1016",
      "Get interface with invalid thread name"},
-    {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
+    {&tfm_sst_test_1017, "TFM_SST_TEST_1017",
      "Get info interface with invalid thread name"},
-    {&tfm_sst_test_1020, "TFM_SST_TEST_1020",
+    {&tfm_sst_test_1018, "TFM_SST_TEST_1018",
      "Remove interface with invalid thread name"},
-    {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
+    {&tfm_sst_test_1019, "TFM_SST_TEST_1019",
      "Attempt to access UID belonging to another thread"},
-    {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
+    {&tfm_sst_test_1020, "TFM_SST_TEST_1020",
      "Set UID alternately from two threads"},
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
-    {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
+    {&tfm_sst_test_1021, "TFM_SST_TEST_1021",
      "Block compaction after remove"},
-    {&tfm_sst_test_1024, "TFM_SST_TEST_1024",
+    {&tfm_sst_test_1022, "TFM_SST_TEST_1022",
      "Multiple partial gets"},
-    {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
+    {&tfm_sst_test_1023, "TFM_SST_TEST_1023",
      "Multiple sets to same UID from same thread"},
-    {&tfm_sst_test_1026, "TFM_SST_TEST_1026",
+    {&tfm_sst_test_1024, "TFM_SST_TEST_1024",
      "Get support interface"},
-    {&tfm_sst_test_1027, "TFM_SST_TEST_1027",
+    {&tfm_sst_test_1025, "TFM_SST_TEST_1025",
      "Set, get and remove interface with different asset sizes"},
 };
 
@@ -266,40 +260,9 @@ TFM_SST_NS_TEST(1003, "Thread_A")
 
 /**
  * \brief Tests set function with:
- * - Data length longer than maximum permitted
- */
-TFM_SST_NS_TEST(1004, "Thread_A")
-{
-    /* A parameter with a buffer pointer where its data length is longer than
-     * maximum permitted, it is treated as a secure violation.
-     * TF-M framework will stop this transaction and not return from this
-     * request to NSPE.
-     */
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-
-#if 0
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_1;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
-    const uint32_t data_len = INVALID_DATA_LEN;
-    const uint8_t write_data[] = WRITE_DATA;
-
-    /* Set with data length longer than the maximum supported */
-    status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
-        TEST_FAIL("Set should not succeed with invalid data length");
-        return;
-    }
-#endif
-
-    ret->val = TEST_PASSED;
-}
-
-/**
- * \brief Tests set function with:
  * - Write once UID that has already been created
  */
-TFM_SST_NS_TEST(1005, "Thread_A")
+TFM_SST_NS_TEST(1004, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = WRITE_ONCE_UID;
@@ -338,7 +301,7 @@ TFM_SST_NS_TEST(1005, "Thread_A")
  * - Valid data, zero offset
  * - Valid data, non-zero offset
  */
-TFM_SST_NS_TEST(1006, "Thread_A")
+TFM_SST_NS_TEST(1005, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -416,7 +379,7 @@ TFM_SST_NS_TEST(1006, "Thread_A")
  * - Zero data length, zero offset
  * - Zero data length, non-zero offset
  */
-TFM_SST_NS_TEST(1007, "Thread_A")
+TFM_SST_NS_TEST(1006, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -476,7 +439,7 @@ TFM_SST_NS_TEST(1007, "Thread_A")
  * - Unset UID
  * - Invalid UID
  */
-TFM_SST_NS_TEST(1008, "Thread_A")
+TFM_SST_NS_TEST(1007, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -520,7 +483,7 @@ TFM_SST_NS_TEST(1008, "Thread_A")
  * - Data length greater than UID length
  * - Data length + offset greater than UID length
  */
-TFM_SST_NS_TEST(1009, "Thread_A")
+TFM_SST_NS_TEST(1008, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -606,7 +569,7 @@ TFM_SST_NS_TEST(1009, "Thread_A")
  *       and not return to the NSPE so this case is not tested here.
  *
  */
-TFM_SST_NS_TEST(1010, "Thread_A")
+TFM_SST_NS_TEST(1009, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -642,7 +605,7 @@ TFM_SST_NS_TEST(1010, "Thread_A")
  * \brief Tests get info function with:
  * - Write once UID
  */
-TFM_SST_NS_TEST(1011, "Thread_A")
+TFM_SST_NS_TEST(1010, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = WRITE_ONCE_UID;
@@ -673,7 +636,7 @@ TFM_SST_NS_TEST(1011, "Thread_A")
  * \brief Tests get info function with:
  * - Valid UID
  */
-TFM_SST_NS_TEST(1012, "Thread_A")
+TFM_SST_NS_TEST(1011, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -721,7 +684,7 @@ TFM_SST_NS_TEST(1012, "Thread_A")
  * - Unset UID
  * - Invalid UID
  */
-TFM_SST_NS_TEST(1013, "Thread_A")
+TFM_SST_NS_TEST(1012, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -767,53 +730,10 @@ TFM_SST_NS_TEST(1013, "Thread_A")
 }
 
 /**
- * \brief Tests get info function with:
- * - NULL info pointer
- */
-TFM_SST_NS_TEST(1014, "Thread_A")
-{
-    /* A parameter with a null pointer is treated as a secure violation.
-     * TF-M framework will stop this transaction and not return from this
-     * request to NSPE.
-     */
-    TEST_LOG("This test is DEPRECATED and the test execution was SKIPPED\r\n");
-
-#if 0
-    psa_ps_status_t status;
-    const psa_ps_uid_t uid = TEST_UID_3;
-    const psa_ps_create_flags_t flags = PSA_PS_FLAG_NONE;
-    const uint32_t data_len = WRITE_DATA_SIZE;
-    const uint8_t write_data[] = WRITE_DATA;
-
-    status = psa_ps_set(uid, data_len, write_data, flags);
-    if (status != PSA_PS_SUCCESS) {
-        TEST_FAIL("Set should not fail");
-        return;
-    }
-
-    /* Get info with NULL info pointer */
-    status = psa_ps_get_info(uid, NULL);
-    if (status != PSA_PS_ERROR_INVALID_ARGUMENT) {
-        TEST_FAIL("Get info should not succeed with NULL info pointer");
-        return;
-    }
-
-    /* Call remove to clean up storage for the next test */
-    status = psa_ps_remove(uid);
-    if (status != PSA_PS_SUCCESS) {
-        TEST_FAIL("Remove should not fail with valid UID");
-        return;
-    }
-#endif
-
-    ret->val = TEST_PASSED;
-}
-
-/**
  * \brief Tests remove function with:
  * - Valid UID
  */
-TFM_SST_NS_TEST(1015, "Thread_A")
+TFM_SST_NS_TEST(1013, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -865,7 +785,7 @@ TFM_SST_NS_TEST(1015, "Thread_A")
  * \brief Tests remove function with:
  * - Write once UID
  */
-TFM_SST_NS_TEST(1016, "Thread_A")
+TFM_SST_NS_TEST(1014, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = WRITE_ONCE_UID;
@@ -884,7 +804,7 @@ TFM_SST_NS_TEST(1016, "Thread_A")
  * \brief Tests remove function with:
  * - Invalid UID
  */
-TFM_SST_NS_TEST(1017, "Thread_A")
+TFM_SST_NS_TEST(1015, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = INVALID_UID;
@@ -903,7 +823,7 @@ TFM_SST_NS_TEST(1017, "Thread_A")
 /**
  * \brief Sets UID with a valid thread name.
  */
-static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_1(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -923,7 +843,7 @@ static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 /**
  * \brief Calls get with an invalid thread name.
  */
-static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_2(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -949,7 +869,7 @@ static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
 /**
  * \brief Removes UID with a valid thread name to clean up storage.
  */
-static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1016_task_3(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -966,25 +886,25 @@ static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
 /**
  * \brief Tests get function with an invalid thread name.
  */
-static void tfm_sst_test_1018(struct test_result_t *ret)
+static void tfm_sst_test_1016(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1018_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1016_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1018_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1016_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1018_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1016_task_3);
 }
 
 /**
  * \brief Sets UID with a valid thread name.
  */
-static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1017_task_1(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1004,7 +924,7 @@ static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
 /**
  * \brief Calls get info with an invalid thread name.
  */
-static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1017_task_2(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1028,7 +948,7 @@ static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
 /**
  * \brief Removes UID with a valid thread name to clean up storage.
  */
-static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1017_task_3(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1045,25 +965,25 @@ static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
 /**
  * \brief Tests get info function with an invalid thread name.
  */
-static void tfm_sst_test_1019(struct test_result_t *ret)
+static void tfm_sst_test_1017(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1019_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1017_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1019_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1017_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1019_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1017_task_3);
 }
 
 /**
  * \brief Sets UID with a valid thread name.
  */
-static void tfm_sst_test_1020_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1018_task_1(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -1083,7 +1003,7 @@ static void tfm_sst_test_1020_task_1(struct test_result_t *ret)
 /**
  * \brief Calls remove with an invalid thread name.
  */
-static void tfm_sst_test_1020_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1018_task_2(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -1100,7 +1020,7 @@ static void tfm_sst_test_1020_task_2(struct test_result_t *ret)
 /**
  * \brief Removes UID with a valid thread name to clean up storage.
  */
-static void tfm_sst_test_1020_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1018_task_3(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -1117,25 +1037,25 @@ static void tfm_sst_test_1020_task_3(struct test_result_t *ret)
 /**
  * \brief Tests remove function with an invalid thread name.
  */
-static void tfm_sst_test_1020(struct test_result_t *ret)
+static void tfm_sst_test_1018(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1018_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1020_task_2);
+    tfm_sst_run_test(INVALID_THREAD_NAME, ret, tfm_sst_test_1018_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1018_task_3);
 }
 
 /**
  * \brief Sets UID with first thread.
  */
-static void tfm_sst_test_1021_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1019_task_1(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -1154,7 +1074,7 @@ static void tfm_sst_test_1021_task_1(struct test_result_t *ret)
 /**
  * \brief Attempts to access same UID from second thread.
  */
-static void tfm_sst_test_1021_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1019_task_2(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -1228,7 +1148,7 @@ static void tfm_sst_test_1021_task_2(struct test_result_t *ret)
 /**
  * \brief Checks that first thread's UID has not been modified.
  */
-static void tfm_sst_test_1021_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1019_task_3(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_3;
@@ -1278,25 +1198,25 @@ static void tfm_sst_test_1021_task_3(struct test_result_t *ret)
 /**
  * \brief Tests attempting to access UID belonging to another thread.
  */
-static void tfm_sst_test_1021(struct test_result_t *ret)
+static void tfm_sst_test_1019(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1019_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1021_task_2);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1019_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1021_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1019_task_3);
 }
 
 /**
  * \brief Sets TEST_UID_1 from Thread_A.
  */
-static void tfm_sst_test_1022_task_1(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_1(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1315,7 +1235,7 @@ static void tfm_sst_test_1022_task_1(struct test_result_t *ret)
 /**
  * \brief Sets TEST_UID_1 from Thread_B.
  */
-static void tfm_sst_test_1022_task_2(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_2(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1334,7 +1254,7 @@ static void tfm_sst_test_1022_task_2(struct test_result_t *ret)
 /**
  * \brief Sets TEST_UID_1 again from Thread_A.
  */
-static void tfm_sst_test_1022_task_3(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_3(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1353,7 +1273,7 @@ static void tfm_sst_test_1022_task_3(struct test_result_t *ret)
 /**
  * \brief Sets TEST_UID_1 again from Thread_B.
  */
-static void tfm_sst_test_1022_task_4(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_4(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1372,7 +1292,7 @@ static void tfm_sst_test_1022_task_4(struct test_result_t *ret)
 /**
  * \brief Gets TEST_UID_1 from Thread_A.
  */
-static void tfm_sst_test_1022_task_5(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_5(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1398,7 +1318,7 @@ static void tfm_sst_test_1022_task_5(struct test_result_t *ret)
 /**
  * \brief Gets TEST_UID_1 from Thread_B.
  */
-static void tfm_sst_test_1022_task_6(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_6(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1431,7 +1351,7 @@ static void tfm_sst_test_1022_task_6(struct test_result_t *ret)
 /**
  * \brief Calls removes from Thread_B to clean up storage for the next test.
  */
-static void tfm_sst_test_1022_task_7(struct test_result_t *ret)
+static void tfm_sst_test_1020_task_7(struct test_result_t *ret)
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_1;
@@ -1450,39 +1370,39 @@ static void tfm_sst_test_1022_task_7(struct test_result_t *ret)
  * \brief Tests writing data to a UID alternately from two threads before
  *        read-back.
  */
-static void tfm_sst_test_1022(struct test_result_t *ret)
+static void tfm_sst_test_1020(struct test_result_t *ret)
 {
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1022_task_1);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_1);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1022_task_2);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1020_task_2);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1022_task_3);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_3);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1022_task_4);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1020_task_4);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1022_task_5);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_5);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1022_task_6);
+    tfm_sst_run_test("Thread_B", ret, tfm_sst_test_1020_task_6);
     if (ret->val != TEST_PASSED) {
         return;
     }
 
-    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1022_task_7);
+    tfm_sst_run_test("Thread_A", ret, tfm_sst_test_1020_task_7);
 }
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
@@ -1493,7 +1413,7 @@ static void tfm_sst_test_1022(struct test_result_t *ret)
  *        the beginning of the block. This test verifies that the compaction
  *        works correctly by reading back UID 2.
  */
-TFM_SST_NS_TEST(1023, "Thread_A")
+TFM_SST_NS_TEST(1021, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid_1 = TEST_UID_2;
@@ -1556,7 +1476,7 @@ TFM_SST_NS_TEST(1023, "Thread_A")
 /**
  * \brief Tests set and multiple partial gets.
  */
-TFM_SST_NS_TEST(1024, "Thread_A")
+TFM_SST_NS_TEST(1022, "Thread_A")
 {
     psa_ps_status_t status;
     uint32_t i;
@@ -1604,7 +1524,7 @@ TFM_SST_NS_TEST(1024, "Thread_A")
 /**
  * \brief Tests multiple sets to the same UID.
  */
-TFM_SST_NS_TEST(1025, "Thread_A")
+TFM_SST_NS_TEST(1023, "Thread_A")
 {
     psa_ps_status_t status;
     const psa_ps_uid_t uid = TEST_UID_2;
@@ -1661,7 +1581,7 @@ TFM_SST_NS_TEST(1025, "Thread_A")
 /**
  * \brief Tests get support function.
  */
-TFM_SST_NS_TEST(1026, "Thread_A")
+TFM_SST_NS_TEST(1024, "Thread_A")
 {
     uint32_t support_flags;
 
@@ -1680,21 +1600,21 @@ TFM_SST_NS_TEST(1026, "Thread_A")
  * - Data length of different asset sizes
  * - No flags
  */
-TFM_SST_NS_TEST(1027, "Thread_A")
+TFM_SST_NS_TEST(1025, "Thread_A")
 {
     uint8_t cycle;
     psa_ps_status_t status;
-    const psa_ps_uid_t test_uid[TEST_1027_CYCLES] = {
+    const psa_ps_uid_t test_uid[TEST_1025_CYCLES] = {
         TEST_UID_1,
         TEST_UID_2,
         TEST_UID_3};
-    const uint32_t test_asset_sizes[TEST_1027_CYCLES] = {
+    const uint32_t test_asset_sizes[TEST_1025_CYCLES] = {
         SST_MAX_ASSET_SIZE >> 2,
         SST_MAX_ASSET_SIZE >> 1,
         SST_MAX_ASSET_SIZE};
 
     /* Loop to test different asset sizes and UID's*/
-    for (cycle = 0; cycle < TEST_1027_CYCLES; cycle++) {
+    for (cycle = 0; cycle < TEST_1025_CYCLES; cycle++) {
         uint32_t data_size = test_asset_sizes[cycle];
         psa_ps_uid_t uid = test_uid[cycle];
         struct psa_ps_info_t info = {0};
