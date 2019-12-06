@@ -50,7 +50,7 @@ if (BL2)
         mcuboot_override_upgrade_strategy("NO_SWAP")
     endif()
 
-    #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/tfm_rotpk.c
+    #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
     #       instead independently loaded from secure code as a blob.
     if (${MCUBOOT_SIGNATURE_TYPE} STREQUAL "RSA-2048")
         add_definitions(-DMCUBOOT_SIGN_RSA_LEN=2048)
@@ -158,7 +158,7 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_HARDWARE_KEYS (true|false) is undefined!")
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/tfm_rotpk.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
 endif()
 
