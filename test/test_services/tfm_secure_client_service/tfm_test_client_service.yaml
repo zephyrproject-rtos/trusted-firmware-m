@@ -51,7 +51,9 @@
     "TFM_ATTEST_GET_TOKEN",
     "TFM_ATTEST_GET_TOKEN_SIZE",
     "TFM_ATTEST_GET_PUBLIC_KEY",
-    "TFM_SST_TEST_PREPARE"
+    "TFM_SST_TEST_PREPARE",
+    "TFM_SP_PLATFORM_SYSTEM_RESET",
+    "TFM_SP_PLATFORM_IOCTL"
   ],
 # Currently there is no platform dependent section of the manifest file,
 # therefore all platform dependent files must be listed here which can be used

@@ -487,6 +487,8 @@ static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
     TFM_ATTEST_GET_TOKEN_SIZE_SID,
     TFM_ATTEST_GET_PUBLIC_KEY_SID,
     TFM_SST_TEST_PREPARE_SID,
+    TFM_SP_PLATFORM_SYSTEM_RESET_SID,
+    TFM_SP_PLATFORM_IOCTL_SID,
 };
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
@@ -668,7 +670,7 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_secure_client_service_init,
-        .dependencies_num     = 14,
+        .dependencies_num     = 16,
         .p_dependencies       = dependencies_TFM_SP_SECURE_TEST_PARTITION,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
