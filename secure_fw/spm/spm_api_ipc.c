@@ -264,7 +264,7 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
 
 int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct tfm_spm_service_t *service,
-                                    int32_t ns_caller)
+                                    bool ns_caller)
 {
     struct spm_partition_desc_t *partition = NULL;
     int32_t i;
