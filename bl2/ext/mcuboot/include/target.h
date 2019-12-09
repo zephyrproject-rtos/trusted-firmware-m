@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2017, Linaro Ltd
- *  Copyright (c) 2018-2019, Arm Limited.
+ *  Copyright (c) 2018-2020, Arm Limited.
  *
  *  SPDX-License-Identifier: Apache-2.0
  */
@@ -85,12 +85,12 @@ defined by the target"
 #error "BL2 supports CMSIS flash interface and device name must be specified"
 #endif
 
-#ifndef BOOT_STATUS_MAX_ENTRIES
-#error "BOOT_STATUS_MAX_ENTRIES must be defined by the target"
+#ifndef MCUBOOT_STATUS_MAX_ENTRIES
+#error "MCUBOOT_STATUS_MAX_ENTRIES must be defined by the target"
 #endif
 
-#ifndef BOOT_MAX_IMG_SECTORS
-#error "BOOT_MAX_IMG_SECTORS must be defined by the target"
+#ifndef MCUBOOT_MAX_IMG_SECTORS
+#error "MCUBOOT_MAX_IMG_SECTORS must be defined by the target"
 #endif
 
 #endif /* H_TARGETS_TARGET_ */

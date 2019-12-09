@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE    (0)
 /* Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS       ((FLASH_S_PARTITION_SIZE + \
+#define MCUBOOT_MAX_IMG_SECTORS    ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
@@ -110,7 +110,7 @@
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE    (0)
 /* Maximum number of image sectors supported by the bootloader. */
-#define BOOT_MAX_IMG_SECTORS       (FLASH_MAX_PARTITION_SIZE / \
+#define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 #else /* MCUBOOT_IMAGE_NUMBER > 2 */
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
@@ -120,7 +120,7 @@
  * is supported on Musca-S1. The maximum number of status entries
  * supported by the bootloader.
  */
-#define BOOT_STATUS_MAX_ENTRIES         (0)
+#define MCUBOOT_STATUS_MAX_ENTRIES      (0)
 
 /* Note: FLASH_SST_AREA_OFFSET, FLASH_ITS_AREA_OFFSET and
  * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes

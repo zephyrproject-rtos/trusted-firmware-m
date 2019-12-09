@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2018-2019 Arm Limited.
+ * Modifications are Copyright (c) 2018-2020 Arm Limited.
  */
 
 #ifndef H_BOOTUTIL_PRIV_
@@ -129,6 +129,8 @@ struct boot_swap_state {
 
 _Static_assert(BOOT_IMAGE_NUMBER > 0, "Invalid value for BOOT_IMAGE_NUMBER");
 
+#define BOOT_MAX_IMG_SECTORS       MCUBOOT_MAX_IMG_SECTORS
+
 /*
  * Extract the swap type and image number from image trailers's swap_info
  * field.
@@ -166,6 +168,7 @@ _Static_assert(BOOT_IMAGE_NUMBER > 0, "Invalid value for BOOT_IMAGE_NUMBER");
 
 /** Maximum number of image sectors supported by the bootloader. */
 #define BOOT_STATUS_STATE_COUNT         3
+#define BOOT_STATUS_MAX_ENTRIES         MCUBOOT_STATUS_MAX_ENTRIES
 
 #define BOOT_PRIMARY_SLOT               0
 #define BOOT_SECONDARY_SLOT             1
