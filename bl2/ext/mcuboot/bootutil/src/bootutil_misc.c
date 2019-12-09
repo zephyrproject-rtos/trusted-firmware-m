@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2019 Arm Limited.
+ * Modifications are Copyright (c) 2019-2020 Arm Limited.
  */
 
 #include <assert.h>
@@ -30,7 +30,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"
+#include "flash_map_backend/flash_map_backend.h"
+
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "bootutil_priv.h"

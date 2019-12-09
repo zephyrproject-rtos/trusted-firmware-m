@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #include "target.h"
 #include "bl2_util.h"
 #include "flash_map/flash_map.h"
+#include "flash_map_backend/flash_map_backend.h"
 #include "bootutil/bootutil_log.h"
 #include "Driver_Flash.h"
 

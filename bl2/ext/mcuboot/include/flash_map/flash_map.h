@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2018-2019 Arm Limited.
+ * Modifications are Copyright (c) 2018-2020 Arm Limited.
  */
 
 #ifndef H_UTIL_FLASH_MAP_
@@ -49,33 +49,6 @@ extern "C" {
  * and match the target offset specified in download script.
  */
 #include <inttypes.h>
-
-#if (MCUBOOT_IMAGE_NUMBER == 1)
-/*
- * NOTE: the definition below returns the same values for true/false on
- * purpose, to avoid having to mark x as non-used by all callers when
- * running in single image mode.
- */
-#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                                      FLASH_AREA_0_ID)
-#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_2_ID : \
-                                                      FLASH_AREA_2_ID)
-#elif (MCUBOOT_IMAGE_NUMBER == 2)
-/* MCUBoot currently supports only up to 2 updatable firmware images.
- * If the number of the current image is greater than MCUBOOT_IMAGE_NUMBER - 1
- * then a dummy value will be assigned to the flash area macros.
- */
-#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                         ((x) == 1) ? FLASH_AREA_1_ID : \
-                                                      255 )
-#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_2_ID : \
-                                         ((x) == 1) ? FLASH_AREA_3_ID : \
-                                                      255 )
-#else
-#error "Image slot and flash area mapping is not defined"
-#endif
-
-#define FLASH_AREA_IMAGE_SCRATCH        FLASH_AREA_SCRATCH_ID
 
 /*
  * For now, we only support one flash device.
@@ -138,16 +111,6 @@ struct flash_sector {
 };
 
 /*
- * Retrieve a memory-mapped flash device's base address.
- *
- * On success, the address will be stored in the value pointed to by
- * ret.
- *
- * Returns 0 on success, or an error code on failure.
- */
-int flash_device_base(uint8_t fd_id, uintptr_t *ret);
-
-/*
  * Start using flash area.
  */
 int flash_area_open(uint8_t id, const struct flash_area **area);
@@ -171,20 +134,6 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len);
 uint32_t flash_area_align(const struct flash_area *area);
 
 /*
- * Returns the value expected to be read when accessing any erased
- * flash byte.
- */
-uint8_t flash_area_erased_val(const struct flash_area *area);
-
-/*
- * Reads len bytes from off, and checks if the read data is erased.
- *
- * Returns 1 if erased, 0 if non-erased, and -1 on failure.
- */
-int flash_area_read_is_empty(const struct flash_area *area, uint32_t off,
-                             void *dst, uint32_t len);
-
-/*
  * Given flash area ID, return info about sectors within the area.
  */
 int flash_area_get_sectors(int fa_id, uint32_t *count,
@@ -196,11 +145,6 @@ int flash_area_get_sectors(int fa_id, uint32_t *count,
  */
 __attribute__((deprecated))
 int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
-
-int flash_area_id_from_image_slot(int slot);
-int flash_area_id_from_multi_image_slot(int image_index, int slot);
-int flash_area_id_to_image_slot(int area_id);
-int flash_area_id_to_multi_image_slot(int image_index, int area_id);
 
 #ifdef __cplusplus
 }

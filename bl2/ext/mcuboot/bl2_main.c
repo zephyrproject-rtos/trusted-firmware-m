@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@
 #include "bootutil/bootutil_log.h"
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
-#include "flash_map/flash_map.h"
-#include "bl2/include/boot_record.h"
+#include "flash_map_backend/flash_map_backend.h"
+#include "boot_record.h"
 #include "security_cnt.h"
-#include "bl2/include/boot_hal.h"
+#include "boot_hal.h"
 #if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
 #include "uart_stdout.h"
 #endif

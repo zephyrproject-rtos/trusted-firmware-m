@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018 Nordic Semiconductor ASA
  * Copyright (c) 2015 Runtime Inc
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,7 +15,9 @@
 #include <errno.h>
 #include "target.h"
 #include "Driver_Flash.h"
+#include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"
+#include "flash_map_backend/flash_map_backend.h"
 #include "bootutil/bootutil_log.h"
 
 /* Flash device name must be specified by target */

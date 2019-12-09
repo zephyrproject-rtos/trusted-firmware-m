@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,9 +10,9 @@
 #include "tfm_boot_status.h"
 #include "target.h"
 #include "../ext/mcuboot/bootutil/src/bootutil_priv.h"
-#include "../ext/mcuboot/bootutil/include/bootutil/image.h"
-#include "../ext/mcuboot/bootutil/include/bootutil/sha256.h"
-#include "../ext/mcuboot/include/flash_map/flash_map.h"
+#include "bootutil/image.h"
+#include "bootutil/sha256.h"
+#include "flash_map/flash_map.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
