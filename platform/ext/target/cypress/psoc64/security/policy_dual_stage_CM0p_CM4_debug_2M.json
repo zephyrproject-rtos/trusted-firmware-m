@@ -66,10 +66,6 @@
                 "upgrade_auth": [
                     3
                 ],
-                "upgrade_keys": [
-                    { "kid": 3, "key": "./keys/MCUBOOT_CM0P_KEY.json" }
-                ],
-                "backup": false,
                 "resources": [
                     {
                         "type": "FLASH_PC1_SPM",
@@ -101,7 +97,7 @@
                 "smif_id": 0,
                 "version": "0.1",
                 "rollback_counter": 0,
-                "upgrade": false,
+                "upgrade": true,
                 "encrypt": false,
                 "encrypt_key_id": 1,
                 "upgrade_auth": [
@@ -149,11 +145,6 @@
                         "type": "BOOT",
                         "address": 268763136,
                         "size": 1179648
-                    },
-                    {
-                        "type": "UPGRADE",
-                        "address": 268763136,
-                        "size": 1179648
                     }
                 ]
             }
@@ -162,5 +153,10 @@
     "cy_bootloader":
     {
         "mode": "debug"
+    },
+    "provisioning":
+    {
+        "packet_dir": "../packet",
+        "chain_of_trust": []
     }
 }

@@ -16,23 +16,14 @@ Please make sure you have all required software installed as explained in the
 Please also make sure that all the source code are fetched by following
 :doc:`general building instruction </docs/user_guides/tfm_build_instruction>`.
 
-Install CySecureTools. The exact command to use depends on what version of
-python you are running (which can be determined with "python3 --version").
-
-If you have python 3.7, use
+Install CySecureTools.
 
 .. code-block:: bash
 
-    pip install cysecuretools==1.0.0
-
-If you have python 3.6.8, use
-
-.. code-block:: bash
-
-    pip3 install --ignore-requires-python git+https://github.com/cypresssemiconductorco/cysecuretools@v1.0.0
+    pip3 install cysecuretools==1.3.3
 
 For more details please refer to
-`CySecureTools <https://pypi.org/project/cysecuretools/1.0.0/>`_ page.
+`CySecureTools <https://pypi.org/project/cysecuretools/1.3.3/>`_ page.
 
 Install OpenOCD with PSoC6 support. It can be obtained from the Cypress
 Programmer, download it from:
@@ -293,23 +284,26 @@ Sign the images (sign.py overwrites unsigned files with signed ones):
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
+      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
+      -d cy8cproto-064s2-sb \
       -s <build folder>/tfm_s.hex \
-      -n <build folder>/tfm_ns.hex \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json
+      -n <build folder>/tfm_ns.hex
 
 Note: each image can be signed individually, for example:
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -n <build folder>/tfm_ns.hex \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json
+      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
+      -d cy8cproto-064s2-sb \
+      -n <build folder>/tfm_ns.hex
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -s <build folder>/tfm_s.hex \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json
+      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
+      -d cy8cproto-064s2-sb \
+      -s <build folder>/tfm_s.hex
 
 **********************
 Programming the Device

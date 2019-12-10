@@ -15,34 +15,102 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cysecuretools
-import sys, getopt
+from cysecuretools import CySecureTools
+import sys, argparse
+import os
+from shutil import copyfile, move
+
+
+def myargs(argv):
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-h', '--help',
+                        dest='show_help',
+                        action='help',
+                        help='Print this help message and exit')
+
+    parser.add_argument('-p', '--policy',
+                        dest='policy_file',
+                        action='store',
+                        type=str,
+                        help="Device policy file",
+                        required=True)
+
+    parser.add_argument('-d', '--device',
+                        dest='device',
+                        action='store',
+                        type=str,
+                        help="device target",
+                        required=True)
+
+    parser.add_argument('-s', '--s_hex',
+                        dest='s_hex_file',
+                        action='store',
+                        default='',
+                        type=str,
+                        help="TFM SPE image to sign in hex format")
+
+    parser.add_argument('-ns', '--ns_hex',
+                        dest='ns_hex_file',
+                        action='store',
+                        default='',
+                        type=str,
+                        help="TFM NSPE image to sign in hex format")
+
+    options = parser.parse_args(argv)
+    return options
+
 
 def main(argv):
-    s_hex_file=""
-    ns_hex_file=""
-    policy_file=""
-    try:
-        opts, args = getopt.getopt(argv,"hs:n:p:", ["s_hex=", "ns_hex=", "policy="])
-    except getopt.GetoptError:
-        print ('sign.py -s <tfm_s hex> -n <tfm_ns hex> -p <policy json>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print ('sign.py -s <tfm_s hex> -n <tfm_ns hex> -p <policy json>')
-            sys.exit()
-        elif opt in ("-s", "--s_hex"):
-            s_hex_file = arg
-        elif opt in ("-n", "--ns_hex"):
-            ns_hex_file = arg
-        elif opt in ("-p", "--policy"):
-            policy_file = arg
-    print ('tfm_s :', s_hex_file)
-    print ('tfm_ns:', ns_hex_file)
-    print ('policy:', policy_file)
 
-    cysecuretools.sign_image(s_hex_file, policy_file, 1);
-    cysecuretools.sign_image(ns_hex_file, policy_file, 16);
+    options = myargs(argv)
+    print("options={}".format(options))
+
+    if not options.s_hex_file and not options.ns_hex_file:
+        print('Error: no files to sign')
+        exit(1)
+
+    tools = CySecureTools(options.device, options.policy_file)
+
+    if options.s_hex_file:
+        print('signing tfm_s image:', options.s_hex_file)
+
+        # sign_image overwrites original image, make a copy of it
+        name, ext = os.path.splitext(options.s_hex_file)
+        s_hex_signed_file = name + '_signed' + ext
+        try:
+            copyfile(options.s_hex_file, s_hex_signed_file)
+        except IOError as e:
+            print("Failed to copy file '{}' to '{}' ({})"
+                   .format(options.s_hex_file, s_hex_signed_file, e.message))
+            raise
+
+        tools.sign_image(s_hex_signed_file, 1)
+
+    if options.ns_hex_file:
+        print('signing tfm_ns image:', options.ns_hex_file)
+
+        name, ext = os.path.splitext(options.ns_hex_file)
+        ns_hex_signed_file = name + '_signed' + ext
+        try:
+            copyfile(options.ns_hex_file, ns_hex_signed_file)
+        except IOError as e:
+            print("Failed to copy file '{}' to '{}' ({})"
+                   .format(options.ns_hex_file, ns_hex_signed_file, e.message))
+            raise
+
+        tools.sign_image(ns_hex_signed_file, 16)
+
+        # for CM4, sign_image creates an unsigned copy of the image
+        # named <image to sign>_cm4.hex. Delete it to avoid confusion.
+        file_name = name + '_signed_cm4' + ext
+        if os.path.isfile(file_name):
+            try:
+                os.remove(file_name)
+            except IOError:
+                print("Could not erase '{}'"
+                          .format(file_name))
+
+    print('Done.')
 
 if __name__ == "__main__":
    main(sys.argv[1:])
