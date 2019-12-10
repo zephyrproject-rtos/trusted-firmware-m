@@ -50,6 +50,7 @@ enum spm_err_t {
 
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
+#define TFM_HANDLE_STATUS_CONNECT_ERROR 2
 
 #ifndef TFM_PSA_API
 /**
@@ -119,9 +120,11 @@ struct spm_partition_runtime_data_t {
 struct tfm_conn_handle_t {
     void *rhandle;                      /* Reverse handle value              */
     uint32_t status;                    /*
-                                         * Status of handle, two valid options:
-                                         * TFM_HANDLE_STATUS_ACTIVE and
-                                         * TFM_HANDLE_STATUS_IDLE
+                                         * Status of handle, three valid
+                                         * options:
+                                         * TFM_HANDLE_STATUS_ACTIVE,
+                                         * TFM_HANDLE_STATUS_IDLE and
+                                         * TFM_HANDLE_STATUS_CONNECT_ERROR
                                          */
     int32_t client_id;                  /*
                                          * Partition ID of the sender of the

@@ -151,6 +151,15 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
     }
 
     /*
+     * Return PSA_ERROR_PROGRAMMER_ERROR immediately for the connection
+     * has been terminated by the RoT Service.
+     */
+    if (((struct tfm_conn_handle_t *)handle)->status ==
+                                              TFM_HANDLE_STATUS_CONNECT_ERROR) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /*
      * Read client invecs from the wrap input vector. It is a fatal error
      * if the memory reference for the wrap input vector is invalid or not
      * readable.
@@ -274,7 +283,7 @@ void tfm_psa_close(psa_handle_t handle, bool ns_caller)
     }
 
     /* It is a fatal error if the connection is currently handling a request. */
-    if(((struct tfm_conn_handle_t *)handle)->status ==
+    if (((struct tfm_conn_handle_t *)handle)->status ==
                                                      TFM_HANDLE_STATUS_ACTIVE) {
         tfm_core_panic();
     }

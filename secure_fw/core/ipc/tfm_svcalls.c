@@ -691,7 +691,6 @@ static void tfm_svcall_psa_reply(uint32_t *args)
         if (msg->msg.type >= PSA_IPC_CALL) {
             /* Reply to a request message. Return values are based on status */
             ret = status;
-
             /*
              * The total number of bytes written to a single parameter must be
              * reported to the client by updating the len member of the
@@ -704,8 +703,13 @@ static void tfm_svcall_psa_reply(uint32_t *args)
         }
     }
 
-    ((struct tfm_conn_handle_t *)(msg->handle))->status =
+    if (ret == PSA_ERROR_PROGRAMMER_ERROR) {
+        ((struct tfm_conn_handle_t *)(msg->handle))->status =
+                                                TFM_HANDLE_STATUS_CONNECT_ERROR;
+    } else {
+        ((struct tfm_conn_handle_t *)(msg->handle))->status =
                                                          TFM_HANDLE_STATUS_IDLE;
+    }
 
     if (is_tfm_rpc_msg(msg)) {
         tfm_rpc_client_call_reply(NULL, ret);
