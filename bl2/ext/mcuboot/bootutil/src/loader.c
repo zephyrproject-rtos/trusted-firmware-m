@@ -668,7 +668,7 @@ boot_status_source(struct boot_loader_state *state)
 }
 
 /*
- * Slots are compatible when all sectors that store upto to size of the image
+ * Slots are compatible when all sectors that store up to to size of the image
  * round up to sector size, in both slot's are able to fit in the scratch
  * area, and have sizes that are a multiple of each other (powers of two
  * presumably!).
@@ -680,7 +680,9 @@ boot_slots_compatible(struct boot_loader_state *state)
     size_t num_sectors_secondary;
     size_t sz0, sz1;
     size_t primary_slot_sz, secondary_slot_sz;
+#ifndef MCUBOOT_OVERWRITE_ONLY
     size_t scratch_sz;
+#endif
     size_t i, j;
     int8_t smaller;
 
@@ -692,7 +694,9 @@ boot_slots_compatible(struct boot_loader_state *state)
         return 0;
     }
 
+#ifndef MCUBOOT_OVERWRITE_ONLY
     scratch_sz = boot_scratch_area_size(state);
+#endif
 
     /*
      * The following loop scans all sectors in a linear fashion, assuring that
@@ -735,6 +739,7 @@ boot_slots_compatible(struct boot_loader_state *state)
             smaller = 2;
             j++;
         }
+#ifndef MCUBOOT_OVERWRITE_ONLY
         if (sz0 == sz1) {
             primary_slot_sz += sz0;
             secondary_slot_sz += sz1;
@@ -748,6 +753,7 @@ boot_slots_compatible(struct boot_loader_state *state)
             }
             smaller = sz0 = sz1 = 0;
         }
+#endif
     }
 
     if ((i != num_sectors_primary) ||
