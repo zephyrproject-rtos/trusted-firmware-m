@@ -159,7 +159,7 @@ SECTIONS
         {{pattern}}(.rodata*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_LD_ATTR_FN)
+        *({{manifest.manifest.name}}_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$${{manifest.manifest.name}}_LINKER$$RO$$Base = ADDR(.{{manifest.manifest.name}}_LINKER);
