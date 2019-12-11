@@ -51,10 +51,13 @@ struct client_call_params_t {
  * handle_req() - Handle PSA client call request from NSPE
  * reply()      - Reply PSA client call return result to NSPE. The parameter
  *                owner identifies the owner of the PSA client call.
+ * get_caller_data() - Get the private data of NSPE client from mailbox to
+ *                     identify the PSA client call.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);
     void (*reply)(const void *owner, int32_t ret);
+    const void * (*get_caller_data)(int32_t client_id);
 };
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -228,12 +228,15 @@ int32_t tfm_mailbox_handle_msg(void)
             continue;
         }
 
-        /*
-         * Although SPE mailbox message handle is set, it is not used currently
-         * since multiple ongoing NSPE PSA client calls are not supported yet.
-         */
         get_spe_mailbox_msg_handle(idx,
                                    &spe_mailbox_queue.queue[idx].msg_handle);
+
+        /*
+         * Set the current slot index under processing.
+         * The value is used in mailbox_get_caller_data() to identify the
+         * mailbox queue slot.
+         */
+        spe_mailbox_queue.cur_proc_slot_idx = idx;
 
         result = tfm_mailbox_dispatch(msg_ptr->call_type, &msg_ptr->params,
                                       msg_ptr->client_id, &psa_ret);
@@ -241,6 +244,9 @@ int32_t tfm_mailbox_handle_msg(void)
             mailbox_clean_queue_slot(idx);
             continue;
         }
+
+        /* Clean up the current slot index under processing */
+        spe_mailbox_queue.cur_proc_slot_idx = NUM_MAILBOX_QUEUE_SLOT;
 
         if ((msg_ptr->call_type == MAILBOX_PSA_FRAMEWORK_VERSION) ||
             (msg_ptr->call_type == MAILBOX_PSA_VERSION)) {
@@ -345,10 +351,26 @@ static void mailbox_reply(const void *owner, int32_t ret)
     (void)tfm_mailbox_reply_msg(handle, ret);
 }
 
+/* RPC get_caller_data() callback */
+static const void *mailbox_get_caller_data(int32_t client_id)
+{
+    uint8_t idx;
+
+    (void)client_id;
+
+    idx = spe_mailbox_queue.cur_proc_slot_idx;
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        return (const void *)&spe_mailbox_queue.queue[idx].msg_handle;
+    }
+
+    return NULL;
+}
+
 /* Mailbox specific operations callback for TF-M RPC */
 static const struct tfm_rpc_ops_t mailbox_rpc_ops = {
     .handle_req = mailbox_handle_req,
     .reply      = mailbox_reply,
+    .get_caller_data = mailbox_get_caller_data,
 };
 
 int32_t tfm_mailbox_init(void)
