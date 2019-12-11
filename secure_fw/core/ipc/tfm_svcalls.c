@@ -690,7 +690,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     }
 
     if (is_tfm_rpc_msg(msg)) {
-        tfm_rpc_client_call_reply(NULL, ret);
+        tfm_rpc_client_call_reply(msg, ret);
     } else {
         tfm_event_wake(&msg->ack_evnt, ret);
     }

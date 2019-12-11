@@ -17,6 +17,7 @@
 #include "tfm_spm_hal.h"
 #include "spm_api.h"
 #include "spm_db.h"
+#include "tfm_api.h"
 #include "tfm_core_mem_check.h"
 #include "tfm_internal_defines.h"
 #include "tfm_wait.h"
@@ -398,6 +399,11 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     /* For connected handle, set rhandle to every message */
     if (handle != PSA_NULL_HANDLE) {
         msg->msg.rhandle = tfm_spm_get_rhandle(service, handle);
+    }
+
+    /* Set the private data of NSPE client caller in multi-core topology */
+    if (TFM_CLIENT_ID_IS_NS(client_id)) {
+        tfm_rpc_set_caller_data(msg, client_id);
     }
 }
 

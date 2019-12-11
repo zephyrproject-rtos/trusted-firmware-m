@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,6 +24,13 @@ struct tfm_msg_body_t {
                                      * Save caller outvec pointer for
                                      * write length update
                                      */
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+    const void *caller_data;        /*
+                                     * Pointer to the private data of the caller
+                                     * It identifies the NSPE PSA client calls
+                                     * in multi-core topology
+                                     */
+#endif
     struct tfm_msg_body_t *next;    /* List operators                   */
 };
 

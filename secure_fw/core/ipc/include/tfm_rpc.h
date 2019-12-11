@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -193,6 +193,15 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
     return false;
 }
 
+/*
+ * \brief Set the private data of the NS caller in \ref msg_body_t, to identify
+ *        the caller after PSA client call is compeleted.
+ *
+ * \param[in] msg           The address of \ref msg_body_t structure
+ * \param[in] client_id     The client ID of the NS caller.
+ */
+void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
+
 #else /* TFM_MULTI_CORE_TOPOLOGY */
 
 /* RPC is only available in multi-core scenario */
@@ -201,6 +210,8 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
 #define tfm_rpc_client_call_handler()           do {} while (0)
 
 #define tfm_rpc_client_call_reply(owner, ret)   do {} while (0)
+
+#define tfm_rpc_set_caller_data(msg, client_id) do {} while (0)
 
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
 #endif /* __TFM_RPC_H__ */
