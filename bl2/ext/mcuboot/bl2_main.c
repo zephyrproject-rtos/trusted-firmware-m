@@ -28,7 +28,7 @@
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
 #include "bl2/include/boot_hal.h"
-#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
+#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
 #include "uart_stdout.h"
 #endif
 #if defined(CRYPTO_HW_ACCELERATOR) || \
@@ -134,7 +134,7 @@ static void do_boot(struct boot_rsp *rsp)
         BOOT_LOG_ERR("Error while uninitializing Flash Interface");
     }
 
-#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
+#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
     stdio_uninit();
 #endif
 
@@ -166,7 +166,7 @@ int main(void)
     __set_MSPLIM(msp_stack_bottom);
 #endif
 
-#if BOOT_LOG_LEVEL > BOOT_LOG_LEVEL_OFF
+#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
     stdio_init();
 #endif
 

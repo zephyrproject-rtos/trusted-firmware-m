@@ -211,7 +211,7 @@ endif()
 #Configure log level for MCUBoot.
 get_property(_log_levels CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS)
 list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
-target_compile_definitions(${PROJECT_NAME} PRIVATE BOOT_LOG_LEVEL=${LOG_LEVEL_ID})
+target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_LOG_LEVEL=${LOG_LEVEL_ID})
 
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
