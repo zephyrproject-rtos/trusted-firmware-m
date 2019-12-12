@@ -8,13 +8,18 @@
 #include "its_s_tests.h"
 #include "psa/internal_trusted_storage.h"
 #include "test/framework/test_framework_helpers.h"
+#include "test/test_services/tfm_secure_client_2/tfm_secure_client_2_api.h"
 #include "../its_tests_common.h"
 #include "tfm_memory_utils.h"
+
+/* UID to test partition access control */
+#define TEST_UID_ACCESS_CONTROL 42U
 
 /* List of tests */
 static void tfm_its_test_2020(struct test_result_t *ret);
 static void tfm_its_test_2021(struct test_result_t *ret);
 static void tfm_its_test_2022(struct test_result_t *ret);
+static void tfm_its_test_2023(struct test_result_t *ret);
 
 static struct test_t psa_its_s_tests[] = {
     {&tfm_its_test_common_001, "TFM_ITS_TEST_2001",
@@ -61,6 +66,8 @@ static struct test_t psa_its_s_tests[] = {
      "Get interface with invalid data lengths and offsets"},
     {&tfm_its_test_2022, "TFM_ITS_TEST_2022",
      "Get info interface with NULL info pointer"},
+    {&tfm_its_test_2023, "TFM_ITS_TEST_2023",
+     "Attempt to get a UID set by a different partition"},
 };
 
 void register_testsuite_s_psa_its_interface(struct test_suite_t *p_test_suite)
@@ -225,6 +232,43 @@ static void tfm_its_test_2022(struct test_result_t *ret)
         return;
     }
 #endif
+
+    /* Call remove to clean up storage for the next test */
+    status = psa_its_remove(uid);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Remove should not fail with valid UID");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+/**
+ * \brief Attempt to get a UID set by a different partition.
+ *
+ * \param[out] ret  Test result
+ */
+static void tfm_its_test_2023(struct test_result_t *ret)
+{
+    psa_status_t status;
+    const psa_storage_uid_t uid = TEST_UID_ACCESS_CONTROL;
+
+    /* Set the UID from this partition's context */
+    status = psa_its_set(uid, WRITE_DATA_SIZE, WRITE_DATA,
+                         PSA_STORAGE_FLAG_NONE);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Set should not fail");
+        return;
+    }
+
+    /* Attempt to get the UID from the Secure Client 2 partition */
+    status = tfm_secure_client_2_call_test(
+                                         TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL,
+                                         &uid, sizeof(uid));
+    if (status != PSA_ERROR_DOES_NOT_EXIST) {
+        TEST_FAIL("Get should not succeed from a different partition");
+        return;
+    }
 
     /* Call remove to clean up storage for the next test */
     status = psa_its_remove(uid);

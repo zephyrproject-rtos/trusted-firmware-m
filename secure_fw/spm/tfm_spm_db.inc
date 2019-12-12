@@ -543,6 +543,13 @@ static int32_t dependencies_TFM_SP_SST_TEST[] =
 };
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+static int32_t dependencies_TFM_SP_SECURE_CLIENT_2[] =
+{
+    TFM_ITS_GET_SID,
+};
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 /**************************************************************************/
 /** The static data of the partition list */
 /**************************************************************************/
@@ -784,8 +791,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_secure_client_2_init,
-        .dependencies_num     = 0,
-        .p_dependencies       = NULL,
+        .dependencies_num     = 1,
+        .p_dependencies       = dependencies_TFM_SP_SECURE_CLIENT_2,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 

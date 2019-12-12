@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+#define TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL 1001
+
 /**
  * \brief Calls the test function with the supplied ID within the execution
  *        context of the Secure Client 2 partition and returns the resulting

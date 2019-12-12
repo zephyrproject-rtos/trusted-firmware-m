@@ -31,6 +31,7 @@
     }
   ],
   "dependencies": [
+    "TFM_ITS_GET"
   ],
   "linker_pattern": {
     "object_list": [

@@ -5,6 +5,9 @@
  *
  */
 
+#include "tfm_secure_client_2_api.h"
+#include "psa/internal_trusted_storage.h"
+
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_secure_client_2.h"
@@ -12,10 +15,29 @@
 #include "psa/client.h"
 #endif
 
+static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
+                                                         size_t arg_len)
+{
+    psa_storage_uid_t uid;
+    size_t p_data_length;
+    uint8_t data[1];
+
+    if (arg_len != sizeof(uid)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    uid = *((psa_storage_uid_t *)arg);
+
+    /* Attempt to get one byte from the UID and return the resulting status */
+    return psa_its_get(uid, 0, sizeof(data), data, &p_data_length);
+}
+
 static psa_status_t secure_client_2_dispatch(int32_t id, const void *arg,
                                              size_t arg_len)
 {
     switch (id) {
+    case TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL:
+        return secure_client_2_test_its_access_ctrl(arg, arg_len);
     default:
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
