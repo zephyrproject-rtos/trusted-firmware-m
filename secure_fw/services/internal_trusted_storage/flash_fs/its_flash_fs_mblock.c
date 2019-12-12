@@ -977,11 +977,11 @@ psa_status_t its_flash_fs_mblock_reset_metablock(void)
      */
     block_meta.data_start = 0;
     block_meta.free_size = ITS_BLOCK_SIZE;
-    for (i = ITS_INIT_DBLOCK_START; i < ITS_NUM_DEDICATED_DBLOCKS; i++) {
+    for (i = 0; i < ITS_NUM_DEDICATED_DBLOCKS; i++) {
         /* If a flash error is detected, the code erases the rest
          * of the blocks anyway to remove all data stored in them.
          */
-        err |= its_flash_erase_block(i);
+        err |= its_flash_erase_block(i + ITS_INIT_DBLOCK_START);
     }
 
     /* If an error is detected while erasing the flash, then return a

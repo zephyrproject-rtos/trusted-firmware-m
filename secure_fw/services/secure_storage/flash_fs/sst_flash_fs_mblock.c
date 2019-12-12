@@ -1040,11 +1040,11 @@ psa_ps_status_t sst_flash_fs_mblock_reset_metablock(void)
      */
     block_meta.data_start = 0;
     block_meta.free_size = SST_BLOCK_SIZE;
-    for (i = SST_INIT_DBLOCK_START; i < SST_NUM_DEDICATED_DBLOCKS; i++) {
+    for (i = 0; i < SST_NUM_DEDICATED_DBLOCKS; i++) {
         /* If a flash error is detected, the code erases the rest
          * of the blocks anyway to remove all data stored in them.
          */
-        err |= sst_flash_erase_block(i);
+        err |= sst_flash_erase_block(i + SST_INIT_DBLOCK_START);
     }
 
     /* If an error is detected while erasing the flash, then return a
