@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
+ * Git SHA of the original version: 61fd888a7f4d741714553f36839dd49fb0065731
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 

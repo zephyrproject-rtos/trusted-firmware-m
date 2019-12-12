@@ -79,6 +79,7 @@ list(APPEND ALL_SRC_C
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_rsa.c"
+		"${MCUBOOT_DIR}/bootutil/src/tlv.c"
 		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
 		"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
 		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"

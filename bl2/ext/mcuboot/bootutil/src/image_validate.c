@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
+ * Git SHA of the original version: 61fd888a7f4d741714553f36839dd49fb0065731
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -276,7 +276,8 @@ bootutil_img_validate(int image_index,
                       int seed_len, uint8_t *out_hash)
 {
     uint32_t off;
-    uint32_t end;
+    uint16_t len;
+    uint8_t type;
     int sha256_valid = 0;
 #ifdef EXPECTED_SIG_TLV
     int valid_signature = 0;
@@ -286,7 +287,7 @@ bootutil_img_validate(int image_index,
     uint8_t key_buf[SIG_BUF_SIZE + 24];
 #endif
 #endif
-    struct image_tlv tlv;
+    struct image_tlv_iter it;
     uint8_t buf[SIG_BUF_SIZE];
     uint8_t hash[32] = {0};
     uint32_t security_cnt;
@@ -304,7 +305,7 @@ bootutil_img_validate(int image_index,
         memcpy(out_hash, hash, 32);
     }
 
-    rc = boot_find_tlv_offs(hdr, fap, &off, &end);
+    rc = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_ANY, false);
     if (rc) {
         return rc;
     }
@@ -313,22 +314,23 @@ bootutil_img_validate(int image_index,
      * Traverse through all of the TLVs, performing any checks we know
      * and are able to do.
      */
-    while (off < end) {
-        rc = LOAD_IMAGE_DATA(hdr, fap, off, &tlv, sizeof(tlv));
-        if (rc) {
-            return rc;
+    while (true) {
+        rc = bootutil_tlv_iter_next(&it, &off, &len, &type);
+        if (rc < 0) {
+            return -1;
+        } else if (rc > 0) {
+            break;
         }
 
-        if (tlv.it_type == IMAGE_TLV_SHA256) {
+        if (type == IMAGE_TLV_SHA256) {
             /*
              * Verify the SHA256 image hash.  This must always be
              * present.
              */
-            if (tlv.it_len != sizeof(hash)) {
+            if (len != sizeof(hash)) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
-                                 buf, sizeof(hash));
+            rc = LOAD_IMAGE_DATA(hdr, fap, off, buf, sizeof(hash));
             if (rc) {
                 return rc;
             }
@@ -339,72 +341,70 @@ bootutil_img_validate(int image_index,
             sha256_valid = 1;
 #ifdef EXPECTED_SIG_TLV
 #ifndef MCUBOOT_HW_KEY
-        } else if (tlv.it_type == IMAGE_TLV_KEYHASH) {
+        } else if (type == IMAGE_TLV_KEYHASH) {
             /*
              * Determine which key we should be checking.
              */
-            if (tlv.it_len > 32) {
+            if (len > 32) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv), buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(hdr, fap, off, buf, len);
             if (rc) {
                 return rc;
             }
-            key_id = bootutil_find_key(buf, tlv.it_len);
+            key_id = bootutil_find_key(buf, len);
             /*
              * The key may not be found, which is acceptable.  There
              * can be multiple signatures, each preceded by a key.
              */
 #else /* MCUBOOT_HW_KEY */
-        } else if (tlv.it_type == IMAGE_TLV_KEY) {
+        } else if (type == IMAGE_TLV_KEY) {
             /*
              * Determine which key we should be checking.
              */
-            if (tlv.it_len > sizeof(key_buf)) {
+            if (len > sizeof(key_buf)) {
                 return -1;
             }
-            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
-                                 key_buf, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(hdr, fap, off, key_buf, len);
             if (rc) {
                 return rc;
             }
-            key_id = bootutil_find_key(image_index, key_buf, tlv.it_len);
+            key_id = bootutil_find_key(image_index, key_buf, len);
             /*
              * The key may not be found, which is acceptable.  There
              * can be multiple signatures, each preceded by a key.
              */
 #endif /* MCUBOOT_HW_KEY */
-        } else if (tlv.it_type == EXPECTED_SIG_TLV) {
+        } else if (type == EXPECTED_SIG_TLV) {
             /* Ignore this signature if it is out of bounds. */
-            if (key_id >= 0 && key_id < bootutil_key_cnt) {
-                if (!EXPECTED_SIG_LEN(tlv.it_len) || tlv.it_len > sizeof(buf)) {
-                    return -1;
-                }
-                rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
-                                     buf, tlv.it_len);
-                if (rc) {
-                    return -1;
-                }
-                rc = bootutil_verify_sig(hash, sizeof(hash), buf, tlv.it_len,
-                                         key_id);
-                if (rc == 0) {
-                    valid_signature = 1;
-                }
+            if (key_id < 0 || key_id >= bootutil_key_cnt) {
+                key_id = -1;
+                continue;
+            }
+            if (!EXPECTED_SIG_LEN(len) || len > sizeof(buf)) {
+                return -1;
+            }
+            rc = LOAD_IMAGE_DATA(hdr, fap, off, buf, len);
+            if (rc) {
+                return -1;
+            }
+            rc = bootutil_verify_sig(hash, sizeof(hash), buf, len, key_id);
+            if (rc == 0) {
+                valid_signature = 1;
             }
             key_id = -1;
 #endif
-        } else if (tlv.it_type == IMAGE_TLV_SEC_CNT) {
+        } else if (type == IMAGE_TLV_SEC_CNT) {
             /*
              * Verify the image's security counter.
              * This must always be present.
              */
-            if (tlv.it_len != sizeof(img_security_cnt)) {
+            if (len != sizeof(img_security_cnt)) {
                 /* Security counter is not valid. */
                 return -1;
             }
 
-            rc = LOAD_IMAGE_DATA(hdr, fap, off + sizeof(tlv),
-                                 &img_security_cnt, tlv.it_len);
+            rc = LOAD_IMAGE_DATA(hdr, fap, off, &img_security_cnt, len);
             if (rc) {
                 return rc;
             }
@@ -424,14 +424,6 @@ bootutil_img_validate(int image_index,
 
             /* The image's security counter has been successfully verified. */
             security_counter_valid = 1;
-        }
-
-        /* Avoid integer overflow. */
-        if (boot_add_uint32_overflow_check(off, (sizeof(tlv) + tlv.it_len))) {
-            /* Potential overflow. */
-            break;
-        } else {
-            off += sizeof(tlv) + tlv.it_len;
         }
     }
 

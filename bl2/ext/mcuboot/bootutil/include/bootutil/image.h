@@ -20,7 +20,7 @@
 /*
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
- * Git SHA of the original version: 4f0ea747c314547daa6b6299ccbd77ae4dee6758
+ * Git SHA of the original version: 61fd888a7f4d741714553f36839dd49fb0065731
  * Modifications are Copyright (c) 2018-2019 Arm Limited.
  */
 
@@ -28,6 +28,7 @@
 #define H_IMAGE_
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +73,7 @@ struct flash_area;
 #define IMAGE_TLV_DEPENDENCY        0x40   /* Image depends on other image */
 #define IMAGE_TLV_SEC_CNT           0x50   /* security counter */
 #define IMAGE_TLV_BOOT_RECORD       0x60   /* measured boot record */
+#define IMAGE_TLV_ANY               0xff   /* Used to iterate over all TLV */
 
 #define IMAGE_VER_MAJOR_LENGTH      8
 #define IMAGE_VER_MINOR_LENGTH      8
@@ -129,10 +131,26 @@ int bootutil_img_validate(int image_index,
                           uint8_t *tmp_buf, uint32_t tmp_buf_sz,
                           uint8_t *seed, int seed_len, uint8_t *out_hash);
 
+struct image_tlv_iter {
+    const struct image_header *hdr;
+    const struct flash_area *fap;
+    uint8_t type;
+    bool prot;
+    uint32_t prot_len;
+    uint32_t tlv_off;
+    uint32_t tlv_end;
+};
+
+int bootutil_tlv_iter_begin(struct image_tlv_iter *it,
+                            const struct image_header *hdr,
+                            const struct flash_area *fap, uint8_t type,
+                            bool prot);
+int bootutil_tlv_iter_next(struct image_tlv_iter *it, uint32_t *off,
+                           uint16_t *len, uint8_t *type);
+
 int32_t bootutil_get_img_security_cnt(struct image_header *hdr,
                                       const struct flash_area *fap,
                                       uint32_t *security_cnt);
-
 
 #ifdef __cplusplus
 }
