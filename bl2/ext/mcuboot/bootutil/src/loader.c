@@ -2672,9 +2672,11 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
 
     static boot_sector_t primary_slot_sectors[BOOT_MAX_IMG_SECTORS];
     static boot_sector_t secondary_slot_sectors[BOOT_MAX_IMG_SECTORS];
+    static boot_sector_t scratch_sectors[BOOT_MAX_IMG_SECTORS];
 
-    BOOT_IMG(state, BOOT_PRIMARY_SLOT).sectors = &primary_slot_sectors[0];
-    BOOT_IMG(state, BOOT_SECONDARY_SLOT).sectors = &secondary_slot_sectors[0];
+    BOOT_IMG(state, BOOT_PRIMARY_SLOT).sectors = primary_slot_sectors;
+    BOOT_IMG(state, BOOT_SECONDARY_SLOT).sectors = secondary_slot_sectors;
+    state->scratch.sectors = scratch_sectors;
 
     /* Open boot_data image areas for the duration of this call. */
     for (i = 0; i < BOOT_NUM_SLOTS; i++) {
