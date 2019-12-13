@@ -33,6 +33,8 @@ static void tfm_ipc_test_1008(struct test_result_t *ret);
 static void tfm_ipc_test_1009(struct test_result_t *ret);
 #endif
 
+static void tfm_ipc_test_1010(struct test_result_t *ret);
+
 static struct test_t ipc_veneers_tests[] = {
     {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
      "Get PSA framework version", {0}},
@@ -58,6 +60,8 @@ static struct test_t ipc_veneers_tests[] = {
     {&tfm_ipc_test_1009, "TFM_IPC_TEST_1009",
      "Call APP RoT memory check test service", {0}},
 #endif
+    {&tfm_ipc_test_1010, "TFM_IPC_TEST_1010",
+     "Test psa_call with the status of PSA_ERROR_PROGRAMMER_ERROR", {0}},
 };
 
 void register_testsuite_ns_ipc_interface(struct test_suite_t *p_test_suite)
@@ -321,3 +325,38 @@ static void tfm_ipc_test_1009(struct test_result_t *ret)
     psa_close(handle);
 }
 #endif
+
+/**
+ * \brief Call IPC_SERVICE_TEST_CLIENT_PREGRAMMER_ERROR RoT Service to
+ *  test psa_call with the status of PSA_ERROR_PROGRAMMER_ERROR.
+ */
+static void tfm_ipc_test_1010(struct test_result_t *ret)
+{
+    psa_handle_t handle;
+    psa_status_t status;
+    handle = psa_connect(IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SID,
+                         IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_VERSION);
+    if (handle > 0) {
+        TEST_LOG("Connect success!\r\n");
+    } else {
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
+        ret->val = TEST_FAILED;
+        return;
+    }
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
+    if (status == PSA_ERROR_PROGRAMMER_ERROR) {
+        TEST_LOG("The first time call success!\r\n");
+    } else {
+        TEST_LOG("The first time call failed!\r\n");
+        ret->val = TEST_FAILED;
+    }
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
+    if (status == PSA_ERROR_PROGRAMMER_ERROR) {
+        TEST_LOG("The second time call success!\r\n");
+    } else {
+        TEST_LOG("The second time call failed!\r\n");
+        ret->val = TEST_FAILED;
+    }
+
+    psa_close(handle);
+}

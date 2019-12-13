@@ -403,6 +403,15 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+    {
+        .name = "IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR",
+        .partition_id = TFM_SP_IPC_SERVICE_TEST,
+        .signal = IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL,
+        .sid = 0x0000F084,
+        .non_secure_client = true,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
@@ -781,6 +790,13 @@ struct tfm_spm_service_t service[] =
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     /******** TFM_SP_IPC_SERVICE_TEST ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
     {
         .service_db = NULL,
         .partition = NULL,

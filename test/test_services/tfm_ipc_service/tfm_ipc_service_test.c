@@ -229,6 +229,38 @@ static void ipc_service_app_access_psa_mem(void)
 }
 #endif
 
+static void ipc_service_programmer_error(void)
+{
+    psa_msg_t msg;
+    psa_status_t r;
+
+    psa_get(IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL, &msg);
+    switch (msg.type) {
+    case PSA_IPC_CONNECT:
+        if (service_in_use & IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL) {
+            r = PSA_ERROR_CONNECTION_REFUSED;
+        } else {
+            service_in_use |= IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL;
+            r = PSA_SUCCESS;
+        }
+        psa_reply(msg.handle, r);
+        break;
+    case PSA_IPC_CALL:
+        psa_reply(msg.handle, PSA_ERROR_PROGRAMMER_ERROR);
+        break;
+    case PSA_IPC_DISCONNECT:
+        assert((service_in_use
+                & IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL) != 0);
+        service_in_use &= ~IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL;
+        psa_reply(msg.handle, PSA_SUCCESS);
+        break;
+    default:
+        /* cannot get here? [broken SPM]. TODO*/
+        tfm_abort();
+        break;
+    }
+}
+
 /* Test thread */
 void ipc_service_test_main(void *param)
 {
@@ -250,6 +282,8 @@ void ipc_service_test_main(void *param)
         } else if (signals & IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM_SIGNAL) {
             ipc_service_app_access_psa_mem();
 #endif
+        } else if (signals & IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR_SIGNAL) {
+            ipc_service_programmer_error();
         } else {
             /* Should not come here */
             tfm_abort();

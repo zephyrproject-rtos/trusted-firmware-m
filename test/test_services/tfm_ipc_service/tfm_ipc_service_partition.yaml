@@ -42,6 +42,13 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
+    },
+    {
+      "name": "IPC_SERVICE_TEST_CLIENT_PROGRAMMER_ERROR",
+      "sid": "0x0000F084",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "linker_pattern": {
