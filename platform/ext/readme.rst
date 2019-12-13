@@ -60,11 +60,18 @@ To configure the CC312 at build time, a few cmake arguments can be specified.
    Provisioning **can not** be reversed, and data in the OTP memory **can not**
    be changed once set.
 
+template
+--------
+This directory contains platform-independent dummy implementations of the
+interfaces in ``platform/include``. These implementations can be built directly
+for initial testing of a platform port, or used as a basic template for a real
+implementation for a particular target. They **must not** be used in production
+systems.
+
 other
 -----
-This folder also contains stdout redirection to UART, a temporary memory mapped
-flash implementation for the bootloader and ``tfm_mbedcrypto_config.h`` for all
-the targets.
+This folder also contains stdout redirection to UART and
+``tfm_mbedcrypto_config.h`` for all the targets.
 
 drivers
 =======
