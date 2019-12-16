@@ -7,13 +7,13 @@ Design proposal process
 
 Purpose and Content
 -------------------
-This document describes the steps of changing Trusted Firmware design. It
+This document describes the steps of adding/changing Trusted Firmware design. It
 specifies:
 
-  - the documentation format to be used
-  - the information which shall be captured
-  - the steps of the process
-  - and the location where the information shall be captured during the process.
+  - The documentation format to be used.
+  - The information which shall be captured.
+  - The steps of the process.
+  - The location where the information shall be captured during the process.
 
 General
 -------
@@ -49,9 +49,19 @@ Example document fragment::
 Design documents are kept in three different sections of the documentation
 reflecting the status of the document. The status of the document determines
 the section it is in. Open (*Draft* and *Detailed* status) and accepted design
-documents shall be put to the ``docs/design_documents``
-directory and rejected documents to the ``docs/design_documents/rejected``
-directory.
+documents shall be put to the ``docs/design_documents`` directory.
+
+.. important::
+  - 'Author' and 'Organization' can be *OPTIONAL* but at least one of them is
+    *MANDATORY*.
+  - 'Contact' is *MANDATORY* and must be valid for contacting with 'Author'
+    or 'Organization'.
+  - 'Status' is *OPTIONAL* if the design document is managed under a version
+    control tool. In this 'Status' field not available case, a guideline can be:
+
+    - No review comments given design is a *Draft* design.
+    - Positive review comments given design is a *Detailed* design.
+    - Merged design is an *Accepted* design.
 
 Preparation
 -------------
@@ -67,8 +77,8 @@ Process steps
 -------------
 
 - Write the design proposal in the format that is described in this document
-  with the status set to *Draft*. Put it to the ``docs/design_documents``
-  directory and create a pull request.
+  with the *Status* set to *Draft* if *Status* field is provided. Put it to the
+  ``docs/design_documents`` directory and create a pull request.
 - Start an e-mail thread on the
   `TF-M mailing list <mailto:tf-m@lists.trustedfirmware.org>`_ for discussing
   the proposal.
@@ -76,17 +86,14 @@ Process steps
   change, rework it according to the feedbacks and identify members who would
   like to participate in the detailed review.
 - When the "short list" of members who are willing to participate in the
-  detailed review is established, set the *Status* field to *Detailed* and
-  push the change to Gerrit.
+  detailed review is established, set the *Status* field to *Detailed* if
+  *Status* field is provided and push the change to Gerrit.
 - Add the members of the "short list" to the Gerrit review as reviewers.
 - The detailed discussion then takes place in the Gerrit review and gets
   recorded there.
   Additional changes are submitted as new commits to the review.
-- When the proposal is accepted, the status field is set to *Accepted*, the
-  change updated and merged.
-- If at any point the proposal is rejected its status field is set to
-  *Rejected*, and the document is moved to the *rejected design documents*
-  section.
+- When the proposal is accepted and *Status* field is provided, the *Status*
+  field is set to *Accepted* and update the change then get merged.
 
 .. uml::
 
@@ -108,7 +115,7 @@ Process steps
 
   start
   :Create first draft.in [[http://docutils.sourceforge.net/rst.html ReST format]];
-  :Set it's status to STATUS_DRAFT.;
+  :Set it's available 'Status' field to STATUS_DRAFT.;
 
   :Add your document under DRAFT_DIR.;
   :Create pull-request at GERRIT_LINK.;
@@ -122,7 +129,7 @@ Process steps
   }
 
   partition "Detailed review." {
-      :Set document status to STATUS_DETAILED.;
+      :Set available 'Status' field to STATUS_DETAILED.;
       :Add reviewers to pull request.;
 
       repeat
@@ -134,18 +141,16 @@ Process steps
       repeat while (Consensus reached?)
   }
 
-  if (Design is rejected?) then (YES_DECISION)
-      :Set document status to STATUS_REJECTED.;
-      :Move the document to REJECTED_DIR.;
-  else (NO_DECISION)
-      :Sets the document status to STATUS_ACCEPTED.;
+  if (Design is accepted?) then (STATUS_ACCEPTED)
+      :Sets available 'Status' field to STATUS_ACCEPTED.;
+      ://Submit// the pull-request.;
+  else (STATUS_REJECTED)
   endif
 
-  ://Submit// the pull-request.;
   stop
 
   @enduml
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
