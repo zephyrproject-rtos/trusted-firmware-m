@@ -20,6 +20,7 @@
 #include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
 #include "test/test_services/tfm_sst_test_service/psa_manifest/tfm_sst_test_service.h"
+#include "test/test_services/tfm_secure_client_2/psa_manifest/tfm_secure_client_2.h"
 #include "psa_manifest/pid.h"
 
 /* Definitions of the signals of the IRQs */

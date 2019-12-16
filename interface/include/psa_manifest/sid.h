@@ -130,6 +130,10 @@ extern "C" {
 #define TFM_SST_TEST_PREPARE_SID                                   (0x0000F0C0U)
 #define TFM_SST_TEST_PREPARE_VERSION                               (1U)
 
+/******** TFM_SP_SECURE_CLIENT_2 ********/
+#define TFM_SECURE_CLIENT_2_SID                                    (0x0000F0E0U)
+#define TFM_SECURE_CLIENT_2_VERSION                                (1U)
+
 #ifdef __cplusplus
 }
 #endif

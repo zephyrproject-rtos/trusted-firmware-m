@@ -60,6 +60,10 @@
 #define TFM_PARTITION_TFM_SP_SST_TEST_IRQ_COUNT 0
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+#define TFM_PARTITION_TFM_SP_SECURE_CLIENT_2_IRQ_COUNT 0
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
@@ -110,6 +114,10 @@ extern void tfm_irq_test_1_init(void);
 #ifdef TFM_PARTITION_TEST_SST
 extern void tfm_sst_test_init(void);
 #endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+extern void tfm_secure_client_2_init(void);
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 /**************************************************************************/
 /** Memory region declarations */
@@ -279,6 +287,19 @@ REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, $$Base);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, $$Limit);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 #endif /* defined(TFM_PSA_API) */
 
 #ifndef TFM_PSA_API
@@ -409,6 +430,15 @@ static uint32_t ctx_stack_TFM_SP_SST_TEST[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+static uint32_t ctx_stack_TFM_SP_SECURE_CLIENT_2[
+        (sizeof(struct interrupted_ctx_stack_frame_t) +
+            (TFM_PARTITION_TFM_SP_SECURE_CLIENT_2_IRQ_COUNT) * (
+                sizeof(struct interrupted_ctx_stack_frame_t) +
+                sizeof(struct handler_ctx_stack_frame_t)
+        )) / sizeof(uint32_t)];
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 
 uint32_t *ctx_stack_list[] =
 {
@@ -445,6 +475,9 @@ uint32_t *ctx_stack_list[] =
 #ifdef TFM_PARTITION_TEST_SST
     ctx_stack_TFM_SP_SST_TEST,
 #endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    ctx_stack_TFM_SP_SECURE_CLIENT_2,
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 };
 #endif /* !defined(TFM_PSA_API) */
 
@@ -473,6 +506,7 @@ static int32_t dependencies_TFM_SP_CORE_TEST[] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
 {
+    TFM_SECURE_CLIENT_2_SID,
     TFM_CRYPTO_SID,
     TFM_SST_SET_SID,
     TFM_SST_GET_SID,
@@ -670,7 +704,7 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_secure_client_service_init,
-        .dependencies_num     = 16,
+        .dependencies_num     = 17,
         .p_dependencies       = dependencies_TFM_SP_SECURE_TEST_PARTITION,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
@@ -738,6 +772,22 @@ const struct spm_partition_static_data_t static_data_list[] =
         .p_dependencies       = dependencies_TFM_SP_SST_TEST,
     },
 #endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    {
+#ifdef TFM_PSA_API
+        .psa_framework_version = 0x0100,
+#endif /* defined(TFM_PSA_API) */
+        .partition_id         = TFM_SP_SECURE_CLIENT_2,
+        .partition_flags      = SPM_PART_FLAG_IPC
+                              | SPM_PART_FLAG_APP_ROT
+                              ,
+        .partition_priority   = TFM_PRIORITY(NORMAL),
+        .partition_init       = tfm_secure_client_2_init,
+        .dependencies_num     = 0,
+        .p_dependencies       = NULL,
+    },
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 };
 
@@ -833,6 +883,10 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 #ifdef TFM_PARTITION_TEST_SST
     NULL,
 #endif /* TFM_PARTITION_TEST_SST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    NULL,
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 };
 
@@ -1034,6 +1088,21 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
     },
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    {
+        .code_start           = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Limit),
+    },
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 };
 #endif /* defined(TFM_PSA_API) */
 
@@ -1194,6 +1263,18 @@ static struct spm_partition_desc_t partition_list [] =
         .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_SST */
+
+    /* -----------------------------------------------------------------------*/
+    /* - Partition DB record for TFM_SP_SECURE_CLIENT_2 */
+    /* -----------------------------------------------------------------------*/
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    {
+    /* Runtime data */
+        .runtime_data             = {},
+        .static_data              = NULL,
+        .platform_data_list       = NULL,
+    },
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 };
 

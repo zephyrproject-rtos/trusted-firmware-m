@@ -48,7 +48,9 @@ endif()
 if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
 elseif (TFM_PARTITION_TEST_SECURE_SERVICES)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_secure_client_service/tfm_secure_client_service.c")
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_secure_client_service/tfm_secure_client_service.c"
+		"${CORE_TEST_DIR}/tfm_secure_client_2/tfm_secure_client_2.c"
+		"${CORE_TEST_DIR}/tfm_secure_client_2/tfm_secure_client_2_api.c")
 
 	list(APPEND ALL_SRC_C_NS "${CORE_TEST_DIR}/tfm_secure_client_service/tfm_secure_client_service_api.c")
 endif()

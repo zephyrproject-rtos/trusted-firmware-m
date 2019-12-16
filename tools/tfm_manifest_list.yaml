@@ -149,6 +149,17 @@
       "version_major": 0,
       "version_minor": 1,
       "pid": 268
+    },
+    {
+      "name": "TF-M Secure Client 2 Service",
+      "short_name": "TFM_SP_SECURE_CLIENT_2",
+      "manifest": "test/test_services/tfm_secure_client_2/tfm_secure_client_2.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 269
     }
   ]
 }

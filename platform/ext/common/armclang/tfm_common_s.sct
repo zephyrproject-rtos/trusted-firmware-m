@@ -153,6 +153,13 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_ENABLE_IRQ_TEST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    TFM_SP_SECURE_CLIENT_2_LINKER +0 ALIGN 32 {
+        *tfm_secure_client_2.* (+RO)
+        *(TFM_SP_SECURE_CLIENT_2_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -247,6 +254,19 @@ LR_CODE S_CODE_START {
     }
 #endif
 #endif /* TFM_ENABLE_IRQ_TEST */
+
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+    TFM_SP_SECURE_CLIENT_2_LINKER_DATA +0 ALIGN 32 {
+        *tfm_secure_client_2.* (+RW +ZI)
+        *(TFM_SP_SECURE_CLIENT_2_ATTR_RW)
+        *(TFM_SP_SECURE_CLIENT_2_ATTR_ZI)
+    }
+
+#if defined (TFM_PSA_API)
+    TFM_SP_SECURE_CLIENT_2_LINKER_STACK +0 ALIGN 128 EMPTY 0x180 {
+    }
+#endif
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
     /*
      * This empty, zero long execution region is here to mark the end address

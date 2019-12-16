@@ -37,6 +37,7 @@
     }
   ],
   "dependencies": [
+    "TFM_SECURE_CLIENT_2",
     "TFM_CRYPTO",
     "TFM_SST_SET",
     "TFM_SST_GET",

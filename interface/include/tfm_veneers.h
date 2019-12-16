@@ -137,6 +137,11 @@ psa_status_t tfm_spm_irq_test_1_execute_test_scenario_veneer(psa_invec *in_vec, 
 psa_status_t tfm_tfm_sst_test_prepare_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 #endif /* TFM_PARTITION_TEST_SST */
 
+#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+/******** TFM_SP_SECURE_CLIENT_2 ********/
+psa_status_t tfm_tfm_secure_client_2_call_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+
 #ifdef __cplusplus
 }
 #endif
