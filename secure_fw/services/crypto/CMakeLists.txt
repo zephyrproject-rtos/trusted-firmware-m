@@ -51,6 +51,9 @@ list(APPEND TFM_CRYPTO_C_DEFINES_LIST __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} __t
 
 if (CRYPTO_ENGINE_MBEDTLS)
   list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_ENGINE_MBEDTLS MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}")
+  if (DEFINED MBEDTLS_USER_CONFIG_FILE)
+	list(APPEND TFM_CRYPTO_C_DEFINES_LIST MBEDTLS_USER_CONFIG_FILE="${MBEDTLS_USER_CONFIG_FILE}")
+  endif()
 endif()
 
 #Add module configuration parameters in case they are provided during CMake configuration step
@@ -91,6 +94,10 @@ if (CRYPTO_ENGINE_MBEDTLS)
 	string(APPEND MBEDCRYPTO_C_FLAGS " ${MBEDCRYPTO_C_FLAGS_SERVICES}")
 	string(APPEND MBEDCRYPTO_C_FLAGS " -DMBEDTLS_CONFIG_FILE=\\\\\\\"${MBEDTLS_CONFIG_FILE}\\\\\\\""
 	                                 " -I${CMAKE_CURRENT_LIST_DIR}")
+	if ((DEFINED MBEDTLS_USER_CONFIG_FILE) AND (DEFINED MBEDTLS_USER_CONFIG_PATH))
+		string(APPEND MBEDCRYPTO_C_FLAGS " -DMBEDTLS_USER_CONFIG_FILE=\\\\\\\"${MBEDTLS_USER_CONFIG_FILE}\\\\\\\""
+		" -I${MBEDTLS_USER_CONFIG_PATH}")
+	endif()
 
 	#Build Mbed Crypto as external project.
 	#This ensures Mbed Crypto is built with exactly defined settings.
