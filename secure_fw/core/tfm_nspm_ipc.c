@@ -89,7 +89,9 @@ __attribute__((naked, section("SFN")))
 void tfm_nspm_thread_entry(void)
 {
     __ASM volatile(
+#ifndef __ICCARM__
         ".syntax unified         \n"
+#endif
         "mov      r4, r0         \n"
         "movs     r2, #1         \n" /* Clear Bit[0] for S to NS transition */
         "bics     r4, r2         \n"

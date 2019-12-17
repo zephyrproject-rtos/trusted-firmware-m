@@ -302,9 +302,7 @@ static enum tfm_status_e check_irq_partition_state(
 static struct iovec_args_t *get_iovec_args_stack_address(uint32_t partition_idx)
 {
     /* Save the iovecs on the common stack. */
-    return (struct iovec_args_t *)((uint8_t *)&REGION_NAME(Image$$,
-                                   TFM_SECURE_STACK, $$ZI$$Limit) -
-                                   sizeof(struct iovec_args_t));
+    return &REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
 }
 
 static enum tfm_status_e tfm_start_partition(
@@ -321,7 +319,6 @@ static enum tfm_status_e tfm_start_partition(
     uint32_t partition_psp, partition_psplim;
     uint32_t partition_state;
     uint32_t caller_partition_state;
-    uint32_t partition_flags;
     struct tfm_state_context_t *svc_ctx;
     uint32_t caller_partition_id;
     int32_t client_id;
@@ -344,7 +341,6 @@ static enum tfm_status_e tfm_start_partition(
     caller_part_data = tfm_spm_partition_get_runtime_data(caller_partition_idx);
     partition_state = curr_part_data->partition_state;
     caller_partition_state = caller_part_data->partition_state;
-    partition_flags = tfm_spm_partition_get_flags(partition_idx);
     caller_partition_id = tfm_spm_partition_get_partition_id(
                                                           caller_partition_idx);
 
@@ -361,8 +357,7 @@ static enum tfm_status_e tfm_start_partition(
      * as stack by the partitions starts at a lower address
      */
     partition_psp =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)-
-        sizeof(struct iovec_args_t);
+        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
     partition_psplim =
         (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 
@@ -472,7 +467,6 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
     uint32_t current_partition_idx =
             tfm_spm_partition_get_running_partition_idx();
     const struct spm_partition_runtime_data_t *curr_part_data, *ret_part_data;
-    uint32_t current_partition_flags;
     uint32_t return_partition_idx;
     uint32_t return_partition_flags;
     uint32_t psp = __get_PSP();
@@ -494,8 +488,6 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
     ret_part_data = tfm_spm_partition_get_runtime_data(return_partition_idx);
 
     return_partition_flags = tfm_spm_partition_get_flags(return_partition_idx);
-    current_partition_flags = tfm_spm_partition_get_flags(
-            current_partition_idx);
 
     tfm_secure_lock--;
 
@@ -509,14 +501,12 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
             (struct tfm_state_context_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
-        REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
+        REGION_DECLARE_T(Image$$, ARM_LIB_STACK, $$ZI$$Base, uint32_t)[];
         uint32_t psp_stack_bottom =
             (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
         tfm_arch_set_psplim(psp_stack_bottom);
 
-        iovec_args = (struct iovec_args_t *)
-            ((uint8_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit) -
-            sizeof(struct iovec_args_t));
+        iovec_args = &REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
 
         for (i = 0; i < curr_part_data->iovec_args.out_len; ++i) {
             curr_part_data->orig_outvec[i].len = iovec_args->out_vec[i].len;

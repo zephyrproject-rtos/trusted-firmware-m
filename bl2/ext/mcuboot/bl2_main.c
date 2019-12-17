@@ -71,10 +71,16 @@ struct arm_vector_table {
  *  - There are secrets in the memory: KDF parameter, symmetric key,
  *    manufacturer sensitive code/data, etc.
  */
+#if defined(__ICCARM__)
+#pragma required = boot_clear_bl2_ram_area
+#endif
+
 __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
 {
     __ASM volatile(
+#if !defined(__ICCARM__)
         ".syntax unified                 \n"
+#endif
         "mov     r7, r0                  \n"
         "bl      boot_clear_bl2_ram_area \n" /* Clear RAM before jump */
         "movs    r0, #0                  \n" /* Clear registers: R0-R12, */

@@ -17,7 +17,7 @@ endif()
 
 if(NOT DEFINED COMPILER)
 	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
-elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM"))
+elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM") AND (NOT ${COMPILER} STREQUAL "IARARM"))
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
@@ -82,7 +82,11 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	# core acts as secure core in multi-core scenario.
 	# leave CMSE_FLAGS undefined
 else()
-	set (CMSE_FLAGS "-mcmse")
+	if(${COMPILER} STREQUAL "IARARM")
+		set (CMSE_FLAGS "--cmse")
+	else()
+		set (CMSE_FLAGS "-mcmse")
+	endif()
 
 	# Clear multi-core test setting
 	set (TFM_MULTI_CORE_TEST OFF)
@@ -125,6 +129,27 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 		#wchar, and this generates linker time warnings. TF-M code does not use
 		#wchar, so the warning can be suppressed.
 		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Wl,-check-sections,-fatal-warnings,--gc-sections,--no-wchar-size-warning,--print-memory-usage --entry=Reset_Handler --specs=nano.specs)
+	endfunction()
+elseif(${COMPILER} STREQUAL "IARARM")
+	#Use any IARARM version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerIARARMXY.cmake
+	#must be present with a matching version.
+	include("Common/FindIARARM")
+	include("Common/${IARARM_MODULE}")
+
+	set (COMMON_COMPILE_FLAGS -e --dlib_config=full --vla --silent -DNO_TYPEOF ${CMSE_FLAGS})
+	##Shared compiler and linker settings.
+	function(config_setting_shared_compiler_flags tgt)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS ${COMMON_COMPILE_FLAGS} "-DImage$$= " "-DLoad$$LR$$= " "-D$$ZI$$Base=$$Base" "-D$$ZI$$Limit=$$Limit" "-D$$RO$$Base=$$Base" "-D$$RO$$Limit=$$Limit" "-D$$RW$$Base=$$Base" "-D$$RW$$Limit=$$Limit" "-D_DATA$$RW$$Base=_DATA$$Base" "-D_DATA$$RW$$Limit=_DATA$$Limit" "-D_DATA$$ZI$$Base=_DATA$$Base" "-D_DATA$$ZI$$Limit=_DATA$$Limit" "-D_STACK$$ZI$$Base=_STACK$$Base" "-D_STACK$$ZI$$Limit=_STACK$$Limit" )
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
+		#--no-wchar-size-warning flag is added because TF-M sources are compiled
+		#with short wchars, however the standard library is compiled with normal
+		#wchar, and this generates linker time warnings. TF-M code does not use
+		#wchar, so the warning can be suppressed.
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS --silent --semihosting --redirect __write=__write_buffered)
 	endfunction()
 endif()
 
