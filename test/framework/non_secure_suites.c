@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,7 @@
 #include "test/suites/crypto/non_secure/crypto_ns_tests.h"
 #include "test/suites/attestation/non_secure/attestation_ns_tests.h"
 #include "test/suites/qcbor/non_secure/qcbor_ns_tests.h"
+#include "test/suites/t_cose/non_secure/t_cose_ns_tests.h"
 #include "test/suites/core/non_secure/core_ns_tests.h"
 #include "test/suites/ipc/non_secure/ipc_ns_tests.h"
 #include "test/suites/platform/non_secure/platform_ns_tests.h"
@@ -51,6 +52,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef ENABLE_QCBOR_TESTS
     /* Non-secure QCBOR library test cases */
     {&register_testsuite_ns_qcbor, 0, 0, 0},
+#endif
+
+#ifdef ENABLE_T_COSE_TESTS
+    /* Non-secure T_COSE library test cases */
+    {&register_testsuite_ns_t_cose, 0, 0, 0},
 #endif
 
 #ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS

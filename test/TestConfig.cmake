@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +11,8 @@ option(ENABLE_AUDIT_LOGGING_SERVICE_TESTS "Option for audit logging service test
 option(ENABLE_CRYPTO_SERVICE_TESTS "Option for crypto service tests" TRUE)
 option(ENABLE_ATTESTATION_SERVICE_TESTS "Option for attestation service tests" TRUE)
 option(ENABLE_PLATFORM_SERVICE_TESTS "Option for platform service tests" TRUE)
-option(ENABLE_QCBOR_TESTS "Option for qcbor tests" TRUE)
+option(ENABLE_QCBOR_TESTS "Option for QCBOR tests" TRUE)
+option(ENABLE_T_COSE_TESTS "Option for T_COSE tests" TRUE)
 
 # If a partition is not enabled, then neither should its tests.
 if (NOT TFM_PARTITION_SECURE_STORAGE)

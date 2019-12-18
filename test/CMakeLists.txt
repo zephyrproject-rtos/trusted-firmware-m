@@ -124,6 +124,10 @@ if (ENABLE_QCBOR_TESTS)
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_QCBOR_TESTS APPEND)
 endif()
 
+if (ENABLE_T_COSE_TESTS)
+	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_T_COSE_TESTS APPEND)
+endif()
+
 if (ENABLE_AUDIT_LOGGING_SERVICE_TESTS)
 	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_AUDIT_LOGGING_SERVICE_TESTS APPEND)
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_AUDIT_LOGGING_SERVICE_TESTS APPEND)
@@ -133,11 +137,11 @@ if (NOT DEFINED TFM_BUILD_IN_SPE)
 	message(FATAL_ERROR "TFM_BUILD_IN_SPE is not set. Cannot specify current building status")
 endif()
 
-if (NOT TARGET tfm_t_cose_verify AND ENABLE_ATTESTATION_SERVICE_TESTS)
+if (NOT TARGET tfm_t_cose_verify AND (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_T_COSE_TESTS))
 	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
 endif()
 
-if ((NOT TARGET tfm_qcbor_encode OR NOT TARGET tfm_qcbor_decode) AND (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS))
+if ((NOT TARGET tfm_qcbor_encode OR NOT TARGET tfm_qcbor_decode) AND (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS OR ENABLE_T_COSE_TESTS))
 	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/qcbor ${CMAKE_CURRENT_BINARY_DIR}/qcbor)
 endif()
 
@@ -174,10 +178,10 @@ else ()
 	#Build the non-secure library
 	set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
 	add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
-	if (ENABLE_ATTESTATION_SERVICE_TESTS)
-		target_sources(tfm_non_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_t_cose_verify>)
+	if (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_T_COSE_TESTS)
+		target_sources(tfm_non_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_t_cose_verify> PRIVATE $<TARGET_OBJECTS:tfm_t_cose_sign>)
 	endif()
-	if (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS)
+	if (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS OR ENABLE_T_COSE_TESTS)
 		target_sources(tfm_non_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_qcbor_decode> PRIVATE $<TARGET_OBJECTS:tfm_qcbor_encode>)
 	endif()
 

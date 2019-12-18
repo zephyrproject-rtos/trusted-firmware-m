@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -44,6 +44,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/suites/its/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/crypto/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/attestation/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/qcbor/CMakeLists.inc)
+include(${CMAKE_CURRENT_LIST_DIR}/suites/t_cose/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/ipc/CMakeLists.inc)
 if (ENABLE_AUDIT_LOGGING_SERVICE_TESTS)
 	include(${CMAKE_CURRENT_LIST_DIR}/suites/audit/CMakeLists.inc)
