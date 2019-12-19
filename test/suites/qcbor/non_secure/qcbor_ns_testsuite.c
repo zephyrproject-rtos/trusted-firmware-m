@@ -102,15 +102,17 @@ const static char *qcbor_test_cases_all[] = {
 
 static void fputs_wrapper(const char *string, void *out_ctx, int new_line)
 {
-    /* To get test result per test case then remove comments around the
-     * following lines.
+    (void)out_ctx;
+    (void)new_line;
+    /*
+     * To get test result per test case, change
+     * the preprocessor '#if 0' to '#if 1'.
      */
-/*
-    fputs(string, (FILE *)out_ctx);
-    if(new_line) {
-        fputs("\r\n", out_ctx);
-    }
-*/
+# if 0
+    TEST_LOG("%s", string);
+#else
+    (void)string;
+#endif
 }
 
 static void tfm_qcbor_test_7001(struct test_result_t *ret)
@@ -118,7 +120,7 @@ static void tfm_qcbor_test_7001(struct test_result_t *ret)
     int32_t test_failed_cnt = 0;
 
     test_failed_cnt = RunTests(qcbor_test_cases_all, fputs_wrapper,
-                               stdout, NULL);
+                               NULL, NULL);
     if (test_failed_cnt != 0) {
         TEST_FAIL("QCBOR test failed");
         return;
