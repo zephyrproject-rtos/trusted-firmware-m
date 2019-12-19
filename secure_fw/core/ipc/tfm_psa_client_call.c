@@ -36,11 +36,11 @@ uint32_t tfm_psa_version(uint32_t sid, bool ns_caller)
     }
 
     /*
-     * It is a fatal error if the caller is not authorized to access the RoT
-     * Service.
+     * It should return PSA_VERSION_NONE if the caller is not authorized
+     * to access the RoT Service.
      */
     if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
-        tfm_panic();
+        return PSA_VERSION_NONE;
     }
 
     return service->service_db->version;
