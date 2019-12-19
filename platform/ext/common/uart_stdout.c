@@ -28,7 +28,7 @@
 /* Imports USART driver */
 extern ARM_DRIVER_USART TFM_DRIVER_STDIO;
 
-static int uart_send_string(const unsigned char *str, uint32_t len)
+int stdio_output_string(const unsigned char *str, uint32_t len)
 {
     int32_t ret;
 
@@ -54,7 +54,7 @@ int fputc(int ch, FILE *f)
     (void)f;
 
     /* Send byte to USART */
-    (void)uart_send_string((const unsigned char *)&ch, 1);
+    (void)stdio_output_string((const unsigned char *)&ch, 1);
 
     /* Return character written */
     return ch;
@@ -66,13 +66,13 @@ int _write(int fd, char *str, int len)
     (void)fd;
 
     /* Send string and return the number of characters written */
-    return uart_send_string((const unsigned char *)str, (uint32_t)len);
+    return stdio_output_string((const unsigned char *)str, (uint32_t)len);
 }
 #elif defined(__ICCARM__)
 int putchar(int ch)
 {
     /* Send byte to USART */
-    (void)uart_send_string((const unsigned char *)&ch, 1);
+    (void)stdio_output_string((const unsigned char *)&ch, 1);
 
     /* Return character written */
     return ch;
@@ -104,4 +104,3 @@ void stdio_uninit(void)
     ret = TFM_DRIVER_STDIO.Uninitialize();
     ASSERT_HIGH(ret);
 }
-
