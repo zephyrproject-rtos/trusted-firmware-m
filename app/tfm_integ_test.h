@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <cmsis_compiler.h>
+#include "log/tfm_log_raw.h"
 
 #ifndef __TFM_INTEG_TEST_H__
 #define __TFM_INTEG_TEST_H__
@@ -49,7 +50,7 @@ __attribute__((always_inline)) __STATIC_INLINE void LOG_MSG(const char *MSG)
 {
     /* if IPSR is non-zero, exception is active. NOT banked S/NS */
     if (!__get_IPSR()) {
-        printf("\t\033[1;32m[Non-Sec] %s\033[0m\r\n", MSG);
+        tfm_log_printf("\t\033[1;32m[Non-Sec] %s\033[0m\r\n", MSG);
     }
 }
 

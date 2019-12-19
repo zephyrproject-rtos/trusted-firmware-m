@@ -32,6 +32,20 @@
 /* For UART the CMSIS driver is used */
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
 
+int stdio_output_string(const unsigned char *str, uint32_t len)
+{
+    int32_t ret;
+
+    ret = NS_DRIVER_STDIO.Send(str, len);
+    if (ret != ARM_DRIVER_OK) {
+        return 0;
+    }
+    /* Add a busy wait after sending. */
+    while (NS_DRIVER_STDIO.GetStatus().tx_busy);
+
+    return NS_DRIVER_STDIO.GetTxCount();
+}
+
 /**
  * \brief Modified table template for user defined SVC functions
  *
