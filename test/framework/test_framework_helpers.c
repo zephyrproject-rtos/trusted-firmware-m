@@ -70,5 +70,5 @@ const char *asset_perms_to_str(uint8_t permissions)
 
 void printf_set_color(enum serial_color_t color_id)
 {
-    printf("\33[3%dm", color_id);
+    TEST_LOG("\33[3%dm", color_id);
 }

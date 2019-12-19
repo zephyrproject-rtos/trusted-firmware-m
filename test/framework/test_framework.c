@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,23 +16,23 @@ static void test_failed(const struct test_result_t *ret)
 {
     printf_set_color(RED);
     if (ret->info_msg != 0) {
-        printf("  %s", ret->info_msg);
+        TEST_LOG("  %s", ret->info_msg);
         if (ret->filename != 0) {
-            printf(" (Failed at %s:%d)\r\n", ret->filename, ret->line);
+            TEST_LOG(" (Failed at %s:%d)\r\n", ret->filename, ret->line);
         }
     } else {
         if (ret->filename != 0) {
-            printf("  Failed at %s:%d\r\n", ret->filename, ret->line);
+            TEST_LOG("  Failed at %s:%d\r\n", ret->filename, ret->line);
         }
     }
 
-    printf("  TEST FAILED!\r\n");
+    TEST_LOG("  TEST FAILED!\r\n");
 }
 
 static void print_error(const char *err_msg)
 {
     printf_set_color(RED);
-    printf("Error ( %s )\r\n", err_msg);
+    TEST_LOG("Error ( %s )\r\n", err_msg);
 }
 
 const char *test_err_to_str(enum test_suite_err_t err)
@@ -102,7 +102,7 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
     }
 
     printf_set_color(YELLOW);
-    printf("Running Test Suite %s...\r\n", test_suite->name);
+    TEST_LOG("Running Test Suite %s...\r\n", test_suite->name);
 
     /* Sets pointer to the first test */
     p_test = test_suite->test_list;
@@ -115,8 +115,8 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
         }
 
         printf_set_color(WHITE);
-        printf("> Executing '%s' \r\n  Description: '%s'\r\n",
-               p_test->name, p_test->desc);
+        TEST_LOG("> Executing '%s' \r\n  Description: '%s'\r\n",
+                 p_test->name, p_test->desc);
 
         /* Sets the default value before the test */
         p_test->ret.val = TEST_PASSED;
@@ -128,7 +128,7 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
             failed_tests++;
         } else {
             printf_set_color(GREEN);
-            printf("  TEST PASSED!\r\n");
+            TEST_LOG("  TEST PASSED!\r\n");
         }
 
         /* Sets pointer to the next test */
@@ -138,14 +138,14 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
 
     if (failed_tests == 0) {
         printf_set_color(GREEN);
-        printf("TESTSUITE PASSED!\r\n");
+        TEST_LOG("TESTSUITE PASSED!\r\n");
         test_suite->val = TEST_PASSED;
     } else {
         printf_set_color(RED);
-        printf("TESTSUITE FAILED!\r\n");
+        TEST_LOG("TESTSUITE FAILED!\r\n");
         printf_set_color(YELLOW);
-        printf("Number of failed tests: %d of %d\r\n",
-               failed_tests, test_suite->list_size);
+        TEST_LOG("Number of failed tests: %d of %d\r\n",
+                 failed_tests, test_suite->list_size);
         test_suite->val = TEST_FAILED;
     }
 

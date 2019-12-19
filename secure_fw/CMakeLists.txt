@@ -218,8 +218,6 @@ function(set_up_secure_fw_build)
 	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
-	target_link_libraries(${EXE_NAME} libtfmsprt)
-
 	# The order of the libraries linked below is important for GCC
 	# Because the GCC linker will search an archive only once.
 	# If the a library has some symbols that are defined in the library which is linked before it,
@@ -259,6 +257,8 @@ function(set_up_secure_fw_build)
 		target_link_libraries(${EXE_NAME} tfm_platform)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PLATFORM")
 	endif()
+
+	target_link_libraries(${EXE_NAME} libtfmsprt)
 
 	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
 
