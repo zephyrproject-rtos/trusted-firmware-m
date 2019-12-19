@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "test/framework/test_framework_helpers.h"
+#include "test/test_services/tfm_secure_client_2/tfm_secure_client_2_api.h"
 #include "tfm_api.h"
 #include "../crypto_tests_common.h"
 
@@ -31,6 +32,7 @@ static void tfm_crypto_test_5030(struct test_result_t *ret);
 static void tfm_crypto_test_5031(struct test_result_t *ret);
 static void tfm_crypto_test_5032(struct test_result_t *ret);
 static void tfm_crypto_test_5033(struct test_result_t *ret);
+static void tfm_crypto_test_5034(struct test_result_t *ret);
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5001, "TFM_CRYPTO_TEST_5001",
@@ -75,6 +77,8 @@ static struct test_t crypto_tests[] = {
      "Secure key policy interface", {0} },
     {&tfm_crypto_test_5033, "TFM_CRYPTO_TEST_5033",
      "Secure key policy check permissions", {0} },
+    {&tfm_crypto_test_5034, "TFM_CRYPTO_TEST_5034",
+     "Key access control", {0} },
 };
 
 void register_testsuite_s_crypto_interface(struct test_suite_t *p_test_suite)
@@ -199,4 +203,46 @@ static void tfm_crypto_test_5032(struct test_result_t *ret)
 static void tfm_crypto_test_5033(struct test_result_t *ret)
 {
     psa_policy_invalid_policy_usage_test(ret);
+}
+
+/**
+ * \brief Tests key access control based on partition ID
+ *
+ * \param[out] ret  Test result
+ */
+static void tfm_crypto_test_5034(struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_key_handle_t key_handle;
+    psa_key_policy_t policy = PSA_KEY_POLICY_INIT;
+
+    /* Allocate a transient key */
+    status = psa_allocate_key(&key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to allocate key");
+        return;
+    }
+
+    /* Setup the key policy */
+    psa_key_policy_set_usage(&policy, PSA_KEY_USAGE_EXPORT, PSA_ALG_CTR);
+    status = psa_set_key_policy(key_handle, &policy);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to set key policy");
+        return;
+    }
+
+    /* Attempt to destroy the key handle from the Secure Client 2 partition */
+    status = tfm_secure_client_2_call_test(
+                                      TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL,
+                                      &key_handle, sizeof(key_handle));
+    if (status != PSA_ERROR_NOT_PERMITTED) {
+        TEST_FAIL("Should not be able to destroy key from another partition");
+        return;
+    }
+
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying a key");
+    }
 }

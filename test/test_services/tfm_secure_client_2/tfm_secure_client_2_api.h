@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,7 +17,8 @@
 extern "C" {
 #endif
 
-#define TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL 1001
+#define TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL    1001
+#define TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL 2001
 
 /**
  * \brief Calls the test function with the supplied ID within the execution

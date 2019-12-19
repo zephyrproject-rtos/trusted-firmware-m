@@ -31,7 +31,8 @@
     }
   ],
   "dependencies": [
-    "TFM_ITS_GET"
+    "TFM_ITS_GET",
+    "TFM_CRYPTO"
   ],
   "linker_pattern": {
     "object_list": [

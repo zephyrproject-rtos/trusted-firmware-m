@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include "tfm_secure_client_2_api.h"
 #include "psa/internal_trusted_storage.h"
+#include "psa/crypto.h"
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"
@@ -15,7 +16,40 @@
 #include "psa/client.h"
 #endif
 
+#ifdef ENABLE_CRYPTO_SERVICE_TESTS
+/**
+ * \brief Tests calling psa_destroy_key() with the supplied key handle.
+ *
+ * \param[in] arg      Pointer to key handle
+ * \param[in] arg_len  Length of arg in bytes
+ *
+ * \return Returns test result as specified in \ref psa_status_t
+ */
+static psa_status_t secure_client_2_test_crypto_access_ctrl(const void *arg,
+                                                            size_t arg_len)
+{
+    psa_key_handle_t key_handle;
+
+    if (arg_len != sizeof(key_handle)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    key_handle = *((psa_key_handle_t *)arg);
+
+    /* Attempt to destroy the key handle */
+    return psa_destroy_key(key_handle);
+}
+#endif /* ENABLE_CRYPTO_SERVICE_TESTS */
+
 #ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
+/**
+ * \brief Tests calling psa_its_get() with the supplied uid.
+ *
+ * \param[in] arg      Pointer to uid
+ * \param[in] arg_len  Length of arg in bytes
+ *
+ * \return Returns test result as specified in \ref psa_status_t
+ */
 static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
                                                          size_t arg_len)
 {
@@ -32,8 +66,18 @@ static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
     /* Attempt to get one byte from the UID and return the resulting status */
     return psa_its_get(uid, 0, sizeof(data), data, &p_data_length);
 }
-#endif
+#endif /* ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS */
 
+/**
+ * \brief Calls the test function with the supplied ID and returns the result
+ *        from the test function.
+ *
+ * \param[in] id       The ID of the test function
+ * \param[in] arg      Pointer to argument to pass to test function
+ * \param[in] arg_len  Length of argument in bytes
+ *
+ * \return Returns test result as specified in \ref psa_status_t
+ */
 static psa_status_t secure_client_2_dispatch(int32_t id, const void *arg,
                                              size_t arg_len)
 {
@@ -41,6 +85,10 @@ static psa_status_t secure_client_2_dispatch(int32_t id, const void *arg,
 #ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
     case TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL:
         return secure_client_2_test_its_access_ctrl(arg, arg_len);
+#endif
+#ifdef ENABLE_CRYPTO_SERVICE_TESTS
+    case TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL:
+        return secure_client_2_test_crypto_access_ctrl(arg, arg_len);
 #endif
     default:
         return PSA_ERROR_PROGRAMMER_ERROR;
