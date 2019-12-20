@@ -110,6 +110,9 @@ void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)
         (struct interrupted_ctx_stack_frame_t *)runtime_data->ctx_stack_ptr;
 
     stack_frame->partition_state = runtime_data->partition_state;
+
+    runtime_data->ctx_stack_ptr +=
+        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
 }
 
 void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
@@ -117,6 +120,9 @@ void tfm_spm_partition_pop_interrupted_ctx(uint32_t partition_idx)
     struct spm_partition_runtime_data_t *runtime_data =
         &g_spm_partition_db.partitions[partition_idx].runtime_data;
     struct interrupted_ctx_stack_frame_t *stack_frame;
+
+    runtime_data->ctx_stack_ptr -=
+        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t);
 
     stack_frame = (struct interrupted_ctx_stack_frame_t *)
                       runtime_data->ctx_stack_ptr;
