@@ -143,6 +143,11 @@ uint32_t *ctx_stack_list[] =
 static int32_t dependencies_{{manifest.manifest.name}}[] =
 {
         {% for dependence in manifest.manifest.dependencies %}
+            {% for service in manifest.manifest.services %}
+                {% if dependence == service.name %}
+#error "Please DO NOT include SP's own RoT Service '{{dependence}}', which will cause a deadlock!"
+                {% endif %}
+            {% endfor %}
     {{dependence}}_SID,
         {% endfor %}
 };
