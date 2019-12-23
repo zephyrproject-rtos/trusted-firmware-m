@@ -26,3 +26,8 @@ enum tfm_plat_err_t tfm_spm_hal_post_init(void)
 
     return TFM_PLAT_ERR_SUCCESS;
 }
+
+__WEAK void tfm_spm_hal_system_reset(void)
+{
+    NVIC_SystemReset();
+}
