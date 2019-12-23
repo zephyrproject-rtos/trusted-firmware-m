@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <cmsis_compiler.h>
+#include "cmsis_compiler.h"
 
 #ifndef __TFM_INTEG_TEST_H__
 #define __TFM_INTEG_TEST_H__

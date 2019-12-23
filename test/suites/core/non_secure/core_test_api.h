@@ -9,7 +9,7 @@
 #define __CORE_TEST_API_H__
 
 #include <stdio.h>
-#include <cmsis_compiler.h>
+#include "cmsis_compiler.h"
 
 #ifdef __cplusplus
 extern "C" {
