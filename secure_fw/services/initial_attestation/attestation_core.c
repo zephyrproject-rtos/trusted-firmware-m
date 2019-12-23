@@ -20,7 +20,6 @@
 #include "attest_eat_defines.h"
 #include "t_cose_defines.h"
 #include "tfm_memory_utils.h"
-#include "attestation_key.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
 
 #define MAX_BOOT_STATUS 512
