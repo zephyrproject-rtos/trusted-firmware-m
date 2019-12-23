@@ -557,6 +557,9 @@ void tfm_spm_init(void)
             continue;
         }
 
+        /* Add PSA_DOORBELL signal to assigned_signals */
+        partition->runtime_data.assigned_signals |= PSA_DOORBELL;
+
         /* TODO: This can be optimized by generating the assigned signal
          *       in code generation time.
          */
