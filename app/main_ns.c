@@ -5,10 +5,6 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
 #include "tfm_api.h"
 #include "cmsis_os2.h"
 #include "tfm_integ_test.h"
@@ -76,36 +72,6 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
  *  ...
  */
 };
-
-#if defined(__ARMCC_VERSION)
-/* Struct FILE is implemented in stdio.h. Used to redirect printf to
- * NS_DRIVER_STDIO
- */
-FILE __stdout;
-/* Redirects armclang printf to NS_DRIVER_STDIO */
-int fputc(int ch, FILE *f) {
-    /* Send byte to NS_DRIVER_STDIO */
-    (void)NS_DRIVER_STDIO.Send((const unsigned char *)&ch, 1);
-    /* Return character written */
-    return ch;
-}
-#elif defined(__GNUC__)
-/* redirects gcc printf to NS_DRIVER_STDIO */
-int _write(int fd, char * str, int len)
-{
-    (void)NS_DRIVER_STDIO.Send(str, len);
-
-    return len;
-}
-#elif defined(__ICCARM__)
-int putchar(int ch)
-{
-    /* Send byte to NS_DRIVER_STDIO */
-    (void)NS_DRIVER_STDIO.Send((const unsigned char *)&ch, 1);
-    /* Return character written */
-    return ch;
-}
-#endif
 
 /**
  * \brief List of RTOS thread attributes
