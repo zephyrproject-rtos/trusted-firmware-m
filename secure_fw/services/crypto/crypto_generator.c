@@ -46,6 +46,7 @@
  *
  * \return Return values as described in \ref psa_status_t
  */
+#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED == 0)
 static psa_status_t tfm_crypto_huk_derivation(psa_crypto_generator_t *generator,
                                               psa_key_handle_t key_handle,
                                               const uint8_t *salt,
@@ -124,6 +125,7 @@ static psa_status_t tfm_crypto_huk_derivation(psa_crypto_generator_t *generator,
 
     return PSA_SUCCESS;
 }
+#endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
 
 /*!
  * \defgroup public_psa Public functions, PSA

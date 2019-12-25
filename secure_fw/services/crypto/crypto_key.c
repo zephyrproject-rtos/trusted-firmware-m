@@ -44,6 +44,7 @@ static struct tfm_crypto_handle_owner_s
  *
  * \return Return values as described in \ref psa_status_t
  */
+#if (TFM_CRYPTO_KEY_MODULE_DISABLED == 0)
 static psa_status_t tfm_crypto_open_huk(psa_key_lifetime_t lifetime,
                                         psa_key_handle_t *key_handle)
 {
@@ -97,6 +98,7 @@ static psa_status_t tfm_crypto_open_huk(psa_key_lifetime_t lifetime,
 
     return status;
 }
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 
 /*!
  * \defgroup public Public functions
