@@ -171,12 +171,30 @@ set (TEST_FRAMEWORK_S  OFF)
 set (TEST_FRAMEWORK_NS OFF)
 set (TFM_PSA_API OFF)
 
-option(TFM_PARTITION_AUDIT_LOG "Enable the TF-M Audit Log partition" ON)
-option(TFM_PARTITION_PLATFORM "Enable the TF-M Platform partition" ON)
-option(TFM_PARTITION_SECURE_STORAGE "Enable the TF-M secure storage partition" ON)
-option(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE "Enable the TF-M internal trusted storage partition" ON)
-option(TFM_PARTITION_CRYPTO "Enable the TF-M crypto partition" ON)
-option(TFM_PARTITION_INITIAL_ATTESTATION "Enable the TF-M initial attestation partition" ON)
+if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
+	# Enable the TF-M Audit Log partition
+	set(TFM_PARTITION_AUDIT_LOG ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_PLATFORM)
+	# Enable the TF-M Platform partition
+	set(TFM_PARTITION_PLATFORM ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
+	# Enable the TF-M secure storage partition
+	set(TFM_PARTITION_SECURE_STORAGE ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	# Enable the TF-M internal trusted storage partition
+	set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_CRYPTO)
+	# Enable the TF-M crypto partition
+	set(TFM_PARTITION_CRYPTO ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_INITIAL_ATTESTATION)
+	# Enable the TF-M initial attestation partition
+	set(TFM_PARTITION_INITIAL_ATTESTATION ON)
+endif()
 
 if (NOT TFM_LVL EQUAL 1 AND NOT DEFINED CONFIG_TFM_ENABLE_MEMORY_PROTECT)
 	set (CONFIG_TFM_ENABLE_MEMORY_PROTECT ON)
