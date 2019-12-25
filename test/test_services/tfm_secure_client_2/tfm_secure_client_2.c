@@ -15,6 +15,7 @@
 #include "psa/client.h"
 #endif
 
+#ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
 static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
                                                          size_t arg_len)
 {
@@ -31,13 +32,16 @@ static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
     /* Attempt to get one byte from the UID and return the resulting status */
     return psa_its_get(uid, 0, sizeof(data), data, &p_data_length);
 }
+#endif
 
 static psa_status_t secure_client_2_dispatch(int32_t id, const void *arg,
                                              size_t arg_len)
 {
     switch (id) {
+#ifdef ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS
     case TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL:
         return secure_client_2_test_its_access_ctrl(arg, arg_len);
+#endif
     default:
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
