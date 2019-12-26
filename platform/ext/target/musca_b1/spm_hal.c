@@ -186,7 +186,7 @@ void MPC_Handler(void)
     NVIC_ClearPendingIRQ(S_MPC_COMBINED_IRQn);
 
     /* Print fault message and block execution */
-    LOG_MSG("Oops... MPC fault!!!");
+    ERROR_MSG("Oops... MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
@@ -205,7 +205,7 @@ void PPC_Handler(void)
     NVIC_ClearPendingIRQ(S_PPC_COMBINED_IRQn);
 
     /* Print fault message*/
-    LOG_MSG("Oops... PPC fault!!!");
+    ERROR_MSG("Oops... PPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();

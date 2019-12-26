@@ -38,9 +38,6 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
     case TFM_SVC_IPC_REQUEST:
         tfm_psa_ipc_request_handler(svc_args);
         break;
-    case TFM_SVC_PRINT:
-        TFM_CORE_MSG((char *)svc_args[0]);
-        break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
         break;

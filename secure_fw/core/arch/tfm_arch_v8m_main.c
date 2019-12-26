@@ -175,7 +175,7 @@ void SecureFault_Handler(void)
                              sizeof(tfm_fault_context));
     }
 
-    LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    ERROR_MSG("Oops... Secure fault!!! You're not going anywhere!");
     while (1) {
         ;
     }

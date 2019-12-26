@@ -13,12 +13,12 @@
 #include "tfm_core_topology.h"
 #include "tfm_nspm.h"
 #include "platform/include/tfm_spm_hal.h"
-#include "secure_utilities.h"
 #include "secure_fw/spm/spm_api.h"
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "tfm_irq_list.h"
 #include "tfm_utils.h"
 #include "spm_db.h"
+#include "log/tfm_log.h"
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa/service.h"
@@ -81,10 +81,10 @@ int32_t tfm_core_init(void)
         return TFM_ERROR_GENERIC;
     }
 
-    LOG_MSG("Secure image initializing!");
+    LOG_MSG("\033[1;34m[Sec Thread] Secure image initializing!\033[0m\r\n");
 
 #ifdef TFM_CORE_DEBUG
-    TFM_LVL_MSG(TFM_LVL);
+    LOG_MSG("TF-M isolation level is: %d\r\n", TFM_LVL);
 #endif
 
     tfm_core_validate_boot_data();
@@ -242,7 +242,7 @@ int main(void)
 
 #ifdef TFM_CORE_DEBUG
     /* Jumps to non-secure code */
-    LOG_MSG("Jumping to non-secure code...");
+    LOG_MSG("\033[1;34mJumping to non-secure code...\033[0m\r\n");
 #endif
 
     jump_to_ns_code();

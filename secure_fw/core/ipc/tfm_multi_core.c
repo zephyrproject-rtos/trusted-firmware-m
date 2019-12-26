@@ -6,11 +6,11 @@
 
 #include "platform/include/tfm_spm_hal.h"
 #include "psa/client.h"
-#include "secure_utilities.h"
 #include "tfm_internal.h"
 #include "tfm_nspm.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_utils.h"
+#include "log/tfm_log.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
 

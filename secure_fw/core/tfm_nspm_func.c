@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include "cmsis_compiler.h"
 #include "platform/include/tfm_spm_hal.h"
-#include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"
@@ -87,9 +86,6 @@ uint32_t TZ_InitContextSystem_S(void)
     }
 
     /* NS RTOS supports TZ context management, override defaults */
-#ifdef PRINT_NSPM_DEBUG
-    LOG_MSG("NS RTOS initialized TZ RTOS context management");
-#endif /* PRINT_NSPM_DEBUG */
     for (i = 1; i < TFM_MAX_NS_THREAD_COUNT; ++i) {
         NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
         NsClientIdList[i].next_free_index = i + 1;
@@ -125,10 +121,6 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
     /* TZ_MemoryId_t must be a positive integer */
     tz_id = (TZ_MemoryId_t)free_index + 1;
     NsClientIdList[free_index].ns_client_id = get_next_ns_client_id();
-#ifdef PRINT_NSPM_DEBUG
-    printf("TZ_AllocModuleContext_S called, returning id %d\r\n",
-        NsClientIdList[free_index].ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
     free_index = NsClientIdList[free_index].next_free_index;
 
     return tz_id;
@@ -160,14 +152,7 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
-#ifdef PRINT_NSPM_DEBUG
-    printf("TZ_FreeModuleContext_S called for id %d\r\n",
-        NsClientIdList[index].ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
     if (active_ns_client_idx == index) {
-#ifdef PRINT_NSPM_DEBUG
-        printf("Freeing active NS client, NS inactive\r\n");
-#endif /* PRINT_NSPM_DEBUG */
         active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
     }
     NsClientIdList[index].ns_client_id = INVALID_CLIENT_ID;
@@ -192,9 +177,6 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
-#ifdef PRINT_NSPM_DEBUG
-    LOG_MSG("TZ_LoadContext_S called");
-#endif /* PRINT_NSPM_DEBUG */
     if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
         /* Invalid TZ_MemoryId_t */
         return 0U;
@@ -208,10 +190,6 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
     }
 
     active_ns_client_idx = index;
-#ifdef PRINT_NSPM_DEBUG
-    printf("TZ_LoadContext_S called for id %d\r\n",
-        NsClientIdList[index].ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
 
     return 1U;    // Success
 }
@@ -230,9 +208,6 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
         return 0U;
     }
 
-#ifdef PRINT_NSPM_DEBUG
-    LOG_MSG("TZ_StoreContext_S called");
-#endif /* PRINT_NSPM_DEBUG */
     /* id corresponds to context being swapped out on NS side */
     if ((id == 0U) || (id > TFM_MAX_NS_THREAD_COUNT)) {
         /* Invalid TZ_MemoryId_t */
@@ -247,18 +222,9 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     }
 
     if (active_ns_client_idx != index) {
-#ifdef PRINT_NSPM_DEBUG
-        printf("TZ_StoreContext_S called for id %d, active id: %d\r\n",
-            NsClientIdList[index].ns_client_id,
-            NsClientIdList[active_ns_client_idx].ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
         return 0U;
     }
 
-#ifdef PRINT_NSPM_DEBUG
-    printf("TZ_StoreContext_S called for id %d\r\n",
-        NsClientIdList[index].ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
     active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
 
     return 1U;    // Success
@@ -292,9 +258,6 @@ enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
     }
 
     NsClientIdList[active_ns_client_idx].ns_client_id = ns_client_id;
-#ifdef PRINT_NSPM_DEBUG
-    printf("tfm_register_client_id called with id %d\r\n", ns_client_id);
-#endif /* PRINT_NSPM_DEBUG */
 
     return TFM_SUCCESS;
 }
