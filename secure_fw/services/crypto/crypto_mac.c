@@ -29,7 +29,7 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -83,7 +83,7 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
                                          psa_outvec out_vec[],
                                          size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -137,7 +137,7 @@ psa_status_t tfm_crypto_mac_update(psa_invec in_vec[],
                                    psa_outvec out_vec[],
                                    size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -184,7 +184,7 @@ psa_status_t tfm_crypto_mac_sign_finish(psa_invec in_vec[],
                                         psa_outvec out_vec[],
                                         size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -236,7 +236,7 @@ psa_status_t tfm_crypto_mac_verify_finish(psa_invec in_vec[],
                                           psa_outvec out_vec[],
                                           size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -285,7 +285,7 @@ psa_status_t tfm_crypto_mac_abort(psa_invec in_vec[],
                                   psa_outvec out_vec[],
                                   size_t out_len)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;

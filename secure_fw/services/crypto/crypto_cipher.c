@@ -29,7 +29,7 @@ psa_status_t tfm_crypto_cipher_generate_iv(psa_invec in_vec[],
                                            psa_outvec out_vec[],
                                            size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -79,7 +79,7 @@ psa_status_t tfm_crypto_cipher_set_iv(psa_invec in_vec[],
                                       psa_outvec out_vec[],
                                       size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -126,7 +126,7 @@ psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
                                              psa_outvec out_vec[],
                                              size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -177,7 +177,7 @@ psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec in_vec[],
                                              psa_outvec out_vec[],
                                              size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -228,7 +228,7 @@ psa_status_t tfm_crypto_cipher_update(psa_invec in_vec[],
                                       psa_outvec out_vec[],
                                       size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -281,7 +281,7 @@ psa_status_t tfm_crypto_cipher_finish(psa_invec in_vec[],
                                       psa_outvec out_vec[],
                                       size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;
@@ -333,7 +333,7 @@ psa_status_t tfm_crypto_cipher_abort(psa_invec in_vec[],
                                      psa_outvec out_vec[],
                                      size_t out_len)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status = PSA_SUCCESS;

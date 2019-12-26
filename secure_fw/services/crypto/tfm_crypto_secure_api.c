@@ -59,7 +59,7 @@ psa_status_t psa_crypto_init(void)
 __attribute__((section("SFN")))
 psa_status_t psa_allocate_key(psa_key_handle_t *handle)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -92,7 +92,7 @@ psa_status_t psa_open_key(psa_key_lifetime_t lifetime,
                           psa_key_id_t id,
                           psa_key_handle_t *handle)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -128,7 +128,7 @@ psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
                             psa_key_id_t id,
                             psa_key_handle_t *handle)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     (void)lifetime;
@@ -143,7 +143,7 @@ psa_status_t psa_create_key(psa_key_lifetime_t lifetime,
 __attribute__((section("SFN")))
 psa_status_t psa_close_key(psa_key_handle_t handle)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -176,7 +176,7 @@ psa_status_t psa_import_key(psa_key_handle_t handle,
                             const uint8_t *data,
                             size_t data_length)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -207,7 +207,7 @@ psa_status_t psa_import_key(psa_key_handle_t handle,
 __attribute__((section("SFN")))
 psa_status_t psa_destroy_key(psa_key_handle_t handle)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -238,7 +238,7 @@ psa_status_t psa_get_key_information(psa_key_handle_t handle,
                                      psa_key_type_t *type,
                                      size_t *bits)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -274,7 +274,7 @@ psa_status_t psa_export_key(psa_key_handle_t handle,
                             size_t data_size,
                             size_t *data_length)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -312,7 +312,7 @@ psa_status_t psa_export_public_key(psa_key_handle_t handle,
                                    size_t data_size,
                                    size_t *data_length)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -350,7 +350,7 @@ psa_status_t psa_copy_key(psa_key_handle_t source_handle,
                           psa_key_handle_t target_handle,
                           const psa_key_policy_t *constraint)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -404,7 +404,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_set_key_policy(psa_key_handle_t handle,
                                 const psa_key_policy_t *policy)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -436,7 +436,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_get_key_policy(psa_key_handle_t handle,
                                 psa_key_policy_t *policy)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -470,7 +470,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_get_key_lifetime(psa_key_handle_t handle,
                                   psa_key_lifetime_t *lifetime)
 {
-#if (TFM_CRYPTO_KEY_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -506,7 +506,7 @@ psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
                                     size_t iv_size,
                                     size_t *iv_length)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -545,7 +545,7 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
                                const unsigned char *iv,
                                size_t iv_length)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -581,7 +581,7 @@ psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -618,7 +618,7 @@ psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
                                       psa_key_handle_t handle,
                                       psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -658,7 +658,7 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -696,7 +696,7 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
 __attribute__((section("SFN")))
 psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -732,7 +732,7 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
                                size_t output_size,
                                size_t *output_length)
 {
-#if (TFM_CRYPTO_CIPHER_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -770,7 +770,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
                             psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -807,7 +807,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
                              const uint8_t *input,
                              size_t input_length)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -845,7 +845,7 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
                              size_t hash_size,
                              size_t *hash_length)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -884,7 +884,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
                              const uint8_t *hash,
                              size_t hash_length)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -918,7 +918,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
 __attribute__((section("SFN")))
 psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -952,7 +952,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
                             psa_hash_operation_t *target_operation)
 {
-#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_HASH_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -987,7 +987,7 @@ psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
                                 psa_key_handle_t handle,
                                 psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1024,7 +1024,7 @@ psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
                                   psa_key_handle_t handle,
                                   psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1061,7 +1061,7 @@ psa_status_t psa_mac_update(psa_mac_operation_t *operation,
                             const uint8_t *input,
                             size_t input_length)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1098,7 +1098,7 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
                                  size_t mac_size,
                                  size_t *mac_length)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1137,7 +1137,7 @@ psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
                                    const uint8_t *mac,
                                    size_t mac_length)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1172,7 +1172,7 @@ psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
 __attribute__((section("SFN")))
 psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 {
-#if (TFM_CRYPTO_MAC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_MAC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1215,7 +1215,7 @@ psa_status_t psa_aead_encrypt(psa_key_handle_t handle,
                               size_t ciphertext_size,
                               size_t *ciphertext_length)
 {
-#if (TFM_CRYPTO_AEAD_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_AEAD_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1290,7 +1290,7 @@ psa_status_t psa_aead_decrypt(psa_key_handle_t handle,
                               size_t plaintext_size,
                               size_t *plaintext_length)
 {
-#if (TFM_CRYPTO_AEAD_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_AEAD_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1361,7 +1361,7 @@ psa_status_t psa_asymmetric_sign(psa_key_handle_t handle,
                                  size_t signature_size,
                                  size_t *signature_length)
 {
-#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1404,7 +1404,7 @@ psa_status_t psa_asymmetric_verify(psa_key_handle_t handle,
                                    const uint8_t *signature,
                                    size_t signature_length)
 {
-#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1445,7 +1445,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_handle_t handle,
                                     size_t output_size,
                                     size_t *output_length)
 {
-#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1507,7 +1507,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_handle_t handle,
                                     size_t output_size,
                                     size_t *output_length)
 {
-#if (TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1562,7 +1562,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_get_generator_capacity(const psa_crypto_generator_t *generator,
                                         size_t *capacity)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1598,7 +1598,7 @@ psa_status_t psa_generator_read(psa_crypto_generator_t *generator,
                                 uint8_t *output,
                                 size_t output_length)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1635,7 +1635,7 @@ psa_status_t psa_generator_import_key(psa_key_handle_t handle,
                                       size_t bits,
                                       psa_crypto_generator_t *generator)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1668,7 +1668,7 @@ psa_status_t psa_generator_import_key(psa_key_handle_t handle,
 __attribute__((section("SFN")))
 psa_status_t psa_generator_abort(psa_crypto_generator_t *generator)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1709,7 +1709,7 @@ psa_status_t psa_key_derivation(psa_crypto_generator_t *generator,
                                 size_t label_length,
                                 size_t capacity)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1774,7 +1774,7 @@ psa_status_t psa_key_agreement(psa_crypto_generator_t *generator,
                                size_t peer_key_length,
                                psa_algorithm_t alg)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1813,7 +1813,7 @@ __attribute__((section("SFN")))
 psa_status_t psa_generate_random(uint8_t *output,
                                  size_t output_size)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1855,7 +1855,7 @@ psa_status_t psa_generate_key(psa_key_handle_t handle,
                               const void *extra,
                               size_t extra_size)
 {
-#if (TFM_CRYPTO_GENERATOR_MODULE_DISABLED != 0)
+#ifdef TFM_CRYPTO_GENERATOR_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
