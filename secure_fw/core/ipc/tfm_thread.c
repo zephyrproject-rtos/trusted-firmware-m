@@ -155,7 +155,7 @@ uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth)
 
 void tfm_thrd_set_status(struct tfm_thrd_ctx *pth, uint32_t new_status)
 {
-    TFM_ASSERT(pth != NULL && new_status < THRD_STAT_INVALID);
+    TFM_CORE_ASSERT(pth != NULL && new_status < THRD_STAT_INVALID);
 
     pth->status = new_status;
     update_running_head(&RUNN_HEAD, pth);
@@ -174,8 +174,8 @@ void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
      * a caller provided thread as current thread. This function
      * should get called only ONCE; further calling triggers assert.
      */
-    TFM_ASSERT(CURR_THRD == NULL);
-    TFM_ASSERT(pth != NULL);
+    TFM_CORE_ASSERT(CURR_THRD == NULL);
+    TFM_CORE_ASSERT(pth != NULL);
 
     CURR_THRD = pth;
     tfm_thrd_activate_schedule();
@@ -201,8 +201,8 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
                              struct tfm_thrd_ctx *prev,
                              struct tfm_thrd_ctx *next)
 {
-    TFM_ASSERT(prev != NULL);
-    TFM_ASSERT(next != NULL);
+    TFM_CORE_ASSERT(prev != NULL);
+    TFM_CORE_ASSERT(next != NULL);
 
     /*
      * First, update latest context into the current thread context.

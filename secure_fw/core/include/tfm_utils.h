@@ -7,20 +7,21 @@
 #ifndef __TFM_UTILS_H__
 #define __TFM_UTILS_H__
 
-#include <stdio.h>
-
 /* CPU spin here */
 void tfm_core_panic(void);
 
-/* Assert and spin */
-#define TFM_ASSERT(cond)                                            \
+/* Core assert and spin */
+#ifndef NDEBUG
+#define TFM_CORE_ASSERT(cond)                                       \
             do {                                                    \
                 if (!(cond)) {                                      \
-                    printf("Assert:%s:%d", __FUNCTION__, __LINE__); \
                     while (1)                                       \
                         ;                                           \
                 }                                                   \
             } while (0)
+#else
+#define TFM_CORE_ASSERT(cond)
+#endif
 
 /* Get container structure start address from member */
 #define TFM_GET_CONTAINER_PTR(ptr, type, member) \

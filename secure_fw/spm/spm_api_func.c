@@ -36,19 +36,9 @@ static void tfm_spm_partition_err_handler(
     sp_error_type_t err_type,
     int32_t err_code)
 {
-#ifdef TFM_CORE_DEBUG
-    if (err_type == TFM_INIT_FAILURE) {
-        printf("Partition init failed for partition id 0x%08X\r\n",
-               partition->static_data->partition_id);
-    } else {
-        printf(
-            "Unknown partition error %d (code: %d) for partition id 0x%08X\r\n",
-            err_type, err_code, partition->static_data->partition_id);
-    }
-#else
     (void)err_type;
     (void)err_code;
-#endif
+
     tfm_spm_partition_set_state(partition->static_data->partition_id,
                                 SPM_PARTITION_STATE_CLOSED);
 }

@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <cmsis_compiler.h>
-#include "log/tfm_log_raw.h"
 
 #ifndef __TFM_INTEG_TEST_H__
 #define __TFM_INTEG_TEST_H__
@@ -41,18 +40,6 @@ void test_app(void *argument);
  *
  */
 void execute_ns_interactive_tests(void);
-
-/**
- * \brief Logging function
- *
- */
-__attribute__((always_inline)) __STATIC_INLINE void LOG_MSG(const char *MSG)
-{
-    /* if IPSR is non-zero, exception is active. NOT banked S/NS */
-    if (!__get_IPSR()) {
-        tfm_log_printf("\t\033[1;32m[Non-Sec] %s\033[0m\r\n", MSG);
-    }
-}
 
 #ifdef __cplusplus
 }

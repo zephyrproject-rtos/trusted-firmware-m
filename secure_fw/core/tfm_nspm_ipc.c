@@ -11,6 +11,7 @@
 #include "tfm_nspm.h"
 #include "tfm_utils.h"
 #include "tfm_internal.h"
+#include "log/tfm_assert.h"
 #include "log/tfm_log.h"
 
 #define DEFAULT_NS_CLIENT_ID ((int32_t)-1)

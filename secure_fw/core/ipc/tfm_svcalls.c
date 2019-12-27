@@ -50,7 +50,7 @@ uint32_t tfm_svcall_psa_version(uint32_t *args, bool ns_caller)
 {
     uint32_t sid;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     sid = (uint32_t)args[0];
 
     return tfm_psa_version(sid, ns_caller);
@@ -61,7 +61,7 @@ psa_status_t tfm_svcall_psa_connect(uint32_t *args, bool ns_caller)
     uint32_t sid;
     uint32_t version;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     sid = (uint32_t)args[0];
     version = (uint32_t)args[1];
 
@@ -78,7 +78,7 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     uint32_t privileged;
     int32_t type;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
 
     partition = tfm_spm_get_running_partition();
@@ -149,7 +149,7 @@ void tfm_svcall_psa_close(uint32_t *args, bool ns_caller)
 {
     psa_handle_t handle;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     handle = args[0];
 
     return tfm_psa_close(handle, ns_caller);
@@ -173,7 +173,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
     uint32_t timeout;
     struct spm_partition_desc_t *partition = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     signal_mask = (psa_signal_t)args[0];
     timeout = args[1];
 
@@ -243,7 +243,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     struct spm_partition_desc_t *partition = NULL;
     uint32_t privileged;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     signal = (psa_signal_t)args[0];
     msg = (psa_msg_t *)args[1];
 
@@ -334,7 +334,7 @@ static void tfm_svcall_psa_set_rhandle(uint32_t *args)
     void *rhandle = NULL;
     struct tfm_msg_body_t *msg = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
     rhandle = (void *)args[1];
 
@@ -380,7 +380,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     uint32_t privileged;
     struct spm_partition_desc_t *partition = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
     invec_idx = args[1];
     buffer = (void *)args[2];
@@ -462,7 +462,7 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
     size_t num_bytes;
     struct tfm_msg_body_t *msg = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
     invec_idx = args[1];
     num_bytes = (size_t)args[2];
@@ -537,7 +537,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
     uint32_t privileged;
     struct spm_partition_desc_t *partition = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
     outvec_idx = args[1];
     buffer = (void *)args[2];
@@ -604,11 +604,11 @@ static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
      */
     /* If it is a NS request via RPC, the owner of this message is not set */
     if (!is_tfm_rpc_msg(msg)) {
-        TFM_ASSERT(msg->ack_evnt.owner->status == THRD_STAT_BLOCK);
+        TFM_CORE_ASSERT(msg->ack_evnt.owner->status == THRD_STAT_BLOCK);
     }
 
     while (msg->msg.out_size[i] != 0) {
-        TFM_ASSERT(msg->caller_outvec[i].base == msg->outvec[i].base);
+        TFM_CORE_ASSERT(msg->caller_outvec[i].base == msg->outvec[i].base);
         msg->caller_outvec[i].len = msg->outvec[i].len;
         i++;
     }
@@ -634,7 +634,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     struct tfm_msg_body_t *msg = NULL;
     int32_t ret = PSA_SUCCESS;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
     status = (psa_status_t)args[1];
 
@@ -773,7 +773,7 @@ static void tfm_svcall_psa_notify(uint32_t *args)
 {
     int32_t partition_id;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     partition_id = (int32_t)args[0];
 
     return notify_with_signal(partition_id, PSA_DOORBELL);
@@ -877,7 +877,7 @@ static void tfm_svcall_psa_eoi(uint32_t *args)
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;
 
-    TFM_ASSERT(args != NULL);
+    TFM_CORE_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];
 
     /* It is a fatal error if passed signal indicates more than one signals. */

@@ -55,7 +55,7 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
 {
     struct tfm_conn_handle_t *p_handle;
 
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
 
     /* Get buffer for handle list structure from handle pool */
     p_handle = (struct tfm_conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
@@ -94,7 +94,7 @@ static struct tfm_conn_handle_t *
     tfm_spm_find_conn_handle_node(struct tfm_spm_service_t *service,
                                   psa_handle_t conn_handle)
 {
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
 
     return (struct tfm_conn_handle_t *)conn_handle;
 }
@@ -104,7 +104,7 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
 {
     struct tfm_conn_handle_t *p_handle;
 
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
 
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
@@ -129,9 +129,9 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
 {
     struct tfm_conn_handle_t *p_handle;
 
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
     /* Set reverse handle value only be allowed for a connected handle */
-    TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
 
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
@@ -148,9 +148,9 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 {
     struct tfm_conn_handle_t *p_handle;
 
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
     /* Get reverse handle value only be allowed for a connected handle */
-    TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
 
     /* There are many handles for each RoT Service */
     p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
@@ -169,7 +169,7 @@ struct tfm_spm_service_t *
     struct tfm_list_node_t *node, *head;
     struct tfm_spm_service_t *service;
 
-    TFM_ASSERT(partition);
+    TFM_CORE_ASSERT(partition);
 
     if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
         tfm_core_panic();
@@ -243,7 +243,7 @@ struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
                                      uint32_t version)
 {
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
 
     switch (service->service_db->version_policy) {
     case TFM_VERSION_POLICY_RELAXED:
@@ -269,7 +269,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
     struct spm_partition_desc_t *partition = NULL;
     int32_t i;
 
-    TFM_ASSERT(service);
+    TFM_CORE_ASSERT(service);
 
     if (ns_caller) {
         if (!service->service_db->non_secure_client) {
@@ -347,7 +347,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 struct tfm_msg_body_t *
     tfm_spm_get_msg_buffer_from_conn_handle(psa_handle_t conn_handle)
 {
-    TFM_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
 
     return &(((struct tfm_conn_handle_t *)conn_handle)->internal_msg);
 }
@@ -362,13 +362,13 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
 {
     uint32_t i;
 
-    TFM_ASSERT(msg);
-    TFM_ASSERT(service);
-    TFM_ASSERT(!(invec == NULL && in_len != 0));
-    TFM_ASSERT(!(outvec == NULL && out_len != 0));
-    TFM_ASSERT(in_len <= PSA_MAX_IOVEC);
-    TFM_ASSERT(out_len <= PSA_MAX_IOVEC);
-    TFM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
+    TFM_CORE_ASSERT(msg);
+    TFM_CORE_ASSERT(service);
+    TFM_CORE_ASSERT(!(invec == NULL && in_len != 0));
+    TFM_CORE_ASSERT(!(outvec == NULL && out_len != 0));
+    TFM_CORE_ASSERT(in_len <= PSA_MAX_IOVEC);
+    TFM_CORE_ASSERT(out_len <= PSA_MAX_IOVEC);
+    TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
     tfm_core_util_memset(msg, 0, sizeof(struct tfm_msg_body_t));
@@ -410,8 +410,8 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     struct spm_partition_runtime_data_t *p_runtime_data =
                                             &service->partition->runtime_data;
 
-    TFM_ASSERT(service);
-    TFM_ASSERT(msg);
+    TFM_CORE_ASSERT(service);
+    TFM_CORE_ASSERT(msg);
 
     /* Enqueue message to service message queue */
     if (tfm_msg_enqueue(&service->msg_queue, msg) != IPC_SUCCESS) {

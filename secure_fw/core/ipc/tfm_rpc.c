@@ -33,7 +33,7 @@ uint32_t tfm_rpc_psa_framework_version(void)
 uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
                              bool ns_caller)
 {
-    TFM_ASSERT(params != NULL);
+    TFM_CORE_ASSERT(params != NULL);
 
     return tfm_psa_version(params->sid, ns_caller);
 }
@@ -41,7 +41,7 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
 psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
                                  bool ns_caller)
 {
-    TFM_ASSERT(params != NULL);
+    TFM_CORE_ASSERT(params != NULL);
 
     return tfm_psa_connect(params->sid, params->version, ns_caller);
 }
@@ -49,7 +49,7 @@ psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
                               bool ns_caller)
 {
-    TFM_ASSERT(params != NULL);
+    TFM_CORE_ASSERT(params != NULL);
 
     return tfm_psa_call(params->handle, params->type,
                         params->in_vec, params->in_len,
@@ -60,7 +60,7 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
 void tfm_rpc_psa_close(const struct client_call_params_t *params,
                        bool ns_caller)
 {
-    TFM_ASSERT(params != NULL);
+    TFM_CORE_ASSERT(params != NULL);
 
     tfm_psa_close(params->handle, ns_caller);
 }

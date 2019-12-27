@@ -20,7 +20,7 @@ void *tfm_core_util_memcpy(void *dest, const void *src, size_t n)
     union tfm_core_addr_t p_dest;
     union tfm_core_addr_t p_src;
 
-    TFM_ASSERT(dest != src);
+    TFM_CORE_ASSERT(dest != src);
 
     p_dest.p_byte = (uint8_t *)dest;
     p_src.p_byte = (uint8_t *)src;

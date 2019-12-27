@@ -10,7 +10,7 @@
 
 void tfm_event_wait(struct tfm_event_t *pevnt)
 {
-    TFM_ASSERT(pevnt && pevnt->magic == TFM_EVENT_MAGIC);
+    TFM_CORE_ASSERT(pevnt && pevnt->magic == TFM_EVENT_MAGIC);
 
     pevnt->owner = tfm_thrd_curr_thread();
     tfm_thrd_set_status(pevnt->owner, THRD_STAT_BLOCK);
@@ -19,7 +19,7 @@ void tfm_event_wait(struct tfm_event_t *pevnt)
 
 void tfm_event_wake(struct tfm_event_t *pevnt, uint32_t retval)
 {
-    TFM_ASSERT(pevnt && pevnt->magic == TFM_EVENT_MAGIC);
+    TFM_CORE_ASSERT(pevnt && pevnt->magic == TFM_EVENT_MAGIC);
 
     if (pevnt->owner && pevnt->owner->status == THRD_STAT_BLOCK) {
         tfm_thrd_set_status(pevnt->owner, THRD_STAT_RUNNING);
