@@ -24,23 +24,8 @@
 #include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
 #endif
-
-/* For UART the CMSIS driver is used */
-extern ARM_DRIVER_USART NS_DRIVER_STDIO;
-
-int stdio_output_string(const unsigned char *str, uint32_t len)
-{
-    int32_t ret;
-
-    ret = NS_DRIVER_STDIO.Send(str, len);
-    if (ret != ARM_DRIVER_OK) {
-        return 0;
-    }
-    /* Add a busy wait after sending. */
-    while (NS_DRIVER_STDIO.GetStatus().tx_busy);
-
-    return NS_DRIVER_STDIO.GetTxCount();
-}
+#include "log/tfm_assert.h"
+#include "log/tfm_log.h"
 
 /**
  * \brief Modified table template for user defined SVC functions
@@ -121,22 +106,65 @@ static void tfm_ns_multi_core_boot(void)
 }
 #endif
 
+/* For UART the CMSIS driver is used */
+extern ARM_DRIVER_USART NS_DRIVER_STDIO;
+
+int stdio_output_string(const unsigned char *str, uint32_t len)
+{
+    int32_t ret;
+
+    ret = NS_DRIVER_STDIO.Send(str, len);
+    if (ret != ARM_DRIVER_OK) {
+        return 0;
+    }
+    /* Add a busy wait after sending. */
+    while (NS_DRIVER_STDIO.GetStatus().tx_busy)
+        ;
+
+    return NS_DRIVER_STDIO.GetTxCount();
+}
+
 /**
  * \brief Platform peripherals and devices initialization.
  *        Can be overridden for platform specific initialization.
  *
  * \return  ARM_DRIVER_OK if the initialization succeeds
-*/
+ */
 __WEAK int32_t tfm_ns_platform_init(void)
 {
-    int32_t status;
+    int32_t ret;
 
-    status = NS_DRIVER_STDIO.Initialize(NULL);
-    if (status == ARM_DRIVER_OK) {
-        status = NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
-                                         DEFAULT_UART_BAUDRATE);
-    }
-    return status;
+    ret = NS_DRIVER_STDIO.Initialize(NULL);
+    TFM_ASSERT(ret == ARM_DRIVER_OK);
+
+    ret = NS_DRIVER_STDIO.PowerControl(ARM_POWER_FULL);
+    TFM_ASSERT(ret == ARM_DRIVER_OK);
+
+    ret = NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                                  DEFAULT_UART_BAUDRATE);
+    TFM_ASSERT(ret == ARM_DRIVER_OK);
+
+    (void)NS_DRIVER_STDIO.Control(ARM_USART_CONTROL_TX, 1);
+
+    return ARM_DRIVER_OK;
+}
+
+/**
+ * \brief Platform peripherals and devices de-initialization.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \return  ARM_DRIVER_OK if the de-initialization succeeds
+ */
+__WEAK int32_t tfm_ns_platform_uninit(void)
+{
+    int32_t ret;
+
+    (void)NS_DRIVER_STDIO.PowerControl(ARM_POWER_OFF);
+
+    ret = NS_DRIVER_STDIO.Uninitialize();
+    TFM_ASSERT(ret == ARM_DRIVER_OK);
+
+    return ARM_DRIVER_OK;
 }
 
 /**
@@ -147,7 +175,6 @@ __attribute__((noreturn))
 #endif
 int main(void)
 {
-
     if (tfm_ns_platform_init() != ARM_DRIVER_OK) {
         /* Avoid undefined behavior if platform init failed */
         while(1);
