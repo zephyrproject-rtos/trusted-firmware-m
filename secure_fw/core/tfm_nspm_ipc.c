@@ -86,18 +86,39 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     return 1U;
 }
 
-__attribute__((section("SFN")))
+__attribute__((used)) static void pre_ns_jumping(void)
+{
+    LOG_MSG("\033[1;34m[Sec Thread] Jumping to non-secure code...\033[0m\r\n");
+}
+
+/*
+ * 'r0' impliedly holds the address of non-secure entry,
+ * given during non-secure partition initialization.
+ */
+__attribute__((naked, section("SFN")))
 void tfm_nspm_thread_entry(void)
 {
-#ifdef TFM_CORE_DEBUG
-    /* Jumps to non-secure code */
-    LOG_MSG("Jumping to non-secure code...");
-#endif
-
-    jump_to_ns_code();
-
-    /* Should not run here */
-    TFM_ASSERT(false);
+    __ASM volatile(
+        ".syntax unified         \n"
+        "mov      r4, r0         \n"
+        "bl       pre_ns_jumping \n"
+        "movs     r2, #1         \n" /* Clear Bit[0] for S to NS transition */
+        "bics     r4, r2         \n"
+        "mov      r0, r4         \n"
+        "mov      r1, r4         \n"
+        "mov      r2, r4         \n"
+        "mov      r3, r4         \n"
+        "mov      r5, r4         \n"
+        "mov      r6, r4         \n"
+        "mov      r7, r4         \n"
+        "mov      r8, r4         \n"
+        "mov      r9, r4         \n"
+        "mov      r10, r4        \n"
+        "mov      r11, r4        \n"
+        "mov      r12, r4        \n"
+        "push     {r0, r1}       \n"
+        "bxns     r0             \n"
+    );
 }
 
 void configure_ns_code(void)
@@ -109,12 +130,4 @@ void configure_ns_code(void)
     uint32_t ns_msp = tfm_spm_hal_get_ns_MSP();
 
     __TZ_set_MSP_NS(ns_msp);
-
-    /* Get the address of non-secure code entry point to jump there */
-    uint32_t entry_ptr = tfm_spm_hal_get_ns_entry_point();
-
-    /* Clears LSB of the function address to indicate the function-call
-     * will perform the switch from secure to non-secure
-     */
-    ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
 }

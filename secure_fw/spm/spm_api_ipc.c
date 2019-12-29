@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -589,6 +589,7 @@ void tfm_spm_init(void)
 
         if (partition->static_data->partition_id == TFM_SP_NON_SECURE_ID) {
             p_ns_entry_thread = pth;
+            pth->param = (void *)tfm_spm_hal_get_ns_entry_point();
         }
 
         /* Kick off */
