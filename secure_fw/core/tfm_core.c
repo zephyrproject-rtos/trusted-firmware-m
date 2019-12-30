@@ -254,6 +254,8 @@ int main(void)
     if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
         tfm_core_panic();
     }
-    tfm_spm_init();
+
+    /* Move to handler mode for further SPM initialization. */
+    tfm_core_handler_mode();
 #endif /* !defined(TFM_PSA_API) */
 }

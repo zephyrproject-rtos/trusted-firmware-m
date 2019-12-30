@@ -133,5 +133,9 @@ void tfm_core_psa_wait(uint32_t *svc_args);
  */
 void tfm_core_psa_eoi(uint32_t *svc_args);
 
+/**
+ * \brief Move to handler mode by a SVC for specific purpose
+ */
+void tfm_core_handler_mode(void);
 
 #endif /* __TFM_INTERNAL_H__ */

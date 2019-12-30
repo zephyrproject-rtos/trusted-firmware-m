@@ -665,9 +665,6 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged);
 
-/* This function should be called before schedule function */
-void tfm_spm_init(void);
-
 /*
  * PendSV specified function.
  *
@@ -679,6 +676,13 @@ void tfm_spm_init(void);
  *  this function will be obsoleted later.
  */
 void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
+
+/**
+ * \brief                      SPM initialization implementation
+ *
+ * \details                    This function must be called under handler mode.
+ */
+void tfm_spm_init(void);
 
 #endif /* ifdef(TFM_PSA_API) */
 

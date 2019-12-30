@@ -11,6 +11,7 @@
 #include "core/tfm_core_svc.h"
 #include "tfm_utils.h"
 #include "tfm_svcalls.h"
+#include "spm_api.h"
 
 extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
 
@@ -35,6 +36,9 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
         tfm_core_panic();
     }
     switch (svc_number) {
+    case TFM_SVC_HANDLER_MODE:
+        tfm_spm_init();
+        break;
     case TFM_SVC_IPC_REQUEST:
         tfm_psa_ipc_request_handler(svc_args);
         break;
@@ -47,6 +51,13 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
     }
 
     return exc_return;
+}
+
+__attribute__ ((naked)) void tfm_core_handler_mode(void)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_HANDLER_MODE));
 }
 
 void tfm_access_violation_handler(void)

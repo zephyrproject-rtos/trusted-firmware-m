@@ -170,14 +170,19 @@ void tfm_thrd_activate_schedule(void)
 void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
 {
     /*
-     * There is no selected thread before scheduler start, assign
-     * a caller provided thread as current thread. This function
-     * should get called only ONCE; further calling triggers assert.
+     * There is no selected thread before scheduler start, assign the caller
+     * provided thread as the current thread. Update the hardware PSP/PSPLIM
+     * with the value in thread context to ensure they are identical.
+     * This function can be called only ONCE; further calling triggers assert.
      */
     TFM_CORE_ASSERT(CURR_THRD == NULL);
     TFM_CORE_ASSERT(pth != NULL);
+    TFM_CORE_ASSERT(pth->state_ctx.ctxb.sp != 0);
+
+    tfm_arch_update_ctx(&pth->state_ctx.ctxb);
 
     CURR_THRD = pth;
+
     tfm_thrd_activate_schedule();
 }
 

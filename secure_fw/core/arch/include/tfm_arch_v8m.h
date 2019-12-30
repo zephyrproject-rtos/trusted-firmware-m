@@ -101,6 +101,17 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
+ * \brief Update context value into hardware
+ *
+ * \param[in] pctx        Pointer of context data
+ */
+__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_state_context_ext *pctx)
+{
+    __set_PSP(pctx->sp);
+    __set_PSPLIM(pctx->sp_limit);
+}
+
+/**
  * \brief Set MSPLIM register.
  *
  * \param[in] msplim        Register value to be written into MSPLIM.

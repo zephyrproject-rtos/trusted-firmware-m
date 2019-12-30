@@ -526,7 +526,7 @@ void tfm_spm_init(void)
 {
     uint32_t i, j, num;
     struct spm_partition_desc_t *partition;
-    struct tfm_thrd_ctx *pth, this_thrd;
+    struct tfm_thrd_ctx *pth, *p_ns_entry_thread = NULL;
     const struct tfm_spm_partition_platform_data_t **platform_data_p;
 
     tfm_pool_init(conn_handle_pool,
@@ -587,6 +587,10 @@ void tfm_spm_init(void)
 
         pth->prior = tfm_spm_partition_get_priority(i);
 
+        if (partition->static_data->partition_id == TFM_SP_NON_SECURE_ID) {
+            p_ns_entry_thread = pth;
+        }
+
         /* Kick off */
         if (tfm_thrd_start(pth) != THRD_SUCCESS) {
             tfm_core_panic();
@@ -614,19 +618,14 @@ void tfm_spm_init(void)
      * All threads initialized, start the scheduler.
      *
      * NOTE:
-     * Here is the booting privileged thread mode, and will never
-     * return to this place after scheduler is started. The start
-     * function has to save current runtime context to act as a
-     * 'current thread' to avoid repeating NULL 'current thread'
-     * checking while context switching. This saved context is worthy
-     * of being saved somewhere if there are potential usage purpose.
-     * Let's save this context in a local variable 'this_thrd' at
-     * current since there is no usage for it.
-     * Also set tfm_nspm_thread_entry as pfn for this thread to
-     * use in detecting NS/S thread scheduling changes.
+     * It is worthy to give the thread object to scheduler if the background
+     * context belongs to one of the threads. Here the background thread is the
+     * initialization thread who calls SPM SVC, which re-uses the non-secure
+     * entry thread's stack. After SPM initialization is done, this stack is
+     * cleaned up and the background context is never going to return. Tell
+     * the scheduler that the current thread is non-secure entry thread.
      */
-    this_thrd.pfn = (tfm_thrd_func_t)tfm_nspm_thread_entry;
-    tfm_thrd_start_scheduler(&this_thrd);
+    tfm_thrd_start_scheduler(p_ns_entry_thread);
 }
 
 void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
