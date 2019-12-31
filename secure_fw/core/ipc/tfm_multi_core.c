@@ -11,6 +11,7 @@
 #include "tfm_spe_mailbox.h"
 #include "tfm_utils.h"
 #include "log/tfm_log.h"
+#include "log/tfm_assert.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
 

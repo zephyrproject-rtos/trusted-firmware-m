@@ -9,6 +9,7 @@
 
 /* This header file collects the architecture related operations. */
 
+#include <stddef.h>
 #include <inttypes.h>
 #include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
