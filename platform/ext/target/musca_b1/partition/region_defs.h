@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,13 @@
 
 #ifdef BL2
 /* Bootloader regions */
+/* Since eFlash is written using the eFlash driver, it is wiser to run
+ * the driver code from sram instead of eFlash, to avoid any interference.
+ */
+#define BL2_CODE_SRAM_ALIAS_BASE (S_CODE_SRAM_ALIAS_BASE)
+#define BL2_CODE_SRAM_ALIAS(x)   (BL2_CODE_SRAM_ALIAS_BASE + x)
+#define BL2_CODE_SRAM_BASE       (BL2_CODE_SRAM_ALIAS(FLASH_AREA_BL2_OFFSET))
+
 #define BL2_CODE_START    (S_ROM_ALIAS(FLASH_AREA_BL2_OFFSET))
 #define BL2_CODE_SIZE     (FLASH_AREA_BL2_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)

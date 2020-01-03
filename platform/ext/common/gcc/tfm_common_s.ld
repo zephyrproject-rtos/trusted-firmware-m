@@ -26,10 +26,13 @@
 
 MEMORY
 {
-  FLASH   (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
-  RAM     (rwx) : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
+  FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
+  RAM      (rwx) : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
+#if defined(S_CODE_SRAM_ALIAS_BASE)
+  CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
+#endif
 #ifndef TFM_MULTI_CORE_TOPOLOGY
-  VENEERS (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
+  VENEERS  (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 #endif
 }
 
@@ -138,6 +141,11 @@ SECTIONS
         LONG (LOADADDR(.TFM_RAM_CODE))
         LONG (ADDR(.TFM_RAM_CODE))
         LONG (SIZEOF(.TFM_RAM_CODE))
+#endif
+#if defined(S_CODE_SRAM_ALIAS_BASE)
+        LONG (LOADADDR(.ER_CODE_SRAM))
+        LONG (ADDR(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM))
 #endif
         __copy_table_end__ = .;
     } > FLASH
@@ -518,6 +526,23 @@ SECTIONS
     {
         KEEP(*(.ramfunc))
     } > RAM AT> FLASH
+#endif
+
+#if defined(S_CODE_SRAM_ALIAS_BASE)
+    .ER_CODE_SRAM : ALIGN(4)
+    {
+        *Driver_GFC100_EFlash.o(.text*)
+        *Driver_GFC100_EFlash.o(.rodata*)
+        *gfc100_eflash_drv.o(.text*)
+        *gfc100_eflash_drv.o(.rodata*)
+        *musca_b1_eflash_drv.o(.text*)
+        *musca_b1_eflash_drv.o(.rodata*)
+        . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
+    } > CODE_RAM AT > FLASH
+    Image$$ER_CODE_SRAM$$RO$$Base = ADDR(.ER_CODE_SRAM);
+    Image$$ER_CODE_SRAM$$RO$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+    Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
+    Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 #endif
 
 #if TFM_LVL != 1

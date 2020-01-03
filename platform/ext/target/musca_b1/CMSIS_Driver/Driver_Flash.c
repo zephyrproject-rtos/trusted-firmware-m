@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -43,7 +43,9 @@
                               + FLASH_SST_AREA_SIZE \
                               + FLASH_ITS_AREA_SIZE \
                               + FLASH_NV_COUNTERS_AREA_SIZE)
-#define FLASH_REDIRECT_DEST  S_CODE_SRAM_ALIAS_BASE
+/* Code SRAM might be used to store code, we redirect r/w to the middle of it */
+#define FLASH_REDIRECT_DEST  (S_CODE_SRAM_ALIAS_BASE \
+                              + (TOTAL_CODE_SRAM_SIZE / 2))
 
 #define FLASH0_BASE_S         0x1A000000
 #define FLASH0_BASE_NS        0x0A000000

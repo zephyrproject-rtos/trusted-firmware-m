@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2019 Arm Limited
+; * Copyright (c) 2009-2020 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
-    RAM   (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
+    FLASH    (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
+    CODE_RAM (rwx) : ORIGIN = BL2_CODE_SRAM_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
+    RAM      (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
 }
 
 __heap_size__  = BL2_HEAP_SIZE;
@@ -38,18 +39,41 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    .text :
+    /* Startup section is loaded to Flash and runs from Flash */
+    .startup :
     {
         KEEP(*(.vectors))
         __Vectors_End = .;
         __Vectors_Size = __Vectors_End - __Vectors;
         __end__ = .;
 
-        *(.text*)
 
         KEEP(*(.init))
         KEEP(*(.fini))
 
+        *startup_cmsdk_musca_bl2.*
+    } > FLASH
+
+    /* eFlash driver code that gets copied from Flash to SRAM */
+    .ER_CODE_SRAM :
+    {
+        *Driver_GFC100_EFlash.o(.text*)
+        *Driver_GFC100_EFlash.o(.rodata*)
+        *gfc100_eflash_drv.o(.text*)
+        *gfc100_eflash_drv.o(.rodata*)
+        *musca_b1_eflash_drv.o(.text*)
+        *musca_b1_eflash_drv.o(.rodata*)
+        . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
+    } > CODE_RAM AT > FLASH
+    Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
+    Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+
+    .text :
+    {
+        *(.text*)
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
 
         /* .ctors */
         *crtbegin.o(.ctors)
@@ -92,6 +116,9 @@ SECTIONS
         LONG (__etext)
         LONG (__data_start__)
         LONG (__data_end__ - __data_start__)
+        LONG (LOADADDR(.ER_CODE_SRAM))
+        LONG (ADDR(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM))
         LONG (DEFINED(__etext2) ? __etext2 : 0)
         LONG (DEFINED(__data2_start__) ? __data2_start__ : 0)
         LONG (DEFINED(__data2_start__) ? __data2_end__ - __data2_start__ : 0)
