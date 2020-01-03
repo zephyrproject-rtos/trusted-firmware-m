@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,5 +48,7 @@
 #define APB_PPCEXP3_DEV     APB_PPCEXP3_DEV_S
 
 #define MUSCA_B1_SCC_DEV    MUSCA_B1_SCC_DEV_S
+
+#define EFLASH0_DEV         GFC100_EFLASH0_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

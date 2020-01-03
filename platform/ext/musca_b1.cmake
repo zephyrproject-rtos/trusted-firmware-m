@@ -97,7 +97,9 @@ if (NOT DEFINED BUILD_NATIVE_DRIVERS)
     message(FATAL_ERROR "Configuration variable BUILD_NATIVE_DRIVERS (true|false) is undefined!")
 elseif (BUILD_NATIVE_DRIVERS)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Native_Driver/uart_pl011_drv.c"
-                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/musca_b1_scc_drv.c")
+                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/musca_b1_scc_drv.c"
+                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/musca_b1_eflash_drv.c"
+                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/gfc100_eflash_drv.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Native_Driver/gpio_cmsdk_drv.c")
 
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/Native_Driver/mpc_sie200_drv.c"
@@ -192,6 +194,7 @@ if (NOT DEFINED BUILD_FLASH)
     message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif (BUILD_FLASH)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_Flash.c")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_GFC100_EFlash.c")
     # As the SST area is going to be in RAM, it is required to set
     # SST_CREATE_FLASH_LAYOUT to be sure the SST service knows that when it
     # starts the SST area does not contain any valid SST flash layout and it

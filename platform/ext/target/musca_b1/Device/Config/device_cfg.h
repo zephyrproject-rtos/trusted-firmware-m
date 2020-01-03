@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,9 @@
 #define CMSDK_TIMER0_NS
 #define CMSDK_TIMER1_S
 #define CMSDK_TIMER1_NS
+
+/* GFC-100 EFlash controller */
+#define GFC100_EFLASH0_S
 
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200

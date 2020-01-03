@@ -26,10 +26,12 @@
  * 0x0A10_0000 Secondary image area (896 KB):
  *    0x0A10_0000 Secure     image secondary (384 KB)
  *    0x0A16_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Secure Storage Area (20 KB)
- * 0x0A1E_5000 Internal Trusted Storage Area (16 KB)
- * 0x0A1E_9000 NV counters area (4 KB)
- * 0x0A1E_A000 Unused
+ * 0x0A1E_0000 Secure Storage Area (80 KB)
+ * 0x0A1F_4000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1F_C000 NV counters area (16 KB)
+ *
+ * Note: As eFlash is written at runtime, the eFlash driver code is placed
+ * in code sram to avoid any interference.
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
@@ -51,8 +53,8 @@
                                          FLASH_S_PARTITION_SIZE :    \
                                          FLASH_NS_PARTITION_SIZE)
 
-/* Sector size of the flash hardware */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)   /* 4 KB */
+/* Sector size of the embedded flash hardware */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x4000)   /* 16 KB */
 #define FLASH_TOTAL_SIZE                (0x200000) /* 2 MB */
 
 /* Flash layout info for BL2 bootloader */
@@ -124,18 +126,19 @@
  */
 #define MCUBOOT_STATUS_MAX_ENTRIES      (0)
 
-/* Note: FLASH_SST_AREA_OFFSET, FLASH_ITS_AREA_OFFSET and
- * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes
- * to these addresses are redirected to Code SRAM by Driver_Flash.c.
+/* Note: FLASH_SST_AREA_OFFSET and FLASH_NV_COUNTERS_AREA_OFFSET point to
+ * offsets in flash, but reads and writes to these addresses are redirected to
+ * Code SRAM by Driver_Flash.c.
+ * SST size is 80 KB.
  */
 #define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+#define FLASH_SST_AREA_SIZE             (5 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
-/* Internal Trusted Storage (ITS) Service definitions */
+/* Internal Trusted Storage (ITS) Service definitions (32 KB) */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
                                          FLASH_SST_AREA_SIZE)
-#define FLASH_ITS_AREA_SIZE             (0x4000)   /* 16 KB */
+#define FLASH_ITS_AREA_SIZE             (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
@@ -183,7 +186,7 @@
  * allocated in the external flash just for development platforms that don't
  * have internal flash available.
  */
-#define ITS_FLASH_DEV_NAME Driver_FLASH0
+#define ITS_FLASH_DEV_NAME Driver_EFLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
@@ -205,7 +208,7 @@
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
 #define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_NV_COUNTERS_AREA_SIZE
 
 /* Use eFlash 0 memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x1A000000)

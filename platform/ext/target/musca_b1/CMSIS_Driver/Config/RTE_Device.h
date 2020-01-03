@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,5 +128,10 @@
 // <i> Configuration settings for Driver_FLASH0 in component ::Drivers:FLASH
 #define   RTE_FLASH0                      1
 // </e> FLASH (Flash Memory) [Driver_FLASH0]
+
+// <e> EFLASH (Flash Memory) [Driver_EFLASH0]
+// <i> Configuration settings for Driver_EFLASH0 in component ::Drivers:FLASH
+#define   RTE_EFLASH0                     1
+// </e> EFLASH (Flash Memory) [Driver_EFLASH0]
 
 #endif  /* __RTE_DEVICE_H__ */
