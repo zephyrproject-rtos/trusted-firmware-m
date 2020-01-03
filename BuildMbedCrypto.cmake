@@ -83,10 +83,6 @@ externalproject_add(${MBEDCRYPTO_TARGET_NAME}
     CMAKE_ARGS -DENABLE_TESTING=OFF -DENABLE_PROGRAMS=OFF
     #Enforce our build system's settings.
     CMAKE_ARGS -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-    #Workaround for MbedTLS issue https://github.com/ARMmbed/mbedtls/issues/1496
-    if(MBEDCRYPTO_MBEDTLS_VERSION VERSION_GREATER "2.7.0")
-       CMAKE_ARGS -DCMAKE_HOST_UNIX:bool=true
-    endif()
     #Inherit the build setting of this project
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${MBEDCRYPTO_BUILD_TYPE}
     #C compiler settings
