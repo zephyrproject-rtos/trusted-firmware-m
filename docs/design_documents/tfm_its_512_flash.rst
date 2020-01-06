@@ -1,6 +1,6 @@
-===============================================================
+###############################################################
 Add support for block-aligned flash in Internal Trusted Storage
-===============================================================
+###############################################################
 
 :Author: Minos Galanakis
 :Organization: Arm Limited
@@ -38,31 +38,31 @@ Proposed implementation overview
 ================================
 
 1. A new block-sized static buffer should be added to its_flash.c when
-``ITS_FLASH_PROGRAM_UNIT`` is larger than currently supported.
+   ``ITS_FLASH_PROGRAM_UNIT`` is larger than currently supported.
 2. Methods calling the flash API such as ``its_flash_write()`` or
-``its_flash_block_to_block_move()`` will populate the buffer instead of
-directly programming the flash.
+   ``its_flash_block_to_block_move()`` will populate the buffer instead of
+   directly programming the flash.
 3. A new method ``its_flash_flush()``, should be provided in order to flush
-the block buffer to the device.
-4. ``its_flash_flush()`` should be called twice: Once after a data block update
-and once more after the metadata block update is completed.
-4. The proposed design should require that the data block update is
-always completed before the metadata block update starts
-5. Writes to the block buffer should be atomic, and guarded against corruption
-by data from different blocks.
+   the block buffer to the device.
+4. ``its_flash_flush()`` should be called twice: Once after a data block
+   update and once more after the metadata block update is completed.
+5. The proposed design should require that the data block update is always
+   completed before the metadata block update starts
+6. Writes to the block buffer should be atomic, and guarded against corruption
+   by data from different blocks.
 
 Considerations
 ==============
 
 - The proposed implementation will increase the RAM usage of ITS by the size
-of a block, only for platforms which require block-aligned writes.
+  of a block, only for platforms which require block-aligned writes.
 - Currently power-failure is detected by software by incrementing an 8-bit
-metadata header field (``swap_count``), as the last written byte. When the
-proposed block-buffer is used, the block is programmed in one-shot and the
-order the bytes are written on the physical device, is hardware dependent.
+  metadata header field (``swap_count``), as the last written byte. When the
+  proposed block-buffer is used, the block is programmed in one-shot and the
+  order the bytes are written on the physical device, is hardware dependent.
 - A set of guarantees are required by the supported flash ECC devices.
-The device's flash APIs should provide a mechanism to capture and raise
-incomplete program operations, as well as write bytes in a sequential order.
+  The device's flash APIs should provide a mechanism to capture and raise
+  incomplete program operations, as well as write bytes in a sequential order.
 
 For example, if a board powers down through a 512 page program operation, the
 next read operation should return an error rather than read invalid data.
@@ -71,6 +71,8 @@ Functional flow diagram
 =======================
 
 The logic of the proposal is described in the following diagram
+
+.. code-block::
 
         |----------------------|
         |   data write()       |
@@ -97,7 +99,6 @@ The logic of the proposal is described in the following diagram
                                         |    Operation Complete    |
                                         |--------------------------|
 
-
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

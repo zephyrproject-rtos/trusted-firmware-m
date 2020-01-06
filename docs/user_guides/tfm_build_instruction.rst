@@ -214,7 +214,7 @@ line arguments:
             ``-DTARGET_PLATFORM=AN524``
           - Cypress CYS0644ABZI-S2D44 board (PSoC64 platform)
             ``-DTARGET_PLATFORM=psoc64``
-            See :doc:`Cypress PSoC 64 platform specifics </platform/ext/target/cypress/psoc64/cypress_psoc_64_spec>`
+            See :doc:`Cypress PSoC 64 platform specifics </platform/ext/target/cypress/psoc64/cypress_psoc64_spec>`
           - DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS platform)
             ``-DTARGET_PLATFORM=SSE-200_AWS``
 
@@ -250,4 +250,4 @@ line arguments:
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

@@ -41,8 +41,8 @@ Feedback can be submitted via email to
 .. _ARMv8-M Architecture: https://developer.arm.com/docs/100688/latest/an-introduction-to-the-armv8-m-architecture
 .. _Platform Security Architecture: https://www.arm.com/why-arm/architecture/platform-security-architecture
 .. _PSA certified: https://www.psacertified.org/
-.. _Trusted Firmware-M documentation: Documentation home_
+.. _Trusted Firmware-M documentation: `Documentation home`_
 .. _Documentation home: https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/readme.html
 .. _trustedfirmware.org: http://www.trustedfirmware.org
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
