@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -75,6 +75,15 @@ int32_t tfm_core_init(void)
         return TFM_ERROR_GENERIC;
     }
 
+    /*
+     * Access to any peripheral should be performed after programming
+     * the necessary security components such as PPC/SAU.
+     */
+    plat_err = tfm_spm_hal_init_isolation_hw();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
+
     /* Performs platform specific initialization */
     plat_err = tfm_spm_hal_post_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -88,11 +97,6 @@ int32_t tfm_core_init(void)
 #endif
 
     tfm_core_validate_boot_data();
-
-    plat_err = tfm_spm_hal_init_isolation_hw();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
 
     configure_ns_code();
 
