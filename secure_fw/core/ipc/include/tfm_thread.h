@@ -45,8 +45,8 @@ struct tfm_state_context {
 struct tfm_core_thread_t {
     tfm_core_thrd_entry_t pfn;          /* entry function               */
     void            *param;             /* entry parameter              */
-    uintptr_t       sp_btm;             /* stack bottom (higher address)*/
-    uintptr_t       sp_top;             /* stack top    (lower address) */
+    uintptr_t       stk_btm;            /* stack bottom (lower address) */
+    uintptr_t       stk_top;            /* stack top    (higher address)*/
     uint32_t        prior;              /* priority                     */
     uint32_t        state;              /* state                        */
 
@@ -61,8 +61,8 @@ struct tfm_core_thread_t {
  *  pth         -    pointer of caller provided thread context
  *  pfn         -    thread entry function
  *  param       -    thread entry function parameter
- *  sp_btm      -    stack pointer bottom (higher address)
- *  sp_top      -    stack pointer top (lower address)
+ *  stk_top     -    stack pointer top (higher address)
+ *  stk_btm     -    stack pointer bottom (lower address)
  *
  * Notes :
  *  Thread contex rely on caller allocated memory; initialize members in
@@ -70,7 +70,7 @@ struct tfm_core_thread_t {
  */
 void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
                         tfm_core_thrd_entry_t pfn, void *param,
-                        uintptr_t sp_btm, uintptr_t sp_top);
+                        uintptr_t stk_top, uintptr_t stk_btm);
 
 /*
  * Set thread priority.

@@ -1002,7 +1002,7 @@ static void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
             stacked_ctx_pos += TFM_BASIC_FP_CONTEXT_WORDS * sizeof(uint32_t);
         }
 
-        if (stacked_ctx_pos != p_cur_sp->runtime_data.sp_thrd.sp_btm) {
+        if (stacked_ctx_pos != p_cur_sp->runtime_data.sp_thrd.stk_top) {
             tfm_core_panic();
         }
     } else if (p_cur_sp->static_data->partition_id <= 0) {

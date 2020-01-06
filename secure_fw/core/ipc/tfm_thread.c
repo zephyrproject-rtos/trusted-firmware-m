@@ -85,14 +85,14 @@ static void update_running_head(struct tfm_core_thread_t **runn,
 /* Set context members only. No validation here */
 void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
                         tfm_core_thrd_entry_t pfn, void *param,
-                        uintptr_t sp_btm, uintptr_t sp_top)
+                        uintptr_t stk_top, uintptr_t stk_btm)
 {
     pth->prior = THRD_PRIOR_MEDIUM;
     pth->state = THRD_STATE_CREATING;
     pth->pfn = pfn;
     pth->param = param;
-    pth->sp_btm = sp_btm;
-    pth->sp_top = sp_top;
+    pth->stk_btm = stk_btm;
+    pth->stk_top = stk_top;
 }
 
 __attribute__((section("SFN")))
@@ -103,14 +103,14 @@ static void exit_zone(void)
 
 static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
                                         void *param, uintptr_t pfn,
-                                        uintptr_t sp_btm, uintptr_t sp_top)
+                                        uintptr_t stk_btm, uintptr_t stk_top)
 {
     /*
      * For security consideration, set unused registers into ZERO;
      * and only necessary registers are set here.
      */
     struct tfm_state_context_t *p_ctxa =
-                            (struct tfm_state_context_t *)sp_btm;
+                            (struct tfm_state_context_t *)stk_top;
 
     /*
      * Shift back SP to leave space for holding base context
@@ -127,7 +127,8 @@ static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
 
     tfm_core_util_memset(ctx, 0, sizeof(*ctx));
 
-    tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa, (uint32_t)sp_top);
+    tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa,
+                                (uint32_t)stk_btm);
 }
 
 uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
@@ -135,15 +136,15 @@ uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
     /* Validate parameters before really start */
     if ((pth->state != THRD_STATE_CREATING) ||
         (pth->pfn == NULL)                  ||
-        (pth->sp_btm == 0)              ||
-        (pth->sp_top == 0)) {
+        (pth->stk_btm == 0)                 ||
+        (pth->stk_top == 0)) {
         return THRD_ERR_INVALID_PARAM;
     }
 
     /* Thread management runs in handler mode; set context for thread mode. */
     tfm_thrd_initialize_context(&pth->state_ctx,
                                 pth->param, (uintptr_t)pth->pfn,
-                                pth->sp_btm, pth->sp_top);
+                                pth->stk_btm, pth->stk_top);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, pth);
