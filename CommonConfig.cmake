@@ -318,14 +318,32 @@ if (PSA_API_TEST)
 	endif()
 endif()
 
+# The config for enable secure context management in TF-M
+if (NOT DEFINED CONFIG_TFM_ENABLE_CTX_MGMT)
+	set(CONFIG_TFM_ENABLE_CTX_MGMT ON)
+endif()
+
+if (CONFIG_TFM_ENABLE_CTX_MGMT)
+	add_definitions(-DCONFIG_TFM_ENABLE_CTX_MGMT)
+endif()
+
 # This flag indicates if the non-secure OS is capable of identify the non-secure clients
 # which call the secure services. It is diabled in IPC model.
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	if (TFM_PSA_API)
 		set(TFM_NS_CLIENT_IDENTIFICATION OFF)
 	else()
-		set(TFM_NS_CLIENT_IDENTIFICATION ON)
+		if (CONFIG_TFM_ENABLE_CTX_MGMT)
+			set(TFM_NS_CLIENT_IDENTIFICATION ON)
+		else()
+			set(TFM_NS_CLIENT_IDENTIFICATION OFF)
+		endif()
 	endif()
+endif()
+
+if (NOT CONFIG_TFM_ENABLE_CTX_MGMT AND TFM_NS_CLIENT_IDENTIFICATION)
+	# NS client ID is part of context management.
+	message(FATAL_ERROR "TFM_NS_CLIENT_IDENTIFICATION cannot be ON when CONFIG_TFM_ENABLE_CTX_MGMT is OFF")
 endif()
 
 if (BL2)
