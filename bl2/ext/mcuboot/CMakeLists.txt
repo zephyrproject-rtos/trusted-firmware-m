@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,17 +12,24 @@ set(TFM_BUILD_IN_SPE ON)
 #Tell cmake where our modules can be found
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../../cmake)
 
-#Set variables to appropriate path
-set(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR})
-get_filename_component(TFM_ROOT_DIR "${MCUBOOT_DIR}/../../.." ABSOLUTE)
-
 #Include common stuff to control cmake.
 include("Common/BuildSys")
 
 #Start an embedded project.
+get_filename_component(TFM_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
 embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(mcuboot LANGUAGES ASM C)
 embedded_project_fixup()
+
+#Set the appropriate MCUBoot path
+if (MCUBOOT_REPO STREQUAL "TF-M")
+	get_filename_component(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR} ABSOLUTE)
+else()
+	get_filename_component(MCUBOOT_DIR "${TFM_ROOT_DIR}/../mcuboot/boot" ABSOLUTE)
+	if (NOT EXISTS ${MCUBOOT_DIR})
+		message(FATAL_ERROR "Missing MCUBoot. Please clone the MCUBoot repo to directory \"${MCUBOOT_DIR}\".")
+	endif()
+endif()
 
 #Check input variables
 if (NOT DEFINED BL2)
@@ -71,19 +78,24 @@ endif()
 
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C
-		"${MCUBOOT_DIR}/bl2_main.c"
-		"${MCUBOOT_DIR}/flash_map_extended.c"
-		"${MCUBOOT_DIR}/flash_map_legacy.c"
-		"${MCUBOOT_DIR}/keys.c"
+		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/bl2_main.c"
+		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/flash_map_extended.c"
+		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/flash_map_legacy.c"
+		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/keys.c"
+		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_rsa.c"
 		"${MCUBOOT_DIR}/bootutil/src/tlv.c"
-		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
-		"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
-		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 	)
+
+if (MCUBOOT_REPO STREQUAL "TF-M")
+	list(APPEND ALL_SRC_C
+			"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
+			"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
+		)
+endif()
 
 #Define location of Mbed Crypto source, build, and installation directory.
 set(MBEDTLS_CONFIG_FILE "config-rsa.h")
@@ -114,7 +126,7 @@ embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR} 
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/bootutil/include/ ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MCUBOOT_DIR}/bootutil/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDCRYPTO_INSTALL_DIR}/include ABSOLUTE APPEND)
 
 #Define linker file
@@ -164,6 +176,7 @@ endif()
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
+message("- MCUBOOT_REPO: '${MCUBOOT_REPO}'.")
 message("- MCUBOOT_IMAGE_NUMBER: '${MCUBOOT_IMAGE_NUMBER}'.")
 message("- MCUBOOT_UPGRADE_STRATEGY: '${MCUBOOT_UPGRADE_STRATEGY}'.")
 message("- MCUBOOT_SIGNATURE_TYPE: '${MCUBOOT_SIGNATURE_TYPE}'.")
@@ -176,6 +189,10 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 							MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}"
 							MCUBOOT_TARGET_CONFIG="flash_layout.h")
+
+if (MCUBOOT_REPO STREQUAL "UPSTREAM")
+	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_USE_UPSTREAM)
+endif()
 
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
 	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_SIGN_RSA MCUBOOT_SIGN_RSA_LEN=3072)

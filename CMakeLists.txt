@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,9 @@ include("Common/BuildSys")
 
 add_subdirectory(secure_fw)
 add_subdirectory(app)
-add_subdirectory(bl2/ext/mcuboot)
+if (BL2)
+    add_subdirectory(bl2/ext/mcuboot)
+endif()
 
 #Define a top-level generic tfm project
 project(tfm LANGUAGES)
