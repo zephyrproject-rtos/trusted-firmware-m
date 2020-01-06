@@ -669,13 +669,13 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
  * PendSV specified function.
  *
  * Parameters :
- *  ctxb        -    State context storage pointer
+ *  p_actx        -    Architecture context storage pointer
  *
  * Notes:
  *  This is a staging API. Scheduler should be called in SPM finally and
  *  this function will be obsoleted later.
  */
-void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
+void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
 
 /**
  * \brief                      SPM initialization implementation

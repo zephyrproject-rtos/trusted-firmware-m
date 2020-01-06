@@ -616,10 +616,10 @@ uint32_t tfm_spm_init(void)
      */
     tfm_core_thrd_start_scheduler(p_ns_entry_thread);
 
-    return p_ns_entry_thread->state_ctx.ctxb.lr;
+    return p_ns_entry_thread->arch_ctx.lr;
 }
 
-void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
+void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL == 2
     struct spm_partition_desc_t *p_next_partition;
@@ -648,7 +648,7 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
         tfm_spm_partition_change_privilege(is_privileged);
 #endif
 
-        tfm_core_thrd_switch_context(ctxb, pth_curr, pth_next);
+        tfm_core_thrd_switch_context(p_actx, pth_curr, pth_next);
     }
 
     /*

@@ -37,10 +37,6 @@
 /* Thread entry function type */
 typedef void *(*tfm_core_thrd_entry_t)(void *);
 
-struct tfm_state_context {
-    struct tfm_state_context_ext  ctxb;
-};
-
 /* Thread context */
 struct tfm_core_thread_t {
     tfm_core_thrd_entry_t pfn;          /* entry function               */
@@ -50,7 +46,7 @@ struct tfm_core_thread_t {
     uint32_t        prior;              /* priority                     */
     uint32_t        state;              /* state                        */
 
-    struct tfm_state_context state_ctx; /* State context                */
+    struct tfm_arch_ctx_t    arch_ctx;  /* State context                */
     struct tfm_core_thread_t *next;     /* next thread in list          */
 };
 
@@ -150,7 +146,7 @@ uint32_t __STATIC_INLINE tfm_core_thrd_get_state(struct tfm_core_thread_t *pth)
 void __STATIC_INLINE tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
                                               uint32_t retval)
 {
-    TFM_STATE_RET_VAL(&pth->state_ctx) = retval;
+    TFM_STATE_RET_VAL(&pth->arch_ctx) = retval;
 }
 
 /*
@@ -206,17 +202,17 @@ void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth);
 void tfm_core_thrd_activate_schedule(void);
 
 /*
- * Save current context into 'prev' thread and switch to 'next'.
+ * Save current architecture context into 'prev' thread and switch to 'next'.
  *
  * Parameters :
- *  ctxb        -     latest caller context
+ *  p_actx      -     latest caller context
  *  prev        -     previous thread to be switched out
  *  next        -     thread to be run
  *
  * Notes :
  *  This function could be called multiple times before scheduling.
  */
-void tfm_core_thrd_switch_context(struct tfm_state_context_ext *ctxb,
+void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,
                                   struct tfm_core_thread_t *prev,
                                   struct tfm_core_thread_t *next);
 

@@ -101,7 +101,7 @@ static void exit_zone(void)
     tfm_core_thrd_exit();
 }
 
-static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
+static void tfm_thrd_initialize_context(struct tfm_arch_ctx_t *p_actx,
                                         void *param, uintptr_t pfn,
                                         uintptr_t stk_btm, uintptr_t stk_top)
 {
@@ -109,25 +109,25 @@ static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
      * For security consideration, set unused registers into ZERO;
      * and only necessary registers are set here.
      */
-    struct tfm_state_context_t *p_ctxa =
+    struct tfm_state_context_t *p_stat_ctx =
                             (struct tfm_state_context_t *)stk_top;
 
     /*
      * Shift back SP to leave space for holding base context
      * since thread is kicked off through exception return.
      */
-    p_ctxa--;
+    p_stat_ctx--;
 
     /* Basic context is considerate at thread start.*/
-    tfm_core_util_memset(p_ctxa, 0, sizeof(*p_ctxa));
-    p_ctxa->r0 = (uint32_t)param;
-    p_ctxa->ra = (uint32_t)pfn;
-    p_ctxa->lr = (uint32_t)exit_zone;
-    p_ctxa->xpsr = XPSR_T32;
+    tfm_core_util_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
+    p_stat_ctx->r0 = (uint32_t)param;
+    p_stat_ctx->ra = (uint32_t)pfn;
+    p_stat_ctx->lr = (uint32_t)exit_zone;
+    p_stat_ctx->xpsr = XPSR_T32;
 
-    tfm_core_util_memset(ctx, 0, sizeof(*ctx));
+    tfm_core_util_memset(p_actx, 0, sizeof(*p_actx));
 
-    tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa,
+    tfm_arch_initialize_ctx_ext(p_actx, (uint32_t)p_stat_ctx,
                                 (uint32_t)stk_btm);
 }
 
@@ -142,7 +142,7 @@ uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
     }
 
     /* Thread management runs in handler mode; set context for thread mode. */
-    tfm_thrd_initialize_context(&pth->state_ctx,
+    tfm_thrd_initialize_context(&pth->arch_ctx,
                                 pth->param, (uintptr_t)pth->pfn,
                                 pth->stk_btm, pth->stk_top);
 
@@ -179,9 +179,9 @@ void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth)
      */
     TFM_CORE_ASSERT(CURR_THRD == NULL);
     TFM_CORE_ASSERT(pth != NULL);
-    TFM_CORE_ASSERT(pth->state_ctx.ctxb.sp != 0);
+    TFM_CORE_ASSERT(pth->arch_ctx.sp != 0);
 
-    tfm_arch_update_ctx(&pth->state_ctx.ctxb);
+    tfm_arch_update_ctx(&pth->arch_ctx);
 
     CURR_THRD = pth;
 
@@ -204,7 +204,7 @@ void tfm_core_thrd_exit(void)
     }
 }
 
-void tfm_core_thrd_switch_context(struct tfm_state_context_ext *ctxb,
+void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,
                                   struct tfm_core_thread_t *prev,
                                   struct tfm_core_thread_t *next)
 {
@@ -215,9 +215,8 @@ void tfm_core_thrd_switch_context(struct tfm_state_context_ext *ctxb,
      * First, update latest context into the current thread context.
      * Then, update background context with next thread's context.
      */
-    tfm_core_util_memcpy(&prev->state_ctx.ctxb, ctxb, sizeof(*ctxb));
-    tfm_core_util_memcpy(ctxb, &next->state_ctx.ctxb,
-                         sizeof(next->state_ctx.ctxb));
+    tfm_core_util_memcpy(&prev->arch_ctx, p_actx, sizeof(*p_actx));
+    tfm_core_util_memcpy(p_actx, &next->arch_ctx, sizeof(next->arch_ctx));
 
     /* Update current thread indicator */
     CURR_THRD = next;

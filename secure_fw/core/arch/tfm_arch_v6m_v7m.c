@@ -70,13 +70,13 @@ __attribute__((naked)) void PendSV_Handler(void)
     );
 }
 
-void tfm_arch_initialize_ctx_ext(struct tfm_state_context_ext *p_ctxb,
+void tfm_arch_initialize_ctx_ext(struct tfm_arch_ctx_t *p_actx,
                                  uint32_t sp, uint32_t sp_limit)
 {
     (void)sp_limit;
 
-    p_ctxb->sp = sp;
-    p_ctxb->lr = INIT_LR_UNPRIVILEGED;
+    p_actx->sp = sp;
+    p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
 
 __attribute__((naked)) void SVC_Handler(void)

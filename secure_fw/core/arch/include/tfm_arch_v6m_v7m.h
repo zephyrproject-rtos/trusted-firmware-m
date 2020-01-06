@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,9 +20,9 @@
 #endif
 
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
-#define INIT_LR_UNPRIVILEGED                    0xFFFFFFFD
+#define EXC_RETURN_THREAD_S_PSP                 0xFFFFFFFD
 
-struct tfm_state_context_ext {
+struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;
     uint32_t    r10;
@@ -97,13 +97,13 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
- * \brief Update context value into hardware
+ * \brief Update architecture context value into hardware
  *
- * \param[in] pctx        Pointer of context data
+ * \param[in] p_actx        Pointer of context data
  */
-__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_state_context_ext *pctx)
+__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
 {
-    __set_PSP(pctx->sp);
+    __set_PSP(p_actx->sp);
 }
 
 /**

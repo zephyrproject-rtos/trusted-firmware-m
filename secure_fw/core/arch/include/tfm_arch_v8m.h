@@ -12,19 +12,26 @@
 
 #include "cmsis_compiler.h"
 
-#define EXC_RETURN_INDICATOR                    (0xF << 28)
-#define EXC_RETURN_SECURITY_STACK_STATUS_MASK   (0x3 << 5)
+#define EXC_RETURN_INDICATOR                    (0xFF << 24)
+#define EXC_RETURN_RES1                         (0x1FFFF << 7)
 #define EXC_RETURN_SECURE_STACK                 (1 << 6)
+#define EXC_RETURN_STACK_RULE                   (1 << 5)
 #define EXC_RETURN_FPU_FRAME_BASIC              (1 << 4)
 #define EXC_RETURN_MODE_THREAD                  (1 << 3)
 #define EXC_RETURN_STACK_PROCESS                (1 << 2)
+#define EXC_RETURN_RES0                         (0 << 1)
 #define EXC_RETURN_EXC_SECURE                   (1)
 
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
-#define INIT_LR_UNPRIVILEGED                    0xFFFFFFFD
+#define EXC_RETURN_THREAD_S_PSP                                 \
+        EXC_RETURN_INDICATOR | EXC_RETURN_RES1 |                \
+        EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
+        EXC_RETURN_FPU_FRAME_BASIC | EXC_RETURN_MODE_THREAD |   \
+        EXC_RETURN_STACK_PROCESS | EXC_RETURN_RES0 |            \
+        EXC_RETURN_EXC_SECURE
 
 #if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
-struct tfm_state_context_ext {
+struct tfm_arch_ctx_t {
     uint32_t    r4;
     uint32_t    r5;
     uint32_t    r6;
@@ -39,7 +46,7 @@ struct tfm_state_context_ext {
     uint32_t    lr;
 };
 #elif defined(__ARM_ARCH_8M_BASE__)
-struct tfm_state_context_ext {
+struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;
     uint32_t    r10;
@@ -101,14 +108,14 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
- * \brief Update context value into hardware
+ * \brief Update architecture context value into hardware
  *
- * \param[in] pctx        Pointer of context data
+ * \param[in] p_actx        Pointer of context data
  */
-__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_state_context_ext *pctx)
+__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
 {
-    __set_PSP(pctx->sp);
-    __set_PSPLIM(pctx->sp_limit);
+    __set_PSP(p_actx->sp);
+    __set_PSPLIM(p_actx->sp_limit);
 }
 
 /**
