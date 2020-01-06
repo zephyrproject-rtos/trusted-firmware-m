@@ -91,7 +91,7 @@ struct spm_partition_runtime_data_t {
     struct tfm_event_t signal_evnt;     /* Event signal                      */
     uint32_t signals;                   /* Service signals had been triggered*/
     struct tfm_list_node_t service_list;/* Service list                      */
-    struct tfm_thrd_ctx sp_thrd;        /* Thread context                    */
+    struct tfm_core_thread_t sp_thrd;   /* Thread object                     */
     uint32_t assigned_signals;          /* All assigned signals              */
 #else /* TFM_PSA_API */
     uint32_t partition_state;

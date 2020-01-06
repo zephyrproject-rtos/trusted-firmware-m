@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,8 +15,8 @@
 #define TFM_EVENT_MAGIC               0x65766e74
 
 struct tfm_event_t {
-    uint32_t magic;               /* 'evnt'               */
-    struct tfm_thrd_ctx *owner;   /* Event blocked thread */
+    uint32_t magic;                    /* 'evnt'               */
+    struct tfm_core_thread_t *owner;   /* Event blocked thread */
 };
 
 /*

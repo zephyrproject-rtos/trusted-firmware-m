@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,18 +14,19 @@
 #include "tfm_core_utils.h"
 
 /* Force ZERO in case ZI(bss) clear is missing */
-static struct tfm_thrd_ctx *p_thrd_head = NULL;
-static struct tfm_thrd_ctx *p_runn_head = NULL;
-static struct tfm_thrd_ctx *p_curr_thrd = NULL;
+static struct tfm_core_thread_t *p_thrd_head = NULL;
+static struct tfm_core_thread_t *p_runn_head = NULL;
+static struct tfm_core_thread_t *p_curr_thrd = NULL;
 
 /* Define Macro to fetch global to support future expansion (PERCPU e.g.) */
 #define LIST_HEAD   p_thrd_head
 #define RUNN_HEAD   p_runn_head
 #define CURR_THRD   p_curr_thrd
 
-static struct tfm_thrd_ctx *find_next_running_thread(struct tfm_thrd_ctx *pth)
+static struct tfm_core_thread_t *find_next_running_thread(
+                                                struct tfm_core_thread_t *pth)
 {
-    while (pth && pth->status != THRD_STAT_RUNNING) {
+    while (pth && pth->state != THRD_STATE_RUNNING) {
         pth = pth->next;
     }
 
@@ -33,7 +34,7 @@ static struct tfm_thrd_ctx *find_next_running_thread(struct tfm_thrd_ctx *pth)
 }
 
 /* To get next running thread for scheduler */
-struct tfm_thrd_ctx *tfm_thrd_next_thread(void)
+struct tfm_core_thread_t *tfm_core_thrd_get_next_thread(void)
 {
     /*
      * First RUNNING thread has highest priority since threads are sorted with
@@ -43,20 +44,20 @@ struct tfm_thrd_ctx *tfm_thrd_next_thread(void)
 }
 
 /* To get current thread for caller */
-struct tfm_thrd_ctx *tfm_thrd_curr_thread()
+struct tfm_core_thread_t *tfm_core_thrd_get_curr_thread(void)
 {
     return CURR_THRD;
 }
 
 /* Insert a new thread into list by descending priority (Highest at head) */
-static void insert_by_prior(struct tfm_thrd_ctx **head,
-                            struct tfm_thrd_ctx *node)
+static void insert_by_prior(struct tfm_core_thread_t **head,
+                            struct tfm_core_thread_t *node)
 {
     if (*head == NULL || (node->prior <= (*head)->prior)) {
         node->next = *head;
         *head = node;
     } else {
-        struct tfm_thrd_ctx *iter = *head;
+        struct tfm_core_thread_t *iter = *head;
 
         while (iter->next && (node->prior > iter->next->prior)) {
             iter = iter->next;
@@ -70,10 +71,10 @@ static void insert_by_prior(struct tfm_thrd_ctx **head,
  * Set first running thread as head to reduce enumerate
  * depth while searching for a first running thread.
  */
-static void update_running_head(struct tfm_thrd_ctx **runn,
-                                struct tfm_thrd_ctx *node)
+static void update_running_head(struct tfm_core_thread_t **runn,
+                                struct tfm_core_thread_t *node)
 {
-    if ((node->status == THRD_STAT_RUNNING) &&
+    if ((node->state == THRD_STATE_RUNNING) &&
         (*runn == NULL || (node->prior < (*runn)->prior))) {
         *runn = node;
     } else {
@@ -82,12 +83,12 @@ static void update_running_head(struct tfm_thrd_ctx **runn,
 }
 
 /* Set context members only. No validation here */
-void tfm_thrd_init(struct tfm_thrd_ctx *pth,
-                   tfm_thrd_func_t pfn, void *param,
-                   uintptr_t sp_btm, uintptr_t sp_top)
+void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
+                        tfm_core_thrd_entry_t pfn, void *param,
+                        uintptr_t sp_btm, uintptr_t sp_top)
 {
     pth->prior = THRD_PRIOR_MEDIUM;
-    pth->status = THRD_STAT_CREATING;
+    pth->state = THRD_STATE_CREATING;
     pth->pfn = pfn;
     pth->param = param;
     pth->sp_btm = sp_btm;
@@ -97,7 +98,7 @@ void tfm_thrd_init(struct tfm_thrd_ctx *pth,
 __attribute__((section("SFN")))
 static void exit_zone(void)
 {
-    tfm_thrd_exit();
+    tfm_core_thrd_exit();
 }
 
 static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
@@ -129,10 +130,10 @@ static void tfm_thrd_initialize_context(struct tfm_state_context *ctx,
     tfm_arch_initialize_ctx_ext(&ctx->ctxb, (uint32_t)p_ctxa, (uint32_t)sp_top);
 }
 
-uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth)
+uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
 {
     /* Validate parameters before really start */
-    if ((pth->status != THRD_STAT_CREATING) ||
+    if ((pth->state != THRD_STATE_CREATING) ||
         (pth->pfn == NULL)                  ||
         (pth->sp_btm == 0)              ||
         (pth->sp_top == 0)) {
@@ -148,26 +149,26 @@ uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth)
     insert_by_prior(&LIST_HEAD, pth);
 
     /* Mark it as RUNNING after insertion */
-    tfm_thrd_set_status(pth, THRD_STAT_RUNNING);
+    tfm_core_thrd_set_state(pth, THRD_STATE_RUNNING);
 
     return THRD_SUCCESS;
 }
 
-void tfm_thrd_set_status(struct tfm_thrd_ctx *pth, uint32_t new_status)
+void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state)
 {
-    TFM_CORE_ASSERT(pth != NULL && new_status < THRD_STAT_INVALID);
+    TFM_CORE_ASSERT(pth != NULL && new_state < THRD_STATE_INVALID);
 
-    pth->status = new_status;
+    pth->state = new_state;
     update_running_head(&RUNN_HEAD, pth);
 }
 
 /* Scheduling won't happen immediately but after the exception returns */
-void tfm_thrd_activate_schedule(void)
+void tfm_core_thrd_activate_schedule(void)
 {
     tfm_arch_trigger_pendsv();
 }
 
-void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
+void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth)
 {
     /*
      * There is no selected thread before scheduler start, assign the caller
@@ -183,18 +184,18 @@ void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth)
 
     CURR_THRD = pth;
 
-    tfm_thrd_activate_schedule();
+    tfm_core_thrd_activate_schedule();
 }
 
 /* Remove current thread out of the schedulable list */
-void tfm_svcall_thrd_exit(void)
+void tfm_svcall_exit_thrd(void)
 {
-    CURR_THRD->status = THRD_STAT_DETACH;
+    CURR_THRD->state = THRD_STATE_DETACH;
     tfm_arch_trigger_pendsv();
 }
 
 __attribute__((section("SFN")))
-void tfm_thrd_exit(void)
+void tfm_core_thrd_exit(void)
 {
     SVC(TFM_SVC_EXIT_THRD);
     while (1) {
@@ -202,9 +203,9 @@ void tfm_thrd_exit(void)
     }
 }
 
-void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
-                             struct tfm_thrd_ctx *prev,
-                             struct tfm_thrd_ctx *next)
+void tfm_core_thrd_switch_context(struct tfm_state_context_ext *ctxb,
+                                  struct tfm_core_thread_t *prev,
+                                  struct tfm_core_thread_t *next)
 {
     TFM_CORE_ASSERT(prev != NULL);
     TFM_CORE_ASSERT(next != NULL);

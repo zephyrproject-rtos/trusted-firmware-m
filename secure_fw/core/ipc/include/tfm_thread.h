@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,12 +12,12 @@
 #include "tfm_arch.h"
 #include "cmsis_compiler.h"
 
-/* Status code */
-#define THRD_STAT_CREATING        0
-#define THRD_STAT_RUNNING         1
-#define THRD_STAT_BLOCK           2
-#define THRD_STAT_DETACH          3
-#define THRD_STAT_INVALID         4
+/* State code */
+#define THRD_STATE_CREATING       0
+#define THRD_STATE_RUNNING        1
+#define THRD_STATE_BLOCK          2
+#define THRD_STATE_DETACH         3
+#define THRD_STATE_INVALID        4
 
 /* Security attribute - default as security */
 #define THRD_ATTR_SECURE_OFFSET   16
@@ -35,23 +35,23 @@
 #define THRD_ERR_INVALID_PARAM    1
 
 /* Thread entry function type */
-typedef void *(*tfm_thrd_func_t)(void *);
+typedef void *(*tfm_core_thrd_entry_t)(void *);
 
 struct tfm_state_context {
     struct tfm_state_context_ext  ctxb;
 };
 
 /* Thread context */
-struct tfm_thrd_ctx {
-    tfm_thrd_func_t pfn;                /* entry function               */
+struct tfm_core_thread_t {
+    tfm_core_thrd_entry_t pfn;          /* entry function               */
     void            *param;             /* entry parameter              */
     uintptr_t       sp_btm;             /* stack bottom (higher address)*/
     uintptr_t       sp_top;             /* stack top    (lower address) */
     uint32_t        prior;              /* priority                     */
-    uint32_t        status;             /* status                       */
+    uint32_t        state;              /* state                        */
 
     struct tfm_state_context state_ctx; /* State context                */
-    struct tfm_thrd_ctx *next;          /* next thread in list          */
+    struct tfm_core_thread_t *next;     /* next thread in list          */
 };
 
 /*
@@ -68,11 +68,12 @@ struct tfm_thrd_ctx {
  *  Thread contex rely on caller allocated memory; initialize members in
  *  context. This function does not insert thread into schedulable list.
  */
-void tfm_thrd_init(struct tfm_thrd_ctx *pth,
-                   tfm_thrd_func_t pfn, void *param,
-                   uintptr_t sp_btm, uintptr_t sp_top);
+void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
+                        tfm_core_thrd_entry_t pfn, void *param,
+                        uintptr_t sp_btm, uintptr_t sp_top);
 
-/* Set thread priority.
+/*
+ * Set thread priority.
  *
  * Parameters :
  *  pth         -     pointer of thread context
@@ -80,10 +81,10 @@ void tfm_thrd_init(struct tfm_thrd_ctx *pth,
  *
  * Notes :
  *  Set thread priority. Priority is set to THRD_PRIOR_MEDIUM in
- *  tfm_thrd_init().
+ *  tfm_core_thrd_init().
  */
-void __STATIC_INLINE tfm_thrd_priority(struct tfm_thrd_ctx *pth,
-                                       uint32_t prior)
+void __STATIC_INLINE tfm_core_thrd_set_priority(struct tfm_core_thread_t *pth,
+                                                uint32_t prior)
 {
     pth->prior &= ~THRD_PRIOR_MASK;
     pth->prior |= prior & THRD_PRIOR_MASK;
@@ -99,40 +100,40 @@ void __STATIC_INLINE tfm_thrd_priority(struct tfm_thrd_ctx *pth,
  * Notes
  *  Reuse prior of thread context to shift down non-secure thread priority.
  */
-void __STATIC_INLINE tfm_thrd_secure(struct tfm_thrd_ctx *pth,
-                                     uint32_t attr_secure)
+void __STATIC_INLINE tfm_core_thrd_set_secure(struct tfm_core_thread_t *pth,
+                                              uint32_t attr_secure)
 {
     pth->prior &= ~THRD_ATTR_NON_SECURE;
     pth->prior |= attr_secure;
 }
 
 /*
- * Set thread status.
+ * Set thread state.
  *
  * Parameters :
  *  pth         -     pointer of thread context
- *  new_status  -     new status of thread
+ *  new_state   -     new state of thread
  *
  * Return :
  *  None
  *
  * Notes :
- *  Thread status is not changed if invalid status value inputed.
+ *  Thread state is not changed if invalid state value inputed.
  */
-void tfm_thrd_set_status(struct tfm_thrd_ctx *pth, uint32_t new_status);
+void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state);
 
 /*
- * Get thread status.
+ * Get thread state.
  *
  * Parameters :
  *  pth         -     pointer of thread context
  *
  * Return :
- *  Status of thread
+ *  State of thread
  */
-uint32_t __STATIC_INLINE tfm_thrd_get_status(struct tfm_thrd_ctx *pth)
+uint32_t __STATIC_INLINE tfm_core_thrd_get_state(struct tfm_core_thread_t *pth)
 {
-    return pth->status;
+    return pth->state;
 }
 
 /*
@@ -146,8 +147,8 @@ uint32_t __STATIC_INLINE tfm_thrd_get_status(struct tfm_thrd_ctx *pth)
  *  This API is useful for blocked syscall blocking thread. Syscall
  *  could set its return value to the caller before caller goes.
  */
-void __STATIC_INLINE tfm_thrd_set_retval(struct tfm_thrd_ctx *pth,
-                                         uint32_t retval)
+void __STATIC_INLINE tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
+                                              uint32_t retval)
 {
     TFM_STATE_RET_VAL(&pth->state_ctx) = retval;
 }
@@ -163,9 +164,9 @@ void __STATIC_INLINE tfm_thrd_set_retval(struct tfm_thrd_ctx *pth,
  *
  * Notes :
  *  This function validates thread info. It returns error if thread info
- *  is not correct. Thread is avaliable after successful tfm_thrd_start().
+ *  is not correct. Thread is avaliable after successful tfm_core_thrd_start().
  */
-uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth);
+uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth);
 
 /*
  * Get current running thread.
@@ -173,7 +174,7 @@ uint32_t tfm_thrd_start(struct tfm_thrd_ctx *pth);
  * Return :
  *  Current running thread context pointer.
  */
-struct tfm_thrd_ctx *tfm_thrd_curr_thread(void);
+struct tfm_core_thread_t *tfm_core_thrd_get_curr_thread(void);
 
 /*
  * Get next running thread in list.
@@ -181,7 +182,7 @@ struct tfm_thrd_ctx *tfm_thrd_curr_thread(void);
  * Return :
  *  Pointer of next thread to be run.
  */
-struct tfm_thrd_ctx *tfm_thrd_next_thread(void);
+struct tfm_core_thread_t *tfm_core_thrd_get_next_thread(void);
 
 /*
  * Start scheduler for existing threads
@@ -194,7 +195,7 @@ struct tfm_thrd_ctx *tfm_thrd_next_thread(void);
  *  Caller needs to provide a thread object to collect current context.
  *  The usage of the collected context is caller defined.
  */
-void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth);
+void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth);
 
 /*
  * Activate a scheduling action after exception.
@@ -202,7 +203,7 @@ void tfm_thrd_start_scheduler(struct tfm_thrd_ctx *pth);
  * Notes :
  *  This function could be called multiple times before scheduling.
  */
-void tfm_thrd_activate_schedule(void);
+void tfm_core_thrd_activate_schedule(void);
 
 /*
  * Save current context into 'prev' thread and switch to 'next'.
@@ -215,9 +216,9 @@ void tfm_thrd_activate_schedule(void);
  * Notes :
  *  This function could be called multiple times before scheduling.
  */
-void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
-                             struct tfm_thrd_ctx *prev,
-                             struct tfm_thrd_ctx *next);
+void tfm_core_thrd_switch_context(struct tfm_state_context_ext *ctxb,
+                                  struct tfm_core_thread_t *prev,
+                                  struct tfm_core_thread_t *next);
 
 /*
  * Svcall to exit current running thread.
@@ -225,7 +226,7 @@ void tfm_thrd_context_switch(struct tfm_state_context_ext *ctxb,
  * Notes :
  *  Remove current thread out of schedulable list.
  */
-void tfm_svcall_thrd_exit(void);
+void tfm_svcall_exit_thrd(void);
 
 /*
  * Exit current running thread for client.
@@ -233,6 +234,6 @@ void tfm_svcall_thrd_exit(void);
  * Notes:
  *  Must be called in thread mode.
  */
-void tfm_thrd_exit(void);
+void tfm_core_thrd_exit(void);
 
 #endif

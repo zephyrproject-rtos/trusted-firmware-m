@@ -176,7 +176,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
 
     /*
      * Expected signals are included in signal wait mask, ignored signals
-     * should not be set and affect caller thread status. Save this mask for
+     * should not be set and affect caller thread state. Save this mask for
      * further checking while signals are ready to be set.
      */
     partition->runtime_data.signal_mask = signal_mask;
@@ -582,7 +582,7 @@ static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
      */
     /* If it is a NS request via RPC, the owner of this message is not set */
     if (!is_tfm_rpc_msg(msg)) {
-        TFM_CORE_ASSERT(msg->ack_evnt.owner->status == THRD_STAT_BLOCK);
+        TFM_CORE_ASSERT(msg->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
     while (msg->msg.out_size[i] != 0) {
@@ -1040,7 +1040,7 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 
     switch (svc_num) {
     case TFM_SVC_EXIT_THRD:
-        tfm_svcall_thrd_exit();
+        tfm_svcall_exit_thrd();
         break;
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();

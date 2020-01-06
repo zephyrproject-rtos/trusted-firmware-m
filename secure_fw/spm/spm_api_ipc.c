@@ -445,7 +445,7 @@ uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    struct tfm_thrd_ctx *pth = tfm_thrd_curr_thread();
+    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
     struct spm_partition_desc_t *partition;
     struct spm_partition_runtime_data_t *r_data;
 
@@ -456,16 +456,16 @@ uint32_t tfm_spm_partition_get_running_partition_id(void)
     return partition->static_data->partition_id;
 }
 
-static struct tfm_thrd_ctx *
+static struct tfm_core_thread_t *
     tfm_spm_partition_get_thread_info(uint32_t partition_idx)
 {
     return &g_spm_partition_db.partitions[partition_idx].runtime_data.sp_thrd;
 }
 
-static tfm_thrd_func_t
+static tfm_core_thrd_entry_t
     tfm_spm_partition_get_init_func(uint32_t partition_idx)
 {
-    return (tfm_thrd_func_t)(g_spm_partition_db.partitions[partition_idx].
+    return (tfm_core_thrd_entry_t)(g_spm_partition_db.partitions[partition_idx].
                              static_data->partition_init);
 }
 
@@ -514,7 +514,7 @@ uint32_t tfm_spm_init(void)
 {
     uint32_t i, j, num;
     struct spm_partition_desc_t *partition;
-    struct tfm_thrd_ctx *pth, *p_ns_entry_thread = NULL;
+    struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct tfm_spm_partition_platform_data_t **platform_data_p;
 
     tfm_pool_init(conn_handle_pool,
@@ -567,11 +567,11 @@ uint32_t tfm_spm_init(void)
             tfm_core_panic();
         }
 
-        tfm_thrd_init(pth,
-                      tfm_spm_partition_get_init_func(i),
-                      NULL,
-                      (uintptr_t)tfm_spm_partition_get_stack_top(i),
-                      (uintptr_t)tfm_spm_partition_get_stack_bottom(i));
+        tfm_core_thrd_init(pth,
+                           tfm_spm_partition_get_init_func(i),
+                           NULL,
+                           (uintptr_t)tfm_spm_partition_get_stack_top(i),
+                           (uintptr_t)tfm_spm_partition_get_stack_bottom(i));
 
         pth->prior = tfm_spm_partition_get_priority(i);
 
@@ -581,7 +581,7 @@ uint32_t tfm_spm_init(void)
         }
 
         /* Kick off */
-        if (tfm_thrd_start(pth) != THRD_SUCCESS) {
+        if (tfm_core_thrd_start(pth) != THRD_SUCCESS) {
             tfm_core_panic();
         }
     }
@@ -614,7 +614,7 @@ uint32_t tfm_spm_init(void)
      * cleaned up and the background context is never going to return. Tell
      * the scheduler that the current thread is non-secure entry thread.
      */
-    tfm_thrd_start_scheduler(p_ns_entry_thread);
+    tfm_core_thrd_start_scheduler(p_ns_entry_thread);
 
     return p_ns_entry_thread->state_ctx.ctxb.lr;
 }
@@ -626,8 +626,8 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
     struct spm_partition_runtime_data_t *r_data;
     uint32_t is_privileged;
 #endif
-    struct tfm_thrd_ctx *pth_next = tfm_thrd_next_thread();
-    struct tfm_thrd_ctx *pth_curr = tfm_thrd_curr_thread();
+    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next_thread();
+    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr_thread();
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL == 2
@@ -648,7 +648,7 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
         tfm_spm_partition_change_privilege(is_privileged);
 #endif
 
-        tfm_thrd_context_switch(ctxb, pth_curr, pth_next);
+        tfm_core_thrd_switch_context(ctxb, pth_curr, pth_next);
     }
 
     /*
