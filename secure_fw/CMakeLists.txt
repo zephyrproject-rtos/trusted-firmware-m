@@ -344,8 +344,6 @@ function(set_up_secure_fw_build)
 
 	install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
 						${INTERFACE_INC_DIR}/tfm_ns_interface.h
-						${INTERFACE_INC_DIR}/tfm_nspm_api.h
-						${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
 						${INTERFACE_INC_DIR}/tfm_ns_svc.h
 			DESTINATION ${EXPORT_INC_DIR})
 
@@ -360,10 +358,6 @@ function(set_up_secure_fw_build)
 	endif()
 
 	#Sources
-	install(FILES       ${INTERFACE_SRC_DIR}/tfm_nspm_api.c
-						${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
-			DESTINATION ${EXPORT_SRC_DIR})
-
 	if (TFM_MULTI_CORE_TOPOLOGY)
 		install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_mailbox.c
 							${INTERFACE_SRC_DIR}/tfm_multi_core_api.c
@@ -377,6 +371,15 @@ function(set_up_secure_fw_build)
 			install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
 		endif()
+	endif()
+
+	if (TFM_NS_CLIENT_IDENTIFICATION)
+		install(FILES       ${INTERFACE_INC_DIR}/tfm_nspm_api.h
+							${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
+				DESTINATION ${EXPORT_INC_DIR})
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_nspm_api.c
+							${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
+				DESTINATION ${EXPORT_SRC_DIR})
 	endif()
 
 	if (TFM_PARTITION_SECURE_STORAGE)

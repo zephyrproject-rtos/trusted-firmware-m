@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,6 +26,7 @@
 typedef uint32_t TZ_ModuleId_t;
 typedef uint32_t TZ_MemoryId_t;
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
 static struct ns_client_list_t {
     int32_t ns_client_id;
     int32_t next_free_index;
@@ -36,20 +37,18 @@ static int32_t active_ns_client_idx = INVALID_NS_CLIENT_IDX;
 
 static int get_next_ns_client_id()
 {
-#ifdef TFM_NS_CLIENT_IDENTIFICATION
     static int32_t next_ns_client_id = DEFAULT_NS_CLIENT_ID;
 
     if (next_ns_client_id > 0) {
         next_ns_client_id = DEFAULT_NS_CLIENT_ID;
     }
     return next_ns_client_id--;
-#else
-    return DEFAULT_NS_CLIENT_ID;
-#endif
 }
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
 void tfm_nspm_configure_clients(void)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     int32_t i;
 
     /* Default to one NS client */
@@ -59,15 +58,20 @@ void tfm_nspm_configure_clients(void)
         NsClientIdList[i].ns_client_id = INVALID_CLIENT_ID;
     }
     active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 }
 
-int32_t tfm_nspm_get_current_client_id()
+int32_t tfm_nspm_get_current_client_id(void)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     if (active_ns_client_idx == INVALID_NS_CLIENT_IDX) {
         return 0;
     } else {
         return NsClientIdList[active_ns_client_idx].ns_client_id;
     }
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    return DEFAULT_NS_CLIENT_ID;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 }
 
 /* TF-M implementation of the CMSIS TZ RTOS thread context management API */
@@ -78,6 +82,7 @@ int32_t tfm_nspm_get_current_client_id()
 __attribute__((cmse_nonsecure_entry))
 uint32_t TZ_InitContextSystem_S(void)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     int32_t i;
 
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
@@ -93,6 +98,8 @@ uint32_t TZ_InitContextSystem_S(void)
 
     /* Terminate list */
     NsClientIdList[i - 1].next_free_index = INVALID_NS_CLIENT_IDX;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
+
     /* Success */
     return 1U;
 }
@@ -108,6 +115,7 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
     TZ_MemoryId_t tz_id;
     (void) module; /* Currently unused */
 
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
         /* This veneer should only be called by NS RTOS in handler mode */
         return 0U;
@@ -122,6 +130,9 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
     tz_id = (TZ_MemoryId_t)free_index + 1;
     NsClientIdList[free_index].ns_client_id = get_next_ns_client_id();
     free_index = NsClientIdList[free_index].next_free_index;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    tz_id = 1;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     return tz_id;
 }
@@ -133,6 +144,7 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 __attribute__((cmse_nonsecure_entry))
 uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     uint32_t index;
 
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
@@ -159,6 +171,9 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
     NsClientIdList[index].next_free_index = free_index;
 
     free_index = index;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     return 1U;    // Success
 }
@@ -170,6 +185,7 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
 __attribute__((cmse_nonsecure_entry))
 uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     uint32_t index;
 
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
@@ -190,6 +206,9 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
     }
 
     active_ns_client_idx = index;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     return 1U;    // Success
 }
@@ -201,6 +220,7 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
 __attribute__((cmse_nonsecure_entry))
 uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
 {
+#ifdef TFM_NS_CLIENT_IDENTIFICATION
     uint32_t index;
 
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
@@ -226,6 +246,9 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     }
 
     active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
+#endif /* TFM_NS_CLIENT_IDENTIFICATION */
 
     return 1U;    // Success
 }
