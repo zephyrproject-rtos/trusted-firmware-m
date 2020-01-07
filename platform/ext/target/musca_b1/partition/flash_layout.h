@@ -26,9 +26,8 @@
  * 0x0A10_0000 Secondary image area (896 KB):
  *    0x0A10_0000 Secure     image secondary (384 KB)
  *    0x0A16_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Secure Storage Area (80 KB)
- * 0x0A1F_4000 Internal Trusted Storage Area (32 KB)
- * 0x0A1F_C000 NV counters area (16 KB)
+ * 0x0A1E_0000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1E_8000 NV counters area (16 KB)
  *
  * Note: As eFlash is written at runtime, the eFlash driver code is placed
  * in code sram to avoid any interference.
@@ -36,6 +35,9 @@
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
  * 0x0A07_0000 Non-secure image
+ *
+ * QSPI Flash layout
+ * 0x0000_0000 Secure Storage Area (20 KB)
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -56,6 +58,10 @@
 /* Sector size of the embedded flash hardware */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x4000)   /* 16 KB */
 #define FLASH_TOTAL_SIZE                (0x200000) /* 2 MB */
+
+/* Sector size of the QSPI flash hardware */
+#define QSPI_FLASH_AREA_IMAGE_SECTOR_SIZE (0x1000)   /* 4 KB */
+#define QSPI_FLASH_TOTAL_SIZE             (0x800000) /* 8 MB */
 
 /* Flash layout info for BL2 bootloader */
 /* Same as MUSCA_B1_EFLASH0_S_BASE */
@@ -126,18 +132,9 @@
  */
 #define MCUBOOT_STATUS_MAX_ENTRIES      (0)
 
-/* Note: FLASH_SST_AREA_OFFSET and FLASH_NV_COUNTERS_AREA_OFFSET point to
- * offsets in flash, but reads and writes to these addresses are redirected to
- * Code SRAM by Driver_Flash.c.
- * SST size is 80 KB.
- */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
-                                         FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (5 * FLASH_AREA_IMAGE_SECTOR_SIZE)
-
 /* Internal Trusted Storage (ITS) Service definitions (32 KB) */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
-                                         FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+                                         FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_ITS_AREA_SIZE             (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* NV Counters definitions */
@@ -153,16 +150,22 @@
                                          SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
+/* Secure Storage (SST) Service definitions size is 20 KB. */
+/* Same as MUSCA_B1_QSPI_FLASH_S_BASE */
+#define QSPI_FLASH_BASE_ADDRESS         (0x10000000)
+#define FLASH_SST_AREA_OFFSET           (0x0)
+#define FLASH_SST_AREA_SIZE             (5 * QSPI_FLASH_AREA_IMAGE_SECTOR_SIZE)
+
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
-#define FLASH_DEV_NAME Driver_FLASH0
+#define FLASH_DEV_NAME Driver_EFLASH0
 
 /* Secure Storage (SST) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M SST Integration Guide.
  */
-#define SST_FLASH_DEV_NAME Driver_FLASH0
+#define SST_FLASH_DEV_NAME Driver_QSPI_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
@@ -170,7 +173,7 @@
 #define SST_FLASH_AREA_ADDR     FLASH_SST_AREA_OFFSET
 /* Dedicated flash area for SST */
 #define SST_FLASH_AREA_SIZE     FLASH_SST_AREA_SIZE
-#define SST_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+#define SST_SECTOR_SIZE         QSPI_FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of SST_SECTOR_SIZE per block */
 #define SST_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */

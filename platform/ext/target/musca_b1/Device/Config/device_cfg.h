@@ -72,6 +72,14 @@
 /* GFC-100 EFlash controller */
 #define GFC100_EFLASH0_S
 
+/* Cadence QSPI Flash Controller */
+#define QSPI_IP6514E_S
+#define QSPI_IP6514E_NS
+
+/* MT25QL Flash memory library */
+#define MT25QL_S
+#define MT25QL_NS
+
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
 

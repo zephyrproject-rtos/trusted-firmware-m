@@ -50,5 +50,6 @@
 #define MUSCA_B1_SCC_DEV    MUSCA_B1_SCC_DEV_S
 
 #define EFLASH0_DEV         GFC100_EFLASH0_DEV_S
+#define FLASH0_DEV          MT25QL_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

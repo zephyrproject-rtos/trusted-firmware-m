@@ -124,10 +124,10 @@
 #define   RTE_APB_PPCEXP3                 0
 // </e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP3]
 
-// <e> FLASH (Flash Memory) [Driver_FLASH0]
-// <i> Configuration settings for Driver_FLASH0 in component ::Drivers:FLASH
-#define   RTE_FLASH0                      1
-// </e> FLASH (Flash Memory) [Driver_FLASH0]
+// <e> QSPI FLASH (Flash Memory) [Driver_QSPI_FLASH0]
+// <i> Configuration settings for Driver_QSPI_FLASH0 in component ::Drivers:FLASH
+#define   RTE_QSPI_FLASH0                 1
+// </e> QSPI FLASH (Flash Memory) [Driver_QSPI_FLASH0]
 
 // <e> EFLASH (Flash Memory) [Driver_EFLASH0]
 // <i> Configuration settings for Driver_EFLASH0 in component ::Drivers:FLASH

@@ -60,6 +60,7 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Device/Includ
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Native_Driver" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/partition" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/services/include" ABSOLUTE)
+embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/Libraries" ABSOLUTE)
 embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 # Gather all source files we need.
@@ -99,7 +100,10 @@ elseif (BUILD_NATIVE_DRIVERS)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Native_Driver/uart_pl011_drv.c"
                           "${PLATFORM_DIR}/target/musca_b1/Native_Driver/musca_b1_scc_drv.c"
                           "${PLATFORM_DIR}/target/musca_b1/Native_Driver/musca_b1_eflash_drv.c"
-                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/gfc100_eflash_drv.c")
+                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/gfc100_eflash_drv.c"
+                          "${PLATFORM_DIR}/target/musca_b1/Native_Driver/qspi_ip6514e_drv.c"
+                          "${PLATFORM_DIR}/target/musca_b1/Libraries/mt25ql_flash_lib.c")
+
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/Native_Driver/gpio_cmsdk_drv.c")
 
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_b1/Native_Driver/mpc_sie200_drv.c"
@@ -193,7 +197,7 @@ endif()
 if (NOT DEFINED BUILD_FLASH)
     message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif (BUILD_FLASH)
-    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_Flash.c")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_QSPI_Flash.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_GFC100_EFlash.c")
     # As the SST area is going to be in RAM, it is required to set
     # SST_CREATE_FLASH_LAYOUT to be sure the SST service knows that when it
