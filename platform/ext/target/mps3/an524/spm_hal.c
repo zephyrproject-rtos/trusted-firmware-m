@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -190,7 +190,7 @@ void MPC_Handler(void)
     NVIC_ClearPendingIRQ(MPC_IRQn);
 
     /* Print fault message and block execution */
-    LOG_MSG("Oops... MPC fault!!!");
+    ERROR_MSG("Oops... MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
@@ -203,7 +203,7 @@ void PPC_Handler(void)
     NVIC_ClearPendingIRQ(PPC_IRQn);
 
     /* Print fault message*/
-    LOG_MSG("Oops... PPC fault!!!");
+    ERROR_MSG("Oops... PPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
