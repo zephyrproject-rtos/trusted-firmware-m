@@ -1,7 +1,7 @@
 /*==============================================================================
  run_tests.c -- test aggregator and results reporting
 
- Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
+ Copyright (c) 2018-2020, Laurence Lundblade. All rights reserved.
 
  SPDX-License-Identifier: BSD-3-Clause
 
@@ -126,10 +126,10 @@ static const char *NumToString(int32_t nNum, UsefulBuf StringMem)
 /*
  Public function. See run_test.h.
  */
-int RunTests(const char    *szTestNames[],
-             OutputStringCB pfOutput,
-             void          *poutCtx,
-             int           *pNumTestsRun)
+int RunTestsTCose(const char    *szTestNames[],
+                  OutputStringCB pfOutput,
+                  void          *poutCtx,
+                  int           *pNumTestsRun)
 {
     int nTestsFailed = 0;
     int nTestsRun = 0;
@@ -271,7 +271,7 @@ static void PrintSize(const char *szWhat,
 /*
  Public function. See run_test.h.
  */
-void PrintSizes(OutputStringCB pfOutput, void *pOutCtx)
+void PrintSizesTCose(OutputStringCB pfOutput, void *pOutCtx)
 {
    // Type and size of return from sizeof() varies. These will never be large
    // so cast is safe.

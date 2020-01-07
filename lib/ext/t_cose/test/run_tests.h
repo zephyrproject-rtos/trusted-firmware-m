@@ -1,7 +1,7 @@
 /*==============================================================================
  run_tests.h -- test aggregator and results reporting
 
- Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
+ Copyright (c) 2018-2020, Laurence Lundblade. All rights reserved.
 
  SPDX-License-Identifier: BSD-3-Clause
 
@@ -43,7 +43,7 @@ typedef void (*OutputStringCB)(const char *szString, void *pOutCtx, int bNewline
 
 
 /**
- @brief Runs the QCBOR tests.
+ @brief Runs the T_COSE tests.
 
  @param[in]  szTestNames    An argv-style list of test names to run. If
                             empty, all are run.
@@ -53,10 +53,10 @@ typedef void (*OutputStringCB)(const char *szString, void *pOutCtx, int bNewline
 
  @return The number of tests that failed. Zero means overall success.
  */
-int RunTests(const char    *szTestNames[],
-             OutputStringCB pfOutput,
-             void          *pOutCtx,
-             int           *pNumTestsRun);
+int RunTestsTCose(const char    *szTestNames[],
+                  OutputStringCB pfOutput,
+                  void          *pOutCtx,
+                  int           *pNumTestsRun);
 
 
 /**
@@ -65,5 +65,5 @@ int RunTests(const char    *szTestNames[],
  @param[in] pfOutput     Function that is called to output text strings.
  @param[in] pOutCtx      Context pointer passed to output function.
  */
-void PrintSizes(OutputStringCB pfOutput, void *pOutCtx);
+void PrintSizesTCose(OutputStringCB pfOutput, void *pOutCtx);
 
