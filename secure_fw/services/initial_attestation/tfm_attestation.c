@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -57,22 +57,12 @@ attest_get_boot_data(uint8_t major_type,
                      uint32_t len)
 {
     enum psa_attest_err_t attest_res = PSA_ATTEST_ERR_SUCCESS;
-
-#ifndef BL2
-    /* Avoid compiler warning due to unused argument */
-    (void)len;
-    (void)major_type;
-
-    boot_data->header.tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
-    boot_data->header.tlv_tot_len = SHARED_DATA_HEADER_SIZE;
-#else
     int32_t tfm_res;
 
     tfm_res = tfm_core_get_boot_data(major_type, boot_data, len);
     if (tfm_res != (int32_t)TFM_SUCCESS) {
         attest_res =  PSA_ATTEST_ERR_INIT_FAILED;
     }
-#endif /* BL2 */
 
     return attest_res;
 }

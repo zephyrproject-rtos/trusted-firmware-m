@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -120,6 +120,7 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
 
 void tfm_core_validate_boot_data(void)
 {
+#ifdef BOOT_DATA_AVAILABLE
     struct tfm_boot_data *boot_data;
 
     boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
@@ -127,6 +128,9 @@ void tfm_core_validate_boot_data(void)
     if (boot_data->header.tlv_magic == SHARED_DATA_TLV_INFO_MAGIC) {
         is_boot_data_valid = BOOT_DATA_VALID;
     }
+#else
+    is_boot_data_valid = BOOT_DATA_VALID;
+#endif /* BOOT_DATA_AVAILABLE */
 }
 
 void tfm_core_get_boot_data_handler(uint32_t args[])
@@ -136,8 +140,10 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uint16_t buf_size  = (uint16_t)args[2];
     uint8_t *ptr;
     struct tfm_boot_data *boot_data;
+#ifdef BOOT_DATA_AVAILABLE
     struct shared_data_tlv_entry tlv_entry;
     uintptr_t tlv_end, offset;
+#endif /* BOOT_DATA_AVAILABLE */
 #ifndef TFM_PSA_API
     uint32_t running_partition_idx =
                 tfm_spm_partition_get_running_partition_idx();
@@ -188,10 +194,12 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         return;
     }
 
+#ifdef BOOT_DATA_AVAILABLE
     /* Get the boundaries of TLV section */
     boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
     tlv_end = BOOT_TFM_SHARED_DATA_BASE + boot_data->header.tlv_tot_len;
     offset  = BOOT_TFM_SHARED_DATA_BASE + SHARED_DATA_HEADER_SIZE;
+#endif /* BOOT_DATA_AVAILABLE */
 
     /* Add header to output buffer as well */
     if (buf_size < SHARED_DATA_HEADER_SIZE) {
@@ -204,6 +212,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         ptr = boot_data->data;
     }
 
+#ifdef BOOT_DATA_AVAILABLE
     /* Iterates over the TLV section and copy TLVs with requested major
      * type to the provided buffer.
      */
@@ -226,6 +235,8 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
             boot_data->header.tlv_tot_len += tlv_entry.tlv_len;
         }
     }
+#endif /* BOOT_DATA_AVAILABLE */
+
     args[0] = (uint32_t)TFM_SUCCESS;
     return;
 }
