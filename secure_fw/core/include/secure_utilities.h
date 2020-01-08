@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,8 +18,6 @@
 #define EXC_NUM_SYSTICK         (15)
 
 #define ERROR_MSG(msg)
-
-int32_t tfm_bitcount(uint32_t n);
 
 bool tfm_is_one_bit_set(uint32_t n);
 

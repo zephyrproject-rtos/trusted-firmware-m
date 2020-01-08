@@ -925,7 +925,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
      * Only one message could be retrieved every time for psa_get(). It is a
      * fatal error if the input signal has more than a signal bit set.
      */
-    if (tfm_bitcount(signal) != 1) {
+    if (!tfm_is_one_bit_set(signal)) {
         tfm_core_panic();
     }
 
