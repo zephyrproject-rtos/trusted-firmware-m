@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,7 @@
 
 #include "qcbor_ns_tests.h"
 #include <stdio.h>
-#include "run_tests.h"
+#include "lib/ext/qcbor/test/run_tests.h"
 
 /*
  * The QCBOR test cases are defined in: lib/ext/qcbor/test/run_test.c
@@ -109,7 +109,7 @@ static void fputs_wrapper(const char *string, void *out_ctx, int new_line)
      * the preprocessor '#if 0' to '#if 1'.
      */
 # if 0
-    TEST_LOG("%s", string);
+    TEST_LOG("%s\r\n", string);
 #else
     (void)string;
 #endif

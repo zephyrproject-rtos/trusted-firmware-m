@@ -151,10 +151,7 @@ if (TFM_BUILD_IN_SPE)
 	#to hold the compiled tfm_qcbor files.
 	add_library(tfm_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_S})
 	if (ENABLE_ATTESTATION_SERVICE_TESTS)
-		target_sources(tfm_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_t_cose_verify>)
-	endif()
-	if (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS)
-		target_sources(tfm_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_qcbor_decode>)
+		target_sources(tfm_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_t_cose_verify> $<TARGET_OBJECTS:tfm_qcbor_decode>)
 	endif()
 
 	#Set common compiler and linker flags
