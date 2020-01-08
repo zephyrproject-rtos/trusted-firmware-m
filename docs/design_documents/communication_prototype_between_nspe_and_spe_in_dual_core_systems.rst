@@ -100,13 +100,14 @@ The mailbox design document should define the structure of the mailbox message.
 
 The information and parameters of PSA Client call in the mailbox message include
 
-- PSA client call type
+- PSA Client API
 
 - Parameters required in PSA Client call. The parameters can include the
   following, according to PSA client call type
 
   - Service ID (SID)
   - Handle
+  - Request type
   - Input vectors and the lengths
   - Output vectors and the lengths
   - Requested version of secure service
@@ -132,8 +133,8 @@ should protect concurrent operations from the other core.
 Support of multiple ongoing NS PSA client calls (informative)
 =============================================================
 
-Current TF-M implementation (commit-id 8aea0c0a) only supports single
-outstanding NS PSA client calls from NSPE.
+Current TF-M implementation (git tag TF-Mv1.0-RC3) only supports single
+outstanding PSA client call from NSPE.
 
 If the support of multiple ongoing NS PSA client calls in TF-M is required
 in dual-core systems, an optional queue can be maintained in TF-M core to store
@@ -467,7 +468,7 @@ result to NSPE.
 
 .. code-block:: c
 
-  void tfm_rpc_client_call_reply(void *owner, int32_t ret);
+  void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
 
 Parameters
 ~~~~~~~~~~
@@ -498,15 +499,16 @@ parameters are passed from non-secure core to secure core via mailbox.
 
 .. code-block:: c
 
-  typedef struct client_call_params_t {
+  struct client_call_params_t {
       uint32_t        sid;
       psa_handle_t    handle;
+      int32_t         type;
       const psa_invec *in_vec;
       size_t          in_len;
       psa_outvec      *out_vec;
       size_t          out_len;
-      uint32_t        minor_version;
-  } client_call_params_t;
+      uint32_t        version;
+  };
 
 Mailbox operations callbacks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -515,10 +517,10 @@ This structures contains the callback functions for specific mailbox operations.
 
 .. code-block:: c
 
-  typedef struct tfm_rpc_ops_t {
+  struct tfm_rpc_ops_t {
       void (*handle_req)(void);
-      void (*reply)(void *owner, int32_t ret);
-  } tfm_rpc_ops_t;
+      void (*reply)(const void *owner, int32_t ret);
+  };
 
 ``tfm_rpc_register_ops()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -527,7 +529,7 @@ This function registers underlying mailbox operations into TF-M RPC callbacks.
 
 .. code-block:: c
 
-  int32_t tfm_rpc_register_ops(const tfm_rpc_ops_t *ops_ptr);
+  int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr);
 
 Parameters
 ~~~~~~~~~~
@@ -551,6 +553,9 @@ Usage
 Mailbox should register TF-M RPC callbacks during mailbox initialization, before
 enabling secure services for NSPE.
 
+Currently one and only one underlying mailbox communication implementation is
+allowed in runtime.
+
 ``tfm_rpc_unregister_ops()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -558,14 +563,13 @@ This function unregisters underlying mailbox operations from TF-M RPC callbacks.
 
 .. code-block:: c
 
-  void tfm_rpc_unregister_ops(const tfm_rpc_ops_t *ops_ptr);
+  void tfm_rpc_unregister_ops(void);
 
-Parameters
-~~~~~~~~~~
+Usage
+~~~~~
 
-+---------+----------------------------------------------+
-| ops_ptr | Pointer to the specific operation structure. |
-+---------+----------------------------------------------+
+Currently one and only one underlying mailbox communication implementation is
+allowed in runtime.
 
 ``tfm_rpc_psa_framework_version()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -574,14 +578,7 @@ TF-M RPC handler for psa_framework_version().
 
 .. code-block:: c
 
-  int32_t tfm_rpc_psa_framework_version(const client_call_params_t *params);
-
-Parameters
-~~~~~~~~~~
-
-+------------+-----------------------------+
-| ``params`` | Base address of parameters. |
-+------------+-----------------------------+
+  uint32_t tfm_rpc_psa_framework_version(void);
 
 Return
 ~~~~~~
@@ -604,17 +601,17 @@ TF-M RPC handler for psa_version().
 
 .. code-block:: c
 
-  int32_t tfm_rpc_psa_version(const client_call_params_t *params,
-                              int32_t ns_caller);
+  uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
+                               bool ns_caller);
 
 Parameters
 ~~~~~~~~~~
 
-+---------------+----------------------------------------------------+
-| ``params``    | Base address of parameters.                        |
-+---------------+----------------------------------------------------+
-| ``ns_caller`` | A non-zero value to indcate the non-secure caller. |
-+---------------+----------------------------------------------------+
++---------------+-----------------------------------+
+| ``params``    | Base address of parameters.       |
++---------------+-----------------------------------+
+| ``ns_caller`` | Whether the caller is non-secure. |
++---------------+-----------------------------------+
 
 Return
 ~~~~~~
@@ -640,17 +637,17 @@ TF-M RPC handler for ``psa_connect()``.
 
 .. code-block:: c
 
-  int32_t tfm_rpc_psa_connect(const client_call_params_t *params,
-                              int32_t ns_caller);
+  psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
+                                   bool ns_caller);
 
 Parameters
 ~~~~~~~~~~
 
-+---------------+----------------------------------------------------+
-| ``params``    | Base address of parameters.                        |
-+---------------+----------------------------------------------------+
-| ``ns_caller`` | A non-zero value to indcate the non-secure caller. |
-+---------------+----------------------------------------------------+
++---------------+-----------------------------------+
+| ``params``    | Base address of parameters.       |
++---------------+-----------------------------------+
+| ``ns_caller`` | Whether the caller is non-secure. |
++---------------+-----------------------------------+
 
 Return
 ~~~~~~
@@ -679,17 +676,17 @@ TF-M RPC handler for ``psa_call()``.
 
 .. code-block:: c
 
-  int32_t tfm_rpc_psa_call(const client_call_params_t *params,
-                           int32_t ns_caller);
+  psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
+                                bool ns_caller);
 
 Parameters
 ~~~~~~~~~~
 
-+---------------+----------------------------------------------------+
-| ``params``    | Base address of parameters.                        |
-+---------------+----------------------------------------------------+
-| ``ns_caller`` | A non-zero value to indcate the non-secure caller. |
-+---------------+----------------------------------------------------+
++---------------+-----------------------------------+
+| ``params``    | Base address of parameters.       |
++---------------+-----------------------------------+
+| ``ns_caller`` | Whether the caller is non-secure. |
++---------------+-----------------------------------+
 
 Return
 ~~~~~~
@@ -714,23 +711,23 @@ TF-M RPC ``psa_close()`` handler
 
 .. code-block:: c
 
-  int32_t tfm_rpc_psa_close(const client_call_params_t *params,
-                            int32_t ns_caller);
+  void tfm_rpc_psa_close(const struct client_call_params_t *params,
+                         bool ns_caller);
 
 Parameters
 ~~~~~~~~~~
 
-+---------------+----------------------------------------------------+
-| ``params``    | Base address of parameters.                        |
-+---------------+----------------------------------------------------+
-| ``ns_caller`` | A non-zero value to indcate the non-secure caller. |
-+---------------+----------------------------------------------------+
++---------------+-----------------------------------+
+| ``params``    | Base address of parameters.       |
++---------------+-----------------------------------+
+| ``ns_caller`` | Whether the caller is non-secure. |
++---------------+-----------------------------------+
 
 Return
 ~~~~~~
 
 +---------------------+---------------------------------------------+
-| ``PSA_SUCCESS``     | Success.                                    |
+| ``void``            | Success.                                    |
 +---------------------+---------------------------------------------+
 | ``Does not return`` | The call is invalid, or invalid parameters. |
 +---------------------+---------------------------------------------+
