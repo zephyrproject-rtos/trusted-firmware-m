@@ -605,7 +605,7 @@ void tfm_spm_init(void)
             tfm_core_panic();
         }
         service[i].partition = partition;
-        partition->runtime_data.assigned_signals |= service->service_db->signal;
+        partition->runtime_data.assigned_signals |= service[i].service_db->signal;
 
         tfm_list_init(&service[i].handle_list);
         tfm_list_add_tail(&partition->runtime_data.service_list,
