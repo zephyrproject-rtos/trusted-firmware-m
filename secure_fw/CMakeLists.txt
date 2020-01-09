@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -343,18 +343,36 @@ function(set_up_secure_fw_build)
 						${INTERFACE_INC_DIR}/tfm_nspm_api.h
 						${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
 						${INTERFACE_INC_DIR}/tfm_ns_svc.h
-						${INTERFACE_INC_DIR}/tfm_veneers.h
 			DESTINATION ${EXPORT_INC_DIR})
 
+	if (TFM_MULTI_CORE_TOPOLOGY)
+		install(FILES       ${INTERFACE_INC_DIR}/tfm_multi_core_api.h
+							${INTERFACE_INC_DIR}/tfm_ns_mailbox.h
+							${INTERFACE_INC_DIR}/tfm_mailbox.h
+				DESTINATION ${EXPORT_INC_DIR})
+	else()
+		install(FILES       ${INTERFACE_INC_DIR}/tfm_veneers.h
+				DESTINATION ${EXPORT_INC_DIR})
+	endif()
+
 	#Sources
-	install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c
-						${INTERFACE_SRC_DIR}/tfm_nspm_api.c
+	install(FILES       ${INTERFACE_SRC_DIR}/tfm_nspm_api.c
 						${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
 			DESTINATION ${EXPORT_SRC_DIR})
 
-	if(TFM_PSA_API)
-		install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
+	if (TFM_MULTI_CORE_TOPOLOGY)
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_mailbox.c
+							${INTERFACE_SRC_DIR}/tfm_multi_core_api.c
+							${INTERFACE_SRC_DIR}/tfm_multi_core_psa_ns_api.c
 				DESTINATION ${EXPORT_SRC_DIR})
+	else()
+		install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c
+				DESTINATION ${EXPORT_SRC_DIR})
+
+		if(TFM_PSA_API)
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
+					DESTINATION ${EXPORT_SRC_DIR})
+		endif()
 	endif()
 
 	if (TFM_PARTITION_SECURE_STORAGE)
