@@ -324,6 +324,15 @@ if (PSA_API_TEST)
 	if (NOT DEFINED PSA_API_TEST_ATTESTATION)
 		set(PSA_API_TEST_ATTESTATION OFF)
 	endif()
+	if (NOT DEFINED PSA_API_TEST_IPC)
+		set(PSA_API_TEST_IPC OFF)
+	endif()
+
+	#Set PSA API compliance test build path
+	if(NOT DEFINED PSA_API_TEST_BUILD_PATH)
+		#If not specified, assume it's the default build folder checked out at the same level of TFM root dir
+		set(PSA_API_TEST_BUILD_PATH "${TFM_ROOT_DIR}/../psa-arch-tests/api-tests/BUILD")
+	endif()
 endif()
 
 # The config for enable secure context management in TF-M

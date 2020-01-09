@@ -262,6 +262,15 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PLATFORM")
 	endif()
 
+	#Add the PSA API compliance test secure libraries
+	if(PSA_API_TEST_IPC)
+		add_definitions(-DPSA_API_TEST_IPC)
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/partition/client_partition.a")
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/partition/server_partition.a")
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/partition/driver_partition.a")
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "PSA_API_TEST_IPC")
+	endif()
+
 	target_link_libraries(${EXE_NAME} libtfmsprt)
 
 	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
