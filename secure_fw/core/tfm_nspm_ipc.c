@@ -86,11 +86,6 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     return 1U;
 }
 
-__attribute__((used)) static void pre_ns_jumping(void)
-{
-    LOG_MSG("\033[1;34m[Sec Thread] Jumping to non-secure code...\033[0m\r\n");
-}
-
 /*
  * 'r0' impliedly holds the address of non-secure entry,
  * given during non-secure partition initialization.
@@ -101,7 +96,6 @@ void tfm_nspm_thread_entry(void)
     __ASM volatile(
         ".syntax unified         \n"
         "mov      r4, r0         \n"
-        "bl       pre_ns_jumping \n"
         "movs     r2, #1         \n" /* Clear Bit[0] for S to NS transition */
         "bics     r4, r2         \n"
         "mov      r0, r4         \n"
