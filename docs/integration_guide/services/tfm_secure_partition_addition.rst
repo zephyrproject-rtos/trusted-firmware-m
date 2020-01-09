@@ -324,46 +324,7 @@ necessary information of secure partition.
 The manifest tool ``tools/tfm_parse_manifest_list.py`` processes it and
 generates necessary files while building.
 
-- ``name``: The name string of the secure partition.
-- ``short_name``: should be the same as the ``name`` in the secure partition
-  manifest file.
-- ``manifest``: the relative path of the manifest file to TF-M root.
-  In out-of-tree secure partition, ``manifest`` can be an absolute path or the
-  relative path to the current manifest list file.
-- ``conditional``: Optional configuration to enable or disable this partition.
-  If it is not set, the Secure Partition is always enabled.
-  The value of this attribute must be a CMake variable surrounded by ``@``.
-  The value of the CMake variable must be:
-
-  - ``ON``, ``TRUE`` or ``ENABLED`` - the Partition is enabled.
-  - ``OFF``, ``FALSE`` or ``DISABLED`` - the Partition is disabled.
-  - unset - the Partition is disabled.
-
-  The build system relies on the CMake command ``configure_file()`` to replace
-  the CMake variables with the corresponding values before the manifest tool
-  processes it.
-  If you are using the manifest tool out of the CMake build system, you can also
-  set this attribute to the values allowed above to make the tool work.
-
-- ``version_major``: major version the partition manifest.
-- ``version_minor``: minor version the partition manifest.
-- ``pid``: Secure Partition ID value distributed in chapter `Secure Partition
-  ID Distribution`_.
-- ``output_dir``: Optional path to hold the generated files.
-  The files are generated to:
-
-  - ``<build_dir>/generated/<output_dir>``, if ``output_dir`` is relative path.
-  - ``<output_dir>``, if ``output_dir`` is absolute path.
-  - ``<build_dir>/generated/``, if ``output_dir`` is not set.
-- ``linker_pattern``: contains the information for linker to place the symbols
-  of the Secure Partition. The following patterns are supported:
-
-    - ``library_list`` - the library defined by CMake in `Add configuration`_
-      section. It must be ``*tfm_*partition_<name>.*``, the ``<name>>`` must
-      match the CMake library name.
-
-    - ``object_list`` - Any object files containing symbols belonging to the
-      Secure Partition but are not included in the Secure Partitions library.
+Please refer to the :ref:`tfm_manifest_list` for the format of manifest lists.
 
 Reference configuration example:
 

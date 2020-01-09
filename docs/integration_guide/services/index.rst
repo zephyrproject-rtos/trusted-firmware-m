@@ -13,7 +13,8 @@ Services
     Protected Storage <tfm_ps_integration_guide>
     PSA Proxy <tfm_psa_proxy_integration_guide>
     Adding a New Service <tfm_secure_partition_addition>
+    The manifest tool <tfm_manifest_tool_user_guide>
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
