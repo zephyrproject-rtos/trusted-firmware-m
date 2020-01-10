@@ -2,6 +2,7 @@
  * attest_token.h
  *
  * Copyright (c) 2018-2019, Laurence Lundblade.
+ * Copyright (c) 2020, Arm Limited.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -78,13 +79,15 @@ enum attest_token_err_t {
     ATTEST_TOKEN_ERR_INSUFFICIENT_MEMORY,
     /** Tampering detected in cryptographic function. */
     ATTEST_TOKEN_ERR_TAMPERING_DETECTED,
+    /** Signing key is not found or of wrong type. */
+    ATTEST_TOKEN_ERR_SIGNING_KEY,
     /** Verification key is not found or of wrong type. */
     ATTEST_TOKEN_ERR_VERIFICATION_KEY,
     /** No token was given or validated */
     ATTEST_TOKEN_ERR_NO_VALID_TOKEN,
     /** Data item with label wasn't found. */
     ATTEST_TOKEN_ERR_NOT_FOUND,
-    /** SW Compoments absence not correctly indicated. */
+    /** SW Components absence not correctly indicated. */
     ATTEST_TOKEN_ERR_SW_COMPONENTS_MISSING
 };
 
@@ -122,10 +125,10 @@ enum attest_token_err_t {
  */
 struct attest_token_ctx {
     /* Private data structure */
-    QCBOREncodeContext      cbor_enc_ctx;
-    uint32_t                opt_flags;
-    int32_t                 key_select;
-    struct t_cose_sign1_ctx signer_ctx;
+    QCBOREncodeContext           cbor_enc_ctx;
+    uint32_t                     opt_flags;
+    int32_t                      key_select;
+    struct t_cose_sign1_sign_ctx signer_ctx;
 };
 
 

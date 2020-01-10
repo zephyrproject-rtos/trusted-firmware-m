@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -134,7 +134,7 @@ if (NOT DEFINED TFM_BUILD_IN_SPE)
 endif()
 
 if (NOT TARGET tfm_t_cose_verify AND ENABLE_ATTESTATION_SERVICE_TESTS)
-	add_subdirectory(${TFM_ROOT_DIR}/lib/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
+	add_subdirectory(${TFM_ROOT_DIR}/lib/ext/t_cose ${CMAKE_CURRENT_BINARY_DIR}/t_cose)
 endif()
 
 if ((NOT TARGET tfm_qcbor_encode OR NOT TARGET tfm_qcbor_decode) AND (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_QCBOR_TESTS))

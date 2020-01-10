@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,7 +18,7 @@
 #include "tfm_attest_hal.h"
 #include "attest_token.h"
 #include "attest_eat_defines.h"
-#include "t_cose_defines.h"
+#include "t_cose_common.h"
 #include "tfm_memory_utils.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
 
@@ -950,9 +950,9 @@ attest_create_token(struct q_useful_buf_c *challenge,
      * which causes the COSE headers to be constructed.
      */
     token_err = attest_token_start(&attest_token_ctx,
-                                   option_flags,         /* option_flags */
-                                   key_select,           /* key_select   */
-                                   COSE_ALGORITHM_ES256, /* alg_select   */
+                                   option_flags,            /* option_flags */
+                                   key_select,              /* key_select   */
+                                   T_COSE_ALGORITHM_ES256,  /* alg_select   */
                                    token);
 
     if (token_err != ATTEST_TOKEN_ERR_SUCCESS) {

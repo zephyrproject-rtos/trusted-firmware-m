@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -64,8 +64,8 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/inc ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/t_cose/src ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/t_cose/inc ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/t_cose/src ABSOLUTE)
 embedded_include_directories(PATH ${INITIAL_ATTESTATION_DIR} ABSOLUTE)
 
 set(BUILD_CMSIS_CORE Off)
