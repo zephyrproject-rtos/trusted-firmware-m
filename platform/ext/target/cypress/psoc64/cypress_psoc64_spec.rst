@@ -9,6 +9,9 @@ Prerequisites
 PSoC64 must first be provisioned with SecureBoot firmware and a provisioning packet
 containing policy and secure keys. Please refer to the guide at
 https://www.cypress.com/documentation/software-and-drivers/psoc-64-secure-mcu-secure-boot-sdk-user-guide
+Use the following policy file for provisioning and signing:
+policy_multi_img_CM0p_CM4_debug_2M.json
+
 
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements </docs/user_guides/tfm_sw_requirement>`.
@@ -284,8 +287,8 @@ Sign the images (sign.py overwrites unsigned files with signed ones):
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
-      -d cy8cproto-064s2-sb \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex \
       -n <build folder>/tfm_ns.hex
 
@@ -294,15 +297,15 @@ Note: each image can be signed individually, for example:
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
-      -d cy8cproto-064s2-sb \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -d cy8ckit-064b0s2-4343w \
       -n <build folder>/tfm_ns.hex
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_dual_stage_CM0p_CM4_debug_2M.json \
-      -d cy8cproto-064s2-sb \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex
 
 **********************
@@ -378,4 +381,4 @@ so be sure to change it if you change that file.
 
 *Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
 
-*Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.*
+*Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.*
