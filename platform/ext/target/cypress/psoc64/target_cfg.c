@@ -99,10 +99,21 @@ void system_reset_cfg(void)
 extern void Cy_Platform_Init(void);
 void platform_init(void)
 {
+#ifdef TFM_ENABLE_IRQ_TEST
+    cy_en_sysint_status_t rc;
+#endif
+
     Cy_PDL_Init(CY_DEVICE_CFG);
 
     init_cycfg_all();
     Cy_Platform_Init();
+
+#ifdef TFM_ENABLE_IRQ_TEST
+    rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
+    if (rc != CY_SYSINT_SUCCESS) {
+        printf("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\n");
+    }
+#endif /* TFM_ENABLE_IRQ_TEST */
 
     /* make sure CM4 is disabled */
     if (CY_SYS_CM4_STATUS_ENABLED == Cy_SysGetCM4Status()) {
