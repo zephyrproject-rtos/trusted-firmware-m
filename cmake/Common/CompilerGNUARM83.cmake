@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -30,11 +30,11 @@ elseif(${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv7-M")
 	string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "-march=" VAL "-march=armv7-m")
 	string_append_unique_item(STRING CMAKE_ASM_FLAGS_CPU KEY "-march=" VAL "-march=armv7-m")
 	string_append_unique_item(STRING CMAKE_LINK_FLAGS_CPU KEY "-march=" VAL "-march=armv7-m")
-elseif(${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6-M")
-	string_append_unique_item(STRING CMAKE_C_FLAGS_CPU KEY "-march=" VAL "-march=armv6-m")
-	string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "-march=" VAL "-march=armv6-m")
-	string_append_unique_item(STRING CMAKE_ASM_FLAGS_CPU KEY "-march=" VAL "-march=armv6-m")
-	string_append_unique_item(STRING CMAKE_LINK_FLAGS_CPU KEY "-march=" VAL "-march=armv6-m")
+elseif(${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6S-M")
+	string_append_unique_item(STRING CMAKE_C_FLAGS_CPU KEY "-march=" VAL "-march=armv6s-m")
+	string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "-march=" VAL "-march=armv6s-m")
+	string_append_unique_item(STRING CMAKE_ASM_FLAGS_CPU KEY "-march=" VAL "-march=armv6s-m")
+	string_append_unique_item(STRING CMAKE_LINK_FLAGS_CPU KEY "-march=" VAL "-march=armv6s-m")
 else()
 	message(FATAL_ERROR "Unknown or unsupported ARM cpu architecture setting.")
 endif()
@@ -69,7 +69,7 @@ if(NOT DEFINED ARM_CPU_ARCHITECTURE)
 		string_append_unique_item(STRING CMAKE_CXX_FLAGS_CPU KEY "-mcpu=" VAL "-mcpu=cortex-m0plus")
 		string_append_unique_item(STRING CMAKE_ASM_FLAGS_CPU KEY "-mcpu=" VAL "-mcpu=Cortex-m0plus")
 		string_append_unique_item(STRING CMAKE_LINK_FLAGS_CPU KEY "-mcpu=" VAL "-mcpu=Cortex-m0plus")
-		set(ARM_CPU_ARCHITECTURE "ARMv6-M")
+		set(ARM_CPU_ARCHITECTURE "ARMv6S-M")
 	else()
 		message(FATAL_ERROR "Unknown ARM cpu setting.")
 	endif()

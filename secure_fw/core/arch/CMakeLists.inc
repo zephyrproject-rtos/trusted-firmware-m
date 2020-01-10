@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -35,7 +35,8 @@ elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.MAIN")
 elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.BASE")
 	set(TFM_ARCH_C_SRC "${TFM_ARCH_DIR}/tfm_arch_v8m_base.c")
 elseif (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv7-M" OR
-		${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6-M")
+		${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6-M" OR
+		${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6S-M")
 	if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 		message(FATAL_ERROR "Armv6-M/Armv7-M can only support multi-core TF-M.")
 	endif()

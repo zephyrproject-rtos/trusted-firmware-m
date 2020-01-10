@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -61,7 +61,8 @@ string(APPEND MBEDCRYPTO_C_FLAGS ${CMAKE_C_FLAGS})
 
 # Workaround Mbed TLS issue https://github.com/ARMmbed/mbedtls/issues/1077
 if ((${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv8-M.BASE") OR
-   (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6-M"))
+    (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6-M") OR
+    (${ARM_CPU_ARCHITECTURE} STREQUAL "ARMv6S-M"))
    string(APPEND MBEDCRYPTO_C_FLAGS " -DMULADDC_CANNOT_USE_R7")
 endif()
 
