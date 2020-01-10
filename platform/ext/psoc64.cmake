@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 # Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -82,7 +82,7 @@ list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/cypress/psoc64/mailbox/platform_
 
 install(FILES ${PLATFORM_DIR}/target/cypress/psoc64/mailbox/ns_ipc_config.h
         ${PLATFORM_DIR}/target/cypress/psoc64/mailbox/platform_multicore.h
-        DESTINATION export/tfm/inc)
+        DESTINATION export/tfm/include)
 
 install(FILES ${PLATFORM_DIR}/target/cypress/psoc64/mailbox/platform_multicore.c
         ${PLATFORM_DIR}/target/cypress/psoc64/mailbox/platform_ns_mailbox.c
