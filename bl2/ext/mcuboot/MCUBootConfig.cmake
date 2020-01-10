@@ -71,17 +71,6 @@ if (BL2)
 				" upstream MCUBoot. Your choice was overriden.")
 			mcuboot_override_upgrade_strategy("OVERWRITE_ONLY")
 		endif()
-
-		if (DEFINED SECURITY_COUNTER OR
-			DEFINED SECURITY_COUNTER_S OR
-			DEFINED SECURITY_COUNTER_NS)
-				message(WARNING "Ignoring the values of SECURITY_COUNTER and/or SECURITY_COUNTER_* variables as"
-					" upstream MCUBoot does not support rollback protection.")
-				set(SECURITY_COUNTER "")
-				set(SECURITY_COUNTER_S "")
-				set(SECURITY_COUNTER_NS "")
-		endif()
-
 	endif()
 
 else() #BL2 is turned off

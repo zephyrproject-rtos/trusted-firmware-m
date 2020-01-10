@@ -87,6 +87,7 @@ list(APPEND ALL_SRC_C
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/flash_map_legacy.c"
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/keys.c"
 		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
+		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
@@ -97,7 +98,6 @@ list(APPEND ALL_SRC_C
 if (MCUBOOT_REPO STREQUAL "TF-M")
 	list(APPEND ALL_SRC_C
 			"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
-			"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 		)
 else()
 	list(APPEND ALL_SRC_C
@@ -204,7 +204,7 @@ get_property(_log_levels CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS)
 list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 
 if (MCUBOOT_REPO STREQUAL "UPSTREAM")
-	set(MCUBOOT_USE_UPSTREAM On)
+	set(MCUBOOT_HW_ROLLBACK_PROT On)
 endif()
 
 if(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")

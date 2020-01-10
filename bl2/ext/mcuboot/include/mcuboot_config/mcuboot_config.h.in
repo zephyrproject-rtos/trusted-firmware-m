@@ -47,7 +47,7 @@ extern "C" {
 #cmakedefine MCUBOOT_RAM_LOADING
 
 #cmakedefine MCUBOOT_HW_KEY
-#cmakedefine MCUBOOT_USE_UPSTREAM
+#cmakedefine MCUBOOT_HW_ROLLBACK_PROT
 
 /*
  * Cryptographic settings

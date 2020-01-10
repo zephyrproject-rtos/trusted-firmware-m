@@ -132,14 +132,12 @@ int main(void)
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-#ifndef MCUBOOT_USE_UPSTREAM
     rc = boot_nv_security_counter_init();
     if (rc != 0) {
         BOOT_LOG_ERR("Error while initializing the security counter");
         while (1)
             ;
     }
-#endif /* !MCUBOOT_USE_UPSTREAM */
 
     rc = boot_go(&rsp);
     if (rc != 0) {
