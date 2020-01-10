@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,14 +48,14 @@ psa_initial_attest_get_token(const uint8_t *challenge_obj,
     if (status < PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
-
-    if (status == PSA_SUCCESS) {
-        *token_size = out_vec[0].len;
-    }
 #else
     status = tfm_initial_attest_get_token_veneer(in_vec, IOVEC_LEN(in_vec),
                                                  out_vec, IOVEC_LEN(out_vec));
 #endif
+
+    if (status == PSA_SUCCESS) {
+        *token_size = out_vec[0].len;
+    }
 
     return (enum psa_attest_err_t)status;
 }
