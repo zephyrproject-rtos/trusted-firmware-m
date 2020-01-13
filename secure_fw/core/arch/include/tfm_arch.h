@@ -100,4 +100,7 @@ void tfm_arch_prioritize_secure_exception(void);
  */
 void tfm_arch_clear_fp_status(void);
 
+void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
+                           void *param, uintptr_t pfn,
+                           uintptr_t stk_btm, uintptr_t stk_top);
 #endif

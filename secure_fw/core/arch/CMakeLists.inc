@@ -48,6 +48,8 @@ else ()
 	message(FATAL_ERROR "Unsupported architecture.")
 endif()
 
+list(APPEND TFM_ARCH_C_SRC "${TFM_ARCH_DIR}/tfm_arch.c")
+
 #Append all our source files to global secure source code lists.
 list(APPEND ALL_SRC_C_S ${TFM_ARCH_C_SRC})
 unset(TFM_ARCH_C_SRC)
