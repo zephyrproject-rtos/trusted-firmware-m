@@ -95,12 +95,6 @@ void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
     pth->stk_top = stk_top;
 }
 
-__attribute__((section("SFN")))
-static void exit_zone(void)
-{
-    tfm_core_thrd_exit();
-}
-
 static void tfm_thrd_initialize_context(struct tfm_arch_ctx_t *p_actx,
                                         void *param, uintptr_t pfn,
                                         uintptr_t stk_btm, uintptr_t stk_top)
@@ -122,7 +116,12 @@ static void tfm_thrd_initialize_context(struct tfm_arch_ctx_t *p_actx,
     tfm_core_util_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
     p_stat_ctx->r0 = (uint32_t)param;
     p_stat_ctx->ra = (uint32_t)pfn;
-    p_stat_ctx->lr = (uint32_t)exit_zone;
+    /*
+     * Prevent thread exits:
+     * Only T32 is supported, so bit[0] must be 1. Clear the bit[0] of LR to
+     * trigger a fault.
+     */
+    p_stat_ctx->lr = ((uint32_t)pfn) & (~1UL);
     p_stat_ctx->xpsr = XPSR_T32;
 
     tfm_core_util_memset(p_actx, 0, sizeof(*p_actx));
@@ -186,22 +185,6 @@ void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth)
     CURR_THRD = pth;
 
     tfm_core_thrd_activate_schedule();
-}
-
-/* Remove current thread out of the schedulable list */
-void tfm_svcall_exit_thrd(void)
-{
-    CURR_THRD->state = THRD_STATE_DETACH;
-    tfm_arch_trigger_pendsv();
-}
-
-__attribute__((section("SFN")))
-void tfm_core_thrd_exit(void)
-{
-    SVC(TFM_SVC_EXIT_THRD);
-    while (1) {
-        ;
-    }
 }
 
 void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,

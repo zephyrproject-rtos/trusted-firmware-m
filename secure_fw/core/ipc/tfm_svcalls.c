@@ -1039,9 +1039,6 @@ int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
     tfm_core_validate_caller(partition, ctx, lr, ns_caller);
 
     switch (svc_num) {
-    case TFM_SVC_EXIT_THRD:
-        tfm_svcall_exit_thrd();
-        break;
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_svcall_psa_framework_version();
     case TFM_SVC_PSA_VERSION:

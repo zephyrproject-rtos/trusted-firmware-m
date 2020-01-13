@@ -216,20 +216,4 @@ void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,
                                   struct tfm_core_thread_t *prev,
                                   struct tfm_core_thread_t *next);
 
-/*
- * Svcall to exit current running thread.
- *
- * Notes :
- *  Remove current thread out of schedulable list.
- */
-void tfm_svcall_exit_thrd(void);
-
-/*
- * Exit current running thread for client.
- *
- * Notes:
- *  Must be called in thread mode.
- */
-void tfm_core_thrd_exit(void);
-
 #endif
