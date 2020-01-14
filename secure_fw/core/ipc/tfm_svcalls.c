@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -39,6 +39,10 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
                      int32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
+
+/* The section names come from the scatter file */
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
 /************************* SVC handler for PSA Client APIs *******************/
 
@@ -1008,11 +1012,23 @@ static void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
 
 int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
 {
-    bool ns_caller = true;
+    bool ns_caller = false;
     struct spm_partition_desc_t *partition = NULL;
+    uint32_t veneer_base =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
+    uint32_t veneer_limit =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
-    if (ctx[5] & TFM_VENEER_LR_BIT0_MASK) {
-        ns_caller = false;
+    /*
+     * The caller security attribute detection bases on LR of state context.
+     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
+     * occupied by general purpose value while calling SVC.
+     * Check if caller comes from non-secure: return address (ctx[6]) is belongs
+     * to veneer section, and the bit0 of LR (ctx[5]) is zero.
+     */
+    if (ctx[6] >= veneer_base && ctx[6] < veneer_limit &&
+        !(ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
+        ns_caller = true;
     }
 
     partition = tfm_spm_get_running_partition();
