@@ -38,11 +38,7 @@ struct tfm_state_context_t {
     uint32_t    xpsr;
 };
 
-/* Architecture specific thread context */
-struct tfm_arch_ctx_t;
-
-#define TFM_STATE_RET_VAL(ctx)     \
-                    (((struct tfm_state_context_t *)((ctx)->sp))->r0)
+#define TFM_STATE_RET_VAL(ctx) (((struct tfm_state_context_t *)((ctx)->sp))->r0)
 
 __attribute__ ((always_inline))
 __STATIC_INLINE void tfm_arch_trigger_pendsv(void)
@@ -87,8 +83,8 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
 /*
  * Initialize CPU architecture specific thread context extension
  */
-void tfm_arch_initialize_ctx_ext(struct tfm_arch_ctx_t *p_actx,
-                                 uint32_t sp, uint32_t sp_limit);
+void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
+                        uint32_t sp, uint32_t sp_limit);
 
 /*
  * Prioritize Secure exceptions

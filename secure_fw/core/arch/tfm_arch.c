@@ -44,9 +44,9 @@ void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
     tfm_core_util_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
     tfm_arch_init_state_ctx(p_stat_ctx, param, pfn);
 
+    /* Initialize architecture context */
     tfm_core_util_memset(p_actx, 0, sizeof(*p_actx));
-    tfm_arch_initialize_ctx_ext(p_actx, (uint32_t)p_stat_ctx,
-                                (uint32_t)stk_btm);
+    tfm_arch_init_actx(p_actx, (uint32_t)p_stat_ctx, (uint32_t)stk_btm);
 }
 
 #endif /* TFM_PSA_API */

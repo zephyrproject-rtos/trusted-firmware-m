@@ -78,8 +78,8 @@ __attribute__((naked)) void PendSV_Handler(void)
     );
 }
 
-void tfm_arch_initialize_ctx_ext(struct tfm_arch_ctx_t *p_actx,
-                                 uint32_t sp, uint32_t sp_limit)
+void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
+                        uint32_t sp, uint32_t sp_limit)
 {
     p_actx->sp = sp;
     p_actx->sp_limit = sp_limit;
