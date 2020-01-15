@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -61,8 +61,6 @@ struct ecc_key_t {
     uint8_t  *puby_key;
     uint32_t  puby_key_size;
 };
-
-#define ECC_P_256_KEY_SIZE  (96u)  /* 3 x 32 = 96 bytes priv + pub-x + pub-y */
 
 #define ROTPK_HASH_LEN (32u) /* SHA256 */
 

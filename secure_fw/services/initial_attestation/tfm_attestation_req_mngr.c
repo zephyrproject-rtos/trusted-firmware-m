@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include "psa/initial_attestation.h"
-#include "psa/crypto_types.h"
+#include "psa/crypto.h"
 #include "attestation.h"
 
 #ifdef TFM_PSA_API
@@ -15,8 +15,8 @@
 #include "tfm_client.h"
 #include "psa/service.h"
 #include "region_defs.h"
-#include "tfm_plat_crypto_keys.h"
 
+#define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 typedef enum psa_attest_err_t (*attest_func_t)(const psa_msg_t *msg);
@@ -102,7 +102,7 @@ static enum psa_attest_err_t psa_attest_get_token_size(const psa_msg_t *msg)
 static enum psa_attest_err_t tfm_attest_get_public_key(const psa_msg_t *msg)
 {
     enum psa_attest_err_t status = PSA_ATTEST_ERR_SUCCESS;
-    uint8_t key_buf[ECC_P_256_KEY_SIZE];
+    uint8_t key_buf[ECC_P256_PUBLIC_KEY_SIZE];
     size_t key_len;
     psa_ecc_curve_t curve_type;
 

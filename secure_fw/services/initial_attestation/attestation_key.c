@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,18 @@
 #include "psa/initial_attestation.h"
 #include "platform/include/tfm_plat_defs.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
+
+#define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
+
+/**
+ * The size of X and Y coordinate in 2 parameter style EC public
+ * key. Format is as defined in [COSE (RFC 8152)]
+ * (https://tools.ietf.org/html/rfc8152) and [SEC 1: Elliptic Curve
+ * Cryptography](http://www.secg.org/sec1-v2.pdf).
+ *
+ * This size is well-known and documented in public standards.
+ */
+#define ECC_P256_COORD_SIZE PSA_BITS_TO_BYTES(256) /* 256 bits -> 32 bytes */
 
 /* 0 is defined as an invalid handle in the PSA spec, so it is used here to
  * indicate that the key isn't loaded.
@@ -27,7 +39,7 @@ static psa_key_handle_t attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
  * The public key is kept loaded as it is both not required to be secret (and
  * hence can be kept in attestation memory) and immutable.
  */
-static uint8_t  attestation_public_key[ECC_P_256_KEY_SIZE];
+static uint8_t  attestation_public_key[ECC_P256_PUBLIC_KEY_SIZE]; /* 65bytes */
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_curve_t attestation_key_curve;
 
@@ -37,7 +49,7 @@ attest_register_initial_attestation_key()
     enum tfm_plat_err_t plat_res;
     psa_ecc_curve_t psa_curve;
     struct ecc_key_t attest_key = {0};
-    uint8_t  key_buf[ECC_P_256_KEY_SIZE];
+    uint8_t key_buf[3 * ECC_P256_COORD_SIZE]; /* priv + x_coord + y_coord */
     psa_key_type_t attest_key_type;
     psa_key_handle_t key_handle;
     psa_status_t crypto_res;
@@ -89,7 +101,7 @@ attest_register_initial_attestation_key()
     /* If the public key length is 0 then it hasn't been loaded */
     if (attestation_public_key_len == 0) {
         crypto_res = psa_export_public_key(key_handle, attestation_public_key,
-                                           ECC_P_256_KEY_SIZE,
+                                           ECC_P256_PUBLIC_KEY_SIZE,
                                            &attestation_public_key_len);
         if (crypto_res != PSA_SUCCESS) {
             return PSA_ATTEST_ERR_GENERAL;
