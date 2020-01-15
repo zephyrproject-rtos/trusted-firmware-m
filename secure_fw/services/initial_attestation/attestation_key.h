@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +10,7 @@
 
 #include "psa/initial_attestation.h"
 #include "psa/crypto.h"
+#include "q_useful_buf.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,20 @@ enum psa_attest_err_t
 attest_get_initial_attestation_public_key(uint8_t **public_key,
                                           size_t *public_key_len,
                                           psa_ecc_curve_t *public_key_curve);
+
+/**
+ * \brief Get the attestation key ID. It is the hash (SHA256) of the COSE_Key
+ *        encoded attestation public key.
+ *
+ * \param[out] attest_key_id  Pointer and length of the key id.
+ *
+ * \retval  PSA_ATTEST_ERR_SUCCESS   Key id calculated successfully.
+ * \retval  PSA_ATTEST_ERR_GENERAL   Key id calculation failed.
+
+ */
+enum psa_attest_err_t
+attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id);
+
 #ifdef __cplusplus
 }
 #endif

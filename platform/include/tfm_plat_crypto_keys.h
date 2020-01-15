@@ -22,20 +22,6 @@ extern "C" {
 #endif
 
 /**
- * Elliptic curve key type identifiers according to RFC8152 (COSE encoding)
- * https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves
- */
-enum cose_ecc_curve_t {
-    P_256        = 1,  /* NIST P-256 also known as secp256r1 */
-    P_384        = 2,  /* NIST P-384 also known as secp384r1 */
-    P_521        = 3,  /* NIST P-521 also known as secp521r1 */
-    X25519       = 4,  /* X25519 for use with ECDH only      */
-    X448         = 5,  /* X448 for use with ECDH only        */
-    ED25519      = 6,  /* Ed25519 for use with EdDSA only    */
-    ED448        = 7,  /* Ed448 for use with EdDSA only      */
-};
-
-/**
  * Structure definition to carry pointer and size information about an Elliptic
  * curve key which is stored in a buffer(key_buf) in raw format (without
  * encoding):

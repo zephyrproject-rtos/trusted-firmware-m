@@ -97,14 +97,24 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
     int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
     psa_key_handle_t private_key;
+    struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
+
 
     /* Remember some of the configuration values */
     me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
+#ifdef INCLUDE_TEST_CODE_AND_KEY_ID
     if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
         t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_SIG;
+    } else {
+        attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
+        if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+            return ATTEST_TOKEN_ERR_GENERAL;
+        }
     }
+#endif
+
     t_cose_sign1_sign_init(&(me->signer_ctx), t_cose_options, cose_alg_id);
 
     attest_ret =
@@ -117,7 +127,7 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
 
     t_cose_sign1_set_signing_key(&(me->signer_ctx),
                                  attest_key,
-                                 NULL_Q_USEFUL_BUF_C); /* No kid */
+                                 attest_key_id);
 
     /* Spin up the CBOR encoder */
     QCBOREncode_Init(&(me->cbor_enc_ctx), *out_buf);
