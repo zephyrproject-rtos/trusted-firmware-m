@@ -437,10 +437,13 @@ those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
   attestation token. Default value: True.
-- ``ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID``: Test code and COSE key-id from
-  unprotected token header is removed if it is False. Its value depends on the
-  build type. It is True if build type is ``Debug``, otherwise False (different
-  kind of ``Release`` builds).
+- ``ATTEST_INCLUDE_TEST_CODE``: Test code is removed from COSE library and from
+  attestation test suite if it is False. Its default value depends on the build
+  type. It is True if build type is ``Debug``, otherwise False (different kinds
+  of ``Release`` builds).
+- ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
+  unprotected header. Key-id is calculated and added to the COSE header based
+  on the value of this flag. Default value: False.
 
 ************
 Verification
@@ -495,4 +498,4 @@ that user has license for DS-5 and FVP models:
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*

@@ -861,7 +861,7 @@ static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
     return PSA_ATTEST_ERR_INVALID_INPUT;
 }
 
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
 /*!
  * \brief Static function to get the option flags from challenge object
  *
@@ -912,7 +912,7 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
         *key_select = 0;
     }
 }
-#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
+#endif /* INCLUDE_TEST_CODE */
 
 /*!
  * \brief Static function to create the initial attestation token
@@ -942,7 +942,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
         goto error;
     }
 
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
     attest_get_option_flags(challenge, &option_flags, &key_select);
 #endif
 

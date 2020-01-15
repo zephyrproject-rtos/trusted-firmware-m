@@ -22,8 +22,8 @@ embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(tfm_t_cose LANGUAGES C)
 embedded_project_fixup()
 
-if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
-	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID is undefined. ")
+if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE)
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE is undefined. ")
 endif()
 
 #Append all our source files to global lists.
@@ -71,7 +71,7 @@ list(APPEND T_COSE_COMPILE_TIME_CONFIG
 	"T_COSE_DISABLE_SIGN_VERIFY_TESTS"
 	)
 
-if (NOT ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID)
+if (NOT ATTEST_INCLUDE_TEST_CODE)
 	list(APPEND T_COSE_COMPILE_TIME_CONFIG "T_COSE_DISABLE_SHORT_CIRCUIT_SIGN")
 endif()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,7 +18,7 @@ static const uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE] = {
 
 /* Define test suite for attestation service tests */
 /* List of tests */
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
 static void tfm_attest_test_2001(struct test_result_t *ret);
 static void tfm_attest_test_2002(struct test_result_t *ret);
 static void tfm_attest_test_2003(struct test_result_t *ret);
@@ -27,7 +27,7 @@ static void tfm_attest_test_2004(struct test_result_t *ret);
 static void tfm_attest_test_2005(struct test_result_t *ret);
 
 static struct test_t attestation_interface_tests[] = {
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
     {&tfm_attest_test_2001, "TFM_ATTEST_TEST_2001",
      "Minimal token test of attest token", {0} },
     {&tfm_attest_test_2002, "TFM_ATTEST_TEST_2002",
@@ -54,7 +54,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
                   attestation_interface_tests, list_size, p_test_suite);
 }
 
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
 /*!
  * \brief Get minimal token, only include a hard coded challenge, but omit the
  *        rest of the claims
@@ -115,7 +115,7 @@ static void tfm_attest_test_2003(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
-#endif /* INCLUDE_TEST_CODE_AND_KEY_ID */
+#endif /* INCLUDE_TEST_CODE */
 
 /*!
  * \brief Get an IAT with proper ECDSA signature. Parse the token, validate

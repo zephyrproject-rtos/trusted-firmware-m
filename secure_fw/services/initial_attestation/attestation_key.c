@@ -47,7 +47,7 @@ static uint8_t  attestation_public_key[ECC_P256_PUBLIC_KEY_SIZE]; /* 65bytes */
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_curve_t attestation_key_curve;
 
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID
+#ifdef INCLUDE_COSE_KEY_ID
 static uint8_t attestation_key_id[PSA_HASH_SIZE(PSA_ALG_SHA_256)]; /* 32bytes */
 #endif
 
@@ -171,7 +171,7 @@ attest_get_initial_attestation_public_key(uint8_t **public_key,
 }
 
 
-#ifdef INCLUDE_TEST_CODE_AND_KEY_ID
+#ifdef INCLUDE_COSE_KEY_ID
 
 #define MAX_ENCODED_COSE_KEY_SIZE \
     1 + /* 1 byte to encode map */ \
@@ -392,4 +392,4 @@ attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif
+#endif /* INCLUDE_COSE_KEY_ID */

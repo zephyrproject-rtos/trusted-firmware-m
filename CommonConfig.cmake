@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,7 @@ elseif(NOT DEFINED CORE_TEST)
 elseif(NOT DEFINED TFM_LVL)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_LVL not defined, Include this file from a Config*.cmake")
 elseif(NOT DEFINED CORE_IPC)
-	message(FATAL_ERROR "ERROR: Incomplete Configuration: CORE_IPC not deinfed. Include this file from a Config*.cmake")
+	message(FATAL_ERROR "ERROR: Incomplete Configuration: CORE_IPC not defined. Include this file from a Config*.cmake")
 endif()
 
 if(NOT DEFINED COMPILER)
@@ -409,10 +409,16 @@ if (NOT DEFINED ATTEST_INCLUDE_OPTIONAL_CLAIMS)
 	set(ATTEST_INCLUDE_OPTIONAL_CLAIMS ON)
 endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "debug")
-	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID ON)
-else()
-	set(ATTEST_INCLUDE_TEST_CODE_AND_KEY_ID OFF)
+if (NOT DEFINED ATTEST_INCLUDE_COSE_KEY_ID)
+	set(ATTEST_INCLUDE_COSE_KEY_ID OFF)
+endif()
+
+if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE)
+	if (CMAKE_BUILD_TYPE STREQUAL "debug")
+		set(ATTEST_INCLUDE_TEST_CODE ON)
+	else()
+		set(ATTEST_INCLUDE_TEST_CODE OFF)
+	endif()
 endif()
 
 set(ATTEST_BOOT_INTERFACE "CBOR_ENCODED_CLAIMS" CACHE STRING "Set the format in which to pass the claims to the initial-attestation service.")
