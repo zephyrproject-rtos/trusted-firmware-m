@@ -286,6 +286,46 @@ line arguments:
     Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
     without BL2 bootloader.
 
+Configurations
+==============
+Configurations files under `configs` are TF-M provided configurations for building.
+They are used by the `-DPROJ_CONFIG` argument for the build command line.
+The following table describes the differences between the configurations:
+
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+|     Configuration      | Model [1]_ | TF-M LVL [2]_ | Regression [3]_ | Core Test [4]_ | IPC Test [5]_ | PSA API Test [6]_ |
++========================+============+===============+=================+================+===============+===================+
+| Default                | Library    | 1             | No              | No             | No            | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| Regression             | Library    | 1             | Yes             | Yes            | No            | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| CoreIPC                | IPC        | 1             | No              | No             | No            | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| CoreIPCTfmLevel2       | IPC        | 2             | No              | No             | No            | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| RegressionIPC          | IPC        | 1             | Yes             | Yes            | Yes           | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| RegressionIPCTfmLevel2 | IPC        | 2             | Yes             | Yes            | Yes           | No                |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| PsaApiTest             | Library    | 1             | No              | No             | No            | Yes               |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| PsaApiTestIPC          | IPC        | 1             | No              | No             | No            | Yes               |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+| PsaApiTestIPCTfmLevel2 | IPC        | 2             | No              | No             | No            | Yes               |
++------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+
+
+.. [1] Which TF-M Model is set: `CORE_IPC`. If `CORE_IPC` is set to true then the model is IPC model, otherwise it's library model.
+
+.. [2] The TF-M isolation level `TFM_LVL`. Currently Library model supports level 1. IPC model supports level 1 and 2.
+
+.. [3] Build regression tests or not: `REGRESSION`.
+
+.. [4] Build core tests or not: `CORE_TEST`.
+
+.. [5] Build IPC tests or not: `IPC_TEST`. It can be only enabled in IPC model
+
+.. [6] `Build for PSA API compliance tests`_ or not: `PSA_API_TEST`.
+
 --------------
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
