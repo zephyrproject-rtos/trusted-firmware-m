@@ -28,6 +28,7 @@
 #include "cy_ipc_drv.h"
 #include "cy_prot.h"
 #include "pc_config.h"
+#include "driver_dap.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -215,6 +216,14 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
     smpu_print_config();
+
+    if (cy_access_port_control(CY_CM4_AP, CY_AP_EN) == 0) {
+        /* The delay is required after Access port was enabled for
+        * debugger/programmer to connect and set TEST BIT */
+        Cy_SysLib_Delay(100);
+        printf("Enabled CM4_AP DAP control\n");
+    }
+
     printf("Starting Cortex-M4 at 0x%x\r\n", start_addr);
     Cy_SysEnableCM4(start_addr);
 }
