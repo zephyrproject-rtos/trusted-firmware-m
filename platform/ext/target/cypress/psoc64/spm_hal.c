@@ -34,6 +34,7 @@ extern const struct memory_region_limits memory_regions;
 
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
+    Cy_PDL_Init(CY_DEVICE_CFG);
     smpu_init_cfg();
     ppu_init_cfg();
     bus_masters_cfg();
@@ -213,6 +214,7 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
 
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
+    smpu_print_config();
     printf("Starting Cortex-M4 at 0x%x\r\n", start_addr);
     Cy_SysEnableCM4(start_addr);
 }
@@ -244,7 +246,7 @@ void tfm_spm_hal_wait_for_ns_cpu_ready(void)
                 Cy_IPC_Drv_ReleaseNotify(Cy_IPC_Drv_GetIpcBaseAddress(IPC_RX_CHAN),
                                          IPC_RX_RELEASE_MASK);
                 if (data == ~IPC_SYNC_MAGIC) {
-                    printf("Cores sync success.\r\n");
+                    printf("\n\rCores sync success.\r\n");
                     break;
                 }
             }
@@ -372,8 +374,6 @@ enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
 
 enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
 {
-    printf("%s()\n", __func__);
-
     return TFM_PLAT_ERR_SUCCESS;
 }
 

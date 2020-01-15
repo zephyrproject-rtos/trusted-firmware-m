@@ -20,6 +20,7 @@
 #include "region_defs.h"
 #include "RTE_Device.h"
 #include "smpu_config.h"
+#include "log/tfm_log.h"
 
 #include "cy_prot.h"
 
@@ -73,12 +74,10 @@ static const char * smpu_name(const SMPU_Resources *smpu_dev)
 }
 
 /* API functions */
-cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev)
-{
-    cy_en_prot_status_t ret;
 
-    printf("%s(%s) - address = %p, size = %#x bytes, %s subregions enabled\n",
-           __func__,
+void SMPU_Print_Config(const SMPU_Resources *smpu_dev)
+{
+    printf("%s - address = %p, size = %#x bytes, %s subregions enabled\n",
            smpu_name(smpu_dev),
            smpu_dev->slave_config.address,
            (uint32_t)REGIONSIZE_TO_BYTES(smpu_dev->slave_config.regionSize),
@@ -92,6 +91,11 @@ cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev)
                    smpu_dev->slave_config.subregions & (1<<i) ? "disabled" : "enabled");
         }
     }
+}
+
+cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev)
+{
+    cy_en_prot_status_t ret;
 
     ret = Cy_Prot_ConfigSmpuSlaveStruct(smpu_dev->smpu,
                                         &smpu_dev->slave_config);
@@ -125,8 +129,7 @@ cy_en_prot_status_t protect_unconfigured_smpus(void)
 
         if ((_FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, att0) == 0)
             && (_FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT1_ENABLED, att1) == 0)) {
-            printf("%s() - protecting unconfigured SMPU %d\n",
-                   __func__, i);
+
             ret = Cy_Prot_ConfigSmpuMasterStruct(&PROT->SMPU.SMPU_STRUCT[i],
                                                  &smpu_config);
             if (ret != CY_PROT_SUCCESS) {

@@ -25,6 +25,7 @@ typedef struct smpu_resources SMPU_Resources;
 /* API functions */
 cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev);
 cy_en_prot_status_t protect_unconfigured_smpus(void);
+void SMPU_Print_Config(const SMPU_Resources *smpu_dev);
 
 /* Exported per-SMPU macros */
 #define DECLARE_SMPU(N) extern const SMPU_Resources SMPU##N##_Resources;

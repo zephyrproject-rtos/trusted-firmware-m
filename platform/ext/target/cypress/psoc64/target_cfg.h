@@ -50,6 +50,11 @@ struct tfm_spm_partition_platform_data_t
 void smpu_init_cfg(void);
 
 /**
+ * \brief Prints out the Shared Memory Protection Units config.
+ */
+void smpu_print_config(void);
+
+/**
  * \brief Configures the Peripheral Protection Units.
  */
 void ppu_init_cfg(void);
