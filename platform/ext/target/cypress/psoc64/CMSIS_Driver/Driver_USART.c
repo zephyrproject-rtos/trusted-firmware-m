@@ -323,10 +323,6 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
     cy_en_scb_uart_status_t cy_retval;
     uint32_t retval;
 
-    Cy_SCB_UART_Disable(uart_dev->base, NULL);
-
-    Cy_SCB_UART_DeInit(uart_dev->base);
-
     switch (control & ARM_USART_CONTROL_Msk) {
         case ARM_USART_MODE_ASYNCHRONOUS:
             /* TODO Default values work for 115200 baud,
@@ -338,6 +334,10 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
         default:
             return ARM_DRIVER_ERROR_UNSUPPORTED;
     }
+
+    Cy_SCB_UART_Disable(uart_dev->base, NULL);
+
+    Cy_SCB_UART_DeInit(uart_dev->base);
 
     /* UART Data bits */
     retval = USARTx_SetDataBits(control, &config);
