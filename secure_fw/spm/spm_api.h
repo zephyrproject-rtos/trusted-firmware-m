@@ -387,28 +387,6 @@ void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
 /*************************** IPC definitions **************************/
 
 /**
- * \brief Get bottom of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region bottom value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx);
-
-/**
- * \brief Get top of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region top value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx);
-
-/**
  * \brief   Get the running partition ID.
  *
  * \return  Returns the partition ID
@@ -441,52 +419,6 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
 int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
                                      int32_t client_id);
 
-/**
- * \brief                   Free connection handle which not used anymore.
- *
- * \param[in] service       Target service context pointer
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
- *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval "Does not return"  Panic for not find service by handle
- */
-int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
-                                 psa_handle_t conn_handle);
-
-/**
- * \brief                   Set reverse handle value for connection.
- *
- * \param[in] service       Target service context pointer
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
- * \param[in] rhandle       rhandle need to save
- *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval "Does not return"  Panic for not find handle node
- */
-int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
-                            psa_handle_t conn_handle,
-                            void *rhandle);
-
-/**
- * \brief                   Get reverse handle value from connection hanlde.
- *
- * \param[in] service       Target service context pointer
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
- *
- * \retval void *           Success
- * \retval "Does not return"  Panic for those:
- *                              service pointer are NULL
- *                              hanlde is \ref PSA_NULL_HANDLE
- *                              handle node does not be found
- */
-void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
-                          psa_handle_t conn_handle);
-
 /******************** Partition management functions *************************/
 
 /**
@@ -497,22 +429,6 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  *                          \ref spm_partition_desc_t structures
  */
 struct spm_partition_desc_t *tfm_spm_get_running_partition(void);
-
-/**
- * \brief                   Get the service context by signal.
- *
- * \param[in] partition     Partition context pointer
- *                          \ref spm_partition_desc_t structures
- * \param[in] signal        Signal associated with inputs to the Secure
- *                          Partition, \ref psa_signal_t
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       Target service context pointer,
- *                          \ref tfm_spm_service_t structures
- */
-struct tfm_spm_service_t *
-    tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
-                                  psa_signal_t signal);
 
 /**
  * \brief                   Get the service context by service ID.
@@ -538,30 +454,7 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 struct tfm_spm_service_t *
     tfm_spm_get_service_by_handle(psa_handle_t conn_handle);
 
-/**
- * \brief                   Get the partition context by partition ID.
- *
- * \param[in] partition_id  Partition identity
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       Target partition context pointer,
- *                          \ref spm_partition_desc_t structures
- */
-struct spm_partition_desc_t *
-    tfm_spm_get_partition_by_id(int32_t partition_id);
-
 /************************ Message functions **********************************/
-
-/**
- * \brief                   Get message context by message handle.
- *
- * \param[in] msg_handle    Message handle which is a reference generated
- *                          by the SPM to a specific message.
- *
- * \return                  The message body context pointer
- *                          \ref tfm_msg_body_t structures
- */
-struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
 
 /**
  * \brief                   Get message context by connect handle.
@@ -687,7 +580,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  */
 uint32_t tfm_spm_init(void);
 
-
 /*
  * \brief This function get the current PSA RoT lifecycle state.
  *
@@ -699,6 +591,293 @@ uint32_t tfm_spm_init(void);
  */
 uint32_t tfm_spm_get_lifecycle_state(void);
 
-#endif /* ifdef(TFM_PSA_API) */
+/* Svcall for PSA Client APIs */
+
+/**
+ * \brief SVC handler for \ref psa_framework_version.
+ *
+ * \return version              The version of the PSA Framework implementation
+ *                              that is providing the runtime services to the
+ *                              caller.
+ */
+uint32_t tfm_spm_psa_framework_version(void);
+
+/**
+ * \brief SVC handler for \ref psa_version.
+ *
+ * \param[in] args              Include all input arguments: sid.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ *
+ * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
+ *                              caller is not permitted to access the service.
+ * \retval > 0                  The version of the implemented RoT Service.
+ */
+uint32_t tfm_spm_psa_version(uint32_t *args, bool ns_caller);
+
+/**
+ * \brief SVC handler for \ref psa_connect.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              sid, version.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_status_t tfm_spm_psa_connect(uint32_t *args, bool ns_caller);
+
+/**
+ * \brief SVC handler for \ref psa_call.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              handle, in_vec, in_len, out_vec, out_len.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ * \param[in] lr                EXC_RETURN value of the SVC.
+ *
+ * \retval >=0                  RoT Service-specific status value.
+ * \retval <0                   RoT Service-specific error code.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The connection has been terminated by the
+ *                              RoT Service. The call is a PROGRAMMER ERROR if
+ *                              one or more of the following are true:
+ * \arg                           An invalid handle was passed.
+ * \arg                           The connection is already handling a request.
+ * \arg                           type < 0.
+ * \arg                           An invalid memory reference was provided.
+ * \arg                           in_len + out_len > PSA_MAX_IOVEC.
+ * \arg                           The message is unrecognized by the RoT
+ *                                Service or incorrectly formatted.
+ */
+psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
+
+/**
+ * \brief SVC handler for \ref psa_close.
+ *
+ * \param[in] args              Include all input arguments: handle.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           An invalid handle was provided that is not
+ *                                the null handle.
+ * \arg                           The connection is handling a request.
+ */
+void tfm_spm_psa_close(uint32_t *args, bool ns_caller);
+
+/* Svcall for PSA Service APIs */
+
+/**
+ * \brief SVC handler for \ref psa_wait.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              signal_mask, timeout.
+ *
+ * \retval >0                   At least one signal is asserted.
+ * \retval 0                    No signals are asserted. This is only seen when
+ *                              a polling timeout is used.
+ */
+psa_signal_t tfm_spm_psa_wait(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_get.
+ *
+ * \param[in] args              Include all input arguments: signal, msg.
+ *
+ * \retval PSA_SUCCESS          Success, *msg will contain the delivered
+ *                              message.
+ * \retval PSA_ERROR_DOES_NOT_EXIST Message could not be delivered.
+ * \retval "Does not return"    The call is invalid because one or more of the
+ *                              following are true:
+ * \arg                           signal has more than a single bit set.
+ * \arg                           signal does not correspond to an RoT Service.
+ * \arg                           The RoT Service signal is not currently
+ *                                asserted.
+ * \arg                           The msg pointer provided is not a valid memory
+ *                                reference.
+ */
+psa_status_t tfm_spm_psa_get(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_set_rhandle.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              msg_handle, rhandle.
+ *
+ * \retval void                 Success, rhandle will be provided with all
+ *                              subsequent messages delivered on this
+ *                              connection.
+ * \retval "Does not return"    msg_handle is invalid.
+ */
+void tfm_spm_psa_set_rhandle(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_read.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              msg_handle, invec_idx, buffer, num_bytes.
+ *
+ * \retval >0                   Number of bytes copied.
+ * \retval 0                    There was no remaining data in this input
+ *                              vector.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           invec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           the memory reference for buffer is invalid or
+ *                                not writable.
+ */
+size_t tfm_spm_psa_read(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_skip.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              msg_handle, invec_idx, num_bytes.
+ *
+ * \retval >0                   Number of bytes skipped.
+ * \retval 0                    There was no remaining data in this input
+ *                              vector.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           invec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ */
+size_t tfm_spm_psa_skip(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_write.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              msg_handle, outvec_idx, buffer, num_bytes.
+ *
+ * \retval void                 Success
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           outvec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           The memory reference for buffer is invalid.
+ * \arg                           The call attempts to write data past the end
+ *                                of the client output vector.
+ */
+void tfm_spm_psa_write(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_reply.
+ *
+ * \param[in] args              Include all input arguments:
+ *                              msg_handle, status.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                         msg_handle is invalid.
+ * \arg                         An invalid status code is specified for the
+ *                              type of message.
+ */
+void tfm_spm_psa_reply(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_notify.
+ *
+ * \param[in] args              Include all input arguments: partition_id.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    partition_id does not correspond to a Secure
+ *                              Partition.
+ */
+void tfm_spm_psa_notify(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_clear.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The Secure Partition's doorbell signal is not
+ *                              currently asserted.
+ */
+void tfm_spm_psa_clear(void);
+
+/**
+ * \brief SVC handler for \ref psa_eoi.
+ *
+ * \param[in] args              Include all input arguments: irq_signal.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           irq_signal is not an interrupt signal.
+ * \arg                           irq_signal indicates more than one signal.
+ * \arg                           irq_signal is not currently asserted.
+ */
+void tfm_spm_psa_eoi(uint32_t *args);
+
+/**
+ * \brief SVC hander of enabling irq_line of the specified irq_signal.
+ *
+ * \param[in] args              Include all input arguments: irq_signal.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           irq_signal is not an interrupt signal.
+ * \arg                           irq_signal indicates more than one signal.
+ */
+void tfm_spm_enable_irq(uint32_t *args);
+
+/**
+ * \brief SVC hander of disabling irq_line of the specified irq_signal.
+ *
+ * \param[in] args              Include all input arguments: irq_signal.
+ *
+ * \retval void                 Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           irq_signal is not an interrupt signal.
+ * \arg                           irq_signal indicates more than one signal.
+ */
+void tfm_spm_disable_irq(uint32_t *args);
+
+/**
+ * \brief Validate the whether NS caller re-enter.
+ *
+ * \param[in] p_cur_sp          Pointer to current partition.
+ * \param[in] p_ctx             Pointer to current stack context.
+ * \param[in] exc_return        EXC_RETURN value.
+ * \param[in] ns_caller         If 'true', call from non-secure client.
+ *                              Or from secure client.
+ *
+ * \retval void                 Success.
+ */
+void tfm_spm_validate_caller(struct spm_partition_desc_t *p_cur_sp,
+                             uint32_t *p_ctx, uint32_t exc_return,
+                             bool ns_caller);
+
+/**
+ * \brief Terminate execution within the calling Secure Partition and will not
+ *        return.
+ *
+ * \retval "Does not return"
+ */
+void tfm_spm_psa_panic(void);
+
+#endif /* defined(TFM_PSA_API) */
 
 #endif /*__SPM_API_H__ */

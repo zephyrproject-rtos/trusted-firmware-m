@@ -27,7 +27,8 @@ endif()
 set (SS_SPM_C_SRC "${SS_SPM_DIR}/spm_api.c")
 
 if(TFM_PSA_API)
-	list(APPEND SS_SPM_C_SRC "${SS_SPM_DIR}/spm_ipc.c")
+	list(APPEND SS_SPM_C_SRC "${SS_SPM_DIR}/spm_ipc.c"
+		"${SS_SPM_DIR}/spm_psa_client_call.c")
 else()
 	list(APPEND SS_SPM_C_SRC "${SS_SPM_DIR}/spm_func.c")
 endif()
@@ -41,7 +42,6 @@ embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 
 set(BUILD_CMSIS_CORE Off)
 set(BUILD_RETARGET Off)

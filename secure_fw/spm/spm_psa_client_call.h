@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@
  * \return version              The version of the PSA Framework implementation
  *                              that is providing the runtime services.
  */
-uint32_t tfm_psa_framework_version(void);
+uint32_t tfm_spm_client_psa_framework_version(void);
 
 /**
  * \brief handler for \ref psa_version.
@@ -32,7 +32,7 @@ uint32_t tfm_psa_framework_version(void);
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_psa_version(uint32_t sid, bool ns_caller);
+uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller);
 
 /**
  * \brief handler for \ref psa_connect.
@@ -51,7 +51,8 @@ uint32_t tfm_psa_version(uint32_t sid, bool ns_caller);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller);
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
+                                        bool ns_caller);
 
 /**
  * \brief handler for \ref psa_call.
@@ -84,10 +85,10 @@ psa_status_t tfm_psa_connect(uint32_t sid, uint32_t version, bool ns_caller);
  * \arg                           The message is unrecognized by the RoT
  *                                Service or incorrectly formatted.
  */
-psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
-                          const psa_invec *inptr, size_t in_num,
-                          psa_outvec *outptr, size_t out_num,
-                          bool ns_caller, uint32_t privileged);
+psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
+                                     const psa_invec *inptr, size_t in_num,
+                                     psa_outvec *outptr, size_t out_num,
+                                     bool ns_caller, uint32_t privileged);
 
 /**
  * \brief handler for \ref psa_close.
@@ -104,6 +105,6 @@ psa_status_t tfm_psa_call(psa_handle_t handle, int32_t type,
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_psa_close(psa_handle_t handle, bool ns_caller);
+void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller);
 
 #endif
