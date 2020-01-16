@@ -412,8 +412,9 @@ function(set_up_secure_fw_build)
 							${INTERFACE_INC_DIR}/psa/crypto_struct.h
 							${INTERFACE_INC_DIR}/psa/crypto_types.h
 							${INTERFACE_INC_DIR}/psa/crypto_values.h
-							${INTERFACE_INC_DIR}/tfm_crypto_defs.h
 				DESTINATION ${EXPORT_INC_DIR}/psa)
+		install(FILES       ${INTERFACE_INC_DIR}/tfm_crypto_defs.h
+				DESTINATION ${EXPORT_INC_DIR})
 		if (TFM_PSA_API)
 			install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
