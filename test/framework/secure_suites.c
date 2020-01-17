@@ -87,9 +87,12 @@ static void tear_down_integ_test(void)
      */
 }
 
-void start_integ_test(void)
+enum test_suite_err_t start_integ_test(void)
 {
+    enum test_suite_err_t retval;
+
     setup_integ_test();
-    integ_test("Secure", test_suites);
+    retval = integ_test("Secure", test_suites);
     tear_down_integ_test();
+    return retval;
 }

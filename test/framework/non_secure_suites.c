@@ -86,13 +86,13 @@ static struct test_suite_t test_suites[] = {
     {0, 0, 0, 0}
 };
 
-void start_integ_test(void)
+enum test_suite_err_t start_integ_test(void)
 {
-    integ_test("Non-secure", test_suites);
+    return integ_test("Non-secure", test_suites);
 }
 
 /* Service stand-in for NS tests. To be called from a non-secure context */
-void tfm_non_secure_client_run_tests(void)
+enum test_suite_err_t tfm_non_secure_client_run_tests(void)
 {
-    start_integ_test();
+    return start_integ_test();
 }
