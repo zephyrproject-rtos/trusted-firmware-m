@@ -381,16 +381,18 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (in_vec[1].len != sizeof(psa_key_attributes_t)) ||
+        (in_vec[1].len != sizeof(psa_client_key_attributes_t)) ||
         (out_vec[0].len != sizeof(psa_key_handle_t))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     uint32_t handle = iov->op_handle;
-    const psa_key_attributes_t *key_attributes = in_vec[1].base;
+    const psa_client_key_attributes_t *client_key_attr = in_vec[1].base;
     psa_key_derivation_operation_t *operation = NULL;
     psa_key_handle_t *key_handle = out_vec[0].base;
+    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
+    int32_t partition_id;
     uint32_t index;
 
     /* Look up the corresponding operation context */
@@ -406,11 +408,23 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
         return status;
     }
 
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = tfm_crypto_key_attributes_from_client(client_key_attr,
+                                                   partition_id,
+                                                   &key_attributes);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
-        status = tfm_crypto_huk_derivation_output_key(key_attributes, operation,
-                                                      key_handle);
+        status = tfm_crypto_huk_derivation_output_key(&key_attributes,
+                                                      operation, key_handle);
     } else {
-        status = psa_key_derivation_output_key(key_attributes, operation,
+        status = psa_key_derivation_output_key(&key_attributes, operation,
                                                key_handle);
     }
     if (status == PSA_SUCCESS) {

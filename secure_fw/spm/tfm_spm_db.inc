@@ -568,6 +568,16 @@ static int32_t dependencies_TFM_SP_STORAGE[] =
 };
 #endif /* TFM_PARTITION_SECURE_STORAGE */
 
+#ifdef TFM_PARTITION_CRYPTO
+static int32_t dependencies_TFM_SP_CRYPTO[] =
+{
+    TFM_ITS_SET_SID,
+    TFM_ITS_GET_SID,
+    TFM_ITS_GET_INFO_SID,
+    TFM_ITS_REMOVE_SID,
+};
+#endif /* TFM_PARTITION_CRYPTO */
+
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
 static int32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
 {
@@ -723,8 +733,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_crypto_init,
-        .dependencies_num     = 0,
-        .p_dependencies       = NULL,
+        .dependencies_num     = 4,
+        .p_dependencies       = dependencies_TFM_SP_CRYPTO,
     },
 #endif /* TFM_PARTITION_CRYPTO */
 
