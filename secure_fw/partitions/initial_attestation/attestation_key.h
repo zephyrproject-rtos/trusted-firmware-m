@@ -8,6 +8,7 @@
 #ifndef __ATTESTATION_KEY_H__
 #define __ATTESTATION_KEY_H__
 
+#include "attestation.h"
 #include "psa/initial_attestation.h"
 #include "psa/crypto.h"
 #include "q_useful_buf.h"
@@ -40,16 +41,19 @@ enum psa_attest_err_t
 attest_unregister_initial_attestation_key();
 
 /**
- * \brief Get a handle to the attestion private key.
+ * \brief Get the handle of the key for signing token
+ *        In asymmetric key algorithm based initial attestation, it is the
+ *        handle of the initial attestation private key.
+ *        In symmetric key algorithm based initial attestation, it is the
+ *        handle of symmetric initial attestation key.
  *
- * \param[out] key_handle Key handle for private key
+ * \param[out] key_handle            The handle of the key for signing token.
  *
- * \retval  PSA_ATTEST_ERR_SUCCESS   Private key was successfully returned.
- * \retval  PSA_ATTEST_ERR_GENERAL   Private key could not be returned.
+ * \retval  PSA_ATTEST_ERR_SUCCESS   Key handle was successfully returned.
+ * \retval  PSA_ATTEST_ERR_GENERAL   Key handle could not be returned.
  */
-
 enum psa_attest_err_t
-attest_get_initial_attestation_private_key_handle(psa_key_handle_t *key_handle);
+attest_get_signing_key_handle(psa_key_handle_t *key_handle);
 
 /**
  * \brief Get the public key derived from the initial attestation private key.

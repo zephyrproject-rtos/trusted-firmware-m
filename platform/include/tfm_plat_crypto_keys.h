@@ -82,6 +82,29 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  uint8_t *key,
                                                  size_t key_size);
 
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+/**
+ * \brief Get the symmetric Initial Attestation Key (IAK)
+ *
+ * The device MUST contain a symmetric IAK, which is used to sign the token.
+ * So far only HMAC is supported in symmetric key algorithm based Initial
+ * Attestation.
+ * Keys must be provided in raw format, just binary data without any encoding
+ * (DER, COSE). Caller provides a buffer to copy all the raw data.
+ *
+ * \param[out]  key_buf     Buffer to store the initial attestation key.
+ * \param[in]   buf_len     The length of buffer.
+ * \param[out]  key_len     Buffer to carry the length of the initial
+ *                          attestation key.
+ * \param[out]  key_alg     The key algorithm. Only HMAC is supported so far.
+ *
+ * \return Returns error code specified in \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t tfm_plat_get_symmetric_iak(uint8_t *key_buf,
+                                               size_t buf_len,
+                                               size_t *key_len,
+                                               psa_algorithm_t *key_alg);
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 /**
  * \brief Get the initial attestation key
  *
@@ -115,6 +138,7 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
                                 psa_ecc_curve_t  *curve_type);
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 /**
  * \brief Get the hash of the corresponding Root of Trust Public Key for

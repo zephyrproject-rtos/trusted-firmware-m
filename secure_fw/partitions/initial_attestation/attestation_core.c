@@ -931,6 +931,19 @@ error:
     return error_mapping_to_psa_status_t(attest_err);
 }
 
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+psa_status_t
+initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
+                                    psa_outvec *out_vec, uint32_t num_outvec)
+{
+    (void)in_vec;
+    (void)num_invec;
+    (void)out_vec;
+    (void)num_outvec;
+
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 psa_status_t
 initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec)
@@ -978,3 +991,4 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
 error:
     return error_mapping_to_psa_status_t(attest_err);
 }
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */

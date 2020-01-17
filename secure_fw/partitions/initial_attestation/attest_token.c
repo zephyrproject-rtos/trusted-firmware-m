@@ -118,8 +118,7 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
 
     t_cose_sign1_sign_init(&(me->signer_ctx), t_cose_options, cose_alg_id);
 
-    attest_ret =
-        attest_get_initial_attestation_private_key_handle(&private_key);
+    attest_ret = attest_get_signing_key_handle(&private_key);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
         return ATTEST_TOKEN_ERR_SIGNING_KEY;
     }

@@ -128,7 +128,7 @@ attest_unregister_initial_attestation_key()
 }
 
 enum psa_attest_err_t
-attest_get_initial_attestation_private_key_handle(psa_key_handle_t *handle)
+attest_get_signing_key_handle(psa_key_handle_t *handle)
 {
     if (attestation_key_handle == ATTEST_KEY_HANDLE_NOT_LOADED) {
         return PSA_ATTEST_ERR_GENERAL;
