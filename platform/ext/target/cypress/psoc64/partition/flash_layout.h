@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@
  * 0x1005_0000 Non-secure image primary (1152 KB)
  * 0x1017_0000 Secure     image secondary (320 KB)
  * 0x101c_0000 - 0x101f_ffff Reserved
- *  0x101c_0000 Secure Storage Area (20 KB)
- *  0x101c_5000 Internal Trusted Storage Area (16 KB)
- *  0x101c_9000 NV counters area (512 Bytes)
- *  0x101c_9200 Scratch area (27.5 KB)
+ *  0x101c_0000 Internal Trusted Storage Area (16 KB)
+ *  0x101c_4000 NV counters area (512 Bytes)
+ *  0x101c_4200 Scratch area (27.5 KB)
+ *  0x101c_b000 Secure Storage Area (20 KB)
  *  0x101d_0000 Reserved (192 KB)
  * 0x101f_ffff End of Flash
  *
@@ -66,27 +66,28 @@
 
 /* FixMe: implement proper mcuboot partitioning for CYBL */
 
-/* Reserved for Secure Storage Area */
-#define FLASH_SST_AREA_OFFSET           (FLASH_RESERVED_AREA_OFFSET)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
-
 /* Internal Trusted Storage Area */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
-                                         FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_OFFSET           (FLASH_RESERVED_AREA_OFFSET)
 #define FLASH_ITS_AREA_SIZE             (0x4000)    /* 16 KB */
 
+/* Non-volatile Counters Area */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 #ifdef BL2
 #error "BL2 configuration is not supported"
-#else /* BL2 */
+#endif /* BL2 */
 
+/* Scratch Area - unused */
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_NV_COUNTERS_AREA_OFFSET + \
                                          FLASH_NV_COUNTERS_AREA_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE         (0x6e00)   /* 27.5 KB */
-#endif /* BL2 */
+
+/* Secure Storage Area */
+#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+                                         FLASH_AREA_SCRATCH_SIZE)
+#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
 
 #define FLASH_AREA_SYSTEM_RESERVED_SIZE (0x30000) /* 192 KB */
 
@@ -104,10 +105,10 @@
 
 /* Check if it fits into available Flash*/
 
-#define FLASH_RESERVED_AREA_SIZE        (FLASH_SST_AREA_SIZE + \
-                                         FLASH_ITS_AREA_SIZE + \
+#define FLASH_RESERVED_AREA_SIZE        (FLASH_ITS_AREA_SIZE + \
                                          FLASH_NV_COUNTERS_AREA_SIZE + \
                                          FLASH_AREA_SCRATCH_SIZE + \
+                                         FLASH_SST_AREA_SIZE + \
                                          FLASH_AREA_SYSTEM_RESERVED_SIZE)
 
 #if (FLASH_RESERVED_AREA_OFFSET + FLASH_RESERVED_AREA_SIZE) > (FLASH_TOTAL_SIZE)
