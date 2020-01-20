@@ -28,6 +28,13 @@
 #define EAT_SW_COMPONENT_NESTED     1  /* Nested map */
 #define EAT_SW_COMPONENT_NOT_NESTED 0  /* Flat structure */
 
+/* The algorithm used in COSE */
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+#define T_COSE_ALGORITHM              T_COSE_ALGORITHM_HMAC256
+#else
+#define T_COSE_ALGORITHM              T_COSE_ALGORITHM_ES256
+#endif
+
 /*!
  * \struct attest_boot_data
  *
@@ -800,7 +807,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
     token_err = attest_token_start(&attest_token_ctx,
                                    option_flags,            /* option_flags */
                                    key_select,              /* key_select   */
-                                   T_COSE_ALGORITHM_ES256,  /* alg_select   */
+                                   T_COSE_ALGORITHM,        /* alg_select   */
                                    token);
 
     if (token_err != ATTEST_TOKEN_ERR_SUCCESS) {

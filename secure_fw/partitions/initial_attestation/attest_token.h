@@ -14,7 +14,11 @@
 
 #include <stdint.h>
 #include "qcbor.h"
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+#include "t_cose_mac0_sign.h"
+#else
 #include "t_cose_sign1_sign.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,7 +132,11 @@ struct attest_token_ctx {
     QCBOREncodeContext           cbor_enc_ctx;
     uint32_t                     opt_flags;
     int32_t                      key_select;
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+    struct t_cose_mac0_sign_ctx  mac_ctx;
+#else
     struct t_cose_sign1_sign_ctx signer_ctx;
+#endif
 };
 
 
