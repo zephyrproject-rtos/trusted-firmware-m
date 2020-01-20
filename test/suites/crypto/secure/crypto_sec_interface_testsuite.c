@@ -33,6 +33,7 @@ static void tfm_crypto_test_5031(struct test_result_t *ret);
 static void tfm_crypto_test_5032(struct test_result_t *ret);
 static void tfm_crypto_test_5033(struct test_result_t *ret);
 static void tfm_crypto_test_5034(struct test_result_t *ret);
+static void tfm_crypto_test_5035(struct test_result_t *ret);
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5001, "TFM_CRYPTO_TEST_5001",
@@ -78,6 +79,8 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5033, "TFM_CRYPTO_TEST_5033",
      "Secure key policy check permissions", {0} },
     {&tfm_crypto_test_5034, "TFM_CRYPTO_TEST_5034",
+     "Secure persistent key interface", {0} },
+    {&tfm_crypto_test_5035, "TFM_CRYPTO_TEST_5035",
      "Key access control", {0} },
 };
 
@@ -206,12 +209,17 @@ static void tfm_crypto_test_5033(struct test_result_t *ret)
     psa_policy_invalid_policy_usage_test(ret);
 }
 
+static void tfm_crypto_test_5034(struct test_result_t *ret)
+{
+    psa_persistent_key_test(1, ret);
+}
+
 /**
  * \brief Tests key access control based on partition ID
  *
  * \param[out] ret  Test result
  */
-static void tfm_crypto_test_5034(struct test_result_t *ret)
+static void tfm_crypto_test_5035(struct test_result_t *ret)
 {
     psa_status_t status;
     psa_key_handle_t key_handle;

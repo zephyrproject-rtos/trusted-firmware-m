@@ -166,6 +166,14 @@ void psa_policy_key_interface_test(struct test_result_t *ret);
  */
 void psa_policy_invalid_policy_usage_test(struct test_result_t *ret);
 
+/**
+ * \brief Tests persistent keys
+ *
+ * \param[out] ret Test result
+ *
+ */
+void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret);
+
 #ifdef __cplusplus
 }
 #endif

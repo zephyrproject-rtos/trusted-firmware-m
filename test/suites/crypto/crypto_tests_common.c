@@ -902,3 +902,75 @@ destroy_key:
         TEST_FAIL("Failed to destroy key");
     }
 }
+
+void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret)
+{
+    psa_status_t status;
+    int comp_result;
+    psa_key_handle_t key_handle;
+    psa_algorithm_t alg = PSA_ALG_CBC_PKCS7;
+    psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
+    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
+    size_t data_len;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    uint8_t data_out[sizeof(data)] = {0};
+
+    /* Setup the key attributes with a key ID to create a persistent key */
+    psa_set_key_id(&key_attributes, key_id);
+    psa_set_key_usage_flags(&key_attributes, usage);
+    psa_set_key_algorithm(&key_attributes, alg);
+    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
+
+    /* Import key data to create the persistent key */
+    status = psa_import_key(&key_attributes, data, sizeof(data), &key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to import a key");
+        return;
+    }
+
+    /* Close the persistent key handle */
+    status = psa_close_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to close a persistent key handle");
+        return;
+    }
+
+    /* Open the previsously-created persistent key */
+    status = psa_open_key(key_id, &key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to open a persistent key");
+        return;
+    }
+
+    /* Export the persistent key */
+    status = psa_export_key(key_handle, data_out, sizeof(data_out), &data_len);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to export a persistent key");
+        return;
+    }
+
+    if (data_len != sizeof(data)) {
+        TEST_FAIL("Number of bytes of exported key different from expected");
+        return;
+    }
+
+    /* Check that the exported key is the same as the imported one */
+#if DOMAIN_NS == 1U
+    comp_result = memcmp(data_out, data, sizeof(data));
+#else
+    comp_result = tfm_memcmp(data_out, data, sizeof(data));
+#endif
+    if (comp_result != 0) {
+        TEST_FAIL("Exported key does not match the imported key");
+        return;
+    }
+
+    /* Destroy the persistent key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to destroy a persistent key");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}

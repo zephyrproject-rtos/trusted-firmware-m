@@ -31,6 +31,7 @@ static void tfm_crypto_test_6030(struct test_result_t *ret);
 static void tfm_crypto_test_6031(struct test_result_t *ret);
 static void tfm_crypto_test_6032(struct test_result_t *ret);
 static void tfm_crypto_test_6033(struct test_result_t *ret);
+static void tfm_crypto_test_6034(struct test_result_t *ret);
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_6001, "TFM_CRYPTO_TEST_6001",
@@ -75,6 +76,8 @@ static struct test_t crypto_tests[] = {
      "Non Secure key policy interface", {0} },
     {&tfm_crypto_test_6033, "TFM_CRYPTO_TEST_6033",
      "Non Secure key policy check permissions", {0} },
+    {&tfm_crypto_test_6034, "TFM_CRYPTO_TEST_6034",
+     "Non Secure persistent key interface", {0} },
 };
 
 void register_testsuite_ns_crypto_interface(struct test_suite_t *p_test_suite)
@@ -199,4 +202,9 @@ static void tfm_crypto_test_6032(struct test_result_t *ret)
 static void tfm_crypto_test_6033(struct test_result_t *ret)
 {
     psa_policy_invalid_policy_usage_test(ret);
+}
+
+static void tfm_crypto_test_6034(struct test_result_t *ret)
+{
+    psa_persistent_key_test(1, ret);
 }
