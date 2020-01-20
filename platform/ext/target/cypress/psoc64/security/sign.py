@@ -73,36 +73,37 @@ def main(argv):
 
     if options.s_hex_file:
         print('signing tfm_s image:', options.s_hex_file)
+        tools.sign_image(options.s_hex_file, 1)
 
-        # sign_image overwrites original image, make a copy of it
+        # rename signed image to *_signed.hex
         name, ext = os.path.splitext(options.s_hex_file)
         s_hex_signed_file = name + '_signed' + ext
         try:
-            copyfile(options.s_hex_file, s_hex_signed_file)
+            move(options.s_hex_file, s_hex_signed_file)
         except IOError as e:
             print("Failed to copy file '{}' to '{}' ({})"
                    .format(options.s_hex_file, s_hex_signed_file, e.message))
             raise
-
-        tools.sign_image(s_hex_signed_file, 1)
+        print('Signed TFM-S image:', s_hex_signed_file)
 
     if options.ns_hex_file:
         print('signing tfm_ns image:', options.ns_hex_file)
+        tools.sign_image(options.ns_hex_file, 16)
 
+        # rename signed image to *_signed.hex
         name, ext = os.path.splitext(options.ns_hex_file)
         ns_hex_signed_file = name + '_signed' + ext
         try:
-            copyfile(options.ns_hex_file, ns_hex_signed_file)
+            move(options.ns_hex_file, ns_hex_signed_file)
         except IOError as e:
             print("Failed to copy file '{}' to '{}' ({})"
                    .format(options.ns_hex_file, ns_hex_signed_file, e.message))
             raise
-
-        tools.sign_image(ns_hex_signed_file, 16)
+        print('Signed TFM-NS image:', ns_hex_signed_file)
 
         # for CM4, sign_image creates an unsigned copy of the image
         # named <image to sign>_cm4.hex. Delete it to avoid confusion.
-        file_name = name + '_signed_cm4' + ext
+        file_name = name + '_cm4' + ext
         if os.path.isfile(file_name):
             try:
                 os.remove(file_name)

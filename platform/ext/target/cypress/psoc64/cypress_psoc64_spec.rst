@@ -308,12 +308,21 @@ Note: each image can be signed individually, for example:
       -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex
 
+Running the sign.py script will result in creation of the following files:
+
+tfm_<s/ns>_signed.hex    - signed image for programming
+tfm_<s/ns>_unsigned.hex  - a copy of original unsigned hex file for reference
+tfm_<s/ns>_upgrade.hex   - signed image for upgrade (if device policy specifies
+                           upgrade slot). Flashing this image into device will
+                           trigger the image update. Upgrade image from the
+                           secondary slot will be moved to the primary slot.
+
 **********************
 Programming the Device
 **********************
 
 After building and signing, the TFM images must be programmed into flash
-memory on the PSoC64 device. There are two methods to program it.
+memory on the PSoC64 device. There are three methods to program it.
 
 DAPLink mode
 ============
@@ -327,17 +336,17 @@ Copy tfm hex files one by one to the DAPLINK device:
 
 .. code-block:: bash
 
-    cp <build folder>/tfm_ns.hex <mount point>/DAPLINK/; sync
-    cp <build folder>/tfm_s.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/tfm_ns_signed.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/tfm_s_signed.hex <mount point>/DAPLINK/; sync
 
 OpenOCD v.2.2
 =============
 
 Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK mode.
 Status LED should be ON and not blinking.
-To program the signed tfm_s image to the device with openocd (assuming
-OPENOCD_PATH is pointing at the openocd installation directory) run the
-following commands:
+To program the signed tfm_s and tfm_ns images to the device with openocd
+(assuming OPENOCD_PATH is pointing at the openocd installation directory)
+run the following commands:
 
 .. code-block:: bash
 
@@ -349,7 +358,7 @@ following commands:
             -f interface/kitprog3.cfg \
             -c "set ENABLE_ACQUIRE 0" \
             -f target/psoc6_2m_secure.cfg \
-            -c "init; reset init; flash write_image erase ${BUILD_DIR}/tfm_s.hex" \
+            -c "init; reset init; flash write_image erase ${BUILD_DIR}/tfm_s_signed.hex" \
             -c "resume; reset; exit"
 
     ${OPENOCD_PATH}/bin/openocd \
@@ -357,7 +366,7 @@ following commands:
             -f interface/kitprog3.cfg \
             -c "set ENABLE_ACQUIRE 0" \
             -f target/psoc6_2m_secure.cfg \
-            -c "init; reset init; flash write_image erase ${BUILD_DIR}/tfm_ns.hex" \
+            -c "init; reset init; flash write_image erase ${BUILD_DIR}/tfm_ns_signed.hex" \
             -c "resume; reset; exit"
 
 Optionally, erase SST partition:
@@ -378,6 +387,30 @@ address of the secure primary image specified in the file:
     platform/ext/target/cypress/psoc64/partition/flash_layout.h
 
 so be sure to change it if you change that file.
+
+
+PyOCD v.0.23.0
+==============
+
+PyOCD v0.23.0 is installed by CySecureTools automatically. It can be used
+to program TFM images into the board.
+
+Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK mode.
+Status LED should be ON and not blinking.
+To program the signed tfm_s and tfm_ns images to the device with pyocd
+run the following commands:
+
+.. code-block:: bash
+
+    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_s_signed.hex
+
+    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_ns_signed.hex
+
+Optionally, erase SST partition:
+
+.. code-block:: bash
+
+    pyocd erase -t cy8c64xa_cm4_full_flash 0x101c0000+0x10000
 
 *Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
 
