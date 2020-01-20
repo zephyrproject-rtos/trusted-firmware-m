@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -62,7 +62,7 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
  * \brief List of RTOS thread attributes
  */
 #if defined(TEST_FRAMEWORK_NS) || defined(PSA_API_TEST_NS)
-static uint64_t test_app_stack[(3u * 1024u) / (sizeof(uint64_t))]; /* 3KB */
+static uint64_t test_app_stack[(4u * 1024u) / (sizeof(uint64_t))]; /* 4KB */
 static const osThreadAttr_t thread_attr = {
     .name = "test_thread",
     .stack_mem = test_app_stack,
