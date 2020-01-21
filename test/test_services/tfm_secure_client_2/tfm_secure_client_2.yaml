@@ -11,7 +11,7 @@
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
   "entry_point": "tfm_secure_client_2_init",
-  "stack_size": "0x200",
+  "stack_size": "0x300",
   "secure_functions": [
     {
       "name": "TFM_SECURE_CLIENT_2_CALL",

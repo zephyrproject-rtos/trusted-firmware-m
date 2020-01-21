@@ -11,7 +11,7 @@
   "type": "PSA-ROT",
   "priority": "NORMAL",
   "entry_point": "tfm_sst_test_init",
-  "stack_size": "0x440",
+  "stack_size": "0x500",
   "secure_functions": [
     {
       "name": "TFM_SST_TEST_PREPARE",

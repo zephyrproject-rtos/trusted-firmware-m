@@ -11,7 +11,7 @@
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
   "entry_point": "ipc_client_test_main",
-  "stack_size": "0x0280",
+  "stack_size": "0x0300",
   "secure_functions": [
   ],
   "services" : [
