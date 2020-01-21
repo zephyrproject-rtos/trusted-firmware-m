@@ -150,6 +150,15 @@ const struct tfm_spm_service_db_t service_db[] =
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
+    {
+        .name = "TFM_SP_PLATFORM_NV_COUNTER",
+        .partition_id = TFM_SP_PLATFORM,
+        .signal = TFM_SP_PLATFORM_NV_COUNTER_SIGNAL,
+        .sid = 0x00000042,
+        .non_secure_client = false,
+        .version = 1,
+        .version_policy = TFM_VERSION_POLICY_STRICT
+    },
 #endif /* TFM_PARTITION_PLATFORM */
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
@@ -607,6 +616,13 @@ struct tfm_spm_service_t service[] =
 
 #ifdef TFM_PARTITION_PLATFORM
     /******** TFM_SP_PLATFORM ********/
+    {
+        .service_db = NULL,
+        .partition = NULL,
+        .handle_list = {0},
+        .msg_queue = {0},
+        .list = {0},
+    },
     {
         .service_db = NULL,
         .partition = NULL,

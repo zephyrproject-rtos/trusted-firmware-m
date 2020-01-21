@@ -73,6 +73,31 @@ the service in ``out_vec``.
 An IOCTL request type not supported on a particular platform should return
 ``TFM_PLATFORM_ERR_NOT_SUPPORTED``
 
+Non-Volatile counters
+=====================
+
+The Platform Service provides an abstracted service for exposing the NV counters
+to the secure world. The following operations are supported:
+
+- Increment a counter.
+- Read a counter value to a preallocated buffer.
+
+.. code-block:: c
+
+    enum tfm_platform_err_t
+    tfm_platform_nv_counter_increment(uint32_t counter_id);
+
+    enum tfm_platform_err_t
+    tfm_platform_nv_counter_read(uint32_t counter_id,
+                                 uint32_t size, uint8_t *val);
+
+The range of counters id is defined in :
+``platform/include/tfm_plat_nv_counters.h``
+
+For Level 2,3 isolation implementations, secure partitions in the
+Application Root of Trust, should have ``TFM_SP_PLATFORM_NV_COUNTER`` set as a
+dependency for access to the NV counter API.
+
 ***************************
 Current Service Limitations
 ***************************

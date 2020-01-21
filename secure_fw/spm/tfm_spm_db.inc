@@ -565,6 +565,7 @@ static int32_t dependencies_TFM_SP_STORAGE[] =
     TFM_ITS_GET_SID,
     TFM_ITS_GET_INFO_SID,
     TFM_ITS_REMOVE_SID,
+    TFM_SP_PLATFORM_NV_COUNTER_SID,
 };
 #endif /* TFM_PARTITION_SECURE_STORAGE */
 
@@ -685,7 +686,7 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_req_mngr_init,
-        .dependencies_num     = 5,
+        .dependencies_num     = 6,
         .p_dependencies       = dependencies_TFM_SP_STORAGE,
     },
 #endif /* TFM_PARTITION_SECURE_STORAGE */

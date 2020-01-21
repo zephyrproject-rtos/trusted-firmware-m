@@ -18,7 +18,11 @@
 #define INIT_NV_COUNTERS_VALUE 42
 
 static uint8_t nv_increment_status = ENABLE_INCREMENT;
-static uint32_t test_nv_counters[TOTAL_SST_NV_COUNTERS] = {0};
+static uint32_t test_nv_counters[TOTAL_SST_NV_COUNTERS] = {
+                                                [0] = INIT_NV_COUNTERS_VALUE,
+                                                [1] = INIT_NV_COUNTERS_VALUE,
+                                                [2] = INIT_NV_COUNTERS_VALUE
+                };
 
 static uint32_t get_nv_counter_position(enum tfm_nv_counter_t counter_id)
 {
@@ -32,21 +36,6 @@ static uint32_t get_nv_counter_position(enum tfm_nv_counter_t counter_id)
     default:
         return TOTAL_SST_NV_COUNTERS;
     }
-}
-
-/* Implementation of SST NV counter interfaces defined by sst_nv_counters.h */
-psa_status_t sst_init_nv_counter(void)
-{
-    static uint8_t is_init = 0;
-
-    if (is_init == 0) {
-        test_nv_counters[0] = INIT_NV_COUNTERS_VALUE;
-        test_nv_counters[1] = INIT_NV_COUNTERS_VALUE;
-        test_nv_counters[2] = INIT_NV_COUNTERS_VALUE;
-        is_init = 1;
-    }
-
-    return PSA_SUCCESS;
 }
 
 psa_status_t sst_read_nv_counter(enum tfm_nv_counter_t counter_id,

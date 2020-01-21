@@ -45,6 +45,8 @@ extern "C" {
 #define TFM_SP_PLATFORM_SYSTEM_RESET_VERSION                       (1U)
 #define TFM_SP_PLATFORM_IOCTL_SID                                  (0x00000041U)
 #define TFM_SP_PLATFORM_IOCTL_VERSION                              (1U)
+#define TFM_SP_PLATFORM_NV_COUNTER_SID                             (0x00000042U)
+#define TFM_SP_PLATFORM_NV_COUNTER_VERSION                         (1U)
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 #define TFM_ATTEST_GET_TOKEN_SID                                   (0x00000020U)

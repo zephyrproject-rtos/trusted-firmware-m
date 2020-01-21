@@ -106,6 +106,8 @@ psa_status_t tfm_crypto_generate_key(psa_invec *, size_t, psa_outvec *, size_t);
 /******** TFM_SP_PLATFORM ********/
 psa_status_t platform_sp_system_reset(psa_invec *, size_t, psa_outvec *, size_t);
 psa_status_t platform_sp_ioctl(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t platform_sp_nv_counter_read(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t platform_sp_nv_counter_increment(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_PARTITION_PLATFORM */
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
@@ -274,6 +276,8 @@ TFM_VENEER_FUNCTION(TFM_SP_CRYPTO, tfm_crypto_generate_key)
 /******** TFM_SP_PLATFORM ********/
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_system_reset)
 TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_ioctl)
+TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_nv_counter_read)
+TFM_VENEER_FUNCTION(TFM_SP_PLATFORM, platform_sp_nv_counter_increment)
 #endif /* TFM_PARTITION_PLATFORM */
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
