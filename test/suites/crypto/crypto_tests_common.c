@@ -358,6 +358,22 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
     ret->val = TEST_PASSED;
 }
 
+void psa_unsupported_hash_test(const psa_algorithm_t alg,
+                               struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_hash_operation_t handle = PSA_HASH_OPERATION_INIT;
+
+    /* Setup the hash object for the unsupported hash algorithm */
+    status = psa_hash_setup(&handle, alg);
+    if (status != PSA_ERROR_NOT_SUPPORTED) {
+        TEST_FAIL("Should not successfully setup an unsupported hash alg");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
 /*
  * \brief This is the list of algorithms supported by the current
  *        configuration of the crypto engine used by the crypto
@@ -365,7 +381,6 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
  *        is changed, this list needs to be updated accordingly
  */
 static const psa_algorithm_t hash_alg[] = {
-    PSA_ALG_SHA_1,
     PSA_ALG_SHA_224,
     PSA_ALG_SHA_256,
     PSA_ALG_SHA_384,
@@ -373,9 +388,6 @@ static const psa_algorithm_t hash_alg[] = {
 };
 
 static const uint8_t hash_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
-    {0x56, 0x4A, 0x0E, 0x35, 0xF1, 0xC7, 0xBC, 0xD0, /*!< SHA-1 */
-     0x7D, 0xCF, 0xB1, 0xBC, 0xC9, 0x16, 0xFA, 0x2E,
-     0xF5, 0xBE, 0x96, 0xB2},
     {0x00, 0xD2, 0x90, 0xE2, 0x0E, 0x4E, 0xC1, 0x7E, /*!< SHA-224 */
      0x7A, 0x95, 0xF5, 0x10, 0x5C, 0x76, 0x74, 0x04,
      0x6E, 0xB5, 0x56, 0x5E, 0xE5, 0xE7, 0xBA, 0x15,
@@ -449,10 +461,45 @@ void psa_hash_test(const psa_algorithm_t alg,
     ret->val = TEST_PASSED;
 }
 
+void psa_unsupported_mac_test(const psa_key_type_t key_type,
+                              const psa_algorithm_t alg,
+                              struct test_result_t *ret)
+{
+    psa_status_t status;
+    psa_key_handle_t key_handle;
+    psa_mac_operation_t handle = PSA_MAC_OPERATION_INIT;
+    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
+    const uint8_t data[] = "THIS IS MY KEY1";
+
+    ret->val = TEST_PASSED;
+
+    /* Setup the key policy */
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_VERIFY);
+    psa_set_key_algorithm(&key_attributes, alg);
+    psa_set_key_type(&key_attributes, key_type);
+
+    /* Import key */
+    status = psa_import_key(&key_attributes, data, sizeof(data), &key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error importing a key");
+        return;
+    }
+
+    /* Setup the mac object for the unsupported mac algorithm */
+    status = psa_mac_verify_setup(&handle, key_handle, alg);
+    if (status != PSA_ERROR_NOT_SUPPORTED) {
+        TEST_FAIL("Should not successfully setup an unsupported MAC alg");
+        /* Do not return, to ensure key is destroyed */
+    }
+
+    /* Destroy the key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error destroying the key");
+    }
+}
+
 static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
-    {0x0d, 0xa6, 0x9d, 0x02, 0x43, 0x17, 0x3e, 0x7e, /*!< SHA-1 */
-     0xe7, 0x3b, 0xc6, 0xa9, 0x51, 0x06, 0x8a, 0xea,
-     0x12, 0xb0, 0xa7, 0x1d},
     {0xc1, 0x9f, 0x19, 0xac, 0x05, 0x65, 0x5f, 0x02, /*!< SHA-224 */
      0x1b, 0x64, 0x32, 0xd9, 0xb1, 0x49, 0xba, 0x75,
      0x05, 0x60, 0x52, 0x4e, 0x78, 0xfa, 0x61, 0xc9,
@@ -477,10 +524,11 @@ static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
      0xa9, 0x6a, 0x5d, 0xb2, 0x81, 0xe1, 0x6f, 0x1f},
 };
 
-static const uint8_t long_key_hmac_val[PSA_HASH_SIZE(PSA_ALG_SHA_1)] = {
-    0xb5, 0x06, 0x7b, 0x9a, 0xb9, 0xe7, 0x47, 0x3c, /*!< SHA-1 */
-    0x2d, 0x44, 0x46, 0x1f, 0x4a, 0xbd, 0x22, 0x53,
-    0x9c, 0x05, 0x34, 0x34
+static const uint8_t long_key_hmac_val[PSA_HASH_SIZE(PSA_ALG_SHA_224)] = {
+    0x47, 0xa3, 0x42, 0xb1, 0x2f, 0x52, 0xd3, 0x8f, /*!< SHA-224 */
+    0x1e, 0x02, 0x4a, 0x46, 0x73, 0x0b, 0x77, 0xc1,
+    0x5e, 0x93, 0x31, 0xa9, 0x3e, 0xc2, 0x81, 0xb5,
+    0x3d, 0x07, 0x6f, 0x31
 };
 
 void psa_mac_test(const psa_algorithm_t alg,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,7 +48,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_6009, "TFM_CRYPTO_TEST_6009",
      "Non Secure Symmetric encryption invalid cipher (HMAC-128-CFB)", {0} },
     {&tfm_crypto_test_6010, "TFM_CRYPTO_TEST_6010",
-     "Non Secure Hash (SHA-1) interface", {0} },
+     "Non Secure Unsupported Hash (SHA-1) interface", {0} },
     {&tfm_crypto_test_6011, "TFM_CRYPTO_TEST_6011",
      "Non Secure Hash (SHA-224) interface", {0} },
     {&tfm_crypto_test_6012, "TFM_CRYPTO_TEST_6012",
@@ -58,7 +58,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_6014, "TFM_CRYPTO_TEST_6014",
      "Non Secure Hash (SHA-512) interface", {0} },
     {&tfm_crypto_test_6019, "TFM_CRYPTO_TEST_6019",
-     "Non Secure HMAC (SHA-1) interface", {0} },
+     "Non Secure Unsupported HMAC (SHA-1) interface", {0} },
     {&tfm_crypto_test_6020, "TFM_CRYPTO_TEST_6020",
      "Non Secure HMAC (SHA-256) interface", {0} },
     {&tfm_crypto_test_6021, "TFM_CRYPTO_TEST_6021",
@@ -66,7 +66,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_6022, "TFM_CRYPTO_TEST_6022",
      "Non Secure HMAC (SHA-512) interface", {0} },
     {&tfm_crypto_test_6024, "TFM_CRYPTO_TEST_6024",
-     "Non Secure HMAC with long key (SHA-1) interface", {0} },
+     "Non Secure HMAC with long key (SHA-224) interface", {0} },
     {&tfm_crypto_test_6030, "TFM_CRYPTO_TEST_6030",
      "Non Secure AEAD (AES-128-CCM) interface", {0} },
     {&tfm_crypto_test_6031, "TFM_CRYPTO_TEST_6031",
@@ -133,7 +133,7 @@ static void tfm_crypto_test_6009(struct test_result_t *ret)
 
 static void tfm_crypto_test_6010(struct test_result_t *ret)
 {
-    psa_hash_test(PSA_ALG_SHA_1, ret);
+    psa_unsupported_hash_test(PSA_ALG_SHA_1, ret);
 }
 
 static void tfm_crypto_test_6011(struct test_result_t *ret)
@@ -158,7 +158,8 @@ static void tfm_crypto_test_6014(struct test_result_t *ret)
 
 static void tfm_crypto_test_6019(struct test_result_t *ret)
 {
-    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
+    psa_unsupported_mac_test(PSA_KEY_TYPE_HMAC, PSA_ALG_HMAC(PSA_ALG_SHA_1),
+                             ret);
 }
 
 static void tfm_crypto_test_6020(struct test_result_t *ret)
@@ -177,7 +178,7 @@ static void tfm_crypto_test_6022(struct test_result_t *ret)
 }
 static void tfm_crypto_test_6024(struct test_result_t *ret)
 {
-    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_224), 1, ret);
 }
 
 static void tfm_crypto_test_6030(struct test_result_t *ret)

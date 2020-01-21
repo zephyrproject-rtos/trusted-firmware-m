@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -92,6 +92,15 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
                              const size_t key_size,
                              struct test_result_t *ret);
 /**
+ * \brief Tests setup of an unsupported hash algorithm
+ *
+ * \param[in]  alg PSA algorithm
+ * \param[out] ret Test result
+ *
+ */
+void psa_unsupported_hash_test(const psa_algorithm_t alg,
+                               struct test_result_t *ret);
+/**
  * \brief Tests different hashing algorithms
  *
  * \param[in]  alg PSA algorithm
@@ -100,6 +109,17 @@ void psa_invalid_cipher_test(const psa_key_type_t key_type,
  */
 void psa_hash_test(const psa_algorithm_t alg,
                    struct test_result_t *ret);
+/**
+ * \brief Tests setup of an unsupported MAC algorithm
+ *
+ * \param[in]  key_type PSA key type
+ * \param[in]  alg      PSA algorithm
+ * \param[out] ret      Test result
+ *
+ */
+void psa_unsupported_mac_test(const psa_key_type_t key_type,
+                              const psa_algorithm_t alg,
+                              struct test_result_t *ret);
 /**
  * \brief Tests different MAC algorithms
  *

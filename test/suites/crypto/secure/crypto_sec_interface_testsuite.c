@@ -50,7 +50,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5009, "TFM_CRYPTO_TEST_5009",
      "Secure Symmetric encryption invalid cipher (HMAC-128-CFB)", {0} },
     {&tfm_crypto_test_5010, "TFM_CRYPTO_TEST_5010",
-     "Secure Hash (SHA-1) interface", {0} },
+     "Secure Unsupported Hash (SHA-1) interface", {0} },
     {&tfm_crypto_test_5011, "TFM_CRYPTO_TEST_5011",
      "Secure Hash (SHA-224) interface", {0} },
     {&tfm_crypto_test_5012, "TFM_CRYPTO_TEST_5012",
@@ -60,7 +60,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5014, "TFM_CRYPTO_TEST_5014",
      "Secure Hash (SHA-512) interface", {0} },
     {&tfm_crypto_test_5019, "TFM_CRYPTO_TEST_5019",
-     "Secure HMAC (SHA-1) interface", {0} },
+     "Secure Unsupported HMAC (SHA-1) interface", {0} },
     {&tfm_crypto_test_5020, "TFM_CRYPTO_TEST_5020",
      "Secure HMAC (SHA-256) interface", {0} },
     {&tfm_crypto_test_5021, "TFM_CRYPTO_TEST_5021",
@@ -68,7 +68,7 @@ static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5022, "TFM_CRYPTO_TEST_5022",
      "Secure HMAC (SHA-512) interface", {0} },
     {&tfm_crypto_test_5024, "TFM_CRYPTO_TEST_5024",
-     "Secure HMAC with long key (SHA-1) interface", {0} },
+     "Secure HMAC with long key (SHA-224) interface", {0} },
     {&tfm_crypto_test_5030, "TFM_CRYPTO_TEST_5030",
      "Secure AEAD (AES-128-CCM) interface", {0} },
     {&tfm_crypto_test_5031, "TFM_CRYPTO_TEST_5031",
@@ -137,7 +137,7 @@ static void tfm_crypto_test_5009(struct test_result_t *ret)
 
 static void tfm_crypto_test_5010(struct test_result_t *ret)
 {
-    psa_hash_test(PSA_ALG_SHA_1, ret);
+    psa_unsupported_hash_test(PSA_ALG_SHA_1, ret);
 }
 
 static void tfm_crypto_test_5011(struct test_result_t *ret)
@@ -162,7 +162,8 @@ static void tfm_crypto_test_5014(struct test_result_t *ret)
 
 static void tfm_crypto_test_5019(struct test_result_t *ret)
 {
-    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 0, ret);
+    psa_unsupported_mac_test(PSA_KEY_TYPE_HMAC, PSA_ALG_HMAC(PSA_ALG_SHA_1),
+                             ret);
 }
 
 static void tfm_crypto_test_5020(struct test_result_t *ret)
@@ -182,7 +183,7 @@ static void tfm_crypto_test_5022(struct test_result_t *ret)
 
 static void tfm_crypto_test_5024(struct test_result_t *ret)
 {
-    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_1), 1, ret);
+    psa_mac_test(PSA_ALG_HMAC(PSA_ALG_SHA_224), 1, ret);
 }
 
 static void tfm_crypto_test_5030(struct test_result_t *ret)
