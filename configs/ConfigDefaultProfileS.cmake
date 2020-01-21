@@ -63,8 +63,10 @@ set(TFM_PARTITION_PLATFORM OFF)
 # Disable Protected Storage service
 set(TFM_PARTITION_PROTECTED_STORAGE OFF)
 
-# Disable Initial Attestation service temporarily
-set(TFM_PARTITION_INITIAL_ATTESTATION OFF)
+# Enable Initial Attestation service
+set(TFM_PARTITION_INITIAL_ATTESTATION ON)
+# Enable Initial Attestation based on symmetric key algorithm
+set(SYMMETRIC_INITIAL_ATTESTATION ON)
 
 # Disable all the test cases
 set(REGRESSION False)
