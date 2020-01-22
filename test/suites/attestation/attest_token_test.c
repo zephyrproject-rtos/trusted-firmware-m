@@ -88,6 +88,7 @@ int token_main_alt(uint32_t option_flags,
     return 0;
 }
 
+#ifndef SYMMETRIC_INITIAL_ATTESTATION
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */
 /**
  * This is the expected output for the minimal test. It is the result
@@ -238,6 +239,7 @@ int_fast16_t buffer_too_small_test()
     return return_value;
 }
 #endif /* INCLUDE_TEST_CODE */
+#endif /* !SYMMETRIC_INITIAL_ATTESTATION */
 
 
 /**
@@ -777,7 +779,6 @@ Done:
     return return_value;
 }
 
-
 /**
  * Modes for decode_test_internal()
  */
@@ -785,7 +786,9 @@ enum decode_test_mode_t {
     /** See documentation for decode_test_short_circuit_sig() */
     SHORT_CIRCUIT_SIGN,
     /** See documentation for decode_test_normal_sig() */
-    NORMAL_SIGN
+    NORMAL_SIGN,
+    /** See documentation for decode_test_symmetric_initial_attest() */
+    COSE_MAC0
 };
 
 /**
@@ -818,6 +821,11 @@ static int_fast16_t decode_test_internal(enum decode_test_mode_t mode)
             break;
 
         case NORMAL_SIGN:
+            token_encode_options = 0;
+            token_decode_options = 0;
+            break;
+
+        case COSE_MAC0:
             token_encode_options = 0;
             token_decode_options = 0;
             break;
@@ -912,7 +920,12 @@ Done:
     return return_value;
 }
 
-
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+int_fast16_t decode_test_symmetric_initial_attest(void)
+{
+    return decode_test_internal(COSE_MAC0);
+}
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 /*
  * Public function. See token_test.h
  */
@@ -929,3 +942,4 @@ int_fast16_t decode_test_normal_sig(void)
 {
     return decode_test_internal(NORMAL_SIGN);
 }
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */

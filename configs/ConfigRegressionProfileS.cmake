@@ -66,8 +66,14 @@ set(TFM_PARTITION_PLATFORM OFF)
 # Disable Protected Storage service
 set(TFM_PARTITION_PROTECTED_STORAGE OFF)
 
-# Disable Initial Attestation service temporarily
-set(TFM_PARTITION_INITIAL_ATTESTATION OFF)
+# Enable Initial Attestation service
+set(TFM_PARTITION_INITIAL_ATTESTATION ON)
+# Enable symmetric key algorithm based attestation
+set(SYMMETRIC_INITIAL_ATTESTATION ON)
+# Disable QCBOR test cases to save memory
+set(ENABLE_QCBOR_TESTS OFF)
+# Disable t_cose test cases to save memory
+set(ENABLE_T_COSE_TESTS OFF)
 
 # Configure the test cases
 set(REGRESSION True)
