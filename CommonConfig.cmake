@@ -145,7 +145,6 @@ set (SERVICES_TEST_ENABLED OFF)
 set (TEST_FRAMEWORK_S  OFF)
 set (TEST_FRAMEWORK_NS OFF)
 set (TFM_PSA_API OFF)
-set (TFM_LEGACY_API ON)
 
 option(TFM_PARTITION_AUDIT_LOG "Enable the TF-M Audit Log partition" ON)
 option(TFM_PARTITION_PLATFORM "Enable the TF-M Platform partition" ON)
@@ -207,17 +206,15 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	endif()
 endif()
 
-if (TFM_LEGACY_API)
-	add_definitions(-DTFM_LEGACY_API)
-endif()
-
 if (SERVICES_TEST_ENABLED)
 	set(SERVICE_TEST_S ON)
 	set(SERVICE_TEST_NS ON)
 endif()
 
 if (CORE_TEST)
-	set(CORE_TEST_POSITIVE ON)
+	if (NOT CORE_IPC OR TFM_LVL EQUAL 1)
+		set(CORE_TEST_POSITIVE ON)
+	endif()
 	set(CORE_TEST_INTERACTIVE OFF)
 endif()
 
