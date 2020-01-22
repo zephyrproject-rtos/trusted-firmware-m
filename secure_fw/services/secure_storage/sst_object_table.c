@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -795,17 +795,9 @@ __STATIC_INLINE psa_ps_status_t sst_table_free_idx(uint32_t idx_num,
  */
 static void sst_table_delete_entry(uint32_t idx)
 {
-    struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
-
-    p_table->obj_db[idx].uid = TFM_SST_INVALID_UID;
-    p_table->obj_db[idx].client_id = 0;
-
-#ifdef SST_ENCRYPTION
-    (void)tfm_memset(p_table->obj_db[idx].tag, SST_DEFAULT_EMPTY_BUFF_VAL,
-                     SST_OBJECTS_TABLE_ENTRY_SIZE);
-#else
-    p_table->obj_db[idx].version = 0;
-#endif
+    /* Initialise object table entry structure */
+    (void)tfm_memset(&sst_obj_table_ctx.obj_table.obj_db[idx],
+                     SST_DEFAULT_EMPTY_BUFF_VAL, SST_OBJECTS_TABLE_ENTRY_SIZE);
 }
 
 psa_ps_status_t sst_object_table_create(void)
