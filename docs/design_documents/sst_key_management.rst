@@ -5,7 +5,7 @@ Secure Storage service key management
 :Author: Jamie Fox
 :Organization: Arm Limited
 :Contact: Jamie Fox <jamie.fox@arm.com>
-:Status: Detailed
+:Status: Accepted
 
 Background
 ==========
@@ -180,4 +180,4 @@ References
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
