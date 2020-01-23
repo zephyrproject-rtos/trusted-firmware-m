@@ -6,7 +6,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2016-2019 Cypress Semiconductor Corporation
+* Copyright 2016-2020 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -505,9 +505,6 @@ extern ARM_DRIVER_USART NS_DRIVER_STDIO;
 void Cy_Platform_Init(void)
 {
     Cy_PDL_Init(CY_DEVICE_CFG);
-
-    (void)NS_DRIVER_STDIO.Initialize(NULL);
-    NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS, 115200);
 
 #if !defined(CY_IPC_DEFAULT_CFG_DISABLE)
 #ifdef __CM0P_PRESENT

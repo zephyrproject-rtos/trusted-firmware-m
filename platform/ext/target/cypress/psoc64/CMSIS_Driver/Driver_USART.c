@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,7 +22,6 @@
  */
 
 #include "Driver_USART.h"
-
 #include "cmsis.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
@@ -104,11 +103,14 @@ static int32_t ARM_USARTx_Initialize(UARTx_Resources* uart_dev)
 {
     cy_en_scb_uart_status_t retval;
 
-#ifdef CY_SYSTEM_CPU_CM0P
+#if CY_SYSTEM_CPU_CM0P
     cy_stc_scb_uart_config_t config = KITPROG_UART_config;
 
     /* Assign and configure pins, assign clock divider */
     retval = Cy_SCB_UART_Init(uart_dev->base, &config, NULL);
+
+    Cy_SCB_UART_ClearRxFifo(uart_dev->base);
+    Cy_SCB_UART_ClearTxFifo(uart_dev->base);
 
     if (retval == CY_SCB_UART_SUCCESS)
         Cy_SCB_UART_Enable(uart_dev->base);
@@ -320,7 +322,6 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
                                   uint32_t arg)
 {
     cy_stc_scb_uart_config_t config = KITPROG_UART_config;
-    cy_en_scb_uart_status_t cy_retval;
     uint32_t retval;
 
     switch (control & ARM_USART_CONTROL_Msk) {
@@ -336,8 +337,6 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
     }
 
     Cy_SCB_UART_Disable(uart_dev->base, NULL);
-
-    Cy_SCB_UART_DeInit(uart_dev->base);
 
     /* UART Data bits */
     retval = USARTx_SetDataBits(control, &config);
@@ -357,12 +356,12 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
     /* USART Flow Control */
     USARTx_SetFlowControl(control, &config);
 
-    cy_retval = Cy_SCB_UART_Init(uart_dev->base, &config, NULL);
+    Cy_SCB_UART_ClearRxFifo(uart_dev->base);
+    Cy_SCB_UART_ClearTxFifo(uart_dev->base);
 
-    if (retval == CY_SCB_UART_SUCCESS)
-        Cy_SCB_UART_Enable(uart_dev->base);
+    Cy_SCB_UART_Enable(uart_dev->base);
 
-    return USARTx_convert_retval(cy_retval);
+    return ARM_DRIVER_OK;
 }
 
 static ARM_USART_STATUS ARM_USARTx_GetStatus(UARTx_Resources* uart_dev)
