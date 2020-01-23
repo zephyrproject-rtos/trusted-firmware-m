@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2019 Arm Limited. All rights reserved
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@
 
 // <e> MPC (Memory Protection Controller) [Driver_SMPU10]
 // <i> Configuration settings for Driver_SMPU10 in component ::Drivers:MPC
-#define   RTE_SMPU10                                1
+#define   RTE_SMPU10                                0
 // </e> MPC (Memory Protection Controller) [Driver_SMPU10]
 
 // <e> MPC (Memory Protection Controller) [Driver_SMPU11]

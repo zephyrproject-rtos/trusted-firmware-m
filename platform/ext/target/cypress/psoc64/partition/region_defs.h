@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +66,7 @@
  *
  * 0x0800_0000 - 0x0802_FFFF Secure (192KB)
  *    0x0800_0000 - 0x0800_FFFF Secure unprivileged data (S_UNPRIV_DATA_SIZE, 64KB)
- *    0x0801_0000 - 0x0802_EFFF Secure priviliged data (S_PRIV_DATA_SIZE, 124KB)
- *    0x0802_F000 - 0x0802_FFFF Secure priv code executable from RAM (S_RAM_CODE_SIZE, 4KB)
+ *    0x0801_0000 - 0x0802_FFFF Secure priviliged data (S_PRIV_DATA_SIZE, 128KB)
  *
  * 0x0803_0000 - 0x080E_7FFF Non-secure (736KB)
  *    0x0803_0000 - 0x080E_6FFF Non-secure OS/App (732KB)
@@ -119,12 +119,10 @@
 
 #define S_DATA_START    (S_RAM_ALIAS(0))
 #define S_UNPRIV_DATA_SIZE  0x10000
-#define S_PRIV_DATA_SIZE    0x1F000
-/* Reserve 4KB for RAM-based executable code */
-#define S_RAM_CODE_SIZE     0x1000
+#define S_PRIV_DATA_SIZE    0x20000
 
 /* Secure data area */
-#define S_DATA_SIZE  (S_UNPRIV_DATA_SIZE + S_PRIV_DATA_SIZE + S_RAM_CODE_SIZE)
+#define S_DATA_SIZE  (S_UNPRIV_DATA_SIZE + S_PRIV_DATA_SIZE)
 #define S_DATA_LIMIT (S_DATA_START + S_DATA_SIZE - 1)
 
 /* We need the privileged data area to be aligned so that an SMPU
@@ -144,11 +142,6 @@
 
 #define S_DATA_PRIV_OFFSET   (S_DATA_UNPRIV_OFFSET + S_UNPRIV_DATA_SIZE)
 #define S_DATA_PRIV_START    S_RAM_ALIAS(S_DATA_PRIV_OFFSET)
-
-/* Reserve area for RAM-based executable code right after secure unprivilaged
- * and privilaged data areas*/
-#define S_RAM_CODE_OFFSET    (S_DATA_PRIV_OFFSET + S_PRIV_DATA_SIZE)
-#define S_RAM_CODE_START     S_RAM_ALIAS(S_RAM_CODE_OFFSET)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \

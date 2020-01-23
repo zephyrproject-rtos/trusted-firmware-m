@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  * Copyright (c) 2019 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -133,12 +133,12 @@
 #error "Flash layout has changed - SMPU6 needs updating"
 #endif
 
-/* S_DATA_PRIV_START must not overlap with SMPU6 region */
-#if S_DATA_PRIV_START < (SMPU6_BASE + REGIONSIZE_TO_BYTES(SMPU6_REGIONSIZE))
-#error "S_DATA_PRIV_START overlaps with unprivileged data section"
+/* SMPU6 should exactly cover the unprivileged secure SRAM */
+#if REGIONSIZE_TO_BYTES(SMPU6_REGIONSIZE) != S_UNPRIV_DATA_SIZE
+#error "SMPU6_REGIONSIZE should match S_UNPRIV_DATA_SIZE"
 #endif
 
-/* SMPU7 - 96KB of privileged secure data at S_DATA_PRIV_START in SRAM */
+/* SMPU7 - 128KB of privileged secure data at S_DATA_PRIV_START in SRAM */
 #define SMPU7_BASE          S_RAM_ALIAS(0)
 #define SMPU7_REGIONSIZE    PROT_SIZE_256KB_BIT_SHIFT
 #define SMPU7_SUBREGION_DIS (CY_PROT_SUBREGION_DIS0 | \
@@ -171,45 +171,9 @@
 #error "Flash layout has changed - S_DATA_PRIV_START isn't subregion 2 of SMPU7"
 #endif
 
-/* SMPUs 6 and 7 should cover the whole secure data area in the RAM */
-#if S_DATA_SIZE != (REGIONSIZE_TO_BYTES(SMPU6_REGIONSIZE) + \
-                    4*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8)
-#error "Flash layout has changed - SMPU6/SMPU7 config needs updating"
-#endif
-
-/* SMPU10 - 4KB of privileged executable data in SRAM
- * Note: Region resides in subregion 4 of SMPU 7*/
-#define SMPU10_BASE         S_RAM_CODE_START
-#define SMPU10_REGIONSIZE   PROT_SIZE_4KB_BIT_SHIFT
-#define SMPU10_SLAVE_CONFIG {\
-    .address = (void *)SMPU10_BASE, \
-    .regionSize = SMPU10_REGIONSIZE, \
-    .subregions = ALL_ENABLED, \
-    .userPermission = CY_PROT_PERM_DISABLED, \
-    .privPermission = CY_PROT_PERM_RX, \
-    .secure = false, \
-    .pcMatch = false, \
-    .pcMask = SECURE_PCS_MASK, \
-}
-#define SMPU10_MASTER_CONFIG COMMON_SMPU_MASTER_CONFIG
-
-/* SMPU requires base address aligned to size */
-#if SMPU10_BASE % REGIONSIZE_TO_BYTES(SMPU10_REGIONSIZE)
-#error "Flash layout has changed - SMPU10 needs updating"
-#endif
-
-#if S_RAM_CODE_SIZE != REGIONSIZE_TO_BYTES(SMPU10_REGIONSIZE)
-#error "SMPU10_REGIONSIZE is not equal S_RAM_CODE_SIZE"
-#endif
-
-/* SMPU10 should be contained within SMPU7 */
-#if (SMPU10_BASE + SMPU10_REGIONSIZE) < (SMPU7_BASE + \
-                    2*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8)
-#error "SMPU10 is below SMPU7"
-#endif
-#if SMPU10_BASE > (SMPU7_BASE + \
-                    6*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8)
-#error "SMPU10 is above SMPU7"
+/* SMPU7 should exactly cover the privileged secure SRAM */
+#if (4*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8) != S_PRIV_DATA_SIZE
+#error "SMPU7_REGIONSIZE should match S_PRIV_DATA_SIZE"
 #endif
 
 #endif /* __SMPU_CONFIG_H__ */
