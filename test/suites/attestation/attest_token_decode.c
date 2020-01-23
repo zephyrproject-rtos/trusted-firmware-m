@@ -61,20 +61,6 @@ void attest_token_decode_init(struct attest_token_decode_context *me,
 }
 
 
-/*
- * Public function. See attest_token_decode.h
- */
-enum attest_token_err_t
-attest_token_decode_set_pub_key(struct attest_token_decode_context *me,
-                                struct q_useful_buf cose_pub_key) {
-    /* FIXME: fill this in */
-    (void)me; /* unused parameter */
-    (void)cose_pub_key; /* unused parameter */
-
-    return ATTEST_TOKEN_ERR_SUCCESS;
-}
-
-
 static enum attest_token_err_t t_cose_verify_error_map[] = {
     /*     T_COSE_SUCCESS = 0 */
     ATTEST_TOKEN_ERR_SUCCESS,
@@ -196,26 +182,6 @@ attest_token_decode_validate_token(struct attest_token_decode_context *me,
     }
 
     return return_value;
-}
-
-
-/*
- * Public function. See attest_token_decode.h
- */
-enum attest_token_err_t
-attest_token_decode_get_map(struct attest_token_decode_context *me,
-                            int32_t label,
-                            QCBORItem *item)
-{
-    if(me->last_error != ATTEST_TOKEN_ERR_SUCCESS) {
-        item->uDataType = QCBOR_TYPE_NONE;
-        return me->last_error;
-    }
-
-    return qcbor_util_get_top_level_item_in_map(me->payload,
-                                               label,
-                                               QCBOR_TYPE_MAP,
-                                               item);
 }
 
 

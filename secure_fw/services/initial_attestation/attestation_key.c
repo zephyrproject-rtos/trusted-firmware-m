@@ -92,7 +92,7 @@ attest_register_initial_attestation_key()
     }
 
     /* Set key type for private key */
-    attest_key_type = PSA_KEY_TYPE_ECC_KEYPAIR(psa_curve);
+    attest_key_type = PSA_KEY_TYPE_ECC_KEYPAIR((psa_key_type_t)psa_curve);
 
     /* Register private key to Crypto service */
     crypto_res = psa_import_key(key_handle,

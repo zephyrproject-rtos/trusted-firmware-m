@@ -301,7 +301,7 @@ attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
  */
 static enum psa_attest_err_t
 attest_add_single_sw_measurment(struct attest_token_ctx *token_ctx,
-                                uint32_t module,
+                                uint8_t module,
                                 uint8_t *tlv_address,
                                 uint32_t nested_map)
 {
@@ -372,7 +372,7 @@ attest_add_single_sw_measurment(struct attest_token_ctx *token_ctx,
  */
 static enum psa_attest_err_t
 attest_add_single_sw_component(struct attest_token_ctx *token_ctx,
-                               uint32_t module,
+                               uint8_t module,
                                uint8_t *tlv_address)
 {
     struct shared_data_tlv_entry tlv_entry;
@@ -453,13 +453,15 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
     uint8_t  tlv_id;
     int32_t found;
     uint32_t cnt = 0;
-    uint32_t module;
+    uint8_t module;
     QCBOREncodeContext *cbor_encode_ctx = NULL;
 #ifdef INDIVIDUAL_SW_COMPONENTS
     enum psa_attest_err_t res;
 #else
     UsefulBufC encoded = NULLUsefulBufC;
 #endif
+
+    cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
 
     /* Starting from module 1, because module 0 contains general claims which
      * are not related to SW module(i.e: boot_seed, etc.)
@@ -481,7 +483,6 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
             cnt++;
             if (cnt == 1) {
                 /* Open array which stores SW components claims */
-                cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
                 QCBOREncode_OpenArrayInMapN(cbor_encode_ctx,
                                             EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
             }
@@ -712,8 +713,7 @@ attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
     }
 
     /* Sanity check */
-    if (security_lifecycle < TFM_SLC_UNKNOWN ||
-        security_lifecycle > TFM_SLC_DECOMMISSIONED) {
+    if (security_lifecycle > TFM_SLC_DECOMMISSIONED) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 

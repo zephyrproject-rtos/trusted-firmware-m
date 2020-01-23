@@ -174,12 +174,10 @@ Done:
  */
 int_fast16_t minimal_get_size_test()
 {
-    int_fast16_t          return_value;
+    int_fast16_t          return_value = 0;
     uint32_t              length;
     struct q_useful_buf_c expected_token;
     struct q_useful_buf_c nonce;
-
-    return_value = 0;
 
     nonce = TOKEN_TEST_VALUE_NONCE;
     expected_token =
