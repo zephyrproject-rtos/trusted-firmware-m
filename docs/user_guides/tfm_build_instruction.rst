@@ -71,10 +71,10 @@ Regression Tests for the AN521 target platform
     cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -am ../configs/ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
-Build for PSA API compliance tests
-==================================
-The build system provides the support for linking with prebuilt PSA API
-compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``,
+Build for PSA Developer API compliance tests
+============================================
+The build system provides the support for linking with prebuilt PSA Developer
+API compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``,
 ``ConfigPsaApiTestIPC.cmake`` or ``ConfigPsaApiTestIPCTfmLevel2.cmake`` config
 file. The build system assumes that the PSA API compliance test suite is checked
 out at the same level of the TF-M root folder and the default name for the build
@@ -97,6 +97,44 @@ tests for the Crypto service only:
     mkdir cmake_psa_test
     cd cmake_psa_test
     cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO=ON -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
+    cmake --build ./ -- install
+
+Build for PSA FF (IPC) compliance tests
+=======================================
+
+The build system assumes that the PSA FF compliance test suite is checked out
+at the same level of the TF-M root folder and the default name for the build
+folder has been used when compiling the PSA FF compliance tests.
+
+Parse the PSA FF compliance tests partition manifests using a tool script named
+as ``tfm_parse_manifest_list.py``. This tool updates the TFM partitions data
+structure with PSA test suite partitions detail and creates the manifest output
+files that are required for the PSA test suite build. Using these manifest
+output files, build the PSA FF compliance tests as per the instructions
+given in the PSA FF compliance tests README.
+
+.. code-block:: bash
+    cd <TF-M base folder>
+    cd trusted-firmware-m
+    python tools/tfm_parse_manifest_list.py -m tools/psa_ff_test_manifest_list.yaml append
+
+The build system provides the support for linking with prebuilt PSA FF
+compliance NS and S test libraries when using the ``ConfigPsaApiTestIPC.cmake``
+or ``ConfigPsaApiTestIPCTfmLevel2.cmake`` config file.  The PSA FF compliance
+tests need to be enabled at the build configuration step by defining::
+
+    -DPSA_API_TEST_IPC=ON.
+
+For example, to enable the PSA FF tests for ConfigPsaApiTestIPCTfmLevel2.cmake
+config :
+
+.. code-block:: bash
+
+    cd <TF-M base folder>
+    cd trusted-firmware-m
+    mkdir cmake_psa_test
+    cd cmake_psa_test
+    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPCTfmLevel2.cmake` -DPSA_API_TEST_IPC=ON -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
     cmake --build ./ -- install
 
 Location of build artifacts
