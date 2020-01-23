@@ -47,7 +47,6 @@ CY_NMI_HANLDER_ADDR    EQU    0x0000000D
                 IMPORT  PendSV_Handler
                 IMPORT  NvicMux7_IRQHandler
                 IMPORT  Cy_SysIpcPipeIsrCm0
-                IMPORT  TFM_TIMER0_IRQ_Handler
 
 __Vectors       ;Core Interrupts
                 DCD     |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|  ; Top of Stack

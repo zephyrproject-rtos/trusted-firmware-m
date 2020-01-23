@@ -61,7 +61,6 @@ __heap_limit
                 EXPORT  __ramVectors
                 IMPORT  Cy_SysIpcPipeIsrCm4
                 IMPORT  Cy_Flash_ResumeIrqHandler
-                IMPORT  TIMER1_Handler
 
 __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
