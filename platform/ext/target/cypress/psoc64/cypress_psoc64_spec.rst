@@ -83,6 +83,7 @@ line arguments:
 
          - ``ARMCLANG``
          - ``GNUARM``
+         - ``IARARM``
 
    * - -DCMAKE_BUILD_TYPE=<build type>
      - Configures debugging support.
@@ -279,6 +280,13 @@ ARMCLANG build:
 
     fromelf --i32 --output=<build folder>/tfm_s.hex <build folder>/secure_fw/tfm_s.axf
     fromelf --i32 --output=<build folder>/tfm_ns.hex <build folder>/app/tfm_ns.axf
+
+IARARM build:
+
+.. code-block:: bash
+
+    ielftool --silent --ihex <build folder>/secure_fw/tfm_s.axf <build folder>/tfm_s.hex
+    ielftool --silent --ihex <build folder>/app/tfm_ns.axf <build folder>/tfm_ns.hex
 
 Copy secure keys used in the board provisioning process to
 platform/ext/target/cypress/psoc64/security/keys:

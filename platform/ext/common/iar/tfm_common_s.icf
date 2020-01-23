@@ -33,7 +33,7 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object platform_retarget_dev.o,
        ro object device_definition.o,
        section SFN,
-       ro section .rodata object tfm_its_secure_api.o,
+       ro section .rodata object tfm_*_secure_api.o,
        ro object *7M_tl*.a,
        ro object *libtfmsprt.a
        };
@@ -377,7 +377,7 @@ define block TFM_SP_SECURE_TEST_PARTITION_LINKER_DATA with alignment = 32 {
     };
 
 #if defined (TFM_PSA_API)
-define block TFM_SP_SECURE_TEST_PARTITION_LINKER_STACK with alignment = 128, size = 0x0D00 { };
+define block TFM_SP_SECURE_TEST_PARTITION_LINKER_STACK with alignment = 128, size = 0x0C80 { };
 #endif
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
