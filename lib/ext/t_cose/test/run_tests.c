@@ -13,6 +13,7 @@
 #include "run_tests.h"
 #include "UsefulBuf.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "t_cose_test.h"
 #include "t_cose_sign_verify_test.h"
@@ -22,7 +23,7 @@
  Test configuration
  */
 
-typedef int (test_fun_t)(void);
+typedef int_fast32_t (test_fun_t)(void);
 typedef const char * (test_fun2_t)(void);
 
 
@@ -48,26 +49,38 @@ static test_entry2 s_tests2[] = {
 #endif
 
 static test_entry s_tests[] = {
+    TEST_ENTRY(sign1_structure_decode_test),
+    TEST_ENTRY(crit_parameters_test),
+    TEST_ENTRY(bad_parameters_test),
+
 #ifndef T_COSE_DISABLE_SIGN_VERIFY_TESTS
-    /* Many tests can be run without a crypto library integration and provide
-     * good test coverage of everything but the signing and verification. These
-     * tests can't be run with signing and verification short circuited */
+    /* Many tests can be run without a crypto library integration and
+     * provide good test coverage of everything but the signing and
+     * verification. These tests can't be run with signing and
+     * verification short circuited.  They must have a real crypto
+     * library integrated. */
     TEST_ENTRY(sign_verify_basic_test),
     TEST_ENTRY(sign_verify_make_cwt_test),
     TEST_ENTRY(sign_verify_sig_fail_test),
     TEST_ENTRY(sign_verify_get_size_test),
-#endif
-    TEST_ENTRY(sign1_structure_decode_test),
+#endif /* T_COSE_DISABLE_SIGN_VERIFY_TESTS */
+
+#ifndef T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
+    /* These tests can't run if short-circuit signatures are disabled.
+     * The most critical ones are replicated in the group of tests
+     * that require a real crypto library. Typically short-circuit
+     * signing is only disabled for extreme code size savings so these
+     * tests are typically always run.
+     */
     TEST_ENTRY(content_type_test),
     TEST_ENTRY(all_header_parameters_test),
     TEST_ENTRY(cose_example_test),
-    TEST_ENTRY(crit_parameters_test),
-    TEST_ENTRY(bad_parameters_test),
+    TEST_ENTRY(short_circuit_signing_error_conditions_test),
+    TEST_ENTRY(short_circuit_self_test),
     TEST_ENTRY(short_circuit_decode_only_test),
     TEST_ENTRY(short_circuit_make_cwt_test),
-    TEST_ENTRY(short_circuit_signing_error_conditions_test),
     TEST_ENTRY(short_circuit_verify_fail_test),
-    TEST_ENTRY(short_circuit_self_test),
+#endif /* T_COSE_DISABLE_SHORT_CIRCUIT_SIGN */
 
 #ifdef T_COSE_ENABLE_HASH_FAIL_TEST
     TEST_ENTRY(short_circuit_hash_fail_test),
@@ -106,12 +119,12 @@ static const char *NumToString(int32_t nNum, UsefulBuf StringMem)
    }
 
    bool bDidSomeOutput = false;
-   for(int n = nMax; n > 0; n/=10) {
-      int x = nNum/n;
-      if(x || bDidSomeOutput){
+   for(int32_t n = nMax; n > 0; n/=10) {
+      int32_t nDigitValue = nNum/n;
+      if(nDigitValue || bDidSomeOutput){
          bDidSomeOutput = true;
-         UsefulOutBuf_AppendByte(&OutBuf, '0' + x);
-         nNum -= x * n;
+         UsefulOutBuf_AppendByte(&OutBuf, (uint8_t)('0' + nDigitValue));
+         nNum -= nDigitValue * n;
       }
    }
    if(!bDidSomeOutput){
@@ -131,6 +144,7 @@ int RunTestsTCose(const char    *szTestNames[],
                   void          *poutCtx,
                   int           *pNumTestsRun)
 {
+    // int (-32767 to 32767 according to C standard) used by conscious choice
     int nTestsFailed = 0;
     int nTestsRun = 0;
     UsefulBuf_MAKE_STACK_UB(StringStorage, 12);
@@ -256,7 +270,7 @@ static void PrintSize(const char *szWhat,
 
    (*pfOutput)(szWhat, pOutCtx, 0);
    (*pfOutput)(" ", pOutCtx, 0);
-   (*pfOutput)(NumToString(uSize, buffer), pOutCtx, 0);
+   (*pfOutput)(NumToString((int32_t)uSize, buffer), pOutCtx, 0);
    (*pfOutput)("", pOutCtx, 1);
 }
 

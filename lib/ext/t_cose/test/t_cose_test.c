@@ -14,6 +14,7 @@
 #include "t_cose_make_test_messages.h"
 #include "q_useful_buf.h"
 #include "t_cose_crypto.h" /* For signature size constant */
+#include "t_cose_util.h" /* for get_short_circuit_kid */
 
 
 /*
@@ -470,7 +471,7 @@ static const uint8_t rfc8152_example_2_1[] = {
 /*
  * Public function, see t_cose_test.h
  */
-int cose_example_test()
+int_fast32_t cose_example_test()
 {
     enum t_cose_err_t             return_value;
     Q_USEFUL_BUF_MAKE_STACK_UB(   signed_cose_buffer, 200);
@@ -512,7 +513,7 @@ int cose_example_test()
 }
 
 
-static enum t_cose_err_t run_test_sign_and_verify(int32_t test_mess_options)
+static enum t_cose_err_t run_test_sign_and_verify(uint32_t test_mess_options)
 {
     struct t_cose_sign1_sign_ctx    sign_ctx;
     struct t_cose_sign1_verify_ctx  verify_ctx;
@@ -562,8 +563,12 @@ static enum t_cose_err_t run_test_sign_and_verify(int32_t test_mess_options)
 }
 
 
-/* copied from t_cose_util.c */
-#ifndef T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
+
+#ifdef T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
+/* copied from t_cose_util.c so these tests that depend on
+ * short circuit signatures can run even when it is
+ * is disabled.  TODO: is this dependency real?*/
+
 /* This is a random hard coded key ID that is used to indicate
  * short-circuit signing. It is OK to hard code this as the
  * probability of collision with this ID is very low and the same
@@ -589,7 +594,7 @@ static struct q_useful_buf_c get_short_circuit_kid(void)
 
     return ss_kid;
 }
-#endif
+#endif /* T_COSE_DISABLE_SHORT_CIRCUIT_SIGN */
 
 int_fast32_t all_header_parameters_test()
 {
@@ -633,12 +638,10 @@ int_fast32_t all_header_parameters_test()
                                        /* Get parameters for checking */
                                        &parameters);
 
-#ifndef T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
     // Need to compare to short circuit kid
     if(q_useful_buf_compare(parameters.kid, get_short_circuit_kid())) {
         return 2;
     }
-#endif
 
     if(parameters.cose_algorithm_id != T_COSE_ALGORITHM_ES256) {
         return 3;
@@ -648,7 +651,7 @@ int_fast32_t all_header_parameters_test()
     if(parameters.content_type_uint != 1) {
         return 4;
     }
-#endif
+#endif /* T_COSE_DISABLE_CONTENT_TYPE */
 
     if(q_useful_buf_compare(parameters.iv, Q_USEFUL_BUF_FROM_SZ_LITERAL("iv"))) {
         return 5;
@@ -662,8 +665,8 @@ int_fast32_t all_header_parameters_test()
 }
 
 struct test_case {
-    int32_t test_option;
-    int   result;
+    uint32_t test_option;
+    enum t_cose_err_t   result;
 };
 
 static struct test_case bad_parameters_tests_table[] = {
@@ -716,7 +719,7 @@ int_fast32_t bad_parameters_test()
 
     for(test = bad_parameters_tests_table; test->test_option; test++) {
         if(run_test_sign_and_verify(test->test_option) != test->result) {
-            return (int)(test - bad_parameters_tests_table);
+            return (int_fast32_t)(test - bad_parameters_tests_table);
         }
     }
 
@@ -770,7 +773,7 @@ int_fast32_t crit_parameters_test()
 
     for(test = crit_tests_table; test->test_option; test++) {
         if(run_test_sign_and_verify(test->test_option) != test->result) {
-            return (int)(test - crit_tests_table);
+            return (int_fast32_t)(test - crit_tests_table);
         }
     }
 
@@ -927,8 +930,9 @@ int_fast32_t sign1_structure_decode_test(void)
                                      &payload,
                                       NULL);
         if(result != sample->expected_error) {
-            /* Returns 100 * index of the input + error code not expected */
-            return (int32_t)(sample - sign1_sample_inputs+1)*100 + result;
+            /* Returns 100 * index of the input + the unexpected error code */
+            const size_t sample_index = (size_t)(sample - sign1_sample_inputs) / sizeof(struct sign1_sample);
+            return (int32_t)((sample_index+1)*100 + result);
         }
     }
 
