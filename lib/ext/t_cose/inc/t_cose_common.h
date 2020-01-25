@@ -2,6 +2,7 @@
  * t_cose_common.h
  *
  * Copyright 2019, Laurence Lundblade
+ * Copyright (c) 2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -88,7 +89,41 @@ extern "C" {
  */
 #define T_COSE_ALGORITHM_ES512 -36
 
+/**
+ * \def T_COSE_ALGORITHM_HMAC256
+ *
+ * \brief Indicates HMAC with SHA256
+ *
+ * This value comes from the
+ * [IANA COSE Registry](https://www.iana.org/assignments/cose/cose.xhtml).
+ *
+ * Value for \ref COSE_HEADER_PARAM_ALG to indicate HMAC w/ SHA-256
+ */
+#define T_COSE_ALGORITHM_HMAC256 5
 
+/**
+ * \def T_COSE_ALGORITHM_HMAC384
+ *
+ * \brief Indicates HMAC with SHA384
+ *
+ * This value comes from the
+ * [IANA COSE Registry](https://www.iana.org/assignments/cose/cose.xhtml).
+ *
+ * Value for \ref COSE_HEADER_PARAM_ALG to indicate HMAC w/ SHA-384
+ */
+#define T_COSE_ALGORITHM_HMAC384 6
+
+/**
+ * \def T_COSE_ALGORITHM_HMAC512
+ *
+ * \brief Indicates HMAC with SHA512
+ *
+ * This value comes from the
+ * [IANA COSE Registry](https://www.iana.org/assignments/cose/cose.xhtml).
+ *
+ * Value for \ref COSE_HEADER_PARAM_ALG to indicate HMAC w/ SHA-512
+ */
+#define T_COSE_ALGORITHM_HMAC512 7
 
 
 /**
@@ -154,6 +189,18 @@ struct t_cose_key {
  */
 #define T_COSE_SIGN1_MAX_SIZE_PROTECTED_PARAMETERS (1+1+5+17)
 
+/* Private value. Intentionally not documented for Doxygen.
+ * This is the size allocated for the encoded protected headers.  It
+ * needs to be big enough for make_protected_header() to succeed. It
+ * currently sized for one header with an algorithm ID up to 32 bits
+ * long -- one byte for the wrapping map, one byte for the label, 5
+ * bytes for the ID. If this is made accidentially too small, QCBOR will
+ * only return an error, and not overrun any buffers.
+ *
+ * 9 extra bytes are added, rounding it up to 16 total, in case some
+ * other protected header is to be added.
+ */
+#define T_COSE_MAC0_MAX_SIZE_PROTECTED_PARAMETERS (1 + 1 + 5 + 9)
 
 /**
  * Error codes return by t_cose.
@@ -345,6 +392,21 @@ enum t_cose_err_t {
  * type.  See \ref t_cose_parameters.
  */
 #define T_COSE_EMPTY_UINT_CONTENT_TYPE UINT16_MAX+1
+
+
+
+
+/**
+ * An \c option_flag to not add the CBOR type 6 tag for a COSE message.
+ * Some uses of COSE may require this tag be absent because its COSE
+ * message type is known from surrounding context.
+ *
+ * Or said another way, per the COSE RFC, this code produces a \c
+ * COSE_Sign1_Tagged/ \c COSE_Mac0_Tagged by default and
+ * a \c COSE_Sign1/ \c COSE_Mac0 when this flag is set.
+ * The only difference between these two is the CBOR tag.
+ */
+#define T_COSE_OPT_OMIT_CBOR_TAG 0x00000002
 
 
 #ifdef __cplusplus

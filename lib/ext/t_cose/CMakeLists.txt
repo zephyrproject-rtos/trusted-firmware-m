@@ -28,18 +28,32 @@ endif()
 
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C_SIGN
-	"${T_COSE_DIR}/src/t_cose_sign1_sign.c"
 	"${T_COSE_DIR}/src/t_cose_util.c"
 	"${T_COSE_DIR}/src/t_cose_parameters.c"
 	"${T_COSE_DIR}/crypto_adapters/t_cose_psa_crypto.c"
 	)
 
+if (SYMMETRIC_INITIAL_ATTESTATION)
+	list(APPEND T_COSE_COMPILE_TIME_CONFIG "T_COSE_DISABLE_SIGN1")
+
+	list(APPEND ALL_SRC_C_SIGN "${T_COSE_DIR}/src/t_cose_mac0_sign.c")
+else()
+	list(APPEND T_COSE_COMPILE_TIME_CONFIG "T_COSE_DISABLE_MAC0")
+
+	list(APPEND ALL_SRC_C_SIGN "${T_COSE_DIR}/src/t_cose_sign1_sign.c")
+endif()
+
 list(APPEND ALL_SRC_C_VERIFY
-	"${T_COSE_DIR}/src/t_cose_sign1_verify.c"
 	"${T_COSE_DIR}/src/t_cose_util.c"
 	"${T_COSE_DIR}/src/t_cose_parameters.c"
-	"${T_COSE_DIR}/crypto_adapters/t_cose_psa_crypto.c"
 	)
+
+if (NOT SYMMETRIC_INITIAL_ATTESTATION)
+	list(APPEND ALL_SRC_C_VERIFY
+		 "${T_COSE_DIR}/src/t_cose_sign1_verify.c"
+		 "${T_COSE_DIR}/crypto_adapters/t_cose_psa_crypto.c"
+		)
+endif()
 
 list(APPEND ALL_SRC_C_TEST
 	"${T_COSE_DIR}/test/run_tests.c"
@@ -65,12 +79,17 @@ add_library(tfm_t_cose_test   OBJECT ${ALL_SRC_C_TEST})
 
 list(APPEND T_COSE_COMPILE_TIME_CONFIG
 	"T_COSE_USE_PSA_CRYPTO"
-	"T_COSE_DISABLE_ES384"
-	"T_COSE_DISABLE_ES512"
 	"T_COSE_DISABLE_CONTENT_TYPE"
-	"T_COSE_DISABLE_SIGN_VERIFY_TESTS"
 	"T_COSE_USE_PSA_CRYPTO_FROM_TFM"
 	)
+
+if (NOT SYMMETRIC_INITIAL_ATTESTATION)
+	list(APPEND T_COSE_COMPILE_TIME_CONFIG
+		"T_COSE_DISABLE_ES384"
+		"T_COSE_DISABLE_ES512"
+		"T_COSE_DISABLE_SIGN_VERIFY_TESTS"
+		)
+endif()
 
 if (NOT ATTEST_INCLUDE_TEST_CODE)
 	list(APPEND T_COSE_COMPILE_TIME_CONFIG "T_COSE_DISABLE_SHORT_CIRCUIT_SIGN")
