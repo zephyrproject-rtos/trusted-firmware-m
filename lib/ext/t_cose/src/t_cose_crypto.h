@@ -604,6 +604,46 @@ t_cose_crypto_hmac_sign_finish(struct t_cose_crypto_hmac *hmac_ctx,
                                struct q_useful_buf_c     *tag);
 
 /**
+ * \brief Set up a multipart HMAC verification operation
+ *
+ * \param[in,out] hmac_ctx           Pointer to the HMAC context.
+ * \param[in] cose_alg_id            The algorithm used in HMAC.
+ * \param[in] verify_key             Key for HMAC verification
+ *
+ * \retval T_COSE_SUCCESS
+ *         Operation succeeds.
+ * \retval T_COSE_ERR_UNSUPPORTED_SIGNING_ALG
+ *         The algorithm is unsupported.
+ * \retval T_COSE_ERR_INVALID_ARGUMENT
+ *         Invalid arguments.
+ * \retval T_COSE_ERR_FAIL
+ *         Some general failure of the HMAC function.
+ */
+enum t_cose_err_t
+t_cose_crypto_hmac_verify_setup(struct t_cose_crypto_hmac *hmac_ctx,
+                                const int                  cose_alg_id,
+                                struct t_cose_key          verify_key);
+
+/**
+ * \brief Finish the verification of the HMAC of a message.
+ *
+ * \param[in,out] hmac_ctx           Pointer to the HMAC context.
+ * \param[in] tag                    Pointer and length of the tag.
+ *
+ * \retval T_COSE_SUCCESS
+ *         Tag calculation succeeds.
+ * \retval T_COSE_ERR_INVALID_ARGUMENT
+ *         Invalid arguments.
+ * \retval T_COSE_ERR_FAIL
+ *         Some general failure of the HMAC function.
+ * \retval PSA_ERROR_INVALID_SIGNATURE
+ *         HMAC verification failed.
+ */
+enum t_cose_err_t
+t_cose_crypto_hmac_verify_finish(struct t_cose_crypto_hmac *hmac_ctx,
+                                 struct q_useful_buf_c      tag);
+
+/**
  * \brief Indicate whether a COSE algorithm is ECDSA or not.
  *
  * \param[in] cose_algorithm_id    The algorithm ID to check.

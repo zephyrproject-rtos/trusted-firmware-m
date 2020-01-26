@@ -46,13 +46,13 @@ endif()
 list(APPEND ALL_SRC_C_VERIFY
 	"${T_COSE_DIR}/src/t_cose_util.c"
 	"${T_COSE_DIR}/src/t_cose_parameters.c"
+	"${T_COSE_DIR}/crypto_adapters/t_cose_psa_crypto.c"
 	)
 
-if (NOT SYMMETRIC_INITIAL_ATTESTATION)
-	list(APPEND ALL_SRC_C_VERIFY
-		 "${T_COSE_DIR}/src/t_cose_sign1_verify.c"
-		 "${T_COSE_DIR}/crypto_adapters/t_cose_psa_crypto.c"
-		)
+if (SYMMETRIC_INITIAL_ATTESTATION)
+	list(APPEND ALL_SRC_C_VERIFY "${T_COSE_DIR}/src/t_cose_mac0_verify.c")
+else()
+	list(APPEND ALL_SRC_C_VERIFY "${T_COSE_DIR}/src/t_cose_sign1_verify.c")
 endif()
 
 if (ENABLE_T_COSE_TESTS)

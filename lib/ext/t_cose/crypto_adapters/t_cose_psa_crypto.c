@@ -451,6 +451,7 @@ psa_status_to_t_cose_error_hmac(psa_status_t status)
            status == PSA_ERROR_INVALID_ARGUMENT    ? T_COSE_ERR_INVALID_ARGUMENT :
            status == PSA_ERROR_INSUFFICIENT_MEMORY ? T_COSE_ERR_INSUFFICIENT_MEMORY :
            status == PSA_ERROR_BUFFER_TOO_SMALL    ? T_COSE_ERR_TOO_SMALL :
+           status == PSA_ERROR_INVALID_SIGNATURE   ? T_COSE_ERR_SIG_VERIFY :
                                                      T_COSE_ERR_FAIL;
 }
 
@@ -534,6 +535,65 @@ t_cose_crypto_hmac_sign_finish(struct t_cose_crypto_hmac *hmac_ctx,
     if(psa_ret == PSA_SUCCESS) {
         tag->ptr = tag_buf.ptr;
     }
+
+    return psa_status_to_t_cose_error_hmac(psa_ret);
+}
+
+/*
+ * See documentation in t_cose_crypto.h
+ */
+enum t_cose_err_t
+t_cose_crypto_hmac_verify_setup(struct t_cose_crypto_hmac *hmac_ctx,
+                                const int                  cose_alg_id,
+                                struct t_cose_key          verify_key)
+{
+    psa_algorithm_t psa_alg;
+    psa_status_t psa_ret;
+
+    if(!hmac_ctx) {
+        return T_COSE_ERR_INVALID_ARGUMENT;
+    }
+
+    /* Map the algorithm ID */
+    psa_alg = cose_hmac_alg_id_to_psa(cose_alg_id);
+    if(!PSA_ALG_IS_MAC(psa_alg)) {
+        return T_COSE_ERR_UNSUPPORTED_SIGNING_ALG;
+    }
+
+    /*
+     * Verify if HMAC algorithm is valid.
+     * According to COSE (RFC 8152), only SHA-256, SHA-384 and SHA-512 are
+     * supported in HMAC.
+     */
+    if((psa_alg != PSA_ALG_HMAC(PSA_ALG_SHA_256)) && \
+        (psa_alg != PSA_ALG_HMAC(PSA_ALG_SHA_384)) && \
+        (psa_alg != PSA_ALG_HMAC(PSA_ALG_SHA_512))) {
+        return T_COSE_ERR_UNSUPPORTED_SIGNING_ALG;
+    }
+
+    hmac_ctx->op_ctx = psa_mac_operation_init();
+
+    psa_ret = psa_mac_verify_setup(&hmac_ctx->op_ctx,
+                                   (psa_key_handle_t)verify_key.k.key_handle,
+                                   psa_alg);
+
+    return psa_status_to_t_cose_error_hmac(psa_ret);
+}
+
+/*
+ * See documentation in t_cose_crypto.h
+ */
+enum t_cose_err_t
+t_cose_crypto_hmac_verify_finish(struct t_cose_crypto_hmac *hmac_ctx,
+                                 struct q_useful_buf_c      tag)
+{
+    psa_status_t psa_ret;
+
+    if(!hmac_ctx) {
+        return T_COSE_ERR_INVALID_ARGUMENT;
+    }
+
+    psa_ret = psa_mac_verify_finish(&hmac_ctx->op_ctx, tag.ptr, tag.len);
 
     return psa_status_to_t_cose_error_hmac(psa_ret);
 }

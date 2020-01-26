@@ -2,6 +2,7 @@
  * t_cose_parameters.h
  *
  * Copyright 2019, Laurence Lundblade
+ * Copyright (c) 2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +13,6 @@
 #ifndef t_cose_parameters_h
 #define t_cose_parameters_h
 
-#include "t_cose_sign1_verify.h"
 #include "q_useful_buf.h"
 #include "t_cose_common.h"
 #include <stdint.h>
@@ -55,6 +55,13 @@ struct t_cose_label_list {
  * considered safe to use as the list terminator.
  */
 #define LABEL_LIST_TERMINATOR 0
+
+
+/**
+ * A special COSE algorithm ID that indicates no COSE algorithm ID or an unset
+ * COSE algorithm ID.
+ */
+#define T_COSE_UNSET_ALGORITHM_ID 0
 
 
 /**

@@ -14,6 +14,7 @@
 #define __T_COSE_COMMON_H__
 
 #include <stdint.h>
+#include "q_useful_buf.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -364,6 +365,12 @@ enum t_cose_err_t {
     /** Something is wrong with the crit parameter. */
     T_COSE_ERR_CRIT_PARAMETER = 36,
 
+    /**
+     * When verifying a \c COSE_Mac0, something is wrong with the
+     * format of the CBOR. For example, it is missing something like
+     * the payload.
+     */
+    T_COSE_ERR_MAC0_FORMAT = 37,
 };
 
 
@@ -393,6 +400,41 @@ enum t_cose_err_t {
  */
 #define T_COSE_EMPTY_UINT_CONTENT_TYPE UINT16_MAX+1
 
+/**
+ * The result of parsing a set of COSE header parameters. The pointers
+ * are all back into the COSE structure blob passed in.
+ *
+ * Approximate size on a 64-bit machine is 80 bytes and on a 32-bit
+ * machine is 40.
+ */
+struct t_cose_parameters {
+    /** The algorithm ID. \ref T_COSE_UNSET_ALGORITHM_ID if the algorithm ID
+     * parameter is not present. String type algorithm IDs are not
+     * supported.  See the
+     * [IANA COSE Registry](https://www.iana.org/assignments/cose/cose.xhtml)
+     * for the algorithms corresponding to the integer values.
+     */
+    int32_t               cose_algorithm_id;
+    /** The COSE key ID. \c NULL_Q_USEFUL_BUF_C if parameter is not
+     * present */
+    struct q_useful_buf_c kid;
+    /** The initialization vector. \c NULL_Q_USEFUL_BUF_C if parameter
+     * is not present */
+    struct q_useful_buf_c iv;
+    /** The partial initialization vector. \c NULL_Q_USEFUL_BUF_C if
+     * parameter is not present */
+    struct q_useful_buf_c partial_iv;
+    /** The content type as a MIME type like
+     * "text/plain". \c NULL_Q_USEFUL_BUF_C if parameter is not present */
+#ifndef T_COSE_DISABLE_CONTENT_TYPE
+    struct q_useful_buf_c content_type_tstr;
+    /** The content type as a CoAP Content-Format
+     * integer. \ref T_COSE_EMPTY_UINT_CONTENT_TYPE if parameter is not
+     * present. Allowed range is 0 to UINT16_MAX per RFC 7252. */
+    uint32_t              content_type_uint;
+#endif /* T_COSE_DISABLE_CONTENT_TYPE */
+};
+
 
 
 
@@ -407,6 +449,42 @@ enum t_cose_err_t {
  * The only difference between these two is the CBOR tag.
  */
 #define T_COSE_OPT_OMIT_CBOR_TAG 0x00000002
+
+
+/**
+ * The error \ref T_COSE_ERR_NO_KID is returned if the kid parameter
+ * is missing. Note that the kid parameter is primarily passed on to
+ * the crypto layer so the crypto layer can look up the key. If the
+ * verification key is determined by other than the kid, then it is
+ * fine if there is no kid.
+ */
+#define T_COSE_OPT_REQUIRE_KID 0x00000002
+
+
+/**
+ * Normally this will decode the CBOR presented as a \c COSE_Sign1
+ * or a \c COSE_Mac0 message whether it is tagged using QCBOR tagging
+ * as such or not.
+ * If this option is set, then \ref T_COSE_ERR_INCORRECTLY_TAGGED is
+ * returned if it is not tagged.
+ */
+#define T_COSE_OPT_TAG_REQUIRED  0x00000004
+
+
+/**
+ * This option disables cryptographic signature verification.  With
+ * this option the \c verification_key is not needed.  This is useful
+ * to decode the a COSE message to get the kid (key ID).  The
+ * verification key can be looked up or otherwise obtained by the
+ * caller. Once the key in in hand, the verification function can be
+ * called again to perform the full verification.
+ *
+ * The payload will always be returned whether this is option is given
+ * or not, but it should not be considered secure when this option is
+ * given.
+ *
+ */
+#define T_COSE_OPT_DECODE_ONLY  0x00000008
 
 
 #ifdef __cplusplus
