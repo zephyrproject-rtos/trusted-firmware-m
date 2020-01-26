@@ -38,6 +38,7 @@ elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	list(APPEND ATTEST_TEST_SRC_S
 		"${ATTESTATION_TEST_DIR}/secure/attestation_s_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
+		"${ATTESTATION_TEST_DIR}/attest_token_decode_common.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
 		"${ATTESTATION_TEST_DIR}/attest_public_key.c"
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"
@@ -46,6 +47,7 @@ elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	list(APPEND ATTEST_TEST_SRC_NS
 		"${ATTESTATION_TEST_DIR}/non_secure/attestation_ns_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
+		"${ATTESTATION_TEST_DIR}/attest_token_decode_common.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
 		"${ATTESTATION_TEST_DIR}/attest_public_key.c"
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"

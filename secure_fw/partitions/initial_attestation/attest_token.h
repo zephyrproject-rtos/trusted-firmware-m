@@ -72,11 +72,12 @@ enum attest_token_err_t {
     /** Integer too large, for example an \c int32_t is required, but
         value only fits in \c int64_t */
     ATTEST_TOKEN_ERR_INTEGER_VALUE,
-    /** Something is wrong with the COSE signing structure, missing
+    /** Something is wrong with the COSE message structure, missing
         headers or such. */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /** COSE signature is invalid, data is corrupted. */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_VALIDATION,
+    ATTEST_TOKEN_ERR_COSE_FORMAT,
+    /** COSE signature or authentication tag is invalid, data
+        is corrupted. */
+    ATTEST_TOKEN_ERR_COSE_VALIDATION,
     /** The signing algorithm is not supported. */
     ATTEST_TOKEN_ERR_UNSUPPORTED_SIG_ALG,
     /** Out of memory. */

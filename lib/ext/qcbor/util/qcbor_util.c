@@ -230,7 +230,7 @@ qcbor_util_get_top_level_item_in_map(struct q_useful_buf_c payload,
     QCBORError              cbor_error;
 
     if(q_useful_buf_c_is_null(payload)) {
-        return_value = ATTEST_TOKEN_ERR_COSE_SIGN1_VALIDATION;
+        return_value = ATTEST_TOKEN_ERR_COSE_VALIDATION;
         goto Done;
     }
 
