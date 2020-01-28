@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,6 +31,14 @@ extern "C" {
  *        - Etc.
  */
 void boot_clear_bl2_ram_area(void);
+
+/**
+ * \brief Platform peripherals and devices initialization.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int32_t boot_platform_init(void);
 
 #ifdef __cplusplus
 }

@@ -166,6 +166,12 @@ int main(void)
     __set_MSPLIM(msp_stack_bottom);
 #endif
 
+    /* Perform platform specific initialization */
+    if (boot_platform_init() != 0) {
+        while (1)
+            ;
+    }
+
 #if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
     stdio_init();
 #endif
@@ -184,13 +190,6 @@ int main(void)
         while (1);
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
-
-    rc = FLASH_DEV_NAME.Initialize(NULL);
-    if(rc != ARM_DRIVER_OK) {
-        BOOT_LOG_ERR("Error while initializing Flash Interface");
-        while (1)
-            ;
-    }
 
 #ifndef MCUBOOT_USE_UPSTREAM
     rc = boot_nv_security_counter_init();

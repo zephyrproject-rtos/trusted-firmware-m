@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -151,6 +151,7 @@ endif()
 if (NOT DEFINED BUILD_BOOT_HAL)
   message(FATAL_ERROR "Configuration variable BUILD_BOOT_HAL (true|false) is undefined!")
 elseif(BUILD_BOOT_HAL)
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/boot_hal.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/mps3/an524/boot_hal.c")
 endif()
 
