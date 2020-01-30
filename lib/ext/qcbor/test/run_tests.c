@@ -1,14 +1,14 @@
 /*==============================================================================
  run_tests.c -- test aggregator and results reporting
 
- Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
+ Copyright (c) 2018-2020, Laurence Lundblade. All rights reserved.
 
  SPDX-License-Identifier: BSD-3-Clause
 
  See BSD-3-Clause license in README.md
 
  Created on 9/30/18
- ==============================================================================*/
+ =============================================================================*/
 
 #include "run_tests.h"
 #include "UsefulBuf.h"
@@ -24,7 +24,7 @@
  Test configuration
  */
 
-typedef int (test_fun_t)(void);
+typedef int32_t (test_fun_t)(void);
 typedef const char * (test_fun2_t)(void);
 
 
@@ -103,6 +103,12 @@ static test_entry s_tests[] = {
     TEST_ENTRY(SetUpAllocatorTest),
     TEST_ENTRY(SimpleValuesIndefiniteLengthTest1),
     TEST_ENTRY(EncodeLengthThirtyoneTest),
+#ifndef     QCBOR_CONFIG_DISABLE_EXP_AND_MANTISSA
+    TEST_ENTRY(EncodeLengthThirtyoneTest),
+    TEST_ENTRY(ExponentAndMantissaDecodeTests),
+    TEST_ENTRY(ExponentAndMantissaDecodeFailTests),
+    TEST_ENTRY(ExponentAndMantissaEncodeTests),
+#endif /* QCBOR_CONFIG_DISABLE_EXP_AND_MANTISSA */
 };
 
 
@@ -131,12 +137,12 @@ static const char *NumToString(int32_t nNum, UsefulBuf StringMem)
    }
 
    bool bDidSomeOutput = false;
-   for(int n = nMax; n > 0; n/=10) {
-      int x = nNum/n;
-      if(x || bDidSomeOutput){
+   for(int32_t n = nMax; n > 0; n/=10) {
+      int nDigitValue = nNum/n;
+      if(nDigitValue || bDidSomeOutput){
          bDidSomeOutput = true;
-         UsefulOutBuf_AppendByte(&OutBuf, '0' + x);
-         nNum -= x * n;
+         UsefulOutBuf_AppendByte(&OutBuf, (uint8_t)('0' + nDigitValue));
+         nNum -= nDigitValue * n;
       }
    }
    if(!bDidSomeOutput){
@@ -151,10 +157,14 @@ static const char *NumToString(int32_t nNum, UsefulBuf StringMem)
 /*
  Public function. See run_test.h.
  */
-int RunTests(const char *szTestNames[], OutputStringCB pfOutput, void *poutCtx, int *pNumTestsRun)
+int RunTestsQCBOR(const char *szTestNames[],
+             OutputStringCB pfOutput,
+             void *poutCtx,
+             int *pNumTestsRun)
 {
     int nTestsFailed = 0;
     int nTestsRun = 0;
+
     UsefulBuf_MAKE_STACK_UB(StringStorage, 12);
 
     test_entry2 *t2;
@@ -228,7 +238,7 @@ int RunTests(const char *szTestNames[], OutputStringCB pfOutput, void *poutCtx, 
             }
         }
 
-        int nTestResult = (t->test_fun)();
+        int32_t nTestResult = (t->test_fun)();
         nTestsRun++;
         if(pfOutput) {
             (*pfOutput)(t->szTestName, poutCtx, 0);
@@ -269,13 +279,16 @@ int RunTests(const char *szTestNames[], OutputStringCB pfOutput, void *poutCtx, 
 /*
  Public function. See run_test.h.
  */
-static void PrintSize(const char *szWhat, uint32_t uSize, OutputStringCB pfOutput, void *pOutCtx)
+static void PrintSize(const char *szWhat,
+                      uint32_t uSize,
+                      OutputStringCB pfOutput,
+                      void *pOutCtx)
 {
    UsefulBuf_MAKE_STACK_UB(buffer, 20);
 
    (*pfOutput)(szWhat, pOutCtx, 0);
    (*pfOutput)(" ", pOutCtx, 0);
-   (*pfOutput)(NumToString(uSize, buffer), pOutCtx, 0);
+   (*pfOutput)(NumToString((int32_t)uSize, buffer), pOutCtx, 0);
    (*pfOutput)("", pOutCtx, 1);
 }
 
@@ -283,15 +296,15 @@ static void PrintSize(const char *szWhat, uint32_t uSize, OutputStringCB pfOutpu
 /*
  Public function. See run_test.h.
  */
-void PrintSizes(OutputStringCB pfOutput, void *pOutCtx)
+void PrintSizesQCBOR(OutputStringCB pfOutput, void *pOutCtx)
 {
-   // Type and size of return from sizeof() varies. These will never be large so cast is safe
-   PrintSize("sizeof(QCBORTrackNesting)",   (uint32_t)sizeof(QCBORTrackNesting), pfOutput, pOutCtx);
+   // These will never be large so cast is safe
+   PrintSize("sizeof(QCBORTrackNesting)",   (uint32_t)sizeof(QCBORTrackNesting),  pfOutput, pOutCtx);
    PrintSize("sizeof(QCBOREncodeContext)",  (uint32_t)sizeof(QCBOREncodeContext), pfOutput, pOutCtx);
    PrintSize("sizeof(QCBORDecodeNesting)",  (uint32_t)sizeof(QCBORDecodeNesting), pfOutput, pOutCtx);
    PrintSize("sizeof(QCBORDecodeContext)",  (uint32_t)sizeof(QCBORDecodeContext), pfOutput, pOutCtx);
-   PrintSize("sizeof(QCBORItem)",           (uint32_t)sizeof(QCBORItem), pfOutput, pOutCtx);
-   PrintSize("sizeof(QCBORTagListIn)",      (uint32_t)sizeof(QCBORTagListIn), pfOutput, pOutCtx);
-   PrintSize("sizeof(QCBORTagListOut)",     (uint32_t)sizeof(QCBORTagListOut), pfOutput, pOutCtx);
+   PrintSize("sizeof(QCBORItem)",           (uint32_t)sizeof(QCBORItem),          pfOutput, pOutCtx);
+   PrintSize("sizeof(QCBORTagListIn)",      (uint32_t)sizeof(QCBORTagListIn),     pfOutput, pOutCtx);
+   PrintSize("sizeof(QCBORTagListOut)",     (uint32_t)sizeof(QCBORTagListOut),    pfOutput, pOutCtx);
    (*pfOutput)("", pOutCtx, 1);
 }

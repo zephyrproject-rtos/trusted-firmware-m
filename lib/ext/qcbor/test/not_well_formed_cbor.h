@@ -58,22 +58,22 @@ static const struct someBinaryBytes paNotWellFormedCBOR[] = {
     // indefinite length text string with indefinite string inside
     {(uint8_t[]){0x7f, 0x7f, 0x61, 0x00, 0xff, 0xff}, 6},
 
-    // Definite length maps and arrays must be closed by having the
+    // Definte length maps and arrays must be closed by having the
     // right number of items
 
-    // A definite length array that is supposed to have 1 item, but has none
+    // A definte length array that is supposed to have 1 item, but has none
     {(uint8_t[]){0x81}, 1},
-    // A definite length array that is supposed to have 2 items, but has only 1
+    // A definte length array that is supposed to have 2 items, but has only 1
     {(uint8_t[]){0x82, 0x00}, 2},
-    // A definite length array that is supposed to have 511 items, but has only 1
+    // A definte length array that is supposed to have 511 items, but has only 1
     {(uint8_t[]){0x9a, 0x01, 0xff, 0x00}, 4},
-    // A definite length map that is supposed to have 1 item, but has none
+    // A definte length map that is supposed to have 1 item, but has none
     {(uint8_t[]){0xa1}, 1},
-    // A definite length map that is supposed to have s item, but has only 1
+    // A definte length map that is supposed to have s item, but has only 1
     {(uint8_t[]){0xa2, 0x01, 0x02}, 3},
 
 
-    // Indefinite length maps and arrays must be ended by a break
+    // Indefinte length maps and arrays must be ended by a break
 
     // Indefinite length array with zero items and no break
     {(uint8_t[]){0x9f}, 1},
@@ -251,10 +251,10 @@ static const struct someBinaryBytes paNotWellFormedCBOR[] = {
     {(uint8_t[]){0x41}, 1},
     // A text string is of length 1 without the 1 byte
     {(uint8_t[]){0x61}, 1},
-    // Byte string should have 2^32-1 bytes, but has one
-    {(uint8_t[]){0x5a, 0xff, 0xff, 0xff, 0xff, 0x00}, 6},
-    // Byte string should have 2^32-1 bytes, but has one
-    {(uint8_t[]){0x7a, 0xff, 0xff, 0xff, 0xff, 0x00}, 6},
+    // Byte string should have 2^32-15 bytes, but has one
+    {(uint8_t[]){0x5a, 0xff, 0xff, 0xff, 0xf0, 0x00}, 6},
+    // Byte string should have 2^32-15 bytes, but has one
+    {(uint8_t[]){0x7a, 0xff, 0xff, 0xff, 0xf0, 0x00}, 6},
 
 
     // Use of unassigned additional information values

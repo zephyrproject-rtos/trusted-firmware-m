@@ -119,8 +119,8 @@ static void tfm_qcbor_test_7001(struct test_result_t *ret)
 {
     int32_t test_failed_cnt = 0;
 
-    test_failed_cnt = RunTests(qcbor_test_cases_all, fputs_wrapper,
-                               NULL, NULL);
+    test_failed_cnt = RunTestsQCBOR(qcbor_test_cases_all, fputs_wrapper,
+                                    NULL, NULL);
     if (test_failed_cnt != 0) {
         TEST_FAIL("QCBOR test failed");
         return;

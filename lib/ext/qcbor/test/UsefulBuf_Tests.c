@@ -1,6 +1,6 @@
 /*==============================================================================
  Copyright (c) 2016-2018, The Linux Foundation.
- Copyright (c) 2018-2019, Laurence Lundblade.
+ Copyright (c) 2018-2020, Laurence Lundblade.
  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- ==============================================================================*/
+ =============================================================================*/
 
 #include "UsefulBuf.h"
 
@@ -79,22 +79,17 @@ const char * UOBTest_NonAdversarial()
    UsefulBufC UBC2 = {"unbounce ", 9};
    UsefulOutBuf_InsertUsefulBuf(&UOB, UBC2, 10);
 
-   // Make it a null terminated string (because all the appends and inserts above not strcpy !)
-   UsefulOutBuf_AppendByte(&UOB, '\0');
 
+   const UsefulBufC Expected = UsefulBuf_FROM_SZ_LITERAL("heffalump unbounce bluster hunny");
 
    UsefulBufC U = UsefulOutBuf_OutUBuf(&UOB);
-
-   const char *expected = "heffalump unbounce bluster hunny";
-
-   if(UsefulBuf_IsNULLC(U) || U.len-1 != strlen(expected) || strcmp(expected, U.ptr) || UsefulOutBuf_GetError(&UOB)) {
+   if(UsefulBuf_IsNULLC(U) || UsefulBuf_Compare(Expected, U) || UsefulOutBuf_GetError(&UOB)) {
       szReturn = "OutUBuf";
    }
 
    UsefulBuf_MAKE_STACK_UB(buf, 50);
    UsefulBufC Out =  UsefulOutBuf_CopyOut(&UOB, buf);
-
-   if(UsefulBuf_IsNULLC(Out) || Out.len-1 != strlen(expected) || strcmp(expected, Out.ptr)) {
+   if(UsefulBuf_IsNULLC(Out) || UsefulBuf_Compare(Expected, Out)) {
       szReturn = "CopyOut";
    }
 
@@ -160,7 +155,8 @@ static int InsertTest(UsefulOutBuf *pUOB,  size_t num, size_t pos, int expected)
    - around MAX size_t
 
 
- Test these for the buffer size and the cursor, the insert amount, the append amount and the insert position
+ Test these for the buffer size and the cursor, the insert amount, the
+ append amount and the insert position
 
  */
 
@@ -314,10 +310,9 @@ const char *UBMacroConversionsTest()
    if(Boo.len != 3 || strncmp(Boo.ptr, "Boo", 3))
      return "UsefulBuf_FROM_BYTE_ARRAY_LITERAL failed";
 
-   char *sz = "not const"; // some data for the test
-   UsefulBuf B = (UsefulBuf){sz, sizeof(sz)};
+   UsefulBuf B = (UsefulBuf){(void *)Too.ptr, Too.len};
    UsefulBufC BC = UsefulBuf_Const(B);
-   if(BC.len != sizeof(sz) || BC.ptr != sz)
+   if(BC.len != Too.len || BC.ptr != Too.ptr)
       return "UsefulBufConst failed";
 
    return NULL;
