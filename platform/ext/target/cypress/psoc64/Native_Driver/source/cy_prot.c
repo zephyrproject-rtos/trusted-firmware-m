@@ -827,14 +827,14 @@ static cy_en_prot_status_t Prot_ConfigPpuAtt(volatile uint32_t * reg, uint16_t p
 
             for(fldIdx = 0UL; fldIdx < CY_PROT_ATT_PC_MAX; fldIdx++)
             {
-                /* Reset the bitfield for the PCx attributes */
-                attReg &= ~((_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, CY_PROT_PERM_RW) |
-                             _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, CY_PROT_PERM_RW) |
-                             _BOOL2FLD(PERI_MS_PPU_PR_V2_MS_ATT0_PC0_NS, true)) <<
-                            (PERI_MS_PPU_PR_V2_MS_ATT0_PC1_UR_Pos * fldIdx));
-
                 if((tmpMask2 & CY_PROT_PCMASK_CHECK) == CY_PROT_STRUCT_ENABLE)
                 {
+                    /* Reset the bitfield for the PCx attributes */
+                    attReg &= ~((_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, CY_PROT_PERM_RW) |
+                                 _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, CY_PROT_PERM_RW) |
+                                 _BOOL2FLD(PERI_MS_PPU_PR_V2_MS_ATT0_PC0_NS, true)) <<
+                                (PERI_MS_PPU_PR_V2_MS_ATT0_PC1_UR_Pos * fldIdx));
+
                     /* Set the bitfield for the PCx attributes */
                     attReg |= (_VAL2FLD(CY_PROT_ATT_PERI_USER_PERM, userPermission) |
                                _VAL2FLD(CY_PROT_ATT_PERI_PRIV_PERM, privPermission) |

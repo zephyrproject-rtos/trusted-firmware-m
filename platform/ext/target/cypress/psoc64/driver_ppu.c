@@ -63,6 +63,10 @@ struct ppu_resources {
 /* Affect all 8 subregions */
 #define ALL_ENABLED 0
 
+/* The PDL doesn't work if we pass in pcMask values that are not supported by the hardware */
+/* Note that this macro depends on the values of CY_PROT_PCMASKx macros */
+#define FILTER_PCS(x) ((x) & ((1<<(PERI_PC_NR-1))-1))
+
 /* Shared Driver wrapper functions */
 cy_en_prot_status_t PPU_Configure(const PPU_Resources *ppu_dev)
 {
@@ -77,8 +81,16 @@ cy_en_prot_status_t PPU_Configure(const PPU_Resources *ppu_dev)
                                              ppu_dev->slave_region_size);
         if (ret != CY_PROT_SUCCESS)
             return ret;
+        /* Disable access from any other Protection Contexts */
         ret = Cy_Prot_ConfigPpuProgSlaveAtt(ppu_dev->ppu.ms_ppu_pr,
-                                            ppu_dev->slave_cfg.ms_ppu.pcMask,
+                                            FILTER_PCS(~ppu_dev->slave_cfg.ms_ppu.pcMask),
+                                            CY_PROT_PERM_DISABLED,
+                                            CY_PROT_PERM_DISABLED,
+                                            true);
+        if (ret != CY_PROT_SUCCESS)
+            return ret;
+        ret = Cy_Prot_ConfigPpuProgSlaveAtt(ppu_dev->ppu.ms_ppu_pr,
+                                            FILTER_PCS(ppu_dev->slave_cfg.ms_ppu.pcMask),
                                             ppu_dev->slave_cfg.ms_ppu.user,
                                             ppu_dev->slave_cfg.ms_ppu.priv,
                                             ppu_dev->slave_cfg.ms_ppu.secure);
@@ -87,8 +99,16 @@ cy_en_prot_status_t PPU_Configure(const PPU_Resources *ppu_dev)
         ret = Cy_Prot_EnablePpuProgSlaveRegion(ppu_dev->ppu.ms_ppu_pr);
         if (ret != CY_PROT_SUCCESS)
             return ret;
+        /* Read-only access from any other Protection Contexts */
         ret = Cy_Prot_ConfigPpuProgMasterAtt(ppu_dev->ppu.ms_ppu_pr,
-                                             ppu_dev->master_cfg.ms_ppu.pcMask,
+                                            FILTER_PCS(~ppu_dev->master_cfg.ms_ppu.pcMask),
+                                            CY_PROT_PERM_R,
+                                            CY_PROT_PERM_R,
+                                            true);
+        if (ret != CY_PROT_SUCCESS)
+            return ret;
+        ret = Cy_Prot_ConfigPpuProgMasterAtt(ppu_dev->ppu.ms_ppu_pr,
+                                             FILTER_PCS(ppu_dev->master_cfg.ms_ppu.pcMask),
                                              ppu_dev->master_cfg.ms_ppu.user,
                                              ppu_dev->master_cfg.ms_ppu.priv,
                                              ppu_dev->master_cfg.ms_ppu.secure);
@@ -98,15 +118,31 @@ cy_en_prot_status_t PPU_Configure(const PPU_Resources *ppu_dev)
 /* This block is only needed if there are MS_PPU_FX PPUs on the board */
 #if defined(PERI_MS_PPU_FX_PERI_MAIN)
     case MS_PPU_FX:
+        /* Disable access from any other Protection Contexts */
         ret = Cy_Prot_ConfigPpuFixedSlaveAtt(ppu_dev->ppu.ms_ppu_fx,
-                                             ppu_dev->slave_cfg.ms_ppu.pcMask,
+                                             FILTER_PCS(~ppu_dev->slave_cfg.ms_ppu.pcMask),
+                                             CY_PROT_PERM_DISABLED,
+                                             CY_PROT_PERM_DISABLED,
+                                             true);
+        if (ret != CY_PROT_SUCCESS)
+            return ret;
+        ret = Cy_Prot_ConfigPpuFixedSlaveAtt(ppu_dev->ppu.ms_ppu_fx,
+                                             FILTER_PCS(ppu_dev->slave_cfg.ms_ppu.pcMask),
                                              ppu_dev->slave_cfg.ms_ppu.user,
                                              ppu_dev->slave_cfg.ms_ppu.priv,
                                              ppu_dev->slave_cfg.ms_ppu.secure);
         if (ret != CY_PROT_SUCCESS)
             return ret;
+        /* Read-only access from any other Protection Contexts */
         ret = Cy_Prot_ConfigPpuFixedMasterAtt(ppu_dev->ppu.ms_ppu_fx,
-                                              ppu_dev->master_cfg.ms_ppu.pcMask,
+                                              FILTER_PCS(~ppu_dev->master_cfg.ms_ppu.pcMask),
+                                              CY_PROT_PERM_R,
+                                              CY_PROT_PERM_R,
+                                              true);
+        if (ret != CY_PROT_SUCCESS)
+            return ret;
+        ret = Cy_Prot_ConfigPpuFixedMasterAtt(ppu_dev->ppu.ms_ppu_fx,
+                                              FILTER_PCS(ppu_dev->master_cfg.ms_ppu.pcMask),
                                               ppu_dev->master_cfg.ms_ppu.user,
                                               ppu_dev->master_cfg.ms_ppu.priv,
                                               ppu_dev->master_cfg.ms_ppu.secure);
