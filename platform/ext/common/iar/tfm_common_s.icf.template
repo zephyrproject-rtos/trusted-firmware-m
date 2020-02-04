@@ -34,6 +34,7 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object device_definition.o,
        section SFN,
        ro section .rodata object tfm_*_secure_api.o,
+       ro object *6M_tl*.a,
        ro object *7M_tl*.a,
        ro object *libtfmsprt.a
        };

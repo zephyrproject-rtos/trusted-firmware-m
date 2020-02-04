@@ -14,7 +14,9 @@ REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 __attribute__((naked)) void boot_clear_bl2_ram_area(void)
 {
     __ASM volatile(
+#ifndef __ICCARM__
         ".syntax unified                             \n"
+#endif
         "movs    r0, #0                              \n"
         "subs    %1, %1, %0                          \n"
         "Loop:                                       \n"
