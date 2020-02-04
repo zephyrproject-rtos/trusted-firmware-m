@@ -46,13 +46,6 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
      */
 define block TFM_PSA_CODE_START with alignment = 32, size = 0 { };
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-define block TFM_SP_STORAGE_LINKER with alignment = 32 {
-        ro object *tfm_storage*,
-        section TFM_SP_STORAGE_ATTR_FN
-    };
-#endif /* TFM_PARTITION_SECURE_STORAGE */
-
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 define block TFM_SP_ITS_LINKER with alignment = 32 {
         ro object *tfm_internal_trusted_storage*,
@@ -137,6 +130,13 @@ define block TFM_PSA_CODE_END with alignment = 32, size = 0 { };
      */
 define block TFM_APP_CODE_START with alignment = 32, size = 0 { };
 
+#ifdef TFM_PARTITION_SECURE_STORAGE
+define block TFM_SP_STORAGE_LINKER with alignment = 32 {
+        ro object *tfm_storage*,
+        ro object *test_sst_nv_counters.*,
+    };
+#endif /* TFM_PARTITION_SECURE_STORAGE */
+
 #ifdef TFM_PARTITION_TEST_CORE
 define block TFM_SP_CORE_TEST_2_LINKER with alignment = 32 {
         ro object *tfm_ss_core_test_2.*,
@@ -198,6 +198,17 @@ define block TFM_UNPRIV_DATA with alignment = 32 {
        };
 
 define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+define block TFM_SP_STORAGE_LINKER_DATA with alignment = 32 {
+        rw object *tfm_storage*,
+        rw object *test_sst_nv_counters.*,
+    };
+
+#if defined (TFM_PSA_API)
+define block TFM_SP_STORAGE_LINKER_STACK with alignment = 128, size = 0x800 { };
+#endif
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
 define block TFM_SP_CORE_TEST_2_LINKER_DATA with alignment = 32 {
@@ -293,16 +304,6 @@ define block ER_TFM_DATA          with alignment = 8 {readwrite};
      * of PSA RoT RW and Stack.
      */
 define block TFM_PSA_RW_STACK_START with alignment = 32, size = 0 { };
-
-#ifdef TFM_PARTITION_SECURE_STORAGE
-define block TFM_SP_STORAGE_LINKER_DATA with alignment = 32 {
-        rw object *tfm_storage*,
-    };
-
-#if defined (TFM_PSA_API)
-define block TFM_SP_STORAGE_LINKER_STACK with alignment = 128, size = 0x600 { };
-#endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 define block TFM_SP_ITS_LINKER_DATA with alignment = 32 {
@@ -419,9 +420,6 @@ define block LR_CODE with fixed order {
        block TFM_UNPRIV_CODE,
        block TFM_PSA_CODE_START,
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-       block TFM_SP_STORAGE_LINKER,
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
        block TFM_SP_ITS_LINKER,
 #endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
@@ -458,6 +456,10 @@ define block LR_CODE with fixed order {
      * of APP RoT code.
      */
        block TFM_APP_CODE_START,
+#ifdef TFM_PARTITION_SECURE_STORAGE
+       block TFM_SP_STORAGE_LINKER,
+#endif /* TFM_PARTITION_SECURE_STORAGE */
+
 #ifdef TFM_PARTITION_TEST_CORE
        block TFM_SP_CORE_TEST_2_LINKER,
 #endif /* TFM_PARTITION_TEST_CORE */
@@ -529,6 +531,14 @@ define block DATA with fixed order {
      * of APP RoT RW and Stack.
      */
     block TFM_APP_RW_STACK_START,
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+    block TFM_SP_STORAGE_LINKER_DATA,
+
+#if defined (TFM_PSA_API)
+    block TFM_SP_STORAGE_LINKER_STACK,
+#endif
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     block TFM_SP_CORE_TEST_2_LINKER_DATA,
@@ -602,14 +612,6 @@ define block DATA with fixed order {
      * of PSA RoT RW and Stack.
      */
     block TFM_PSA_RW_STACK_START,
-
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    block TFM_SP_STORAGE_LINKER_DATA,
-
-#if defined (TFM_PSA_API)
-    block TFM_SP_STORAGE_LINKER_STACK,
-#endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     block TFM_SP_ITS_LINKER_DATA,

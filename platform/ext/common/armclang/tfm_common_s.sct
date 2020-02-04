@@ -46,13 +46,6 @@ LR_CODE S_CODE_START {
     TFM_PSA_CODE_START +0 ALIGN 32 EMPTY 0x0 {
     }
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    TFM_SP_STORAGE_LINKER +0 ALIGN 32 {
-        *tfm_storage* (+RO)
-        *(TFM_SP_STORAGE_ATTR_FN)
-    }
-#endif /* TFM_PARTITION_SECURE_STORAGE */
-
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     TFM_SP_ITS_LINKER +0 ALIGN 32 {
         *tfm_internal_trusted_storage* (+RO)
@@ -138,6 +131,14 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_CODE_START +0 ALIGN 32 EMPTY 0x0 {
     }
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+    TFM_SP_STORAGE_LINKER +0 ALIGN 32 {
+        *tfm_storage* (+RO)
+        *test_sst_nv_counters.* (+RO)
+        *(TFM_SP_STORAGE_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_2_LINKER +0 ALIGN 32 {
@@ -238,6 +239,20 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
     }
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+    TFM_SP_STORAGE_LINKER_DATA +0 ALIGN 32 {
+        *tfm_storage* (+RW +ZI)
+        *test_sst_nv_counters.* (+RW +ZI)
+        *(TFM_SP_STORAGE_ATTR_RW)
+        *(TFM_SP_STORAGE_ATTR_ZI)
+    }
+
+#if defined (TFM_PSA_API)
+    TFM_SP_STORAGE_LINKER_STACK +0 ALIGN 128 EMPTY 0x800 {
+    }
+#endif
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_2_LINKER_DATA +0 ALIGN 32 {
@@ -350,19 +365,6 @@ LR_CODE S_CODE_START {
      */
     TFM_PSA_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
     }
-
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    TFM_SP_STORAGE_LINKER_DATA +0 ALIGN 32 {
-        *tfm_storage* (+RW +ZI)
-        *(TFM_SP_STORAGE_ATTR_RW)
-        *(TFM_SP_STORAGE_ATTR_ZI)
-    }
-
-#if defined (TFM_PSA_API)
-    TFM_SP_STORAGE_LINKER_STACK +0 ALIGN 128 EMPTY 0x800 {
-    }
-#endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     TFM_SP_ITS_LINKER_DATA +0 ALIGN 32 {
