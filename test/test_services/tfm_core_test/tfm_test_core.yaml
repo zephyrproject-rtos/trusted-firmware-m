@@ -41,11 +41,6 @@
       "version_policy": "STRICT"
     }
   ],
-  "linker_pattern": {
-    "object_list": [
-      "*tfm_ss_core_test.*"
-    ]
-  },
   "services": [
     {
       "name": "SPM_CORE_TEST_INIT_SUCCESS",

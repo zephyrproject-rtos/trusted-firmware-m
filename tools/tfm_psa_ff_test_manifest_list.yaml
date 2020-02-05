@@ -20,7 +20,12 @@
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 270
+      "pid": 271,
+      "linker_pattern": {
+        "library_list":[
+          "*client_partition.a"
+        ]
+      }
     },
     {
       "name": "PSA FF Test Server Partition",
@@ -31,7 +36,12 @@
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 271
+      "pid": 272,
+      "linker_pattern": {
+        "library_list":[
+          "*server_partition.a"
+        ]
+      }
     },
     {
       "name": "PSA FF Test Driver Partition",
@@ -42,7 +52,12 @@
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 272
+      "pid": 273,
+      "linker_pattern": {
+        "library_list":[
+          "*driver_partition.a"
+        ]
+      }
     }
   ]
 }

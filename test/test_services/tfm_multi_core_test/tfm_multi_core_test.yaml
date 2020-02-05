@@ -32,10 +32,5 @@
       "minor_version": 1,
       "minor_policy": "STRICT"
     }
-  ],
-  "linker_pattern": {
-    "object_list": [
-      "*multi_core_test.*"
-    ]
-  }
+  ]
 }

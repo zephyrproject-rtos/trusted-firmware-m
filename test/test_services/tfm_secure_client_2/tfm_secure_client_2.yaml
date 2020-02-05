@@ -33,10 +33,5 @@
   "dependencies": [
     "TFM_ITS_GET",
     "TFM_CRYPTO"
-  ],
-  "linker_pattern": {
-    "object_list": [
-      "*tfm_secure_client_2.*"
-    ]
-  }
+  ]
 }

@@ -56,11 +56,6 @@
       "version_policy": "STRICT"
     }
   ],
-  "linker_pattern": {
-    "object_list": [
-      "*tfm_ss_core_test_2.*"
-    ]
-  },
   "services": [
     {
       "name": "SPM_CORE_TEST_2_SLAVE_SERVICE",

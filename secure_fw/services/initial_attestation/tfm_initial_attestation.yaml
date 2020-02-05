@@ -38,11 +38,6 @@
       "version_policy": "STRICT"
     }
   ],
-  "linker_pattern": {
-    "library_list": [
-      "*tfm_attest*"
-    ]
-  },
   "services": [
     {
       "name": "TFM_ATTEST_GET_TOKEN",

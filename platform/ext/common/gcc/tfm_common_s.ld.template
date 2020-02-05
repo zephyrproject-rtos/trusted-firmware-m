@@ -147,14 +147,14 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_LINKER : ALIGN(32)
     {
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}(.rodata*)
         {% endfor %}
@@ -185,14 +185,14 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_LINKER : ALIGN(32)
     {
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}(.rodata*)
         {% endfor %}
@@ -370,13 +370,13 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_LINKER_DATA : ALIGN(32)
     {
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
@@ -389,14 +389,14 @@ SECTIONS
     .{{manifest.manifest.name}}_LINKER_BSS : ALIGN(32)
     {
         start_of_{{manifest.manifest.name}}_LINKER = .;
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}
@@ -520,13 +520,13 @@ SECTIONS
     {% endif %}
     .{{manifest.manifest.name}}_LINKER_DATA : ALIGN(32)
     {
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
@@ -539,14 +539,14 @@ SECTIONS
     .{{manifest.manifest.name}}_LINKER_BSS : ALIGN(32)
     {
         start_of_{{manifest.manifest.name}}_LINKER = .;
-    {% if manifest.manifest.linker_pattern.library_list %}
-        {% for pattern in manifest.manifest.linker_pattern.library_list %}
+    {% if manifest.attr.linker_pattern.library_list %}
+        {% for pattern in manifest.attr.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.manifest.linker_pattern.object_list %}
-        {% for pattern in manifest.manifest.linker_pattern.object_list %}
+    {% if manifest.attr.linker_pattern.object_list %}
+        {% for pattern in manifest.attr.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}

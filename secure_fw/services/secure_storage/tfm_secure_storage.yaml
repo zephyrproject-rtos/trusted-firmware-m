@@ -91,10 +91,5 @@
     "TFM_ITS_GET",
     "TFM_ITS_GET_INFO",
     "TFM_ITS_REMOVE"
-  ],
-  "linker_pattern": {
-    "library_list": [
-      "*tfm_storage*"
-    ]
-  }
+  ]
 }

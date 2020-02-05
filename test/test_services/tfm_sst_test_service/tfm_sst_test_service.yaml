@@ -34,10 +34,5 @@
     "TFM_CRYPTO",
     "TFM_ITS_GET",
     "TFM_ITS_REMOVE"
-  ],
-  "linker_pattern": {
-    "object_list": [
-      "*tfm_sst_test_service.*",
-    ]
-  }
+  ]
 }

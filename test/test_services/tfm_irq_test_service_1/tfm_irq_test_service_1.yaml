@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -41,12 +41,6 @@
       "tfm_irq_priority": 64,
     }
   ],
-  "linker_pattern": {
-    "object_list": [
-      "*tfm_irq_test_service_1.*",
-      "*timer_cmsdk*",
-    ]
-  },
   "services": [
     {
       "name": "SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO",
