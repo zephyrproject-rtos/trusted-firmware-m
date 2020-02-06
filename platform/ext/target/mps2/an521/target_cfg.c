@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited
+ * Copyright (c) 2017-2020 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@
 #include "region_defs.h"
 #include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
+
+#ifdef PSA_API_TEST_IPC
+#define PSA_FF_TEST_SECURE_UART2
+#endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -120,6 +124,61 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
         PPC_SP_APB_PPC0,
         CMSDK_TIMER0_APB_PPC_POS
 };
+
+#ifdef PSA_API_TEST_IPC
+
+/* Below data structure are only used for PSA FF tests, and this pattern is
+ * definitely not to be followed for real life use cases, as it can break
+ * security.
+ */
+
+struct tfm_spm_partition_platform_data_t
+    tfm_peripheral_FF_TEST_UART_REGION = {
+        UART2_BASE_S,
+        UART2_BASE_S + 0xFFF,
+        PPC_SP_APB_PPC_EXP2,
+        CMSDK_UART2_APB_PPC_POS
+};
+
+struct tfm_spm_partition_platform_data_t
+    tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
+        APB_WATCHDOG_BASE_S,
+        APB_WATCHDOG_BASE_S + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+#define FF_TEST_NVMEM_REGION_START            0x102FFC00
+#define FF_TEST_NVMEM_REGION_END              0x102FFFFF
+#define FF_TEST_SERVER_PARTITION_MMIO_START   0x3801FC00
+#define FF_TEST_SERVER_PARTITION_MMIO_END     0x3801FD00
+#define FF_TEST_DRIVER_PARTITION_MMIO_START   0x3801FE00
+#define FF_TEST_DRIVER_PARTITION_MMIO_END     0x3801FF00
+
+struct tfm_spm_partition_platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct tfm_spm_partition_platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct tfm_spm_partition_platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+#endif
 
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
@@ -252,6 +311,10 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
     NVIC_EnableIRQ(PPC_IRQn);
 
+#ifdef PSA_FF_TEST_SECURE_UART2
+    NVIC_EnableIRQ(FF_TEST_UART_IRQ);
+#endif
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -282,7 +345,19 @@ const struct sau_cfg_t sau_cfg[] = {
     {
         TFM_NS_REGION_PERIPH_1,
         PERIPHERALS_BASE_NS_START,
-#ifdef SECURE_UART1
+#if (defined(SECURE_UART1) && defined(PSA_FF_TEST_SECURE_UART2))
+        (UART1_BASE_NS - 1)
+    },
+    {
+        TFM_NS_REGION_PERIPH_2,
+        UART3_BASE_NS,
+#elif defined(PSA_FF_TEST_SECURE_UART2)
+       (UART2_BASE_NS - 1)
+    },
+    {
+        TFM_NS_REGION_PERIPH_2,
+        UART3_BASE_NS,
+#elif defined(SECURE_UART1)
         (UART1_BASE_NS - 1)
     },
     {
@@ -417,7 +492,10 @@ void ppc_init_cfg(void)
 #else
                             (1U << CMSDK_UART1_APB_PPC_POS) |
 #endif
+
+#ifndef PSA_FF_TEST_SECURE_UART2
                             (1U << CMSDK_UART2_APB_PPC_POS) |
+#endif
                             (1U << CMSDK_UART3_APB_PPC_POS) |
                             (1U << CMSDK_UART4_APB_PPC_POS) |
                             (1U << CMSDK_I2C0_APB_PPC_POS) |
