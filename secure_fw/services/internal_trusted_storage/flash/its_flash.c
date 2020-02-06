@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +8,9 @@
 
 #include "its_flash.h"
 
-#define MAX_BLOCK_DATA_COPY 256
+#ifndef ITS_MAX_BLOCK_DATA_COPY
+#define ITS_MAX_BLOCK_DATA_COPY 256
+#endif
 
 extern const struct its_flash_info_t its_flash_info_internal;
 extern const struct its_flash_info_t its_flash_info_external;
@@ -31,11 +34,11 @@ psa_status_t its_flash_block_to_block_move(const struct its_flash_info_t *info,
 {
     psa_status_t status;
     size_t bytes_to_move;
-    uint8_t dst_block_data_copy[MAX_BLOCK_DATA_COPY];
+    uint8_t dst_block_data_copy[ITS_MAX_BLOCK_DATA_COPY];
 
     while (size > 0) {
         /* Calculates the number of bytes to move */
-        bytes_to_move = ITS_UTILS_MIN(size, MAX_BLOCK_DATA_COPY);
+        bytes_to_move = ITS_UTILS_MIN(size, ITS_MAX_BLOCK_DATA_COPY);
 
         /* Reads data from source block and store it in the in-memory copy of
          * destination content.

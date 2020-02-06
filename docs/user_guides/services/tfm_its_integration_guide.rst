@@ -241,6 +241,9 @@ The following optional platform definitions may also be defined in
   expense of latency, as data will be copied in multiple iterations. *Note:*
   when data is copied in multiple iterations, the atomicity property of the
   filesystem is lost in the case of an asynchronous power failure.
+- ``ITS_MAX_BLOCK_DATA_COPY`` - Defines the buffer size used when copying data
+  between blocks, in bytes. If not provided, defaults to 256. Increasing this
+  value will increase the memory footprint of the service.
 
 Flash Interface
 ===============
@@ -290,3 +293,4 @@ needs. The list of ITS services flags are:
 --------------
 
 *Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*
