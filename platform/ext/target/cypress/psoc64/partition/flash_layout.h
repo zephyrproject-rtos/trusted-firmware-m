@@ -165,6 +165,8 @@
 #define ITS_MAX_ASSET_SIZE      (512)
 /* The maximum number of assets to be stored in the ITS area */
 #define ITS_NUM_ASSETS          (10)
+/* Decrease flash wear slightly, at the cost of increased ITS service memory */
+#define ITS_MAX_BLOCK_DATA_COPY 512
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_FLASH_DEV    Driver_FLASH0
