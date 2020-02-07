@@ -175,13 +175,6 @@ LR_CODE S_CODE_START {
     TFM_APP_CODE_END +0 ALIGN 32 EMPTY 0x0 {
     }
 
-#if defined (S_RAM_CODE_START)
-    /**** Executable code allocated in RAM */
-    TFM_RAM_CODE S_RAM_CODE_START {
-        * (.ramfunc)
-    }
-#endif
-
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     /* eFlash driver code that gets copied from Flash to SRAM */
     ER_CODE_SRAM S_CODE_SRAM_ALIAS_BASE ALIGN 4 {
@@ -482,6 +475,13 @@ LR_CODE S_CODE_START {
      */
     TFM_PSA_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
     }
+
+#if defined (S_RAM_CODE_START)
+    /* Executable code allocated in RAM */
+    TFM_RAM_CODE S_RAM_CODE_START {
+        * (.ramfunc)
+    }
+#endif
 
     /* This empty, zero long execution region is here to mark the limit address
      * of the last execution region that is allocated in SRAM.

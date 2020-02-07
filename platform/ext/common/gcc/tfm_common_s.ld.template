@@ -213,14 +213,6 @@ SECTIONS
     /**** APPLICATION RoT RO part (CODE + RODATA) end here */
     Image$$TFM_APP_CODE_END$$Base = .;
 
-#if defined (S_RAM_CODE_START)
-    /* Code executed from RAM */
-    .TFM_RAM_CODE S_RAM_CODE_START :
-    {
-        KEEP(*(.ramfunc))
-    } > RAM AT> FLASH
-#endif
-
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     .ER_CODE_SRAM : ALIGN(4)
     {
@@ -630,6 +622,14 @@ SECTIONS
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
+
+#if defined (S_RAM_CODE_START)
+    /* Code executed from RAM */
+    .TFM_RAM_CODE S_RAM_CODE_START :
+    {
+        KEEP(*(.ramfunc))
+    } > RAM AT> FLASH
+#endif
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     /*
