@@ -25,14 +25,6 @@ Trusted Firmware-M Documentation
     docs/lic
 
 .. toctree::
-    :caption: Components
-    :maxdepth: 2
-    :glob:
-    :hidden:
-
-    lib/**
-
-.. toctree::
     :caption: Target platforms
     :maxdepth: 2
     :glob:
@@ -52,4 +44,4 @@ Trusted Firmware-M Documentation
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
