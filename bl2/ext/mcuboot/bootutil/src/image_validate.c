@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2018-2019 Arm Limited.
+ * Modifications are Copyright (c) 2018-2020 Arm Limited.
  */
 
 #include <assert.h>
@@ -193,7 +193,6 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
     struct image_tlv_iter it;
     uint32_t off;
     uint16_t len;
-    uint32_t found = 0;
     int32_t rc;
 
     if ((hdr == NULL) ||
@@ -216,34 +215,24 @@ bootutil_get_img_security_cnt(struct image_header *hdr,
     /* Traverse through the protected TLV area to find
      * the security counter TLV.
      */
-    while (true) {
-        rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
-        if (rc < 0) {
-            return -1;
-        } else if (rc > 0) {
-            break;
-        }
 
-        if (len != sizeof(*img_security_cnt)) {
-            /* Security counter is not valid. */
-            return BOOT_EBADIMAGE;
-        }
-
-        rc = LOAD_IMAGE_DATA(hdr, fap, off, img_security_cnt, len);
-        if (rc != 0) {
-            return BOOT_EFLASH;
-        }
-
-        /* Security counter has been found. */
-        found = 1;
-        break;
+    rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
+    if (rc != 0) {
+        /* Security counter TLV has not been found. */
+        return -1;
     }
 
-    if (found) {
-        return 0;
+    if (len != sizeof(*img_security_cnt)) {
+        /* Security counter is not valid. */
+        return BOOT_EBADIMAGE;
     }
 
-    return -1;
+    rc = LOAD_IMAGE_DATA(hdr, fap, off, img_security_cnt, len);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    return 0;
 }
 
 /*
