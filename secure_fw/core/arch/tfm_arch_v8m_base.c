@@ -122,7 +122,7 @@ int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr)
         "POP    {pc}                        \n"
         : : [SVC_REQ] "I" (TFM_SVC_SFN_REQUEST),
             [SVC_RET] "I" (TFM_SVC_SFN_RETURN)
-        : "r0");
+        );
 }
 
 __attribute__((section("SFN"), naked))
@@ -169,7 +169,7 @@ void priv_irq_handler_main(uint32_t partition_id,
           "POP   {r4-r7, pc}                \n"
           : : [SVC_REQ] "I" (TFM_SVC_DEPRIV_REQ)
           , [SVC_RET] "I" (TFM_SVC_DEPRIV_RET)
-          : "r0");
+          );
 }
 #endif
 
