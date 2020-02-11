@@ -681,8 +681,11 @@ void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb);
  * \brief                      SPM initialization implementation
  *
  * \details                    This function must be called under handler mode.
+ * \retval                     This function returns an EXC_RETURN value. Other
+ *                             faults would panic the execution and never
+ *                             returned.
  */
-void tfm_spm_init(void);
+uint32_t tfm_spm_init(void);
 
 #endif /* ifdef(TFM_PSA_API) */
 

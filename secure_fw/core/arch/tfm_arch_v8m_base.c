@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -233,4 +233,9 @@ void tfm_arch_prioritize_secure_exception(void)
     scb->AIRCR = SCB_AIRCR_PRIS_Msk |
                  VECTKEY |
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
+}
+
+/* There is no FPCA in baseline. */
+void tfm_arch_clear_fp_status(void)
+{
 }

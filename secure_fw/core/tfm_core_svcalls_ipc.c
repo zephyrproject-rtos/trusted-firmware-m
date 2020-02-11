@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include "tfm_api.h"
+#include "tfm_arch.h"
 #include "tfm_internal.h"
 #include "core/tfm_core_svc.h"
 #include "tfm_utils.h"
@@ -35,7 +36,8 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
     }
     switch (svc_number) {
     case TFM_SVC_HANDLER_MODE:
-        tfm_spm_init();
+        tfm_arch_clear_fp_status();
+        exc_return = tfm_spm_init();
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);

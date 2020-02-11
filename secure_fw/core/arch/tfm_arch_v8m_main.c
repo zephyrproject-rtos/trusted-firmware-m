@@ -224,3 +224,15 @@ void tfm_arch_prioritize_secure_exception(void)
                  VECTKEY |
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 }
+
+__attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
+{
+    __ASM volatile(
+                   ".syntax unified          \n"
+                   "mrs  r0, control         \n"
+                   "bics r0, r0, #4          \n"
+                   "msr  control, r0         \n"
+                   "isb                      \n"
+                   "bx   lr                  \n"
+                  );
+}

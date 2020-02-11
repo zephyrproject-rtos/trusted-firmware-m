@@ -97,4 +97,9 @@ void tfm_arch_initialize_ctx_ext(struct tfm_state_context_ext *p_ctxb,
  */
 void tfm_arch_prioritize_secure_exception(void);
 
+/*
+ * Clear float point status.
+ */
+void tfm_arch_clear_fp_status(void);
+
 #endif

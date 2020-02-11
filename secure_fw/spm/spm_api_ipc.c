@@ -510,7 +510,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 /********************** SPM functions for thread mode ************************/
 
-void tfm_spm_init(void)
+uint32_t tfm_spm_init(void)
 {
     uint32_t i, j, num;
     struct spm_partition_desc_t *partition;
@@ -615,6 +615,8 @@ void tfm_spm_init(void)
      * the scheduler that the current thread is non-secure entry thread.
      */
     tfm_thrd_start_scheduler(p_ns_entry_thread);
+
+    return p_ns_entry_thread->state_ctx.ctxb.lr;
 }
 
 void tfm_pendsv_do_schedule(struct tfm_state_context_ext *ctxb)
