@@ -2,11 +2,6 @@
 Adding Secure Partition
 #######################
 
-:Authors: Edison Ai, Sherry Zhang
-:Organization: Arm Limited
-:Contact: edison.ai@arm.com, sherry.zhang@arm.com
-:Status: Draft
-
 ***********************
 Terms and abbreviations
 ***********************
