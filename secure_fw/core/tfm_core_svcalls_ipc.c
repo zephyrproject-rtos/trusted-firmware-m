@@ -103,7 +103,7 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
         tfm_spm_psa_panic();
         break;
     case TFM_SVC_SPM_REQUEST:
-        tfm_core_spm_request_handler((const struct tfm_state_context_t *)ctx);
+        tfm_spm_request_handler((const struct tfm_state_context_t *)ctx);
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();

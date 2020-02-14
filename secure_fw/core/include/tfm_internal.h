@@ -49,9 +49,4 @@ void tfm_core_get_boot_data_handler(uint32_t args[]);
  */
 void tfm_core_validate_boot_data(void);
 
-/**
- * \brief Handle an SPM request by a secure service
- */
-void tfm_core_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
-
 #endif /* __TFM_INTERNAL_H__ */

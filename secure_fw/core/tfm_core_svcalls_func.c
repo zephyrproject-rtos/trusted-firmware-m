@@ -19,10 +19,11 @@
 #include "tfm_arch.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
+#include "spm_api.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
-				     uint32_t *svc_args, uint32_t lr);
+                                     uint32_t *svc_args, uint32_t lr);
 #endif
 
 /* Include the definitions of the privileged IRQ handlers in case of library
@@ -64,7 +65,7 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         tfm_spm_get_caller_client_id_handler(svc_args);
         break;
     case TFM_SVC_SPM_REQUEST:
-        tfm_core_spm_request_handler((struct tfm_state_context_t *)svc_args);
+        tfm_spm_request_handler((struct tfm_state_context_t *)svc_args);
         break;
     case TFM_SVC_DEPRIV_REQ:
         lr = tfm_spm_depriv_req_handler(svc_args, lr);
