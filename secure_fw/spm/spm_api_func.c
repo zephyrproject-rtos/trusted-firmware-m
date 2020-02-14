@@ -58,7 +58,10 @@ enum spm_err_t tfm_spm_partition_init(void)
         platform_data_p = part->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
-                tfm_spm_hal_configure_default_isolation(idx, *platform_data_p);
+                if (tfm_spm_hal_configure_default_isolation(idx,
+                            *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
+                    fail_cnt++;
+                }
                 ++platform_data_p;
             }
         }

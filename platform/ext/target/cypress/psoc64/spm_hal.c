@@ -43,15 +43,18 @@ enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-void tfm_spm_hal_configure_default_isolation(
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         uint32_t partition_idx,
         const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     (void) partition_idx; /* Unused parameter */
     printf("In %s()\n", __func__);
-    if (platform_data) {
-        /* TBD */
+    if (!platform_data) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
     }
+    /* TBD */
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 #if TFM_LVL != 1

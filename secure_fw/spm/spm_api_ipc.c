@@ -542,7 +542,10 @@ uint32_t tfm_spm_init(void)
         platform_data_p = partition->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
-                tfm_spm_hal_configure_default_isolation(i, *platform_data_p);
+                if (tfm_spm_hal_configure_default_isolation(i,
+                            *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
+                    tfm_core_panic();
+                }
                 ++platform_data_p;
             }
         }

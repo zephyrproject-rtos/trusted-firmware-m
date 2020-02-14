@@ -41,22 +41,26 @@ enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-void tfm_spm_hal_configure_default_isolation(
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
                   const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     bool privileged = tfm_is_partition_privileged(partition_idx);
-    if (platform_data) {
-        if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
-            if (privileged) {
-                ppc_clr_secure_unpriv(platform_data->periph_ppc_bank,
-                                      platform_data->periph_ppc_loc);
-            } else {
-                ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
-                                     platform_data->periph_ppc_loc);
-            }
+
+    if (!platform_data) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+        if (privileged) {
+            ppc_clr_secure_unpriv(platform_data->periph_ppc_bank,
+                                  platform_data->periph_ppc_loc);
+        } else {
+            ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
+                                 platform_data->periph_ppc_loc);
         }
     }
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 #if TFM_LVL != 1

@@ -126,9 +126,11 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
  * \param[in] partition_idx    The index of the partition that this peripheral
  *                             is assigned to.
  * \param[in] platform_data    The platform fields of the partition DB record to
- *                             be used for configuration. Can be NULL.
+ *                             be used for configuration.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-void tfm_spm_hal_configure_default_isolation(
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  uint32_t partition_idx,
                  const struct tfm_spm_partition_platform_data_t *platform_data);
 /**
