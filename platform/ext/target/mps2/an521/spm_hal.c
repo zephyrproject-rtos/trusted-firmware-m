@@ -27,6 +27,19 @@ extern const struct memory_region_limits memory_regions;
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
+#if TFM_LVL != 1
+#define MPU_REGION_VENEERS              0
+#define MPU_REGION_TFM_UNPRIV_CODE      1
+#define MPU_REGION_TFM_UNPRIV_DATA      2
+#define MPU_REGION_NS_STACK             3
+#define PARTITION_REGION_RO             4
+#define PARTITION_REGION_RW_STACK       5
+#define PARTITION_REGION_PERIPH_START   6
+#define PARTITION_REGION_PERIPH_MAX_NUM 2
+
+uint32_t periph_num_count = 0;
+#endif /* TFM_LVL != 1 */
+
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
     int32_t ret = ARM_DRIVER_OK;
@@ -45,10 +58,39 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     bool privileged = tfm_is_partition_privileged(partition_idx);
+#if TFM_LVL != 1
+    struct mpu_armv8m_region_cfg_t region_cfg;
+#endif
 
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
+
+#if TFM_LVL != 1
+    if (!privileged) {
+        region_cfg.region_nr = PARTITION_REGION_PERIPH_START +
+                                periph_num_count;
+        periph_num_count++;
+        if (periph_num_count >= PARTITION_REGION_PERIPH_MAX_NUM) {
+            return TFM_PLAT_ERR_MAX_VALUE;
+        }
+        region_cfg.region_base = platform_data->periph_start;
+        region_cfg.region_limit = platform_data->periph_limit;
+        region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
+        region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+        region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
+        region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
+
+        mpu_armv8m_disable(&dev_mpu_s);
+
+        if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg)
+            != MPU_ARMV8M_OK) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+        mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
+                          HARDFAULT_NMI_ENABLE);
+    }
+#endif /* TFM_LVL != 1 */
 
     if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
         ppc_configure_to_secure(platform_data->periph_ppc_bank,
@@ -65,15 +107,6 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 }
 
 #if TFM_LVL != 1
-
-#define MPU_REGION_VENEERS           0
-#define MPU_REGION_TFM_UNPRIV_CODE   1
-#define MPU_REGION_TFM_UNPRIV_DATA   2
-#define MPU_REGION_NS_STACK          3
-#define PARTITION_REGION_RO          4
-#define PARTITION_REGION_RW_STACK    5
-#define PARTITION_REGION_PERIPH      6
-
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
