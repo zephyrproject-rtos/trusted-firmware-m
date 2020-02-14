@@ -65,7 +65,7 @@ psa_status_t psa_open_key(psa_key_id_t id,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
-    const struct tfm_crypto_pack_iovec iov = {
+    struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_OPEN_KEY_SID,
     };
     psa_invec in_vec[] = {
@@ -98,7 +98,7 @@ psa_status_t psa_close_key(psa_key_handle_t handle)
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
-    const struct tfm_crypto_pack_iovec iov = {
+    struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CLOSE_KEY_SID,
         .key_handle = handle,
     };
