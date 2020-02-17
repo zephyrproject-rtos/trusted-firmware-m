@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,10 +21,12 @@
 #define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
 #endif
 
+#ifndef TFM_PSA_API
 /**
  * \brief initialise the NS context database
  */
 void tfm_nspm_configure_clients(void);
+#endif
 
 /**
  * \brief Get the client ID of the current NS client

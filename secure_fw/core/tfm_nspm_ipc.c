@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,11 +18,6 @@
 
 typedef uint32_t TZ_ModuleId_t;
 typedef uint32_t TZ_MemoryId_t;
-
-void tfm_nspm_configure_clients(void)
-{
-    return;
-}
 
 int32_t tfm_nspm_get_current_client_id(void)
 {
