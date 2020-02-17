@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -56,11 +56,6 @@ void tfm_core_validate_secure_caller_handler(const uint32_t svc_args[]);
  * \brief Stores caller's client id in state context
  */
 void tfm_core_get_caller_client_id_handler(const uint32_t svc_args[]);
-
-/**
- * \brief Checks if a secure service's access to a memory location is permitted
- */
-void tfm_core_memory_permission_check_handler(const uint32_t svc_args[]);
 
 /**
  * \brief Handle an SPM request by a secure service

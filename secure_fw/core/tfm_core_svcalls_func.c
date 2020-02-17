@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -64,9 +64,6 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
         break;
     case TFM_SVC_SPM_REQUEST:
         tfm_core_spm_request_handler((struct tfm_state_context_t *)svc_args);
-        break;
-    case TFM_SVC_MEMORY_CHECK:
-        tfm_core_memory_permission_check_handler(svc_args);
         break;
     case TFM_SVC_DEPRIV_REQ:
         lr = tfm_core_depriv_req_handler(svc_args, lr);

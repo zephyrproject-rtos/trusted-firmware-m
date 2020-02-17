@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -77,10 +77,6 @@ enum tfm_memory_access_e {
 extern int32_t tfm_core_validate_secure_caller(void);
 
 extern int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id);
-
-extern int32_t tfm_core_memory_permission_check(const void *ptr,
-                                                uint32_t size,
-                                                int32_t access);
 
 extern int32_t tfm_core_get_boot_data(uint8_t major_type,
                                       struct tfm_boot_data *boot_data,

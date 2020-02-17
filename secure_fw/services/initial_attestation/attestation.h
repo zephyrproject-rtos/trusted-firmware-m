@@ -16,14 +16,6 @@
 extern "C" {
 #endif
 
-/*!
- * \brief Type of memory access
- */
-enum attest_memory_access_t {
-    TFM_ATTEST_ACCESS_RO = 1,
-    TFM_ATTEST_ACCESS_RW = 2,
-};
-
 /**
  * \enum psa_attest_err_t
  *
@@ -75,21 +67,6 @@ attest_get_boot_data(uint8_t major_type,
  */
 enum psa_attest_err_t
 attest_get_caller_client_id(int32_t *caller_id);
-
-/*!
- * \brief Verify memory access rights
- *
- * \param[in]  addr    Pointer to the base of the address range to check
- * \param[in]  size    Size of the address range to check
- * \param[in]  access  Type of memory access as specified in
- *                     \ref attest_memory_access
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-enum psa_attest_err_t
-attest_check_memory_access(void *addr,
-                           uint32_t size,
-                           enum attest_memory_access_t access);
 
 /*!
  * \brief Initialise the initial attestation service during the TF-M boot up

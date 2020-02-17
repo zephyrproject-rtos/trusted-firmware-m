@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -33,8 +33,6 @@
      description, {0} }
 
 #ifndef TFM_PSA_API
-static void tfm_core_test_permissions(struct test_result_t *ret);
-static void tfm_core_test_mpu_access(struct test_result_t *ret);
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);
 static void tfm_core_test_spm_request(struct test_result_t *ret);
 #endif /* TFM_PSA_API */
@@ -67,20 +65,11 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_CHECK_INIT, tfm_core_test_check_init,
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_RECURSION, tfm_core_test_recursion,
     "Test direct recursion of secure services"),
 #endif
-#ifndef TFM_PSA_API
-CORE_TEST_DESCRIPTION(CORE_TEST_ID_MEMORY_PERMISSIONS,
-    tfm_core_test_permissions,
-    "Test secure service memory access permissions"),
-#endif /* TFM_PSA_API */
 #ifdef TFM_ENABLE_IRQ_TEST
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SECURE_IRQ,
     tfm_core_test_irq,
     "Test secure irq"),
 #endif
-#ifndef TFM_PSA_API
-CORE_TEST_DESCRIPTION(CORE_TEST_ID_MPU_ACCESS, tfm_core_test_mpu_access,
-    "Test secure service MPU accesses"),
-#endif /* TFM_PSA_API */
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_BUFFER_CHECK, tfm_core_test_buffer_check,
     "Test secure service buffer accesses"),
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_SS_TO_SS, tfm_core_test_ss_to_ss,
@@ -673,69 +662,6 @@ static void tfm_core_test_recursion(struct test_result_t *ret)
     TEST_FAIL("The test case is not implemented yet.");
 }
 #endif
-
-#ifndef TFM_PSA_API
-static char *error_to_string(const char *desc, int32_t err)
-{
-    static char info[80];
-
-    sprintf(info, "%s. Error code: %d, extra data: %d",
-        desc,
-        CORE_TEST_ERROR_GET_CODE(err),
-        CORE_TEST_ERROR_GET_EXTRA(err));
-    return info;
-}
-
-static void tfm_core_test_mpu_access(struct test_result_t *ret)
-{
-    int32_t err;
-    int32_t test_case_id = CORE_TEST_ID_MPU_ACCESS;
-    uint32_t data[4] = {0};
-    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
-                          {data, sizeof(data)},
-                          {(void *)((int32_t)tfm_core_test_mpu_access &
-                                                                      (~(0x3))),
-                           sizeof(uint32_t)} };
-    psa_outvec outvec[] = { {data, sizeof(data)} };
-    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
-
-    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        char *info = error_to_string(
-            "Service memory accesses configured incorrectly.", err);
-        TEST_FAIL(info);
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-
-static void tfm_core_test_permissions(struct test_result_t *ret)
-{
-    int32_t err;
-    int32_t test_case_id = CORE_TEST_ID_MEMORY_PERMISSIONS;
-    uint32_t data[4] = {0};
-    psa_invec in_vec[] = { {&test_case_id, sizeof(int32_t)},
-                          {data, sizeof(data)},
-                          {(void *)((int32_t)tfm_core_test_mpu_access &
-                                                                      (~(0x3))),
-                           sizeof(uint32_t)} };
-    psa_outvec outvec[] = { {data, sizeof(data)} };
-    struct tfm_core_test_call_args_t args = {in_vec, 3, outvec, 1};
-
-    err = tfm_core_test_call(tfm_spm_core_test_sfn_veneer, &args);
-
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        char *info = error_to_string(
-            "Service memory accesses configured incorrectly.", err);
-        TEST_FAIL(info);
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-#endif /* TFM_PSA_API */
 
 static void tfm_core_test_buffer_check(struct test_result_t *ret)
 {

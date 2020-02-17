@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 - 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -113,94 +113,6 @@ psa_status_t spm_core_test_sfn_direct_recursion(
         return CORE_TEST_ERRNO_SUCCESS;
     }
 }
-
-
-/* Service RW data array for testing memory accesses */
-static int32_t mem[4] = {1, 2, 3, 4};
-
-static psa_status_t test_mpu_access(
-    uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
-{
-    /* If these accesses fail, TFM Core kicks in, there's no returning to sfn */
-    /* Code execution, stack access is implicitly tested */
-    /* Read RW data */
-    int32_t len = sizeof(uint32_t);
-    int32_t tmp = mem[0];
-
-    tmp++;
-    /* Write to RW data region */
-    mem[0] = mem[1];
-    mem[1] = tmp;
-    mem[2] = len;
-    mem[3] = ~len;
-
-    /* Read from NS data region */
-    if (tfm_core_memory_permission_check(data_r_ptr, len, TFM_MEMORY_ACCESS_RO)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_INVALID_BUFFER);
-    }
-    mem[0] = *data_r_ptr;
-
-    /* Write to NS data region */
-    if (tfm_core_memory_permission_check(data_w_ptr, len, TFM_MEMORY_ACCESS_RW)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_INVALID_BUFFER);
-    }
-    data_w_ptr[0] = mem[0];
-    data_w_ptr[1] = len;
-
-    /* Read from NS code region */
-    if (tfm_core_memory_permission_check(code_ptr, len, TFM_MEMORY_ACCESS_RO)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_INVALID_BUFFER);
-    }
-    data_w_ptr[2] = *code_ptr;
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-static psa_status_t test_memory_permissions(
-    uint32_t *data_r_ptr, uint32_t *code_ptr, uint32_t *data_w_ptr)
-{
-    int32_t len = sizeof(uint32_t);
-    /* Read from NS data region */
-    if (tfm_core_memory_permission_check(data_r_ptr, len, TFM_MEMORY_ACCESS_RO)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    /* Write to NS data region */
-    if (tfm_core_memory_permission_check(data_w_ptr, len, TFM_MEMORY_ACCESS_RW)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    /* Read from NS code region */
-    if (tfm_core_memory_permission_check(code_ptr, len, TFM_MEMORY_ACCESS_RO)
-        != TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    /* Write to NS code region - should be rejected */
-    if (tfm_core_memory_permission_check(code_ptr, len, TFM_MEMORY_ACCESS_RW)
-        == TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    /* NS peripheral region - should be rejected */
-    if (tfm_core_memory_permission_check(
-        (uint32_t *)0x40000000, len, TFM_MEMORY_ACCESS_RO) == TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    /* S peripheral region - should be rejected */
-    if (tfm_core_memory_permission_check(
-        (uint32_t *)0x50000000, len, TFM_MEMORY_ACCESS_RO) == TFM_SUCCESS) {
-        CORE_TEST_RETURN_ERROR(CORE_TEST_ERRNO_UNEXPECTED_CORE_BEHAVIOUR);
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
 #endif /* !defined(TFM_PSA_API) */
 
 static psa_status_t test_peripheral_access(void)
@@ -245,16 +157,6 @@ static psa_status_t test_ss_to_ss_buffer(uint32_t *in_ptr, uint32_t *out_ptr,
     if (len > SS_BUFFER_LEN) {
         return CORE_TEST_ERRNO_TEST_FAULT;
     }
-
-#ifndef TFM_PSA_API
-    /* Check requires byte-based size */
-    if ((tfm_core_memory_permission_check(in_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
-        (tfm_core_memory_permission_check(out_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     for (i = 0; i < len; i++) {
         ss_buffer[i] = in_ptr[i];
@@ -487,30 +389,6 @@ psa_status_t spm_core_test_sfn(struct psa_invec *in_vec, size_t in_len,
     tc = *((uint32_t *)in_vec[0].base);
 
     switch (tc) {
-    case CORE_TEST_ID_MPU_ACCESS:
-        if ((in_len != 3) || (out_len != 1) ||
-        (in_vec[1].len < sizeof(int32_t)) ||
-        (in_vec[2].len < sizeof(int32_t)) ||
-        (out_vec[0].len < 3*sizeof(int32_t))) {
-            return CORE_TEST_ERRNO_INVALID_PARAMETER;
-        }
-        arg1 = (int32_t)in_vec[1].base;
-        arg2 = (int32_t)in_vec[2].base;
-        arg3 = (int32_t)out_vec[0].base;
-        return test_mpu_access(
-            (uint32_t *)arg1, (uint32_t *)arg2, (uint32_t *)arg3);
-    case CORE_TEST_ID_MEMORY_PERMISSIONS:
-        if ((in_len != 3) || (out_len != 1) ||
-        (in_vec[1].len < sizeof(int32_t)) ||
-        (in_vec[2].len < sizeof(int32_t)) ||
-        (out_vec[0].len < sizeof(int32_t))) {
-            return CORE_TEST_ERRNO_INVALID_PARAMETER;
-        }
-        arg1 = (int32_t)in_vec[1].base;
-        arg2 = (int32_t)in_vec[2].base;
-        arg3 = (int32_t)out_vec[0].base;
-        return test_memory_permissions(
-            (uint32_t *)arg1, (uint32_t *)arg2, (uint32_t *)arg3);
     case CORE_TEST_ID_SS_TO_SS:
         return test_ss_to_ss();
     case CORE_TEST_ID_SS_TO_SS_BUFFER:
@@ -558,16 +436,6 @@ static psa_status_t tfm_core_test_sfn_wrap_init_success(psa_msg_t *msg)
 static psa_status_t tfm_core_test_sfn_wrap_direct_recursion(psa_msg_t *msg)
 {
     return CORE_TEST_ERRNO_TEST_FAULT;
-}
-
-static psa_status_t tfm_core_test_sfn_wrap_mpu_access(psa_msg_t *msg)
-{
-    return CORE_TEST_ERRNO_TEST_NOT_SUPPORTED;
-}
-
-static psa_status_t tfm_core_test_sfn_wrap_memory_permissions(psa_msg_t *msg)
-{
-    return CORE_TEST_ERRNO_TEST_NOT_SUPPORTED;
 }
 
 static psa_status_t tfm_core_test_sfn_wrap_ss_to_ss(psa_msg_t *msg)
@@ -687,12 +555,6 @@ psa_status_t core_test_init(void)
         } else if (signals & SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL) {
             core_test_signal_handle(SPM_CORE_TEST_DIRECT_RECURSION_SIGNAL,
                                     tfm_core_test_sfn_wrap_direct_recursion);
-        } else if (signals & SPM_CORE_TEST_MPU_ACCESS_SIGNAL) {
-            core_test_signal_handle(SPM_CORE_TEST_MPU_ACCESS_SIGNAL,
-                                    tfm_core_test_sfn_wrap_mpu_access);
-        } else if (signals & SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL) {
-            core_test_signal_handle(SPM_CORE_TEST_MEMORY_PERMISSIONS_SIGNAL,
-                                    tfm_core_test_sfn_wrap_memory_permissions);
         } else if (signals & SPM_CORE_TEST_SS_TO_SS_SIGNAL) {
             core_test_signal_handle(SPM_CORE_TEST_SS_TO_SS_SIGNAL,
                                     tfm_core_test_sfn_wrap_ss_to_ss);

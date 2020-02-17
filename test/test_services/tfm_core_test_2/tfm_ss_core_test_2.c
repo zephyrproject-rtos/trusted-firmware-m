@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -142,27 +142,11 @@ static psa_status_t spm_core_test_2_sfn_invert_internal(uint32_t *in_ptr,
     int32_t i;
     static uint32_t invert_buffer[SFN_INVERT_MAX_LEN];
 
-#ifndef TFM_PSA_API
-    if (tfm_core_memory_permission_check(res_ptr, sizeof(int32_t),
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;
-    }
-#endif /* !defined(TFM_PSA_API) */
     *res_ptr = -1;
 
     if (len > SFN_INVERT_MAX_LEN) {
         return CORE_TEST_ERRNO_INVALID_BUFFER;
     }
-
-#ifndef TFM_PSA_API
-    /* Check requires byte-based size */
-    if ((tfm_core_memory_permission_check(in_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS) ||
-        (tfm_core_memory_permission_check(out_ptr, len << 2,
-        TFM_MEMORY_ACCESS_RW) != TFM_SUCCESS)) {
-        return CORE_TEST_ERRNO_INVALID_BUFFER;
-    }
-#endif /* !defined(TFM_PSA_API) */
 
     for (i = 0; i < len; i++) {
         invert_buffer[i] = in_ptr[i];

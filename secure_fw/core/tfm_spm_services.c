@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,17 +23,6 @@ void jump_to_ns_code(void)
 }
 
 #ifndef TFM_PSA_API
-__attribute__((naked))
-int32_t tfm_core_memory_permission_check(const void *ptr,
-                                         uint32_t len,
-                                         int32_t access)
-{
-  __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_MEMORY_CHECK));
-}
-
 __attribute__((naked))
 int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
 {

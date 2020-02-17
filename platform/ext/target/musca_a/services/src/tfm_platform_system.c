@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,35 +11,7 @@
 #include "target_cfg.h"
 #include "device_definition.h"
 #include "psa/client.h"
-#include "tfm_secure_api.h"
 #include "services/include/tfm_ioctl_api.h"
-
-#ifndef TFM_PSA_API
-/*!
- * \brief Verify access rights for memory addresses sent in io vectors
- *
- * \param[in] in_vec     Pointer to in_vec array, which contains pointer
- *                       to input arguments for the service
- * \param[in] out_vec    Pointer out_vec array, which contains pointer to
- *                       output data of the pin service
- *
- * \return Returns true if memory is accessible by the service
- */
-static bool memory_addr_check(const psa_invec *in_vec,
-                              const psa_outvec *out_vec)
-{
-    if ((in_vec->base != NULL) &&
-        (tfm_core_memory_permission_check((void *)in_vec->base, in_vec->len,
-                                        TFM_MEMORY_ACCESS_RO) == TFM_SUCCESS) &&
-        (out_vec->base != NULL) &&
-        (tfm_core_memory_permission_check((void *)out_vec->base, out_vec->len,
-                                        TFM_MEMORY_ACCESS_RW) == TFM_SUCCESS)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-#endif /* TFM_PSA_API */
 
 void tfm_platform_hal_system_reset(void)
 {
@@ -58,12 +30,6 @@ tfm_platform_hal_gpio_service(const psa_invec  *in_vec,
      * on Musca-A, the default value is passed to the driver
      */
     enum gpio_cmsdk_altfunc_t altfunc = GPIO_CMSDK_MAIN_FUNC;
-
-#ifndef TFM_PSA_API
-    if (memory_addr_check(in_vec, out_vec) == false) {
-            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-#endif /* TFM_PSA_API */
 
     if (in_vec->len != sizeof(struct tfm_gpio_service_args_t) ||
         out_vec->len != sizeof(struct tfm_gpio_service_out_t)) {
@@ -137,4 +103,3 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
         return TFM_PLATFORM_ERR_NOT_SUPPORTED;
     }
 }
-

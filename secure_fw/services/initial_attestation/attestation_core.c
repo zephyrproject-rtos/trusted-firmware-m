@@ -1093,22 +1093,8 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    attest_err = attest_check_memory_access((void *)challenge.ptr,
-                                            challenge.len,
-                                            TFM_ATTEST_ACCESS_RO);
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-        goto error;
-    }
-
     if (token.len == 0) {
         attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
-        goto error;
-    }
-
-    attest_err = attest_check_memory_access(token.ptr,
-                                            token.len,
-                                            TFM_ATTEST_ACCESS_RW);
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
 
@@ -1187,20 +1173,6 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
     if (out_vec[1].len != sizeof(curve_type) ||
         out_vec[2].len != sizeof(key_len)) {
         attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
-        goto error;
-    }
-
-    attest_err = attest_check_memory_access(key_buffer.ptr,
-                                            key_buffer.len,
-                                            TFM_ATTEST_ACCESS_RW);
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-        goto error;
-    }
-
-    attest_err = attest_check_memory_access(out_vec[1].base,
-                                            out_vec[1].len,
-                                            TFM_ATTEST_ACCESS_RW);
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
     }
 
