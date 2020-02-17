@@ -682,8 +682,16 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     }
 
     if (ret == PSA_ERROR_PROGRAMMER_ERROR) {
-        ((struct tfm_conn_handle_t *)(msg->handle))->status =
+        /*
+         * If the source of the programmer error is a Secure Partition, the SPM
+         * must panic the Secure Partition in response to a PROGRAMMER ERROR.
+         */
+        if (TFM_CLIENT_ID_IS_NS(msg->msg.client_id)) {
+            ((struct tfm_conn_handle_t *)(msg->handle))->status =
                                                 TFM_HANDLE_STATUS_CONNECT_ERROR;
+        } else {
+            tfm_core_panic();
+        }
     } else {
         ((struct tfm_conn_handle_t *)(msg->handle))->status =
                                                          TFM_HANDLE_STATUS_IDLE;
