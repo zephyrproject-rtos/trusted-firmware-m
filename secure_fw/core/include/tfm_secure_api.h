@@ -60,15 +60,6 @@ struct tfm_sfn_req_s {
     bool ns_caller;
 };
 
-enum tfm_ns_region_e {
-    TFM_NS_REGION_CODE = 0,
-    TFM_NS_REGION_DATA,
-    TFM_NS_REGION_VENEER,
-    TFM_NS_REGION_PERIPH_1,
-    TFM_NS_REGION_PERIPH_2,
-    TFM_NS_SECONDARY_IMAGE_REGION,
-};
-
 enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RO = 1,
     TFM_MEMORY_ACCESS_RW = 2,

@@ -20,7 +20,6 @@
 #include "platform_description.h"
 #include "device_definition.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
 
@@ -333,33 +332,33 @@ void sau_and_idau_cfg(void)
     TZ_SAU_Enable();
 
     /* Configures SAU regions to be non-secure */
-    SAU->RNR  = TFM_NS_REGION_CODE;
+    SAU->RNR  = 0U;
     SAU->RBAR = (memory_regions.non_secure_partition_base
                 & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.non_secure_partition_limit
                 & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-    SAU->RNR  = TFM_NS_REGION_DATA;
+    SAU->RNR  = 1U;
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
     /* Configures veneers region to be non-secure callable */
-    SAU->RNR  = TFM_NS_REGION_VENEER;
+    SAU->RNR  = 2U;
     SAU->RBAR = (memory_regions.veneer_base  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk
                 | SAU_RLAR_NSC_Msk;
 
     /* Configure the peripherals space */
-    SAU->RNR  = TFM_NS_REGION_PERIPH_1;
+    SAU->RNR  = 3U;
     SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
 #ifdef BL2
     /* Secondary image partition */
-    SAU->RNR  = TFM_NS_SECONDARY_IMAGE_REGION;
+    SAU->RNR  = 4U;
     SAU->RBAR = (memory_regions.secondary_partition_base  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
