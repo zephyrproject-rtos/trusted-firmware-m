@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Open Source Foundries Limited
- * Copyright (c) 2019 Arm Limited
+ * Copyright (c) 2019-2020 Arm Limited
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,11 +29,26 @@ extern "C" {
  */
 #ifndef __BOOTSIM__
 
+#define MCUBOOT_VALIDATE_PRIMARY_SLOT
+#define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
+#define MCUBOOT_TARGET_CONFIG "flash_layout.h"
+
 /*
- * In TF-M most of the configuration flags (e.g. signature type,
- * upgrade mode ...) are handled by the CMake-based buildsystem and
- * added to the compiler command lines.
+ * Signature types
  */
+#cmakedefine MCUBOOT_SIGN_RSA
+#cmakedefine MCUBOOT_SIGN_RSA_LEN @MCUBOOT_SIGN_RSA_LEN@
+
+/*
+ * Upgrade mode
+ */
+#cmakedefine MCUBOOT_OVERWRITE_ONLY
+#cmakedefine MCUBOOT_NO_SWAP
+#cmakedefine MCUBOOT_RAM_LOADING
+
+#cmakedefine MCUBOOT_INDIVIDUAL_CLAIMS
+#cmakedefine MCUBOOT_HW_KEY
+#cmakedefine MCUBOOT_USE_UPSTREAM
 
 /*
  * Cryptographic settings
@@ -44,6 +59,7 @@ extern "C" {
  * Logging
  */
 #define MCUBOOT_HAVE_LOGGING    1
+#define MCUBOOT_LOG_LEVEL       @LOG_LEVEL_ID@
 
 #endif /* !__BOOTSIM__ */
 

@@ -21,10 +21,11 @@
  * Original code taken from mcuboot project at:
  * https://github.com/JuulLabs-OSS/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2019 Arm Limited.
+ * Modifications are Copyright (c) 2019-2020 Arm Limited.
  */
 
 #include <bootutil/sign_key.h>
+#include "mcuboot_config/mcuboot_config.h"
 
 #if !defined(MCUBOOT_HW_KEY)
 #if defined(MCUBOOT_SIGN_RSA)

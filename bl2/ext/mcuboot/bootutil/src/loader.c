@@ -45,6 +45,7 @@
 #include "bl2/include/tfm_boot_status.h"
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
+#include "mcuboot_config/mcuboot_config.h"
 
 static struct boot_loader_state boot_data;
 

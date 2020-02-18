@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include "mcuboot_config/mcuboot_config.h"
 #include <assert.h>
 #include "bl2_util.h"
 #include "target.h"
