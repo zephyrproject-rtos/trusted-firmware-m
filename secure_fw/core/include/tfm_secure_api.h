@@ -75,7 +75,7 @@ extern int32_t tfm_core_get_boot_data(uint8_t major_type,
 
 int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr);
 
-int32_t tfm_core_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
+int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr);
 
 /**
  * \brief Check whether a memory range is inside a memory region.
@@ -158,7 +158,7 @@ int32_t tfm_core_partition_request(uint32_t id, void *fn,
         if (desc.ns_caller) {
             return tfm_core_sfn_request(desc_ptr);
         } else {
-            return tfm_core_sfn_request_thread_mode(desc_ptr);
+            return tfm_spm_sfn_request_thread_mode(desc_ptr);
         }
     }
     return TFM_ERROR_GENERIC;

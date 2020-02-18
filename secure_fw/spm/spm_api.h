@@ -381,6 +381,89 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx);
  */
 void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
                                        uint32_t signal_mask);
+
+/**
+ * \brief Signal that secure partition initialisation is finished
+ */
+void tfm_spm_secure_api_init_done(void);
+
+/**
+ * \brief Called if veneer is running in thread mode
+ */
+uint32_t tfm_spm_partition_request_svc_handler(
+        const uint32_t *svc_args, uint32_t lr);
+
+/**
+ * \brief Called when secure service returns
+ */
+uint32_t tfm_spm_partition_return_handler(uint32_t lr);
+
+/**
+ * \brief Called by secure service to check if client is secure
+ */
+void tfm_spm_validate_secure_caller_handler(uint32_t *svc_args);
+
+/**
+ * \brief Stores caller's client id in state context
+ */
+void tfm_spm_get_caller_client_id_handler(uint32_t *svc_args);
+
+/**
+ * \brief Checks if a secure service's access to a memory location is permitted
+ */
+void tfm_spm_memory_permission_check_handler(uint32_t *svc_args);
+
+/**
+ * \brief Check whether a buffer is ok for writing to by the privileged API
+ *        function.
+ *
+ * This function checks whether the caller partition owns the buffer, can write
+ * to it, and the buffer has proper alignment.
+ *
+ * \param[in] partition_idx     Partition index
+ * \param[in] start_addr        The start address of the buffer
+ * \param[in] len               The length of the buffer
+ * \param[in] alignment         The expected alignment (in bits)
+ *
+ * \return 1 if the check passes, 0 otherwise.
+ *
+ * \note For a 0 long buffer the check fails.
+ */
+int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
+                                    void     *start_addr,
+                                    size_t    len,
+                                    uint32_t  alignment);
+
+/**
+ * \brief Handle deprivileged request
+ */
+extern uint32_t tfm_spm_depriv_req_handler(uint32_t *svc_args,
+                                           uint32_t excReturn);
+
+/**
+ * \brief Handle request to return to privileged
+ */
+uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr);
+
+/**
+ * \brief Handle IRQ enable request
+ */
+void tfm_spm_enable_irq_handler(uint32_t *svc_args);
+
+/**
+ * \brief Handle IRQ disable request
+ */
+void tfm_spm_disable_irq_handler(uint32_t *svc_args);
+
+/**
+ * \brief Handle signal wait request
+ */
+void tfm_spm_psa_wait(uint32_t *svc_args);
+
+/**
+ * \brief Handle request to record IRQ processed
+ */
+void tfm_spm_psa_eoi(uint32_t *svc_args);
 #endif /* !defined(TFM_PSA_API) */
 
 #ifdef TFM_PSA_API

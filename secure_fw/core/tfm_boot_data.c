@@ -154,13 +154,14 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
 #endif
 
 #ifndef TFM_PSA_API
-    /* Make sure that the output pointer points to a memory area that is owned
-     * by the partition
+    /*
+     * Make sure that the output pointer points to a memory area that is owned
+     * by the partition. And check 4 bytes alignment.
      */
-    res = tfm_core_check_buffer_access(running_partition_idx,
-                                       (void *)buf_start,
-                                       buf_size,
-                                       2); /* Check 4 bytes alignment */
+    res = tfm_spm_check_buffer_access(running_partition_idx,
+                                      (void *)buf_start,
+                                      buf_size,
+                                      2);
     if (!res) {
         /* Not in accessible range, return error */
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
