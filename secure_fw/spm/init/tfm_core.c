@@ -6,7 +6,6 @@
  */
 
 #include "region.h"
-#include "tfm_core_topology.h"
 #include "tfm_internal.h"
 #include "tfm_irq_list.h"
 #include "tfm_nspm.h"
@@ -132,7 +131,7 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
         return TFM_ERROR_GENERIC;
     }
 
-    tfm_core_topology_set_pendsv_priority();
+    tfm_arch_set_pendsv_priority();
 
     return TFM_SUCCESS;
 }
