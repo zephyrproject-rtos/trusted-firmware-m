@@ -101,6 +101,7 @@ if (MCUBOOT_REPO STREQUAL "TF-M")
 		)
 else()
 	list(APPEND ALL_SRC_C
+			"${MCUBOOT_DIR}/bootutil/src/boot_record.c"
 			"${MCUBOOT_DIR}/bootutil/src/swap_scratch.c"
 			"${MCUBOOT_DIR}/bootutil/src/swap_move.c"
 			"${MCUBOOT_DIR}/bootutil/src/swap_misc.c"
@@ -205,6 +206,7 @@ list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 
 if (MCUBOOT_REPO STREQUAL "UPSTREAM")
 	set(MCUBOOT_HW_ROLLBACK_PROT On)
+	set(MCUBOOT_MEASURED_BOOT On)
 endif()
 
 if(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")

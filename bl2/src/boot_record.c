@@ -24,20 +24,6 @@
 #endif
 
 /*!
- * \def MAX_BOOT_RECORD_SZ
- *
- * \brief Maximum size of the measured boot record.
- *
- * Its size can be calculated based on the following aspects:
- *   - There are 5 allowed software component claims,
- *   - SHA256 is used as the measurement method for the other claims.
- * Considering these aspects, the only claim which size can vary is the
- * type of the software component. In case of single image boot it is
- * "NSPE_SPE" which results the maximum boot record size of 96.
- */
-#define MAX_BOOT_RECORD_SZ  (96u)
-
-/*!
  * \var shared_memory_init_done
  *
  * \brief Indicates whether shared memory area was already initialized.

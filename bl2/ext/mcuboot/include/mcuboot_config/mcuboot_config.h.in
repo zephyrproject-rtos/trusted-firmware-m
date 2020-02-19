@@ -48,6 +48,19 @@ extern "C" {
 
 #cmakedefine MCUBOOT_HW_KEY
 #cmakedefine MCUBOOT_HW_ROLLBACK_PROT
+#cmakedefine MCUBOOT_MEASURED_BOOT
+
+/*
+ * Maximum size of the measured boot record.
+ *
+ * Its size can be calculated based on the following aspects:
+ *     - There are 5 allowed software component claims,
+ *     - SHA256 is used as the measurement method for the other claims.
+ * Considering these aspects, the only claim which size can vary is the type
+ * of the software component with a maximum length of 12 bytes, which means
+ * the boot record size can be up to 100 bytes.
+ */
+#define MAX_BOOT_RECORD_SZ  (100u)
 
 /*
  * Cryptographic settings
