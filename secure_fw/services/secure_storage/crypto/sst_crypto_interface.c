@@ -36,72 +36,48 @@ psa_status_t sst_crypto_init(void)
 psa_status_t sst_crypto_setkey(void)
 {
     psa_status_t status;
-    psa_key_handle_t huk_key_handle;
-    psa_key_policy_t key_policy = PSA_KEY_POLICY_INIT;
-    psa_crypto_generator_t sst_key_generator = PSA_CRYPTO_GENERATOR_INIT;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
 
-    /* Allocate a transient key handle for the storage key */
-    status = psa_allocate_key(&sst_key_handle);
+    /* Set the key attributes for the storage key */
+    psa_set_key_usage_flags(&attributes, SST_KEY_USAGE);
+    psa_set_key_algorithm(&attributes, SST_CRYPTO_ALG);
+    psa_set_key_type(&attributes, SST_KEY_TYPE);
+    psa_set_key_bits(&attributes, PSA_BYTES_TO_BITS(SST_KEY_LEN_BYTES));
+
+    /* Set up a key derivation operation with HUK derivation as the alg */
+    status = psa_key_derivation_setup(&op, TFM_CRYPTO_ALG_HUK_DERIVATION);
     if (status != PSA_SUCCESS) {
-        return PSA_ERROR_GENERIC_ERROR;
+        return status;
     }
 
-    /* Set the key policy for the storage key */
-    psa_key_policy_set_usage(&key_policy, SST_KEY_USAGE, SST_CRYPTO_ALG);
-    status = psa_set_key_policy(sst_key_handle, &key_policy);
+    /* Supply the SST key label as an input to the key derivation */
+    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_LABEL,
+                                            sst_key_label,
+                                            sizeof(sst_key_label));
     if (status != PSA_SUCCESS) {
-        goto release_sst_key;
+        goto err_release_op;
     }
 
-    /* Open a handle to the HUK */
-    status = psa_open_key(PSA_KEY_LIFETIME_PERSISTENT, TFM_CRYPTO_KEY_ID_HUK,
-                          &huk_key_handle);
+    /* Create the storage key from the key derivation operation */
+    status = psa_key_derivation_output_key(&attributes, &op, &sst_key_handle);
     if (status != PSA_SUCCESS) {
-        goto release_sst_key;
+        goto err_release_op;
     }
 
-    /* Set up a key derivation operation with the HUK as the input key */
-    status = psa_key_derivation(&sst_key_generator,
-                                huk_key_handle,
-                                TFM_CRYPTO_ALG_HUK_DERIVATION,
-                                NULL, 0,
-                                sst_key_label, sizeof(sst_key_label),
-                                SST_KEY_LEN_BYTES);
+    /* Free resources associated with the key derivation operation */
+    status = psa_key_derivation_abort(&op);
     if (status != PSA_SUCCESS) {
-        goto release_huk;
-    }
-
-    /* Create the storage key from the key generator */
-    status = psa_generator_import_key(sst_key_handle,
-                                      SST_KEY_TYPE,
-                                      PSA_BYTES_TO_BITS(SST_KEY_LEN_BYTES),
-                                      &sst_key_generator);
-    if (status != PSA_SUCCESS) {
-        goto release_generator;
-    }
-
-    /* Free resources allocated by the generator */
-    status = psa_generator_abort(&sst_key_generator);
-    if (status != PSA_SUCCESS) {
-        goto release_huk;
-    }
-
-    /* Close the handle to the HUK */
-    status = psa_close_key(huk_key_handle);
-    if (status != PSA_SUCCESS) {
-        goto release_sst_key;
+        goto err_release_key;
     }
 
     return PSA_SUCCESS;
 
-release_generator:
-    (void)psa_generator_abort(&sst_key_generator);
-
-release_huk:
-    (void)psa_close_key(huk_key_handle);
-
-release_sst_key:
+err_release_key:
     (void)psa_destroy_key(sst_key_handle);
+
+err_release_op:
+    (void)psa_key_derivation_abort(&op);
 
     return PSA_ERROR_GENERIC_ERROR;
 }
