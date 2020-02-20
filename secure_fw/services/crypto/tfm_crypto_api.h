@@ -83,31 +83,25 @@ psa_status_t tfm_crypto_check_handle_owner(psa_key_handle_t handle,
                                            uint32_t *index);
 
 /**
- * \brief Checks that there is enough local storage in RAM to keep
- *        another key, and returns the index of the storage to use
- *        and the ID of the partition to associated to the key
+ * \brief Checks that there is enough local storage in RAM to keep another key,
+ *        and returns the index of the storage to use.
  *
- * \param[out] partition_id ID of the requesting partition
- * \param[out] index        Index of the local storage to use
+ * \param[out] index  Index of the local storage to use
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_check_key_storage(int32_t *partition_id,
-                                          uint32_t *index);
+psa_status_t tfm_crypto_check_key_storage(uint32_t *index);
 
 /**
- * \brief Sets the index of the local storage in use with a key
- *        requested by a partition specified by the input parameter
- *        partition_id, and stores the corresponding key_handle
+ * \brief Sets the index of the local storage in use with a key requested by the
+ *        calling partition, and stores the corresponding key_handle.
  *
- * \param[in] partition_id ID of the requesting partition
- * \param[in] index        Index of the local storage to use
- * \param[in] key_handle   Corresponding key handle to associate
+ * \param[in] index       Index of the local storage to use
+ * \param[in] key_handle  Corresponding key handle to associate
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_set_key_storage(int32_t partition_id,
-                                        uint32_t index,
+psa_status_t tfm_crypto_set_key_storage(uint32_t index,
                                         psa_key_handle_t key_handle);
 /**
  * \brief Allocate an operation context in the backend

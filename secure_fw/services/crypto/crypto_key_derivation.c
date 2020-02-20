@@ -274,8 +274,7 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     const psa_key_attributes_t *key_attributes = in_vec[1].base;
     psa_key_derivation_operation_t *operation = NULL;
     psa_key_handle_t *key_handle = out_vec[0].base;
-    //int32_t partition_id = 0;
-    //uint32_t index = 0;
+    uint32_t index;
 
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
@@ -284,18 +283,18 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
         return status;
     }
-    /*
-    status = tfm_crypto_check_key_storage(&partition_id, &index);
+
+    status = tfm_crypto_check_key_storage(&index);
     if (status != PSA_SUCCESS) {
         return status;
     }
-    */
-    status = psa_key_derivation_output_key(key_attributes, operation, key_handle);
-    /*
+
+    status = psa_key_derivation_output_key(key_attributes, operation,
+                                           key_handle);
     if (status == PSA_SUCCESS) {
-        status = tfm_crypto_set_key_storage(partition_id, index, *key_handle);
+        status = tfm_crypto_set_key_storage(index, *key_handle);
     }
-    */
+
     return status;
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }

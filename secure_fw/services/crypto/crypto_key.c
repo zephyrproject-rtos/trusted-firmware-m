@@ -71,6 +71,46 @@ psa_status_t tfm_crypto_check_handle_owner(psa_key_handle_t handle,
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
+psa_status_t tfm_crypto_check_key_storage(uint32_t *index)
+{
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    uint32_t i;
+
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
+            *index = i;
+            return PSA_SUCCESS;
+        }
+    }
+
+    return PSA_ERROR_INSUFFICIENT_MEMORY;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
+}
+
+psa_status_t tfm_crypto_set_key_storage(uint32_t index,
+                                        psa_key_handle_t key_handle)
+{
+#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status;
+    int32_t partition_id;
+
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    handle_owner[index].owner = partition_id;
+    handle_owner[index].handle = key_handle;
+    handle_owner[index].in_use = TFM_CRYPTO_IN_USE;
+
+    return PSA_SUCCESS;
+#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
+}
+
 psa_status_t tfm_crypto_set_key_domain_parameters(psa_invec in_vec[],
                                    size_t in_len,
                                    psa_outvec out_vec[],
