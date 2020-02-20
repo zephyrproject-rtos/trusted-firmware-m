@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,8 +15,115 @@
  */
 #include "tfm_mbedcrypto_include.h"
 
+/* Required for mbedtls_calloc in tfm_crypto_huk_derivation_input_bytes */
+#include "mbedtls/platform.h"
+
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
+#include "tfm_memory_utils.h"
+
+#include "platform/include/tfm_plat_crypto_keys.h"
+
+#ifdef TFM_PARTITION_TEST_SST
+#include "psa_manifest/pid.h"
+#endif /* TFM_PARTITION_TEST_SST */
+
+#ifndef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
+static psa_status_t tfm_crypto_huk_derivation_setup(
+                                      psa_key_derivation_operation_t *operation,
+                                      psa_algorithm_t alg)
+{
+    operation->alg = TFM_CRYPTO_ALG_HUK_DERIVATION;
+    return PSA_SUCCESS;
+}
+
+static psa_status_t tfm_crypto_huk_derivation_input_bytes(
+                                      psa_key_derivation_operation_t *operation,
+                                      psa_key_derivation_step_t step,
+                                      const uint8_t *data,
+                                      size_t data_length)
+{
+    psa_status_t status;
+    int32_t partition_id;
+
+    if (step != PSA_KEY_DERIVATION_INPUT_LABEL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Concatenate the caller's partition ID with the supplied label to prevent
+     * two different partitions from deriving the same key.
+     */
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+#ifdef TFM_PARTITION_TEST_SST
+    /* The SST tests run some operations under the wrong partition ID - this
+     * causes the key derivation to change.
+     */
+    if (partition_id == TFM_SP_SST_TEST) {
+        partition_id = TFM_SP_STORAGE;
+    }
+#endif /* TFM_PARTITION_TEST_SST */
+
+    /* Put the label in the tls12_prf ctx to make it available in the output key
+     * step.
+     */
+    operation->ctx.tls12_prf.label = mbedtls_calloc(1, sizeof(partition_id)
+                                                       + data_length);
+    if (operation->ctx.tls12_prf.label == NULL) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+    (void)tfm_memcpy(operation->ctx.tls12_prf.label, &partition_id,
+                     sizeof(partition_id));
+    (void)tfm_memcpy(operation->ctx.tls12_prf.label + sizeof(partition_id),
+                     data, data_length);
+    operation->ctx.tls12_prf.label_length = sizeof(partition_id) + data_length;
+
+    return PSA_SUCCESS;
+}
+
+static psa_status_t tfm_crypto_huk_derivation_output_key(
+                                      const psa_key_attributes_t *attributes,
+                                      psa_key_derivation_operation_t *operation,
+                                      psa_key_handle_t *handle)
+{
+    enum tfm_plat_err_t err;
+    size_t bytes = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
+
+    if (sizeof(operation->ctx.tls12_prf.output_block) < bytes) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    /* Derive key material from the HUK and output it to the operation buffer */
+    err = tfm_plat_get_huk_derived_key(operation->ctx.tls12_prf.label,
+                                       operation->ctx.tls12_prf.label_length,
+                                       NULL, 0,
+                                       operation->ctx.tls12_prf.output_block,
+                                       bytes);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
+
+    return psa_import_key(attributes, operation->ctx.tls12_prf.output_block,
+                          bytes, handle);
+}
+
+static psa_status_t tfm_crypto_huk_derivation_abort(
+                                      psa_key_derivation_operation_t *operation)
+{
+    if (operation->ctx.tls12_prf.label != NULL) {
+        (void)tfm_memset(operation->ctx.tls12_prf.label, 0,
+                         operation->ctx.tls12_prf.label_length);
+        mbedtls_free(operation->ctx.tls12_prf.label);
+    }
+
+    (void)tfm_memset(operation, 0, sizeof(*operation));
+
+    return PSA_SUCCESS;
+}
+#endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 
 /*!
  * \defgroup public_psa Public functions, PSA
@@ -58,7 +165,11 @@ psa_status_t tfm_crypto_key_derivation_setup(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    status = psa_key_derivation_setup(operation, alg);
+    if (alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        status = tfm_crypto_huk_derivation_setup(operation, alg);
+    } else {
+        status = psa_key_derivation_setup(operation, alg);
+    }
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
@@ -171,7 +282,13 @@ psa_status_t tfm_crypto_key_derivation_input_bytes(psa_invec in_vec[],
         return status;
     }
 
-    return psa_key_derivation_input_bytes(operation, step, data, data_length);
+    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        return tfm_crypto_huk_derivation_input_bytes(operation, step, data,
+                                                     data_length);
+    } else {
+        return psa_key_derivation_input_bytes(operation, step, data,
+                                              data_length);
+    }
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 
@@ -289,8 +406,13 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_key_derivation_output_key(key_attributes, operation,
-                                           key_handle);
+    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        status = tfm_crypto_huk_derivation_output_key(key_attributes, operation,
+                                                      key_handle);
+    } else {
+        status = psa_key_derivation_output_key(key_attributes, operation,
+                                               key_handle);
+    }
     if (status == PSA_SUCCESS) {
         status = tfm_crypto_set_key_storage(index, *key_handle);
     }
@@ -336,7 +458,11 @@ psa_status_t tfm_crypto_key_derivation_abort(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    status = psa_key_derivation_abort(operation);
+    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+        status = tfm_crypto_huk_derivation_abort(operation);
+    } else {
+        status = psa_key_derivation_abort(operation);
+    }
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
