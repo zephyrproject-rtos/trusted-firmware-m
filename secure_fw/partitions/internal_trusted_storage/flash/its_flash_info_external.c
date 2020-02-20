@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,15 +15,6 @@
 
 #ifndef PS_FLASH_DEV_NAME
 #error "PS_FLASH_DEV_NAME must be defined by the target in flash_layout.h"
-#endif
-
-#ifndef PS_FLASH_AREA_ADDR
-#error "PS_FLASH_AREA_ADDR must be defined by the target in flash_layout.h"
-#endif
-
-/* Adjust to a size that will allow all assets to fit */
-#ifndef PS_FLASH_AREA_SIZE
-#error "PS_FLASH_AREA_SIZE must be defined by the target in flash_layout.h"
 #endif
 
 /* Adjust to match the size of the flash device's physical erase unit */
@@ -47,6 +39,9 @@
 /* Include the correct flash interface implementation */
 #ifdef PS_RAM_FS
 #include "its_flash_ram.h"
+#ifndef PS_RAM_FS_SIZE
+#error "PS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
+#endif
 #define FLASH_INFO_INIT its_flash_ram_init
 #define FLASH_INFO_READ its_flash_ram_read
 #define FLASH_INFO_WRITE its_flash_ram_write
@@ -80,7 +75,6 @@
 
 /* Calculate the block layout */
 #define FLASH_INFO_BLOCK_SIZE (PS_SECTOR_SIZE * PS_SECTORS_PER_BLOCK)
-#define FLASH_INFO_NUM_BLOCKS (PS_FLASH_AREA_SIZE / FLASH_INFO_BLOCK_SIZE)
 
 /* Maximum file size */
 #define FLASH_INFO_MAX_FILE_SIZE ITS_UTILS_ALIGN(PS_MAX_OBJECT_SIZE, \
@@ -94,7 +88,7 @@
 
 #ifdef PS_RAM_FS
 /* Allocate a static buffer to emulate storage in RAM */
-static uint8_t ps_block_data[FLASH_INFO_BLOCK_SIZE * FLASH_INFO_NUM_BLOCKS];
+static uint8_t ps_block_data[PS_RAM_FS_SIZE];
 #define FLASH_INFO_DEV ps_block_data
 #else
 /* Import the CMSIS flash device driver */
@@ -102,23 +96,19 @@ extern ARM_DRIVER_FLASH PS_FLASH_DEV_NAME;
 #define FLASH_INFO_DEV &PS_FLASH_DEV_NAME
 #endif
 
-const struct its_flash_info_t its_flash_info_external = {
+struct its_flash_info_t its_flash_info_external = {
     .init = FLASH_INFO_INIT,
     .read = FLASH_INFO_READ,
     .write = FLASH_INFO_WRITE,
     .flush = FLASH_INFO_FLUSH,
     .erase = FLASH_INFO_ERASE,
     .flash_dev = (void *)FLASH_INFO_DEV,
-    .flash_area_addr = PS_FLASH_AREA_ADDR,
+    .fs_info = {0, 0}, /* Filled by its_flash_get_info() */
     .sector_size = PS_SECTOR_SIZE,
     .block_size = FLASH_INFO_BLOCK_SIZE,
-    .num_blocks = FLASH_INFO_NUM_BLOCKS,
+    .num_blocks = 0, /* Filled by its_flash_get_info() */
     .program_unit = PS_FLASH_ALIGNMENT,
     .max_file_size = FLASH_INFO_MAX_FILE_SIZE,
     .max_num_files = FLASH_INFO_MAX_NUM_FILES,
     .erase_val = FLASH_INFO_ERASE_VAL,
 };
-
-/* Checks at compile time that the flash device configuration is valid */
-#include \
-"secure_fw/partitions/internal_trusted_storage/flash_fs/its_flash_fs_check_info.h"

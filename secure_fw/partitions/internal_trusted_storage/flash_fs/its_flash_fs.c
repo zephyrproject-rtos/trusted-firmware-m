@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,6 +60,11 @@ psa_status_t its_flash_fs_prepare(struct its_flash_fs_ctx_t *fs_ctx,
 {
     psa_status_t err;
     uint32_t idx;
+
+    /* Check for valid flash_info */
+    if (!flash_info) {
+        return PSA_ERROR_STORAGE_FAILURE;
+    }
 
     /* Associate the flash device info with the context */
     fs_ctx->flash_info = flash_info;
@@ -501,4 +507,73 @@ psa_status_t its_flash_fs_file_read(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     return PSA_SUCCESS;
+}
+
+/* TODO This is very similar to (static) its_num_active_dblocks() */
+static uint32_t its_flash_fs_num_active_dblocks(const struct its_flash_info_t *info)
+{
+    /* Total number of datablocks is the number of dedicated datablocks plus
+     * logical datablock 0 stored in the metadata block.
+     */
+    if (info->num_blocks == 2) {
+        /* Metadata and data are stored in the same physical block, and the other
+         * block is required for power failure safe operation.
+         */
+        /* There are no dedicated data blocks when only two blocks are available */
+        return 1;
+    }
+    else {
+        /* One metadata block and two scratch blocks are reserved. One scratch block
+         * for metadata operations and the other for files data operations.
+         */
+        return info->num_blocks - 2;
+    }
+}
+
+static size_t its_flash_fs_all_metadata_size(const struct its_flash_info_t *info)
+{
+    return (sizeof(struct its_metadata_block_header_t)
+            + (its_flash_fs_num_active_dblocks(info)
+                * sizeof(struct its_block_meta_t))
+            + (info->max_num_files * sizeof(struct its_file_meta_t)));
+}
+
+psa_status_t its_flash_fs_validate_params(const struct its_flash_info_t *info)
+{
+    psa_status_t ret = PSA_SUCCESS;
+
+    /* The minimum number of blocks is 2. In this case, metadata and data are
+      * stored in the same physical block, and the other block is required for
+      * power failure safe operation.
+      * If at least 1 data block is available, 1 data scratch block is required for
+      * power failure safe operation. So, in this case, the minimum number of
+      * blocks is 4 (2 metadata block + 2 data blocks).
+      */
+    if ((info->num_blocks < 2) || (info->num_blocks == 3)) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    if (info->num_blocks == 2) {
+        /* Metadata and data are stored in the same physical block */
+        if (info->max_file_size > info->block_size
+                                   - its_flash_fs_all_metadata_size(info)) {
+            ret = PSA_ERROR_STORAGE_FAILURE;
+        }
+    }
+
+    /* It is not required that all files fit in ITS flash area at the same time.
+     * So, it is possible that a create action fails because flash is full.
+     * However, the larger file must have enough space in the ITS flash area to be
+     * created, at least, when the ITS flash area is empty.
+     */
+    if (info->max_file_size > info->block_size) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    /* Metadata must fit in a flash block */
+    if (its_flash_fs_all_metadata_size(info) > info->block_size) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    return ret;
 }

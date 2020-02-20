@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +172,7 @@
 #define PS_SECTOR_SIZE      FLASH_AREA_IMAGE_SECTOR_SIZE
 #define PS_SECTORS_PER_BLOCK   (0x1)
 #define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_RAM_FS_SIZE         PS_FLASH_AREA_SIZE
 
 /* The sectors must be in consecutive memory location */
 #define PS_NBR_OF_SECTORS  (FLASH_PS_AREA_SIZE / PS_SECTOR_SIZE)
@@ -185,6 +187,7 @@
 
 #define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
 #define ITS_FLASH_AREA_SIZE     FLASH_ITS_AREA_SIZE
+#define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
 
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* The sectors must be in consecutive memory location */

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -163,6 +164,18 @@ psa_status_t its_flash_fs_file_read(its_flash_fs_ctx_t *fs_ctx,
  */
 psa_status_t its_flash_fs_file_delete(its_flash_fs_ctx_t *fs_ctx,
                                       const uint8_t *fid);
+
+/**
+ * \brief Validates the configuration of the flash filesystem.
+ *
+ * This function checks that the flash block provided is compatible with the
+ * flash_fs described by the info parameter
+ *
+ * \param[in] info        Filesystem information
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t its_flash_fs_validate_params(const struct its_flash_info_t *info);
 
 #ifdef __cplusplus
 }

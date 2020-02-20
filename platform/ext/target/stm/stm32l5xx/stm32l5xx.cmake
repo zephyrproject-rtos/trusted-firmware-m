@@ -1,4 +1,5 @@
 # Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -78,6 +79,8 @@ elseif(BUILD_TARGET_CFG)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/stm/stm32l5xx/secure/system_stm32l5xx.c")
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/stm/stm32l5xx/secure/tfm_platform_system.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_its.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_ps.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/stm/stm32l5xx/Native_Driver" ABSOLUTE)
 endif()

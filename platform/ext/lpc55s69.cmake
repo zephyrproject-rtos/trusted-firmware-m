@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
+# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -174,6 +175,8 @@ elseif(BUILD_TARGET_CFG)
   if (TFM_PARTITION_PLATFORM)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/nxp/lpcxpresso55s69/services/src/tfm_platform_system.c")
   endif()
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_its.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_ps.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
   embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
 endif()

@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -138,6 +139,8 @@ elseif(BUILD_TARGET_CFG)
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/spm_hal.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/template/attest_hal.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/Native_Driver/mpu_armv8m_drv.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_its.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_hal_ps.c")
   list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
   if (TFM_PARTITION_PLATFORM)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_a/services/src/tfm_platform_system.c")

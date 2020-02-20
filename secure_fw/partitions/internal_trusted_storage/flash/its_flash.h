@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -51,6 +52,16 @@ extern "C" {
 enum its_flash_id_t {
     ITS_FLASH_ID_INTERNAL = 0,
     ITS_FLASH_ID_EXTERNAL,
+};
+
+/**
+ * \brief flash filesystem configuration structure
+ *
+ */
+struct flash_fs_info_t {
+    /* TODO - move flash_dev here from struct its_flash_info_t */
+    uint32_t flash_area_addr; /**< base address of the flash region */
+    uint32_t flash_area_size; /**< size in bytes of the flash region */
 };
 
 /**
@@ -141,19 +152,22 @@ struct its_flash_info_t {
     psa_status_t (*erase)(const struct its_flash_info_t *info,
                           uint32_t block_id);
 
-    void *flash_dev;          /**< Pointer to the flash device */
-    uint32_t flash_area_addr; /**< Start address of the flash area */
-    uint16_t sector_size;     /**< Size of the flash device's physical erase
-                               *   unit
-                               */
-    uint16_t block_size;      /**< Size of a logical erase unit presented by the
-                               *   flash interface, a multiple of sector_size.
-                               */
-    uint16_t num_blocks;      /**< Number of logical erase blocks */
-    uint16_t program_unit;    /**< Minimum size of a program operation */
-    uint16_t max_file_size;   /**< Maximum file size */
-    uint16_t max_num_files;   /**< Maximum number of files */
-    uint8_t erase_val;        /**< Value of a byte after erase (usually 0xFF) */
+    void *flash_dev;                /**< Pointer to the flash device */
+    struct flash_fs_info_t fs_info; /**< Filesystem configuration */
+    uint16_t sector_size;           /**< Size of the flash device's physical
+                                     *   erase unit
+                                     */
+    uint16_t block_size;            /**< Size of a logical erase unit presented
+                                     *   by the flash interface, a multiple of
+                                     *   sector_size.
+                                     */
+    uint16_t num_blocks;            /**< Number of logical erase blocks */
+    uint16_t program_unit;          /**< Minimum size of a program operation */
+    uint16_t max_file_size;         /**< Maximum file size */
+    uint16_t max_num_files;         /**< Maximum number of files */
+    uint8_t erase_val;              /**< Value of a byte after erase
+                                     * (usually 0xFF)
+                                     */
 };
 
 /**

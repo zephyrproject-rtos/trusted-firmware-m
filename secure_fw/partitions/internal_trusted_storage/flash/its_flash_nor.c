@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,7 +21,8 @@
 static uint32_t get_phys_address(const struct its_flash_info_t *info,
                                  uint32_t block_id, size_t offset)
 {
-    return info->flash_area_addr + (block_id * info->block_size) + offset;
+    return info->fs_info.flash_area_addr + (block_id * info->block_size)
+            + offset;
 }
 
 psa_status_t its_flash_nor_init(const struct its_flash_info_t *info)

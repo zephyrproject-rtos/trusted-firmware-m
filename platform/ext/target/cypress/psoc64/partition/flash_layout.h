@@ -132,6 +132,7 @@
 #define PS_FLASH_AREA_ADDR     FLASH_PS_AREA_OFFSET
 /* Dedicated flash area for PS */
 #define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_RAM_FS_SIZE         PS_FLASH_AREA_SIZE
 #define PS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of PS_SECTOR_SIZE per block */
 #define PS_SECTORS_PER_BLOCK   0x8
@@ -156,6 +157,7 @@
 #define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
 /* Dedicated flash area for ITS */
 #define ITS_FLASH_AREA_SIZE     FLASH_ITS_AREA_SIZE
+#define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of ITS_SECTOR_SIZE per block */
 #define ITS_SECTORS_PER_BLOCK   (0x8)

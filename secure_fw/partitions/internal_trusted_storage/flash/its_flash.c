@@ -8,21 +8,49 @@
 
 #include "its_flash.h"
 
+#include "flash_fs/its_flash_fs.h"
+#include "tfm_hal_its.h"
+#include "tfm_hal_ps.h"
+
 #ifndef ITS_MAX_BLOCK_DATA_COPY
 #define ITS_MAX_BLOCK_DATA_COPY 256
 #endif
 
-extern const struct its_flash_info_t its_flash_info_internal;
-extern const struct its_flash_info_t its_flash_info_external;
+extern struct its_flash_info_t its_flash_info_internal;
+extern struct its_flash_info_t its_flash_info_external;
 
-static const struct its_flash_info_t *const flash_infos[] = {
+static struct its_flash_info_t *const flash_infos[] = {
     [ITS_FLASH_ID_INTERNAL] = &its_flash_info_internal,
     [ITS_FLASH_ID_EXTERNAL] = &its_flash_info_external,
 };
 
 const struct its_flash_info_t *its_flash_get_info(enum its_flash_id_t id)
 {
-    return flash_infos[id];
+    struct its_flash_info_t *ret = flash_infos[id];
+
+    /* Ask the platform for the filesystem config */
+    switch (id) {
+    case ITS_FLASH_ID_INTERNAL:
+        tfm_hal_its_fs_info(&ret->fs_info.flash_area_addr, &ret->fs_info.flash_area_size);
+        break;
+
+    case ITS_FLASH_ID_EXTERNAL:
+        tfm_hal_ps_fs_info(&ret->fs_info.flash_area_addr, &ret->fs_info.flash_area_size);
+        break;
+
+    default:
+        return NULL;
+    }
+
+    /* Derive num_blocks */
+    ret->num_blocks = ret->fs_info.flash_area_size / ret->block_size;
+
+    /* Check that the parameters are compatible */
+    if (its_flash_fs_validate_params(ret) != PSA_SUCCESS) {
+        ret = NULL;
+    }
+
+    return ret;
 }
 
 psa_status_t its_flash_block_to_block_move(const struct its_flash_info_t *info,
