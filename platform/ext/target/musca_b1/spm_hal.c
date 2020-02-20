@@ -218,6 +218,20 @@ void PPC_Handler(void)
     tfm_access_violation_handler();
 }
 
+void NMI_Handler(void)
+{
+    /*
+     * FixMe: Due to the issue on the MUSCA_B1 board: secure watchdog is not
+     * able to reset the system on the second timeout. Hence performing the
+     * warm reset as part of watchdog interrupt (Take place in NMI).
+     */
+    /* Print fault message*/
+    ERROR_MSG("Oops... NMI fault!!!");
+
+    /* Trigger warm-reset */
+    tfm_spm_hal_system_reset();
+}
+
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
     return memory_regions.non_secure_code_start;
