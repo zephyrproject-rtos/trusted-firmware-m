@@ -14,6 +14,7 @@
 #include "spm_api.h"
 #include "psa/service.h"
 
+#ifndef TFM_PSA_API
 nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
@@ -22,7 +23,6 @@ void jump_to_ns_code(void)
     ns_entry();
 }
 
-#ifndef TFM_PSA_API
 __attribute__((naked))
 int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
 {

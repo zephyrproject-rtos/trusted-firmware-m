@@ -5,15 +5,13 @@
  *
  */
 
-#include "secure_utilities.h"
-#include "tfm_arch.h"
-
 #ifndef __TFM_INTERNAL_H__
 #define __TFM_INTERNAL_H__
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-typedef void (*nsfptr_t) (void);
-#else
+#include "secure_utilities.h"
+#include "tfm_arch.h"
+
+#ifndef TFM_PSA_API
 /*
  * This function pointer is meant to only hold non secure function pointers.
  * It will be turned into a non-secure one (LSB cleared) before being called
@@ -22,7 +20,6 @@ typedef void (*nsfptr_t) (void);
  * from secure to non-secure world.
  */
 typedef void (*nsfptr_t) (void) __attribute__((cmse_nonsecure_call));
-#endif
 
 extern nsfptr_t ns_entry;
 
@@ -30,11 +27,13 @@ extern nsfptr_t ns_entry;
  * \brief Jumps to non-secure code.
  */
 void jump_to_ns_code(void);
+#else /* !defined(TFM_PSA_API) */
 
 /**
  * \brief Move to handler mode by a SVC for specific purpose
  */
 void tfm_core_handler_mode(void);
+#endif /* !defined(TFM_PSA_API) */
 
 /**
  * \brief Retrieve secure partition related data from shared memory area, which
