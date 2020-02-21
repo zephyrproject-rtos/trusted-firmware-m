@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2017-2020 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,8 +38,7 @@
 #define S_PSP_STACK_SIZE        0x0000800
 
 #define NS_HEAP_SIZE            0x0001000
-#define NS_MSP_STACK_SIZE       0x0000400
-#define NS_PSP_STACK_SIZE       0x0000C00
+#define NS_MSP_STACK_SIZE       (0x0000200)
 
 /* Relocation of vectors to RAM support */
 /* #define RAM_VECTORS_SUPPORT */
