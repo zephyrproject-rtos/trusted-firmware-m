@@ -62,11 +62,11 @@ SECTIONS
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-#if TFM_LVL != 1
+#if defined(TFM_PSA_API)
         LONG (LOADADDR(.TFM_UNPRIV_DATA))
         LONG (ADDR(.TFM_UNPRIV_DATA))
         LONG (SIZEOF(.TFM_UNPRIV_DATA))
-#endif /* TFM_LVL != 1 */
+#endif /* defined(TFM_PSA_API) */
 #ifdef TFM_PARTITION_SECURE_STORAGE
         LONG (LOADADDR(.TFM_SP_STORAGE_LINKER_DATA))
         LONG (ADDR(.TFM_SP_STORAGE_LINKER_DATA))
@@ -649,8 +649,6 @@ SECTIONS
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 #endif
 
-#if TFM_LVL == 1
-
 #if !defined(TFM_PSA_API)
     .TFM_SECURE_STACK : ALIGN(128)
     {
@@ -660,6 +658,7 @@ SECTIONS
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 #endif /* !defined(TFM_PSA_API) */
 
+#if (TFM_LVL == 1)
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -669,7 +668,9 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-#else /* TFM_LVL == 1 */
+#endif /* TFM_LVL == 1 */
+
+#if defined(TFM_PSA_API)
     .TFM_UNPRIV_DATA : ALIGN(32)
     {
         */tfm_spm_services.o(.data*)
@@ -692,7 +693,7 @@ SECTIONS
     } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
     Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
-#endif /* TFM_LVL == 1 */
+#endif /* defined(TFM_PSA_API) */
 
     /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;
