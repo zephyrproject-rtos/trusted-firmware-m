@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -58,6 +58,10 @@ endif()
 #Service specific configuration for the PSA API Compliance test requirements
 if(PSA_API_TEST_CRYPTO)
 	set(CRYPTO_ENGINE_BUF_SIZE 20480)
+endif()
+
+if(PSA_API_TEST_IPC)
+	set (CONFIG_TFM_ENABLE_MEMORY_PROTECT ON)
 endif()
 
 include ("${TFM_ROOT_DIR}/CommonConfig.cmake")
