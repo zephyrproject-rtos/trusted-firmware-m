@@ -208,11 +208,11 @@ int main(void)
         tfm_core_panic();
     }
 
-#if TFM_LVL != 1
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
     if (tfm_spm_hal_setup_isolation_hw() != TFM_PLAT_ERR_SUCCESS) {
         tfm_core_panic();
     }
-#endif /* TFM_LVL != 1 */
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 #ifndef TFM_PSA_API
     tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);

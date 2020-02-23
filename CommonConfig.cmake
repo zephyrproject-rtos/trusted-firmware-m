@@ -156,6 +156,10 @@ option(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE "Enable the TF-M internal trusted 
 option(TFM_PARTITION_CRYPTO "Enable the TF-M crypto partition" ON)
 option(TFM_PARTITION_INITIAL_ATTESTATION "Enable the TF-M initial attestation partition" ON)
 
+if (NOT TFM_LVL EQUAL 1 AND NOT DEFINED CONFIG_TFM_ENABLE_MEMORY_PROTECT)
+	set (CONFIG_TFM_ENABLE_MEMORY_PROTECT ON)
+endif()
+
 if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_SECURE_STORAGE)
 	#PSA Initial Attestation and Protected storage rely on Cryptography API
 	set(TFM_PARTITION_CRYPTO ON)
@@ -307,6 +311,10 @@ endif()
 
 if (TFM_PARTITION_TEST_SECURE_SERVICES)
 	add_definitions(-DTFM_PARTITION_TEST_SECURE_SERVICES)
+endif()
+
+if (CONFIG_TFM_ENABLE_MEMORY_PROTECT)
+	add_definitions(-DCONFIG_TFM_ENABLE_MEMORY_PROTECT)
 endif()
 
 if (PSA_API_TEST)

@@ -105,7 +105,7 @@ enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void);
  */
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void);
 
-#if TFM_LVL != 1
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
  * \brief This function initialises the HW used for isolation, and sets the
  *        default configuration for them.
@@ -114,7 +114,7 @@ enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
-#endif
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 /**
  * \brief Configure peripherals for a partition based on the platform data and

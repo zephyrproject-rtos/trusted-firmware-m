@@ -57,7 +57,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-#if TFM_LVL != 1
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 
 #define MPU_REGION_TFM_UNPRIV_CODE   1
 #define MPU_REGION_TFM_UNPRIV_DATA   2
@@ -199,7 +199,7 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* TFM_LVL != 1 */
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {

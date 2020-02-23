@@ -27,7 +27,7 @@ extern const struct memory_region_limits memory_regions;
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
-#if TFM_LVL != 1
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 #define MPU_REGION_VENEERS              0
 #define MPU_REGION_TFM_UNPRIV_CODE      1
 #define MPU_REGION_TFM_UNPRIV_DATA      2
@@ -38,7 +38,7 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 #define PARTITION_REGION_PERIPH_MAX_NUM 2
 
 uint32_t periph_num_count = 0;
-#endif /* TFM_LVL != 1 */
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
@@ -58,7 +58,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     bool privileged = tfm_is_partition_privileged(partition_idx);
-#if TFM_LVL != 1
+#if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
     struct mpu_armv8m_region_cfg_t region_cfg;
 #endif
 
@@ -66,7 +66,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
-#if TFM_LVL != 1
+#if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
     if (!privileged) {
         region_cfg.region_nr = PARTITION_REGION_PERIPH_START +
                                 periph_num_count;
@@ -90,7 +90,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                           HARDFAULT_NMI_ENABLE);
     }
-#endif /* TFM_LVL != 1 */
+#endif /* defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1) */
 
     if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
         ppc_configure_to_secure(platform_data->periph_ppc_bank,
@@ -106,7 +106,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-#if TFM_LVL != 1
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
@@ -211,7 +211,7 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
     }
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* TFM_LVL != 1 */
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 void MPC_Handler(void)
 {
