@@ -43,9 +43,9 @@ Jamie Fox
 Crypto
 ~~~~~~
 
-Antonio de Angelis
-    :email: `Antonio.DeAngelis@arm.com <Antonio.DeAngelis@arm.com>`__
-    :github: `adeaarm <https://github.com/adeaarm>`__
+Soby Mathew
+    :email: `Soby.Mathew@arm.com <Soby.Mathew@arm.com>`__
+    :github: `soby-mathew <https://github.com/soby-mathew>`__
 
 SPM & IPC
 ~~~~~~~~~
@@ -61,9 +61,9 @@ Mate Toth-Pal
 Audit Log
 ~~~~~~~~~
 
-Antonio de Angelis
-    :email: `Antonio.DeAngelis@arm.com <Antonio.DeAngelis@arm.com>`__
-    :github: `adeaarm <https://github.com/adeaarm>`__
+Anton Komlev
+    :email: `Anton.Komlev <Anton.Komlev@arm.com>`__
+    :github: `Anton-TF <https://github.com/Anton-TF>`__
 
 Attestation
 ~~~~~~~~~~~
@@ -74,4 +74,4 @@ Tamas Ban
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
