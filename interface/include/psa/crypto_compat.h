@@ -84,6 +84,24 @@ typedef MBEDTLS_PSA_DEPRECATED psa_key_usage_t mbedtls_deprecated_psa_key_usage_
 #define PSA_ASYMMETRIC_SIGN_OUTPUT_SIZE( key_type, key_bits, alg ) \
     MBEDTLS_DEPRECATED_CONSTANT( size_t, PSA_SIGN_OUTPUT_SIZE( key_type, key_bits, alg ) )
 
+/*
+ * Deprecated PSA Crypto function names (PSA Crypto API  <= 1.0 beta3)
+ */
+MBEDTLS_PSA_DEPRECATED psa_status_t psa_asymmetric_sign( psa_key_handle_t key,
+                            psa_algorithm_t alg,
+                            const uint8_t *hash,
+                            size_t hash_length,
+                            uint8_t *signature,
+                            size_t signature_size,
+                            size_t *signature_length );
+
+MBEDTLS_PSA_DEPRECATED psa_status_t psa_asymmetric_verify( psa_key_handle_t key,
+                              psa_algorithm_t alg,
+                              const uint8_t *hash,
+                              size_t hash_length,
+                              const uint8_t *signature,
+                              size_t signature_length );
+
 #endif /* MBEDTLS_DEPRECATED_REMOVED */
 
 #ifdef __cplusplus
