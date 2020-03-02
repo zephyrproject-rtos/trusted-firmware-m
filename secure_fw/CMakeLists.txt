@@ -151,6 +151,9 @@ if (DEFINED TFM_PLATFORM_SECURE_DEFS)
 endif()
 
 #Set common compiler flags
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
 if(NOT DEFINED TARGET_NV_COUNTERS_ENABLE)
@@ -219,7 +222,7 @@ function(set_up_secure_fw_build)
 	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${S_SCATTER_FILE_NAME}")
 
 	#Set macro definitions for the project.
-	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 	# The order of the libraries linked below is important for GCC

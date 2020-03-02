@@ -159,10 +159,13 @@ if (TFM_BUILD_IN_SPE)
 	endif()
 
 	#Set common compiler and linker flags
+	if (DEFINED CMSE_FLAGS)
+		embedded_set_target_compile_flags(TARGET tfm_secure_tests LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	endif()
 	config_setting_shared_compiler_flags(tfm_secure_tests)
 	config_setting_shared_linker_flags(tfm_secure_tests)
 
-	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL} APPEND)
 
 	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 		set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE
@@ -191,7 +194,7 @@ else ()
 	config_setting_shared_linker_flags(tfm_non_secure_tests)
 
 	#Set macro definitions
-	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL})
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS TFM_LVL=${TFM_LVL})
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

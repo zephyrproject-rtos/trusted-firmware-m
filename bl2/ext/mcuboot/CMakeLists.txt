@@ -76,6 +76,10 @@ if (DEFINED TFM_PLATFORM_SECURE_DEFS)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE ASM DEFINES ${TFM_PLATFORM_SECURE_DEFS} APPEND)
 endif()
 
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET ${PROJECT_NAME} LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/bl2_main.c"

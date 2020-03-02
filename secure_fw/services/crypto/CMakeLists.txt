@@ -47,7 +47,7 @@ if (CRYPTO_HW_ACCELERATOR)
 endif()
 
 #Create a list of the C defines
-list(APPEND TFM_CRYPTO_C_DEFINES_LIST __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} __thumb2__ TFM_LVL=${TFM_LVL})
+list(APPEND TFM_CRYPTO_C_DEFINES_LIST __thumb2__ TFM_LVL=${TFM_LVL})
 
 if (CRYPTO_ENGINE_MBEDTLS)
   list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_ENGINE_MBEDTLS MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}")
@@ -108,6 +108,11 @@ endif()
 #Specify what we build (for the crypto service, build as a static library)
 add_library(tfm_crypto STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
 embedded_set_target_compile_defines(TARGET tfm_crypto LANGUAGE C DEFINES ${TFM_CRYPTO_C_DEFINES_LIST})
+
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET tfm_crypto LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 if (CRYPTO_ENGINE_MBEDTLS)
 	#Add a dependency on the Mbed Crypto install target.
 	add_dependencies(tfm_crypto ${MBEDCRYPTO_TARGET_NAME}_install)

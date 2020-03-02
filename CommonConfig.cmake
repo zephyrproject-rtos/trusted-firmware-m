@@ -80,11 +80,9 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	# CMSE is unnecessary in multi-core scenarios.
 	# TODO: Need further discussion about if CMSE is required when an Armv8-M
 	# core acts as secure core in multi-core scenario.
-	set (CMSE_FLAGS "")
-	set (ARM_FEATURE_CMSE 0)
+	# leave CMSE_FLAGS undefined
 else()
 	set (CMSE_FLAGS "-mcmse")
-	set (ARM_FEATURE_CMSE 3)
 
 	# Clear multi-core test setting
 	set (TFM_MULTI_CORE_TEST OFF)
@@ -97,10 +95,10 @@ if(${COMPILER} STREQUAL "ARMCLANG")
 	include("Common/FindArmClang")
 	include("Common/${ARMCLANG_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none ${CMSE_FLAGS} -ffunction-sections -fdata-sections)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -ffunction-sections -fdata-sections)
 	##Shared compiler settings.
 	function(config_setting_shared_compiler_flags tgt)
-		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
 	endfunction()
 
 	##Shared linker settings.
@@ -114,10 +112,10 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 	include("Common/FindGNUARM")
 	include("Common/${GNUARM_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float ${CMSE_FLAGS} -ffunction-sections -fdata-sections --specs=nano.specs)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -ffunction-sections -fdata-sections --specs=nano.specs)
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
-		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
 	endfunction()
 
 	##Shared linker settings.
@@ -385,7 +383,7 @@ if (BL2)
 endif()
 
 ##Set Mbed Crypto compiler flags and variables for crypto service
-set(MBEDCRYPTO_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+set(MBEDCRYPTO_C_FLAGS_SERVICES "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
 #Default TF-M secure storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
@@ -481,7 +479,7 @@ if (NOT DEFINED BOOT_DATA_AVAILABLE)
 endif()
 
 ##Set mbedTLS compiler flags for BL2 bootloader
-set(MBEDCRYPTO_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-rsa.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
+set(MBEDCRYPTO_C_FLAGS_BL2 "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-rsa.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
 	string(APPEND MBEDCRYPTO_C_FLAGS_BL2 " -DMCUBOOT_SIGN_RSA_LEN=3072")
 endif()

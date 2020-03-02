@@ -80,6 +80,12 @@ embedded_set_target_compile_defines(TARGET tfm_t_cose_sign   LANGUAGE C DEFINES 
 embedded_set_target_compile_defines(TARGET tfm_t_cose_verify LANGUAGE C DEFINES ${T_COSE_COMPILE_TIME_CONFIG} APPEND)
 embedded_set_target_compile_defines(TARGET tfm_t_cose_test   LANGUAGE C DEFINES ${T_COSE_COMPILE_TIME_CONFIG} APPEND)
 
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET tfm_t_cose_sign   LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	embedded_set_target_compile_flags(TARGET tfm_t_cose_verify LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	embedded_set_target_compile_flags(TARGET tfm_t_cose_test   LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 #Set common compiler flags
 config_setting_shared_compiler_flags(tfm_t_cose_sign)
 config_setting_shared_compiler_flags(tfm_t_cose_verify)
