@@ -202,6 +202,7 @@ int main(void)
     UNUSED_VARIABLE(thread_func);
 #endif
 
+    LOG_MSG("Non-Secure system starting...\r\n");
     status = osKernelStart();
 
     /* Reached only in case of error */
