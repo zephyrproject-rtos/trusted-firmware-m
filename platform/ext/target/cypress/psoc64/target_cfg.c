@@ -1184,14 +1184,11 @@ const PPU_Resources *ppu_init_table[] = {
 
 void ppu_init_cfg(void)
 {
-    cy_en_prot_status_t ret;
-    (void)ret;
-
     size_t n = sizeof(ppu_init_table)/sizeof(ppu_init_table[0]);
 
     for (int i = 0; i < n; i++)
     {
-        ret = PPU_Configure(ppu_init_table[i]);
+        cy_en_prot_status_t ret = PPU_Configure(ppu_init_table[i]);
         assert(ret == CY_PROT_SUCCESS);
     }
 

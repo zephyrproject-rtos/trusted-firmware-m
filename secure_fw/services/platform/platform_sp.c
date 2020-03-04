@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -102,16 +102,16 @@ platform_sp_ioctl_ipc(const psa_msg_t *msg)
 
     num = psa_read(msg->handle, 0, &request, sizeof(request));
     if (num != sizeof(request)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
+        return (enum tfm_platform_err_t) PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     if (in_len > 1) {
         if (msg->in_size[1] > INPUT_BUFFER_SIZE) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
+            return (enum tfm_platform_err_t) PSA_ERROR_PROGRAMMER_ERROR;
         }
         num = psa_read(msg->handle, 1, &input_buffer, msg->in_size[1]);
         if (num != msg->in_size[1]) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
+            return (enum tfm_platform_err_t) PSA_ERROR_PROGRAMMER_ERROR;
         }
         invec.base = input_buffer;
         invec.len = msg->in_size[1];
@@ -120,7 +120,7 @@ platform_sp_ioctl_ipc(const psa_msg_t *msg)
 
     if (out_len > 0) {
         if (msg->out_size[0] > OUTPUT_BUFFER_SIZE) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
+            return (enum tfm_platform_err_t) PSA_ERROR_PROGRAMMER_ERROR;
         }
         outvec.base = output_buffer;
         outvec.len = msg->out_size[0];
@@ -188,7 +188,7 @@ enum tfm_platform_err_t platform_sp_init(void)
         }
     }
 
-#endif /* TFM_PSA_API */
-
+#else
     return TFM_PLATFORM_ERR_SUCCESS;
+#endif /* TFM_PSA_API */
 }

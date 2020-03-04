@@ -74,9 +74,9 @@ static const osThreadAttr_t thread_attr = {
  * \brief Static globals to hold RTOS related quantities,
  *        main thread
  */
-static osStatus_t     status;
-static osThreadId_t   thread_id;
+#if defined(TEST_FRAMEWORK_NS) || defined(PSA_API_TEST_NS)
 static osThreadFunc_t thread_func;
+#endif
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 static struct ns_mailbox_queue_t ns_mailbox_queue;
@@ -184,7 +184,7 @@ int main(void)
     tfm_ns_multi_core_boot();
 #endif
 
-    status = osKernelInitialize();
+    (void) osKernelInitialize();
 
     /* Initialize the TFM NS interface */
     tfm_ns_interface_init();
@@ -196,14 +196,11 @@ int main(void)
 #endif
 
 #if defined(TEST_FRAMEWORK_NS) || defined(PSA_API_TEST_NS)
-    thread_id = osThreadNew(thread_func, NULL, &thread_attr);
-#else
-    UNUSED_VARIABLE(thread_id);
-    UNUSED_VARIABLE(thread_func);
+    (void) osThreadNew(thread_func, NULL, &thread_attr);
 #endif
 
     LOG_MSG("Non-Secure system starting...\r\n");
-    status = osKernelStart();
+    (void) osKernelStart();
 
     /* Reached only in case of error */
     for (;;) {

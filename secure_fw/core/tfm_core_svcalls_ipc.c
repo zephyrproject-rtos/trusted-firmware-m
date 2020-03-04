@@ -120,7 +120,7 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
 
 uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
 {
-    uint8_t svc_number = 0;
+    tfm_svc_number_t svc_number = TFM_SVC_SFN_REQUEST;
     /*
      * Stack contains:
      * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
@@ -130,7 +130,7 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */
-        svc_number = ((uint8_t *)svc_args[6])[-2];
+        svc_number = ((tfm_svc_number_t *)svc_args[6])[-2];
     } else {
         /* Secure SV executing with NS return.
          * NS cannot directly trigger S SVC so this should not happen. This is

@@ -257,7 +257,7 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
     NVIC_EnableIRQ(PPC_IRQn);
 
-    return ARM_DRIVER_OK;
+    return (enum tfm_plat_err_t) ARM_DRIVER_OK;
 }
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/

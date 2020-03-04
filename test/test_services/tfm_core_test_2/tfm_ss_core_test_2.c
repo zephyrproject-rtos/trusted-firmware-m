@@ -32,7 +32,6 @@ static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 #endif /* !defined(TFM_PSA_API) */
 
 /* structures for secure IRQ testing */
-static enum irq_test_scenario_t current_scenario = IRQ_TEST_SCENARIO_NONE;
 static struct irq_test_execution_data_t *current_execution_data;
 
 psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
@@ -193,7 +192,6 @@ static psa_status_t spm_core_test_2_prepare_test_scenario_internal(
                                enum irq_test_scenario_t irq_test_scenario,
                                struct irq_test_execution_data_t *execution_data)
 {
-    current_scenario = irq_test_scenario;
     current_execution_data = execution_data;
 
     switch (irq_test_scenario) {
@@ -401,7 +399,7 @@ psa_status_t spm_core_test_2_wrap_prepare_test_scenario(psa_msg_t *msg)
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(uint32_t));
+    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(irq_test_scenario));
     if (num != msg->in_size[0]) {
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
@@ -412,7 +410,8 @@ psa_status_t spm_core_test_2_wrap_prepare_test_scenario(psa_msg_t *msg)
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    return spm_core_test_2_prepare_test_scenario_internal(irq_test_scenario,
+    return spm_core_test_2_prepare_test_scenario_internal((enum irq_test_scenario_t)
+                                                          irq_test_scenario,
                                                           execution_data);
 }
 
@@ -425,12 +424,13 @@ psa_status_t spm_core_test_2_wrap_execute_test_scenario(psa_msg_t *msg)
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(uint32_t));
+    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(irq_test_scenario));
     if (num != msg->in_size[0]) {
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    return spm_core_test_2_execute_test_scenario_internal(irq_test_scenario);
+    return spm_core_test_2_execute_test_scenario_internal((enum irq_test_scenario_t)
+                                                          irq_test_scenario);
 }
 
 #endif /* defined(TFM_PSA_API) */
@@ -472,6 +472,7 @@ psa_status_t core_test_2_init(void)
             ; /* do nothing */
         }
     }
-#endif /* defined(TFM_PSA_API) */
+#else
     return CORE_TEST_ERRNO_SUCCESS;
+#endif /* defined(TFM_PSA_API) */
 }

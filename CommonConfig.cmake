@@ -137,7 +137,7 @@ elseif(${COMPILER} STREQUAL "IARARM")
 	include("Common/FindIARARM")
 	include("Common/${IARARM_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -e --dlib_config=full --vla --silent -DNO_TYPEOF ${CMSE_FLAGS})
+	set (COMMON_COMPILE_FLAGS -e --dlib_config=full --vla --silent -DNO_TYPEOF ${CMSE_FLAGS} --diag_suppress Pe546,Pe940)
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS ${COMMON_COMPILE_FLAGS} "-DImage$$= " "-DLoad$$LR$$= " "-D$$ZI$$Base=$$Base" "-D$$ZI$$Limit=$$Limit" "-D$$RO$$Base=$$Base" "-D$$RO$$Limit=$$Limit" "-D$$RW$$Base=$$Base" "-D$$RW$$Limit=$$Limit" "-D_DATA$$RW$$Base=_DATA$$Base" "-D_DATA$$RW$$Limit=_DATA$$Limit" "-D_DATA$$ZI$$Base=_DATA$$Base" "-D_DATA$$ZI$$Limit=_DATA$$Limit" "-D_STACK$$ZI$$Base=_STACK$$Base" "-D_STACK$$ZI$$Limit=_STACK$$Limit" )

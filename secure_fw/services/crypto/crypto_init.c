@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -113,7 +113,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
                                         const uint32_t sfn_id)
 {
     psa_status_t status = PSA_SUCCESS;
-    size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i, read_size;
+    size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i;
     psa_invec in_vec[PSA_MAX_IOVEC] = { {0} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = { {0} };
     void *alloc_buf_ptr = NULL;
@@ -140,7 +140,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
             return status;
         }
         /* Read from the IPC framework inputs into the scratch */
-        read_size = psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
+        (void) psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
         /* Populate the fields of the input to the secure function */
         in_vec[i].base = alloc_buf_ptr;
         in_vec[i].len = msg->in_size[i];
@@ -258,7 +258,7 @@ static void tfm_crypto_ipc_handler(void)
         }
     }
 
-    /* This is unreachable */
+    /* NOTREACHED */
     return;
 }
 #endif /* TFM_PSA_API */

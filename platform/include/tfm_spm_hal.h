@@ -221,7 +221,7 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void);
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
                                                         uint32_t priority);
 
 /**
@@ -229,21 +229,21 @@ enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
  *
  * \param[in] irq_line    The IRQ to clear pending for.
  */
-void tfm_spm_hal_clear_pending_irq(int32_t irq_line);
+void tfm_spm_hal_clear_pending_irq(IRQn_Type irq_line);
 
 /**
  * \brief Enables an IRQ
  *
  * \param[in] irq_line    The IRQ to be enabled.
  */
-void tfm_spm_hal_enable_irq(int32_t irq_line);
+void tfm_spm_hal_enable_irq(IRQn_Type irq_line);
 
 /**
  * \brief Disables an IRQ
  *
  * \param[in] irq_line    The IRQ to be disabled
  */
-void tfm_spm_hal_disable_irq(int32_t irq_line);
+void tfm_spm_hal_disable_irq(IRQn_Type irq_line);
 
 /**
  * \brief Set the target state of an IRQ
@@ -257,7 +257,7 @@ void tfm_spm_hal_disable_irq(int32_t irq_line);
  *                        assigned to Non-Secure
  */
 enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
-                                          int32_t irq_line,
+                                          IRQn_Type irq_line,
                                           enum irq_target_state_t target_state);
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY

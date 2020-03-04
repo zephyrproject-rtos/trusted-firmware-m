@@ -47,7 +47,7 @@ TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     int32_t irq_line);
+                     IRQn_Type irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
@@ -1392,7 +1392,7 @@ void tfm_spm_psa_notify(uint32_t *args)
  * \retval "Does not return"    Partition ID is invalid
  */
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     int32_t irq_line)
+                     IRQn_Type irq_line)
 {
     tfm_spm_hal_disable_irq(irq_line);
     notify_with_signal(partition_id, signal);
@@ -1441,7 +1441,7 @@ void tfm_spm_psa_panic(void)
  */
 static int32_t get_irq_line_for_signal(int32_t partition_id,
                                        psa_signal_t signal,
-                                       int32_t *irq_line)
+                                       IRQn_Type *irq_line)
 {
     size_t i;
 
@@ -1458,7 +1458,7 @@ static int32_t get_irq_line_for_signal(int32_t partition_id,
 void tfm_spm_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
-    int32_t irq_line = 0;
+    IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;
 
@@ -1497,7 +1497,7 @@ void tfm_spm_enable_irq(uint32_t *args)
 {
     struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
     psa_signal_t irq_signal = svc_ctx->r0;
-    int32_t irq_line = 0;
+    IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;
 
@@ -1525,7 +1525,7 @@ void tfm_spm_disable_irq(uint32_t *args)
 {
     struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
     psa_signal_t irq_signal = svc_ctx->r0;
-    int32_t irq_line = 0;
+    IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
     struct spm_partition_desc_t *partition = NULL;
 

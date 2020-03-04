@@ -28,7 +28,7 @@ static void tfm_qcbor_test_7001(struct test_result_t *ret);
 
 static struct test_t qcbor_regression_test[] = {
     {&tfm_qcbor_test_7001, "TFM_QCBOR_TEST_7001",
-     "Regression test of QCBOR library", {0} },
+     "Regression test of QCBOR library", {TEST_PASSED} },
 };
 
 /* To execute only selected test cases, then remove unwanted ones from the array

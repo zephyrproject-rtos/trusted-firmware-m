@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,7 +31,7 @@ enum tfm_platform_err_t tfm_platform_gpio_init(uint32_t *result)
                              &out_vec);
 
     *result = out.u.result;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -60,7 +60,7 @@ tfm_platform_gpio_pin_config(uint32_t pin_num, uint32_t direction,
                              &out_vec);
 
     *result = out.u.result;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -88,7 +88,7 @@ tfm_platform_gpio_pin_write(uint32_t pin_num, uint32_t value, uint32_t *result)
                              &out_vec);
 
     *result = out.u.result;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -116,7 +116,7 @@ tfm_platform_gpio_pin_read(uint32_t pin_num, uint32_t *data, uint32_t *result)
 
     *result = out.u.gpio_read_result.result;
     *data = out.u.gpio_read_result.data;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -145,7 +145,7 @@ tfm_platform_gpio_port_config(uint32_t pin_mask, uint32_t direction,
                              &out_vec);
 
     *result = out.u.result;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -174,7 +174,7 @@ tfm_platform_gpio_port_write(uint32_t pin_mask, uint32_t value,
                              &out_vec);
 
     *result = out.u.result;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 
 __attribute__((section("SFN")))
@@ -202,6 +202,6 @@ tfm_platform_gpio_port_read(uint32_t pin_mask, uint32_t *data, uint32_t *result)
 
     *result = out.u.gpio_read_result.result;
     *data = out.u.gpio_read_result.data;
-    return ret;
+    return (enum tfm_platform_err_t) ret;
 }
 

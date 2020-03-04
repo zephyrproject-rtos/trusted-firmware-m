@@ -232,8 +232,8 @@ static psa_status_t test_outvec_write(void)
 
     out_buf_1 = data_buf_ptr;
     data_buf_ptr += in_vec[1].len;
-    out_vec[1].base = out_buf_0;
-    out_vec[1].len = data_buf_ptr - out_buf_0;
+    out_vec[1].base = out_buf_1;
+    out_vec[1].len = data_buf_ptr - out_buf_1;
 
 #ifdef TFM_PSA_API
     err = psa_test_common(SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
@@ -583,7 +583,7 @@ psa_status_t core_test_init(void)
             ; /* do nothing */
         }
     }
-#endif /* defined(TFM_PSA_API) */
-
+#else
     return CORE_TEST_ERRNO_SUCCESS;
+#endif /* defined(TFM_PSA_API) */
 }

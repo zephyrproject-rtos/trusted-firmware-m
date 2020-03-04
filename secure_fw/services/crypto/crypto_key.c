@@ -577,7 +577,6 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
 
     return status;
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
-    return PSA_ERROR_NOT_SUPPORTED;
 }
 
 psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],

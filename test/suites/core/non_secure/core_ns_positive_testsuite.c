@@ -30,7 +30,7 @@
 #define TOSTRING(x) #x
 #define CORE_TEST_DESCRIPTION(number, fn, description) \
     {fn, "TFM_CORE_TEST_"TOSTRING(number),\
-     description, {0} }
+     description, {TEST_PASSED} }
 
 #ifndef TFM_PSA_API
 static void tfm_core_test_get_caller_client_id(struct test_result_t *ret);

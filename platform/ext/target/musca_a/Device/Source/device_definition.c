@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -615,7 +615,7 @@ struct mt25ql_dev_t MT25QL_DEV_S = {
      * more.
      */
     .size = 0x00800000U, /* 8 MiB */
-    .config_state = { 0 },
+    .config_state = { MT25QL_FUNC_STATE_NOT_INITED },
 };
 #endif
 
@@ -632,6 +632,6 @@ struct mt25ql_dev_t MT25QL_DEV_NS
      * more.
      */
     .size = 0x00800000U, /* 8 MiB */
-    .config_state = { 0 },
+    .config_state = { MT25QL_FUNC_STATE_NOT_INITED },
 };
 #endif

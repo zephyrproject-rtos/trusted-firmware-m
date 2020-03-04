@@ -539,7 +539,7 @@ static enum t_cose_err_t run_test_sign_and_verify(uint32_t test_mess_options)
                                        signed_cose_buffer,
                                        &signed_cose);
     if(return_value) {
-        return 2000 + return_value;
+        return ((enum t_cose_err_t) (2000 + return_value));
     }
     /* --- Done making COSE Sign1 object  --- */
 
@@ -706,7 +706,7 @@ static struct test_case bad_parameters_tests_table[] = {
 
     {T_COSE_TEST_BAD_PROTECTED, T_COSE_ERR_PARAMETER_CBOR},
 
-    {0, 0}
+    {0, T_COSE_SUCCESS}
 };
 
 
@@ -760,7 +760,7 @@ static struct test_case crit_tests_table[] = {
 
     {T_COSE_TEST_TOO_MANY_TSTR_CRIT_LABLELS, T_COSE_ERR_CRIT_PARAMETER},
 
-    {0, 0}
+    {0, T_COSE_SUCCESS}
 };
 
 
@@ -906,7 +906,7 @@ static struct sign1_sample sign1_sample_inputs[] = {
     /* Just one not-well-formed byte -- a reserved value */
     { {(uint8_t[]){0x3c}, 1}, T_COSE_ERR_SIGN1_FORMAT },
     /* terminate the list */
-    { {NULL, 0}, 0 },
+    { {NULL, 0}, T_COSE_SUCCESS },
 };
 
 

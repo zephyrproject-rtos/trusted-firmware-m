@@ -275,7 +275,7 @@ enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
                                                         uint32_t priority)
 {
     uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
@@ -283,23 +283,23 @@ enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-void tfm_spm_hal_clear_pending_irq(int32_t irq_line)
+void tfm_spm_hal_clear_pending_irq(IRQn_Type irq_line)
 {
     NVIC_ClearPendingIRQ(irq_line);
 }
 
-void tfm_spm_hal_enable_irq(int32_t irq_line)
+void tfm_spm_hal_enable_irq(IRQn_Type irq_line)
 {
     NVIC_EnableIRQ(irq_line);
 }
 
-void tfm_spm_hal_disable_irq(int32_t irq_line)
+void tfm_spm_hal_disable_irq(IRQn_Type irq_line)
 {
     NVIC_DisableIRQ(irq_line);
 }
 
 enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
-                                           int32_t irq_line,
+                                           IRQn_Type irq_line,
                                            enum irq_target_state_t target_state)
 {
     uint32_t result;

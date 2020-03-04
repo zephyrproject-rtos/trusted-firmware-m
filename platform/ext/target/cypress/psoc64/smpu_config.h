@@ -47,7 +47,7 @@
                              CY_PROT_SUBREGION_DIS7)
 #define SMPU0_SLAVE_CONFIG {\
     .address = (void *)SMPU0_BASE, \
-    .regionSize = SMPU0_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU0_REGIONSIZE, \
     .subregions = SMPU0_SUBREGION_DIS, \
     .userPermission = CY_PROT_PERM_RWX, \
     .privPermission = CY_PROT_PERM_RWX, \
@@ -74,7 +74,7 @@
 #define SMPU1_REGIONSIZE   PROT_SIZE_16KB_BIT_SHIFT
 #define SMPU1_SLAVE_CONFIG {\
     .address = (void *)SMPU1_BASE, \
-    .regionSize = SMPU1_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU1_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
     .userPermission = CY_PROT_PERM_RW, \
     .privPermission = CY_PROT_PERM_RW, \
@@ -99,7 +99,7 @@
 #define SMPU2_REGIONSIZE   PROT_SIZE_512B_BIT_SHIFT
 #define SMPU2_SLAVE_CONFIG {\
     .address = (void *)SMPU2_BASE, \
-    .regionSize = SMPU2_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU2_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
     .userPermission = CY_PROT_PERM_RW, \
     .privPermission = CY_PROT_PERM_RW, \
@@ -127,7 +127,7 @@
                              CY_PROT_SUBREGION_DIS2)
 #define SMPU3_SLAVE_CONFIG {\
     .address = (void *)SMPU3_BASE, \
-    .regionSize = SMPU3_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU3_REGIONSIZE, \
     .subregions = SMPU3_SUBREGION_DIS, \
     .userPermission = CY_PROT_PERM_RW, \
     .privPermission = CY_PROT_PERM_RW, \
@@ -161,7 +161,7 @@
 #define SMPU6_REGIONSIZE   PROT_SIZE_32KB_BIT_SHIFT
 #define SMPU6_SLAVE_CONFIG {\
     .address = (void *)SMPU6_BASE, \
-    .regionSize = SMPU6_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU6_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
     .userPermission = CY_PROT_PERM_RW, \
     .privPermission = CY_PROT_PERM_RW, \
@@ -188,7 +188,7 @@
                              CY_PROT_SUBREGION_DIS1)
 #define SMPU7_SLAVE_CONFIG {\
     .address = (void *)SMPU7_BASE, \
-    .regionSize = SMPU7_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU7_REGIONSIZE, \
     .subregions = SMPU7_SUBREGION_DIS, \
     .userPermission = CY_PROT_PERM_DISABLED, \
     .privPermission = CY_PROT_PERM_RW, \

@@ -29,16 +29,16 @@ static void tfm_attest_test_1005(struct test_result_t *ret);
 static struct test_t attestation_interface_tests[] = {
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */
     {&tfm_attest_test_1001, "TFM_ATTEST_TEST_1001",
-     "Minimal token test of attest token", {0} },
+     "Minimal token test of attest token", {TEST_PASSED} },
     {&tfm_attest_test_1002, "TFM_ATTEST_TEST_1002",
-     "Minimal token size test of attest token", {0} },
+     "Minimal token size test of attest token", {TEST_PASSED} },
     {&tfm_attest_test_1003, "TFM_ATTEST_TEST_1003",
-     "Short circuit signature test of attest token", {0} },
+     "Short circuit signature test of attest token", {TEST_PASSED} },
 #endif
     {&tfm_attest_test_1004, "TFM_ATTEST_TEST_1004",
-     "ECDSA signature test of attest token", {0} },
+     "ECDSA signature test of attest token", {TEST_PASSED} },
     {&tfm_attest_test_1005, "TFM_ATTEST_TEST_1005",
-     "Negative test cases for initial attestation service", {0} },
+     "Negative test cases for initial attestation service", {TEST_PASSED} },
 };
 
 void

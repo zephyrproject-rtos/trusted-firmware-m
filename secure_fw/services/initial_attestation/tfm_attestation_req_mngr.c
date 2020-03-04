@@ -171,13 +171,10 @@ static void attest_signal_handle(psa_signal_t signal, attest_func_t pfn)
 
 psa_status_t attest_partition_init(void)
 {
-    psa_status_t err = PSA_SUCCESS;
+    psa_status_t err = attest_init();
 #ifdef TFM_PSA_API
     psa_signal_t signals;
-#endif
 
-    err = attest_init();
-#ifdef TFM_PSA_API
     if (err != PSA_SUCCESS) {
         tfm_abort();
     }
@@ -197,6 +194,7 @@ psa_status_t attest_partition_init(void)
             tfm_abort();
         }
     }
-#endif
+#else
     return err;
+#endif
 }

@@ -82,7 +82,7 @@ int32_t HalfPrecisionDecodeBasicTests()
     UsefulBufC HalfPrecision = UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spExpectedHalf);
 
     QCBORDecodeContext DC;
-    QCBORDecode_Init(&DC, HalfPrecision, 0);
+    QCBORDecode_Init(&DC, HalfPrecision, QCBOR_DECODE_MODE_NORMAL);
 
     QCBORItem Item;
 
@@ -210,7 +210,7 @@ int32_t HalfPrecisionAgainstRFCCodeTest()
         // Now parse the hand-constructed CBOR. This will invoke the
         // conversion to a float
         QCBORDecodeContext DC;
-        QCBORDecode_Init(&DC, UsefulOutBuf_OutUBuf(&UOB), 0);
+        QCBORDecode_Init(&DC, UsefulOutBuf_OutUBuf(&UOB), QCBOR_DECODE_MODE_NORMAL);
 
         QCBORItem Item;
 
