@@ -42,8 +42,8 @@ if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PROTECTED_STORAGE is undefined.")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -94,9 +94,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/TestConfig.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.inc)
 
-if (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_SECURE_STORAGE_SERVICE_TESTS APPEND)
-	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_SECURE_STORAGE_SERVICE_TESTS APPEND)
+if (ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_PROTECTED_STORAGE_SERVICE_TESTS APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_PROTECTED_STORAGE_SERVICE_TESTS APPEND)
 endif()
 
 if (ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS)
@@ -207,8 +207,8 @@ else ()
 			DESTINATION export/tfm/test/lib
 			PUBLIC_HEADER DESTINATION export/tfm/test/inc)
 
-	if(ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-		#only SST tests are using semaphore and thread APIs
+	if(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+		#only PS tests are using semaphore and thread APIs
 		install(FILES ${TFM_ROOT_DIR}/interface/include/os_wrapper/semaphore.h
 				${TFM_ROOT_DIR}/interface/include/os_wrapper/thread.h
 			DESTINATION export/tfm/include/os_wrapper)

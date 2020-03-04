@@ -10,7 +10,7 @@
 #ifndef __TFM_SERVICE_LIST_INC__
 #define __TFM_SERVICE_LIST_INC__
 
-#include "secure_fw/partitions/secure_storage/psa_manifest/tfm_secure_storage.h"
+#include "secure_fw/partitions/protected_storage/psa_manifest/tfm_protected_storage.h"
 #include "secure_fw/partitions/internal_trusted_storage/psa_manifest/tfm_internal_trusted_storage.h"
 #include "secure_fw/partitions/audit_logging/psa_manifest/tfm_audit_logging.h"
 #include "secure_fw/partitions/crypto/psa_manifest/tfm_crypto.h"
@@ -22,60 +22,60 @@
 #include "test/test_services/tfm_ipc_service/psa_manifest/tfm_ipc_service_partition.h"
 #include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
-#include "test/test_services/tfm_sst_test_service/psa_manifest/tfm_sst_test_service.h"
+#include "test/test_services/tfm_ps_test_service/psa_manifest/tfm_ps_test_service.h"
 #include "test/test_services/tfm_secure_client_2/psa_manifest/tfm_secure_client_2.h"
 #include "test/test_services/tfm_multi_core_test/psa_manifest/tfm_multi_core_test.h"
 
 const struct tfm_spm_service_db_t service_db[] =
 {
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    /******** TFM_SP_STORAGE ********/
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    /******** TFM_SP_PS ********/
     {
-        .name = "TFM_SST_SET",
-        .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_SET_SIGNAL,
+        .name = "TFM_PS_SET",
+        .partition_id = TFM_SP_PS,
+        .signal = TFM_PS_SET_SIGNAL,
         .sid = 0x00000060,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
     {
-        .name = "TFM_SST_GET",
-        .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_SIGNAL,
+        .name = "TFM_PS_GET",
+        .partition_id = TFM_SP_PS,
+        .signal = TFM_PS_GET_SIGNAL,
         .sid = 0x00000061,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
     {
-        .name = "TFM_SST_GET_INFO",
-        .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_INFO_SIGNAL,
+        .name = "TFM_PS_GET_INFO",
+        .partition_id = TFM_SP_PS,
+        .signal = TFM_PS_GET_INFO_SIGNAL,
         .sid = 0x00000062,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
     {
-        .name = "TFM_SST_REMOVE",
-        .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_REMOVE_SIGNAL,
+        .name = "TFM_PS_REMOVE",
+        .partition_id = TFM_SP_PS,
+        .signal = TFM_PS_REMOVE_SIGNAL,
         .sid = 0x00000063,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
     {
-        .name = "TFM_SST_GET_SUPPORT",
-        .partition_id = TFM_SP_STORAGE,
-        .signal = TFM_SST_GET_SUPPORT_SIGNAL,
+        .name = "TFM_PS_GET_SUPPORT",
+        .partition_id = TFM_SP_PS,
+        .signal = TFM_PS_GET_SUPPORT_SIGNAL,
         .sid = 0x00000064,
         .non_secure_client = true,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     /******** TFM_SP_ITS ********/
@@ -477,18 +477,18 @@ const struct tfm_spm_service_db_t service_db[] =
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-    /******** TFM_SP_SST_TEST ********/
+#ifdef TFM_PARTITION_TEST_PS
+    /******** TFM_SP_PS_TEST ********/
     {
-        .name = "TFM_SST_TEST_PREPARE",
-        .partition_id = TFM_SP_SST_TEST,
-        .signal = TFM_SST_TEST_PREPARE_SIGNAL,
+        .name = "TFM_PS_TEST_PREPARE",
+        .partition_id = TFM_SP_PS_TEST,
+        .signal = TFM_PS_TEST_PREPARE_SIGNAL,
         .sid = 0x0000F0C0,
         .non_secure_client = false,
         .version = 1,
         .version_policy = TFM_VERSION_POLICY_STRICT
     },
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     /******** TFM_SP_SECURE_CLIENT_2 ********/
@@ -532,8 +532,8 @@ const struct tfm_spm_service_db_t service_db[] =
 /**************************************************************************/
 struct tfm_spm_service_t service[] =
 {
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    /******** TFM_SP_STORAGE ********/
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    /******** TFM_SP_PS ********/
     {
         .service_db = NULL,
         .partition = NULL,
@@ -569,7 +569,7 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     /******** TFM_SP_ITS ********/
@@ -891,8 +891,8 @@ struct tfm_spm_service_t service[] =
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-    /******** TFM_SP_SST_TEST ********/
+#ifdef TFM_PARTITION_TEST_PS
+    /******** TFM_SP_PS_TEST ********/
     {
         .service_db = NULL,
         .partition = NULL,
@@ -900,7 +900,7 @@ struct tfm_spm_service_t service[] =
         .msg_queue = {0},
         .list = {0},
     },
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     /******** TFM_SP_SECURE_CLIENT_2 ********/

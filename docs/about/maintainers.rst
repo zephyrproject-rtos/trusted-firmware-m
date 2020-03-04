@@ -33,8 +33,8 @@ Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
     :github: `tamban01 <https://github.com/tamban01>`__
 
-Secure Storage
-~~~~~~~~~~~~~~
+Secure Storage (ITS & PS)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__

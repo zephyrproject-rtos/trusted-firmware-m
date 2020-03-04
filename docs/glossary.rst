@@ -80,9 +80,13 @@ TF-M related
         A component within the TEE that is atomic from a security/trust point of
         view, i.e. which is viewed as a single entity from a TF-M point of view.
 
-    SST : TF-M related
-    Secure Storage Service
-        Secure storage service provided by TF-M.
+    PS : TF-M related
+    Protected Storage
+        Protected storage service provided by TF-M.
+
+    ITS : TF-M related
+    Internal Trusted Storage
+        Internal Trusted Storage service provided by TF-M.
 
     TFM
     TF-M

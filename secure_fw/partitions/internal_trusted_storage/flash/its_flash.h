@@ -29,10 +29,10 @@ extern "C" {
 #define ITS_FLASH_ALIGNMENT 1
 #endif
 
-#if (SST_FLASH_PROGRAM_UNIT <= 16)
-#define SST_FLASH_ALIGNMENT SST_FLASH_PROGRAM_UNIT
+#if (PS_FLASH_PROGRAM_UNIT <= 16)
+#define PS_FLASH_ALIGNMENT PS_FLASH_PROGRAM_UNIT
 #else
-#define SST_FLASH_ALIGNMENT 1
+#define PS_FLASH_ALIGNMENT 1
 #endif
 
 /**
@@ -40,7 +40,7 @@ extern "C" {
  *        by any flash device that can be accessed through this interface.
  */
 #define ITS_FLASH_MAX_ALIGNMENT ITS_UTILS_MAX(ITS_FLASH_ALIGNMENT, \
-                                              SST_FLASH_ALIGNMENT)
+                                              PS_FLASH_ALIGNMENT)
 
 /**
  * \brief Enumerates the available flash devices.

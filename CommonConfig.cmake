@@ -165,7 +165,7 @@ set (CORE_TEST_POSITIVE OFF)
 set (CORE_TEST_INTERACTIVE OFF)
 set (REFERENCE_PLATFORM OFF)
 set (TFM_PARTITION_TEST_SECURE_SERVICES OFF)
-set (TFM_PARTITION_TEST_SST OFF)
+set (TFM_PARTITION_TEST_PS OFF)
 set (SERVICES_TEST_ENABLED OFF)
 set (TEST_FRAMEWORK_S  OFF)
 set (TEST_FRAMEWORK_NS OFF)
@@ -179,9 +179,9 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	# Enable the TF-M Platform partition
 	set(TFM_PARTITION_PLATFORM ON)
 endif()
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	# Enable the TF-M secure storage partition
-	set(TFM_PARTITION_SECURE_STORAGE ON)
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	# Enable the TF-M Protected storage partition
+	set(TFM_PARTITION_PROTECTED_STORAGE ON)
 endif()
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 	# Enable the TF-M internal trusted storage partition
@@ -200,12 +200,12 @@ if (NOT TFM_LVL EQUAL 1 AND NOT DEFINED CONFIG_TFM_ENABLE_MEMORY_PROTECT)
 	set (CONFIG_TFM_ENABLE_MEMORY_PROTECT ON)
 endif()
 
-if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_PROTECTED_STORAGE)
 	#PSA Initial Attestation and Protected storage rely on Cryptography API
 	set(TFM_PARTITION_CRYPTO ON)
 endif()
 
-if (TFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_PROTECTED_STORAGE)
 	set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON)
 endif()
 
@@ -327,8 +327,8 @@ if (TFM_PARTITION_PLATFORM)
 	add_definitions(-DTFM_PARTITION_PLATFORM)
 endif()
 
-if (TFM_PARTITION_SECURE_STORAGE)
-	add_definitions(-DTFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_PROTECTED_STORAGE)
+	add_definitions(-DTFM_PARTITION_PROTECTED_STORAGE)
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -428,46 +428,46 @@ endif()
 ##Set Mbed Crypto compiler flags and variables for crypto service
 set(MBEDCRYPTO_C_FLAGS_SERVICES "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
-#Default TF-M secure storage flags.
+#Default TF-M protected storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
-#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.rst
-if (NOT DEFINED SST_ENCRYPTION)
-	set (SST_ENCRYPTION ON)
+#Documentation about these flags can be found in docs/user_guides/services/tfm_ps_integration_guide.rst
+if (NOT DEFINED PS_ENCRYPTION)
+	set (PS_ENCRYPTION ON)
 endif()
 
-if (NOT DEFINED SST_ROLLBACK_PROTECTION)
-	set (SST_ROLLBACK_PROTECTION OFF)
+if (NOT DEFINED PS_ROLLBACK_PROTECTION)
+	set (PS_ROLLBACK_PROTECTION OFF)
 endif()
 
-if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
-	set (SST_CREATE_FLASH_LAYOUT OFF)
+if (NOT DEFINED PS_CREATE_FLASH_LAYOUT)
+	set (PS_CREATE_FLASH_LAYOUT OFF)
 endif()
 
-if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
-	set (SST_VALIDATE_METADATA_FROM_FLASH ON)
+if (NOT DEFINED PS_VALIDATE_METADATA_FROM_FLASH)
+	set (PS_VALIDATE_METADATA_FROM_FLASH ON)
 endif()
 
-if (NOT DEFINED SST_RAM_FS)
+if (NOT DEFINED PS_RAM_FS)
 	if (REGRESSION)
-		set (SST_RAM_FS ON)
+		set (PS_RAM_FS ON)
 	else()
-		set (SST_RAM_FS OFF)
+		set (PS_RAM_FS OFF)
 	endif()
 endif()
 
-if (NOT DEFINED SST_TEST_NV_COUNTERS)
-	if (REGRESSION AND ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-		set(SST_TEST_NV_COUNTERS ON)
+if (NOT DEFINED PS_TEST_NV_COUNTERS)
+	if (REGRESSION AND ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+		set(PS_TEST_NV_COUNTERS ON)
 	else()
-		set(SST_TEST_NV_COUNTERS OFF)
+		set(PS_TEST_NV_COUNTERS OFF)
 	endif()
 endif()
 
-# The SST NV counter tests depend on the SST test partition to call
-# sst_system_prepare().
-if (SST_TEST_NV_COUNTERS)
-	set(TFM_PARTITION_TEST_SST ON)
-	add_definitions(-DTFM_PARTITION_TEST_SST)
+# The PS NV counter tests depend on the PS test partition to call
+# ps_system_prepare().
+if (PS_TEST_NV_COUNTERS)
+	set(TFM_PARTITION_TEST_PS ON)
+	add_definitions(-DTFM_PARTITION_TEST_PS)
 endif()
 
 #Default TF-M internal trusted storage flags.

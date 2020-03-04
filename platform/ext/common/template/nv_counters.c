@@ -6,8 +6,8 @@
  */
 
 /* NOTE: This API should be implemented by platform vendor. For the security of
- * the secure storage system's and the bootloader's rollback protection etc. it
- * is CRITICAL to use a internal (in-die) persistent memory for multiple time
+ * the protected storage system's and the bootloader's rollback protection etc.
+ * it is CRITICAL to use a internal (in-die) persistent memory for multiple time
  * programmable (MTP) non-volatile counters or use a One-time Programmable (OTP)
  * non-volatile counters solution.
  *

@@ -67,7 +67,7 @@ have to be provided, e.g. to blink LEDs or count time in the MPS2 board.
 
 .. Note::
 
-    Currently SST and BL2 bootloader use different flash interface
+    Currently ITS, PS and BL2 bootloader use different flash interface
 
 Target configuration files
 ==========================
@@ -104,13 +104,13 @@ The files needed for the interface with TF-M are exported at the
 ``<build_dir>/install/export/tfm`` path. The NS side is only allowed to call
 TF-M secure functions (veneers) from the NS Thread mode. For this reason, the
 API is a collection of functions in the ``<build_dir>/install/export/tfm/inc``
-directory. For example, the interface for the Secure STorage (SST) service
-is described in the file ``psa_sst_api.h`` as a collection of functions that
+directory. For example, the interface for the Protected Storage (PS) service
+is described in the file ``psa_ps_api.h`` as a collection of functions that
 call service veneer functions. This API is a wrapper for the secure veneers,
 and returns the return value from the service to the caller.
 
-The secure storage service uses a numerical ID, to identify the clients that use
-the service. For details see
+The protected storage service uses a numerical ID, to identify the clients that
+use the service. For details see
 :doc:`ns client identification documentation <tfm_ns_client_identification>`.
 
 Interface with non-secure world regression tests
@@ -123,7 +123,7 @@ i.e. ``<build_dir>/install/export/tfm/test/inc``. The non-secure regression
 tests are precompiled and delivered as a static library which is available in
 ``<build_dir>/install/export/tfm/test/lib``, so that the non-secure application
 needs to link against the library to be able to invoke the
-``tfm_non_secure_client_run_tests()`` function. The SST non-secure side
+``tfm_non_secure_client_run_tests()`` function. The PS non-secure side
 regression tests rely on some OS functionality e.g. threads, mutexes etc. These
 functions comply with CMSIS RTOS2 standard and have been exported as thin
 wrappers defined in ``os_wrapper.h`` contained in
@@ -148,4 +148,4 @@ interrupt.
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

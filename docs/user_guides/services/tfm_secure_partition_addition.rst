@@ -152,7 +152,7 @@ Here is the Secure Partition ID table used in TF-M.
     **Partition name**              **Partition ID**
    =============================== =================
    Reserved                        0-255
-   TFM_SP_STORAGE                  256
+   TFM_SP_PS                       256
    TFM_SP_ITS                      257
    TFM_SP_AUDIT_LOG                258
    TFM_SP_CRYPTO                   259
@@ -164,7 +164,7 @@ Here is the Secure Partition ID table used in TF-M.
    TFM_SP_IPC_SERVICE_TEST         265
    TFM_SP_IPC_CLIENT_TEST          266
    TFM_IRQ_TEST_1                  267
-   TFM_SP_SST_TEST                 268
+   TFM_SP_PS_TEST                  268
    =============================== =================
 
 About where to add the definition, please refer to the chapter `Add
@@ -188,7 +188,7 @@ Here is the RoT Service ID table used in TF-M.
    audit_logging               0x00000                0x000-0x01F
    initial_attestation         0x00000                0x020-0x03F
    platform                    0x00000                0x040-0x05F
-   secure_storage              0x00000                0x060-0x07F
+   protected_storage           0x00000                0x060-0x07F
    crypto                      0x00000                0x080-0x09F
    internal_trusted_storage    0x00000                0x0A0-0x0BF
    test_secure_service         0x0000F                0x000-0x01F
@@ -197,7 +197,7 @@ Here is the RoT Service ID table used in TF-M.
    tfm_ipc_client              0x0000F                0x060-0x07F
    tfm_ipc_service             0x0000F                0x080-0x09F
    tfm_irq_test_service_1      0x0000F                0x0A0-0x0BF
-   tfm_sst_test_service        0x0000F                0x0C0-0x0DF
+   tfm_ps_test_service         0x0000F                0x0C0-0x0DF
    =========================== ====================== ========================
 
 mmio_regions

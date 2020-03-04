@@ -10,14 +10,14 @@
 #include "tfm_secure_api.h"
 #include "tfm/spm_partition_defs.h"
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-/******** TFM_SP_STORAGE ********/
-psa_status_t tfm_sst_set_req(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_sst_get_req(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_sst_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_sst_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
-psa_status_t tfm_sst_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+/******** TFM_SP_PS ********/
+psa_status_t tfm_ps_set_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_ps_get_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_ps_get_info_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_ps_remove_req(psa_invec *, size_t, psa_outvec *, size_t);
+psa_status_t tfm_ps_get_support_req(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /******** TFM_SP_ITS ********/
@@ -153,10 +153,10 @@ psa_status_t spm_irq_test_1_prepare_test_scenario(psa_invec *, size_t, psa_outve
 psa_status_t spm_irq_test_1_execute_test_scenario(psa_invec *, size_t, psa_outvec *, size_t);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-/******** TFM_SP_SST_TEST ********/
-psa_status_t tfm_sst_test_prepare(psa_invec *, size_t, psa_outvec *, size_t);
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+/******** TFM_SP_PS_TEST ********/
+psa_status_t tfm_ps_test_prepare(psa_invec *, size_t, psa_outvec *, size_t);
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_CLIENT_2 ********/
@@ -183,14 +183,14 @@ psa_status_t tfm_secure_client_2_call(psa_invec *, size_t, psa_outvec *, size_t)
                                    in_vec, in_len, out_vec, out_len); \
     }
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-/******** TFM_SP_STORAGE ********/
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_set_req)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_req)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_info_req)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_remove_req)
-TFM_VENEER_FUNCTION(TFM_SP_STORAGE, tfm_sst_get_support_req)
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+/******** TFM_SP_PS ********/
+TFM_VENEER_FUNCTION(TFM_SP_PS, tfm_ps_set_req)
+TFM_VENEER_FUNCTION(TFM_SP_PS, tfm_ps_get_req)
+TFM_VENEER_FUNCTION(TFM_SP_PS, tfm_ps_get_info_req)
+TFM_VENEER_FUNCTION(TFM_SP_PS, tfm_ps_remove_req)
+TFM_VENEER_FUNCTION(TFM_SP_PS, tfm_ps_get_support_req)
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /******** TFM_SP_ITS ********/
@@ -326,10 +326,10 @@ TFM_VENEER_FUNCTION(TFM_IRQ_TEST_1, spm_irq_test_1_prepare_test_scenario)
 TFM_VENEER_FUNCTION(TFM_IRQ_TEST_1, spm_irq_test_1_execute_test_scenario)
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-/******** TFM_SP_SST_TEST ********/
-TFM_VENEER_FUNCTION(TFM_SP_SST_TEST, tfm_sst_test_prepare)
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+/******** TFM_SP_PS_TEST ********/
+TFM_VENEER_FUNCTION(TFM_SP_PS_TEST, tfm_ps_test_prepare)
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 /******** TFM_SP_SECURE_CLIENT_2 ********/

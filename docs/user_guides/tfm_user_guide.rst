@@ -131,30 +131,30 @@ port (baud 115200 8n1) the following messages::
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
 
-    #### Execute test suites for the secure storage service ####
-    Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
+    #### Execute test suites for the protected storage service ####
+    Running Test Suite PS secure interface tests (TFM_PS_TEST_2XXX)...
 
-    > Executing 'TFM_SST_TEST_2001'
+    > Executing 'TFM_PS_TEST_2001'
       Description: 'Create interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2002'
+    > Executing 'TFM_PS_TEST_2002'
       Description: 'Get handle interface (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2003'
+    > Executing 'TFM_PS_TEST_2003'
       Description: 'Get handle with null handle pointer (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2004'
+    > Executing 'TFM_PS_TEST_2004'
       Description: 'Write interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2005'
+    > Executing 'TFM_PS_TEST_2005'
       Description: 'Read interface'
     ....
 
 .. Note::
 
-    SST reliability tests take a few minutes to run on the MPS2.
+    PS reliability tests take a few minutes to run on the MPS2.
 
 Example application without BL2 bootloader
 ------------------------------------------
@@ -187,24 +187,24 @@ port (baud 115200 8n1) the following messages::
 
     [Sec Thread] Secure image initializing!
 
-    #### Execute test suites for the secure storage service ####
-    Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
+    #### Execute test suites for the protected storage service ####
+    Running Test Suite PS secure interface tests (TFM_PS_TEST_2XXX)...
 
-    > Executing 'TFM_SST_TEST_2001'
+    > Executing 'TFM_PS_TEST_2001'
       Description: 'Create interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2002'
+    > Executing 'TFM_PS_TEST_2002'
       Description: 'Get handle interface (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2003'
+    > Executing 'TFM_PS_TEST_2003'
       Description: 'Get handle with null handle pointer (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2004'
+    > Executing 'TFM_PS_TEST_2004'
       Description: 'Write interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2005'
+    > Executing 'TFM_PS_TEST_2005'
       Description: 'Read interface'
     ....
 
@@ -286,23 +286,23 @@ DAPLink UART (baud 115200 8n1)::
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
 
-    #### Execute test suites for the secure storage service ####
-    Running Test Suite SST secure interface tests (TFM_SST_TEST_2XXX)...
-    > Executing 'TFM_SST_TEST_2001'
+    #### Execute test suites for the protected storage service ####
+    Running Test Suite PS secure interface tests (TFM_PS_TEST_2XXX)...
+    > Executing 'TFM_PS_TEST_2001'
       Description: 'Create interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2002'
+    > Executing 'TFM_PS_TEST_2002'
       Description: 'Get handle interface (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2003'
+    > Executing 'TFM_PS_TEST_2003'
       Description: 'Get handle with null handle pointer (DEPRECATED)'
     This test is DEPRECATED and the test execution was SKIPPED
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2004'
+    > Executing 'TFM_PS_TEST_2004'
       Description: 'Get attributes interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2005'
+    > Executing 'TFM_PS_TEST_2005'
       Description: 'Get attributes with null attributes struct pointer'
     ....
 
@@ -396,17 +396,17 @@ port (baud 115200 8n1) the following messages::
     [Sec Thread] Secure image initializing!
 
     #### Execute test suites for the Secure area ####
-    Running Test Suite PSA protected storage S interface tests (TFM_SST_TEST_2XXX)...
-    > Executing 'TFM_SST_TEST_2001'
+    Running Test Suite PSA protected storage S interface tests (TFM_PS_TEST_2XXX)...
+    > Executing 'TFM_PS_TEST_2001'
       Description: 'Set interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2002'
+    > Executing 'TFM_PS_TEST_2002'
       Description: 'Set interface with create flags'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2003'
+    > Executing 'TFM_PS_TEST_2003'
       Description: 'Set interface with NULL data pointer'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2004'
+    > Executing 'TFM_PS_TEST_2004'
       Description: 'Set interface with invalid data length'
       TEST PASSED!
     ....
@@ -449,17 +449,17 @@ port (baud 115200 8n1) the following messages::
     [Sec Thread] Secure image initializing!
 
     #### Execute test suites for the Secure area ####
-    Running Test Suite PSA protected storage S interface tests (TFM_SST_TEST_2XXX)...
-    > Executing 'TFM_SST_TEST_2001'
+    Running Test Suite PSA protected storage S interface tests (TFM_PS_TEST_2XXX)...
+    > Executing 'TFM_PS_TEST_2001'
       Description: 'Set interface'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2002'
+    > Executing 'TFM_PS_TEST_2002'
       Description: 'Set interface with create flags'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2003'
+    > Executing 'TFM_PS_TEST_2003'
       Description: 'Set interface with NULL data pointer'
       TEST PASSED!
-    > Executing 'TFM_SST_TEST_2004'
+    > Executing 'TFM_PS_TEST_2004'
       Description: 'Set interface with invalid data length'
       TEST PASSED!
     ....

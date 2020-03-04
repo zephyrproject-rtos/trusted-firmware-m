@@ -440,7 +440,7 @@ run the following commands:
             -c "init; reset init; flash write_image erase ${BUILD_DIR}/tfm_ns_signed.hex" \
             -c "resume; reset; exit"
 
-Optionally, erase SST partition:
+Optionally, erase PS partition:
 
 .. code-block:: bash
 
@@ -452,7 +452,7 @@ Optionally, erase SST partition:
             -c "flash erase_address 0x101c0000 0x10000" \
             -c "shutdown"
 
-Note that the ``0x101C0000`` in the command above must match the SST start
+Note that the ``0x101C0000`` in the command above must match the PS start
 address of the secure primary image specified in the file:
 
     platform/ext/target/cypress/psoc64/partition/flash_layout.h
@@ -492,7 +492,7 @@ run the following commands:
             -c "flash write_image erase ${BUILD_DIR}/tfm_ns.hex" \
             -c "reset run"
 
-Optionally, erase SST partition:
+Optionally, erase PS partition:
 
 .. code-block:: bash
 
@@ -504,7 +504,7 @@ Optionally, erase SST partition:
             -c "flash erase_address 0x101c0000 0x10000" \
             -c "shutdown"
 
-Note that the ``0x101C0000`` in the command above must match the SST start
+Note that the ``0x101C0000`` in the command above must match the PS start
 address of the secure primary image specified in the file:
 
     platform/ext/target/cypress/psoc64/partition/flash_layout.h
@@ -532,7 +532,7 @@ run the following commands:
 
     pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_ns.hex
 
-Optionally, erase SST partition:
+Optionally, erase PS partition:
 
 .. code-block:: bash
 

@@ -41,8 +41,8 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PROTECTED_STORAGE is undefined.")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -69,8 +69,8 @@ if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_TEST_SST)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
+if (NOT DEFINED TFM_PARTITION_TEST_PS)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_PS is undefined.")
 endif()
 
 if (NOT DEFINED TEST_FRAMEWORK_S)
@@ -241,9 +241,9 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INITIAL_ATTESTATION")
 	endif()
 
-	if (TFM_PARTITION_SECURE_STORAGE)
+	if (TFM_PARTITION_PROTECTED_STORAGE)
 		target_link_libraries(${EXE_NAME} tfm_storage)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_SECURE_STORAGE")
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PROTECTED_STORAGE")
 	endif()
 
 	if (TFM_PARTITION_CRYPTO)
@@ -287,8 +287,8 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE_IPC")
 	endif()
 
-	if (TFM_PARTITION_TEST_SST)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SST")
+	if (TFM_PARTITION_TEST_PS)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_PS")
 	endif()
 
 	if (TEST_FRAMEWORK_S)
@@ -400,14 +400,14 @@ function(set_up_secure_fw_build)
 				DESTINATION ${EXPORT_SRC_DIR})
 	endif()
 
-	if (TFM_PARTITION_SECURE_STORAGE)
+	if (TFM_PARTITION_PROTECTED_STORAGE)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
 				DESTINATION ${EXPORT_INC_DIR}/psa)
 		if (TFM_PSA_API)
-			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
 		else()
-			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_func_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
 		endif()
 	endif()
@@ -506,9 +506,9 @@ if (TFM_PARTITION_CRYPTO)
 	add_subdirectory(${SECURE_FW_DIR}/partitions/crypto)
 endif()
 
-#Add the secure storage library target
-if (TFM_PARTITION_SECURE_STORAGE)
-	add_subdirectory(${SECURE_FW_DIR}/partitions/secure_storage)
+#Add the protected storage library target
+if (TFM_PARTITION_PROTECTED_STORAGE)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/protected_storage)
 endif()
 
 #Add the internal trusted storage library target

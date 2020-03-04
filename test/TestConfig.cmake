@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-option(ENABLE_SECURE_STORAGE_SERVICE_TESTS "Option for secure storage service tests" TRUE)
+option(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS "Option for protected storage service tests" TRUE)
 option(ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS "Option for internal trusted storage services tests" TRUE)
 option(ENABLE_AUDIT_LOGGING_SERVICE_TESTS "Option for audit logging service tests" TRUE)
 option(ENABLE_CRYPTO_SERVICE_TESTS "Option for crypto service tests" TRUE)
@@ -15,8 +15,8 @@ option(ENABLE_QCBOR_TESTS "Option for QCBOR tests" TRUE)
 option(ENABLE_T_COSE_TESTS "Option for T_COSE tests" TRUE)
 
 # If a partition is not enabled, then neither should its tests.
-if (NOT TFM_PARTITION_SECURE_STORAGE)
-	set(ENABLE_SECURE_STORAGE_SERVICE_TESTS FALSE)
+if (NOT TFM_PARTITION_PROTECTED_STORAGE)
+	set(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS FALSE)
 endif()
 
 if (NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)

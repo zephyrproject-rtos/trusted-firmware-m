@@ -91,7 +91,7 @@ API compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``,
 file. The build system assumes that the PSA API compliance test suite is checked
 out at the same level of the TF-M root folder and the default name for the build
 folder has been used when compiling the PSA API compliance tests. Each set of
-tests for the Internal Trusted Storage, Secure Storage, Crypto and Attestation
+tests for the Internal Trusted Storage, Protected Storage, Crypto and Attestation
 services needs to be enabled at the build configuration step by defining::
 
     -DPSA_API_TEST_INTERNAL_TRUSTED_STORAGE=ON

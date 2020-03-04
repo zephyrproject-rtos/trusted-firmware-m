@@ -63,8 +63,8 @@ set(TFM_PARTITION_AUDIT_LOG OFF)
 # Disable Platform service
 set(TFM_PARTITION_PLATFORM OFF)
 
-# Disable Secure Storage service
-set(TFM_PARTITION_SECURE_STORAGE OFF)
+# Disable Protected Storage service
+set(TFM_PARTITION_PROTECTED_STORAGE OFF)
 
 # Disable Initial Attestation service temporarily
 set(TFM_PARTITION_INITIAL_ATTESTATION OFF)

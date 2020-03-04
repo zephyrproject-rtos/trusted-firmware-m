@@ -115,7 +115,7 @@ Core Files
 - ``tfm_internal_trusted_storage.c`` - Contains the TF-M internal trusted
   storage API implementations which are the entry points to the ITS service.
   Allocates a filesystem context for ITS and makes appropriate fs calls. Also
-  handles requests from the SST partition with a separate fs context.
+  handles requests from the PS partition with a separate fs context.
 
 - ``its_utils.c`` - Contains common and basic functionalities used across the
   ITS service code.
@@ -170,7 +170,7 @@ Flash Interface
 
 - ``flash/its_flash_info_external.c`` - Defines an instance of the
   ``struct its_flash_info_t`` type for the external flash device, used only to
-  handle requests from the SST partition.
+  handle requests from the PS partition.
 
 The CMSIS flash interface **must** be implemented for each target based on its
 flash controller.

@@ -1,7 +1,7 @@
 ###########################
 Non-Secure Identity Manager
 ###########################
-The ID of the current application/thread is known by TF-M, and the SST service
+The ID of the current application/thread is known by TF-M, and the PS service
 queries the ID of the currently running client via a dedicated API.
 
 The identity of secure clients can be tracked by TF-M core, because it also
@@ -40,4 +40,4 @@ client ID to it automatically.
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*

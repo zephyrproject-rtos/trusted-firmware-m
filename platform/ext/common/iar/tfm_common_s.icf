@@ -110,12 +110,12 @@ define block TFM_SP_IPC_SERVICE_TEST_LINKER with alignment = 32 {
     };
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-define block TFM_SP_SST_TEST_LINKER with alignment = 32 {
-        ro object *tfm_sst_test_service.*,
-        section TFM_SP_SST_TEST_ATTR_FN
+#ifdef TFM_PARTITION_TEST_PS
+define block TFM_SP_PS_TEST_LINKER with alignment = 32 {
+        ro object *tfm_ps_test_service.*,
+        section TFM_SP_PS_TEST_ATTR_FN
     };
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -130,12 +130,12 @@ define block TFM_PSA_CODE_END with alignment = 32, size = 0 { };
      */
 define block TFM_APP_CODE_START with alignment = 32, size = 0 { };
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-define block TFM_SP_STORAGE_LINKER with alignment = 32 {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+define block TFM_SP_PS_LINKER with alignment = 32 {
         ro object *tfm_storage*,
-        ro object *test_sst_nv_counters.*,
+        ro object *test_ps_nv_counters.*,
     };
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
 define block TFM_SP_CORE_TEST_2_LINKER with alignment = 32 {
@@ -199,16 +199,16 @@ define block TFM_UNPRIV_DATA with alignment = 32 {
 
 define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-define block TFM_SP_STORAGE_LINKER_DATA with alignment = 32 {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+define block TFM_SP_PS_LINKER_DATA with alignment = 32 {
         rw object *tfm_storage*,
-        rw object *test_sst_nv_counters.*,
+        rw object *test_ps_nv_counters.*,
     };
 
 #if defined (TFM_PSA_API)
-define block TFM_SP_STORAGE_LINKER_STACK with alignment = 128, size = 0x800 { };
+define block TFM_SP_PS_LINKER_STACK with alignment = 128, size = 0x800 { };
 #endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
 define block TFM_SP_CORE_TEST_2_LINKER_DATA with alignment = 32 {
@@ -393,15 +393,15 @@ define block TFM_SP_IPC_SERVICE_TEST_LINKER_STACK with alignment = 128, size = 0
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-define block TFM_SP_SST_TEST_LINKER_DATA with alignment = 32 {
-        rw object *tfm_sst_test_service.*,
+#ifdef TFM_PARTITION_TEST_PS
+define block TFM_SP_PS_TEST_LINKER_DATA with alignment = 32 {
+        rw object *tfm_ps_test_service.*,
     };
 
 #if defined (TFM_PSA_API)
-define block TFM_SP_SST_TEST_LINKER_STACK with alignment = 128, size = 0x500 { };
+define block TFM_SP_PS_TEST_LINKER_STACK with alignment = 128, size = 0x500 { };
 #endif
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 
     /*
@@ -444,9 +444,9 @@ define block LR_CODE with fixed order {
 #ifdef TFM_PARTITION_TEST_CORE_IPC
        block TFM_SP_IPC_SERVICE_TEST_LINKER,
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
-#ifdef TFM_PARTITION_TEST_SST
-       block TFM_SP_SST_TEST_LINKER,
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+       block TFM_SP_PS_TEST_LINKER,
+#endif /* TFM_PARTITION_TEST_PS */
 
        block TFM_PSA_CODE_END,
 
@@ -456,9 +456,9 @@ define block LR_CODE with fixed order {
      * of APP RoT code.
      */
        block TFM_APP_CODE_START,
-#ifdef TFM_PARTITION_SECURE_STORAGE
-       block TFM_SP_STORAGE_LINKER,
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+       block TFM_SP_PS_LINKER,
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
        block TFM_SP_CORE_TEST_2_LINKER,
@@ -532,13 +532,13 @@ define block DATA with fixed order {
      */
     block TFM_APP_RW_STACK_START,
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    block TFM_SP_STORAGE_LINKER_DATA,
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    block TFM_SP_PS_LINKER_DATA,
 
 #if defined (TFM_PSA_API)
-    block TFM_SP_STORAGE_LINKER_STACK,
+    block TFM_SP_PS_LINKER_STACK,
 #endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     block TFM_SP_CORE_TEST_2_LINKER_DATA,
@@ -677,13 +677,13 @@ define block DATA with fixed order {
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-    block TFM_SP_SST_TEST_LINKER_DATA,
+#ifdef TFM_PARTITION_TEST_PS
+    block TFM_SP_PS_TEST_LINKER_DATA,
 
 #if defined (TFM_PSA_API)
-    block TFM_SP_SST_TEST_LINKER_STACK,
+    block TFM_SP_PS_TEST_LINKER_STACK,
 #endif
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /*
      * This empty, zero long execution region is here to mark the end address

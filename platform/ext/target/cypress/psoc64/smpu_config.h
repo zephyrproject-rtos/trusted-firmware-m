@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -119,7 +119,7 @@
 #error "Flash layout has changed - SMPU2_REGIONSIZE isn't FLASH_NV_COUNTERS_AREA_SIZE"
 #endif
 
-/* SMPU3 - SST in Flash */
+/* SMPU3 - PS in Flash */
 #define SMPU3_BASE         S_ROM_ALIAS(0x1c8000)
 #define SMPU3_REGIONSIZE   PROT_SIZE_32KB_BIT_SHIFT
 #define SMPU3_SUBREGION_DIS (CY_PROT_SUBREGION_DIS0 | \
@@ -143,17 +143,17 @@
 #endif
 
 /*
- * SST_FLASH_AREA_ADDR must equal the base address of subregion 3 of
+ * PS_FLASH_AREA_ADDR must equal the base address of subregion 3 of
  * SMPU3
  */
-#if S_ROM_ALIAS(SST_FLASH_AREA_ADDR) != (SMPU3_BASE + \
+#if S_ROM_ALIAS(PS_FLASH_AREA_ADDR) != (SMPU3_BASE + \
                           (3 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8))
 #error "Flash layout has changed - S_DATA_PRIV_START isn't subregion 3 of SMPU3"
 #endif
 
-/* Should exactly cover the SST region */
-#if FLASH_SST_AREA_SIZE != (5 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8)
-#error "Flash layout has changed - SMPU3_REGIONSIZE isn't FLASH_SST_AREA_SIZE"
+/* Should exactly cover the PS region */
+#if FLASH_PS_AREA_SIZE != (5 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8)
+#error "Flash layout has changed - SMPU3_REGIONSIZE isn't FLASH_PS_AREA_SIZE"
 #endif
 
 /* SMPU6 - 32KB of unprivileged secure data in SRAM */

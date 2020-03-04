@@ -63,11 +63,11 @@ elseif (TFM_PARTITION_TEST_CORE_IPC)
 		)
 endif()
 
-if (NOT DEFINED TFM_PARTITION_TEST_SST)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
-elseif (TFM_PARTITION_TEST_SST)
-	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_sst_test_service/tfm_sst_test_service.c"
-		"${CORE_TEST_DIR}/tfm_sst_test_service/tfm_sst_test_service_api.c")
+if (NOT DEFINED TFM_PARTITION_TEST_PS)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_PS is undefined.")
+elseif (TFM_PARTITION_TEST_PS)
+	list(APPEND ALL_SRC_C_S "${CORE_TEST_DIR}/tfm_ps_test_service/tfm_ps_test_service.c"
+		"${CORE_TEST_DIR}/tfm_ps_test_service/tfm_ps_test_service_api.c")
 endif()
 
 if (NOT DEFINED TFM_MULTI_CORE_TEST)

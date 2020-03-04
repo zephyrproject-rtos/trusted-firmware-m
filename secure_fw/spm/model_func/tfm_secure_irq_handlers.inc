@@ -7,7 +7,7 @@
 
 /*********** WARNING: This is an auto-generated file. Do not edit! ***********/
 
-#include "secure_fw/partitions/secure_storage/psa_manifest/tfm_secure_storage.h"
+#include "secure_fw/partitions/protected_storage/psa_manifest/tfm_protected_storage.h"
 #include "secure_fw/partitions/internal_trusted_storage/psa_manifest/tfm_internal_trusted_storage.h"
 #include "secure_fw/partitions/audit_logging/psa_manifest/tfm_audit_logging.h"
 #include "secure_fw/partitions/crypto/psa_manifest/tfm_crypto.h"
@@ -19,7 +19,7 @@
 #include "test/test_services/tfm_ipc_service/psa_manifest/tfm_ipc_service_partition.h"
 #include "test/test_services/tfm_ipc_client/psa_manifest/tfm_ipc_client_partition.h"
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
-#include "test/test_services/tfm_sst_test_service/psa_manifest/tfm_sst_test_service.h"
+#include "test/test_services/tfm_ps_test_service/psa_manifest/tfm_ps_test_service.h"
 #include "test/test_services/tfm_secure_client_2/psa_manifest/tfm_secure_client_2.h"
 #include "test/test_services/tfm_multi_core_test/psa_manifest/tfm_multi_core_test.h"
 #include "psa_manifest/pid.h"

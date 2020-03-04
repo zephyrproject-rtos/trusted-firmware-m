@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@
  *  0x101c_0000 Internal Trusted Storage Area (16 KB)
  *  0x101c_4000 NV counters area (1 KB)
  *  0x101c_4400 Scratch area (27 KB)
- *  0x101c_b000 Secure Storage Area (20 KB)
+ *  0x101c_b000 Protected Storage Area (20 KB)
  *  0x101d_0000 Reserved (192 KB)
  * 0x101f_ffff End of Flash
  *
@@ -84,10 +84,10 @@
                                          FLASH_NV_COUNTERS_AREA_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE         (0x6c00)   /* 27 KB */
 
-/* Secure Storage Area */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+/* Protected Storage Area */
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+#define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
 
 #define FLASH_AREA_SYSTEM_RESERVED_SIZE (0x30000) /* 192 KB */
 
@@ -108,39 +108,39 @@
 #define FLASH_RESERVED_AREA_SIZE        (FLASH_ITS_AREA_SIZE + \
                                          FLASH_NV_COUNTERS_AREA_SIZE + \
                                          FLASH_AREA_SCRATCH_SIZE + \
-                                         FLASH_SST_AREA_SIZE + \
+                                         FLASH_PS_AREA_SIZE + \
                                          FLASH_AREA_SYSTEM_RESERVED_SIZE)
 
 #if (FLASH_RESERVED_AREA_OFFSET + FLASH_RESERVED_AREA_SIZE) > (FLASH_TOTAL_SIZE)
 #error "Out of Flash memory"
 #endif
 
-/* Flash device name used by BL2 and SST
+/* Flash device name used by BL2 and PS
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
 
-/* Secure Storage (SST) Service definitions
+/* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
- * TF-M SST Integration Guide.
+ * TF-M PS Integration Guide.
  */
-#define SST_FLASH_DEV_NAME Driver_FLASH0
+#define PS_FLASH_DEV_NAME Driver_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
  */
-#define SST_FLASH_AREA_ADDR     FLASH_SST_AREA_OFFSET
-/* Dedicated flash area for SST */
-#define SST_FLASH_AREA_SIZE     FLASH_SST_AREA_SIZE
-#define SST_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
-/* Number of SST_SECTOR_SIZE per block */
-#define SST_SECTORS_PER_BLOCK   0x8
+#define PS_FLASH_AREA_ADDR     FLASH_PS_AREA_OFFSET
+/* Dedicated flash area for PS */
+#define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+/* Number of PS_SECTOR_SIZE per block */
+#define PS_SECTORS_PER_BLOCK   0x8
 /* Specifies the smallest flash programmable unit in bytes */
-#define SST_FLASH_PROGRAM_UNIT  0x1
-/* The maximum asset size to be stored in the SST area */
-#define SST_MAX_ASSET_SIZE      2048
-/* The maximum number of assets to be stored in the SST area */
-#define SST_NUM_ASSETS          10
+#define PS_FLASH_PROGRAM_UNIT  0x1
+/* The maximum asset size to be stored in the PS area */
+#define PS_MAX_ASSET_SIZE      2048
+/* The maximum number of assets to be stored in the PS area */
+#define PS_NUM_ASSETS          10
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the

@@ -12,7 +12,7 @@
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
 #include "its_utils.h"
-#include "sst_object_defs.h"
+#include "ps_object_defs.h"
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"

@@ -33,11 +33,11 @@ static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
 
 static its_flash_fs_ctx_t fs_ctx_its;
-static its_flash_fs_ctx_t fs_ctx_sst;
+static its_flash_fs_ctx_t fs_ctx_ps;
 
 static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
 {
-    return (client_id == TFM_SP_STORAGE) ? &fs_ctx_sst : &fs_ctx_its;
+    return (client_id == TFM_SP_PS) ? &fs_ctx_ps : &fs_ctx_its;
 }
 
 /**
@@ -89,35 +89,35 @@ psa_status_t tfm_its_init(void)
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
-    /* Initialise the SST context */
-    status = its_flash_fs_prepare(&fs_ctx_sst,
+    /* Initialise the PS context */
+    status = its_flash_fs_prepare(&fs_ctx_ps,
                                   its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
-#ifdef SST_CREATE_FLASH_LAYOUT
-    /* If SST_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
-     * create a SST flash layout. SST service will generate an empty and valid
-     * SST flash layout to store assets. It will erase all data located in the
-     * assigned SST memory area before generating the SST layout.
-     * This flag is required to be set if the SST memory area is located in
+#ifdef PS_CREATE_FLASH_LAYOUT
+    /* If PS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+     * create a PS flash layout. PS service will generate an empty and valid
+     * PS flash layout to store assets. It will erase all data located in the
+     * assigned PS memory area before generating the PS layout.
+     * This flag is required to be set if the PS memory area is located in
      * non-persistent memory.
-     * This flag can be set if the SST memory area is located in persistent
-     * memory without a previous valid SST flash layout in it. That is the case
-     * when it is the first time in the device life that the SST service is
+     * This flag can be set if the PS memory area is located in persistent
+     * memory without a previous valid PS flash layout in it. That is the case
+     * when it is the first time in the device life that the PS service is
      * executed.
      */
      if (status != PSA_SUCCESS) {
-        /* Remove all data in the SST memory area and create a valid SST flash
+        /* Remove all data in the PS memory area and create a valid PS flash
          * layout in that area.
          */
-        status = its_flash_fs_wipe_all(&fs_ctx_sst);
+        status = its_flash_fs_wipe_all(&fs_ctx_ps);
         if (status != PSA_SUCCESS) {
             return status;
         }
 
         /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx_sst,
+        status = its_flash_fs_prepare(&fs_ctx_ps,
                                      its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
     }
-#endif /* SST_CREATE_FLASH_LAYOUT */
+#endif /* PS_CREATE_FLASH_LAYOUT */
 
     return status;
 }
@@ -219,12 +219,12 @@ psa_status_t tfm_its_get(int32_t client_id,
     psa_status_t status;
     size_t read_size;
 
-#ifdef TFM_PARTITION_TEST_SST
-    /* The SST test partiton can call tfm_its_get() through SST code. Treat it
-     * as if it were SST.
+#ifdef TFM_PARTITION_TEST_PS
+    /* The PS test partition can call tfm_its_get() through PS code. Treat it
+     * as if it were PS.
      */
-    if (client_id == TFM_SP_SST_TEST) {
-        client_id = TFM_SP_STORAGE;
+    if (client_id == TFM_SP_PS_TEST) {
+        client_id = TFM_SP_PS;
     }
 #endif
 
@@ -312,12 +312,12 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
 {
     psa_status_t status;
 
-#ifdef TFM_PARTITION_TEST_SST
-    /* The SST test partiton can call tfm_its_remove() through SST code. Treat
-     * it as if it were SST.
+#ifdef TFM_PARTITION_TEST_PS
+    /* The PS test partition can call tfm_its_remove() through PS code. Treat
+     * it as if it were PS.
      */
-    if (client_id == TFM_SP_SST_TEST) {
-        client_id = TFM_SP_STORAGE;
+    if (client_id == TFM_SP_PS_TEST) {
+        client_id = TFM_SP_PS;
     }
 #endif
 

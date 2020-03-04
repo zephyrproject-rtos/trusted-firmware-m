@@ -16,9 +16,9 @@
 /**************************************************************************/
 /** IRQ count per partition */
 /**************************************************************************/
-#ifdef TFM_PARTITION_SECURE_STORAGE
-#define TFM_PARTITION_TFM_SP_STORAGE_IRQ_COUNT 0
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+#define TFM_PARTITION_TFM_SP_PS_IRQ_COUNT 0
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 #define TFM_PARTITION_TFM_SP_ITS_IRQ_COUNT 0
@@ -64,9 +64,9 @@
 #define TFM_PARTITION_TFM_IRQ_TEST_1_IRQ_COUNT 1
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-#define TFM_PARTITION_TFM_SP_SST_TEST_IRQ_COUNT 0
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+#define TFM_PARTITION_TFM_SP_PS_TEST_IRQ_COUNT 0
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 #define TFM_PARTITION_TFM_SP_SECURE_CLIENT_2_IRQ_COUNT 0
@@ -81,9 +81,9 @@
 /**************************************************************************/
 extern void tfm_nspm_thread_entry(void);
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-extern void tfm_sst_req_mngr_init(void);
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+extern void tfm_ps_req_mngr_init(void);
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 extern void tfm_its_req_mngr_init(void);
@@ -129,9 +129,9 @@ extern void ipc_client_test_main(void);
 extern void tfm_irq_test_1_init(void);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-extern void tfm_sst_test_init(void);
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+extern void tfm_ps_test_init(void);
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 extern void tfm_secure_client_2_init(void);
@@ -147,18 +147,18 @@ extern void multi_core_test_main(void);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$Base);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$Limit);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$RW$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Limit);
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, $$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, $$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 REGION_DECLARE(Image$$, TFM_SP_ITS_LINKER, $$Base);
@@ -303,18 +303,18 @@ REGION_DECLARE(Image$$, TFM_IRQ_TEST_1_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_IRQ_TEST_1_LINKER, _STACK$$ZI$$Limit);
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, $$Base);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, $$Limit);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _DATA$$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _DATA$$RW$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _DATA$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _DATA$$ZI$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Limit);
-#endif /* TFM_PARTITION_TEST_SST */
+#ifdef TFM_PARTITION_TEST_PS
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, $$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, $$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _DATA$$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _DATA$$RW$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _DATA$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _DATA$$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _STACK$$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_PS_TEST_LINKER, _STACK$$ZI$$Limit);
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, $$Base);
@@ -345,8 +345,8 @@ REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Limit);
 /**************************************************************************/
 /** Dependencies array for Secure Partition */
 /**************************************************************************/
-#ifdef TFM_PARTITION_SECURE_STORAGE
-static int32_t dependencies_TFM_SP_STORAGE[] =
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+static int32_t dependencies_TFM_SP_PS[] =
 {
     TFM_CRYPTO_SID,
     TFM_ITS_SET_SID,
@@ -355,7 +355,7 @@ static int32_t dependencies_TFM_SP_STORAGE[] =
     TFM_ITS_REMOVE_SID,
     TFM_SP_PLATFORM_NV_COUNTER_SID,
 };
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_CRYPTO
 static int32_t dependencies_TFM_SP_CRYPTO[] =
@@ -388,11 +388,11 @@ static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
 {
     TFM_SECURE_CLIENT_2_SID,
     TFM_CRYPTO_SID,
-    TFM_SST_SET_SID,
-    TFM_SST_GET_SID,
-    TFM_SST_GET_INFO_SID,
-    TFM_SST_REMOVE_SID,
-    TFM_SST_GET_SUPPORT_SID,
+    TFM_PS_SET_SID,
+    TFM_PS_GET_SID,
+    TFM_PS_GET_INFO_SID,
+    TFM_PS_REMOVE_SID,
+    TFM_PS_GET_SUPPORT_SID,
     TFM_ITS_SET_SID,
     TFM_ITS_GET_SID,
     TFM_ITS_GET_INFO_SID,
@@ -400,7 +400,7 @@ static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
     TFM_ATTEST_GET_TOKEN_SID,
     TFM_ATTEST_GET_TOKEN_SIZE_SID,
     TFM_ATTEST_GET_PUBLIC_KEY_SID,
-    TFM_SST_TEST_PREPARE_SID,
+    TFM_PS_TEST_PREPARE_SID,
     TFM_SP_PLATFORM_SYSTEM_RESET_SID,
     TFM_SP_PLATFORM_IOCTL_SID,
 };
@@ -416,14 +416,14 @@ static int32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
 };
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-static int32_t dependencies_TFM_SP_SST_TEST[] =
+#ifdef TFM_PARTITION_TEST_PS
+static int32_t dependencies_TFM_SP_PS_TEST[] =
 {
     TFM_CRYPTO_SID,
     TFM_ITS_GET_SID,
     TFM_ITS_REMOVE_SID,
 };
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 static int32_t dependencies_TFM_SP_SECURE_CLIENT_2[] =
@@ -450,19 +450,19 @@ const struct spm_partition_static_data_t static_data_list[] =
         .partition_init       = tfm_nspm_thread_entry,
     },
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     {
         .psa_framework_version = 0x0100,
-        .partition_id         = TFM_SP_STORAGE,
+        .partition_id         = TFM_SP_PS,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_APP_ROT
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
-        .partition_init       = tfm_sst_req_mngr_init,
+        .partition_init       = tfm_ps_req_mngr_init,
         .dependencies_num     = 6,
-        .p_dependencies       = dependencies_TFM_SP_STORAGE,
+        .p_dependencies       = dependencies_TFM_SP_PS,
     },
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
@@ -618,19 +618,19 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
+#ifdef TFM_PARTITION_TEST_PS
     {
         .psa_framework_version = 0x0100,
-        .partition_id         = TFM_SP_SST_TEST,
+        .partition_id         = TFM_SP_PS_TEST,
         .partition_flags      = SPM_PART_FLAG_IPC
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
-        .partition_init       = tfm_sst_test_init,
+        .partition_init       = tfm_ps_test_init,
         .dependencies_num     = 3,
-        .p_dependencies       = dependencies_TFM_SP_SST_TEST,
+        .p_dependencies       = dependencies_TFM_SP_PS_TEST,
     },
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
@@ -707,9 +707,9 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 {
     NULL,
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     NULL,
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     NULL,
@@ -755,9 +755,9 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
     platform_data_list_TFM_IRQ_TEST_1,
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
+#ifdef TFM_PARTITION_TEST_PS
     NULL,
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     NULL,
@@ -779,20 +779,20 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .stack_top            = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
         .rw_start             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
     },
-#ifdef TFM_PARTITION_SECURE_STORAGE
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     {
-        .code_start           = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$Base),
-        .code_limit           = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$Limit),
-        .ro_start             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$RO$$Base),
-        .ro_limit             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, $$RO$$Limit),
-        .rw_start             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _DATA$$RW$$Base),
-        .rw_limit             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _DATA$$RW$$Limit),
-        .zi_start             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Base),
-        .zi_limit             = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _DATA$$ZI$$Limit),
-        .stack_bottom         = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Base),
-        .stack_top            = PART_REGION_ADDR(TFM_SP_STORAGE_LINKER, _STACK$$ZI$$Limit),
+        .code_start           = PART_REGION_ADDR(TFM_SP_PS_LINKER, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_PS_LINKER, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_PS_LINKER, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_PS_LINKER, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_PS_LINKER, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_PS_LINKER, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_PS_LINKER, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_PS_LINKER, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_PS_LINKER, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_PS_LINKER, _STACK$$ZI$$Limit),
     },
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
@@ -959,20 +959,20 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
     },
 #endif /* TFM_ENABLE_IRQ_TEST */
 
-#ifdef TFM_PARTITION_TEST_SST
+#ifdef TFM_PARTITION_TEST_PS
     {
-        .code_start           = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, $$Base),
-        .code_limit           = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, $$Limit),
-        .ro_start             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, $$RO$$Base),
-        .ro_limit             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, $$RO$$Limit),
-        .rw_start             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _DATA$$RW$$Base),
-        .rw_limit             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _DATA$$RW$$Limit),
-        .zi_start             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _DATA$$ZI$$Base),
-        .zi_limit             = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _DATA$$ZI$$Limit),
-        .stack_bottom         = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Base),
-        .stack_top            = PART_REGION_ADDR(TFM_SP_SST_TEST_LINKER, _STACK$$ZI$$Limit),
+        .code_start           = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, $$Base),
+        .code_limit           = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, $$Limit),
+        .ro_start             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, $$RO$$Base),
+        .ro_limit             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, $$RO$$Limit),
+        .rw_start             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _DATA$$RW$$Base),
+        .rw_limit             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _DATA$$RW$$Limit),
+        .zi_start             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _DATA$$ZI$$Base),
+        .zi_limit             = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _DATA$$ZI$$Limit),
+        .stack_bottom         = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _STACK$$ZI$$Base),
+        .stack_top            = PART_REGION_ADDR(TFM_SP_PS_TEST_LINKER, _STACK$$ZI$$Limit),
     },
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
@@ -1014,16 +1014,16 @@ static struct spm_partition_desc_t partition_list [] =
     {{0}}, /* placeholder for Non-secure internal partition */
 
     /* -----------------------------------------------------------------------*/
-    /* - Partition DB record for TFM_SP_STORAGE */
+    /* - Partition DB record for TFM_SP_PS */
     /* -----------------------------------------------------------------------*/
-#ifdef TFM_PARTITION_SECURE_STORAGE
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     {
     /* Runtime data */
         .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
-#endif /* TFM_PARTITION_SECURE_STORAGE */
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_ITS */
@@ -1158,16 +1158,16 @@ static struct spm_partition_desc_t partition_list [] =
 #endif /* TFM_ENABLE_IRQ_TEST */
 
     /* -----------------------------------------------------------------------*/
-    /* - Partition DB record for TFM_SP_SST_TEST */
+    /* - Partition DB record for TFM_SP_PS_TEST */
     /* -----------------------------------------------------------------------*/
-#ifdef TFM_PARTITION_TEST_SST
+#ifdef TFM_PARTITION_TEST_PS
     {
     /* Runtime data */
         .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_SECURE_CLIENT_2 */

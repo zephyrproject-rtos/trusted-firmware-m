@@ -621,7 +621,7 @@ struct mt25ql_dev_t MT25QL_DEV_S = {
 
 #if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
 struct mt25ql_dev_t MT25QL_DEV_NS
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_STORAGE")
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_PS")
     = {
     .controller = &QSPI_DEV_NS,
     .direct_access_start_addr = MUSCA_QSPI_FLASH_NS_BASE,

@@ -24,9 +24,9 @@
 
 #include "tfm_plat_crypto_keys.h"
 
-#ifdef TFM_PARTITION_TEST_SST
+#ifdef TFM_PARTITION_TEST_PS
 #include "psa_manifest/pid.h"
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
 #ifndef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
 static psa_status_t tfm_crypto_huk_derivation_setup(
@@ -58,14 +58,14 @@ static psa_status_t tfm_crypto_huk_derivation_input_bytes(
         return status;
     }
 
-#ifdef TFM_PARTITION_TEST_SST
-    /* The SST tests run some operations under the wrong partition ID - this
+#ifdef TFM_PARTITION_TEST_PS
+    /* The PS tests run some operations under the wrong partition ID - this
      * causes the key derivation to change.
      */
-    if (partition_id == TFM_SP_SST_TEST) {
-        partition_id = TFM_SP_STORAGE;
+    if (partition_id == TFM_SP_PS_TEST) {
+        partition_id = TFM_SP_PS;
     }
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /* Put the label in the tls12_prf ctx to make it available in the output key
      * step.

@@ -186,9 +186,9 @@ elseif (BUILD_TARGET_NV_COUNTERS)
     #       API ONLY if the target has non-volatile counters.
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/nv_counters.c")
     set(TARGET_NV_COUNTERS_ENABLE ON)
-    # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
+    # Sets PS_ROLLBACK_PROTECTION flag to compile in the PS services
     # rollback protection code as the target supports nv counters.
-    set(SST_ROLLBACK_PROTECTION ON)
+    set(PS_ROLLBACK_PROTECTION ON)
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
@@ -205,13 +205,13 @@ if (NOT DEFINED BUILD_FLASH)
   message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif(BUILD_FLASH)
   list(APPEND ALL_SRC_C "${AN524_DIR}/cmsis_drivers/Driver_Flash.c")
-  # For AN524 currently BRAM is used for SST The Driver_Flash driver just emulates a flash
+  # For AN524 currently BRAM is used for PS The Driver_Flash driver just emulates a flash
   # interface and behaviour on top of the BRAM memory.
-  # As the SST area is going to be in RAM, it is required to set SST_CREATE_FLASH_LAYOUT
-  # to be sure the SST service knows that when it starts the SST area does not contain any
-  # valid SST flash layout and it needs to create one. The same for ITS.
-  set(SST_CREATE_FLASH_LAYOUT ON)
-  set(SST_RAM_FS OFF)
+  # As the PS area is going to be in RAM, it is required to set PS_CREATE_FLASH_LAYOUT
+  # to be sure the PS service knows that when it starts the PS area does not contain any
+  # valid PS flash layout and it needs to create one. The same for ITS.
+  set(PS_CREATE_FLASH_LAYOUT ON)
+  set(PS_RAM_FS OFF)
   set(ITS_CREATE_FLASH_LAYOUT ON)
   set(ITS_RAM_FS OFF)
   embedded_include_directories(PATH "${AN524_DIR}/cmsis_drivers" ABSOLUTE)
