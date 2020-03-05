@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -105,7 +105,7 @@ def process_manifest(manifest_list_file, append):
         manifest_dir, manifest_name = os.path.split(manifest_path)
         outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
         context['file_name'] = outfile_name.replace('.h', '')
-        outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name)
+        outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
 
         manifest_header_list.append(outfile_name)
 
