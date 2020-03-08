@@ -146,9 +146,9 @@ listed above.
      - Specifies the service to support
        The possible values are:
 
-         - ``PSA_API_TEST_ATTESTATION``
+         - ``PSA_API_TEST_INITIAL_ATTESTATION``
          - ``PSA_API_TEST_CRYPTO``
-         - ``PSA_API_TEST_SECURE_STORAGE``
+         - ``PSA_API_TEST_PROTECTED_STORAGE``
          - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
 
 .. code-block:: bash
@@ -162,7 +162,7 @@ listed above.
         -G"Unix Makefiles" \
         -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPC.cmake` \
         -DPSA_API_TEST_BUILD_PATH=../psa-arch-tests/api-tests/BUILD_ATT.GNUARM
-        -DPSA_API_TEST_ATTESTATION=1 \
+        -DPSA_API_TEST_INITIAL_ATTESTATION=1 \
         -DTARGET_PLATFORM=psoc64 \
         -DCOMPILER=ARMCLANG \
         -DCMAKE_BUILD_TYPE=Release
@@ -229,9 +229,9 @@ listed above.
      - Specifies the service to support
        The possible values are:
 
-         - ``PSA_API_TEST_ATTESTATION``
+         - ``PSA_API_TEST_INITIAL_ATTESTATION``
          - ``PSA_API_TEST_CRYPTO``
-         - ``PSA_API_TEST_SECURE_STORAGE``
+         - ``PSA_API_TEST_PROTECTED_STORAGE``
          - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
 
 .. code-block:: bash
@@ -245,7 +245,7 @@ listed above.
         -G"Unix Makefiles" \
         -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPCTfmLevel2.cmake` \
         -DPSA_API_TEST_BUILD_PATH=../psa-arch-tests/api-tests/BUILD_PS.GNUARM
-        -DPSA_API_TEST_SECURE_STORAGE=1 \
+        -DPSA_API_TEST_PROTECTED_STORAGE=1 \
         -DTARGET_PLATFORM=psoc64 \
         -DCOMPILER=ARMCLANG \
         -DCMAKE_BUILD_TYPE=Release
@@ -412,6 +412,6 @@ Optionally, erase SST partition:
 
     pyocd erase -t cy8c64xa_cm4_full_flash 0x101c0000+0x10000
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
 
 *Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.*

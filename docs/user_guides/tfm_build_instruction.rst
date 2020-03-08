@@ -83,9 +83,9 @@ tests for the Internal Trusted Storage, Secure Storage, Crypto and Attestation
 services needs to be enabled at the build configuration step by defining::
 
     -DPSA_API_TEST_INTERNAL_TRUSTED_STORAGE=ON
-    -DPSA_API_TEST_SECURE_STORAGE=ON
+    -DPSA_API_TEST_PROTECTED_STORAGE=ON
     -DPSA_API_TEST_CRYPTO=ON
-    -DPSA_API_TEST_ATTESTATION=ON
+    -DPSA_API_TEST_INITIAL_ATTESTATION=ON
 
 respectively for the corresponding service. For example, to enable the PSA API
 tests for the Crypto service only:
