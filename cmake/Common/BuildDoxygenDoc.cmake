@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -85,7 +85,7 @@ if (NOT NODOC)
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. A process need to defined for
 	#      versioning the document (and TF-M).
-	set(DOXYCFG_TFM_VERSION "v1.0-RC3")
+	set(DOXYCFG_TFM_VERSION "v1.0")
 
 	#Using add_custom_command allows CMake to generate proper clean commands
 	#for document generation.

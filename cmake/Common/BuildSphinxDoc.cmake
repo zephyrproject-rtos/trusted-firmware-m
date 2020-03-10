@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -84,8 +84,8 @@ if (NOT SPHINX_NODOC)
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. We need a process to define the
 	#      version number of the document (and TF-M).
-	set(SPHINXCFG_TFM_VERSION "v1.0-RC3")
-	set(SPHINXCFG_TFM_VERSION_FULL "Version 1.0-RC3")
+	set(SPHINXCFG_TFM_VERSION "v1.0")
+	set(SPHINXCFG_TFM_VERSION_FULL "Version 1.0")
 
 	get_filename_component(_NDX_FILE_DIR ${SPHINX_CONFIGURED_INDEX_FILE} DIRECTORY )
 
