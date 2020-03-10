@@ -103,21 +103,21 @@ The PSA PS interfaces for SST service are located in ``interface/include/psa``
 PSA Protected Storage Interfaces
 ================================
 
-The SST service exposes the following mandatory PSA PS interfaces, version
-1.0-beta-2:
+The SST service exposes the following mandatory PSA PS interfaces, version 1.0:
 
 .. code-block:: c
 
-    psa_ps_status_t psa_ps_set(psa_ps_uid_t uid, uint32_t data_length, const void *p_data, psa_ps_create_flags_t create_flags);
-    psa_ps_status_t psa_ps_get(psa_ps_uid_t uid, uint32_t data_offset, uint32_t data_length, void *p_data);
-    psa_ps_status_t psa_ps_get_info(psa_ps_uid_t uid, struct psa_ps_info_t *p_info);
-    psa_ps_status_t psa_ps_remove(psa_ps_uid_t uid);
+    psa_status_t psa_ps_set(psa_storage_uid_t uid, size_t data_length, const void *p_data, psa_storage_create_flags_t create_flags);
+    psa_status_t psa_ps_get(psa_storage_uid_t uid, size_t data_offset, size_t data_size, void *p_data, size_t *p_data_length);
+    psa_status_t psa_ps_get_info(psa_storage_uid_t uid, struct psa_storage_info_t *p_info);
+    psa_status_t psa_ps_remove(psa_storage_uid_t uid);
     uint32_t psa_ps_get_support(void);
 
 For the moment, it does not support the extended version of those APIs.
 
 These PSA PS interfaces and SST TF-M types are defined and documented in
-``interface/include/psa/protected_storage.h`` and
+``interface/include/psa/protected_storage.h``,
+``interface/include/psa/storage_common.h`` and
 ``interface/include/tfm_sst_defs.h``
 
 Core Files
