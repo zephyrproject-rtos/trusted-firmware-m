@@ -748,7 +748,7 @@ attest_add_security_lifecycle_claim(struct attest_token_ctx *token_ctx)
     }
 
     /* Sanity check */
-    if (security_lifecycle > TFM_SLC_DECOMMISSIONED) {
+    if (security_lifecycle > TFM_SLC_MAX_VALUE) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
