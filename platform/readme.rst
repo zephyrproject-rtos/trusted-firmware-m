@@ -2,17 +2,12 @@
 Details for the platform folder
 ###############################
 
-.. Warning::
-
-    This folder and subfolders, especially the target folder, are likely to be
-    refactored and updated to improve the overall structure of dependencies.
-
 *********************
 Interfacing with TF-M
 *********************
 
-platformext/target/tfm_peripherals_def.h
-========================================
+platform/ext/target/tfm_peripherals_def.h
+=========================================
 This file should enumerate the hardware peripherals that are available for TF-M
 on the platform. The name of the peripheral used by a service is set in its
 manifest file. The platform have to provide a macro for each of the provided

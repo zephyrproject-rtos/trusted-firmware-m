@@ -310,12 +310,12 @@ Note: each image can be signed individually, for example:
 
 Running the sign.py script will result in creation of the following files:
 
-tfm_<s/ns>_signed.hex    - signed image for programming
-tfm_<s/ns>_unsigned.hex  - a copy of original unsigned hex file for reference
-tfm_<s/ns>_upgrade.hex   - signed image for upgrade (if device policy specifies
-                           upgrade slot). Flashing this image into device will
-                           trigger the image update. Upgrade image from the
-                           secondary slot will be moved to the primary slot.
+* tfm_<s/ns>_signed.hex    - signed image for programming
+* tfm_<s/ns>_unsigned.hex  - a copy of original unsigned hex file for reference
+* tfm_<s/ns>_upgrade.hex   - signed image for upgrade (if device policy
+  specifies upgrade slot). Flashing this image into device will
+  trigger the image update. Upgrade image from the
+  secondary slot will be moved to the primary slot.
 
 **********************
 Programming the Device

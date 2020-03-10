@@ -7,8 +7,6 @@ for ARMv8-M.
 .. Note::
     The software implementation contained in this project is designed to be a
     reference implementation of the Platform Security Architecture (PSA).
-    It currently does not implement all the features of that architecture,
-    however we expect the code to evolve along with the specifications.
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
 refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/glossary>` has the list
@@ -46,9 +44,9 @@ This release includes:
     - A secure fw model with NS application example.
     - Secure services running within this SPE:
 
-        - Secure Storage Service (PSA Protected Storage API - 1.0-beta-2)
-        - Attestation (PSA API 1.0-beta-0)
-        - Crypto Service (PSA API 1.0-beta-1)
+        - Secure Storage Service (PSA Protected Storage API - 1.0.0)
+        - Attestation (PSA Attestation API 1.0.0)
+        - Crypto Service (PSA API 1.0-beta-3)
         - TF-M Audit Log
         - Platform Service
         - Internal Trusted Storage (PSA API 1.0.0)
@@ -61,6 +59,7 @@ This release includes:
     - Build system based on cmake, supporting armclang and GNU Arm.
     - Support for integrated CryptoCell-312 cryptographic hardware accelerator
       on Musca-B1 platform.
+    - Meets requirements for Updatable RoT for PSA Level 2 Certification
 
 *********
 Platforms
@@ -132,8 +131,8 @@ Further documents can be found in the ``docs`` folder.
 ####################
 Feedback and support
 ####################
-For this early access release, feedback is requested via email to
-`support-trustedfirmware-m@arm.com <support-trustedfirmware-m@arm.com>`__.
+For this release, feedback is requested via email to
+`tf-m@lists.trustedfirmware.org <tf-m@lists.trustedfirmware.org>`__.
 
 ###############
 Version history
@@ -152,4 +151,4 @@ Version history
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
