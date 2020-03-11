@@ -116,7 +116,7 @@ given in the PSA FF compliance tests README.
 .. code-block:: bash
     cd <TF-M base folder>
     cd trusted-firmware-m
-    python tools/tfm_parse_manifest_list.py -m tools/psa_ff_test_manifest_list.yaml append
+    python tools/tfm_parse_manifest_list.py -m tools/tfm_psa_ff_test_manifest_list.yaml append
 
 The build system provides the support for linking with prebuilt PSA FF
 compliance NS and S test libraries when using the ``ConfigPsaApiTestIPC.cmake``
