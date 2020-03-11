@@ -17,6 +17,7 @@
 #include "secure_fw/include/tfm_spm_services_api.h"
 #include "tfm_irq_list.h"
 #include "tfm_utils.h"
+#include "tfm_version.h"
 #include "spm_db.h"
 #include "log/tfm_log.h"
 #ifdef TFM_PSA_API
@@ -203,6 +204,9 @@ int main(void)
     if (tfm_core_init() != TFM_SUCCESS) {
         tfm_core_panic();
     }
+    /* Print the TF-M version */
+    LOG_MSG("\033[1;34mBooting TFM v%d.%d %s\033[0m\r\n",
+            VERSION_MAJOR, VERSION_MINOR, VERSION_STRING);
 
     if (tfm_spm_db_init() != SPM_ERR_OK) {
         tfm_core_panic();
