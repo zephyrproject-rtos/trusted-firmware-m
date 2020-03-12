@@ -183,7 +183,6 @@ elseif(BUILD_FLASH)
   # to be sure the SST service knows that when it starts the SST area does not contain any
   # valid SST flash layout and it needs to create one. The same for ITS.
   set(SST_CREATE_FLASH_LAYOUT ON)
-  set(SST_RAM_FS ON)
   set(ITS_CREATE_FLASH_LAYOUT ON)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_a/CMSIS_Driver" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
