@@ -94,7 +94,7 @@ enum read_type_t {
  */
 static psa_status_t sst_read_object(enum read_type_t type)
 {
-    psa_ps_status_t err;
+    psa_status_t err;
     size_t data_length;
 
     /* Read object header */
@@ -103,7 +103,7 @@ static psa_status_t sst_read_object(enum read_type_t type)
                       SST_OBJECT_HEADER_SIZE,
                       (void *)&g_sst_object.header,
                       &data_length);
-    if (err != PSA_PS_SUCCESS) {
+    if (err != PSA_SUCCESS) {
         return err;
     }
 
@@ -112,7 +112,7 @@ static psa_status_t sst_read_object(enum read_type_t type)
      */
     if (g_sst_object.header.fid != g_obj_tbl_info.fid ||
         g_sst_object.header.version != g_obj_tbl_info.version) {
-        return PSA_PS_ERROR_DATA_CORRUPT;
+        return PSA_ERROR_DATA_CORRUPT;
     }
 
     /* Read object data if any */
@@ -122,12 +122,12 @@ static psa_status_t sst_read_object(enum read_type_t type)
                           g_sst_object.header.info.current_size,
                           (void *)g_sst_object.data,
                           &data_length);
-        if (err != PSA_PS_SUCCESS) {
+        if (err != PSA_SUCCESS) {
             return err;
         }
     }
 
-    return PSA_PS_SUCCESS;
+    return PSA_SUCCESS;
 }
 
 /**
