@@ -20,6 +20,8 @@
 #include "prod_hw_defs.h"
 #include "cc_otp_defs.h"
 
+#include "region_defs.h"
+
 #define CC312_NULL_CONTEXT "NO SALT!"
 
 CCRndContext_t*           CC312_pRndCtx         = NULL;
@@ -34,9 +36,16 @@ CCError_t CC_PalDataBufferAttrGet(const unsigned char *pDataBuffer,
     CC_UNUSED_PARAM(buffType);
 
     *pBuffNs = DATA_BUFFER_IS_SECURE;
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
     if (cmse_check_address_range((void*)pDataBuffer, buffSize, CMSE_NONSECURE)) {
         *pBuffNs = DATA_BUFFER_IS_NONSECURE;
     }
+#else
+    if (pDataBuffer >= (uint8_t *)NS_DATA_START &&
+        (pDataBuffer + buffSize) <= (uint8_t *)NS_DATA_LIMIT) {
+        *pBuffNs = DATA_BUFFER_IS_NONSECURE;
+    }
+#endif
 
     return CC_OK;
 }

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,9 +13,30 @@ HOST_LIBNAME = cc3x_lib
 
 TEE_OS = no_os
 REE_OS = no_os
+
+HOST_ARM_CPU_TYPE = "@ARM_CPU_TYPE@"
+
+ifeq ($(HOST_ARM_CPU_TYPE),)
+$(error HOST_ARM_CPU_TYPE is NULL)
+endif
+
+ifeq ($(HOST_ARM_CPU_TYPE), "Cortex-M33")
 CORTEX = cortex-m33
 ARM_CPU = cortex-m33
 M_ARCH=armv8-m.main
+endif
+
+ifeq ($(HOST_ARM_CPU_TYPE), "Cortex-M0p")
+CORTEX = Cortex-M0plus
+ARM_CPU = cortex-m0plus
+M_ARCH=armv6-m
+endif
+
+ifeq ($(HOST_ARM_CPU_TYPE), "Cortex-M3")
+CORTEX = Cortex-M3
+ARM_CPU = cortex-m3
+M_ARCH=armv7-m
+endif
 
 PROJ_CFG_NAME = ''
 CC_HW_VERSION  =  0xFF

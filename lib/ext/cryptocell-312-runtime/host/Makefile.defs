@@ -179,6 +179,13 @@ ifeq ($(ARCH),arm)
             CFLAGS += -march=armv8-m.main
             CFLAGS += -mcmse
             CFLAGS += -DARCH_V8M
+        else ifeq ($(ARM_CPU), cortex-m3)
+            # For arm-none-eabi assume cortex-m3
+            ARM_CPU ?= cortex-m3
+            CFLAGS += -mcpu=$(ARM_CPU)
+        else ifeq ($(ARM_CPU), cortex-m0plus)
+            ARM_CPU ?= cortex-m0plus
+            CFLAGS += -mcpu=$(ARM_CPU)
         else
             $(error unrecognized ARM_CPU "$(ARM_CPU)")
         endif
@@ -194,6 +201,12 @@ ifeq ($(ARCH),arm)
             CFLAGS += -mcmse
             CFLAGS += -mfpu=none
             CFLAGS += -DARCH_V8M
+        else ifeq ($(ARM_CPU), cortex-m3)
+            ARM_CPU ?= cortex-m3
+            CFLAGS += -mcpu=$(ARM_CPU)
+        else ifeq ($(ARM_CPU), cortex-m0plus)
+            ARM_CPU ?= cortex-m0plus
+            CFLAGS += -mcpu=$(ARM_CPU)
         else
             $(error unrecognized ARM_CPU "$(ARM_CPU)")
         endif
@@ -319,6 +332,9 @@ TESTAL_PAL_ARCH = ca9
 endif
 ifeq ($(ARM_CPU),cortex-m3)
 TESTAL_PAL_ARCH = cm3
+endif
+ifeq ($(ARM_CPU),cortex-m0plus)
+TESTAL_PAL_ARCH = cm0plus
 endif
 ifeq ($(ARM_CPU),cortex-m33)
 TESTAL_PAL_ARCH = cm33
