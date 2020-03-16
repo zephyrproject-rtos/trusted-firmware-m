@@ -99,6 +99,12 @@ if (MCUBOOT_REPO STREQUAL "TF-M")
 			"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
 			"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 		)
+else()
+	list(APPEND ALL_SRC_C
+			"${MCUBOOT_DIR}/bootutil/src/swap_scratch.c"
+			"${MCUBOOT_DIR}/bootutil/src/swap_move.c"
+			"${MCUBOOT_DIR}/bootutil/src/swap_misc.c"
+	)
 endif()
 
 #Define location of Mbed Crypto source, build, and installation directory.

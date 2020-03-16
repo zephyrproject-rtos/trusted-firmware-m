@@ -281,7 +281,7 @@ code is present at the required location the ``MCUBOOT_REPO=UPSTREAM`` option
 must be added to the command line at the CMake configuration step::
 
     cd <TF-M base folder>
-    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.4.0
+    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.5.0
     cd <TF-M build folder>
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DMCUBOOT_REPO=UPSTREAM ../
 
