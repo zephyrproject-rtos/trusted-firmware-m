@@ -12,7 +12,6 @@ https://www.cypress.com/documentation/software-and-drivers/psoc-64-secure-mcu-se
 Use the following policy file for provisioning and signing:
 policy_multi_img_CM0p_CM4_debug_2M.json
 
-
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements </docs/user_guides/tfm_sw_requirement>`.
 
@@ -23,14 +22,22 @@ Install CySecureTools.
 
 .. code-block:: bash
 
-    pip3 install cysecuretools==1.3.3
+    pip3 install cysecuretools==1.4.0
+
+
+Note: the upcoming CY SecureBoot release requires CySecuretools v2.0.0 or newer.
+
+.. code-block:: bash
+
+    pip3 install cysecuretools==2.0.0
 
 For more details please refer to
-`CySecureTools <https://pypi.org/project/cysecuretools/1.3.3/>`_ page.
+`CySecureTools <https://pypi.org/project/cysecuretools>`_ page.
 
-Install OpenOCD with PSoC6 support. It can be obtained from the Cypress
-Programmer, download it from:
-https://www.cypress.com/products/psoc-programming-solutions
+Install OpenOCD with PSoC6 support. Download the latest revision from:
+https://github.com/cypresssemiconductorco/openocd/releases
+
+Note: the latest CY SecureBoot release requires OpenOCD 3.1.0 or newer.
 
 ******************************************
 Building Multi-Core TF-M on Cypress PSoC64
@@ -282,12 +289,20 @@ platform/ext/target/cypress/psoc64/security/keys:
 Note: provisioned board in SECURE claimed state is required, otherwise refer to
 Cypress documentation for details on the provisioning process.
 
-Sign the images (sign.py overwrites unsigned files with signed ones):
+
+Depending on the used CySecureTools, signing process is different.
+
+CySecureTools 1.x.x
+===================
+
+Sign the images with a helper script (sign.py overwrites unsigned files with
+signed ones). For CySecureTools 1.x.x use policy
+policy_multi_img_CM0p_CM4_debug_2M_legacy.json:
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex \
       -n <build folder>/tfm_ns.hex
@@ -297,14 +312,14 @@ Note: each image can be signed individually, for example:
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -n <build folder>/tfm_ns.hex
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex
 
@@ -316,6 +331,49 @@ Running the sign.py script will result in creation of the following files:
   specifies upgrade slot). Flashing this image into device will
   trigger the image update. Upgrade image from the
   secondary slot will be moved to the primary slot.
+
+CySecureTools 2.x.x
+===================
+
+Sign the images using CySecureTools CLI tool.
+
+SPE image:
+
+.. code-block:: bash
+
+    cysecuretools \
+    --policy platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --target cy8ckit-064b0s2-4343w \
+    sign-image \
+    --hex <build folder>/tfm_s.hex \
+    --image-type BOOT \
+    --image-id 1
+
+NSPE image:
+
+.. code-block:: bash
+
+    cysecuretools \
+    --policy platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --target cy8ckit-064b0s2-4343w \
+    sign-image \
+    --hex <build folder>/tfm_ns.hex \
+    --image-type BOOT \
+    --image-id 16
+
+* CySecureTools sign-image overwrites unsigned file with a signed one,
+  also it creates an unsigned copy _unsigned.hex.
+
+* image-type option: "--image-type BOOT" creates a signed hex file with offsets
+  for the primary image slot. Use "--image-type UPGRADE" if you want to create
+  an image for the secondary "upgrade" slot.
+  When booting, CyBootloader will validate image in the secondary slot and copy
+  it to the primary boot slot.
+
+* image-id option: Each image has its own ID. By default, SPE image running on
+  CM0P core has ID=1, NSPE image running on CM4 core has ID=16. Refer to the
+  policy file for the actual ID's.
+
 
 **********************
 Programming the Device
@@ -336,14 +394,17 @@ Copy tfm hex files one by one to the DAPLINK device:
 
 .. code-block:: bash
 
-    cp <build folder>/tfm_ns_signed.hex <mount point>/DAPLINK/; sync
-    cp <build folder>/tfm_s_signed.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/tfm_ns.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/tfm_s.hex <mount point>/DAPLINK/; sync
 
-OpenOCD v.2.2
+OpenOCD v.2.x
 =============
 
-Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK mode.
-Status LED should be ON and not blinking.
+Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK or
+CMSIS-DAP HID mode. Status LED should be ON and not blinking for
+CMSIS-DAP BULK or slowly blinking for CMSIS-DAP HID mode. Device programming
+in CMSIS-DAP BULK mode is faster and thus is recommended.
+
 To program the signed tfm_s and tfm_ns images to the device with openocd
 (assuming OPENOCD_PATH is pointing at the openocd installation directory)
 run the following commands:
@@ -388,23 +449,78 @@ address of the secure primary image specified in the file:
 
 so be sure to change it if you change that file.
 
+OpenOCD v.3.x
+=============
 
-PyOCD v.0.23.0
-==============
+Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK or
+CMSIS-DAP HID mode. Status LED should be ON and not blinking for
+CMSIS-DAP BULK or slowly blinking for CMSIS-DAP HID mode. Device programming
+in CMSIS-DAP BULK mode is faster and thus is recommended.
 
-PyOCD v0.23.0 is installed by CySecureTools automatically. It can be used
+To program the signed tfm_s and tfm_ns images to the device with openocd
+(assuming OPENOCD_PATH is pointing at the openocd installation directory)
+run the following commands:
+
+.. code-block:: bash
+
+    OPENOCD_PATH=<cyprogrammer dir>/openocd
+    BUILD_DIR=<build folder>
+
+    ${OPENOCD_PATH}/bin/openocd \
+            -s ${OPENOCD_PATH}/scripts \
+            -f interface/kitprog3.cfg \
+            -f target/psoc6_2m_secure.cfg \
+            -c "init; reset" \
+            -c "flash write_image erase ${BUILD_DIR}/tfm_s.hex" \
+            -c "shutdown"
+
+    ${OPENOCD_PATH}/bin/openocd \
+            -s ${OPENOCD_PATH}/scripts \
+            -f interface/kitprog3.cfg \
+            -f target/psoc6_2m_secure.cfg \
+            -c "init; reset" \
+            -c "flash write_image erase ${BUILD_DIR}/tfm_ns.hex" \
+            -c "reset run"
+
+Optionally, erase SST partition:
+
+.. code-block:: bash
+
+    ${OPENOCD_PATH}/bin/openocd \
+            -s ${OPENOCD_PATH}/scripts \
+            -f interface/kitprog3.cfg \
+            -f target/psoc6_2m_secure.cfg \
+            -c "init; reset" \
+            -c "flash erase_address 0x101c0000 0x10000" \
+            -c "shutdown"
+
+Note that the ``0x101C0000`` in the command above must match the SST start
+address of the secure primary image specified in the file:
+
+    platform/ext/target/cypress/psoc64/partition/flash_layout.h
+
+so be sure to change it if you change that file.
+
+
+PyOCD
+=====
+
+PyOCD is installed by CySecureTools automatically. It can be used
 to program TFM images into the board.
 
-Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK mode.
-Status LED should be ON and not blinking.
+Using KitProg3 mode button, switch to KitProg3 CMSIS-DAP BULK or
+CMSIS-DAP HID mode. Status LED should be ON and not blinking for
+CMSIS-DAP BULK or slowly blinking for CMSIS-DAP HID mode. Device programming
+in CMSIS-DAP BULK mode is faster and thus is recommended.
+
 To program the signed tfm_s and tfm_ns images to the device with pyocd
 run the following commands:
 
 .. code-block:: bash
 
-    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_s_signed.hex
+    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_s.hex
 
-    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_ns_signed.hex
+    pyocd flash  -t cy8c64xa_cm4_full_flash ${BUILD_DIR}/tfm_ns.hex
 
 Optionally, erase SST partition:
 
