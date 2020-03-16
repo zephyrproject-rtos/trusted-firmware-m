@@ -20,6 +20,7 @@ Quick Links
 * `Platform Security Architecture`_
 * `PSA certified`_
 * `Documentation home`_
+* `Release notes`_
 * `Software requirements`_
 * `Build instructions`_
 * `User Guide`_
@@ -44,5 +45,6 @@ Feedback can be submitted via email to
 .. _Trusted Firmware-M documentation: `Documentation home`_
 .. _Documentation home: https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/readme.html
 .. _trustedfirmware.org: http://www.trustedfirmware.org
+.. _Release notes: https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/changelog.html
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

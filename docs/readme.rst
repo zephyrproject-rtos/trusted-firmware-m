@@ -34,56 +34,11 @@ The original license text is included in those source files.
     Any code that has license other than BSD-3-Clause is kept in specific sub
     folders named ``ext`` so that it can isolated if required.
 
-############
-This Release
-############
-This release includes:
-
-    - A Secure FW with support for PSA Level 1 and 2 isolation on Armv8-M.
-    - The Interfaces exposed by the Secure FW to NS side.
-    - A secure fw model with NS application example.
-    - Secure services running within this SPE:
-
-        - Secure Storage Service (PSA Protected Storage API - 1.0.0)
-        - Attestation (PSA Attestation API 1.0.0)
-        - Crypto Service (PSA API 1.0-beta-3)
-        - TF-M Audit Log
-        - Platform Service
-        - Internal Trusted Storage (PSA API 1.0.0)
-
-    - PSA IPC support
-    - Support for Armv8-M mainline and baseline
-    - Testcases running baremetal and with RTX to test the functionality.
-    - BL2 bootloader for image authentication based on SHA256 and RSA-3072
-      digital signature.
-    - Build system based on cmake, supporting armclang and GNU Arm.
-    - Support for integrated CryptoCell-312 cryptographic hardware accelerator
-      on Musca-B1 platform.
-    - Meets requirements for Updatable RoT for PSA Level 2 Certification
-
-*********
-Platforms
-*********
-Current release has been tested on:
-
-    - Cortex M33 based SSE-200 system:
-
-        - `FPGA image loaded on MPS2 board.
-          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`__
-        - `Fast model FVP_MPS2_AEMv8M.
-          <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`__
-        - `Musca-A test chip board.
-          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
-        - `Musca-B1 test chip board.
-          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`__
-        - `Musca-S1 test chip board.`
-        - `FPGA image loaded on MPS3 board.
-          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`__
-
-    - Cortex M23 based IoT Kit system:
-
-       - `FPGA image loaded on MPS2 board.
-         <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`__
+#############
+Release Notes
+#############
+The :doc:`Change Log & Release Notes </docs/changelog>` provides details of
+major features of the release and platforms supported.
 
 ###############
 Getting Started
@@ -137,17 +92,19 @@ For this release, feedback is requested via email to
 ###############
 Version history
 ###############
-+-------------+--------------+--------------------+
-| Version     | Date         | Description        |
-+=============+==============+====================+
-| v1.0-beta   | 2019-02-15   | 1.0-beta release   |
-+-------------+--------------+--------------------+
-| v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    |
-+-------------+--------------+--------------------+
-| v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    |
-+-------------+--------------+--------------------+
-| v1.0-RC3    | 2019-11-29   | 1.0-RC3 release    |
-+-------------+--------------+--------------------+
++-------------+--------------+--------------------+---------------+
+| Version     | Date         | Description        | PSA-arch tag  |
++=============+==============+====================+===============+
+| v1.0-beta   | 2019-02-15   | 1.0-beta release   |       -       |
++-------------+--------------+--------------------+---------------+
+| v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    | v19.06_API0.9 |
++-------------+--------------+--------------------+---------------+
+| v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    | v19.06_API0.9 |
++-------------+--------------+--------------------+---------------+
+| v1.0-RC3    | 2019-11-29   | 1.0-RC3 release    | v19.06_API0.9 |
++-------------+--------------+--------------------+---------------+
+| v1.0        | 2020-03-27   | 1.0 release        | v20.03_API1.0 |
++-------------+--------------+--------------------+---------------+
 
 --------------
 

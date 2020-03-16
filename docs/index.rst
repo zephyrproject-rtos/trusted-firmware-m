@@ -18,6 +18,7 @@ Trusted Firmware-M Documentation
 
     Home<docs/readme>
     docs/about/index
+    docs/changelog
     docs/design_documents/index
     docs/user_guides/index
     docs/processes/index
