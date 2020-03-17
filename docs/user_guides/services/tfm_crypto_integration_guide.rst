@@ -12,11 +12,11 @@ authenticated encryption with associated data (AEAD).
 **************
 Code structure
 **************
-The PSA interfaces for the Crypto service are located in ``interface\include``.
+The PSA interfaces for the Crypto service are located in ``interface/include``.
 The only header to be included by applications that want to use functions from
 the PSA API is ``psa/crypto.h``.
 The TF-M Crypto service source files are located in
-``secure_fw\services\crypto``.
+``secure_fw/services/crypto``.
 
 PSA interfaces
 ==============
@@ -33,8 +33,8 @@ Service source files
 - ``crypto_hash.c`` : This module handles requests for hashing operations
 - ``crypto_mac.c`` : This module handles requests for MAC operations
 - ``crypto_aead.c`` : This module handles requests for AEAD operations
-- ``crypto_generator.c`` : This module handles requests for generator related
-  operations
+- ``crypto_key_derivation.c`` : This module handles requests for key derivation
+  related operations
 - ``crypto_key.c`` : This module handles requests for key related operations
 - ``crypto_asymmetric.c`` : This module handles requests for asymmetric
   cryptographic operations
@@ -56,7 +56,7 @@ Service source files
   termination or an abort
 - ``tfm_crypto_secure_api.c`` : This module implements the PSA Crypto API
   client interface exposed to the Secure Processing Environment
-- ``tfm_crypto_api.c`` :  This module is contained in ``interface\src`` and
+- ``tfm_crypto_api.c`` :  This module is contained in ``interface/src`` and
   implements the PSA Crypto API client interface exposed to the  Non-Secure
   Processing Environment.
 
