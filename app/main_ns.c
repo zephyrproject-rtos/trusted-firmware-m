@@ -175,6 +175,12 @@ __attribute__((noreturn))
 #endif
 int main(void)
 {
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+    /* Set Main Stack Pointer limit */
+    extern uint32_t Image$$ARM_LIB_STACK_MSP$$ZI$$Base;
+    __set_MSPLIM((uint32_t)&Image$$ARM_LIB_STACK_MSP$$ZI$$Base);
+#endif
+
     if (tfm_ns_platform_init() != ARM_DRIVER_OK) {
         /* Avoid undefined behavior if platform init failed */
         while(1);
