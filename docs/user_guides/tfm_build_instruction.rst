@@ -5,7 +5,7 @@ Please make sure you have all required software installed as explained in the
 :doc:`software requirements <tfm_sw_requirement>`.
 
 The external dependecies are briefly listed in the
-:ref:`docs/user_guides/tfm_build_instruction:External dependencies` section.
+:ref:`docs/user_guides/tfm_sw_requirement:External dependencies` section.
 
 The configuration-table
 :ref:`docs/user_guides/tfm_build_instruction:Configuring the build` section
@@ -35,6 +35,10 @@ Getting the source-code
    `CMSIS_5` now uses `git-lfs` for storing large size binaries so the cloning
    process has changed from previous releases. Please refer to the `CMSIS_5`
    documentation for more details.
+
+.. Note::
+   For building with Armclang compiler version 6.10.0, please follow the note
+   in :ref:`docs/user_guides/tfm_sw_requirement:External dependencies` section.
 
 Build steps for the AN521 target platform:
 ==========================================
@@ -209,12 +213,6 @@ Building the User Guide
 The documentation files will be available under the directory::
 
     cmake_doc/install/doc/user_guide
-
-*********************
-External dependencies
-*********************
-- `CMSIS_5` is used to import RTX for the example non-secure app
-- `Mbed Crypto` is used as crypto library on the secure side
 
 *********************
 Configuring the build
