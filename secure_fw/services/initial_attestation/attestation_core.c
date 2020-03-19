@@ -1073,11 +1073,6 @@ error:
     return attest_err;
 }
 
-/* Limitations of the current implementation:
- *  - Token is not signed yet properly, just a fake signature is added to the
- *    token due to lack of psa_asymmetric_sign() implementation in crypto
- *    service.
- */
 psa_status_t
 initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
                                psa_outvec *out_vec, uint32_t num_outvec)
@@ -1128,7 +1123,6 @@ error:
     return error_mapping_to_psa_status_t(attest_err);
 }
 
-/* Initial implementation, just returns with hard coded value */
 psa_status_t
 initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec)
