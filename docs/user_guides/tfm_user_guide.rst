@@ -227,31 +227,31 @@ Example application with BL2 bootloader
 
         - Windows::
 
-            srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
+            srec_cat.exe install\outputs\MUSCA_A\mcuboot.bin -Binary -offset 0x200000 install\outputs\MUSCA_A\tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
+            srec_cat install/outputs/MUSCA_A/mcuboot.bin -Binary -offset 0x200000 install/outputs/MUSCA_A/tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
 
     - For Musca-B1
 
         - Windows::
 
-            srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat.exe install\outputs\MUSCA_B1\mcuboot.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat install/outputs/MUSCA_B1/mcuboot.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
     - For Musca-S1
 
         - Windows::
 
-            srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat.exe install\outputs\MUSCA_S1\mcuboot.bin -Binary -offset 0xA000000 install\outputs\MUSCA_S1\tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat install/outputs/MUSCA_S1/mcuboot.bin -Binary -offset 0xA000000 install/outputs/MUSCA_S1/tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
 #. Power up the Musca board by connecting it to a computer with a USB lead.
    Press the ``PBON`` button if the green ``ON`` LED does not immediately turn
@@ -314,11 +314,11 @@ and ``tfm_ns.bin``:
 
 - Windows::
 
-    srec_cat.exe app\secure_fw\tfm_s.bin -Binary -offset 0xA000000 app\tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
 
 - Linux::
 
-    srec_cat app/secure_fw/tfm_s.bin -Binary -offset 0xA000000 app/tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards
@@ -430,7 +430,7 @@ Example application without BL2 bootloader
     IMAGE0ADDRESS: 0x00000000          ;Please select the required executable program
     IMAGE0FILE: \SOFTWARE\tfm_s.bin
     IMAGE1UPDATE: AUTO
-    IMAGE1ADDRESS: 0x00080000
+    IMAGE1ADDRESS: 0x000C0000
     IMAGE1FILE: \SOFTWARE\tfm_ns.bin
 
 #. Close ``<MPS3 device name>/MB/HBI0309B/AN521/images.txt``
@@ -471,4 +471,4 @@ upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
