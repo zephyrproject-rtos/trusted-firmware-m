@@ -579,7 +579,7 @@ static void tfm_svcall_psa_write(uint32_t *args)
 
 static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
 {
-    int32_t i = 0;
+    uint32_t i;
 
     /*
      * FixeMe: abstract these part into dedicated functions to avoid
@@ -590,10 +590,14 @@ static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
         TFM_CORE_ASSERT(msg->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
-    while (msg->msg.out_size[i] != 0) {
+    for (i = 0; i < PSA_MAX_IOVEC; i++) {
+        if (msg->msg.out_size[i] == 0) {
+            continue;
+        }
+
         TFM_CORE_ASSERT(msg->caller_outvec[i].base == msg->outvec[i].base);
+
         msg->caller_outvec[i].len = msg->outvec[i].len;
-        i++;
     }
 }
 /**
