@@ -294,31 +294,15 @@ static struct tfm_spm_service_t *
 
 struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    uint32_t i;
-    struct tfm_list_node_t *node, *head;
-    struct tfm_spm_service_t *service;
-    struct spm_partition_desc_t *partition;
+    uint32_t i, num;
 
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        partition = &g_spm_partition_db.partitions[i];
-        /* Skip partition without IPC flag */
-        if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
-            continue;
-        }
-
-        if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
-            continue;
-        }
-
-        head = &partition->runtime_data.service_list;
-        TFM_LIST_FOR_EACH(node, head) {
-            service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t,
-                                            list);
-            if (service->service_db->sid == sid) {
-                return service;
-            }
+    num = sizeof(service) / sizeof(struct tfm_spm_service_t);
+    for (i = 0; i < num; i++) {
+        if (service[i].service_db->sid == sid) {
+            return &service[i];
         }
     }
+
     return NULL;
 }
 
