@@ -56,6 +56,19 @@ enum psa_attest_err_t
 attest_get_signing_key_handle(psa_key_handle_t *key_handle);
 
 /**
+ * \brief Get the buffer of Instance ID data
+ *
+ * \param[out] id_buf  Address and length of Instance ID buffer
+ *
+ * \retval  PSA_ATTEST_ERR_SUCCESS            Instance ID was successfully
+ *                                            returned.
+ * \retval  PSA_ATTEST_ERR_CLAIM_UNAVAILABLE  Instance ID is unavailable
+ * \retval  PSA_ATTEST_ERR_GENERAL            Instance ID could not be returned.
+ */
+enum psa_attest_err_t
+attest_get_instance_id(struct q_useful_buf_c *id_buf);
+
+/**
  * \brief Get the public key derived from the initial attestation private key.
  *
  * \param[out] public_key       Pointer to public key buffer.

@@ -372,6 +372,36 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+/*!
+ * \brief Static function to add instance id claim to attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \note This mandatory claim represents the unique identifier of the instance.
+ *       So far, only GUID type is supported.
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
+{
+    struct q_useful_buf_c claim_value;
+    enum psa_attest_err_t err;
+
+    /* Leave the first byte for UEID type byte */
+    err = attest_get_instance_id(&claim_value);
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        return err;
+    }
+
+    attest_token_add_bstr(token_ctx,
+                          EAT_CBOR_ARM_LABEL_UEID,
+                          &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 /*!
  * \brief Static function to add instance id claim to attestation token.
  *
@@ -436,6 +466,7 @@ attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 /*!
  * \brief Static function to add implementation id claim to attestation token.

@@ -12,12 +12,20 @@
 #include "attestation_key.h"
 #include "platform/include/tfm_plat_crypto_keys.h"
 #include "psa/crypto.h"
+#include "tfm_memory_utils.h"
 
 /* Only support HMAC as MAC algorithm in COSE_Mac0 so far */
 #define SYMMETRIC_IAK_MAX_SIZE        PSA_MAC_MAX_SIZE
 
+/* Hash algorithm for calculating Instance ID */
+#define INSTANCE_ID_HASH_ALG          PSA_ALG_SHA_256
+
 /* Symmetric IAK handle */
 static psa_key_handle_t symmetric_iak_handle = 0;
+
+/* Instance ID for symmetric IAK */
+static uint8_t instance_id_buf[PSA_HASH_SIZE(INSTANCE_ID_HASH_ALG) + 1];
+static size_t instance_id_len = 0;
 
 static psa_status_t destroy_iak(psa_key_handle_t *iak_handle)
 {
@@ -27,6 +35,90 @@ static psa_status_t destroy_iak(psa_key_handle_t *iak_handle)
 
     *iak_handle = 0;
     return res;
+}
+
+/**
+ * \brief Static function to execute hash computation of symmetric IAK once.
+ *
+ * \param[in]  iak_buf      Buffer containing the IAK raw data
+ * \param[in]  iak_len      The length of IAK raw data
+ * \param[out] hash_buf     The buffer to be written with hash data
+ * \param[in]  hash_size    The size of hash_buf
+ * \param[out] hash_len     The actual length of hash data
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+static psa_status_t symmetric_iak_hash(const uint8_t *iak_buf,
+                                       size_t        iak_len,
+                                       uint8_t       *hash_buf,
+                                       size_t        hash_size,
+                                       size_t        *hash_len)
+{
+    psa_hash_operation_t hash_op = psa_hash_operation_init();
+    psa_status_t status;
+
+    if (!iak_buf || !hash_buf || !hash_len) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    status = psa_hash_setup(&hash_op, INSTANCE_ID_HASH_ALG);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_hash_update(&hash_op, iak_buf, iak_len);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_hash_finish(&hash_op, hash_buf, hash_size, hash_len);
+
+    return status;
+}
+
+/*
+ * Hash a symmetric Initial Attestation Key (IAK) twice to get the Instance ID.
+ *
+ * \note Please note that this function will corrupt the original IAK data in
+ *       iak_buf.
+ *       It can save a 32-byte buffer to put the intermediate data of the first
+ *       hash into iak_buf.
+ */
+static psa_status_t calc_instance_id(uint8_t *iak_buf, size_t iak_len)
+{
+    psa_status_t status;
+    /* Leave the first byte for UEID type byte */
+    uint8_t *id_ptr = instance_id_buf + 1;
+    size_t id_len = sizeof(instance_id_buf) - 1;
+
+    if (!iak_buf) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    status = symmetric_iak_hash(iak_buf, iak_len, id_ptr, id_len,
+                                &instance_id_len);
+    if (status != PSA_SUCCESS) {
+        instance_id_len = 0;
+        return status;
+    }
+
+    /*
+     * instance_id_len = SHA-256 block size < key_len <= key_buf size
+     * It should be safe to directly copy without boundary check.
+     */
+    tfm_memcpy(iak_buf, id_ptr, instance_id_len);
+
+    status = symmetric_iak_hash(iak_buf, instance_id_len, id_ptr, id_len,
+                                &instance_id_len);
+    if (status == PSA_SUCCESS) {
+        /* Add UEID type byte 0x01 */
+        instance_id_buf[0] = 0x01;
+        instance_id_len++;
+    } else {
+        instance_id_len = 0;
+    }
+
+    return status;
 }
 
 enum psa_attest_err_t attest_register_initial_attestation_key(void)
@@ -87,6 +179,19 @@ enum psa_attest_err_t attest_register_initial_attestation_key(void)
 
     symmetric_iak_handle = key_handle;
 
+    /*
+     * Calculate the Instance ID.
+     * Since Instance ID is generated from symmetric IAK, achieve it now to
+     * protect critical IAK raw data from being repeatedly fetched.
+     * IAK in key_buf will be corrupted. Therefore, this step must be called
+     * at the end.
+     */
+    psa_res = calc_instance_id(key_buf, key_len);
+    if (psa_res != PSA_SUCCESS) {
+        destroy_iak(&symmetric_iak_handle);
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
@@ -97,6 +202,9 @@ enum psa_attest_err_t attest_unregister_initial_attestation_key(void)
     }
 
     destroy_iak(&symmetric_iak_handle);
+
+    /* Invalidate the Instance ID as well */
+    instance_id_len = 0;
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
@@ -109,6 +217,23 @@ attest_get_signing_key_handle(psa_key_handle_t *key_handle)
     }
 
     *key_handle = symmetric_iak_handle;
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+enum psa_attest_err_t
+attest_get_instance_id(struct q_useful_buf_c *id_buf)
+{
+    if (!id_buf) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    if (!instance_id_len) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    id_buf->ptr = instance_id_buf;
+    id_buf->len = instance_id_len;
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
