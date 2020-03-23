@@ -40,7 +40,8 @@
  * 0x0A1E_0000 Secure Storage Area (20 KB)
  * 0x0A1E_5000 Internal Trusted Storage Area (16 KB)
  * 0x0A1E_9000 NV counters area (4 KB)
- * 0x0A1E_A000 Unused
+ * 0x0A1E_A000 TF_M key area (256 bytes)
+ * 0x0A1E_A100 Unused
  *
  * Flash layout on Musca-S1 without BL2:
  * 0x0A00_0000 Secure     image
@@ -149,6 +150,11 @@
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+
+/* TF-M crypto key area definitions */
+#define FLASH_TFM_CRYPTO_KEY_AREA_OFFSET   (FLASH_NV_COUNTERS_AREA_OFFSET + \
+                                            FLASH_NV_COUNTERS_AREA_SIZE)
+#define FLASH_TFM_CRYPTO_KEY_AREA_SIZE     (0x100)
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
