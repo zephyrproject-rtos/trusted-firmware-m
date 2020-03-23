@@ -150,7 +150,7 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
@@ -188,4 +188,56 @@ elseif (BUILD_FLASH)
     set(ITS_CREATE_FLASH_LAYOUT ON)
     embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_s1/CMSIS_Driver" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
+endif()
+
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
+    set (CRYPTO_HW_ACCELERATOR OFF)
+endif()
+
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR_OTP_STATE)
+    set (CRYPTO_HW_ACCELERATOR_OTP_STATE "DISABLED")
+endif()
+
+if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
+    set(CRYPTO_HW_ACCELERATOR OFF)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312Provisioning.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_PROVISIONING")
+
+    add_definitions("-DCC_IOT")
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    set(CRYPTO_HW_ACCELERATOR ON)
+
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_ENABLED")
+elseif(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "DISABLED")
+else()
+    message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_OTP_STATE invalid. expected (DISABLED|PROVISIONING|ENABLED)")
+endif()
+
+#Enable CryptoCell-312 HW accelerator
+if (CRYPTO_HW_ACCELERATOR)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR")
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_CC312")
+
+    add_definitions("-DCC_IOT")
+    #The CC312 uses GNU make as a build system so does not use the cmake flag
+    #system. As such any flags that need to be set for both CC312 and TF-M
+    #require setting multiple times.
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+
+    #Compiling this file requires to disable warning: -Wunused-local-typedefs
+    set_source_files_properties("${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c" PROPERTIES COMPILE_FLAGS -Wno-unused-local-typedefs)
 endif()
