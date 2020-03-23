@@ -1,17 +1,12 @@
 /*
  * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-/* NOTE: This API should be implemented by platform vendor. For the security of
- * the secure storage system's and the bootloader's rollback protection etc. it
- * is CRITICAL to use a internal (in-die) persistent memory for multiple time
- * programmable (MTP) non-volatile counters or use a One-time Programmable (OTP)
- * non-volatile counters solution.
- *
- * The current software dummy implementation is not resistant to asynchronous
+/* The current software implementation is not resistant to asynchronous
  * power failures and should not be used in production code. It is exclusively
  * for testing purposes.
  */

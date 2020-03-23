@@ -207,10 +207,7 @@ endif()
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_NV_COUNTERS (true|false) is undefined!")
 elseif(BUILD_TARGET_NV_COUNTERS)
-  # NOTE: This non-volatile counters implementation is a dummy
-  #       implementation. Platform vendors have to implement the
-  #       API ONLY if the target has non-volatile counters.
-  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/cypress/psoc64/dummy_nv_counters.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/cypress/psoc64/nv_counters.c")
   set(TARGET_NV_COUNTERS_ENABLE ON)
   # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
   # rollback protection code as the target supports nv counters.
