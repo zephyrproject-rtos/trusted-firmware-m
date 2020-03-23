@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -121,6 +121,126 @@ exit:
     return rc;
 }
 
+/*
+ * All Musca-S1 platform-dependent defines (DX_PLAT_MUSCA_S1) are due to the
+ * fact that the S1 board's OTP is just an ordinary register which is volatile.
+ * The MRAM is used instead, and this is what the changes reflect.
+ */
+#ifdef DX_PLAT_MUSCA_S1
+
+#define HAL_WRITE_MRAM_UINT32(val, regOffset)                      \
+        (*((volatile uint32_t *)(DX_MRAM_CC + ((regOffset) *       \
+        sizeof(uint32_t)))) = (val))
+
+static void cc312_otp_copy_to_mram(const uint32_t offs, size_t size_in_words)
+{
+    uint32_t i = 0;
+    uint32_t temp = 0;
+
+    for(i = 0; i < size_in_words; i++) {
+        CC_PROD_OTP_READ(temp, offs + i);
+        HAL_WRITE_MRAM_UINT32(temp, offs + i);
+    }
+}
+
+static void cc312_otp_copy_attestation_to_mram(void)
+{
+    cc312_otp_copy_to_mram(CC_OTP_ATTESTATION_KEY_OFFSET,
+                           CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS);
+
+    cc312_otp_copy_to_mram(CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET, 1);
+}
+
+static int32_t cc312_otp_copy_dm_content_to_mram(CCDmpuData_t *pDmpuData)
+{
+    uint32_t hbkSizeInWords;
+    uint32_t hbkOtpWordOffset;
+    uint32_t swVerOtpWordOffset;
+    uint32_t swVerSizeInWords;
+    uint32_t icvWord;
+
+    if (pDmpuData == NULL) {
+        return -1;
+    }
+
+    CC_PROD_OTP_READ(icvWord, CC_OTP_MANUFACTURE_FLAG_OFFSET);
+
+    switch (pDmpuData->hbkType) {
+    case DMPU_HBK_TYPE_HBK1:
+            if (!IS_HBK0_USED(icvWord)) {
+                return -1;
+            }
+            hbkSizeInWords = CC_OTP_HBK1_SIZE_IN_WORDS;
+            hbkOtpWordOffset = CC_OTP_HBK1_OFFSET;
+            swVerOtpWordOffset = CC_OTP_HBK1_MIN_VERSION_OFFSET;
+            swVerSizeInWords = CC_OTP_HBK1_MIN_VERSION_SIZE_IN_WORDS;
+            break;
+    case DMPU_HBK_TYPE_HBK:
+            if (IS_HBK0_USED(icvWord)) {
+                return -1;
+            }
+            hbkSizeInWords = CC_OTP_HBK_SIZE_IN_WORDS;
+            hbkOtpWordOffset = CC_OTP_HBK_OFFSET;
+            swVerOtpWordOffset = CC_OTP_HBK_MIN_VERSION_OFFSET;
+            swVerSizeInWords = CC_OTP_HBK_MIN_VERSION_SIZE_IN_WORDS;
+            break;
+    default:
+            return -1;
+    }
+
+
+    cc312_otp_copy_to_mram(CC_OTP_OEM_FLAG_OFFSET, 1);
+
+    cc312_otp_copy_to_mram(hbkOtpWordOffset, hbkSizeInWords);
+
+    cc312_otp_copy_to_mram(CC_OTP_DCU_OFFSET, CC_OTP_DCU_SIZE_IN_WORDS);
+
+    cc312_otp_copy_to_mram(swVerOtpWordOffset, swVerSizeInWords);
+
+    if (pDmpuData->kcpDataType != ASSET_NO_KEY) {
+        cc312_otp_copy_to_mram(CC_OTP_KCP_OFFSET, CC_OTP_KCP_SIZE_IN_WORDS);
+    }
+    if (pDmpuData->kceDataType != ASSET_NO_KEY) {
+        cc312_otp_copy_to_mram(CC_OTP_KCE_OFFSET, CC_OTP_KCE_SIZE_IN_WORDS);
+    }
+
+    return 0;
+}
+
+static int32_t cc312_otp_copy_cm_content_to_mram(CCCmpuData_t *pCmpuData)
+{
+    if (pCmpuData == NULL) {
+        return -1;
+    }
+
+    cc312_otp_copy_to_mram(CC_OTP_MANUFACTURE_FLAG_OFFSET, 1);
+
+    cc312_otp_copy_to_mram(CC_OTP_HUK_OFFSET, CC_OTP_HUK_SIZE_IN_WORDS);
+
+    if (pCmpuData->uniqueDataType == CMPU_UNIQUE_IS_HBK0) {
+        cc312_otp_copy_to_mram(CC_OTP_HBK0_OFFSET, CC_OTP_HBK0_SIZE_IN_WORDS);
+
+        cc312_otp_copy_to_mram(CC_OTP_DCU_OFFSET, CC_OTP_DCU_SIZE_IN_WORDS);
+
+        cc312_otp_copy_to_mram(CC_OTP_HBK0_MIN_VERSION_OFFSET,
+        CC_OTP_HBK0_MIN_VERSION_SIZE_IN_WORDS);
+    }
+    if (pCmpuData->kpicvDataType  != ASSET_NO_KEY) {
+        cc312_otp_copy_to_mram(CC_OTP_KPICV_OFFSET,
+                               CC_OTP_KPICV_SIZE_IN_WORDS);
+    }
+    if (pCmpuData->kceicvDataType  != ASSET_NO_KEY) {
+        cc312_otp_copy_to_mram(CC_OTP_KCEICV_OFFSET,
+                               CC_OTP_KCEICV_SIZE_IN_WORDS);
+    }
+    cc312_otp_copy_to_mram(CC_OTP_ICV_GENERAL_PURPOSE_FLAG_OFFSET, 1);
+
+    return 0;
+}
+#endif /* DX_PLAT_MUSCA_S1 */
+
+
+
 static int cc312_program_attestation_private_key(
                                     mbedtls_ecp_group_id curve_type)
 {
@@ -159,9 +279,14 @@ static int cc312_program_attestation_private_key(
     CC_PROD_OTP_WRITE_VERIFY_WORD(CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET,
                                   zero_count,
                                   error);
+
     if (error != CC_OK) {
         return -1;
     }
+
+#ifdef DX_PLAT_MUSCA_S1
+    cc312_otp_copy_attestation_to_mram();
+#endif
 
     return 0;
 }
@@ -195,6 +320,14 @@ static int cc312_cmpu_provision(void)
     rc = CCProd_Cmpu(DX_BASE_CC, &cmpuData, (unsigned long)pWorkspaceBuf,
                      CMPU_WORKSPACE_MINIMUM_SIZE);
 
+#ifdef DX_PLAT_MUSCA_S1
+    if (rc) {
+        return rc;
+    }
+
+    rc = cc312_otp_copy_cm_content_to_mram(&cmpuData);
+#endif
+
     return rc;
 }
 
@@ -225,6 +358,15 @@ static int cc312_dmpu_provision(void)
 
     rc = CCProd_Dmpu(DX_BASE_CC, &dmpuData, (unsigned long)pWorkspaceBuf,
                      DMPU_WORKSPACE_MINIMUM_SIZE);
+
+#ifdef DX_PLAT_MUSCA_S1
+    if (rc) {
+        return rc;
+    }
+
+    rc = cc312_otp_copy_dm_content_to_mram(&dmpuData);
+#endif
+
     return rc;
 }
 

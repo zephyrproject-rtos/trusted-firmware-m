@@ -190,6 +190,7 @@ elseif (BUILD_FLASH)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
 
+#The CC312 is disabled by default
 if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
     set (CRYPTO_HW_ACCELERATOR OFF)
 endif()

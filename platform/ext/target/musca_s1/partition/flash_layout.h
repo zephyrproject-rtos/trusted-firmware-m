@@ -40,7 +40,9 @@
  * 0x0A1E_0000 Secure Storage Area (20 KB)
  * 0x0A1E_5000 Internal Trusted Storage Area (16 KB)
  * 0x0A1E_9000 NV counters area (4 KB)
- * 0x0A1E_A000 TF_M key area (256 bytes)
+ * 0x0A1E_A000 TF_M key area (256 bytes) This area is referred to in
+ *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
+ *             dx_reg_base_host.h Do not change one without changing the other.
  * 0x0A1E_A100 Unused
  *
  * Flash layout on Musca-S1 without BL2:
