@@ -22,6 +22,8 @@
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
 #include "crypto_hw.h"
 #include "mbedtls_cc_mng_int.h"
+#include "mbedtls_cc_util_key_derivation.h"
+#include "cc_otp_defs.h"
 #endif /* CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
 
 /* FIXME: Functions in this file should be implemented by platform vendor. For
@@ -31,6 +33,9 @@
  */
 
 #define TFM_KEY_LEN_BYTES  16
+
+#define CC312_NULL_CONTEXT "NO SALT!"
+#define CC_BITS_IN_32BIT_WORD 32
 
 #ifndef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
 static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
@@ -80,6 +85,9 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
     int rc;
     uint32_t lcs;
+    struct mbedtls_util_keydata mram_key = { 0 };
+    uint32_t huk[CC_OTP_HUK_SIZE_IN_WORDS] = { 0 };
+    int i = 0;
 
     rc = crypto_hw_accelerator_get_lcs(&lcs);
     if (rc) {
@@ -90,8 +98,27 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
-    rc = crypto_hw_accelerator_huk_derive_key(label, label_size, context,
-                                              context_size, key, key_size);
+    for (i = 0; i < CC_OTP_HUK_SIZE_IN_WORDS; i++) {
+        CC_READ_MRAM_WORD((CC_OTP_HUK_OFFSET + i) * sizeof(uint32_t), huk[i]);
+    }
+
+    mram_key.pKey = (uint8_t*)huk;
+
+    mram_key.keySize = CC_OTP_HUK_SIZE_IN_WORDS * sizeof(uint32_t);
+
+    if (context == NULL || context_size == 0) {
+        /* The CC312 requires the context to not be null, so a default
+         * is given.
+         */
+        context = (const uint8_t *)CC312_NULL_CONTEXT;
+        context_size = sizeof(CC312_NULL_CONTEXT);
+    }
+
+    rc = mbedtls_util_key_derivation_cmac(CC_UTIL_USER_KEY, &mram_key,
+                                          label, label_size,
+                                          context, context_size,
+                                          key, key_size);
+
     if (rc) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -106,6 +133,39 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+/*
+ * Count number of zero bits in 32-bit word.
+ * Copied from:
+ * lib/ext/cryptocell-312-runtime/host/src/ \
+ * cc3x_productionlib/common/prod_util.c: CC_PROD_GetZeroCount(..)
+ */
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+static int get_zero_bits_count(uint32_t *buf,
+                               uint32_t  buf_word_size,
+                               uint32_t *zero_count)
+{
+    uint32_t val;
+    uint32_t index = 0;
+
+    *zero_count = 0;
+    for (index = 0; index < buf_word_size; index++) {
+        val = buf[index];
+        val = val - ((val >> 1) & 0x55555555);
+        val = (val & 0x33333333) + ((val >> 2) & 0x33333333);
+        val = ((((val + (val >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24);
+        *zero_count += (32 - val);
+    }
+    /* All 0's and all 1's is forbidden */
+    if ((*zero_count == 0)
+        || (*zero_count == buf_word_size*CC_BITS_IN_32BIT_WORD)) {
+        *zero_count = 0;
+        return -1;
+    }
+
+    return 0;
+}
+#endif
+
 enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
@@ -114,6 +174,12 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
 {
     uint32_t key_size = initial_attestation_private_key_size;
     int rc;
+#ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
+    uint32_t *key = (uint32_t *)key_buf;
+    uint32_t zero_count;
+    uint32_t otp_zero_count;
+    int i;
+#endif
 
     if (size < key_size) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
@@ -124,7 +190,32 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
 
     /* Copy the private key to the buffer, it MUST be present */
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_ENABLED
-    rc = crypto_hw_accelerator_get_attestation_private_key(key_buf, &size);
+    if (key == NULL ||
+        size < CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS * sizeof(uint32_t)) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    size = CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS * sizeof(uint32_t);
+
+    for (i = 0; i < CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS; i++) {
+        CC_READ_MRAM_WORD((CC_OTP_ATTESTATION_KEY_OFFSET + i) *
+                          sizeof(uint32_t), key[i]);
+    }
+
+    /* Verify the zero number of private key */
+    rc = get_zero_bits_count((uint32_t *)key_buf,
+                             CC_OTP_ATTESTATION_KEY_SIZE_IN_WORDS,
+                             &zero_count);
+    if (rc) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    CC_READ_MRAM_WORD(CC_OTP_ATTESTATION_KEY_ZERO_COUNT_OFFSET *
+                      sizeof(uint32_t), otp_zero_count);
+
+    if (otp_zero_count != zero_count) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     key_size = size;
 #else
     copy_key(key_buf, initial_attestation_private_key, key_size);

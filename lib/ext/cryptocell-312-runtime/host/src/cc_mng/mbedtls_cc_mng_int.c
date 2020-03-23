@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,6 +20,10 @@
 #include "cc_util_pm.h"
 
 /************* Auxiliary API's *************/
+/* All Musca-S1 platform-dependent defines (DX_PLAT_MUSCA_S1) are due to the
+ * fact that the S1 board's OTP is just an ordinary register which is volatile.
+ * The MRAM is used instead, and this is what the changes reflect.
+ */
 int mbedtls_mng_otpWordRead(uint32_t otpAddress, uint32_t *pOtpWord)
 {
     uint32_t regVal=0;
@@ -36,7 +40,11 @@ int mbedtls_mng_otpWordRead(uint32_t otpAddress, uint32_t *pOtpWord)
     }
 
     /* read OTP word */
+#ifdef DX_PLAT_MUSCA_S1
+    CC_READ_MRAM_WORD(otpAddress*sizeof(uint32_t), regVal);
+#else
     CC_READ_OTP_WORD(otpAddress*sizeof(uint32_t), regVal);
+#endif
     *pOtpWord = regVal;
 
     return CC_OK;
