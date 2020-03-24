@@ -922,7 +922,8 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
     uint8_t *challenge_data;
 
     /* Get option flags if there is encoded in the challenge object */
-    if (challenge->len == PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) {
+    if ((challenge->len == PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) &&
+        (challenge->ptr)) {
         challenge_end  = ((uint8_t *)challenge->ptr) + challenge->len;
         challenge_data = ((uint8_t *)challenge->ptr) + option_flags_size;
 
