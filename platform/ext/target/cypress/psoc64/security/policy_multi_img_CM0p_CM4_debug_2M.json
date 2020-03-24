@@ -94,10 +94,10 @@
             },
             {
                 "boot_auth": [
-                    8
+                    6
                 ],
                 "boot_keys": [
-                    { "kid": 8, "key": "./keys/USERAPP_CM4_KEY.json" }
+                    { "kid": 6, "key": "./keys/TFM_S_KEY.json" }
                 ],
                 "id": 1,
                 "monotonic": 0,
@@ -111,10 +111,10 @@
                 "encrypt_key_id": 1,
                 "encrypt_peer": "./keys/dev_pub_key.pem",
                 "upgrade_auth": [
-                    8
+                    6
                 ],
                 "upgrade_keys": [
-                    { "kid": 8, "key": "./keys/USERAPP_CM4_KEY.json" }
+                    { "kid": 6, "key": "./keys/TFM_S_KEY.json" }
                 ],
                 "backup": false,
                 "resources": [
@@ -135,7 +135,7 @@
                     8
                 ],
                 "boot_keys": [
-                    { "kid": 8, "key": "./keys/USERAPP_CM4_KEY.json" }
+                    { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
                 ],
                 "id": 16,
                 "monotonic": 0,
@@ -152,7 +152,7 @@
                     8
                 ],
                 "upgrade_keys": [
-                    { "kid": 8, "key": "./keys/USERAPP_CM4_KEY.json" }
+                    { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
                 ],
                 "backup": false,
                 "resources": [
