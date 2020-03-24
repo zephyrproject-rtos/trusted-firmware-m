@@ -289,7 +289,7 @@ attest_token_decode_get_int(struct attest_token_decode_context *me,
             return_value = ATTEST_TOKEN_ERR_INTEGER_VALUE;
         }
     } else {
-        return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+        return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
     }
 
 Done:
@@ -337,7 +337,7 @@ attest_token_decode_get_uint(struct attest_token_decode_context *me,
             return_value = ATTEST_TOKEN_ERR_INTEGER_VALUE;
         }
     } else {
-        return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+        return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
     }
 
 Done:
@@ -584,7 +584,7 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
             switch(claim_item.label.int64) {
             case EAT_CBOR_SW_COMPONENT_MEASUREMENT_TYPE:
                 if(claim_item.uDataType != QCBOR_TYPE_TEXT_STRING) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+                    return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
                     goto Done;
                 }
                 sw_component->measurement_type = claim_item.val.string;
@@ -595,7 +595,7 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
 
             case EAT_CBOR_SW_COMPONENT_MEASUREMENT_VALUE:
                 if(claim_item.uDataType != QCBOR_TYPE_BYTE_STRING) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+                    return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
                     goto Done;
                 }
                 sw_component->measurement_val = claim_item.val.string;
@@ -605,7 +605,7 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
 
             case EAT_CBOR_SW_COMPONENT_VERSION:
                 if(claim_item.uDataType != QCBOR_TYPE_TEXT_STRING) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+                    return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
                     goto Done;
                 }
                 sw_component->version = claim_item.val.string;
@@ -615,7 +615,7 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
 
             case EAT_CBOR_SW_COMPONENT_SIGNER_ID:
                 if(claim_item.uDataType != QCBOR_TYPE_BYTE_STRING) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+                    return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
                     goto Done;
                 }
                 sw_component->signer_id = claim_item.val.string;
@@ -625,7 +625,7 @@ decode_sw_component(QCBORDecodeContext               *decode_context,
 
             case EAT_CBOR_SW_COMPONENT_MEASUREMENT_DESC:
                 if(claim_item.uDataType != QCBOR_TYPE_TEXT_STRING) {
-                    return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+                    return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
                     goto Done;
                 }
                 sw_component->measurement_desc = claim_item.val.string;
@@ -683,7 +683,7 @@ attest_token_get_sw_component(struct attest_token_decode_context *me,
     }
 
     if(sw_components_array_item.uDataType != QCBOR_TYPE_ARRAY) {
-        return_value = ATTETST_TOKEN_ERR_CBOR_TYPE;
+        return_value = ATTEST_TOKEN_ERR_CBOR_TYPE;
         goto Done;
     }
 

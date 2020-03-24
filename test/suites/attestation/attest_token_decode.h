@@ -546,7 +546,7 @@ attest_token_get_num_sw_components(struct attest_token_decode_context *me,
  * \retval ATTEST_TOKEN_ERR_NOT_FOUND
  *         There were not \c requested_index in the token.
  *
- * \retval ATTETST_TOKEN_ERR_CBOR_TYPE
+ * \retval ATTEST_TOKEN_ERR_CBOR_TYPE
  *         The claim labeled to contain SW components is not an array.
  */
 enum attest_token_err_t
@@ -573,7 +573,7 @@ attest_token_get_sw_component(struct attest_token_decode_context *me,
  * \retval ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED
  *         CBOR syntax is wrong and it is not decodable.
  *
- * \retval ATTETST_TOKEN_ERR_CBOR_TYPE
+ * \retval ATTEST_TOKEN_ERR_CBOR_TYPE
  *         Returned if the claim is not a byte string.
  *
  * \retval ATTEST_TOKEN_ERR_NOT_FOUND
@@ -606,7 +606,7 @@ attest_token_decode_get_bstr(struct attest_token_decode_context *me,
  * \retval ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED
  *         CBOR syntax is wrong and it is not decodable.
  *
- * \retval ATTETST_TOKEN_ERR_CBOR_TYPE
+ * \retval ATTEST_TOKEN_ERR_CBOR_TYPE
  *         Returned if the claim is not a byte string.
  *
  * \retval ATTEST_TOKEN_ERR_NOT_FOUND
@@ -642,7 +642,7 @@ attest_token_decode_get_tstr(struct attest_token_decode_context *me,
  * \retval ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED
  *         CBOR syntax is wrong and it is not decodable.
  *
- * \retval ATTETST_TOKEN_ERR_CBOR_TYPE
+ * \retval ATTEST_TOKEN_ERR_CBOR_TYPE
  *         Returned if the claim is not a byte string.
  *
  * \retval ATTEST_TOKEN_ERR_NOT_FOUND
@@ -684,7 +684,7 @@ attest_token_decode_get_int(struct attest_token_decode_context *me,
  * \retval ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED
  *         CBOR syntax is wrong and it is not decodable.
  *
- * \retval ATTETST_TOKEN_ERR_CBOR_TYPE
+ * \retval ATTEST_TOKEN_ERR_CBOR_TYPE
  *         Returned if the claim is not a byte string.
  *
  * \retval ATTEST_TOKEN_ERR_NOT_FOUND
