@@ -120,6 +120,14 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
     attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
     attest_key.k.key_handle = (uint64_t)key_handle;
 
+    attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
+    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+        return ATTEST_TOKEN_ERR_GENERAL;
+    } else if (!attest_key_id.ptr || !attest_key_id.len) {
+        /* In case kid value is invalid, set it to NULL */
+        attest_key_id = NULL_Q_USEFUL_BUF_C;
+    }
+
     t_cose_mac0_set_signing_key(&(me->mac_ctx),
                                 attest_key,
                                 attest_key_id);

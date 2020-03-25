@@ -104,6 +104,25 @@ enum tfm_plat_err_t tfm_plat_get_symmetric_iak(uint8_t *key_buf,
                                                size_t buf_len,
                                                size_t *key_len,
                                                psa_algorithm_t *key_alg);
+
+#ifdef INCLUDE_COSE_KEY_ID
+/**
+ * \brief Get the key identifier of the symmetric Initial Attestation Key as the
+ *        'kid' parameter in COSE Header.
+ *
+ * \note This `kid` parameter is included in COSE Header. Please don't confuse
+ *       it with that `kid` in COSE_Key structure.
+ *
+ * \param[out] kid_buf  The buffer to be written with key id
+ * \param[in]  buf_len  The length of kid_buf
+ * \param[out] kid_len  The length of key id
+ *
+ * \return Returns error code specified in \ref tfm_plat_err_t.
+ */
+enum tfm_plat_err_t tfm_plat_get_symmetric_iak_id(void *kid_buf,
+                                                  size_t buf_len,
+                                                  size_t *kid_len);
+#endif
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
 /**
  * \brief Get the initial attestation key

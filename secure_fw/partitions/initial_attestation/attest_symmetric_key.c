@@ -20,12 +20,22 @@
 /* Hash algorithm for calculating Instance ID */
 #define INSTANCE_ID_HASH_ALG          PSA_ALG_SHA_256
 
+/* Length of kid buffer */
+#define KID_BUF_LEN                   32
+
 /* Symmetric IAK handle */
 static psa_key_handle_t symmetric_iak_handle = 0;
 
 /* Instance ID for symmetric IAK */
 static uint8_t instance_id_buf[PSA_HASH_SIZE(INSTANCE_ID_HASH_ALG) + 1];
 static size_t instance_id_len = 0;
+
+#ifdef INCLUDE_COSE_KEY_ID
+/* kid buffer */
+static uint8_t kid_buf[KID_BUF_LEN];
+/* Actual kid length */
+static size_t kid_len = 0;
+#endif
 
 static psa_status_t destroy_iak(psa_key_handle_t *iak_handle)
 {
@@ -206,6 +216,11 @@ enum psa_attest_err_t attest_unregister_initial_attestation_key(void)
     /* Invalidate the Instance ID as well */
     instance_id_len = 0;
 
+#ifdef INCLUDE_COSE_KEY_ID
+    /* Invalidate the corresponding kid as well */
+    kid_len = 0;
+#endif
+
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
@@ -237,3 +252,44 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+
+#ifdef INCLUDE_COSE_KEY_ID
+enum psa_attest_err_t
+attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
+{
+    enum tfm_plat_err_t plat_res;
+
+    if (!attest_key_id) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    /* The kid has not been fetched previously */
+    if (!kid_len) {
+        plat_res = tfm_plat_get_symmetric_iak_id(kid_buf,
+                                                 sizeof(kid_buf),
+                                                 &kid_len);
+        /* In case the buffer size was not checked, although unlikely */
+        if (sizeof(kid_buf) < kid_len) {
+            /*
+             * Something critical following kid_buf may be overwritten.
+             * Directly jump into fatal error handling.
+             *
+             * TODO: Should be replaced by a call to psa_panic() when it
+             * becomes available.
+             */
+            while (1) {
+                ;
+            }
+        }
+
+        if (plat_res != TFM_PLAT_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_GENERAL;
+        }
+    }
+
+    attest_key_id->ptr = (const void *)&kid_buf;
+    attest_key_id->len = kid_len;
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#endif /* INCLUDE_COSE_KEY_ID */

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include "tfm_plat_crypto_keys.h"
 #include <stddef.h>
+#include <string.h>
+
 #include "psa/crypto_types.h"
+#include "tfm_plat_crypto_keys.h"
 
 /* FIXME: Functions in this file should be implemented by platform vendor. For
  * the security of the storage system, it is critical to use a hardware unique
@@ -34,6 +36,7 @@ static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
 extern const psa_algorithm_t tfm_attest_hmac_sign_alg;
 extern const uint8_t initial_attestation_hmac_sha256_key[];
 extern const size_t initial_attestation_hmac_sha256_key_size;
+extern const char *initial_attestation_kid;
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
 extern const psa_ecc_curve_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
@@ -106,6 +109,23 @@ enum tfm_plat_err_t tfm_plat_get_symmetric_iak(uint8_t *key_buf,
 
     *key_alg = tfm_attest_hmac_sign_alg;
     *key_len = initial_attestation_hmac_sha256_key_size;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_get_symmetric_iak_id(void *kid_buf,
+                                                  size_t buf_len,
+                                                  size_t *kid_len)
+{
+    /* kid is string in this example. '\0' is ignore. */
+    size_t len = strlen(initial_attestation_kid);
+
+    if (!kid_buf || !kid_len || (buf_len < len)) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    copy_key(kid_buf, (const uint8_t *)initial_attestation_kid, len);
+    *kid_len = len;
 
     return TFM_PLAT_ERR_SUCCESS;
 }

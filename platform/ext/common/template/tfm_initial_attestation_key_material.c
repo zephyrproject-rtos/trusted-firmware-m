@@ -42,6 +42,9 @@ const uint8_t initial_attestation_hmac_sha256_key[] =
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
 const size_t initial_attestation_hmac_sha256_key_size =
         sizeof(initial_attestation_hmac_sha256_key);
+
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+const char *initial_attestation_kid = "kid@trustedfirmware.example";
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
 /*
  * This file contains the hard coded version of the ECDSA P-256 secret key in:
