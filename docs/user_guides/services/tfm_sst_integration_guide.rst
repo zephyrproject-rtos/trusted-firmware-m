@@ -332,6 +332,14 @@ needs. The list of SST services flags are:
   is set by default in the regression tests, if it is not defined by the
   platform.  The SST regression tests reduce the life of the flash memory
   as they write/erase multiple times in the memory.
+
+  .. Note::
+    If this flag is manually disabled when running the regression tests,
+    then the storage flash area should also be erased before running the tests
+    to ensure they run successfully. The type of storage flash area is platform
+    specific (QSPI, eFlash, etc.) and it is described in corresponding
+    flash_layout.h
+
 - ``SST_TEST_NV_COUNTERS``- this flag enables the virtual
   implementation of the SST NV counters interface in
   ``test/suites/sst/secure/nv_counters``, which emulates NV counters in

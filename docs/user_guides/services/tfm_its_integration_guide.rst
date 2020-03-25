@@ -280,6 +280,13 @@ needs. The list of ITS services flags are:
   platform. The ITS regression tests reduce the life of the flash memory
   as they write/erase multiple times in the memory.
 
+  .. Note::
+    If this flag is manually disabled when running the regression tests,
+    then the storage flash area should also be erased before running the tests
+    to ensure they run successfully. The type of storage flash area is platform
+    specific (QSPI, eFlash, etc.) and it is described in corresponding
+    flash_layout.h
+
 --------------
 
 *Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
