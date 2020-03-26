@@ -138,6 +138,10 @@ attest_token_decode_validate_token(struct attest_token_decode_context *me,
         return return_value;
     }
 
+    if (me->options & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
+        t_cose_options |= T_COSE_OPT_ALLOW_SHORT_CIRCUIT;
+    }
+
     t_cose_mac0_verify_init(&verify_ctx, t_cose_options);
 
     attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;

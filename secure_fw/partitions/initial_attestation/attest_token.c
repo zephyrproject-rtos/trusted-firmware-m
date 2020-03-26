@@ -111,6 +111,10 @@ enum attest_token_err_t attest_token_start(struct attest_token_ctx *me,
     me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
+    if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
+        t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_TAG;
+    }
+
     t_cose_mac0_sign_init(&(me->mac_ctx), t_cose_options, cose_alg_id);
 
     attest_ret = attest_get_signing_key_handle(&key_handle);
