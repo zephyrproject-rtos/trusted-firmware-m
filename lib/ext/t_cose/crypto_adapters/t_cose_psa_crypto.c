@@ -290,10 +290,13 @@ enum t_cose_err_t t_cose_crypto_sig_size(int32_t           cose_algorithm_id,
 Done:
     return return_value;
 }
+#endif /* !T_COSE_DISABLE_SIGN1 */
 
 
 
 
+#if !defined(T_COSE_DISABLE_SHORT_CIRCUIT_SIGN) || \
+    !defined(T_COSE_DISABLE_SIGN1)
 /**
  * \brief Convert COSE hash algorithm ID to a PSA hash algorithm ID
  *
@@ -408,7 +411,7 @@ t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
 Done:
     return psa_status_to_t_cose_error_hash(hash_ctx->status);
 }
-#endif /* !T_COSE_DISABLE_SIGN1 */
+#endif /* !T_COSE_DISABLE_SHORT_CIRCUIT_SIGN || !T_COSE_DISABLE_SIGN1 */
 
 #ifndef T_COSE_DISABLE_MAC0
 /**

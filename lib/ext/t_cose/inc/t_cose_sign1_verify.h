@@ -52,17 +52,6 @@ extern "C" {
 
 
 /**
- * Pass this as \c option_flags to allow verification of short-circuit
- * signatures. This should only be used as a test mode as
- * short-circuit signatures are not secure.
- *
- * See also \ref T_COSE_OPT_SHORT_CIRCUIT_SIG.
- */
-#define T_COSE_OPT_ALLOW_SHORT_CIRCUIT 0x00000001
-
-
-
-/**
  * Context for signature verification.  It is about 24 bytes on a
  * 64-bit machine and 12 bytes on a 32-bit machine.
  */

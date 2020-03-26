@@ -724,6 +724,23 @@ static inline size_t t_cose_tag_size(int32_t cose_alg_id)
     }
 }
 
+#ifndef T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
+/*
+ * Get the COSE Hash algorithm ID from the corresponding
+ * COSE HMAC algorithm ID
+ */
+static inline int32_t t_cose_hmac_to_hash_alg_id(int32_t cose_hamc_alg_id)
+{
+    switch(cose_hamc_alg_id) {
+        case T_COSE_ALGORITHM_HMAC256:
+            return COSE_ALGORITHM_SHA_256;
+
+        default:
+            return INT32_MAX;
+    }
+}
+#endif
+
 #ifdef __cplusplus
 }
 #endif

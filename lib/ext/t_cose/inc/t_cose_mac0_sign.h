@@ -18,6 +18,27 @@ extern "C" {
 
 
 /**
+ * This selects a test mode called _short_ _circuit_ _tagging_.
+ * This mode is useful when the symmetric key is unavailable
+ * or unable to be accessed, perhaps because it has not been provisioned or
+ * configured for the particular device.
+ *
+ * It has no value for security at all. Data signed this way MUST NOT
+ * be trusted as anyone can sign like this.
+ *
+ * In this mode, the tag is the hash of that which would normally be MACed by
+ * a symmetric key.
+ *
+ * This mode is very useful for testing because all the code except
+ * the actual MAC algorithm is run exactly as it would if a proper
+ * MAC algorithm was run. This can be used for end-end system
+ * testing all the way to a server or relying party, not just for
+ * testing device code as t_cose_mac0_verify() supports it too.
+ */
+#define T_COSE_OPT_SHORT_CIRCUIT_TAG 0x00000004
+
+
+/**
  * This is the context for creating a \c COSE_Mac0 structure. The caller
  * should allocate it and pass it to the functions here.  This is
  * about 32 bytes so it fits easily on the stack.
@@ -49,7 +70,8 @@ struct t_cose_mac0_sign_ctx {
  *
  * Initialize the \ref t_cose_mac0_sign_ctx context. Typically, no
  * \c option_flags are needed and 0 is passed. A \c cose_algorithm_id
- * must always be given.
+ * must always be given. See \ref T_COSE_OPT_SHORT_CIRCUIT_TAG and
+ * related for possible option flags.
  *
  * The algorithm ID space is from
  * [COSE (RFC8152)](https://tools.ietf.org/html/rfc8152) and the
@@ -74,6 +96,10 @@ t_cose_mac0_sign_init(struct t_cose_mac0_sign_ctx *me,
  *
  * This needs to be called to set the signing key to use. The \c kid
  * may be omitted by giving \c NULL_Q_USEFUL_BUF_C.
+ *
+ * If short-circuit signing is used,
+ * \ref T_COSE_OPT_SHORT_CIRCUIT_TAG, then this does not need to be
+ * called.
  */
 static void
 t_cose_mac0_set_signing_key(struct t_cose_mac0_sign_ctx *context,

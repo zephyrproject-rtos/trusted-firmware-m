@@ -452,6 +452,16 @@ struct t_cose_parameters {
 
 
 /**
+ * Pass this as \c option_flags to allow verification of short-circuit
+ * signatures. This should only be used as a test mode as
+ * short-circuit signatures are not secure.
+ *
+ * See also \ref T_COSE_OPT_SHORT_CIRCUIT_SIG.
+ */
+#define T_COSE_OPT_ALLOW_SHORT_CIRCUIT 0x00000001
+
+
+/**
  * The error \ref T_COSE_ERR_NO_KID is returned if the kid parameter
  * is missing. Note that the kid parameter is primarily passed on to
  * the crypto layer so the crypto layer can look up the key. If the
