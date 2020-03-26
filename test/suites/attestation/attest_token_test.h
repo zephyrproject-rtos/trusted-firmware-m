@@ -77,6 +77,24 @@ int_fast16_t buffer_too_small_test(void);
  * INCLUDE_TEST_CODE is enabled.
  */
 int_fast16_t decode_test_symmetric_initial_attest(void);
+
+/**
+ * \brief Test by checking short-circuit tagged values of claims.
+ *
+ * \return non-zero on failure.
+ *
+ * This is an extensive test that can compare the values in the token
+ * to expected valued compiled into the test app from
+ * token_test_values.h. All the values represented in \ref
+ * attest_token_iat_simple_t and in \ref attest_token_sw_component_t
+ * are checked.
+ *
+ * This uses a short-circuit tag rather than real HMAC operation with
+ * symmetric IAK. This tests everything in the implementation except the final
+ * MAC. It can work even without HMAC integration and without
+ * any keys configured.
+ */
+int_fast16_t decode_test_symmetric_iat_short_circuit_tag(void);
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
 /**
  * \brief Test by checking signed values of claims.
