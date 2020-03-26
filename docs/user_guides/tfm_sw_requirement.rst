@@ -137,6 +137,14 @@ with trustedfirmware-m
    `CMSIS release notes <https://github.com/ARM-software/CMSIS_5/releases>`__.
    for guidance.
 
+********************************************
+Tools for configuring and programming boards
+********************************************
+
+For stm32l5xx boards, `STM32_Programmer_CLI  <https://www.st.com/en/development-tools/stm32cubeprog.html>`__ 
+is used to configure security protections and to write the code in internal flash.
+A version is available for Linux and Windows host machine.
+
 **************
 Example setups
 **************

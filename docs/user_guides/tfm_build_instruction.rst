@@ -265,6 +265,12 @@ line arguments:
             See :doc:`Cypress PSoC 64 platform specifics </platform/ext/target/cypress/psoc64/cypress_psoc64_spec>`
           - DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS platform)
             ``-DTARGET_PLATFORM=SSE-200_AWS``
+          - DISCO_L562QE board (Cortex-M33 STM32L562)
+            ``-DTARGET_PLATFORM=STM_DISCO_L562QE``
+            See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
+          - NUCLEO_L552ZE_Q (Cortex-M33 STM32L552)
+            ``-DTARGET_PLATFORM=SSTM_NUCLEO_L552ZE_Q``
+            See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
 
    * - -DCOMPILER=<compiler name>
      - Specifies the compiler toolchain

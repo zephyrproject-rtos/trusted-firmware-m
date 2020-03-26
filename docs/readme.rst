@@ -111,6 +111,10 @@ Platforms supported
           <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
         - `NXP LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
+        - `NUCLEO L552ZE Q.
+          <https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-l552ze-q.html>`_
+        - `DISCO L562QE.
+          <https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-discovery-kits/stm32l562e-dk.html>`_
 
     - Cortex-M23 system:
 
