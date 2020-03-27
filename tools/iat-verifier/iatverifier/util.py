@@ -10,6 +10,7 @@ from copy import deepcopy
 
 import cbor
 import yaml
+import base64
 from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 from pycose.mac0message import Mac0Message
@@ -138,7 +139,7 @@ def recursive_bytes_to_strings(d, in_place=False):
         result = [recursive_bytes_to_strings(r, in_place=True)
                   for r in result]
     elif isinstance(result, bytes):
-        result = str(result)[2:-1]
+        result = str(base64.b16encode(result))
 
     return result
 
