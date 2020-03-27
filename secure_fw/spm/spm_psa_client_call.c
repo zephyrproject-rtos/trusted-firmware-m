@@ -135,7 +135,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         client_id = tfm_spm_partition_get_running_partition_id();
     }
 
-    conn_handle = (struct tfm_conn_handle_t *)handle;
+    conn_handle = tfm_spm_to_handle_instance(handle);
     /* It is a fatal error if an invalid handle was passed. */
     if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
         tfm_core_panic();
@@ -266,8 +266,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
         client_id = tfm_spm_partition_get_running_partition_id();
     }
 
-    conn_handle = (struct tfm_conn_handle_t *)handle;
-
+    conn_handle = tfm_spm_to_handle_instance(handle);
     /*
      * It is a fatal error if an invalid handle was provided that is not the
      * null handle.

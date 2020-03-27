@@ -956,6 +956,11 @@ void tfm_spm_validate_caller(struct spm_partition_desc_t *p_cur_sp,
  */
 void tfm_spm_psa_panic(void);
 
+/**
+ * \brief Converts a user handle into a corresponded handle instance.
+ */
+struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
+
 #endif /* defined(TFM_PSA_API) */
 
 #endif /*__SPM_API_H__ */

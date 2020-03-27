@@ -52,6 +52,91 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
+/*********************** Connection handle conversion APIs *******************/
+
+/* Set a minimal value here for feature expansion. */
+#define CLIENT_HANDLE_VALUE_MIN        32
+
+#define CONVERSION_FACTOR_BITOFFSET    3
+#define CONVERSION_FACTOR_VALUE        (1 << CONVERSION_FACTOR_BITOFFSET)
+/* Set 32 as the maximum */
+#define CONVERSION_FACTOR_VALUE_MAX    0x20
+
+#if CONVERSION_FACTOR_VALUE > CONVERSION_FACTOR_VALUE_MAX
+#error "CONVERSION FACTOR OUT OF RANGE"
+#endif
+
+static uint32_t loop_index;
+
+/*
+ * A handle instance psa_handle_t allocated inside SPM is actually a memory
+ * address among the handle pool. Return this handle to the client directly
+ * exposes information of secure memory address. In this case, converting the
+ * handle into another value does not represent the memory address to avoid
+ * exposing secure memory directly to clients.
+ *
+ * This function converts the handle instance into another value by scaling the
+ * handle in pool offset, the converted value is named as a user handle.
+ *
+ * The formula:
+ *  user_handle = (handle_instance - POOL_START) * CONVERSION_FACTOR_VALUE +
+ *                CLIENT_HANDLE_VALUE_MIN + loop_index
+ * where:
+ *  CONVERSION_FACTOR_VALUE = 1 << CONVERSION_FACTOR_BITOFFSET, and should not
+ *  exceed CONVERSION_FACTOR_VALUE_MAX.
+ *
+ *  handle_instance in RANGE[POOL_START, POOL_END]
+ *  user_handle     in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
+ *  loop_index      in RANGE[0, CONVERSION_FACTOR_VALUE - 1]
+ *
+ *  note:
+ *  loop_index is used to promise same handle instance is converted into
+ *  different user handles in short time.
+ */
+static psa_handle_t tfm_spm_to_user_handle(
+                                    struct tfm_conn_handle_t *handle_instance)
+{
+    psa_handle_t user_handle;
+
+    loop_index = (loop_index + 1) % CONVERSION_FACTOR_VALUE;
+    user_handle = (psa_handle_t)((((uintptr_t)handle_instance -
+                  (uintptr_t)conn_handle_pool) << CONVERSION_FACTOR_BITOFFSET) +
+                  CLIENT_HANDLE_VALUE_MIN + loop_index);
+
+    return user_handle;
+}
+
+/*
+ * This function converts a user handle into a corresponded handle instance.
+ * The converted value is validated before returning, an invalid handle instance
+ * is returned as NULL.
+ *
+ * The formula:
+ *  handle_instance = ((user_handle - CLIENT_HANDLE_VALUE_MIN) /
+ *                    CONVERSION_FACTOR_VALUE) + POOL_START
+ * where:
+ *  CONVERSION_FACTOR_VALUE = 1 << CONVERSION_FACTOR_BITOFFSET, and should not
+ *  exceed CONVERSION_FACTOR_VALUE_MAX.
+ *
+ *  handle_instance in RANGE[POOL_START, POOL_END]
+ *  user_handle     in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
+ *  loop_index      in RANGE[0, CONVERSION_FACTOR_VALUE - 1]
+ */
+struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
+{
+    struct tfm_conn_handle_t *handle_instance;
+
+    if (user_handle == PSA_NULL_HANDLE) {
+        return NULL;
+    }
+
+    handle_instance = (struct tfm_conn_handle_t *)((((uintptr_t)user_handle -
+                      CLIENT_HANDLE_VALUE_MIN) >> CONVERSION_FACTOR_BITOFFSET) +
+                      (uintptr_t)conn_handle_pool);
+
+    return handle_instance;
+}
+
 /* Service handle management functions */
 struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
                                         struct tfm_spm_service_t *service,
@@ -1232,7 +1317,7 @@ void tfm_spm_psa_reply(uint32_t *args)
          * input status.
          */
         if (status == PSA_SUCCESS) {
-            ret = (psa_handle_t)msg->handle;
+            ret = tfm_spm_to_user_handle(msg->handle);
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
             tfm_spm_free_conn_handle(service, msg->handle);
