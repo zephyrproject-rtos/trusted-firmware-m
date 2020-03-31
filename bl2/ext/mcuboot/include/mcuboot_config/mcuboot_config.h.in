@@ -62,6 +62,9 @@ extern "C" {
  */
 #define MAX_BOOT_RECORD_SZ  (100u)
 
+#cmakedefine MCUBOOT_ENC_IMAGES
+#cmakedefine MCUBOOT_ENCRYPT_RSA
+
 /*
  * Cryptographic settings
  */

@@ -105,12 +105,14 @@ else()
 			"${MCUBOOT_DIR}/bootutil/src/swap_scratch.c"
 			"${MCUBOOT_DIR}/bootutil/src/swap_move.c"
 			"${MCUBOOT_DIR}/bootutil/src/swap_misc.c"
+			"${MCUBOOT_DIR}/bootutil/src/encrypted.c"
 	)
 endif()
 
 #Define location of Mbed Crypto source, build, and installation directory.
 set(MBEDTLS_CONFIG_FILE "config-rsa.h")
 set(MBEDTLS_CONFIG_PATH "${TFM_ROOT_DIR}/bl2/ext/mcuboot/include")
+
 get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
 if(NOT EXISTS ${MBEDCRYPTO_SOURCE_DIR})
     message(FATAL_ERROR "Missing mbed-crypto. Please clone the mbed-crypto repo to directory \"${MBEDCRYPTO_SOURCE_DIR}\".")
@@ -124,6 +126,16 @@ if (CRYPTO_HW_ACCELERATOR OR CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISION
 	endif()
 	include(${CRYPTO_HW_ACCELERATOR_CMAKE_BUILD})
 endif()
+
+if(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
+	set(MCUBOOT_MBEDCRYPTO_SIGNATURE " -DMCUBOOT_SIGN_RSA_LEN=3072")
+elseif(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
+	set(MCUBOOT_MBEDCRYPTO_SIGNATURE " -DMCUBOOT_SIGN_RSA_LEN=2048")
+else()
+	set(MCUBOOT_MBEDCRYPTO_SIGNATURE "")
+endif()
+
+string(APPEND MBEDCRYPTO_C_FLAGS_BL2 " ${MCUBOOT_MBEDCRYPTO_SIGNATURE} -I${MBEDTLS_CONFIG_PATH}")
 
 #Build Mbed Crypto as external project.
 #This ensures Mbed Crypto is built with exactly defined settings.

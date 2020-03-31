@@ -39,6 +39,8 @@ if (BL2)
 
 	set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
 
+	set(MCUBOOT_ENCRYPT_RSA Off CACHE BOOL "Add encrypted image support to BL2. Also encrypts the signed images.")
+
 	set(MCUBOOT_LOG_LEVEL "LOG_LEVEL_INFO" CACHE STRING "Configure the level of logging in MCUBoot.")
 	set_property(CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS "LOG_LEVEL_OFF;LOG_LEVEL_ERROR;LOG_LEVEL_WARNING;LOG_LEVEL_INFO;LOG_LEVEL_DEBUG")
 	if (NOT CMAKE_BUILD_TYPE STREQUAL "debug")
@@ -56,12 +58,21 @@ if (BL2)
 	endif()
 
 	if (MCUBOOT_REPO STREQUAL "UPSTREAM")
+		if(MCUBOOT_ENCRYPT_RSA)
+			set(MCUBOOT_ENC_IMAGES On)
+		endif()
+
 		set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP")
 		if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" OR
 			${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
 			message(WARNING "The ${MCUBOOT_UPGRADE_STRATEGY} upgrade strategy cannot be used when building against"
 				" upstream MCUBoot. Your choice was overriden.")
 			mcuboot_override_upgrade_strategy("OVERWRITE_ONLY")
+		endif()
+	elseif (MCUBOOT_REPO STREQUAL "TF-M")
+		if (MCUBOOT_ENCRYPT_RSA)
+			set(MCUBOOT_ENCRYPT_RSA Off)
+			message(WARNING "BL2 encryption cannot be used when building against the TF-M MCUBoot fork. Your choice was overridden.")
 		endif()
 	endif()
 

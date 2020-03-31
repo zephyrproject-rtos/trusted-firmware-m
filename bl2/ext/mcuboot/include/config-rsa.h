@@ -1,7 +1,7 @@
 /*
  *  Minimal configuration for using TLS in the bootloader
  *
- *  Copyright (C) 2006-2019, Arm Limited. All rights reserved.
+ *  Copyright (C) 2006-2020, Arm Limited. All rights reserved.
  *  Copyright (C) 2016, Linaro Ltd
  *
  *  SPDX-License-Identifier: Apache-2.0
@@ -47,7 +47,7 @@
 #define MBEDTLS_PLATFORM_PRINTF_ALT
 
 #define MBEDTLS_RSA_C
-#define MBEDTLS_PKCS1_V15
+#define MBEDTLS_PKCS1_V21
 
 /* mbed TLS modules */
 #define MBEDTLS_ASN1_PARSE_C
@@ -56,6 +56,7 @@
 #define MBEDTLS_MD_C
 #define MBEDTLS_OID_C
 #define MBEDTLS_SHA256_C
+#define MBEDTLS_AES_C
 
 /* Save RAM by adjusting to our exact needs */
 #if MCUBOOT_SIGN_RSA_LEN == 3072
@@ -71,7 +72,6 @@
 
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
 #define MBEDTLS_CIPHER_C
-#define MBEDTLS_AES_C
 #define MBEDTLS_CCM_C
 #define MBEDTLS_ECDSA_C
 #define MBEDTLS_ECP_C

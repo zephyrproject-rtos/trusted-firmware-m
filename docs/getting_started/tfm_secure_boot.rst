@@ -415,6 +415,15 @@ Compile time switches:
     ``LOG_LEVEL_INFO`` by default. In case of different kinds of ``Release``
     builds its value is set to ``LOG_LEVEL_OFF`` (any other value will be
     overridden).
+- MCUBOOT_ENCRYPT_RSA (default: False):
+    - **True:** Adds encrypted image support in the source and encrypts the
+      resulting image using the ``enc-rsa2048-pub.pem`` key found in the MCUBoot
+      repository.
+    - **False:** Doesn't add encrypted image support and doesn't encrypt the
+      image.
+
+    .. Warning::
+        DO NOT use this key in production code, it is exclusively for testing!
 
 Image versioning
 ================

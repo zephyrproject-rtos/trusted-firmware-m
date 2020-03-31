@@ -50,7 +50,12 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
+#ifdef MCUBOOT_ENCRYPT_RSA
+#define BL2_MBEDTLS_MEM_BUF_LEN 0x225C
+#else
 #define BL2_MBEDTLS_MEM_BUF_LEN 0x2000
+#endif
+
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[BL2_MBEDTLS_MEM_BUF_LEN];
 

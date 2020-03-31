@@ -59,6 +59,12 @@ function(mcuboot_create_boot_payload)
 		message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 	endif()
 
+	if(MCUBOOT_ENCRYPT_RSA)
+		set(ADD_ENCRYPTION "-E${TFM_ROOT_DIR}/../mcuboot/enc-rsa2048-pub.pem")
+	else()
+		set(ADD_ENCRYPTION "")
+	endif()
+
 	#Configure in which format (full or hash) include the public key to the image manifest
 	#
 	#|-----------------------|-----------------------|-------------------|--------------------|
@@ -168,6 +174,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						#Sign secure binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE_S}
+							 ${ADD_ENCRYPTION}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 ${OVERWRITE}
@@ -184,6 +191,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						#Sign non-secure binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE_NS}
+							 ${ADD_ENCRYPTION}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 ${OVERWRITE}
@@ -265,6 +273,7 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 						#Sign concatenated binary image with default public key in mcuboot folder
 						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE}
+							 ${ADD_ENCRYPTION}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
 							 ${OVERWRITE}
