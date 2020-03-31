@@ -24,8 +24,10 @@
  * Modifications are Copyright (c) 2019-2020 Arm Limited.
  */
 
+#include <stddef.h>
 #include <bootutil/sign_key.h>
 #include "mcuboot_config/mcuboot_config.h"
+#include "platform/include/tfm_plat_crypto_keys.h"
 
 #if !defined(MCUBOOT_HW_KEY)
 #if defined(MCUBOOT_SIGN_RSA)
@@ -246,4 +248,13 @@ struct bootutil_key bootutil_keys[1] = {
     },
 };
 const int bootutil_key_cnt = 1;
-#endif
+
+int boot_retrieve_public_key_hash(uint8_t image_index,
+                                  uint8_t *public_key_hash,
+                                  size_t *key_hash_size)
+{
+    return tfm_plat_get_rotpk_hash(image_index,
+                                   public_key_hash,
+                                   (uint32_t *)key_hash_size);
+}
+#endif /* !MCUBOOT_HW_KEY */

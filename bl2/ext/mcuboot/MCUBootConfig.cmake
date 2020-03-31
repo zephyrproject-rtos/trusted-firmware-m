@@ -37,15 +37,7 @@ if (BL2)
 		set(MCUBOOT_REPO "TF-M")
 	endif()
 
-	if (MCUBOOT_REPO STREQUAL "TF-M")
-		set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
-	else() #Using upstream MCUBoot
-		if (MCUBOOT_HW_KEY)
-			message(WARNING "Cannot use HW key for image verification when building against upstream MCUBoot."
-				" Your choice was overriden (MCUBOOT_HW_KEY=Off).")
-		endif()
-		set(MCUBOOT_HW_KEY Off)
-	endif()
+	set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
 
 	set(MCUBOOT_LOG_LEVEL "LOG_LEVEL_INFO" CACHE STRING "Configure the level of logging in MCUBoot.")
 	set_property(CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS "LOG_LEVEL_OFF;LOG_LEVEL_ERROR;LOG_LEVEL_WARNING;LOG_LEVEL_INFO;LOG_LEVEL_DEBUG")

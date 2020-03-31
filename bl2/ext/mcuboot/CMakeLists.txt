@@ -207,6 +207,13 @@ list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 if (MCUBOOT_REPO STREQUAL "UPSTREAM")
 	set(MCUBOOT_HW_ROLLBACK_PROT On)
 	set(MCUBOOT_MEASURED_BOOT On)
+
+	#FixMe: This becomes unnecessary and can be deleted once the sign_key.c file
+	#in upstream MCUboot includes the mcuboot_config.h file and starts "reading"
+	#the configuration macros from there.
+	if (MCUBOOT_HW_KEY)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_HW_KEY)
+	endif()
 endif()
 
 if(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
@@ -225,9 +232,20 @@ elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
 	set(MCUBOOT_RAM_LOADING On)
 endif()
 
-configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
-			   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
-			   @ONLY)
+#FixMe: This becomes unnecessary and can be deleted once the sign_key.c file
+#in upstream MCUboot includes the mcuboot_config.h file and starts "reading"
+#the configuration macros from there.
+if (MCUBOOT_REPO STREQUAL "UPSTREAM" AND MCUBOOT_HW_KEY)
+	set(MCUBOOT_HW_KEY Off)
+	configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
+				   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
+				   @ONLY)
+	set(MCUBOOT_HW_KEY On)
+else()
+	configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
+				   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
+				   @ONLY)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}")
 
