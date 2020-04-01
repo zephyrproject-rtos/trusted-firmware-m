@@ -6,12 +6,8 @@
  */
 #include <inttypes.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include "core/tfm_core_svc.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_svcalls.h"
-#include "tfm_thread.h"
 #include "tfm_wait.h"
 #include "tfm_utils.h"
 #include "tfm_internal_defines.h"
@@ -20,30 +16,19 @@
 #include "tfm_irq_list.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
-#include "tfm_memory_utils.h"
 #include "spm_api.h"
 #include "tfm_peripherals_def.h"
 #include "spm_db.h"
 #include "tfm_core_utils.h"
 #include "tfm_psa_client_call.h"
 #include "tfm_rpc.h"
-#include "tfm_internal.h"
 #include "tfm_core_trustzone.h"
 #include "region.h"
-
-#ifdef PLATFORM_SVC_HANDLERS
-extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
-                                     uint32_t *ctx, uint32_t lr);
-#endif
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
                      int32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
-
-/* The section names come from the scatter file */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
 /************************* SVC handler for PSA Client APIs *******************/
 
@@ -141,17 +126,7 @@ uint32_t tfm_svcall_get_lifecycle_state(void)
 
 /*********************** SVC handler for PSA Service APIs ********************/
 
-/**
- * \brief SVC handler for \ref psa_wait.
- *
- * \param[in] args              Include all input arguments:
- *                              signal_mask, timeout.
- *
- * \retval >0                   At least one signal is asserted.
- * \retval 0                    No signals are asserted. This is only seen when
- *                              a polling timeout is used.
- */
-static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
+psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
 {
     psa_signal_t signal_mask;
     uint32_t timeout;
@@ -201,24 +176,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
     return partition->runtime_data.signals & signal_mask;
 }
 
-/**
- * \brief SVC handler for \ref psa_get.
- *
- * \param[in] args              Include all input arguments: signal, msg.
- *
- * \retval PSA_SUCCESS          Success, *msg will contain the delivered
- *                              message.
- * \retval PSA_ERROR_DOES_NOT_EXIST Message could not be delivered.
- * \retval "Does not return"    The call is invalid because one or more of the
- *                              following are true:
- * \arg                           signal has more than a single bit set.
- * \arg                           signal does not correspond to an RoT Service.
- * \arg                           The RoT Service signal is not currently
- *                                asserted.
- * \arg                           The msg pointer provided is not a valid memory
- *                                reference.
- */
-static psa_status_t tfm_svcall_psa_get(uint32_t *args)
+psa_status_t tfm_svcall_psa_get(uint32_t *args)
 {
     psa_signal_t signal;
     psa_msg_t *msg = NULL;
@@ -301,18 +259,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     return PSA_SUCCESS;
 }
 
-/**
- * \brief SVC handler for \ref psa_set_rhandle.
- *
- * \param[in] args              Include all input arguments:
- *                              msg_handle, rhandle.
- *
- * \retval void                 Success, rhandle will be provided with all
- *                              subsequent messages delivered on this
- *                              connection.
- * \retval "Does not return"    msg_handle is invalid.
- */
-static void tfm_svcall_psa_set_rhandle(uint32_t *args)
+void tfm_svcall_psa_set_rhandle(uint32_t *args)
 {
     psa_handle_t msg_handle;
     void *rhandle = NULL;
@@ -334,26 +281,7 @@ static void tfm_svcall_psa_set_rhandle(uint32_t *args)
     tfm_spm_set_rhandle(msg->service, msg->handle, rhandle);
 }
 
-/**
- * \brief SVC handler for \ref psa_read.
- *
- * \param[in] args              Include all input arguments:
- *                              msg_handle, invec_idx, buffer, num_bytes.
- *
- * \retval >0                   Number of bytes copied.
- * \retval 0                    There was no remaining data in this input
- *                              vector.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a request
- *                                message.
- * \arg                           invec_idx is equal to or greater than
- *                                \ref PSA_MAX_IOVEC.
- * \arg                           the memory reference for buffer is invalid or
- *                                not writable.
- */
-static size_t tfm_svcall_psa_read(uint32_t *args)
+size_t tfm_svcall_psa_read(uint32_t *args)
 {
     psa_handle_t msg_handle;
     uint32_t invec_idx;
@@ -422,24 +350,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
     return bytes;
 }
 
-/**
- * \brief SVC handler for \ref psa_skip.
- *
- * \param[in] args              Include all input arguments:
- *                              msg_handle, invec_idx, num_bytes.
- *
- * \retval >0                   Number of bytes skipped.
- * \retval 0                    There was no remaining data in this input
- *                              vector.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a request
- *                                message.
- * \arg                           invec_idx is equal to or greater than
- *                                \ref PSA_MAX_IOVEC.
- */
-static size_t tfm_svcall_psa_skip(uint32_t *args)
+size_t tfm_svcall_psa_skip(uint32_t *args)
 {
     psa_handle_t msg_handle;
     uint32_t invec_idx;
@@ -494,25 +405,7 @@ static size_t tfm_svcall_psa_skip(uint32_t *args)
     return num_bytes;
 }
 
-/**
- * \brief SVC handler for \ref psa_write.
- *
- * \param[in] args              Include all input arguments:
- *                              msg_handle, outvec_idx, buffer, num_bytes.
- *
- * \retval void                 Success
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           msg_handle is invalid.
- * \arg                           msg_handle does not refer to a request
- *                                message.
- * \arg                           outvec_idx is equal to or greater than
- *                                \ref PSA_MAX_IOVEC.
- * \arg                           The memory reference for buffer is invalid.
- * \arg                           The call attempts to write data past the end
- *                                of the client output vector.
- */
-static void tfm_svcall_psa_write(uint32_t *args)
+void tfm_svcall_psa_write(uint32_t *args)
 {
     psa_handle_t msg_handle;
     uint32_t outvec_idx;
@@ -602,20 +495,8 @@ static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
         msg->caller_outvec[i].len = msg->outvec[i].len;
     }
 }
-/**
- * \brief SVC handler for \ref psa_reply.
- *
- * \param[in] args              Include all input arguments:
- *                              msg_handle, status.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                         msg_handle is invalid.
- * \arg                         An invalid status code is specified for the
- *                              type of message.
- */
-static void tfm_svcall_psa_reply(uint32_t *args)
+
+void tfm_svcall_psa_reply(uint32_t *args)
 {
     psa_handle_t msg_handle;
     psa_status_t status;
@@ -757,16 +638,7 @@ static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
                    partition->runtime_data.signal_mask);
 }
 
-/**
- * \brief SVC handler for \ref psa_notify.
- *
- * \param[in] args              Include all input arguments: partition_id.
- *
- * \retval void                 Success.
- * \retval "Does not return"    partition_id does not correspond to a Secure
- *                              Partition.
- */
-static void tfm_svcall_psa_notify(uint32_t *args)
+void tfm_svcall_psa_notify(uint32_t *args)
 {
     int32_t partition_id;
 
@@ -793,14 +665,7 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
     notify_with_signal(partition_id, signal);
 }
 
-/**
- * \brief SVC handler for \ref psa_clear.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The Secure Partition's doorbell signal is not
- *                              currently asserted.
- */
-static void tfm_svcall_psa_clear(uint32_t *args)
+void tfm_svcall_psa_clear(void)
 {
     struct spm_partition_desc_t *partition = NULL;
 
@@ -819,13 +684,7 @@ static void tfm_svcall_psa_clear(uint32_t *args)
     partition->runtime_data.signals &= ~PSA_DOORBELL;
 }
 
-/**
- * \brief Terminate execution within the calling Secure Partition and will not
- *        return.
- *
- * \retval "Does not return"
- */
-static void tfm_svcall_psa_panic(void)
+void tfm_svcall_psa_panic(void)
 {
     /*
      * PSA FF recommends that the SPM causes the system to restart when a secure
@@ -863,26 +722,7 @@ static int32_t get_irq_line_for_signal(int32_t partition_id,
     return IPC_ERROR_GENERIC;
 }
 
-/*
- * FIXME: tfm_svcall_psa_eoi, tfm_core_enable_irq_handler and
- * tfm_core_disable_irq_handler function has an implementation in
- * tfm_secure_api.c for the library model.
- * The two implementations should be merged as part of restructuring common code
- * among library and IPC model.
- */
-/**
- * \brief SVC handler for \ref psa_eoi.
- *
- * \param[in] args              Include all input arguments: irq_signal.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- * \arg                           irq_signal is not currently asserted.
- */
-static void tfm_svcall_psa_eoi(uint32_t *args)
+void tfm_svcall_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
     int32_t irq_line = 0;
@@ -976,20 +816,9 @@ void tfm_svcall_disable_irq(uint32_t *args)
     tfm_spm_hal_disable_irq(irq_line);
 }
 
-/**
- * \brief Validate the whether NS caller re-enter.
- *
- * \param[in] p_cur_sp          Pointer to current partition.
- * \param[in] p_ctx             Pointer to current stack context.
- * \param[in] exc_return        EXC_RETURN value.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
- *
- * \retval void                 Success.
- */
-static void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
-                                     uint32_t *p_ctx, uint32_t exc_return,
-                                     bool ns_caller)
+void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
+                              uint32_t *p_ctx, uint32_t exc_return,
+                              bool ns_caller)
 {
     uintptr_t stacked_ctx_pos;
 
@@ -1027,95 +856,4 @@ static void tfm_core_validate_caller(struct spm_partition_desc_t *p_cur_sp,
     } else if (p_cur_sp->static_data->partition_id <= 0) {
         tfm_core_panic();
     }
-}
-
-int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx, uint32_t lr)
-{
-    bool ns_caller = false;
-    struct spm_partition_desc_t *partition = NULL;
-    uint32_t veneer_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-    uint32_t veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
-    /*
-     * The caller security attribute detection bases on LR of state context.
-     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
-     * occupied by general purpose value while calling SVC.
-     * Check if caller comes from non-secure: return address (ctx[6]) is belongs
-     * to veneer section, and the bit0 of LR (ctx[5]) is zero.
-     */
-    if (ctx[6] >= veneer_base && ctx[6] < veneer_limit &&
-        !(ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
-        ns_caller = true;
-    }
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    tfm_core_validate_caller(partition, ctx, lr, ns_caller);
-
-    switch (svc_num) {
-    case TFM_SVC_PSA_FRAMEWORK_VERSION:
-        return tfm_svcall_psa_framework_version();
-    case TFM_SVC_PSA_VERSION:
-        return tfm_svcall_psa_version(ctx, ns_caller);
-    case TFM_SVC_PSA_CONNECT:
-        return tfm_svcall_psa_connect(ctx, ns_caller);
-    case TFM_SVC_PSA_CALL:
-        return tfm_svcall_psa_call(ctx, ns_caller, lr);
-    case TFM_SVC_PSA_CLOSE:
-        tfm_svcall_psa_close(ctx, ns_caller);
-        break;
-    case TFM_SVC_PSA_WAIT:
-        return tfm_svcall_psa_wait(ctx);
-    case TFM_SVC_PSA_GET:
-        return tfm_svcall_psa_get(ctx);
-    case TFM_SVC_PSA_SET_RHANDLE:
-        tfm_svcall_psa_set_rhandle(ctx);
-        break;
-    case TFM_SVC_PSA_READ:
-        return tfm_svcall_psa_read(ctx);
-    case TFM_SVC_PSA_SKIP:
-        return tfm_svcall_psa_skip(ctx);
-    case TFM_SVC_PSA_WRITE:
-        tfm_svcall_psa_write(ctx);
-        break;
-    case TFM_SVC_PSA_REPLY:
-        tfm_svcall_psa_reply(ctx);
-        break;
-    case TFM_SVC_PSA_NOTIFY:
-        tfm_svcall_psa_notify(ctx);
-        break;
-    case TFM_SVC_PSA_CLEAR:
-        tfm_svcall_psa_clear(ctx);
-        break;
-    case TFM_SVC_PSA_EOI:
-        tfm_svcall_psa_eoi(ctx);
-        break;
-    case TFM_SVC_ENABLE_IRQ:
-        tfm_svcall_enable_irq(ctx);
-        break;
-    case TFM_SVC_DISABLE_IRQ:
-        tfm_svcall_disable_irq(ctx);
-        break;
-    case TFM_SVC_PSA_PANIC:
-        tfm_svcall_psa_panic();
-        break;
-    case TFM_SVC_SPM_REQUEST:
-        tfm_core_spm_request_handler((const struct tfm_state_context_t *)ctx);
-        break;
-    case TFM_SVC_PSA_LIFECYCLE:
-        return tfm_svcall_get_lifecycle_state();
-    default:
-#ifdef PLATFORM_SVC_HANDLERS
-        return (platform_svc_handlers(svc_num, ctx, lr));
-#else
-        ERROR_MSG("Unknown SVC number requested!");
-        return PSA_ERROR_GENERIC_ERROR;
-#endif
-    }
-    return PSA_SUCCESS;
 }

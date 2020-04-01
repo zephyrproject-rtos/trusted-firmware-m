@@ -8,6 +8,13 @@
 #ifndef __SPM_DB_H__
 #define __SPM_DB_H__
 
+#include <stdint.h>
+#include "spm_api.h"
+#include "target_cfg.h"
+#ifdef TFM_PSA_API
+#include "tfm_spm_hal.h"
+#endif
+
 struct spm_partition_desc_t;
 struct spm_partition_db_t;
 
