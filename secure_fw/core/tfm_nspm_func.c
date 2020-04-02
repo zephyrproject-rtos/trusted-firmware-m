@@ -117,7 +117,7 @@ uint32_t TZ_InitContextSystem_S(void)
 __attribute__((cmse_nonsecure_entry))
 TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 {
-    TZ_MemoryId_t tz_id;
+    TZ_MemoryId_t tz_id = 1;
     (void) module; /* Currently unused */
 
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
@@ -137,8 +137,6 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
     NsClientIdList[free_index].ns_client_id = get_next_ns_client_id();
     free_index = NsClientIdList[free_index].next_free_index;
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
-#else /* CONFIG_TFM_ENABLE_CTX_MGMT */
-    tz_id = 1;
 #endif /* CONFIG_TFM_ENABLE_CTX_MGMT */
 
     return tz_id;
@@ -179,6 +177,8 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
     NsClientIdList[index].next_free_index = free_index;
 
     free_index = index;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
 #else /* CONFIG_TFM_ENABLE_CTX_MGMT */
     (void)id;
@@ -216,6 +216,8 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
     }
 
     active_ns_client_idx = index;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
 #else /* CONFIG_TFM_ENABLE_CTX_MGMT */
     (void)id;
@@ -258,6 +260,8 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     }
 
     active_ns_client_idx = DEFAULT_NS_CLIENT_IDX;
+#else /* TFM_NS_CLIENT_IDENTIFICATION */
+    (void)id;
 #endif /* TFM_NS_CLIENT_IDENTIFICATION */
 #else /* CONFIG_TFM_ENABLE_CTX_MGMT */
     (void)id;
