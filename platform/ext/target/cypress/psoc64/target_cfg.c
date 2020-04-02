@@ -17,6 +17,8 @@
 
 #include <assert.h>
 #include <stdio.h> /* for debugging printfs */
+#include <inttypes.h>
+
 #include "cy_prot.h"
 #include "cycfg.h"
 #include "device_definition.h"
@@ -248,9 +250,12 @@ void smpu_init_cfg(void)
 void smpu_print_config(void)
 {
     printf("\nSMPU config:\n");
-    printf("memory_regions.non_secure_code_start = %#x\n", memory_regions.non_secure_code_start);
-    printf("memory_regions.non_secure_partition_base = %#x\n", memory_regions.non_secure_partition_base);
-    printf("memory_regions.non_secure_partition_limit = %#x\n", memory_regions.non_secure_partition_limit);
+    printf("memory_regions.non_secure_code_start = %#"PRIx32"\n",
+           memory_regions.non_secure_code_start);
+    printf("memory_regions.non_secure_partition_base = %#"PRIx32"\n",
+           memory_regions.non_secure_partition_base);
+    printf("memory_regions.non_secure_partition_limit = %#"PRIx32"\n",
+           memory_regions.non_secure_partition_limit);
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
