@@ -156,9 +156,9 @@
 #error "Flash layout has changed - SMPU3_REGIONSIZE isn't FLASH_SST_AREA_SIZE"
 #endif
 
-/* SMPU6 - 64KB of unprivileged secure data in SRAM */
+/* SMPU6 - 32KB of unprivileged secure data in SRAM */
 #define SMPU6_BASE         S_DATA_START
-#define SMPU6_REGIONSIZE   PROT_SIZE_64KB_BIT_SHIFT
+#define SMPU6_REGIONSIZE   PROT_SIZE_32KB_BIT_SHIFT
 #define SMPU6_SLAVE_CONFIG {\
     .address = (void *)SMPU6_BASE, \
     .regionSize = SMPU6_REGIONSIZE, \
@@ -181,13 +181,11 @@
 #error "SMPU6_REGIONSIZE should match S_UNPRIV_DATA_SIZE"
 #endif
 
-/* SMPU7 - 128KB of privileged secure data at S_DATA_PRIV_START in SRAM */
+/* SMPUs 7 and 10 - 160KB of privileged secure data at S_DATA_PRIV_START in SRAM */
 #define SMPU7_BASE          S_RAM_ALIAS(0)
-#define SMPU7_REGIONSIZE    PROT_SIZE_256KB_BIT_SHIFT
+#define SMPU7_REGIONSIZE    PROT_SIZE_128KB_BIT_SHIFT
 #define SMPU7_SUBREGION_DIS (CY_PROT_SUBREGION_DIS0 | \
-                             CY_PROT_SUBREGION_DIS1 | \
-                             CY_PROT_SUBREGION_DIS6 | \
-                             CY_PROT_SUBREGION_DIS7)
+                             CY_PROT_SUBREGION_DIS1)
 #define SMPU7_SLAVE_CONFIG {\
     .address = (void *)SMPU7_BASE, \
     .regionSize = SMPU7_REGIONSIZE, \
@@ -214,9 +212,36 @@
 #error "Flash layout has changed - S_DATA_PRIV_START isn't subregion 2 of SMPU7"
 #endif
 
-/* SMPU7 should exactly cover the privileged secure SRAM */
-#if (4*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8) != S_PRIV_DATA_SIZE
-#error "SMPU7_REGIONSIZE should match S_PRIV_DATA_SIZE"
+#define SMPU10_BASE          S_RAM_ALIAS(0x20000)
+#define SMPU10_REGIONSIZE    PROT_SIZE_64KB_BIT_SHIFT
+#define SMPU10_SLAVE_CONFIG {\
+    .address = (void *)SMPU10_BASE, \
+    .regionSize = SMPU10_REGIONSIZE, \
+    .subregions = ALL_ENABLED, \
+    .userPermission = CY_PROT_PERM_DISABLED, \
+    .privPermission = CY_PROT_PERM_RW, \
+    .secure = false, \
+    .pcMatch = false, \
+    .pcMask = SECURE_PCS_MASK, \
+}
+#define SMPU10_MASTER_CONFIG COMMON_SMPU_MASTER_CONFIG
+
+/* SMPU requires base address aligned to size */
+#if SMPU10_BASE % REGIONSIZE_TO_BYTES(SMPU10_REGIONSIZE)
+#error "Flash layout has changed - SMPU10 needs updating"
+#endif
+
+/*
+ * SMPU10 must immediately follow SMPU7
+ */
+#if SMPU10_BASE != (SMPU7_BASE + REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE))
+#error "Flash layout has changed - SMPU10 doesn't immediately follow SMPU7"
+#endif
+
+/* SMPU7 and SMPU10 should exactly cover the privileged secure SRAM */
+#if ((6*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8) + \
+     REGIONSIZE_TO_BYTES(SMPU10_REGIONSIZE)) != S_PRIV_DATA_SIZE
+#error "SMPU7_REGIONSIZE+SMPU10_REGIONSIZE should match S_PRIV_DATA_SIZE"
 #endif
 
 #endif /* __SMPU_CONFIG_H__ */

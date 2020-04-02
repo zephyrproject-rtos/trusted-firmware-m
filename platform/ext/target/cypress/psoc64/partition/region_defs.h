@@ -65,8 +65,8 @@
 /* TFM PSoC6 CY8CKIT_064 RAM layout:
  *
  * 0x0800_0000 - 0x0802_FFFF Secure (192KB)
- *    0x0800_0000 - 0x0800_FFFF Secure unprivileged data (S_UNPRIV_DATA_SIZE, 64KB)
- *    0x0801_0000 - 0x0802_FFFF Secure priviliged data (S_PRIV_DATA_SIZE, 128KB)
+ *    0x0800_0000 - 0x0800_7FFF Secure unprivileged data (S_UNPRIV_DATA_SIZE, 32KB)
+ *    0x0800_8000 - 0x0802_FFFF Secure priviliged data (S_PRIV_DATA_SIZE, 160KB)
  *
  * 0x0803_0000 - 0x080E_7FFF Non-secure (736KB)
  *    0x0803_0000 - 0x080E_6FFF Non-secure OS/App (732KB)
@@ -118,8 +118,8 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0))
-#define S_UNPRIV_DATA_SIZE  0x10000
-#define S_PRIV_DATA_SIZE    0x20000
+#define S_UNPRIV_DATA_SIZE  0x08000
+#define S_PRIV_DATA_SIZE    0x28000
 
 /* Secure data area */
 #define S_DATA_SIZE  (S_UNPRIV_DATA_SIZE + S_PRIV_DATA_SIZE)
@@ -133,9 +133,9 @@
  * of secure data space available after all the unprivileged data,
  * round that down to a power of 2 to get the actual size we want
  * to use for privileged data, and then determine this value from
- * that. We'd also potentially have to update the configs for SMPU9
- * and SMPU10.
- * Leave the SMPU alignment check in SMPU configuration file.
+ * that. We'd also potentially have to update the SMPU configs.
+ *
+ * Instead, there's an alignment check in SMPU configuration file.
  */
 #define S_DATA_UNPRIV_OFFSET (0)
 #define S_DATA_UNPRIV_START  S_RAM_ALIAS(S_DATA_UNPRIV_OFFSET)
@@ -185,4 +185,3 @@
 #define BOOT_TFM_SHARED_DATA_SIZE 0x400
 
 #endif /* __REGION_DEFS_H__ */
-
