@@ -61,53 +61,6 @@ void attest_token_decode_init(struct attest_token_decode_context *me,
 }
 
 
-static enum attest_token_err_t t_cose_verify_error_map[] = {
-    /*     T_COSE_SUCCESS = 0 */
-    ATTEST_TOKEN_ERR_SUCCESS,
-    /*     T_COSE_ERR_UNSUPPORTED_SIGNING_ALG */
-    ATTEST_TOKEN_ERR_UNSUPPORTED_SIG_ALG,
-    /*     T_COSE_ERR_PROTECTED_HEADERS */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_UNSUPPORTED_HASH */
-    ATTEST_TOKEN_ERR_HASH_UNAVAILABLE,
-    /*     T_COSE_ERR_HASH_GENERAL_FAIL */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_HASH_BUFFER_SIZE */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_SIG_BUFFER_SIZE */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_KEY_BUFFER_SIZE */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_SIGN1_FORMAT */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /*     T_COSE_ERR_CBOR_NOT_WELL_FORMED */
-    ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED,
-    /*     T_COSE_ERR_NO_ALG_ID */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /*     T_COSE_ERR_NO_KID */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /*     T_COSE_ERR_SIG_VERIFY */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_VALIDATION,
-    /*     T_COSE_ERR_BAD_SHORT_CIRCUIT_KID */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /*     T_COSE_ERR_INVALID_ARGUMENT */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_INSUFFICIENT_MEMORY */
-    ATTEST_TOKEN_ERR_INSUFFICIENT_MEMORY,
-    /*     T_COSE_ERR_FAIL */
-    ATTEST_TOKEN_ERR_GENERAL,
-    /*     T_COSE_ERR_TAMPERING_DETECTED */
-    ATTEST_TOKEN_ERR_TAMPERING_DETECTED,
-    /*     T_COSE_ERR_UNKNOWN_KEY */
-    ATTEST_TOKEN_ERR_VERIFICATION_KEY,
-    /*     T_COSE_ERR_WRONG_TYPE_OF_KEY */
-    ATTEST_TOKEN_ERR_VERIFICATION_KEY,
-    /*     T_COSE_ERR_SIG_STRUCT */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT,
-    /*     T_COSE_ERR_SHORT_CIRCUIT_SIG */
-    ATTEST_TOKEN_ERR_COSE_SIGN1_VALIDATION
-};
-
 /**
 
  \brief Map t_cose errors into attestation token errors
@@ -119,21 +72,75 @@ static enum attest_token_err_t t_cose_verify_error_map[] = {
 static inline enum attest_token_err_t
 map_t_cose_errors(enum t_cose_err_t t_cose_error)
 {
-    /*
-     * Object code is smaller by using the mapping array, assuming
-     * compiler makes enums as small as possible.
-     */
-    enum attest_token_err_t return_value;
-    const size_t map_size = sizeof(t_cose_verify_error_map)/
-                                sizeof(enum attest_token_err_t);
+    switch (t_cose_error) {
+    case T_COSE_SUCCESS:
+        return ATTEST_TOKEN_ERR_SUCCESS;
+        break;
+    case T_COSE_ERR_UNSUPPORTED_SIGNING_ALG:
+        return ATTEST_TOKEN_ERR_UNSUPPORTED_SIG_ALG;
+        break;
+    case T_COSE_ERR_UNSUPPORTED_HASH:
+        return ATTEST_TOKEN_ERR_HASH_UNAVAILABLE;
+        break;
+    case T_COSE_ERR_CBOR_NOT_WELL_FORMED:
+        return ATTEST_TOKEN_ERR_CBOR_NOT_WELL_FORMED;
+        break;
+    case T_COSE_ERR_INSUFFICIENT_MEMORY:
+        return ATTEST_TOKEN_ERR_INSUFFICIENT_MEMORY;
+        break;
+    case T_COSE_ERR_TAMPERING_DETECTED:
+        return ATTEST_TOKEN_ERR_TAMPERING_DETECTED;
+        break;
+    case T_COSE_ERR_CBOR_FORMATTING:
+        return ATTEST_TOKEN_ERR_CBOR_FORMATTING;
+        break;
+    case T_COSE_ERR_TOO_SMALL:
+        return ATTEST_TOKEN_ERR_TOO_SMALL;
+        break;
 
-    if(t_cose_error > map_size) {
-        return_value = ATTEST_TOKEN_ERR_GENERAL;
-    } else {
-        return_value = t_cose_verify_error_map[t_cose_error];
+    case T_COSE_ERR_PARAMETER_CBOR:
+    case T_COSE_ERR_NON_INTEGER_ALG_ID:
+        return ATTEST_TOKEN_ERR_CBOR_STRUCTURE;
+        break;
+
+    case T_COSE_ERR_SIG_VERIFY:
+    case T_COSE_ERR_SHORT_CIRCUIT_SIG:
+        return ATTEST_TOKEN_ERR_COSE_SIGN1_VALIDATION;
+        break;
+
+    case T_COSE_ERR_SIGN1_FORMAT:
+    case T_COSE_ERR_NO_ALG_ID:
+    case T_COSE_ERR_NO_KID:
+    case T_COSE_ERR_BAD_SHORT_CIRCUIT_KID:
+    case T_COSE_ERR_SIG_STRUCT:
+        return ATTEST_TOKEN_ERR_COSE_SIGN1_FORMAT;
+        break;
+
+    case T_COSE_ERR_UNKNOWN_KEY:
+    case T_COSE_ERR_WRONG_TYPE_OF_KEY:
+        return ATTEST_TOKEN_ERR_VERIFICATION_KEY;
+        break;
+
+    case T_COSE_ERR_MAKING_PROTECTED:
+    case T_COSE_ERR_HASH_GENERAL_FAIL:
+    case T_COSE_ERR_HASH_BUFFER_SIZE:
+    case T_COSE_ERR_SIG_BUFFER_SIZE:
+    case T_COSE_ERR_INVALID_ARGUMENT:
+    case T_COSE_ERR_FAIL:
+    case T_COSE_ERR_SIG_FAIL:
+    case T_COSE_ERR_TOO_MANY_PARAMETERS:
+    case T_COSE_ERR_UNKNOWN_CRITICAL_PARAMETER:
+    case T_COSE_ERR_SHORT_CIRCUIT_SIG_DISABLED:
+    case T_COSE_ERR_INCORRECT_KEY_FOR_LIB:
+    case T_COSE_ERR_BAD_CONTENT_TYPE:
+    case T_COSE_ERR_INCORRECTLY_TAGGED:
+    case T_COSE_ERR_EMPTY_KEY:
+    case T_COSE_ERR_DUPLICATE_PARAMETER:
+    case T_COSE_ERR_PARAMETER_NOT_PROTECTED:
+    case T_COSE_ERR_CRIT_PARAMETER:
+    default:
+        return ATTEST_TOKEN_ERR_GENERAL;
     }
-
-    return return_value;
 }
 
 
