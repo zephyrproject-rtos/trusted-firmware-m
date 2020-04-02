@@ -191,6 +191,14 @@ function(compiler_generate_binary_output TARGET)
 	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_GNUARM_OBJCOPY} ARGS -O binary $<TARGET_FILE:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>/${TARGET}.bin)
 endfunction()
 
+function(compiler_generate_hex_output TARGET)
+	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_GNUARM_OBJCOPY} ARGS -O ihex $<TARGET_FILE:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>/${TARGET}.hex)
+endfunction()
+
+function(compiler_generate_elf_output TARGET)
+	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_GNUARM_OBJCOPY} ARGS -O elf32-little $<TARGET_FILE:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>/${TARGET}.elf)
+endfunction()
+
 # Function for creating a new target that preprocesses a .c file
 #INPUTS:
 #    SRC - (mandatory) - file to be preprocessed

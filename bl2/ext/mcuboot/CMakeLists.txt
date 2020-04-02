@@ -187,6 +187,12 @@ endif()
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
+#Generate intel hex file from axf
+compiler_generate_hex_output(${PROJECT_NAME})
+
+#Generate elf file from axf
+compiler_generate_elf_output(${PROJECT_NAME})
+
 message("- MCUBOOT_REPO: '${MCUBOOT_REPO}'.")
 message("- MCUBOOT_IMAGE_NUMBER: '${MCUBOOT_IMAGE_NUMBER}'.")
 message("- MCUBOOT_UPGRADE_STRATEGY: '${MCUBOOT_UPGRADE_STRATEGY}'.")
@@ -237,10 +243,14 @@ endif()
 #Collect executables to common location: build/install/outputs/
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
 			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
 		DESTINATION outputs/${TARGET_PLATFORM}/)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
 			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
 		DESTINATION outputs/fvp/)
 
 #Finally let cmake system apply changes after the whole project is defined.
