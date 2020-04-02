@@ -426,6 +426,7 @@ function(set_up_secure_fw_build)
 
 	if (TFM_PARTITION_CRYPTO)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
+							${INTERFACE_INC_DIR}/psa/crypto_compat.h
 							${INTERFACE_INC_DIR}/psa/crypto.h
 							${INTERFACE_INC_DIR}/psa/crypto_platform.h
 							${INTERFACE_INC_DIR}/psa/crypto_sizes.h
