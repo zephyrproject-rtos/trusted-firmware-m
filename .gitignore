@@ -11,6 +11,7 @@
 
 # Garbage files
 build*/
+cmake_build*/
 *.orig
 **/__pycache__
 *.pyc
