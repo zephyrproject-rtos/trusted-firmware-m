@@ -37,10 +37,6 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_s1/partition")
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
-    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
-        message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
-        mcuboot_override_upgrade_strategy("NO_SWAP")
-    endif()
 
     #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
     #       instead independently loaded from secure code as a blob.

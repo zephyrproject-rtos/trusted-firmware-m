@@ -17,7 +17,19 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on Musca-B1 with BL2(single image boot, boot from eFlash 0):
+/* Flash layout on Musca-B1 with BL2 (multiple image boot, boot from eFlash 0):
+ *
+ * 0x0A00_0000 BL2 - MCUBoot (128 KB)
+ * 0x0A02_0000 Secure image     primary slot (384 KB)
+ * 0x0A08_0000 Non-secure image primary slot (512 KB)
+ * 0x0A10_0000 Secure image     secondary slot (384 KB)
+ * 0x0A16_0000 Non-secure image secondary slot (512 KB)
+ * 0x0A1E_0000 Scratch area (64 KB)
+ * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1F_8000 NV counters area (16 KB)
+ * 0x0A1F_C000 Unused (32 KB)
+ *
+ * Flash layout on Musca-B1 with BL2 (single image boot):
  *
  * 0x0A00_0000 BL2 - MCUBoot (128 KB)
  * 0x0A02_0000 Primary image area (896 KB):
@@ -26,11 +38,13 @@
  * 0x0A10_0000 Secondary image area (896 KB):
  *    0x0A10_0000 Secure     image secondary (384 KB)
  *    0x0A16_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Internal Trusted Storage Area (32 KB)
- * 0x0A1E_8000 NV counters area (16 KB)
+ * 0x0A1E_0000 Scratch area (64 KB)
+ * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1F_8000 NV counters area (16 KB)
+ * 0x0A1F_C000 Unused (32 KB)
  *
  * Note: As eFlash is written at runtime, the eFlash driver code is placed
- * in code sram to avoid any interference.
+ * in code SRAM to avoid any interference.
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
@@ -86,12 +100,14 @@
 #define FLASH_AREA_2_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1.
- */
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (0)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* The maximum number of status entries supported by the bootloader. */
+#define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
+                                     FLASH_NS_PARTITION_SIZE) / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -113,24 +129,19 @@
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1.
- */
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (0)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* The maximum number of status entries supported by the bootloader. */
+#define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 #else /* MCUBOOT_IMAGE_NUMBER > 2 */
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
-
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1. The maximum number of status entries
- * supported by the bootloader.
- */
-#define MCUBOOT_STATUS_MAX_ENTRIES      (0)
 
 /* Internal Trusted Storage (ITS) Service definitions (32 KB) */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
