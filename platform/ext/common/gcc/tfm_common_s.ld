@@ -291,17 +291,25 @@ SECTIONS
     {
         *libc_nano*:*(.text*)
         *libc_nano*:*(.rodata*)
-        *tfm_spm_services.o(.text*)
-        *tfm_spm_services.o(.rodata*)
-        *platform_retarget_dev.o(.text*)
-        *platform_retarget_dev.o(.rodata*)
-        *device_definition.o(.text*)
-        *device_definition.o(.rodata*)
+        *tfm_spm_services.*(.text*)
+        *tfm_spm_services.*(.rodata*)
+        *platform_retarget_dev.*(.text*)
+        *platform_retarget_dev.*(.rodata*)
+        *device_definition.*(.text*)
+        *device_definition.*(.rodata*)
         *(SFN)
         *libgcc*:*(.text*)
         *libgcc*:*(.rodata*)
         *libtfmsprt*:*(.text*)
         *libtfmsprt*:*(.rodata*)
+        *psa_client.*(.text*)              /* NXP */
+        *psa_client.*(.rodata*)
+        *psa_service.*(.text*)             /* NXP */
+        *psa_service.*(.rodata*)
+        *psa_lifecycle.*(.text*)             /* NXP */
+        *psa_lifecycle.*(.rodata*)
+        *tfm_log_raw.*(.text*)             /* NXP */
+        *tfm_log_raw.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
@@ -673,9 +681,9 @@ SECTIONS
 #if defined(TFM_PSA_API)
     .TFM_UNPRIV_DATA : ALIGN(32)
     {
-        */tfm_spm_services.o(.data*)
-        */platform_retarget_dev.o(.data*)
-        */device_definition.o(.data*)
+        */tfm_spm_services.*(.data*)
+        */platform_retarget_dev.*(.data*)
+        */device_definition.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_DATA);
@@ -683,12 +691,12 @@ SECTIONS
 
     .TFM_UNPRIV_BSS : ALIGN(32)
     {
-        */tfm_spm_services.o(.bss*)
-        */platform_retarget_dev.o(.bss*)
-        */device_definition.o(.bss*)
-        */tfm_spm_services.o(COMMON)
-        */platform_retarget_dev.o(COMMON)
-        */device_definition.o(COMMON)
+        */tfm_spm_services.*(.bss*)
+        */platform_retarget_dev.*(.bss*)
+        */device_definition.*(.bss*)
+        */tfm_spm_services.*(COMMON)
+        */platform_retarget_dev.*(COMMON)
+        */device_definition.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
