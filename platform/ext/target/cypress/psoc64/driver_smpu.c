@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <inttypes.h>
-#include <stdio.h>
-
 #include "driver_smpu.h"
 #include "pc_config.h"
 #include "region_defs.h"
 #include "RTE_Device.h"
 #include "smpu_config.h"
+#include "log/tfm_log.h"
+#include "tfm_hal_its.h"
+#include "tfm_hal_ps.h"
+#include "tfm_memory_utils.h"
 
 #include "cy_prot.h"
 
@@ -73,23 +74,262 @@ static const char * smpu_name(const SMPU_Resources *smpu_dev)
     }
 }
 
+static bool is_runtime(const SMPU_Resources *smpu_dev)
+{
+    if ((smpu_dev->slave_config.address == SMPU_DYNAMIC_BASE) &&
+        (smpu_dev->slave_config.regionSize == SMPU_DYNAMIC_REGIONSIZE) &&
+        (smpu_dev->slave_config.subregions == SMPU_DYNAMIC_SUBREGIONS))
+        return true;
+    return false;
+}
+
+static bool is_whole_power_of_two(uint32_t size)
+{
+    return ((size - 1) & size) == 0;
+}
+
+static bool is_aligned(uint32_t base, uint32_t size)
+{
+    return (base % size) == 0;
+}
+
+/* size must be a whole power of two, >= 4 */
+static cy_en_prot_size_t bytes_to_regionsize(uint32_t size)
+{
+    int ret = 1;
+
+    while (REGIONSIZE_TO_BYTES(ret) < size)
+        ret += 1;
+    return (cy_en_prot_size_t)ret;
+}
+
+static uint32_t round_up_to_power_of_two(uint32_t x)
+{
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x++;
+    return x;
+}
+
+static uint32_t round_down_to_power_of_two(uint32_t x)
+{
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x = x - (x >> 1);
+    return x;
+}
+
+static uint32_t round_down_to_multiple(uint32_t base, uint32_t regionSize)
+{
+    return (regionSize * (base / regionSize));
+}
+
+/* Maps 0..7 to CY_PROT_SUBREGION_DIS0..CY_PROT_SUBREGION_DIS7 */
+static uint32_t subregion_num_to_mask(int num) {
+    return CY_PROT_SUBREGION_DIS0 << num;
+}
+
+#define MIN_REGIONSIZE 256
+/* The largest regionSize is actually 4GB, but that doesn't fit in a uint32_t */
+#define MAX_REGIONSIZE (1 * 1024 * 1024 * 1024)
+#define NUM_SUBREGIONS 8
+
+static cy_en_prot_status_t calc_smpu_params(uint32_t base,
+                                            uint32_t size,
+                                            cy_stc_smpu_cfg_t *slave_config)
+{
+    /* Simplest case - base is a multiple of the size,
+     * and size is a whole power of two, and >= 256
+     */
+    if (is_whole_power_of_two(size) &&
+        is_aligned(base, size) &&
+        (size >= MIN_REGIONSIZE)) {
+        slave_config->address = (void *)base;
+        slave_config->regionSize = bytes_to_regionsize(size);
+        slave_config->subregions = ALL_ENABLED;
+
+        return CY_PROT_SUCCESS;
+    } else {
+        /* Try to find a regionSize that could work */
+        uint32_t low_rs = round_up_to_power_of_two(size);
+        uint32_t high_rs = round_down_to_power_of_two(size * NUM_SUBREGIONS);
+        uint32_t regionSize;
+
+        if (low_rs < MIN_REGIONSIZE)
+            low_rs = MIN_REGIONSIZE;
+
+        if (size > MAX_REGIONSIZE / NUM_SUBREGIONS)
+            high_rs = MAX_REGIONSIZE;
+
+        for (regionSize = low_rs; regionSize <= high_rs; regionSize <<= 1)
+        {
+            const uint32_t sub_size = regionSize / NUM_SUBREGIONS;
+            uint32_t address;
+            int n;
+            uint32_t mask = 0;
+
+            /* Would this work with the base address ? */
+            if (base % sub_size) {
+                /* TODO If we get here, are we guaranteed to fail ? */
+                continue;
+            }
+
+            /* is the size 1..8 * subregion size ? */
+            for (n = 1; n <= NUM_SUBREGIONS; n++) {
+                if (size == n * sub_size) {
+                    break;
+                }
+            }
+            if (n > NUM_SUBREGIONS) {
+                continue;
+            }
+
+            /* What would the base address be? */
+            address = round_down_to_multiple(base, regionSize);
+
+            /* Would the upper limit of the SMPU region cover what we need? */
+            if (address + regionSize < base + size) {
+                continue;
+            }
+
+            /* Calculate the SMPU config */
+            slave_config->address = (void *)address;
+            slave_config->regionSize = bytes_to_regionsize(regionSize);
+
+            /* Figure out which subregions to disable */
+            for (int num = 0; num < NUM_SUBREGIONS; num += 1) {
+                if (address + num * sub_size < base) {
+                    /* Disable this subregion */
+                    mask |= subregion_num_to_mask(num);
+                } else if (address + num * sub_size >= base + size) {
+                    /* Disable this subregion */
+                    mask |= subregion_num_to_mask(num);
+                }
+            }
+            slave_config->subregions = mask;
+
+            return CY_PROT_SUCCESS;
+        }
+
+        /* If we get here, we failed */
+        return CY_PROT_FAILURE;
+    }
+}
+
+static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
+                                      uint32_t *base, uint32_t *size)
+{
+    cy_en_prot_status_t ret = CY_PROT_SUCCESS;
+
+    /* Figure out the base, size, and subregion mask to use */
+    if (smpu == ITS_SMPU_STRUCT) {
+        /* Retrieve the ITS region definition */
+        tfm_hal_its_fs_info(base, size);
+    } else if (smpu == PS_SMPU_STRUCT) {
+        /* Retrieve the PS region definition */
+        tfm_hal_ps_fs_info(base, size);
+    } else {
+        /* We don't know where to get the region definition */
+        ret = CY_PROT_FAILURE;
+    }
+    /* flash driver uses offsets rather than absolute addresses,
+     * so we need to add the flash base address here.
+     */
+    *base += FLASH_BASE_ADDRESS;
+
+    return ret;
+}
+
+static cy_en_prot_status_t populate_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
+                                           cy_stc_smpu_cfg_t *slave_config)
+{
+    cy_en_prot_status_t ret;
+    uint32_t base;
+    uint32_t size;
+
+    ret = get_region(smpu, &base, &size);
+
+    if (ret == CY_PROT_SUCCESS) {
+        /* And figure out how to configure the SMPU region */
+        ret = calc_smpu_params(base, size, slave_config);
+    }
+
+    return ret;
+}
+
+static void print_smpu_config(const char *name,
+                              const cy_stc_smpu_cfg_t *slave_config)
+{
+    LOG_MSG("%s - address = %p, size = 0x%x bytes, %s subregions enabled\r\n",
+           name,
+           slave_config->address,
+           (uint32_t)REGIONSIZE_TO_BYTES(slave_config->regionSize),
+           slave_config->subregions == ALL_ENABLED ? "all" : "some");
+    if (slave_config->subregions != ALL_ENABLED) {
+        LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
+                (uint32_t)REGIONSIZE_TO_BYTES(slave_config->regionSize)/8);
+        for (int i=0; i<8; i++) {
+            LOG_MSG("\tsubregion %d %s\r\n",
+                    i,
+                    slave_config->subregions & (1<<i) ? "disabled" : "enabled");
+        }
+    }
+}
+
+static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
+{
+    uint32_t base;
+    uint32_t size;
+    uint32_t reg = smpu->ATT0;
+
+    if (CY_PROT_SUCCESS == get_region(smpu, &base, &size)) {
+        LOG_MSG(" base = 0x%x, size = 0x%x\r\n", base, size);
+    } else {
+        LOG_MSG(" Unsupported dynamic SMPU region\r\n");
+    }
+
+    if (_FLD2BOOL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, reg)) {
+        uint32_t size = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT0_REGION_SIZE, reg);
+        uint32_t subregions;
+
+        reg = smpu->ADDR0;
+        subregions = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_SUBREGION_DISABLE, reg);
+        LOG_MSG("\tAddress = 0x%x",
+                _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_ADDR24, reg) << 8);
+        LOG_MSG(", size = 0x%x bytes", REGIONSIZE_TO_BYTES(size));
+        LOG_MSG(", %s subregions enabled\r\n",
+                subregions == ALL_ENABLED ? "all" : "some");
+        if (subregions != ALL_ENABLED) {
+            LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
+                    (uint32_t)REGIONSIZE_TO_BYTES(size)/8);
+            for (int i=0; i<8; i++) {
+                LOG_MSG("\tsubregion %d %s\r\n",
+                        i,
+                        subregions & (1<<i) ? "disabled" : "enabled");
+            }
+        }
+    } else {
+        LOG_MSG("SMPU slave is disabled\r\n");
+    }
+}
+
 /* API functions */
 
 void SMPU_Print_Config(const SMPU_Resources *smpu_dev)
 {
-    printf("%s - address = %p, size = %#"PRIx32" bytes, %s subregions enabled\n",
-           smpu_name(smpu_dev),
-           smpu_dev->slave_config.address,
-           (uint32_t)REGIONSIZE_TO_BYTES(smpu_dev->slave_config.regionSize),
-           smpu_dev->slave_config.subregions == ALL_ENABLED ? "all" : "some");
-    if (smpu_dev->slave_config.subregions != ALL_ENABLED) {
-        printf("\tsubregion size = %#"PRIx32" bytes\n",
-            (uint32_t)REGIONSIZE_TO_BYTES(smpu_dev->slave_config.regionSize)/8);
-        for (int i=0; i<8; i++) {
-            printf("\tsubregion %d %s\n",
-                   i,
-                   smpu_dev->slave_config.subregions & (1<<i) ? "disabled" : "enabled");
-        }
+    if (is_runtime(smpu_dev)) {
+        LOG_MSG("%s - configured algorithmically.", smpu_name(smpu_dev));
+
+        dump_smpu(smpu_dev->smpu);
+    } else {
+        print_smpu_config(smpu_name(smpu_dev), &smpu_dev->slave_config);
     }
 }
 
@@ -97,8 +337,27 @@ cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev)
 {
     cy_en_prot_status_t ret;
 
-    ret = Cy_Prot_ConfigSmpuSlaveStruct(smpu_dev->smpu,
-                                        &smpu_dev->slave_config);
+    if (is_runtime(smpu_dev)) {
+        cy_stc_smpu_cfg_t slave_config;
+
+        /* Start with a verbatim copy of the slave config */
+        tfm_memcpy(&slave_config,
+                   &smpu_dev->slave_config,
+                   sizeof(slave_config));
+
+        ret = populate_region(smpu_dev->smpu, &slave_config);
+        if (ret != CY_PROT_SUCCESS) {
+            return ret;
+        }
+
+        ret = Cy_Prot_ConfigSmpuSlaveStruct(smpu_dev->smpu,
+                                            &slave_config);
+    } else {
+        /* Use the slave config verbatim */
+        ret = Cy_Prot_ConfigSmpuSlaveStruct(smpu_dev->smpu,
+                                            &smpu_dev->slave_config);
+    }
+
     if (ret != CY_PROT_SUCCESS) {
         return ret;
     }
