@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ extern "C" {
 #ifdef GPIO0_CMSDK_S
 #include "gpio_cmsdk_drv.h"
 extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_S;
-#endif
-#ifdef GPIO0_CMSDK_NS
-#include "gpio_cmsdk_drv.h"
-extern struct gpio_cmsdk_dev_t GPIO0_CMSDK_DEV_NS;
 #endif
 
 /* ARM MPC SIE 200 driver structures */
