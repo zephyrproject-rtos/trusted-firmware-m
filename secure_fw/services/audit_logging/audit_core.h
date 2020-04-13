@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -130,7 +131,7 @@ struct log_tlr {
  * \brief Initializes the Audit logging service
  *        during the TFM boot up process
  *
- * \return Returns PSA_STATUS_T_SUCCESS if init has been completed,
+ * \return Returns PSA_SUCCESS if init has been completed,
  *         otherwise error as specified in \ref psa_status_t
  */
 psa_status_t audit_core_init(void);
