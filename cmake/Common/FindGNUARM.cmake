@@ -15,6 +15,8 @@
 #                the compiler on the PATH is used.
 #  GNUARM_VER  - (optional)- version number. If set the module will validate
 #                the compiler version.
+#  GNUARM_PREFIX (optional)- execute prefix for toolchain, allow for vendor
+#                toolchains, default to arm-none-eabi
 #
 #outputs:
 #  GNUARM_PATH   - will be set to the root directory of the compiler. Only set
@@ -28,7 +30,10 @@
 #Include some dependencies
 Include(Common/Utils)
 
-set(_GCC_BINARY_NAME "arm-none-eabi-gcc")
+if(NOT DEFINED GNUARM_PREFIX)
+	set(GNUARM_PREFIX "arm-none-eabi")
+endif()
+set(_GCC_BINARY_NAME "${GNUARM_PREFIX}-gcc")
 
 #Get the version of armgcc.
 #
