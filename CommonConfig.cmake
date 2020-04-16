@@ -99,7 +99,7 @@ if(${COMPILER} STREQUAL "ARMCLANG")
 	include("Common/FindArmClang")
 	include("Common/${ARMCLANG_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -ffunction-sections -fdata-sections)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -ffunction-sections -fdata-sections -fno-builtin -nostdlib)
 	##Shared compiler settings.
 	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
@@ -116,7 +116,7 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 	include("Common/FindGNUARM")
 	include("Common/${GNUARM_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -ffunction-sections -fdata-sections --specs=nano.specs)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -ffunction-sections -fdata-sections --specs=nano.specs -fno-builtin)
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
 		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
