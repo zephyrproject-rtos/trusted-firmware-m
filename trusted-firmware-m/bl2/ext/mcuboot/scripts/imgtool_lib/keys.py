@@ -106,7 +106,7 @@ class RSAutil():
     def sign(self, payload):
         if sign_rsa_pss:
             signature = self.key.sign(
-                data=payload,
+                data=bytes(payload),
                 padding=PSS(
                     mgf=MGF1(SHA256()),
                     salt_length=32
@@ -115,7 +115,7 @@ class RSAutil():
             )
         else:
             signature = self.key.sign(
-                data=payload,
+                data=bytes(payload),
                 padding=PKCS1v15(),
                 algorithm=SHA256()
             )
