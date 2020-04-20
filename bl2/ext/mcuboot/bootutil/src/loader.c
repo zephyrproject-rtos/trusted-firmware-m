@@ -186,7 +186,7 @@ boot_verify_image_header(struct image_header *hdr)
         return BOOT_EBADIMAGE;
     }
 
-#if MCUBOOT_RAM_LOADING
+#ifdef MCUBOOT_RAM_LOADING
     if (!(hdr->ih_flags & IMAGE_F_RAM_LOAD)) {
         return BOOT_EBADIMAGE;
     }
