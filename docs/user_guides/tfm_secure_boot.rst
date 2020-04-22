@@ -235,9 +235,9 @@ modes are supported by which platforms:
 +-------------+-----------------+---------------+----------+-------------+-----------------+
 | Musca-A     | No              | No            | No       | No          | Yes             |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
-| Musca-B1    | Yes             | No            | No       | Yes         | No              |
+| Musca-B1    | Yes             | Yes           | Yes      | Yes         | No              |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
-| Musca-S1    | Yes             | No            | No       | Yes         | No              |
+| Musca-S1    | Yes             | Yes           | Yes      | Yes         | No              |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
 | AN524       | Yes             | No            | No       | Yes         | No              |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
@@ -694,8 +694,8 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     IMAGE2ADDRESS: 0x10180000
     IMAGE2FILE: \Software\tfm_sig1.bin ; TF-M regression test binary blob
 
-Executing firmware upgrade on Musca-B1 board
---------------------------------------------
+Executing firmware upgrade on Musca-B1 and Musca-S1 boards
+----------------------------------------------------------
 After the two images have been built, they can be concatenated to create the
 combined image using ``srec_cat``:
 

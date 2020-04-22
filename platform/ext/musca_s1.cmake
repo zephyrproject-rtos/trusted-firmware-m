@@ -37,6 +37,9 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_s1/partition")
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
+    if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+        message(FATAL_ERROR "ERROR: RAM_LOADING upgrade strategy is not supported on target '${TARGET_PLATFORM}'.")
+    endif()
 
     #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
     #       instead independently loaded from secure code as a blob.
