@@ -36,6 +36,8 @@ set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "
 
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools by adding -g")
 
+set(TFM_SP_META_PTR_ENABLE              OFF         CACHE BOOL      "Use Partition Metadata Pointer")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

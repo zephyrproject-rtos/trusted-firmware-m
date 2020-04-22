@@ -19,6 +19,9 @@
 #define MPU_REGION_NS_STACK             2
 #define PARTITION_REGION_RO             3
 #define PARTITION_REGION_RW_STACK       4
+#ifdef TFM_SP_META_PTR_ENABLE
+#define MPU_REGION_SP_META_PTR          7
+#endif /* TFM_SP_META_PTR_ENABLE*/
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
@@ -28,6 +31,10 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+#ifdef TFM_SP_META_PTR_ENABLE
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+#endif /* TFM_SP_META_PTR_ENABLE */
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -120,6 +127,22 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
         return TFM_HAL_ERROR_GENERIC;
     }
+
+#ifdef TFM_SP_META_PTR_ENABLE
+    /* TFM partition metadata poniter region */
+    region_cfg.region_nr = MPU_REGION_SP_META_PTR;
+    region_cfg.region_base =
+     (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+    region_cfg.region_limit =
+     (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
+    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
+    if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+#endif /* TFM_SP_META_PTR_ENABLE */
 #endif
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);

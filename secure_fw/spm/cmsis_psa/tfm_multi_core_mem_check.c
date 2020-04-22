@@ -97,6 +97,10 @@ void tfm_get_mem_region_security_attr(const void *p, size_t s,
 #if TFM_LVL == 2
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+#ifdef TFM_SP_META_PTR_ENABLE
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+#endif /* TFM_SP_META_PTR_ENABLE */
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -146,6 +150,20 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
         p_attr->is_xn = false;
         return;
     }
+
+#ifdef TFM_SP_META_PTR_ENABLE
+    /* TFM partition metadata pointer region */
+    base = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit) - 1;
+    if (check_address_range(p, s, base, limit) == TFM_SUCCESS) {
+        p_attr->is_priv_rd_allow = true;
+        p_attr->is_priv_wr_allow = true;
+        p_attr->is_unpriv_rd_allow = true;
+        p_attr->is_unpriv_wr_allow = true;
+        p_attr->is_xn = true;
+        return;
+    }
+#endif
 
     /* APP RoT partition RO region */
     base = (uintptr_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);

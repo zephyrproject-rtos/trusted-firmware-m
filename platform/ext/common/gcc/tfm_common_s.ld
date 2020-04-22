@@ -111,6 +111,11 @@ SECTIONS
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
 #endif
+#if defined(TFM_SP_META_PTR_ENABLE)
+        LONG (LOADADDR(.TFM_SP_META_PTR))
+        LONG (ADDR(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR))
+#endif
         __zero_table_end__ = .;
     } > FLASH
 
@@ -319,6 +324,15 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 #endif /* TFM_LVL == 1 */
+
+#if defined(TFM_SP_META_PTR_ENABLE)
+    .TFM_SP_META_PTR : ALIGN(32)
+    {
+        *(SP_META_PTR_SPRTL_INST)
+    } > RAM
+    Image$$TFM_SP_META_PTR$$RW$$Base = ADDR(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$RW$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+#endif
 
     /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;

@@ -58,3 +58,7 @@ set(TFM_CODE_SHARING_PLATFORM_LISTS mps2/an521 musca_b1/sse_200) # Without crypt
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND NOT TFM_PLATFORM IN_LIST TFM_CODE_SHARING_PLATFORM_LISTS)
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND CRYPTO_HW_ACCELERATOR)
 tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
+
+####################### SP META Pointer ########################################
+
+tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND NOT TFM_PSA_API)

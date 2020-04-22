@@ -97,6 +97,12 @@ define block TFM_SECURE_STACK   with size = 0x2000, alignment = 128 {};
 keep {block TFM_SECURE_STACK};
 #endif /* !defined(TFM_PSA_API) */
 
+#if defined(TFM_SP_META_PTR_ENABLE)
+define block TFM_SP_META_PTR_ENABLE with alignment = 32 {
+       section SP_META_PTR_SPRTL_INST
+       };
+#endif
+
 define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
 
     define block TFM_APP_ROT_LINKER_DATA with alignment = 32 {
@@ -240,6 +246,10 @@ define block DATA with fixed order {
 #if !defined(TFM_PSA_API)
     block TFM_SECURE_STACK,
 #endif /* !defined(TFM_PSA_API) */
+
+#if defined(TFM_SP_META_PTR_ENABLE)
+    block TFM_SP_META_PTR,
+#endif
 
     /**** APP RoT DATA start here */
     /*

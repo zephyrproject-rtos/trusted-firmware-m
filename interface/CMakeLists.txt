@@ -48,6 +48,7 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
         $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
+        $<$<BOOL:${TFM_SP_META_PTR_ENABLE}>:TFM_SP_META_PTR_ENABLE>
 )
 
 ###################### PSA api (S lib) #########################################

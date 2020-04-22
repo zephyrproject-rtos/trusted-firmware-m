@@ -63,6 +63,9 @@ static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
 #define MPU_REGION_NS_STACK             2
 #define PARTITION_REGION_RO             3
 #define PARTITION_REGION_RW_STACK       4
+#ifdef TFM_SP_META_PTR_ENABLE
+#define MPU_REGION_SP_META_PTR          7
+#endif /* TFM_SP_META_PTR_ENABLE */
 
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
@@ -74,6 +77,10 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+#ifdef TFM_SP_META_PTR_ENABLE
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+#endif /* TFM_SP_META_PTR_ENABLE */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* Veneer region */
@@ -125,7 +132,19 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
+    },
+#ifdef TFM_SP_META_PTR_ENABLE
+    /* TFM partition metadata pointer region */
+    {
+        MPU_REGION_SP_META_PTR,
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit),
+        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
+        MPU_ARMV8M_SH_NONE
     }
+#endif
 };
 #endif /* TFM_LVL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
