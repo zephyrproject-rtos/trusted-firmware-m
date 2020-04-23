@@ -53,6 +53,10 @@ if (ENABLE_CRYPTO)
                     "${CRYPTO_DIR}/tfm_crypto_secure_api.c"
       )
 
+  if (CRYPTO_ENGINE_MBEDTLS)
+    list(APPEND CRYPTO_C_SRC "${CRYPTO_DIR}/tfm_mbedcrypto_alt.c")
+  endif()
+
   #Append all our source files to global lists.
   list(APPEND ALL_SRC_C ${CRYPTO_C_SRC})
   unset(CRYPTO_C_SRC)

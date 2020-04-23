@@ -59,6 +59,9 @@ Service source files
 - ``tfm_crypto_api.c`` :  This module is contained in ``interface/src`` and
   implements the PSA Crypto API client interface exposed to the  Non-Secure
   Processing Environment.
+- ``tfm_mbedcrypto_alt.c`` : This module contains alternative implementations of
+  Mbed Crypto functions. Decryption code is skipped in AES CCM mode in Profile
+  Small by default.
 
 **************************
 Crypto service integration
