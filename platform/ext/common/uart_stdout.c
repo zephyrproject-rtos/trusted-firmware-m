@@ -96,6 +96,7 @@ void stdio_init(void)
     ret = STDIO_DRIVER.Control(ARM_USART_MODE_ASYNCHRONOUS,
                                DEFAULT_UART_BAUDRATE);
     ASSERT_HIGH(ret);
+    (void)ret;
 
     (void)STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
 }
@@ -108,4 +109,5 @@ void stdio_uninit(void)
 
     ret = STDIO_DRIVER.Uninitialize();
     ASSERT_HIGH(ret);
+    (void)ret;
 }

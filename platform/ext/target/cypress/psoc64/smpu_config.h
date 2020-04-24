@@ -216,7 +216,7 @@
 #define SMPU10_REGIONSIZE    PROT_SIZE_64KB_BIT_SHIFT
 #define SMPU10_SLAVE_CONFIG {\
     .address = (void *)SMPU10_BASE, \
-    .regionSize = SMPU10_REGIONSIZE, \
+    .regionSize = (cy_en_prot_size_t) SMPU10_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
     .userPermission = CY_PROT_PERM_DISABLED, \
     .privPermission = CY_PROT_PERM_RW, \
