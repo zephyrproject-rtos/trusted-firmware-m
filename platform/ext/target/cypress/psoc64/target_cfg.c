@@ -163,6 +163,7 @@ void bus_masters_cfg(void)
     cy_en_prot_status_t ret;
     ret = set_bus_master_attr();
     assert(ret == CY_PROT_SUCCESS);
+    (void)ret;
 }
 
 const SMPU_Resources *smpu_init_table[] = {
@@ -238,6 +239,7 @@ void smpu_init_cfg(void)
     /* Now protect all unconfigured SMPUs */
     ret = protect_unconfigured_smpus();
     assert(ret == CY_PROT_SUCCESS);
+    (void)ret;
 
     __DSB();
     __ISB();
@@ -1190,6 +1192,7 @@ void ppu_init_cfg(void)
     {
         cy_en_prot_status_t ret = PPU_Configure(ppu_init_table[i]);
         assert(ret == CY_PROT_SUCCESS);
+        (void)ret;
     }
 
     __DSB();
