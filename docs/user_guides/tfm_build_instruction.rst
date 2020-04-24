@@ -96,6 +96,7 @@ services needs to be enabled at the build configuration step by defining::
 
     -DPSA_API_TEST_INTERNAL_TRUSTED_STORAGE=ON
     -DPSA_API_TEST_PROTECTED_STORAGE=ON
+    -DPSA_API_TEST_STORAGE=ON
     -DPSA_API_TEST_CRYPTO=ON
     -DPSA_API_TEST_INITIAL_ATTESTATION=ON
 

@@ -158,6 +158,7 @@ listed above.
          - ``PSA_API_TEST_CRYPTO``
          - ``PSA_API_TEST_PROTECTED_STORAGE``
          - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
+         - ``PSA_API_TEST_STORAGE``
 
 .. code-block:: bash
 
@@ -241,6 +242,7 @@ listed above.
          - ``PSA_API_TEST_CRYPTO``
          - ``PSA_API_TEST_PROTECTED_STORAGE``
          - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
+         - ``PSA_API_TEST_STORAGE``
 
 .. code-block:: bash
 
