@@ -2666,7 +2666,7 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
     int fa_id;
     uint32_t boot_sequence[BOOT_NUM_SLOTS];
     uint32_t img_cnt;
-    struct image_header *selected_image_header;
+    struct image_header *selected_image_header = NULL;
 #ifdef MCUBOOT_RAM_LOADING
     int image_copied = 0;
     uint32_t img_dst = 0;
