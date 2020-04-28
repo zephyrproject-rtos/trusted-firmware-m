@@ -118,7 +118,7 @@ def process_manifest(manifest_list_file, append):
 
         print ("Generating " + outfile_name)
 
-        outfile = io.open(outfile_name, "w", newline='\n')
+        outfile = io.open(outfile_name, "w", newline=None)
         outfile.write(template.render(context))
         outfile.close()
 
@@ -161,7 +161,7 @@ def gen_files(context, gen_file_list, append):
 
         template = ENV.get_template(templatefile_name)
 
-        outfile = io.open(outfile_name, "w", newline='\n')
+        outfile = io.open(outfile_name, "w", newline=None)
         outfile.write(template.render(context))
         outfile.close()
 
