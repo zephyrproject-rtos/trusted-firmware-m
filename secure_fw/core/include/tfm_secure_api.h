@@ -25,17 +25,35 @@
  *
  * \brief Attributes for secure gateway functions
  */
+#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
+/*
+ * GNUARM requires noclone attribute to protect gateway function symbol from
+ * being renamed and cloned
+ */
 #define __tfm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noinline, section("SFN")))
+        __attribute__((cmse_nonsecure_entry, noclone, section("SFN")))
+#else
+#define __tfm_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry, section("SFN")))
+#endif /* __GNUC__ && !__ARMCC_VERSION */
 
 /*!
  * \def __tfm_psa_secure_gateway_attributes__
  *
  * \brief Attributes for psa api secure gateway functions
  */
+#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
+/*
+ * GNUARM requires noclone attribute to protect gateway function symbol from
+ * being renamed and cloned
+ */
 #define __tfm_psa_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noinline, naked, section("SFN")))
-#endif
+        __attribute__((cmse_nonsecure_entry, noclone, naked, section("SFN")))
+#else
+#define __tfm_psa_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry, naked, section("SFN")))
+#endif /* __GNUC__ && !__ARMCC_VERSION */
+#endif /* TFM_MULTI_CORE_TOPOLOGY */
 
 /* Hide specific errors if not debugging */
 #ifdef TFM_CORE_DEBUG

@@ -82,7 +82,7 @@ int32_t tfm_nspm_get_current_client_id(void)
 /// Initialize secure context memory system
 /// \return execution status (1: success, 0: error)
 /* This veneer is TF-M internal, not a secure service */
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 uint32_t TZ_InitContextSystem_S(void)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
@@ -114,7 +114,7 @@ uint32_t TZ_InitContextSystem_S(void)
 /// \return value != 0 id TrustZone memory slot identifier
 /// \return value 0    no memory available or internal error
 /* This veneer is TF-M internal, not a secure service */
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 {
     TZ_MemoryId_t tz_id = 1;
@@ -146,7 +146,7 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
 /// \param[in]  id  TrustZone memory slot identifier
 /// \return execution status (1: success, 0: error)
 /* This veneer is TF-M internal, not a secure service */
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
@@ -191,7 +191,7 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
 /// \param[in]  id  TrustZone memory slot identifier
 /// \return execution status (1: success, 0: error)
 /* This veneer is TF-M internal, not a secure service */
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
@@ -230,7 +230,7 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
 /// \param[in]  id  TrustZone memory slot identifier
 /// \return execution status (1: success, 0: error)
 /* This veneer is TF-M internal, not a secure service */
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
@@ -271,7 +271,7 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
 }
 
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
-__attribute__((cmse_nonsecure_entry))
+__tfm_nspm_secure_gateway_attributes__
 enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
 {
     int current_client_id;

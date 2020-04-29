@@ -19,7 +19,24 @@
  */
 #undef cmse_nsfptr_create
 #define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
-#endif
+
+/*!
+ * \def __tfm_nspm_secure_gateway_attributes__
+ *
+ * \brief Attributes for secure gateway functions for NSPM
+ */
+#ifndef __ARMCC_VERSION
+/*
+ * GNUARM requires noclone attribute to protect gateway function symbol from
+ * being renamed and cloned
+ */
+#define __tfm_nspm_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry, noclone))
+#else
+#define __tfm_nspm_secure_gateway_attributes__ \
+        __attribute__((cmse_nonsecure_entry))
+#endif /* !__ARMCC_VERSION */
+#endif /* __GNUC__ && !TFM_MULTI_CORE_TOPOLOGY */
 
 #ifndef TFM_PSA_API
 /**
