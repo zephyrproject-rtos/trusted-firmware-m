@@ -85,6 +85,37 @@ contribute to this project.
 
 Further documents can be found in the ``docs`` folder.
 
+###################
+Platforms supported
+###################
+    - Cortex-M33 system:
+
+        - `FPGA image loaded on MPS2 board.
+          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
+        - `Fast model FVP_MPS2_AEMv8M.
+          <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`_
+        - `Musca-A test chip board.
+          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`_
+        - `Musca-B1 test chip board.
+          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`_
+        - `Musca-S1 test chip board.
+          <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
+        - `FPGA image loaded on MPS3 board.
+          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
+        - `Arm DesignStart FPGA on AWS Cloud.
+          <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
+        - `NXP LPC55S69.
+          <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
+
+    - Cortex-M23 system:
+
+        - `FPGA image loaded on MPS2 board.
+          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
+
+    - Dual Core Cortex-M system:
+
+        - `Cypress PSoc64.
+          <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
 
 ####################
 Feedback and support

@@ -74,9 +74,9 @@ Current release has been tested on:
 
 Other supported platforms:
 
-    - Dual Core Cortex-M system:
+    - Dual CPU system:
 
-        - `Cypress PSoc64.
+        - `Cypress PSoC64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`__
 
 Platform Limitations
