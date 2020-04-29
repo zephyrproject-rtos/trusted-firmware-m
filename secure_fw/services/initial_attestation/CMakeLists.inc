@@ -32,10 +32,6 @@ if (NOT DEFINED ATTEST_INCLUDE_COSE_KEY_ID)
 	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_COSE_KEY_ID is undefined.")
 endif()
 
-if (NOT DEFINED ATTEST_BOOT_INTERFACE)
-	message(FATAL_ERROR "Incomplete build configuration: ATTEST_BOOT_INTERFACE is undefined.")
-endif()
-
 list(APPEND ATTEST_C_SRC
 	"${INITIAL_ATTESTATION_DIR}/tfm_attestation_secure_api.c"
 	"${INITIAL_ATTESTATION_DIR}/tfm_attestation.c"
@@ -57,16 +53,11 @@ if (ATTEST_INCLUDE_COSE_KEY_ID)
 	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_COSE_KEY_ID)
 endif()
 
-if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
-	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INDIVIDUAL_SW_COMPONENTS)
-endif()
-
 #Inform the user about attestation service features selected based on the cmake flags
 message("The Initial Attestation service compile configuration is as follows:")
 message("- ATTEST_INCLUDE_OPTIONAL_CLAIMS: ${ATTEST_INCLUDE_OPTIONAL_CLAIMS}")
 message("- ATTEST_INCLUDE_TEST_CODE:       ${ATTEST_INCLUDE_TEST_CODE}")
 message("- ATTEST_INCLUDE_COSE_KEY_ID:     ${ATTEST_INCLUDE_COSE_KEY_ID}")
-message("- ATTEST_BOOT_INTERFACE:          ${ATTEST_BOOT_INTERFACE}")
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)

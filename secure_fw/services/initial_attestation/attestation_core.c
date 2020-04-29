@@ -264,214 +264,6 @@ static int32_t attest_get_tlv_by_id(uint8_t    claim,
     return found;
 }
 
-#ifdef INDIVIDUAL_SW_COMPONENTS /* DEPRECATED */
-/*!
- * \brief Static function to add SW component related claims to attestation
- *        token in CBOR format.
- *
- *  This function translates between TLV  and CBOR encoding.
- *
- * \param[in]  token_ctx    Attestation token encoding context
- * \param[in]  tlv_id       The ID of claim
- * \param[in]  claim_value  A structure which carries a pointer and size about
- *                          the data item to be added to the token
- *
- * \deprecated This function is deprecated and will probably be removed
- *             in the future.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_sw_component_claim(struct attest_token_ctx *token_ctx,
-                              uint8_t tlv_id,
-                              const struct q_useful_buf_c *claim_value)
-{
-    switch (tlv_id) {
-    case SW_MEASURE_VALUE:
-        attest_token_add_bstr(token_ctx,
-                              EAT_CBOR_SW_COMPONENT_MEASUREMENT_VALUE,
-                              claim_value);
-        break;
-    case SW_MEASURE_TYPE:
-        attest_token_add_tstr(token_ctx,
-                              EAT_CBOR_SW_COMPONENT_MEASUREMENT_DESC,
-                              claim_value);
-        break;
-    case SW_VERSION:
-        attest_token_add_tstr(token_ctx,
-                              EAT_CBOR_SW_COMPONENT_VERSION,
-                              claim_value);
-        break;
-    case SW_SIGNER_ID:
-        attest_token_add_bstr(token_ctx,
-                              EAT_CBOR_SW_COMPONENT_SIGNER_ID,
-                              claim_value);
-        break;
-    case SW_TYPE:
-        attest_token_add_tstr(token_ctx,
-                              EAT_CBOR_SW_COMPONENT_MEASUREMENT_TYPE,
-                              claim_value);
-        break;
-    default:
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add the measurement data of a single SW components
- *        to the attestation token.
- *
- * \param[in]  token_ctx    Token encoding context
- * \param[in]  module       SW component identifier
- * \param[in]  tlv_address  Address of the first TLV entry in the boot status,
- *                          which belongs to this SW component.
- * \param[in]  nested_map   Flag to indicate that how to encode the SW component
- *                          measurement data: nested map or non-nested map.
- * \deprecated This function is deprecated and will probably be removed
- *             in the future.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_single_sw_measurment(struct attest_token_ctx *token_ctx,
-                                uint8_t module,
-                                uint8_t *tlv_address,
-                                uint32_t nested_map)
-{
-    struct shared_data_tlv_entry tlv_entry;
-    uint16_t tlv_len;
-    uint8_t  tlv_id;
-    uint8_t *tlv_ptr = tlv_address;
-    int32_t found = 1;
-    struct q_useful_buf_c claim_value;
-    enum psa_attest_err_t res;
-    QCBOREncodeContext *cbor_encode_ctx;
-
-    /* Create local copy to avoid unaligned access */
-    (void)tfm_memcpy(&tlv_entry, tlv_address, SHARED_DATA_ENTRY_HEADER_SIZE);
-    tlv_len = tlv_entry.tlv_len;
-    tlv_id = GET_IAS_CLAIM(tlv_entry.tlv_type);
-
-    cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
-
-    /* Open nested map for SW component measurement claims */
-    if (nested_map) {
-        QCBOREncode_OpenMapInMapN(cbor_encode_ctx,
-                                 EAT_CBOR_SW_COMPONENT_MEASUREMENT_VALUE);
-    }
-
-    /* Look up all measurement TLV entry which belongs to the SW component */
-    while (found) {
-        /* Here only measurement claims are added to the token */
-        if (GET_IAS_MEASUREMENT_CLAIM(tlv_id)) {
-            claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
-            claim_value.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
-            res = attest_add_sw_component_claim(token_ctx,
-                                                tlv_id,
-                                                &claim_value);
-            if (res != PSA_ATTEST_ERR_SUCCESS) {
-                return res;
-            }
-        }
-
-        /* Look up next entry it can be non-measurement claim*/
-        found = attest_get_tlv_by_module(module, &tlv_id,
-                                         &tlv_len, &tlv_ptr);
-        if (found == -1) {
-            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-        }
-    }
-
-    if (nested_map) {
-        QCBOREncode_CloseMap(cbor_encode_ctx);
-    }
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add the claims of a single SW components to the
- *        attestation token.
- *
- * \param[in]  token_ctx    Token encoding context
- * \param[in]  module       SW component identifier
- * \param[in]  tlv_address  Address of the first TLV entry in the boot status,
- *                          which belongs to this SW component.
- *
- * \deprecated This function is deprecated and will probably be removed
- *             in the future.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_single_sw_component(struct attest_token_ctx *token_ctx,
-                               uint8_t module,
-                               uint8_t *tlv_address)
-{
-    struct shared_data_tlv_entry tlv_entry;
-    uint16_t tlv_len;
-    uint8_t  tlv_id;
-    uint8_t *tlv_ptr = tlv_address;
-    int32_t found = 1;
-    uint32_t measurement_claim_cnt = 0;
-    struct q_useful_buf_c claim_value;
-    QCBOREncodeContext *cbor_encode_ctx;
-    enum psa_attest_err_t res;
-
-    /* Create local copy to avoid unaligned access */
-    (void)tfm_memcpy(&tlv_entry, tlv_address, SHARED_DATA_ENTRY_HEADER_SIZE);
-    tlv_len = tlv_entry.tlv_len;
-    tlv_id = GET_IAS_CLAIM(tlv_entry.tlv_type);
-
-    /* Open map which stores claims belong to a SW component */
-    cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
-    QCBOREncode_OpenMap(cbor_encode_ctx);
-
-    /* Look up all TLV entry which belongs to the same SW component */
-    while (found) {
-        /* Check whether claim is measurement claim */
-        if (GET_IAS_MEASUREMENT_CLAIM(tlv_id)) {
-            if (measurement_claim_cnt == 0) {
-                /* Call only once when first measurement claim found */
-                measurement_claim_cnt++;
-                res = attest_add_single_sw_measurment(
-                                                   token_ctx,
-                                                   module,
-                                                   tlv_ptr,
-                                                   EAT_SW_COMPONENT_NOT_NESTED);
-                if (res != PSA_ATTEST_ERR_SUCCESS) {
-                    return res;
-                }
-            }
-        } else {
-            /* Adding top level claims */
-            claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
-            claim_value.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
-            res = attest_add_sw_component_claim(token_ctx,
-                                                tlv_id,
-                                                &claim_value);
-            if (res != PSA_ATTEST_ERR_SUCCESS) {
-                return res;
-            }
-        }
-
-        /* Look up next entry which belongs to SW component */
-        found = attest_get_tlv_by_module(module, &tlv_id,
-                                         &tlv_len, &tlv_ptr);
-        if (found == -1) {
-            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-        }
-    }
-
-    /* Close map which stores claims belong to a SW component */
-    QCBOREncode_CloseMap(cbor_encode_ctx);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-#endif /* INDIVIDUAL_SW_COMPONENTS */
-
 /*!
  * \brief Static function to add the claims of all SW components to the
  *        attestation token.
@@ -490,11 +282,7 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
     uint32_t cnt = 0;
     uint8_t module;
     QCBOREncodeContext *cbor_encode_ctx = NULL;
-#ifdef INDIVIDUAL_SW_COMPONENTS
-    enum psa_attest_err_t res;
-#else
     UsefulBufC encoded = NULLUsefulBufC;
-#endif
 
     cbor_encode_ctx = attest_token_borrow_cbor_cntxt(token_ctx);
 
@@ -522,16 +310,9 @@ attest_add_all_sw_components(struct attest_token_ctx *token_ctx)
                                             EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
             }
 
-#ifdef INDIVIDUAL_SW_COMPONENTS
-            res = attest_add_single_sw_component(token_ctx, module, tlv_ptr);
-            if (res != PSA_ATTEST_ERR_SUCCESS) {
-                return res;
-            }
-#else
             encoded.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
             encoded.len = tlv_len - SHARED_DATA_ENTRY_HEADER_SIZE;
             QCBOREncode_AddEncoded(cbor_encode_ctx, encoded);
-#endif /* INDIVIDUAL_SW_COMPONENTS */
         }
     }
 

@@ -217,10 +217,6 @@ elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
 	set(MCUBOOT_RAM_LOADING On)
 endif()
 
-if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
-	set(MCUBOOT_INDIVIDUAL_CLAIMS On)
-endif()
-
 configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
 			   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
 			   @ONLY)
@@ -232,11 +228,6 @@ if (NOT MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072" AND NOT MCUBOOT_SIGNATURE_TYP
 endif()
 
 validate_cache_value(MCUBOOT_UPGRADE_STRATEGY)
-
-if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
-	message(WARNING "ATTEST_BOOT_INTERFACE was set to ${ATTEST_BOOT_INTERFACE}. This configuration is "
-			"deprecated and this feature will probably be removed from MCUBoot in the future.")
-endif()
 
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

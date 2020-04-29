@@ -46,7 +46,6 @@ extern "C" {
 #cmakedefine MCUBOOT_NO_SWAP
 #cmakedefine MCUBOOT_RAM_LOADING
 
-#cmakedefine MCUBOOT_INDIVIDUAL_CLAIMS
 #cmakedefine MCUBOOT_HW_KEY
 #cmakedefine MCUBOOT_USE_UPSTREAM
 
