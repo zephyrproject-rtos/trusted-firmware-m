@@ -156,7 +156,13 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c")
+
+  if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/crypto_keys.c")
+  else()
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+  endif()
+
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
@@ -244,7 +250,4 @@ if (CRYPTO_HW_ACCELERATOR)
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
     embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
-
-    #Compiling this file requires to disable warning: -Wunused-local-typedefs
-    set_source_files_properties("${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c" PROPERTIES COMPILE_FLAGS -Wno-unused-local-typedefs)
 endif()
