@@ -9,6 +9,8 @@ Follow the instructions in
 Notes for building with IARARM
 ------------------------------
 
+    IAR Embedded Workbench for ARM (EWARM) versions 8.42 or later are required.
+
     Currently the MUSCA_B1, MUSCA_S1 and SSE-200_AWS targets are not supported with IARARM,
     due to lack of testing.
 
@@ -31,13 +33,15 @@ Notes for building with IARARM
 
     For mbed-crypto (CMakeLists.txt):
 
- if(CMAKE_COMPILER_IS_IAR)
--    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --warn_about_c_style_casts --warnings_are_errors -Ohz")
-+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --warn_about_c_style_casts")
-+    set(CMAKE_C_FLAGS_RELEASE     "-Ohz")
-+    set(CMAKE_C_FLAGS_DEBUG       "--debug -On")
-+    set(CMAKE_C_FLAGS_CHECK       "--warnings_are_errors")
- endif(CMAKE_COMPILER_IS_IAR)
+.. code-block:: bash
+
+     if(CMAKE_COMPILER_IS_IAR)
+    -    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --warn_about_c_style_casts --warnings_are_errors -Ohz")
+    +    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --warn_about_c_style_casts")
+    +    set(CMAKE_C_FLAGS_RELEASE     "-Ohz")
+    +    set(CMAKE_C_FLAGS_DEBUG       "--debug -On")
+    +    set(CMAKE_C_FLAGS_CHECK       "--warnings_are_errors")
+     endif(CMAKE_COMPILER_IS_IAR)
 
 
 Build steps:
