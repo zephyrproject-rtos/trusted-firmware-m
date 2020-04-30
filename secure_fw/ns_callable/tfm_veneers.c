@@ -175,7 +175,10 @@ psa_status_t tfm_secure_client_2_call(psa_invec *, size_t, psa_outvec *, size_t)
                                          psa_outvec *out_vec, \
                                          size_t out_len) \
     { \
+        bool is_ns = tfm_core_is_ns_client(); \
+      \
         TFM_CORE_IOVEC_SFN_REQUEST(partition_name, \
+                                   is_ns, \
                                    (void *) sfn_name, \
                                    in_vec, in_len, out_vec, out_len); \
     }
