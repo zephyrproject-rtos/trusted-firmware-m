@@ -26,8 +26,6 @@ class set_sst_template_line : public sst_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
-        bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                     bool fill_in_template, bool create_call, template_line *temLin,
                     tf_fuzz_info *rsrc) {
@@ -52,8 +50,6 @@ class remove_sst_template_line : public sst_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
-        bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                             bool fill_in_template, bool create_call,
                             template_line *temLin, tf_fuzz_info *rsrc) {
@@ -77,8 +73,6 @@ class read_sst_template_line : public sst_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
-        bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                             bool fill_in_template, bool create_call,
                             template_line *temLin, tf_fuzz_info *rsrc) {

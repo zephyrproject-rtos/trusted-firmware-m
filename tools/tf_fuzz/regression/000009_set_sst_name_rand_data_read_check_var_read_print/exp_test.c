@@ -7,7 +7,7 @@
 
 /*
  * Test purpose:
- *     to dump to a variable or to the log
+ *     to check against a variable or dump into the log
  *
  */
 
@@ -40,42 +40,42 @@ void test_thread (struct test_result_t *ret) {
         return;
     }
 
-    TEST_LOG("Test to dump to a variable or to the log");
+    TEST_LOG("Test to check against a variable or dump into the log");
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t greebledorf_data[] = "@@002@10@@********";
-    static int greebledorf_data_size = \d+;
-    static uint8_t a_variable[] = "";
-    static uint8_t greebledorf_act_data[2048] = "********";
-    static int greebledorf_act_length = 0;
-    static uint8_t greebledorf_act_data[2048] = "********";
-    static int greebledorf_act_length = 0;
+    static uint8_t greebledorf_set_data\[\] = "@@002@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t greebledorf_set_length = \d+;
+    static uint8_t a_variable_data\[\] = "[A-Z][a-z ]*[\.\?\!]";
+    static size_t a_variable_length = \d+;
+    static uint8_t greebledorf_act_data\[2048\] = "[A-Z][a-z ]*[\.\?\!]";
+    static size_t greebledorf_act_length = \d+;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "greebledorf," with data "@@002@10@@...". */
-    sst_status = psa_ps_set(@@@001@@@, greebledorf_data_size, greebledorf_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "greebledorf," with data "@@002@10@@...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, greebledorf_set_length, greebledorf_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    sst_status = psa_ps_get(@@@001@@@, 0, 0, greebledorf_act_data,
+    sst_status = psa_ps_get\(@@@001@@@, 0, \d+, greebledorf_act_data,
                             &greebledorf_act_length);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_get() expected PSA_SUCCESS.");
         return;
     }
     /* Check that the data is correct */
-    if (tfm_memcmp(greebledorf_act_data, a_variable, 0) != 0) {
+    if (tfm_memcmp(greebledorf_act_data, a_variable,
+                   greebledorf_act_length) != 0) {
         TEST_FAIL("Read data should be equal to result data");
         return;
     }
 
-    sst_status = psa_ps_get(@@@001@@@, 0, 0, greebledorf_act_data,
+    sst_status = psa_ps_get\(@@@001@@@, 0, \d+, greebledorf_act_data,
                             &greebledorf_act_length);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_get() expected PSA_SUCCESS.");
@@ -85,7 +85,7 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

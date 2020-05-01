@@ -27,6 +27,8 @@ class sst_set_call : public sst_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         sst_set_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -51,6 +53,8 @@ public:
         uint32_t data_length;
         string data_var_name;
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         sst_get_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -71,6 +75,8 @@ class sst_remove_call : public sst_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         sst_remove_call (tf_fuzz_info *test_state, long &asset_ser_no,

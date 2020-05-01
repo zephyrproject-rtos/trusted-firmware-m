@@ -86,7 +86,7 @@ data                      return DATA;
 active                    return ACTIVE;
 deleted                   return DELETED;
 check                     return CHECK;
-assign                    return ASSIGN;
+var                       return VAR;
 print                     return PRINT;
 hash                      return HASH;
 neq                       return NEQ;

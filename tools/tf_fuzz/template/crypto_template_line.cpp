@@ -35,19 +35,14 @@ set_policy_template_line::set_policy_template_line (tf_fuzz_info *resources)
     return;  // just to have something to pin a breakpoint onto
 }
 
-bool set_policy_template_line::copy_template_to_asset (void)
-{
-    // TODO:  Should this ever be invoked?
-    return true;
-}
-
 bool set_policy_template_line::copy_template_to_call (void)
 {
     for (auto call : test_state->calls) {
-        if (call->call_ser_no == call_ser_no && call->expect.pf_info_incomplete) {
-            call->asset_id.set_just_name (asset_id.get_name());
-            call->asset_id.id_n = asset_id.id_n;
-            call->expect.pf_info_incomplete = true;
+        if (call->call_ser_no == call_ser_no && call->exp_data.pf_info_incomplete) {
+            call->asset_info.set_just_name (asset_info.get_name());
+            call->asset_info.id_n = asset_info.id_n;
+            call->random_asset = random_asset;
+            call->exp_data.pf_info_incomplete = true;
             return true;
         }
     }
@@ -78,39 +73,14 @@ read_policy_template_line::read_policy_template_line (tf_fuzz_info *resources)
 {
 }
 
-bool read_policy_template_line::copy_template_to_asset (void)
-{
-    vector<psa_asset*>::iterator found_asset;
-    sst_asset* this_asset;
-    // Find the call by serial number (must search;  may have moved).
-    asset_search how_found = test_state->find_or_create_sst_asset (
-                        psa_asset_search::serial, psa_asset_usage::all, "", 0,
-                        asset_ser_no, dont_create_asset, found_asset );
-    // The vector is base-class, but this itself *really is* an sst_asset object:
-    if (how_found == asset_search::unsuccessful) {
-        cerr << "\nError:  Tool-internal:  TF-Fuzz failed to find a required asset."
-             << endl;
-        exit(108);
-    }
-    // Copy *the other way* on asset reads!
-    if (how_found != asset_search::not_found) {
-        this_asset = reinterpret_cast<sst_asset*>(*found_asset);
-        set_data.string_specified = this_asset->set_data.string_specified;
-        set_data.file_specified = this_asset->set_data.file_specified;
-        flags_string = this_asset->flags_string;
-        asset_id.id_n = this_asset->asset_id.id_n;
-        asset_id.name_specified = this_asset->asset_id.name_specified;
-    }
-    return true;
-}
-
 bool read_policy_template_line::copy_template_to_call (void)
 {
     for (auto call : test_state->calls) {
-        if (call->call_ser_no == call_ser_no && call->expect.pf_info_incomplete) {
-            call->asset_id.set_just_name (asset_id.get_name());
-            call->asset_id.id_n = asset_id.id_n;
-            call->expect.pf_info_incomplete = true;
+        if (call->call_ser_no == call_ser_no && call->exp_data.pf_info_incomplete) {
+            call->asset_info.set_just_name (asset_info.get_name());
+            call->asset_info.id_n = asset_info.id_n;
+            call->random_asset = random_asset;
+            call->exp_data.pf_info_incomplete = true;
             return true;
         }
     }
@@ -141,48 +111,22 @@ set_key_template_line::set_key_template_line (tf_fuzz_info *resources)
     // Nothing further to initialize.
 }
 
-bool set_key_template_line::copy_template_to_asset (void)
-{
-    vector<psa_asset*>::iterator found_asset;
-    key_asset* this_asset;
-
-    // Find the asset by serial number (must search;  may have moved).
-    asset_search how_found = test_state->find_or_create_key_asset (
-                        psa_asset_search::serial, psa_asset_usage::all, "", 0,
-                        asset_ser_no, yes_create_asset, found_asset );
-    // The vector is base-class, but this itself *really is* a key_asset object:
-    if (how_found == asset_search::unsuccessful) {
-        cerr << "\nError:  Tool-internal:  TF-Fuzz failed to find a required asset."
-             << endl;
-        exit(109);
-    }
-    // Copy over everything relevant:
-    if (how_found != asset_search::not_found) {  // will be found for make calls, but not necessarily others
-        this_asset = reinterpret_cast<key_asset*>(*found_asset);
-        this_asset->set_data.string_specified = set_data.string_specified;
-        this_asset->set_data.set (set_data.get());
-        this_asset->set_data.file_specified = set_data.file_specified;
-        this_asset->set_data.file_path = set_data.file_path;
-        this_asset->flags_string = flags_string;
-    }
-    return true;
-}
-
 bool set_key_template_line::copy_template_to_call (void)
 {
-    // Find the call by serial number (must search;  may have moved).
     for (auto call : test_state->calls) {
         if (call->call_ser_no == call_ser_no) {
             // Copy asset info to call object for creation code:
-            call->asset_id.set_just_name (asset_id.get_name());
-            call->asset_id.id_n = asset_id.id_n;
+            call->asset_info.set_just_name (asset_info.get_name());
+            call->asset_info.id_n = asset_info.id_n;
+            call->asset_info.asset_ser_no = asset_info.asset_ser_no;
+            call->asset_info.how_asset_found = asset_info.how_asset_found;
+            call->random_asset = random_asset;
             call->set_data.string_specified = set_data.string_specified;
-            call->set_data.set (set_data.get());  call->asset_ser_no = asset_ser_no;
+            call->set_data.set (set_data.get());
             call->set_data.file_specified = set_data.file_specified;
             call->set_data.file_path = set_data.file_path;
+            call->exp_data.pf_info_incomplete = true;
             call->flags_string = flags_string;
-            call->how_asset_found = how_asset_found;
-            call->expect.pf_info_incomplete = true;
             return true;
         }
     }
@@ -213,45 +157,20 @@ remove_key_template_line::remove_key_template_line (tf_fuzz_info *resources)
     is_remove = true;  // template_line's constructor defaults this to false
 }
 
-bool remove_key_template_line::copy_template_to_asset (void)
-{
-    vector<psa_asset*>::iterator found_asset;
-    sst_asset* this_asset;
-    // Find the call by serial number (must search;  may have moved).
-    asset_search how_found = test_state->find_or_create_sst_asset (
-                        psa_asset_search::serial, psa_asset_usage::all, "", 0,
-                        asset_ser_no, dont_create_asset, found_asset );
-    // The vector is base-class, but this itself *really is* an sst_asset object:
-    if (how_found == asset_search::unsuccessful) {
-        cerr << "\nError:  Tool-internal:  TF-Fuzz failed to find a required asset."
-             << endl;
-        exit(108);
-    }
-    // Copy *the other way* on asset reads!
-    if (how_found != asset_search::not_found) {  // will be found for make calls, but not necessarily others
-        this_asset = reinterpret_cast<sst_asset*>(*found_asset);
-        set_data.string_specified = this_asset->set_data.string_specified;
-        set_data.file_specified = this_asset->set_data.file_specified;
-        flags_string = this_asset->flags_string;
-        asset_id.id_n = this_asset->asset_id.id_n;
-        asset_id.name_specified = this_asset->asset_id.name_specified;
-    }
-    return true;
-}
-
 bool remove_key_template_line::copy_template_to_call (void)
 {
-    // Find the call by serial number (must search;  may have moved).
     for (auto call : test_state->calls) {
         if (call->call_ser_no == call_ser_no) {
-            call->asset_id.set_just_name (asset_id.get_name());
-            call->asset_id.id_n = asset_id.id_n;
-            call->expect.pf_nothing = expect.pf_nothing;
-            call->expect.pf_pass = expect.pf_pass;  call->asset_ser_no = asset_ser_no;
-            call->expect.pf_specified = expect.pf_specified;
-            call->expect.pf_result_string = expect.pf_result_string;
-            call->how_asset_found = how_asset_found;
-            call->expect.pf_info_incomplete = true;
+            call->asset_info.set_just_name (asset_info.get_name());
+            call->asset_info.id_n = asset_info.id_n;
+            call->asset_info.asset_ser_no = asset_info.asset_ser_no;
+            call->asset_info.how_asset_found = asset_info.how_asset_found;
+            call->random_asset = random_asset;
+            call->exp_data.pf_nothing = expect.pf_nothing;
+            call->exp_data.pf_pass = expect.pf_pass;
+            call->exp_data.pf_specified = expect.pf_specified;
+            call->exp_data.pf_result_string = expect.pf_result_string;
+            call->exp_data.pf_info_incomplete = true;
             return true;
         }
     }
@@ -292,48 +211,23 @@ read_key_template_line::read_key_template_line (tf_fuzz_info *resources)
     set_data.file_path = "";  // can't really devise a random path
 }
 
-bool read_key_template_line::copy_template_to_asset (void)
-{
-    vector<psa_asset*>::iterator found_asset;
-    sst_asset* this_asset;
-    // Find the call by serial number (must search;  may have moved).
-    asset_search how_found = test_state->find_or_create_sst_asset (
-                        psa_asset_search::serial, psa_asset_usage::all, "", 0,
-                        asset_ser_no, dont_create_asset, found_asset );
-    // The vector is base-class, but this itself *really is* an sst_asset object:
-    if (how_found == asset_search::unsuccessful) {
-        cerr << "\nError:  Tool-internal:  TF-Fuzz failed to find a required asset."
-             << endl;
-        exit(108);
-    }
-    // Copy *the other way* on asset reads!
-    if (how_found != asset_search::not_found) {
-        this_asset = reinterpret_cast<sst_asset*>(*found_asset);
-        set_data.string_specified = this_asset->set_data.string_specified;
-        set_data.file_specified = this_asset->set_data.file_specified;
-        flags_string = this_asset->flags_string;
-        asset_id.id_n = this_asset->asset_id.id_n;
-        asset_id.name_specified = this_asset->asset_id.name_specified;
-    }
-    return true;
-}
-
 bool read_key_template_line::copy_template_to_call (void)
 {
-    // Find the call by serial number (must search;  may have moved).
     for (auto call : test_state->calls) {
         if (call->call_ser_no == call_ser_no) {
             // Copy expected results to the call object, to check:
-            call->asset_id.set_just_name (asset_id.get_name());
-            call->asset_id.id_n = asset_id.id_n;
+            call->asset_info.set_just_name (asset_info.get_name());
+            call->asset_info.id_n = asset_info.id_n;
+            call->asset_info.how_asset_found = asset_info.how_asset_found;
+            call->asset_info.asset_ser_no = asset_info.asset_ser_no;
+            call->random_asset = random_asset;
             call->set_data.string_specified = set_data.string_specified;
-            call->set_data.set (set_data.get());  call->asset_ser_no = asset_ser_no;
+            call->set_data.set (set_data.get());
             call->set_data.file_specified = set_data.file_specified;
             call->set_data.file_path = set_data.file_path;
-            call->flags_string = flags_string;
             call->set_data.string_specified = set_data.string_specified;
-            call->how_asset_found = how_asset_found;
-            call->expect.pf_info_incomplete = true;
+            call->exp_data.pf_info_incomplete = true;
+            call->flags_string = flags_string;
             return true;
         }
     }

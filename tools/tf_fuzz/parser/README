@@ -1,12 +1,9 @@
-.../tf_fuzz/parser directory contents:
-
-tf_fuzz_grammar.l  tf_fuzz_grammar.y
-
---------------------------------------------------------------------------------
-
 This directory contains the Lex and YACC grammars for parsing the TF-Fuzz command
-"language," if it can be called that.  The tf_fuzz_grammar.tab.cpp/.hpp files
-generated also form the executive for the entire parsing process.
+"language" (if it can be called a language as such).
+
+For more information, please browse to:
+
+    https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/user_guides/tf_fuzz/parser_dir.html
 
 --------------
 

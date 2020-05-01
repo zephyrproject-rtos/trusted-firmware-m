@@ -1,0 +1,7 @@
+purpose to read an asset into a named variable the set another asset from that variable;
+set sst name source;  // shorthand for random data
+read sst name source var transfer;
+set sst name intermediate var transfer;
+read sst name intermediate var transfer;
+set sst name destination var transfer;
+read sst name destination check transfer;

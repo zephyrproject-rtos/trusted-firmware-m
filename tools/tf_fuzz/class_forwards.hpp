@@ -13,8 +13,19 @@
 
 using namespace std;
 
+// find_or_create_asset.hpp:
+enum class asset_search;
+enum class psa_asset_usage;
+enum class psa_asset_search;
+enum class psa_asset_type;
+
 // data_blocks.hpp:
 class expect_info;
+class set_data_info;
+class asset_name_id_info;
+
+// variables.hpp:
+class variable_info;
 
 // template_line.hpp:
 class template_line;

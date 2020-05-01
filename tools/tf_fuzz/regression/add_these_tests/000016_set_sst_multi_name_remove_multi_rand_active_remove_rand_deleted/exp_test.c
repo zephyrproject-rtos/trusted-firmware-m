@@ -41,22 +41,22 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t president_data[] = "no new taxes";
-    int president_data_size = 12;
-    static uint8_t george_data[] = "no new taxes";
-    int george_data_size = 12;
-    static uint8_t herbert_data[] = "no new taxes";
-    int herbert_data_size = 12;
-    static uint8_t walker_data[] = "no new taxes";
-    int walker_data_size = 12;
-    static uint8_t bush_data[] = "no new taxes";
-    int bush_data_size = 12;
+    static uint8_t president_set_data[] = "no new taxes";
+    int president_set_length = 12;
+    static uint8_t george_set_data[] = "no new taxes";
+    int george_set_length = 12;
+    static uint8_t herbert_set_data[] = "no new taxes";
+    int herbert_set_length = 12;
+    static uint8_t walker_set_data[] = "no new taxes";
+    int walker_set_length = 12;
+    static uint8_t bush_set_data[] = "no new taxes";
+    int bush_set_length = 12;
 
 
     /* PSA calls to test: */
 
     /* Creating SST asset "president," with data "no new tax...". */
-    sst_status = psa_ps_set(4713, president_data_size, president_data,
+    sst_status = psa_ps_set(4713, president_set_length, president_set_data,
                             PSA_PS_FLAG_WRITE_ONCE);
     if (sst_status != PSA_PS_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_PS_SUCCESS, got #%d, (int) sst_status);
@@ -64,28 +64,28 @@ void test_thread (struct test_result_t *ret) {
     }
 
     /* Creating SST asset "george," with data "no new tax...". */
-    sst_status = psa_ps_set(5517, george_data_size, george_data, PSA_PS_FLAG_WRITE_ONCE);
+    sst_status = psa_ps_set(5517, george_set_length, george_data, PSA_PS_FLAG_WRITE_ONCE);
     if (sst_status != PSA_PS_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_PS_SUCCESS, got #%d, (int) sst_status);
         return;
     }
 
     /* Creating SST asset "herbert," with data "no new tax...". */
-    sst_status = psa_ps_set(4661, herbert_data_size, herbert_data, PSA_PS_FLAG_WRITE_ONCE);
+    sst_status = psa_ps_set(4661, herbert_set_length, herbert_data, PSA_PS_FLAG_WRITE_ONCE);
     if (sst_status != PSA_PS_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_PS_SUCCESS, got #%d, (int) sst_status);
         return;
     }
 
     /* Creating SST asset "walker," with data "no new tax...". */
-    sst_status = psa_ps_set(3441, walker_data_size, walker_data, PSA_PS_FLAG_WRITE_ONCE);
+    sst_status = psa_ps_set(3441, walker_set_length, walker_data, PSA_PS_FLAG_WRITE_ONCE);
     if (sst_status != PSA_PS_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_PS_SUCCESS, got #%d, (int) sst_status);
         return;
     }
 
     /* Creating SST asset "bush," with data "no new tax...". */
-    sst_status = psa_ps_set(5446, bush_data_size, bush_data, PSA_PS_FLAG_WRITE_ONCE);
+    sst_status = psa_ps_set(5446, bush_set_length, bush_data, PSA_PS_FLAG_WRITE_ONCE);
     if (sst_status != PSA_PS_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_PS_SUCCESS, got #%d, (int) sst_status);
         return;

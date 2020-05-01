@@ -23,6 +23,8 @@ class hash_call : public security_call
 public:
     // Data members:  // (low value in hiding these behind setters and getters)
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         /* Hash checks are different from the rest in that there's a single "call" --

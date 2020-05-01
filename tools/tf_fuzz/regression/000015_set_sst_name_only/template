@@ -1,0 +1,3 @@
+purpose to show that if you don't have say anything about data to randomize it;
+set sst name random;
+set sst name *;

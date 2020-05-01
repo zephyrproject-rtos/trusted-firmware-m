@@ -1,0 +1,7 @@
+purpose to read the value of a single asset multiple times;
+set sst name just_checking data *;
+// TF-Fuzz needs enhancements to correctly predict the "expect" values below:
+read sst name just_checking check "Not this" expect fail;
+read sst name just_checking check "Not this either" expect fail;
+read sst name just_checking check "No dice on this either" expect fail;
+read sst name just_checking print;

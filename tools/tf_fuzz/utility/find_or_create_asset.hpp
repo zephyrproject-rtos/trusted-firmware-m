@@ -8,6 +8,8 @@
 #ifndef FIND_OR_CREATE_ASSET_HPP
 #define FIND_OR_CREATE_ASSET_HPP
 
+using namespace std;
+
 /* This enum defines possible results when asked to find an existing, or create a
    new PSA asset. */
 enum class asset_search
@@ -15,7 +17,7 @@ enum class asset_search
     found_deleted,  // found as a previously-used, but now-unusable asset
     found_invalid,  // found as a previously-used, but now-unusable asset
     not_found,  // if not found and if not allowed to create it
-    created_new,  // no such existing asset was found so created new one
+    created_new,  // no such existing asset was found so created new, active asset
     unsuccessful,  // ran out of memory or whatever
     something_wrong  // something wrong with the code;  shouldn't happen
 };
@@ -37,7 +39,8 @@ enum class psa_asset_search
 enum class psa_asset_type
 {   sst,  // (pretty obvious what each of these mean)
     key,
-    policy
+    policy,
+    unknown
 };
 
 
@@ -72,13 +75,13 @@ asset_search generic_find_or_create_asset (
             psa_asset *pass = *as;
             switch (criterion) {
                 case psa_asset_search::name:  // human-meaningful name
-                    match = (pass->asset_id.get_name() == target_name);
+                    match = (pass->asset_info.get_name() == target_name);
                     break;
                 case psa_asset_search::id:  // ID#
-                    match = (pass->asset_id.id_n == target_id);
+                    match = (pass->asset_info.id_n == target_id);
                     break;
                 default:  // psa_asset_search::serial
-                    match = (pass->asset_ser_no == serial_no);
+                    match = (pass->asset_info.asset_ser_no == serial_no);
                     break;
             }
             if (match) {
@@ -94,18 +97,28 @@ asset_search generic_find_or_create_asset (
             psa_asset *pass = *as;
             switch (criterion) {
                 case psa_asset_search::name:  // human-meaningful name
-                    match = (pass->asset_id.get_name() == target_name);
+                    match = (pass->asset_info.get_name() == target_name);
                     break;
                 case psa_asset_search::id:  // ID#
-                    match = (pass->asset_id.id_n == target_id);
+                    match = (pass->asset_info.id_n == target_id);
                     break;
                 default:  // psa_asset_search::serial
-                    match = (pass->asset_ser_no == serial_no);
+                    match = (pass->asset_info.asset_ser_no == serial_no);
                     break;
             }
             if (match) {
                 asset = as;
-                return asset_search::found_deleted;
+                if (create_asset) {
+                    /* Asset previously existed, but has since been removed.  Resur-
+                       rect it into active assets, but zap its data: */
+                    pass->set_data.set("");
+                    pass->exp_data.data.assign("");
+                    deleted_asset_vector.erase (as);
+                    active_asset_vector.push_back (pass);
+                    return asset_search::found_active;  // it's active now anyway...
+                } else {
+                    return asset_search::found_deleted;
+                }
             }
         }
     }
@@ -116,13 +129,13 @@ asset_search generic_find_or_create_asset (
             psa_asset *pass = *as;
             switch (criterion) {
                 case psa_asset_search::name:  // human-meaningful name
-                    match = (pass->asset_id.get_name() == target_name);
+                    match = (pass->asset_info.get_name() == target_name);
                     break;
                 case psa_asset_search::id:  // ID#
-                    match = (pass->asset_id.id_n == target_id);
+                    match = (pass->asset_info.id_n == target_id);
                     break;
                 default:  // psa_asset_search::serial
-                    match = (pass->asset_ser_no == serial_no);
+                    match = (pass->asset_info.asset_ser_no == serial_no);
                     break;
             }
             if (match) {
@@ -136,7 +149,7 @@ asset_search generic_find_or_create_asset (
         try {
             new_asset = new ASSET_TYPE;
             if (criterion == psa_asset_search::id) {
-                new_asset->asset_id.id_n = target_id;
+                new_asset->asset_info.id_n = target_id;
             }  // TO DO:  probably should do the same for its name in a name search!
             active_asset_vector.push_back(new_asset);
             asset = prev(active_asset_vector.end());

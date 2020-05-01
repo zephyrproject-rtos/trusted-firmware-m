@@ -25,6 +25,7 @@
 #include "crypto_asset.hpp"
 #include "psa_call.hpp"
 #include "tf_fuzz_grammar.tab.hpp"
+#include "variables.hpp"
 
 
 extern FILE* yyin;  // telling lex&yacc which file to parse
@@ -79,7 +80,7 @@ asset_search tf_fuzz_info::find_or_create_policy_asset (
     uint64_t target_id,  // also ignored unless searching on ID (e.g., SST UID)
     long &serial_no,  // search by asset's unique serial number
     bool create_asset,  // true to create the asset if it doesn't exist
-    vector<psa_asset*>::iterator &asset  // returns iterator to requested asset
+    vector<psa_asset*>::iterator &asset  // iterator to requested asset
 ) {
     return generic_find_or_create_asset<policy_asset>(
                active_policy_asset, deleted_policy_asset,
@@ -121,6 +122,35 @@ asset_search tf_fuzz_info::find_or_create_psa_asset (
     }
 }
 
+// Return an iterator to a variable, if it exists.  If not return variable.end().
+vector<variable_info>::iterator tf_fuzz_info::find_var (string var_name)
+{
+    vector<variable_info>::iterator the_var;
+    if (variable.empty()) {
+        return variable.end();
+    }
+    for (the_var = variable.begin();  the_var < variable.end();  the_var++) {
+        if (the_var->name == var_name) {
+            break;
+        }
+    }
+    return the_var;
+}
+// Add a variable to the vector if not already there; return true if already there.
+bool tf_fuzz_info::make_var (string var_name)
+{
+    bool found = false;
+    variable_info new_variable;
+
+    found = (find_var (var_name) != variable.end());
+    if (!found) {
+        new_variable.name.assign (var_name);
+        variable.push_back (new_variable);
+    }
+    return found;
+}
+
+
 // Remove any PSA resources used in the test.  Returns success==true, fail==false.
 void tf_fuzz_info::teardown_test (void)
 {
@@ -128,7 +158,7 @@ void tf_fuzz_info::teardown_test (void)
     // Traverse through the SST-assets list, writing out remove commands:
     for (auto &asset : active_sst_asset) {
         call = bplate->bplate_string[teardown_sst];
-        find_replace_1st ("$uid", to_string(asset->asset_id.id_n), call);
+        find_replace_1st ("$uid", to_string(asset->asset_info.id_n), call);
         call.append (bplate->bplate_string[teardown_sst_check]);
         output_C_file << call;
     }
@@ -192,8 +222,45 @@ void tf_fuzz_info::write_test (void)
 }
 
 
-/* Parse command-line parameters.  exit() if error(s) found.  Place results
-   into resource object. */
+/* simulate_calls() goes through the vector of generated calls calculating expected
+   results for each. */
+void tf_fuzz_info::simulate_calls (void)
+{
+    bool asset_state_changed = false;
+
+    /* For now, much of the simulation "thinking" infrastructure is here for future
+       elaboration.  The algorithm is to through each call one by one, copying
+       information to the asset in question.  Then each currently-active asset is
+       allowed to react to that information until they all agree that they're
+       "quiescent."  Finally, result information is copied from the asset back to
+       the call. */
+    for (auto this_call : calls) {
+        this_call->copy_call_to_asset();
+           /* Note:  this_call->the_asset will now point to the asset
+                     associated with this_call, if any such asset exists. */
+        if (this_call->asset_info.the_asset != nullptr) {
+            /* If the asset exists, allow changes to it to affect other active
+               assets. */
+            asset_state_changed = false;
+            do {
+               for (auto this_asset : active_sst_asset) {
+                   asset_state_changed |= this_asset->simulate();
+               }
+               for (auto this_asset : active_policy_asset) {
+                   asset_state_changed |= this_asset->simulate();
+               }
+               for (auto this_asset : active_key_asset) {
+                   asset_state_changed |= this_asset->simulate();
+               }
+            } while (asset_state_changed);
+        }
+        this_call->copy_asset_to_call();
+    }
+}
+
+
+/* Parse command-line parameters.  exit() if error(s) found.  Place results into
+   the resource object. */
 void tf_fuzz_info::parse_cmd_line_params (int argc, char* argv[])
 {
     int exit_val = 0;  // the linux return value, default 0, meaning all-good
@@ -346,6 +413,10 @@ int main(int argc, char* argv[])
     } else if (parse_result == 2) {
         cerr << "\nError:  Sorry, TF-Fuzz ran out of memory." << endl;
     }
+    cout << "Call sequence generated." << endl;
+
+    cout << "Simulating call sequence..." << endl;
+    rsrc->simulate_calls();
 
     cout << "Writing test file, " << rsrc->test_output_file_name << "." << endl;
     rsrc->write_test();

@@ -25,17 +25,15 @@
 
 using namespace std;
 
-/* class tf_fuzz_info mostly just groups together everything needed to gather, then
-   write out the test.  This, so that they can be passed into the parser. */
-
+// class tf_fuzz_info mostly just groups together everything needed generate the test.
 class tf_fuzz_info
 {
-    /* In creating a test, TF-Fuzz collects together a vector of strings cataloging
-       data structures used by PSA commands, and a vector of PSA call objects.  Once
-       the template is completely parsed, write_test() writes it all out.  The
+    /* In creating a test, TF-Fuzz parses the test template, creating a vector of
+       PSA-call-tracker objects.  TF-Fuzz then performs a simulation of those calls
+       -- simulation only in enough detail to predict expected results of those PSA
+       calls. After that simulation phase, write_test() writes it all out.  The
        process of creating these structures also requires the boilerplate text
-       strings.  In the process of building the test, it must track PSA assets to
-       "model" expected results of calls. */
+       strings. */
 
 public:
     // Data members (this class is mostly just to group stuff together, so public):
@@ -57,7 +55,16 @@ public:
         vector<psa_asset*> active_policy_asset;  // list of known, usable policies
         vector<psa_asset*> deleted_policy_asset;  // deleted policies
         vector<psa_asset*> invalid_policy_asset;  // policies with invalid attrs
-        string test_purpose;  // one text substitution to be performed at the top level
+        /* The "variable" vector tracks variables in the generated code.  Actually,
+           it tracks variables explicitly named in the test template, and actual-data
+           holder variables from reading an asset.  It does not track asset set-data
+           or asset expect-data variables, because there are multiple versions of
+           those, and it's easier to just to "count off" those multiple versions.
+           Notice that, unlike the above vectors, the variable vector is not a
+           vector of pointers to variable_info objects, but of the objects themselves.
+           This is because polymorphism is not of concern here. */
+        vector<variable_info> variable;
+        string test_purpose;  // what the test tests
         long rand_seed;  // the original random seed, whether passed in or defaulted
         string template_file_name, test_output_file_name;
         FILE *template_file;
@@ -82,7 +89,7 @@ public:
             psa_asset_search criterion,  // what to search on
             psa_asset_usage where,  // where to search
             string target_name,  // ignored if not searching on name
-            uint64_t target_id,  // also ignored if not searching on ID (e.g., SST UID)
+            uint64_t target_id,  // ignored if not searching on ID (e.g., SST UID)
             long &serial_no,  // search by asset's unique serial number
             bool create_asset,  // true to create the asset if it doesn't exist
             vector<psa_asset*>:: iterator &asset  // returns iterator to asset
@@ -106,8 +113,12 @@ public:
             bool create_asset,  // true to create the asset if it doesn't exist
             vector<psa_asset*>::iterator &asset  // returns iterator to asset
         );
+        vector<variable_info>::iterator find_var (string var_name);
+        bool make_var (string var_name);
         void teardown_test(void);  // removes any PSA resources used in the test
-        void write_test (void);  // returns success==true, fail==false
+        void simulate_calls (void);
+            // goes through generated calls calculating expected results
+        void write_test (void);  // writes out the test's .c file
         void parse_cmd_line_params (int argc, char* argv[]);
             // parse command-line parameters, and open files
         tf_fuzz_info (void);  // (constructor)
@@ -142,7 +153,7 @@ void define_call (set_data_info set_data, bool random_data, bool fill_in_templat
     if (fill_in_template) {
         if (set_data.literal_data_not_file) {
             if (random_data) {
-                int rand_data_length = 10 + (rand() % 800);
+                int rand_data_length = 12 + (rand() % 800);
                 gib.sentence (gib_buff, gib_buff + rand_data_length - 1);
                 t_string = gib_buff;
                 temLin->set_data.set_calculated (t_string);
@@ -158,15 +169,10 @@ void define_call (set_data_info set_data, bool random_data, bool fill_in_templat
         }
     }
     if (create_call) {
-        if (temLin->how_asset_found == asset_search::unsuccessful) {
-            cerr << "Error:  Tool-internal:  Please report error "
-                 << "#401 to the TF-Fuzz developers." << endl;
-            exit(401);
-        }
         the_call = new CALL_TYPE (rsrc, temLin->call_ser_no,
-                                  temLin->how_asset_found);
-        rsrc->calls.push_back(the_call);  /* (note: this is not a memory leak!) */
-        temLin->copy_template_to_asset();
+                                  temLin->asset_info.how_asset_found);
+        rsrc->calls.push_back(the_call);  // (note: this is not a memory leak!)
+//        temLin->copy_template_to_asset();  TODO:  Remove this "note-to-self" comment
         if (!temLin->copy_template_to_call()) {
             cerr << "Error:  Tool-internal:  Please report error "
                  << "#402 to the TF-Fuzz developers." << endl;

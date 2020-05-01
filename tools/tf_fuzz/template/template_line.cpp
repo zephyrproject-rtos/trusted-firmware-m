@@ -5,12 +5,11 @@
  *
  */
 
- /* Objects of these types are new()ed as a test-template line is parsed, and are
-    resolved to be the type of template command stated -- "create a key," "remove
-    an SST asset," or similar.  Parameters of the template line are parsed into
-    the object's members, where specified, but those members are randomized upon
-    construction.  Thus, any parameters not "nailed down," get randomized.
- */
+/* Objects typed to subclasses of the these classes are constructed and filled in by
+   the parser as it parses test-template lines.  There is not necessarily a one-to-one
+   correspondence between the template lines and either the PSA commands generated nor
+   PSA assets they manipulate.  PSA assets (which persist through the test) and PSA
+   commands are therefore tracked in separate objects, but referenced here. */
 
 #include <vector>
 #include <algorithm>  // for STL find()
@@ -59,8 +58,10 @@ template_line::template_line (tf_fuzz_info *resources) : test_state(resources)
 template_line::~template_line (void)
 {
     // Destruct the vectors of asset names/IDs:
-    asset_id.asset_name_vector.erase (asset_id.asset_name_vector.begin(), asset_id.asset_name_vector.end());
-    asset_id.asset_id_n_vector.erase (asset_id.asset_id_n_vector.begin(), asset_id.asset_id_n_vector.end());
+    asset_info.asset_name_vector.erase (asset_info.asset_name_vector.begin(),
+                                        asset_info.asset_name_vector.end());
+    asset_info.asset_id_n_vector.erase (asset_info.asset_id_n_vector.begin(),
+                                        asset_info.asset_id_n_vector.end());
 }
 
 // (Default constructor not used)
@@ -74,10 +75,36 @@ template_line::~template_line (void)
    Methods of class sst_template_line follow:
 **********************************************************************************/
 
-sst_template_line::sst_template_line (tf_fuzz_info *resources) : template_line (resources)
+// (Currently, no need to specialize copy_template_to_call() for individual SST ops.)
+bool sst_template_line::copy_template_to_call (void)
 {
-    asset_type = psa_asset_type::sst;
-    return;  // just to have something to pin a breakpoint onto
+    for (auto call : test_state->calls) {
+        if (call->call_ser_no == call_ser_no) {
+            // Copy asset info to call object for creation code:
+            call->asset_info = asset_info;
+            call->set_data = set_data;
+            call->set_data.string_specified =   set_data.string_specified
+                                             || set_data.random_data;
+                // not really right, but more convenient to combine these two cases
+            call->assign_data_var_specified = assign_data_var_specified;
+            call->assign_data_var = assign_data_var;
+            call->random_asset = random_asset;
+            call->flags_string = flags_string;
+            call->exp_data = expect;
+            call->exp_data.pf_info_incomplete = true;
+            call->id_string = asset_name;  // data = expected
+            call->print_data = print_data;
+            call->hash_data = hash_data;
+            return true;
+        }
+    }
+    return false;  // somehow didn't find it the call.
+}
+
+sst_template_line::sst_template_line (tf_fuzz_info *resources)
+                                          : template_line (resources)
+{
+    asset_info.asset_type = psa_asset_type::sst;
 }
 
 // Default destructor:
@@ -100,12 +127,13 @@ sst_template_line::~sst_template_line (void)
    Methods of class key_template_line follow:
 **********************************************************************************/
 
-key_template_line::key_template_line (tf_fuzz_info *resources) : template_line (resources)
+key_template_line::key_template_line (tf_fuzz_info *resources)
+                                          : template_line (resources)
 {
     // Note:  Similar random initialization for asset and template
     // Randomize handle:
     // TODO:  Key handles appear to be a lot more complex a question than the below
-    asset_type = psa_asset_type::key;
+    asset_info.asset_type = psa_asset_type::key;
     string wrong_data;  // holder for random data to be overwritten
     gibberish *gib = new gibberish;
     handle_str = gib->word (false, const_cast<char*>(wrong_data.c_str()),
@@ -151,7 +179,7 @@ key_template_line::~key_template_line (void)
 policy_template_line::policy_template_line (tf_fuzz_info *resources)
             : template_line (resources)
 {
-    asset_type = psa_asset_type::policy;
+    asset_info.asset_type = psa_asset_type::policy;
     // Randomize key-policy usage and algorithm:
     policy_usage = rand_key_usage();
     policy_algorithm = rand_key_algorithm();

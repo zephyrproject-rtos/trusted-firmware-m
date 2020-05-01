@@ -43,6 +43,7 @@ expect_info::expect_info (void)  // (default constructor)
     data_specified = false;
     data.assign ("");
     pf_info_incomplete = true;
+    n_exp_vars = -1;  // so the first reference is 0 (no suffix), then _1, _2, ...
 }
 expect_info::~expect_info (void)  // (destructor)
 {}
@@ -68,17 +69,17 @@ void expect_info::set_pf_error (string error)
     pf_pass = pf_nothing = false;
 }
 
-/* What the call expects is not available from the parser until the call has already
-   been created.  The flag, pf_info_incomplete, that indicates whether or not the
-   "expects" information has been filled in  If not, fill it in from the template,
+/* The expected pass/fail results are not available from the parser until the call has
+   already been created.  The flag, pf_info_incomplete, that indicates whether or not
+   the "expects" information has been filled in.  If not, fill it in from the template,
    once that info has been parsed. */
 void expect_info::copy_expect_to_call (psa_call *the_call)
 {
-    the_call->expect.pf_nothing = pf_nothing;
-    the_call->expect.pf_pass = pf_pass;
-    the_call->expect.pf_specified = pf_specified;
-    the_call->expect.pf_result_string = pf_result_string;
-    the_call->expect.pf_info_incomplete = false;
+    the_call->exp_data.pf_nothing = pf_nothing;
+    the_call->exp_data.pf_pass = pf_pass;
+    the_call->exp_data.pf_specified = pf_specified;
+    the_call->exp_data.pf_result_string = pf_result_string;
+    the_call->exp_data.pf_info_incomplete = false;
 }
 
 /**********************************************************************************
@@ -98,6 +99,7 @@ set_data_info::set_data_info (void)  // (default constructor)
     random_data = false;
     file_specified = false;
     file_path.assign ("");
+    n_set_vars = -1;  // so the first reference is 0 (no suffix), then _1, _2, ...
 }
 set_data_info::~set_data_info (void)  // (destructor)
 {}
@@ -129,6 +131,27 @@ void set_data_info::set_calculated (string set_val)
     literal_data_not_file = true;  // currently, not using files as data sources
     string_specified = false;
     data.assign (set_val);
+}
+
+/* randomize() establishes:
+   *  An asset's data value as *not* taken from a template line, and
+   *  *That* such a value was randomized.
+   Arguably, this method "has side effects," in that it not only sets a value, but
+   also "takes notes" about where that value came from.
+*/
+void set_data_info::randomize (void)
+{
+    gibberish gib;
+    char gib_buff[4096];  // spew gibberish into here
+    int rand_data_length = 0;
+
+    string_specified = false;
+    random_data = true;
+    literal_data_not_file = true;
+    rand_data_length = 40 + (rand() % 256);
+        /* Note:  Multiple assets do get different random data */
+    gib.sentence (gib_buff, gib_buff + rand_data_length - 1);
+    data = gib_buff;
 }
 
 /* Getter for protected member, data.  Protected so that it can only be set by
@@ -171,6 +194,8 @@ asset_name_id_info::asset_name_id_info (void)  // (default constructor)
     id_n_specified = name_specified = false;  // no ID info yet
     asset_name_vector.clear();
     asset_id_n_vector.clear();
+    asset_type = psa_asset_type::unknown;
+    the_asset = nullptr;
 }
 asset_name_id_info::~asset_name_id_info (void)
 {
@@ -230,9 +255,25 @@ void asset_name_id_info::set_id_n (uint64_t set_val)
 }
 
 // Create ID-based name:
-string asset_name_id_info::make_id_n_based_name (uint64_t id_n, string &name)
+string asset_name_id_info::make_id_n_based_name (uint64_t id_n)
 {
-    string result = "SST_ID_";
+    string result;
+
+    switch (asset_type) {
+        case psa_asset_type::sst:
+            result = "SST_ID_";
+            break;
+        case psa_asset_type::key:
+            result = "Key_ID_";
+            break;
+        case psa_asset_type::policy:
+            result = "Policy_ID_";
+            break;
+        default:
+            cerr << "\nError:  Tool-internal:  Please report error "
+                 << "#1223 to the TF-Fuzz developers." << endl;
+            exit(1223);
+    }
     result.append(to_string(id_n));
     return result;
 }

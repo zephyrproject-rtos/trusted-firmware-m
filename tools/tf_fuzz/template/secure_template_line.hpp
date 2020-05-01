@@ -6,9 +6,9 @@
  */
 
 /* Objects typed to subclasses of the these classes are constructed and filled in
-   by the parser as it parses the template.  Although these objects do fairly
-   closely correspond to template lines, there's no real correlation to lines in
-   the generated code. */
+   by the parser as it parses the test template.  Although these objects do largely
+   correspond to template lines, there's no real correlation to lines in the
+   generated code. */
 
 #ifndef SECURE_TEMPLATE_LINE_HPP
 #define SECURE_TEMPLATE_LINE_HPP
@@ -42,7 +42,6 @@ public:
             define_call<hash_call> (set_data, random_data,
                             fill_in_template, create_call, temLin, rsrc);
         }
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         security_hash_template_line (tf_fuzz_info *resources);  // (constructor)
         ~security_hash_template_line (void);

@@ -44,15 +44,15 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t SST_ID_104_data[] = "Very simple test";
-    static int SST_ID_104_data_size = 16;
+    static uint8_t SST_ID_104_set_data[] = "Very simple test";
+    static uint32_t SST_ID_104_set_length = 16;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset UID = 104 with data "Very simpl...". */
-    sst_status = psa_ps_set(104, SST_ID_104_data_size, SST_ID_104_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 104 with data "Very simpl...". \*/
+    sst_status = psa_ps_set(104, SST_ID_104_set_length, SST_ID_104_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;

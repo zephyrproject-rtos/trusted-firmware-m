@@ -153,7 +153,7 @@ void gibberish::sentence (char *string_ptr, char *stop)
             *parser++ = ' ';
         }
     }
-    parser--;  
+    parser--;
     if (*parser == ' ') {
         *parser = vowel();  // just to not have a blank at the end
     }

@@ -44,20 +44,20 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t forecast_data[] = "sunny with a 30% chance of weather!";
-    static int forecast_data_size = 35;
+    static uint8_t forecast_set_data[] = "sunny with a 30% chance of weather!";
+    static uint32_t forecast_set_length = 35;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "forecast," with data "sunny with...". */
-    sst_status = psa_ps_set(@@@001@@@, forecast_data_size, forecast_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "forecast," with data "sunny with...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, forecast_set_length, forecast_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     /* (No checks for this PSA call.) */
 
 
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

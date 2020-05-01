@@ -44,15 +44,15 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t gibberish_data[] = "@@002@10@@********";
-    static int gibberish_data_size = \d+;
+    static uint8_t gibberish_set_data\[\] = "@@002@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t gibberish_set_length = \d+;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "gibberish," with data "@@002@10@@...". */
-    sst_status = psa_ps_set(@@@001@@@, gibberish_data_size, gibberish_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "gibberish," with data "@@002@10@@...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, gibberish_set_length, gibberish_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
@@ -60,7 +60,7 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

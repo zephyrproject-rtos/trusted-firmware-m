@@ -30,7 +30,7 @@ bool sst_asset::set_uid (uint64_t uid)
     /* TODO:  What are the limits upon UIDs?  I don't necessarily not want to be
               able to set an illegal value, but if it is illegal, I might want to
               set some flag appropriately to generate expected results. */
-    asset_id.set_id_n (uid);
+    asset_info.set_id_n (uid);
     return true;
 }
 

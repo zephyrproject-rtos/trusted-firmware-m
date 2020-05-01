@@ -28,20 +28,28 @@ public:
                on-going, real-time asset data value than about *setting* its data
                value.  On a template_line or a psa_call, it's about setting its
                value at one particular time. */
-        asset_name_id_info asset_id;  // everything about the asset(s) for this line
+        expect_info exp_data;
+            /* For now at least, this is here only for its n_exp_vars member, to
+               keep track of how many expected-data variables in the test. */
+        asset_name_id_info asset_info;  // everything about the asset(s) for this line
         vector<int> template_ref;
             // list of template line #s that reference this asset
         vector<psa_call> call_ref;  // list of PSA calls that reference this asset
         string handle_str;  // the text name of the key's "handle"
         string flags_string;  // creation flags
-        long asset_ser_no;
-            // unique serial# for this psa_asset; see note in tf_fuzz.hpp
         bool asset_name_specified;
             /* true if the template specified the asset_name, as opposed to us
                having inferred it. */
     // Methods:
         void set_name (string set_val);
         string get_name (void);
+        virtual bool simulate (void);
+            /* simulate() tells this asset to react to its current state information.
+               Initially, this won't really do much, but will allow assets to react
+               to each other, if that is relevant.  It returns true if anything
+               in the state of the asset changed, in which case all assets' simulate()
+               methods will be invoked again to react again.  That will repeat until
+               all assets read a quiescent state. */
         psa_asset();  // (constructor)
         ~psa_asset();
 

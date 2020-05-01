@@ -1,4 +1,4 @@
-purpose to dump to a variable or to the log;
+purpose to check against a variable or dump into the log;
 set sst name greebledorf data *;
 read sst name greebledorf check a_variable;
 read sst name greebledorf print;

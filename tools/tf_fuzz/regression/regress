@@ -6,13 +6,17 @@ echo
 echo TF-Fuzz Regression Testing
 echo
 for reg_test in `ls -F | grep \/$ | grep -v add_these_tests | grep -v regress_lib`; do
+    echo
     echo Running "$reg_test"...
     cd $reg_test
     rm -f test.c stdout_stderr
-    ../../tfz -v ./template test.c >stdout_stderr 2>&1
-    rm -f diff_stdout_stderr diff_test.c
-    diff stdout_stderr exp_stdout_stderr >diff_stdout_stderr
-    diff test.c exp_test.c >diff_test.c
-    python ./check.py diff_stdout_stderr diff_test.c stdout_stderr
+    python3 check.py --q template exp_stdout_stderr stdout_stderr exp_test.c test.c
+    if test $? -ne 0
+    then
+        exit
+    fi
     cd ..
 done
+echo
+echo
+echo All TF-Fuzz regression tests passed.

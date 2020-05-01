@@ -166,7 +166,8 @@ void test_thread (struct test_result_t *ret) {
         return;
     }
     /* Check that the data is correct */
-    if (tfm_memcmp($act_data, $exp_data, $length) != 0) {
+    if (tfm_memcmp($act_data, $exp_data,
+                   $length) != 0) {
         TEST_FAIL("Read data should be equal to result data");
         return;
     }

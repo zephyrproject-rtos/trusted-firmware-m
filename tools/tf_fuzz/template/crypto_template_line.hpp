@@ -26,7 +26,6 @@ class set_policy_template_line : public policy_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                             bool fill_in_template, bool create_call,
@@ -52,7 +51,6 @@ class read_policy_template_line : public policy_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                             bool fill_in_template, bool create_call,
@@ -78,7 +76,6 @@ class set_key_template_line : public key_template_line
 public:
    // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                          bool fill_in_template, bool create_call,
@@ -103,7 +100,6 @@ class remove_key_template_line : public key_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                          bool fill_in_template, bool create_call,
@@ -128,7 +124,6 @@ class read_key_template_line : public key_template_line
 public:
     // Data members:
     // Methods:
-        bool copy_template_to_asset (void);
         bool copy_template_to_call (void);
         void setup_call (set_data_info set_info, bool random_data,
                          bool fill_in_template, bool create_call,

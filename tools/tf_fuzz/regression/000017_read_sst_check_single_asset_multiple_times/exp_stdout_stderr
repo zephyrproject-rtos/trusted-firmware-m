@@ -1,0 +1,56 @@
+Trusted Firmware Fuzzer (TF-Fuzz) starting...
+
+Info:  random seed was not specified.
+
+Using seed value of \d+ \(0x[a-f\d]+\).
+Purpose line:  to read the value of a single asset multiple times
+ASSET_IDENTIFIER:  "just_checking"
+SST-asset identifier list:  "data"
+SST-create from random data
+Set SST command:  "*"
+Set command:  "*"
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "just_checking"
+SST-asset identifier list:  "check"
+LITERAL:  "Not this"
+SST-read check against literal:  "Not this"
+Read SST command:  ""Not this""
+Read command:  ""Not this""
+IDENTIFIER:  "fail"
+Expect error clause:  "fail"
+Command with expect:  ";"
+ASSET_IDENTIFIER:  "just_checking"
+SST-asset identifier list:  "check"
+LITERAL:  "Not this either"
+SST-read check against literal:  "Not this either"
+Read SST command:  ""Not this either""
+Read command:  ""Not this either""
+IDENTIFIER:  "fail"
+Expect error clause:  "fail"
+Command with expect:  ";"
+ASSET_IDENTIFIER:  "just_checking"
+SST-asset identifier list:  "check"
+LITERAL:  "No dice on this either"
+SST-read check against literal:  "No dice on this either"
+Read SST command:  ""No dice on this either""
+Read command:  ""No dice on this either""
+IDENTIFIER:  "fail"
+Expect error clause:  "fail"
+Command with expect:  ";"
+ASSET_IDENTIFIER:  "just_checking"
+SST-asset identifier list:  "print"
+SST-read log to test log:  "print"
+Read SST command:  "print"
+Read command:  "print"
+Command with no expect:  ";"
+Lines:  Line number 8.
+Lines:  Line number 8.
+Lines:  Line number 8.
+Lines:  Line number 8.
+Lines:  Line number 8.
+Lines:  Line number 8.
+Call sequence generated.
+Simulating call sequence...
+Writing test file, ./test.c.
+
+TF-Fuzz test generation complete.

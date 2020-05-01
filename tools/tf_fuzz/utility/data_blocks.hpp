@@ -39,23 +39,24 @@ class expect_info
 {
 public:
     // Data members:
+        // Expected-result info:
         bool pf_nothing;  // true to not generate results-check(s)
         bool pf_pass;  // if !expect.pf_nothing, then pass is expected
         bool pf_specified;
             /* if !pf_nothing && !pf_pass, then
                true == expected result was specified
-               false == tf_fuzz must model expected result */
-        bool data_specified;  // (literal data specified)
-        string data;  // expected data from reading an asset
-        bool data_var_specified;
+               false == tf_fuzz must model expected result, and
+               pf_result_string is the expected result */
+        string pf_result_string;
+        bool data_specified;  // (literal expected data specified)
+        string data;  // what test template expects data from reading an asset to be
+        int n_exp_vars;  // how many check-value variables have been created
+        bool data_var_specified;  // check against a variable
         string data_var;  // name of variable containing expected data
         bool pf_info_incomplete;
             /* In parsing the template, the expect information comes later than the
-               rest of the call info.  This flag tells us to fill in the expect
-               info when it comes available. */
-        // Expected-result info:
-        string pf_result_string;
-            // if !pf_nothing && !pf_pass then this is expected result
+               rest of the call info.  This flag tells us to fill in the pass/fail
+               expect info when it comes available. */
     // Methods:
         expect_info (void);  // (default constructor)
         ~expect_info (void);  // (destructor)
@@ -89,12 +90,14 @@ public:
         bool file_specified;  // true if a file of expected data was specified
         bool literal_data_not_file;
             // true to use data strings rather than files as data source
+        int n_set_vars;  // how many implicit set variables have been created
         string file_path;  // path to file, if specified
     // Methods:
         set_data_info (void);  // (default constructor)
         ~set_data_info (void);  // (destructor)
         void set (string set_val);
         void set_calculated (string set_val);
+        void randomize (void);
         string get (void);
         bool set_file (string file_name);
 
@@ -113,14 +116,22 @@ class asset_name_id_info
 {
 public:
     // Data members (not much value in "hiding" these behind getters)
+        psa_asset *the_asset;
+        psa_asset_type asset_type;  // SST vs. key vs. policy (etc.)
         bool id_n_not_name;  // true to create a PSA asset by ID
         bool name_specified;  // true iff template supplied human name
         bool id_n_specified;  // true iff template supplied ID #
         vector<string> asset_name_vector;
         vector<int> asset_id_n_vector;
+        long asset_ser_no;  // unique ID for psa asset needed to find data string
+            /* Note:  The original theory is that we can't save away iterators to
+                      assets, because STL vectors could get relocated.  However,
+                      we've switched over to lists, which don't get moved around, so
+                      we should be safe now. */
+        asset_search how_asset_found;
         uint64_t id_n;  // asset ID# (e.g., SST UID).
-            /* Note:  This is just a holder to pass ID from template-line to call.
-                      The IDs for a given template line are in asset_id.asset_id_n_vector. */
+            /* Note:  This is just a holder to pass ID from template-line to call.  The
+               IDs for a given template line are in asset_info.asset_id_n_vector. */
     // Methods:
         asset_name_id_info (void);  // (default constructor)
         ~asset_name_id_info (void);  // (destructor)
@@ -130,7 +141,7 @@ public:
         string get_name (void);
         void set_id_n (string set_val);
         void set_id_n (uint64_t set_val);
-        string make_id_n_based_name (uint64_t id_n, string &name);
+        string make_id_n_based_name (uint64_t id_n);
             // create UID-based asset name
 
 protected:

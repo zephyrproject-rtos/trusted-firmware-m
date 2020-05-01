@@ -7,7 +7,7 @@
 
 /*
  * Test purpose:
- *     to show that TF-Fuzz can infer results
+ *     to show that TF-Fuzz can \"infer\" \"results\"
  *
  */
 
@@ -40,19 +40,19 @@ void test_thread (struct test_result_t *ret) {
         return;
     }
 
-    TEST_LOG("Test to show that TF-Fuzz can infer results");
+    TEST_LOG("Test to show that TF-Fuzz can \"infer\" \"results\"");
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t jonathan_data[] = "I am the man";
-    static int jonathan_data_size = 12;
+    static uint8_t jonathan_set_data[] = "I am the man";
+    static uint32_t jonathan_set_length = 12;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "jonathan," with data "I am the m...". */
-    sst_status = psa_ps_set(@@@001@@@, jonathan_data_size, jonathan_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "jonathan," with data "I am the m...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, jonathan_set_length, jonathan_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
@@ -60,7 +60,7 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

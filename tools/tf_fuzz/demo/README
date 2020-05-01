@@ -1,17 +1,9 @@
-.../tf_fuzz/demo directory contents:
+This directory contains some example usages of TF-Fuzz, in a form that makes it
+easy to run each case and quickly see the results.
 
-1  10  11  12  13  14  15  16  17  18  19  2  3  4  5  6  7  8  9  r
+For more information, please browse to:
 
---------------------------------------------------------------------------------
-
-The numbered files are test-template files -- input to TF-Fuzz -- for demon-
-strating what it can do.
-
-The "r" shell script is designed to make it quick and easy to run the demo
-tests one by one:  just type "r 5" for example.
-
-The initial, "purpose" line in each numbered file briefly describes what that
-file demonstrates.
+    https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/user_guides/tf_fuzz/demo_dir.html
 
 --------------
 

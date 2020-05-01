@@ -1,13 +1,9 @@
-.../tf_fuzz/template directory contents:
-
-crypto_template_line.cpp  secure_template_line.hpp  template_line.cpp
-crypto_template_line.hpp  sst_template_line.cpp     template_line.hpp
-secure_template_line.cpp  sst_template_line.hpp
-
---------------------------------------------------------------------------------
-
 These classes describe "tracker" objects for parsing test templates, and for
 generating PSA calls from them.
+
+For more information, please browse to:
+
+    https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/user_guides/tf_fuzz/template_dir.html
 
 --------------
 

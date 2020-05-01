@@ -1,14 +1,10 @@
-.../tf_fuzz/utility directory contents:
+As its name implies, this .../tf_fuzz/utility directory just contains
+various utility-compute code.
 
-compute.cpp      find_or_create_asset.hpp  randomization.cpp  string_ops.hpp
-compute.hpp      gibberish.cpp             randomization.hpp
-data_blocks.cpp  gibberish.hpp             Source.cpp
-data_blocks.hpp  interactive.c             string_ops.cpp
 
---------------------------------------------------------------------------------
+For more information, please browse to:
 
-As its name implies, this .../utility directory just contains various utility-
-compute "stuff."
+    https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/user_guides/tf_fuzz/utility_dir.html
 
 --------------
 

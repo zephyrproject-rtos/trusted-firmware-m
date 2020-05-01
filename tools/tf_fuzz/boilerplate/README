@@ -1,16 +1,9 @@
-.../tf_fuzz/boilerplate directory contents:
-
-boilerplate.cpp  boilerplate.hpp
-
---------------------------------------------------------------------------------
-
 These are the C++ code to work with the customizable, "boilerplate" code
-snippets in the .../lib directory.  Actually, mostly what this code does is
-read these code snippets into an STL vector of, essentially, named strings.
+snippets in the .../lib directory.  
 
-This is currently implemented as a vector of strings, with a parallel vector
-of const int array-index names.  A much better way, in hindsight, to manage
-the boilerplate code is in an STL "map" container.
+For more information, please browse to:
+
+    https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/user_guides/tf_fuzz/boilerplate_dir.html
 
 --------------
 

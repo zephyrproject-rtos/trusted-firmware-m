@@ -41,6 +41,8 @@ Lines:  Line number 7.
 Lines:  Line number 7.
 Lines:  Line number 7.
 Lines:  Line number 7.
-Writing test file, test.c.
+Call sequence generated.
+Simulating call sequence...
+Writing test file, ./test.c.
 
 TF-Fuzz test generation complete.

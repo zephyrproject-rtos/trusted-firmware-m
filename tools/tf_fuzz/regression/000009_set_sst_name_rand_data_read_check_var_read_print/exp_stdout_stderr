@@ -3,7 +3,7 @@ Trusted Firmware Fuzzer (TF-Fuzz) starting...
 Info:  random seed was not specified.
 
 Using seed value of \d+ \(0x[a-f\d]+\).
-Purpose line:  to dump to a variable or to the log
+Purpose line:  to check against a variable or dump into the log
 ASSET_IDENTIFIER:  "greebledorf"
 SST-asset identifier list:  "data"
 SST-create from random data
@@ -28,6 +28,8 @@ Lines:  Line number 5.
 Lines:  Line number 5.
 Lines:  Line number 5.
 Lines:  Line number 5.
-Writing test file, test.c.
+Call sequence generated.
+Simulating call sequence...
+Writing test file, ./test.c.
 
 TF-Fuzz test generation complete.

@@ -44,15 +44,15 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t @@@003@@@_data[] = "@@002@10@@********";
-    static int @@@003@@@_data_size = \d+;
+    static uint8_t @@@003@@@_set_data\[\] = "@@002@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t @@@003@@@_set_length = \d+;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "@@@003@@@," with data "@@002@10@@...". */
-    sst_status = psa_ps_set(@@@001@@@, @@@003@@@_data_size, @@@003@@@_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "@@@003@@@," with data "@@002@10@@...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, @@@003@@@_set_length, @@@003@@@_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
@@ -60,7 +60,7 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

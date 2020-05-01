@@ -28,6 +28,8 @@ public:
         string policy_usage;
         string policy_algorithm;
     // Methods:
+        vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
+                                                    psa_asset_usage where);
         policy_call (tf_fuzz_info *test_state, long &asset_ser_no,
                     asset_search how_asset_found);  // (constructor)
         ~policy_call (void);
@@ -54,6 +56,8 @@ public:
         string expected_n_bits;
            // for get_key_info call (possibly others) exected key size in bits
     // Methods:
+        vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
+                                                    psa_asset_usage where);
         key_call (tf_fuzz_info *test_state, long &asset_ser_no,
                     asset_search how_asset_found);  // (constructor)
         ~key_call (void);
@@ -74,6 +78,8 @@ class policy_set_call : public policy_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         policy_set_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -95,6 +101,8 @@ class policy_get_call : public policy_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         policy_get_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -117,6 +125,8 @@ class set_key_call : public key_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         set_key_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -138,6 +148,8 @@ class get_key_info_call : public key_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         get_key_info_call (tf_fuzz_info *test_state, long &asset_ser_no,
@@ -159,6 +171,8 @@ class destroy_key_call : public key_call
 public:
     // Data members:
     // Methods:
+        bool copy_call_to_asset (void);
+        bool copy_asset_to_call (void);
         void fill_in_prep_code (void);
         void fill_in_command (void);
         destroy_key_call (tf_fuzz_info *test_state, long &asset_ser_no,

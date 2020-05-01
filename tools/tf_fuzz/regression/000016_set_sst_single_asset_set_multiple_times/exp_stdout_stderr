@@ -1,0 +1,50 @@
+Trusted Firmware Fuzzer (TF-Fuzz) starting...
+
+Info:  random seed was not specified.
+
+Using seed value of \d+ \(0x[a-f\d]+\).
+Purpose line:  to assign a sequence of values to a single asset
+ASSET_IDENTIFIER:  "indecisive"
+SST-asset identifier list:  "data"
+LITERAL:  "First value"
+SST-create from literal data:  ""First value""
+Set SST command:  ""First value""
+Set command:  ""First value""
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "indecisive"
+SST-asset identifier list:  "data"
+LITERAL:  "Second value"
+SST-create from literal data:  ""Second value""
+Set SST command:  ""Second value""
+Set command:  ""Second value""
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "indecisive"
+SST-asset identifier list:  "data"
+SST-create from random data
+Set SST command:  "*"
+Set command:  "*"
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "indecisive"
+SST-asset identifier list:  "data"
+LITERAL:  "Fourth value"
+SST-create from literal data:  ""Fourth value""
+Set SST command:  ""Fourth value""
+Set command:  ""Fourth value""
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "indecisive"
+SST-asset identifier list:  "data"
+SST-create from random data
+Set SST command:  "*"
+Set command:  "*"
+Command with no expect:  ";"
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Call sequence generated.
+Simulating call sequence...
+Writing test file, ./test.c.
+
+TF-Fuzz test generation complete.

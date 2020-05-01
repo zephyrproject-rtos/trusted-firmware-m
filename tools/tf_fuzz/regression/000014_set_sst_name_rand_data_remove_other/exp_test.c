@@ -44,28 +44,29 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t george_data[] = "@@002@10@@********";
-    static int george_data_size = \d+;
+    static uint8_t george_set_data\[\] = "@@002@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t george_set_length = \d+;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset "george," with data "@@002@10@@...". */
-    sst_status = psa_ps_set(@@@001@@@, george_data_size, george_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset "george," with data "@@002@10@@...". \*/
+    sst_status = psa_ps_set\(@@@001@@@, george_set_length, george_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    sst_status = psa_ps_remove(********);
+    sst_status = psa_ps_remove\(\d+\);
     if (sst_status != PSA_ERROR_DOES_NOT_EXIST) {
         TEST_FAIL("psa_ps_remove() expected PSA_ERROR_DOES_NOT_EXIST.");
         return;
     }
 
+
     /* Removing assets left over from testing: */
-    psa_ps_remove(@@@001@@@);
+    psa_ps_remove\(@@@001@@@\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;

@@ -45,20 +45,21 @@ void test_thread (struct test_result_t *ret) {
 
     /* Variables (etc.) to initialize and check PSA assets: */
     static uint8_t napoleon_exp_data[] = "this won't work";
-    static uint8_t napoleon_act_data[2048] = "********";
-    static int napoleon_act_length = 0;
+    static uint8_t napoleon_act_data\[2048\] = "[A-Z][a-z ]*[\.\?\!]";
+    static size_t napoleon_act_length = \d+;
 
 
     /* PSA calls to test: */
 
-    sst_status = psa_ps_get(********, 0, 0, napoleon_act_data,
+    sst_status = psa_ps_get\(\d+, 0, @@@001@@@, napoleon_act_data,
                             &napoleon_act_length);
     if (sst_status != PSA_ERROR_GENERIC_ERROR) {
         TEST_FAIL("psa_ps_get() expected PSA_ERROR_GENERIC_ERROR.");
         return;
     }
     /* Check that the data is correct */
-    if (tfm_memcmp(napoleon_act_data, napoleon_exp_data, ********) != 0) {
+    if \(tfm_memcmp\(napoleon_act_data, napoleon_exp_data, 
+                   napoleon_act_length\) != 0\) \{
         TEST_FAIL("Read data should be equal to result data");
         return;
     }

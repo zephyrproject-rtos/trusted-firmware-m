@@ -35,12 +35,24 @@ hash_call::hash_call (tf_fuzz_info *test_state,    // (constructor)
                           asset_search how_asset_found)
                              : security_call(test_state, call_ser_no, how_asset_found)
 {
-    // TODO:  Randomize key-policy usage and algorithm:
+    return;  // just to have something to pin a breakpoint onto
 }
 hash_call::~hash_call (void)
 {
     // Nothing further to delete.
     return;  // just to have something to pin a breakpoint onto
+}
+
+bool hash_call::copy_call_to_asset (void)
+{
+    // The assets are not directly involved in this call.
+    return true;
+}
+
+bool hash_call::copy_asset_to_call (void)
+{
+    // The assets are not directly involved in this call.
+    return true;
 }
 
 /* Note:  These functions are overridden in all subclasses, but they still need to be
@@ -52,14 +64,14 @@ void hash_call::fill_in_prep_code (void)
 
 void hash_call::fill_in_command (void)
 {
-    if (asset_id.asset_name_vector.size() > 1) {  // nothing to compare with less than 2
+    if (asset_info.asset_name_vector.size() > 1) {  // nothing to compare with less than 2
         // Fill in preceding comment:
         // Fill in the hash-comparison code itself:
-        for (auto outer = asset_id.asset_name_vector.begin();
-             outer < asset_id.asset_name_vector.end();
+        for (auto outer = asset_info.asset_name_vector.begin();
+             outer < asset_info.asset_name_vector.end();
              ++outer) {
             for (auto inner = outer+1;
-                 inner < asset_id.asset_name_vector.end();
+                 inner < asset_info.asset_name_vector.end();
                  ++inner) {
                 call_code.append ("    if (" + *outer + "_hash == " + *inner + "_hash) {\n");
                 call_code.append (  "        TEST_FAIL(\"Probable data leak between assets "

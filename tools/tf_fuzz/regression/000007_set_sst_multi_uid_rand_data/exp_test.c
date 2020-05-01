@@ -44,65 +44,65 @@ void test_thread (struct test_result_t *ret) {
 
 
     /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t SST_ID_17_data[] = "@@012@10@@********";
-    static int SST_ID_17_data_size = \d+;
-    static uint8_t SST_ID_19_data[] = "@@013@10@@********";
-    static int SST_ID_19_data_size = \d+;
-    static uint8_t SST_ID_24_data[] = "@@014@10@@********";
-    static int SST_ID_24_data_size = \d+;
-    static uint8_t SST_ID_31_data[] = "@@015@10@@********";
-    static int SST_ID_31_data_size = \d+;
-    static uint8_t SST_ID_34_data[] = "@@016@10@@********";
-    static int SST_ID_34_data_size = \d+;
-    static uint8_t SST_ID_41_data[] = "@@017@10@@********";
-    static int SST_ID_41_data_size = \d+;
+    static uint8_t SST_ID_17_set_data\[\] = "@@012@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_17_set_length = \d+;
+    static uint8_t SST_ID_19_set_data\[\] = "@@013@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_19_set_length = \d+;
+    static uint8_t SST_ID_24_set_data\[\] = "@@014@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_24_set_length = \d+;
+    static uint8_t SST_ID_31_set_data\[\] = "@@015@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_31_set_length = \d+;
+    static uint8_t SST_ID_34_set_data\[\] = "@@016@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_34_set_length = \d+;
+    static uint8_t SST_ID_41_set_data\[\] = "@@017@10@@[a-z\ ]*[\.\?\!]";
+    static uint32_t SST_ID_41_set_length = \d+;
 
 
     /* PSA calls to test: */
 
-    /* Creating SST asset UID = 17 with data "@@012@10@@...". */
-    sst_status = psa_ps_set(17, SST_ID_17_data_size, SST_ID_17_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 17 with data "@@012@10@@...". \*/
+    sst_status = psa_ps_set(17, SST_ID_17_set_length, SST_ID_17_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    /* Creating SST asset UID = 19 with data "@@013@10@@...". */
-    sst_status = psa_ps_set(19, SST_ID_19_data_size, SST_ID_19_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 19 with data "@@013@10@@...". \*/
+    sst_status = psa_ps_set(19, SST_ID_19_set_length, SST_ID_19_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    /* Creating SST asset UID = 24 with data "@@014@10@@...". */
-    sst_status = psa_ps_set(24, SST_ID_24_data_size, SST_ID_24_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 24 with data "@@014@10@@...". \*/
+    sst_status = psa_ps_set(24, SST_ID_24_set_length, SST_ID_24_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    /* Creating SST asset UID = 31 with data "@@015@10@@...". */
-    sst_status = psa_ps_set(31, SST_ID_31_data_size, SST_ID_31_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 31 with data "@@015@10@@...". \*/
+    sst_status = psa_ps_set(31, SST_ID_31_set_length, SST_ID_31_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    /* Creating SST asset UID = 34 with data "@@016@10@@...". */
-    sst_status = psa_ps_set(34, SST_ID_34_data_size, SST_ID_34_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 34 with data "@@016@10@@...". \*/
+    sst_status = psa_ps_set(34, SST_ID_34_set_length, SST_ID_34_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;
     }
 
-    /* Creating SST asset UID = 41 with data "@@017@10@@...". */
-    sst_status = psa_ps_set(41, SST_ID_41_data_size, SST_ID_41_data,
-                            PSA_STORAGE_FLAG_********);
+    /\* Creating SST asset UID = 41 with data "@@017@10@@...". \*/
+    sst_status = psa_ps_set(41, SST_ID_41_set_length, SST_ID_41_set_data,
+                            PSA_STORAGE_FLAG_[A-Z_]+\);
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("psa_ps_set() expected PSA_SUCCESS.");
         return;

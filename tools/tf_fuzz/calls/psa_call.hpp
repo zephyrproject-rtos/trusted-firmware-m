@@ -24,22 +24,27 @@ class psa_call
 public:
     /* Data members -- not all PSA calls have/need these, but they need to be acces-
        sible polymorphically via a psa_call iterator: */
-        expect_info expect;  // everything about expected results
+        expect_info exp_data;  // everything about expected results
         set_data_info set_data;  // everything about setting PSA-asset-data values
+        asset_name_id_info asset_info;  // everything about the asset(s) for this line
+        psa_asset_usage random_asset;
+            /* if asked to use some random asset from active or deleted, this says
+               which.  psa_asset_usage::all if not using this feature. */
+        bool assign_data_var_specified;  // asset data to/from named variable
         string assign_data_var;  // name of variable to dump (assign) data into
-        asset_name_id_info asset_id;  // everything about the asset(s) for this line
-        bool assign_data_var_specified;
         // Expected-result info:
         bool print_data;  // true to print asset data to test log
         bool hash_data;  // true to hash data for later comparison
         string id_string;  // not all PSA calls involve an ID, but a diverse set do
-        long asset_ser_no;  // unique ID for psa asset needed to find data string
         long call_ser_no;  // unique serial# for this psa_call (see note in tf_fuzz.hpp)
-        asset_search how_asset_found;
         tf_fuzz_info *test_state;  // the big blob with pointers to everything going on
         string flags_string;
             // creation flags, nominally for SST but have to be in a vector of base-class
     // Methods:
+        virtual vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
+                                                            psa_asset_usage where) = 0;
+        virtual bool copy_call_to_asset (void) = 0;
+        virtual bool copy_asset_to_call (void) = 0;
         virtual void fill_in_prep_code (void) = 0;
         virtual void fill_in_command (void) = 0;
         void write_out_prep_code (ofstream &test_file);
@@ -69,6 +74,8 @@ class sst_call : public psa_call
 public:
     // Data members:  // (low value in hiding these behind setters and getters)
     // Methods:
+        vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
+                                                    psa_asset_usage where);
         sst_call (tf_fuzz_info *test_state, long &asset_ser_no,
                   asset_search how_asset_found);  // (constructor)
         ~sst_call (void);
@@ -87,9 +94,6 @@ class crypto_call : public psa_call
 {
 public:
     // Data members:  // (low value in hiding these behind setters and getters)
-        key_asset the_key_asset;  // are these used (yet)?
-        policy_asset the_policy_asset;
-            // the policy (if any) involved in this call
     // Methods:
         crypto_call (tf_fuzz_info *test_state, long &asset_ser_no,
                     asset_search how_asset_found);  // (constructor)
@@ -114,6 +118,8 @@ class security_call : public psa_call
 public:
     // Data members:  // (low value in hiding these behind setters and getters)
     // Methods:
+        vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
+                                                    psa_asset_usage where);
         security_call (tf_fuzz_info *test_state, long &asset_ser_no,
                        asset_search how_asset_found);  // (constructor)
         ~security_call (void);

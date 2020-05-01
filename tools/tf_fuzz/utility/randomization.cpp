@@ -109,7 +109,7 @@ string rand_key_algorithm (void)
  */
 string rand_key_type (void)
 {
-    switch (rand() % 22) {
+    switch (rand() % 24) {
         case 0:  return "PSA_KEY_TYPE_NONE";
         case 1:  return "PSA_KEY_TYPE_VENDOR_FLAG";
         case 2:  return "PSA_KEY_TYPE_CATEGORY_MASK";
@@ -125,15 +125,19 @@ string rand_key_type (void)
         case 12:  return "PSA_KEY_TYPE_DES";
         case 13:  return "PSA_KEY_TYPE_CAMELLIA";
         case 14:  return "PSA_KEY_TYPE_ARC4";
-        case 15:  return "PSA_KEY_TYPE_RSA_PUBLIC_KEY";
-        case 16:  return "PSA_KEY_TYPE_RSA_KEYPAIR";
-        case 17:  return "PSA_KEY_TYPE_DSA_PUBLIC_KEY";
-        case 18:  return "PSA_KEY_TYPE_DSA_KEYPAIR";
-        case 19:  return "PSA_KEY_TYPE_ECC_PUBLIC_KEY_BASE";
-        case 20:  return "PSA_KEY_TYPE_ECC_KEYPAIR_BASE";
-        case 21:  return "PSA_KEY_TYPE_ECC_CURVE_MASK";
+        case 15:  return "PSA_KEY_TYPE_CHACHA20";
+        case 16:  return "PSA_KEY_TYPE_RSA_PUBLIC_KEY";
+        case 17:  return "PSA_KEY_TYPE_RSA_KEY_PAIR";
+        case 18:  return "PSA_KEY_TYPE_ECC_PUBLIC_KEY_BASE";
+        case 19:  return "PSA_KEY_TYPE_ECC_KEY_PAIR_BASE";
+        case 20:  return "PSA_KEY_TYPE_ECC_CURVE_MASK";
+        case 21:  return "PSA_KEY_TYPE_DH_PUBLIC_KEY_BASE";
+        case 22:  return "PSA_KEY_TYPE_DH_KEY_PAIR_BASE";
+        case 23:  return "PSA_KEY_TYPE_DH_GROUP_MASK";
         default:  return "";
     }
     return "";  /* placate compiler */
 }
+
+
 

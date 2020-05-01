@@ -32,32 +32,27 @@
 
 //**************** security_hash_template_line methods ****************
 
-bool security_hash_template_line::copy_template_to_asset (void)
-{
-    // The assets are not directly involved in this call.
-    return true;
-}
-
 bool security_hash_template_line::copy_template_to_call (void)
 {
-    // Find the call by serial number (must search;  may have moved).
     for (auto call : test_state->calls) {
         if (call->call_ser_no == call_ser_no) {
             // Copy asset info to call object for creation code -- the entire vector:
-            for (auto as_name : asset_id.asset_name_vector) {
+            for (auto as_name : asset_info.asset_name_vector) {
                 /* Also copy into template line object's local vector: */
-                call->asset_id.asset_name_vector.push_back (as_name);
+                call->asset_info.asset_name_vector.push_back (as_name);
             }
-            call->asset_id.id_n = asset_id.id_n;
+            call->asset_info.id_n = asset_info.id_n;
                 // this call is currently limited to name-based
-            call->asset_id.name_specified = true;
+            call->asset_info.name_specified = true;
+            call->asset_info.asset_ser_no = asset_info.asset_ser_no;  // TODO:  Does this make sense?
+            call->asset_info.how_asset_found = asset_search::found_active;
+            call->random_asset = random_asset;
             call->set_data.string_specified = false;  // shouldn't matter, but...
             call->set_data.file_specified = false;
             call->set_data.file_path.assign("");
-            call->asset_ser_no = asset_ser_no;  // TODO:  Does this make sense?
-            call->flags_string.assign ("");  call->set_data.set("");
-            call->how_asset_found = asset_search::found_active;
-            call->expect.pf_info_incomplete = true;
+            call->set_data.set("");
+            call->exp_data.pf_info_incomplete = true;
+            call->flags_string.assign ("");
             return true;
         }
     }

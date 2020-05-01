@@ -23,6 +23,8 @@ Command with no expect:  ";"
 Lines:  Line number 4.
 Lines:  Line number 4.
 Lines:  Line number 4.
-Writing test file, test.c.
+Call sequence generated.
+Simulating call sequence...
+Writing test file, ./test.c.
 
 TF-Fuzz test generation complete.
