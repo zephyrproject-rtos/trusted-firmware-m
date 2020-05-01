@@ -77,12 +77,18 @@ if (ENABLE_CRYPTO)
   else()
     message("- CRYPTO_CONC_OPER_NUM: " ${CRYPTO_CONC_OPER_NUM})
   endif()
+
   if (NOT DEFINED CRYPTO_KEY_MODULE_DISABLED)
     message("- KEY module enabled")
     set(CRYPTO_KEY_MODULE_DISABLED 0)
   else()
     message("- CRYPTO_KEY_MODULE_DISABLED: " ${CRYPTO_KEY_MODULE_DISABLED})
   endif()
+  if (NOT CRYPTO_KEY_MODULE_DISABLED AND
+      NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+    message(FATAL_ERROR "Internal trusted storage should be enabled for persistent key storage")
+  endif()
+
   if (NOT DEFINED CRYPTO_AEAD_MODULE_DISABLED)
     message("- AEAD module enabled")
     set(CRYPTO_AEAD_MODULE_DISABLED 0)

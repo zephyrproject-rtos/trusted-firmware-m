@@ -130,6 +130,11 @@ if (CRYPTO_ENGINE_MBEDTLS)
 	endif()
 endif()
 
+#Persistent key requires ITS service
+if (NOT CRYPTO_KEY_MODULE_DISABLED)
+	target_link_libraries(tfm_crypto PRIVATE tfm_internal_trusted_storage)
+endif()
+
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_crypto)
 config_setting_shared_linker_flags(tfm_crypto)

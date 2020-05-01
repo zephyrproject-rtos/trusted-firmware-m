@@ -230,6 +230,10 @@ function(set_up_secure_fw_build)
 	# If the a library has some symbols that are defined in the library which is linked before it,
 	# it will not cause the linker to search again.
 	# So please put a library before what it relies on.
+	# If the link dependency is complicated or it is difficult to sort out link
+	# dependency by only adjusting the order, it is recommended to explicitly
+	# add the dependency in the dedicated CMake file of corresponding module, to
+	# simplify the ordering and avoid any potential linking issue.
 	if (CORE_TEST OR TFM_PARTITION_TEST_SECURE_SERVICES)
 		target_link_libraries(${EXE_NAME} tfm_secure_tests)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
@@ -245,14 +249,14 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_SECURE_STORAGE")
 	endif()
 
-	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
-	endif()
-
 	if (TFM_PARTITION_CRYPTO)
 		target_link_libraries(${EXE_NAME} tfm_crypto)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_CRYPTO")
+	endif()
+
+	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
