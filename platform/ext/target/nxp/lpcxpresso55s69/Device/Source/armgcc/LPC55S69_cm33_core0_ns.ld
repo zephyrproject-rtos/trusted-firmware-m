@@ -167,7 +167,9 @@ SECTIONS
     {
         . += __msp_stack_size__;
     } > RAM
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
 
     .psp_stack : ALIGN(32)
     {
