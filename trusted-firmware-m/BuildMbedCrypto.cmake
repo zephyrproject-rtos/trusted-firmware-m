@@ -109,6 +109,7 @@ externalproject_add(${MBEDCRYPTO_TARGET_NAME}
 #this target installation happens only when a clean mbed-crypto build is executed.
 add_custom_target(${MBEDCRYPTO_TARGET_NAME}_install
     COMMAND ${CMAKE_COMMAND} --build ${MBEDCRYPTO_BINARY_DIR}  -- install
+    BYPRODUCTS ${MBEDCRYPTO_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}
     WORKING_DIRECTORY ${MBEDCRYPTO_BINARY_DIR}
     COMMENT "Installing Mbed Crypto to ${MBEDCRYPTO_INSTALL_DIR}"
     VERBATIM)
