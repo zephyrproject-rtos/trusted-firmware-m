@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#if defined(__GNUC__) && !defined(TFM_MULTI_CORE_TOPOLOGY)
+#if !defined(TFM_MULTI_CORE_TOPOLOGY)
 /*
  * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
  * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
@@ -25,7 +25,7 @@
  *
  * \brief Attributes for secure gateway functions for NSPM
  */
-#ifndef __ARMCC_VERSION
+#if !defined(__ARMCC_VERSION) && !defined(__ICCARM__)
 /*
  * GNUARM requires noclone attribute to protect gateway function symbol from
  * being renamed and cloned
