@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +32,7 @@ define region TFM_SHARED_MEM =   mem:[from NS_DATA_SHARED_START size NS_DATA_SHA
 #endif
 
 define block ARM_LIB_STACK_MSP  with alignment = 8, size = NS_MSP_STACK_SIZE { };
-define block ARM_LIB_STACK      with alignment = 8, size = NS_PSP_STACK_SIZE { };
+define block ARM_LIB_STACK      with alignment = 8, size = NS_MSP_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = NS_HEAP_SIZE { };
 define block TFM_RAM_CODE       with alignment = 32 { readonly section .ramfunc };
 

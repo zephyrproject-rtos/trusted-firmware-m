@@ -1,6 +1,7 @@
 ;/*
 ; * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
 ; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2020 IAR Systems AB
 ; *
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
@@ -26,7 +27,7 @@
                 MODULE   ?cstartup
 
                 ;; Forward declaration of sections.
-                SECTION  ARM_LIB_STACK_MSP:DATA:NOROOT(3)
+                SECTION  ARM_LIB_STACK:DATA:NOROOT(3)
 
                 SECTION  .intvec:CODE:NOROOT(2)
 
@@ -43,7 +44,7 @@
                 DATA
 
 __vector_table
-                DCD     sfe(ARM_LIB_STACK_MSP)    ; Top of Stack
+                DCD     sfe(ARM_LIB_STACK)        ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     NMI_Handler               ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler
