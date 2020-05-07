@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.13.1)
 #
 # BINARY_DIR: The location where the build outputs will be written
 # BOARD: The string identifying the board target for TF-M (AN521, etc.)
-# CONFIG_FILE: The TF-M config file to use, without the .cmake extension
+# CFGFILE: The TF-M config file to use, without the .cmake extension
 #
 # The following output values can also be used:
 #
@@ -26,11 +26,11 @@ cmake_minimum_required(VERSION 3.13.1)
 #
 # trusted_firmware_build(BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
 #                        BOARD ${TFMBOARD}
-#                        CONFIG_FILE "ConfigRegressionIPC"
+#                        CFGFILE "ConfigRegressionIPC"
 #                        OUT_VENEERS_FILE VENEERS_FILE
 #                        OUT_INCLUDE_PATH TFM_INCLUDE_PATH)
 function(trusted_firmware_build)
-  set(oneValueArgs BINARY_DIR BOARD CONFIG_FILE OUT_VENEERS_FILE OUT_INCLUDE_PATH)
+  set(oneValueArgs BINARY_DIR BOARD CFGFILE OUT_VENEERS_FILE OUT_INCLUDE_PATH)
   cmake_parse_arguments(TFM "" "${oneValueArgs}" "" ${ARGN})
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/install/export/tfm/veneers/s_veneers.o)
@@ -59,7 +59,7 @@ function(trusted_firmware_build)
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
     BINARY_DIR ${TFM_BINARY_DIR}
     BUILD_BYPRODUCTS ${VENEERS_FILE}
-    CMAKE_ARGS -DPROJ_CONFIG=${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/configs/${TFM_CONFIG_FILE}.cmake
+    CMAKE_ARGS -DPROJ_CONFIG=${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/configs/${TFM_CFGFILE}.cmake
                -DTARGET_PLATFORM=${TFM_BOARD}
                -DBL2=True
                -DCOMPILER=${TFM_TOOLCHAIN}
