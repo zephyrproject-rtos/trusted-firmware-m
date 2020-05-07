@@ -19,7 +19,8 @@ static struct secure_mailbox_queue_t spe_mailbox_queue;
 
 static int32_t tfm_mailbox_dispatch(uint32_t call_type,
                                     const struct psa_client_params_t *params,
-                                    int32_t client_id, int32_t *psa_ret)
+                                    int32_t client_id,
+                                    psa_status_t *psa_ret)
 {
     struct client_call_params_t spm_params = {0};
 
@@ -39,7 +40,7 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
     case MAILBOX_PSA_CONNECT:
         spm_params.sid = params->psa_connect_params.sid;
         spm_params.version = params->psa_connect_params.version;
-        *psa_ret = (uint32_t)tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CALL:
         spm_params.handle = params->psa_call_params.handle;
@@ -48,7 +49,7 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         spm_params.in_len = params->psa_call_params.in_len;
         spm_params.out_vec = params->psa_call_params.out_vec;
         spm_params.out_len = params->psa_call_params.out_len;
-        *psa_ret = (uint32_t)tfm_rpc_psa_call(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_call(&spm_params, NS_CALLER_FLAG);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CLOSE:
         spm_params.handle = params->psa_close_params.handle;
@@ -183,7 +184,7 @@ int32_t tfm_mailbox_handle_msg(void)
 {
     uint8_t idx;
     int32_t result;
-    int32_t psa_ret = PSA_ERROR_GENERIC_ERROR;
+    psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     mailbox_queue_status_t mask_bits, pend_slots, reply_slots = 0;
     struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
     struct mailbox_msg_t *msg_ptr;
@@ -255,7 +256,7 @@ int32_t tfm_mailbox_handle_msg(void)
              */
             reply_slots |= (1 << idx);
 
-            mailbox_direct_reply(idx, psa_ret);
+            mailbox_direct_reply(idx, (uint32_t)psa_ret);
         } else if ((msg_ptr->call_type == MAILBOX_PSA_CONNECT) ||
                    (msg_ptr->call_type == MAILBOX_PSA_CALL)) {
             /*
@@ -264,7 +265,7 @@ int32_t tfm_mailbox_handle_msg(void)
              */
             if (psa_ret != PSA_SUCCESS) {
                 reply_slots |= (1 << idx);
-                mailbox_direct_reply(idx, psa_ret);
+                mailbox_direct_reply(idx, (uint32_t)psa_ret);
             }
         }
         /*
