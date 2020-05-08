@@ -13,14 +13,14 @@ cmake_minimum_required(VERSION 3.13.1)
 # BINARY_DIR: The location where the build outputs will be written
 # BOARD: The string identifying the board target for TF-M (AN521, etc.)
 # CFGFILE: The TF-M config file to use, without the .cmake extension
+# IPC: Build TFM IPC library. This library allows a non-secure application to
+#      interface to secure domain using IPC.
 #
 # The following output values can also be used:
 #
 # OUT_VENEERS_FILE: The path and filename of the veneer library to link against,
 #                   which identifies where the veneer functions are in memory.
 #                   Should be added via "target_link_libraries"
-# OUT_INCLUDE_PATH: The path where the TF-M header files are available, which
-#                   should be added to the app via "target_include_directories"
 #
 # Example usage:
 #
@@ -30,8 +30,9 @@ cmake_minimum_required(VERSION 3.13.1)
 #                        OUT_VENEERS_FILE VENEERS_FILE
 #                        OUT_INCLUDE_PATH TFM_INCLUDE_PATH)
 function(trusted_firmware_build)
+  set(options IPC)
   set(oneValueArgs BINARY_DIR BOARD CFGFILE OUT_VENEERS_FILE OUT_INCLUDE_PATH)
-  cmake_parse_arguments(TFM "" "${oneValueArgs}" "" ${ARGN})
+  cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/install/export/tfm/veneers/s_veneers.o)
   set(${TFM_OUT_VENEERS_FILE} ${VENEERS_FILE} PARENT_SCOPE)
@@ -58,7 +59,6 @@ function(trusted_firmware_build)
     tfm
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
     BINARY_DIR ${TFM_BINARY_DIR}
-    BUILD_BYPRODUCTS ${VENEERS_FILE}
     CMAKE_ARGS -DPROJ_CONFIG=${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/configs/${TFM_CFGFILE}.cmake
                -DTARGET_PLATFORM=${TFM_BOARD}
                -DBL2=True
@@ -67,5 +67,25 @@ function(trusted_firmware_build)
                -DGNUARM_PATH=${TFM_TOOLCHAIN_PATH}
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
+    BUILD_BYPRODUCTS ${VENEERS_FILE}
   )
+
+  set(TFM_INTERFACE_SOURCE ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/src)
+
+  # IPC mode source dependencies
+  if(TFM_IPC)
+    add_library(tfm_ipc_psa_api
+                ${TFM_INTERFACE_SOURCE}/tfm_psa_ns_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_crypto_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_initial_attestation_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_its_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_platform_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_sst_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_ns_interface.c
+    )
+    target_include_directories(tfm_ipc_psa_api PUBLIC ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include)
+    target_compile_definitions(tfm_ipc_psa_api PUBLIC TFM_PSA_API TFM_PARTITION_TEST_CORE_IPC)
+    target_link_libraries(tfm_ipc_psa_api PRIVATE zephyr_interface)
+  endif()
+
 endfunction()
