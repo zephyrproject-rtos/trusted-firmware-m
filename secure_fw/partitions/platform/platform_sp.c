@@ -50,7 +50,7 @@ static bool nv_counter_access_grant(int32_t client_id,
 
     /* Boundary check the input argument */
     if (nv_counter_no >= NV_COUNTER_MAP_SIZE ||
-        nv_counter_no < 0 || nv_counter_no >= PLAT_NV_COUNTER_MAX) {
+        (int32_t)nv_counter_no < 0 || nv_counter_no >= PLAT_NV_COUNTER_MAX) {
         return false;
     }
 
