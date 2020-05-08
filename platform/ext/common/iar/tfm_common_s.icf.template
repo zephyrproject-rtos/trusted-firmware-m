@@ -22,10 +22,6 @@
 
 define memory mem with size = 4G;
 
-define region S_CODE_region     = mem:[from S_CODE_START size S_CODE_SIZE];
-
-define region S_RAM_region      = mem:[from S_DATA_START size S_DATA_SIZE];
-
 define block ER_TFM_CODE          with fixed order, alignment = 8 {readonly section .intvec, readonly};
 
 define block TFM_UNPRIV_CODE with alignment = 32 {
@@ -62,7 +58,6 @@ define block {{manifest.manifest.name}}_LINKER with alignment = 32 {
         ro object {{pattern}},
         {% endfor %}
     {% endif %}
-        section {{manifest.manifest.name}}_ATTR_FN
     };
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
@@ -161,7 +156,7 @@ define block {{manifest.manifest.name}}_LINKER_STACK with alignment = 128, size 
 #endif
     {% else %}
 #if defined (TFM_PSA_API)
-define block {{manifest.manifest.name}}_LINKER_STACK with alignment =  128 { };
+define block {{manifest.manifest.name}}_LINKER_STACK with alignment =  128, size = 0 { };
 #endif
     {% endif %}
     {% if manifest.attr.conditional %}
@@ -311,7 +306,7 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
   initialize by copy { section __DLIB_PERTHREAD };
 }
 
-place in S_CODE_region         { block LR_CODE };
+place at address S_CODE_START         { block LR_CODE };
 
 define block DATA with fixed order {
     /**** Base address of secure data area */
@@ -373,8 +368,10 @@ define block DATA with fixed order {
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #ifdef S_DATA_PRIV_START
     /**** Privileged data area base address specified by multi-core platform */
+};
+define block PRIV_DATA with fixed order {
     block TFM_SECURE_PRIV_DATA_BOUNDARY,
- #endif
+#endif
 
     /*
      * Move BL2 shared area and MSP stack to the beginning of privileged data
@@ -438,6 +435,11 @@ define block DATA with fixed order {
      */
 };
 
+place at address S_DATA_START          { block DATA };
+#if defined(TFM_MULTI_CORE_TOPOLOGY) && defined(S_DATA_PRIV_START)
+place at address S_DATA_PRIV_START     { block PRIV_DATA };
+#endif
+
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     /*
      * Place the CMSE Veneers (containing the SG instruction) in a separate
@@ -465,5 +467,3 @@ place at address NS_PARTITION_START { block LR_NS_PARTITION };
 define block LR_SECONDARY_PARTITION with size = SECONDARY_PARTITION_SIZE { };
 place at address SECONDARY_PARTITION_START { block LR_SECONDARY_PARTITION };
 #endif /* BL2 */
-
-place in S_RAM_region          { block DATA };
