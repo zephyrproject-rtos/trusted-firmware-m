@@ -2,7 +2,7 @@
 Trusted Firmware M
 ##################
 Trusted Firmware M provides a reference implementation of secure world software
-for ARMv8-M.
+for Arm M-profile architecture.
 
 .. Note::
     The software implementation contained in this project is designed to be a
@@ -20,19 +20,21 @@ Contributions to this project are accepted under the same license with developer
 sign-off as described in the :doc:`Contributing Guidelines </docs/processes/contributing>`.
 
 This project contains code from other projects as listed below. The code from
-external projects is limited to ``app`` and ``platform`` folders.
-The original license text is included in those source files.
+external projects is limited to ``app``, ``bl2``, ``lib`` and ``platform``
+folders. The original license text is included in those source files.
 
-- The ``platform`` folder currently contains drivers imported from external
-  project and the files have Apache 2.0 license.
 - The ``app`` folder contains files imported from CMSIS_5 project and the files
   have Apache 2.0 license.
 - The ``bl2`` folder contains files imported from MCUBoot project and the files
   have Apache 2.0 license.
+- The ``lib`` folder may contain 3rd party files with diverse licenses.
+- The ``platform`` folder currently contains platforms support imported from
+  the external project and the files may have different licenses.
 
 .. Note::
-    Any code that has license other than BSD-3-Clause is kept in specific sub
-    folders named ``ext`` so that it can isolated if required.
+    Any folder that contains or directly imports 3rd party code is kept in a
+    specific subfolder named ``ext`` so that it can be isolated if required.
+    The 'ext' folder can be seen in the folders above mentioned.
 
 #############
 Release Notes
@@ -49,7 +51,8 @@ Prerequisite
 ************
 Trusted Firmware M provides a reference implementation of PSA specifications.
 It is assumed that the reader is familiar with PSA concepts and terms. PSA
-specifications are currently not available in the public domain.
+specifications can be found at
+`Platform Security Architecture Resources <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>`__.
 
 The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
 good understanding of the v8-M architecture is also necessary. A good place to
@@ -59,8 +62,8 @@ get started with ARMv8-M is
 **********************
 Really getting started
 **********************
-Trusted Firmware M source code is available on `git.trustedfirmware.org
-<https://git.trustedfirmware.org/trusted-firmware-m.git/>`__
+Trusted Firmware M source code is available on
+`git.trustedfirmware.org <https://git.trustedfirmware.org/trusted-firmware-m.git/>`__.
 
 To build & run TF-M:
 
