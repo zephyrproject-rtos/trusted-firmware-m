@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+
+#include "os_wrapper/common.h"
 
 /**
  * \brief Called on the non-secure CPU.
@@ -36,6 +38,17 @@ int32_t tfm_ns_wait_for_s_cpu_ready(void);
  */
 int32_t tfm_platform_ns_wait_for_s_cpu_ready(void);
 
+#ifdef FORWARD_PROT_MSG
+static inline uint32_t tfm_ns_multi_core_lock_acquire(void)
+{
+    return OS_WRAPPER_SUCCESS;
+}
+
+static inline uint32_t tfm_ns_multi_core_lock_release(void)
+{
+    return OS_WRAPPER_SUCCESS;
+}
+#else /* FORWARD_PROT_MSG */
 /**
  * \brief Acquire the multi-core lock for synchronizing PSA client call(s)
  *        The actual implementation depends on the use scenario.
@@ -53,6 +66,7 @@ uint32_t tfm_ns_multi_core_lock_acquire(void);
  * \return \ref OS_WRAPPER_ERROR on error
  */
 uint32_t tfm_ns_multi_core_lock_release(void);
+#endif /* FORWARD_PROT_MSG */
 
 #ifdef __cplusplus
 }

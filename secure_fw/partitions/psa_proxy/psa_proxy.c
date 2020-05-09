@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,7 +48,6 @@ static psa_status_t forward_psa_call_to_secure_enclave(const psa_msg_t *msg)
     psa_status_t status;
     psa_handle_t *forward_handle_ptr = (psa_handle_t *)msg->rhandle;
     struct psa_client_params_t params;
-    mailbox_msg_handle_t mailbox_handle;
     int32_t ret;
 
     params.psa_call_params.handle = *forward_handle_ptr;
@@ -60,16 +59,8 @@ static psa_status_t forward_psa_call_to_secure_enclave(const psa_msg_t *msg)
         return status;
     }
 
-    mailbox_handle = tfm_ns_mailbox_tx_client_req(MAILBOX_PSA_CALL, &params,
-                                                  NON_SECURE_CLIENT_ID);
-
-    /* Waiting for mailbox answer */
-    while(!tfm_ns_mailbox_is_msg_replied(mailbox_handle)) {
-        ;
-    }
-
-    ret = tfm_ns_mailbox_rx_client_reply(mailbox_handle, (int32_t *)&status);
-
+    ret = tfm_ns_mailbox_client_call(MAILBOX_PSA_CALL, &params,
+                                     NON_SECURE_CLIENT_ID, (int32_t *)&status);
     if (ret != MAILBOX_SUCCESS) {
         status = PSA_ERROR_COMMUNICATION_FAILURE;
     }
@@ -85,20 +76,12 @@ static void psa_disconnect_from_secure_enclave(psa_msg_t *msg)
 {
     psa_handle_t *forward_handle_ptr = (psa_handle_t *)msg->rhandle;
     struct psa_client_params_t params;
-    mailbox_msg_handle_t mailbox_handle;
     int32_t reply;
 
     params.psa_close_params.handle = *forward_handle_ptr;
 
-    mailbox_handle = tfm_ns_mailbox_tx_client_req(MAILBOX_PSA_CLOSE, &params,
-                                                  NON_SECURE_CLIENT_ID);
-
-    /* Waiting for mailbox answer */
-    while(!tfm_ns_mailbox_is_msg_replied(mailbox_handle)) {
-        ;
-    }
-
-    tfm_ns_mailbox_rx_client_reply(mailbox_handle, (int32_t *)&reply);
+    (void)tfm_ns_mailbox_client_call(MAILBOX_PSA_CLOSE, &params,
+                                     NON_SECURE_CLIENT_ID, &reply);
 
     deallocate_forward_handle(forward_handle_ptr);
 }
@@ -182,7 +165,6 @@ static psa_status_t psa_connect_to_secure_enclave(psa_signal_t signal,
 {
     psa_handle_t *forward_handle_ptr;
     struct psa_client_params_t params;
-    mailbox_msg_handle_t mailbox_handle;
     int32_t ret;
 
     forward_handle_ptr = allocate_forward_handle();
@@ -193,18 +175,9 @@ static psa_status_t psa_connect_to_secure_enclave(psa_signal_t signal,
                                        &params.psa_connect_params.version);
 
         /* Fixme: All messages sent with the same client id */
-        mailbox_handle = tfm_ns_mailbox_tx_client_req(MAILBOX_PSA_CONNECT,
-                                                      &params,
-                                                      NON_SECURE_CLIENT_ID);
-
-        /* Waiting for mailbox answer */
-        while (!tfm_ns_mailbox_is_msg_replied(mailbox_handle)) {
-            ;
-        }
-
-        ret = tfm_ns_mailbox_rx_client_reply(mailbox_handle,
-                                             (int32_t *)forward_handle_ptr);
-
+        ret = tfm_ns_mailbox_client_call(MAILBOX_PSA_CONNECT, &params,
+                                         NON_SECURE_CLIENT_ID,
+                                         (int32_t *)forward_handle_ptr);
         if (ret != MAILBOX_SUCCESS) {
             *forward_handle_ptr = PSA_NULL_HANDLE;
         }

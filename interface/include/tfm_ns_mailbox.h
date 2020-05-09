@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,45 +35,6 @@ struct ns_mailbox_stats_res_t {
 #endif
 
 /**
- * \brief Prepare and send PSA client request to SPE via mailbox.
- *
- * \param[in] call_type         PSA client call type
- * \param[in] params            Parmaters used for PSA client call
- * \param[in] client_id         Optional client ID of non-secure caller.
- *                              It is required to identify the non-secure caller
- *                              when NSPE OS enforces non-secure task isolation.
- *
- * \retval >= 0                 The handle to the mailbox message assigned.
- * \retval < 0                  Operation failed with an error code.
- */
-mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
-                                       const struct psa_client_params_t *params,
-                                       int32_t client_id);
-
-/**
- * \brief Fetch PSA client return result.
- *
- * \param[in] handle            The handle to the mailbox message
- * \param[out] reply            The address to be written with return result.
- *
- * \retval MAILBOX_SUCCESS      Successfully get PSA client call return result.
- * \retval Other return code    Operation failed with an error code.
- */
-int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
-                                       int32_t *reply);
-
-/**
- * \brief Check whether a specific mailbox message has been replied.
- *
- * \param[in] handle            The handle to the mailbox message
- *
- * \retval true                 The PSA client call return value is replied.
- * \retval false                The PSA client call return value is not
- *                              replied yet.
- */
-bool tfm_ns_mailbox_is_msg_replied(mailbox_msg_handle_t handle);
-
-/**
  * \brief NSPE mailbox initialization
  *
  * \param[in] queue             The base address of NSPE mailbox queue to be
@@ -83,6 +44,25 @@ bool tfm_ns_mailbox_is_msg_replied(mailbox_msg_handle_t handle);
  * \retval Other return code    Operation failed with an error code.
  */
 int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue);
+
+/**
+ * \brief Send PSA client call to SPE via mailbox. Wait and fetch PSA client
+ *        call result.
+ *
+ * \param[in] call_type         PSA client call type
+ * \param[in] params            Parameters used for PSA client call
+ * \param[in] client_id         Optional client ID of non-secure caller.
+ *                              It is required to identify the non-secure caller
+ *                              when NSPE OS enforces non-secure task isolation.
+ * \param[out] reply            The buffer written with PSA client call result.
+ *
+ * \retval MAILBOX_SUCCESS      The PSA client call is completed successfully.
+ * \retval Other return code    Operation failed with an error code.
+ */
+int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
+                                   const struct psa_client_params_t *params,
+                                   int32_t client_id,
+                                   int32_t *reply);
 
 #ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
 /**
@@ -105,43 +85,22 @@ static inline const void *tfm_ns_mailbox_get_task_handle(void)
 #endif
 
 /**
- * \brief Fetch the handle to the first replied mailbox message in the NSPE
- *        mailbox queue.
+ * \brief Wake up the owner task of the first replied mailbox message in the
+ *        NSPE mailbox queue.
  *        This function is intended to be called inside platform specific
  *        notification IRQ handler.
  *
  * \note The replied status of the fetched mailbox message will be cleaned after
- *       the message is fetched. When this function is called again, it fetches
- *       the next replied mailbox message from the NSPE mailbox queue.
+ *       the message is fetched. When this function is called again, it wakes
+ *       the owner task of next replied mailbox message from the NSPE mailbox
+ *       queue.
  *
- * \return Return the handle to the first replied mailbox message in the
- *         queue.
- *         Return \ref MAILBOX_MSG_NULL_HANDLE if no mailbox message is replied.
+ * \return MAILBOX_SUCCESS       The task of the first replied mailbox message
+ *                               is found and wake-up signal is sent.
+ * \return MAILBOX_NO_PEND_EVENT No replied mailbox message is found.
+ * \return Other return code     Failed with an error code
  */
-mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void);
-
-/**
- * \brief Return the handle of owner task of a mailbox message according to the
- *        \ref mailbox_msg_handle_t
- *
- * \param[in] handle            The handle of mailbox message.
- *
- * \return Return the handle value of the owner task.
- */
-const void *tfm_ns_mailbox_get_msg_owner(mailbox_msg_handle_t handle);
-
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
-/**
- * \brief Wait for the reply returned from SPE to the mailbox message specified
- *        by handle
- *
- * \param[in] handle            The handle of mailbox message.
- *
- * \retval MAILBOX_SUCCESS      Return from waiting successfully.
- * \retval Other return code    Failed to wait with an error code.
- */
-int32_t tfm_ns_mailbox_wait_reply(mailbox_msg_handle_t handle);
-#endif
+int32_t tfm_ns_mailbox_wake_reply_owner_isr(void);
 
 /**
  * \brief Platform specific NSPE mailbox initialization.
@@ -199,11 +158,31 @@ void tfm_ns_mailbox_hal_exit_critical_isr(void);
  *        the reply of the specified mailbox message to be returned from SPE.
  *
  * \note This function is implemented by platform and NS OS specific waiting
- *       mechanism accroding to use scenario.
+ *       mechanism according to use scenario.
  *
  * \param[in] handle            The handle of mailbox message.
  */
 void tfm_ns_mailbox_hal_wait_reply(mailbox_msg_handle_t handle);
+
+/*
+ * \brief Performs platform and NS OS specific mechanism in a mailbox IRQ
+ *        handler, to wake up a sleeping task which is waiting for its mailbox
+ *        message reply.
+ *
+ * \note The underlying platform and NS OS specific function called inside this
+ *       function should be able to work in an IRQ handler.
+ *
+ * \note This function is implemented by platform and NS OS specific waiting
+ *       mechanism according to use scenario.
+ *
+ * \param[in] task_handle       The handle to the task to be woken up.
+ * \param[in] handle            The mailbox handle which can be used as thread
+ *                              flag.
+ */
+void tfm_ns_mailbox_hal_wake_task_isr(const void *task_handle,
+                                      mailbox_msg_handle_t handle);
+#else
+#define tfm_ns_mailbox_hal_wait_reply(handle)        do {} while (0)
 #endif
 
 #ifdef TFM_MULTI_CORE_TEST

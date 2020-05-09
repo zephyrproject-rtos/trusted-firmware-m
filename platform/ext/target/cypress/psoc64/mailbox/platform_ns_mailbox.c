@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -108,6 +108,12 @@ void tfm_ns_mailbox_hal_wait_reply(mailbox_msg_handle_t handle)
     os_wrapper_thread_wait_flag((uint32_t)handle, OS_WRAPPER_WAIT_FOREVER);
 }
 
+void tfm_ns_mailbox_hal_wake_task_isr(const void *task_handle,
+                                      mailbox_msg_handle_t handle)
+{
+    os_wrapper_thread_set_flag_isr((void *)task_handle, (uint32_t)handle);
+}
+
 void tfm_ns_mailbox_hal_enter_critical(void)
 {
     saved_irq_state = Cy_SysLib_EnterCriticalSection();
@@ -162,8 +168,7 @@ static bool mailbox_clear_intr(void)
 void cpuss_interrupts_ipc_8_IRQHandler(void)
 {
     uint32_t magic;
-    mailbox_msg_handle_t handle;
-    void *task_handle;
+    int32_t ret;
 
     if (!mailbox_clear_intr())
         return;
@@ -172,14 +177,9 @@ void cpuss_interrupts_ipc_8_IRQHandler(void)
     if (magic == PSA_CLIENT_CALL_REPLY_MAGIC) {
         /* Handle all the pending replies */
         while (1) {
-            handle = tfm_ns_mailbox_fetch_reply_msg_isr();
-            if (handle == MAILBOX_MSG_NULL_HANDLE) {
+            ret = tfm_ns_mailbox_wake_reply_owner_isr();
+            if (ret != MAILBOX_SUCCESS) {
                 break;
-            }
-
-            task_handle = (void *)tfm_ns_mailbox_get_msg_owner(handle);
-            if (task_handle) {
-                os_wrapper_thread_set_flag_isr(task_handle, (uint32_t)handle);
             }
         }
     }

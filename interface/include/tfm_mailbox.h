@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -73,6 +73,7 @@ extern "C" {
 #define MAILBOX_CHAN_BUSY                   (INT32_MIN + 5)
 #define MAILBOX_CALLBACK_REG_ERROR          (INT32_MIN + 6)
 #define MAILBOX_INIT_ERROR                  (INT32_MIN + 7)
+#define MAILBOX_GENERIC_ERROR               (INT32_MIN + 8)
 
 /*
  * This structure holds the parameters used in a PSA client call.

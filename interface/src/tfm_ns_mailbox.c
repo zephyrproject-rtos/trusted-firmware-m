@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,11 +8,14 @@
 #include <string.h>
 
 #include "cmsis_compiler.h"
+#include "os_wrapper/common.h"
+#include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
-#include "tfm_plat_ns.h"
 
 /* The pointer to NSPE mailbox queue */
 static struct ns_mailbox_queue_t *mailbox_queue_ptr = NULL;
+
+static int32_t mailbox_wait_reply(mailbox_msg_handle_t handle);
 
 static inline void clear_queue_slot_empty(uint8_t idx)
 {
@@ -35,8 +38,8 @@ static inline void set_queue_slot_pend(uint8_t idx)
     }
 }
 
-static inline int32_t get_mailbox_msg_handle(uint8_t idx,
-                                             mailbox_msg_handle_t *handle)
+static int32_t get_mailbox_msg_handle(uint8_t idx,
+                                      mailbox_msg_handle_t *handle)
 {
     if ((idx >= NUM_MAILBOX_QUEUE_SLOT) || !handle) {
         return MAILBOX_INVAL_PARAMS;
@@ -66,6 +69,15 @@ static inline void clear_queue_slot_replied(uint8_t idx)
     }
 }
 
+static inline bool is_queue_slot_replied(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        return mailbox_queue_ptr->replied_slots & (1UL << idx);
+    }
+
+    return false;
+}
+
 static inline void set_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
@@ -89,7 +101,7 @@ static inline void clear_queue_slot_woken(uint8_t idx)
     }
 }
 
-static uint8_t acquire_empty_slot(const struct ns_mailbox_queue_t *queue)
+static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 {
     uint8_t idx;
     mailbox_queue_status_t status;
@@ -193,22 +205,14 @@ void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res)
 }
 #endif
 
-mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
-                                       const struct psa_client_params_t *params,
-                                       int32_t client_id)
+static int32_t mailbox_tx_client_req(uint32_t call_type,
+                                     const struct psa_client_params_t *params,
+                                     int32_t client_id,
+                                     mailbox_msg_handle_t *handle)
 {
     uint8_t idx;
     struct mailbox_msg_t *msg_ptr;
-    mailbox_msg_handle_t handle;
     const void *task_handle;
-
-    if (!mailbox_queue_ptr) {
-        return MAILBOX_MSG_NULL_HANDLE;
-    }
-
-    if (!params) {
-        return MAILBOX_MSG_NULL_HANDLE;
-    }
 
     idx = acquire_empty_slot(mailbox_queue_ptr);
     if (idx >= NUM_MAILBOX_QUEUE_SLOT) {
@@ -233,7 +237,7 @@ mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
     task_handle = tfm_ns_mailbox_get_task_handle();
     set_msg_owner(idx, task_handle);
 
-    get_mailbox_msg_handle(idx, &handle);
+    get_mailbox_msg_handle(idx, handle);
 
     tfm_ns_mailbox_hal_enter_critical();
     set_queue_slot_pend(idx);
@@ -241,18 +245,14 @@ mailbox_msg_handle_t tfm_ns_mailbox_tx_client_req(uint32_t call_type,
 
     tfm_ns_mailbox_hal_notify_peer();
 
-    return handle;
+    return MAILBOX_SUCCESS;
 }
 
-int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
+static int32_t mailbox_rx_client_reply(mailbox_msg_handle_t handle,
                                        int32_t *reply)
 {
     uint8_t idx;
     int32_t ret;
-
-    if (!mailbox_queue_ptr) {
-        return MAILBOX_INVAL_PARAMS;
-    }
 
     if ((handle == MAILBOX_MSG_NULL_HANDLE) || (!reply)) {
         return MAILBOX_INVAL_PARAMS;
@@ -269,7 +269,6 @@ int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
     set_msg_owner(idx, NULL);
 
     tfm_ns_mailbox_hal_enter_critical();
-    clear_queue_slot_replied(idx);
     clear_queue_slot_woken(idx);
     /*
      * Make sure that the empty flag is set after all the other status flags are
@@ -281,44 +280,59 @@ int32_t tfm_ns_mailbox_rx_client_reply(mailbox_msg_handle_t handle,
     return MAILBOX_SUCCESS;
 }
 
-bool tfm_ns_mailbox_is_msg_replied(mailbox_msg_handle_t handle)
+int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
+                                   const struct psa_client_params_t *params,
+                                   int32_t client_id,
+                                   int32_t *reply)
+{
+    mailbox_msg_handle_t handle = MAILBOX_MSG_NULL_HANDLE;
+    int32_t reply_buf = 0x0;
+    int32_t ret;
+
+    if (!mailbox_queue_ptr) {
+        return MAILBOX_INIT_ERROR;
+    }
+
+    if (!params || !reply) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    if (tfm_ns_multi_core_lock_acquire() != OS_WRAPPER_SUCCESS) {
+        return MAILBOX_QUEUE_FULL;
+    }
+
+    /* It requires SVCall if NS mailbox is put in privileged mode. */
+    ret = mailbox_tx_client_req(call_type, params, client_id, &handle);
+    if (ret != MAILBOX_SUCCESS) {
+        goto exit;
+    }
+
+    mailbox_wait_reply(handle);
+
+    /* It requires SVCall if NS mailbox is put in privileged mode. */
+    ret = mailbox_rx_client_reply(handle, &reply_buf);
+    if (ret == MAILBOX_SUCCESS) {
+        *reply = reply_buf;
+    }
+
+exit:
+    if (tfm_ns_multi_core_lock_release() != OS_WRAPPER_SUCCESS) {
+        return MAILBOX_GENERIC_ERROR;
+    }
+
+    return ret;
+}
+
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 {
     uint8_t idx;
     int32_t ret;
-    mailbox_queue_status_t status;
-
-    if (!mailbox_queue_ptr) {
-        return false;
-    }
-
-    if (handle == MAILBOX_MSG_NULL_HANDLE) {
-        return false;
-    }
-
-    ret = get_mailbox_msg_idx(handle, &idx);
-    if (ret != MAILBOX_SUCCESS) {
-        return false;
-    }
-
-    tfm_ns_mailbox_hal_enter_critical();
-    status = mailbox_queue_ptr->replied_slots;
-    tfm_ns_mailbox_hal_exit_critical();
-
-    if (status & (1 << idx)) {
-        return true;
-    }
-
-    return false;
-}
-
-mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void)
-{
-    uint8_t idx;
     mailbox_msg_handle_t handle;
     mailbox_queue_status_t replied_status;
 
     if (!mailbox_queue_ptr) {
-        return MAILBOX_MSG_NULL_HANDLE;
+        return MAILBOX_INIT_ERROR;
     }
 
     tfm_ns_mailbox_hal_enter_critical_isr();
@@ -326,7 +340,7 @@ mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void)
     tfm_ns_mailbox_hal_exit_critical_isr();
 
     if (!replied_status) {
-        return MAILBOX_MSG_NULL_HANDLE;
+        return MAILBOX_NO_PEND_EVENT;
     }
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
@@ -337,29 +351,26 @@ mailbox_msg_handle_t tfm_ns_mailbox_fetch_reply_msg_isr(void)
             set_queue_slot_woken(idx);
             tfm_ns_mailbox_hal_exit_critical_isr();
 
-            if (get_mailbox_msg_handle(idx, &handle) == MAILBOX_SUCCESS) {
-                return handle;
-            }
+            break;
        }
     }
 
-    return MAILBOX_MSG_NULL_HANDLE;
-}
-
-const void *tfm_ns_mailbox_get_msg_owner(mailbox_msg_handle_t handle)
-{
-    uint8_t idx;
-
-    if (get_mailbox_msg_idx(handle, &idx) != MAILBOX_SUCCESS) {
-        return NULL;
+    /* In theory, it won't occur. Just in case */
+    if (idx == NUM_MAILBOX_QUEUE_SLOT) {
+        return MAILBOX_NO_PEND_EVENT;
     }
 
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        return mailbox_queue_ptr->queue[idx].owner;
+    ret = get_mailbox_msg_handle(idx, &handle);
+    if (ret != MAILBOX_SUCCESS) {
+        return ret;
     }
 
-    return NULL;
+    tfm_ns_mailbox_hal_wake_task_isr(mailbox_queue_ptr->queue[idx].owner,
+                                     handle);
+
+    return MAILBOX_SUCCESS;
 }
+#endif
 
 int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 {
@@ -394,15 +405,10 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
     return ret;
 }
 
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
-int32_t tfm_ns_mailbox_wait_reply(mailbox_msg_handle_t handle)
+static int32_t mailbox_wait_reply(mailbox_msg_handle_t handle)
 {
     uint8_t idx;
     int32_t ret;
-
-    if (!mailbox_queue_ptr) {
-        return MAILBOX_INVAL_PARAMS;
-    }
 
     if (handle == MAILBOX_MSG_NULL_HANDLE) {
         return MAILBOX_INVAL_PARAMS;
@@ -422,13 +428,27 @@ int32_t tfm_ns_mailbox_wait_reply(mailbox_msg_handle_t handle)
          * woken up by reply event, rather than other events.
          */
         tfm_ns_mailbox_hal_enter_critical();
+        /*
+         * It requires SVCall to access NS mailbox flags if NS mailbox is put
+         * in privileged mode.
+         * An alternative is to let NS thread allocate its own is_woken flag.
+         * But a spinlock-like mechanism is still required.
+         */
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
         if (is_queue_slot_woken(idx)) {
-            tfm_ns_mailbox_hal_exit_critical();
+            clear_queue_slot_woken(idx);
             break;
         }
+#else
+        if (is_queue_slot_replied(idx)) {
+            clear_queue_slot_replied(idx);
+            break;
+        }
+#endif
         tfm_ns_mailbox_hal_exit_critical();
     }
 
+    tfm_ns_mailbox_hal_exit_critical();
+
     return MAILBOX_SUCCESS;
 }
-#endif
