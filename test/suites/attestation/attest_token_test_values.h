@@ -2,7 +2,7 @@
  * attest_token_test_values.h
  *
  * Copyright (c) 2019, Laurence Lundblade.
- * Copyright (c) 2019-2020, Arm Limited.
+ * Copyright (c) 2019, Arm Limited.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -150,7 +150,7 @@
 #define TOKEN_TEST_REQUIRE_SECURITY_LIFECYCLE true /* Mandatory claim */
 
 /* An integer (can be positive or negative */
-#define TOKEN_TEST_VALUE_CLIENT_ID 0 /* invalid value to trigger check */
+#define TOKEN_TEST_VALUE_CLIENT_ID INT32_MAX /* Value not checked */
 #define TOKEN_TEST_REQUIRE_CLIENT_ID true /* Mandatory claim */
 
 /* Text string naming the profile definition:
