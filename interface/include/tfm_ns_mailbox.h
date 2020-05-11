@@ -192,14 +192,12 @@ const void *tfm_ns_mailbox_os_get_task_handle(void);
 
 /**
  * \brief Performs use scenario and NS OS specific waiting mechanism to wait for
- *        the reply of the specified mailbox message to be returned from SPE.
+ *        the reply to be returned from SPE.
  *
  * \note This function is implemented by NS OS specific waiting mechanism
  *       according to use scenario.
- *
- * \param[in] handle            The handle of mailbox message.
  */
-void tfm_ns_mailbox_os_wait_reply(mailbox_msg_handle_t handle);
+void tfm_ns_mailbox_os_wait_reply(void);
 
 /*
  * \brief Performs use scenario and NS OS specific mechanism in a mailbox IRQ
@@ -213,20 +211,17 @@ void tfm_ns_mailbox_os_wait_reply(mailbox_msg_handle_t handle);
  *       mechanism according to use scenario.
  *
  * \param[in] task_handle       The handle to the task to be woken up.
- * \param[in] handle            The mailbox handle which can be used as thread
- *                              flag.
  */
-void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle,
-                                     mailbox_msg_handle_t handle);
+void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle);
 #else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
-#define tfm_ns_mailbox_os_wait_reply(handle)        do {} while (0)
+#define tfm_ns_mailbox_os_wait_reply()         do {} while (0)
 
 static inline const void *tfm_ns_mailbox_os_get_task_handle(void)
 {
     return NULL;
 }
 
-#define tfm_ns_mailbox_os_wake_task_isr(task, handle)    do {} while (0)
+#define tfm_ns_mailbox_os_wake_task_isr(task)  do {} while (0)
 #endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
 
 #ifdef TFM_MULTI_CORE_TEST

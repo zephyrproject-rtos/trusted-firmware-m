@@ -119,11 +119,6 @@ struct mailbox_msg_t {
                                             */
 };
 
-/* A handle to a mailbox message in use */
-typedef int32_t    mailbox_msg_handle_t;
-
-#define MAILBOX_MSG_NULL_HANDLE          ((mailbox_msg_handle_t)0)
-
 /*
  * Mailbox reply structure in non-secure memory
  * to hold the PSA client call return result from SPE

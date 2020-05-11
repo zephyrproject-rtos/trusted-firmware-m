@@ -18,6 +18,14 @@
 
 #define MAX_SEMAPHORE_COUNT            NUM_MAILBOX_QUEUE_SLOT
 
+/*
+ * Thread flag to manage wait/wake mechanism in mailbox.、
+ * Thread flag can be RTOS specific.
+ * The following example definition also covers the rule of CMSIS-RTOS2, which
+ * requires the MSB of thread flags must be 0b0.
+ */
+#define MAILBOX_THREAD_FLAG            0x5FCA0000
+
 static void *ns_lock_handle = NULL;
 
 #ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
@@ -26,15 +34,14 @@ const void *tfm_ns_mailbox_os_get_task_handle(void)
     return os_wrapper_thread_get_handle();
 }
 
-void tfm_ns_mailbox_os_wait_reply(mailbox_msg_handle_t handle)
+void tfm_ns_mailbox_os_wait_reply(void)
 {
-    os_wrapper_thread_wait_flag((uint32_t)handle, OS_WRAPPER_WAIT_FOREVER);
+    os_wrapper_thread_wait_flag(MAILBOX_THREAD_FLAG, OS_WRAPPER_WAIT_FOREVER);
 }
 
-void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle,
-                                     mailbox_msg_handle_t handle)
+void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle)
 {
-    os_wrapper_thread_set_flag_isr((void *)task_handle, (uint32_t)handle);
+    os_wrapper_thread_set_flag_isr((void *)task_handle, MAILBOX_THREAD_FLAG);
 }
 #endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
 
