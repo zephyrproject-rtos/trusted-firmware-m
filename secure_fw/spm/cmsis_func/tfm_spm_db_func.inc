@@ -71,10 +71,6 @@
 #define TFM_PARTITION_TFM_SP_SECURE_CLIENT_2_IRQ_COUNT 0
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-#define TFM_PARTITION_TFM_SP_MULTI_CORE_TEST_IRQ_COUNT 0
-#endif /* TFM_MULTI_CORE_TEST */
-
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
@@ -133,10 +129,6 @@ extern void tfm_ps_test_init(void);
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 extern void tfm_secure_client_2_init(void);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-extern void multi_core_test_main(void);
-#endif /* TFM_MULTI_CORE_TEST */
 
 /**************************************************************************/
 /** Context stacks for IRQ handling */
@@ -282,15 +274,6 @@ static uint32_t ctx_stack_TFM_SP_SECURE_CLIENT_2[
         )) / sizeof(uint32_t)];
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-static uint32_t ctx_stack_TFM_SP_MULTI_CORE_TEST[
-        (sizeof(struct interrupted_ctx_stack_frame_t) +
-            (TFM_PARTITION_TFM_SP_MULTI_CORE_TEST_IRQ_COUNT) * (
-                sizeof(struct interrupted_ctx_stack_frame_t) +
-                sizeof(struct handler_ctx_stack_frame_t)
-        )) / sizeof(uint32_t)];
-#endif /* TFM_MULTI_CORE_TEST */
-
 uint32_t *ctx_stack_list[] =
 {
     ns_interrupt_ctx_stack,
@@ -337,9 +320,6 @@ uint32_t *ctx_stack_list[] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     ctx_stack_TFM_SP_SECURE_CLIENT_2,
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-#ifdef TFM_MULTI_CORE_TEST
-    ctx_stack_TFM_SP_MULTI_CORE_TEST,
-#endif /* TFM_MULTI_CORE_TEST */
 };
 
 /**************************************************************************/
@@ -630,19 +610,6 @@ const struct spm_partition_static_data_t static_data_list[] =
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-    {
-        .partition_id         = TFM_SP_MULTI_CORE_TEST,
-        .partition_flags      = SPM_PART_FLAG_IPC
-                              | SPM_PART_FLAG_APP_ROT
-                              ,
-        .partition_priority   = TFM_PRIORITY(NORMAL),
-        .partition_init       = multi_core_test_main,
-        .dependencies_num     = 0,
-        .p_dependencies       = NULL,
-    },
-#endif /* TFM_MULTI_CORE_TEST */
-
 };
 
 /**************************************************************************/
@@ -746,10 +713,6 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     NULL,
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-    NULL,
-#endif /* TFM_MULTI_CORE_TEST */
 
 };
 
@@ -928,18 +891,6 @@ static struct spm_partition_desc_t partition_list [] =
         .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-    /* -----------------------------------------------------------------------*/
-    /* - Partition DB record for TFM_SP_MULTI_CORE_TEST */
-    /* -----------------------------------------------------------------------*/
-#ifdef TFM_MULTI_CORE_TEST
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
-#endif /* TFM_MULTI_CORE_TEST */
 
 };
 

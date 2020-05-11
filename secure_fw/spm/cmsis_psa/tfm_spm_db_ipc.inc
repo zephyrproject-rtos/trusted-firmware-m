@@ -71,10 +71,6 @@
 #define TFM_PARTITION_TFM_SP_SECURE_CLIENT_2_IRQ_COUNT 0
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-#define TFM_PARTITION_TFM_SP_MULTI_CORE_TEST_IRQ_COUNT 0
-#endif /* TFM_MULTI_CORE_TEST */
-
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
@@ -135,10 +131,6 @@ extern void tfm_ps_test_init(void);
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
 extern void tfm_secure_client_2_init(void);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-extern void multi_core_test_main(void);
-#endif /* TFM_MULTI_CORE_TEST */
 
 /**************************************************************************/
 /** Memory region declarations */
@@ -327,19 +319,6 @@ REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_SECURE_CLIENT_2_LINKER, _STACK$$ZI$$Limit);
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, $$Base);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, $$Limit);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$RW$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$ZI$$Limit);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Limit);
-#endif /* TFM_MULTI_CORE_TEST */
 
 /**************************************************************************/
 /** Dependencies array for Secure Partition */
@@ -645,20 +624,6 @@ const struct partition_static_t static_data_list[] =
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-    {
-        .psa_framework_version = 0x0100,
-        .partition_id         = TFM_SP_MULTI_CORE_TEST,
-        .partition_flags      = SPM_PART_FLAG_IPC
-                              | SPM_PART_FLAG_APP_ROT
-                              ,
-        .partition_priority   = TFM_PRIORITY(NORMAL),
-        .partition_init       = multi_core_test_main,
-        .dependencies_num     = 0,
-        .p_dependencies       = NULL,
-    },
-#endif /* TFM_MULTI_CORE_TEST */
-
 };
 
 /**************************************************************************/
@@ -761,10 +726,6 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     NULL,
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-    NULL,
-#endif /* TFM_MULTI_CORE_TEST */
 
 };
 
@@ -988,21 +949,6 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-    {
-        .code_start           = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, $$Base),
-        .code_limit           = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, $$Limit),
-        .ro_start             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, $$RO$$Base),
-        .ro_limit             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, $$RO$$Limit),
-        .rw_start             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$RW$$Base),
-        .rw_limit             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$RW$$Limit),
-        .zi_start             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$ZI$$Base),
-        .zi_limit             = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _DATA$$ZI$$Limit),
-        .stack_bottom         = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Base),
-        .stack_top            = PART_REGION_ADDR(TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Limit),
-    },
-#endif /* TFM_MULTI_CORE_TEST */
-
 };
 
 /**************************************************************************/
@@ -1179,18 +1125,6 @@ static struct partition_t partition_list [] =
         .platform_data_list       = NULL,
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-    /* -----------------------------------------------------------------------*/
-    /* - Partition DB record for TFM_SP_MULTI_CORE_TEST */
-    /* -----------------------------------------------------------------------*/
-#ifdef TFM_MULTI_CORE_TEST
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
-#endif /* TFM_MULTI_CORE_TEST */
 
 };
 

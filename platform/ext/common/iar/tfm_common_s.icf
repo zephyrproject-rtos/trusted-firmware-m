@@ -148,12 +148,6 @@ define block TFM_SP_SECURE_CLIENT_2_LINKER with alignment = 32 {
     };
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-define block TFM_SP_MULTI_CORE_TEST_LINKER with alignment = 32 {
-        ro object *multi_core_test.*,
-    };
-#endif /* TFM_MULTI_CORE_TEST */
-
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -235,16 +229,6 @@ define block TFM_SP_SECURE_CLIENT_2_LINKER_DATA with alignment = 32 {
 define block TFM_SP_SECURE_CLIENT_2_LINKER_STACK with alignment = 128, size = 0x300 { };
 #endif
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-define block TFM_SP_MULTI_CORE_TEST_LINKER_DATA with alignment = 32 {
-        rw object *multi_core_test.*,
-    };
-
-#if defined (TFM_PSA_API)
-define block TFM_SP_MULTI_CORE_TEST_LINKER_STACK with alignment = 128, size = 0x0100 { };
-#endif
-#endif /* TFM_MULTI_CORE_TEST */
 
 
     /*
@@ -461,10 +445,6 @@ define block LR_CODE with fixed order {
        block TFM_SP_SECURE_CLIENT_2_LINKER,
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-       block TFM_SP_MULTI_CORE_TEST_LINKER,
-#endif /* TFM_MULTI_CORE_TEST */
-
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -556,14 +536,6 @@ define block DATA with fixed order {
     block TFM_SP_SECURE_CLIENT_2_LINKER_STACK,
 #endif
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-    block TFM_SP_MULTI_CORE_TEST_LINKER_DATA,
-
-#if defined (TFM_PSA_API)
-    block TFM_SP_MULTI_CORE_TEST_LINKER_STACK,
-#endif
-#endif /* TFM_MULTI_CORE_TEST */
 
     /*
      * This empty, zero long execution region is here to mark the end address

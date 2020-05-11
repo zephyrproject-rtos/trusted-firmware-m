@@ -15,8 +15,12 @@
 #include "test/framework/test_framework_helpers.h"
 #include "tfm_ns_mailbox.h"
 
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
 /* Max number of child threads for multiple outstanding PSA client call test */
 #define NR_MULTI_CALL_CHILD                   (NUM_MAILBOX_QUEUE_SLOT * 2)
+#else
+#define NR_MULTI_CALL_CHILD                   0
+#endif
 
 /* The event flag to sync up between parent thread and child threads */
 #define TEST_CHILD_EVENT_FLAG(x)              (uint32_t)(0x1UL << (x))
@@ -46,23 +50,6 @@ struct test_params {
     bool is_parent;                 /* Whether executed in parent thread */
 };
 
-/* Multiple outstanding PSA client call test secure service SID and version */
-struct multi_call_service_info {
-    uint32_t sid;
-    uint32_t version;
-};
-
-/*
- * If not enough secure services are defined for multiple outstanding PSA
- * client call test, the definitions below will trigger compiling error.
- */
-const static struct multi_call_service_info multi_call_service_list[] = {
-    {MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_SID,
-     MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_VERSION},
-    {MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_SID,
-     MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_VERSION}
-};
-
 /* List of tests */
 static void multi_client_call_light_test(struct test_result_t *ret);
 static void multi_client_call_heavy_test(struct test_result_t *ret);
@@ -70,16 +57,22 @@ static void multi_client_call_heavy_test(struct test_result_t *ret);
 static struct test_t multi_core_tests[] = {
     {&multi_client_call_light_test,
      "MULTI_CLIENT_CALL_LIGHT_TEST",
-     "Multiple outstanding NS PSA client calls lightweight test", {TEST_PASSED}},
+     "Multiple outstanding NS PSA client calls lightweight test",
+     {TEST_PASSED}},
     {&multi_client_call_heavy_test,
      "MULTI_CLIENT_CALL_HEAVY_TEST",
-     "Multiple outstanding NS PSA client calls heavyweight test", {TEST_PASSED}},
+     "Multiple outstanding NS PSA client calls heavyweight test",
+     {TEST_PASSED}},
 };
 
 void register_testsuite_multi_core_ns_interface(
                                               struct test_suite_t *p_test_suite)
 {
     uint32_t list_size;
+
+    if (!sizeof(multi_core_tests)) {
+        return;
+    }
 
     list_size = (sizeof(multi_core_tests) / sizeof(multi_core_tests[0]));
 
@@ -215,34 +208,17 @@ static void multi_client_call_test(struct test_result_t *ret,
     ret->val = TEST_PASSED;
 }
 
-static inline enum test_status_t multi_client_call_light_loop(uint8_t child_idx,
-                                                             uint32_t nr_rounds)
+static inline
+enum test_status_t multi_client_call_light_loop(uint32_t nr_rounds)
 {
-    psa_handle_t handle;
-    psa_status_t status;
-    uint32_t i, nr_calls, nr_service, sid, version;
-    struct psa_outvec outvec = {&nr_calls, sizeof(nr_calls)};
-
-    nr_service = sizeof(multi_call_service_list) /
-                 sizeof(multi_call_service_list[0]);
-    /* Determine the secure service ID and version */
-    sid = multi_call_service_list[child_idx % nr_service].sid;
-    version = multi_call_service_list[child_idx % nr_service].version;
+    uint32_t i, version;
 
     for (i = 0; i < nr_rounds; i++) {
-        handle = psa_connect(sid, version);
-        if (handle <= 0) {
-            TEST_LOG("Fail to connect test service!\r\n");
+        version = psa_framework_version();
+        if (version != PSA_FRAMEWORK_VERSION) {
+            TEST_LOG("Incorrect PSA framework version!\r\n");
             return TEST_FAILED;
         }
-
-        status = psa_call(handle, PSA_IPC_CALL, NULL, 0, &outvec, 1);
-        if (status < 0) {
-            TEST_LOG("Fail to call test service\r\n");
-            return TEST_FAILED;
-        }
-
-        psa_close(handle);
     }
 
     return TEST_PASSED;
@@ -258,8 +234,7 @@ static void multi_client_call_light_runner(void *argument)
                                     OS_WRAPPER_WAIT_FOREVER);
     }
 
-    params->ret = multi_client_call_light_loop(params->child_idx,
-                                               params->nr_rounds);
+    params->ret = multi_client_call_light_loop(params->nr_rounds);
 
     if (!params->is_parent) {
         /* Mark this child thread has completed */

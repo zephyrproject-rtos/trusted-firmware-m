@@ -24,7 +24,6 @@
 #include "test/test_services/tfm_irq_test_service_1/psa_manifest/tfm_irq_test_service_1.h"
 #include "test/test_services/tfm_ps_test_service/psa_manifest/tfm_ps_test_service.h"
 #include "test/test_services/tfm_secure_client_2/psa_manifest/tfm_secure_client_2.h"
-#include "test/test_services/tfm_multi_core_test/psa_manifest/tfm_multi_core_test.h"
 
 const struct tfm_spm_service_db_t service_db[] =
 {
@@ -503,28 +502,6 @@ const struct tfm_spm_service_db_t service_db[] =
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-    /******** TFM_SP_MULTI_CORE_TEST ********/
-    {
-        .name = "MULTI_CORE_MULTI_CLIENT_CALL_TEST_0",
-        .partition_id = TFM_SP_MULTI_CORE_TEST,
-        .signal = MULTI_CORE_MULTI_CLIENT_CALL_TEST_0_SIGNAL,
-        .sid = 0x0000F100,
-        .non_secure_client = true,
-        .version = 1,
-        .version_policy = TFM_VERSION_POLICY_STRICT
-    },
-    {
-        .name = "MULTI_CORE_MULTI_CLIENT_CALL_TEST_1",
-        .partition_id = TFM_SP_MULTI_CORE_TEST,
-        .signal = MULTI_CORE_MULTI_CLIENT_CALL_TEST_1_SIGNAL,
-        .sid = 0x0000F101,
-        .non_secure_client = true,
-        .version = 1,
-        .version_policy = TFM_VERSION_POLICY_STRICT
-    },
-#endif /* TFM_MULTI_CORE_TEST */
-
 };
 
 /**************************************************************************/
@@ -912,24 +889,6 @@ struct tfm_spm_service_t service[] =
         .list = {0},
     },
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-    /******** TFM_SP_MULTI_CORE_TEST ********/
-    {
-        .service_db = NULL,
-        .partition = NULL,
-        .handle_list = {0},
-        .msg_queue = {0},
-        .list = {0},
-    },
-    {
-        .service_db = NULL,
-        .partition = NULL,
-        .handle_list = {0},
-        .msg_queue = {0},
-        .list = {0},
-    },
-#endif /* TFM_MULTI_CORE_TEST */
 
 };
 

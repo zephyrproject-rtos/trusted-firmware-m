@@ -28,9 +28,8 @@ extern "C" {
 #define TFM_IRQ_TEST_1                                                 (267)
 #define TFM_SP_PS_TEST                                                 (268)
 #define TFM_SP_SECURE_CLIENT_2                                         (269)
-#define TFM_SP_MULTI_CORE_TEST                                         (270)
 
-#define TFM_MAX_USER_PARTITIONS                                        (15)
+#define TFM_MAX_USER_PARTITIONS                                        (14)
 
 #ifdef __cplusplus
 }

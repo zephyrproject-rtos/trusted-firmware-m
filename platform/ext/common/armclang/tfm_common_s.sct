@@ -168,13 +168,6 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
-#ifdef TFM_MULTI_CORE_TEST
-    TFM_SP_MULTI_CORE_TEST_LINKER +0 ALIGN 32 {
-        *multi_core_test.* (+RO)
-        *(TFM_SP_MULTI_CORE_TEST_ATTR_FN)
-    }
-#endif /* TFM_MULTI_CORE_TEST */
-
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -302,19 +295,6 @@ LR_CODE S_CODE_START {
     }
 #endif
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-
-#ifdef TFM_MULTI_CORE_TEST
-    TFM_SP_MULTI_CORE_TEST_LINKER_DATA +0 ALIGN 32 {
-        *multi_core_test.* (+RW +ZI)
-        *(TFM_SP_MULTI_CORE_TEST_ATTR_RW)
-        *(TFM_SP_MULTI_CORE_TEST_ATTR_ZI)
-    }
-
-#if defined (TFM_PSA_API)
-    TFM_SP_MULTI_CORE_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x0100 {
-    }
-#endif
-#endif /* TFM_MULTI_CORE_TEST */
 
     /*
      * This empty, zero long execution region is here to mark the end address
