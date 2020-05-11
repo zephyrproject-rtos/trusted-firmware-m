@@ -21,7 +21,6 @@
 #include "tfm_veneers.h"
 #endif /* TFM_PSA_API */
 #ifdef TFM_ENABLE_IRQ_TEST
-#include "platform_irq.h"
 #include "tfm_peripherals_def.h"
 #endif
 
