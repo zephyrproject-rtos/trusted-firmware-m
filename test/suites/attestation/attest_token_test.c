@@ -271,7 +271,6 @@ static int_fast16_t check_simple_claims(
 
     return_value = 0;
 
-
     /* -- check value of the nonce claim -- */
     if(!IS_ITEM_FLAG_SET(NONCE_FLAG, simple_claims->item_flags)) {
         /* Claim is not present in token */
@@ -425,9 +424,16 @@ static int_fast16_t check_simple_claims(
         /* Don't have to check if its presence is required */
         if(TOKEN_TEST_VALUE_CLIENT_ID != INT32_MAX &&
            simple_claims->client_id != TOKEN_TEST_VALUE_CLIENT_ID) {
-            /* Check of its value was requested and failed */
-            return_value = -63;
-            goto Done;
+#if DOMAIN_NS == 1U
+            /* Non-secure caller client ID has to be negative */
+            if(simple_claims->client_id > -1) {
+#else
+            /* Secure caller client ID has to be positive */
+            if(simple_claims->client_id < 1) {
+#endif
+                return_value = -63;
+                goto Done;
+            }
         }
     }
 
