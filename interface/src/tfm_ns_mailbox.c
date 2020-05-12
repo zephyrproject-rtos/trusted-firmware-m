@@ -8,8 +8,6 @@
 #include <string.h>
 
 #include "cmsis_compiler.h"
-#include "os_wrapper/common.h"
-#include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
 
 /* The pointer to NSPE mailbox queue */
@@ -234,7 +232,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
      * Fetch the current task handle. The task will be woken up according the
      * handle value set in the owner field.
      */
-    task_handle = tfm_ns_mailbox_get_task_handle();
+    task_handle = tfm_ns_mailbox_os_get_task_handle();
     set_msg_owner(idx, task_handle);
 
     get_mailbox_msg_handle(idx, handle);
@@ -297,7 +295,7 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
         return MAILBOX_INVAL_PARAMS;
     }
 
-    if (tfm_ns_multi_core_lock_acquire() != OS_WRAPPER_SUCCESS) {
+    if (tfm_ns_mailbox_os_lock_acquire() != MAILBOX_SUCCESS) {
         return MAILBOX_QUEUE_FULL;
     }
 
@@ -316,7 +314,7 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
     }
 
 exit:
-    if (tfm_ns_multi_core_lock_release() != OS_WRAPPER_SUCCESS) {
+    if (tfm_ns_mailbox_os_lock_release() != MAILBOX_SUCCESS) {
         return MAILBOX_GENERIC_ERROR;
     }
 
@@ -365,8 +363,8 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
         return ret;
     }
 
-    tfm_ns_mailbox_hal_wake_task_isr(mailbox_queue_ptr->queue[idx].owner,
-                                     handle);
+    tfm_ns_mailbox_os_wake_task_isr(mailbox_queue_ptr->queue[idx].owner,
+                                    handle);
 
     return MAILBOX_SUCCESS;
 }
@@ -397,6 +395,11 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 
     /* Platform specific initialization. */
     ret = tfm_ns_mailbox_hal_init(queue);
+    if (ret != MAILBOX_SUCCESS) {
+        return ret;
+    }
+
+    ret = tfm_ns_mailbox_os_lock_init();
 
 #ifdef TFM_MULTI_CORE_TEST
     tfm_ns_mailbox_tx_stats_init();
@@ -420,7 +423,7 @@ static int32_t mailbox_wait_reply(mailbox_msg_handle_t handle)
     }
 
     while (1) {
-        tfm_ns_mailbox_hal_wait_reply(handle);
+        tfm_ns_mailbox_os_wait_reply(handle);
 
         /*
          * Woken up from sleep

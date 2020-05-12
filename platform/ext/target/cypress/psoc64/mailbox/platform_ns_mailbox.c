@@ -98,22 +98,6 @@ int32_t tfm_ns_mailbox_hal_init(struct ns_mailbox_queue_t *queue)
     return MAILBOX_SUCCESS;
 }
 
-const void *tfm_ns_mailbox_get_task_handle(void)
-{
-    return os_wrapper_thread_get_handle();
-}
-
-void tfm_ns_mailbox_hal_wait_reply(mailbox_msg_handle_t handle)
-{
-    os_wrapper_thread_wait_flag((uint32_t)handle, OS_WRAPPER_WAIT_FOREVER);
-}
-
-void tfm_ns_mailbox_hal_wake_task_isr(const void *task_handle,
-                                      mailbox_msg_handle_t handle)
-{
-    os_wrapper_thread_set_flag_isr((void *)task_handle, (uint32_t)handle);
-}
-
 void tfm_ns_mailbox_hal_enter_critical(void)
 {
     saved_irq_state = Cy_SysLib_EnterCriticalSection();

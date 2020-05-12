@@ -113,8 +113,9 @@ endif()
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_mailbox.c
-                        ${INTERFACE_SRC_DIR}/tfm_multi_core_api.c
+                        ${INTERFACE_SRC_DIR}/tfm_multi_core_ns_api.c
                         ${INTERFACE_SRC_DIR}/tfm_multi_core_psa_ns_api.c
+                        ${INTERFACE_SRC_DIR}/tfm_ns_mailbox_rtos_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 else()
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c

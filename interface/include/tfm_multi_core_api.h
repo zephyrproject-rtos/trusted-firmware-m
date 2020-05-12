@@ -14,8 +14,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "os_wrapper/common.h"
-
 /**
  * \brief Called on the non-secure CPU.
  *        Flags that the non-secure side has completed its initialization.
@@ -37,36 +35,6 @@ int32_t tfm_ns_wait_for_s_cpu_ready(void);
  * \retval Otherwise, return specific error code.
  */
 int32_t tfm_platform_ns_wait_for_s_cpu_ready(void);
-
-#ifdef FORWARD_PROT_MSG
-static inline uint32_t tfm_ns_multi_core_lock_acquire(void)
-{
-    return OS_WRAPPER_SUCCESS;
-}
-
-static inline uint32_t tfm_ns_multi_core_lock_release(void)
-{
-    return OS_WRAPPER_SUCCESS;
-}
-#else /* FORWARD_PROT_MSG */
-/**
- * \brief Acquire the multi-core lock for synchronizing PSA client call(s)
- *        The actual implementation depends on the use scenario.
- *
- * \return \ref OS_WRAPPER_SUCCESS on success
- * \return \ref OS_WRAPPER_ERROR on error
- */
-uint32_t tfm_ns_multi_core_lock_acquire(void);
-
-/**
- * \brief Release the multi-core lock for synchronizing PSA client call(s)
- *        The actual implementation depends on the use scenario.
- *
- * \return \ref OS_WRAPPER_SUCCESS on success
- * \return \ref OS_WRAPPER_ERROR on error
- */
-uint32_t tfm_ns_multi_core_lock_release(void);
-#endif /* FORWARD_PROT_MSG */
 
 #ifdef __cplusplus
 }
