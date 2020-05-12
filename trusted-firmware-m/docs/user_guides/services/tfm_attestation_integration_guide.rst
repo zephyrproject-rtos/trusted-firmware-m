@@ -248,11 +248,6 @@ according to their SPM implementation.
     enum psa_attest_err_t
     attest_get_caller_client_id(int32_t *caller_id);
 
-    enum psa_attest_err_t
-    attest_check_memory_access(void *addr,
-                               uint32_t size,
-                               enum attest_memory_access access);
-
 - ``attest_get_boot_data()``: Service can retrieve the relevant data from shared
   memory area between boot loader and runtime software. It might be the case
   that only SPM has direct access to the shared memory area, therefore this
@@ -271,8 +266,6 @@ according to their SPM implementation.
       tlv_header->tlv_tot_len = sizeof(struct shared_data_tlv_header *tlv_header);
 
 - ``attest_get_caller_client_id()``: Retrieves the ID of the caller thread.
-- ``attest_check_memory_access()``: Validates the availability and access rights
-  of memory regions received as input data: challenge object, token buffer, etc.
 - ``tfm_client.h``: Service relies on the following external definitions, which
   must be present or included in this header file:
 

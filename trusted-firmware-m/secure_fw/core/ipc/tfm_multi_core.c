@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,10 +15,6 @@
 #include "log/tfm_assert.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
-
-void tfm_nspm_configure_clients(void)
-{
-}
 
 int32_t tfm_nspm_get_current_client_id(void)
 {
@@ -46,7 +42,8 @@ void tfm_nspm_thread_entry(void)
     while (1) {
     }
 
-    /* Should not run here */
+
+    /* NOTREACHED */
     TFM_ASSERT(false);
 }
 

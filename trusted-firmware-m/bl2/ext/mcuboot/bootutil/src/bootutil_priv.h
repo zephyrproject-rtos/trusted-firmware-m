@@ -32,6 +32,7 @@
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
 #include "flash_layout.h"
+#include "mcuboot_config/mcuboot_config.h"
 
 #ifdef __cplusplus
 extern "C" {

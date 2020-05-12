@@ -37,10 +37,6 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_s1/partition")
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
-    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
-        message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
-        mcuboot_override_upgrade_strategy("NO_SWAP")
-    endif()
 
     #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
     #       instead independently loaded from secure code as a blob.
@@ -63,6 +59,10 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_s1/services/incl
 embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 # Gather all source files we need.
+if (TFM_PARTITION_PLATFORM)
+    list(APPEND ALL_SRC_C_NS "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_ioctl_ns_api.c")
+endif()
+
 if (NOT DEFINED BUILD_CMSIS_CORE)
     message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif (BUILD_CMSIS_CORE)
@@ -93,8 +93,9 @@ if (NOT DEFINED BUILD_NATIVE_DRIVERS)
     message(FATAL_ERROR "Configuration variable BUILD_NATIVE_DRIVERS (true|false) is undefined!")
 elseif (BUILD_NATIVE_DRIVERS)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/Native_Driver/uart_pl011_drv.c")
-    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpc_sie200_drv.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/Native_Driver/ppc_sse200_drv.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/gpio_cmsdk_drv.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpc_sie200_drv.c")
 endif()
 
 if (NOT DEFINED BUILD_TIME)
@@ -131,6 +132,7 @@ elseif (BUILD_TARGET_CFG)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpu_armv8m_drv.c")
     if (TFM_PARTITION_PLATFORM)
         list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_platform_system.c")
+        list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_ioctl_s_api.c")
     endif()
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
     embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
@@ -154,7 +156,7 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c")
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
@@ -192,4 +194,57 @@ elseif (BUILD_FLASH)
     set(ITS_CREATE_FLASH_LAYOUT ON)
     embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_s1/CMSIS_Driver" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
+endif()
+
+#The CC312 is disabled by default
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
+    set (CRYPTO_HW_ACCELERATOR OFF)
+endif()
+
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR_OTP_STATE)
+    set (CRYPTO_HW_ACCELERATOR_OTP_STATE "DISABLED")
+endif()
+
+if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
+    set(CRYPTO_HW_ACCELERATOR OFF)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312Provisioning.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_PROVISIONING")
+
+    add_definitions("-DCC_IOT")
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    set(CRYPTO_HW_ACCELERATOR ON)
+
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_ENABLED")
+elseif(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "DISABLED")
+else()
+    message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_OTP_STATE invalid. expected (DISABLED|PROVISIONING|ENABLED)")
+endif()
+
+#Enable CryptoCell-312 HW accelerator
+if (CRYPTO_HW_ACCELERATOR)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR")
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_CC312")
+
+    add_definitions("-DCC_IOT")
+    #The CC312 uses GNU make as a build system so does not use the cmake flag
+    #system. As such any flags that need to be set for both CC312 and TF-M
+    #require setting multiple times.
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+
+    #Compiling this file requires to disable warning: -Wunused-local-typedefs
+    set_source_files_properties("${PLATFORM_DIR}/target/musca_s1/dummy_crypto_keys.c" PROPERTIES COMPILE_FLAGS -Wno-unused-local-typedefs)
 endif()

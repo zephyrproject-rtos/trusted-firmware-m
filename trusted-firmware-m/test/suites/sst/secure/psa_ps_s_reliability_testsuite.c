@@ -36,9 +36,9 @@ static void tfm_sst_test_3002(struct test_result_t *ret);
 
 static struct test_t reliability_tests[] = {
     {&tfm_sst_test_3001, "TFM_SST_TEST_3001",
-     "repetitive sets and gets in/from an asset", {0} },
+     "repetitive sets and gets in/from an asset", {TEST_PASSED} },
     {&tfm_sst_test_3002, "TFM_SST_TEST_3002",
-     "repetitive sets, gets and removes", {0} },
+     "repetitive sets, gets and removes", {TEST_PASSED} },
 };
 
 void register_testsuite_s_psa_ps_reliability(struct test_suite_t *p_test_suite)

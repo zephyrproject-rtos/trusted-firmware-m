@@ -47,7 +47,7 @@ if (CRYPTO_HW_ACCELERATOR)
 endif()
 
 #Create a list of the C defines
-list(APPEND TFM_CRYPTO_C_DEFINES_LIST __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} __thumb2__ TFM_LVL=${TFM_LVL})
+list(APPEND TFM_CRYPTO_C_DEFINES_LIST __thumb2__ TFM_LVL=${TFM_LVL})
 
 if (CRYPTO_ENGINE_MBEDTLS)
   list(APPEND TFM_CRYPTO_C_DEFINES_LIST TFM_CRYPTO_ENGINE_MBEDTLS MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}")
@@ -98,6 +98,8 @@ if (CRYPTO_ENGINE_MBEDTLS)
 		string(APPEND MBEDCRYPTO_C_FLAGS " -DMBEDTLS_USER_CONFIG_FILE=\\\\\\\"${MBEDTLS_USER_CONFIG_FILE}\\\\\\\""
 		" -I${MBEDTLS_USER_CONFIG_PATH}")
 	endif()
+	#Add TF-M include directory so Mbed Crypto can include PSA ITS headers
+	string(APPEND MBEDCRYPTO_C_FLAGS " -I${TFM_ROOT_DIR}/interface/include")
 
 	#Build Mbed Crypto as external project.
 	#This ensures Mbed Crypto is built with exactly defined settings.
@@ -108,6 +110,11 @@ endif()
 #Specify what we build (for the crypto service, build as a static library)
 add_library(tfm_crypto STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
 embedded_set_target_compile_defines(TARGET tfm_crypto LANGUAGE C DEFINES ${TFM_CRYPTO_C_DEFINES_LIST})
+
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET tfm_crypto LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 if (CRYPTO_ENGINE_MBEDTLS)
 	#Add a dependency on the Mbed Crypto install target.
 	add_dependencies(tfm_crypto ${MBEDCRYPTO_TARGET_NAME}_install)
@@ -121,6 +128,11 @@ if (CRYPTO_ENGINE_MBEDTLS)
 		endif()
 		include(${CRYPTO_HW_ACCELERATOR_CMAKE_LINK})
 	endif()
+endif()
+
+#Persistent key requires ITS service
+if (NOT CRYPTO_KEY_MODULE_DISABLED)
+	target_link_libraries(tfm_crypto PRIVATE tfm_internal_trusted_storage)
 endif()
 
 #Set common compiler and linker flags

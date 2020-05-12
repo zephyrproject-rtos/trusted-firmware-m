@@ -291,17 +291,25 @@ SECTIONS
     {
         *libc_nano*:*(.text*)
         *libc_nano*:*(.rodata*)
-        *tfm_spm_services.o(.text*)
-        *tfm_spm_services.o(.rodata*)
-        *platform_retarget_dev.o(.text*)
-        *platform_retarget_dev.o(.rodata*)
-        *device_definition.o(.text*)
-        *device_definition.o(.rodata*)
+        *tfm_spm_services.*(.text*)
+        *tfm_spm_services.*(.rodata*)
+        *platform_retarget_dev.*(.text*)
+        *platform_retarget_dev.*(.rodata*)
+        *device_definition.*(.text*)
+        *device_definition.*(.rodata*)
         *(SFN)
         *libgcc*:*(.text*)
         *libgcc*:*(.rodata*)
         *libtfmsprt*:*(.text*)
         *libtfmsprt*:*(.rodata*)
+        *psa_client.*(.text*)              /* NXP */
+        *psa_client.*(.rodata*)
+        *psa_service.*(.text*)             /* NXP */
+        *psa_service.*(.rodata*)
+        *psa_lifecycle.*(.text*)             /* NXP */
+        *psa_lifecycle.*(.rodata*)
+        *tfm_log_raw.*(.text*)             /* NXP */
+        *tfm_log_raw.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
@@ -309,20 +317,6 @@ SECTIONS
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
     Image$$TFM_PSA_CODE_START$$Base = .;
-
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    .TFM_SP_STORAGE_LINKER : ALIGN(32)
-    {
-        *tfm_storage*:*(.text*)
-        *tfm_storage*:*(.rodata*)
-        *(TFM_SP_STORAGE_ATTR_FN)
-        . = ALIGN(32);
-    } > FLASH
-    Image$$TFM_SP_STORAGE_LINKER$$RO$$Base = ADDR(.TFM_SP_STORAGE_LINKER);
-    Image$$TFM_SP_STORAGE_LINKER$$RO$$Limit = ADDR(.TFM_SP_STORAGE_LINKER) + SIZEOF(.TFM_SP_STORAGE_LINKER);
-    Image$$TFM_SP_STORAGE_LINKER$$Base = ADDR(.TFM_SP_STORAGE_LINKER);
-    Image$$TFM_SP_STORAGE_LINKER$$Limit = ADDR(.TFM_SP_STORAGE_LINKER) + SIZEOF(.TFM_SP_STORAGE_LINKER);
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     .TFM_SP_ITS_LINKER : ALIGN(32)
@@ -471,6 +465,22 @@ SECTIONS
 
     /**** APPLICATION RoT RO part (CODE + RODATA) start here */
     Image$$TFM_APP_CODE_START$$Base = .;
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+    .TFM_SP_STORAGE_LINKER : ALIGN(32)
+    {
+        *tfm_storage*:*(.text*)
+        *tfm_storage*:*(.rodata*)
+        *test_sst_nv_counters.*(.text*)
+        *test_sst_nv_counters.*(.rodata*)
+        *(TFM_SP_STORAGE_ATTR_FN)
+        . = ALIGN(32);
+    } > FLASH
+    Image$$TFM_SP_STORAGE_LINKER$$RO$$Base = ADDR(.TFM_SP_STORAGE_LINKER);
+    Image$$TFM_SP_STORAGE_LINKER$$RO$$Limit = ADDR(.TFM_SP_STORAGE_LINKER) + SIZEOF(.TFM_SP_STORAGE_LINKER);
+    Image$$TFM_SP_STORAGE_LINKER$$Base = ADDR(.TFM_SP_STORAGE_LINKER);
+    Image$$TFM_SP_STORAGE_LINKER$$Limit = ADDR(.TFM_SP_STORAGE_LINKER) + SIZEOF(.TFM_SP_STORAGE_LINKER);
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     .TFM_SP_CORE_TEST_2_LINKER : ALIGN(32)
@@ -673,9 +683,9 @@ SECTIONS
 #if defined(TFM_PSA_API)
     .TFM_UNPRIV_DATA : ALIGN(32)
     {
-        */tfm_spm_services.o(.data*)
-        */platform_retarget_dev.o(.data*)
-        */device_definition.o(.data*)
+        */tfm_spm_services.*(.data*)
+        */platform_retarget_dev.*(.data*)
+        */device_definition.*(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_DATA);
@@ -683,12 +693,12 @@ SECTIONS
 
     .TFM_UNPRIV_BSS : ALIGN(32)
     {
-        */tfm_spm_services.o(.bss*)
-        */platform_retarget_dev.o(.bss*)
-        */device_definition.o(.bss*)
-        */tfm_spm_services.o(COMMON)
-        */platform_retarget_dev.o(COMMON)
-        */device_definition.o(COMMON)
+        */tfm_spm_services.*(.bss*)
+        */platform_retarget_dev.*(.bss*)
+        */device_definition.*(.bss*)
+        */tfm_spm_services.*(COMMON)
+        */platform_retarget_dev.*(COMMON)
+        */device_definition.*(COMMON)
         . = ALIGN(32);
     } > RAM AT> RAM
     Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
@@ -697,6 +707,42 @@ SECTIONS
 
     /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;
+
+#ifdef TFM_PARTITION_SECURE_STORAGE
+    .TFM_SP_STORAGE_LINKER_DATA : ALIGN(32)
+    {
+        *tfm_storage*:*(.data*)
+        *test_sst_nv_counters.*(.data*)
+        *(TFM_SP_STORAGE_ATTR_RW)
+        . = ALIGN(32);
+    } > RAM AT> FLASH
+    Image$$TFM_SP_STORAGE_LINKER_DATA$$RW$$Base = ADDR(.TFM_SP_STORAGE_LINKER_DATA);
+    Image$$TFM_SP_STORAGE_LINKER_DATA$$RW$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_DATA) + SIZEOF(.TFM_SP_STORAGE_LINKER_DATA);
+
+    .TFM_SP_STORAGE_LINKER_BSS : ALIGN(32)
+    {
+        start_of_TFM_SP_STORAGE_LINKER = .;
+        *tfm_storage*:*(.bss*)
+        *tfm_storage*:*(COMMON)
+        *test_sst_nv_counters.*(.bss*)
+        *test_sst_nv_counters.*(COMMON)
+        *(TFM_SP_STORAGE_ATTR_ZI)
+        . += (. - start_of_TFM_SP_STORAGE_LINKER) ? 0 : 4;
+        . = ALIGN(32);
+    } > RAM AT> RAM
+    Image$$TFM_SP_STORAGE_LINKER_DATA$$ZI$$Base = ADDR(.TFM_SP_STORAGE_LINKER_BSS);
+    Image$$TFM_SP_STORAGE_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_BSS) + SIZEOF(.TFM_SP_STORAGE_LINKER_BSS);
+
+#if defined (TFM_PSA_API)
+    .TFM_SP_STORAGE_LINKER_STACK : ALIGN(128)
+    {
+        . += 0x800;
+    } > RAM
+    Image$$TFM_SP_STORAGE_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_STORAGE_LINKER_STACK);
+    Image$$TFM_SP_STORAGE_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_STACK) + SIZEOF(.TFM_SP_STORAGE_LINKER_STACK);
+#endif
+
+#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     .TFM_SP_CORE_TEST_2_LINKER_DATA : ALIGN(32)
@@ -953,39 +999,6 @@ SECTIONS
 
     /**** PSA RoT DATA start here */
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
-
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    .TFM_SP_STORAGE_LINKER_DATA : ALIGN(32)
-    {
-        *tfm_storage*:*(.data*)
-        *(TFM_SP_STORAGE_ATTR_RW)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-    Image$$TFM_SP_STORAGE_LINKER_DATA$$RW$$Base = ADDR(.TFM_SP_STORAGE_LINKER_DATA);
-    Image$$TFM_SP_STORAGE_LINKER_DATA$$RW$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_DATA) + SIZEOF(.TFM_SP_STORAGE_LINKER_DATA);
-
-    .TFM_SP_STORAGE_LINKER_BSS : ALIGN(32)
-    {
-        start_of_TFM_SP_STORAGE_LINKER = .;
-        *tfm_storage*:*(.bss*)
-        *tfm_storage*:*(COMMON)
-        *(TFM_SP_STORAGE_ATTR_ZI)
-        . += (. - start_of_TFM_SP_STORAGE_LINKER) ? 0 : 4;
-        . = ALIGN(32);
-    } > RAM AT> RAM
-    Image$$TFM_SP_STORAGE_LINKER_DATA$$ZI$$Base = ADDR(.TFM_SP_STORAGE_LINKER_BSS);
-    Image$$TFM_SP_STORAGE_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_BSS) + SIZEOF(.TFM_SP_STORAGE_LINKER_BSS);
-
-#if defined (TFM_PSA_API)
-    .TFM_SP_STORAGE_LINKER_STACK : ALIGN(128)
-    {
-        . += 0x600;
-    } > RAM
-    Image$$TFM_SP_STORAGE_LINKER_STACK$$ZI$$Base = ADDR(.TFM_SP_STORAGE_LINKER_STACK);
-    Image$$TFM_SP_STORAGE_LINKER_STACK$$ZI$$Limit = ADDR(.TFM_SP_STORAGE_LINKER_STACK) + SIZEOF(.TFM_SP_STORAGE_LINKER_STACK);
-#endif
-
-#endif /* TFM_PARTITION_SECURE_STORAGE */
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     .TFM_SP_ITS_LINKER_DATA : ALIGN(32)

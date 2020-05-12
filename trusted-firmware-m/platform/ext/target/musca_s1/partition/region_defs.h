@@ -28,8 +28,8 @@
 #define S_PSP_STACK_SIZE        (0x0000800)
 
 #define NS_HEAP_SIZE            (0x0001000)
-#define NS_MSP_STACK_SIZE       (0x0000400)
-#define NS_PSP_STACK_SIZE       (0x0000C00)
+#define NS_MSP_STACK_SIZE       (0x00000A0)
+#define NS_PSP_STACK_SIZE       (0x0000140)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
@@ -72,11 +72,11 @@
  */
 #ifdef BL2
 #define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
-#define BL2_TRAILER_SIZE     (0x400)       /* 1 KB */
+#define BL2_TRAILER_SIZE     (0x800)       /* 2 KB */
 #else
 /* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
 #define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x800)
+#define BL2_TRAILER_SIZE     (0xC00)
 #endif /* BL2 */
 
 #define IMAGE_S_CODE_SIZE \

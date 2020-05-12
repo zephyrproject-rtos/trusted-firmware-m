@@ -44,6 +44,7 @@ if (BL2)
 	if (NOT CMAKE_BUILD_TYPE STREQUAL "debug")
 		set(MCUBOOT_LOG_LEVEL "LOG_LEVEL_OFF")
 	endif()
+
 	validate_cache_value(MCUBOOT_LOG_LEVEL)
 
 	if ((${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" OR

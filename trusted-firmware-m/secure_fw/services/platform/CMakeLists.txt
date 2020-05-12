@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,7 +31,10 @@ endif()
 
 #Specify what we build (for the platform service, build as a static library)
 add_library(tfm_platform STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
-embedded_set_target_compile_defines(TARGET tfm_platform LANGUAGE C DEFINES __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} __thumb2__ TFM_LVL=${TFM_LVL})
+embedded_set_target_compile_defines(TARGET tfm_platform LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL})
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET tfm_platform LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
 
 #Set common compiler and linker flags
 config_setting_shared_compiler_flags(tfm_platform)

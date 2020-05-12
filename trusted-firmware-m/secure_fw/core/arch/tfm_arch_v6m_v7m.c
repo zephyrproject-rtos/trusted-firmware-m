@@ -44,6 +44,11 @@ extern uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr);
  *
  * Scheduler does not support handler mode thread so take PSP as thread SP.
  */
+#if defined(__ICCARM__)
+extern void tfm_pendsv_do_schedule(void);
+#pragma required = tfm_pendsv_do_schedule
+#endif
+
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
@@ -79,10 +84,14 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
     p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
 
+#if defined(__ICCARM__)
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+#pragma required = tfm_core_svc_handler
+#endif
+
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    ".syntax unified               \n"
     "MOVS    r0, #4                \n" /* Check store SP in thread mode to r0 */
     "MOV     r1, lr                \n"
     "TST     r0, r1                \n"

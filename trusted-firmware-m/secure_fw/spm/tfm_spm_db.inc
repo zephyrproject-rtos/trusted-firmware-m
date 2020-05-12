@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -565,8 +565,19 @@ static int32_t dependencies_TFM_SP_STORAGE[] =
     TFM_ITS_GET_SID,
     TFM_ITS_GET_INFO_SID,
     TFM_ITS_REMOVE_SID,
+    TFM_SP_PLATFORM_NV_COUNTER_SID,
 };
 #endif /* TFM_PARTITION_SECURE_STORAGE */
+
+#ifdef TFM_PARTITION_CRYPTO
+static int32_t dependencies_TFM_SP_CRYPTO[] =
+{
+    TFM_ITS_SET_SID,
+    TFM_ITS_GET_SID,
+    TFM_ITS_GET_INFO_SID,
+    TFM_ITS_REMOVE_SID,
+};
+#endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
 static int32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
@@ -671,11 +682,11 @@ const struct spm_partition_static_data_t static_data_list[] =
 #endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_STORAGE,
         .partition_flags      = SPM_PART_FLAG_IPC
-                              | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                              | SPM_PART_FLAG_APP_ROT
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_sst_req_mngr_init,
-        .dependencies_num     = 5,
+        .dependencies_num     = 6,
         .p_dependencies       = dependencies_TFM_SP_STORAGE,
     },
 #endif /* TFM_PARTITION_SECURE_STORAGE */
@@ -723,8 +734,8 @@ const struct spm_partition_static_data_t static_data_list[] =
                               ,
         .partition_priority   = TFM_PRIORITY(NORMAL),
         .partition_init       = tfm_crypto_init,
-        .dependencies_num     = 0,
-        .p_dependencies       = NULL,
+        .dependencies_num     = 4,
+        .p_dependencies       = dependencies_TFM_SP_CRYPTO,
     },
 #endif /* TFM_PARTITION_CRYPTO */
 
@@ -1261,10 +1272,10 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 static struct spm_partition_desc_t partition_list [] =
 {
-    {{}}, /* placeholder for Non-secure internal partition */
+    {{0}}, /* placeholder for Non-secure internal partition */
 #ifndef TFM_PSA_API
-    {{}}, /* placeholder for TF-M Core internal partition */
-#endif /* !ifndefined(TFM_PSA_API) */
+    {{0}},   /* placeholder for TF-M Core internal partition */
+#endif
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_STORAGE */
@@ -1272,7 +1283,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_SECURE_STORAGE
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1284,7 +1295,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1296,7 +1307,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_AUDIT_LOG
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1308,7 +1319,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_CRYPTO
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1320,7 +1331,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_PLATFORM
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1332,7 +1343,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1344,7 +1355,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_CORE
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1356,7 +1367,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_CORE
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1368,7 +1379,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1380,7 +1391,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1392,7 +1403,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_CORE_IPC
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1404,7 +1415,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_ENABLE_IRQ_TEST
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1416,7 +1427,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_SST
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1428,7 +1439,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },
@@ -1440,7 +1451,7 @@ static struct spm_partition_desc_t partition_list [] =
 #ifdef TFM_MULTI_CORE_TEST
     {
     /* Runtime data */
-        .runtime_data             = {},
+        .runtime_data             = {0},
         .static_data              = NULL,
         .platform_data_list       = NULL,
     },

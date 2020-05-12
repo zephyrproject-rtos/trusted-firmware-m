@@ -8,7 +8,6 @@
 #include "psa/protected_storage.h"
 
 #include "tfm_ns_interface.h"
-#include "tfm_veneers.h"
 #include "psa_manifest/sid.h"
 
 #define IOVEC_LEN(x) (uint32_t)(sizeof(x)/sizeof(x[0]))

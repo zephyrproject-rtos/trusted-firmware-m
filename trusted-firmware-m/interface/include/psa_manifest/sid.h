@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,6 +45,8 @@ extern "C" {
 #define TFM_SP_PLATFORM_SYSTEM_RESET_VERSION                       (1U)
 #define TFM_SP_PLATFORM_IOCTL_SID                                  (0x00000041U)
 #define TFM_SP_PLATFORM_IOCTL_VERSION                              (1U)
+#define TFM_SP_PLATFORM_NV_COUNTER_SID                             (0x00000042U)
+#define TFM_SP_PLATFORM_NV_COUNTER_VERSION                         (1U)
 
 /******** TFM_SP_INITIAL_ATTESTATION ********/
 #define TFM_ATTEST_GET_TOKEN_SID                                   (0x00000020U)
@@ -59,10 +61,6 @@ extern "C" {
 #define SPM_CORE_TEST_INIT_SUCCESS_VERSION                         (1U)
 #define SPM_CORE_TEST_DIRECT_RECURSION_SID                         (0x0000F021U)
 #define SPM_CORE_TEST_DIRECT_RECURSION_VERSION                     (1U)
-#define SPM_CORE_TEST_MPU_ACCESS_SID                               (0x0000F022U)
-#define SPM_CORE_TEST_MPU_ACCESS_VERSION                           (1U)
-#define SPM_CORE_TEST_MEMORY_PERMISSIONS_SID                       (0x0000F023U)
-#define SPM_CORE_TEST_MEMORY_PERMISSIONS_VERSION                   (1U)
 #define SPM_CORE_TEST_SS_TO_SS_SID                                 (0x0000F024U)
 #define SPM_CORE_TEST_SS_TO_SS_VERSION                             (1U)
 #define SPM_CORE_TEST_SS_TO_SS_BUFFER_SID                          (0x0000F025U)

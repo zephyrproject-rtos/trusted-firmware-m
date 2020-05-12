@@ -68,10 +68,8 @@ static struct test_suite_t test_suites[] = {
 #endif /* SERVICES_TEST_NS */
 
 #ifdef CORE_TEST_POSITIVE
-#if !defined(TFM_PSA_API) || (TFM_LVL == 1)
     /* Non-secure core test cases */
     {&register_testsuite_ns_core_positive, 0, 0, 0},
-#endif
 #endif
 
 #ifdef CORE_TEST_INTERACTIVE

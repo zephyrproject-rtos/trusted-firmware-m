@@ -16,24 +16,6 @@ extern int32_t g_attest_caller_id;
 #endif
 
 enum psa_attest_err_t
-attest_check_memory_access(void *addr,
-                           uint32_t size,
-                           enum attest_memory_access_t access)
-{
-    enum psa_attest_err_t attest_res = PSA_ATTEST_ERR_SUCCESS;
-#ifndef TFM_PSA_API
-    int32_t tfm_res;
-
-    tfm_res = tfm_core_memory_permission_check(addr, size, (int32_t)access);
-    if (tfm_res) {
-        attest_res = PSA_ATTEST_ERR_INVALID_INPUT;
-    }
-#endif
-
-    return attest_res;
-}
-
-enum psa_attest_err_t
 attest_get_caller_client_id(int32_t *caller_id)
 {
     enum psa_attest_err_t attest_res = PSA_ATTEST_ERR_SUCCESS;

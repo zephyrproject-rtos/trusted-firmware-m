@@ -705,6 +705,7 @@ const char *UBUTest_CopyUtil()
       return "CopyFloatToUint32 failed";
    }
 
+#if !defined(__ICCARM__) || (__SUBNORMAL_FLOATING_POINTS__ == 1)
    if(UsefulBufUtil_CopyDoubleToUint64(4e-40F) != 0X37C16C2800000000ULL) {
       return "CopyDoubleToUint64 failed";
    }
@@ -712,6 +713,7 @@ const char *UBUTest_CopyUtil()
    if(UsefulBufUtil_CopyUint64ToDouble(0X37C16C2800000000ULL) != 4e-40F) {
       return "CopyUint64ToDouble failed";
    }
+#endif
 
    if(UsefulBufUtil_CopyUint32ToFloat(0x47800000) != 65536.0F) {
       return "CopyUint32ToFloat failed";

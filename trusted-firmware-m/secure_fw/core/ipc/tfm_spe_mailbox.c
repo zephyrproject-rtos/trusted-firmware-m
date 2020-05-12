@@ -19,7 +19,7 @@ static struct secure_mailbox_queue_t spe_mailbox_queue;
 
 static int32_t tfm_mailbox_dispatch(uint32_t call_type,
                                     const struct psa_client_params_t *params,
-                                    int32_t client_id, uint32_t *psa_ret)
+                                    int32_t client_id, int32_t *psa_ret)
 {
     struct client_call_params_t spm_params = {0};
 
@@ -183,7 +183,7 @@ int32_t tfm_mailbox_handle_msg(void)
 {
     uint8_t idx;
     int32_t result;
-    uint32_t psa_ret = PSA_ERROR_GENERIC_ERROR;
+    int32_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     mailbox_queue_status_t mask_bits, pend_slots, reply_slots = 0;
     struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
     struct mailbox_msg_t *msg_ptr;

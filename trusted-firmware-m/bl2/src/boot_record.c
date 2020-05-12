@@ -5,6 +5,7 @@
  *
  */
 
+#include "mcuboot_config/mcuboot_config.h"
 #include "boot_record.h"
 #include "region_defs.h"
 #include "tfm_boot_status.h"

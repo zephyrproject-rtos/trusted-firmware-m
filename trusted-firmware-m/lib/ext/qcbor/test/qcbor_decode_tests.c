@@ -2080,7 +2080,6 @@ int32_t DateParseTest()
 {
    QCBORDecodeContext DCtx;
    QCBORItem Item;
-   int nCBORError;
 
    QCBORDecode_Init(&DCtx,
                     UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spDateTestInput),
@@ -2092,7 +2091,7 @@ int32_t DateParseTest()
    QCBORDecode_SetCallerConfiguredTagList(&DCtx, &TagList);
 
    // String date
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_DATE_STRING ||
       UsefulBuf_Compare(Item.val.dateString, UsefulBuf_FromSZ("1985-04-12"))){
@@ -2100,7 +2099,7 @@ int32_t DateParseTest()
    }
 
    // Epoch date
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -3;
    if(Item.uDataType != QCBOR_TYPE_DATE_EPOCH ||
       Item.val.epochDate.nSeconds != 1400000000 ||
@@ -2110,7 +2109,7 @@ int32_t DateParseTest()
 
    // Epoch date with extra CBOR_TAG_B64 tag that doesn't really mean anything
    // but want to be sure extra tag doesn't cause a problem
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -5;
    if(Item.uDataType != QCBOR_TYPE_DATE_EPOCH ||
       Item.val.epochDate.nSeconds != 1400000001 ||
@@ -2125,7 +2124,7 @@ int32_t DateParseTest()
    }
 
    // Epoch date in float format with fractional seconds
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -8;
    if(Item.uDataType != QCBOR_TYPE_DATE_EPOCH ||
       Item.val.epochDate.nSeconds != 1 ||
@@ -2550,7 +2549,6 @@ int32_t BignumParseTest()
 {
    QCBORDecodeContext DCtx;
    QCBORItem Item;
-   int nCBORError;
 
    QCBORDecode_Init(&DCtx,
                     UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spBigNumInput),
@@ -2558,14 +2556,14 @@ int32_t BignumParseTest()
 
 
    //
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_ARRAY) {
       return -1;
    }
 
    //
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_POSBIGNUM ||
       UsefulBuf_Compare(Item.val.bigNum, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spBigNum))){
@@ -2573,7 +2571,7 @@ int32_t BignumParseTest()
    }
 
    //
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_NEGBIGNUM ||
       UsefulBuf_Compare(Item.val.bigNum, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spBigNum))){
@@ -2581,13 +2579,13 @@ int32_t BignumParseTest()
    }
 
    //
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_MAP) {
       return -1;
    }
 
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_POSBIGNUM ||
       Item.uLabelType != QCBOR_TYPE_TEXT_STRING ||
@@ -2595,7 +2593,7 @@ int32_t BignumParseTest()
       return -1;
    }
 
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_POSBIGNUM ||
       Item.uLabelType != QCBOR_TYPE_INT64 ||
@@ -2604,7 +2602,7 @@ int32_t BignumParseTest()
       return -1;
    }
 
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_NEGBIGNUM ||
       Item.uLabelType != QCBOR_TYPE_TEXT_STRING ||
@@ -2612,7 +2610,7 @@ int32_t BignumParseTest()
       return -1;
    }
 
-   if((nCBORError = QCBORDecode_GetNext(&DCtx, &Item)))
+   if(QCBORDecode_GetNext(&DCtx, &Item))
       return -1;
    if(Item.uDataType != QCBOR_TYPE_NEGBIGNUM ||
       Item.uLabelType != QCBOR_TYPE_INT64 ||
@@ -2634,9 +2632,8 @@ static int32_t CheckItemWithIntLabel(QCBORDecodeContext *pCtx,
                                  QCBORItem *pItem)
 {
    QCBORItem Item;
-   int nCBORError;
 
-   if((nCBORError = QCBORDecode_GetNext(pCtx, &Item))) return -1;
+   if(QCBORDecode_GetNext(pCtx, &Item)) return -1;
    if(Item.uDataType != uDataType) return -1;
    if(uNestingLevel > 0) {
       if(Item.uLabelType != QCBOR_TYPE_INT64 &&
@@ -2811,7 +2808,7 @@ static UsefulBufC make_nested_indefinite_arrays(int n, UsefulBuf Storage)
 static int32_t parse_indeflen_nested(UsefulBufC Nested, int nNestLevel)
 {
    QCBORDecodeContext DC;
-   QCBORDecode_Init(&DC, Nested, 0);
+   QCBORDecode_Init(&DC, Nested, QCBOR_DECODE_MODE_NORMAL);
 
    int j;
    for(j = 0; j < nNestLevel; j++) {
@@ -3421,7 +3418,8 @@ int32_t MemPoolTest(void)
    // nothing can be done with it unless that is set up.
    QCBORDecodeContext DC;
    const uint8_t pMinimalCBOR[] = {0xa0}; // One empty map
-   QCBORDecode_Init(&DC, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(pMinimalCBOR),0);
+   QCBORDecode_Init(&DC, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(pMinimalCBOR),
+                    QCBOR_DECODE_MODE_NORMAL);
 
    // Set up an memory pool of 100 bytes
    // Then fish into the internals of the decode context
@@ -3519,7 +3517,8 @@ int32_t SetUpAllocatorTest(void)
    // nothing can be done with it unless that is set up.
    QCBORDecodeContext DC;
    const uint8_t pMinimalCBOR[] = {0x62, 0x48, 0x69}; // "Hi"
-   QCBORDecode_Init(&DC, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(pMinimalCBOR),0);
+   QCBORDecode_Init(&DC, UsefulBuf_FROM_BYTE_ARRAY_LITERAL(pMinimalCBOR),
+                    QCBOR_DECODE_MODE_NORMAL);
 
    uint8_t pAllocatorBuffer[50];
 

@@ -19,19 +19,14 @@
 #include "Driver_MPC.h"
 #include "platform_retarget_dev.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
+#include "region.h"
 
 #ifdef PSA_API_TEST_IPC
 #define PSA_FF_TEST_SECURE_UART2
 #endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -320,81 +315,76 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/
 struct sau_cfg_t {
-    uint32_t RNR;
     uint32_t RBAR;
     uint32_t RLAR;
+    bool nsc;
 };
 
 const struct sau_cfg_t sau_cfg[] = {
     {
-        TFM_NS_REGION_CODE,
         ((uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base)),
         ((uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        NS_PARTITION_SIZE - 1)
+        NS_PARTITION_SIZE - 1),
+        false,
     },
     {
-        TFM_NS_REGION_DATA,
         NS_DATA_START,
-        NS_DATA_LIMIT
+        NS_DATA_LIMIT,
+        false,
     },
     {
-        TFM_NS_REGION_VENEER,
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit)
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        true,
     },
     {
-        TFM_NS_REGION_PERIPH_1,
         PERIPHERALS_BASE_NS_START,
 #if (defined(SECURE_UART1) && defined(PSA_FF_TEST_SECURE_UART2))
-        (UART1_BASE_NS - 1)
+        (UART1_BASE_NS - 1),
+        false,
     },
     {
-        TFM_NS_REGION_PERIPH_2,
         UART3_BASE_NS,
 #elif defined(PSA_FF_TEST_SECURE_UART2)
-       (UART2_BASE_NS - 1)
+        (UART2_BASE_NS - 1),
+        false,
     },
     {
-        TFM_NS_REGION_PERIPH_2,
         UART3_BASE_NS,
 #elif defined(SECURE_UART1)
-        (UART1_BASE_NS - 1)
+        (UART1_BASE_NS - 1),
+        false,
     },
     {
-        TFM_NS_REGION_PERIPH_2,
         UART2_BASE_NS,
 #endif
-        PERIPHERALS_BASE_NS_END
-    }
+        PERIPHERALS_BASE_NS_END,
+        false,
+    },
 #ifdef BL2
-    ,
     {
-        TFM_NS_SECONDARY_IMAGE_REGION,
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
-        SECONDARY_PARTITION_SIZE - 1
-    }
+        SECONDARY_PARTITION_SIZE - 1,
+        false,
+    },
 #endif
 };
 
 void sau_and_idau_cfg(void)
 {
-    struct spctrl_def* spctrl = CMSDK_SPCTRL;
-    int32_t i;
+    struct spctrl_def *spctrl = CMSDK_SPCTRL;
+    uint32_t i;
 
     /* Enables SAU */
     TZ_SAU_Enable();
 
     for (i = 0; i < ARRAY_SIZE(sau_cfg); i++) {
-        SAU->RNR = sau_cfg[i].RNR;
+        SAU->RNR = i;
         SAU->RBAR = sau_cfg[i].RBAR & SAU_RBAR_BADDR_Msk;
-        if (sau_cfg[i].RNR == TFM_NS_REGION_VENEER) {
-            SAU->RLAR = sau_cfg[i].RLAR | SAU_RLAR_ENABLE_Msk |
-                        SAU_RLAR_NSC_Msk;
-        } else {
-            SAU->RLAR = (sau_cfg[i].RLAR & SAU_RLAR_LADDR_Msk) |
-                        SAU_RLAR_ENABLE_Msk;
-        }
+        SAU->RLAR = (sau_cfg[i].RLAR & SAU_RLAR_LADDR_Msk) |
+                    (sau_cfg[i].nsc ? SAU_RLAR_NSC_Msk : 0U) |
+                    SAU_RLAR_ENABLE_Msk;
     }
 
     /* Allows SAU to define the code region as a NSC */

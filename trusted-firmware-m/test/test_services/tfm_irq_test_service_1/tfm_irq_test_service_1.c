@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,7 +45,7 @@ static void stop_timer(void)
     tfm_plat_test_secure_timer_stop();
 }
 
-uint32_t spm_irq_test_1_prepare_test_scenario_internal(
+int32_t spm_irq_test_1_prepare_test_scenario_internal(
                                enum irq_test_scenario_t irq_test_scenario,
                                struct irq_test_execution_data_t *execution_data)
 {
@@ -73,7 +73,7 @@ uint32_t spm_irq_test_1_prepare_test_scenario_internal(
     return CORE_TEST_ERRNO_SUCCESS;
 }
 
-uint32_t spm_irq_test_1_execute_test_scenario(
+int32_t spm_irq_test_1_execute_test_scenario(
                                      struct psa_invec *in_vec, size_t in_len,
                                      struct psa_outvec *out_vec, size_t out_len)
 {
@@ -283,7 +283,8 @@ static psa_status_t spm_irq_test_1_wrap_prepare_test_scenario(psa_msg_t *msg)
         return CORE_TEST_ERRNO_INVALID_PARAMETER;
     }
 
-    return spm_irq_test_1_prepare_test_scenario_internal(irq_test_scenario,
+    return spm_irq_test_1_prepare_test_scenario_internal((enum irq_test_scenario_t)
+                                                         irq_test_scenario,
                                                          execution_data);
 }
 
@@ -400,7 +401,7 @@ int32_t tfm_irq_test_1_init(void)
             ; /* do nothing */
         }
     }
-#endif /* TFM_PSA_API */
-
+#else
     return TFM_SUCCESS;
+#endif /* TFM_PSA_API */
 }

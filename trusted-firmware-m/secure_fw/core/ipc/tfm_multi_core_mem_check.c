@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -15,6 +15,7 @@
 #include "tfm_multi_core.h"
 #include "tfm_secure_api.h"
 #include "tfm_utils.h"
+#include "region.h"
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!

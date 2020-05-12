@@ -19,7 +19,7 @@
 #include "tfm_core.h"
 #include "tfm_peripherals_def.h"
 #include "spm_partition_defs.h"
-#include "psa/lifecycle.h"
+#include "region.h"
 
 #define NON_SECURE_INTERNAL_PARTITION_DB_IDX 0
 #define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1
@@ -105,15 +105,6 @@ bool tfm_is_partition_privileged(uint32_t partition_idx)
 
     return tfm_spm_partition_get_privileged_mode(flags) ==
         TFM_PARTITION_PRIVILEGED_MODE;
-}
-
-uint32_t tfm_spm_get_lifecycle_state(void)
-{
-    /*
-     * FixMe: return PSA_LIFECYCLE_UNKNOWN to the caller directly. It will be
-     * implemented in the future.
-     */
-    return PSA_LIFECYCLE_UNKNOWN;
 }
 
 __attribute__((section("SFN")))

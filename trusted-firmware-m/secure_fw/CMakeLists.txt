@@ -151,6 +151,9 @@ if (DEFINED TFM_PLATFORM_SECURE_DEFS)
 endif()
 
 #Set common compiler flags
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
 if(NOT DEFINED TARGET_NV_COUNTERS_ENABLE)
@@ -219,7 +222,7 @@ function(set_up_secure_fw_build)
 	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${S_SCATTER_FILE_NAME}")
 
 	#Set macro definitions for the project.
-	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 	# The order of the libraries linked below is important for GCC
@@ -227,6 +230,10 @@ function(set_up_secure_fw_build)
 	# If the a library has some symbols that are defined in the library which is linked before it,
 	# it will not cause the linker to search again.
 	# So please put a library before what it relies on.
+	# If the link dependency is complicated or it is difficult to sort out link
+	# dependency by only adjusting the order, it is recommended to explicitly
+	# add the dependency in the dedicated CMake file of corresponding module, to
+	# simplify the ordering and avoid any potential linking issue.
 	if (CORE_TEST OR TFM_PARTITION_TEST_SECURE_SERVICES)
 		target_link_libraries(${EXE_NAME} tfm_secure_tests)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
@@ -242,14 +249,14 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_SECURE_STORAGE")
 	endif()
 
-	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
-	endif()
-
 	if (TFM_PARTITION_CRYPTO)
 		target_link_libraries(${EXE_NAME} tfm_crypto)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_CRYPTO")
+	endif()
+
+	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
@@ -423,6 +430,7 @@ function(set_up_secure_fw_build)
 
 	if (TFM_PARTITION_CRYPTO)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
+							${INTERFACE_INC_DIR}/psa/crypto_compat.h
 							${INTERFACE_INC_DIR}/psa/crypto.h
 							${INTERFACE_INC_DIR}/psa/crypto_platform.h
 							${INTERFACE_INC_DIR}/psa/crypto_sizes.h

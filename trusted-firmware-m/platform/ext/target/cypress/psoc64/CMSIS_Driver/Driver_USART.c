@@ -207,7 +207,7 @@ static uint32_t ARM_USARTx_GetRxCount(UARTx_Resources* uart_dev)
     return uart_dev->rx_nbr_bytes;
 }
 
-static uint32_t USARTx_SetDataBits(uint32_t control,
+static int32_t USARTx_SetDataBits(uint32_t control,
                                    cy_stc_scb_uart_config_t *config)
 {
     switch (control & ARM_USART_DATA_BITS_Msk) {
@@ -238,7 +238,7 @@ static uint32_t USARTx_SetDataBits(uint32_t control,
     return ARM_DRIVER_OK;
 }
 
-static uint32_t USARTx_SetParity(uint32_t control,
+static int32_t USARTx_SetParity(uint32_t control,
                                  cy_stc_scb_uart_config_t *config)
 {
     switch (control & ARM_USART_PARITY_Msk) {
@@ -261,7 +261,7 @@ static uint32_t USARTx_SetParity(uint32_t control,
     return ARM_DRIVER_OK;
 }
 
-static uint32_t USARTx_SetStopBits(uint32_t control,
+static int32_t USARTx_SetStopBits(uint32_t control,
                                    cy_stc_scb_uart_config_t *config)
 {
     switch (control & ARM_USART_STOP_BITS_Msk) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,10 +29,11 @@ const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
 #ifdef TFM_ENABLE_IRQ_TEST
     { TFM_IRQ_TEST_1, SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ, TFM_TIMER0_IRQ, 64 },
 #endif /* TFM_ENABLE_IRQ_TEST */
+   {0, 0, (IRQn_Type) 0, 0}                         /* add dummy element to avoid non-standard empty array */
 };
 
-const size_t tfm_core_irq_signals_count = sizeof(tfm_core_irq_signals) /
-                                          sizeof(*tfm_core_irq_signals);
+const size_t tfm_core_irq_signals_count = (sizeof(tfm_core_irq_signals) /
+                                           sizeof(*tfm_core_irq_signals)) - 1; /* adjust for the dummy element */
 
 /* Definitions of privileged IRQ handlers (if any) */
 #ifdef TFM_ENABLE_IRQ_TEST

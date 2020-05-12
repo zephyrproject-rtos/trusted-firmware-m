@@ -47,6 +47,10 @@
  * thread SP/SP_LIMIT. R2 holds dummy data due to stack operation is 8 bytes
  * aligned.
  */
+#if defined(__ICCARM__)
+#pragma required = tfm_pendsv_do_schedule
+#endif
+
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
@@ -87,7 +91,6 @@ __attribute__((section("SFN"), naked))
 int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr)
 {
     __ASM volatile(
-        ".syntax unified                    \n"
         "PUSH   {lr}                        \n"
         "PUSH   {r4-r7}                     \n"
         "MOV    r4, r8                      \n"
@@ -119,7 +122,7 @@ int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr)
         "POP    {pc}                        \n"
         : : [SVC_REQ] "I" (TFM_SVC_SFN_REQUEST),
             [SVC_RET] "I" (TFM_SVC_SFN_RETURN)
-        : "r0");
+        );
 }
 
 __attribute__((section("SFN"), naked))
@@ -166,7 +169,7 @@ void priv_irq_handler_main(uint32_t partition_id,
           "POP   {r4-r7, pc}                \n"
           : : [SVC_REQ] "I" (TFM_SVC_DEPRIV_REQ)
           , [SVC_RET] "I" (TFM_SVC_DEPRIV_RET)
-          : "r0");
+          );
 }
 #endif
 
@@ -187,10 +190,14 @@ void HardFault_Handler(void)
     }
 }
 
+#if defined(__ICCARM__)
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+#pragma required = tfm_core_svc_handler
+#endif
+
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    ".syntax unified                        \n"
     "MRS     r2, MSP                        \n"
     "MOVS    r1, #4                         \n"
     "MOV     r3, lr                         \n"

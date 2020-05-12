@@ -6,7 +6,7 @@
  */
 
 #include "spm_api.h"
-#include "tfm_psa_client_call.h"
+#include "spm_psa_client_call.h"
 #include "tfm_rpc.h"
 #include "tfm_utils.h"
 
@@ -35,7 +35,7 @@ static struct tfm_rpc_ops_t rpc_ops = {
 
 uint32_t tfm_rpc_psa_framework_version(void)
 {
-    return tfm_psa_framework_version();
+    return tfm_spm_client_psa_framework_version();
 }
 
 uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
@@ -43,7 +43,7 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
 {
     TFM_CORE_ASSERT(params != NULL);
 
-    return tfm_psa_version(params->sid, ns_caller);
+    return tfm_spm_client_psa_version(params->sid, ns_caller);
 }
 
 psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
@@ -51,7 +51,7 @@ psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
 {
     TFM_CORE_ASSERT(params != NULL);
 
-    return tfm_psa_connect(params->sid, params->version, ns_caller);
+    return tfm_spm_client_psa_connect(params->sid, params->version, ns_caller);
 }
 
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
@@ -59,10 +59,10 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
 {
     TFM_CORE_ASSERT(params != NULL);
 
-    return tfm_psa_call(params->handle, params->type,
-                        params->in_vec, params->in_len,
-                        params->out_vec, params->out_len, ns_caller,
-                        TFM_PARTITION_UNPRIVILEGED_MODE);
+    return tfm_spm_client_psa_call(params->handle, params->type,
+                                   params->in_vec, params->in_len,
+                                   params->out_vec, params->out_len, ns_caller,
+                                   TFM_PARTITION_UNPRIVILEGED_MODE);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params,
@@ -70,7 +70,7 @@ void tfm_rpc_psa_close(const struct client_call_params_t *params,
 {
     TFM_CORE_ASSERT(params != NULL);
 
-    tfm_psa_close(params->handle, ns_caller);
+    tfm_spm_client_psa_close(params->handle, ns_caller);
 }
 
 int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr)

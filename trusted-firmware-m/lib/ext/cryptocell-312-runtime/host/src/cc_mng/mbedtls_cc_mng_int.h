@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -85,6 +85,11 @@ typedef enum {
 #define CC_READ_OTP_WORD(otpAddr, otpData)                          \
     do {                                                                                \
         otpData = CC_HAL_READ_REGISTER(CC_OTP_BASE_ADDR + otpAddr);     \
+    }while(0)
+
+#define CC_READ_MRAM_WORD(mramOffs, mramData)                               \
+    do {                                                                    \
+        mramData = (*((volatile uint32_t *)(DX_MRAM_CC + (mramOffs))));     \
     }while(0)
 
 /*! Poll NVM register to assure that the NVM boot is finished (and LCS and the keys are valid). */

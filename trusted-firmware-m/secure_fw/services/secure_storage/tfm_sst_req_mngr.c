@@ -418,12 +418,13 @@ psa_status_t tfm_sst_req_mngr_init(void)
             tfm_abort();
         }
     }
-#endif
+#else
     /* In library mode, initialisation is delayed until the first secure
      * function call, as calls to the Crypto service are required for
      * initialisation.
      */
     return PSA_SUCCESS;
+#endif
 }
 
 psa_status_t sst_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size)

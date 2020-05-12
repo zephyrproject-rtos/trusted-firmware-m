@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,9 +33,12 @@ endif()
 add_library(tfm_internal_trusted_storage STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
 
 #Set common compiler and linker flags
+if (DEFINED CMSE_FLAGS)
+    embedded_set_target_compile_flags(TARGET tfm_internal_trusted_storage LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
 config_setting_shared_compiler_flags(tfm_internal_trusted_storage)
 config_setting_shared_linker_flags(tfm_internal_trusted_storage)
 
-embedded_set_target_compile_defines(TARGET tfm_internal_trusted_storage LANGUAGE C DEFINES __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} __thumb2__ TFM_LVL=${TFM_LVL})
+embedded_set_target_compile_defines(TARGET tfm_internal_trusted_storage LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL})
 
 embedded_project_end(tfm_internal_trusted_storage)

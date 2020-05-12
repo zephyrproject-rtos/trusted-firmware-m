@@ -24,6 +24,9 @@
       "linker_pattern": {
         "library_list": [
            "*tfm_storage*"
+         ],
+         "object_list": [
+           "*test_sst_nv_counters.*",
          ]
       }
     },

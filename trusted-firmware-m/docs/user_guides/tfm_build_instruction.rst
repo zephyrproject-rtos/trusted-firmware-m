@@ -44,6 +44,10 @@ Getting the source-code
    For building with Armclang compiler version 6.10.0, please follow the note
    in :ref:`docs/user_guides/tfm_sw_requirement:External dependencies` section.
 
+.. Note::
+   For building with the IAR toolchain, please see the notes in
+   :doc:`software requirements <tfm_build_instruction_iar>`
+
 Build steps for the AN521 target platform:
 ==========================================
 .. code-block:: bash

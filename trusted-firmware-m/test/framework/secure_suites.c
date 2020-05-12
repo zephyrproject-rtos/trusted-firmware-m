@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -52,16 +52,9 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_platform_interface, 0, 0, 0},
 #endif
 
-#ifndef TFM_PSA_API
-    /*
-     * FixMe: since the following partitions haven't implement the IPC model,
-     * they will block the process. Skip them in IPC model.
-     */
 #ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
-#endif
-
 #endif
 
 #ifdef ENABLE_IPC_TEST

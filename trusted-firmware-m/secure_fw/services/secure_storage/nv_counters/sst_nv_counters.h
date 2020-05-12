@@ -31,14 +31,6 @@ extern "C" {
 #endif
 
 /**
- * \brief Initializes all non-volatile (NV) counters.
- *
- * \return  PSA_SUCCESS if the initialization succeeds, otherwise
- *          PSA_ERROR_GENERIC_ERROR
- */
-psa_status_t sst_init_nv_counter(void);
-
-/**
  * \brief Reads the given non-volatile (NV) counter.
  *
  * \param[in]  counter_id  NV counter ID.

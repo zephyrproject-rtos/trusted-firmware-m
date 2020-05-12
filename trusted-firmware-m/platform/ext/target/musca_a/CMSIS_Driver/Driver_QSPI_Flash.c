@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,8 +249,8 @@ static int32_t ARM_Flash_EraseSector(uint32_t addr)
     /* The erase function checks whether the address is aligned with
      * the sector or subsector and checks the Flash memory boundaries.
      */
-    err = mt25ql_erase(ARM_FLASH0_DEV.dev,
-                       addr, ARM_FLASH0_DEV.data->sector_size);
+    err = mt25ql_erase(ARM_FLASH0_DEV.dev, addr,
+                       (enum mt25ql_erase_t) ARM_FLASH0_DEV.data->sector_size);
 
     ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
 

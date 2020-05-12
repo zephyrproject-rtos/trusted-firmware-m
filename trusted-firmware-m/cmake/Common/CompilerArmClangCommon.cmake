@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -84,7 +84,7 @@ function(compiler_set_preinclude_file)
 		#allow the target to be defined after this function call. This helps
 		#modularisation
 		foreach(_TGT IN_LISTS _MY_PARAM_TARGETS)
-			embedded_set_target_compile_flags(TARGET ${_TGT} LANGUAGE "C" FLAGS "${_OPTION_STRING}")
+			embedded_set_target_compile_flags(TARGET ${_TGT} LANGUAGE "C" APPEND FLAGS "${_OPTION_STRING}")
 		endforeach()
 		#Iterate over files
 		foreach(_FILE IN_LISTS _MY_PARAM_FILES)

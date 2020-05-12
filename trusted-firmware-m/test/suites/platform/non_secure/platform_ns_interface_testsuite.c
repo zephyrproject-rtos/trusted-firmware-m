@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 
 static struct test_t platform_interface_tests[] = {
     {&tfm_platform_test_common_001, "TFM_PLATFORM_TEST_2001",
-     "Minimal platform service test", {0} },
+     "Minimal platform service test", {TEST_PASSED} },
 };
 
 void

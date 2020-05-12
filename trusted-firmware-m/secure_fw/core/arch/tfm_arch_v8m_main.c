@@ -61,6 +61,10 @@ struct tfm_fault_context_s {
  * thread SP/SP_LIMIT. R2 holds dummy data due to stack operation is 8 bytes
  * aligned.
  */
+#if defined(__ICCARM__)
+#pragma required = tfm_pendsv_do_schedule
+#endif
+
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
@@ -105,7 +109,7 @@ int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr)
         "POP    {r4-r12, pc}                \n"
         : : [SVC_REQ] "I" (TFM_SVC_SFN_REQUEST),
             [SVC_RET] "I" (TFM_SVC_SFN_RETURN)
-        : "r0");
+        );
 }
 
 __attribute__((section("SFN"), naked))
@@ -138,7 +142,7 @@ void priv_irq_handler_main(uint32_t partition_id,
           "POP    {r4-r12, pc}              \n"
           : : [SVC_REQ] "I" (TFM_SVC_DEPRIV_REQ)
             , [SVC_RET] "I" (TFM_SVC_DEPRIV_RET)
-          : "r0");
+          );
 }
 #endif
 
@@ -180,6 +184,11 @@ void SecureFault_Handler(void)
         ;
     }
 }
+
+#if defined(__ICCARM__)
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+#pragma required = tfm_core_svc_handler
+#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
@@ -228,7 +237,6 @@ void tfm_arch_prioritize_secure_exception(void)
 __attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
 {
     __ASM volatile(
-                   ".syntax unified          \n"
                    "mrs  r0, control         \n"
                    "bics r0, r0, #4          \n"
                    "msr  control, r0         \n"

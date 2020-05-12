@@ -35,6 +35,8 @@
 #include "bootutil/sign_key.h"
 #include "security_cnt.h"
 
+#include "mcuboot_config/mcuboot_config.h"
+
 #if defined(MCUBOOT_SIGN_RSA)
 #include "mbedtls/rsa.h"
 #endif

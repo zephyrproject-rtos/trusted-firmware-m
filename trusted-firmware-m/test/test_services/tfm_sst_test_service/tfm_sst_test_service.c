@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -43,6 +43,7 @@ psa_status_t tfm_sst_test_init(void)
             break;
         }
     }
-#endif
+#else
     return PSA_SUCCESS;
+#endif
 }

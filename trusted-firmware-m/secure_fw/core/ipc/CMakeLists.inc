@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,12 +33,10 @@ endif()
 if (NOT DEFINED TFM_PSA_API)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PSA_API is undefined. ")
 elseif (TFM_PSA_API)
-	set (SS_IPC_C_SRC "${SS_IPC_DIR}/tfm_svcalls.c"
-			"${SS_IPC_DIR}/tfm_thread.c"
+	set (SS_IPC_C_SRC "${SS_IPC_DIR}/tfm_thread.c"
 			"${SS_IPC_DIR}/tfm_wait.c"
 			"${SS_IPC_DIR}/tfm_message_queue.c"
 			"${SS_IPC_DIR}/tfm_pools.c"
-			"${SS_IPC_DIR}/tfm_psa_client_call.c"
 			"${SS_IPC_DIR}/../tfm_core.c"
 			"${SS_IPC_DIR}/../tfm_secure_api.c"
 			"${SS_IPC_DIR}/../tfm_spm_services.c"

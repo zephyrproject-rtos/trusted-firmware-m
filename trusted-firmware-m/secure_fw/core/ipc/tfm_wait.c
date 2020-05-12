@@ -24,6 +24,7 @@ void tfm_event_wake(struct tfm_event_t *pevnt, uint32_t retval)
     if (pevnt->owner && pevnt->owner->state == THRD_STATE_BLOCK) {
         tfm_core_thrd_set_state(pevnt->owner, THRD_STATE_RUNNING);
         tfm_core_thrd_set_retval(pevnt->owner, retval);
+        pevnt->owner = NULL;
         tfm_core_thrd_activate_schedule();
     }
 }

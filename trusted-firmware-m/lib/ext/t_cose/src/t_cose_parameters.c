@@ -1,7 +1,7 @@
 /*
  * t_cose_parameters.c
  *
- * Copyright 2019, Laurence Lundblade
+ * Copyright 2019-2020, Laurence Lundblade
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -583,7 +583,7 @@ parse_protected_header_parameters(const struct q_useful_buf_c encoded_protected_
     QCBORDecodeContext decode_context;
     enum t_cose_err_t  return_value;
 
-    QCBORDecode_Init(&decode_context, encoded_protected_parameters, 0);
+    QCBORDecode_Init(&decode_context, encoded_protected_parameters, QCBOR_DECODE_MODE_NORMAL);
 
     return_value = parse_cose_header_parameters(&decode_context,
                                                  returned_params,

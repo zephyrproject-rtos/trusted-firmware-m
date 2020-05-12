@@ -45,6 +45,7 @@
 #include "bl2/include/tfm_boot_status.h"
 #include "bl2/include/boot_record.h"
 #include "security_cnt.h"
+#include "mcuboot_config/mcuboot_config.h"
 
 static struct boot_loader_state boot_data;
 
@@ -54,7 +55,8 @@ static struct boot_loader_state boot_data;
 #define IMAGES_ITER(x)
 #endif
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && !defined(MCUBOOT_OVERWRITE_ONLY)
+
 
 #if defined(MCUBOOT_VALIDATE_PRIMARY_SLOT) && !defined(MCUBOOT_OVERWRITE_ONLY)
 static int boot_status_fails = 0;
@@ -158,7 +160,7 @@ static const struct boot_status_table boot_status_tables[] = {
                  (state)->swap_type,                                \
                  (state)->copy_done,                                \
                  (state)->image_ok)
-#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING */
+#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING && !defined(MCUBOOT_OVERWRITE_ONLY) */
 
 /*
  * \brief Verifies the image header: magic value, flags, integer overflow.
@@ -185,7 +187,7 @@ boot_verify_image_header(struct image_header *hdr)
         return BOOT_EBADIMAGE;
     }
 
-#if MCUBOOT_RAM_LOADING
+#ifdef MCUBOOT_RAM_LOADING
     if (!(hdr->ih_flags & IMAGE_F_RAM_LOAD)) {
         return BOOT_EBADIMAGE;
     }
@@ -598,7 +600,8 @@ done:
 }
 #endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_OVERWRITE_ONLY */
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && !defined(MCUBOOT_OVERWRITE_ONLY)
+
 /**
  * Determines where in flash the most recent boot status is stored. The boot
  * status is necessary for completing a swap that was interrupted by a boot
@@ -859,13 +862,6 @@ boot_read_status_bytes(const struct flash_area *fap,
 static int
 boot_read_status(struct boot_loader_state *state, struct boot_status *bs)
 {
-    const struct flash_area *fap;
-    uint32_t off;
-    uint8_t swap_info;
-    int status_loc;
-    int area_id;
-    int rc;
-
     memset(bs, 0, sizeof *bs);
     bs->idx = BOOT_STATUS_IDX_0;
     bs->state = BOOT_STATUS_STATE_0;
@@ -874,7 +870,13 @@ boot_read_status(struct boot_loader_state *state, struct boot_status *bs)
 #ifdef MCUBOOT_OVERWRITE_ONLY
     /* Overwrite-only doesn't make use of the swap status area. */
     return 0;
-#endif
+#else
+    const struct flash_area *fap;
+    uint32_t off;
+    uint8_t swap_info;
+    int status_loc;
+    int area_id;
+    int rc;
 
     status_loc = boot_status_source(state);
     switch (status_loc) {
@@ -915,6 +917,7 @@ boot_read_status(struct boot_loader_state *state, struct boot_status *bs)
     flash_area_close(fap);
 
     return rc;
+#endif
 }
 
 /**
@@ -2663,7 +2666,7 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
     int fa_id;
     uint32_t boot_sequence[BOOT_NUM_SLOTS];
     uint32_t img_cnt;
-    struct image_header *selected_image_header;
+    struct image_header *selected_image_header = NULL;
 #ifdef MCUBOOT_RAM_LOADING
     int image_copied = 0;
     uint32_t img_dst = 0;

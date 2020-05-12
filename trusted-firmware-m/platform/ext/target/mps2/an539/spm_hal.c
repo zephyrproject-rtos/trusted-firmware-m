@@ -13,6 +13,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "platform_description.h"
+#include "region.h"
 
 /* Debug configuration flags */
 #define SPNIDEN_SEL_STATUS (0x01u << 7)
@@ -241,7 +242,7 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
 
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(int32_t irq_line, uint32_t priority)
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line, uint32_t priority)
 {
     uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
     NVIC_SetPriority(irq_line, quantized_priority);
@@ -290,7 +291,7 @@ enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
 }
 
 enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
-                                           int32_t irq_line,
+                                           IRQn_Type irq_line,
                                            enum irq_target_state_t target_state)
 {
     uint32_t result;
@@ -328,17 +329,17 @@ enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
     return nvic_interrupt_enable();
 }
 
-void tfm_spm_hal_clear_pending_irq(int32_t irq_line)
+void tfm_spm_hal_clear_pending_irq(IRQn_Type irq_line)
 {
     NVIC_ClearPendingIRQ(irq_line);
 }
 
-void tfm_spm_hal_enable_irq(int32_t irq_line)
+void tfm_spm_hal_enable_irq(IRQn_Type irq_line)
 {
     NVIC_EnableIRQ(irq_line);
 }
 
-void tfm_spm_hal_disable_irq(int32_t irq_line)
+void tfm_spm_hal_disable_irq(IRQn_Type irq_line)
 {
     NVIC_DisableIRQ(irq_line);
 }

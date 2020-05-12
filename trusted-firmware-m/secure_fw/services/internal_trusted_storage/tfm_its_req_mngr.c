@@ -349,8 +349,8 @@ psa_status_t tfm_its_req_mngr_init(void)
         return PSA_ERROR_GENERIC_ERROR;
     }
     its_is_init = true;
-#endif
     return PSA_SUCCESS;
+#endif
 }
 
 size_t its_req_mngr_read(uint8_t *buf, size_t num_bytes)

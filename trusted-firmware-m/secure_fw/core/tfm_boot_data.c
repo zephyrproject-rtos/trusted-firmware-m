@@ -138,9 +138,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uint8_t  tlv_major = (uint8_t)args[0];
     uint8_t *buf_start = (uint8_t *)args[1];
     uint16_t buf_size  = (uint16_t)args[2];
-    uint8_t *ptr;
     struct tfm_boot_data *boot_data;
 #ifdef BOOT_DATA_AVAILABLE
+    uint8_t *ptr;
     struct shared_data_tlv_entry tlv_entry;
     uintptr_t tlv_end, offset;
 #endif /* BOOT_DATA_AVAILABLE */
@@ -154,13 +154,14 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
 #endif
 
 #ifndef TFM_PSA_API
-    /* Make sure that the output pointer points to a memory area that is owned
-     * by the partition
+    /*
+     * Make sure that the output pointer points to a memory area that is owned
+     * by the partition. And check 4 bytes alignment.
      */
-    res = tfm_core_check_buffer_access(running_partition_idx,
-                                       (void *)buf_start,
-                                       buf_size,
-                                       2); /* Check 4 bytes alignment */
+    res = tfm_spm_check_buffer_access(running_partition_idx,
+                                      (void *)buf_start,
+                                      buf_size,
+                                      2);
     if (!res) {
         /* Not in accessible range, return error */
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
@@ -209,10 +210,10 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         boot_data = (struct tfm_boot_data *)buf_start;
         boot_data->header.tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
         boot_data->header.tlv_tot_len = SHARED_DATA_HEADER_SIZE;
-        ptr = boot_data->data;
     }
 
 #ifdef BOOT_DATA_AVAILABLE
+    ptr = boot_data->data;
     /* Iterates over the TLV section and copy TLVs with requested major
      * type to the provided buffer.
      */

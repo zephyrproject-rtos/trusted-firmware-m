@@ -231,6 +231,8 @@ modes are supported by which platforms:
 +-------------+-----------------+---------------+----------+-------------+-----------------+
 | AN539       | Yes             | Yes           | Yes      | Yes         | No              |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
+| LPC55S69    | No              | No            | No       | No          | No              |
++-------------+-----------------+---------------+----------+-------------+-----------------+
 | Musca-A     | No              | No            | No       | No          | Yes             |
 +-------------+-----------------+---------------+----------+-------------+-----------------+
 | Musca-B1    | Yes             | No            | No       | Yes         | No              |
@@ -281,7 +283,7 @@ code is present at the required location the ``MCUBOOT_REPO=UPSTREAM`` option
 must be added to the command line at the CMake configuration step::
 
     cd <TF-M base folder>
-    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.4.0
+    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.5.0
     cd <TF-M build folder>
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DMCUBOOT_REPO=UPSTREAM ../
 

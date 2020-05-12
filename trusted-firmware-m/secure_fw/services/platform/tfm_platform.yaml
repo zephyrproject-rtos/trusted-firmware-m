@@ -28,6 +28,14 @@
       "non_secure_clients": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
+     },
+     {
+       "name": "TFM_SP_PLATFORM_NV_COUNTER",
+       "signal": "PLATFORM_SP_NV_COUNTER_SIG",
+       "sid": "0x00000042",
+       "non_secure_clients": false,
+       "version": 1,
+       "version_policy": "STRICT"
      }
   ],
   "secure_functions": [
@@ -46,6 +54,20 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
-     }
+     },
+     {
+       "name": "TFM_SP_PLATFORM_NV_COUNTER_READ",
+       "signal": "PLATFORM_SP_NV_COUNTER_READ",
+       "non_secure_clients": false,
+       "minor_version": 1,
+       "minor_policy": "STRICT"
+      },
+      {
+        "name": "TFM_SP_PLATFORM_NV_COUNTER_INCREMENT",
+        "signal": "PLATFORM_SP_NV_COUNTER_INCREMENT",
+        "non_secure_clients": false,
+        "minor_version": 1,
+        "minor_policy": "STRICT"
+       }
   ]
 }

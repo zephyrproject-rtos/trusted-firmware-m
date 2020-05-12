@@ -59,6 +59,14 @@ elseif(COMPILER STREQUAL "GNUARM")
       # [libRTX_CM3.a should be used for CM4 without FPU]
       set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_CM3.a")
     endif()
+elseif(COMPILER STREQUAL "IARARM")
+    set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/iar/tfm_common_s.icf")
+    set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/iar/psoc6_ns.icf")
+    if (DEFINED CMSIS_5_DIR)
+      # not all project defines CMSIS_5_DIR, only the ones that use it.
+      # [RTX_CM3.a should be used for CM4 without FPU]
+      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/IAR/RTX_CM3.a")
+    endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
 endif()
@@ -151,6 +159,8 @@ elseif(BUILD_NATIVE_DRIVERS)
 	  list(APPEND ALL_SRC_ASM "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/armclang/cy_syslib_mdk.s")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNUARM")
 	  list(APPEND ALL_SRC_ASM "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/gcc/cy_syslib_gcc.S")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "IARARM")
+	  list(APPEND ALL_SRC_ASM "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/iar/cy_syslib_iar.c")
   else()
     message(FATAL_ERROR "No cy_syslib is available for compiler '${CMAKE_C_COMPILER_ID}'.")
   endif()
@@ -172,6 +182,9 @@ elseif(BUILD_STARTUP)
     list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/gcc/startup_psoc64_ns.S")
     set_property(SOURCE "${ALL_SRC_ASM_S}" "${ALL_SRC_ASM_NS}" APPEND
       PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "IARARM")
+    list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/iar/startup_psoc64_s.s")
+    list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/iar/startup_psoc64_ns.s")
   else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
   endif()
@@ -207,10 +220,7 @@ endif()
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_NV_COUNTERS (true|false) is undefined!")
 elseif(BUILD_TARGET_NV_COUNTERS)
-  # NOTE: This non-volatile counters implementation is a dummy
-  #       implementation. Platform vendors have to implement the
-  #       API ONLY if the target has non-volatile counters.
-  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/cypress/psoc64/dummy_nv_counters.c")
+  list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/cypress/psoc64/nv_counters.c")
   set(TARGET_NV_COUNTERS_ENABLE ON)
   # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
   # rollback protection code as the target supports nv counters.

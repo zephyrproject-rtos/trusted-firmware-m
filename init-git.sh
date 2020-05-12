@@ -1,15 +1,15 @@
 #!/bin/sh
 
-TFM_GIT_SHA=TF-Mv1.0
+TFM_GIT_SHA=1e863233251f3d32c57f6313aed4daa6dc6cfd1f
 CMSIS_5_GIT_SHA=5.5.0
 MBED_CRYPTO_GIT_SHA=mbedcrypto-3.0.1
 PSA_ARCH_TESTS_GIT_SHA=v20.03_API1.0
 
 if [ ! -d trusted-firmware-m/.git ]; then
-   git clone https://git.trustedfirmware.org/trusted-firmware-m.git -b ${TFM_GIT_SHA} --bare trusted-firmware-m/.git
+   git clone https://git.trustedfirmware.org/trusted-firmware-m.git --bare trusted-firmware-m/.git
    cd trusted-firmware-m
    git init
-   git checkout -f
+   git checkout -f ${TFM_GIT_SHA}
    cd ..
 fi
 
@@ -38,4 +38,3 @@ if [ ! -d psa-arch-tests/.git ]; then
    git checkout -f
    cd ..
 fi
-

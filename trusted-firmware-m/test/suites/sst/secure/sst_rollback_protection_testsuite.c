@@ -65,29 +65,29 @@ static void tfm_sst_test_4009(struct test_result_t *ret);
 
 static struct test_t interface_tests[] = {
     {&tfm_sst_test_4001, "TFM_SST_TEST_4001",
-     "Check SST area version when NV counters 1/2/3 have the same value", {0}},
+     "Check SST area version when NV counters 1/2/3 have the same value", {TEST_PASSED}},
     {&tfm_sst_test_4002, "TFM_SST_TEST_4002",
-     "Check SST area version when it is different from NV counters 1/2/3", {0}},
+     "Check SST area version when it is different from NV counters 1/2/3", {TEST_PASSED}},
     {&tfm_sst_test_4003, "TFM_SST_TEST_4003",
      "Check SST area version when NV counters 1 and 2 are equals, 3 is "
-     "different, and SST area version match NV counters 1 and 2", {0}},
+     "different, and SST area version match NV counters 1 and 2", {TEST_PASSED}},
     {&tfm_sst_test_4004, "TFM_SST_TEST_4004",
      "Check SST area version when NV counters 2 and 3 are equals, 1 is "
-     "different and SST area version match NV counter 2 and 3", {0}},
+     "different and SST area version match NV counter 2 and 3", {TEST_PASSED}},
     {&tfm_sst_test_4005, "TFM_SST_TEST_4005",
      "Check SST area version when NV counters 2 and 3 are equals, 1 is "
-     "different and SST area version match NV counter 1", {0}},
+     "different and SST area version match NV counter 1", {TEST_PASSED}},
     {&tfm_sst_test_4006, "TFM_SST_TEST_4006",
      "Check SST area version when NV counters 1, 2 and 3 have different values "
-     "and SST area version match NV counter 1 value", {0}},
+     "and SST area version match NV counter 1 value", {TEST_PASSED}},
     {&tfm_sst_test_4007, "TFM_SST_TEST_4007",
      "Check SST area version when NV counters 1, 2 and 3 have different values "
-     "and SST area version match NV counter 2 value", {0}},
+     "and SST area version match NV counter 2 value", {TEST_PASSED}},
     {&tfm_sst_test_4008, "TFM_SST_TEST_4008",
      "Check SST area version when NV counters 1, 2 and 3 have different values "
-     "and SST area version match NV counter 3 value", {0}},
+     "and SST area version match NV counter 3 value", {TEST_PASSED}},
     {&tfm_sst_test_4009, "TFM_SST_TEST_4009",
-     "Check SST area version when NV counter 1 cannot be incremented", {0}},
+     "Check SST area version when NV counter 1 cannot be incremented", {TEST_PASSED}},
 };
 
 void register_testsuite_s_rollback_protection(struct test_suite_t *p_test_suite)

@@ -810,16 +810,6 @@ psa_status_t sst_object_table_create(void)
 {
     struct sst_obj_table_t *p_table = &sst_obj_table_ctx.obj_table;
 
-#ifdef SST_ROLLBACK_PROTECTION
-    psa_status_t err;
-
-    /* Initialize SST NV counters */
-    err = sst_init_nv_counter();
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-#endif
-
     /* Initialize object structure */
     (void)tfm_memset(&sst_obj_table_ctx, SST_DEFAULT_EMPTY_BUFF_VAL,
                      sizeof(struct sst_obj_table_ctx_t));
@@ -861,13 +851,6 @@ psa_status_t sst_object_table_init(uint8_t *obj_data)
     }
 
 #ifdef SST_ROLLBACK_PROTECTION
-    /* Initialize SST NV counters */
-    err = sst_init_nv_counter();
-    if (err != PSA_SUCCESS) {
-        (void)sst_crypto_destroykey();
-        return err;
-    }
-
     /* Authenticate table */
     err = sst_object_table_nvc_authenticate(&init_ctx);
     if (err != PSA_SUCCESS) {

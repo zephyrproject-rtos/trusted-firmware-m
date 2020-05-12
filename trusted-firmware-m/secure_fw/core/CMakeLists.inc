@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -34,7 +34,6 @@ set (SS_CORE_C_SRC
 		"${SS_CORE_DIR}/tfm_core.c"
 		"${SS_CORE_DIR}/tfm_core_svcalls_func.c"
 		"${SS_CORE_DIR}/tfm_secure_api.c"
-		"${SS_CORE_DIR}/tfm_func_api.c"
 		"${SS_CORE_DIR}/tfm_spm_services.c"
 		"${SS_CORE_DIR}/tfm_nspm_func.c"
 		"${SS_CORE_DIR}/tfm_boot_data.c"
