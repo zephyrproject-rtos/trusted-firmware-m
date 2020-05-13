@@ -65,18 +65,13 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
                                    int32_t *reply);
 
 /**
- * \brief Wake up the owner task of the first replied mailbox message in the
- *        NSPE mailbox queue.
+ * \brief Go through mailbox messages already replied by SPE mailbox and
+ *        wake up the owner tasks of replied mailbox messages.
  *        This function is intended to be called inside platform specific
  *        notification IRQ handler.
  *
- * \note The replied status of the fetched mailbox message will be cleaned after
- *       the message is fetched. When this function is called again, it wakes
- *       the owner task of next replied mailbox message from the NSPE mailbox
- *       queue.
- *
- * \return MAILBOX_SUCCESS       The task of the first replied mailbox message
- *                               is found and wake-up signal is sent.
+ * \return MAILBOX_SUCCESS       The tasks of replied mailbox messages
+ *                               were found and wake-up signals were sent.
  * \return MAILBOX_NO_PEND_EVENT No replied mailbox message is found.
  * \return Other return code     Failed with an error code
  */

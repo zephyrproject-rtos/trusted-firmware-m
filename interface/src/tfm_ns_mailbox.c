@@ -43,6 +43,11 @@ static inline void clear_queue_slot_replied(uint8_t idx)
     }
 }
 
+static inline void clear_queue_slot_all_replied(mailbox_queue_status_t status)
+{
+    mailbox_queue_ptr->replied_slots &= ~status;
+}
+
 static inline bool is_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
@@ -296,6 +301,7 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 
     tfm_ns_mailbox_hal_enter_critical_isr();
     replied_status = mailbox_queue_ptr->replied_slots;
+    clear_queue_slot_all_replied(replied_status);
     tfm_ns_mailbox_hal_exit_critical_isr();
 
     if (!replied_status) {
@@ -303,23 +309,26 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
     }
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
-        /* Find the first replied message in queue */
-        if (replied_status & (0x1UL << idx)) {
-            tfm_ns_mailbox_hal_enter_critical_isr();
-            clear_queue_slot_replied(idx);
-            set_queue_slot_woken(idx);
-            tfm_ns_mailbox_hal_exit_critical_isr();
+        /*
+         * The reply has already received from SPE mailbox but
+         * the wake-up signal is not sent yet.
+         */
+        if (!(replied_status & (0x1UL << idx))) {
+            continue;
+        }
 
+        /* Set woken-up flag */
+        tfm_ns_mailbox_hal_enter_critical_isr();
+        set_queue_slot_woken(idx);
+        tfm_ns_mailbox_hal_exit_critical_isr();
+
+        tfm_ns_mailbox_os_wake_task_isr(mailbox_queue_ptr->queue[idx].owner);
+
+        replied_status &= ~(0x1UL << idx);
+        if (!replied_status) {
             break;
-       }
+        }
     }
-
-    /* In theory, it won't occur. Just in case */
-    if (idx >= NUM_MAILBOX_QUEUE_SLOT) {
-        return MAILBOX_NO_PEND_EVENT;
-    }
-
-    tfm_ns_mailbox_os_wake_task_isr(mailbox_queue_ptr->queue[idx].owner);
 
     return MAILBOX_SUCCESS;
 }

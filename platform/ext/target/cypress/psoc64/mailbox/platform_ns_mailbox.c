@@ -152,7 +152,6 @@ static bool mailbox_clear_intr(void)
 void cpuss_interrupts_ipc_8_IRQHandler(void)
 {
     uint32_t magic;
-    int32_t ret;
 
     if (!mailbox_clear_intr())
         return;
@@ -160,11 +159,6 @@ void cpuss_interrupts_ipc_8_IRQHandler(void)
     platform_mailbox_fetch_msg_data(&magic);
     if (magic == PSA_CLIENT_CALL_REPLY_MAGIC) {
         /* Handle all the pending replies */
-        while (1) {
-            ret = tfm_ns_mailbox_wake_reply_owner_isr();
-            if (ret != MAILBOX_SUCCESS) {
-                break;
-            }
-        }
+        tfm_ns_mailbox_wake_reply_owner_isr();
     }
 }
