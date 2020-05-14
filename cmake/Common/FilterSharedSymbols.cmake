@@ -24,22 +24,26 @@ file(STRINGS ${ALL_SYMBOLS}        ALL_SYMBOLS)
 
 # In 'arm-none-eabi-nm' and 'armclang --symdefs' output 'T' indicates the global
 # symbols which can be shared between independently linked executables.
-set(_GLOBAL_TEXT_SYMBOL "T")
+# 'D' is necessary to share two specific function pointers: 'mbedtls_calloc_func'
+# and 'mbedtls_free_func'. These also need the 'static' keyword removed in mbed-crypto
+set(_SHARED_SYMBOL_TYPES "T;D")
 
 foreach(_SYMBOL_TEMPLATE IN LISTS SHARED_SYMBOL_TEMPLATE)
     string(SUBSTRING _SYMBOL_TEMPLATE 0 1 FIRST_CHAR)
-    if(NOT _SYMBOL_TEMPLATE STREQUAL "" AND NOT FIRST_CHAR STREQUAL "#")
+    if (NOT _SYMBOL_TEMPLATE STREQUAL "" AND NOT FIRST_CHAR STREQUAL "#")
         foreach(_ONE_SYMBOL IN LISTS ALL_SYMBOLS)
-            string(FIND ${_ONE_SYMBOL} "${_GLOBAL_TEXT_SYMBOL} ${_SYMBOL_TEMPLATE}" POSITION)
-            if (NOT POSITION EQUAL -1)
-                # Get matching symbol name and its address
-                list(APPEND SHARED_SYMBOL_ADDR_LIST "${_ONE_SYMBOL}")
+            foreach(_TEXT IN LISTS _SHARED_SYMBOL_TYPES)
+                string(FIND ${_ONE_SYMBOL} "${_TEXT} ${_SYMBOL_TEMPLATE}" POSITION)
+                if (NOT POSITION EQUAL -1)
+                    # Get matching symbol name and its address
+                    list(APPEND SHARED_SYMBOL_ADDR_LIST "${_ONE_SYMBOL}")
 
-                # Get matching symbol name
-                string(SUBSTRING ${_ONE_SYMBOL} ${POSITION} 200 _ONE_SYMBOL_NAME)
-                string(REPLACE "${_GLOBAL_TEXT_SYMBOL} " "" _ONE_SYMBOL_NAME ${_ONE_SYMBOL_NAME})
-                list(APPEND SHARED_SYMBOL_NAME_LIST "${_ONE_SYMBOL_NAME}")
-            endif()
+                    # Get matching symbol name
+                    string(SUBSTRING ${_ONE_SYMBOL} ${POSITION} 200 _ONE_SYMBOL_NAME)
+                    string(REPLACE "${_TEXT} " "" _ONE_SYMBOL_NAME ${_ONE_SYMBOL_NAME})
+                    list(APPEND SHARED_SYMBOL_NAME_LIST "${_ONE_SYMBOL_NAME}")
+                endif()
+            endforeach()
         endforeach()
     endif()
 endforeach()
