@@ -24,7 +24,7 @@ LR_CODE NS_CODE_START {
         .ANY (+RO)
     }
 
-    ER_DATA NS_DATA_START NS_DATA_SIZE {
+    ER_DATA NS_DATA_START {
         .ANY (+ZI +RW)
     }
 
@@ -45,5 +45,16 @@ LR_CODE NS_CODE_START {
     TFM_SHARED_MEM NS_DATA_SHARED_START EMPTY NS_DATA_SHARED_SIZE {
     }
 #endif
+
+    /* This empty, zero long execution region is here to mark the limit address
+     * of the last execution region that is allocated in SRAM.
+     */
+    SRAM_WATERMARK +0 EMPTY 0x0 {
+    }
+
+    /* Make sure that the sections allocated in the SRAM does not exceed the
+     * size of the SRAM available.
+     */
+    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= NS_DATA_START + NS_DATA_SIZE)
 }
 
