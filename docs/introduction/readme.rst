@@ -60,11 +60,6 @@ folders. The original license text is included in those source files.
 - The ``platform`` folder currently contains platforms support imported from
   the external project and the files may have different licenses.
 
-.. Note::
-    Any folder that contains or directly imports 3rd party code is kept in a
-    specific subfolder named ``ext`` so that it can be isolated if required.
-    The 'ext' folder can be seen in the folders above mentioned.
-
 #########################
 Release Notes and Process
 #########################
