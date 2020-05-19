@@ -50,6 +50,9 @@ static void tfm_crypto_test_5032(struct test_result_t *ret);
 static void tfm_crypto_test_5033(struct test_result_t *ret);
 static void tfm_crypto_test_5034(struct test_result_t *ret);
 static void tfm_crypto_test_5035(struct test_result_t *ret);
+#ifdef TFM_CRYPTO_TEST_ALG_CCM
+static void tfm_crypto_test_5036(struct test_result_t *ret);
+#endif /* TFM_CRYPTO_TEST_ALG_CCM */
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5001, "TFM_CRYPTO_TEST_5001",
@@ -114,6 +117,11 @@ static struct test_t crypto_tests[] = {
      "Secure persistent key interface", {TEST_PASSED} },
     {&tfm_crypto_test_5035, "TFM_CRYPTO_TEST_5035",
      "Key access control", {TEST_PASSED} },
+#ifdef TFM_CRYPTO_TEST_ALG_CCM
+    {&tfm_crypto_test_5036, "TFM_CRYPTO_TEST_6036",
+     "Secure AEAD interface with truncated auth tag (AES-128-CCM-8)",
+     {TEST_PASSED} },
+#endif /* TFM_CRYPTO_TEST_ALG_CCM */
 };
 
 void register_testsuite_s_crypto_interface(struct test_suite_t *p_test_suite)
@@ -301,3 +309,13 @@ static void tfm_crypto_test_5035(struct test_result_t *ret)
     }
     return;
 }
+
+#ifdef TFM_CRYPTO_TEST_ALG_CCM
+static void tfm_crypto_test_5036(struct test_result_t *ret)
+{
+    psa_algorithm_t alg = PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM,
+                                                       TRUNCATED_AUTH_TAG_LEN);
+
+    psa_aead_test(PSA_KEY_TYPE_AES, alg, ret);
+}
+#endif /* TFM_CRYPTO_TEST_ALG_GCM */

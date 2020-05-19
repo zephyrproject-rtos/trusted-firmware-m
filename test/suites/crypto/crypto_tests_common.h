@@ -59,6 +59,11 @@ extern "C" {
 #define TEST_MAX_KEY_LENGTH (64)
 
 /**
+ * \brief The length of truncated authentication tag for AEAD algorithm
+ */
+#define TRUNCATED_AUTH_TAG_LEN (8)
+
+/**
  * \brief Tests the key interfaces with different key types
  *
  * \param[in]  key_type PSA key type
