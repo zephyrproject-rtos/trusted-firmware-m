@@ -53,7 +53,8 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
 #include "tfm_secure_irq_handlers_ipc.inc"
 
 /* Service handle management functions */
-psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
+struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
+                                        struct tfm_spm_service_t *service,
                                         int32_t client_id)
 {
     struct tfm_conn_handle_t *p_handle;
@@ -63,7 +64,7 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
     /* Get buffer for handle list structure from handle pool */
     p_handle = (struct tfm_conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
     if (!p_handle) {
-        return PSA_NULL_HANDLE;
+        return NULL;
     }
 
     p_handle->service = service;
@@ -73,11 +74,12 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
     /* Add handle node to list for next psa functions */
     tfm_list_add_tail(&service->handle_list, &p_handle->list);
 
-    return (psa_handle_t)p_handle;
+    return p_handle;
 }
 
-int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
-                                     int32_t client_id)
+int32_t tfm_spm_validate_conn_handle(
+                                    const struct tfm_conn_handle_t *conn_handle,
+                                    int32_t client_id)
 {
     /* Check the handle address is validated */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
@@ -86,20 +88,11 @@ int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
     }
 
     /* Check the handle caller is correct */
-    if (((struct tfm_conn_handle_t *)conn_handle)->client_id != client_id) {
+    if (conn_handle->client_id != client_id) {
         return IPC_ERROR_GENERIC;
     }
 
     return IPC_SUCCESS;
-}
-
-static struct tfm_conn_handle_t *
-    tfm_spm_find_conn_handle_node(struct tfm_spm_service_t *service,
-                                  psa_handle_t conn_handle)
-{
-    TFM_CORE_ASSERT(service);
-
-    return (struct tfm_conn_handle_t *)conn_handle;
 }
 
 /**
@@ -107,33 +100,26 @@ static struct tfm_conn_handle_t *
  *
  * \param[in] service       Target service context pointer
  * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
+ *                          tfm_spm_create_conn_handle()
  *
  * \retval IPC_SUCCESS      Success
  * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
 static int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
-                                        psa_handle_t conn_handle)
+                                        struct tfm_conn_handle_t *conn_handle)
 {
-    struct tfm_conn_handle_t *p_handle;
-
     TFM_CORE_ASSERT(service);
-
-    /* There are many handles for each RoT Service */
-    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!p_handle) {
-        tfm_core_panic();
-    }
+    TFM_CORE_ASSERT(conn_handle != NULL);
 
     /* Clear magic as the handler is not used anymore */
-    p_handle->internal_msg.magic = 0;
+    conn_handle->internal_msg.magic = 0;
 
     /* Remove node from handle list */
-    tfm_list_del_node(&p_handle->list);
+    tfm_list_del_node(&conn_handle->list);
 
     /* Back handle buffer to pool */
-    tfm_pool_free(p_handle);
+    tfm_pool_free(conn_handle);
     return IPC_SUCCESS;
 }
 
@@ -142,7 +128,7 @@ static int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
  *
  * \param[in] service       Target service context pointer
  * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
+ *                          tfm_spm_create_conn_handle()
  * \param[in] rhandle       rhandle need to save
  *
  * \retval IPC_SUCCESS      Success
@@ -150,22 +136,14 @@ static int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
  * \retval "Does not return"  Panic for not find handle node
  */
 static int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
-                                   psa_handle_t conn_handle,
+                                   struct tfm_conn_handle_t *conn_handle,
                                    void *rhandle)
 {
-    struct tfm_conn_handle_t *p_handle;
-
     TFM_CORE_ASSERT(service);
     /* Set reverse handle value only be allowed for a connected handle */
-    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != NULL);
 
-    /* There are many handles for each RoT Service */
-    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!p_handle) {
-        tfm_core_panic();
-    }
-
-    p_handle->rhandle = rhandle;
+    conn_handle->rhandle = rhandle;
     return IPC_SUCCESS;
 }
 
@@ -174,7 +152,7 @@ static int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
  *
  * \param[in] service       Target service context pointer
  * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
+ *                          tfm_spm_create_conn_handle()
  *
  * \retval void *           Success
  * \retval "Does not return"  Panic for those:
@@ -183,21 +161,13 @@ static int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
  *                              handle node does not be found
  */
 static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
-                                 psa_handle_t conn_handle)
+                                 struct tfm_conn_handle_t *conn_handle)
 {
-    struct tfm_conn_handle_t *p_handle;
-
     TFM_CORE_ASSERT(service);
     /* Get reverse handle value only be allowed for a connected handle */
-    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != NULL);
 
-    /* There are many handles for each RoT Service */
-    p_handle = tfm_spm_find_conn_handle_node(service, conn_handle);
-    if (!p_handle) {
-        tfm_core_panic();
-    }
-
-    return p_handle->rhandle;
+    return conn_handle->rhandle;
 }
 
 /* Partition management functions */
@@ -265,12 +235,6 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
         }
     }
     return NULL;
-}
-
-struct tfm_spm_service_t *
-    tfm_spm_get_service_by_handle(psa_handle_t conn_handle)
-{
-    return ((struct tfm_conn_handle_t *)conn_handle)->service;
 }
 
 /**
@@ -418,16 +382,16 @@ static struct tfm_msg_body_t *
 }
 
 struct tfm_msg_body_t *
-    tfm_spm_get_msg_buffer_from_conn_handle(psa_handle_t conn_handle)
+ tfm_spm_get_msg_buffer_from_conn_handle(struct tfm_conn_handle_t *conn_handle)
 {
-    TFM_CORE_ASSERT(conn_handle != PSA_NULL_HANDLE);
+    TFM_CORE_ASSERT(conn_handle != NULL);
 
-    return &(((struct tfm_conn_handle_t *)conn_handle)->internal_msg);
+    return &(conn_handle->internal_msg);
 }
 
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
-                      psa_handle_t handle,
+                      struct tfm_conn_handle_t *handle,
                       int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,
@@ -472,7 +436,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     msg->msg.handle = (psa_handle_t)msg;
 
     /* For connected handle, set rhandle to every message */
-    if (handle != PSA_NULL_HANDLE) {
+    if (handle) {
         msg->msg.rhandle = tfm_spm_get_rhandle(service, handle);
     }
 
@@ -1268,7 +1232,7 @@ void tfm_spm_psa_reply(uint32_t *args)
          * input status.
          */
         if (status == PSA_SUCCESS) {
-            ret = msg->handle;
+            ret = (psa_handle_t)msg->handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
             tfm_spm_free_conn_handle(service, msg->handle);

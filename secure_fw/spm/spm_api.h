@@ -490,10 +490,11 @@ uint32_t tfm_spm_partition_get_running_partition_id(void);
  * \param[in] service       Target service context pointer
  * \param[in] client_id     Partition ID of the sender of the message
  *
- * \retval PSA_NULL_HANDLE  Create failed \ref PSA_NULL_HANDLE
- * \retval >0               Service handle created, \ref psa_handle_t
+ * \retval NULL             Create failed
+ * \retval "Not NULL"       Service handle created
  */
-psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
+struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
+                                        struct tfm_spm_service_t *service,
                                         int32_t client_id);
 
 /**
@@ -505,8 +506,9 @@ psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service,
  * \retval IPC_SUCCESS        Success
  * \retval IPC_ERROR_GENERIC  Invalid handle
  */
-int32_t tfm_spm_validate_conn_handle(psa_handle_t conn_handle,
-                                     int32_t client_id);
+int32_t tfm_spm_validate_conn_handle(
+                                    const struct tfm_conn_handle_t *conn_handle,
+                                    int32_t client_id);
 
 /******************** Partition management functions *************************/
 
@@ -530,19 +532,6 @@ struct spm_partition_desc_t *tfm_spm_get_running_partition(void);
  */
 struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
-/**
- * \brief                   Get the service context by connection handle.
- *
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle()
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       Target service context pointer,
- *                          \ref tfm_spm_service_t structures
- */
-struct tfm_spm_service_t *
-    tfm_spm_get_service_by_handle(psa_handle_t conn_handle);
-
 /************************ Message functions **********************************/
 
 /**
@@ -554,7 +543,7 @@ struct tfm_spm_service_t *
  *                          \ref msg_body_t structures
  */
 struct tfm_msg_body_t *
-    tfm_spm_get_msg_buffer_from_conn_handle(psa_handle_t conn_handle);
+ tfm_spm_get_msg_buffer_from_conn_handle(struct tfm_conn_handle_t *conn_handle);
 
 /**
  * \brief                   Fill the message for PSA client call.
@@ -574,7 +563,7 @@ struct tfm_msg_body_t *
  */
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
-                      psa_handle_t handle,
+                      struct tfm_conn_handle_t *handle,
                       int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,

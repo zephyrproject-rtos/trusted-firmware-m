@@ -14,24 +14,24 @@
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
-    struct tfm_spm_service_t *service; /* RoT service pointer           */
-    psa_handle_t handle;            /* Connected Service handle         */
-    struct tfm_event_t ack_evnt;    /* Event for ack reponse            */
-    psa_msg_t msg;                  /* PSA message body                 */
-    psa_invec invec[PSA_MAX_IOVEC]; /* Put in/out vectors in msg body   */
+    struct tfm_spm_service_t *service; /* RoT service pointer            */
+    struct tfm_conn_handle_t *handle;  /* Connected Service handle       */
+    struct tfm_event_t ack_evnt;       /* Event for ack reponse          */
+    psa_msg_t msg;                     /* PSA message body               */
+    psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
-    psa_outvec *caller_outvec;      /*
-                                     * Save caller outvec pointer for
-                                     * write length update
-                                     */
+    psa_outvec *caller_outvec;         /*
+                                        * Save caller outvec pointer for
+                                        * write length update
+                                        */
 #ifdef TFM_MULTI_CORE_TOPOLOGY
-    const void *caller_data;        /*
-                                     * Pointer to the private data of the caller
-                                     * It identifies the NSPE PSA client calls
-                                     * in multi-core topology
-                                     */
+    const void *caller_data;           /*
+                                        * Pointer to the private data of the
+                                        * caller. It identifies the NSPE PSA
+                                        * client calls in multi-core topology
+                                        */
 #endif
-    struct tfm_msg_body_t *next;    /* List operators                   */
+    struct tfm_msg_body_t *next;       /* List operators                 */
 };
 
 struct tfm_msg_queue_t {

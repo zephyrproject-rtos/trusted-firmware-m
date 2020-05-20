@@ -50,7 +50,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
 {
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
-    psa_handle_t connect_handle;
+    struct tfm_conn_handle_t *connect_handle;
     int32_t client_id;
 
     /* It is a fatal error if the RoT Service does not exist on the platform */
@@ -78,7 +78,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
      * code to client when creation fails.
      */
     connect_handle = tfm_spm_create_conn_handle(service, client_id);
-    if (connect_handle == PSA_NULL_HANDLE) {
+    if (!connect_handle) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
@@ -116,6 +116,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
+    struct tfm_conn_handle_t *conn_handle;
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
     int i, j;
@@ -134,19 +135,19 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         client_id = tfm_spm_partition_get_running_partition_id();
     }
 
+    conn_handle = (struct tfm_conn_handle_t *)handle;
     /* It is a fatal error if an invalid handle was passed. */
-    if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
         tfm_core_panic();
     }
-    service = tfm_spm_get_service_by_handle(handle);
+    service = conn_handle->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
 
     /* It is a fatal error if the connection is currently handling a request. */
-    if (((struct tfm_conn_handle_t *)handle)->status ==
-                                                     TFM_HANDLE_STATUS_ACTIVE) {
+    if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
         tfm_core_panic();
     }
 
@@ -154,8 +155,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * Return PSA_ERROR_PROGRAMMER_ERROR immediately for the connection
      * has been terminated by the RoT Service.
      */
-    if (((struct tfm_conn_handle_t *)handle)->status ==
-                                              TFM_HANDLE_STATUS_CONNECT_ERROR) {
+    if (conn_handle->status == TFM_HANDLE_STATUS_CONNECT_ERROR) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -228,14 +228,14 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * FixMe: Need to check if the message is unrecognized by the RoT
      * Service or incorrectly formatted.
      */
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
 
-    tfm_spm_fill_msg(msg, service, handle, type, client_id, invecs,
-                     in_num, outvecs, out_num, outptr);
+    tfm_spm_fill_msg(msg, service, conn_handle, type, client_id,
+                     invecs, in_num, outvecs, out_num, outptr);
 
     /*
      * Send message and wake up the SP who is waiting on message queue,
@@ -252,6 +252,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
 {
     struct tfm_spm_service_t *service;
     struct tfm_msg_body_t *msg;
+    struct tfm_conn_handle_t *conn_handle;
     int32_t client_id;
 
     /* It will have no effect if called with the NULL handle */
@@ -265,33 +266,34 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
         client_id = tfm_spm_partition_get_running_partition_id();
     }
 
+    conn_handle = (struct tfm_conn_handle_t *)handle;
+
     /*
      * It is a fatal error if an invalid handle was provided that is not the
      * null handle.
      */
-    if (tfm_spm_validate_conn_handle(handle, client_id) != IPC_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
         tfm_core_panic();
     }
-    service = tfm_spm_get_service_by_handle(handle);
+    service = conn_handle->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
 
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(handle);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
 
     /* It is a fatal error if the connection is currently handling a request. */
-    if (((struct tfm_conn_handle_t *)handle)->status ==
-                                                     TFM_HANDLE_STATUS_ACTIVE) {
+    if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
         tfm_core_panic();
     }
 
     /* No input or output needed for close message */
-    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, client_id,
+    tfm_spm_fill_msg(msg, service, conn_handle, PSA_IPC_DISCONNECT, client_id,
                      NULL, 0, NULL, 0, NULL);
 
     /*
