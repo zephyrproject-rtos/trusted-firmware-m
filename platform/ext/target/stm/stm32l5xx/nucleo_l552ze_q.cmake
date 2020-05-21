@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,9 +27,9 @@ if(COMPILER STREQUAL "GNUARM")
   set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_bl2.ld")
   set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
   set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_ns.ld")
-  if (DEFINED CMSIS_5_DIR)
-    # not all project defines CMSIS_5_DIR, only the ones that use it.
-    set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+  if (DEFINED CMSIS_DIR)
+    # not all project defines CMSIS_DIR, only the ones that use it.
+    set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
   endif()
 else()
   message(FATAL_ERROR "'${COMPILER}' is not supported.")

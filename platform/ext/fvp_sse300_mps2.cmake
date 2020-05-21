@@ -20,9 +20,9 @@ if(COMPILER STREQUAL "ARMCLANG")
     set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set (BL2_SCATTER_FILE_NAME  "${FVP_SSE300_DIR}/device/source/armclang/fvp_sse300_mps2_bl2.sct")
     set (NS_SCATTER_FILE_NAME  "${FVP_SSE300_DIR}/device/source/armclang/fvp_sse300_mps2_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-      # not all project defines CMSIS_5_DIR, only the ones that use it.
-      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif(COMPILER STREQUAL "GNUARM")
     message(FATAL_ERROR "No GNUARM support yet for target '${TARGET_PLATFORM}'.")

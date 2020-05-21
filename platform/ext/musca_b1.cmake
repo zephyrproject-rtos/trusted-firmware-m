@@ -17,17 +17,17 @@ if (COMPILER STREQUAL "ARMCLANG")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_bl2.sct")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif (COMPILER STREQUAL "GNUARM")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_bl2.ld")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_ns.ld")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
     endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")

@@ -47,25 +47,25 @@ set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 if(COMPILER STREQUAL "ARMCLANG")
     set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/armclang/psoc6_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-      # not all project defines CMSIS_5_DIR, only the ones that use it.
-      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_CM4F.lib")
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_CM4F.lib")
     endif()
 elseif(COMPILER STREQUAL "GNUARM")
     set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/gcc/psoc6_ns.ld")
-    if (DEFINED CMSIS_5_DIR)
-      # not all project defines CMSIS_5_DIR, only the ones that use it.
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
       # [libRTX_CM3.a should be used for CM4 without FPU]
-      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_CM3.a")
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_CM3.a")
     endif()
 elseif(COMPILER STREQUAL "IARARM")
     set (S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/iar/tfm_common_s.icf")
     set (NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/cypress/psoc64/Device/Source/iar/psoc6_ns.icf")
-    if (DEFINED CMSIS_5_DIR)
-      # not all project defines CMSIS_5_DIR, only the ones that use it.
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
       # [RTX_CM3.a should be used for CM4 without FPU]
-      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/IAR/RTX_CM3.a")
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/IAR/RTX_CM3.a")
     endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")

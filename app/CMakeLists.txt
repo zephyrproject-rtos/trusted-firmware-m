@@ -30,10 +30,10 @@ set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")
 include("${MCUBOOT_DIR}/MCUBoot.cmake")
 
 #Set variables
-get_filename_component(CMSIS_5_DIR ${TFM_ROOT_DIR}/../CMSIS_5 ABSOLUTE)
+get_filename_component(CMSIS_DIR ${TFM_ROOT_DIR}/../CMSIS_5/CMSIS ABSOLUTE)
 
-if(NOT EXISTS ${CMSIS_5_DIR})
-	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_5_DIR}\".")
+if(NOT EXISTS ${CMSIS_DIR})
+	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_DIR}\".")
 endif()
 
 if (NOT DEFINED BL2)
@@ -70,8 +70,8 @@ endif()
 
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/app ABSOLUTE)
 
-set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
-	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
+set(NS_APP_SRC "${CMSIS_DIR}/RTOS2/RTX/Config/RTX_Config.c"
+	"${CMSIS_DIR}/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_cmsis_rtos_v2.c"
@@ -207,9 +207,9 @@ embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${INTERFACE_D
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Config  ABSOLUTE APPEND)
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
