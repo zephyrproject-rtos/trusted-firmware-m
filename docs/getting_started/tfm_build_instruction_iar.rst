@@ -19,11 +19,8 @@ Notes for building with IARARM
     cmake needs to be version 3.14 or newer.
 
     The V8M IAR CMSIS_5 RTX libraries in CMSIS_5 5.5.0 has a problem and has been updated in
-    CMSIS_5 5.7.0. However 5.7.0 causes link errors and is currently unsupported in tf-m. Use
-    the 5.5.0 branch and replace the libraries in .../CMSIS_5/CMSIS/RTOS2/RTX/Library/IAR
-    with the ones from 5.7.0.
-
-    This will be sorted out once tf-m upgrades to use CMSIS_5 5.7.0 (or later)
+    CMSIS_5 5.7.0. The updated libraries are part of the tf-m-tests repo and no special instructions
+    are needed when the libraries from this repo are used.
 
     For all configurations and build options some of the QCBOR tests fail due to the tests not handling
     double float NaN:s according to the Arm Runtime ABI. This should be sorted out in the future.

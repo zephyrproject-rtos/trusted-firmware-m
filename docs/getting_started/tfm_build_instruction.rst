@@ -29,16 +29,7 @@ Getting the source-code
     cd <TF-M base folder>
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
     git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-3.0.1
-    git clone https://github.com/ARM-software/CMSIS_5.git -b 5.5.0
-
-    # If CMSIS was cloned before the git-lfs dependency was installed,
-    # use the following command to download the binaries.
-    cd CMSIS_5 && git lfs pull
-
-.. Note::
-   `CMSIS_5` now uses `git-lfs` for storing large size binaries so the cloning
-   process has changed from previous releases. Please refer to the `CMSIS_5`
-   documentation for more details.
+    git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
 
 .. Note::
    For building with Armclang compiler version 6.10.0, please follow the note

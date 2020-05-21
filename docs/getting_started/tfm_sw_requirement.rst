@@ -128,8 +128,9 @@ In order to build TF-M the following external projects are required:
 
     - `Mbed Crypto library <https://github.com/ARMmbed/mbed-crypto>`__ v3.0.1
       is used as crypto library on the secure side
-    - `CMSIS Version 5 <https://github.com/ARM-software/CMSIS_5>`__ v5.5.0
-      is used to import RTX for the example non-secure app
+
+And the following TF-M projects as well:
+    - `TF-M tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git>`__
 
 Each of the listed dependencies should be placed in a common root directory
 with trustedfirmware-m
@@ -137,8 +138,8 @@ with trustedfirmware-m
 .. code-block:: bash
 
     .
-    ├── CMSIS_5
     ├── mbed-crypto
+    ├── tf-m-tests
     └── trusted-firmware-m
 
 .. Note::
@@ -153,7 +154,7 @@ with trustedfirmware-m
 Tools for configuring and programming boards
 ********************************************
 
-For stm32l5xx boards, `STM32_Programmer_CLI  <https://www.st.com/en/development-tools/stm32cubeprog.html>`__ 
+For stm32l5xx boards, `STM32_Programmer_CLI  <https://www.st.com/en/development-tools/stm32cubeprog.html>`__
 is used to configure security protections and to write the code in internal flash.
 A version is available for Linux and Windows host machine.
 
@@ -171,7 +172,6 @@ Install the following tools:
 
 - DS-5 |DS5_VERSION|.
 - Git tools v2.10.0
-- Git Large File Storage (git-lfs)
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
 - Python3 and the pip package manager (from Python 3.4 it's included)
@@ -226,7 +226,6 @@ Install the following tools:
 - uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition) which
   provides the Arm Compiler v6.10 compiler or GNU Arm compiler v6.3.1.
 - Git client latest version (https://git-scm.com/download/win)
-- Git Large File Storage (`native Windows version <https://git-lfs.github.com/>`__,
 - CMake (`native Windows version <https://cmake.org/download/>`__,
   see the `Supported CMake versions`_ chapter)
 - `Cygwin <https://www.cygwin.com/>`__. Tests done with version 2.877
@@ -489,7 +488,7 @@ To build the TF-M firmware the following tools are needed:
    "C compiler",See `Supported C compilers`_,"Firmware"
    "CMake",See `Supported CMake versions`_,
    "GNU Make",See `Supported GNU make versions`_,
-   "CMSIS 5",See `External dependencies`_,
+   "tf-m-tests",See `External dependencies`_,
    "mbed-crypto",See `External dependencies`_,
    "Python",3.x,"Firmware, User Guide"
    "yaml",,"Firmware"
