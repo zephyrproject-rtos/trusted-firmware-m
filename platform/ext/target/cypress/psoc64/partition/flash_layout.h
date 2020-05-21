@@ -29,8 +29,8 @@
  * 0x1017_0000 Secure     image secondary (320 KB)
  * 0x101c_0000 - 0x101f_ffff Reserved
  *  0x101c_0000 Internal Trusted Storage Area (16 KB)
- *  0x101c_4000 NV counters area (512 Bytes)
- *  0x101c_4200 Scratch area (27.5 KB)
+ *  0x101c_4000 NV counters area (1 KB)
+ *  0x101c_4400 Scratch area (27 KB)
  *  0x101c_b000 Secure Storage Area (20 KB)
  *  0x101d_0000 Reserved (192 KB)
  * 0x101f_ffff End of Flash
@@ -73,7 +73,7 @@
 /* Non-volatile Counters Area */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+#define FLASH_NV_COUNTERS_AREA_SIZE     (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 #ifdef BL2
 #error "BL2 configuration is not supported"
@@ -82,7 +82,7 @@
 /* Scratch Area - unused */
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_NV_COUNTERS_AREA_OFFSET + \
                                          FLASH_NV_COUNTERS_AREA_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE         (0x6e00)   /* 27.5 KB */
+#define FLASH_AREA_SCRATCH_SIZE         (0x6c00)   /* 27 KB */
 
 /* Secure Storage Area */
 #define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
@@ -167,11 +167,10 @@
 #define ITS_NUM_ASSETS          (10)
 
 /* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
+#define TFM_NV_COUNTERS_FLASH_DEV    Driver_FLASH0
 #define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  MAX(FLASH_NV_COUNTERS_AREA_SIZE, \
-                                         FLASH_AREA_IMAGE_SECTOR_SIZE)
+#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Use Flash to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10000000)

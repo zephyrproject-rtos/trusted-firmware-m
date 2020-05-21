@@ -96,7 +96,7 @@
 
 /* SMPU2 - NV counters in Flash */
 #define SMPU2_BASE         S_ROM_ALIAS(FLASH_NV_COUNTERS_AREA_OFFSET)
-#define SMPU2_REGIONSIZE   PROT_SIZE_512B_BIT_SHIFT
+#define SMPU2_REGIONSIZE   PROT_SIZE_1KB_BIT_SHIFT
 #define SMPU2_SLAVE_CONFIG {\
     .address = (void *)SMPU2_BASE, \
     .regionSize = (cy_en_prot_size_t) SMPU2_REGIONSIZE, \
