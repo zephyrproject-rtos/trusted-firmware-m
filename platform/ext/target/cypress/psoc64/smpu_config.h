@@ -76,7 +76,7 @@
     .address = (void *)SMPU1_BASE, \
     .regionSize = (cy_en_prot_size_t) SMPU1_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
-    .userPermission = CY_PROT_PERM_RW, \
+    .userPermission = CY_PROT_PERM_DISABLED, \
     .privPermission = CY_PROT_PERM_RW, \
     .secure = false, \
     .pcMatch = false, \
@@ -101,7 +101,7 @@
     .address = (void *)SMPU2_BASE, \
     .regionSize = (cy_en_prot_size_t) SMPU2_REGIONSIZE, \
     .subregions = ALL_ENABLED, \
-    .userPermission = CY_PROT_PERM_RW, \
+    .userPermission = CY_PROT_PERM_DISABLED, \
     .privPermission = CY_PROT_PERM_RW, \
     .secure = false, \
     .pcMatch = false, \
