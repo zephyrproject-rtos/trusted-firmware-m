@@ -29,11 +29,11 @@ embedded_project_fixup()
 set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")
 include("${MCUBOOT_DIR}/MCUBoot.cmake")
 
-#Set variables
-get_filename_component(CMSIS_DIR ${TFM_ROOT_DIR}/../CMSIS_5/CMSIS ABSOLUTE)
+#CMSIS
+get_filename_component(CMSIS_DIR ${TFM_ROOT_DIR}/../tf-m-tests/CMSIS ABSOLUTE)
 
 if(NOT EXISTS ${CMSIS_DIR})
-	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_DIR}\".")
+	message(FATAL_ERROR "Missing CMSIS. Please clone the tf-m-tests repo.")
 endif()
 
 if (NOT DEFINED BL2)
