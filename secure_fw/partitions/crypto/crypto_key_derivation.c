@@ -381,14 +381,14 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (in_vec[1].len != sizeof(psa_client_key_attributes_t)) ||
+        (in_vec[1].len != sizeof(struct psa_client_key_attributes_s)) ||
         (out_vec[0].len != sizeof(psa_key_handle_t))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     uint32_t handle = iov->op_handle;
-    const psa_client_key_attributes_t *client_key_attr = in_vec[1].base;
+    const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_key_derivation_operation_t *operation = NULL;
     psa_key_handle_t *key_handle = out_vec[0].base;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;

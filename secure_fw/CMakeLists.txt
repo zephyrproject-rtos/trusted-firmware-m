@@ -429,7 +429,7 @@ function(set_up_secure_fw_build)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
 							${INTERFACE_INC_DIR}/psa/crypto_compat.h
 							${INTERFACE_INC_DIR}/psa/crypto.h
-							${INTERFACE_INC_DIR}/psa/crypto_platform.h
+							${INTERFACE_INC_DIR}/psa/crypto_client_struct.h
 							${INTERFACE_INC_DIR}/psa/crypto_sizes.h
 							${INTERFACE_INC_DIR}/psa/crypto_struct.h
 							${INTERFACE_INC_DIR}/psa/crypto_types.h

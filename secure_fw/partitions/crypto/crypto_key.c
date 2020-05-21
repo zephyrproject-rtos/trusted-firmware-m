@@ -37,10 +37,9 @@ static struct tfm_crypto_handle_owner_s
  * \defgroup public Public functions
  *
  */
-
 /*!@{*/
 psa_status_t tfm_crypto_key_attributes_from_client(
-                             const psa_client_key_attributes_t *client_key_attr,
+                             const struct psa_client_key_attributes_s *client_key_attr,
                              int32_t client_id,
                              psa_key_attributes_t *key_attributes)
 {
@@ -48,19 +47,17 @@ psa_status_t tfm_crypto_key_attributes_from_client(
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* Domain parameters are not supported, ignore any passed by the client */
-    key_attributes->domain_parameters = NULL;
-    key_attributes->domain_parameters_size = 0;
+    *key_attributes = psa_key_attributes_init();
 
     /* Copy core key attributes from the client core key attributes */
-    key_attributes->core.type = client_key_attr->core.type;
-    key_attributes->core.lifetime = client_key_attr->core.lifetime;
-    key_attributes->core.policy = client_key_attr->core.policy;
-    key_attributes->core.bits = client_key_attr->core.bits;
-    key_attributes->core.flags = client_key_attr->core.flags;
+    key_attributes->core.type = client_key_attr->type;
+    key_attributes->core.lifetime = client_key_attr->lifetime;
+    key_attributes->core.policy.usage = client_key_attr->usage;
+    key_attributes->core.policy.alg = client_key_attr->alg;
+    key_attributes->core.bits = client_key_attr->bits;
 
     /* Use the client key id as the key_id and its partition id as the owner */
-    key_attributes->core.id.key_id = client_key_attr->core.id;
+    key_attributes->core.id.key_id = client_key_attr->id;
     key_attributes->core.id.owner = client_id;
 
     return PSA_SUCCESS;
@@ -68,25 +65,24 @@ psa_status_t tfm_crypto_key_attributes_from_client(
 
 psa_status_t tfm_crypto_key_attributes_to_client(
                                    const psa_key_attributes_t *key_attributes,
-                                   psa_client_key_attributes_t *client_key_attr)
+                                   struct psa_client_key_attributes_s *client_key_attr)
 {
     if (client_key_attr == NULL || key_attributes == NULL) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* Domain parameters are not supported, avoid passing any to the client */
-    client_key_attr->domain_parameters = NULL;
-    client_key_attr->domain_parameters_size = 0;
+    struct psa_client_key_attributes_s v = PSA_CLIENT_KEY_ATTRIBUTES_INIT;
+    *client_key_attr = v;
 
-    /* Copy core key attributes to the client core key attributes */
-    client_key_attr->core.type = key_attributes->core.type;
-    client_key_attr->core.lifetime = key_attributes->core.lifetime;
-    client_key_attr->core.policy = key_attributes->core.policy;
-    client_key_attr->core.bits = key_attributes->core.bits;
-    client_key_attr->core.flags = key_attributes->core.flags;
+    /* Copy core key attributes from the client core key attributes */
+    client_key_attr->type = key_attributes->core.type;
+    client_key_attr->lifetime = key_attributes->core.lifetime;
+    client_key_attr->usage = key_attributes->core.policy.usage;
+    client_key_attr->alg = key_attributes->core.policy.alg;
+    client_key_attr->bits = key_attributes->core.bits;
 
     /* Return the key_id as the client key id, do not return the owner */
-    client_key_attr->core.id = key_attributes->core.id.key_id;
+    client_key_attr->id = key_attributes->core.id.key_id;
 
     return PSA_SUCCESS;
 }
@@ -203,11 +199,11 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (in_vec[1].len != sizeof(psa_client_key_attributes_t)) ||
+        (in_vec[1].len != sizeof(struct psa_client_key_attributes_s)) ||
         (out_vec[0].len != sizeof(psa_key_handle_t))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
-    const psa_client_key_attributes_t *client_key_attr = in_vec[1].base;
+    const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     const uint8_t *data = in_vec[2].base;
     size_t data_length = in_vec[2].len;
     psa_key_handle_t *key_handle = out_vec[0].base;
@@ -398,13 +394,13 @@ psa_status_t tfm_crypto_get_key_attributes(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(psa_client_key_attributes_t))) {
+        (out_vec[0].len != sizeof(struct psa_client_key_attributes_s))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_handle_t key = iov->key_handle;
-    psa_client_key_attributes_t *client_key_attr = out_vec[0].base;
+    struct psa_client_key_attributes_s *client_key_attr = out_vec[0].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
 
@@ -437,11 +433,11 @@ psa_status_t tfm_crypto_reset_key_attributes(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(psa_client_key_attributes_t))) {
+        (out_vec[0].len != sizeof(struct psa_client_key_attributes_s))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
 
-    psa_client_key_attributes_t *client_key_attr = out_vec[0].base;
+    struct psa_client_key_attributes_s *client_key_attr = out_vec[0].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     int32_t partition_id;
@@ -530,14 +526,14 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(psa_key_handle_t)) ||
-        (in_vec[1].len != sizeof(psa_client_key_attributes_t))) {
+        (in_vec[1].len != sizeof(struct psa_client_key_attributes_s))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_handle_t source_handle = iov->key_handle;
     psa_key_handle_t *target_handle = out_vec[0].base;
-    const psa_client_key_attributes_t *client_key_attr = in_vec[1].base;
+    const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     uint32_t i = 0;
@@ -592,12 +588,12 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     }
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (in_vec[1].len != sizeof(psa_client_key_attributes_t)) ||
+        (in_vec[1].len != sizeof(struct psa_client_key_attributes_s)) ||
         (out_vec[0].len != sizeof(psa_key_handle_t))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
     psa_key_handle_t *key_handle = out_vec[0].base;
-    const psa_client_key_attributes_t *client_key_attr = in_vec[1].base;
+    const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     uint32_t i = 0;

@@ -24,6 +24,8 @@ extern "C" {
 typedef psa_status_t (*tfm_crypto_us_t)(psa_invec[],size_t,psa_outvec[],size_t);
 #endif
 
+#include "psa/crypto_client_struct.h"
+
 #define UNIFORM_SIGNATURE_API(api_name) \
     psa_status_t api_name(psa_invec[], size_t, psa_outvec[], size_t)
 
@@ -43,32 +45,6 @@ enum tfm_crypto_operation_type {
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
 };
-
-/**
- * \brief Core key attributes struct as seen by the client, with
- *        psa_app_key_id_t as the key ID type.
- */
-typedef struct {
-    psa_key_type_t type;
-    psa_key_lifetime_t lifetime;
-    psa_app_key_id_t id; /* Client key ID */
-    psa_key_policy_t policy;
-    psa_key_bits_t bits;
-    psa_key_attributes_flag_t flags;
-} psa_client_core_key_attributes_t;
-
-/**
- * \brief This struct represents the psa_key_attributes_t struct exposed to the
- *        client. The Mbed Crypto library needs a different abstraction for
- *        psa_key_attributes_t, so this intermediate struct is defined.
- *
- * TODO: Cleanup crypto implementation details from client-side PSA abstraction.
- */
-typedef struct {
-    psa_client_core_key_attributes_t core; /* Client core key attributes */
-    void *domain_parameters;
-    size_t domain_parameters_size;
-} psa_client_key_attributes_t;
 
 /**
  * \brief Initialise the service
@@ -103,7 +79,7 @@ psa_status_t tfm_crypto_get_caller_id(int32_t *id);
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_key_attributes_from_client(
-                             const psa_client_key_attributes_t *client_key_attr,
+                             const struct psa_client_key_attributes_s *client_key_attr,
                              int32_t client_id,
                              psa_key_attributes_t *key_attributes);
 
@@ -117,7 +93,7 @@ psa_status_t tfm_crypto_key_attributes_from_client(
  */
 psa_status_t tfm_crypto_key_attributes_to_client(
                                   const psa_key_attributes_t *key_attributes,
-                                  psa_client_key_attributes_t *client_key_attr);
+                                  struct psa_client_key_attributes_s *client_key_attr);
 
 /**
  * \brief Checks that the requested handle belongs to the requesting
