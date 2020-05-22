@@ -6,6 +6,14 @@ This document assumes that the user has set up the build environment, is
 capable of compiling the TF-M project, and is in possession of at least one
 Musca-S1 board, or a Musca-B1 board that has not been provisioned before.
 
+.. Note::
+    During provisioning, the 'MCUBOOT_IMAGE_NUMBER' configuration's value
+    determines which Root of Trust public key's hash will be stored. Whichever
+    one is stored, it can only be checked against successfully in the matching
+    way later. This means that a board provisioned with a build in which
+    'MCUBOOT_IMAGE_NUMBER=1' can only be used with 'MCUBOOT_IMAGE_NUMBER=1',
+    as long as the OTP is enabled. Same goes with 'MCUBOOT_IMAGE_NUMBER=2'.
+
 *********************************
 Provisioning on Musca HW variants
 *********************************
@@ -20,9 +28,12 @@ Enabled lifecycle, which it recognizes by the contents of the OTP.
 Debug and board reprogramming through USB is locked down in this state.
 This lock can be forced open, but only with DAPLink firmware v34 or above.
 
-Because the S1 "OTP" content is lost on a power cycle, it can not only be
-provisioned several times through simply repeating the process, but it is also
-unaffected by the lockdown.
+Because the S1 "OTP" content is stored in the MRAM, it can be provisioned only
+once with the normal provisioning flow. However, a workaround to re-provision
+the board does exist. To achieve this, one needs to wipe the key area in the
+MRAM with the debugger in advance. The address and size of said area can be
+found at 'platform/ext/target/musca_s1/partition/flash_layout.h' as
+'TF-M key area'.
 
 For further information on the DAPLink firmware and update process, please
 refer to the `Musca-B1 Technical Reference Manual

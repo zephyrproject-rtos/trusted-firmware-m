@@ -52,7 +52,7 @@ int mbedtls_mng_otpWordRead(uint32_t otpAddress, uint32_t *pOtpWord)
 
 int mbedtls_mng_lcsGet(uint32_t *pLcs)
 {
-#if defined(DX_PLAT_MUSCA_S1) && defined(CRYPTO_HW_ACCELERATOR_OTP_ENABLED)
+#ifdef DX_PLAT_MUSCA_S1
     uint32_t manufacturer_flag;
     uint32_t oem_flag;
 
@@ -92,7 +92,7 @@ int mbedtls_mng_lcsGet(uint32_t *pLcs)
     /* return the LCS value */
     *pLcs = regVal;
     return CC_OK;
-#endif /* DX_PLAT_MUSCA_S1 && CRYPTO_HW_ACCELERATOR_OTP_ENABLED */
+#endif /* DX_PLAT_MUSCA_S1 */
 }
 
 int mbedtls_mng_swVersionGet(mbedtls_mng_pubKeyType_t keyIndex, uint32_t *swVersion)
