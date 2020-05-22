@@ -445,6 +445,10 @@ those flags. The list of flags are:
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
   on the value of this flag. Default value: OFF.
+- ``ATTEST_CLAIM_VALUE_CHECK``: Check attestation claims against hard-coded
+  values found in ``platform/ext/common/template/attest_hal.c``. Default value
+  is OFF. Set to ON in a platform's CMake file if the attest HAL is not yet
+  properly ported to it.
 
 Related compile time options
 ----------------------------

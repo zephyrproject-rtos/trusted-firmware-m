@@ -517,6 +517,10 @@ if (NOT DEFINED BOOT_DATA_AVAILABLE)
 	endif()
 endif()
 
+if (NOT DEFINED ATTEST_CLAIM_VALUE_CHECK)
+	set(ATTEST_CLAIM_VALUE_CHECK OFF)
+endif()
+
 ##Set mbedTLS compiler flags for BL2 bootloader
 set(MBEDCRYPTO_C_FLAGS_BL2 "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-rsa.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")

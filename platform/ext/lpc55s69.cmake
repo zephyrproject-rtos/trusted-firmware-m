@@ -160,6 +160,9 @@ elseif (BUILD_STARTUP)
     endif()
 endif()
 
+#Enable the checks of attestation claims against hard-coded values.
+set(ATTEST_CLAIM_VALUE_CHECK ON)
+
 if (NOT DEFINED BUILD_TARGET_CFG)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
 elseif(BUILD_TARGET_CFG)
