@@ -7,8 +7,8 @@
 
 {{utilities.donotedit_warning}}
 
-#ifndef __TFM_SPM_DB_INC__
-#define __TFM_SPM_DB_INC__
+#ifndef __TFM_SPM_DB_IPC_INC__
+#define __TFM_SPM_DB_IPC_INC__
 
 #include "spm_api.h"
 #include "psa_manifest/sid.h"
@@ -39,9 +39,7 @@
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
-#ifdef TFM_PSA_API
 extern void tfm_nspm_thread_entry(void);
-#endif
 
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
@@ -56,7 +54,6 @@ extern void {{manifest.manifest.entry_point}}(void);
 /**************************************************************************/
 /** Memory region declarations */
 /**************************************************************************/
-#ifdef TFM_PSA_API
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
@@ -79,59 +76,6 @@ REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit);
     {% endif %}
 
 {% endfor %}
-#endif /* defined(TFM_PSA_API) */
-
-#ifndef TFM_PSA_API
-/**************************************************************************/
-/** Context stacks for IRQ handling */
-/**************************************************************************/
-/* The max size of the context stack can be calculated as a function of the IRQ
- * count of the secure partition:
- *
- * max_stack_size = intr_ctx_size + (IRQ_CNT * (intr_ctx_size + hndl_ctx_size))
- *
- * where:
- *   intr_ctx: Frame pushed when the partition is interrupted
- *   hndl_ctx: Frame pushed when the partition is handling an interrupt
- */
-static uint32_t ns_interrupt_ctx_stack[
-        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
-
-static uint32_t tfm_core_interrupt_ctx_stack[
-        sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
-
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-static uint32_t ctx_stack_{{manifest.manifest.name}}[
-        (sizeof(struct interrupted_ctx_stack_frame_t) +
-            (TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT) * (
-                sizeof(struct interrupted_ctx_stack_frame_t) +
-                sizeof(struct handler_ctx_stack_frame_t)
-        )) / sizeof(uint32_t)];
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-{% endfor %}
-
-uint32_t *ctx_stack_list[] =
-{
-    ns_interrupt_ctx_stack,
-    tfm_core_interrupt_ctx_stack,
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    ctx_stack_{{manifest.manifest.name}},
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-{% endfor %}
-};
-#endif /* !defined(TFM_PSA_API) */
-
 /**************************************************************************/
 /** Dependencies array for Secure Partition */
 /**************************************************************************/
@@ -163,11 +107,8 @@ static int32_t dependencies_{{manifest.manifest.name}}[] =
 const struct spm_partition_static_data_t static_data_list[] =
 {
     {
-#ifdef TFM_PSA_API
         .psa_framework_version = 0x0100,
-#endif /* defined(TFM_PSA_API) */
         .partition_id         = TFM_SP_NON_SECURE_ID,
-#ifdef TFM_PSA_API
 #if TFM_MULTI_CORE_TOPOLOGY
         .partition_flags      = SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_IPC,
 #else
@@ -175,30 +116,18 @@ const struct spm_partition_static_data_t static_data_list[] =
 #endif
         .partition_priority   = TFM_PRIORITY_LOW,
         .partition_init       = tfm_nspm_thread_entry,
-#else
-        .partition_flags      = 0,
-#endif
     },
-
-#ifndef TFM_PSA_API
-    {
-        .partition_id         = TFM_SP_CORE_ID,
-        .partition_flags      = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT,
-    },
-#endif
 
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{'{'}}
-#ifdef TFM_PSA_API
     {% if manifest.manifest.psa_framework_version == 1.0 %}
         .psa_framework_version = 0x0100,
     {% else %}
         .psa_framework_version = 0,
     {% endif %}
-#endif /* defined(TFM_PSA_API) */
         .partition_id         = {{manifest.manifest.name}},
     {% if manifest.attr.tfm_partition_ipc %}
         .partition_flags      = SPM_PART_FLAG_IPC
@@ -261,10 +190,6 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 {
     NULL,
 
-#ifndef TFM_PSA_API
-    NULL,
-#endif
-
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
@@ -284,7 +209,6 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 /**************************************************************************/
 /** The memory data of the partition list */
 /**************************************************************************/
-#ifdef TFM_PSA_API
 const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 {
     {
@@ -314,7 +238,6 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 
 {% endfor %}
 };
-#endif /* defined(TFM_PSA_API) */
 
 /**************************************************************************/
 /** The partition list for the DB */
@@ -322,9 +245,6 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 static struct spm_partition_desc_t partition_list [] =
 {
     {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
-#ifndef TFM_PSA_API
-    {{'{{0}}'}},   /* placeholder for TF-M Core internal partition */
-#endif
 
 {% for manifest in manifests %}
     /* -----------------------------------------------------------------------*/
@@ -349,10 +269,7 @@ static struct spm_partition_desc_t partition_list [] =
 struct spm_partition_db_t g_spm_partition_db = {
     .is_init = 0,
     .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
-#ifndef TFM_PSA_API
-    .running_partition_idx = 0,
-#endif
     .partitions = partition_list,
 };
 
-#endif /* __TFM_SPM_DB_INC__ */
+#endif /* __TFM_SPM_DB_IPC_INC__ */
