@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020 ARM Limited
+ * Copyright (c) 2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +45,11 @@ LR_CODE NS_CODE_START {
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY NS_HEAP_SIZE {
     }
+
+#if defined(PSA_API_TEST_ENABLED)
+    PSA_API_TEST_NVMEM PSA_API_TEST_NVMEM_START EMPTY PSA_API_TEST_NVMEM_SIZE {
+    }
+#endif
 
 #if defined (NS_DATA_SHARED_START)
     /* Shared memory data */

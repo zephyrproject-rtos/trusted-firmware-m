@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Arm Limited
  * Copyright (c) 2020 IAR Systems AB
+ * Copyright (c) 2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +51,10 @@ define block DATA with fixed order, maximum size = NS_DATA_SIZE {
        block TFM_RAM_CODE
 };
 place at address NS_DATA_START {block DATA};
+
+#if defined(PSA_API_TEST_ENABLED)
+define region PSA_NVMEM_region = mem:[from PSA_API_TEST_NVMEM_START size PSA_API_TEST_NVMEM_SIZE];
+#endif
 
 #if defined (NS_DATA_SHARED_START)
     /* Shared memory data */

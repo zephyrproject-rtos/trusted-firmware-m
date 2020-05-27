@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
-# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2020-2021, Cypress Semiconductor Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,6 +19,10 @@ set (CY_PDL_LIB_PATH  "libs/mtb-pdl-cat1")
 target_include_directories(platform_region_defs
     INTERFACE
         partition
+)
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform common defs ===============================#
