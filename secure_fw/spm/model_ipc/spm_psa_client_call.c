@@ -52,6 +52,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     struct tfm_msg_body_t *msg;
     struct tfm_conn_handle_t *connect_handle;
     int32_t client_id;
+    psa_handle_t handle;
 
     /* It is a fatal error if the RoT Service does not exist on the platform */
     service = tfm_spm_get_service_by_sid(sid);
@@ -96,8 +97,9 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
+    handle = tfm_spm_to_user_handle(connect_handle);
     /* No input or output needed for connect message */
-    tfm_spm_fill_msg(msg, service, connect_handle, PSA_IPC_CONNECT,
+    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
     /*
@@ -234,7 +236,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         tfm_core_panic();
     }
 
-    tfm_spm_fill_msg(msg, service, conn_handle, type, client_id,
+    tfm_spm_fill_msg(msg, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
 
     /*
@@ -292,7 +294,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
     }
 
     /* No input or output needed for close message */
-    tfm_spm_fill_msg(msg, service, conn_handle, PSA_IPC_DISCONNECT, client_id,
+    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, client_id,
                      NULL, 0, NULL, 0, NULL);
 
     /*

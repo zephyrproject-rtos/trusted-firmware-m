@@ -558,7 +558,7 @@ struct tfm_msg_body_t *
  */
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
-                      struct tfm_conn_handle_t *handle,
+                      psa_handle_t handle,
                       int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,
@@ -950,6 +950,11 @@ void tfm_spm_validate_caller(struct spm_partition_desc_t *p_cur_sp,
  * \retval "Does not return"
  */
 void tfm_spm_psa_panic(void);
+
+/**
+ * \brief Converts a handle instance into a corresponded user handle.
+ */
+psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance);
 
 /**
  * \brief Converts a user handle into a corresponded handle instance.

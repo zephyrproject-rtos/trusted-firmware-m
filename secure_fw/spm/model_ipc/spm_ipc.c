@@ -92,8 +92,7 @@ static uint32_t loop_index;
  *  loop_index is used to promise same handle instance is converted into
  *  different user handles in short time.
  */
-static psa_handle_t tfm_spm_to_user_handle(
-                                    struct tfm_conn_handle_t *handle_instance)
+psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance)
 {
     psa_handle_t user_handle;
 
@@ -411,42 +410,33 @@ static struct tfm_msg_body_t *
      *      unused, or owned by anither partition)
      * Check the conditions above
      */
-    struct tfm_conn_handle_t *connection_handle_address;
-    struct tfm_msg_body_t *msg;
+    struct tfm_msg_body_t *p_msg;
     uint32_t partition_id;
-
-    msg = (struct tfm_msg_body_t *)msg_handle;
-
-    connection_handle_address =
-        TFM_GET_CONTAINER_PTR(msg, struct tfm_conn_handle_t, internal_msg);
+    struct tfm_conn_handle_t *p_conn_handle =
+                                     tfm_spm_to_handle_instance(msg_handle);
 
     if (is_valid_chunk_data_in_pool(
-        conn_handle_pool, (uint8_t *)connection_handle_address) != 1) {
+        conn_handle_pool, (uint8_t *)p_conn_handle) != 1) {
         return NULL;
     }
+
+    p_msg = &p_conn_handle->internal_msg;
 
     /*
      * Check that the magic number is correct. This proves that the message
      * structure contains an active message.
      */
-    if (msg->magic != TFM_MSG_MAGIC) {
+    if (p_msg->magic != TFM_MSG_MAGIC) {
         return NULL;
     }
 
     /* Check that the running partition owns the message */
     partition_id = tfm_spm_partition_get_running_partition_id();
-    if (partition_id != msg->service->partition->static_data->partition_id) {
+    if (partition_id != p_msg->service->partition->static_data->partition_id) {
         return NULL;
     }
 
-    /*
-     * FixMe: For condition 1 it should be checked whether the message belongs
-     * to the service. Skipping this check isn't a security risk as even if the
-     * message belongs to another service, the handle belongs to the calling
-     * partition.
-     */
-
-    return msg;
+    return p_msg;
 }
 
 struct tfm_msg_body_t *
@@ -459,13 +449,14 @@ struct tfm_msg_body_t *
 
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
-                      struct tfm_conn_handle_t *handle,
+                      psa_handle_t handle,
                       int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
                       psa_outvec *outvec, size_t out_len,
                       psa_outvec *caller_outvec)
 {
     uint32_t i;
+    struct tfm_conn_handle_t *conn_handle;
 
     TFM_CORE_ASSERT(msg);
     TFM_CORE_ASSERT(service);
@@ -481,7 +472,6 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     tfm_event_init(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;
     msg->service = service;
-    msg->handle = handle;
     msg->caller_outvec = caller_outvec;
     msg->msg.client_id = client_id;
 
@@ -500,12 +490,13 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
         msg->outvec[i].len = 0;
     }
 
-    /* Use message address as handle */
-    msg->msg.handle = (psa_handle_t)msg;
+    /* Use the user connect handle as the message handle */
+    msg->msg.handle = handle;
 
+    conn_handle = tfm_spm_to_handle_instance(handle);
     /* For connected handle, set rhandle to every message */
-    if (handle) {
-        msg->msg.rhandle = tfm_spm_get_rhandle(service, handle);
+    if (conn_handle) {
+        msg->msg.rhandle = tfm_spm_get_rhandle(service, conn_handle);
     }
 
     /* Set the private data of NSPE client caller in multi-core topology */
@@ -1007,8 +998,9 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    ((struct tfm_conn_handle_t *)(tmp_msg->handle))->status =
-                                                       TFM_HANDLE_STATUS_ACTIVE;
+    (TFM_GET_CONTAINER_PTR(tmp_msg,
+                           struct tfm_conn_handle_t,
+                           internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
 
     tfm_core_util_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
@@ -1028,6 +1020,7 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
     psa_handle_t msg_handle;
     void *rhandle = NULL;
     struct tfm_msg_body_t *msg = NULL;
+    struct tfm_conn_handle_t *conn_handle;
 
     TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -1040,9 +1033,10 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
     }
 
     msg->msg.rhandle = rhandle;
+    conn_handle = tfm_spm_to_handle_instance(msg_handle);
 
     /* Store reverse handle for following client calls. */
-    tfm_spm_set_rhandle(msg->service, msg->handle, rhandle);
+    tfm_spm_set_rhandle(msg->service, conn_handle, rhandle);
 }
 
 size_t tfm_spm_psa_read(uint32_t *args)
@@ -1267,6 +1261,7 @@ void tfm_spm_psa_reply(uint32_t *args)
     struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *msg = NULL;
     int32_t ret = PSA_SUCCESS;
+    struct tfm_conn_handle_t *conn_handle;
 
     TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -1292,6 +1287,7 @@ void tfm_spm_psa_reply(uint32_t *args)
      * Three type of message are passed in this function: CONNECTION, REQUEST,
      * DISCONNECTION. It needs to process differently for each type.
      */
+    conn_handle = tfm_spm_to_handle_instance(msg_handle);
     switch (msg->msg.type) {
     case PSA_IPC_CONNECT:
         /*
@@ -1300,10 +1296,10 @@ void tfm_spm_psa_reply(uint32_t *args)
          * input status.
          */
         if (status == PSA_SUCCESS) {
-            ret = tfm_spm_to_user_handle(msg->handle);
+            ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            tfm_spm_free_conn_handle(service, msg->handle);
+            tfm_spm_free_conn_handle(service, conn_handle);
             ret = PSA_ERROR_CONNECTION_REFUSED;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
@@ -1314,7 +1310,7 @@ void tfm_spm_psa_reply(uint32_t *args)
         break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
-        tfm_spm_free_conn_handle(service, msg->handle);
+        tfm_spm_free_conn_handle(service, conn_handle);
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -1343,14 +1339,12 @@ void tfm_spm_psa_reply(uint32_t *args)
          * must panic the Secure Partition in response to a PROGRAMMER ERROR.
          */
         if (TFM_CLIENT_ID_IS_NS(msg->msg.client_id)) {
-            ((struct tfm_conn_handle_t *)(msg->handle))->status =
-                                                TFM_HANDLE_STATUS_CONNECT_ERROR;
+            conn_handle->status = TFM_HANDLE_STATUS_CONNECT_ERROR;
         } else {
             tfm_core_panic();
         }
     } else {
-        ((struct tfm_conn_handle_t *)(msg->handle))->status =
-                                                         TFM_HANDLE_STATUS_IDLE;
+        conn_handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
     if (is_tfm_rpc_msg(msg)) {
