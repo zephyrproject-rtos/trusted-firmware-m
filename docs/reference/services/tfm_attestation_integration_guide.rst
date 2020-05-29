@@ -8,13 +8,26 @@ Introduction
 TF-M Initial Attestation Service allows the application to prove the device
 identity during an authentication process to a verification entity. The initial
 attestation service can create a token on request, which contains a fix set of
-device specific data. Device must contain an attestation key pair, which is
-unique per device. The token is signed with the private part of attestation key
-pair. The public part of the key pair is known by the verification entity. The
-public key is used to verify the token authenticity. The data items in the token
-used to verify the device integrity and assess its trustworthiness. Attestation
-key provisioning is out of scope for the attestation service and is expected to
-take part during manufacturing of the device.
+device specific data.
+
+TF-M Initial Attestation Service by default enables asymmetric key algorithm
+based attestation (*asymmetric attestation* for short). Symmetric key algorithm
+based attestation (*symmetric attestation* for short) can be enabled instead by
+selecting build option ``SYMMETRIC_INITIAL_ATTESTATION``.
+
+    - In asymmetric attestation, device must contain an attestation key pair,
+      which is unique per device. The token is signed with the private part of
+      attestation key pair. The public part of the key pair is known by the
+      verification entity. The public key is used to verify the token
+      authenticity.
+    - In symmetric attestation, device should contain a symmetric attestation
+      key to generate the authentication tag of token content. The verification
+      entity uses the same symmetric key to verify the token authenticity.
+
+The data items in the token used to verify the device integrity and assess its
+trustworthiness. Attestation key provisioning is out of scope for the
+attestation service and is expected to take part during manufacturing of the
+device.
 
 ***************************************
 Claims in the initial attestation token
@@ -31,12 +44,18 @@ claims are included in the token:
       time as that standard exists, the claim will be represented by a custom
       claim. Value is encoded as byte string.
 
-    - **Instance ID**: It represents the unique identifier of the instance. In
-      the PSA definition it is a hash of the public attestation key of the
-      instance. The claim is modeled to be eventually represented by the EAT
-      standard claim UEID of type GUID. Until such a time as that standard
-      exists, the claim will be represented by a custom claim  Value is encoded
-      as byte string.
+    - **Instance ID**: It represents the unique identifier of the instance.
+      In the PSA definition it is:
+
+        - a hash of the public attestation key of the instance in asymmetric
+          attestation.
+        - hashes of the symmetric attestation key of the instance in symmetric
+          attestation.
+
+      The claim is modeled to be eventually represented by the EAT standard
+      claim UEID of type GUID. Until such a time as that standard exists, the
+      claim will be represented by a custom claim Value is encoded as byte
+      string.
 
     - **Verification service indicator**: Optional, recommended claim. It
       is used by a Relying Party to locate a validation service for the
@@ -155,8 +174,8 @@ Service source files
       implementation of APIs, retrieval of claims and token creation.
     - ``attest_token.c``: Implements the token creation function such as
       start and finish token creation and adding claims to the token.
-    - ``attestation_key.c``: Get the attestation key from platform layer
-      and register it to the TF-M Crypto service for further usage.
+    - ``attestation_key.c``: Get the asymmetric attestation key from platform
+      layer and register it to the TF-M Crypto service for further usage.
     - ``tfm_attestation.c``: Implements the SPM abstraction layer, and bind
       the attestation service to the SPM implementation in TF-M project.
     - ``tfm_attestation_secure_api.c``: Implements the secure API layer to
@@ -165,6 +184,10 @@ Service source files
     - ``tfm_attestation_req_mngr.c``: Includes the initialization entry of
       attestation service and handles attestation service requests in IPC
       model.
+    - ``attest_symmetric_key.c``: Get the symmetric initial attestation key
+      from platform layer and register it into TF-M Crypto service for further
+      usage. Also calculate the Instance ID value based on symmetric initial
+      attestation key.
 
 Service interface definitions
 =============================
@@ -386,6 +409,9 @@ Overall structure of shared data::
 
 Crypto interface
 ================
+
+Asymmetric key algorithm based attestation
+------------------------------------------
 Device **must** contain an asymmetric key pair. The private part of it is used
 to sign the initial attestation token. Current implementation supports only the
 ECDSA P256 signature over SHA256. The public part of the key pair is used to
@@ -412,7 +438,7 @@ Interface needed by verification code:
 -  ``t_cose_crypto_pub_key_verify()``: Verify the signature over a hash value.
 
 Key handling
-------------
+^^^^^^^^^^^^
 The provisioning of the initial attestation key is out of scope of the service
 and this document. It is assumed that device maker provisions the unique
 asymmetric key pair during the manufacturing process. The following API is
@@ -429,6 +455,56 @@ service with ``psa_import_key()`` and ``psa_destroy_key()`` API calls for
 further usage. See in ``attestation_key.c``. In other implementation if the
 attestation key is directly retrieved by the Crypto service then this key
 handling is not necessary.
+
+Symmetric key algorithm based attestation
+-----------------------------------------
+Device **must** contain a symmetric key to generate the authentication tag of
+the initial attestation token. A key identifier (kid) can be encoded in the
+unprotected part of the COSE header. It helps verification entity look up the
+symmetric key to verify the authentication tag in the token.
+
+The `t_cose` part of the initial attestation service implements the
+authentication tag generation. The authentication tag generation is done by the
+Crypto service. System integrators might need to re-implement the following
+functions if platforms provide a different cryptographic library than Crypto
+service:
+
+- ``t_cose_crypto_hmac_sign_setup()``: Set up a multi-part HMAC calculation
+  operation.
+- ``t_cose_crypto_hmac_update()``: Add a message fragment to a multi-part HMAC
+  operation.
+- ``t_cose_crypto_hmac_sign_finish()``: Finish the calculation of the HMAC of a
+  message.
+
+Interface needed by verification code:
+
+- ``t_cose_crypto_hmac_verify_setup()``: Set up a multi-part HMAC verification
+  operation.
+- ``t_cose_crypto_hmac_verify_finish()``: Finish the verification of the HMAC of
+  a message.
+
+It also requires the same hash operations as listed in asymmetric key algorithm
+based initial attestation above, in attestation test cases.
+
+Key handling
+^^^^^^^^^^^^
+The provisioning of the initial attestation key is out of scope of the service
+and this document. It is assumed that device maker provisions the symmetric key
+during the manufacturing process. The following API is defined to retrieve the
+symmetric attestation key from platform layer. Software integrators **must**
+port this interface according to their SoC design and make sure that key is
+available by Crypto service:
+
+- ``tfm_plat_get_symmetric_iak()``: Get the symmetric initial attestation key
+  raw data.
+- ``tfm_plat_get_symmetric_iak_id()``: Get the key identifier of the symmetric
+  initial attestation key. The key identifier can be used as ``kid`` parameter
+  in COSE header. Optional.
+
+.. note:
+
+   Asymmetric initial attestation and symmetric initial attestation may share
+   the same HAL APIs in future development.
 
 Initial Attestation Service compile time options
 ================================================
@@ -449,6 +525,8 @@ those flags. The list of flags are:
   values found in ``platform/ext/common/template/attest_hal.c``. Default value
   is OFF. Set to ON in a platform's CMake file if the attest HAL is not yet
   properly ported to it.
+- ``SYMMETRIC_INITIAL_ATTESTATION``: Select symmetric initial attestation.
+  Default value: OFF.
 
 Related compile time options
 ----------------------------
@@ -495,18 +573,33 @@ that user has license for DS-5 and FVP models:
  - Set a breakpoint in ``test/suites/attestation/attest_token_test.c``
    in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
    i.e. on line 859. Execute the code in the model until the breakpoint hits
-   second time. At this point the console prints the following message:
-   ``ECDSA signature test of attest token``.
+   second time. At this point the console prints the test case name:
+
+   - For asymmetric initial attestation, the console prints
+     ``ECDSA signature test of attest token``.
+   - For symmetric initial attestation, the console prints
+     ``Symmetric key algorithm based Initial Attestation test``.
+
  - At this point the token resides in the model memory and can be dumped to host
    computer.
  - The ADDRESS and SIZE attributes of the initial attestation token is stored in
    the ``completed_token`` local variable. Their value can be extracted in the
    ``(x)=Variables`` debug window.
- - Apply this command in the ``Commands`` debug window to dump the token in
+ - Apply commands below in the ``Commands`` debug window to dump the token in
    binary format to the host computer:
-   ``dump memory <PATH>/iat_01.cbor <ADDRESS> +<SIZE>``
- - Execute this command on the host computer to verify the token:
-   ``check_iat -p -K -k platform/ext/common/template/tfm_initial_attestation_key.pem <PATH>/iat_01.cbor``
+
+   - For asymmetric initial attestation
+     ``dump memory <PATH>/iat_01.cbor <ADDRESS> +<SIZE>``
+   - For symmetric initial attestation
+     ``dump memory <PATH>/iat_hmac_02.cbor <ADDRESS> +<SIZE>``
+
+ - Execute commands below on the host computer to verify the token:
+
+   - For asymmetric initial attestation
+     ``check_iat -p -K -k platform/ext/common/template/tfm_initial_attestation_key.pem <PATH>/iat_01.cbor``
+   - For symmetric initial attestation
+     ``check_iat -m mac -p -K -k platform/ext/common/template/tfm_symmetric_iak.key <PATH>/iat_hmac_02.cbor``
+
  - Documentation of the iat-verifier can be found
    :doc:`here </tools/iat-verifier/README>`.
 
