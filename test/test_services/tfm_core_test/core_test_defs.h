@@ -15,7 +15,6 @@ extern "C" {
 #include <inttypes.h>
 #include <limits.h>
 #include "tfm_api.h"
-#include "tfm_core.h"
 
 /* These definitions are used in symbols, only digits are permitted */
 #define CORE_TEST_ID_NS_THREAD            1001

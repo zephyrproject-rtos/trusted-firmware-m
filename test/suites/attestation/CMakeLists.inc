@@ -55,7 +55,7 @@ elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/services/initial_attestation ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/partitions/initial_attestation ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/util ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/t_cose/inc ABSOLUTE)

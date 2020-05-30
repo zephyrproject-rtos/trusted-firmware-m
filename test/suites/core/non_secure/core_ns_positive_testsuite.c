@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "core_ns_tests.h"
+#include "cmsis.h"
 #include "tfm_api.h"
 #include "tfm_plat_test.h"
 #include "test/suites/core/non_secure/core_test_api.h"

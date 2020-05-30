@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#include "secure_fw/services/secure_storage/nv_counters/sst_nv_counters.h"
+#include "secure_fw/partitions/secure_storage/nv_counters/sst_nv_counters.h"
 #include "nv_counters/test_sst_nv_counters.h"
 #include "psa/protected_storage.h"
 #include "tfm_memory_utils.h"

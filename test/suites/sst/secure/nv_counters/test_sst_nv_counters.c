@@ -8,8 +8,8 @@
 #include "test_sst_nv_counters.h"
 
 #include <limits.h>
-#include "secure_fw/services/secure_storage/nv_counters/sst_nv_counters.h"
-#include "secure_fw/services/secure_storage/sst_utils.h"
+#include "secure_fw/partitions/secure_storage/nv_counters/sst_nv_counters.h"
+#include "secure_fw/partitions/secure_storage/sst_utils.h"
 
 #define DISABLE_INCREMENT 0
 #define ENABLE_INCREMENT  1

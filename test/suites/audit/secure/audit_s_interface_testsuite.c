@@ -10,7 +10,7 @@
 #include "audit_s_tests.h"
 #include "tfm_api.h"
 #include "psa_audit_api.h"
-#include "secure_fw/services/audit_logging/audit_core.h"
+#include "secure_fw/partitions/audit_logging/audit_core.h"
 
 #include "../audit_tests_common.h"
 

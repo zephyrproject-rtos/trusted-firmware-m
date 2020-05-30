@@ -97,17 +97,14 @@ if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_ENABLE_IRQ_TEST is not defined.")
 endif()
 
-include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
-if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
-	include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
-endif ()
 #Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
 if(TFM_PSA_API)
-	include(${SECURE_FW_DIR}/core/ipc/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/model_ipc/CMakeLists.inc)
 else()
-	include(${SECURE_FW_DIR}/core/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/model_func/CMakeLists.inc)
 endif()
-include(${SECURE_FW_DIR}/core/arch/CMakeLists.inc)
+
+include(${SECURE_FW_DIR}/spm/arch/CMakeLists.inc)
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
@@ -506,36 +503,36 @@ add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/secure_test)
 
 #Add the crypto library target
 if (TFM_PARTITION_CRYPTO)
-	add_subdirectory(${SECURE_FW_DIR}/services/crypto)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/crypto)
 endif()
 
 #Add the secure storage library target
 if (TFM_PARTITION_SECURE_STORAGE)
-	add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/secure_storage)
 endif()
 
 #Add the internal trusted storage library target
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-	add_subdirectory(${SECURE_FW_DIR}/services/internal_trusted_storage)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/internal_trusted_storage)
 endif()
 
 #Add the platform service library target
 if (TFM_PARTITION_PLATFORM)
-	add_subdirectory(${SECURE_FW_DIR}/services/platform)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/platform)
 endif()
 
 #Add the initial attestation service library target
 if (TFM_PARTITION_INITIAL_ATTESTATION)
-	add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/initial_attestation)
 endif()
 
 #Add the audit logging library target
 if (TFM_PARTITION_AUDIT_LOG)
-	add_subdirectory(${SECURE_FW_DIR}/services/audit_logging)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/audit_logging)
 endif()
 
 #Add the secure runtime library target
-add_subdirectory(${SECURE_FW_DIR}/lib/sprt)
+add_subdirectory(${SECURE_FW_DIR}/partitions/lib/sprt)
 
 if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 	#Broadcast veneer path in bundled building case

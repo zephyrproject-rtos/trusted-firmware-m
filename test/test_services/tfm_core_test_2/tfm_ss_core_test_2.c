@@ -10,7 +10,7 @@
 #include "tfm_ss_core_test_2.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
-#include "spm_partition_defs.h"
+#include "tfm/spm_partition_defs.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_test_core_2.h"
 

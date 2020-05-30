@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <inttypes.h>
-#include "core/tfm_core_svc.h"
+#include "tfm/tfm_core_svc.h"
 #include "psa/client.h"
 #include "tfm_api.h"
 

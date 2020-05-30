@@ -10,7 +10,6 @@
 
 #include <stdint.h>
 #include "tfm_secure_api.h"
-#include "spm_api.h"
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #include "tfm_multi_core.h"
 #endif

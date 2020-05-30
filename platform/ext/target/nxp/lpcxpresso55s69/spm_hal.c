@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include "cmsis.h"
 #include "platform/include/tfm_spm_hal.h"
-#include "spm_api.h"
-#include "spm_db.h"
+#include "tfm/spm_api.h"
+#include "tfm/spm_db.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "mpu_armv8m_drv.h"
