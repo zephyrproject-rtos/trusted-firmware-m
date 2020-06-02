@@ -307,7 +307,7 @@ capable of measuring the runtime firmware components (calculates the hash value
 of firmware images) and provide other attributes of these (version, type, etc).
 If the used boot loader is not capable of sharing these information with the
 runtime software then the ``BOOT_DATA_AVAILABLE`` compiler flag **must** be
-set to false (see `Related compile time options`_).
+set to OFF (see `Related compile time options`_).
 
 The shared data between boot loader and runtime software is TLV encoded. The
 definition of TLV structure is described in ``bl2/include/tfm_boot_status.h``.
@@ -437,20 +437,20 @@ service features. The ``CommonConfig.cmake`` file sets the default values of
 those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
-  attestation token. Default value: True.
+  attestation token. Default value: ON.
 - ``ATTEST_INCLUDE_TEST_CODE``: Test code is removed from COSE library and from
-  attestation test suite if it is False. Its default value depends on the build
-  type. It is True if build type is ``Debug``, otherwise False (different kinds
+  attestation test suite if it is OFF. Its default value depends on the build
+  type. It is ON if build type is ``Debug``, otherwise OFF (different kinds
   of ``Release`` builds).
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
-  on the value of this flag. Default value: False.
+  on the value of this flag. Default value: OFF.
 
 Related compile time options
 ----------------------------
 - ``BOOT_DATA_AVAILABLE``: The boot data is expected to be present in the shared
-  data area between the boot loader and the runtime firmware when it's true.
-  Otherwise, when it's false does not check the content of the shared data area.
+  data area between the boot loader and the runtime firmware when it's ON.
+  Otherwise, when it's OFF does not check the content of the shared data area.
   Also assume that the TLV header is present and valid (the magic number is
   correct) and there are no other data entries. Its default value depends on
   the BL2 flag.
