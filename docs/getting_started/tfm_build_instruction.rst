@@ -176,9 +176,17 @@ Further details on how to integrate a new NS app with TF-M are available in the
 
 Building the documentation
 ==========================
-Please ensure the dependencies for building the firmware and the
-documentation are installed as explained in the
-:doc:`software requirements <tfm_sw_requirement>`.
+Please ensure the dependencies for building the documentation are installed
+as explained in the :doc:`software requirements <tfm_sw_requirement>`. The
+requirements to build the firmware, are only required when using the CMAKE
+method
+
+There are currently two ways of building the documentation:
+- Using the CMake build system as custom targets
+- Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
+
+Using the CMake build-system
+----------------------------
 
 Building PDF output is optional and can be disabled by removing LaTex from the
 PATH.
@@ -188,7 +196,7 @@ PATH.
    be available.
 
 Building the Reference Manual
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
     cd <TF-M base folder>
@@ -202,7 +210,7 @@ The documentation files will be available under the directory::
     cmake_doc/install/doc/reference_manual
 
 Building the User Guide
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
     cd <TF-M base folder>
@@ -214,6 +222,26 @@ Building the User Guide
 The documentation files will be available under the directory::
 
     cmake_doc/install/doc/user_guide
+
+Manually using documentation generation tools
+---------------------------------------------
+
+Invoking Sphinx-build will build both user_guide and reference_manual
+targets.
+
+.. code-block:: bash
+
+    # Build the documentation from build_docs directory
+    cd <TF-M base folder>/ build_docs/
+    sphinx-build ./ user_guide
+
+    # Build the documentation from a custom location
+    # setting the build_docs as input
+
+    # Note that using this method will still generate the reference manual
+    # to the  <TF-M base folder>/build_docs/reference_manual
+    cd <TF-M base folder>/OTHER_DIR/OTHER_DIR2
+    sphinx-build  <TF-M base folder>/build_docs/ DESIRED_OUTPUT_DIR
 
 *********************
 Configuring the build
@@ -343,6 +371,9 @@ The following table describes the differences between the configurations:
 
 .. [7] Profile Small config doesn't cover all the platforms. Please check
        Profile Small config files to find out the supported platforms.
+
+.. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
+.. _Doxygen: https://www.doxygen.nl
 
 --------------
 

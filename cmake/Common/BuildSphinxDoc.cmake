@@ -72,14 +72,28 @@ if (NOT SPHINX_NODOC)
 	set(SPHINXCFG_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/doc_sphinx")
 
 	set(SPHINX_TMP_DOC_DIR "${CMAKE_CURRENT_BINARY_DIR}/doc_sphinx_in")
-
+	set(SPHINXCFG_CONFIGURED_FILE "${TFM_ROOT_DIR}/build_docs/conf.py")
 	set(SPHINXCFG_TEMPLATE_FILE "${TFM_ROOT_DIR}/docs/conf.py.in")
-	set(SPHINXCFG_CONFIGURED_FILE "${SPHINXCFG_OUTPUT_PATH}/conf.py")
+	set(SPHINXCFG_ENVIRONMENT_FILE "${TFM_ROOT_DIR}/docs/tfm_env.py.in")
+	set(_PDF_FILE "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf")
 
-	set(SPHINX_DESIGN_DOC_ROOT "${TFM_ROOT_DIR}/docs/design_documents")
-	set(SPHINX_TEMPLATE_INDEX_FILE "${SPHINX_DESIGN_DOC_ROOT}/index.rst.in")
-	set(SPHINX_CONFIGURED_INDEX_FILE "${SPHINX_TMP_DOC_DIR}/docs/design_documents/index.rst")
-	set(SPHINX_MAIN_INDEX_FILE "docs/index.rst")
+	# Set the build-tool to copy over the files to ${SPHINX_TMP_DOC_DIR~
+	set(SPHINXCFG_COPY_FILES True)
+	# Set the config to render the conf.py. If needed to build it by cmake
+	# set it to False
+	set(SPHINXCFG_RENDER_CONF True)
+
+	# TODO Reference example on how a doxygen build can be requested.
+	# Currently the logic of BuildDoxygenDoc.cmake is still used for
+	# compatibility purposes.
+	set(DOXYCFG_DOXYGEN_BUILD False)
+	if (SPHINXCFG_RENDER_CONF)
+		find_package(Doxygen 1.8.0)
+		set(DOXYCFG_DOXYGEN_CFG_DIR ${TFM_ROOT_DIR}/doxygen)
+		set(DOXYCFG_OUTPUT_PATH ${SPHINXCFG_OUTPUT_PATH}/user_manual)
+		set(DOXYCFG_ECLIPSE_DOCID "org.arm.tf-m-refman")
+		file(MAKE_DIRECTORY ${SPHINXCFG_OUTPUT_PATH}/user_manual)
+	endif()
 
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. We need a process to define the
@@ -87,44 +101,26 @@ if (NOT SPHINX_NODOC)
 	set(SPHINXCFG_TFM_VERSION "v1.1")
 	set(SPHINXCFG_TFM_VERSION_FULL "Version 1.1")
 
-	get_filename_component(_NDX_FILE_DIR ${SPHINX_CONFIGURED_INDEX_FILE} DIRECTORY )
-
 	#This command does not generates the specified output file and thus it will
 	#always be run. Any other command or target depending on the "run-allways"
 	#output will be always executed too.
 	add_custom_command(OUTPUT run-allways
 		COMMAND "${CMAKE_COMMAND}" -E echo)
 
-	#Using add_custom_command allows CMake to generate proper clean commands
-	#for document generation.
-	add_custom_command(OUTPUT "${SPHINX_TMP_DOC_DIR}"
-						"${SPHINX_CONFIGURED_INDEX_FILE}"
-		#Create target directory for SPHINX_CONFIGURED_INDEX_FILE. Needed
-		#by the next command.
-		COMMAND "${CMAKE_COMMAND}" -E make_directory "${_NDX_FILE_DIR}"
-		#Fill out index.rst template
-		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR}
-				-D SPHINX_TEMPLATE_INDEX_FILE=${SPHINX_TEMPLATE_INDEX_FILE}
-				-D SPHINX_CONFIGURED_INDEX_FILE=${SPHINX_CONFIGURED_INDEX_FILE}
-				-D SPHINX_DESIGN_DOC_ROOT=${SPHINX_DESIGN_DOC_ROOT}
-				-P "${TFM_ROOT_DIR}/cmake/SphinxDesignDocStatus.cmake"
-		#Copy document files to temp direcotry
-		COMMAND "${CMAKE_COMMAND}" -D TFM_ROOT_DIR=${TFM_ROOT_DIR}
-				-D DST_DIR=${SPHINX_TMP_DOC_DIR}
-				-D BINARY_DIR=${CMAKE_BINARY_DIR}
-				-D MASTER_IDX=${SPHINX_MAIN_INDEX_FILE}
-				-P "${TFM_ROOT_DIR}/cmake/SphinxCopyDoc.cmake"
-		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
-		DEPENDS run-allways
-		VERBATIM
-		)
+	file(REMOVE_RECURSE ${SPHINX_TMP_DOC_DIR})
+	file(MAKE_DIRECTORY ${SPHINX_TMP_DOC_DIR})
+
+	#Call configure file to fill out the message template.
+	configure_file("${SPHINXCFG_ENVIRONMENT_FILE}" "${SPHINX_TMP_DOC_DIR}/tfm_env.py" @ONLY)
+
+	file(COPY "${SPHINXCFG_CONFIGURED_FILE}" DESTINATION ${SPHINX_TMP_DOC_DIR})
 
 	add_custom_target(create_sphinx_input
 		SOURCES "${SPHINX_TMP_DOC_DIR}"
 	)
 
 	add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/html"
-		COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b html "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/html"
+		COMMAND "${SPHINX_EXECUTABLE}" -b html "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/html"
 		WORKING_DIRECTORY "${TFM_ROOT_DIR}"
 		DEPENDS create_sphinx_input run-allways
 		COMMENT "Running Sphinx to generate user guide (HTML)."
@@ -145,6 +141,15 @@ if (NOT SPHINX_NODOC)
 		PATTERN .buildinfo EXCLUDE
 		)
 
+	if (DOXYCFG_DOXYGEN_BUILD)
+		#Add the HTML documentation to install content
+		install(DIRECTORY ${SPHINXCFG_OUTPUT_PATH}/user_manual DESTINATION doc
+		EXCLUDE_FROM_ALL
+		COMPONENT user_guide
+		PATTERN .buildinfo EXCLUDE
+		)
+	endif()
+
 	#If PDF documentation is being made.
 	if (LATEX_PDFLATEX_FOUND)
 		if (NOT CMAKE_GENERATOR MATCHES "Makefiles")
@@ -156,10 +161,8 @@ if (NOT SPHINX_NODOC)
 				message(FATAL_ERROR "CMAKE_MAKE_PROGRAM is not set. This file must be included after the project command is run.")
 			endif()
 
-			set(_PDF_FILE "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf")
-
 			add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex"
-				COMMAND "${SPHINX_EXECUTABLE}" -c "${SPHINXCFG_OUTPUT_PATH}" -b latex "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/latex"
+				COMMAND "${SPHINX_EXECUTABLE}" -b latex "${SPHINX_TMP_DOC_DIR}" "${SPHINXCFG_OUTPUT_PATH}/latex"
 				WORKING_DIRECTORY "${TFM_ROOT_DIR}"
 				DEPENDS create_sphinx_input
 				COMMENT "Running Sphinx to generate user guide (LaTeX)."
@@ -205,7 +208,4 @@ if (NOT SPHINX_NODOC)
 			-P "${CMAKE_BINARY_DIR}/cmake_install.cmake")
 	endif()
 
-	#Now instantiate a Sphinx configuration file from the template.
-	message(STATUS "Writing Sphinx configuration...")
-	configure_file(${SPHINXCFG_TEMPLATE_FILE} ${SPHINXCFG_CONFIGURED_FILE} @ONLY)
 endif()
