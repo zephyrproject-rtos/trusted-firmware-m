@@ -425,9 +425,6 @@ The details will be covered in each module in `Implementation details`_.
    * - ``CRYPTO_AEAD_MODULE_DISABLED``
      - ``OFF``
      - Enable AEAD in Crypto service
-   * - ``CRYPTO_KEY_DERIVATION_MODULE_DISABLED``
-     - ``ON``
-     - Disable key derivation in Crypto service
    * - ``MBEDTLS_CONFIG_FILE``
      - ``tfm_profile_s_mbedcrypto_config``
      - Default mbed-crypto config file for Profile Small under
@@ -527,7 +524,6 @@ config file. Crypto SP modules not supported in TF-M Profile Small are disabled.
 The disabled modules are shown below.
 
     - Disable asymmetric cipher
-    - Disable key derivation
 
 Other modules and configurations [10]_ are kept as default values.
 

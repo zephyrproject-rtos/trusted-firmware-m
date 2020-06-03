@@ -53,7 +53,6 @@ set(ITS_BUF_SIZE 32)
 # Enable Crypto service
 set(TFM_PARTITION_CRYPTO ON)
 set(CRYPTO_ASYMMETRIC_MODULE_DISABLED ON)
-set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED ON)
 # Set the dedicated mbed-crypto default config file
 set(MBEDTLS_CONFIG_FILE "tfm_profile_s_mbedcrypto_config.h")
 
