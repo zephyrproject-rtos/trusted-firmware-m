@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-#include "bl2/include/tfm_boot_status.h"
+#include "tfm_boot_status.h"
 #include "region_defs.h"
 #include "tfm_memory_utils.h"
 #include "tfm_internal.h"

@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "region_defs.h"
 #include "secure_utilities.h"
 #include "tfm/spm_api.h"

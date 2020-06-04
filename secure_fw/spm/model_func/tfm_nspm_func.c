@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 #include "cmsis_compiler.h"
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "tfm_arch.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"

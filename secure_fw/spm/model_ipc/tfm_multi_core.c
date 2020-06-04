@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "psa/client.h"
 #include "tfm_internal.h"
 #include "tfm_nspm.h"

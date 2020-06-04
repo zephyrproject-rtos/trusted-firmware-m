@@ -6,7 +6,7 @@
  */
 
 #include <stdbool.h>
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "psa/error.h"
 #include "tfm_nspm.h"
 #include "tfm_utils.h"

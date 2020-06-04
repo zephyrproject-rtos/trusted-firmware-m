@@ -16,7 +16,7 @@
 #include "tfm_core.h"
 #include "tfm_api.h"
 #include "tfm_utils.h"
-#include "bl2/include/tfm_boot_status.h"
+#include "tfm_boot_status.h"
 #include "psa/service.h"
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
