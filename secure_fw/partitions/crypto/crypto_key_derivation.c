@@ -22,7 +22,7 @@
 #include "tfm_crypto_defs.h"
 #include "tfm_memory_utils.h"
 
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_crypto_keys.h"
 
 #ifdef TFM_PARTITION_TEST_SST
 #include "psa_manifest/pid.h"

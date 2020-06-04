@@ -9,7 +9,7 @@
 #include "tfm_secure_api.h"
 #include "attestation.h"
 #include "psa/initial_attestation.h"
-#include "bl2/include/tfm_boot_status.h"
+#include "tfm_boot_status.h"
 
 #ifdef TFM_PSA_API
 extern int32_t g_attest_caller_id;

@@ -10,8 +10,8 @@
 #include "attestation.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "platform/include/tfm_plat_defs.h"
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_defs.h"
+#include "tfm_plat_crypto_keys.h"
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
 #include "qcbor.h"

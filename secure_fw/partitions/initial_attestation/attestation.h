@@ -10,7 +10,7 @@
 
 #include "psa/initial_attestation.h"
 #include "tfm_client.h"
-#include "bl2/include/tfm_boot_status.h"
+#include "tfm_boot_status.h"
 
 #ifdef __cplusplus
 extern "C" {

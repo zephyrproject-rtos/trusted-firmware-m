@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 #include "psa/protected_storage.h"
-#include "platform/include/tfm_plat_nv_counters.h"
+#include "tfm_plat_nv_counters.h"
 
 #define TFM_SST_NV_COUNTER_1        PLAT_NV_COUNTER_0
 #define TFM_SST_NV_COUNTER_2        PLAT_NV_COUNTER_1
