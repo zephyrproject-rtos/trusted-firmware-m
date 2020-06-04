@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited
+ * Copyright (c) 2018-2020 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
-#include "platform/ext/common/uart_stdout.h"
+#include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
 #include "fsl_usart.h"
 

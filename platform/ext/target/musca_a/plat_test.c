@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "timer_cmsdk_drv.h"
-#include "platform/include/tfm_plat_defs.h"
+#include "tfm_plat_defs.h"
 #include "tfm_plat_test.h"
 #include "device_definition.h"
 

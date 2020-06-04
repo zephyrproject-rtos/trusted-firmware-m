@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "tfm_platform_api.h"
-#include "services/include/tfm_ioctl_api.h"
+#include "tfm_ioctl_api.h"
 
 enum tfm_platform_err_t tfm_platform_gpio_init(uint32_t *result)
 {

@@ -6,12 +6,12 @@
  */
 
 #include <stdbool.h>
-#include "platform/include/tfm_platform_system.h"
+#include "tfm_platform_system.h"
 #include "platform_description.h"
 #include "target_cfg.h"
 #include "device_definition.h"
 #include "psa/client.h"
-#include "services/include/tfm_ioctl_api.h"
+#include "tfm_ioctl_api.h"
 
 void tfm_platform_hal_system_reset(void)
 {

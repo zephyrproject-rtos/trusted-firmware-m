@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2020 ARM Limited
  * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
-#include "platform/ext/common/uart_stdout.h"
+#include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
 
 #define TFM_DRIVER_STDIO    Driver_USART5

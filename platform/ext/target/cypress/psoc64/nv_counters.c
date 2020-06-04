@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "platform/include/tfm_plat_nv_counters.h"
+#include "tfm_plat_nv_counters.h"
 
 #include <limits.h>
 #include <stddef.h>

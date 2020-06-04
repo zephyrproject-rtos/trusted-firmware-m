@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 
 #include "device_definition.h"
 #include "region_defs.h"

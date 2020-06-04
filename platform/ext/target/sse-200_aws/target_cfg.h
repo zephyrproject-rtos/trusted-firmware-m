@@ -17,7 +17,7 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
-#include "platform/ext/common/uart_stdout.h"
+#include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_plat_defs.h"
 #include "uart_cmsdk_drv.h"

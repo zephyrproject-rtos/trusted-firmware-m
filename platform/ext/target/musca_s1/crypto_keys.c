@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "platform/include/tfm_plat_crypto_keys.h"
-#include "platform/include/tfm_attest_hal.h"
+#include "tfm_plat_crypto_keys.h"
+#include "tfm_attest_hal.h"
 #include <stddef.h>
 #include "psa/crypto_types.h"
 #include "crypto_hw.h"

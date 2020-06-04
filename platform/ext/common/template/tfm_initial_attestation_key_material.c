@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stdint.h>
-#include "platform/include/tfm_plat_defs.h"
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_defs.h"
+#include "tfm_plat_crypto_keys.h"
 #include "psa/crypto_types.h"
 #include "psa/crypto_values.h"
 

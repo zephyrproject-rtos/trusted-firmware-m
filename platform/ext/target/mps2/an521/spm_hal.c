@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include "cmsis.h"
-#include "platform/include/tfm_spm_hal.h"
+#include "tfm_spm_hal.h"
 #include "tfm/spm_api.h"
 #include "tfm/spm_db.h"
 #include "tfm_platform_core_api.h"
