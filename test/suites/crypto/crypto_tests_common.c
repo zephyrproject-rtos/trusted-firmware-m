@@ -1046,3 +1046,142 @@ void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+
+#define KEY_DERIVE_OUTPUT_LEN          32
+#define KEY_DERIV_SECRET_LEN           16
+#define KEY_DERIV_LABEL_INFO_LEN       8
+#define KEY_DERIV_SEED_SALT_LEN        8
+
+static uint8_t key_deriv_secret[KEY_DERIV_SECRET_LEN];
+static uint8_t key_deriv_label_info[KEY_DERIV_LABEL_INFO_LEN];
+static uint8_t key_deriv_seed_salt[KEY_DERIV_SEED_SALT_LEN];
+
+void psa_key_derivation_test(psa_algorithm_t deriv_alg,
+                             struct test_result_t *ret)
+{
+    psa_key_handle_t input_handle = 0, output_handle = 0;
+    psa_key_attributes_t input_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_attributes_t output_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_derivation_operation_t deriv_ops;
+    psa_status_t status;
+    uint8_t counter = 0xA5;
+
+    /* Prepare the parameters */
+#if DOMAIN_NS == 1U
+    memset(key_deriv_secret, counter, KEY_DERIV_SECRET_LEN);
+    memset(key_deriv_label_info, counter++, KEY_DERIV_LABEL_INFO_LEN);
+    memset(key_deriv_seed_salt, counter++, KEY_DERIV_SEED_SALT_LEN);
+#else
+    tfm_memset(key_deriv_secret, counter, KEY_DERIV_SECRET_LEN);
+    tfm_memset(key_deriv_label_info, counter++, KEY_DERIV_LABEL_INFO_LEN);
+    tfm_memset(key_deriv_seed_salt, counter++, KEY_DERIV_SEED_SALT_LEN);
+#endif
+
+    deriv_ops = psa_key_derivation_operation_init();
+
+    psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE);
+    psa_set_key_algorithm(&input_key_attr, deriv_alg);
+    psa_set_key_type(&input_key_attr, PSA_KEY_TYPE_DERIVE);
+
+    /* Force to use HMAC-SHA256 as HMAC operation so far */
+    status = psa_import_key(&input_key_attr, key_deriv_secret,
+                            KEY_DERIV_SECRET_LEN, &input_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to import secret");
+        return;
+    }
+
+    status = psa_key_derivation_setup(&deriv_ops, deriv_alg);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to setup derivation operation");
+        goto destroy_key;
+    }
+
+    if (PSA_ALG_IS_TLS12_PRF(deriv_alg) ||
+        PSA_ALG_IS_TLS12_PSK_TO_MS(deriv_alg)) {
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_SEED,
+                                                key_deriv_seed_salt,
+                                                KEY_DERIV_SEED_SALT_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input seed");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_key(&deriv_ops,
+                                              PSA_KEY_DERIVATION_INPUT_SECRET,
+                                              input_handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input key");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_LABEL,
+                                                key_deriv_label_info,
+                                                KEY_DERIV_LABEL_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input label");
+            goto deriv_abort;
+        }
+    } else if (PSA_ALG_IS_HKDF(deriv_alg)) {
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_SALT,
+                                                key_deriv_seed_salt,
+                                                KEY_DERIV_SEED_SALT_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input salt");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_key(&deriv_ops,
+                                              PSA_KEY_DERIVATION_INPUT_SECRET,
+                                              input_handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input key");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_INFO,
+                                                key_deriv_label_info,
+                                                KEY_DERIV_LABEL_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input info");
+            goto deriv_abort;
+        }
+    } else {
+        TEST_FAIL("Unsupported derivation algorithm");
+        goto deriv_abort;
+    }
+
+    if (NR_TEST_AES_MODE < 1) {
+        TEST_LOG("No AES algorithm to verify. Output raw data instead");
+        psa_set_key_type(&output_key_attr, PSA_KEY_TYPE_RAW_DATA);
+    } else {
+        psa_set_key_usage_flags(&output_key_attr, PSA_KEY_USAGE_ENCRYPT);
+        psa_set_key_algorithm(&output_key_attr, test_aes_mode_array[0]);
+        psa_set_key_type(&output_key_attr, PSA_KEY_TYPE_AES);
+    }
+    psa_set_key_bits(&output_key_attr,
+                     PSA_BYTES_TO_BITS(KEY_DERIVE_OUTPUT_LEN));
+
+    status = psa_key_derivation_output_key(&output_key_attr, &deriv_ops,
+                                           &output_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to output key");
+        goto deriv_abort;
+    }
+
+    ret->val = TEST_PASSED;
+
+deriv_abort:
+    psa_key_derivation_abort(&deriv_ops);
+destroy_key:
+    psa_destroy_key(input_handle);
+    if (output_handle) {
+        psa_destroy_key(output_handle);
+    }
+
+    return;
+}

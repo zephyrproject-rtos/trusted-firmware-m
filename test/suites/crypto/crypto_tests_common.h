@@ -179,6 +179,15 @@ void psa_policy_invalid_policy_usage_test(struct test_result_t *ret);
  */
 void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret);
 
+/**
+ * \brief Key derivation test
+ *
+ * \param[in] deriv_alg Key derivation algorithm
+ * \param[out] ret      Test result
+ */
+void psa_key_derivation_test(psa_algorithm_t deriv_alg,
+                             struct test_result_t *ret);
+
 #ifdef __cplusplus
 }
 #endif

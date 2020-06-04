@@ -86,6 +86,7 @@ set(TFM_CRYPTO_TEST_ALG_CFB OFF)
 set(TFM_CRYPTO_TEST_ALG_CTR OFF)
 set(TFM_CRYPTO_TEST_ALG_GCM OFF)
 set(TFM_CRYPTO_TEST_ALG_SHA_512 OFF)
+set(TFM_CRYPTO_TEST_HKDF OFF)
 
 # Include platform specific profile configuration extension file if it is
 # provided via argument TFM_PROFILE_CONFIG_EXT in command line.

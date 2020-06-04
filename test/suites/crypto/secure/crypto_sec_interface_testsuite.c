@@ -53,6 +53,11 @@ static void tfm_crypto_test_5035(struct test_result_t *ret);
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
 static void tfm_crypto_test_5036(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
+static void tfm_crypto_test_5037(struct test_result_t *ret);
+static void tfm_crypto_test_5038(struct test_result_t *ret);
+#ifdef TFM_CRYPTO_TEST_HKDF
+static void tfm_crypto_test_5039(struct test_result_t *ret);
+#endif /* TFM_CRYPTO_TEST_HKDF */
 
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_5001, "TFM_CRYPTO_TEST_5001",
@@ -122,6 +127,14 @@ static struct test_t crypto_tests[] = {
      "Secure AEAD interface with truncated auth tag (AES-128-CCM-8)",
      {TEST_PASSED} },
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
+    {&tfm_crypto_test_5037, "TFM_CRYPTO_TEST_5037",
+     "Secure TLS 1.2 PRF key derivation", {TEST_PASSED} },
+    {&tfm_crypto_test_5038, "TFM_CRYPTO_TEST_5038",
+     "Secure TLS-1.2 PSK-to-MasterSecret key derivation", {TEST_PASSED} },
+#ifdef TFM_CRYPTO_TEST_HKDF
+    {&tfm_crypto_test_5039, "TFM_CRYPTO_TEST_5039",
+     "Secure HKDF key derivation", {TEST_PASSED} },
+#endif /* TFM_CRYPTO_TEST_HKDF */
 };
 
 void register_testsuite_s_crypto_interface(struct test_suite_t *p_test_suite)
@@ -319,3 +332,20 @@ static void tfm_crypto_test_5036(struct test_result_t *ret)
     psa_aead_test(PSA_KEY_TYPE_AES, alg, ret);
 }
 #endif /* TFM_CRYPTO_TEST_ALG_GCM */
+
+static void tfm_crypto_test_5037(struct test_result_t *ret)
+{
+    psa_key_derivation_test(PSA_ALG_TLS12_PRF(PSA_ALG_SHA_256), ret);
+}
+
+static void tfm_crypto_test_5038(struct test_result_t *ret)
+{
+    psa_key_derivation_test(PSA_ALG_TLS12_PSK_TO_MS(PSA_ALG_SHA_256), ret);
+}
+
+#ifdef TFM_CRYPTO_TEST_HKDF
+static void tfm_crypto_test_5039(struct test_result_t *ret)
+{
+    psa_key_derivation_test(PSA_ALG_HKDF(PSA_ALG_SHA_256), ret);
+}
+#endif /* TFM_CRYPTO_TEST_HKDF */
