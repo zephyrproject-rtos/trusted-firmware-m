@@ -127,7 +127,7 @@ The PSA interface for the Initial Attestation Service is located in
 to use functions from the PSA API is ``psa/initial_attestation.h``.
 
 The TF-M Initial Attestation Service source files are located in
-``secure_fw/services/initial_attestation``.
+``secure_fw/partitions/initial_attestation``.
 The CBOR library is located in ``lib/ext/qcbor`` folder.
 
 Service source files
@@ -231,7 +231,7 @@ found here:
    implementation for library model
 -  ``interface/src/tfm_initial_attestation_ipc_api.c``: non-secure interface
    implementation for IPC model
--  ``secure_fw/services/initial_attestation/tfm_attestation_secure_api.c``:
+-  ``secure_fw/partitions/initial_attestation/tfm_attestation_secure_api.c``:
    secure interface implementation
 
 Secure Partition Manager (SPM) interface

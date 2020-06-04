@@ -91,7 +91,7 @@ Current SST Service Limitations
 **************
 Code Structure
 **************
-Secure storage service code is located in ``secure_fw/services/secure_storage/``
+Secure storage service code is located in ``secure_fw/partitions/secure_storage/``
 and is divided as follows:
 
     - Core files
@@ -154,15 +154,15 @@ it handles the request by using a separate filesystem context initialised to use
 the external flash device.
 
 The ITS filesystem and flash interfaces and their implementation can be found in
-``secure_fw/services/internal_trusted_storage/flash_fs`` and
-``secure_fw/services/internal_trusted_storage/flash`` respectively. More
+``secure_fw/partitions/internal_trusted_storage/flash_fs`` and
+``secure_fw/partitions/internal_trusted_storage/flash`` respectively. More
 information about the filesystem and flash interfaces can be found in the
 :doc:`ITS integration guide
 </docs/user_guides/services/tfm_its_integration_guide>`.
 
 The structure containing info about the external flash device, used by the ITS
 service to handle requests from the SST partition, is defined in
-``secure_fw/services/internal_trusted_storage/flash/its_flash_info_external.c``,
+``secure_fw/partitions/internal_trusted_storage/flash/its_flash_info_external.c``,
 which depends on target-specific definitions from
 ``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``. Please see the
 `Secure Storage Service Definitions` section for details.
@@ -293,10 +293,10 @@ by a vendor specific implementation.
 
 The SST service abstracts all the cryptographic requirements and specifies the
 required cryptographic interface in
-``secure_fw/services/secure_storage/crypto/sst_crypto_interface.h``
+``secure_fw/partitions/secure_storage/crypto/sst_crypto_interface.h``
 
 The SST service cryptographic operations are implemented in
-``secure_fw/services/secure_storage/crypto/sst_crypto_interface.c``, using calls
+``secure_fw/partitions/secure_storage/crypto/sst_crypto_interface.c``, using calls
 to the TF-M Crypto service.
 
 SST Service Features Flags

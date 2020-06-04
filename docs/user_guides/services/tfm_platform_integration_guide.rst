@@ -22,7 +22,7 @@ TF-M Platform interfaces
 The TF-M interfaces for the Platform service are located in
 ``interface/include/``.
 The TF-M Platform service source files are located in
-``secure_fw/services/platform``.
+``secure_fw/partitions/platform``.
 
 *********************
 TF-M Platform service

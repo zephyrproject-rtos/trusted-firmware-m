@@ -78,7 +78,7 @@ Current ITS Service Limitations
 Code Structure
 **************
 TF-M Internal Trusted Storage service code is located in
-``secure_fw/services/internal_trusted_storage/`` and is divided as follows:
+``secure_fw/partitions/internal_trusted_storage/`` and is divided as follows:
 
     - Core files
     - Flash filesystem interfaces
@@ -254,7 +254,7 @@ number of blocks greater than or equal to 4. Total number of blocks can not be
 update operations.
 
 For API specification, please check:
-``secure_fw/services/internal_trusted_storage/flash/its_flash.h``
+``secure_fw/partitions/internal_trusted_storage/flash/its_flash.h``
 
 ITS Service Features Flags
 ==========================

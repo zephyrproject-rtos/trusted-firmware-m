@@ -95,7 +95,7 @@ file to initialize the global spm data array g_spm_partition_db.
 
 .. code-block:: c
 
-    #include "secure_fw/services/tfm_spm_db.inc"
+    #include "secure_fw/partitions/tfm_spm_db.inc"
 
 Built-in Partitions
 ===================

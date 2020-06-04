@@ -64,7 +64,7 @@ The main steps to add a secure partition are as follows:
 
 Add source folder
 =================
-Add a source folder under ``<TF-M base folder>/secure_fw/services`` for the new
+Add a source folder under ``<TF-M base folder>/secure_fw/partitions`` for the new
 secure partition (Let's take EXAMPLE as the folder name):
 
 This folder should include those parts:
@@ -299,7 +299,7 @@ Reference configuration example:
     {
       "name": "Example Service",
       "short_name": "TFM_SP_EXAMPLE",
-      "manifest": "secure_fw/services/EXAMPLE/tfm_example.yaml",
+      "manifest": "secure_fw/partitions/EXAMPLE/tfm_example.yaml",
       "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_EXAMPLE_ENABLE",

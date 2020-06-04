@@ -40,7 +40,7 @@ The PSA interfaces for the Audit logging service are located in
 ``interface/include``.
 
 The TF-M Audit logging service source files are located in
-``secure_fw/services/audit_logging``.
+``secure_fw/partitions/audit_logging``.
 
 PSA interfaces
 ==============

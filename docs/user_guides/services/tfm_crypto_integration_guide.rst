@@ -16,7 +16,7 @@ The PSA interfaces for the Crypto service are located in ``interface/include``.
 The only header to be included by applications that want to use functions from
 the PSA API is ``psa/crypto.h``.
 The TF-M Crypto service source files are located in
-``secure_fw/services/crypto``.
+``secure_fw/partitions/crypto``.
 
 PSA interfaces
 ==============
