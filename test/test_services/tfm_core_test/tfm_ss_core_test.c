@@ -26,6 +26,8 @@ static int32_t partition_init_done;
 #define INVALID_NS_CLIENT_ID  0x49abcdef
 #define EXPECTED_NS_CLIENT_ID (-1)
 
+#define IRQ_TEST_TOOL_CODE_LOCATION(name)
+
 #ifndef TFM_PSA_API
 /* Don't initialise caller_partition_id_zi and expect it to be linked in the
  * zero-initialised data area
@@ -270,6 +272,7 @@ static psa_status_t test_ss_to_ss(void)
 {
     int32_t ret;
     /* Call to a different service, should be successful */
+    IRQ_TEST_TOOL_CODE_LOCATION(example_secure_service_start);
 #ifdef TFM_PSA_API
     ret = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
                           SPM_CORE_TEST_2_SLAVE_SERVICE_VERSION,
@@ -277,6 +280,7 @@ static psa_status_t test_ss_to_ss(void)
 #else /* defined(TFM_PSA_API) */
     ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);
 #endif /* defined(TFM_PSA_API) */
+    IRQ_TEST_TOOL_CODE_LOCATION(example_secure_service_end);
     if (ret == CORE_TEST_ERRNO_SUCCESS_2) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {

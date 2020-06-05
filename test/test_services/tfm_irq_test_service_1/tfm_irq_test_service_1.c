@@ -17,6 +17,8 @@
 #include "psa_manifest/tfm_irq_test_service_1.h"
 #include "tfm_plat_test.h"
 
+#define IRQ_TEST_TOOL_CODE_LOCATION(name)
+
 static enum irq_test_scenario_t current_scenario = IRQ_TEST_SCENARIO_NONE;
 static struct irq_test_execution_data_t *current_execution_data;
 
@@ -42,6 +44,7 @@ static void halt_test_execution(void)
  */
 static void stop_timer(void)
 {
+    IRQ_TEST_TOOL_CODE_LOCATION(stop_secure_timer);
     tfm_plat_test_secure_timer_stop();
 }
 
@@ -56,7 +59,7 @@ int32_t spm_irq_test_1_prepare_test_scenario_internal(
 
     switch (irq_test_scenario) {
     case IRQ_TEST_SCENARIO_NONE:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
+        break; /* uninitialised scenario */
     case IRQ_TEST_SCENARIO_1:
     case IRQ_TEST_SCENARIO_2:
     case IRQ_TEST_SCENARIO_3:
@@ -165,7 +168,7 @@ void SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ_isr(void)
 
     switch (current_scenario) {
     case IRQ_TEST_SCENARIO_NONE:
-        halt_test_execution();
+        psa_eoi(SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ);
         break;
     case IRQ_TEST_SCENARIO_1:
     case IRQ_TEST_SCENARIO_2:
@@ -222,11 +225,11 @@ void TIMER_0_isr_ipc(void)
 {
     current_execution_data->timer0_triggered = 1;
 
-    tfm_plat_test_secure_timer_stop();
+    stop_timer();
 
     switch (current_scenario) {
     case IRQ_TEST_SCENARIO_NONE:
-        halt_test_execution();
+        psa_eoi(SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ);
         break;
     case IRQ_TEST_SCENARIO_1:
     case IRQ_TEST_SCENARIO_2:

@@ -108,6 +108,11 @@ it to be triggered
 A platform can skip IRQ handling test by setting ``TFM_ENABLE_IRQ_TEST`` to
 ``OFF`` in its cmake configuration file.
 
+The irq test services also demonstrate how to use the ``IRQ_TEST_TOOL_*``
+(``IRQ_TEST_TOOL_CODE_LOCATION``) macros. These macros should be defined to
+substitute empty string, and are used by the ``tools\generate_breakpoints.py``
+script in the `IRQ testing tool <https://git.trustedfirmware.org/TF-M/tf-m-tools.git/tree/irq_test_tool>`_.
+
 --------------
 
 *Copyright (c) 2019, Arm Limited. All rights reserved.*
