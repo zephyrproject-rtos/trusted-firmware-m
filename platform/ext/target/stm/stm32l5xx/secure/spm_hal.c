@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include "tfm_spm_hal.h"
-#include "spm_api.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
@@ -72,7 +71,7 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 #endif
 
-static enum spm_err_t tfm_spm_mpu_init(void)
+static enum tfm_plat_err_t tfm_spm_mpu_init(void)
 {
     struct mpu_armv8m_region_cfg_t region_cfg;
 
@@ -87,7 +86,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* TFM Core unprivileged code region */
@@ -101,7 +100,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* TFM Core unprivileged data region */
@@ -115,7 +114,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
 #if TFM_LVL == 3
@@ -128,7 +127,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif
 
@@ -144,7 +143,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* RO region */
@@ -158,7 +157,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* RW, ZI and stack as one region */
@@ -172,14 +171,14 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif
 
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);
 
-    return SPM_ERR_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 
@@ -188,11 +187,11 @@ static enum spm_err_t tfm_spm_mpu_init(void)
 /**
  * Set share region to which the partition needs access
  */
-enum spm_err_t tfm_spm_hal_set_share_region(
+enum tfm_plat_err_t tfm_spm_hal_set_share_region(
         enum tfm_buffer_share_region_e share)
 {
     struct mpu_armv8m_region_cfg_t region_cfg;
-    enum spm_err_t res = SPM_ERR_INVALID_CONFIG;
+    enum tfm_plat_err_t res = TFM_PLAT_ERR_SYSTEM_ERR;
     uint32_t scratch_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_SCRATCH, $$ZI$$Base);
     uint32_t scratch_limit =
@@ -214,7 +213,7 @@ enum spm_err_t tfm_spm_hal_set_share_region(
             /* Use scratch area for SP-to-SP data sharing */
             region_cfg.region_base = scratch_base;
             region_cfg.region_limit = scratch_limit;
-            res = SPM_ERR_OK;
+            res = TFM_PLAT_ERR_SUCCESS;
             break;
         case TFM_BUFFER_SHARE_NS_CODE:
             region_cfg.region_base = memory_regions.non_secure_partition_base;
@@ -223,13 +222,13 @@ enum spm_err_t tfm_spm_hal_set_share_region(
              * exec.never attribute
              */
             region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
-            res = SPM_ERR_OK;
+            res = TFM_PLAT_ERR_SUCCESS;
             break;
         default:
             /* Leave res to be set to SPM_ERR_INVALID_CONFIG */
             break;
         }
-        if (res == SPM_ERR_OK) {
+        if (res == TFM_PLAT_ERR_SUCCESS) {
             mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
         }
     }
@@ -244,14 +243,14 @@ enum spm_err_t tfm_spm_hal_set_share_region(
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 {
 #if TFM_LVL != 1
-    if (tfm_spm_mpu_init() != SPM_ERR_OK) {
+    if (tfm_spm_mpu_init() != TFM_PLAT_ERR_SUCCESS) {
         ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
         while (1) {
             ;
         }
     }
 #endif
-   return SPM_ERR_OK;
+   return TFM_PLAT_ERR_SUCCESS;
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
