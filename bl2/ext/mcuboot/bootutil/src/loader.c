@@ -55,8 +55,8 @@ static struct boot_loader_state boot_data;
 #define IMAGES_ITER(x)
 #endif
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && !defined(MCUBOOT_OVERWRITE_ONLY)
-
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && \
+    !defined(MCUBOOT_OVERWRITE_ONLY)
 
 #if defined(MCUBOOT_VALIDATE_PRIMARY_SLOT) && !defined(MCUBOOT_OVERWRITE_ONLY)
 static int boot_status_fails = 0;
@@ -68,7 +68,7 @@ static int boot_status_fails = 0;
     } while (0)
 #else
 #define BOOT_STATUS_ASSERT(x) ASSERT(x)
-#endif
+#endif /* MCUBOOT_VALIDATE_PRIMARY_SLOT && !MCUBOOT_OVERWRITE_ONLY */
 
 struct boot_status_table {
     uint8_t bst_magic_primary_slot;
@@ -160,7 +160,7 @@ static const struct boot_status_table boot_status_tables[] = {
                  (state)->swap_type,                                \
                  (state)->copy_done,                                \
                  (state)->image_ok)
-#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING && !defined(MCUBOOT_OVERWRITE_ONLY) */
+#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING && !MCUBOOT_OVERWRITE_ONLY */
 
 /*
  * \brief Verifies the image header: magic value, flags, integer overflow.
@@ -600,78 +600,7 @@ done:
 }
 #endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_OVERWRITE_ONLY */
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && !defined(MCUBOOT_OVERWRITE_ONLY)
-
-/**
- * Determines where in flash the most recent boot status is stored. The boot
- * status is necessary for completing a swap that was interrupted by a boot
- * loader reset.
- *
- * @return      A BOOT_STATUS_SOURCE_[...] code indicating where status should
- *              be read from.
- */
-static int
-boot_status_source(struct boot_loader_state *state)
-{
-    const struct boot_status_table *table;
-    struct boot_swap_state state_scratch;
-    struct boot_swap_state state_primary_slot;
-    int rc;
-    size_t i;
-    uint8_t source;
-    uint8_t image_index;
-
-#if (BOOT_IMAGE_NUMBER == 1)
-    (void)state;
-#endif
-
-    image_index = BOOT_CURR_IMG(state);
-    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
-            &state_primary_slot);
-    assert(rc == 0);
-
-    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SCRATCH, &state_scratch);
-    assert(rc == 0);
-
-    BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
-    BOOT_LOG_SWAP_STATE("Scratch", &state_scratch);
-
-    for (i = 0; i < BOOT_STATUS_TABLES_COUNT; i++) {
-        table = &boot_status_tables[i];
-
-        if (boot_magic_compatible_check(table->bst_magic_primary_slot,
-                          state_primary_slot.magic) &&
-            boot_magic_compatible_check(table->bst_magic_scratch,
-                          state_scratch.magic) &&
-            (table->bst_copy_done_primary_slot == BOOT_FLAG_ANY ||
-             table->bst_copy_done_primary_slot == state_primary_slot.copy_done))
-        {
-            source = table->bst_status_source;
-
-#if (BOOT_IMAGE_NUMBER > 1)
-            /* In case of multi-image boot it can happen that if boot status
-             * info is found on scratch area then it does not belong to the
-             * currently examined image.
-             */
-            if (source == BOOT_STATUS_SOURCE_SCRATCH &&
-                state_scratch.image_num != BOOT_CURR_IMG(state)) {
-                source = BOOT_STATUS_SOURCE_NONE;
-            }
-#endif
-
-            BOOT_LOG_INF("Boot source: %s",
-                         source == BOOT_STATUS_SOURCE_NONE ? "none" :
-                         source == BOOT_STATUS_SOURCE_SCRATCH ? "scratch" :
-                         source == BOOT_STATUS_SOURCE_PRIMARY_SLOT ?
-                                   "primary slot" : "BUG; can't happen");
-            return source;
-        }
-    }
-
-    BOOT_LOG_INF("Boot source: none");
-    return BOOT_STATUS_SOURCE_NONE;
-}
-
+#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
 /*
  * Slots are compatible when all sectors that store up to to size of the image
  * round up to sector size, in both slot's are able to fit in the scratch
@@ -782,6 +711,77 @@ boot_status_internal_off(int idx, int state, int elem_sz)
            (state - BOOT_STATUS_STATE_0) * elem_sz;
 }
 
+#ifndef MCUBOOT_OVERWRITE_ONLY
+/**
+ * Determines where in flash the most recent boot status is stored. The boot
+ * status is necessary for completing a swap that was interrupted by a boot
+ * loader reset.
+ *
+ * @return      A BOOT_STATUS_SOURCE_[...] code indicating where status should
+ *              be read from.
+ */
+static int
+boot_status_source(struct boot_loader_state *state)
+{
+    const struct boot_status_table *table;
+    struct boot_swap_state state_scratch;
+    struct boot_swap_state state_primary_slot;
+    int rc;
+    size_t i;
+    uint8_t source;
+    uint8_t image_index;
+
+#if (BOOT_IMAGE_NUMBER == 1)
+    (void)state;
+#endif
+
+    image_index = BOOT_CURR_IMG(state);
+    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
+            &state_primary_slot);
+    assert(rc == 0);
+
+    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SCRATCH, &state_scratch);
+    assert(rc == 0);
+
+    BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
+    BOOT_LOG_SWAP_STATE("Scratch", &state_scratch);
+
+    for (i = 0; i < BOOT_STATUS_TABLES_COUNT; i++) {
+        table = &boot_status_tables[i];
+
+        if (boot_magic_compatible_check(table->bst_magic_primary_slot,
+                          state_primary_slot.magic) &&
+            boot_magic_compatible_check(table->bst_magic_scratch,
+                          state_scratch.magic) &&
+            (table->bst_copy_done_primary_slot == BOOT_FLAG_ANY ||
+             table->bst_copy_done_primary_slot == state_primary_slot.copy_done))
+        {
+            source = table->bst_status_source;
+
+#if (BOOT_IMAGE_NUMBER > 1)
+            /* In case of multi-image boot it can happen that if boot status
+             * info is found on scratch area then it does not belong to the
+             * currently examined image.
+             */
+            if (source == BOOT_STATUS_SOURCE_SCRATCH &&
+                state_scratch.image_num != BOOT_CURR_IMG(state)) {
+                source = BOOT_STATUS_SOURCE_NONE;
+            }
+#endif
+
+            BOOT_LOG_INF("Boot source: %s",
+                         source == BOOT_STATUS_SOURCE_NONE ? "none" :
+                         source == BOOT_STATUS_SOURCE_SCRATCH ? "scratch" :
+                         source == BOOT_STATUS_SOURCE_PRIMARY_SLOT ?
+                                   "primary slot" : "BUG; can't happen");
+            return source;
+        }
+    }
+
+    BOOT_LOG_INF("Boot source: none");
+    return BOOT_STATUS_SOURCE_NONE;
+}
+
 /**
  * Reads the status of a partially-completed swap, if any.  This is necessary
  * to recover in case the boot lodaer was reset in the middle of a swap
@@ -852,6 +852,7 @@ boot_read_status_bytes(const struct flash_area *fap,
 
     return 0;
 }
+#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
 /**
  * Reads the boot status from the flash.  The boot status contains
