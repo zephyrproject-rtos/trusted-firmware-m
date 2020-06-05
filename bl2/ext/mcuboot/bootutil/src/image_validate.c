@@ -381,7 +381,7 @@ bootutil_img_validate(int image_index,
                 return rc;
             }
 
-            rc = boot_nv_security_counter_get(0, &security_cnt);
+            rc = boot_nv_security_counter_get(image_index, &security_cnt);
             if (rc) {
                 return rc;
             }
