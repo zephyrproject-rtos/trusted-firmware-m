@@ -12,9 +12,11 @@
 #include <stddef.h>
 #include "tfm_plat_defs.h"
 #include "tfm_plat_crypto_keys.h"
+#include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
 #include "qcbor.h"
+#include "tfm_memory_utils.h"
 
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
 
@@ -50,6 +52,10 @@ static psa_ecc_curve_t attestation_key_curve;
 #ifdef INCLUDE_COSE_KEY_ID
 static uint8_t attestation_key_id[PSA_HASH_SIZE(PSA_ALG_SHA_256)]; /* 32bytes */
 #endif
+
+/* Instance ID for asymmetric IAK */
+static uint8_t instance_id_buf[INSTANCE_ID_MAX_SIZE];
+static size_t instance_id_len = 0U;
 
 enum psa_attest_err_t
 attest_register_initial_attestation_key()
@@ -157,6 +163,70 @@ attest_get_initial_attestation_public_key(uint8_t **public_key,
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
+/*!
+ * \brief Static function to calculate instance id.
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t attest_calc_instance_id(void)
+{
+    psa_status_t crypto_res;
+    enum psa_attest_err_t attest_res;
+    uint8_t *public_key;
+    size_t key_len;
+    psa_ecc_curve_t psa_curve;
+    psa_hash_operation_t hash = psa_hash_operation_init();
+
+    attest_res = attest_get_initial_attestation_public_key(&public_key,
+                                                           &key_len,
+                                                           &psa_curve);
+    if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    crypto_res = psa_hash_setup(&hash, PSA_ALG_SHA_256);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    crypto_res = psa_hash_update(&hash, public_key, key_len);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    /* The hash starts from the second byte, leaving the first free. */
+    crypto_res = psa_hash_finish(&hash, instance_id_buf + 1,
+                                 INSTANCE_ID_MAX_SIZE - 1,
+                                 &instance_id_len);
+    if (crypto_res != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    /* Add UEID type byte 0x01 */
+    instance_id_buf[0] = 0x01;
+    instance_id_len = instance_id_len + 1;
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+enum psa_attest_err_t
+attest_get_instance_id(struct q_useful_buf_c *id_buf)
+{
+    if (instance_id_len == 0U) {
+        if (attest_calc_instance_id() != PSA_ATTEST_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+        }
+    }
+
+    if (id_buf == NULL) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    id_buf->ptr = instance_id_buf;
+    id_buf->len = instance_id_len;
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
 
 #ifdef INCLUDE_COSE_KEY_ID
 

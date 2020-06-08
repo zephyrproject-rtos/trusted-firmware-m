@@ -379,7 +379,6 @@ attest_add_boot_seed_claim(struct attest_token_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef SYMMETRIC_INITIAL_ATTESTATION
 /*!
  * \brief Static function to add instance id claim to attestation token.
  *
@@ -408,72 +407,6 @@ attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#else /* SYMMETRIC_INITIAL_ATTESTATION */
-/*!
- * \brief Static function to add instance id claim to attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \note This mandatory claim represents the unique identifier of the instance.
- *       In the PSA definition it is a hash of the public attestation key of the
- *       instance. The claim will be represented by the EAT standard claim UEID
- *       of type GUID. The EAT definition of a GUID type is that it will be
- *       between 128 & 256 bits but this implementation will use the full 256
- *       bits to accommodate a hash result.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_instance_id_claim(struct attest_token_ctx *token_ctx)
-{
-    psa_status_t crypto_res;
-    enum psa_attest_err_t attest_res;
-    uint8_t instance_id[INSTANCE_ID_MAX_SIZE];
-    size_t instance_id_len;
-    struct q_useful_buf_c claim_value;
-    uint8_t *public_key;
-    size_t key_len;
-    psa_ecc_curve_t psa_curve;
-    psa_hash_operation_t hash = psa_hash_operation_init();
-
-    attest_res = attest_get_initial_attestation_public_key(&public_key,
-                                                           &key_len,
-                                                           &psa_curve);
-    if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
-
-    crypto_res = psa_hash_setup(&hash, PSA_ALG_SHA_256);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
-
-    crypto_res = psa_hash_update(&hash, public_key, key_len);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
-
-    /* The hash starts from the second byte, leaving the first free. */
-    crypto_res = psa_hash_finish(&hash, instance_id + 1,
-                                 INSTANCE_ID_MAX_SIZE - 1,
-                                 &instance_id_len);
-    if (crypto_res != PSA_SUCCESS) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
-
-    /* First byte indicates the type: 0x01 indicates GUID */
-    instance_id[0] = 0x01;
-    instance_id_len += 1;
-
-    claim_value.ptr = instance_id;
-    claim_value.len = instance_id_len;
-    attest_token_add_bstr(token_ctx,
-                          EAT_CBOR_ARM_LABEL_UEID,
-                          &claim_value);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-#endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 /*!
  * \brief Static function to add implementation id claim to attestation token.
