@@ -36,13 +36,14 @@ public:
     // Data members:
     // Methods:
         void setup_call (set_data_info set_data, bool random_data,
-                 bool fill_in_template, bool create_call, template_line *temLin,
-                 tf_fuzz_info *rsrc)
+                         bool fill_in_template, bool create_call,
+                         template_line *temLin, tf_fuzz_info *rsrc)
         {
-            define_call<hash_call> (set_data, random_data,
-                            fill_in_template, create_call, temLin, rsrc);
+            define_call<hash_call> (set_data, random_data, fill_in_template,
+                                    create_call, temLin, rsrc,
+                                    add_to_end, yes_set_barrier);
         }
-        bool copy_template_to_call (void);
+        bool copy_template_to_call (psa_call *the_call);
         security_hash_template_line (tf_fuzz_info *resources);  // (constructor)
         ~security_hash_template_line (void);
 

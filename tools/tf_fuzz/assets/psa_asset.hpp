@@ -32,11 +32,11 @@ public:
             /* For now at least, this is here only for its n_exp_vars member, to
                keep track of how many expected-data variables in the test. */
         asset_name_id_info asset_info;  // everything about the asset(s) for this line
+        key_policy_info policy;  // (specific to crypto, but have to put this here)
         vector<int> template_ref;
             // list of template line #s that reference this asset
         vector<psa_call> call_ref;  // list of PSA calls that reference this asset
         string handle_str;  // the text name of the key's "handle"
-        string flags_string;  // creation flags
         bool asset_name_specified;
             /* true if the template specified the asset_name, as opposed to us
                having inferred it. */

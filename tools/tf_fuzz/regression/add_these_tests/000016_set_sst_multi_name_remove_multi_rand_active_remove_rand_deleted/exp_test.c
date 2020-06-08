@@ -1,11 +1,4 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
- */
-
-/*
  * Test purpose:
  *     to show a more-interesting removal case
  *
@@ -20,26 +13,17 @@
 #include "../sst/non_secure/ns_test_helpers.h"
 #include "psa/protected_storage.h"
 #include "test/framework/test_framework_helpers.h"
-#include "crypto_tests_common.h"
 #include "tfm_memory_utils.h"
+#include "psa/crypto.h"
+#include "psa/crypto_sizes.h"
 /* For now, just a single test_result_t struct is sufficient.*/
 static struct test_result_t ret;
 
 /* This is not yet right for how to run a test;  need to register tests, etc. */
 
 void test_thread (struct test_result_t *ret) {
-    psa_status_t crypto_status;  // result from Crypto calls
+    psa_status_t crypto_status;  /* result from Crypto calls */
     psa_ps_status_t sst_status;
-
-    crypto_status = psa_crypto_init();
-    if (crypto_status != PSA_SUCCESS) {
-        TEST_FAIL("Could not initialize Crypto.");
-        return;
-    }
-
-    TEST_LOG("Test to show a more-interesting removal case");
-
-
     /* Variables (etc.) to initialize and check PSA assets: */
     static uint8_t president_set_data[] = "no new taxes";
     int president_set_length = 12;
@@ -51,6 +35,16 @@ void test_thread (struct test_result_t *ret) {
     int walker_set_length = 12;
     static uint8_t bush_set_data[] = "no new taxes";
     int bush_set_length = 12;
+
+    crypto_status = psa_crypto_init();
+    if (crypto_status != PSA_SUCCESS) {
+        TEST_FAIL("Could not initialize Crypto.");
+        return;
+    }
+
+    TEST_LOG("Test to show a more-interesting removal case");
+
+
 
 
     /* PSA calls to test: */

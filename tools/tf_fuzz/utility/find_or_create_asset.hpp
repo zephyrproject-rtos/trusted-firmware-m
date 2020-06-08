@@ -25,7 +25,7 @@ enum class asset_search
 enum class psa_asset_usage  // one particular area or all
 {   active,  // found as an actively-used asset
     deleted,  // found as a previously-used, but now-unusable asset
-    invalid,  // found as a previously-used, but now-unusable asset
+    invalid,  // (invalid assets aren't completely defined yet)
     all,  // if not found and if not allowed to create it
     none  // just create it
 };

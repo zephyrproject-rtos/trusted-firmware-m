@@ -8,26 +8,26 @@ The functions here perform straight-forward line-by-line comparisons of regressi
 TF-Fuzz regression tests.  These are not sufficient to address cases where the PSA
 calls are randomized.
 
-Each given line of the expected files (exp_stdout_stderr and exp_test.c) functions as
-Python regex for the corresonding line in the actual/generated corresponding file.
-Actually, the expected-file lines may need a little bit of tweaking first.  There are
-three scenarios:
+Each given line of the expected files (exp_stdout_stderr and exp_test.c) functions
+as Python regex for the corresonding line in the actual/generated corresponding
+file.  Actually, the expected-file lines may need a little bit of tweaking first.
+There are three scenarios:
 *  The line in exp_* file contains no regex content at all.  In this case, the two
    lines must be exactly identical, character for character. The actual/generated 
    output files do not contain regexes, but can contain parentheses or other 
-   characters that "look like" regex content, and thus confuse re.match().  So, it's 
-   first checked for an exact string == match. 
-*  The line in the exp_* file contains one or more standard-Python regex patterns to 
-   match.  In this case, a Python re.match() will still report a match.
+   characters that "look like" regex content, and thus confuse re.match().  So, 
+   it's first checked for an exact string == match. 
+*  The line in the exp_* file contains one or more standard-Python regex patterns
+   to match.  In this case, a Python re.match() will still report a match.
 *  The line in the exp_* file contains one or more non-standard regex pattern, in
    which case that non-standard regex pattern needs to be replaced with the actual,
    expected character string.
 
 As described in the above-cited README, these non-standard regex wildcards in the 
 exp_* files take either of two formats:
-*  "@@@" a 3-digit pattern number "@@@" (e.g., "@@@005@@@"):  This denotes a pattern 
-   of no particular length that must match the same text every occurrence in the 
-   actual/generated file.
+*  "@@@" a 3-digit pattern number "@@@" (e.g., "@@@005@@@"):  This denotes a
+   pattern of no particular length that must match the same text every occurrence
+   in the actual/generated file.
 *  "@@" a 3-digit pattern number "@" a 2-digit length in chars "@@":  Same idea as
    the previous pattern, except that it also has a specific length.
    
@@ -113,8 +113,8 @@ def resolve_wildcards (exp, act, wildcard_dict):
 
 '''
 check_file() checks that an actual-output test file (act_test_file) matches an 
-expected-output file (exp_test_file), line by line, including resolving the wildcards
-of the nature described above.
+expected-output file (exp_test_file), line by line, including resolving the 
+wildcards of the nature described above.
 '''
 def check_file (   exp_test_file, exp_test_file_name, 
                    act_test_file, act_test_file_name,

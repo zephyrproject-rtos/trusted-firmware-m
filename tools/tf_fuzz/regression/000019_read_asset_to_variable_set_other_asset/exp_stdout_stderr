@@ -5,46 +5,55 @@ Info:  random seed was not specified.
 Using seed value of \d+ \(0x[a-f\d]+\).
 Purpose line:  to read an asset into a named variable the set another asset from that variable
 ASSET_IDENTIFIER:  "source"
-SST-asset identifier list:  ";"
+Asset identifier list:  ";"
 SST-create from random data (no 'data *')
 Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
 Set command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "source"
-SST-asset identifier list:  "var"
+Asset identifier list:  "var"
 IDENTIFIER:  "transfer"
-SST-read dump to variable:  "transfer"
-Read SST command:  "transfer"
-Read command:  "transfer"
+Read dump to variable:  "transfer"
+SST-read arguments:  ;"
+Read SST command:  ";"
+Appended to end of call sequence:  SST-get call.
+Read command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "intermediate"
-SST-asset identifier list:  "var"
+Asset identifier list:  "var"
 IDENTIFIER:  "transfer"
 SST-set set from variable:  "transfer"
-Set SST command:  "transfer"
-Set command:  "transfer"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "intermediate"
-SST-asset identifier list:  "var"
+Asset identifier list:  "var"
 IDENTIFIER:  "transfer"
-SST-read dump to variable:  "transfer"
-Read SST command:  "transfer"
-Read command:  "transfer"
+Read dump to variable:  "transfer"
+SST-read arguments:  ;"
+Read SST command:  ";"
+Appended to end of call sequence:  SST-get call.
+Read command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "destination"
-SST-asset identifier list:  "var"
+Asset identifier list:  "var"
 IDENTIFIER:  "transfer"
 SST-set set from variable:  "transfer"
-Set SST command:  "transfer"
-Set command:  "transfer"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "destination"
-SST-asset identifier list:  "check"
+Asset identifier list:  "check"
 IDENTIFIER:  "transfer"
-SST-read-arguments variable name:  "transfer"
-SST-read check against variable:  "transfer"
-Read SST command:  "transfer"
-Read command:  "transfer"
+Read-arguments variable name:  "transfer"
+Read check against variable:  "transfer"
+SST-read arguments:  ;"
+Read SST command:  ";"
+Appended to end of call sequence:  SST-get call.
+Read command:  ";"
 Command with no expect:  ";"
 Lines:  Line number 8.
 Lines:  Line number 8.
@@ -55,6 +64,13 @@ Lines:  Line number 8.
 Lines:  Line number 8.
 Call sequence generated.
 Simulating call sequence...
+Call sequence:
+    SST-set call for asset source
+    SST-get call for asset source
+    SST-set call for asset intermediate
+    SST-get call for asset intermediate
+    SST-set call for asset destination
+    SST-get call for asset destination
 Writing test file, ./test.c.
 
 TF-Fuzz test generation complete.

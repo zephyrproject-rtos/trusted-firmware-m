@@ -14,5 +14,5 @@ echo
 echo
 echo --------------------------------------------------
 echo
-echo $ ../tfz -v $1 tossThis2
-../tfz -v $1 tossThis2
+echo $ ../tfz -v $1 tossThis.c
+../tfz -v $1 tossThis.c

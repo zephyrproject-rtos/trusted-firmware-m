@@ -1,0 +1,2 @@
+purpose to define a policy mostly-default (random) policy;
+set policy name nothingMuch attr export volatile;

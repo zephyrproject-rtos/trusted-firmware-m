@@ -1,11 +1,4 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
- */
-
-/*
  * Test purpose:
  *     to illustrate that you can override TF-Fuzz's expected result
  *
@@ -20,19 +13,23 @@
 #include "../sst/non_secure/ns_test_helpers.h"
 #include "psa/protected_storage.h"
 #include "test/framework/test_framework_helpers.h"
-#include "crypto_tests_common.h"
 #include "tfm_memory_utils.h"
+#include "psa/crypto.h"
+#include "psa/crypto_sizes.h"
 
 /* This is not yet right for how to run a test;  need to register tests, etc. */
 
 void test_thread (struct test_result_t *ret) {
-    psa_status_t crypto_status;  // result from Crypto calls
+    psa_status_t crypto_status;  /* result from Crypto calls */
     psa_status_t sst_status;
-
-    /* To prevent unused variable warning, as the variable might not be used
-     * in this testcase
-     */
+    /* Variables (etc.) to initialize and check PSA assets: */
+    static uint8_t napoleon_exp_data[] = "this won't work";
+    static uint8_t napoleon_act_data\[2048\] = "[A-Z][a-z ]*[\.\?\!]";
+    static size_t napoleon_act_length = \d+;
     (void)sst_status;
+        /* "void" to prevent unused-variable warning, since the variable may not
+         * be used in this particular test case.
+         */
 
     crypto_status = psa_crypto_init();
     if (crypto_status != PSA_SUCCESS) {
@@ -43,14 +40,7 @@ void test_thread (struct test_result_t *ret) {
     TEST_LOG("Test to illustrate that you can override TF-Fuzz's expected result");
 
 
-    /* Variables (etc.) to initialize and check PSA assets: */
-    static uint8_t napoleon_exp_data[] = "this won't work";
-    static uint8_t napoleon_act_data\[2048\] = "[A-Z][a-z ]*[\.\?\!]";
-    static size_t napoleon_act_length = \d+;
-
-
     /* PSA calls to test: */
-
     sst_status = psa_ps_get\(\d+, 0, @@@001@@@, napoleon_act_data,
                             &napoleon_act_length);
     if (sst_status != PSA_SUCCESS) {

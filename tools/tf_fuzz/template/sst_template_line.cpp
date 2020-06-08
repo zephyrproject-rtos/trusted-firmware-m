@@ -28,44 +28,10 @@
 
 //**************** set_sst_template_line methods ****************
 
-string set_sst_template_line::rand_creation_flags (void)
-{
-    return ((rand() % 2) == 1)?
-        "PSA_STORAGE_FLAG_WRITE_ONCE" : "PSA_STORAGE_FLAG_NONE";
-    /* TODO:  There's seems to be some uncertainty as to how many creation-flag
-       values are actually used, so for now only using PSA_STORAGE_FLAG_WRITE_ONCE
-       and PSA_STORAGE_FLAG_NONE.  If there are more in real-world use, then
-       resurrect the commented-out code below to assign them:
-    string result = "";
-    const int most_flags = 3,
-    int n_flags = (rand() % most_flags);
-
-    for (int i = 0;  i < ;  i < n_flags;  ++i) {
-        switch (rand() % 5) {
-            case 0:
-                result += "PSA_STORAGE_FLAG_WRITE_ONCE";
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-        }
-        if (i < n_flags-1)
-            result += " | ";
-    }
-    if (result == "") result = "PSA_STORAGE_FLAG_NONE";
-*/
-}
-
 set_sst_template_line::set_sst_template_line (tf_fuzz_info *resources)
     : sst_template_line (resources)  // constructor)
 {
-    // Creation flags:
-    flags_string = rand_creation_flags();
+    return;  // just to have something to pin a breakpoint onto
 }
 
 
@@ -100,7 +66,8 @@ read_sst_template_line::read_sst_template_line (tf_fuzz_info *resources)
     test_state->gibbergen.sentence (gibberish_buffer, gibberish_buffer + data_length);
     databuff = gibberish_buffer;  set_data.set (databuff);
 
-    set_data.file_specified = (!set_data.string_specified && (rand()%2) == 1)?  true : false;
+    set_data.file_specified
+        = (!set_data.string_specified && (rand()%2) == 1)?  true : false;
     set_data.file_path = "";  // can't really devise a random path
 }
 

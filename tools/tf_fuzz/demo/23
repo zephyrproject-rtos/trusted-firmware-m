@@ -1,0 +1,2 @@
+purpose to create multiple policies with attributes including key size (523);
+set policy name aPolicy anotherPolicy yetAnother alg sha_256 attr 523 noexport;

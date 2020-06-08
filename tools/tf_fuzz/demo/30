@@ -1,0 +1,4 @@
+purpose to create a key, then read the key data ("material") into a variable;
+set policy name somePolicy alg rsa_pkcs1v15_sign_base attr derive noverify;
+set key name aKey data * policy somePolicy;
+read key name aKey check "12345678" expect fail;

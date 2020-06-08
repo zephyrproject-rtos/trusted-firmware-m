@@ -103,13 +103,13 @@ def main():
                    act_stdout_file_name, exp_test_file_name, act_test_file_name))
     
     # Check it all:
-    if not quiet: print ("Checking stdout and stderr:  ", end="")
-    line_by_line.check_file (   exp_stdout_file, exp_stdout_file_name, 
-                                act_stdout_file, act_stdout_file_name,
-                                loud, quiet, ultra_quiet                      )
     if not quiet: print ("\nChecking test C file:  ", end="")
     line_by_line.check_file (   exp_test_file, exp_test_file_name, 
                                 act_test_file, act_test_file_name,
+                                loud, quiet, ultra_quiet                      )
+    if not quiet: print ("Checking stdout and stderr:  ", end="")
+    line_by_line.check_file (   exp_stdout_file, exp_stdout_file_name, 
+                                act_stdout_file, act_stdout_file_name,
                                 loud, quiet, ultra_quiet                      )
     
     # Ran to completion normally, so pass:

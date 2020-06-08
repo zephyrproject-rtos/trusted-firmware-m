@@ -1,0 +1,89 @@
+Trusted Firmware Fuzzer (TF-Fuzz) starting...
+
+Info:  random seed was not specified.
+
+Using seed value of \d+ \(0x[a-f\d]+\).
+Purpose line:  to set SST creation flags
+ASSET_IDENTIFIER:  "hasCF"
+Asset identifier list:  "data"
+LITERAL string:  "this asset has write-once"
+Create from literal data:  ""this asset has write-once""
+SST write-once flag:  write_once"
+SST creation flag
+;"
+SST creation flags
+;"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "hasCF2"
+Asset identifier list:  "data"
+LITERAL string:  "this asset has also write-once"
+Create from literal data:  ""this asset has also write-once""
+SST write-once flag:  wo"
+SST creation flag
+;"
+SST creation flags
+;"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "alsoHasCF"
+Asset identifier list:  "data"
+LITERAL string:  "this asset has no flags"
+Create from literal data:  ""this asset has no flags""
+SST no storage flag:  none"
+SST creation flag
+expect"
+SST creation flags
+expect"
+Set SST command:  "expect"
+Appended to end of call sequence:  SST-set call.
+Set command:  "expect"
+Expect pass clause:  "pass"
+Command with expect:  ";"
+ASSET_IDENTIFIER:  "alsoHasCF2"
+Asset identifier list:  "data"
+LITERAL string:  "this asset has NO_CONFIDENTIALITY"
+Create from literal data:  ""this asset has NO_CONFIDENTIALITY""
+SST no-confidentiality flag:  ncf"
+SST creation flag
+;"
+SST creation flags
+;"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
+Command with no expect:  ";"
+ASSET_IDENTIFIER:  "yetAnother"
+Asset identifier list:  "data"
+LITERAL string:  "this asset has NO_REPLAY_PROTECTION"
+Create from literal data:  ""this asset has NO_REPLAY_PROTECTION""
+SST no-replay-protection flag:  nrp"
+SST creation flag
+;"
+SST creation flags
+;"
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
+Command with no expect:  ";"
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Lines:  Line number 7.
+Call sequence generated.
+Simulating call sequence...
+Call sequence:
+    SST-set call for asset hasCF
+    SST-set call for asset hasCF2
+    SST-set call for asset alsoHasCF
+    SST-set call for asset alsoHasCF2
+    SST-set call for asset yetAnother
+Writing test file, ./test.c.
+
+TF-Fuzz test generation complete.

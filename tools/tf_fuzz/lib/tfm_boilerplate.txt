@@ -28,17 +28,7 @@ Four extremely important things about this file:
    number, for checking against the "const int" list in boilerplate.hpp.  So, these
    tags are literally the exactly the 3 characters directly after the backtick termi-
    nating the previous string.
-
-TO DO:  Hindsight-obvious:  This plus the table of constants in boilerplate.hpp should
-        be replaced with an STL map container!
 `000
-/*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
- */
-
 /*
  * Test purpose:
  *     $purpose
@@ -54,8 +44,9 @@ TO DO:  Hindsight-obvious:  This plus the table of constants in boilerplate.hpp 
 #include "../sst/non_secure/ns_test_helpers.h"
 #include "psa/protected_storage.h"
 #include "test/framework/test_framework_helpers.h"
-#include "crypto_tests_common.h"
 #include "tfm_memory_utils.h"
+#include "psa/crypto.h"
+#include "psa/crypto_sizes.h"
 `001
 #include <stdint.h>
 
@@ -99,13 +90,13 @@ static uint32_t crc_byte (uint8_t a_byte)
 /* This is not yet right for how to run a test;  need to register tests, etc. */
 
 void test_thread (struct test_result_t *ret) {
-    psa_status_t crypto_status;  // result from Crypto calls
+    psa_status_t crypto_status;  /* result from Crypto calls */
     psa_status_t sst_status;
-
-    /* To prevent unused variable warning, as the variable might not be used
-     * in this testcase
-     */
+`003
     (void)sst_status;
+        /* "void" to prevent unused-variable warning, since the variable may not
+         * be used in this particular test case.
+         */
 
     crypto_status = psa_crypto_init();
     if (crypto_status != PSA_SUCCESS) {
@@ -114,53 +105,67 @@ void test_thread (struct test_result_t *ret) {
     }
 
     TEST_LOG("Test $purpose");
-`003
-    static int $var = $init;
 `004
-    static uint8_t $var[] = "$init";
+    static int $var = $init;
 `005
-    static uint8_t $var[2048] = "$init";
+    static uint8_t $var[] = "$init";
 `006
-    $type $var = $init;
+    static uint8_t $var[2048] = "$init";
 `007
-    TEST_LOG($message);
+    static size_t $var = $init;
 `008
-    psa_ps_remove($uid);
+    static psa_key_attributes_t $var;
 `009
+    static psa_algorithm_t $var;
+`010
+    static psa_key_lifetime_t $var;
+`011
+    static psa_key_type_t $var;
+`012
+    static psa_key_usage_t $var;
+`013
+    static psa_key_handle_t $var;
+`014
+    $type $var = $init;
+`015
+    TEST_LOG("$message");
+`016
+    psa_ps_remove($uid);
+`017
     if (sst_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down an SST asset upon test completion.");
         return;
     }
-`010
+`018
     psa_destroy_key($handle);
-`011
+`019
     if (crypto_status != PSA_SUCCESS) {
         TEST_FAIL("Failed to tear down a crypto asset upon test completion");
         return;
     }
-`012
+`020
 
     /* Test completed */
     ret->val = TEST_PASSED;
 }
-`013 PSA_SUCCESS`014 PSA_ERROR_DOES_NOT_EXIST`015
+`021 PSA_SUCCESS`022 PSA_ERROR_DOES_NOT_EXIST`023
     /* $op SST asset $description with data $data_source. */
     sst_status = psa_ps_set($uid, $length, $data,
                             $flags);
-`016
+`024
     if (sst_status != $expect) {
         TEST_FAIL("psa_ps_set() expected $expect.");
         return;
     }
-`017
+`025
     sst_status = psa_ps_get($uid, $offset, $length, $act_data,
                             &$act_length);
-`018
+`026
     if (sst_status != $expect) {
         TEST_FAIL("psa_ps_get() expected $expect.");
         return;
     }
-`019
+`027
     if (sst_status != $expect) {
         TEST_FAIL("psa_ps_get() expected $expect.");
         return;
@@ -171,56 +176,116 @@ void test_thread (struct test_result_t *ret) {
         TEST_FAIL("Read data should be equal to result data");
         return;
     }
-`020
-    // Hash the actual data for later data-leak checking:
+`028
+    /* Hash the actual data for later data-leak checking: */
     seed_hasher();
     for (i = 0;  i < strlen((char *) $act_data_var);  ++i) {
         crc_byte ($act_data_var[i]);
     }
     $hash_var = shift_reg;
-`021
+`029
     sst_status = psa_ps_remove($uid);
-`022
+`030
     if (sst_status != $expect) {
         TEST_FAIL("psa_ps_remove() expected $expect.");
         return;
     }
-`023
-    crypto_status = psa_key_policy_set_usage(*$policy, $usage, $alg);
-`024
-    if (crypto_status != $expect) {
-        TEST_FAIL("psa_key_policy_set_usage() expected $expect.");
-        return;
-    }
-`025
-    crypto_status = psa_key_policy_get_usage(*$policy);
-`026
-    if (crypto_status != $expect) {
-        TEST_FAIL("psa_key_policy_set_usage() expected $expect.");
-        return;
-    }
-`027
-    crypto_status = psa_create_key($lifetime, *$handle);
-`028
-    if (crypto_status != $expect) {
-        TEST_FAIL("psa_create_key() expected $expect.");
-        return;
-    }
-`029
-    crypto_status = psa_get_key_information($handle, *$type, *$bits);
-`030
-    if (crypto_status != $expect) {
-        TEST_FAIL("psa_get_key_information() expected $expect.");
-        return;
-    }
 `031
-    if ($n_bits != $m_bits) {
-        TEST_FAIL("The number of key bits is different from expected");
+    $policy = psa_key_attributes_init();
+`032
+    psa_reset_key_attributes (&$policy);
+`033
+    psa_set_key_usage_flags (
+            &$policy,
+               psa_get_key_usage_flags (&$policy)
+            |  $flag
+    );
+`034
+    psa_set_key_lifetime (&$policy, $life);
+`035
+    psa_set_key_bits (&$policy, $size);
+`036
+    psa_set_key_type (&$policy, $type);
+`037
+    psa_set_key_algorithm (&$policy, $algorithm);
+`038
+    psa_set_key_usage_flags (&$policy, $usage);
+`039
+    $life = psa_get_key_lifetime (&$policy);
+`040
+    $life = psa_get_key_lifetime (&$policy);
+    if ($life == PSA_KEY_LIFETIME_VOLATILE) {
+        TEST_LOG("$policy:  Lifetime is volatile.");
+    } else {
+        TEST_LOG("$policy:  Lifetime is persistent.");
+    }
+`041
+    $size = psa_get_key_bits (&$policy);
+`042
+    $type = psa_get_key_type (&$policy);
+`043
+    $type = psa_get_key_type (&$policy);
+    TEST_LOG("$policy:  Key-type code == $type.");
+`044
+    $algorithm = psa_get_key_algorithm (&$policy);
+`045
+    $algorithm = psa_get_key_algorithm (&$policy);
+    TEST_LOG("$policy:  Key-algorithm code == $algorithm.");
+`046
+    $usage = psa_get_key_usage_flags (&$policy);
+`047
+    if (($usage & $usage_string) != 0) {
+        TEST_LOG("$policy:  $print_usage_true_string.");
+    } else {
+        TEST_LOG("$policy:  $print_usage_false_string.");
+    }
+`048
+    crypto_status = psa_get_key_attributes ($key, &$policy);
+`049
+    if (crypto_status != $expect) {
+        TEST_FAIL("psa_get_key_attributes() expected $expect.");
         return;
     }
-`032
-    crypto_status = psa_destroy_key($handle);
-`033
+`050
+    crypto_status = psa_generate_key (&$policy, &$key);
+`051
+    if (crypto_status != $expect) {
+        TEST_FAIL("psa_generate_key() expected $expect.");
+        return;
+    }
+`052
+    crypto_status
+        = psa_import_key (&$policy, $data, $length, &$key);
+`053
+    if (crypto_status != $expect) {
+        TEST_FAIL("psa_import_key() expected $expect.");
+        return;
+    }
+`054
+    crypto_status = psa_copy_key ($master, &$policy, &$copy);
+`055
+    if (crypto_status != $expect) {
+        TEST_FAIL("psa_copy_key() expected $expect.");
+        return;
+    }
+`056
+    /* Check that the data is correct */
+    if (tfm_memcmp($act_data, $exp_data,
+                   $length) != 0) {
+        TEST_FAIL("Read data should be equal to result data");
+        return;
+    }
+`057
+    crypto_status
+        = psa_export_key ($key, $data, $length, &$act_size);
+`058
+    if (crypto_status != $expect) {
+        TEST_FAIL("psa_export_key() expected $expect.");
+        return;
+    }
+`059
+    crypto_status = psa_destroy_key($key);
+`060
     if (crypto_status != $expect) {
         TEST_FAIL("psa_destroy_key() expected $expect.");
         return;

@@ -51,12 +51,8 @@ edit3:
 	utility/variables.cpp utility/gibberish.cpp utility/randomization.cpp \
 	utility/string_ops.cpp utility/compute.cpp boilerplate/boilerplate.cpp \
 	tf_fuzz.cpp &
-	$(EDITOR) tests/example_template tests/sstSets tests/sstReads \
-	lib/tfm_boilerplate.txt boilerplate/boilerplate.hpp \
-	Makefile README assets/README \
-	boilerplate/README calls/README demo/README lib/README parser/README \
-	template/README tests/README regression/README utility/README \
-	visualStudio/README &
+	$(EDITOR) tests/example_template Makefile tests/sstSets tests/sstReads \
+	lib/tfm_boilerplate.txt boilerplate/boilerplate.hpp &
 
 includes = -I . -I ./parser -I ./template -I ./assets -I ./calls -I ./boilerplate -I ./utility
 

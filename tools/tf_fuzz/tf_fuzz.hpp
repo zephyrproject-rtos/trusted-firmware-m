@@ -23,6 +23,20 @@
 #include "boilerplate.hpp"
 */
 
+/* Shortcuts, to reduce code clutter, and reduce risk of coding errors. */
+#define IVM(content) if(rsrc->verbose_mode){content}  // IVM = "If Verbose Mode"
+#define IV(content) if(verbose_mode){content}  // Same, but for use by tf_fuzz methods
+
+
+// consts to help readability:
+const bool add_to_end = true;  // add a call to the end of the call vector
+const bool add_random_after_barrier = false;
+    /* add to the call list randomly after the latest barrier for this asset, and
+       as late as the end of the list. */
+const bool yes_set_barrier = true;  // create the call and set a barrier for that asset
+const bool dont_set_barrier = false;
+    // inserted call does not preclude calls related to that asset being placed earlier
+
 using namespace std;
 
 // class tf_fuzz_info mostly just groups together everything needed generate the test.
@@ -114,13 +128,18 @@ public:
             vector<psa_asset*>::iterator &asset  // returns iterator to asset
         );
         vector<variable_info>::iterator find_var (string var_name);
+        void parse_cmd_line_params (int argc, char* argv[]);
+            // parse command-line parameters, and open files
+        void add_call (psa_call *the_call, bool to_end, bool set_barrier_bool);
+            /* stuffs a new call into the call list, either sequentially or at a random
+               place after a "barrier" for that particular asset.  If set_barrier_bool
+               is true, it will prevent calls related to this asset from going before
+               this call. */
         bool make_var (string var_name);
-        void teardown_test(void);  // removes any PSA resources used in the test
         void simulate_calls (void);
             // goes through generated calls calculating expected results
         void write_test (void);  // writes out the test's .c file
-        void parse_cmd_line_params (int argc, char* argv[]);
-            // parse command-line parameters, and open files
+        void teardown_test(void);  // removes any PSA resources used in the test
         tf_fuzz_info (void);  // (constructor)
         ~tf_fuzz_info (void);
 
@@ -143,8 +162,8 @@ private:
 
 template<typename CALL_TYPE>
 void define_call (set_data_info set_data, bool random_data, bool fill_in_template,
-                 bool create_call, template_line *temLin, tf_fuzz_info *rsrc
-) {
+                 bool create_call, template_line *temLin, tf_fuzz_info *rsrc,
+                 bool to_end_bool, bool set_barrier_bool) {
     CALL_TYPE *the_call;
     gibberish gib;
     char gib_buff[1000];
@@ -171,13 +190,12 @@ void define_call (set_data_info set_data, bool random_data, bool fill_in_templat
     if (create_call) {
         the_call = new CALL_TYPE (rsrc, temLin->call_ser_no,
                                   temLin->asset_info.how_asset_found);
-        rsrc->calls.push_back(the_call);  // (note: this is not a memory leak!)
-//        temLin->copy_template_to_asset();  TODO:  Remove this "note-to-self" comment
-        if (!temLin->copy_template_to_call()) {
+        if (!temLin->copy_template_to_call (the_call)) {
             cerr << "Error:  Tool-internal:  Please report error "
                  << "#402 to the TF-Fuzz developers." << endl;
             exit(402);
         }
+        rsrc->add_call (the_call, to_end_bool, set_barrier_bool);
     }
 }
 

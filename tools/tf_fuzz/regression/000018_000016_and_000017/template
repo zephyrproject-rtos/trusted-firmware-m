@@ -1,5 +1,5 @@
 purpose to both read the value of a single asset multiple times and assign a sequence of values to a single asset;
-set sst name indecisive data "First value";
+set sst name indecisive data "First value" flag none;
 read sst name indecisive check "Not this" expect fail;
 set sst name indecisive data "Second value";
 read sst name indecisive check "Not this either" expect fail;

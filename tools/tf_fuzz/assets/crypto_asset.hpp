@@ -27,6 +27,7 @@ class crypto_asset : public psa_asset
 {
 public:
     // Data members:
+        key_policy_info policy;
     // Methods:
         crypto_asset (void);  // (constructor)
         ~crypto_asset (void);
@@ -75,7 +76,6 @@ public:
         string usage;  // for now just strings;  maybe future tap TF-M(?) value list
         string alg;  // these only apply if the string was created without a policy
         string lifetime_str;  // similarly, the text representation of the key's lifetime
-        string handle_str;  // the text name of the key's "handle"
     // Methods:
         bool set_key_id (int id_n);  // checks key-ID value, returns true==success
         key_asset (void);  // (constructor)

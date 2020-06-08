@@ -73,9 +73,9 @@ template_line                   *templateLin = nullptr;
     remove_key_template_line    *remKeyTemplateLin = nullptr;
   security_template_line        *secTemplateLin = nullptr;
     security_hash_template_line *secHasTemplateLin = nullptr;
-/* Call and asset objects are presumably not immediately needed, because the objects of
-   these types are within the resource object, *rsrc, but even if only just to show
-   that class hierarchy: */
+/* Call and asset objects are presumably not immediately needed, because the objects
+   of these types are within the resource object, *rsrc, but even if only just to
+   show that class hierarchy: */
 psa_call                        *psaCal = nullptr;
   sst_call                      *sstCal = nullptr;
     sst_set_call                *sstSetCal = nullptr;
@@ -83,12 +83,25 @@ psa_call                        *psaCal = nullptr;
     sst_remove_call             *sstRemCal = nullptr;
   crypto_call                   *cryCal = nullptr;
     policy_call                 *polCal = nullptr;
-      policy_set_call           *polSetCal = nullptr;
-      policy_get_call           *polGetCal = nullptr;
+      init_policy_call          *iniPolCal = nullptr;
+      reset_policy_call         *resPolCal = nullptr;
+      add_policy_usage_call     *addPolUsaCal = nullptr;
+      set_policy_lifetime_call  *setPolLifCal = nullptr;
+      set_policy_type_call      *setPolTypCal = nullptr;
+      set_policy_algorithm_call *setPolAlgCal = nullptr;
+      set_policy_usage_call     *setPolUsaCal = nullptr;
+      get_policy_lifetime_call  *getPolLifCal = nullptr;
+      get_policy_type_call      *getPolTypCal = nullptr;
+      get_policy_algorithm_call *getPolAlgCal = nullptr;
+      get_policy_usage_call     *getPolUsaCal = nullptr;
+      get_policy_size_call      *getPolSizCal = nullptr;
+      get_key_policy_call       *getKeyPolCal = nullptr;
     key_call                    *keyCal = nullptr;
-      get_key_info_call         *getKeyInfCal = nullptr;
-      set_key_call              *makKeyCal = nullptr;
-      destroy_key_call          *desKeyCal = nullptr;
+      generate_key_call         *genKeyCal = nullptr;
+      create_key_call           *creKeyCal = nullptr;
+      copy_key_call             *copKeyCal = nullptr;
+      read_key_data_call        *reaKeyDatCal = nullptr;
+      remove_key_call           *remKeyCal = nullptr;
 psa_asset                       *psaAst = nullptr;
   sst_asset                     *sstAst = nullptr;
   crypto_asset                  *cryAst = nullptr;
@@ -101,32 +114,38 @@ char gib_buff[4096];  // spew gibberish into here
 int rand_data_length = 0;
 
 /* General-utility variables: */
-psa_asset_usage random_asset = psa_asset_usage::all;  /* pick what type of asset at random */
+bool purpose_defined = false;
+psa_asset_usage random_asset = psa_asset_usage::all;
+    /* to pick what type of asset at random */
 bool random_name;  /* template didn't specify name, so it's generated randomly */
 string literal_data;  /* literal data for an asset value */
 
 /* Holders for state in read commands: */
 expect_info expect;  /* everything about expected results and data */
 set_data_info set_data;  /* everything about setting the value of PSA-asset data */
-asset_name_id_info asset_info;  /* everything about identifying assets */
-bool assign_data_var_specified;
+asset_name_id_info parsed_asset;  /* everything about identifying assets */
+string target_barrier = "";  /* asset to set and search barrier when re-ordering PSA calls */
+key_policy_info policy_info;  /* everything about key policies */
+bool assign_data_var_specified = false;
 string assign_data_var;
-bool print_data;  /* true to just print asset data to the test log */
-bool hash_data;  /* true to just print asset data to the test log */
+bool print_data = false;  /* true to just print asset data to the test log */
+bool hash_data = false;  /* true to just print asset data to the test log */
+bool literal_is_string = true;
+    /* if true, literal value is character-string;  if false, is list of hex values */
 
 /* The following are more tied to the template syntax than to the resulting PSA calls */
 string literal;  /* temporary holder for all string literals */
 string identifier;  /* temporary holder for strings representing identifiers */
 string var_name;  /* a variable name */
-string asset_name;  /* as parsed, not yet put into asset_info */
+string asset_name;  /* as parsed, not yet put into parsed_asset */
 string aid;  /* string-typed holder for an asset ID in a list thereof */
 int nid;  /* same idea as aid, but for asset ID# lists */
 size_t strFind1, strFind2;  /* for searching through strings */
 
 /* Because of the parsing order, psa_calls of the specific type have to be
    push_back()ed onto rsrc->calls before their expected results are known.  Therefore,
-   inject those results after parsing the expected results.  add_expect is a vector
-   index of where to start "back-filling" the expect information. */
+   must inject those results after parsing the expected results.  add_expect is a
+   loop index to track where to add results. */
 unsigned int add_expect = 0;
 
 /* Temporaries: */
@@ -150,9 +169,6 @@ bool shuffle_not_pick;
 int low_nmbr_lines = 1;  /* if picking so-and-so number of template lines from a ... */
 int high_nmbr_lines = 1; /*    ... block at random, these are fewest and most lines. */
 int exact_nmbr_lines = 1;
-
-/* Shortcuts, to reduce code clutter, and reduce risk of coding errors. */
-#define IVM(content) if(rsrc->verbose_mode){content}  /* IVM = "If Verbose Mode" */
 
 using namespace std;
 
@@ -246,9 +262,9 @@ void randomize_template_lines (
 void interpret_template_line (
     template_line *templateLin,  /* the template line to process */
     tf_fuzz_info *rsrc,  /* program resources in general */
-    set_data_info set_data, psa_asset_usage random_asset,
-    bool assign_data_var_specified, expect_info expect, bool print_data, bool hash_data,
-    string asset_name, string assign_data_var,
+    set_data_info &set_data, psa_asset_usage random_asset,
+    bool assign_data_var_specified, expect_info &expect, key_policy_info &policy_info,
+    bool print_data, bool hash_data, string asset_name, string assign_data_var,
     asset_name_id_info &asset_info,  /* everything about the asset(s) involved */
     bool create_call_bool,  /* true to create the PSA call at this time */
     bool create_asset_bool,  /* true to create the PSA asset at this time */
@@ -261,19 +277,19 @@ void interpret_template_line (
 
     if (fill_in_template) {
         /* Set basic parameters from the template line: */
+        templateLin->set_data = set_data;
+        templateLin->expect = expect;
+        templateLin->policy_info = policy_info;
         templateLin->asset_info.id_n_not_name = asset_info.id_n_not_name;
         templateLin->asset_info.set_name (asset_name);
         /* Fill in state parsed from the template below: */
         templateLin->assign_data_var_specified = assign_data_var_specified;
         templateLin->assign_data_var.assign (assign_data_var);
-        templateLin->expect = expect;
         templateLin->print_data = print_data;
         templateLin->hash_data = hash_data;
         templateLin->random_asset = random_asset;
-        templateLin->set_data.random_data = set_data.random_data;
-        templateLin->set_data.string_specified = set_data.literal_data_not_file;
-            /* TODO:  is this right for multiple assets? */
-        if (set_data.literal_data_not_file && !set_data.random_data) {
+        if (   set_data.literal_data_not_file && !set_data.random_data
+            && set_data.string_specified) {
             templateLin->set_data.set (literal_data);
         }
         /* Save names or IDs to the template-line tracker: */
@@ -287,8 +303,9 @@ void interpret_template_line (
         asset_info.asset_name_vector.clear();
     }
 
+    /* Random asset choice (e.g., *active) case: */
     if (templateLin->random_asset != psa_asset_usage::all) {
-        /* Just create the call tracker;  it will address this in simulation stage: */
+        /* Just create the call tracker;  random name chosen in simulation stage: */
         templateLin->setup_call (set_data, templateLin->set_data.random_data,
                                  yes_fill_in_template, create_call_bool,
                                  templateLin, rsrc   );
@@ -314,12 +331,11 @@ void interpret_template_line (
            asset names: */
         for (auto as_name :  templateLin->asset_info.asset_name_vector) {
             /* Also copy into template line object's local vector: */
-            string t_string;
-            t_string.assign(as_name);
             if (instance > 0) {
-                t_string += "_" + to_string (instance);
+                templateLin->asset_info.set_name (as_name + "_" + to_string (instance));
+            } else {
+                templateLin->asset_info.set_name (as_name);
             }
-            templateLin->asset_info.set_name (t_string);
             /* Give each occurrence a different random ID: */
             templateLin->asset_info.set_id_n (100 + (rand() % 10000));
                 /* TODO:  unlikely, but this *could* alias! */
@@ -338,10 +354,18 @@ void interpret_template_line (
 %token <tokenN> PURPOSE RAW_TEXT
 %token <tokenN> SET READ REMOVE SECURE DONE  /* root commands */
 %token <tokenN> SST KEY POLICY NAME UID STAR ACTIVE DELETED EQUAL DATA DFNAME
-%token <tokenN> CHECK VAR HASH NEQ PRINT EXPECT PASS NOTHING ERROR  /* expected results */
-%token <str> IDENTIFIER_TOK LITERAL_TOK FILE_PATH_TOK  /* variables and content */
+%token <tokenN> FLAG NONE WRITE_ONCE NO_RP NO_CONF  /* SST creation flag keywords */
+%token <tokenN> OFFSET  /* offset into an SST asset */
+%token <tokenN> CHECK VAR HASH NEQ PRINT EXPECT PASS FAIL NOTHING ERROR  /* expected results */
+%token <str> IDENTIFIER_TOK LITERAL_TOK HEX_LIST FILE_PATH_TOK  /* variables and content */
 %token <valueN> NUMBER_TOK  /* variables and content */
 %token <tokenN> SEMICOLON SHUFFLE TO OF OPEN_BRACE CLOSE_BRACE  /* block structure */
+%token <tokenN> ATTR TYPE ALG  /* "set policy" line portions */
+%token <tokenN> EXPORT COPY ENCRYPT DECRYPT SIGN VERIFY DERIVE  /* key-usage keywords */
+%token <tokenN> NOEXPORT NOCOPY NOENCRYPT NODECRYPT NOSIGN NOVERIFY NODERIVE
+%token <tokenN> PERSISTENT VOLATILE  /* key lifetime keywords */
+%token <tokenN> FROM  /* for copying a key "from" another */
+%token <tokenN> WITH  /* for specifying a key without explicitly defining a policy */
 
 %define parse.error verbose
 %locations
@@ -350,9 +374,15 @@ void interpret_template_line (
 %%
 
   /* Top-level syntax: */
-lines:      /* nothing */
+lines:
+        %empty  /* nothing */
       | line lines {
-            IVM(cout << "Lines:  Line number " << yylineno << "." << endl;)
+            IVM(cout << "Lines:  Line number " << dec << yylineno << "." << endl;)
+            /* Re-randomize objects we parse into: */
+            expect = expect_info();
+            set_data = set_data_info();
+            parsed_asset = asset_name_id_info();
+            policy_info = key_policy_info();
         }
       ;
 
@@ -361,10 +391,20 @@ line:
             IVM(cout << "Purpose line:  " << flush;)
             set_purp_str (yytext, rsrc);
             IVM(cout << rsrc->test_purpose << endl;)
-            /* Just a precaution to make sure that these vectors start out empty.
-               Should already be, but purpose is typically specified first: */
-            asset_info.asset_id_n_vector.clear();
-            asset_info.asset_name_vector.clear();
+            /* TODO:  Is there much/any value in turning this back on?  The
+                      constructor clear()s them out, and run-time errors observed
+                      under Visual Studio...
+               Just a precaution to make sure that these vectors start out empty.
+               Should inherently be, but purpose is typically specified first:
+            parsed_asset.asset_id_n_vector.clear();
+            parsed_asset.asset_name_vector.clear(); */
+            /* Re-randomize or re-initialize objects we parse into: */
+            purpose_defined = true;
+            expect = expect_info();
+            set_data = set_data_info();
+            parsed_asset = asset_name_id_info();
+            policy_info = key_policy_info();
+            target_barrier = "";
         }
       | block {
             /* TODO:  This code may not won't work with "secure hash neq ..." */
@@ -384,16 +424,19 @@ line:
                 /* Note that temLin will have its fields filled in already. */
                 interpret_template_line (
                     templateLin, rsrc, set_data, random_asset,
-                    assign_data_var_specified, expect, print_data, hash_data,
-                    asset_name, assign_data_var, asset_info,
+                    assign_data_var_specified, expect, policy_info,
+                    print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                     yes_create_call,  /* did not create call nor asset earlier */
                     yes_create_asset,
                     dont_fill_in_template,  /* but did fill it all in before */
                     0
                 );
                 k++;
-                for (;  add_expect < rsrc->calls.size();  ++add_expect) {
-                    templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                for (add_expect = 0;  add_expect < rsrc->calls.size();  ++add_expect) {
+                    if (!(rsrc->calls[add_expect]->exp_data.expected_results_saved)) {
+                        templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                        templateLin->expect.expected_results_saved = true;
+                    }
                 }
             }
             templateLin->asset_info.asset_id_n_vector.clear();
@@ -407,9 +450,19 @@ line:
         }
       | command SEMICOLON {
             IVM(cout << "Command with no expect:  \"" << flush;)
+            if (!purpose_defined) {
+                cerr << endl << endl
+                     << "Error:  Please begin your test with the \"purpose\" "
+                     << "directive.  \n        For example, "
+                     << "\"purpose to exercise crypto and SST...\"" << endl;
+                exit (1024);
+            }
             if (nesting_level == 0) {  /* if laying down the code now... */
-                for (;  add_expect < rsrc->calls.size();  ++add_expect) {
-                    templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                for (add_expect = 0;  add_expect < rsrc->calls.size();  ++add_expect) {
+                    if (!(rsrc->calls[add_expect]->exp_data.expected_results_saved)) {
+                        templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                        templateLin->expect.expected_results_saved = true;
+                    }
                 }
                 delete templateLin;  /* done with this template line */
             } else {
@@ -420,10 +473,21 @@ line:
             IVM(cout << yytext << "\"" << endl;)
         }
       | command expect SEMICOLON {
+            /* (This is the same as for command SEMICOLON, other than the IVM.) */
             IVM(cout << "Command with expect:  \"" << flush;)
+            if (!purpose_defined) {
+                cerr << endl << endl
+                     << "Error:  Please begin your test with the \"purpose\" "
+                     << "directive.  \n        For example, "
+                     << "\"purpose to exercise crypto and SST...\"" << endl;
+                exit (1024);
+            }
             if (nesting_level == 0) {
-                for (;  add_expect < rsrc->calls.size();  ++add_expect) {
-                    templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                for (add_expect = 0;  add_expect < rsrc->calls.size();  ++add_expect) {
+                    if (!(rsrc->calls[add_expect]->exp_data.expected_results_saved)) {
+                        templateLin->expect.copy_expect_to_call (rsrc->calls[add_expect]);
+                        templateLin->expect.expected_results_saved = true;
+                    }
                 }
                 delete templateLin;
             } else {
@@ -457,6 +521,11 @@ expect:
             templateLin->expect.set_pf_pass();
             IVM(cout << yytext << "\"" << endl;)
         }
+      | EXPECT FAIL {
+            IVM(cout << "Expect fail clause:  \"" << flush;)
+            templateLin->expect.set_pf_fail();
+            IVM(cout << yytext << "\"" << endl;)
+        }
       | EXPECT NOTHING {
             IVM(cout << "Expect nothing clause:  \"" << flush;)
             templateLin->expect.set_pf_nothing();
@@ -471,123 +540,116 @@ expect:
 
   /* Root commands: */
 set_command:
-        SET SST sst_set_args {
-            IVM(cout << "Set SST command:  \"" << flush;)
+        SET SST sst_set_base_args sst_set_extended_args {
+            IVM(cout << "Set SST command:  \"" << yytext << "\"" << endl;)
             templateLin = new set_sst_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 nesting_level == 0 /* similarly, create asset unless inside {} */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       | SET KEY key_set_args {
-            IVM(cout << "Set key command:  \"" << flush;)
+            IVM(cout << "Set key command:  \"" << yytext << "\"" << endl;)
             templateLin = new set_key_template_line (rsrc);
+            target_barrier = policy_info.asset_2_name;  /* policy */
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 nesting_level == 0 /* similarly, create asset unless inside {} */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       | SET POLICY policy_set_args {
-            IVM(cout << "Set policy command:  \"" << flush;)
+            IVM(cout << "Set policy command:  \"" << yytext << "\"" << endl;;)
             templateLin = new set_policy_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 nesting_level == 0 /* similarly, create asset unless inside {} */,
                 yes_fill_in_template, 0
             );
-            rsrc->calls.push_back (t_policy_call);
-            IVM(cout << yytext << "\"" << endl;)
         }
       ;
 
 read_command:
         READ SST sst_read_args {
-            IVM(cout << "Read SST command:  \"" << flush;)
+            IVM(cout << "Read SST command:  \"" << yytext << "\"" << endl;;)
             templateLin = new read_sst_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 dont_create_asset /* if no such asset exists, fail the call */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       | READ KEY key_read_args {
-            IVM(cout << "Read key command:  \"" << flush;)
+            IVM(cout << "Read key command:  \"" << yytext << "\"" << endl;;)
             templateLin = new read_key_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 dont_create_asset /* if no such asset exists, fail the call */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       | READ POLICY policy_read_args {
-            IVM(cout << "Read policy command:  \"" << flush;)
+            IVM(cout << "Read policy command:  \"" << yytext << "\"" << endl;;)
             templateLin = new read_policy_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 dont_create_asset /* if no such asset exists, fail the call */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       ;
 
 remove_command:
         REMOVE SST sst_remove_args {
-            IVM(cout << "Remove SST command:  \"" << flush;)
+            IVM(cout << "Remove SST command:  \"" << yytext << "\"" << endl;;)
             templateLin = new remove_sst_template_line (rsrc);
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 dont_create_asset /* don't create an asset being deleted */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       | REMOVE KEY key_remove_args {
-            IVM(cout << "Remove key command:  \"" << flush;)
+            IVM(cout << "Remove key command:  \"" << yytext << "\"" << endl;;)
             templateLin = new remove_key_template_line (rsrc);
             templateLin->asset_info.set_name (asset_name);  // set in key_asset_name, below
             interpret_template_line (
                 templateLin, rsrc, set_data, random_asset,
-                assign_data_var_specified, expect, print_data, hash_data,
-                asset_name, assign_data_var, asset_info,
+                assign_data_var_specified, expect, policy_info,
+                print_data, hash_data, asset_name, assign_data_var, parsed_asset,
                 nesting_level == 0 /* create call unless inside {} */,
                 dont_create_asset /* don't create an asset being deleted */,
                 yes_fill_in_template, 0
             );
-            IVM(cout << yytext << "\"" << endl;)
         }
       ;
 
 secure_command: SECURE HASH NEQ ASSET_IDENTIFIER_LIST {
   /* TODO:  This needs to allow not only SST assets, but mix and match with others
              (keys especially) as well. */
+            IVM(cout << "Secure hash command:  \"" << yytext << "\"" << endl;)
             templateLin = new security_hash_template_line (rsrc);
             templateLin->asset_info.set_name (asset_name);
             templateLin->assign_data_var_specified = assign_data_var_specified;
@@ -600,7 +662,7 @@ secure_command: SECURE HASH NEQ ASSET_IDENTIFIER_LIST {
                "call" -- not a PSA call though -- for all of the assets cited in the
                template line.  In *other* cases, create a single call for *each*
                asset cited by the template line, but not in this case. */
-            for (auto as_name : asset_info.asset_name_vector) {
+            for (auto as_name : parsed_asset.asset_name_vector) {
                 /* Also copy into template line object's local vector: */
                  templateLin->asset_info.asset_name_vector.push_back (as_name);
             }
@@ -608,8 +670,7 @@ secure_command: SECURE HASH NEQ ASSET_IDENTIFIER_LIST {
             templateLin->expect.data_var = var_name;
             templateLin->setup_call (set_data, set_data.random_data, yes_fill_in_template,
                                      nesting_level == 0, templateLin, rsrc   );
-            asset_info.asset_name_vector.clear();
-            IVM(cout << yytext << "\"" << endl;)
+            parsed_asset.asset_name_vector.clear();
 
 
         }
@@ -626,22 +687,29 @@ done_command: DONE {
         }
       ;
 
-  /* Root-command parameters: */
-sst_set_args:
-        sst_asset_name DATA LITERAL {
-            IVM(cout << "SST-create from literal data:  \"" << flush;)
+literal_or_random_data:
+        DATA LITERAL {
+            IVM(cout << "Create from literal data:  \"" << flush;)
             set_data.random_data = false;
+            set_data.string_specified = true;
             set_data.literal_data_not_file = true;
             literal.erase(0,1);  // zap the ""s
             literal.erase(literal.length()-1,1);
             literal_data.assign (literal);
             IVM(cout << yytext << "\"" << endl;)
         }
-      | sst_asset_name DATA STAR {  /* TF-Fuzz supplies random data */
-            IVM(cout << "SST-create from random data" << endl;)
+      | DATA STAR {  /* TF-Fuzz supplies random data */
+            IVM(cout << "Create from random data" << endl;)
             set_data.randomize();
             literal.assign (set_data.get());  /* just in case something uses literal */
+            set_data.random_data = true;
+            set_data.string_specified = false;
         }
+      ;
+
+  /* Root-command parameters: */
+sst_set_base_args:
+        sst_asset_name literal_or_random_data
       | sst_asset_name {
             IVM(cout << "SST-create from random data (no 'data *')" << endl;)
             set_data.randomize();
@@ -664,17 +732,80 @@ sst_set_args:
         }
       ;
 
+sst_set_extended_args:
+        %empty /* nothing */
+      | FLAG sst_flags {
+            IVM(cout << "SST creation flags" << endl;)
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      ;
+
+sst_flags:
+        %empty /* nothing */
+      | sst_flag sst_flags {
+            IVM(cout << "SST creation flag" << endl;)
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      ;
+
+sst_flag:  none | write_once | no_rp | no_conf;
+
+none : NONE {
+            set_data.flags_string = "PSA_STORAGE_FLAG_NONE";
+                /* TODO:  grab from boilerplate */
+            IVM(cout << "SST no storage flag:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+write_once : WRITE_ONCE {
+            set_data.flags_string = "PSA_STORAGE_FLAG_WRITE_ONCE";
+                /* TODO:  grab from boilerplate */
+            IVM(cout << "SST write-once flag:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+no_rp : NO_RP {
+            set_data.flags_string = "PSA_STORAGE_FLAG_NO_REPLAY_PROTECTION";
+                /* TODO:  grab from boilerplate */
+            IVM(cout << "SST no-replay-protection flag:  "
+                     << yytext << "\"" << endl;)
+        }
+      ;
+
+no_conf : NO_CONF {
+            set_data.flags_string = "PSA_STORAGE_FLAG_NO_CONFIDENTIALITY";
+                /* TODO:  grab from boilerplate */
+            IVM(cout << "SST no-confidentiality flag:  " << yytext
+                     << "\"" << endl;)
+        }
+      ;
+
+sst_offset_spec:
+        NUMBER_TOK {
+            IVM(cout << "SST-data offset:  \"" << flush;)
+            set_data.data_offset = atol(yytext);
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      ;
+
+
 sst_read_args:
-        sst_asset_name VAR IDENTIFIER {  /* dump to variable */
-            IVM(cout << "SST-read dump to variable:  \"" << flush;)
+        sst_asset_name read_args sst_read_extended_args {
+            IVM(cout << "SST-read arguments:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+read_args:
+        VAR IDENTIFIER {  /* dump to variable */
+            IVM(cout << "Read dump to variable:  \"" << flush;)
             assign_data_var.assign (identifier);
             assign_data_var_specified = true;
             expect.data_specified = false;
             expect.data_var_specified = false;
             IVM(cout << yytext << "\"" << endl;)
         }
-      | sst_asset_name CHECK sst_read_args_var_name {  /* check against variable */
-            IVM(cout << "SST-read check against variable:  \""
+      | CHECK read_args_var_name {  /* check against variable */
+            IVM(cout << "Read check against variable:  \""
                      << yytext << "\"" << endl;)
             set_data.set (literal);
             assign_data_var_specified = false;
@@ -682,8 +813,8 @@ sst_read_args:
             expect.data_var_specified = true;
             expect.data_var = identifier;
         }
-      | sst_asset_name CHECK LITERAL {  /* check against literal */
-            IVM(cout << "SST-read check against literal:  " << flush;)
+      | CHECK LITERAL {  /* check against literal */
+            IVM(cout << "Read check against literal:  " << flush;)
             expect.data.assign (literal);
             expect.data.erase(0,1);    // zap the ""s
             expect.data.erase(expect.data.length()-1,1);
@@ -692,8 +823,8 @@ sst_read_args:
             expect.data_var_specified = false;  /* don't check against variable */
             IVM(cout << yytext << endl;)
         }
-      | sst_asset_name PRINT {  /* print out content in test log */
-            IVM(cout << "SST-read log to test log:  \"" << flush;)
+      | PRINT {  /* print out content in test log */
+            IVM(cout << "Read log to test log:  \"" << flush;)
             /* TODO:  set_data content probably doesn't need to be set here;
                        constructor probably sets it fine. */
             set_data.random_data = false;
@@ -704,8 +835,8 @@ sst_read_args:
             print_data = true;
             IVM(cout << yytext << "\"" << endl;)
         }
-      | sst_asset_name HASH {  /* hash the data and save for later comparison */
-            IVM(cout << "SST-read hash for future data-leak detection:  \"" << flush;)
+      | HASH {  /* hash the data and save for later comparison */
+            IVM(cout << "Read hash for future data-leak detection:  \"" << flush;)
             /* TODO:  set_data content probably doesn't need to be set here;
                        constructor probably sets it fine. */
             set_data.random_data = false;
@@ -717,156 +848,408 @@ sst_read_args:
             rsrc->include_hashing_code = true;
             IVM(cout << yytext << "\"" << endl;)
         }
-      | sst_asset_name DFNAME sst_asset_dump_file_path {  /* dump to file */
-            IVM(cout << "SST-read dump to file:  \""
+      | DFNAME sst_asset_dump_file_path {  /* dump to file */
+            IVM(cout << "Read dump to file:  \""
                      << yytext << "\"" << endl;)
             set_data.literal_data_not_file = set_data.random_data = false;
         }
       ;
 
-sst_remove_args:
-      sst_asset_name {
-            IVM(cout << "SST-remove arguments:  \""
-                     << yytext << "\"" << endl;)
-      }
+sst_read_extended_args:
+        %empty /* nothing */
+      | OFFSET sst_offset_spec {
+            IVM(cout << "SST data offset" << endl;)
+            set_data.data_offset = atol(yytext);
+            IVM(cout << yytext << "\"" << endl;)
+        }
       ;
 
-sst_asset_name:
+sst_remove_args:
+        sst_asset_name | random_picked_asset {
+            IVM(cout << "SST-remove arguments:  \""
+                     << yytext << "\"" << endl;)
+        }
+      ;
+
+asset_designator:
         NAME ASSET_IDENTIFIER_LIST {
-            IVM(cout << "SST-asset identifier list:  \"" << flush;)
+            IVM(cout << "Asset identifier list:  \"" << flush;)
             random_name = false;
             asset_name.assign (identifier);  /* TODO:  Not sure this ultimately has any effect... */
-            random_asset = psa_asset_usage::all;  /* don't use random asset */
-            asset_info.id_n_not_name = false;
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
             IVM(cout << yytext << "\"" << endl;)
         }
       | NAME STAR {
-            IVM(cout << "SST-asset random identifier:  \"" << flush;)
+            IVM(cout << "Asset random identifier:  \"" << flush;)
             random_name = true;
-            rand_data_length = 2 + (rand() % 10);
+            rand_data_length = 4 + (rand() % 5);
             gib.word (false, gib_buff, gib_buff + rand_data_length - 1);
             aid.assign (gib_buff);
-            asset_info.asset_name_vector.push_back (aid);
-            random_asset = psa_asset_usage::all;  /* don't use random asset */
-            asset_info.id_n_not_name = false;
+            parsed_asset.asset_name_vector.push_back (aid);
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
             IVM(cout << yytext << "\"" << endl;)
         }
+      ;
+single_existing_asset:
+        IDENTIFIER {
+            IVM(cout << "Single existing asset by name:  \"" << flush;)
+            random_name = false;
+            policy_info.asset_3_name.assign (identifier);
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | random_picked_asset
+      ;
+
+random_picked_asset:
+        STAR ACTIVE {
+            IVM(cout << "Asset random active:  \"" << flush;)
+            random_asset = psa_asset_usage::active;
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | STAR DELETED {
+            IVM(cout << "Asset random deleted:  \"" << flush;)
+            random_asset = psa_asset_usage::deleted;
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      ;
+
+sst_asset_name:
+        asset_designator
       | UID ASSET_NUMBER_LIST {
             IVM(cout << "SST-asset UID list:  \"" << flush;)
             random_name = false;
-            random_asset = psa_asset_usage::all;  /* don't use random asset */
-            asset_info.id_n_not_name = true;
-            asset_info.id_n_specified = true;
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = true;
+            parsed_asset.id_n_specified = true;
             IVM(cout << yytext << "\"" << endl;)
         }
       | UID STAR {
             IVM(cout << "SST-asset random UID:  \"" << flush;)
-            asset_info.id_n_not_name = true;
+            parsed_asset.id_n_not_name = true;
             random_name = false;
             nid = 100 + (rand() % 10000);
-            asset_info.asset_id_n_vector.push_back (nid);
-            random_asset = psa_asset_usage::all;  /* don't use random asset */
-            IVM(cout << yytext << "\"" << endl;)
-        }
-      | STAR ACTIVE {
-            IVM(cout << "SST-asset random active:  \"" << flush;)
-            random_asset = psa_asset_usage::active;
-            asset_info.id_n_not_name = false;
-            IVM(cout << yytext << "\"" << endl;)
-        }
-      | STAR DELETED {
-            IVM(cout << "SST-asset random deleted:  \"" << flush;)
-            random_asset = psa_asset_usage::deleted;
-            asset_info.id_n_not_name = false;
+            parsed_asset.asset_id_n_vector.push_back (nid);
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
             IVM(cout << yytext << "\"" << endl;)
         }
       ;
 
 sst_asset_set_file_path:
-      FILE_PATH {
+        FILE_PATH {
             IVM(cout << "SST-asset-create file path:  \"" << flush;)
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-sst_read_args_var_name:
-      IDENTIFIER {
-            IVM(cout << "SST-read-arguments variable name:  \"" << flush;)
+read_args_var_name:
+        IDENTIFIER {
+            IVM(cout << "Read-arguments variable name:  \"" << flush;)
             var_name = yytext;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
 sst_asset_dump_file_path:
-      FILE_PATH {
+        FILE_PATH {
             IVM(cout << "SST-asset dump-file path:  \"" << flush;)
             set_data.file_path = yytext;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-key_set_args:
-      key_id POLICY policy_asset_name {
-            IVM(cout << "Key-create arguments:  \""
-                     << yytext << "\"" << endl;)
-      }
+key_size:
+        NUMBER_TOK {
+            IVM(cout << "Key size:  \"" << flush;)
+            policy_info.n_bits = atol(yytext);
+            IVM(cout << yytext << "\"" << endl;)
+        }
       ;
 
-key_remove_args:
-      key_id {
-            IVM(cout << "Key-remove arguments:  \""
-                     << yytext << "\"" << endl;)
-      }
+policy_usage_list:  ATTR policy_usage policy_usages;  /* at least one usage */
+
+policy_usages:
+        %empty  /* nothing */
+      | policy_usage policy_usages {
+            IVM(cout << "Key-policy usages at line number " << dec << yylineno
+                     << "." << endl;)
+        }
       ;
 
-key_read_args:
-      key_id key_read_var_name {
-            IVM(cout << "Key dump to variable:  \""
-                     << yytext << "\"" << endl;)
-      }
+export : EXPORT {
+            policy_info.exportable = true;
+            IVM(cout << "Exportable key true:  " << yytext << "\"" << endl;)
+        }
       ;
 
-key_read_var_name:
-      IDENTIFIER {
-            IVM(cout << "Key-read variable name:  \""
-                     << yytext << "\"" << endl;)
-      }
+noexport : NOEXPORT {
+            policy_info.exportable = false;
+            IVM(cout << "Non-exportable key:  " << yytext << "\"" << endl;)
+        }
       ;
 
-key_id:
-      IDENTIFIER {
-            IVM(cout << "Key ID:  \""
-                     << yytext << "\"" << endl;)
-      }
+copy : COPY {
+            policy_info.copyable = true;
+            IVM(cout << "Copyable key true:  " << yytext << "\"" << endl;)
+        }
       ;
 
-policy_set_args:
-      policy_asset_name {
-            IVM(cout << "Policy-create arguments:  \""
-                     << yytext << "\"" << endl;)
-      }
+nocopy : NOCOPY {
+            policy_info.copyable = false;
+            IVM(cout << "Non-copyable key:  " << yytext << "\"" << endl;)
+        }
       ;
 
-policy_read_args:
-      policy_asset_name policy_read_var_name {
-            IVM(cout << "Policy dump to variable:  \""
-                     << yytext << "\"" << endl;)
+encrypt : ENCRYPT {
+            policy_info.can_encrypt = true;
+            IVM(cout << "Encryption key true:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+noencrypt : NOENCRYPT {
+            policy_info.can_encrypt = false;
+            IVM(cout << "Non-encryption key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+decrypt : DECRYPT {
+            policy_info.can_decrypt = true;
+            IVM(cout << "Decryption key true:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+nodecrypt : NODECRYPT {
+            policy_info.can_decrypt = false;
+            IVM(cout << "Non-decryption key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+sign : SIGN {
+            policy_info.can_sign = true;
+            IVM(cout << "Signing key true:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+nosign : NOSIGN {
+            policy_info.can_sign = false;
+            IVM(cout << "Non-signing key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+verify : VERIFY {
+            policy_info.can_verify = true;
+            IVM(cout << "Verify key true:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+noverify : NOVERIFY {
+            policy_info.can_verify = false;
+            IVM(cout << "Non-verify key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+derive : DERIVE {
+            policy_info.derivable = true;
+            IVM(cout << "Derivable key true:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+noderive : NODERIVE {
+            policy_info.derivable = false;
+            IVM(cout << "Non-derivable key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+persistent : PERSISTENT {
+            policy_info.persistent = true;
+            IVM(cout << "Persistent key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+volatle : VOLATILE {
+            policy_info.persistent = false;
+            IVM(cout << "Volatile key:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+policy_usage:
+        export | copy | encrypt | decrypt | sign | verify | derive
+      | noexport | nocopy | noencrypt | nodecrypt | nosign | noverify
+      | noderive | persistent | volatle | key_size {
+            IVM(cout << "Policy usage:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+policy_type:
+      TYPE IDENTIFIER {
+            // Change type identifier, e.g., from "raw_data" to PSA_KEY_TYPE_RAW_DATA:
+            identifier = formalize (identifier, "PSA_KEY_TYPE_");
+            policy_info.key_type = identifier;
+            IVM(cout << "Policy type:  \""
+                     << policy_info.key_type << "\"" << endl;)
       }
+
+policy_algorithm:
+      ALG IDENTIFIER {
+            // Change type identifier, e.g., from "sha_256" to PSA_ALG_SHA_256:
+            identifier = formalize (identifier, "PSA_ALG_");
+            policy_info.key_algorithm = identifier;
+            IVM(cout << "Policy algorithm:  \""
+                     << policy_info.key_algorithm << "\"" << endl;)
+      }
+
+policy_specs:
+        %empty  /* nothing */
+      | policy_spec policy_specs {
+            IVM(cout << "Key-policy specs at line number " << dec << yylineno
+                     << "." << endl;)
+        }
+      ;
+
+policy_spec:  policy_usage_list | policy_type | policy_algorithm;
+
+policy_asset_spec:
+        %empty  /* nothing */
+      | NAME ASSET_IDENTIFIER_LIST {
+            IVM(cout << "policy-asset identifier list:  \"" << flush;)
+            random_name = false;
+            asset_name.assign (identifier);  /* TODO:  Not sure this ultimately has any effect... */
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | NAME STAR {
+            IVM(cout << "policy-asset random identifier:  \"" << flush;)
+            random_name = true;
+            rand_data_length = 2 + (rand() % 10);
+            gib.word (false, gib_buff, gib_buff + rand_data_length - 1);
+            aid.assign (gib_buff);
+            parsed_asset.asset_name_vector.push_back (aid);
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
       ;
 
 policy_asset_name:
-      IDENTIFIER {
-            IVM(cout << "Policy Asset ID:  \"" << flush;)
-            asset_name = identifier;
+        NAME IDENTIFIER {
+            IVM(cout << "policy-asset identifier list:  \"" << flush;)
+            random_name = false;
+            policy_info.get_policy_from_key = false;
+            asset_name.assign (identifier);  /* TODO:  Not sure this ultimately has any effect... */
+            parsed_asset.asset_name_vector.push_back (identifier);
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
+      | STAR ACTIVE {
+            IVM(cout << "policy-asset random active:  \"" << flush;)
+            policy_info.get_policy_from_key = false;
+            random_asset = psa_asset_usage::active;
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | STAR DELETED {
+            IVM(cout << "policy-asset random deleted:  \"" << flush;)
+            policy_info.get_policy_from_key = false;
+            random_asset = psa_asset_usage::deleted;
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | KEY IDENTIFIER {
+            IVM(cout << "policy-asset specified by key:  \"" << flush;)
+            policy_info.get_policy_from_key = true;
+            random_name = false;
+            asset_name.assign (identifier);  /* ask this key what it's policy is */
+            random_asset = psa_asset_usage::all;  /* don't randomly choose existing asset */
+            parsed_asset.id_n_not_name = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
       ;
 
-policy_read_var_name:
-      IDENTIFIER {
-            IVM(cout << "Policy read variable name:  \""
+policy_set_args:
+        policy_asset_spec policy_specs {
+            IVM(cout << "Policy-create arguments:  \"" << yytext << "\"" << endl;)
+        }
+      ;
+
+policy_read_args:
+        policy_asset_name read_args {
+            IVM(cout << "Policy-read arguments:  " << yytext << "\"" << endl;)
+        }
+      ;
+
+key_set_sources:
+        %empty  /* nothing */
+      | key_set_source key_set_sources {
+            IVM(cout << "Key-set sources at Line number "
                      << yytext << "\"" << endl;)
-      }
+        }
+      ;
+
+key_set_source:
+        literal_or_random_data {
+            IVM(cout << "Key-set sources, literal or random data:  "
+                     << yytext << "\"" << endl;)
+        }
+      | POLICY IDENTIFIER {
+            IVM(cout << "Key-set sources, explicitly-specified policy name:  "
+                     << flush;)
+            policy_info.asset_2_name = identifier;  /* policy */
+            /* Make note that key data (key material) was not specified: */
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      ;
+
+key_data_or_not:
+        %empty  /* nothing */
+      | literal_or_random_data {
+            IVM(cout << "Key data, literal or random data:  "
+                     << yytext << "\"" << endl;)
+        }
+      ;
+
+key_set_args:
+        asset_designator key_set_sources {
+            IVM(cout << "Key-create from data, policy, or nothing (default):  \""
+                     << yytext << "\"" << endl;)
+            policy_info.copy_key = false;
+            policy_info.implicit_policy = false;
+        }
+      | asset_designator FROM single_existing_asset POLICY IDENTIFIER {
+            IVM(cout << "Key-copy from other key:  \"" << flush;)
+            policy_info.asset_2_name = identifier;  /* policy */
+            policy_info.copy_key = true;
+            policy_info.implicit_policy = false;
+            IVM(cout << yytext << "\"" << endl;)
+        }
+      | asset_designator key_data_or_not WITH policy_specs {
+            IVM(cout << "Key-create directly specifying policy attributes (implicit policy):  \""
+                     << yytext << "\"" << endl;)
+            policy_info.copy_key = false;
+            policy_info.implicit_policy = true;
+            cerr << "\nError:  Defining keys with implicit policies is not yet implemented."
+                 << endl;
+            exit (772);
+        }
+      ;
+
+key_remove_args:
+        asset_designator {
+            IVM(cout << "Key-remove arguments:  \""
+                     << yytext << "\"" << endl;)
+        }
+      ;
+
+key_read_args:
+        asset_designator read_args {
+            IVM(cout << "Key dump:  \"" << yytext << "\"" << endl;)
+        }
       ;
 
 /* Code structuring: */
@@ -911,108 +1294,128 @@ block_content:
         }
       ;
 
-open_brace:   OPEN_BRACE {
+open_brace:
+        OPEN_BRACE {
             IVM(cout << "Open brace:  \"" << flush;)
             template_block_vector.clear();  // clean slate of template lines
             nesting_level = 1;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-close_brace:  CLOSE_BRACE {
+close_brace:
+        CLOSE_BRACE {
             IVM(cout << "Close brace:  " << flush;)
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
   /* Low-level structures: */
 
   /* Please see comment before ASSET_IDENTIFIER_LIST, below. */
-ASSET_NUMBER_LIST:    ASSET_NUMBER ASSET_NUMBERS;  /* at least one number */
+ASSET_NUMBER_LIST:
+        ASSET_NUMBER ASSET_NUMBERS;  /* at least one number */
 
-ASSET_NUMBERS:      /* nothing, or */
+ASSET_NUMBERS:
+        %empty  /* nothing */
       | ASSET_NUMBER ASSET_NUMBERS;
 
-ASSET_NUMBER:     NUMBER_TOK {
+ASSET_NUMBER:
+        NUMBER_TOK {
             IVM(cout << "ASSET_NUMBER:  \"" << flush;)
             nid = atol(yytext);
-            asset_info.asset_id_n_vector.push_back (nid);
+            parsed_asset.asset_id_n_vector.push_back (nid);
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-  /* ASSET_IDENTIFIER* are used specifically for lists of assets in a template line.
-     That, as opposed to list of identifers in general.  The difference is the need
-     to queue ASSET_IDENTIFIERS up into asset_info.asset_name_vector, and have to do so
-     here before they "vanish." */
-ASSET_IDENTIFIER_LIST:  ASSET_IDENTIFIER ASSET_IDENTIFIERS;  /* (at least one) */
+  /* ASSET_IDENTIFIER are used specifically for lists of assets within a singletemplate
+     line.  That, as opposed to list of identifers in general.  The difference is the
+     need to queue ASSET_IDENTIFIERS up into parsed_asset.asset_name_vector, and have to
+     do so here before they "vanish." */
+ASSET_IDENTIFIER_LIST:
+        ASSET_IDENTIFIER ASSET_IDENTIFIERS;  /* (at least one) */
 
 ASSET_IDENTIFIERS:
-        /* nothing, or */
+        %empty  /* nothing */
       | ASSET_IDENTIFIER ASSET_IDENTIFIERS;
 
-ASSET_IDENTIFIER: IDENTIFIER_TOK {
+ASSET_IDENTIFIER:
+        IDENTIFIER_TOK {
             IVM(cout << "ASSET_IDENTIFIER:  \"" << flush;)
             aid = identifier = yytext;
-            asset_info.asset_name_vector.push_back (aid);
+            parsed_asset.asset_name_vector.push_back (aid);
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-IDENTIFIER: IDENTIFIER_TOK {
+IDENTIFIER:
+        IDENTIFIER_TOK {
             IVM(cout << "IDENTIFIER:  \"" << flush;)
             identifier = yytext;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-FILE_PATH: FILE_PATH_TOK {
+FILE_PATH:
+        FILE_PATH_TOK {
             IVM(cout << "FILE_PATH:  \"" << flush;)
             set_data.file_path = yytext;
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
   /* These are related to randomized blocks of template lines: */
 
-exact_sel_count:  NUMBER {
+exact_sel_count:
+        NUMBER {
             IVM(cout << "Exact number of random template lines:  \"" << flush;)
             low_nmbr_lines = high_nmbr_lines = exact_nmbr_lines = number;
             ++nesting_level;
             IVM(cout << number << "\"" << endl;)
-      }
+        }
       ;
 
-low_sel_count:  NUMBER {
+low_sel_count:
+        NUMBER {
             IVM(cout << "Least number of random template lines:  \"" << flush;)
             low_nmbr_lines = number;
             IVM(cout << number << "\"" << endl;)
-      }
+        }
       ;
 
-high_sel_count:  NUMBER {
+high_sel_count:
+        NUMBER {
             IVM(cout << "Most number of random template lines:  \"" << flush;)
             high_nmbr_lines = number;
             ++nesting_level;
             IVM(cout << number << "\"" << endl;)
-      }
+        }
       ;
 
 
   /* These are general-case numbers, literals and such: */
 
-NUMBER:   NUMBER_TOK {
+NUMBER: NUMBER_TOK {
             IVM(cout << "NUMBER:  \"" << flush;)
             number = atol(yytext);
             IVM(cout << yytext << "\"" << endl;)
-      }
+        }
       ;
 
-LITERAL:  LITERAL_TOK {
-            IVM(cout << "LITERAL:  " << flush;)
-            literal = yytext;
-            IVM(cout << yytext << endl;)
-      }
+LITERAL:
+        LITERAL_TOK {
+          IVM(cout << "LITERAL string:  " << flush;)
+          literal = yytext;
+          literal_is_string = true;
+          IVM(cout << yytext << endl;)
+        }
+      | HEX_LIST {
+          IVM(cout << "LITERAL hex-value list:  " << flush;)
+          literal = yytext;
+          literal_is_string = false;
+          IVM(cout << yytext << endl;)
+        }
       ;
 
 

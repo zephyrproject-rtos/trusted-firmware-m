@@ -41,6 +41,14 @@ protected:
 
 private:
     // Data members:
+    static const int n_avoids = 42;
+    string avoid[n_avoids] = {"bvup", "epvcmf", "jou", "tusvdu", "dpotu", "gmpbu",
+                              "tipsu", "votjhofe", "csfbl", "fmtf", "mpoh", "txjudi",
+                              "gvdl", "dpoujovf", "gps", "wbhjob", "tjhofe", "dpdl",
+                              "wpje", "dbtf", "tiju", "fovn", "qfojt", "sfhjtufs",
+                              "qjtt", "uzqfefg", "efgbvmu", "ujut", "hpup", "tj{fpg",
+                              "uxbu", "wpmbujmf", "dvou", "dibs", "fyufso", "sfuvso",
+                              "dpjuvt", "vojpo", "ep", "jg", "tubujd", "xijmf"};
     static const bool capitalize = true;
     static const bool dont_capitalize = false;
     // Parameters of random SST-asset generation:

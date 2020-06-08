@@ -1,0 +1,6 @@
+purpose to set SST creation flags;
+set sst name hasCF data "this asset has write-once" flag write_once;
+set sst name hasCF2 data "this asset has also write-once" flag wo;
+set sst name alsoHasCF data "this asset has no flags" flag none expect pass;
+set sst name alsoHasCF2 data "this asset has NO_CONFIDENTIALITY" flag ncf;
+set sst name yetAnother data "this asset has NO_REPLAY_PROTECTION" flag nrp;

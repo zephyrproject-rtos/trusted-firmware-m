@@ -1,0 +1,194 @@
+/*
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+This file is a library text file of boilerplate-text snippets.  TF-Fuzz reads in these
+snippets and then performs targeted text substitutions upon them, to create the indi-
+vidual PSA commands, and other important code snippets.  This one in particular
+library-text file is used to create a human-readable summary of the actual code.  It's
+not exactly documentation as such, but more of just a human-oriented flow of the
+generated test code.
+
+Four extremely important things about this file:
+*  The individual text snippets are separated by "backtick" (AKA back-apostrophe)
+   characters (see below).  This means that text snippets of TF code can't use backtick
+   characters (reasonably safe for C code).
+*  The text snippets are *positional*.  The loop in boilerplate.cpp reads them in, in
+   the order they appear in this file, into a vector of strings.  The "const int"s in
+   boilerplate.hpp assign symbolic names to the vector indices.  It is therefore
+   *critical* that the, for example, 11th backtick-delineated text snippet in this file,
+   be read into the 11 string in this vector of strings!
+*  This first text snippet that you're now reading -- a README about this file -- is
+   ignored by this boilerplate.cpp loop;  it is not read into this vector of snippets.
+*  To make it easier to track the positional nature of the text snippets in this file,
+   the first three characters, plus the leading \n, of these snippets is trimmed off
+   and ignored.  These first three characters in each string comprise a sequence
+   number, for Check against the "const int" list in boilerplate.hpp.  So, these
+   tags are literally the exactly the 3 characters directly after the backtick termi-
+   nating the previous string.
+`000
+This test is intended:
+    $purpose.
+
+    It starts with essential #include directives.
+`001
+
+    The code continues with declaration and definitions of helper functions
+    that perform a simple hashing of data.  This hash allows many different
+    blocks of data to be compared to each other in all combinations.  Nominally
+    this is to find data leaks between variables.
+`002
+
+    Next is a declaration of the thread function that performs the generated
+    test, then...
+
+`003          `004
+    Declaration of int-type variable called $var, with initial value "$init"
+`005
+    Declaration of uint8_t unchanging array, $var, with initial value of:
+        $init
+`006
+    Declaration of uint8_t array, $var, with initial value of:
+        $init
+        A lot of space is given to this array anticipating that it will be over-
+        written with potentially large read-data.
+`007
+    Declaration of size_t-type variable called $var, 
+        with initial value "$init".
+`008
+    Declaration of psa_key_attributes_t-type variable called $var.
+`009
+    Declaration of psa_algorithm_t-type variable called $var.
+`010
+    Declaration of psa_key_lifetime_t-type variable called $var.
+`011
+    Declaration of psa_key_type_t-type variable $var;
+`012
+    Declaration of psa_key_usage_t-type variable $var;
+`013
+    Declaration of psa_key_handle_t-type variable $var;
+`014
+    Declaration of $type-type variable called $var, with initial value "$init".
+`015
+
+    Writing to the message log:
+        $message.
+`016
+
+    Test-teardown delete of SST asset UID $uid.
+`017
+    Verify that the previous call was successful.
+`018
+
+    Test-teardown delete of key asset, handle "$handle."
+`019
+    Verify that the previous call was successful.
+`020
+
+And this is the end of the test.
+`021 PSA_SUCCESS`022 PSA_ERROR_DOES_NOT_EXIST`023
+
+    Set an SST asset:
+    *  UID = $uid, length = $length,
+    *  data = $data, and
+    *  creation flags = $flags.
+`024
+    Verify that previous had a result of $expect.
+`025
+
+    Read (get) SST-asset data:
+    *  UID = $uid, length = $length,
+    *  actual data in $act_data, and
+    *  actual length in $act_length.
+`026
+    Verify that previous had a result of $expect.
+`027
+    Verify that the previous SST get (read) had a result of "$expect,"
+        then a comparison of the values read, $act_data against $exp_data.
+`028
+    Hash the SST data in $act_data_var for later data-leak check,
+        resulting has being placed in $hash_var. */
+`029
+
+    Deletion of SST asset, UID = $uid.
+`030
+    Verify that previous SST-asset deletion had a result of $expect.
+`031
+    Initializing PSA-Crypto attributes (policy) "$policy".
+`032
+    Resetting key attributes (policy) for "$policy".
+`033
+    Adding a key-policy attribute of $flag to "$policy".
+`034
+    Setting key-policy "$policy"'s lifetime to $life.
+`035
+    Setting the key size for "$policy" to $size bits.
+`036
+    Setting the key type for "$policy" to $type.
+`037
+    Setting the key algorithm for "$policy" to $algorithm.
+`038
+    Setting key usage flags for "$policy" to $usage.
+`039
+    Reading key lifetime for "$policy" into variable $life.
+`040
+    Reading key lifetime for "$policy" into variable $life,
+        and displaying it to the log file.
+
+`041
+    Reading key size into variable $size, for key policy "$policy".
+`042
+    Reading key type into variable $type, for key policy "$policy".
+`043
+    Reading key type into variable $type, for key policy "$policy",
+        and displaying it to the log file.
+`044
+    Reading key algorithm into variable $algorithm, for key policy "$policy".
+`045
+    Reading key algorithm into variable $algorithm, for key policy "$policy",
+        and displaying it to the log file.
+`046
+    Reading key usage into variable $usage, for key policy "$policy".
+`047
+    Displaying to the log the presence or not of key-policy usage
+        $usage_string for key-policy "$policy",
+        as either $print_usage_true_string or $print_usage_false_string.
+`048
+    Reading attributes (policy) for key $key into variable "$policy".
+`049
+    Verify that previous get (read) of key policies had result of $expect.
+`050
+    Generate key (no key data specified) $key, from policy "$policy".
+`051
+    Verify that previous key generation had result of $expect.
+`052
+    Creating key for key $key:
+    *  Policy = "$policy", 
+    *  Data variable = $data, and
+    *  Length = $length.
+`053
+    Verify that key-creation had result of $expect.
+`054
+    Copying a key:
+    *  Master key = $master,
+    *  Copy key = $copy, and
+    *  New-key policy = "$policy".
+`055
+    Verify that key-export (read of key data) had result of $expect.
+`056
+    Verify that key-data read into $act_data, matches dat in $exp_data.
+`057
+    Export (read) of key data for $key:
+    *  Data variable = $data,
+    *  Data-length variable = $length, and
+    *  Actual data-size variable = $act_size.
+`058
+    Verify that key-export (read of key data) had result of $expect.
+`059
+    Delete key $key.
+`060
+    Verify that key-delete had result of $expect.
+`

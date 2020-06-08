@@ -32,31 +32,26 @@
 
 //**************** security_hash_template_line methods ****************
 
-bool security_hash_template_line::copy_template_to_call (void)
+bool security_hash_template_line::copy_template_to_call (psa_call *call)
 {
-    for (auto call : test_state->calls) {
-        if (call->call_ser_no == call_ser_no) {
-            // Copy asset info to call object for creation code -- the entire vector:
-            for (auto as_name : asset_info.asset_name_vector) {
-                /* Also copy into template line object's local vector: */
-                call->asset_info.asset_name_vector.push_back (as_name);
-            }
-            call->asset_info.id_n = asset_info.id_n;
-                // this call is currently limited to name-based
-            call->asset_info.name_specified = true;
-            call->asset_info.asset_ser_no = asset_info.asset_ser_no;  // TODO:  Does this make sense?
-            call->asset_info.how_asset_found = asset_search::found_active;
-            call->random_asset = random_asset;
-            call->set_data.string_specified = false;  // shouldn't matter, but...
-            call->set_data.file_specified = false;
-            call->set_data.file_path.assign("");
-            call->set_data.set("");
-            call->exp_data.pf_info_incomplete = true;
-            call->flags_string.assign ("");
-            return true;
-        }
+    // Copy asset info to call object for creation code -- the entire vector:
+    for (auto as_name : asset_info.asset_name_vector) {
+        /* Also copy into template line object's local vector: */
+        call->asset_info.asset_name_vector.push_back (as_name);
     }
-    return false;  // somehow didn't find it the call.
+    call->asset_info.id_n = asset_info.id_n;
+        // this call is currently limited to name-based
+    call->asset_info.name_specified = true;
+    call->asset_info.asset_ser_no = asset_info.asset_ser_no;  // TODO:  Does this make sense?
+    call->asset_info.how_asset_found = asset_search::found_active;
+    call->random_asset = random_asset;
+    call->set_data.string_specified = false;  // shouldn't matter, but...
+    call->set_data.file_specified = false;
+    call->set_data.file_path.assign("");
+    call->set_data.set("");
+    call->set_data.flags_string.assign ("");
+    call->exp_data.pf_info_incomplete = true;
+    return true;
 }
 
 security_hash_template_line::security_hash_template_line (tf_fuzz_info *resources)

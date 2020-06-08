@@ -157,10 +157,15 @@ void tf_fuzz_info::teardown_test (void)
     string call;
     // Traverse through the SST-assets list, writing out remove commands:
     for (auto &asset : active_sst_asset) {
-        call = bplate->bplate_string[teardown_sst];
-        find_replace_1st ("$uid", to_string(asset->asset_info.id_n), call);
-        call.append (bplate->bplate_string[teardown_sst_check]);
-        output_C_file << call;
+        // It turns out you're not allowed to remove "WRITE_ONCE" assets:
+        if (   asset->set_data.flags_string.find("PSA_STORAGE_FLAG_WRITE_ONCE")
+            == string::npos
+           ) {
+            call = bplate->bplate_string[teardown_sst];
+            find_replace_1st ("$uid", to_string(asset->asset_info.id_n), call);
+            call.append (bplate->bplate_string[teardown_sst_check]);
+            output_C_file << call;
+        }
     }
     // Same, but with key assets:
     for (auto &asset : active_key_asset) {
@@ -188,12 +193,12 @@ void tf_fuzz_info::write_test (void)
         output_C_file << work;
     }
 
-    // Print out the second half of the preamble code:
+    // Print out the second part of the preamble code:
     work = bplate->bplate_string[preamble_B];
     find_replace_all ("$purpose", test_purpose, work);
     output_C_file << work;
 
-    output_C_file << "\n\n    /* Variables (etc.) to initialize and check PSA "
+    output_C_file << "    /* Variables (etc.) to initialize and check PSA "
                   << "assets: */" << endl;
     for (auto call : calls) {
         // Reminder:  calls is a vector of *pointers to* psa_call subclass objects.
@@ -201,10 +206,14 @@ void tf_fuzz_info::write_test (void)
         call->write_out_prep_code (output_C_file);
     }
 
+    // Print out the final part of the preamble code:
+    work = bplate->bplate_string[preamble_C];
+    find_replace_all ("$purpose", test_purpose, work);
+    output_C_file << work;
+
     output_C_file << "\n\n    /* PSA calls to test: */" << endl;
     for (auto call : calls) {
         call->fill_in_command();  // (fills in check code too)
-        output_C_file << endl;
         call->write_out_command (output_C_file);
         call->write_out_check_code (output_C_file);
     }
@@ -228,6 +237,7 @@ void tf_fuzz_info::simulate_calls (void)
 {
     bool asset_state_changed = false;
 
+    IV(cout << "Call sequence:" << endl;)
     /* For now, much of the simulation "thinking" infrastructure is here for future
        elaboration.  The algorithm is to through each call one by one, copying
        information to the asset in question.  Then each currently-active asset is
@@ -235,6 +245,8 @@ void tf_fuzz_info::simulate_calls (void)
        "quiescent."  Finally, result information is copied from the asset back to
        the call. */
     for (auto this_call : calls) {
+        IV(cout << "    " << this_call->call_description << " for asset "
+                << this_call->asset_info.get_name() << endl;)
         this_call->copy_call_to_asset();
            /* Note:  this_call->the_asset will now point to the asset
                      associated with this_call, if any such asset exists. */
@@ -374,6 +386,79 @@ void tf_fuzz_info::parse_cmd_line_params (int argc, char* argv[])
         exit (exit_val);
     }
 }
+
+
+void tf_fuzz_info::add_call (psa_call *the_call, bool append_bool,
+                             bool set_barrier_bool) {
+    // For testing purposes only, uncomment this to force sequential ordering:
+    //append_bool = true;
+    vector<psa_call*>::size_type
+        barrier_pos = 0,
+            // barrier pos. before which calls for this asset may not be placed
+        insert_call_pos = 0,  // where to place the new call
+        i;  // loop index
+    bool barrier_found = false;
+    psa_call *candidate = nullptr;  // (not for long)
+
+    if (set_barrier_bool) {
+        // Prevent calls regarding this asset being placed before this call:
+        the_call->barrier.assign (the_call->target_barrier);
+        IV(cout << "Inserted barrier for asset " << the_call->barrier << "." << endl;)
+    }
+    if (append_bool || calls.size() == 0) {
+        // Just .push_back() onto the end if asked to, or if this is the first call:
+        calls.push_back (the_call);
+        IV(cout << "Appended to end of call sequence:  " << the_call->call_description
+                 << "." << endl;)
+        return;  // done, easy!
+    }
+    /* Now search for last call with a barrier for this asset.  (Note:  because
+       vector<psa_call*>::size_type is unsigned, we can't search backward from
+       .end(), decrementing past 0.  Also, cannot initialize barrier_pos to -1;
+       must maintain boolean for that.) */
+    for (i = 0ULL, barrier_found = false;  i < calls.size();  i++) {
+        candidate = calls[i];
+        if (candidate->barrier == the_call->target_barrier) {
+            barrier_pos = i;
+            barrier_found = true;
+        }
+    }
+    if (!barrier_found) {
+        /* STL-vector inserts occur *before* the stated index.  With no barrier
+           found, we want to insert somewhere between before .begin() and after
+           .end().  So, we want a number between 0 and calls.size(), inclusive. */
+        insert_call_pos = (rand() % (calls.size() + 1));
+        IV(cout << "No barrier for asset " << the_call->asset_info.get_name()
+                 << " found." << endl
+                 << "    Placing " << the_call->call_description
+                 << " at position " << insert_call_pos << " in call sequence."
+                 << endl;)
+    } else {
+        /* Insert at a random point between just after barrier and after the end
+           (including possibly after the end, but strictly after that barrier).
+           Since STL-vector inserts occur before the stated index, we want an
+           insertion point between the call after the barrier and calls.end(),
+           inclusive. */
+        insert_call_pos = (vector<psa_call*>::size_type)
+                          (   barrier_pos + 1  // must be *after* barrier-carrying call
+                           + (rand() % (calls.size() - barrier_pos))
+                          );
+        IV(cout << "Barrier for asset " << the_call->asset_info.get_name()
+                 << " found at position " << dec << barrier_pos << "." << endl;)
+    }
+    if (insert_call_pos == calls.size()) {
+        // Insert at end:
+        calls.push_back (the_call);
+        IV(cout << "Insertion position is at end of call list." << endl;)
+    } else {
+        // Insert before insert_call_position:
+        calls.insert (calls.begin() + insert_call_pos, the_call);
+        IV(cout << "Inserting " << the_call->call_description
+                 << " at position " << dec << insert_call_pos << " in call sequence."
+                 << endl;)
+    }
+}
+
 
 tf_fuzz_info::tf_fuzz_info (void)  // (constructor)
 {

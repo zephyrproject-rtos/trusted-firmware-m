@@ -42,6 +42,7 @@ public:
         // Expected-result info:
         bool pf_nothing;  // true to not generate results-check(s)
         bool pf_pass;  // if !expect.pf_nothing, then pass is expected
+        bool pf_fail;  // if "expect fail" was specified
         bool pf_specified;
             /* if !pf_nothing && !pf_pass, then
                true == expected result was specified
@@ -57,10 +58,17 @@ public:
             /* In parsing the template, the expect information comes later than the
                rest of the call info.  This flag tells us to fill in the pass/fail
                expect info when it comes available. */
+        bool expected_results_saved;
+            /* This indicates whether expected results have or have not already been
+               copied to this call.  It's a "one-shot," so to speak, to copy only
+               once when results are known good.  Since calls can be inserted into
+               earlier points in the call sequence (not always appended), the call
+               sequence has to be gone over for this process multiple times. */
     // Methods:
         expect_info (void);  // (default constructor)
         ~expect_info (void);  // (destructor)
         void set_pf_pass (void);
+        void set_pf_fail (void);
         void set_pf_nothing (void);
         void set_pf_error (string error);
         void copy_expect_to_call (psa_call *the_call);
@@ -85,13 +93,16 @@ class set_data_info
 public:
     // Data members:
         bool string_specified;
-            // true if a string of expected data is specified in template file
+            // true if a string of data is specified in template file
         bool random_data;  // true to generate random data for the asset
         bool file_specified;  // true if a file of expected data was specified
         bool literal_data_not_file;
             // true to use data strings rather than files as data source
         int n_set_vars;  // how many implicit set variables have been created
         string file_path;  // path to file, if specified
+        string flags_string;
+            // creation flags, nominally for SST but have to be in a vector of base-class
+        uint32_t data_offset;  // offset into asset data
     // Methods:
         set_data_info (void);  // (default constructor)
         ~set_data_info (void);  // (destructor)
@@ -104,6 +115,8 @@ public:
 protected:
     // Data members:
         string data;  // String describing asset data.
+    // Methods:
+        string rand_creation_flags (void);
 };
 
 
@@ -124,10 +137,6 @@ public:
         vector<string> asset_name_vector;
         vector<int> asset_id_n_vector;
         long asset_ser_no;  // unique ID for psa asset needed to find data string
-            /* Note:  The original theory is that we can't save away iterators to
-                      assets, because STL vectors could get relocated.  However,
-                      we've switched over to lists, which don't get moved around, so
-                      we should be safe now. */
         asset_search how_asset_found;
         uint64_t id_n;  // asset ID# (e.g., SST UID).
             /* Note:  This is just a holder to pass ID from template-line to call.  The
@@ -147,6 +156,69 @@ public:
 protected:
     // Data members:
         string asset_name;  // parsed from template, assigned to psa_asset object
+};
+
+
+/**********************************************************************************
+  Class key_policy_info collects together the aspects of a Crypto key attributes
+  ("policies").  These include aspects that can affect TF-Fuzz's test-generation.
+**********************************************************************************/
+
+class key_policy_info
+{
+public:
+    // Data members:
+        // Digested info:
+        bool get_policy_from_key;
+            /* if true, then we must get policy info from a stated key;  the asset
+               here is a key that uses the policy, and not the policy itself. */
+        bool implicit_policy;
+            /* if true, then the key was defined with policy specifications, but not
+               a named policy, meaning that we have to create an implicit policy. */
+        bool copy_key;  // true to indicate copying one key to another
+        bool exportable;   // key data can be exported (viewed - fail exports if not).
+        bool copyable;     // can be copied (fail key-copies if not).
+        bool can_encrypt;  // OK for encryption (fail other uses).
+        bool can_decrypt;  // OK for decryption (fail other uses).
+        bool can_sign;     // OK for signing (fail other operations).
+        bool can_verify;   // OK for verifing a message signature (fail other uses).
+        bool derivable;    // OK for derive other keys (fail other uses).
+        bool persistent;   // must be deleted at the end of test.
+        string usage_string;
+            /* This string is set to a PSA_KEY_USAGE_* value in the template
+               immediately prior to making define_call<add_policy_usage_call>.
+               The copy_template_to_call() therein sets the corresponding string
+               in the call, and that is copied into the code in the fill_in_command()
+               invocation. */
+        string print_usage_true_string;
+            /* For printing out policy usage, this states how to describe the usage
+               if it can be used this way.  This is managed similarly with, and used
+               in conjunction with usage_string above.  NOTE:  THIS ALSO SERVES AS AN
+               INDICATOR WHETHER OR NOT TO PRINT ON A GET-USAGE CALL.  "" means not
+               to print. */
+        string print_usage_false_string;
+            /* Also for printing out policy usage, this is how to describe usage if
+               it cannot be used this way. */
+        string key_type;   // AES, DES, RSA pair, DS public, etc.
+        string key_algorithm;
+        int n_bits;
+           // for get_key_info call (possibly others) exected key size in bits
+        string handle_str; // the text name of the key's "handle"
+        string key_data;   // the key data as best we can know it.
+        string asset_2_name;
+            // if there's a 2nd asset, such as policy on key call, this is its name
+        string asset_3_name;  // if there's a 3rd asset, then this is its name
+
+    // Methods:
+        key_policy_info (void);  // (default constructor)
+        ~key_policy_info (void);  // (destructor)
+
+
+protected:
+    // Data members:
+        bool data_matches_asset;
+            /* true if template specifies expected data, and that expected data
+               agrees with that in the asset */
 };
 
 

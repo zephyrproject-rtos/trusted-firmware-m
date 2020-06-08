@@ -41,6 +41,16 @@ public:
         expect_info expect;  // everything about expected results
         set_data_info set_data;  // everything about setting PSA-asset data
         asset_name_id_info asset_info;  // everything about the asset(s) for this line
+        string asset_2_name;  // if there's a 2nd asset, then this is its name
+        string asset_3_name;  // if there's a 3rd asset, then this is its name
+        string target_barrier;
+            /* asset to tell the psa_call objects to set and search barrier to when
+               re-ordering PSA calls.  For key policies, this is not necessarily the
+               nominal asset of that call.  For a policy call, it is that policy asset,
+               so that later re-settings of the same policy don't pollute the current
+               setting of that policy.  However, for key sets and reads, it is not the
+               key asset, but its policy. */
+        key_policy_info policy_info;  // specific to crypto, but must be in base class
         long call_ser_no;  // unique identifer for psa_call tracker object
         psa_asset_usage random_asset;
             /* if asked to use some random asset from active or deleted, this says
@@ -53,7 +63,7 @@ public:
            PSA calls from a single template line. */
         bool is_remove;  // true if this template line is to remove an asset
     // Methods (mostly for calling from within yyparse()):
-        virtual bool copy_template_to_call (void) = 0;
+        virtual bool copy_template_to_call (psa_call *the_call) = 0;
         virtual void setup_call (set_data_info set_data, bool random_data,
                                  bool fill_in_template, bool create_call,
                                  template_line *temLin, tf_fuzz_info *rsrc) = 0;
@@ -66,7 +76,6 @@ protected:  // a lot simpler to just let subclasses access these directly
         /* Not all template lines involve expected data, but all that do use it,
            use it the same, so include it here. */
         string asset_name;  // parsed from template, assigned to psa_asset object
-        string flags_string;  // creation flags
     // Methods:
 
 private:
@@ -88,7 +97,7 @@ public:
         // SST-asset info:
         // PSA-call info:
     // Methods:
-        bool copy_template_to_call (void);
+        bool copy_template_to_call (psa_call *the_call);
         sst_template_line (tf_fuzz_info *resources);  // (constructor)
         ~sst_template_line (void);
 
@@ -106,13 +115,8 @@ class key_template_line : public template_line
 {
 public:
     // Data members:
-        string handle_str;  // the text name of the key's "handle"
-        string key_type;  // DES, AES, RAW, vendor, none, etc.
-        string lifetime_str;
-            // similarly, the text representation of the key's lifetime
-        string expected_n_bits;
-           // for get_key_info call (possibly others) exected key size in bits
     // Methods:
+        bool copy_template_to_call (psa_call *the_call);
         string make_id_based_name (uint64_t id_n, string &name);
             // create ID-based asset name
         key_template_line (tf_fuzz_info *resources);  // (constructor)
@@ -131,9 +135,8 @@ class policy_template_line : public template_line
 {
 public:
     // Data members:
-        string policy_usage;
-        string policy_algorithm;
     // Methods:
+        bool copy_template_to_call (psa_call *the_call);
         policy_template_line (tf_fuzz_info *resources);  // (constructor)
         ~policy_template_line (void);
 

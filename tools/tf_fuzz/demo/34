@@ -1,0 +1,3 @@
+purpose to set an offset on psa_ps_get();
+set sst name whoNose data *;
+read sst name whoNose print offset 10;

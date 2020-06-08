@@ -42,6 +42,8 @@ psa_call::psa_call (tf_fuzz_info *test_state, long &call_ser_no,   // (construct
     // These will be set in the lower-level constructors, but...
     prep_code = call_code = check_code = "";
     print_data = hash_data = false;
+    barrier = target_barrier = "";  // not (yet) any barrier for re-ordering calls
+    call_description = "";
 }
 
 psa_call::~psa_call (void)
@@ -84,15 +86,26 @@ void psa_call::write_out_check_code (ofstream &test_file)
    so lots of room for further refinement here. */
 void sst_call::calc_result_code (void)
 {
+    string formalized;  // "proper" result string
+
     if (!exp_data.pf_nothing) {
         if (exp_data.pf_pass) {
             find_replace_all ("$expect",
                               test_state->bplate->bplate_string[sst_pass_string],
                               check_code);
+        } else if (exp_data.pf_fail) {
+            // Check for not-success:
+            find_replace_1st ("!=", "==",
+                              check_code);
+            find_replace_all ("$expect",
+                              test_state->bplate->bplate_string[sst_pass_string],
+                              check_code);
+            find_replace_1st ("expected ", "expected not ",
+                              check_code);
         } else {
             if (exp_data.pf_specified) {
-                find_replace_all ("$expect", exp_data.pf_result_string,
-                                  check_code);
+                formalized = formalize (exp_data.pf_result_string, "PSA_ERROR_");
+                find_replace_all ("$expect", formalized, check_code);
             } else {
                 // Figure out what the message should read:
                 switch (asset_info.how_asset_found) {
@@ -112,7 +125,7 @@ void sst_call::calc_result_code (void)
                         break;
                     default:
                         find_replace_1st ("!=", "==",
-                                          check_code);  // for now, just make sure...
+                                          check_code);  // like "fail", just make sure...
                         find_replace_all ("$expect",
                                           test_state->bplate->
                                               bplate_string[sst_pass_string],
@@ -211,34 +224,67 @@ sst_call::~sst_call (void)
    method, (starting around line 20ish). */
 void crypto_call::calc_result_code (void)
 {
+    string formalized;  // "proper" result string
+
     if (!exp_data.pf_nothing) {
         if (exp_data.pf_pass) {
-            find_replace_1st ("$expect", "PSA_SUCCESS", check_code);
+            find_replace_all ("$expect",
+                              test_state->bplate->bplate_string[sst_pass_string],
+                              check_code);
+        } else if (exp_data.pf_fail) {
+            // Check for not-success:
+            find_replace_1st ("!=", "==",
+                              check_code);
+            find_replace_all ("$expect",
+                              test_state->bplate->bplate_string[sst_pass_string],
+                              check_code);
+            find_replace_1st ("expected ", "expected not ",
+                              check_code);
         } else {
             if (exp_data.pf_specified) {
-                find_replace_1st ("$expect", exp_data.pf_result_string,
-                                  check_code);
+                formalized = formalize (exp_data.pf_result_string, "PSA_ERROR_");
+                find_replace_all ("$expect", formalized, check_code);
             } else {
                 // Figure out what the message should read:
                 switch (asset_info.how_asset_found) {
                     case asset_search::found_active:
                     case asset_search::created_new:
-                        find_replace_all ("$expect", "PSA_SUCCESS",
+                        find_replace_all ("$expect",
+                                          test_state->bplate->
+                                              bplate_string[sst_pass_string],
                                           check_code);
                         break;
+                    case asset_search::not_found:
                     case asset_search::found_deleted:
                         find_replace_all ("$expect", "PSA_ERROR_INVALID_HANDLE",
-                                          check_code);
+                                          check_code);  // TODO:  take from boilerplate
                         break;
                     default:
                         find_replace_1st ("!=", "==",
-                                          check_code);  // for now, just make sure...
-                        find_replace_all ("$expect", "PSA_SUCCESS",
+                                          check_code);  // like "fail", just make sure...
+                        find_replace_all ("$expect",
+                                          test_state->bplate->
+                                              bplate_string[sst_pass_string],
                                           check_code);  // ... it's *not* PSA_SUCCESS
                         break;
                 }
             }
         }
+    }
+}
+
+
+bool crypto_call::copy_asset_to_call (void)
+{
+    if (asset_info.the_asset == nullptr) {
+        return false;
+    } else {
+        // Get updated asset info from the asset:
+        asset_info.asset_ser_no = asset_info.the_asset->asset_info.asset_ser_no;
+        asset_info.id_n = asset_info.the_asset->asset_info.id_n;
+        exp_data.n_exp_vars = asset_info.the_asset->exp_data.n_exp_vars;
+        exp_data.data = asset_info.the_asset->exp_data.data;
+        return true;
     }
 }
 

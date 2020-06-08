@@ -5,23 +5,30 @@ Info:  random seed was not specified.
 Using seed value of \d+ \(0x[a-f\d]+\).
 Purpose line:  to create and show an asset
 ASSET_IDENTIFIER:  "snortwaggle"
-SST-asset identifier list:  "data"
-SST-create from random data
-Set SST command:  "*"
-Set command:  "*"
+Asset identifier list:  "data"
+Create from random data
+Set SST command:  ";"
+Appended to end of call sequence:  SST-set call.
+Set command:  ";"
 Command with no expect:  ";"
 ASSET_IDENTIFIER:  "snortwaggle"
-SST-asset identifier list:  "check"
-LITERAL:  "almost certainly not *this*"
-SST-read check against literal:  "almost certainly not *this*"
-Read SST command:  ""almost certainly not *this*""
-Read command:  ""almost certainly not *this*""
-Command with no expect:  ";"
+Asset identifier list:  "check"
+LITERAL string:  "almost certainly not *this*"
+Read check against literal:  "almost certainly not *this*"
+SST-read arguments:  expect"
+Read SST command:  "expect"
+Appended to end of call sequence:  SST-get call.
+Read command:  "expect"
+Expect fail clause:  "fail"
+Command with expect:  ";"
 Lines:  Line number 4.
 Lines:  Line number 4.
 Lines:  Line number 4.
 Call sequence generated.
 Simulating call sequence...
+Call sequence:
+    SST-set call for asset snortwaggle
+    SST-get call for asset snortwaggle
 Writing test file, ./test.c.
 
 TF-Fuzz test generation complete.

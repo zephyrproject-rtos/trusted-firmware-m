@@ -1,0 +1,14 @@
+echo
+echo "Check-compiling..."
+echo
+gcc -I../../../../trusted-firmware-m-backup/test/suites/sst \
+    -I../../../../trusted-firmware-m-backup/interface/include \
+    -I../../../../trusted-firmware-m-backup \
+    -I../../../../trusted-firmware-m-backup/test/suites/crypto \
+    -I../../../secure_fw/spm/include \
+    -I../../../../CMSIS_5/CMSIS/Core/Include \
+    -Werror -Wunused-variable \
+    -c tossThis.c
+echo
+echo "Check-compile complete."
+echo

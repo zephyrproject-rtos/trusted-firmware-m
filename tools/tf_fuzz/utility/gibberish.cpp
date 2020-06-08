@@ -112,17 +112,28 @@ char *gibberish::word (bool initial_cap, char *string_ptr, char *stop)
 {
     int syllable_count;
     char *parser;  /* points into string while building it */
-
-    for (syllable_count = 0, parser = string_ptr;
-            syllable_count < 4
-         && (rand() % 4) >= syllable_count
-         && parser < stop;
-         syllable_count++) {
-        parser = syllable (parser, stop);
-    }
-    if (initial_cap) {
-        *string_ptr -= 'a' - 'A';  /* more or less assumes ASCII */
-    }
+    string avoid_check;
+    bool has_avoid_words;
+    do {
+        has_avoid_words = false;
+        for (syllable_count = 0, parser = string_ptr;
+                syllable_count < 4
+             && (rand() % 5) >= syllable_count
+             && parser < stop;
+             syllable_count++) {
+            parser = syllable (parser, stop);
+        }
+        for (int i = 0;  i < n_avoids;  i++) {
+            avoid_check = string_ptr;
+            if (avoid[i] == avoid_check) {
+                has_avoid_words = true;
+                break;
+            }
+        }
+        if (initial_cap) {
+            *string_ptr -= 'a' - 'A';  /* more or less assumes ASCII */
+        }
+    } while (has_avoid_words);
     return parser;
 }
 
@@ -177,7 +188,15 @@ int gibberish::pick_sentence_len (void)
  */
 gibberish::gibberish (void)
 {
-    // Nothing to set up.
+    string holder;
+    
+    for (int i = 0;  i < n_avoids;  i++) {
+        holder = avoid[i];
+        for (long unsigned int j = 0;  j < holder.length();  j++) {
+            holder[j] = holder[j] - 1;
+        }
+        avoid[i] = holder;
+    }
 }
 
 

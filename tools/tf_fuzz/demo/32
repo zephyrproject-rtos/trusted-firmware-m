@@ -1,0 +1,4 @@
+purpose to create then remove a key;
+set policy name somePolicy attr sign verify copy alg arc4;
+set key name aKey data * policy somePolicy;
+remove key name aKey;

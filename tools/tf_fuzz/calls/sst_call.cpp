@@ -38,6 +38,7 @@ sst_set_call::sst_set_call (tf_fuzz_info *test_state,    // (constructor)
     prep_code.assign ("");  // will fill in, depending upon template line content
     call_code.assign (test_state->bplate->bplate_string[set_sst_call]);
     check_code.assign (test_state->bplate->bplate_string[set_sst_check]);
+    call_description = "SST-set call";
 }
 sst_set_call::~sst_set_call (void)
 {
@@ -51,14 +52,13 @@ bool sst_set_call::copy_call_to_asset (void)
     found_asset = resolve_asset (yes_create_asset, psa_asset_usage::all);
     // Copy over everything relevant:
     if (asset_info.how_asset_found != asset_search::not_found) {
-        // will be found for make calls, but not necessarily others
         asset_info.the_asset = reinterpret_cast<sst_asset*>(*found_asset);
             /* Note:  The vector is base-class, but the assets in this list
                       themselves *really are* sst_asset-type objects. */
         int i = asset_info.the_asset->set_data.n_set_vars;  // save this
-        asset_info.the_asset->set_data = set_data;
+        asset_info.the_asset->set_data = set_data;  // TO DO:  does this make sense?!
         asset_info.the_asset->set_data.n_set_vars = set_data.n_set_vars = ++i;
-        asset_info.the_asset->flags_string = flags_string;
+        asset_info.the_asset->set_data.flags_string.assign (set_data.flags_string);
         if (asset_info.how_asset_found == asset_search::created_new) {
             asset_info.the_asset->asset_info.name_specified = asset_info.name_specified;
             asset_info.the_asset->asset_info.set_name (asset_info.get_name());
@@ -92,6 +92,7 @@ void sst_set_call::fill_in_prep_code (void)
            and write declaration for it: */
         assign_variable = test_state->find_var (assign_data_var);
         if (assign_variable == test_state->variable.end()) {
+            // No such variable exists, so:
             test_state->make_var (assign_data_var);
             assign_variable = test_state->find_var (assign_data_var);
             prep_code.append (test_state->bplate->bplate_string[declare_big_string]);
@@ -99,9 +100,7 @@ void sst_set_call::fill_in_prep_code (void)
             temp_string = (char *) assign_variable->value;
             find_replace_1st ("$init", temp_string, prep_code);
             // Actual-data length:
-            temp_string.assign (test_state->bplate->bplate_string[declare_int]);
-            find_replace_1st ("static int", "static size_t", temp_string);
-            prep_code.append (temp_string);
+            prep_code.append (test_state->bplate->bplate_string[declare_size_t]);
             find_replace_1st ("$var", length_var_name, prep_code);
             find_replace_1st ("$init", to_string(temp_string.length()), prep_code);
             // Offset (always 0 for now):
@@ -114,6 +113,7 @@ void sst_set_call::fill_in_prep_code (void)
         if (set_data.n_set_vars > 0) {
             var_name_suffix += "_" + to_string(set_data.n_set_vars);
             length_var_name_suffix += "_" + to_string(set_data.n_set_vars);
+            // We'll increment set_data.n_set_vars after we fill in the call itself.
         }
         var_name.assign (asset_info.get_name() + var_name_suffix);
         length_var_name.assign (asset_info.get_name() + length_var_name_suffix);
@@ -173,11 +173,16 @@ void sst_set_call::fill_in_command (void)
         length_var_name.assign (asset_info.get_name() + length_var_name_suffix);
     }
     find_replace_1st ("$data", var_name, call_code);
-    find_replace_1st ("$flags", flags_string, call_code);
+    find_replace_1st ("$flags", set_data.flags_string, call_code);
     string id_string = to_string((long) asset_info.id_n);
     find_replace_1st ("$uid", id_string, call_code);
     find_replace_1st ("$length", length_var_name, call_code);
     // Figure out what expected results:
+    if (   set_data.flags_string == "PSA_STORAGE_FLAG_WRITE_ONCE"
+        && set_data.n_set_vars > 0) {
+        exp_data.pf_specified = true;
+        exp_data.pf_result_string = "PSA_ERROR_NOT_PERMITTED";
+    }
     calc_result_code();
 }
 
@@ -200,6 +205,7 @@ sst_get_call::sst_get_call (tf_fuzz_info *test_state,    // (constructor)
     call_code.assign (test_state->bplate->bplate_string[get_sst_call]);
     check_code.assign ("");
         // depends upon the particular usage;  will get it in fill_in_command()
+    call_description = "SST-get call";
 }
 sst_get_call::~sst_get_call (void)
 {
@@ -229,7 +235,7 @@ bool sst_get_call::copy_asset_to_call (void)
         set_data.string_specified = asset_info.the_asset->set_data.string_specified;
         set_data.file_specified = asset_info.the_asset->set_data.file_specified;
         set_data.set (asset_info.the_asset->set_data.get());
-        flags_string = asset_info.the_asset->flags_string;
+        set_data.flags_string = asset_info.the_asset->set_data.flags_string;
         asset_info.id_n = asset_info.the_asset->asset_info.id_n;
         asset_info.asset_ser_no = asset_info.the_asset->asset_info.asset_ser_no;
         asset_info.name_specified = asset_info.the_asset->asset_info.name_specified;
@@ -255,7 +261,6 @@ void sst_get_call::fill_in_prep_code (void)
                 test_state->make_var (var_base);
                 exp_variable = test_state->find_var (var_base);
                 var_name = var_base + "_data";
-                length_var_name = var_base + "_length";
                 prep_code.append (test_state->bplate->bplate_string[declare_string]);
                 find_replace_1st ("$var", var_name, prep_code);
                 temp_string = (char *) exp_variable->value;
@@ -263,9 +268,6 @@ void sst_get_call::fill_in_prep_code (void)
                 // Expected-data length:
                 temp_string.assign (test_state->bplate->bplate_string[declare_int]);
                 find_replace_1st ("static int", "static size_t", temp_string);
-                prep_code.append (temp_string);
-                find_replace_1st ("$var", length_var_name, prep_code);
-                find_replace_1st ("$init", to_string(temp_string.length()), prep_code);
             }
         } else {
             if (exp_data.data_specified) {
@@ -368,7 +370,7 @@ void sst_get_call::fill_in_command (void)
               the check-data stuff will just simply not have any effect. */
     if (exp_data.data_var_specified) {
         // Check against data in variable:
-        exp_var_name.assign (exp_data.data_var);
+        exp_var_name.assign (exp_data.data_var + "_data");
     } else {
         var_name_suffix = "_exp_data";
         if (exp_data.n_exp_vars > 0) {
@@ -389,7 +391,7 @@ void sst_get_call::fill_in_command (void)
     // Fill in the PSA command itself:
     find_replace_1st ("$uid", id_string, call_code);
     find_replace_all ("$length", to_string(set_data.get().length()), call_code);
-    find_replace_1st ("$offset", "0", call_code);
+    find_replace_1st ("$offset", to_string(set_data.data_offset), call_code);
     find_replace_1st ("$exp_data", exp_var_name, call_code);
     find_replace_all ("$act_data", act_var_name, call_code);
     find_replace_all ("$act_length", act_data_length, call_code);
@@ -404,7 +406,7 @@ void sst_get_call::fill_in_command (void)
         find_replace_1st ("$message", act_var_name, check_code);
     }
     if (hash_data) {
-        hash_var_name.assign (asset_info.get_name() + "_hash");
+        hash_var_name.assign (asset_info.get_name() + "_act_hash");
             // this is where to put the hash of the data
         check_code.append (test_state->bplate->bplate_string[get_sst_hash]);
         find_replace_all ("$act_data_var", act_var_name, check_code);
@@ -433,6 +435,7 @@ sst_remove_call::sst_remove_call (tf_fuzz_info *test_state,    // (constructor)
     prep_code.assign ("");
     call_code.assign (test_state->bplate->bplate_string[remove_sst]);
     check_code.assign (test_state->bplate->bplate_string[remove_sst_check]);
+    call_description = "SST-remove call";
 }
 sst_remove_call::~sst_remove_call (void)
 {
@@ -461,7 +464,7 @@ bool sst_remove_call::copy_asset_to_call (void)
     if (asset_info.the_asset != nullptr) {
         set_data.string_specified = asset_info.the_asset->set_data.string_specified;
         set_data.file_specified = asset_info.the_asset->set_data.file_specified;
-        flags_string = asset_info.the_asset->flags_string;
+        set_data.flags_string = asset_info.the_asset->set_data.flags_string;
         asset_info.id_n = asset_info.the_asset->asset_info.id_n;
         asset_info.name_specified = asset_info.the_asset->asset_info.name_specified;
     }

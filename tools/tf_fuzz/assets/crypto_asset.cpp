@@ -80,10 +80,14 @@ key_asset::key_asset (void)
     // Note:  Similar random initialization for asset and template
     // Randomize handle:
     // TODO:  Key handles appear to be a lot more complex a question than the below
-    string wrong_data;  // temporary for initial random to be overwritten
     gibberish *gib = new gibberish;
-    handle_str = gib->word (false, const_cast<char*>(wrong_data.c_str()),
-                            const_cast<char*>(wrong_data.c_str()) + data.length()-1);
+    char buffer[256];
+    char *end;
+    int buf_len = 5ULL + (uint64_t) (rand() % 10);
+    end = gib->word (false, buffer, buffer + buf_len);
+    *end = '\0';
+    buffer[buf_len] = '\0';
+    handle_str = buffer;
     // Randomize key type:
     key_type = rand_key_type();
     // Randomize lifetime:

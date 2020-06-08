@@ -35,7 +35,7 @@ hash_call::hash_call (tf_fuzz_info *test_state,    // (constructor)
                           asset_search how_asset_found)
                              : security_call(test_state, call_ser_no, how_asset_found)
 {
-    return;  // just to have something to pin a breakpoint onto
+    call_description = "hash call";
 }
 hash_call::~hash_call (void)
 {
@@ -73,11 +73,13 @@ void hash_call::fill_in_command (void)
             for (auto inner = outer+1;
                  inner < asset_info.asset_name_vector.end();
                  ++inner) {
-                call_code.append ("    if (" + *outer + "_hash == " + *inner + "_hash) {\n");
+                call_code.append ("    if (  " + *outer + "_act_hash == " + *inner
+                                           + "_act_hash) {\n");
                 call_code.append (  "        TEST_FAIL(\"Probable data leak between assets "
                                   + *outer + " and " + *inner + ".\\n\");\n");
                 call_code.append ("        return;\n");
                 call_code.append ("    }\n");
+                // TODO:  Pull this from boilerplate!!
             }
         }
     } else {

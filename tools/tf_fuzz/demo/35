@@ -1,0 +1,4 @@
+purpose to verify we can't write multiple times to a write-once SST asset;
+set sst name writeOnce data * flag wo;
+set sst name writeOnce data *;
+set sst name writeOnce data *;

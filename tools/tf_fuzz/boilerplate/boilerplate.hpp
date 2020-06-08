@@ -34,42 +34,67 @@ const int
         preamble_B = 2,  // setup stuff before PSA calls begin
             /* Strings to be substituted from template:
             $purpose:  The purpose of the test */
-        declare_int = 3,  // declaration for an int
+        preamble_C = 3,  // setup stuff before PSA calls begin
+            /* Strings to be substituted from template:
+            $purpose:  The purpose of the test */
+        declare_int = 4,  // declaration for an int
             /* Strings to be substituted from template:
             $var:  The integer thing to declare
             $init:  Its initialization */
-        declare_string = 4,  // declaration for a string
+        declare_string = 5,  // declaration for a string
             /* Strings to be substituted from template:
             $var:  The string variable to declare
             $init:  Its initialization */
-        declare_big_string = 5,  // declaration for a string, sized large
+        declare_big_string = 6,  // declaration for a string, sized large
             /* Strings to be substituted from template:
             $var:  The string variable to declare
             $init:  Its initialization */
-        declare_generic = 6,  // declaration for a some other type
+        declare_size_t = 7,  // declaration for a size_t
+            /* Strings to be substituted from template:
+            $var:  The integer thing to declare
+            $init:  Its initialization */
+        declare_policy = 8,  // declaration for a policy (key attributes)
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_policy_algorithm = 9,  // declaration for a
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_policy_lifetime = 10,  // declaration for a
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_policy_type = 11,  // declaration for a
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_policy_usage = 12,  // declaration for a
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_key = 13,  // declaration for a
+            /* Strings to be substituted from template:
+            $var:  The variable to declare */
+        declare_generic = 14,  // declaration for a some other type
             /* Strings to be substituted from template:
             $type:  The type to declare the variable to
             $var:  The string variable to declare
             $init:  Its initialization */
-        test_log = 7,  // print a message to the test log
+        test_log = 15,  // print a message to the test log
             /* Strings to be substituted from template:
             $message:  What to print. */
-        teardown_sst = 8,  // call to delete SST resources after test completes
+        teardown_sst = 16,  // call to delete SST resources after test completes
             /* Strings to be substituted from template:
               $uid:  (Exactly that) */
-        teardown_sst_check = 9,  // boilerplate code to check success of previous;
+        teardown_sst_check = 17,  // boilerplate code to check success of previous;
             /* No strings to be substituted from template */
-        teardown_key = 10,  // call to delete crypto keys after test completes
+        teardown_key = 18,  // call to delete crypto keys after test completes
             /* Strings to be substituted from template:
               $handle:  The handle to the key */
-        teardown_key_check = 11,  // boilerplate code to check success of previous;
+        teardown_key_check = 19,  // boilerplate code to check success of previous;
             /* No strings to be substituted from template */
-        closeout = 12,  // final code to close out the test.
+        closeout = 20,  // final code to close out the test.
             // No strings to substitute.
-        sst_pass_string = 13,  // passing SST expected result
-        sst_fail_removed = 14,  // SST expected result from having deleted the asset
+        sst_pass_string = 21,  // passing SST expected result
+        sst_fail_removed = 22,  // SST expected result from having deleted the asset
     // SST calls:
-        set_sst_call = 15,  // boilerplate for setting up an SST asset;
+        set_sst_call = 23,  // boilerplate for setting up an SST asset;
             /* Strings to be substituted from template:
               $op:  (for comment) either "Creating" or "Resetting"
               $description:  its "human name" if given, or "UID=..." if not
@@ -78,77 +103,154 @@ const int
               $length:  Data length
               $data:  Pointer to data (C string)
               $flags:  SST-asset creation flags */
-        set_sst_check = 16,  // boilerplate code to check success of previous;
+        set_sst_check = 24,  // boilerplate code to check success of previous;
             /* Strings to be substituted from template:
               $expect:  Expected return status string */
-        get_sst_call = 17,  // boilerplate for retrieving data from an SST asset;
+        get_sst_call = 25,  // boilerplate for retrieving data from an SST asset;
             /* Strings to be substituted from template:
               $uid:  (Exactly that)
               $offset:  Start positon in the "file"  TO DO:  ADD OFFSET
               $length:  Data length
               $act_data:  Pointer to actual data (C string) */
-        get_sst_check = 18,  // boilerplate code to check call result only;
+        get_sst_check = 26,  // boilerplate code to check call result only;
             /* Strings to be substituted from template:
               $expect:  Expected return status string */
-        get_sst_check_all = 19,  // boilerplate code to check call result and data;
+        get_sst_check_all = 27,  // boilerplate code to check call result and data;
             /* Strings to be substituted from template:
               $expect:  Expected return status
               $exp_data:  Expected read data
               $act_data:  Actual read data
               $length:  Data length */
-        get_sst_hash = 20,  // boilerplate code to invoke hasher;
+        get_sst_hash = 28,  // boilerplate code to invoke hasher;
             /* Strings to be substituted from template:
               $act_data_var:  Actual read data, to be hashed
               $hash_var:  Hash-result variable */
-        remove_sst = 21,  // boilerplate for removing an SST asset;
+        remove_sst = 29,  // boilerplate for removing an SST asset;
             /* Strings to be substituted from template:
               $uid:  (Exactly that) */
-        remove_sst_check = 22,  // boilerplate code to check success of previous;
+        remove_sst_check = 30,  // boilerplate code to check success of previous;
             /* Strings to be substituted from template:
               $expect:  Expected return status */
     // Crypto-key-policy calls:
-        set_policy = 23,  // boilerplate for setting up a key policy;
+        init_policy = 31,  // initialize a policy (key attributes);
             /* Strings to be substituted from template:
-              $policy:  The key-policy to define
-              $usage:  The key-policy usage
-              $alg:  The key-policy algorithm */
-        set_policy_check = 24,  // boilerplate code to check success of previous;
+              $policy:  The name of the policy */
+        reset_policy = 32,  // reset a policy (key attributes);
             /* Strings to be substituted from template:
-              $expect:  Expected return status */
-        get_policy = 25,  // boilerplate for retrieving data from a key policy;
+              $policy:  The name of the policy */
+        add_policy_usage = 33,  // add a usage flag to a policy;
             /* Strings to be substituted from template:
-              $policy:  The key-policy to view */
-        get_policy_check = 26,  // boilerplate code to check success of previous;
+              $policy:  The name of the policy
+              $flag:  usage-flag name */
+        set_policy_lifetime = 34,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $life:  Lifetime -- volatile or persistent */
+        set_policy_size = 35,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $size:  The key size, in bits */
+        set_policy_type = 36,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $type:  The key type -- RSA pair, AES, etc. */
+        set_policy_algorithm = 37,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $algorithm:  The algorithm -- AEAD, sign, hash mask, etc. */
+        set_policy_usage = 38,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $usage:  The usage -- encrypt, decrypt, export, copy, etc. */
+        get_policy_lifetime = 39,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $life:  Lifetime -- volatile or persistent */
+        get_policy_lifetime_print = 40,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $life:  Lifetime -- volatile or persistent */
+        get_policy_size = 41,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $size:  The key size, in bits */
+        get_policy_type = 42,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $type:  The key type -- RSA pair, AES, etc. */
+        get_policy_type_print = 43,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $type:  The key type -- RSA pair, AES, etc. */
+        get_policy_algorithm = 44,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $algorithm:  The algorithm -- AEAD, sign, hash mask, etc. */
+        get_policy_algorithm_print = 45,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $algorithm:  The algorithm -- AEAD, sign, hash mask, etc. */
+        get_policy_usage = 46,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $usage:  The usage -- encrypt, decrypt, export, copy, etc. */
+        print_policy_usage = 47,
+            /* Strings to be substituted from template:
+              $policy:  The name of the policy
+              $usage:  The usage -- encrypt, decrypt, export, copy, etc. */
+        get_policy = 48,  // read the policy from a key;
+            /* Strings to be substituted from template:
+              $key:  The key whose policy we want to read
+              $policy:  The policy variable to read into */
+        get_policy_check = 49,  // success check fpr previous;
             /* Strings to be substituted from template:
               $expect:  Expected return status */
     // Crypto-key-related calls:
-        set_key = 27,  // boilerplate for setting up a key;
+        generate_key = 50,  // generate key from scratch;
             /* Strings to be substituted from template:
-              $lifetime:  The lifetime of the key
-              $handle:  The handle to the key */
-        set_key_check = 28,  // boilerplate code to check success of previous;
-            /* Strings to be substituted from template:
-              $expect:  Expected return status */
-        get_key = 29,  // boilerplate for retrieving data from a key;
-            /* Strings to be substituted from template:
-              $handle:  The handle to the key
-              $type:  The returned key type
-              $bits:  The returned size in bits */
-        get_key_check = 30,  // boilerplate code to check success of previous;
+              $key:  The key to generate
+              $policy:  The name of the policy */
+        generate_key_check = 51,  // success check for previous;
             /* Strings to be substituted from template:
               $expect:  Expected return status */
-        get_key_check_n_bits = 31,
+        create_key = 52,  // Create key from policy and key data;
             /* Strings to be substituted from template:
-              $n_bits:  returned #bits (actually just left side of if (a!=b)
-              $m_bits:  expected #bits (actually just right side of if (a!=b) */
-        remove_key = 32,  // boilerplate for creating a key;
+              $policy:  The name of the policy
+              $data:  The key data
+              $length:  The key-data length -- sizeof() */
+        create_key_check = 53,  // success check for previous;
+            /* Strings to be substituted from template:
+              $expect:  Expected return status */
+        copy_key = 54,  // Copy key data from one key to another; different policy;
+            /* Strings to be substituted from template:
+              $master:  The source key-handle variable
+              $policy:  The name of the policy
+              $copy:  The copy key-handle variable */
+        copy_key_check = 55,  // success check for previous;
+            /* Strings to be substituted from template:
+              $expect:  Expected return status */
+        compare_data = 56,  // compare data blocks, such as key data
+            /* Strings to be substituted from template:
+              $exp_data:  Expected read data
+              $act_data:  Actual read data
+              $length:  Data length */
+        read_key_data = 57,  // read key data;
+            /* Strings to be substituted from template:
+              $key:  The key to read
+              $data:  Where to put the data
+              $length:  Length of the data buffer
+              $act_size:  The actual size of the key data retrieved */
+        read_key_data_check = 58,  // success check for previous;
+            /* Strings to be substituted from template:
+              $expect:  Expected return status */
+        remove_key = 59,  // boilerplate for creating a key;
             /* Strings to be substituted from template:
               $handle:  The handle to the key */
-        remove_key_check = 33,  // boilerplate code to check success of previous;
+        remove_key_check = 60,  // boilerplate code to check success of previous;
             /* Strings to be substituted from template:
               $expect:  Expected return status */
     // Just an anchor at the end, for sizing the string array (if needed):
-        n_boilerplate_texts = 34;
+        n_boilerplate_texts = 61;
 
 
 class boilerplate

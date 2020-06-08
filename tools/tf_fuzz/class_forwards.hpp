@@ -51,19 +51,42 @@ class security_hash;
 
 // psa_call.hpp:
 class psa_call;
+class sst_call;
+class crypto_call;
 
 // sst_call.hpp:
-class sst_call;
 class sst_set_call;
 class sst_get_call;
 class sst_remove_call;
 
 // crypto_call.hpp:
-class crypto_call;
-class policy_set_call;
-class policy_get_call;
-class set_key_call;
-class get_key_info_call;
+class policy_call;
+class key_call;
+class init_policy_call;
+class reset_policy_call;
+class set_policy_usage_call;
+class add_policy_usage_call;
+class set_policy_lifetime_call;
+class set_policy_algorithm_call;
+class set_policy_size_call;
+class set_policy_type_call;
+class get_policy_lifetime_call;
+class get_policy_size_call;
+class get_policy_type_call;
+class get_policy_algorithm_call;
+class get_policy_usage_call;
+class print_policy_usage_call;
+class get_key_policy_call;
+class generate_key_call;
+class create_key_call;
+class copy_key_call;
+class read_key_data_call;
+class remove_key_call;
+
+
+// ************************    INSERT THE NEW STUFF HERE!!
+
+
 class destroy_key_call;
 
 // psa_asset.hpp:

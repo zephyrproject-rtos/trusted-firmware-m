@@ -1,0 +1,4 @@
+purpose to create a key, then read the key data ("material") into a variable;
+set policy name somePolicy attr sign verify copy alg arc4;
+set key name aKey data * policy somePolicy;
+read key name aKey print;

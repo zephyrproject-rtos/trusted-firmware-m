@@ -24,9 +24,13 @@ class psa_call
 public:
     /* Data members -- not all PSA calls have/need these, but they need to be acces-
        sible polymorphically via a psa_call iterator: */
+        string call_description;  // description of the call, just for tracing
         expect_info exp_data;  // everything about expected results
         set_data_info set_data;  // everything about setting PSA-asset-data values
         asset_name_id_info asset_info;  // everything about the asset(s) for this line
+        key_policy_info policy;  // (specific to crypto, but have to put this here)
+        string asset_2_name;  // if there's a 2nd asset, then this is its name
+        string asset_3_name;  // if there's a 3rd asset, then this is its name
         psa_asset_usage random_asset;
             /* if asked to use some random asset from active or deleted, this says
                which.  psa_asset_usage::all if not using this feature. */
@@ -38,8 +42,23 @@ public:
         string id_string;  // not all PSA calls involve an ID, but a diverse set do
         long call_ser_no;  // unique serial# for this psa_call (see note in tf_fuzz.hpp)
         tf_fuzz_info *test_state;  // the big blob with pointers to everything going on
-        string flags_string;
-            // creation flags, nominally for SST but have to be in a vector of base-class
+        string barrier;
+            /* "barrier" is used for template-line operations that resolve a series of
+               PSA calls.  In particular, with respect to the fact that TF-Fuzz strives
+               to randomize these multiple calls where possible, meaning interspersing
+               them among other, earlier commands.  However, for example, calls to set
+               the aspects of a policy can't be pushed too far back, such as in among
+               calls setting that same policy for a previous operation!  "barrier" is
+               either "", in which case this call does not care whether you place calls
+               before it, or it contains the name of an asset that, calls related to
+               which must be placed *after* this call. */
+        string target_barrier;
+            /* asset to tell the psa_call objects to set and search barrier to when
+               re-ordering PSA calls.  For key policies, this is not necessarily the
+               nominal asset of that call.  For a policy call, it is that policy asset,
+               so that later re-settings of the same policy don't pollute the current
+               setting of that policy.  However, for key sets and reads, it is not the
+               key asset, but its policy. */
     // Methods:
         virtual vector<psa_asset*>::iterator resolve_asset (bool create_asset_bool,
                                                             psa_asset_usage where) = 0;
@@ -95,6 +114,7 @@ class crypto_call : public psa_call
 public:
     // Data members:  // (low value in hiding these behind setters and getters)
     // Methods:
+        bool copy_asset_to_call (void);
         crypto_call (tf_fuzz_info *test_state, long &asset_ser_no,
                     asset_search how_asset_found);  // (constructor)
         ~crypto_call (void);
