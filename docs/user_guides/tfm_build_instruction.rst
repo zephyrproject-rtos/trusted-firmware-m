@@ -27,7 +27,7 @@ Getting the source-code
 .. code-block:: bash
 
     cd <TF-M base folder>
-    git clone https://git.trustedfirmware.org/trusted-firmware-m.git
+    git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
     git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-3.0.1
     git clone https://github.com/ARM-software/CMSIS_5.git -b 5.5.0
 

@@ -25,7 +25,7 @@ Contributions to the TF-M project need to follow the process below.
   patch should be posted; follow guidelines below:
 
   - Clone the TF-M code on your own machine from `TF-M git repository
-    <http://git.trustedfirmware.org/trusted-firmware-m.git>`_.
+    <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git>`_.
   - Follow the :doc:`SW Requirements </docs/user_guides/tfm_sw_requirement>`,
     :doc:`Build Instructions </docs/user_guides/tfm_build_instruction>` and
     :doc:`Coding Guide </docs/about/coding_guide>` for the TF-M project.
@@ -53,7 +53,7 @@ Contributions to the TF-M project need to follow the process below.
 
     .. code-block:: shell
 
-       git push ssh://review.trustedfirmware.org:29418/trusted-firmware-m.git HEAD:refs/for/master
+       git push ssh://review.trustedfirmware.org:29418/TF-M/trusted-firmware-m.git HEAD:refs/for/master
 
 - Add relevant :doc:`maintainers </docs/about/maintainers>` for reviewing
   the patch.
@@ -66,4 +66,4 @@ Contributions to the TF-M project need to follow the process below.
 
 --------------
 
-*Copyright (c) 2017-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

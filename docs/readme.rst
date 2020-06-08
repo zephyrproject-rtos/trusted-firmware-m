@@ -63,7 +63,7 @@ get started with ARMv8-M is
 Really getting started
 **********************
 Trusted Firmware M source code is available on
-`git.trustedfirmware.org <https://git.trustedfirmware.org/trusted-firmware-m.git/>`__.
+`git.trustedfirmware.org <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/>`__.
 
 To build & run TF-M:
 
