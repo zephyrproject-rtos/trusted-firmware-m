@@ -13,13 +13,27 @@
 #include "psa/crypto.h"
 #include "tfm_memory_utils.h"
 
+#ifndef PS_CRYPTO_AEAD_ALG
+#define PS_CRYPTO_AEAD_ALG PSA_ALG_GCM
+#endif
+
 /* The PSA key type used by this implementation */
 #define PS_KEY_TYPE PSA_KEY_TYPE_AES
 /* The PSA key usage required by this implementation */
 #define PS_KEY_USAGE (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT)
+
 /* The PSA algorithm used by this implementation */
 #define PS_CRYPTO_ALG \
-    PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, PS_TAG_LEN_BYTES)
+    PSA_ALG_AEAD_WITH_TAG_LENGTH(PS_CRYPTO_AEAD_ALG, PS_TAG_LEN_BYTES)
+
+/*
+ * \brief Check whether the PS AEAD algorithm is a valid one
+ *
+ * Triggers a compilation error if the input algorithm is not a valid AEAD
+ * algorithm. The compilation error should be
+ * "error: 'PS_ERROR_NOT_AEAD_ALG' declared as an array with a negative size"
+ */
+typedef char PS_ERROR_NOT_AEAD_ALG[(PSA_ALG_IS_AEAD(PS_CRYPTO_ALG)) ? 1 : -1];
 
 static const uint8_t ps_key_label[] = "storage_key";
 static psa_key_handle_t ps_key_handle;
