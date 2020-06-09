@@ -47,13 +47,24 @@ Contributions to the TF-M project need to follow the process below.
 
        Sign off authority needs to adhere to the [DCO](./dco.txt) rules.
 
-  - You may add other fields in the commit message. Need to add the Task ID link
-    in the comment for the commit.
+  - You must add a `Change-Id
+    <https://review.trustedfirmware.org/Documentation/user-changeid.html>` to
+    the commit message, which can be generated any way you like (e.g. from the
+    SHA of the commit), or use the commit hook.
+  - Create a user in the `TF-M Gerrit <https://review.trustedfirmware.org>`,
+    then add `SSH keys or HTTP credentials
+    <https://review.trustedfirmware.org/settings/>`.
   - Submit your patch for review.
 
     .. code-block:: shell
 
        git push ssh://review.trustedfirmware.org:29418/TF-M/trusted-firmware-m.git HEAD:refs/for/master
+
+    or
+
+    .. code-block:: shell
+
+       git push https://review.trustedfirmware.org/TF-M/trusted-firmware-m.git HEAD:refs/for/master
 
 - Add relevant :doc:`maintainers </docs/contributing/maintainers>` for reviewing
   the patch.
