@@ -13,7 +13,7 @@ set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")
 if (BL2)
 	add_definitions(-DBL2)
 
-	set(MCUBOOT_REPO "TF-M" CACHE STRING "Configure which repository use the MCUBoot from")
+	set(MCUBOOT_REPO "UPSTREAM" CACHE STRING "Configure which repository use the MCUBoot from")
 	set_property(CACHE MCUBOOT_REPO PROPERTY STRINGS "TF-M;UPSTREAM")
 	validate_cache_value(MCUBOOT_REPO)
 
@@ -28,6 +28,14 @@ if (BL2)
 	set(MCUBOOT_SIGNATURE_TYPE "RSA-3072" CACHE STRING "Algorithm used by MCUBoot to validate signatures.")
 	set_property(CACHE MCUBOOT_SIGNATURE_TYPE PROPERTY STRINGS "RSA-3072;RSA-2048")
 	validate_cache_value(MCUBOOT_SIGNATURE_TYPE)
+
+	#FixMe: These checks can be removed when the upgrade strategies in question are upstreamed to the original MCUBoot repo.
+	if (TARGET_PLATFORM STREQUAL "MUSCA_A" OR TARGET_PLATFORM STREQUAL "AN524")
+		if (MCUBOOT_REPO STREQUAL "UPSTREAM")
+		    message(WARNING "The 'UPSTREAM' MCUBoot repository cannot be used when building for ${TARGET_PLATFORM}. Your choice was overridden.")
+		endif()
+		set(MCUBOOT_REPO "TF-M")
+	endif()
 
 	if (MCUBOOT_REPO STREQUAL "TF-M")
 		set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")

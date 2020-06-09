@@ -273,25 +273,24 @@ modes are supported by which platforms:
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
-**************************
-Using the original MCUBoot
-**************************
-The original MCUBoot from `GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__
-can also be used as the bootloader in TF-M. However please note that the
-original MCUBoot doesn't support the ``No-swap`` and ``RAM loading`` upgrade
-strategies, therefore those platforms that doesn't support other upgrade
-strategies (e.g. ``Overwrite``) cannot be used with the original MCUBoot at the
-moment.
-
-To use the upstream MCUBoot it must be cloned into the TF-M base folder
-first (into which the TF-M was cloned previously). After the original MCUBoot
-code is present at the required location the ``MCUBOOT_REPO=UPSTREAM`` option
-must be added to the command line at the CMake configuration step::
+*******
+MCUBoot
+*******
+By default, the original MCUBoot from
+`GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__ is used as the bootloader
+in TF-M. The repository must be cloned into the base folder (into which TF-M
+was cloned previously).::
 
     cd <TF-M base folder>
-    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.5.0
+    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.6.0
     cd <TF-M build folder>
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DMCUBOOT_REPO=UPSTREAM ../
+
+However, please note that it doesn't support the ``No-swap`` and ``RAM loading``
+upgrade strategies, therefore the platforms that don't support other upgrade
+strategies (e.g. ``Overwrite``) cannot be used with the original MCUBoot at the
+moment. To use the TF-M project's fork, the ``MCUBOOT_REPO=TF-M`` option
+must be added to the command line at the CMake configuration step.
 
 *******************
 Multiple image boot
@@ -362,12 +361,12 @@ Compile time switches:
     - **False:** TF-M built without bootloader. Secure image linked to the
       beginning of the device memory and executed after reset. If it is false
       then using any of the further compile time switches is invalid.
-- MCUBOOT_REPO (default: "TF-M"):
+- MCUBOOT_REPO (default: "UPSTREAM"):
     - **"TF-M":** Use TF-M's MCUBoot fork as bootloader which is located in the
       bl2/ext/mcuboot folder.
     - **"UPSTREAM":** Use the original (upstream) MCUBoot as bootloader. Before
-      selecting this option please read the `Using the original MCUBoot`_
-      section for more information and the limitations of using this option.
+      selecting this option please read the `MCUBoot`_ section for more
+      information and the limitations of using this option.
 - MCUBOOT_UPGRADE_STRATEGY (default: "OVERWRITE_ONLY"):
     - **"OVERWRITE_ONLY":** Default firmware upgrade operation with overwrite.
     - **"SWAP":** Activate swapping firmware upgrade operation.
