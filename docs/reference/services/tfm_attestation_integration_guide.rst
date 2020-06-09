@@ -73,7 +73,7 @@ claims are included in the token:
 
     - **Implementation ID**: Uniquely identifies the underlying immutable PSA
       RoT. A verification service can use this claim to locate the details of
-      the verification process. Such details include the implementation’s origin
+      the verification process. Such details include the implementation's origin
       and associated certification state. Custom claim with a value encoded as
       byte string.
 
@@ -153,7 +153,7 @@ Service source files
 ====================
 - CBOR library
     - ``lib/ext/qcbor`` This library is used to create a proper CBOR token.
-      It can be used on 32-bit and 64-bit machines.  It was designed to suite
+      It can be used on 32-bit and 64-bit machines. It was designed to suite
       constrained devices with low memory usage and without dynamic memory
       allocation.
       It is a fork of this external `QCBOR library <https://github.com/laurencelundblade/QCBOR>`__.
@@ -161,14 +161,16 @@ Service source files
       library.
 
 - COSE library:
-    - ``lib/t_cose``: This library is used to sign a CBOR token and create
+    - ``lib/ext/t_cose``: This library is used to sign a CBOR token and create
       the COSE header and signature around the initial attestation token. Only
       a subset of the `COSE <https://tools.ietf.org/html/rfc8152>`__ standard
-      is implemented. Only the cose_sign1 signature schema is supported.
-    - ``lib/t_cose/src/t_cose_crypto.h``: Expose an API to bind ``t_cose``
+      is implemented. The COSE_Sign1 and COSE_Mac0 (only available in TF-M fork)
+      signature schemas are supported.
+    - It is a fork of this external `t_cose library <https://github.com/laurencelundblade/t_cose>`__.
+    - ``lib/ext/t_cose/src/t_cose_crypto.h``: Expose an API to bind ``t_cose``
       library with available crypto library in the device.
-    - ``lib/t_cose/src/t_cose_psa_crypto.c``: Implements the exposed API
-      and ports ``t_cose`` to the PSA Crypto API.
+    - ``lib/ext/t_cose/crypto_adapters/t_cose_psa_crypto.c``: Implements the
+      exposed API and ports ``t_cose`` to the PSA Crypto API.
 - Initial Attestation Service:
     - ``attestation_core.c`` : Implements core functionalities such as
       implementation of APIs, retrieval of claims and token creation.
@@ -203,7 +205,7 @@ Service interface definitions
       security lifecycle, verification service indicator, profile definition.
     - ``tfm_plat_boot_seed.h``: Expose an API to get the boot seed claim.
     - ``tfm_plat_device_id.h``: Expose an API to get the following claims:
-      implementation ID, hardware version, instance ID.
+      implementation ID, hardware version.
 - **SPM interface**:
     - ``attestation.h``: Expose an API to bind attestation service to an SPM
       implementation.
