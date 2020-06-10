@@ -34,6 +34,7 @@ The following environments are supported:
     Some tools (i.e. python3 and CMake) must NOT be installed from
     Cygwin and instead a native windows version is needed. Please see the
     chapter `Windows + Cygwin setup`_ below.
+    IAR requires Ubuntu 18.04 or later.
 
 *********************
 Supported C compilers
@@ -49,6 +50,8 @@ versions are:
     - Arm Compiler v6.13
     - GNU Arm compiler v6.3.1
     - GNU Arm compiler v7.3
+    - IAR Arm compiler v8.42.x
+    - IAR Arm compiler v8.50.x
 
 .. Note::
     - The Arm compilers above are provided via Keil uVision |KEIL_VERSION|
@@ -65,6 +68,12 @@ versions are:
       `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
       On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
       or *GNU Arm Embedded Toolchain: 7-2018-q2-update*
+
+    - The IAR Arm compilers above are provided via IAR Embedded Workbench (Windows) or
+      IAR build tools for linux.
+      For information, see
+      `here <https://www.iar.com/iar-embedded-workbench/#!?architecture=Arm>`__ or
+      `here <https://www.iar.com/iar-embedded-workbench/build-tools-for-linux/>`__.
 
 ************************
 Supported CMake versions
@@ -89,6 +98,7 @@ The build-system is CMake based and supports the following versions:
       https://cmake.org/files.
     - For Cygwin users, please use a native windows CMake version
       instead of the version installed with Cygwin.
+    - IAR requires version 3.14 or later.
 
 ***************************
 Supported GNU make versions
@@ -104,8 +114,8 @@ On Windows the following binaries are supported:
     - GNU make v4.2.1 executable from msys2
     - GNU make v4.2 executable from DS5 |DS5_VERSION| (see <DS5 directory>/bin)
 
-CMake is quiet tolerant to GNU make versions and basically any
-"reasonably recent" GNU make version shall work.
+CMake is quite tolerant to GNU make versions and basically any
+"reasonably recent" GNU make version should work.
 
 CMake generators other than "Unix Makefiles" may work, but are not
 officially supported.
@@ -136,6 +146,8 @@ with trustedfirmware-m
    Arm Compiler v6.10. Please refer to
    `CMSIS release notes <https://github.com/ARM-software/CMSIS_5/releases>`__.
    for guidance.
+   For building with the IAR toolchain, see instructions in
+   :doc:`software requirements <tfm_build_instruction_iar>`
 
 ********************************************
 Tools for configuring and programming boards
@@ -192,13 +204,19 @@ To import CMake in your bash shell console:
 
 .. code-block:: bash
 
-    export PATH=/bin:$PATH
+    export PATH=<CMake path>/bin:$PATH
 
 To import GNU Arm in your bash shell console:
 
 .. code-block:: bash
 
-    export PATH=/bin:$PATH
+    export PATH=<bash path>/bin:$PATH
+
+    To import IAR Arm compiler in your bash shell console:
+
+.. code-block:: bash
+
+    export PATH=<IAR compiler path>/bin:$PATH
 
 Windows + Cygwin setup
 ======================
