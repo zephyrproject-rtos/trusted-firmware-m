@@ -356,8 +356,21 @@ The structure of shared data must be the following:
    entry header structure: ``struct shared_data_tlv_entry`` and the data. In
    the entry header is a type field ``tlv_type`` which identify the consumer of
    the entry in the runtime software and specify the subtype of that data item.
-   There is a size field ``tlv_len`` which covers the size of the entry header
-   and the data. After this structure comes the actual data.
+
+   .. Note::
+
+       There is a size field ``tlv_len`` which has different definitions in the
+       upstream MCUboot repository and in its TF-M forked version:
+
+       - Upstream MCUboot: Covers only the length of data but not the header
+         size.
+       - TF-M MCUboot: Covers the size of the entry header and the data
+         together.
+
+       This difference is handled by TF-M code based on which bootloader is used
+       along with TF-M runtime.
+
+   After the entry header structure comes the actual data.
 
    .. code-block:: c
 

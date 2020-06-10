@@ -142,6 +142,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uint8_t *ptr;
     struct shared_data_tlv_entry tlv_entry;
     uintptr_t tlv_end, offset;
+    size_t next_tlv_offset;
 #endif /* BOOT_DATA_AVAILABLE */
 #ifndef TFM_PSA_API
     uint32_t running_partition_idx =
@@ -216,23 +217,27 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     /* Iterates over the TLV section and copy TLVs with requested major
      * type to the provided buffer.
      */
-    for (; offset < tlv_end; offset += tlv_entry.tlv_len) {
+    for (; offset < tlv_end; offset += next_tlv_offset) {
         /* Create local copy to avoid unaligned access */
         (void)tfm_core_util_memcpy(&tlv_entry,
                                    (const void *)offset,
                                    SHARED_DATA_ENTRY_HEADER_SIZE);
+#ifdef LEGACY_TFM_TLV_HEADER
+        next_tlv_offset = tlv_entry.tlv_len;
+#else
+        next_tlv_offset = SHARED_DATA_ENTRY_HEADER_SIZE + tlv_entry.tlv_len;
+#endif
         if (GET_MAJOR(tlv_entry.tlv_type) == tlv_major) {
             /* Check buffer overflow */
-            if (((ptr - buf_start) + tlv_entry.tlv_len) > buf_size) {
+            if (((ptr - buf_start) + next_tlv_offset) > buf_size) {
                 args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
                 return;
             }
 
             (void)tfm_core_util_memcpy(ptr, (const void *)offset,
-                                       tlv_entry.tlv_len);
-
-            ptr += tlv_entry.tlv_len;
-            boot_data->header.tlv_tot_len += tlv_entry.tlv_len;
+                                       next_tlv_offset);
+            ptr += next_tlv_offset;
+            boot_data->header.tlv_tot_len += next_tlv_offset;
         }
     }
 #endif /* BOOT_DATA_AVAILABLE */

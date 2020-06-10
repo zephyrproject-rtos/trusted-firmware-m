@@ -62,6 +62,10 @@ if (ATTEST_INCLUDE_COSE_KEY_ID)
 	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_COSE_KEY_ID)
 endif()
 
+if (LEGACY_TFM_TLV_HEADER)
+	set_property(SOURCE ${ATTEST_C_SRC} APPEND PROPERTY COMPILE_DEFINITIONS LEGACY_TFM_TLV_HEADER)
+endif()
+
 #Inform the user about attestation service features selected based on the cmake flags
 message("The Initial Attestation service compile configuration is as follows:")
 message("- ATTEST_INCLUDE_OPTIONAL_CLAIMS: ${ATTEST_INCLUDE_OPTIONAL_CLAIMS}")

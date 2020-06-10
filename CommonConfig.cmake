@@ -426,6 +426,11 @@ if (BL2)
 	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
 		set(LINK_TO_BOTH_MEMORY_REGION ON)
 	endif()
+
+	if (MCUBOOT_REPO STREQUAL "TF-M")
+		# FixMe: LEGACY_TFM_TLV_HEADER could be removed when MCUBoot fork is deleted.
+		set(LEGACY_TFM_TLV_HEADER ON)
+	endif()
 endif()
 
 ##Set Mbed Crypto compiler flags and variables for crypto service
