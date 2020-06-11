@@ -14,7 +14,6 @@
 #include "tfm_version.h"
 #include "log/tfm_log.h"
 #include "tfm/spm_api.h"
-#include "tfm/spm_db.h"
 
 /*
  * Avoids the semihosting issue

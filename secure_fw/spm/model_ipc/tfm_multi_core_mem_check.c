@@ -10,7 +10,6 @@
 #include "region_defs.h"
 #include "secure_utilities.h"
 #include "tfm/spm_api.h"
-#include "tfm/spm_db.h"
 #include "tfm_internal.h"
 #include "tfm_multi_core.h"
 #include "tfm_secure_api.h"

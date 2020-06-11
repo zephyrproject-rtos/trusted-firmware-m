@@ -15,6 +15,7 @@
 #include "tfm_irq_list.h"
 #include "psa/service.h"
 #include "tfm_core_mem_check.h"
+#include "tfm_peripherals_def.h"
 #include "tfm_secure_api.h"
 #include "tfm_spm_hal.h"
 #include "tfm/spm_api.h"
@@ -22,6 +23,7 @@
 #include "region_defs.h"
 #include "region.h"
 #include "tfm/tfm_spm_services_api.h"
+#include "tfm_spm_db_func.inc"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1
@@ -39,8 +41,6 @@ REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
  */
 extern int32_t tfm_secure_lock;
 static int32_t tfm_secure_api_initializing = 1;
-
-extern struct spm_partition_db_t g_spm_partition_db;
 
 static uint32_t *prepare_partition_iovec_ctx(
                              const struct tfm_state_context_t *svc_ctx,
@@ -1317,4 +1317,31 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
     default:
         *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
+}
+
+enum spm_err_t tfm_spm_db_init(void)
+{
+    uint32_t i;
+
+    /* This function initialises partition db */
+
+    /* For the non secure Execution environment */
+    tfm_nspm_configure_clients();
+
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+        g_spm_partition_db.partitions[i].runtime_data.partition_state =
+            SPM_PARTITION_STATE_UNINIT;
+        g_spm_partition_db.partitions[i].runtime_data.caller_partition_idx =
+            SPM_INVALID_PARTITION_IDX;
+        g_spm_partition_db.partitions[i].runtime_data.caller_client_id =
+            TFM_INVALID_CLIENT_ID;
+        g_spm_partition_db.partitions[i].runtime_data.ctx_stack_ptr =
+            ctx_stack_list[i];
+        g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
+        g_spm_partition_db.partitions[i].platform_data_list =
+                                                     platform_data_list_list[i];
+    }
+    g_spm_partition_db.is_init = 1;
+
+    return SPM_ERR_OK;
 }

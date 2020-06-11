@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include "tfm_spm_hal.h"
 #include "tfm/spm_api.h"
-#include "tfm/spm_db.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"

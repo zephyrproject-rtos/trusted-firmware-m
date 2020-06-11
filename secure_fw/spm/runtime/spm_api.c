@@ -7,25 +7,11 @@
 
 /* All the APIs defined in this file are common for library and IPC model. */
 
-#include <stdio.h>
-#include <string.h>
 #include "tfm/spm_api.h"
-#include "tfm_spm_hal.h"
-#include "tfm_memory_utils.h"
 #include "tfm/spm_db.h"
-#include "tfm_internal.h"
-#include "tfm_api.h"
-#include "tfm_nspm.h"
-#include "tfm_core.h"
-#include "tfm_peripherals_def.h"
-#include "tfm/spm_partition_defs.h"
-#include "region.h"
 
-#define NON_SECURE_INTERNAL_PARTITION_DB_IDX 0
-#define TFM_CORE_INTERNAL_PARTITION_DB_IDX   1
-
-/* Define SPM DB structure */
-#include "tfm_spm_db.inc"
+/* Extern SPM variable */
+extern struct spm_partition_db_t g_spm_partition_db;
 
 uint32_t get_partition_idx(uint32_t partition_id)
 {
@@ -42,40 +28,6 @@ uint32_t get_partition_idx(uint32_t partition_id)
         }
     }
     return SPM_INVALID_PARTITION_IDX;
-}
-
-enum spm_err_t tfm_spm_db_init(void)
-{
-    uint32_t i;
-
-    /* This function initialises partition db */
-
-    /* For the non secure Execution environment */
-#ifndef TFM_PSA_API
-    tfm_nspm_configure_clients();
-#endif
-
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-#ifndef TFM_PSA_API
-        g_spm_partition_db.partitions[i].runtime_data.partition_state =
-            SPM_PARTITION_STATE_UNINIT;
-        g_spm_partition_db.partitions[i].runtime_data.caller_partition_idx =
-            SPM_INVALID_PARTITION_IDX;
-        g_spm_partition_db.partitions[i].runtime_data.caller_client_id =
-            TFM_INVALID_CLIENT_ID;
-        g_spm_partition_db.partitions[i].runtime_data.ctx_stack_ptr =
-            ctx_stack_list[i];
-#endif /* !defined(TFM_PSA_API) */
-        g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
-        g_spm_partition_db.partitions[i].platform_data_list =
-                                                     platform_data_list_list[i];
-#ifdef TFM_PSA_API
-        g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
-#endif
-    }
-    g_spm_partition_db.is_init = 1;
-
-    return SPM_ERR_OK;
 }
 
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)

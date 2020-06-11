@@ -10,7 +10,6 @@
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "tfm/spm_api.h"
-#include "tfm/spm_db.h"
 #include "target_cfg.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"

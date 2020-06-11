@@ -31,17 +31,16 @@
 #include "tfm_core_mem_check.h"
 #include "tfm_list.h"
 #include "tfm_pools.h"
+#include "region.h"
 #include "region_defs.h"
 #include "tfm/tfm_spm_services_api.h"
 
 #include "secure_fw/partitions/tfm_service_list.inc"
+#include "tfm_spm_db_ipc.inc"
 
 /* Extern service variable */
 extern struct tfm_spm_service_t service[];
 extern const struct tfm_spm_service_db_t service_db[];
-
-/* Extern SPM variable */
-extern struct spm_partition_db_t g_spm_partition_db;
 
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
@@ -1657,4 +1656,21 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
     default:
         *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
+}
+
+enum spm_err_t tfm_spm_db_init(void)
+{
+    uint32_t i;
+
+    /* This function initialises partition db */
+
+    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+        g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
+        g_spm_partition_db.partitions[i].platform_data_list =
+                                                     platform_data_list_list[i];
+        g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
+    }
+    g_spm_partition_db.is_init = 1;
+
+    return SPM_ERR_OK;
 }
