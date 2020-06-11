@@ -31,7 +31,7 @@ Quick Links
 Feedback and support
 ####################
 Feedback can be submitted via email to
-`support-trustedfirmware-m@arm.com <support-trustedfirmware-m@arm.com>`__.
+`TF-M mailing list <tf-m@lists.trustedfirmware.org>`__.
 
 .. _License: https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/lic.html
 .. _Contribution guidelines: https://ci.trustedfirmware.org/job/tf-m-build-test-nightly/lastSuccessfulBuild/artifact/build-docs/tf-m_documents/install/doc/user_guide/html/docs/contributing.html
