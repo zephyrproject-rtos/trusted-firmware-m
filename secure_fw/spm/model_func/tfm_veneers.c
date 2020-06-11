@@ -8,7 +8,7 @@
 /*********** WARNING: This is an auto-generated file. Do not edit! ***********/
 
 #include "tfm_secure_api.h"
-#include "tfm/spm_partition_defs.h"
+#include "spm_partition_defs.h"
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 /******** TFM_SP_PS ********/

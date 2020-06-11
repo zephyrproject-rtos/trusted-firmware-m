@@ -7,8 +7,8 @@
 
 /* All the APIs defined in this file are common for library and IPC model. */
 
-#include "tfm/spm_api.h"
-#include "tfm/spm_db.h"
+#include "spm_api.h"
+#include "spm_db.h"
 
 /* Extern SPM variable */
 extern struct spm_partition_db_t g_spm_partition_db;

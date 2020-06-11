@@ -7,7 +7,7 @@
 
 #include <arm_cmse.h>
 #include "region_defs.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "tfm_api.h"
 
 /**

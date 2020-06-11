@@ -10,7 +10,7 @@
 
 /* This file contains the apis exported by the SPM to tfm core */
 #include "tfm_api.h"
-#include "tfm/spm_partition_defs.h"
+#include "spm_partition_defs.h"
 #include "tfm_secure_api.h"
 #include <stdbool.h>
 #ifdef TFM_PSA_API
@@ -329,13 +329,13 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
                                                 uint32_t caller_partition_idx);
 
 /**
-* \brief Set the caller client ID for a given partition
-*
-* \param[in] partition_idx        Partition index
-* \param[in] caller_client_id     The ID of the calling client
-*
-* \note This function doesn't check if any of the partition_idxs are valid.
-*/
+ * \brief Set the caller client ID for a given partition
+ *
+ * \param[in] partition_idx        Partition index
+ * \param[in] caller_client_id     The ID of the calling client
+ *
+ * \note This function doesn't check if any of the partition_idxs are valid.
+ */
 void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
                                             int32_t caller_client_id);
 
@@ -908,7 +908,7 @@ void tfm_spm_psa_clear(void);
 void tfm_spm_psa_eoi(uint32_t *args);
 
 /**
- * \brief SVC hander of enabling irq_line of the specified irq_signal.
+ * \brief SVC handler of enabling irq_line of the specified irq_signal.
  *
  * \param[in] args              Include all input arguments: irq_signal.
  *
@@ -921,7 +921,7 @@ void tfm_spm_psa_eoi(uint32_t *args);
 void tfm_spm_enable_irq(uint32_t *args);
 
 /**
- * \brief SVC hander of disabling irq_line of the specified irq_signal.
+ * \brief SVC handler of disabling irq_line of the specified irq_signal.
  *
  * \param[in] args              Include all input arguments: irq_signal.
  *

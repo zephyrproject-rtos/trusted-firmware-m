@@ -10,7 +10,7 @@
 #include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "tfm/tfm_core_svc.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)

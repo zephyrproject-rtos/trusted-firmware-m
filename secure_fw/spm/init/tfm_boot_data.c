@@ -12,8 +12,8 @@
 #include "tfm_internal.h"
 #include "tfm_api.h"
 #include "tfm_core_utils.h"
-#include "tfm/spm_api.h"
-#include "tfm/spm_partition_defs.h"
+#include "spm_api.h"
+#include "spm_partition_defs.h"
 #ifdef TFM_PSA_API
 #include "tfm_internal_defines.h"
 #include "tfm_utils.h"
@@ -22,7 +22,7 @@
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
 #include "tfm_spm_hal.h"
-#include "tfm/spm_db.h"
+#include "spm_db.h"
 #endif
 
 /*!

@@ -8,7 +8,7 @@
 {{utilities.donotedit_warning}}
 
 #include "tfm_secure_api.h"
-#include "tfm/spm_partition_defs.h"
+#include "spm_partition_defs.h"
 
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}

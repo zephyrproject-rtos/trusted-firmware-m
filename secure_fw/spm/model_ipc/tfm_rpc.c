@@ -5,7 +5,7 @@
  *
  */
 
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "spm_psa_client_call.h"
 #include "tfm_rpc.h"
 #include "tfm_utils.h"

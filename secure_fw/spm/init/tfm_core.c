@@ -13,7 +13,7 @@
 #include "tfm_spm_hal.h"
 #include "tfm_version.h"
 #include "log/tfm_log.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 
 /*
  * Avoids the semihosting issue

@@ -10,8 +10,8 @@
 #include "tfm_ss_core_test_2.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
-#include "tfm/spm_partition_defs.h"
 #include "psa/service.h"
+#include "psa_manifest/pid.h"
 #include "psa_manifest/tfm_test_core_2.h"
 
 #define INVALID_NS_CLIENT_ID  0x49abcdef

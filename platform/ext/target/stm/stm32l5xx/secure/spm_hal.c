@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include "tfm_spm_hal.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"

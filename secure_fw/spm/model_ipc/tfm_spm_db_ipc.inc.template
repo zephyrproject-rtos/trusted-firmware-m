@@ -10,7 +10,7 @@
 #ifndef __TFM_SPM_DB_IPC_INC__
 #define __TFM_SPM_DB_IPC_INC__
 
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "psa_manifest/sid.h"
 
 {# Produce a build error if heap_size is presented in the manifest, because of the dynamic memory allocation is not supported now. #}

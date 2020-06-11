@@ -13,7 +13,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"
 #include "tfm_secure_api.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "tfm/tfm_core_svc.h"
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)

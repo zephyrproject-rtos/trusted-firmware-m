@@ -13,9 +13,9 @@
 #include "secure_utilities.h"
 #include "tfm_secure_api.h"
 #include "secure_fw/include/tfm/tfm_spm_services_api.h"
-#include "tfm/spm_partition_defs.h"
 #include "psa/service.h"
 #include "tfm_plat_test.h"
+#include "psa_manifest/pid.h"
 #include "psa_manifest/tfm_test_core.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"

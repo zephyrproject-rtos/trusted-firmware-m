@@ -16,7 +16,7 @@
 #include "region_defs.h"
 #include "secure_utilities.h"
 #include "spe_ipc_config.h"
-#include "tfm/spm_api.h"
+#include "spm_api.h"
 #include "target_cfg.h"
 #include "tfm_multi_core.h"
 #include "tfm_platform_core_api.h"
