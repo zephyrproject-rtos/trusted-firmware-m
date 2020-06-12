@@ -7,7 +7,7 @@ Software requirements
 .. |DEV_STUDIO_VERSION| replace:: 2018.0
 
 A quick reference table is included in the
-:ref:`docs/user_guides/tfm_sw_requirement:Tool & Dependency overview` section
+:ref:`docs/getting_started/tfm_sw_requirement:Tool & Dependency overview` section
 of this document.
 
 ****************************

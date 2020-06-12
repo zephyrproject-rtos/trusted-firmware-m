@@ -13,10 +13,10 @@ Use the following policy file for provisioning and signing:
 policy_multi_img_CM0p_CM4_debug_2M.json
 
 Please make sure you have all required software installed as explained in the
-:doc:`software requirements </docs/user_guides/tfm_sw_requirement>`.
+:doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
 
 Please also make sure that all the source code are fetched by following
-:doc:`general building instruction </docs/user_guides/tfm_build_instruction>`.
+:doc:`general building instruction </docs/getting_started/tfm_build_instruction>`.
 
 Install CySecureTools.
 

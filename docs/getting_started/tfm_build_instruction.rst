@@ -5,10 +5,10 @@ Please make sure you have all required software installed as explained in the
 :doc:`software requirements <tfm_sw_requirement>`.
 
 The external dependecies are briefly listed in the
-:ref:`docs/user_guides/tfm_sw_requirement:External dependencies` section.
+:ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
 
 The configuration-table
-:ref:`docs/user_guides/tfm_build_instruction:Configuring the build` section
+:ref:`docs/getting_started/tfm_build_instruction:Configuring the build` section
 explains all the supported build parameters:
 
 ****************
@@ -42,7 +42,7 @@ Getting the source-code
 
 .. Note::
    For building with Armclang compiler version 6.10.0, please follow the note
-   in :ref:`docs/user_guides/tfm_sw_requirement:External dependencies` section.
+   in :ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
 
 .. Note::
    For building with the IAR toolchain, please see the notes in

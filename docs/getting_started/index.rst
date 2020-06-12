@@ -1,5 +1,5 @@
-User Guides
-===========
+Getting Started Guides
+======================
 .. toctree::
     :maxdepth: 1
     :caption: Contents
@@ -7,8 +7,7 @@ User Guides
     :numbered:
 
     *
-    services/index
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2020, Arm Limited. All rights reserved.*

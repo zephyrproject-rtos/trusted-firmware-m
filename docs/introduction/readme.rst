@@ -9,15 +9,15 @@ for Arm M-profile architecture.
     reference implementation of the Platform Security Architecture (PSA).
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
-refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/glossary>` has the list
+refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/reference/glossary>` has the list
 of terms and abbreviations.
 
 #######
 License
 #######
-The software is provided under a BSD-3-Clause :doc:`License </docs/lic>`.
+The software is provided under a BSD-3-Clause :doc:`License </docs/contributing/lic>`.
 Contributions to this project are accepted under the same license with developer
-sign-off as described in the :doc:`Contributing Guidelines </docs/processes/contributing>`.
+sign-off as described in the :doc:`Contributing Guidelines </docs/contributing/contributing>`.
 
 This project contains code from other projects as listed below. The code from
 external projects is limited to ``app``, ``bl2``, ``lib`` and ``platform``
@@ -39,7 +39,7 @@ folders. The original license text is included in those source files.
 #############
 Release Notes
 #############
-The :doc:`Change Log & Release Notes </docs/changelog>` provides details of
+The :doc:`Change Log & Release Notes </docs/reference/changelog>` provides details of
 major features of the release and platforms supported.
 
 ###############
@@ -67,20 +67,20 @@ Trusted Firmware M source code is available on
 
 To build & run TF-M:
 
-    - Follow the :doc:`SW requirements guide </docs/user_guides/tfm_sw_requirement>`
+    - Follow the :doc:`SW requirements guide </docs/getting_started/tfm_sw_requirement>`
       to set up your environment.
     - Follow the
-      :doc:`Build instructions </docs/user_guides/tfm_build_instruction>` to compile
+      :doc:`Build instructions </docs/getting_started/tfm_build_instruction>` to compile
       and build the TF-M source.
-    - Follow the :doc:`User guide </docs/user_guides/tfm_user_guide>` for information
+    - Follow the :doc:`User guide </docs/getting_started/tfm_user_guide>` for information
       on running the example.
 
 To port TF-M to a another system or OS, follow the
-:doc:`OS Integration Guide </docs/user_guides/tfm_integration_guide>`
+:doc:`OS Integration Guide </docs/getting_started/tfm_integration_guide>`
 
-Please also see the :doc:`glossary </docs/glossary>` of terms used in the project.
+Please also see the :doc:`glossary </docs/reference/glossary>` of terms used in the project.
 
-:doc:`Contributing Guidelines </docs/processes/contributing>` contains guidance on how to
+:doc:`Contributing Guidelines </docs/contributing/contributing>` contains guidance on how to
 contribute to this project.
 
 Further documents can be found in the ``docs`` folder.

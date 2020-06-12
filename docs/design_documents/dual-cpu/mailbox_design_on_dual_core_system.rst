@@ -86,7 +86,7 @@ notifications between SPE and NSPE.
 
 The architecture is showed in following figure.
 
-.. figure:: media/dual_core_mailbox_arch.png
+.. figure:: dual_core_mailbox_arch.png
 
 ******************************************
 Mailbox communication for PSA Client calls

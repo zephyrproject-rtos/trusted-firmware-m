@@ -590,7 +590,7 @@ Reference
 
 .. [2] :doc:`Trusted Firmware-M Profile Small Design </docs/design_documents/tfm_profile_small>`
 
-.. [3] :doc:`Initial Attestation Service Integration Guide </docs/user_guides/services/tfm_attestation_integration_guide>`
+.. [3] :doc:`Initial Attestation Service Integration Guide </docs/reference/services/tfm_attestation_integration_guide>`
 
 .. [4] `HMAC: Keyed-Hashing for Message Authentication <https://tools.ietf.org/html/rfc2104>`_
 

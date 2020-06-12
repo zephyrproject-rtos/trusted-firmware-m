@@ -28,7 +28,7 @@ manifest file IRQ declaration example
 
 .. code-block:: json
 
-    "irqs": [
+    {"irqs": [
     {
         "line_num": 17,
         "signal": "RTC"
@@ -37,7 +37,7 @@ manifest file IRQ declaration example
         "line_name": "UART1_IRQ",
         "signal": "UART1"
     }
-    ]
+    ]}
 
 Partition ISR function
 ======================

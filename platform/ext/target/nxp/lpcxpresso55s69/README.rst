@@ -146,7 +146,7 @@ Debugging with GDB
 
     **NOTE**: When debugging with the mbed-crypto library, you also require an
     additional ``-DMBEDCRYPTO_DEBUG=ON`` compile-time switch, as defined here:
-    :ref:`docs/user_guides/tfm_build_instruction:Configuring the build`
+    :ref:`docs/getting_started/tfm_build_instruction:Configuring the build`
 
 
 Start the GDB server, pointing to the secure application image:
