@@ -45,17 +45,6 @@ elseif (ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
 		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS TFM_NS_CLIENT_IDENTIFICATION)
 	endif()
 
-	if (NOT PS_RAM_FS
-		AND
-		NOT (REFERENCE_PLATFORM
-			 OR ${TARGET_PLATFORM} STREQUAL "AN524"
-			 OR ${TARGET_PLATFORM} STREQUAL "FVP_SSE300_MPS2"))
-		# Show flash warning message only when the RAM FS is not in use and the target platform contains a flash device.
-		# The reference platforms, AN524 and FVP_SSE300_MPS2 use RAM memory to emulate the flash.
-		set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS PS_SHOW_FLASH_WARNING)
-		set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS PS_SHOW_FLASH_WARNING)
-	endif()
-
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/test/interface/include ABSOLUTE)

@@ -34,17 +34,6 @@ elseif (ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS)
                 "${ITS_TEST_DIR}/secure/psa_its_s_reliability_testsuite.c"
                 "${ITS_TEST_DIR}/its_tests_common.c")
 
-    if (NOT ITS_RAM_FS
-        AND
-        NOT (REFERENCE_PLATFORM
-             OR ${TARGET_PLATFORM} STREQUAL "AN524"
-             OR ${TARGET_PLATFORM} STREQUAL "FVP_SSE300_MPS2"))
-        # Show flash warning message only when the RAM FS is not in use and the target platform contains a flash device.
-        # The reference platforms, AN524 and FVP_SSE300_MPS2 use RAM memory to emulate the flash.
-        set_property(SOURCE ${ALL_SRC_C_S} APPEND PROPERTY COMPILE_DEFINITIONS ITS_SHOW_FLASH_WARNING)
-        set_property(SOURCE ${ALL_SRC_C_NS} APPEND PROPERTY COMPILE_DEFINITIONS ITS_SHOW_FLASH_WARNING)
-    endif()
-
     #Setting include directories
     embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
     embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)

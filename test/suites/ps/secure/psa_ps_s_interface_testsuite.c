@@ -126,13 +126,6 @@ void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite)
 
     set_testsuite("PSA protected storage S interface tests (TFM_PS_TEST_2XXX)",
                   psa_ps_s_tests, list_size, p_test_suite);
-
-#ifdef PS_SHOW_FLASH_WARNING
-    TEST_LOG("\r\n**WARNING** The PS regression tests reduce the life of the "
-             "flash memory as they write/erase multiple times the memory. \r\n"
-             "Please, set the PS_RAM_FS flag to use RAM instead of flash."
-             "\r\n\r\n");
-#endif
 }
 
 /**

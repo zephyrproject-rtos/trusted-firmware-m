@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,11 +59,4 @@ void register_testsuite_ns_psa_its_interface(struct test_suite_t *p_test_suite)
     set_testsuite("PSA internal trusted storage NS interface tests "
                  "(TFM_ITS_TEST_1XXX)",
                   psa_its_ns_tests, list_size, p_test_suite);
-
-#ifdef ITS_SHOW_FLASH_WARNING
-    TEST_LOG("\r\n**WARNING** The ITS regression tests reduce the life of the "
-             "flash memory as they write/erase multiple times the memory. \r\n"
-             "Please, set the ITS_RAM_FS flag to use RAM instead of flash."
-             "\r\n\r\n");
-#endif
 }
