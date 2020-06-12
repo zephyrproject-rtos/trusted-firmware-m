@@ -26,7 +26,7 @@
  * 0x000A_0000 Secure image     secondary slot (384 KB)
  * 0x0010_0000 Non-secure image secondary slot (256 KB)
  * 0x0014_0000 Scratch area (384 KB)
- * 0x001A_0000 Secure Storage Area (20 KB)
+ * 0x001A_0000 Protected Storage Area (20 KB)
  * 0x001A_5000 Internal Trusted Storage Area (16 KB)
  * 0x001A_9000 NV counters area (4 KB)
  * 0x001A_A000 Unused
@@ -40,7 +40,7 @@
  *    0x000A_0000 Secure     image secondary
  *    0x0010_0000 Non-secure image secondary
  * 0x0014_0000 Scratch area (640 KB)
- * 0x001E_0000 Secure Storage Area (20 KB)
+ * 0x001E_0000 Protected Storage Area (20 KB)
  * 0x001E_5000 Internal Trusted Storage Area (16 KB)
  * 0x001E_9000 NV counters area (4 KB)
  * 0x001E_A000 Unused
@@ -141,14 +141,14 @@
 #error "Secondary image overlaps to SSRAM3 device, which is not supported!"
 #endif
 
-/* Secure Storage (SST) Service definitions */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+/* Protected Storage (PS) Service definitions */
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+#define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
-                                         FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
+                                         FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x4000)   /* 16 KB */
 
 /* NV Counters definitions */
@@ -169,27 +169,27 @@
  */
 #define FLASH_DEV_NAME Driver_FLASH0
 
-/* Secure Storage (SST) Service definitions
+/* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
- * TF-M SST Integration Guide.
+ * TF-M PS Integration Guide.
  */
-#define SST_FLASH_DEV_NAME Driver_FLASH0
+#define PS_FLASH_DEV_NAME Driver_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
  */
-#define SST_FLASH_AREA_ADDR     FLASH_SST_AREA_OFFSET
-/* Dedicated flash area for SST */
-#define SST_FLASH_AREA_SIZE     FLASH_SST_AREA_SIZE
-#define SST_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
-/* Number of SST_SECTOR_SIZE per block */
-#define SST_SECTORS_PER_BLOCK   (0x1)
+#define PS_FLASH_AREA_ADDR     FLASH_PS_AREA_OFFSET
+/* Dedicated flash area for PS */
+#define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+/* Number of PS_SECTOR_SIZE per block */
+#define PS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
-#define SST_FLASH_PROGRAM_UNIT  (0x1)
-/* The maximum asset size to be stored in the SST area */
-#define SST_MAX_ASSET_SIZE      (2048)
-/* The maximum number of assets to be stored in the SST area */
-#define SST_NUM_ASSETS          (10)
+#define PS_FLASH_PROGRAM_UNIT  (0x1)
+/* The maximum asset size to be stored in the PS area */
+#define PS_MAX_ASSET_SIZE      (2048)
+/* The maximum number of assets to be stored in the PS area */
+#define PS_NUM_ASSETS          (10)
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
