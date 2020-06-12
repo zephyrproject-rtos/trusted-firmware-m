@@ -35,6 +35,7 @@ install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 
 install(FILES       ${INTERFACE_INC_DIR}/os_wrapper/common.h
+                    ${INTERFACE_INC_DIR}/os_wrapper/msg_queue.h
                     ${INTERFACE_INC_DIR}/os_wrapper/mutex.h
                     ${INTERFACE_INC_DIR}/os_wrapper/semaphore.h
                     ${INTERFACE_INC_DIR}/os_wrapper/thread.h
