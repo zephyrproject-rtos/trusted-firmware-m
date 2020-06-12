@@ -209,20 +209,28 @@ TFM_PS_NS_TEST(1002, "Thread_A")
 
     /* Set with no flags */
     status = psa_ps_set(WRITE_ONCE_UID, data_len, write_data, flags);
-    if (status != PSA_SUCCESS) {
+    if (status == PSA_SUCCESS) {
+        /* Set with valid flag: PSA_STORAGE_FLAG_WRITE_ONCE (with previously
+         * created UID)
+         * Note: Once created, WRITE_ONCE_UID cannot be deleted. It is reused
+         * across multiple tests.
+         */
+        status = psa_ps_set(WRITE_ONCE_UID, WRITE_ONCE_DATA_SIZE,
+                            WRITE_ONCE_DATA, PSA_STORAGE_FLAG_WRITE_ONCE);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Set should not fail with valid flags (existing UID)");
+            return;
+        }
+    } else if (status == PSA_ERROR_NOT_PERMITTED) {
+        /* The UID has already been created with the PSA_STORAGE_FLAG_WRITE_ONCE
+         * flag in a previous test run, so skip creating it again and emit a
+         * warning.
+         */
+        TEST_LOG("Note: The UID in this test has already been created with\r\n"
+                 "the PSA_STORAGE_FLAG_WRITE_ONCE flag in a previous test\r\n"
+                 "run. Wipe the storage area to run the full test.\r\n");
+    } else {
         TEST_FAIL("Set should not fail with no flags");
-        return;
-    }
-
-    /* Set with valid flag: PSA_STORAGE_FLAG_WRITE_ONCE
-     * (with previously created UID)
-     * Note: Once created, WRITE_ONCE_UID cannot be deleted. It is reused across
-     * multiple tests.
-     */
-    status = psa_ps_set(WRITE_ONCE_UID, WRITE_ONCE_DATA_SIZE, WRITE_ONCE_DATA,
-                        PSA_STORAGE_FLAG_WRITE_ONCE);
-    if (status != PSA_SUCCESS) {
-        TEST_FAIL("Set should not fail with valid flags (and existing UID)");
         return;
     }
 
