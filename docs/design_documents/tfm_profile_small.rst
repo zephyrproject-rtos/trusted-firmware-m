@@ -410,9 +410,6 @@ The details will be covered in each module in `Implementation details`_.
    * - ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE``
      - ``ON``
      - Enable ITS SP
-   * - ``ITS_RAM_FS``
-     - ``OFF``
-     - Stop using RAM to simulate Flash
    * - ``ITS_BUF_SIZE``
      - ``32``
      - ITS internal transient buffer size

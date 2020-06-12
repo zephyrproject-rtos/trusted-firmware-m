@@ -45,8 +45,6 @@ endif()
 
 # Enable Internal Trusted Storage service
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON)
-# Use the real Flash for Internal Trusted Storage
-set(ITS_RAM_FS OFF)
 # Decrease the transient internal buffer size to 32 bytes
 set(ITS_BUF_SIZE 32)
 

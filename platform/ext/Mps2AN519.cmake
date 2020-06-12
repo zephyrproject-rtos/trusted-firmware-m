@@ -205,8 +205,6 @@ elseif(BUILD_FLASH)
   # to be sure the PS service knows that when it starts the PS area does not contain any
   # valid PS flash layout and it needs to create one. The same for ITS.
   set(PS_CREATE_FLASH_LAYOUT ON)
-  set(PS_RAM_FS OFF)
   set(ITS_CREATE_FLASH_LAYOUT ON)
-  set(ITS_RAM_FS OFF)
   embedded_include_directories(PATH "${PLATFORM_DIR}/target/mps2/an519/cmsis_drivers" ABSOLUTE)
 endif()

@@ -327,18 +327,18 @@ needs. The list of PS services flags are:
 - ``PS_ROLLBACK_PROTECTION``- this flag allows to enable/disable
   rollback protection in protected storage service. This flag takes effect only
   if the target has non-volatile counters and ``PS_ENCRYPTION`` flag is on.
-- ``PS_RAM_FS``- this flag allows to enable/disable the use of RAM
-  instead of the flash to store the FS in protected storage service. This flag
-  is set by default in the regression tests, if it is not defined by the
-  platform.  The PS regression tests reduce the life of the flash memory
-  as they write/erase multiple times in the memory.
+- ``PS_RAM_FS``- setting this flag to ``ON`` enables the use of RAM instead of
+  the persistent storage device to store the FS in the Protected Storage
+  service. This flag is ``OFF`` by default. The PS regression tests write/erase
+  storage multiple time, so enabling this flag can increase the life of flash
+  memory when testing.
 
   .. Note::
-    If this flag is manually disabled when running the regression tests,
-    then the storage flash area should also be erased before running the tests
-    to ensure they run successfully. The type of storage flash area is platform
-    specific (QSPI, eFlash, etc.) and it is described in corresponding
-    flash_layout.h
+    If this flag is disabled when running the regression tests, then it is
+    recommended that the persistent storage area is erased before running the
+    tests to ensure that all tests can run to completion. The type of persistent
+    storage area is platform specific (eFlash, MRAM, etc.) and it is described
+    in corresponding flash_layout.h
 
 - ``PS_TEST_NV_COUNTERS``- this flag enables the virtual
   implementation of the PS NV counters interface in
