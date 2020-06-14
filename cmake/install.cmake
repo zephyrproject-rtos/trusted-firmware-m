@@ -53,9 +53,9 @@ install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
-    install(FILES       ${INTERFACE_INC_DIR}/tfm_multi_core_api.h
-                        ${INTERFACE_INC_DIR}/tfm_ns_mailbox.h
-                        ${INTERFACE_INC_DIR}/tfm_mailbox.h
+    install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
+                        ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h
+                        ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 else()
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
@@ -112,10 +112,10 @@ endif()
 ####################### export sources #########################################
 
 if (TFM_MULTI_CORE_TOPOLOGY)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_mailbox.c
-                        ${INTERFACE_SRC_DIR}/tfm_multi_core_ns_api.c
-                        ${INTERFACE_SRC_DIR}/tfm_multi_core_psa_ns_api.c
-                        ${INTERFACE_SRC_DIR}/tfm_ns_mailbox_rtos_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox.c
+                        ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
+                        ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
+                        ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_rtos_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 else()
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c

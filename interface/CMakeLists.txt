@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,6 +27,7 @@ target_include_directories(psa_interface
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_BINARY_DIR}/generated/interface/include
         ${CMAKE_CURRENT_SOURCE_DIR}/include/os_wrapper
+        $<$<OR:$<BOOL:${FORWARD_PROT_MSG}>,$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
 )
 
 # PSA interface files are generated from a template

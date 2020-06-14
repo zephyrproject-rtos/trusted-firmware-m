@@ -27,7 +27,7 @@ target_sources(tfm_psa_rot_partition_psa_proxy
     PRIVATE
         psa_proxy.c
         psa_proxy_shared_mem_mngr.c
-        ../../../interface/src/tfm_ns_mailbox.c
+        ../../../interface/src/multi_core/tfm_ns_mailbox.c
 )
 
 # The generated sources
