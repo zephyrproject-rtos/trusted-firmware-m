@@ -85,7 +85,7 @@ if (NOT NODOC)
 	#Version ID of TF-M.
 	#TODO: this shall not be hard-coded here. A process need to defined for
 	#      versioning the document (and TF-M).
-	set(DOXYCFG_TFM_VERSION "v1.0")
+	set(DOXYCFG_TFM_VERSION "v1.1")
 
 	#Using add_custom_command allows CMake to generate proper clean commands
 	#for document generation.
