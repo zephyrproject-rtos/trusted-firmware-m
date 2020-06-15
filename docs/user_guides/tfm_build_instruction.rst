@@ -331,10 +331,10 @@ The following table describes the differences between the configurations:
 | PsaApiTestIPCTfmLevel2 | IPC        | 2             | No              | No             | No            | Yes               | TF-M & PSA API tests    |
 +------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
 | DefaultProfileS        | Library    | 1             | No              | No             | No            | No                | TF-M Profile Small,     |
-|                        |            |               |                 |                |               |                   | no tests                |
+|                        |            |               |                 |                |               |                   | no tests [7]_           |
 +------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
 | RegressionProfileS     | Library    | 1             | Yes             | Yes            | No            | No                | TF-M Profile Small &    |
-|                        |            |               |                 |                |               |                   | Regression tests        |
+|                        |            |               |                 |                |               |                   | Regression tests [7]_   |
 +------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
 
 .. [1] Which TF-M Model is set: `CORE_IPC`. If `CORE_IPC` is set to true then the model is IPC model, otherwise it's library model.
@@ -348,6 +348,9 @@ The following table describes the differences between the configurations:
 .. [5] Build IPC tests or not: `IPC_TEST`. It can be only enabled in IPC model
 
 .. [6] Build for PSA API compliance tests or not: `PSA_API_TEST`.
+
+.. [7] Profile Small config doesn't cover all the platforms. Please check
+       Profile Small config files to find out the supported platforms.
 
 --------------
 
