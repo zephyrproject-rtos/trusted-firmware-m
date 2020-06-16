@@ -32,15 +32,6 @@ int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
         : : "I" (TFM_SVC_GET_CALLER_CLIENT_ID));
 }
 
-__attribute__((naked))
-int32_t tfm_core_validate_secure_caller(void)
-{
-    __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_VALIDATE_SECURE_CALLER));
-}
-
 #endif
 
 __attribute__((naked))

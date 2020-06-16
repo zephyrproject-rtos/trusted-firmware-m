@@ -83,8 +83,6 @@ enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RW = 2,
 };
 
-extern int32_t tfm_core_validate_secure_caller(void);
-
 extern int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id);
 
 extern int32_t tfm_core_get_boot_data(uint8_t major_type,

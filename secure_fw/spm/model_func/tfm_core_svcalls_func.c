@@ -57,9 +57,6 @@ uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp)
     case TFM_SVC_SFN_RETURN:
         lr = tfm_spm_partition_return_handler(lr);
         break;
-    case TFM_SVC_VALIDATE_SECURE_CALLER:
-        tfm_spm_validate_secure_caller_handler(svc_args);
-        break;
     case TFM_SVC_GET_CALLER_CLIENT_ID:
         tfm_spm_get_caller_client_id_handler(svc_args);
         break;

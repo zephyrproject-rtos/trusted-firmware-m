@@ -405,11 +405,6 @@ uint32_t tfm_spm_partition_request_svc_handler(
 uint32_t tfm_spm_partition_return_handler(uint32_t lr);
 
 /**
- * \brief Called by secure service to check if client is secure
- */
-void tfm_spm_validate_secure_caller_handler(uint32_t *svc_args);
-
-/**
  * \brief Stores caller's client id in state context
  */
 void tfm_spm_get_caller_client_id_handler(uint32_t *svc_args);

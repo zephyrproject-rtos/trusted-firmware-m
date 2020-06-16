@@ -694,38 +694,6 @@ int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     return (int32_t)res;
 }
 
-void tfm_spm_validate_secure_caller_handler(uint32_t *svc_args)
-{
-
-    enum tfm_status_e res = TFM_ERROR_GENERIC;
-    uint32_t running_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_idx);
-    uint32_t running_partition_flags =
-            tfm_spm_partition_get_flags(running_partition_idx);
-    uint32_t caller_partition_flags =
-            tfm_spm_partition_get_flags(curr_part_data->caller_partition_idx);
-
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED) {
-        /* This handler shouldn't be called from outside partition context.
-         * Also if the current partition is handling IRQ, the caller partition
-         * index might not be valid;
-         * Partitions are only allowed to run while S domain is locked.
-         */
-        svc_args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-        return;
-    }
-
-    /* Store return value in r0 */
-    if (caller_partition_flags & SPM_PART_FLAG_APP_ROT) {
-        res = TFM_SUCCESS;
-    }
-    svc_args[0] = (uint32_t)res;
-}
-
 int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
                                     void     *start_addr,
                                     size_t    len,
