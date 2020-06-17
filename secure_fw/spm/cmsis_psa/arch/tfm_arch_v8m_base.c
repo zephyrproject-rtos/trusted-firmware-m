@@ -6,17 +6,16 @@
  */
 
 #include <inttypes.h>
+#include "spm_ipc.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"
-#include "spm_api.h"
 #include "tfm/tfm_core_svc.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
 #error "Unsupported ARM Architecture."
 #endif
 
-#ifdef TFM_PSA_API
 /*
  * Stack status at PendSV entry:
  *
@@ -85,7 +84,6 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
     p_actx->sp_limit = sp_limit;
     p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
-#endif
 
 /**
  * \brief Overwrites default Hard fault handler.

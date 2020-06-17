@@ -12,6 +12,9 @@
 #include "target_cfg.h"
 #ifdef TFM_PSA_API
 #include "tfm_spm_hal.h"
+#include "spm_ipc.h"
+#else
+#include "spm_func.h"
 #endif
 
 struct spm_partition_desc_t;

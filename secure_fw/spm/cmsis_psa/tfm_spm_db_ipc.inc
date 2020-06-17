@@ -10,7 +10,6 @@
 #ifndef __TFM_SPM_DB_IPC_INC__
 #define __TFM_SPM_DB_IPC_INC__
 
-#include "spm_api.h"
 #include "psa_manifest/sid.h"
 
 /**************************************************************************/

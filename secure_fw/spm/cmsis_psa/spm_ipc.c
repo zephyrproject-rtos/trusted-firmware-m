@@ -20,7 +20,7 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
-#include "spm_api.h"
+#include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
 #include "spm_db.h"
 #include "tfm_core_utils.h"
@@ -33,6 +33,8 @@
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
+#include "spm_partition_defs.h"
+#include "psa_manifest/pid.h"
 #include "tfm/tfm_spm_services.h"
 
 #include "secure_fw/partitions/tfm_service_list.inc"

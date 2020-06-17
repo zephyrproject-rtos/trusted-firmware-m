@@ -12,7 +12,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"
 #include "tfm_secure_api.h"
-#include "spm_api.h"
+#include "spm_ipc.h"
 #include "tfm/tfm_core_svc.h"
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
@@ -30,7 +30,6 @@ struct tfm_fault_context_s {
     uint32_t RETPSR;
 } tfm_fault_context;
 
-#ifdef TFM_PSA_API
 /*
  * Stack status at PendSV entry:
  *
@@ -88,7 +87,6 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
     p_actx->sp_limit = sp_limit;
     p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
-#endif
 
 /**
  * \brief Overwrites default Secure fault handler.

@@ -6,9 +6,15 @@
  */
 
 #include <arm_cmse.h>
+#include <stdbool.h>
 #include "region_defs.h"
-#include "spm_api.h"
+#include "tfm_arch.h"
 #include "tfm_api.h"
+#ifdef TFM_PSA_API
+#include "spm_ipc.h"
+#else
+#include "spm_func.h"
+#endif
 
 /**
  * \brief Check whether the current partition has access to a memory range

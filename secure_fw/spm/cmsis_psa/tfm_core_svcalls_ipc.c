@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include "region.h"
-#include "spm_api.h"
 #include "spm_db.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"

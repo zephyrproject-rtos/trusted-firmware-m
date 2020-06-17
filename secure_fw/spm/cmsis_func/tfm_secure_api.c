@@ -6,7 +6,7 @@
  */
 
 #include <stdbool.h>
-#include "spm_api.h"
+#include "spm_func.h"
 #include "tfm_secure_api.h"
 
 void tfm_secure_api_error_handler(void)

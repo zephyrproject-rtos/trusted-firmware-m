@@ -10,7 +10,7 @@
 #include "tfm/tfm_core_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"
-#include "spm_api.h"
+#include "spm_func.h"
 #include "spm_partition_defs.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"

@@ -6,7 +6,7 @@
  */
 
 #include "psa/service.h"
-#include "spm_api.h"
+#include "spm_ipc.h"
 #include "tfm_core_utils.h"
 #include "tfm_internal_defines.h"
 #include "tfm_memory_utils.h"

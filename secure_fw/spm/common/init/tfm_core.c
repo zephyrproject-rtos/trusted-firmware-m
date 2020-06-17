@@ -12,7 +12,12 @@
 #include "tfm_spm_hal.h"
 #include "tfm_version.h"
 #include "log/tfm_log.h"
-#include "spm_api.h"
+#ifdef TFM_PSA_API
+#include "spm_ipc.h"
+#else
+#include "spm_func.h"
+#include "spm_partition_defs.h"
+#endif
 
 /*
  * Avoids the semihosting issue
