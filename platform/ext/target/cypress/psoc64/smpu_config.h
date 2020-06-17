@@ -238,10 +238,48 @@
 #error "Flash layout has changed - SMPU8 doesn't immediately follow SMPU7"
 #endif
 
-/* SMPU7 and SMPU8 should exactly cover the privileged secure SRAM */
+/* SMPU7 and SMPU8 should exactly cover the privileged secure SRAM which
+ * consists of S_PRIV_DATA and S_RAM_CODE
+ */
 #if ((6*REGIONSIZE_TO_BYTES(SMPU7_REGIONSIZE)/8) + \
-     REGIONSIZE_TO_BYTES(SMPU8_REGIONSIZE)) != S_PRIV_DATA_SIZE
-#error "SMPU7_REGIONSIZE+SMPU8_REGIONSIZE should match S_PRIV_DATA_SIZE"
+     REGIONSIZE_TO_BYTES(SMPU8_REGIONSIZE)) != \
+     (S_PRIV_DATA_SIZE + S_RAM_CODE_SIZE)
+#error "SMPU7+SMPU8 REGIONSIZE should match privileged secure SRAM size"
+#endif
+
+/* SMPU9 - 2KB of privileged executable data in SRAM
+ * Note: Region resides in subregion 7 of SMPU 8*/
+#define SMPU9_BASE         S_RAM_CODE_START
+#define SMPU9_REGIONSIZE   PROT_SIZE_2KB_BIT_SHIFT
+#define SMPU9_SLAVE_CONFIG {\
+    .address = (void *)SMPU9_BASE, \
+    .regionSize = (cy_en_prot_size_t) SMPU9_REGIONSIZE, \
+    .subregions = ALL_ENABLED, \
+    .userPermission = CY_PROT_PERM_DISABLED, \
+    .privPermission = CY_PROT_PERM_RX, \
+    .secure = false, \
+    .pcMatch = false, \
+    .pcMask = SECURE_PCS_MASK, \
+}
+#define SMPU9_MASTER_CONFIG COMMON_SMPU_MASTER_CONFIG
+
+/* SMPU requires base address aligned to size */
+#if SMPU9_BASE % REGIONSIZE_TO_BYTES(SMPU9_REGIONSIZE)
+#error "Flash layout has changed - SMPU9 needs updating"
+#endif
+
+#if S_RAM_CODE_SIZE != REGIONSIZE_TO_BYTES(SMPU9_REGIONSIZE)
+#error "SMPU9_REGIONSIZE is not equal S_RAM_CODE_SIZE"
+#endif
+
+/* SMPU9 should be contained within SMPU8 */
+#if SMPU9_BASE < SMPU8_BASE
+#error "SMPU9 is below SMPU8"
+#endif
+
+#if (SMPU9_BASE + REGIONSIZE_TO_BYTES(SMPU9_REGIONSIZE)) > \
+    (SMPU8_BASE + REGIONSIZE_TO_BYTES(SMPU8_REGIONSIZE))
+#error "SMPU9 is not within SMPU8"
 #endif
 
 #endif /* __SMPU_CONFIG_H__ */
