@@ -36,9 +36,12 @@ folders. The original license text is included in those source files.
     specific subfolder named ``ext`` so that it can be isolated if required.
     The 'ext' folder can be seen in the folders above mentioned.
 
-#############
-Release Notes
-#############
+#########################
+Release Notes and Process
+#########################
+The :doc:`Release Cadence and Process </docs/contributing/release_process>` provides
+release cadence and process information.
+
 The :doc:`Change Log & Release Notes </docs/reference/changelog>` provides details of
 major features of the release and platforms supported.
 
