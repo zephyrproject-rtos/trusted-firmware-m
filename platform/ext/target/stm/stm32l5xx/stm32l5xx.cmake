@@ -81,6 +81,7 @@ endif()
     list(APPEND ALL_SRC_C_BL2 "${PLATFORM_DIR}/target/stm/stm32l5xx/Native_Driver/tick.c")
     list(APPEND ALL_SRC_C_BL2 "${PLATFORM_DIR}/common/template/crypto_keys.c")
     list(APPEND ALL_SRC_C_BL2 "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
+    list(APPEND ALL_SRC_C_BL2 "${PLATFORM_DIR}/common/boot_hal.c")
 
 if (NOT DEFINED BUILD_NATIVE_DRIVERS)
   message(FATAL_ERROR "Configuration variable BUILD_NATIVE_DRIVERS (true|false) is undefined!")

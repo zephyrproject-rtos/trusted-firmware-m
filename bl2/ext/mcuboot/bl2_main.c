@@ -54,60 +54,9 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[BL2_MBEDTLS_MEM_BUF_LEN];
 
-struct arm_vector_table {
-    uint32_t msp;
-    uint32_t reset;
-};
-
-/*!
- * \brief Chain-loading the next image in the boot sequence.
- *
- * This function calls the Reset_Handler of the next image in the boot sequence,
- * usually it is the secure firmware. Before passing the execution to next image
- * there is conditional rule to remove the secrets from the memory. This must be
- * done if the following conditions are satisfied:
- *  - Memory is shared between SW components at different stages of the trusted
- *    boot process.
- *  - There are secrets in the memory: KDF parameter, symmetric key,
- *    manufacturer sensitive code/data, etc.
- */
-#if defined(__ICCARM__)
-#pragma required = boot_clear_bl2_ram_area
-#endif
-
-__attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
-{
-    __ASM volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                 \n"
-#endif
-        "mov     r7, r0                  \n"
-        "bl      boot_clear_bl2_ram_area \n" /* Clear RAM before jump */
-        "movs    r0, #0                  \n" /* Clear registers: R0-R12, */
-        "mov     r1, r0                  \n" /* except R7 */
-        "mov     r2, r0                  \n"
-        "mov     r3, r0                  \n"
-        "mov     r4, r0                  \n"
-        "mov     r5, r0                  \n"
-        "mov     r6, r0                  \n"
-        "mov     r8, r0                  \n"
-        "mov     r9, r0                  \n"
-        "mov     r10, r0                 \n"
-        "mov     r11, r0                 \n"
-        "mov     r12, r0                 \n"
-        "mov     lr,  r0                 \n"
-        "bx      r7                      \n" /* Jump to Reset_handler */
-    );
-}
-
 static void do_boot(struct boot_rsp *rsp)
 {
-    /* Clang at O0, stores variables on the stack with SP relative addressing.
-     * When manually set the SP then the place of reset vector is lost.
-     * Static variables are stored in 'data' or 'bss' section, change of SP has
-     * no effect on them.
-     */
-    static struct arm_vector_table *vt;
+    struct boot_arm_vector_table *vt;
     uintptr_t flash_base;
     int rc;
 
@@ -123,15 +72,14 @@ static void do_boot(struct boot_rsp *rsp)
        /* The image has been copied to SRAM, find the vector table
         * at the load address instead of image's address in flash
         */
-        vt = (struct arm_vector_table *)(rsp->br_hdr->ih_load_addr +
+        vt = (struct boot_arm_vector_table *)(rsp->br_hdr->ih_load_addr +
                                          rsp->br_hdr->ih_hdr_size);
     } else {
         /* Using the flash address as not executing in SRAM */
-        vt = (struct arm_vector_table *)(flash_base +
+        vt = (struct boot_arm_vector_table *)(flash_base +
                                          rsp->br_image_off +
                                          rsp->br_hdr->ih_hdr_size);
     }
-
     rc = FLASH_DEV_NAME.Uninitialize();
     if(rc != ARM_DRIVER_OK) {
         BOOT_LOG_ERR("Error while uninitializing Flash Interface");
@@ -140,20 +88,10 @@ static void do_boot(struct boot_rsp *rsp)
 #if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
     stdio_uninit();
 #endif
-
-#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
-    /* Restore the Main Stack Pointer Limit register's reset value
-     * before passing execution to runtime firmware to make the
-     * bootloader transparent to it.
+    /* This function never returns, because it calls the secure application
+     * Reset_Handler()
      */
-    __set_MSPLIM(0);
-#endif
-
-    __set_MSP(vt->msp);
-    __DSB();
-    __ISB();
-
-    boot_jump_to_next_image(vt->reset);
+    boot_platform_quit(vt);
 }
 
 int main(void)
