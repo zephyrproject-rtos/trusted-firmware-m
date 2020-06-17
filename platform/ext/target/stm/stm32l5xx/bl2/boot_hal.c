@@ -29,6 +29,69 @@
 #include "region_defs.h"
 
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+/* Place code in a specific section */
+#if defined(__GNUC__)
+__attribute__((section(".BL2_NoHdp_Code")))
+#endif /* __GNUC__ */
+__attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                 \n"
+#endif
+        "mov     r7, r0                  \n"
+        "bl      boot_clear_bl2_ram_area \n" /* Clear RAM before jump */
+        "movs    r0, #0                  \n" /* Clear registers: R0-R12, */
+        "mov     r1, r0                  \n" /* except R7 */
+        "mov     r2, r0                  \n"
+        "mov     r3, r0                  \n"
+        "mov     r4, r0                  \n"
+        "mov     r5, r0                  \n"
+        "mov     r6, r0                  \n"
+        "mov     r8, r0                  \n"
+        "mov     r9, r0                  \n"
+        "mov     r10, r0                 \n"
+        "mov     r11, r0                 \n"
+        "mov     r12, r0                 \n"
+        "mov     lr,  r0                 \n"
+        "bx      r7                      \n" /* Jump to Reset_handler */
+    );
+}
+/* Place code in a specific section */
+#if defined(__GNUC__)
+__attribute__((section(".BL2_NoHdp_Code")))
+#endif /* __GNUC__ */
+/**
+  * @brief This function is called to clear all RAM area before jumping in
+  * in Secure application .
+  * @note
+  * @retval void
+  */
+void boot_platform_quit(struct boot_arm_vector_table *vt)
+{
+    /* Clang at O0, stores variables on the stack with SP relative addressing.
+     * When manually set the SP then the place of reset vector is lost.
+     * Static variables are stored in 'data' or 'bss' section, change of SP has
+     * no effect on them.
+     */
+    static struct boot_arm_vector_table *vt_cpy;
+
+    vt_cpy=vt;
+    /* activate protection before jumping in secure image */
+    TFM_LL_SECU_UpdateRunTimeProtections();
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
+    /* Restore the Main Stack Pointer Limit register's reset value
+     * before passing execution to runtime firmware to make the
+     * bootloader transparent to it.
+     */
+    __set_MSPLIM(0);
+#endif
+    __set_MSP(vt->msp);
+    __DSB();
+    __ISB();
+
+    boot_jump_to_next_image(vt_cpy->reset);
+}
 
 /* Place code in a specific section */
 #if defined(__GNUC__)
