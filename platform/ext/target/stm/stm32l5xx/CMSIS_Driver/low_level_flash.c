@@ -25,7 +25,7 @@
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)
 #endif /* ARG_UNUSED */
-
+void NMI_Handler(void);
 /* config for flash driver */
 #define FLASH0_SECTOR_SIZE  0x1000
 #define FLASH0_PAGE_SIZE 0x800

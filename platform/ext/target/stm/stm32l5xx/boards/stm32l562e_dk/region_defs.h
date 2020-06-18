@@ -162,10 +162,6 @@
 #define SECONDARY_PARTITION_SIZE            (FLASH_AREA_2_SIZE)
 
 #ifdef BL2
-/* Personalized region */
-#define PERSO_START                         (S_ROM_ALIAS(FLASH_AREA_PERSO_OFFSET))
-#define PERSO_SIZE                          (FLASH_AREA_PERSO_SIZE)
-#define PERSO_LIMIT                         (PERSO_START + PERSO_SIZE - 1)
 
 /* Bootloader region protected by hdp */
 #define BL2_CODE_START                      (S_ROM_ALIAS(FLASH_AREA_BL2_OFFSET))

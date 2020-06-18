@@ -492,7 +492,7 @@ static void sau_and_idau_cfg(void)
   SAU->RNR  = 3;
   SAU->RBAR = ((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET) & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = (((uint32_t)FLASH_BASE_NS + FLASH_AREA_3_OFFSET
-                + FLASH_AREA_3_SIZE) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+                + FLASH_AREA_3_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
   /* Force memory writes before continuing */
   __DSB();
   /* Flush and refill pipeline with updated permissions */
@@ -520,10 +520,10 @@ static void mpu_init_cfg(void)
   /* descriptor 0 is set execute readonly before jumping in Secure application */
   region_cfg.region_nr = 0;
   region_cfg.region_base = FLASH_BASE_S + FLASH_AREA_0_OFFSET ;
-  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE;
+  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -531,10 +531,10 @@ static void mpu_init_cfg(void)
   }
   region_cfg.region_nr = 1;
   region_cfg.region_base = FLASH_BASE_S + FLASH_AREA_1_OFFSET ;
-  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE;
+  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -545,7 +545,7 @@ static void mpu_init_cfg(void)
   region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_BL2_OFFSET - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -556,7 +556,7 @@ static void mpu_init_cfg(void)
   region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_0_OFFSET - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -565,10 +565,10 @@ static void mpu_init_cfg(void)
   /* Forbid execuction on full SRAM area */
   region_cfg.region_nr = 4;
   region_cfg.region_base = SRAM1_BASE_S ;
-  region_cfg.region_limit = SRAM1_BASE_S + TOTAL_RAM_SIZE;
+  region_cfg.region_limit = SRAM1_BASE_S + TOTAL_RAM_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -580,7 +580,7 @@ static void mpu_init_cfg(void)
   region_cfg.region_limit = PERIPH_BASE_S + 0xFFFFFFF;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -594,10 +594,10 @@ static void mpu_init_cfg(void)
   /* reduced execution to all flash during control */
   region_cfg.region_nr = 0;
   region_cfg.region_base = FLASH_BASE_NS + FLASH_AREA_1_OFFSET;
-  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE;
+  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -605,10 +605,10 @@ static void mpu_init_cfg(void)
   }
   region_cfg.region_nr = 1;
   region_cfg.region_base = FLASH_BASE_NS + FLASH_AREA_2_OFFSET;
-  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE;
+  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -621,10 +621,10 @@ static void mpu_init_cfg(void)
 #else
   region_cfg.region_base = SRAM1_BASE_NS ;
 #endif /*   TFM_ERROR_HANDLER_NON_SECURE */
-  region_cfg.region_limit = SRAM1_BASE_NS + TOTAL_RAM_SIZE;
+  region_cfg.region_limit = SRAM1_BASE_NS + TOTAL_RAM_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -635,8 +635,8 @@ static void mpu_init_cfg(void)
   region_cfg.region_base = PERIPH_BASE_NS;
   region_cfg.region_limit = PERIPH_BASE_NS + 0xFFFFFFF;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
-  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
   if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -665,16 +665,17 @@ __attribute__((section(".BL2_NoHdp_Code")))
 static void mpu_appli_cfg(void)
 {
 #ifdef TFM_BOOT_MPU_PROTECTION
-  struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
-  struct mpu_armv8m_dev_t dev_mpu_ns = { MPU_BASE_NS};
+  /* static variables are used to ensure rodata placement in the specific section */
+  static struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
+  static struct mpu_armv8m_dev_t dev_mpu_ns = { MPU_BASE_NS};
   struct mpu_armv8m_region_cfg_t region_cfg;
   /* region 0 is now enable for execution */
   region_cfg.region_nr = 0;
   region_cfg.region_base = FLASH_BASE_S + FLASH_AREA_0_OFFSET ;
-  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE;
+  region_cfg.region_limit = FLASH_BASE_S + FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
   region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
   if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK)
   {
@@ -683,15 +684,30 @@ static void mpu_appli_cfg(void)
   /* region 0 is now enable for execution */
   region_cfg.region_nr = 0;
   region_cfg.region_base = FLASH_BASE_NS + FLASH_AREA_1_OFFSET;
-  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE;
+  region_cfg.region_limit = FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE - 1;
   region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-  region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_ONLY;
-  region_cfg.attr_sh = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
   region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
   if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
   {
     Error_Handler();
   }
+#ifdef TFM_ERROR_HANDLER_NON_SECURE
+  region_cfg.region_base = SRAM1_BASE_NS ;
+  /* Forbid execution on full SRAM area */
+  region_cfg.region_nr = 4;
+  region_cfg.region_base = SRAM1_BASE_NS ;
+  region_cfg.region_limit = SRAM1_BASE_NS + (~MPU_RBAR_BASE_Msk);
+  region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+  region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+  region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
+  region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
+  if (mpu_armv8m_region_enable(&dev_mpu_ns, &region_cfg) != MPU_ARMV8M_OK)
+  {
+    Error_Handler();
+  }
+#endif /*   TFM_ERROR_HANDLER_NON_SECURE */
 #endif /* TFM_BOOT_MPU_PROTECTION */
 }
 

@@ -54,7 +54,9 @@
 #endif /* STM32L5 */
 
 #if defined(__DOMAIN_NS) && (__DOMAIN_NS == 1)
-#undef __ARM_FEATURE_CMSE
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
+#error "non secure build with secure option"
+#endif
 #endif
 
 /* Uncomment the line below according to the target STM32L5 device used in your

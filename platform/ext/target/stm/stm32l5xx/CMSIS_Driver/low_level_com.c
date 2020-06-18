@@ -159,12 +159,12 @@ static int32_t USART0_Transfer(const void *data_out, void *data_in,
 
 static uint32_t USART0_GetTxCount(void)
 {
-  return ARM_DRIVER_ERROR_UNSUPPORTED;
+  return 0;
 }
 
 static uint32_t USART0_GetRxCount(void)
 {
-  return ARM_DRIVER_ERROR_UNSUPPORTED;
+  return 0;
 }
 static int32_t USART0_Control(uint32_t control, uint32_t arg)
 {
