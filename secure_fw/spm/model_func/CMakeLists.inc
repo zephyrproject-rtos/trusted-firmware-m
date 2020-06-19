@@ -46,6 +46,7 @@ set (SFW_FUNC_SPM_SRC
 		"${SFW_FUNC_SPM_DIR}/../runtime/tfm_core_mem_check.c"
 		"${SFW_FUNC_SPM_DIR}/../runtime/tfm_core_utils.c"
 		"${SFW_FUNC_SPM_DIR}/tfm_veneers.c"
+		"${SFW_FUNC_SPM_DIR}/arch.c"
 	)
 
 #Append all our source files to global lists.
