@@ -9,7 +9,7 @@
 
 #include "tfm_platform_system.h"
 #include "tfm_plat_nv_counters.h"
-#include "tfm/tfm_spm_services_api.h"
+#include "tfm/tfm_spm_services.h"
 #include "tfm_secure_api.h"
 #include "psa_manifest/pid.h"
 

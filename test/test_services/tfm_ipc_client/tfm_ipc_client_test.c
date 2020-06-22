@@ -10,7 +10,7 @@
 #include "psa/client.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_ipc_client_partition.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "psa_manifest/sid.h"
 
 /* Define the return status */

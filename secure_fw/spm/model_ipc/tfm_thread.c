@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include "tfm_arch.h"
 #include "tfm_thread.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_memory_utils.h"
 #include "tfm/tfm_core_svc.h"
 #include "spm_api.h"

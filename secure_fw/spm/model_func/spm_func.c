@@ -21,7 +21,7 @@
 #include "spm_db.h"
 #include "region_defs.h"
 #include "region.h"
-#include "tfm/tfm_spm_services_api.h"
+#include "tfm/tfm_spm_services.h"
 #include "tfm_spm_db_func.inc"
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
@@ -38,7 +38,7 @@ REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
  * This is the "Big Lock" on the secure side, to guarantee single entry
  * to SPE
  */
-extern int32_t tfm_secure_lock;
+static int32_t tfm_secure_lock;
 static int32_t tfm_secure_api_initializing = 1;
 
 static uint32_t *prepare_partition_iovec_ctx(

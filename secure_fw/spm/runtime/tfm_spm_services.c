@@ -10,7 +10,7 @@
 #include "tfm/tfm_core_svc.h"
 #include "tfm_secure_api.h"
 #include "tfm_internal.h"
-#include "tfm/tfm_spm_services_api.h"
+#include "tfm/tfm_spm_services.h"
 #include "spm_api.h"
 #include "psa/service.h"
 

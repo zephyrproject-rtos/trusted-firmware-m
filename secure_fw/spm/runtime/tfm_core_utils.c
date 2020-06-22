@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stdint.h>
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_core_utils.h"
 
 union tfm_core_addr_t {

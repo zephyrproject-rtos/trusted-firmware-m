@@ -15,7 +15,7 @@
  */
 
 #include "cmsis.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "target_cfg.h"
 #include "Driver_SSE300_PPC.h"
 #include "Driver_MPC.h"

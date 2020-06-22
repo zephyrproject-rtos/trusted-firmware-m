@@ -9,7 +9,7 @@
 
 #include "psa/error.h"
 #include "tfm_core_utils.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
 

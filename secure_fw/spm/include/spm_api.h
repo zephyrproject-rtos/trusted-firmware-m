@@ -165,6 +165,11 @@ struct tfm_spm_service_t {
     struct tfm_msg_queue_t msg_queue;        /* Message queue                */
     struct tfm_list_node_t list;             /* For list operation           */
 };
+
+enum tfm_memory_access_e {
+    TFM_MEMORY_ACCESS_RO = 1,
+    TFM_MEMORY_ACCESS_RW = 2,
+};
 #endif /* ifdef(TFM_PSA_API) */
 
 /*********************** common definitions ***********************/

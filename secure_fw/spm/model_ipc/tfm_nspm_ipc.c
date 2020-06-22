@@ -9,7 +9,7 @@
 #include "tfm_spm_hal.h"
 #include "psa/error.h"
 #include "tfm_nspm.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_internal.h"
 #include "log/tfm_assert.h"
 #include "log/tfm_log.h"

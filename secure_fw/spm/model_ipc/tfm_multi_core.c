@@ -9,7 +9,7 @@
 #include "tfm_internal.h"
 #include "tfm_nspm.h"
 #include "tfm_spe_mailbox.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "log/tfm_assert.h"
 #include "log/tfm_log.h"
 #include "log/tfm_assert.h"

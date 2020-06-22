@@ -11,7 +11,7 @@
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "tfm_veneers.h"
 #include "tfm_secure_api.h"
-#include "secure_fw/include/tfm/tfm_spm_services_api.h"
+#include "secure_fw/include/tfm/tfm_spm_services.h"
 #include "psa/service.h"
 #include "tfm_plat_test.h"
 #include "psa_manifest/pid.h"

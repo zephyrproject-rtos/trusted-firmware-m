@@ -14,7 +14,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "region_defs.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "Driver_Common.h"
 
 /* Get address of memory regions to configure MPU */

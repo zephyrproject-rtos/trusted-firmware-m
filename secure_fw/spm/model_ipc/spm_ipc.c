@@ -12,7 +12,7 @@
 #include "psa/lifecycle.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_internal_defines.h"
 #include "tfm_message_queue.h"
 #include "tfm_spm_hal.h"
@@ -33,7 +33,7 @@
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
-#include "tfm/tfm_spm_services_api.h"
+#include "tfm/tfm_spm_services.h"
 
 #include "secure_fw/partitions/tfm_service_list.inc"
 #include "tfm_spm_db_ipc.inc"

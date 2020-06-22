@@ -14,7 +14,7 @@
 #include "tfm_core_trustzone.h"
 #include "tfm_internal.h"
 #include "tfm_svcalls.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm/tfm_core_svc.h"
 
 /* The section names come from the scatter file */

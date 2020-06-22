@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "psa/service.h"
 #include "tfm_internal_defines.h"
 #include "cmsis_compiler.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_list.h"
 #include "tfm_pools.h"
 #include "tfm_memory_utils.h"

@@ -14,7 +14,7 @@
 
 #include "device_definition.h"
 #include "region_defs.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "spe_ipc_config.h"
 #include "spm_api.h"
 #include "target_cfg.h"

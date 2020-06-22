@@ -5,7 +5,7 @@
  *
  */
 #include "tfm_thread.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_wait.h"
 
 void tfm_event_wait(struct tfm_event_t *pevnt)

@@ -12,7 +12,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_message_queue.h"
 #include "spm_psa_client_call.h"
-#include "tfm_utils.h"
+#include "utilities.h"
 #include "tfm_wait.h"
 #include "tfm_nspm.h"
 
