@@ -166,7 +166,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						POST_BUILD
 
 						#Sign secure binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE_S}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
@@ -182,7 +182,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
 
 						#Sign non-secure binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE_NS}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
@@ -263,7 +263,7 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 							 -o ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 
 						#Sign concatenated binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper/wrapper.py
 						ARGS -k ${KEY_FILE}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1

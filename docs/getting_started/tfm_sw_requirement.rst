@@ -170,11 +170,11 @@ Install the following tools:
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
 - Python3 and the pip package manager (from Python 3.4 it's included)
-- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click*
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click, imgtool v1.6.0*
 
   .. code-block:: bash
 
-    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
 - SRecord v1.58 (for Musca test chip boards)
 
@@ -230,11 +230,11 @@ Install the following tools:
   installation.
 - Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
   the pip package manager (from Python 3.4 it's included)
-- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click*
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click imgtool v1.6.0*
 
   .. code-block:: bash
 
-    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
 - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
   chip boards)
@@ -493,6 +493,7 @@ To build the TF-M firmware the following tools are needed:
    "cryptography",,"Firmware"
    "cbor",,"Firmware"
    "click",,"Firmware"
+   "imgtool",,"Firmware"
    "Doxygen",">1.8","Reference manual"
    "Sphinx",">1.4","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
@@ -544,12 +545,14 @@ Dependency chain:
     fw --> jinja2
     fw --> cbor
     fw --> click
+    fw --> imgtool
     cryptography --> Python3
     pyasn1 --> Python3
     yaml --> Python3
     jinja2 --> Python3
     cbor --> Python3
     click --> Python3
+    imgtool --> Python3
 
     [*] --> u_guide
     u_guide --> Sphinx

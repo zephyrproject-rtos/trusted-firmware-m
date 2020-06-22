@@ -11,13 +11,12 @@ import re
 import os
 import sys
 import click
-import macro_parser
-# Import the external MCUBoot repo's imgtool script
-scripts_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                            '../../../../../mcuboot/scripts'))
-sys.path.insert(0, scripts_path)
 import imgtool
 import imgtool.main
+# Import macro_parser script
+parser_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(parser_path)
+import macro_parser
 
 sign_bin_size_re = re.compile(r"^\s*RE_SIGN_BIN_SIZE\s*=\s*(.*)")
 load_addr_re = re.compile(r"^\s*RE_IMAGE_LOAD_ADDRESS\s*=\s*(.*)")
