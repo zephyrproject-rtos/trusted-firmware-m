@@ -92,12 +92,12 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 	if (SECURITY_COUNTER_S)
 		set(ADD_SECURITY_COUNTER_S "-s ${SECURITY_COUNTER_S}")
 	else()
-		set(ADD_SECURITY_COUNTER_S "")
+		set(ADD_SECURITY_COUNTER_S '-sauto')
 	endif()
 	if (SECURITY_COUNTER_NS)
 		set(ADD_SECURITY_COUNTER_NS "-s ${SECURITY_COUNTER_NS}")
 	else()
-		set(ADD_SECURITY_COUNTER_NS "")
+		set(ADD_SECURITY_COUNTER_NS '-sauto')
 	endif()
 	if (DEFINED SECURITY_COUNTER)
 		message(WARNING "In case of multiple updatable images the security counter value can be specified"
@@ -130,6 +130,12 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 		set(ADD_NS_IMAGE_MIN_VER "")
 	endif()
 
+	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY")
+		set(OVERWRITE "--overwrite-only")
+	else()
+		set(OVERWRITE "")
+	endif()
+
 	set(FILE_TO_PREPROCESS ${CMAKE_BINARY_DIR}/image_macros_to_preprocess)
 	set(PREPROCESSED_FILE ${CMAKE_BINARY_DIR}/image_macros_preprocessed)
 
@@ -160,29 +166,33 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 						POST_BUILD
 
 						#Sign secure binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
-						ARGS sign
-							 --layout ${PREPROCESSED_FILE}_s.c
-							 -k ${KEY_FILE_S}
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						ARGS -k ${KEY_FILE_S}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
+							 ${OVERWRITE}
 							 -v ${IMAGE_VERSION_S}
 							 ${ADD_NS_IMAGE_MIN_VER}
 							 ${ADD_SECURITY_COUNTER_S}
+							 -l ${PREPROCESSED_FILE}_s.c
+							 --pad
+							 --pad-header
 							 -H 0x400
 							 $<TARGET_FILE_DIR:${_MY_PARAMS_S_BIN}>/${_MY_PARAMS_S_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_S_BIN}_signed.bin
 
 						#Sign non-secure binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
-						ARGS sign
-							 --layout ${PREPROCESSED_FILE}_ns.c
-							 -k ${KEY_FILE_NS}
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						ARGS -k ${KEY_FILE_NS}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
+							 ${OVERWRITE}
 							 -v ${IMAGE_VERSION_NS}
 							 ${ADD_S_IMAGE_MIN_VER}
 							 ${ADD_SECURITY_COUNTER_NS}
+							 -l ${PREPROCESSED_FILE}_ns.c
+							 --pad
+							 --pad-header
 							 -H 0x400
 							 $<TARGET_FILE_DIR:${_MY_PARAMS_NS_BIN}>/${_MY_PARAMS_NS_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_NS_BIN}_signed.bin
@@ -198,7 +208,7 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 	if (SECURITY_COUNTER)
 		set(ADD_SECURITY_COUNTER "-s ${SECURITY_COUNTER}")
 	else()
-		set(ADD_SECURITY_COUNTER "")
+		set(ADD_SECURITY_COUNTER "-sauto")
 	endif()
 	if (DEFINED SECURITY_COUNTER_S OR
 		DEFINED SECURITY_COUNTER_NS)
@@ -253,17 +263,20 @@ else() # MCUBOOT_IMAGE_NUMBER = 1
 							 -o ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 
 						#Sign concatenated binary image with default public key in mcuboot folder
-						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/imgtool.py
-						ARGS sign
-							 --layout ${PREPROCESSED_FILE}
-							 -k ${KEY_FILE}
+						COMMAND ${PYTHON_EXECUTABLE} ${MCUBOOT_DIR}/scripts/wrapper.py
+						ARGS -k ${KEY_FILE}
 							 --public-key-format ${PUBLIC_KEY_FORMAT}
 							 --align 1
+							 ${OVERWRITE}
 							 -v ${IMAGE_VERSION}
 							 ${ADD_SECURITY_COUNTER}
+							 -l ${PREPROCESSED_FILE}
+							 --pad
+							 --pad-header
 							 -H 0x400
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_FULL_BIN}.bin
 							 ${CMAKE_BINARY_DIR}/${_MY_PARAMS_SIGN_BIN}.bin)
+
 endif()
 
 	#Collect executables to common location: build/install/outputs/

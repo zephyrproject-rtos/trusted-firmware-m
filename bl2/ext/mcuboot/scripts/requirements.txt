@@ -2,3 +2,4 @@ cryptography
 pyasn1
 pyyaml
 cbor>=1.0.0
+click
