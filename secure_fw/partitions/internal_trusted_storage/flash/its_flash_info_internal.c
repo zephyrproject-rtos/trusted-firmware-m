@@ -86,7 +86,7 @@
                                                  ITS_FLASH_ALIGNMENT)
 
 /* Maximum number of files */
-#define FLASH_INFO_MAX_NUM_FILES ITS_NUM_ASSETS
+#define FLASH_INFO_MAX_NUM_FILES (ITS_NUM_ASSETS + 1)
 
 /* Default value of each byte in the flash when erased */
 #define FLASH_INFO_ERASE_VAL 0xFFU

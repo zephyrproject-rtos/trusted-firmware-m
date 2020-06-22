@@ -8,6 +8,7 @@
 #ifndef __ITS_FLASH_FS_MBLOCK_H__
 #define __ITS_FLASH_FS_MBLOCK_H__
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -146,17 +147,18 @@ struct its_flash_fs_ctx_t {
 psa_status_t its_flash_fs_mblock_init(struct its_flash_fs_ctx_t *fs_ctx);
 
 /**
- * \brief Copies rest of the file metadata, except for the one pointed by
- *        index.
+ * \brief Copies the file metadata entries between two indexes from the active
+ *        metadata block to the scratch metadata block.
  *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     idx     File metadata entry index to skip
+ * \param[in,out] fs_ctx     Filesystem context
+ * \param[in]     idx_start  File metadata entry index to start copy, inclusive
+ * \param[in]     idx_end    File metadata entry index to end copy, exclusive
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_mblock_cp_remaining_file_meta(
-                                              struct its_flash_fs_ctx_t *fs_ctx,
-                                              uint32_t idx);
+psa_status_t its_flash_fs_mblock_cp_file_meta(struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t idx_start,
+                                              uint32_t idx_end);
 
 /**
  * \brief Gets current scratch datablock physical ID.
@@ -181,6 +183,20 @@ uint32_t its_flash_fs_mblock_cur_data_scratch_id(
  */
 psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
                                               const uint8_t *fid,
+                                              uint32_t *idx);
+/**
+ * \brief Gets file metadata entry index of the first file with one of the
+ *        provided flags set.
+ *
+ * \param[in,out] fs_ctx  Filesystem context
+ * \param[in]     flags   Flags to search for
+ * \param[out]    idx     Index of the file metadata in the file system
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t its_flash_fs_mblock_get_file_idx_flag(
+                                              struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t flags,
                                               uint32_t *idx);
 
 /**
@@ -244,6 +260,8 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
  *
  * \param[in,out] fs_ctx         Filesystem context
  * \param[in]     fid            File ID
+ * \param[in]     use_spare      If true then the spare file will be used,
+ *                               otherwise at least one file will be left free
  * \param[in]     size           Size of the file for which space is reserve
  * \param[in]     flags          Flags set when the file was created
  * \param[out]    file_meta_idx  File metadata entry index
@@ -255,6 +273,7 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
 psa_status_t its_flash_fs_mblock_reserve_file(
                                            struct its_flash_fs_ctx_t *fs_ctx,
                                            const uint8_t *fid,
+                                           bool use_spare,
                                            size_t size,
                                            uint32_t flags,
                                            uint32_t *file_meta_idx,
