@@ -10,7 +10,6 @@
 #include "tfm_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
 #include "tfm_veneers.h"
-#include "secure_utilities.h"
 #include "tfm_secure_api.h"
 #include "secure_fw/include/tfm/tfm_spm_services_api.h"
 #include "psa/service.h"

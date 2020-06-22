@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include "psa/client.h"
 #include "psa/service.h"
-#include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"

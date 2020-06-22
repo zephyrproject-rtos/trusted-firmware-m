@@ -8,7 +8,6 @@
 #include <inttypes.h>
 #include "tfm_hal_device_header.h"
 #include "region_defs.h"
-#include "secure_utilities.h"
 #include "tfm_arch.h"
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"

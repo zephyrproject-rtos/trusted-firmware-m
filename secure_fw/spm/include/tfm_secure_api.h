@@ -13,7 +13,6 @@
 #endif
 #include "tfm_arch.h"
 #include "tfm/tfm_core_svc.h"
-#include "tfm_core.h"
 #include "tfm_api.h"
 #include "tfm_utils.h"
 #include "tfm_boot_status.h"

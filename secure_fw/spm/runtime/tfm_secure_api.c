@@ -6,7 +6,7 @@
  */
 
 #include <stdbool.h>
-#include "secure_utilities.h"
+#include "spm_api.h"
 #include "tfm_secure_api.h"
 
 /* This is the "Big Lock" on the secure side, to guarantee single entry

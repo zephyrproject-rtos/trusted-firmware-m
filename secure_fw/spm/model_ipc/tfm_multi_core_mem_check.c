@@ -8,7 +8,6 @@
 
 #include "tfm_spm_hal.h"
 #include "region_defs.h"
-#include "secure_utilities.h"
 #include "spm_api.h"
 #include "tfm_internal.h"
 #include "tfm_multi_core.h"

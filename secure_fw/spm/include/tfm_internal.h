@@ -8,7 +8,6 @@
 #ifndef __TFM_INTERNAL_H__
 #define __TFM_INTERNAL_H__
 
-#include "secure_utilities.h"
 #include "tfm_arch.h"
 
 #ifndef TFM_PSA_API

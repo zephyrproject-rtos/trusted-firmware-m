@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-#include "secure_utilities.h"
 #include "tfm/tfm_core_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"

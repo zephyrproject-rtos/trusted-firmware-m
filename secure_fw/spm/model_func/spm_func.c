@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <arm_cmse.h>
 #include "tfm_nspm.h"
-#include "secure_utilities.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_irq_list.h"

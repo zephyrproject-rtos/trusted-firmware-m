@@ -14,7 +14,7 @@
 #include "Driver_MPC.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
-#include "secure_utilities.h"
+#include "tfm_utils.h"
 #include "region.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))

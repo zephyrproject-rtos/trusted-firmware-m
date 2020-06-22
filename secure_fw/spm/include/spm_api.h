@@ -53,6 +53,12 @@ enum spm_err_t {
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
 
 #ifndef TFM_PSA_API
+
+#define EXC_NUM_THREAD_MODE     (0)
+#define EXC_NUM_SVCALL          (11)
+#define EXC_NUM_PENDSV          (14)
+#define EXC_NUM_SYSTICK         (15)
+
 /**
  * \brief Holds the iovec parameters that are passed to a service
  *
