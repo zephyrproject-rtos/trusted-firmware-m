@@ -142,14 +142,6 @@ with trustedfirmware-m
     ├── tf-m-tests
     └── trusted-firmware-m
 
-.. Note::
-   `CMSIS_5` v5.5.0 has a known issue, affecting compilation using
-   Arm Compiler v6.10. Please refer to
-   `CMSIS release notes <https://github.com/ARM-software/CMSIS_5/releases>`__.
-   for guidance.
-   For building with the IAR toolchain, see instructions in
-   :doc:`software requirements <tfm_build_instruction_iar>`
-
 ********************************************
 Tools for configuring and programming boards
 ********************************************
