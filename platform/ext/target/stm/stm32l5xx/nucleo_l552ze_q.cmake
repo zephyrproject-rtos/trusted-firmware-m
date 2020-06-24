@@ -16,7 +16,8 @@ set(MBEDCRYPTO_DEBUG OFF)
 set(MCUBOOT_IMAGE_NUMBER 2)
 set(TFM_ENABLE_IRQ_TEST OFF)
 set(TFM_ENABLE_PERIPH_ACCESS_TEST OFF)
-
+set(ITS_RAM_FS ON)
+set(PS_RAM_FS ON)
 add_definitions("-DSTM32L552xx")
 
 # force RDP level 0 usage
@@ -97,7 +98,9 @@ elseif(BUILD_FLASH)
   # to be sure the PS service knows that when it starts the PS area does not contain any
   # valid PS flash layout and it needs to create one.
   set(ITS_CREATE_FLASH_LAYOUT ON)
+  set(ITS_RAM_FS OFF)
   set(PS_CREATE_FLASH_LAYOUT ON)
+  set(PS_RAM_FS OFF)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
 
