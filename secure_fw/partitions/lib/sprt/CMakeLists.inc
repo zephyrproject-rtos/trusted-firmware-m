@@ -28,6 +28,7 @@ set (LIBSPRT_C_SRC
     "${LIBSPRT_DIR}/tfm_libsprt_c_memcpy.c"
     "${LIBSPRT_DIR}/tfm_libsprt_c_memmove.c"
     "${LIBSPRT_DIR}/tfm_libsprt_c_memcmp.c"
+    "${LIBSPRT_DIR}/service_api.c"
     "${TFM_ROOT_DIR}/interface/src/log/tfm_log_raw.c")
 
 if (TFM_PSA_API)
@@ -44,3 +45,4 @@ unset(LIBSPRT_C_SRC)
 
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
+embedded_include_directories(PATH ${LIBSPRT_DIR}/include ABSOLUTE)

@@ -53,17 +53,6 @@ int32_t tfm_spm_request_reset_vote(void)
 }
 
 __attribute__((naked))
-int32_t tfm_core_get_boot_data(uint8_t major_type,
-                               struct tfm_boot_data *boot_status,
-                               uint32_t len)
-{
-    __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_GET_BOOT_DATA));
-}
-
-__attribute__((naked))
 void tfm_enable_irq(psa_signal_t irq_signal)
 {
     __ASM("SVC %0\n"
