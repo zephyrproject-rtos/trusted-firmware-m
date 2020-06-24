@@ -86,7 +86,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     __set_MSPLIM(0);
 #endif
-    __set_MSP(vt->msp);
+    __set_MSP(vt_cpy->msp);
     __DSB();
     __ISB();
 
