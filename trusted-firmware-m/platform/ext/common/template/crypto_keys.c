@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include "platform/include/tfm_plat_crypto_keys.h"
 #include <stddef.h>
+#include <string.h>
+
 #include "psa/crypto_types.h"
+#include "tfm_plat_crypto_keys.h"
 
 /* FIXME: Functions in this file should be implemented by platform vendor. For
  * the security of the storage system, it is critical to use a hardware unique
@@ -30,9 +32,16 @@ static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
              {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+extern const psa_algorithm_t tfm_attest_hmac_sign_alg;
+extern const uint8_t initial_attestation_hmac_sha256_key[];
+extern const size_t initial_attestation_hmac_sha256_key_size;
+extern const char *initial_attestation_kid;
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 extern const psa_ecc_curve_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
 extern const uint32_t initial_attestation_private_key_size;
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 extern const struct tfm_plat_rotpk_t device_rotpk[];
 extern const uint32_t rotpk_key_cnt;
@@ -77,6 +86,50 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+enum tfm_plat_err_t tfm_plat_get_symmetric_iak(uint8_t *key_buf,
+                                               size_t buf_len,
+                                               size_t *key_len,
+                                               psa_algorithm_t *key_alg)
+{
+    if (!key_buf || !key_len || !key_alg) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (buf_len < initial_attestation_hmac_sha256_key_size) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    /*
+     * Actual implementation may derive a key with other input, other than
+     * directly providing provisioned symmetric initial attestation key.
+     */
+    copy_key(key_buf, initial_attestation_hmac_sha256_key,
+             initial_attestation_hmac_sha256_key_size);
+
+    *key_alg = tfm_attest_hmac_sign_alg;
+    *key_len = initial_attestation_hmac_sha256_key_size;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_get_symmetric_iak_id(void *kid_buf,
+                                                  size_t buf_len,
+                                                  size_t *kid_len)
+{
+    /* kid is string in this example. '\0' is ignore. */
+    size_t len = strlen(initial_attestation_kid);
+
+    if (!kid_buf || !kid_len || (buf_len < len)) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    copy_key(kid_buf, (const uint8_t *)initial_attestation_kid, len);
+    *kid_len = len;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+#else /* SYMMETRIC_INITIAL_ATTESTATION */
 enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
@@ -110,6 +163,7 @@ tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
 
     return TFM_PLAT_ERR_SUCCESS;
 }
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 #ifdef BL2
 enum tfm_plat_err_t

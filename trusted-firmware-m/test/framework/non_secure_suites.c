@@ -10,7 +10,7 @@
 #include "test_framework.h"
 
 /* Service specific includes */
-#include "test/suites/sst/non_secure/sst_ns_tests.h"
+#include "test/suites/ps/non_secure/ps_ns_tests.h"
 #include "test/suites/its/non_secure/its_ns_tests.h"
 #include "test/suites/audit/non_secure/audit_ns_tests.h"
 #include "test/suites/crypto/non_secure/crypto_ns_tests.h"
@@ -26,7 +26,7 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_NS
     /* List test cases which are compliant with level 1 isolation */
 
-#ifdef ENABLE_SECURE_STORAGE_SERVICE_TESTS
+#ifdef ENABLE_PROTECTED_STORAGE_SERVICE_TESTS
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
 #endif
 
@@ -68,10 +68,8 @@ static struct test_suite_t test_suites[] = {
 #endif /* SERVICES_TEST_NS */
 
 #ifdef CORE_TEST_POSITIVE
-#if !defined(TFM_PSA_API) || (TFM_LVL == 1)
     /* Non-secure core test cases */
     {&register_testsuite_ns_core_positive, 0, 0, 0},
-#endif
 #endif
 
 #ifdef CORE_TEST_INTERACTIVE

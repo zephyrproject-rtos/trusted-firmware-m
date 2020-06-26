@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited
+ * Copyright (c) 2017-2020 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_crypto_keys.h"
 #include <stddef.h>
 #include "psa/crypto_types.h"
 

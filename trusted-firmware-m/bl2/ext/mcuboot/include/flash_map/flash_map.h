@@ -49,6 +49,7 @@ extern "C" {
  * and match the target offset specified in download script.
  */
 #include <inttypes.h>
+#include "region_defs.h"
 
 /*
  * For now, we only support one flash device.
@@ -58,6 +59,16 @@ extern "C" {
  */
 #define FLASH_DEVICE_ID                 100
 #define FLASH_DEVICE_BASE               FLASH_BASE_ADDRESS
+
+/*
+ * Shared data area between bootloader and runtime firmware.
+ */
+#if (defined(BOOT_TFM_SHARED_DATA_BASE) && defined(BOOT_TFM_SHARED_DATA_SIZE))
+#define MCUBOOT_SHARED_DATA_BASE    BOOT_TFM_SHARED_DATA_BASE
+#define MCUBOOT_SHARED_DATA_SIZE    BOOT_TFM_SHARED_DATA_SIZE
+#else
+#error "BOOT_TFM_SHARED_DATA_* must be defined by target."
+#endif
 
 /**
  * @brief Structure describing an area on a flash device.

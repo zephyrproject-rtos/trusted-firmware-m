@@ -28,34 +28,61 @@ if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE)
 	message(FATAL_ERROR "Incomplete build configuration: ATTEST_INCLUDE_TEST_CODE is undefined. ")
 endif()
 
+if (NOT DEFINED ATTEST_CLAIM_VALUE_CHECK)
+	message(FATAL_ERROR "Incomplete build configuration: ATTEST_CLAIM_VALUE_CHECK is undefined. ")
+endif()
+
 if (NOT DEFINED ENABLE_ATTESTATION_SERVICE_TESTS)
 	message(FATAL_ERROR "Incomplete build configuration: ENABLE_ATTESTATION_SERVICE_TESTS is undefined. ")
 elseif(ENABLE_ATTESTATION_SERVICE_TESTS)
 	list(APPEND ATTEST_TEST_SRC_S
-		"${ATTESTATION_TEST_DIR}/secure/attestation_s_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
-		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
-		"${ATTESTATION_TEST_DIR}/attest_public_key.c"
+		"${ATTESTATION_TEST_DIR}/attest_token_decode_common.c"
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"
 	)
 
 	list(APPEND ATTEST_TEST_SRC_NS
-		"${ATTESTATION_TEST_DIR}/non_secure/attestation_ns_interface_testsuite.c"
 		"${ATTESTATION_TEST_DIR}/attest_token_test.c"
-		"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
-		"${ATTESTATION_TEST_DIR}/attest_public_key.c"
+		"${ATTESTATION_TEST_DIR}/attest_token_decode_common.c"
 		"${TFM_ROOT_DIR}/lib/ext/qcbor/util/qcbor_util.c"
 	)
+
+	if (SYMMETRIC_INITIAL_ATTESTATION)
+		list(APPEND ATTEST_TEST_SRC_S
+			"${ATTESTATION_TEST_DIR}/secure/symmetric_attest_s_interface_testsuite.c"
+			"${ATTESTATION_TEST_DIR}/attest_symmetric_iat_decode.c"
+		)
+		list(APPEND ATTEST_TEST_SRC_NS
+			"${ATTESTATION_TEST_DIR}/non_secure/symmetric_attest_ns_interface_testsuite.c"
+			"${ATTESTATION_TEST_DIR}/attest_symmetric_iat_decode.c"
+		)
+	else()
+		list(APPEND ATTEST_TEST_SRC_S
+			"${ATTESTATION_TEST_DIR}/secure/attestation_s_interface_testsuite.c"
+			"${ATTESTATION_TEST_DIR}/attest_public_key.c"
+			"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
+		)
+		list(APPEND ATTEST_TEST_SRC_NS
+			"${ATTESTATION_TEST_DIR}/non_secure/attestation_ns_interface_testsuite.c"
+			"${ATTESTATION_TEST_DIR}/attest_public_key.c"
+			"${ATTESTATION_TEST_DIR}/attest_token_decode.c"
+		)
+	endif()
 
 	if (ATTEST_INCLUDE_TEST_CODE)
 		set_property(SOURCE ${ATTEST_TEST_SRC_S}  APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE)
 		set_property(SOURCE ${ATTEST_TEST_SRC_NS} APPEND PROPERTY COMPILE_DEFINITIONS INCLUDE_TEST_CODE)
 	endif()
 
+	if (ATTEST_CLAIM_VALUE_CHECK)
+		set_property(SOURCE ${ATTEST_TEST_SRC_S}  APPEND PROPERTY COMPILE_DEFINITIONS CLAIM_VALUE_CHECK)
+		set_property(SOURCE ${ATTEST_TEST_SRC_NS} APPEND PROPERTY COMPILE_DEFINITIONS CLAIM_VALUE_CHECK)
+	endif()
+
 	#Setting include directories
 	embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/services/initial_attestation ABSOLUTE)
+	embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/partitions/initial_attestation ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/inc ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/qcbor/util ABSOLUTE)
 	embedded_include_directories(PATH ${TFM_ROOT_DIR}/lib/ext/t_cose/inc ABSOLUTE)

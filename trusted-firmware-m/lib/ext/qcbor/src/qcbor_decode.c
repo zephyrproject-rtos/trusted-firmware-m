@@ -915,12 +915,12 @@ GetNext_FullItem(QCBORDecodeContext *me, QCBORItem *pDecodedItem)
       FullString = UsefulBuf_CopyOffset(NewMem, FullString.len, StringChunkItem.val.string);
    }
 
-Done:
    if(nReturn != QCBOR_SUCCESS && !UsefulBuf_IsNULLC(FullString)) {
       // Getting the item failed, clean up the allocated memory
       StringAllocator_Free(pAllocator, UNCONST_POINTER(FullString.ptr));
    }
 
+Done:
    return nReturn;
 }
 

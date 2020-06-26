@@ -59,6 +59,11 @@ extern "C" {
 #define TEST_MAX_KEY_LENGTH (64)
 
 /**
+ * \brief The length of truncated authentication tag for AEAD algorithm
+ */
+#define TRUNCATED_AUTH_TAG_LEN (8)
+
+/**
  * \brief Tests the key interfaces with different key types
  *
  * \param[in]  key_type PSA key type
@@ -165,6 +170,23 @@ void psa_policy_key_interface_test(struct test_result_t *ret);
  *
  */
 void psa_policy_invalid_policy_usage_test(struct test_result_t *ret);
+
+/**
+ * \brief Tests persistent keys
+ *
+ * \param[out] ret Test result
+ *
+ */
+void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret);
+
+/**
+ * \brief Key derivation test
+ *
+ * \param[in] deriv_alg Key derivation algorithm
+ * \param[out] ret      Test result
+ */
+void psa_key_derivation_test(psa_algorithm_t deriv_alg,
+                             struct test_result_t *ret);
 
 #ifdef __cplusplus
 }

@@ -25,7 +25,7 @@ static void tfm_t_cose_test_8001(struct test_result_t *ret);
 
 static struct test_t t_cose_regression_test[] = {
     {&tfm_t_cose_test_8001, "TFM_T_COSE_TEST_8001",
-     "Regression test of t_cose library", {0} },
+     "Regression test of t_cose library", {TEST_PASSED} },
 };
 
 /* To execute all test cases, then pass this array to RunTestsTCose()

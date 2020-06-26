@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -32,7 +32,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit /* Top of Stack */
+    .long    Image$$ARM_LIB_STACK$$ZI$$Limit /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
     .long    NMI_Handler           /* NMI Handler */
     .long    HardFault_Handler     /* Hard Fault Handler */

@@ -24,7 +24,7 @@
 #define CY_PROT_SPM_DEFAULT     CY_PROT_PC1
 /* PC=2 : unused (secure) */
 /* PC=3 : unused (secure) */
-/* PC=4 : unused (non-secure) */
+/* PC=4 : unused (secure) */
 /* PC=5 : unused (non-secure) */
 /* PC=6 : non-secure code (CM4) */
 #define CY_PROT_HOST_DEFAULT    CY_PROT_PC6
@@ -32,8 +32,9 @@
 #define CY_PROT_TC              CY_PROT_PC7
 
 #define ONLY_BL2_SPM_MASK       CY_PROT_PCMASK1
-#define SECURE_PCS_MASK         (CY_PROT_PCMASK1 | CY_PROT_PCMASK2 | CY_PROT_PCMASK3)
-#define HOST_PCS_MASK           (CY_PROT_PCMASK4 | CY_PROT_PCMASK5 | CY_PROT_PCMASK6)
+#define SECURE_PCS_MASK         (CY_PROT_PCMASK1 | CY_PROT_PCMASK2 | CY_PROT_PCMASK3 | \
+                                 CY_PROT_PCMASK4)
+#define HOST_PCS_MASK           (CY_PROT_PCMASK5 | CY_PROT_PCMASK6)
 #define TC_PC_MASK              CY_PROT_PCMASK7
 #define ALL_PCS_EXCEPT_TC_MASK  (CY_PROT_PCMASK1 | CY_PROT_PCMASK2 | CY_PROT_PCMASK3 | \
                                  CY_PROT_PCMASK4 | CY_PROT_PCMASK5 | CY_PROT_PCMASK6)

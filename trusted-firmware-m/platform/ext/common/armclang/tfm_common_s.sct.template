@@ -160,9 +160,6 @@ LR_CODE S_CODE_START {
 #endif /* !defined(TFM_PSA_API) */
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
-        tfm_spm_services.o (+RW +ZI)
-        platform_retarget_dev.o (+RW +ZI)
-        device_definition.o (+RW +ZI)
     }
 
     /**** APP RoT DATA start here */

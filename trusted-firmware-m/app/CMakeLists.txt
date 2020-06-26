@@ -29,11 +29,11 @@ embedded_project_fixup()
 set(MCUBOOT_DIR "${TFM_ROOT_DIR}/bl2/ext/mcuboot")
 include("${MCUBOOT_DIR}/MCUBoot.cmake")
 
-#Set variables
-get_filename_component(CMSIS_5_DIR ${TFM_ROOT_DIR}/../CMSIS_5 ABSOLUTE)
+#CMSIS
+get_filename_component(CMSIS_DIR ${TFM_ROOT_DIR}/../tf-m-tests/CMSIS ABSOLUTE)
 
-if(NOT EXISTS ${CMSIS_5_DIR})
-	message(FATAL_ERROR "Missing CMSIS_5. Please clone the CMSIS_5 repo to directory \"${CMSIS_5_DIR}\".")
+if(NOT EXISTS ${CMSIS_DIR})
+	message(FATAL_ERROR "Missing CMSIS. Please clone the tf-m-tests repo.")
 endif()
 
 if (NOT DEFINED BL2)
@@ -48,8 +48,8 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PROTECTED_STORAGE is undefined.")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -70,8 +70,8 @@ endif()
 
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/app ABSOLUTE)
 
-set(NS_APP_SRC "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config/RTX_Config.c"
-	"${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Source/rtx_lib.c"
+set(NS_APP_SRC "${CMSIS_DIR}/RTOS2/RTX/Config/RTX_Config.c"
+	"${CMSIS_DIR}/RTOS2/RTX/Source/rtx_lib.c"
 	"${APP_DIR}/main_ns.c"
 	"${APP_DIR}/tfm_integ_test.c"
 	"${APP_DIR}/os_wrapper_cmsis_rtos_v2.c"
@@ -98,11 +98,11 @@ if (TFM_PARTITION_PLATFORM)
 	endif()
 endif()
 
-if (TFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_PROTECTED_STORAGE)
 	if (TFM_PSA_API)
-		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_sst_ipc_api.c")
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ps_ipc_api.c")
 	else()
-		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_sst_func_api.c")
+		list(APPEND NS_APP_SRC "${INTERFACE_DIR}/src/tfm_ps_func_api.c")
 	endif()
 endif()
 
@@ -167,7 +167,7 @@ set(BUILD_TARGET_CFG Off)
 set(BUILD_TARGET_HARDWARE_KEYS Off)
 set(BUILD_TARGET_NV_COUNTERS Off)
 set(BUILD_CMSIS_DRIVERS On)
-set(BUILD_UART_STDOUT Off)
+set(BUILD_UART_STDOUT On)
 set(BUILD_FLASH Off)
 if(CORE_TEST_POSITIVE)
 	set(BUILD_PLAT_TEST On)
@@ -198,7 +198,7 @@ add_library(${PROJECT_OBJ_LIB} OBJECT ${ALL_SRC_C} ${ALL_SRC_C_NS} ${ALL_SRC_ASM
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
 #Set macro definitions
-set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE})
+set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS)
 target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE ${TARGET_COMPILE_DEFINITIONS})
 
 #Set include directories.
@@ -207,9 +207,9 @@ embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${INTERFACE_D
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR} ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/Include ABSOLUTE APPEND)
-embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Config  ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/Include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Config  ABSOLUTE APPEND)
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
@@ -279,11 +279,8 @@ function(set_up_app_build)
 		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/val/val_nspe.a")
 		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/platform/pal_nspe.a")
 	endif()
-	if(PSA_API_TEST_NS AND PSA_API_TEST_INTERNAL_TRUSTED_STORAGE)
-		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/internal_trusted_storage/test_combine.a")
-	endif()
-	if(PSA_API_TEST_NS AND PSA_API_TEST_PROTECTED_STORAGE)
-		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/protected_storage/test_combine.a")
+	if(PSA_API_TEST_NS AND (PSA_API_TEST_INTERNAL_TRUSTED_STORAGE OR PSA_API_TEST_PROTECTED_STORAGE OR PSA_API_TEST_STORAGE))
+		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/storage/test_combine.a")
 	endif()
 	if(PSA_API_TEST_NS AND PSA_API_TEST_CRYPTO)
 		target_link_libraries(${EXE_NAME} "${PSA_API_TEST_BUILD_PATH}/dev_apis/crypto/test_combine.a")
@@ -302,6 +299,12 @@ function(set_up_app_build)
 
 	#Generate binary file from axf
 	compiler_generate_binary_output(${EXE_NAME})
+
+	#Generate intel hex file from axf
+	compiler_generate_hex_output(${EXE_NAME})
+
+	#Generate elf file from axf
+	compiler_generate_elf_output(${EXE_NAME})
 
 	#Generate MCUBoot compatible payload
 	if (BL2)
@@ -376,10 +379,14 @@ function(set_up_app_build)
 	#Collect executables to common location: build/install/outputs/
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.axf
 				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.bin
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.hex
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.elf
 			DESTINATION outputs/${TARGET_PLATFORM}/)
 
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.axf
 				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.bin
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.hex
+				  ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.elf
 			DESTINATION outputs/fvp/)
 endfunction()
 
@@ -412,7 +419,7 @@ endif()
 if(NOT TARGET tfm_non_secure_tests)
 	#Add the test source to the build.
 	#As of today since secure_fw is built as a sub-project this code will never execute.
-	option(ENABLE_SECURE_STORAGE_SERVICE_TESTS "" TRUE)
+	option(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS "" TRUE)
 	include(../test/CMakeLists.inc)
 	target_sources(${PROJECT_OBJ_LIB} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
 endif()

@@ -288,10 +288,8 @@ enum gfc100_error_t gfc100_eflash_read(struct gfc100_eflash_dev_t *dev,
         return GFC100_ERROR_OUT_OF_RANGE;
     }
 
-    if (reg_map->status != 0) {
-        /* Previous command is still pending,
-         * or the arbitration is locked
-         */
+    if (reg_map->status & GFC100_CMD_STAT_PENDING_MASK) {
+        /* Previous command is still pending */
         return GFC100_ERROR_CMD_PENDING;
     }
 
@@ -371,10 +369,8 @@ enum gfc100_error_t gfc100_eflash_write(struct gfc100_eflash_dev_t *dev,
         return GFC100_ERROR_OUT_OF_RANGE;
     }
 
-    if (reg_map->status != 0) {
-        /* Previous command is still pending,
-         * or the arbitration is locked
-         */
+    if (reg_map->status & GFC100_CMD_STAT_PENDING_MASK) {
+        /* Previous command is still pending */
         return GFC100_ERROR_CMD_PENDING;
     }
 
@@ -423,10 +419,8 @@ enum gfc100_error_t gfc100_eflash_row_write(struct gfc100_eflash_dev_t *dev,
         return GFC100_ERROR_OUT_OF_RANGE;
     }
 
-    if (reg_map->status != 0U) {
-        /* Previous command is still pending,
-         * or the arbitration is locked
-         */
+    if (reg_map->status & GFC100_CMD_STAT_PENDING_MASK) {
+        /* Previous command is still pending */
         return GFC100_ERROR_CMD_PENDING;
     }
 
@@ -493,10 +487,8 @@ enum gfc100_error_t gfc100_eflash_erase(struct gfc100_eflash_dev_t *dev,
         return GFC100_ERROR_NOT_INITED;
     }
 
-    if (reg_map->status != 0) {
-        /* Previous command is still pending,
-         * or the arbitration is locked
-         */
+    if (reg_map->status & GFC100_CMD_STAT_PENDING_MASK) {
+        /* Previous command is still pending */
         return GFC100_ERROR_CMD_PENDING;
     }
 
@@ -564,4 +556,3 @@ uint32_t gfc100_get_proc_spec_error(struct gfc100_eflash_dev_t *dev)
     return (gfc100_proc_spec_get_error_cause(
                              dev->cfg->base + GFC100_PROCESS_SPEC_REG_MAP_OFF));
 }
-

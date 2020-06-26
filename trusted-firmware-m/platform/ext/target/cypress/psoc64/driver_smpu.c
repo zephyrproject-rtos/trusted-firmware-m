@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <inttypes.h>
 #include <stdio.h>
 
 #include "driver_smpu.h"
@@ -77,13 +78,13 @@ static const char * smpu_name(const SMPU_Resources *smpu_dev)
 
 void SMPU_Print_Config(const SMPU_Resources *smpu_dev)
 {
-    printf("%s - address = %p, size = %#x bytes, %s subregions enabled\n",
+    printf("%s - address = %p, size = %#"PRIx32" bytes, %s subregions enabled\n",
            smpu_name(smpu_dev),
            smpu_dev->slave_config.address,
            (uint32_t)REGIONSIZE_TO_BYTES(smpu_dev->slave_config.regionSize),
            smpu_dev->slave_config.subregions == ALL_ENABLED ? "all" : "some");
     if (smpu_dev->slave_config.subregions != ALL_ENABLED) {
-        printf("\tsubregion size = %#x bytes\n",
+        printf("\tsubregion size = %#"PRIx32" bytes\n",
             (uint32_t)REGIONSIZE_TO_BYTES(smpu_dev->slave_config.regionSize)/8);
         for (int i=0; i<8; i++) {
             printf("\tsubregion %d %s\n",

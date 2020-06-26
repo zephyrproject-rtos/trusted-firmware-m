@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited
+ * Copyright (c) 2018-2020 ARM Limited
  * Copyright 2016-2018 Cypress Semiconductor Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,6 @@ ENTRY(Reset_Handler)
 #include "region_defs.h"
 
 __heap_size__  = NS_HEAP_SIZE;
-__psp_stack_size__ = NS_PSP_STACK_SIZE;
 __msp_stack_size__ = NS_MSP_STACK_SIZE;
 
 /* Force symbol to be entered in the output file as an undefined symbol. Doing
@@ -290,15 +289,7 @@ SECTIONS
     {
         . += __msp_stack_size__;
     } > ram
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-    .psp_stack : ALIGN(32)
-    {
-        . += __psp_stack_size__;
-    } > ram
-
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 

@@ -46,13 +46,6 @@ LR_CODE S_CODE_START {
     TFM_PSA_CODE_START +0 ALIGN 32 EMPTY 0x0 {
     }
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    TFM_SP_STORAGE_LINKER +0 ALIGN 32 {
-        *tfm_storage* (+RO)
-        *(TFM_SP_STORAGE_ATTR_FN)
-    }
-#endif /* TFM_PARTITION_SECURE_STORAGE */
-
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     TFM_SP_ITS_LINKER +0 ALIGN 32 {
         *tfm_internal_trusted_storage* (+RO)
@@ -117,12 +110,12 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-    TFM_SP_SST_TEST_LINKER +0 ALIGN 32 {
-        *tfm_sst_test_service.* (+RO)
-        *(TFM_SP_SST_TEST_ATTR_FN)
+#ifdef TFM_PARTITION_TEST_PS
+    TFM_SP_PS_TEST_LINKER +0 ALIGN 32 {
+        *tfm_ps_test_service.* (+RO)
+        *(TFM_SP_PS_TEST_ATTR_FN)
     }
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -138,6 +131,14 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_CODE_START +0 ALIGN 32 EMPTY 0x0 {
     }
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    TFM_SP_PS_LINKER +0 ALIGN 32 {
+        *tfm_storage* (+RO)
+        *test_ps_nv_counters.* (+RO)
+        *(TFM_SP_PS_ATTR_FN)
+    }
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_2_LINKER +0 ALIGN 32 {
@@ -226,9 +227,6 @@ LR_CODE S_CODE_START {
 #endif /* !defined(TFM_PSA_API) */
 
     TFM_UNPRIV_DATA +0 ALIGN 32 {
-        tfm_spm_services.o (+RW +ZI)
-        platform_retarget_dev.o (+RW +ZI)
-        device_definition.o (+RW +ZI)
     }
 
     /**** APP RoT DATA start here */
@@ -238,6 +236,20 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
     }
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    TFM_SP_PS_LINKER_DATA +0 ALIGN 32 {
+        *tfm_storage* (+RW +ZI)
+        *test_ps_nv_counters.* (+RW +ZI)
+        *(TFM_SP_PS_ATTR_RW)
+        *(TFM_SP_PS_ATTR_ZI)
+    }
+
+#if defined (TFM_PSA_API)
+    TFM_SP_PS_LINKER_STACK +0 ALIGN 128 EMPTY 0x800 {
+    }
+#endif
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_TEST_CORE
     TFM_SP_CORE_TEST_2_LINKER_DATA +0 ALIGN 32 {
@@ -351,19 +363,6 @@ LR_CODE S_CODE_START {
     TFM_PSA_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
     }
 
-#ifdef TFM_PARTITION_SECURE_STORAGE
-    TFM_SP_STORAGE_LINKER_DATA +0 ALIGN 32 {
-        *tfm_storage* (+RW +ZI)
-        *(TFM_SP_STORAGE_ATTR_RW)
-        *(TFM_SP_STORAGE_ATTR_ZI)
-    }
-
-#if defined (TFM_PSA_API)
-    TFM_SP_STORAGE_LINKER_STACK +0 ALIGN 128 EMPTY 0x600 {
-    }
-#endif
-#endif /* TFM_PARTITION_SECURE_STORAGE */
-
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     TFM_SP_ITS_LINKER_DATA +0 ALIGN 32 {
         *tfm_internal_trusted_storage* (+RW +ZI)
@@ -476,18 +475,18 @@ LR_CODE S_CODE_START {
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_PARTITION_TEST_SST
-    TFM_SP_SST_TEST_LINKER_DATA +0 ALIGN 32 {
-        *tfm_sst_test_service.* (+RW +ZI)
-        *(TFM_SP_SST_TEST_ATTR_RW)
-        *(TFM_SP_SST_TEST_ATTR_ZI)
+#ifdef TFM_PARTITION_TEST_PS
+    TFM_SP_PS_TEST_LINKER_DATA +0 ALIGN 32 {
+        *tfm_ps_test_service.* (+RW +ZI)
+        *(TFM_SP_PS_TEST_ATTR_RW)
+        *(TFM_SP_PS_TEST_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API)
-    TFM_SP_SST_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x500 {
+    TFM_SP_PS_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x500 {
     }
 #endif
-#endif /* TFM_PARTITION_TEST_SST */
+#endif /* TFM_PARTITION_TEST_PS */
 
     /*
      * This empty, zero long execution region is here to mark the end address

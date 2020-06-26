@@ -21,6 +21,7 @@
 #define __BOOTUTIL_SIGN_KEY_H_
 
 #include <stdint.h>
+#include "mcuboot_config/mcuboot_config.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -91,6 +91,22 @@ this:
    }
 
 
+
+***********
+Mac0Message
+***********
+
+By default, the expectation is that the message will be wrapped using
+Sign1Message  COSE structure, however, the alternative Mac0Message structure
+that uses HMAC with SHA256 algorithm rather than a signature is supported via
+the ``-m mac`` flag:
+
+::
+
+    $ check_iat -m mac -k sample/hmac.key sample/iat-hmac.cbor
+    Signature OK
+    Token format OK
+
 *******
 Testing
 *******
@@ -126,4 +142,4 @@ the output to the specified file.
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

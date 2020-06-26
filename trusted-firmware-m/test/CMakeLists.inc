@@ -32,14 +32,14 @@ if (NOT DEFINED ENABLE_PLATFORM_SERVICE_TESTS)
 endif()
 
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/spm ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
+embedded_include_directories(PATH ${TFM_ROOT_DIR}/bl2/include ABSOLUTE)
 
 # Include the test framework
 include(${CMAKE_CURRENT_LIST_DIR}/framework/CMakeLists.inc)
 
 # Include the test suites
 include(${CMAKE_CURRENT_LIST_DIR}/suites/core/CMakeLists.inc)
-include(${CMAKE_CURRENT_LIST_DIR}/suites/sst/CMakeLists.inc)
+include(${CMAKE_CURRENT_LIST_DIR}/suites/ps/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/its/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/crypto/CMakeLists.inc)
 include(${CMAKE_CURRENT_LIST_DIR}/suites/attestation/CMakeLists.inc)

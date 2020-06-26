@@ -17,6 +17,8 @@
 
 #include <assert.h>
 #include <stdio.h> /* for debugging printfs */
+#include <inttypes.h>
+
 #include "cy_prot.h"
 #include "cycfg.h"
 #include "device_definition.h"
@@ -28,12 +30,8 @@
 #include "RTE_Device.h"
 #include "target_cfg.h"
 #include "tfm_plat_defs.h"
+#include "region.h"
 
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -165,6 +163,7 @@ void bus_masters_cfg(void)
     cy_en_prot_status_t ret;
     ret = set_bus_master_attr();
     assert(ret == CY_PROT_SUCCESS);
+    (void)ret;
 }
 
 const SMPU_Resources *smpu_init_table[] = {
@@ -240,6 +239,7 @@ void smpu_init_cfg(void)
     /* Now protect all unconfigured SMPUs */
     ret = protect_unconfigured_smpus();
     assert(ret == CY_PROT_SUCCESS);
+    (void)ret;
 
     __DSB();
     __ISB();
@@ -248,9 +248,12 @@ void smpu_init_cfg(void)
 void smpu_print_config(void)
 {
     printf("\nSMPU config:\n");
-    printf("memory_regions.non_secure_code_start = %#x\n", memory_regions.non_secure_code_start);
-    printf("memory_regions.non_secure_partition_base = %#x\n", memory_regions.non_secure_partition_base);
-    printf("memory_regions.non_secure_partition_limit = %#x\n", memory_regions.non_secure_partition_limit);
+    printf("memory_regions.non_secure_code_start = %#"PRIx32"\n",
+           memory_regions.non_secure_code_start);
+    printf("memory_regions.non_secure_partition_base = %#"PRIx32"\n",
+           memory_regions.non_secure_partition_base);
+    printf("memory_regions.non_secure_partition_limit = %#"PRIx32"\n",
+           memory_regions.non_secure_partition_limit);
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
@@ -1183,15 +1186,13 @@ const PPU_Resources *ppu_init_table[] = {
 
 void ppu_init_cfg(void)
 {
-    cy_en_prot_status_t ret;
-    (void)ret;
-
     size_t n = sizeof(ppu_init_table)/sizeof(ppu_init_table[0]);
 
     for (int i = 0; i < n; i++)
     {
-        ret = PPU_Configure(ppu_init_table[i]);
+        cy_en_prot_status_t ret = PPU_Configure(ppu_init_table[i]);
         assert(ret == CY_PROT_SUCCESS);
+        (void)ret;
     }
 
     __DSB();

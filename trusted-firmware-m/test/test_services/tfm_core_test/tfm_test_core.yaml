@@ -57,20 +57,6 @@
       "version_policy": "STRICT"
     },
     {
-      "name": "SPM_CORE_TEST_MPU_ACCESS",
-      "sid": "0x0000F022",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "SPM_CORE_TEST_MEMORY_PERMISSIONS",
-      "sid": "0x0000F023",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
       "name": "SPM_CORE_TEST_SS_TO_SS",
       "sid": "0x0000F024",
       "non_secure_clients": true,

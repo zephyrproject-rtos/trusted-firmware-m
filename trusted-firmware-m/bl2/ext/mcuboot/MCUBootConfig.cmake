@@ -13,7 +13,7 @@ set(BL2 True CACHE BOOL "Configure TF-M to use BL2 and enable building BL2")
 if (BL2)
 	add_definitions(-DBL2)
 
-	set(MCUBOOT_REPO "TF-M" CACHE STRING "Configure which repository use the MCUBoot from")
+	set(MCUBOOT_REPO "UPSTREAM" CACHE STRING "Configure which repository use the MCUBoot from")
 	set_property(CACHE MCUBOOT_REPO PROPERTY STRINGS "TF-M;UPSTREAM")
 	validate_cache_value(MCUBOOT_REPO)
 
@@ -29,21 +29,22 @@ if (BL2)
 	set_property(CACHE MCUBOOT_SIGNATURE_TYPE PROPERTY STRINGS "RSA-3072;RSA-2048")
 	validate_cache_value(MCUBOOT_SIGNATURE_TYPE)
 
-	if (MCUBOOT_REPO STREQUAL "TF-M")
-		set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
-	else() #Using upstream MCUBoot
-		if (MCUBOOT_HW_KEY)
-			message(WARNING "Cannot use HW key for image verification when building against upstream MCUBoot."
-				" Your choice was overriden (MCUBOOT_HW_KEY=Off).")
+	#FixMe: These checks can be removed when the upgrade strategies in question are upstreamed to the original MCUBoot repo.
+	if (TARGET_PLATFORM STREQUAL "MUSCA_A" OR TARGET_PLATFORM STREQUAL "AN524")
+		if (MCUBOOT_REPO STREQUAL "UPSTREAM")
+		    message(WARNING "The 'UPSTREAM' MCUBoot repository cannot be used when building for ${TARGET_PLATFORM}. Your choice was overridden.")
 		endif()
-		set(MCUBOOT_HW_KEY Off)
+		set(MCUBOOT_REPO "TF-M")
 	endif()
+
+	set(MCUBOOT_HW_KEY On CACHE BOOL "Configure to use HW key for image verification. Otherwise key is embedded in MCUBoot image.")
 
 	set(MCUBOOT_LOG_LEVEL "LOG_LEVEL_INFO" CACHE STRING "Configure the level of logging in MCUBoot.")
 	set_property(CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS "LOG_LEVEL_OFF;LOG_LEVEL_ERROR;LOG_LEVEL_WARNING;LOG_LEVEL_INFO;LOG_LEVEL_DEBUG")
 	if (NOT CMAKE_BUILD_TYPE STREQUAL "debug")
 		set(MCUBOOT_LOG_LEVEL "LOG_LEVEL_OFF")
 	endif()
+
 	validate_cache_value(MCUBOOT_LOG_LEVEL)
 
 	if ((${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP" OR
@@ -62,17 +63,6 @@ if (BL2)
 				" upstream MCUBoot. Your choice was overriden.")
 			mcuboot_override_upgrade_strategy("OVERWRITE_ONLY")
 		endif()
-
-		if (DEFINED SECURITY_COUNTER OR
-			DEFINED SECURITY_COUNTER_S OR
-			DEFINED SECURITY_COUNTER_NS)
-				message(WARNING "Ignoring the values of SECURITY_COUNTER and/or SECURITY_COUNTER_* variables as"
-					" upstream MCUBoot does not support rollback protection.")
-				set(SECURITY_COUNTER "")
-				set(SECURITY_COUNTER_S "")
-				set(SECURITY_COUNTER_NS "")
-		endif()
-
 	endif()
 
 else() #BL2 is turned off

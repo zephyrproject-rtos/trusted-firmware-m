@@ -28,7 +28,7 @@ int flash_device_base(uint8_t fd_id, uintptr_t *ret)
     if (fd_id != FLASH_DEVICE_ID) {
         BOOT_LOG_ERR("invalid flash ID %d; expected %d",
                      fd_id, FLASH_DEVICE_ID);
-        return -EINVAL;
+        return -1;
     }
     *ret = FLASH_DEVICE_BASE;
     return 0;
@@ -47,7 +47,7 @@ int flash_area_id_from_multi_image_slot(int image_index, int slot)
     case 2: return FLASH_AREA_IMAGE_SCRATCH;
     }
 
-    return -EINVAL; /* flash_area_open will fail on that */
+    return -1; /* flash_area_open will fail on that */
 }
 
 int flash_area_id_from_image_slot(int slot)

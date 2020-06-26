@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.base -E -xc
 
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,14 @@ LR_CODE BL2_CODE_START {
         * (+RO)
     }
 
-    TFM_SHARED_DATA BL2_DATA_START ALIGN 32 EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    /* Base address of bootloader data area */
+    BL2_DATA_START S_DATA_START {
     }
 
-    ER_DATA +0 BL2_DATA_SIZE {
+    TFM_SHARED_DATA +0 ALIGN 32 EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    }
+
+    ER_DATA +0 {
         * (+ZI +RW)
     }
 
@@ -37,4 +41,15 @@ LR_CODE BL2_CODE_START {
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY BL2_HEAP_SIZE {
     }
+
+    /* This empty, zero long execution region is here to mark the limit address
+     * of the last execution region that is allocated in SRAM.
+     */
+    SRAM_WATERMARK +0 EMPTY 0x0 {
+    }
+
+    /* Make sure that the sections allocated in the SRAM does not exceed the
+     * size of the SRAM available.
+     */
+    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= BL2_DATA_START + BL2_DATA_SIZE)
 }

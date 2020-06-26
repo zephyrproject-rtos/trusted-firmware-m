@@ -41,8 +41,8 @@ if (NOT DEFINED TFM_PARTITION_PLATFORM)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PLATFORM is undefined.")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PROTECTED_STORAGE is undefined.")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -69,8 +69,8 @@ if (NOT DEFINED TFM_PARTITION_TEST_SECURE_SERVICES)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SECURE_SERVICES is undefined. ")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_TEST_SST)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_SST is undefined.")
+if (NOT DEFINED TFM_PARTITION_TEST_PS)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_TEST_PS is undefined.")
 endif()
 
 if (NOT DEFINED TEST_FRAMEWORK_S)
@@ -97,17 +97,14 @@ if (NOT DEFINED TFM_ENABLE_IRQ_TEST)
 	message(FATAL_ERROR "ERROR: Incomplete Configuration: TFM_ENABLE_IRQ_TEST is not defined.")
 endif()
 
-include(${SECURE_FW_DIR}/spm/CMakeLists.inc)
-if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
-	include(${SECURE_FW_DIR}/ns_callable/CMakeLists.inc)
-endif ()
 #Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
 if(TFM_PSA_API)
-	include(${SECURE_FW_DIR}/core/ipc/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/model_ipc/CMakeLists.inc)
 else()
-	include(${SECURE_FW_DIR}/core/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/model_func/CMakeLists.inc)
 endif()
-include(${SECURE_FW_DIR}/core/arch/CMakeLists.inc)
+
+include(${SECURE_FW_DIR}/spm/arch/CMakeLists.inc)
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)
@@ -151,18 +148,25 @@ if (DEFINED TFM_PLATFORM_SECURE_DEFS)
 endif()
 
 #Set common compiler flags
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
 config_setting_shared_compiler_flags(${PROJECT_OBJ_LIB})
 
-if(NOT DEFINED TARGET_NV_COUNTERS_ENABLE)
+if (NOT DEFINED TARGET_NV_COUNTERS_ENABLE)
 	set(TARGET_NV_COUNTERS_ENABLE OFF)
 endif()
 
-if(TARGET_NV_COUNTERS_ENABLE)
+if (TARGET_NV_COUNTERS_ENABLE)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES TFM_NVCOUNTERS_ENABLE APPEND)
 endif()
 
-if(BOOT_DATA_AVAILABLE)
+if (BOOT_DATA_AVAILABLE)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES BOOT_DATA_AVAILABLE APPEND)
+endif()
+
+if (LEGACY_TFM_TLV_HEADER)
+	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES LEGACY_TFM_TLV_HEADER APPEND)
 endif()
 
 if (NOT DEFINED CORE_TEST)
@@ -219,7 +223,7 @@ function(set_up_secure_fw_build)
 	embedded_set_target_linker_file(TARGET ${EXE_NAME} PATH "${S_SCATTER_FILE_NAME}")
 
 	#Set macro definitions for the project.
-	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=0 DOMAIN_NS=__DOMAIN_NS TFM_LVL=${TFM_LVL} ${DEBUG_AUTHENTICATION})
 	embedded_set_target_compile_defines(TARGET ${PROJECT_OBJ_LIB} LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 	# The order of the libraries linked below is important for GCC
@@ -227,6 +231,10 @@ function(set_up_secure_fw_build)
 	# If the a library has some symbols that are defined in the library which is linked before it,
 	# it will not cause the linker to search again.
 	# So please put a library before what it relies on.
+	# If the link dependency is complicated or it is difficult to sort out link
+	# dependency by only adjusting the order, it is recommended to explicitly
+	# add the dependency in the dedicated CMake file of corresponding module, to
+	# simplify the ordering and avoid any potential linking issue.
 	if (CORE_TEST OR TFM_PARTITION_TEST_SECURE_SERVICES)
 		target_link_libraries(${EXE_NAME} tfm_secure_tests)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SECURE_SERVICES")
@@ -237,19 +245,19 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INITIAL_ATTESTATION")
 	endif()
 
-	if (TFM_PARTITION_SECURE_STORAGE)
+	if (TFM_PARTITION_PROTECTED_STORAGE)
 		target_link_libraries(${EXE_NAME} tfm_storage)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_SECURE_STORAGE")
-	endif()
-
-	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_PROTECTED_STORAGE")
 	endif()
 
 	if (TFM_PARTITION_CRYPTO)
 		target_link_libraries(${EXE_NAME} tfm_crypto)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_CRYPTO")
+	endif()
+
+	if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+		target_link_libraries(${EXE_NAME} tfm_internal_trusted_storage)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE")
 	endif()
 
 	if (TFM_PARTITION_AUDIT_LOG)
@@ -283,8 +291,8 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_CORE_IPC")
 	endif()
 
-	if (TFM_PARTITION_TEST_SST)
-		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_SST")
+	if (TFM_PARTITION_TEST_PS)
+		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_PARTITION_TEST_PS")
 	endif()
 
 	if (TEST_FRAMEWORK_S)
@@ -326,6 +334,12 @@ function(set_up_secure_fw_build)
 
 	#Generate binary file from executable
 	compiler_generate_binary_output(${EXE_NAME})
+
+	#Generate intel hex file from axf
+	compiler_generate_hex_output(${EXE_NAME})
+
+	#Generate elf file from axf
+	compiler_generate_elf_output(${EXE_NAME})
 
 	if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 		#Configure where we put the CMSE veneers generated by the compiler.
@@ -396,14 +410,14 @@ function(set_up_secure_fw_build)
 				DESTINATION ${EXPORT_SRC_DIR})
 	endif()
 
-	if (TFM_PARTITION_SECURE_STORAGE)
+	if (TFM_PARTITION_PROTECTED_STORAGE)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
 				DESTINATION ${EXPORT_INC_DIR}/psa)
 		if (TFM_PSA_API)
-			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_ipc_api.c
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
 		else()
-			install(FILES       ${INTERFACE_SRC_DIR}/tfm_sst_func_api.c
+			install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_func_api.c
 					DESTINATION ${EXPORT_SRC_DIR})
 		endif()
 	endif()
@@ -423,8 +437,9 @@ function(set_up_secure_fw_build)
 
 	if (TFM_PARTITION_CRYPTO)
 		install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
+							${INTERFACE_INC_DIR}/psa/crypto_compat.h
 							${INTERFACE_INC_DIR}/psa/crypto.h
-							${INTERFACE_INC_DIR}/psa/crypto_platform.h
+							${INTERFACE_INC_DIR}/psa/crypto_client_struct.h
 							${INTERFACE_INC_DIR}/psa/crypto_sizes.h
 							${INTERFACE_INC_DIR}/psa/crypto_struct.h
 							${INTERFACE_INC_DIR}/psa/crypto_types.h
@@ -486,10 +501,14 @@ function(set_up_secure_fw_build)
 
 	install(FILES ${MY_BINARY_DIR}/${EXE_NAME}.axf
 				  ${MY_BINARY_DIR}/${EXE_NAME}.bin
+				  ${MY_BINARY_DIR}/${EXE_NAME}.hex
+				  ${MY_BINARY_DIR}/${EXE_NAME}.elf
 			DESTINATION outputs/${TARGET_PLATFORM}/)
 
 	install(FILES ${MY_BINARY_DIR}/${EXE_NAME}.axf
 				  ${MY_BINARY_DIR}/${EXE_NAME}.bin
+				  ${MY_BINARY_DIR}/${EXE_NAME}.hex
+				  ${MY_BINARY_DIR}/${EXE_NAME}.elf
 			DESTINATION outputs/fvp/)
 endfunction()
 
@@ -498,36 +517,36 @@ add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/secure_test)
 
 #Add the crypto library target
 if (TFM_PARTITION_CRYPTO)
-	add_subdirectory(${SECURE_FW_DIR}/services/crypto)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/crypto)
 endif()
 
-#Add the secure storage library target
-if (TFM_PARTITION_SECURE_STORAGE)
-	add_subdirectory(${SECURE_FW_DIR}/services/secure_storage)
+#Add the protected storage library target
+if (TFM_PARTITION_PROTECTED_STORAGE)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/protected_storage)
 endif()
 
 #Add the internal trusted storage library target
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-	add_subdirectory(${SECURE_FW_DIR}/services/internal_trusted_storage)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/internal_trusted_storage)
 endif()
 
 #Add the platform service library target
 if (TFM_PARTITION_PLATFORM)
-	add_subdirectory(${SECURE_FW_DIR}/services/platform)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/platform)
 endif()
 
 #Add the initial attestation service library target
 if (TFM_PARTITION_INITIAL_ATTESTATION)
-	add_subdirectory(${SECURE_FW_DIR}/services/initial_attestation)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/initial_attestation)
 endif()
 
 #Add the audit logging library target
 if (TFM_PARTITION_AUDIT_LOG)
-	add_subdirectory(${SECURE_FW_DIR}/services/audit_logging)
+	add_subdirectory(${SECURE_FW_DIR}/partitions/audit_logging)
 endif()
 
 #Add the secure runtime library target
-add_subdirectory(${SECURE_FW_DIR}/lib/sprt)
+add_subdirectory(${SECURE_FW_DIR}/partitions/lib/sprt)
 
 if (NOT DEFINED TFM_MULTI_CORE_TOPOLOGY OR NOT TFM_MULTI_CORE_TOPOLOGY)
 	#Broadcast veneer path in bundled building case

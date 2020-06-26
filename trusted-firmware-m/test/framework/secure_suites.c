@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 #include "test_framework.h"
 
 /* Service specific includes */
-#include "test/suites/sst/secure/sst_tests.h"
+#include "test/suites/ps/secure/ps_tests.h"
 #include "test/suites/its/secure/its_s_tests.h"
 #include "test/suites/audit/secure/audit_s_tests.h"
 #include "test/suites/attestation/secure/attestation_s_tests.h"
@@ -22,11 +22,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef SERVICES_TEST_S
     /* List test cases which are compliant with level 1 isolation */
 
-#ifdef ENABLE_SECURE_STORAGE_SERVICE_TESTS
+#ifdef ENABLE_PROTECTED_STORAGE_SERVICE_TESTS
     {&register_testsuite_s_psa_ps_interface, 0, 0, 0},
     {&register_testsuite_s_psa_ps_reliability, 0, 0, 0},
 
-#ifdef SST_TEST_NV_COUNTERS
+#ifdef PS_TEST_NV_COUNTERS
     {&register_testsuite_s_rollback_protection, 0, 0, 0},
 #endif
 #endif
@@ -52,16 +52,9 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_platform_interface, 0, 0, 0},
 #endif
 
-#ifndef TFM_PSA_API
-    /*
-     * FixMe: since the following partitions haven't implement the IPC model,
-     * they will block the process. Skip them in IPC model.
-     */
 #ifdef ENABLE_AUDIT_LOGGING_SERVICE_TESTS
     /* Secure Audit Logging test cases */
     {&register_testsuite_s_audit_interface, 0, 0, 0},
-#endif
-
 #endif
 
 #ifdef ENABLE_IPC_TEST

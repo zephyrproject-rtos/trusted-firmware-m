@@ -76,6 +76,10 @@ if (DEFINED TFM_PLATFORM_SECURE_DEFS)
 	embedded_set_target_compile_defines(TARGET ${PROJECT_NAME} LANGUAGE ASM DEFINES ${TFM_PLATFORM_SECURE_DEFS} APPEND)
 endif()
 
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET ${PROJECT_NAME} LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 #Append all our source files to global lists.
 list(APPEND ALL_SRC_C
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/bl2_main.c"
@@ -83,6 +87,7 @@ list(APPEND ALL_SRC_C
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/flash_map_legacy.c"
 		"${TFM_ROOT_DIR}/bl2/ext/mcuboot/keys.c"
 		"${TFM_ROOT_DIR}/bl2/src/flash_map.c"
+		"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 		"${MCUBOOT_DIR}/bootutil/src/loader.c"
 		"${MCUBOOT_DIR}/bootutil/src/bootutil_misc.c"
 		"${MCUBOOT_DIR}/bootutil/src/image_validate.c"
@@ -93,8 +98,14 @@ list(APPEND ALL_SRC_C
 if (MCUBOOT_REPO STREQUAL "TF-M")
 	list(APPEND ALL_SRC_C
 			"${TFM_ROOT_DIR}/bl2/src/boot_record.c"
-			"${TFM_ROOT_DIR}/bl2/src/security_cnt.c"
 		)
+else()
+	list(APPEND ALL_SRC_C
+			"${MCUBOOT_DIR}/bootutil/src/boot_record.c"
+			"${MCUBOOT_DIR}/bootutil/src/swap_scratch.c"
+			"${MCUBOOT_DIR}/bootutil/src/swap_move.c"
+			"${MCUBOOT_DIR}/bootutil/src/swap_misc.c"
+	)
 endif()
 
 #Define location of Mbed Crypto source, build, and installation directory.
@@ -128,6 +139,7 @@ embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${TFM_ROOT_DIR}/bl2/ext/mcuboot/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MCUBOOT_DIR}/bootutil/include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${MBEDCRYPTO_INSTALL_DIR}/include ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_NAME} PATH ${CMAKE_CURRENT_BINARY_DIR} ABSOLUTE APPEND)
 
 #Define linker file
 if(NOT DEFINED BL2_LINKER_CONFIG)
@@ -176,6 +188,12 @@ endif()
 #Generate binary file from axf
 compiler_generate_binary_output(${PROJECT_NAME})
 
+#Generate intel hex file from axf
+compiler_generate_hex_output(${PROJECT_NAME})
+
+#Generate elf file from axf
+compiler_generate_elf_output(${PROJECT_NAME})
+
 message("- MCUBOOT_REPO: '${MCUBOOT_REPO}'.")
 message("- MCUBOOT_IMAGE_NUMBER: '${MCUBOOT_IMAGE_NUMBER}'.")
 message("- MCUBOOT_UPGRADE_STRATEGY: '${MCUBOOT_UPGRADE_STRATEGY}'.")
@@ -183,52 +201,59 @@ message("- MCUBOOT_SIGNATURE_TYPE: '${MCUBOOT_SIGNATURE_TYPE}'.")
 message("- MCUBOOT_HW_KEY: '${MCUBOOT_HW_KEY}'.")
 message("- MCUBOOT_LOG_LEVEL: '${MCUBOOT_LOG_LEVEL}'.")
 
-#Set macro definitions for the project.
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-							MCUBOOT_VALIDATE_PRIMARY_SLOT
-							MCUBOOT_USE_FLASH_AREA_GET_SECTORS
-							MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}"
-							MCUBOOT_TARGET_CONFIG="flash_layout.h")
+get_property(_log_levels CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS)
+list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 
 if (MCUBOOT_REPO STREQUAL "UPSTREAM")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_USE_UPSTREAM)
+	set(MCUBOOT_HW_ROLLBACK_PROT On)
+	set(MCUBOOT_MEASURED_BOOT On)
+
+	#FixMe: This becomes unnecessary and can be deleted once the sign_key.c file
+	#in upstream MCUboot includes the mcuboot_config.h file and starts "reading"
+	#the configuration macros from there.
+	if (MCUBOOT_HW_KEY)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_HW_KEY)
+	endif()
 endif()
 
-if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_SIGN_RSA MCUBOOT_SIGN_RSA_LEN=3072)
+if(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
+	set(MCUBOOT_SIGN_RSA On)
+	set(MCUBOOT_SIGN_RSA_LEN 3072)
 elseif(MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_SIGN_RSA MCUBOOT_SIGN_RSA_LEN=2048)
-else()
-	message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
+	set(MCUBOOT_SIGN_RSA On)
+	set(MCUBOOT_SIGN_RSA_LEN 2048)
 endif()
 
 if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_OVERWRITE_ONLY)
-elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_NO_SWAP)
+	set(MCUBOOT_OVERWRITE_ONLY On)
+elseif(${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
+	set(MCUBOOT_NO_SWAP On)
 elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_RAM_LOADING)
-elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP")
-	#No compile definition needs to be specified for this upgrade strategy
+	set(MCUBOOT_RAM_LOADING On)
+endif()
+
+#FixMe: This becomes unnecessary and can be deleted once the sign_key.c file
+#in upstream MCUboot includes the mcuboot_config.h file and starts "reading"
+#the configuration macros from there.
+if (MCUBOOT_REPO STREQUAL "UPSTREAM" AND MCUBOOT_HW_KEY)
+	set(MCUBOOT_HW_KEY Off)
+	configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
+				   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
+				   @ONLY)
+	set(MCUBOOT_HW_KEY On)
 else()
-	get_property(_upgrade_strategies CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
-	message(FATAL_ERROR "ERROR: MCUBoot supports the ${_upgrade_strategies} upgrade strategies only.")
+	configure_file("${CMAKE_CURRENT_LIST_DIR}/include/mcuboot_config/mcuboot_config.h.in"
+				   "${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h"
+				   @ONLY)
 endif()
 
-if (MCUBOOT_HW_KEY)
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_HW_KEY)
+target_compile_definitions(${PROJECT_NAME} PRIVATE MBEDTLS_CONFIG_FILE="${MBEDTLS_CONFIG_FILE}")
+
+if (NOT MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072" AND NOT MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-2048")
+	message(FATAL_ERROR "${MCUBOOT_SIGNATURE_TYPE} is not supported as firmware signing algorithm")
 endif()
 
-if (ATTEST_BOOT_INTERFACE STREQUAL "INDIVIDUAL_CLAIMS")
-	target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_INDIVIDUAL_CLAIMS)
-	message(WARNING "ATTEST_BOOT_INTERFACE was set to ${ATTEST_BOOT_INTERFACE}. This configuration is "
-			"deprecated and this feature will probably be removed from MCUBoot in the future.")
-endif()
-
-#Configure log level for MCUBoot.
-get_property(_log_levels CACHE MCUBOOT_LOG_LEVEL PROPERTY STRINGS)
-list(FIND _log_levels ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
-target_compile_definitions(${PROJECT_NAME} PRIVATE MCUBOOT_LOG_LEVEL=${LOG_LEVEL_ID})
+validate_cache_value(MCUBOOT_UPGRADE_STRATEGY)
 
 #Set install location. Keep original value to avoid overriding command line settings.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -238,10 +263,14 @@ endif()
 #Collect executables to common location: build/install/outputs/
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
 			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
 		DESTINATION outputs/${TARGET_PLATFORM}/)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.axf
 			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.hex
+			  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
 		DESTINATION outputs/fvp/)
 
 #Finally let cmake system apply changes after the whole project is defined.

@@ -54,6 +54,12 @@ add_library(tfm_qcbor_encode OBJECT ${ALL_SRC_C_ENCODE})
 add_library(tfm_qcbor_decode OBJECT ${ALL_SRC_C_DECODE})
 add_library(tfm_qcbor_test   OBJECT ${ALL_SRC_C_TEST})
 
+if (DEFINED CMSE_FLAGS)
+	embedded_set_target_compile_flags(TARGET tfm_qcbor_encode LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	embedded_set_target_compile_flags(TARGET tfm_qcbor_decode LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	embedded_set_target_compile_flags(TARGET tfm_qcbor_test   LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+endif()
+
 #Set common compiler flags
 config_setting_shared_compiler_flags(tfm_qcbor_encode)
 config_setting_shared_compiler_flags(tfm_qcbor_decode)

@@ -35,6 +35,8 @@
 #include "bootutil/sign_key.h"
 #include "security_cnt.h"
 
+#include "mcuboot_config/mcuboot_config.h"
+
 #if defined(MCUBOOT_SIGN_RSA)
 #include "mbedtls/rsa.h"
 #endif
@@ -379,7 +381,7 @@ bootutil_img_validate(int image_index,
                 return rc;
             }
 
-            rc = boot_nv_security_counter_get(0, &security_cnt);
+            rc = boot_nv_security_counter_get(image_index, &security_cnt);
             if (rc) {
                 return rc;
             }

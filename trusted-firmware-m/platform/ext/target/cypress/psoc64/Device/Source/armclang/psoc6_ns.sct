@@ -1,7 +1,7 @@
 #! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
 
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2020 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,12 @@ LR_CODE NS_CODE_START {
         .ANY (+RO)
     }
 
-    ER_DATA NS_DATA_START NS_DATA_SIZE {
+    ER_DATA NS_DATA_START {
         .ANY (+ZI +RW)
     }
 
     /* MSP */
-    ARM_LIB_STACK_MSP +0 ALIGN 32 EMPTY NS_MSP_STACK_SIZE {
-    }
-
-    /* PSP */
-    ARM_LIB_STACK +0 ALIGN 32 EMPTY NS_PSP_STACK_SIZE {
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY NS_MSP_STACK_SIZE {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY NS_HEAP_SIZE {
@@ -49,5 +45,16 @@ LR_CODE NS_CODE_START {
     TFM_SHARED_MEM NS_DATA_SHARED_START EMPTY NS_DATA_SHARED_SIZE {
     }
 #endif
+
+    /* This empty, zero long execution region is here to mark the limit address
+     * of the last execution region that is allocated in SRAM.
+     */
+    SRAM_WATERMARK +0 EMPTY 0x0 {
+    }
+
+    /* Make sure that the sections allocated in the SRAM does not exceed the
+     * size of the SRAM available.
+     */
+    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= NS_DATA_START + NS_DATA_SIZE)
 }
 

@@ -769,6 +769,34 @@ destroy_key_aead:
     }
 }
 
+/*
+ * The list of available AES cipher/AEAD mode for test.
+ * Not all the modes can be available in some use cases and configurations.
+ */
+static const psa_algorithm_t test_aes_mode_array[] = {
+#ifdef TFM_CRYPTO_TEST_ALG_CBC
+    PSA_ALG_CBC_NO_PADDING,
+#endif
+#ifdef TFM_CRYPTO_TEST_ALG_CCM
+    PSA_ALG_CCM,
+#endif
+#ifdef TFM_CRYPTO_TEST_ALG_CFB
+    PSA_ALG_CFB,
+#endif
+#ifdef TFM_CRYPTO_TEST_ALG_CTR
+    PSA_ALG_CTR,
+#endif
+#ifdef TFM_CRYPTO_TEST_ALG_GCM
+    PSA_ALG_GCM,
+#endif
+    /* In case no AES algorithm is available */
+    PSA_ALG_VENDOR_FLAG,
+};
+
+/* Number of available AES cipher modes */
+#define NR_TEST_AES_MODE        (sizeof(test_aes_mode_array) / \
+                                 sizeof(test_aes_mode_array[0]) - 1)
+
 void psa_invalid_key_length_test(struct test_result_t *ret)
 {
     psa_status_t status;
@@ -776,9 +804,14 @@ void psa_invalid_key_length_test(struct test_result_t *ret)
     psa_key_handle_t key_handle;
     const uint8_t data[19] = {0};
 
+    if (NR_TEST_AES_MODE < 1) {
+        TEST_FAIL("A cipher mode in AES is required in current test case");
+        return;
+    }
+
     /* Setup the key policy */
     psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_ENCRYPT);
-    psa_set_key_algorithm(&key_attributes, PSA_ALG_CBC_NO_PADDING);
+    psa_set_key_algorithm(&key_attributes, test_aes_mode_array[0]);
     psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
 
     /* AES does not support 152-bit keys */
@@ -793,13 +826,18 @@ void psa_invalid_key_length_test(struct test_result_t *ret)
 
 void psa_policy_key_interface_test(struct test_result_t *ret)
 {
-    psa_algorithm_t alg = PSA_ALG_CBC_NO_PADDING;
+    psa_algorithm_t alg = test_aes_mode_array[0];
     psa_algorithm_t alg_out;
     psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_VOLATILE;
     psa_key_lifetime_t lifetime_out;
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
     psa_key_usage_t usage_out;
+
+    if (NR_TEST_AES_MODE < 1) {
+        TEST_FAIL("A cipher mode in AES is required in current test case");
+        return;
+    }
 
     /* Verify that initialised policy forbids all usage */
     usage_out = psa_get_key_usage_flags(&key_attributes);
@@ -846,7 +884,7 @@ void psa_policy_key_interface_test(struct test_result_t *ret)
 void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
 {
     psa_status_t status;
-    psa_algorithm_t alg = PSA_ALG_CBC_NO_PADDING;
+    psa_algorithm_t alg, not_permit_alg;
     psa_cipher_operation_t handle = psa_cipher_operation_init();
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_handle_t key_handle;
@@ -854,8 +892,37 @@ void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
     size_t data_len;
     const uint8_t data[] = "THIS IS MY KEY1";
     uint8_t data_out[sizeof(data)];
+    uint8_t i, j;
 
     ret->val = TEST_PASSED;
+
+    if (NR_TEST_AES_MODE < 2) {
+        TEST_LOG("Two cipher modes are required. Skip this test case\r\n");
+        return;
+    }
+
+    /*
+     * Search for two modes for test. Both modes should be Cipher algorithms.
+     * Otherwise, cipher setup may fail before policy permission check.
+     */
+    for (i = 0; i < NR_TEST_AES_MODE - 1; i++) {
+        if (PSA_ALG_IS_CIPHER(test_aes_mode_array[i])) {
+            alg = test_aes_mode_array[i];
+            break;
+        }
+    }
+
+    for (j = i + 1; j < NR_TEST_AES_MODE; j++) {
+        if (PSA_ALG_IS_CIPHER(test_aes_mode_array[j])) {
+            not_permit_alg = test_aes_mode_array[j];
+            break;
+        }
+    }
+
+    if (j == NR_TEST_AES_MODE) {
+        TEST_LOG("Unable to find two Cipher algs. Skip this test case.\r\n");
+        return;
+    }
 
     /* Setup the key policy */
     psa_set_key_usage_flags(&key_attributes, usage);
@@ -883,7 +950,7 @@ void psa_policy_invalid_policy_usage_test(struct test_result_t *ret)
     }
 
     /* Attempt to setup a cipher with an alg not permitted by the policy */
-    status = psa_cipher_encrypt_setup(&handle, key_handle, PSA_ALG_CFB);
+    status = psa_cipher_encrypt_setup(&handle, key_handle, not_permit_alg);
     if (status != PSA_ERROR_NOT_PERMITTED) {
         TEST_FAIL("Was able to setup cipher operation with wrong alg");
         goto destroy_key;
@@ -901,4 +968,220 @@ destroy_key:
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Failed to destroy key");
     }
+}
+
+void psa_persistent_key_test(psa_key_id_t key_id, struct test_result_t *ret)
+{
+    psa_status_t status;
+    int comp_result;
+    psa_key_handle_t key_handle;
+    psa_algorithm_t alg = test_aes_mode_array[0];
+    psa_key_usage_t usage = PSA_KEY_USAGE_EXPORT;
+    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
+    size_t data_len;
+    const uint8_t data[] = "THIS IS MY KEY1";
+    uint8_t data_out[sizeof(data)] = {0};
+
+    if (NR_TEST_AES_MODE < 1) {
+        TEST_FAIL("A cipher mode in AES is required in current test case");
+        return;
+    }
+
+    /* Setup the key attributes with a key ID to create a persistent key */
+    psa_set_key_id(&key_attributes, key_id);
+    psa_set_key_usage_flags(&key_attributes, usage);
+    psa_set_key_algorithm(&key_attributes, alg);
+    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
+
+    /* Import key data to create the persistent key */
+    status = psa_import_key(&key_attributes, data, sizeof(data), &key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to import a key");
+        return;
+    }
+
+    /* Close the persistent key handle */
+    status = psa_close_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to close a persistent key handle");
+        return;
+    }
+
+    /* Open the previsously-created persistent key */
+    status = psa_open_key(key_id, &key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to open a persistent key");
+        return;
+    }
+
+    /* Export the persistent key */
+    status = psa_export_key(key_handle, data_out, sizeof(data_out), &data_len);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to export a persistent key");
+        return;
+    }
+
+    if (data_len != sizeof(data)) {
+        TEST_FAIL("Number of bytes of exported key different from expected");
+        return;
+    }
+
+    /* Check that the exported key is the same as the imported one */
+#if DOMAIN_NS == 1U
+    comp_result = memcmp(data_out, data, sizeof(data));
+#else
+    comp_result = tfm_memcmp(data_out, data, sizeof(data));
+#endif
+    if (comp_result != 0) {
+        TEST_FAIL("Exported key does not match the imported key");
+        return;
+    }
+
+    /* Destroy the persistent key */
+    status = psa_destroy_key(key_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to destroy a persistent key");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+
+#define KEY_DERIVE_OUTPUT_LEN          32
+#define KEY_DERIV_SECRET_LEN           16
+#define KEY_DERIV_LABEL_INFO_LEN       8
+#define KEY_DERIV_SEED_SALT_LEN        8
+
+static uint8_t key_deriv_secret[KEY_DERIV_SECRET_LEN];
+static uint8_t key_deriv_label_info[KEY_DERIV_LABEL_INFO_LEN];
+static uint8_t key_deriv_seed_salt[KEY_DERIV_SEED_SALT_LEN];
+
+void psa_key_derivation_test(psa_algorithm_t deriv_alg,
+                             struct test_result_t *ret)
+{
+    psa_key_handle_t input_handle = 0, output_handle = 0;
+    psa_key_attributes_t input_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_attributes_t output_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_derivation_operation_t deriv_ops;
+    psa_status_t status;
+    uint8_t counter = 0xA5;
+
+    /* Prepare the parameters */
+#if DOMAIN_NS == 1U
+    memset(key_deriv_secret, counter, KEY_DERIV_SECRET_LEN);
+    memset(key_deriv_label_info, counter++, KEY_DERIV_LABEL_INFO_LEN);
+    memset(key_deriv_seed_salt, counter++, KEY_DERIV_SEED_SALT_LEN);
+#else
+    tfm_memset(key_deriv_secret, counter, KEY_DERIV_SECRET_LEN);
+    tfm_memset(key_deriv_label_info, counter++, KEY_DERIV_LABEL_INFO_LEN);
+    tfm_memset(key_deriv_seed_salt, counter++, KEY_DERIV_SEED_SALT_LEN);
+#endif
+
+    deriv_ops = psa_key_derivation_operation_init();
+
+    psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE);
+    psa_set_key_algorithm(&input_key_attr, deriv_alg);
+    psa_set_key_type(&input_key_attr, PSA_KEY_TYPE_DERIVE);
+
+    /* Force to use HMAC-SHA256 as HMAC operation so far */
+    status = psa_import_key(&input_key_attr, key_deriv_secret,
+                            KEY_DERIV_SECRET_LEN, &input_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to import secret");
+        return;
+    }
+
+    status = psa_key_derivation_setup(&deriv_ops, deriv_alg);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to setup derivation operation");
+        goto destroy_key;
+    }
+
+    if (PSA_ALG_IS_TLS12_PRF(deriv_alg) ||
+        PSA_ALG_IS_TLS12_PSK_TO_MS(deriv_alg)) {
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_SEED,
+                                                key_deriv_seed_salt,
+                                                KEY_DERIV_SEED_SALT_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input seed");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_key(&deriv_ops,
+                                              PSA_KEY_DERIVATION_INPUT_SECRET,
+                                              input_handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input key");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_LABEL,
+                                                key_deriv_label_info,
+                                                KEY_DERIV_LABEL_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input label");
+            goto deriv_abort;
+        }
+    } else if (PSA_ALG_IS_HKDF(deriv_alg)) {
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_SALT,
+                                                key_deriv_seed_salt,
+                                                KEY_DERIV_SEED_SALT_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input salt");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_key(&deriv_ops,
+                                              PSA_KEY_DERIVATION_INPUT_SECRET,
+                                              input_handle);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input key");
+            goto deriv_abort;
+        }
+
+        status = psa_key_derivation_input_bytes(&deriv_ops,
+                                                PSA_KEY_DERIVATION_INPUT_INFO,
+                                                key_deriv_label_info,
+                                                KEY_DERIV_LABEL_INFO_LEN);
+        if (status != PSA_SUCCESS) {
+            TEST_FAIL("Failed to input info");
+            goto deriv_abort;
+        }
+    } else {
+        TEST_FAIL("Unsupported derivation algorithm");
+        goto deriv_abort;
+    }
+
+    if (NR_TEST_AES_MODE < 1) {
+        TEST_LOG("No AES algorithm to verify. Output raw data instead");
+        psa_set_key_type(&output_key_attr, PSA_KEY_TYPE_RAW_DATA);
+    } else {
+        psa_set_key_usage_flags(&output_key_attr, PSA_KEY_USAGE_ENCRYPT);
+        psa_set_key_algorithm(&output_key_attr, test_aes_mode_array[0]);
+        psa_set_key_type(&output_key_attr, PSA_KEY_TYPE_AES);
+    }
+    psa_set_key_bits(&output_key_attr,
+                     PSA_BYTES_TO_BITS(KEY_DERIVE_OUTPUT_LEN));
+
+    status = psa_key_derivation_output_key(&output_key_attr, &deriv_ops,
+                                           &output_handle);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Failed to output key");
+        goto deriv_abort;
+    }
+
+    ret->val = TEST_PASSED;
+
+deriv_abort:
+    psa_key_derivation_abort(&deriv_ops);
+destroy_key:
+    psa_destroy_key(input_handle);
+    if (output_handle) {
+        psa_destroy_key(output_handle);
+    }
+
+    return;
 }

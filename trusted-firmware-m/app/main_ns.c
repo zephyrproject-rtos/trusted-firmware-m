@@ -26,6 +26,8 @@
 #endif
 #include "log/tfm_assert.h"
 #include "log/tfm_log.h"
+#include "uart_stdout.h"
+#include "region.h"
 
 /**
  * \brief Modified table template for user defined SVC functions
@@ -74,9 +76,9 @@ static const osThreadAttr_t thread_attr = {
  * \brief Static globals to hold RTOS related quantities,
  *        main thread
  */
-static osStatus_t     status;
-static osThreadId_t   thread_id;
+#if defined(TEST_FRAMEWORK_NS) || defined(PSA_API_TEST_NS)
 static osThreadFunc_t thread_func;
+#endif
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 static struct ns_mailbox_queue_t ns_mailbox_queue;
@@ -106,24 +108,6 @@ static void tfm_ns_multi_core_boot(void)
 }
 #endif
 
-/* For UART the CMSIS driver is used */
-extern ARM_DRIVER_USART NS_DRIVER_STDIO;
-
-int stdio_output_string(const unsigned char *str, uint32_t len)
-{
-    int32_t ret;
-
-    ret = NS_DRIVER_STDIO.Send(str, len);
-    if (ret != ARM_DRIVER_OK) {
-        return 0;
-    }
-    /* Add a busy wait after sending. */
-    while (NS_DRIVER_STDIO.GetStatus().tx_busy)
-        ;
-
-    return NS_DRIVER_STDIO.GetTxCount();
-}
-
 /**
  * \brief Platform peripherals and devices initialization.
  *        Can be overridden for platform specific initialization.
@@ -132,19 +116,7 @@ int stdio_output_string(const unsigned char *str, uint32_t len)
  */
 __WEAK int32_t tfm_ns_platform_init(void)
 {
-    int32_t ret;
-
-    ret = NS_DRIVER_STDIO.Initialize(NULL);
-    TFM_ASSERT(ret == ARM_DRIVER_OK);
-
-    ret = NS_DRIVER_STDIO.PowerControl(ARM_POWER_FULL);
-    TFM_ASSERT(ret == ARM_DRIVER_OK);
-
-    ret = NS_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
-                                  DEFAULT_UART_BAUDRATE);
-    TFM_ASSERT(ret == ARM_DRIVER_OK);
-
-    (void)NS_DRIVER_STDIO.Control(ARM_USART_CONTROL_TX, 1);
+    stdio_init();
 
     return ARM_DRIVER_OK;
 }
@@ -157,12 +129,7 @@ __WEAK int32_t tfm_ns_platform_init(void)
  */
 __WEAK int32_t tfm_ns_platform_uninit(void)
 {
-    int32_t ret;
-
-    (void)NS_DRIVER_STDIO.PowerControl(ARM_POWER_OFF);
-
-    ret = NS_DRIVER_STDIO.Uninitialize();
-    TFM_ASSERT(ret == ARM_DRIVER_OK);
+    stdio_uninit();
 
     return ARM_DRIVER_OK;
 }
@@ -175,6 +142,13 @@ __attribute__((noreturn))
 #endif
 int main(void)
 {
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+    /* Set Main Stack Pointer limit */
+    REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base);
+    __set_MSPLIM((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+                                        $$ZI$$Base));
+#endif
+
     if (tfm_ns_platform_init() != ARM_DRIVER_OK) {
         /* Avoid undefined behavior if platform init failed */
         while(1);
@@ -184,7 +158,7 @@ int main(void)
     tfm_ns_multi_core_boot();
 #endif
 
-    status = osKernelInitialize();
+    (void) osKernelInitialize();
 
     /* Initialize the TFM NS interface */
     tfm_ns_interface_init();
@@ -196,13 +170,11 @@ int main(void)
 #endif
 
 #if defined(TEST_FRAMEWORK_NS) || defined(PSA_API_TEST_NS)
-    thread_id = osThreadNew(thread_func, NULL, &thread_attr);
-#else
-    UNUSED_VARIABLE(thread_id);
-    UNUSED_VARIABLE(thread_func);
+    (void) osThreadNew(thread_func, NULL, &thread_attr);
 #endif
 
-    status = osKernelStart();
+    LOG_MSG("Non-Secure system starting...\r\n");
+    (void) osKernelStart();
 
     /* Reached only in case of error */
     for (;;) {

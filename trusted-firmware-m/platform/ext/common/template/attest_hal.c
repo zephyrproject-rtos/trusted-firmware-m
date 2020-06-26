@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,9 +7,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "platform/include/tfm_attest_hal.h"
-#include "platform/include/tfm_plat_boot_seed.h"
-#include "platform/include/tfm_plat_device_id.h"
+#include "tfm_attest_hal.h"
+#include "tfm_plat_boot_seed.h"
+#include "tfm_plat_device_id.h"
 
 /*!
  * \def BOOT_SEED

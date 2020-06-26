@@ -125,7 +125,7 @@ html_show_copyright = False
 
 #Add custom css for HTML. Used to allow full page width rendering
 def setup(app):
-    app.add_stylesheet('css/custom.css')
+    app.add_stylesheet('css/tfm_custom.css')
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
