@@ -80,7 +80,7 @@ function(trusted_firmware_build)
                 ${TFM_INTERFACE_SOURCE}/tfm_initial_attestation_ipc_api.c
                 ${TFM_INTERFACE_SOURCE}/tfm_its_ipc_api.c
                 ${TFM_INTERFACE_SOURCE}/tfm_platform_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_sst_ipc_api.c
+                ${TFM_INTERFACE_SOURCE}/tfm_ps_ipc_api.c
                 ${TFM_INTERFACE_SOURCE}/tfm_ns_interface.c
     )
     target_include_directories(tfm_ipc_psa_api PUBLIC ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include)
