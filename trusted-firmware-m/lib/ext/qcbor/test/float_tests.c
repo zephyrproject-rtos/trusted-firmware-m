@@ -82,7 +82,7 @@ int32_t HalfPrecisionDecodeBasicTests()
     UsefulBufC HalfPrecision = UsefulBuf_FROM_BYTE_ARRAY_LITERAL(spExpectedHalf);
 
     QCBORDecodeContext DC;
-    QCBORDecode_Init(&DC, HalfPrecision, 0);
+    QCBORDecode_Init(&DC, HalfPrecision, QCBOR_DECODE_MODE_NORMAL);
 
     QCBORItem Item;
 
@@ -210,7 +210,7 @@ int32_t HalfPrecisionAgainstRFCCodeTest()
         // Now parse the hand-constructed CBOR. This will invoke the
         // conversion to a float
         QCBORDecodeContext DC;
-        QCBORDecode_Init(&DC, UsefulOutBuf_OutUBuf(&UOB), 0);
+        QCBORDecode_Init(&DC, UsefulOutBuf_OutUBuf(&UOB), QCBOR_DECODE_MODE_NORMAL);
 
         QCBORItem Item;
 
@@ -394,10 +394,12 @@ int32_t DoubleAsSmallestTest()
     // in hex single is 0x38800000, exponent -14, significand 0
     QCBOREncode_AddDoubleAsSmallestToMap(&EC, "biggest subnormal",  0.0000610351563F);
 
+#if !defined(__ICCARM__) || (__SUBNORMAL_FLOATING_POINTS__ == 1)
     // 70                                   # text(16)
     //    7375626E6F726D616C2073696E676C65  # "subnormal single"
     // FB 37C16C2800000000                  # primitive(4017611261645684736)
     QCBOREncode_AddDoubleAsSmallestToMap(&EC, "subnormal single", 4e-40F);
+#endif
 
     // 03                                   # unsigned(3)
     // F9 C000                              # primitive(49152)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -817,11 +817,9 @@ static int32_t APB_PPCEXP2_ConfigPeriph(uint8_t periph,
                                         ARM_PPC_SecAttr sec_attr,
                                         ARM_PPC_PrivAttr priv_attr)
 {
-    enum ppc_sse200_error_t ret;
-
-    ret = ppc_sse200_config_peripheral(&APB_PPCEXP2_DEV, periph,
-                                       (enum ppc_sse200_sec_attr_t)sec_attr,
-                                       (enum ppc_sse200_priv_attr_t)priv_attr);
+    ppc_sse200_config_peripheral(&APB_PPCEXP2_DEV, periph,
+                                 (enum ppc_sse200_sec_attr_t)sec_attr,
+                                 (enum ppc_sse200_priv_attr_t)priv_attr);
 
     return ARM_DRIVER_OK;
 }

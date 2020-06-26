@@ -9,7 +9,7 @@ import os
 import io
 import sys
 import argparse
-from jinja2 import Environment, BaseLoader, select_autoescape
+from jinja2 import Environment, BaseLoader, select_autoescape, TemplateNotFound
 
 try:
     import yaml
@@ -84,7 +84,7 @@ def process_manifest(manifest_list_file, append):
         manifest_dic = yaml.safe_load(manifest_list_yaml_file)
         manifest_list.extend(manifest_dic["manifest_list"])
 
-    templatefile_name = 'secure_fw/services/manifestfilename.template'
+    templatefile_name = 'secure_fw/partitions/manifestfilename.template'
     template = ENV.get_template(templatefile_name)
 
     for manifest_item in manifest_list:
@@ -118,7 +118,7 @@ def process_manifest(manifest_list_file, append):
 
         print ("Generating " + outfile_name)
 
-        outfile = io.open(outfile_name, "w", newline='\n')
+        outfile = io.open(outfile_name, "w", newline=None)
         outfile.write(template.render(context))
         outfile.close()
 
@@ -161,7 +161,7 @@ def gen_files(context, gen_file_list, append):
 
         template = ENV.get_template(templatefile_name)
 
-        outfile = io.open(outfile_name, "w", newline='\n')
+        outfile = io.open(outfile_name, "w", newline=None)
         outfile.write(template.render(context))
         outfile.close()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited
+ * Copyright (c) 2016-2020 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "platform_retarget_dev.h"
 #include "platform_retarget.h"
 #include "system_cmsdk_sse-200_aws.h"
-#include "platform/include/tfm_plat_defs.h"
+#include "tfm_plat_defs.h"
 
 /* ARM UART driver structures */
 #ifdef UART0_CMSDK_S

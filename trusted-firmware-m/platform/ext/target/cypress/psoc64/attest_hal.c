@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "platform/include/tfm_attest_hal.h"
+#include "tfm_attest_hal.h"
 #include <stdint.h>
 
 /* Example verification service URL for initial attestation token */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 Arm Limited
+ * Copyright (c) 2009-2020 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,8 +310,12 @@ Reset_Handler:
 .L_loop3_done:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
-    ldr      r0, =Image$$ARM_LIB_STACK_MSP$$ZI$$Limit
-    msr      msplim, r0
+    mrs      r0, control    /* Get control value */
+    movs     r1, #2
+    orrs     r0, r0, r1     /* Select switch to PSP */
+    msr      control, r0
+    ldr      r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
+    msr      psp, r0
 
     bl       SystemInit
     bl       _start

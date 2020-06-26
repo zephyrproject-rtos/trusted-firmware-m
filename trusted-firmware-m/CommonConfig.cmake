@@ -17,7 +17,7 @@ endif()
 
 if(NOT DEFINED COMPILER)
 	message(FATAL_ERROR "ERROR: COMPILER is not set in command line")
-elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM"))
+elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUARM") AND (NOT ${COMPILER} STREQUAL "IARARM"))
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
@@ -80,11 +80,13 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	# CMSE is unnecessary in multi-core scenarios.
 	# TODO: Need further discussion about if CMSE is required when an Armv8-M
 	# core acts as secure core in multi-core scenario.
-	set (CMSE_FLAGS "")
-	set (ARM_FEATURE_CMSE 0)
+	# leave CMSE_FLAGS undefined
 else()
-	set (CMSE_FLAGS "-mcmse")
-	set (ARM_FEATURE_CMSE 3)
+	if(${COMPILER} STREQUAL "IARARM")
+		set (CMSE_FLAGS "--cmse")
+	else()
+		set (CMSE_FLAGS "-mcmse")
+	endif()
 
 	# Clear multi-core test setting
 	set (TFM_MULTI_CORE_TEST OFF)
@@ -97,10 +99,10 @@ if(${COMPILER} STREQUAL "ARMCLANG")
 	include("Common/FindArmClang")
 	include("Common/${ARMCLANG_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none ${CMSE_FLAGS} -ffunction-sections -fdata-sections)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -mfpu=none -ffunction-sections -fdata-sections -fno-builtin -nostdlib)
 	##Shared compiler settings.
 	function(config_setting_shared_compiler_flags tgt)
-		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror)
 	endfunction()
 
 	##Shared linker settings.
@@ -114,10 +116,10 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 	include("Common/FindGNUARM")
 	include("Common/${GNUARM_MODULE}")
 
-	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float ${CMSE_FLAGS} -ffunction-sections -fdata-sections --specs=nano.specs)
+	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -ffunction-sections -fdata-sections --specs=nano.specs -fno-builtin)
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
-		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
 	endfunction()
 
 	##Shared linker settings.
@@ -127,6 +129,27 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 		#wchar, and this generates linker time warnings. TF-M code does not use
 		#wchar, so the warning can be suppressed.
 		embedded_set_target_link_flags(TARGET ${tgt} FLAGS -Wl,-check-sections,-fatal-warnings,--gc-sections,--no-wchar-size-warning,--print-memory-usage --entry=Reset_Handler --specs=nano.specs)
+	endfunction()
+elseif(${COMPILER} STREQUAL "IARARM")
+	#Use any IARARM version found on PATH. Note: Only versions supported by the
+	#build system will work. A file cmake/Common/CompilerIARARMXY.cmake
+	#must be present with a matching version.
+	include("Common/FindIARARM")
+	include("Common/${IARARM_MODULE}")
+
+	set (COMMON_COMPILE_FLAGS -e --dlib_config=full --vla --silent -DNO_TYPEOF --diag_suppress Pe546,Pe940,Pa082,Pa084)
+	##Shared compiler and linker settings.
+	function(config_setting_shared_compiler_flags tgt)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS ${COMMON_COMPILE_FLAGS} "-DImage$$= " "-DLoad$$LR$$= " "-D$$ZI$$Base=$$Base" "-D$$ZI$$Limit=$$Limit" "-D$$RO$$Base=$$Base" "-D$$RO$$Limit=$$Limit" "-D$$RW$$Base=$$Base" "-D$$RW$$Limit=$$Limit" "-D_DATA$$RW$$Base=_DATA$$Base" "-D_DATA$$RW$$Limit=_DATA$$Limit" "-D_DATA$$ZI$$Base=_DATA$$Base" "-D_DATA$$ZI$$Limit=_DATA$$Limit" "-D_STACK$$ZI$$Base=_STACK$$Base" "-D_STACK$$ZI$$Limit=_STACK$$Limit" )
+	endfunction()
+
+	##Shared linker settings.
+	function(config_setting_shared_linker_flags tgt)
+		#--no-wchar-size-warning flag is added because TF-M sources are compiled
+		#with short wchars, however the standard library is compiled with normal
+		#wchar, and this generates linker time warnings. TF-M code does not use
+		#wchar, so the warning can be suppressed.
+		embedded_set_target_link_flags(TARGET ${tgt} FLAGS --silent --semihosting --redirect __write=__write_buffered)
 	endfunction()
 endif()
 
@@ -140,37 +163,49 @@ set (TFM_PARTITION_TEST_CORE OFF)
 set (TFM_PARTITION_TEST_CORE_IPC OFF)
 set (CORE_TEST_POSITIVE OFF)
 set (CORE_TEST_INTERACTIVE OFF)
-set (REFERENCE_PLATFORM OFF)
 set (TFM_PARTITION_TEST_SECURE_SERVICES OFF)
-set (TFM_PARTITION_TEST_SST OFF)
+set (TFM_PARTITION_TEST_PS OFF)
 set (SERVICES_TEST_ENABLED OFF)
 set (TEST_FRAMEWORK_S  OFF)
 set (TEST_FRAMEWORK_NS OFF)
 set (TFM_PSA_API OFF)
-set (TFM_LEGACY_API ON)
 
-option(TFM_PARTITION_AUDIT_LOG "Enable the TF-M Audit Log partition" ON)
-option(TFM_PARTITION_PLATFORM "Enable the TF-M Platform partition" ON)
-option(TFM_PARTITION_SECURE_STORAGE "Enable the TF-M secure storage partition" ON)
-option(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE "Enable the TF-M internal trusted storage partition" ON)
-option(TFM_PARTITION_CRYPTO "Enable the TF-M crypto partition" ON)
-option(TFM_PARTITION_INITIAL_ATTESTATION "Enable the TF-M initial attestation partition" ON)
+if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
+	# Enable the TF-M Audit Log partition
+	set(TFM_PARTITION_AUDIT_LOG ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_PLATFORM)
+	# Enable the TF-M Platform partition
+	set(TFM_PARTITION_PLATFORM ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	# Enable the TF-M Protected storage partition
+	set(TFM_PARTITION_PROTECTED_STORAGE ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+	# Enable the TF-M internal trusted storage partition
+	set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_CRYPTO)
+	# Enable the TF-M crypto partition
+	set(TFM_PARTITION_CRYPTO ON)
+endif()
+if (NOT DEFINED TFM_PARTITION_INITIAL_ATTESTATION)
+	# Enable the TF-M initial attestation partition
+	set(TFM_PARTITION_INITIAL_ATTESTATION ON)
+endif()
 
 if (NOT TFM_LVL EQUAL 1 AND NOT DEFINED CONFIG_TFM_ENABLE_MEMORY_PROTECT)
 	set (CONFIG_TFM_ENABLE_MEMORY_PROTECT ON)
 endif()
 
-if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_INITIAL_ATTESTATION OR TFM_PARTITION_PROTECTED_STORAGE)
 	#PSA Initial Attestation and Protected storage rely on Cryptography API
 	set(TFM_PARTITION_CRYPTO ON)
 endif()
 
-if (TFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_PROTECTED_STORAGE)
 	set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON)
-endif()
-
-if(${TARGET_PLATFORM} STREQUAL "AN521" OR ${TARGET_PLATFORM} STREQUAL "AN519" OR ${TARGET_PLATFORM} STREQUAL "AN539")
-	set (REFERENCE_PLATFORM ON)
 endif()
 
 # Option to demonstrate usage of secure-only peripheral
@@ -209,17 +244,15 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 	endif()
 endif()
 
-if (TFM_LEGACY_API)
-	add_definitions(-DTFM_LEGACY_API)
-endif()
-
 if (SERVICES_TEST_ENABLED)
 	set(SERVICE_TEST_S ON)
 	set(SERVICE_TEST_NS ON)
 endif()
 
 if (CORE_TEST)
-	set(CORE_TEST_POSITIVE ON)
+	if (NOT CORE_IPC OR TFM_LVL EQUAL 1)
+		set(CORE_TEST_POSITIVE ON)
+	endif()
 	set(CORE_TEST_INTERACTIVE OFF)
 endif()
 
@@ -289,8 +322,8 @@ if (TFM_PARTITION_PLATFORM)
 	add_definitions(-DTFM_PARTITION_PLATFORM)
 endif()
 
-if (TFM_PARTITION_SECURE_STORAGE)
-	add_definitions(-DTFM_PARTITION_SECURE_STORAGE)
+if (TFM_PARTITION_PROTECTED_STORAGE)
+	add_definitions(-DTFM_PARTITION_PROTECTED_STORAGE)
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -303,6 +336,14 @@ endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
 	add_definitions(-DTFM_PARTITION_INITIAL_ATTESTATION)
+
+	if (NOT DEFINED SYMMETRIC_INITIAL_ATTESTATION)
+		set(SYMMETRIC_INITIAL_ATTESTATION OFF)
+	endif()
+
+	if (SYMMETRIC_INITIAL_ATTESTATION)
+		add_definitions(-DSYMMETRIC_INITIAL_ATTESTATION)
+	endif()
 endif()
 
 if (TFM_PARTITION_TEST_CORE)
@@ -326,6 +367,9 @@ if (PSA_API_TEST)
 	set(PSA_API_TEST_NS ON)
 	if (NOT DEFINED PSA_API_TEST_CRYPTO)
 		set(PSA_API_TEST_CRYPTO OFF)
+	endif()
+	if (NOT DEFINED PSA_API_TEST_STORAGE)
+		set(PSA_API_TEST_STORAGE OFF)
 	endif()
 	if (NOT DEFINED PSA_API_TEST_INTERNAL_TRUSTED_STORAGE)
 		set(PSA_API_TEST_INTERNAL_TRUSTED_STORAGE OFF)
@@ -382,51 +426,52 @@ if (BL2)
 	if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
 		set(LINK_TO_BOTH_MEMORY_REGION ON)
 	endif()
+
+	if (MCUBOOT_REPO STREQUAL "TF-M")
+		# FixMe: LEGACY_TFM_TLV_HEADER could be removed when MCUBoot fork is deleted.
+		set(LEGACY_TFM_TLV_HEADER ON)
+	endif()
 endif()
 
 ##Set Mbed Crypto compiler flags and variables for crypto service
-set(MBEDCRYPTO_C_FLAGS_SERVICES "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
+set(MBEDCRYPTO_C_FLAGS_SERVICES "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -I${CMAKE_CURRENT_LIST_DIR}/platform/ext/common")
 
-#Default TF-M secure storage flags.
+#Default TF-M protected storage flags.
 #These flags values can be overwritten by setting them in platform/ext/<TARGET_NAME>.cmake
-#Documentation about these flags can be found in docs/user_guides/services/tfm_sst_integration_guide.rst
-if (NOT DEFINED SST_ENCRYPTION)
-	set (SST_ENCRYPTION ON)
+#Documentation about these flags can be found in docs/user_guides/services/tfm_ps_integration_guide.rst
+if (NOT DEFINED PS_ENCRYPTION)
+	set (PS_ENCRYPTION ON)
 endif()
 
-if (NOT DEFINED SST_ROLLBACK_PROTECTION)
-	set (SST_ROLLBACK_PROTECTION OFF)
+if (NOT DEFINED PS_ROLLBACK_PROTECTION)
+	set (PS_ROLLBACK_PROTECTION OFF)
 endif()
 
-if (NOT DEFINED SST_CREATE_FLASH_LAYOUT)
-	set (SST_CREATE_FLASH_LAYOUT OFF)
+if (NOT DEFINED PS_CREATE_FLASH_LAYOUT)
+	set (PS_CREATE_FLASH_LAYOUT OFF)
 endif()
 
-if (NOT DEFINED SST_VALIDATE_METADATA_FROM_FLASH)
-	set (SST_VALIDATE_METADATA_FROM_FLASH ON)
+if (NOT DEFINED PS_VALIDATE_METADATA_FROM_FLASH)
+	set (PS_VALIDATE_METADATA_FROM_FLASH ON)
 endif()
 
-if (NOT DEFINED SST_RAM_FS)
-	if (REGRESSION)
-		set (SST_RAM_FS ON)
+if (NOT DEFINED PS_RAM_FS)
+	set (PS_RAM_FS OFF)
+endif()
+
+if (NOT DEFINED PS_TEST_NV_COUNTERS)
+	if (REGRESSION AND ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+		set(PS_TEST_NV_COUNTERS ON)
 	else()
-		set (SST_RAM_FS OFF)
+		set(PS_TEST_NV_COUNTERS OFF)
 	endif()
 endif()
 
-if (NOT DEFINED SST_TEST_NV_COUNTERS)
-	if (REGRESSION AND ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-		set(SST_TEST_NV_COUNTERS ON)
-	else()
-		set(SST_TEST_NV_COUNTERS OFF)
-	endif()
-endif()
-
-# The SST NV counter tests depend on the SST test partition to call
-# sst_system_prepare().
-if (SST_TEST_NV_COUNTERS)
-	set(TFM_PARTITION_TEST_SST ON)
-	add_definitions(-DTFM_PARTITION_TEST_SST)
+# The PS NV counter tests depend on the PS test partition to call
+# ps_system_prepare().
+if (PS_TEST_NV_COUNTERS)
+	set(TFM_PARTITION_TEST_PS ON)
+	add_definitions(-DTFM_PARTITION_TEST_PS)
 endif()
 
 #Default TF-M internal trusted storage flags.
@@ -439,11 +484,7 @@ if (NOT DEFINED ITS_VALIDATE_METADATA_FROM_FLASH)
 endif()
 
 if (NOT DEFINED ITS_RAM_FS)
-	if (REGRESSION)
-		set (ITS_RAM_FS ON)
-	else()
-		set (ITS_RAM_FS OFF)
-	endif()
+	set (ITS_RAM_FS OFF)
 endif()
 
 if (NOT DEFINED MBEDCRYPTO_DEBUG)
@@ -468,20 +509,20 @@ if (NOT DEFINED ATTEST_INCLUDE_TEST_CODE)
 	endif()
 endif()
 
-set(ATTEST_BOOT_INTERFACE "CBOR_ENCODED_CLAIMS" CACHE STRING "Set the format in which to pass the claims to the initial-attestation service.")
-set_property(CACHE ATTEST_BOOT_INTERFACE PROPERTY STRINGS "INDIVIDUAL_CLAIMS;CBOR_ENCODED_CLAIMS")
-validate_cache_value(ATTEST_BOOT_INTERFACE)
-
 if (NOT DEFINED BOOT_DATA_AVAILABLE)
-	if (BL2 AND (NOT MCUBOOT_REPO STREQUAL "UPSTREAM"))
+	if (BL2)
 		set(BOOT_DATA_AVAILABLE ON)
 	else()
 		set(BOOT_DATA_AVAILABLE OFF)
 	endif()
 endif()
 
+if (NOT DEFINED ATTEST_CLAIM_VALUE_CHECK)
+	set(ATTEST_CLAIM_VALUE_CHECK OFF)
+endif()
+
 ##Set mbedTLS compiler flags for BL2 bootloader
-set(MBEDCRYPTO_C_FLAGS_BL2 "-D__ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-rsa.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
+set(MBEDCRYPTO_C_FLAGS_BL2 "${CMSE_FLAGS} -D__thumb2__ ${COMMON_COMPILE_FLAGS_STR} -DMBEDTLS_CONFIG_FILE=\\\\\\\"config-rsa.h\\\\\\\" -I${CMAKE_CURRENT_LIST_DIR}/bl2/ext/mcuboot/include")
 if (MCUBOOT_SIGNATURE_TYPE STREQUAL "RSA-3072")
 	string(APPEND MBEDCRYPTO_C_FLAGS_BL2 " -DMCUBOOT_SIGN_RSA_LEN=3072")
 endif()

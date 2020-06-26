@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -70,10 +70,10 @@ static void multi_client_call_heavy_test(struct test_result_t *ret);
 static struct test_t multi_core_tests[] = {
     {&multi_client_call_light_test,
      "MULTI_CLIENT_CALL_LIGHT_TEST",
-     "Multiple outstanding NS PSA client calls lightweight test", {0}},
+     "Multiple outstanding NS PSA client calls lightweight test", {TEST_PASSED}},
     {&multi_client_call_heavy_test,
      "MULTI_CLIENT_CALL_HEAVY_TEST",
-     "Multiple outstanding NS PSA client calls heavyweight test", {0}},
+     "Multiple outstanding NS PSA client calls heavyweight test", {TEST_PASSED}},
 };
 
 void register_testsuite_multi_core_ns_interface(

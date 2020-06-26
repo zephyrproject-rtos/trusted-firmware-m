@@ -19,17 +19,25 @@ if(COMPILER STREQUAL "ARMCLANG")
     set (BL2_SCATTER_FILE_NAME "${AN539_DIR}/device/source/armclang/an539_mps2_bl2.sct")
     set (S_SCATTER_FILE_NAME "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set (NS_SCATTER_FILE_NAME "${AN539_DIR}/device/source/armclang/an539_mps2_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-      # not all project defines CMSIS_5_DIR, only the ones that use it.
-      set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib")
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib")
     endif()
 elseif(COMPILER STREQUAL "GNUARM")
     set (BL2_SCATTER_FILE_NAME "${AN539_DIR}/device/source/gcc/an539_mps2_bl2.ld")
     set (S_SCATTER_FILE_NAME "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set (NS_SCATTER_FILE_NAME "${AN539_DIR}/device/source/gcc/an539_mps2_ns.ld")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set (RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_V8MBN.a")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MBN.a")
+    endif()
+elseif(COMPILER STREQUAL "IARARM")
+    set (BL2_SCATTER_FILE_NAME "${AN539_DIR}/device/source/iar/an539_mps2_bl2.icf")
+    set (S_SCATTER_FILE_NAME "${PLATFORM_DIR}/common/iar/tfm_common_s.icf")
+    set (NS_SCATTER_FILE_NAME "${AN539_DIR}/device/source/iar/an539_mps2_ns.icf")
+    if (DEFINED CMSIS_DIR)
+      # not all project defines CMSIS_DIR, only the ones that use it.
+      set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/IAR/RTX_V8MBN.a")
     endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
@@ -113,10 +121,17 @@ elseif(BUILD_STARTUP)
     list(APPEND ALL_SRC_ASM_BL2 "${AN539_DIR}/device/source/gcc/startup_cmsdk_an539_mps2_bl2.S")
     set_property(SOURCE "${ALL_SRC_ASM_S}" "${ALL_SRC_ASM_NS}" "${ALL_SRC_ASM_BL2}" APPEND
         PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "IARARM")
+    list(APPEND ALL_SRC_ASM_S "${AN539_DIR}/device/source/iar/startup_cmsdk_an539_mps2_s.s")
+    list(APPEND ALL_SRC_ASM_NS "${AN539_DIR}/device/source/iar/startup_cmsdk_an539_mps2_ns.s")
+    list(APPEND ALL_SRC_ASM_BL2 "${AN539_DIR}/device/source/iar/startup_cmsdk_an539_mps2_bl2.s")
   else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
   endif()
 endif()
+
+#Enable the checks of attestation claims against hard-coded values.
+set(ATTEST_CLAIM_VALUE_CHECK ON)
 
 if (NOT DEFINED BUILD_TARGET_CFG)
   message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
@@ -148,9 +163,9 @@ elseif (BUILD_TARGET_NV_COUNTERS)
     #       API ONLY if the target has non-volatile counters.
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/nv_counters.c")
     set(TARGET_NV_COUNTERS_ENABLE ON)
-    # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
+    # Sets PS_ROLLBACK_PROTECTION flag to compile in the PS services
     # rollback protection code as the target supports nv counters.
-    set(SST_ROLLBACK_PROTECTION ON)
+    set(PS_ROLLBACK_PROTECTION ON)
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
@@ -190,13 +205,11 @@ elseif(BUILD_FLASH)
   # There is no real flash memory for code on MPS2 board. Instead a code SRAM is used for code
   # storage: SSRAM1. The Driver_Flash driver just emulates a flash interface and behaviour on
   # top of the SRAM memory.
-  # As the SST area is going to be in RAM, it is required to set SST_CREATE_FLASH_LAYOUT
-  # to be sure the SST service knows that when it starts the SST area does not contain any
-  # valid SST flash layout and it needs to create one. The same for ITS.
-  set(SST_CREATE_FLASH_LAYOUT ON)
-  set(SST_RAM_FS OFF)
+  # As the PS area is going to be in RAM, it is required to set PS_CREATE_FLASH_LAYOUT
+  # to be sure the PS service knows that when it starts the PS area does not contain any
+  # valid PS flash layout and it needs to create one. The same for ITS.
+  set(PS_CREATE_FLASH_LAYOUT ON)
   set(ITS_CREATE_FLASH_LAYOUT ON)
-  set(ITS_RAM_FS OFF)
   embedded_include_directories(PATH "${AN539_DIR}/cmsis_drivers" ABSOLUTE)
   embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()

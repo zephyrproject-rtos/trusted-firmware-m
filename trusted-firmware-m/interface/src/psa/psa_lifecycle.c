@@ -6,7 +6,7 @@
  */
 #include <inttypes.h>
 #include "psa/lifecycle.h"
-#include "core/tfm_core_svc.h"
+#include "tfm/tfm_core_svc.h"
 
 __attribute__((naked))
 uint32_t psa_rot_lifecycle_state(void)

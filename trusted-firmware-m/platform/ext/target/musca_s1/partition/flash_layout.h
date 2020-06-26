@@ -17,18 +17,33 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on Musca-S1 with BL2(boot from MRAM):
+/* Flash layout on Musca-S1 with BL2(multiple image boot, boot from MRAM):
  * 0x0A00_0000 BL2 - MCUBoot(128 KB)
- * 0x0A02_0000 Primary image area (832 KB):
- *    0x0A02_0000 Secure     image primary (320 KB)
- *    0x0A07_0000 Non-secure image primary (512 KB)
- * 0x0A0F_0000 Secondary image area (832 KB):
- *    0x0A0F_0000 Secure     image secondary (320 KB)
- *    0x0A14_0000 Non-secure image secondary (512 KB)
- * 0x0A1C_0000 Secure Storage Area (20 KB)
- * 0x0A1C_5000 Internal Trusted Storage Area (16 KB)
- * 0x0A1C_9000 NV counters area (4 KB)
- * 0x0A1C_A000 Unused
+ * 0x0A02_0000 Secure     image primary (320 KB)
+ * 0x0A07_0000 Non-secure image primary (512 KB)
+ * 0x0A0F_0000 Secure     image secondary (320 KB)
+ * 0x0A14_0000 Non-secure image secondary (512 KB)
+ * 0x0A1C_0000 Scratch Area (16 KB)
+ * 0x0A1C_4000 Protected Storage Area (20 KB)
+ * 0x0A1C_9000 Internal Trusted Storage Area (16 KB)
+ * 0x0A1C_D000 NV counters area (4 KB)
+ * 0x0A1C_E000 Unused
+ *
+ * Flash layout on Musca-S1 with BL2(single image boot):
+ * 0x0A00_0000 BL2 - MCUBoot(128 KB)
+ * 0x0A02_0000 Primary image area (896 KB):
+ *    0x0A02_0000 Secure     image primary (384 KB)
+ *    0x0A08_0000 Non-secure image primary (512 KB)
+ * 0x0A10_0000 Secondary image area (896 KB):
+ *    0x0A10_0000 Secure     image secondary (384 KB)
+ *    0x0A16_0000 Non-secure image secondary (512 KB)
+ * 0x0A1E_0000 Protected Storage Area (20 KB)
+ * 0x0A1E_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0A1E_9000 NV counters area (4 KB)
+ * 0x0A1E_A000 TF-M key area (256 bytes) This area is referred to in
+ *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
+ *             dx_reg_base_host.h Do not change one without changing the other.
+ * 0x0A1E_A100 Unused
  *
  * Flash layout on Musca-S1 without BL2:
  * 0x0A00_0000 Secure     image
@@ -43,7 +58,7 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE          (0x50000) /* S partition: 320 KB */
+#define FLASH_S_PARTITION_SIZE          (0x60000) /* S partition: 384 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS partition: 512 KB */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
@@ -76,12 +91,15 @@
 #define FLASH_AREA_2_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-S1.
- */
+
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (0)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* The maximum number of status entries supported by the bootloader. */
+#define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
+                                     FLASH_NS_PARTITION_SIZE) / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -103,12 +121,13 @@
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-S1.
- */
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (0)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* The maximum number of status entries supported by the bootloader. */
+#define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
+                                    FLASH_AREA_SCRATCH_SIZE)
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
@@ -116,29 +135,28 @@
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
 
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-S1. The maximum number of status entries
- * supported by the bootloader.
- */
-#define MCUBOOT_STATUS_MAX_ENTRIES      (0)
-
-/* Note: FLASH_SST_AREA_OFFSET, FLASH_ITS_AREA_OFFSET and
+/* Note: FLASH_PS_AREA_OFFSET, FLASH_ITS_AREA_OFFSET and
  * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes
  * to these addresses are redirected to Code SRAM by Driver_Flash.c.
  */
-#define FLASH_SST_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_SST_AREA_SIZE             (0x5000)   /* 20 KB */
+#define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_SST_AREA_OFFSET + \
-                                         FLASH_SST_AREA_SIZE)
+#define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
+                                         FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x4000)   /* 16 KB */
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+
+/* TF-M crypto key area definitions */
+#define FLASH_TFM_CRYPTO_KEY_AREA_OFFSET   (FLASH_NV_COUNTERS_AREA_OFFSET + \
+                                            FLASH_NV_COUNTERS_AREA_SIZE)
+#define FLASH_TFM_CRYPTO_KEY_AREA_SIZE     (0x100)
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -153,27 +171,27 @@
  */
 #define FLASH_DEV_NAME Driver_FLASH0
 
-/* Secure Storage (SST) Service definitions
+/* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
- * TF-M SST Integration Guide.
+ * TF-M PS Integration Guide.
  */
-#define SST_FLASH_DEV_NAME Driver_FLASH0
+#define PS_FLASH_DEV_NAME Driver_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
  */
-#define SST_FLASH_AREA_ADDR     FLASH_SST_AREA_OFFSET
-/* Dedicated flash area for SST */
-#define SST_FLASH_AREA_SIZE     FLASH_SST_AREA_SIZE
-#define SST_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
-/* Number of SST_SECTOR_SIZE per block */
-#define SST_SECTORS_PER_BLOCK   (0x1)
+#define PS_FLASH_AREA_ADDR     FLASH_PS_AREA_OFFSET
+/* Dedicated flash area for PS */
+#define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
+/* Number of PS_SECTOR_SIZE per block */
+#define PS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
-#define SST_FLASH_PROGRAM_UNIT  (0x1)
-/* The maximum asset size to be stored in the SST area */
-#define SST_MAX_ASSET_SIZE      (2048)
-/* The maximum number of assets to be stored in the SST area */
-#define SST_NUM_ASSETS          (10)
+#define PS_FLASH_PROGRAM_UNIT  (0x1)
+/* The maximum asset size to be stored in the PS area */
+#define PS_MAX_ASSET_SIZE      (2048)
+/* The maximum number of assets to be stored in the PS area */
+#define PS_NUM_ASSETS          (10)
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the

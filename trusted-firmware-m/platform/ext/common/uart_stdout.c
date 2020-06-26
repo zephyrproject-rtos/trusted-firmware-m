@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited
+ * Copyright (c) 2017-2020 ARM Limited
  *
  * Licensed under the Apace License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdint.h>
 #include "Driver_USART.h"
 #include "target_cfg.h"
 #include "device_cfg.h"
@@ -26,26 +25,32 @@
 #define ASSERT_HIGH(X)  assert(X == ARM_DRIVER_OK)
 
 /* Imports USART driver */
+#if DOMAIN_NS == 1U
+extern ARM_DRIVER_USART NS_DRIVER_STDIO;
+#define STDIO_DRIVER    NS_DRIVER_STDIO
+#else
 extern ARM_DRIVER_USART TFM_DRIVER_STDIO;
+#define STDIO_DRIVER    TFM_DRIVER_STDIO
+#endif
 
 int stdio_output_string(const unsigned char *str, uint32_t len)
 {
     int32_t ret;
 
-    ret = TFM_DRIVER_STDIO.Send(str, len);
+    ret = STDIO_DRIVER.Send(str, len);
     if (ret != ARM_DRIVER_OK) {
         return 0;
     }
     /* Add a busy wait after sending. */
-    while (TFM_DRIVER_STDIO.GetStatus().tx_busy);
+    while (STDIO_DRIVER.GetStatus().tx_busy);
 
-    return TFM_DRIVER_STDIO.GetTxCount();
+    return STDIO_DRIVER.GetTxCount();
 }
 
-/* Redirects printf to TFM_DRIVER_STDIO in case of ARMCLANG*/
+/* Redirects printf to STDIO_DRIVER in case of ARMCLANG*/
 #if defined(__ARMCC_VERSION)
 /* Struct FILE is implemented in stdio.h. Used to redirect printf to
- * TFM_DRIVER_STDIO
+ * STDIO_DRIVER
  */
 FILE __stdout;
 /* __ARMCC_VERSION is only defined starting from Arm compiler version 6 */
@@ -60,7 +65,7 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 #elif defined(__GNUC__)
-/* Redirects printf to TFM_DRIVER_STDIO in case of GNUARM */
+/* Redirects printf to STDIO_DRIVER in case of GNUARM */
 int _write(int fd, char *str, int len)
 {
     (void)fd;
@@ -82,25 +87,27 @@ int putchar(int ch)
 void stdio_init(void)
 {
     int32_t ret;
-    ret = TFM_DRIVER_STDIO.Initialize(NULL);
+    ret = STDIO_DRIVER.Initialize(NULL);
     ASSERT_HIGH(ret);
 
-    ret = TFM_DRIVER_STDIO.PowerControl(ARM_POWER_FULL);
+    ret = STDIO_DRIVER.PowerControl(ARM_POWER_FULL);
     ASSERT_HIGH(ret);
 
-    ret = TFM_DRIVER_STDIO.Control(ARM_USART_MODE_ASYNCHRONOUS,
-                                   DEFAULT_UART_BAUDRATE);
+    ret = STDIO_DRIVER.Control(ARM_USART_MODE_ASYNCHRONOUS,
+                               DEFAULT_UART_BAUDRATE);
     ASSERT_HIGH(ret);
+    (void)ret;
 
-    (void)TFM_DRIVER_STDIO.Control(ARM_USART_CONTROL_TX, 1);
+    (void)STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
 }
 
 void stdio_uninit(void)
 {
     int32_t ret;
 
-    (void)TFM_DRIVER_STDIO.PowerControl(ARM_POWER_OFF);
+    (void)STDIO_DRIVER.PowerControl(ARM_POWER_OFF);
 
-    ret = TFM_DRIVER_STDIO.Uninitialize();
+    ret = STDIO_DRIVER.Uninitialize();
     ASSERT_HIGH(ret);
+    (void)ret;
 }

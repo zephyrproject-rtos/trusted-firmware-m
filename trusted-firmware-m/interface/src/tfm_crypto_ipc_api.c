@@ -5,7 +5,6 @@
  *
  */
 
-#include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 #include "tfm_ns_interface.h"

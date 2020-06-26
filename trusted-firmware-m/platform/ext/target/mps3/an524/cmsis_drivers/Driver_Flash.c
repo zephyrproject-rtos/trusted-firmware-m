@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,7 +21,7 @@
  * Git SHA: 9f3da0b83e45e6d26ad0be45c090d2e4382fb04f
  */
 
-/* FIXME: This interim flash driver uses BRAM to emulate flash for SST.
+/* FIXME: This interim flash driver uses BRAM to emulate flash for PS.
  * Code is still running on QSPI, and only direct read is supported,
  * write is not supported yet.
  * It should be replaced with a real flash driver.
@@ -40,9 +40,9 @@
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
 
-#define FLASH_REDIRECT_BASE   SST_FLASH_AREA_ADDR
+#define FLASH_REDIRECT_BASE   PS_FLASH_AREA_ADDR
 #define FLASH_REDIRECT_LIMIT  (FLASH_REDIRECT_BASE   \
-                               + FLASH_SST_AREA_SIZE \
+                               + FLASH_PS_AREA_SIZE \
                                + FLASH_ITS_AREA_SIZE \
                                + FLASH_NV_COUNTERS_AREA_SIZE)
 #define FLASH_REDIRECT_DEST   0x38000000
@@ -188,7 +188,7 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    /* Redirecting SST storage to BRAM */
+    /* Redirecting PS storage to BRAM */
     if (addr >= FLASH_REDIRECT_BASE && addr <= FLASH_REDIRECT_LIMIT) {
         start_addr = FLASH_REDIRECT_DEST + (addr - FLASH_REDIRECT_BASE);
     }
@@ -212,10 +212,10 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    /* Redirecting SST storage to BRAM */
+    /* Redirecting PS storage to BRAM */
     if (addr >= FLASH_REDIRECT_BASE && addr <= FLASH_REDIRECT_LIMIT) {
         start_addr = FLASH_REDIRECT_DEST + (addr - FLASH_REDIRECT_BASE);
-        /* SST Flash is emulated over BRAM. use memcpy function. */
+        /* PS Flash is emulated over BRAM. use memcpy function. */
         memcpy((void *)start_addr, data, cnt);
     } else {
         /* Flash driver for QSPI is not ready */
@@ -234,9 +234,9 @@ static int32_t ARM_Flash_EraseSector(uint32_t addr)
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    /* Redirecting SST storage to BRAM */
+    /* Redirecting PS storage to BRAM */
     if (addr >= FLASH_REDIRECT_BASE && addr <= FLASH_REDIRECT_LIMIT) {
-        /* SST Flash IS emulated over BRAM. use memcpy function. */
+        /* PS Flash IS emulated over BRAM. use memcpy function. */
         memset((void *)(FLASH_REDIRECT_DEST
                               + (addr - FLASH_REDIRECT_BASE)),
                      FLASH0_DEV->data->erased_value,
@@ -257,7 +257,7 @@ static int32_t ARM_Flash_EraseChip(void)
     /* Check driver capability erase_chip bit */
     if (DriverCapabilities.erase_chip == 1) {
         for (i = 0; i < FLASH0_DEV->data->sector_count; i++) {
-            /* Redirecting SST storage to BRAM */
+            /* Redirecting PS storage to BRAM */
             if (addr >= FLASH_REDIRECT_BASE && addr <= FLASH_REDIRECT_LIMIT) {
                 memset((void *)(FLASH_REDIRECT_DEST +
                         (addr - FLASH0_DEV->memory_base - FLASH_REDIRECT_BASE)),

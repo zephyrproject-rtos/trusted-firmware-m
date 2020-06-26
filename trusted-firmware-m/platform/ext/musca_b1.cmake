@@ -17,17 +17,17 @@ if (COMPILER STREQUAL "ARMCLANG")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_bl2.sct")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/armclang/musca_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif (COMPILER STREQUAL "GNUARM")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_bl2.ld")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_b1/Device/Source/gcc/musca_ns.ld")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
     endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
@@ -37,9 +37,8 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_b1/partition")
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
-    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
-        message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
-        mcuboot_override_upgrade_strategy("NO_SWAP")
+    if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+        message(FATAL_ERROR "ERROR: RAM_LOADING upgrade strategy is not supported on target '${TARGET_PLATFORM}'.")
     endif()
 
     #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
@@ -135,6 +134,9 @@ elseif (BUILD_STARTUP)
     endif()
 endif()
 
+#Enable the checks of attestation claims against hard-coded values.
+set(ATTEST_CLAIM_VALUE_CHECK ON)
+
 if (NOT DEFINED BUILD_TARGET_CFG)
     message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
 elseif (BUILD_TARGET_CFG)
@@ -168,7 +170,12 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif (BUILD_TARGET_HARDWARE_KEYS)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
-    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/dummy_crypto_keys.c")
+
+    if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+      list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/crypto_keys.c")
+    else()
+      list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+    endif()
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
@@ -179,9 +186,9 @@ elseif (BUILD_TARGET_NV_COUNTERS)
     #       API ONLY if the target has non-volatile counters.
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/nv_counters.c")
     set(TARGET_NV_COUNTERS_ENABLE ON)
-    # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
+    # Sets PS_ROLLBACK_PROTECTION flag to compile in the PS services
     # rollback protection code as the target supports nv counters.
-    set(SST_ROLLBACK_PROTECTION ON)
+    set(PS_ROLLBACK_PROTECTION ON)
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
@@ -199,11 +206,11 @@ if (NOT DEFINED BUILD_FLASH)
 elseif (BUILD_FLASH)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_QSPI_Flash.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver/Driver_GFC100_EFlash.c")
-    # As the SST area is going to be in RAM, it is required to set
-    # SST_CREATE_FLASH_LAYOUT to be sure the SST service knows that when it
-    # starts the SST area does not contain any valid SST flash layout and it
+    # As the PS area is going to be in RAM, it is required to set
+    # PS_CREATE_FLASH_LAYOUT to be sure the PS service knows that when it
+    # starts the PS area does not contain any valid PS flash layout and it
     # needs to create one. The same for ITS.
-    set(SST_CREATE_FLASH_LAYOUT ON)
+    set(PS_CREATE_FLASH_LAYOUT ON)
     set(ITS_CREATE_FLASH_LAYOUT ON)
     embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_b1/CMSIS_Driver" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
@@ -230,7 +237,7 @@ if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
     add_definitions("-DCC_IOT")
     string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
-    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/partitions/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
 elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
     set(CRYPTO_HW_ACCELERATOR ON)
@@ -256,9 +263,6 @@ if (CRYPTO_HW_ACCELERATOR)
     #require setting multiple times.
     string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_b1")
     embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_b1" ABSOLUTE)
-    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/services/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/partitions/crypto/cryptocell/install/include" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
-
-    #Compiling this file requires to disable warning: -Wunused-local-typedefs
-    set_source_files_properties("${PLATFORM_DIR}/target/musca_b1/dummy_crypto_keys.c" PROPERTIES COMPILE_FLAGS -Wno-unused-local-typedefs)
 endif()

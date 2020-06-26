@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,17 +13,38 @@
 #being generated to which matching documents are added. These lists are used
 #then to fill template values using configure_file()
 #
+#The ":Status:" field is optional according to design proposal process.
+#Apparently, only the documents in "Accepted" status will be merged and included
+#in Sphinx build. Therefore, a design document without ":Status:" field will be
+#put in "Accepted" category by default.
+#If there are design document drafts in local environment, it is assumed that
+#developers are aware of the status of these drafts and won't be confused.
+#A message will be still thrown out when a design document doesn't contain
+#":Status:" field. It can be removed if more and more design documents don't
+#maintain that field.
+#
 #Functions are used whenever possible to avoid global variable name space
 #pollution.
 #
 
 Include(CMakeParseArguments)
 
+#Set the status value here to avoid any typo or upper/lower case trouble.
+set(ACCEPTED_STATUS "ACCEPTED")
+set(DRAFT_STATUS "DRAFT")
+set(DETAILED_STATUS "DETAILED")
+#"NO_SET" is used to mark documents without status field.
+set(NO_SET "NO_SET")
+#"INVALID_STATUS" is used to mark a document which specifies the status but the
+#status value is invalid or unrecognized.
+set(INVALID_STATUS "INVALID_STATUS")
+
 #This function will search for .rst files in a given directory, read them and
 #check if the ":Status:" field is defined in them. Then will add each file to a
 #list with a name matching the status value.
 #See the definition of _STATE_VALUES below for a list of valid state values.
-#Files with missing or invalid state value will be placed on the "unknown" list.
+#Files without state value will be placed on the both "Accepted" list and
+#"NO_SET" list.
 #State value comparison is case insensitive.
 #
 #The output lists will have the prefix specified in the PREFIX parameter.
@@ -33,17 +54,18 @@ Include(CMakeParseArguments)
 #    PREFIX The prefix of output list variables.
 #
 #Outputs:
-#   <prefix>_<state>       - list; will hold all files with a valid state value.
-#   <prefix>_unknown       - list; all files with missing or invalid state
-#                            value.
+#   <prefix>_<state>        - list; all files with a valid state value.
+#   <prefix>_NO_SET         - list; all files without status field.
+#   <prefix>_INVALID_STATUS - list; all files with invalid status field.
+#
 #Examples
 #   sphinx_categorize_rst(DIR ${TFM_ROOT_DIR}/docs/design_documents
 #                          PREFIX "DESIGN_DOCS")
 #
 function(sphinx_categorize_rst)
-	#Valid state values. "unknown" is used as a quard to detect invalid status
-	#values.
-	set(_STATE_VALUES "draft" "rejected" "accepted" "detailed" "unknown")
+	#Valid state values.
+	set(_STATE_VALUES ${DRAFT_STATUS} ${ACCEPTED_STATUS} ${DETAILED_STATUS}
+					  ${NO_SET} ${INVALID_STATUS})
 
 	#No option (on/off) arguments
 	set( _OPTIONS_ARGS )
@@ -74,7 +96,12 @@ function(sphinx_categorize_rst)
 
 		#Nothing read -> the field is missing
 		if (_CONTENT STREQUAL "")
-			list(APPEND _STATUS_UNKNOWN ${_FILE})
+			#If a document doesn't maintain a status field, put it in
+			#Accepted list by default.
+			list(APPEND _STATUS_${ACCEPTED_STATUS} ${_FILE})
+			#Also add the file to the "NO_SET" list. Thus it can be
+			#highlighted later.
+			list(APPEND _STATUS_${NO_SET} ${_FILE})
 		else()
 			#convert to upper case for case insensitive matching.
 			string(TOUPPER ${_CONTENT} _CONTENT)
@@ -90,11 +117,10 @@ function(sphinx_categorize_rst)
 					#and exit the loop
 					break()
 				endif()
-				#"unknown" status is used as a quard and is an invalid value.
-				#If we reach it the file has invalid status value.
-				if (_STATUS STREQUAL "UNKNOWN")
-					#add the file to the unknown list
-					list(APPEND _STATUS_${_STATUS} ${_FILE})
+
+				#If the status value is invalid.
+				if (_STATUS STREQUAL ${INVALID_STATUS})
+					list(APPEND _STATUS_${INVALID_STATUS} ${_FILE})
 				endif()
 			endforeach()
 		endif()
@@ -120,7 +146,7 @@ endfunction()
 #Inputs:
 #    SRC      Full path to template index file
 #    DST      Full patch to configured output file.
-#....DOC_DIR  Path to design documents directory.
+#    DOC_DIR  Path to design documents directory.
 #    DOC_ROOT Path to root directory of documentation
 #
 #Outputs:
@@ -131,7 +157,8 @@ endfunction()
 #                          PREFIX "DESIGN_DOCS")
 #
 function(sphinx_configure_index)
-	set(_STATE_VALUES "draft" "rejected" "accepted" "detailed" "unknown")
+	set(_STATE_VALUES ${DRAFT_STATUS} ${ACCEPTED_STATUS} ${DETAILED_STATUS}
+					  ${DEFAULT_STATUS} ${INVALID_STATUS})
 
 	#No option (on/off) arguments
 	set( _OPTIONS_ARGS )
@@ -153,10 +180,16 @@ function(sphinx_configure_index)
 	#Assign design documents to lists based on their status
 	sphinx_categorize_rst(DIR ${_MY_PARAMS_DOC_DIR} PREFIX "_DD")
 
+	#Highlight documents without status field
+	if (DEFINED _DD_${NO_SET})
+		string(REPLACE ";" "\n \t" _DD_${NO_SET} "${_DD_${NO_SET}}")
+		message(" The following documents are put into Accepted category without status field:\n \t${_DD_${NO_SET}}")
+	endif()
+
 	#Look for invalid documents
-	if (DEFINED _DD_UNKNOWN)
-		string(REPLACE ";" "\n \t" _DD_UNKNOWN "${_DD_UNKNOWN}")
-		message(FATAL_ERROR " The following documents have no or invalid status:\n \t${_DD_UNKNOWN}")
+	if (DEFINED _DD_${INVALID_STATUS})
+		string(REPLACE ";" "\n \t" _DD_${INVALID_STATUS} "${_DD_${INVALID_STATUS}}")
+		message(WARNING " The following documents provide invalid status information:\n \t${_DD_${INVALID_STATUS}}")
 	endif()
 
 	#The document root must be an absolute path
@@ -164,7 +197,7 @@ function(sphinx_configure_index)
 							ABSOLUTE)
 
 	#Loop over status lists
-	foreach(_STATUS IN ITEMS "DRAFT" "DETAILED" "ACCEPTED" "REJECTED")
+	foreach(_STATUS IN ITEMS ${DRAFT_STATUS} ${DETAILED_STATUS} ${ACCEPTED_STATUS})
 		#Create an empty file list for this status
 		set(${_STATUS}_DD_LIST "")
 		#If the source list is empty go to next iteration
@@ -178,8 +211,8 @@ function(sphinx_configure_index)
 			# Strip path from the filesince index is placed in same location
 			get_filename_component(_FILE ${_FILE} NAME)
 			#Detailed and Draft files go to the same section
-			if (_STATUS STREQUAL "DETAILED")
-				set(_STATUS "DRAFT")
+			if (_STATUS STREQUAL ${DETAILED_STATUS})
+				set(_STATUS ${DRAFT_STATUS})
 			endif()
 
 			#Append the file to the output string

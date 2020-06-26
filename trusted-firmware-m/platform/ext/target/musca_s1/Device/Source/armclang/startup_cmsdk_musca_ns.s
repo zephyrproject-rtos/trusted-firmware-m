@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+; * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -142,7 +142,6 @@ Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK]
                 IMPORT  __main
                 MRS     R0, control    ; Get control value
-                ORR     R0, R0, #1     ; Select switch to unprivilage mode
                 ORR     R0, R0, #2     ; Select switch to PSP
                 MSR     control, R0
                 LDR     R0, =__main

@@ -5,6 +5,7 @@
  *
  */
 
+#include "mcuboot_config/mcuboot_config.h"
 #include "boot_record.h"
 #include "region_defs.h"
 #include "tfm_boot_status.h"
@@ -21,20 +22,6 @@
 #if defined(MCUBOOT_SIGN_RSA) && defined(MCUBOOT_HW_KEY)
 #   define SIG_BUF_SIZE     (MCUBOOT_SIGN_RSA_LEN / 8)
 #endif
-
-/*!
- * \def MAX_BOOT_RECORD_SZ
- *
- * \brief Maximum size of the measured boot record.
- *
- * Its size can be calculated based on the following aspects:
- *   - There are 5 allowed software component claims,
- *   - SHA256 is used as the measurement method for the other claims.
- * Considering these aspects, the only claim which size can vary is the
- * type of the software component. In case of single image boot it is
- * "NSPE_SPE" which results the maximum boot record size of 96.
- */
-#define MAX_BOOT_RECORD_SZ  (96u)
 
 /*!
  * \var shared_memory_init_done
@@ -67,226 +54,6 @@ static uint32_t shared_memory_init_done;
       BOOT_TFM_SHARED_DATA_LIMIT <= NS_DATA_LIMIT))
 #error "Shared data area and non-secure data area is overlapping"
 #endif
-
-#ifdef MCUBOOT_INDIVIDUAL_CLAIMS
-/*!
- * \brief Add the measurement data of SW component to the shared memory area
- *
- * Measurements data are:
- *  - measurement value:  Hash of the image, read out from the image's manifest
- *                        section.
- *  - measurement type:   Short test description: SHA256, etc.
- *  - signer ID:          Hash of the image public key, read out from the
- *                        image's manifest section.
- *
- * \param[in]  sw_module  Identifier of the SW component
- * \param[in]  hdr        Pointer to the image header stored in RAM
- * \param[in]  fap        Pointer to the flash area where image is stored
- *
- * \return Returns error code as specified in \ref boot_status_err_t
- */
-static enum boot_status_err_t
-boot_save_sw_measurements(uint8_t sw_module,
-                          const struct image_header *hdr,
-                          const struct flash_area *fap)
-{
-    struct image_tlv_iter it;
-    uint32_t offset;
-    uint16_t len;
-    uint8_t type;
-    uint8_t buf[32];
-    int32_t res;
-    uint16_t ias_minor;
-    enum shared_memory_err_t res2;
-    char measure_type[] = "SHA256";
-#if defined(MCUBOOT_SIGN_RSA) && defined(MCUBOOT_HW_KEY)
-    /* Few extra bytes for encoding and for public exponent */
-    uint8_t key_buf[SIG_BUF_SIZE + 24];
-    bootutil_sha256_context sha256_ctx;
-#endif
-
-    /* Manifest data is concatenated to the end of the image. It is encoded in
-     * TLV format.
-     */
-
-    res = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_ANY, false);
-    if (res) {
-        return BOOT_STATUS_ERROR;
-    }
-
-    /* Iterates over the manifest data and copy the relevant attributes to the
-     * shared data area:
-     *  - image hash:      SW component measurement value
-     *  - public key hash: Signer ID
-     */
-    while (true) {
-        res = bootutil_tlv_iter_next(&it, &offset, &len, &type);
-        if (res < 0) {
-            return BOOT_STATUS_ERROR;
-        } else if (res > 0) {
-            break;
-        }
-
-        if (type == IMAGE_TLV_SHA256) {
-            /* Get the image's hash value from the manifest section */
-            if (len != sizeof(buf)) { /* SHA256 - 32 bytes */
-                return BOOT_STATUS_ERROR;
-            }
-
-            res = LOAD_IMAGE_DATA(hdr, fap, offset, buf, len);
-            if (res) {
-                return BOOT_STATUS_ERROR;
-            }
-
-            /* Add the image's hash value to the shared data area */
-            ias_minor = SET_IAS_MINOR(sw_module, SW_MEASURE_VALUE);
-            res2 = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                                ias_minor,
-                                                len,
-                                                buf);
-            if (res2) {
-                return BOOT_STATUS_ERROR;
-            }
-
-            /* Add the measurement type to the shared data area */
-            ias_minor = SET_IAS_MINOR(sw_module, SW_MEASURE_TYPE);
-            res2 = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                                ias_minor,
-                                                sizeof(measure_type) - 1,
-                                                (const uint8_t *)measure_type);
-            if (res2) {
-                return BOOT_STATUS_ERROR;
-            }
-
-#ifdef MCUBOOT_SIGN_RSA
-#ifndef MCUBOOT_HW_KEY
-        } else if (type == IMAGE_TLV_KEYHASH) {
-            /* Get the hash of the public key from the manifest section */
-            if (len != sizeof(buf)) { /* SHA256 - 32 bytes */
-                return BOOT_STATUS_ERROR;
-            }
-
-            res = LOAD_IMAGE_DATA(hdr, fap, offset, buf, len);
-            if (res) {
-                return BOOT_STATUS_ERROR;
-            }
-#else /* MCUBOOT_HW_KEY */
-        } else if (type == IMAGE_TLV_KEY) {
-            /* Get the public key from the manifest section. */
-            if (len > sizeof(key_buf)) {
-                return BOOT_STATUS_ERROR;
-            }
-            res = LOAD_IMAGE_DATA(hdr, fap, offset, key_buf, len);
-            if (res) {
-                return BOOT_STATUS_ERROR;
-            }
-
-            /* Calculate the hash of the public key. */
-            bootutil_sha256_init(&sha256_ctx);
-            bootutil_sha256_update(&sha256_ctx, key_buf, len);
-            bootutil_sha256_finish(&sha256_ctx, buf);
-#endif /* MCUBOOT_HW_KEY */
-
-            /* Add the hash of the public key to the shared data area */
-            ias_minor = SET_IAS_MINOR(sw_module, SW_SIGNER_ID);
-            res2 = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                                ias_minor,
-                                                SHA256_HASH_SIZE,
-                                                buf);
-            if (res2) {
-                return BOOT_STATUS_ERROR;
-            }
-#endif
-        }
-    }
-
-    return BOOT_STATUS_OK;
-}
-
-/*!
- * \brief Add a type identifier(short test name) of SW component to the shared
- *        memory area
- *
- * \param[in]  sw_module  Identifier of the SW component
- *
- * \return Returns error code as specified in \ref boot_status_err_t
- */
-static enum boot_status_err_t
-boot_save_sw_type(uint8_t sw_module)
-{
-    uint16_t ias_minor;
-    enum shared_memory_err_t res;
-    const char *sw_type;
-    static const char sw_comp_s[] = "SPE";
-    static const char sw_comp_ns[] = "NSPE";
-    static const char sw_comp_ns_s[] = "NSPE_SPE";
-
-    switch (sw_module) {
-    case SW_SPE:
-        sw_type = sw_comp_s;
-        break;
-    case SW_NSPE:
-        sw_type = sw_comp_ns;
-        break;
-    case SW_S_NS:
-        sw_type = sw_comp_ns_s;
-        break;
-    default:
-        return BOOT_STATUS_ERROR;
-    }
-
-    /* Add the type identifier of the SW component to the shared data area */
-    ias_minor = SET_IAS_MINOR(sw_module, SW_TYPE);
-    res = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                       ias_minor,
-                                       strlen(sw_type),
-                                       (const uint8_t *)sw_type);
-    if (res) {
-        return BOOT_STATUS_ERROR;
-    }
-
-    return BOOT_STATUS_OK;
-}
-
-/*!
- * \brief Add the version of SW component to the shared memory area
- *
- * \param[in]  sw_module  Identifier of the SW component
- * \param[in]  hdr        Pointer to the image header stored in RAM
- *
- * \return Returns error code as specified in \ref boot_status_err_t
- */
-static enum boot_status_err_t
-boot_save_sw_version(uint8_t sw_module,
-                     const struct image_header *hdr)
-{
-    int32_t cnt;
-    enum shared_memory_err_t res;
-    char sw_version[14]; /* 8bit.8bit.16bit: 3 + 1 + 3 + 1 + 5 + 1 */
-    uint16_t ias_minor;
-
-    /* FixMe: snprintf can be replaced with a custom implementation */
-    cnt = snprintf(sw_version, sizeof(sw_version), "%u.%u.%u",
-                   hdr->ih_ver.iv_major,
-                   hdr->ih_ver.iv_minor,
-                   hdr->ih_ver.iv_revision);
-    if (cnt < 0 || cnt >= sizeof(sw_version)) {
-        return BOOT_STATUS_ERROR;
-    }
-
-    /* Add the version of the SW component to the shared data area */
-    ias_minor = SET_IAS_MINOR(sw_module, SW_VERSION);
-    res = boot_add_data_to_shared_area(TLV_MAJOR_IAS,
-                                       ias_minor,
-                                       cnt,
-                                       (const uint8_t *)sw_version);
-    if (res) {
-        return BOOT_STATUS_ERROR;
-    }
-
-    return BOOT_STATUS_OK;
-}
-#endif /* MCUBOOT_INDIVIDUAL_CLAIMS */
 
 /* See in boot_record.h */
 enum shared_memory_err_t
@@ -362,32 +129,6 @@ boot_save_boot_status(uint8_t sw_module,
                       const struct image_header *hdr,
                       const struct flash_area *fap)
 {
-#ifdef MCUBOOT_INDIVIDUAL_CLAIMS
-    /* This implementation is deprecated and will probably
-     * be removed in the future.
-     */
-
-    enum boot_status_err_t res;
-
-    res = boot_save_sw_type(sw_module);
-    if (res) {
-        return res;
-    }
-
-    res = boot_save_sw_version(sw_module, hdr);
-    if (res) {
-        return res;
-    }
-
-    res = boot_save_sw_measurements(sw_module, hdr, fap);
-    if (res) {
-        return res;
-    }
-
-    return BOOT_STATUS_OK;
-
-#else /* MCUBOOT_INDIVIDUAL_CLAIMS */
-
     struct image_tlv_iter it;
     uint32_t offset;
     uint16_t len;
@@ -485,6 +226,4 @@ boot_save_boot_status(uint8_t sw_module,
     }
 
     return BOOT_STATUS_OK;
-
-#endif /* MCUBOOT_INDIVIDUAL_CLAIMS */
 }

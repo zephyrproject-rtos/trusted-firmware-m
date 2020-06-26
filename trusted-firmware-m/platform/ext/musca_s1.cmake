@@ -17,17 +17,17 @@ if (COMPILER STREQUAL "ARMCLANG")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_s1/Device/Source/armclang/musca_bl2.sct")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_s1/Device/Source/armclang/musca_ns.sct")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
     endif()
 elseif (COMPILER STREQUAL "GNUARM")
     set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
     set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/musca_s1/Device/Source/gcc/musca_bl2.ld")
     set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/musca_s1/Device/Source/gcc/musca_ns.ld")
-    if (DEFINED CMSIS_5_DIR)
-        # Not all projects define CMSIS_5_DIR, only the ones that use it.
-        set(RTX_LIB_PATH "${CMSIS_5_DIR}/CMSIS/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+    if (DEFINED CMSIS_DIR)
+        # Not all projects define CMSIS_DIR, only the ones that use it.
+        set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
     endif()
 else()
     message(FATAL_ERROR "No startup file is available for compiler '${CMAKE_C_COMPILER_ID}'.")
@@ -37,9 +37,8 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/musca_s1/partition")
 
 if (BL2)
     set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
-    if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
-        message(WARNING "NO_SWAP upgrade strategy is mandatory on target '${TARGET_PLATFORM}'. Your choice was overriden.")
-        mcuboot_override_upgrade_strategy("NO_SWAP")
+    if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
+        message(FATAL_ERROR "ERROR: RAM_LOADING upgrade strategy is not supported on target '${TARGET_PLATFORM}'.")
     endif()
 
     #FixMe: MCUBOOT_SIGN_RSA_LEN can be removed when ROTPK won't be hard coded in platform/ext/common/template/tfm_rotpk.c
@@ -63,6 +62,10 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_s1/services/incl
 embedded_include_directories(PATH "${PLATFORM_DIR}/../include" ABSOLUTE)
 
 # Gather all source files we need.
+if (TFM_PARTITION_PLATFORM)
+    list(APPEND ALL_SRC_C_NS "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_ioctl_ns_api.c")
+endif()
+
 if (NOT DEFINED BUILD_CMSIS_CORE)
     message(FATAL_ERROR "Configuration variable BUILD_CMSIS_CORE (true|false) is undefined!")
 elseif (BUILD_CMSIS_CORE)
@@ -93,8 +96,9 @@ if (NOT DEFINED BUILD_NATIVE_DRIVERS)
     message(FATAL_ERROR "Configuration variable BUILD_NATIVE_DRIVERS (true|false) is undefined!")
 elseif (BUILD_NATIVE_DRIVERS)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/Native_Driver/uart_pl011_drv.c")
-    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpc_sie200_drv.c")
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/Native_Driver/ppc_sse200_drv.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/gpio_cmsdk_drv.c")
+    list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpc_sie200_drv.c")
 endif()
 
 if (NOT DEFINED BUILD_TIME)
@@ -122,6 +126,9 @@ elseif (BUILD_STARTUP)
     endif()
 endif()
 
+#Enable the checks of attestation claims against hard-coded values.
+set(ATTEST_CLAIM_VALUE_CHECK ON)
+
 if (NOT DEFINED BUILD_TARGET_CFG)
     message(FATAL_ERROR "Configuration variable BUILD_TARGET_CFG (true|false) is undefined!")
 elseif (BUILD_TARGET_CFG)
@@ -131,6 +138,7 @@ elseif (BUILD_TARGET_CFG)
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/Native_Driver/mpu_armv8m_drv.c")
     if (TFM_PARTITION_PLATFORM)
         list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_platform_system.c")
+        list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/target/musca_s1/services/src/tfm_ioctl_s_api.c")
     endif()
     list(APPEND ALL_SRC_C_S "${PLATFORM_DIR}/common/tfm_platform.c")
     embedded_include_directories(PATH "${PLATFORM_DIR}/common" ABSOLUTE)
@@ -154,7 +162,13 @@ if (NOT DEFINED BUILD_TARGET_HARDWARE_KEYS)
 elseif(BUILD_TARGET_HARDWARE_KEYS)
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_initial_attestation_key_material.c")
   list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/tfm_rotpk.c")
-  list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+
+  if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/crypto_keys.c")
+  else()
+    list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/crypto_keys.c")
+  endif()
+
 endif()
 
 if (NOT DEFINED BUILD_TARGET_NV_COUNTERS)
@@ -165,9 +179,9 @@ elseif (BUILD_TARGET_NV_COUNTERS)
     #       API ONLY if the target has non-volatile counters.
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/common/template/nv_counters.c")
     set(TARGET_NV_COUNTERS_ENABLE ON)
-    # Sets SST_ROLLBACK_PROTECTION flag to compile in the SST services
+    # Sets PS_ROLLBACK_PROTECTION flag to compile in the PS services
     # rollback protection code as the target supports nv counters.
-    set(SST_ROLLBACK_PROTECTION ON)
+    set(PS_ROLLBACK_PROTECTION ON)
 endif()
 
 if (NOT DEFINED BUILD_CMSIS_DRIVERS)
@@ -184,12 +198,62 @@ if (NOT DEFINED BUILD_FLASH)
     message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif (BUILD_FLASH)
     list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/musca_s1/CMSIS_Driver/Driver_Flash_MRAM.c")
-    # As the SST area is going to be in RAM, it is required to set
-    # SST_CREATE_FLASH_LAYOUT to be sure the SST service knows that when it
-    # starts the SST area does not contain any valid SST flash layout and it
+    # As the PS area is going to be in RAM, it is required to set
+    # PS_CREATE_FLASH_LAYOUT to be sure the PS service knows that when it
+    # starts the PS area does not contain any valid PS flash layout and it
     # needs to create one. The same for ITS.
-    set(SST_CREATE_FLASH_LAYOUT ON)
+    set(PS_CREATE_FLASH_LAYOUT ON)
     set(ITS_CREATE_FLASH_LAYOUT ON)
     embedded_include_directories(PATH "${PLATFORM_DIR}/target/musca_s1/CMSIS_Driver" ABSOLUTE)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
+endif()
+
+#The CC312 is disabled by default
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
+    set (CRYPTO_HW_ACCELERATOR OFF)
+endif()
+
+if (NOT DEFINED CRYPTO_HW_ACCELERATOR_OTP_STATE)
+    set (CRYPTO_HW_ACCELERATOR_OTP_STATE "DISABLED")
+endif()
+
+if (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "PROVISIONING")
+    set(CRYPTO_HW_ACCELERATOR OFF)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312Provisioning.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_PROVISIONING")
+
+    add_definitions("-DCC_IOT")
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/partitions/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
+elseif (CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
+    set(CRYPTO_HW_ACCELERATOR ON)
+
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_OTP_ENABLED")
+elseif(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "DISABLED")
+else()
+    message(FATAL_ERROR "CRYPTO_HW_ACCELERATOR_OTP_STATE invalid. expected (DISABLED|PROVISIONING|ENABLED)")
+endif()
+
+#Enable CryptoCell-312 HW accelerator
+if (CRYPTO_HW_ACCELERATOR)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_BUILD "${PLATFORM_DIR}/common/cc312/BuildCC312.cmake" PARENT_SCOPE)
+    set(CRYPTO_HW_ACCELERATOR_CMAKE_LINK "${PLATFORM_DIR}/common/cc312/LinkCC312.cmake" PARENT_SCOPE)
+
+    get_filename_component(CC312_SOURCE_DIR "${PLATFORM_DIR}/../../lib/ext/cryptocell-312-runtime" ABSOLUTE)
+    add_definitions("-DCRYPTO_HW_ACCELERATOR")
+    add_definitions("-DCRYPTO_HW_ACCELERATOR_CC312")
+
+    add_definitions("-DCC_IOT")
+    #The CC312 uses GNU make as a build system so does not use the cmake flag
+    #system. As such any flags that need to be set for both CC312 and TF-M
+    #require setting multiple times.
+    string(APPEND CC312_INC_DIR " ${CC312_SOURCE_DIR}/shared/hw/include/musca_s1")
+    embedded_include_directories(PATH "${CC312_SOURCE_DIR}/shared/hw/include/musca_s1" ABSOLUTE)
+    embedded_include_directories(PATH "${CMAKE_CURRENT_BINARY_DIR}/partitions/crypto/cryptocell/install/include" ABSOLUTE)
+    embedded_include_directories(PATH "${PLATFORM_DIR}/common/cc312/" ABSOLUTE)
 endif()

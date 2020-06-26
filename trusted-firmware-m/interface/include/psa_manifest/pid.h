@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define TFM_SP_STORAGE                                                 (256)
+#define TFM_SP_PS                                                      (256)
 #define TFM_SP_ITS                                                     (257)
 #define TFM_SP_AUDIT_LOG                                               (258)
 #define TFM_SP_CRYPTO                                                  (259)
@@ -26,7 +26,7 @@ extern "C" {
 #define TFM_SP_IPC_SERVICE_TEST                                        (265)
 #define TFM_SP_IPC_CLIENT_TEST                                         (266)
 #define TFM_IRQ_TEST_1                                                 (267)
-#define TFM_SP_SST_TEST                                                (268)
+#define TFM_SP_PS_TEST                                                 (268)
 #define TFM_SP_SECURE_CLIENT_2                                         (269)
 #define TFM_SP_MULTI_CORE_TEST                                         (270)
 

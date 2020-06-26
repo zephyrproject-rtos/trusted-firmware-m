@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
-#include "platform/ext/common/uart_stdout.h"
+#include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
 #include "uart_pl011_drv.h"
 
@@ -71,7 +71,7 @@ struct tfm_spm_partition_platform_data_t
 {
     uint32_t periph_start;
     uint32_t periph_limit;
-    int16_t periph_ppc_bank;
+    enum ppc_bank_e periph_ppc_bank;
     int16_t periph_ppc_loc;
 };
 

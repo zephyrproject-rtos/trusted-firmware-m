@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+# Copyright (c) 2017-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,8 +28,8 @@ elseif (_C_COMPILER_NAME MATCHES "^.*gcc(\\.exe)?$")
 	set(CMAKE_C_COMPILER_ID "GNUARM" CACHE INTERNAL "C compiler ID" FORCE)
 	set(ARM_TOOLCHAIN_FILE "Compiler/GNUARM-C")
 elseif (_C_COMPILER_NAME MATCHES "^.*iccarm(\\.exe)?$")
-	set(CMAKE_C_COMPILER_ID "IAR" CACHE INTERNAL "C compiler ID" FORCE)
-	set(ARM_TOOLCHAIN_FILE "Compiler/IAR-C")
+	set(CMAKE_C_COMPILER_ID "IARARM" CACHE INTERNAL "C compiler ID" FORCE)
+	set(ARM_TOOLCHAIN_FILE "Compiler/IARARM-C")
 else()
 	message(FATAL_ERROR "C Compiler executable ${_C_COMPILER_NAME} is unknown.\
 Please add needed settings to ${CMAKE_CURRENT_LIST_FILE}")

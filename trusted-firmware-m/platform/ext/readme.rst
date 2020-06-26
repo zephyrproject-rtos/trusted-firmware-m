@@ -202,26 +202,26 @@ binary. It requires the following definition:
   is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to
   be ``RAM_LOADING``.
 
-Secure Storage (SST) Service definitions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The SST service requires the following definitions:
+Protected Storage (PS) Service definitions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The PS service requires the following definitions:
 
-- ``SST_FLASH_AREA_ADDR`` - Defines the flash address where the secure storage
+- ``PS_FLASH_AREA_ADDR`` - Defines the flash address where the protected storage
   area starts.
-- ``SST_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for secure storage in bytes.
-- ``SST_SECTOR_SIZE`` - Defines the size of the external flash sectors (the
+- ``PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
+  for protected storage in bytes.
+- ``PS_SECTOR_SIZE`` - Defines the size of the external flash sectors (the
   smallest erasable unit) in bytes.
-- ``SST_SECTORS_PER_BLOCK`` - Defines the number of contiguous SST_SECTOR_SIZE
+- ``PS_SECTORS_PER_BLOCK`` - Defines the number of contiguous PS_SECTOR_SIZE
   to form a logical block in the filesystem.
-- ``SST_FLASH_DEV_NAME`` - Specifies the flash device used by SST to store the
+- ``PS_FLASH_DEV_NAME`` - Specifies the flash device used by PS to store the
   data.
-- ``SST_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
+- ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes.
-- ``SST_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  SST area.
-- ``SST_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  SST area.
+- ``PS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
+  PS area.
+- ``PS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
+  PS area.
 
 .. Note::
 
@@ -256,7 +256,7 @@ The ITS service requires the following definitions:
 Expose target support for HW components
 ***************************************
 Services may require HW components to be supported by the target to enable some
-features (e.g. SST service with rollback protection, etc). The following
+features (e.g. PS service with rollback protection, etc). The following
 definitions need to be set in the .cmake file if the target has the following
 HW components:
 

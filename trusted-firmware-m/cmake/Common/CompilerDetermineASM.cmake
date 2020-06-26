@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -22,6 +22,8 @@ elseif(_ASM_COMPILER_NAME MATCHES "^.*armasm(\\.exe)?$")
 	set(ARM_TOOLCHAIN_FILE "Compiler/ARMCC-ASM")
 elseif (_ASM_COMPILER_NAME MATCHES "^.*gcc(\\.exe)?$")
 	set(ARM_TOOLCHAIN_FILE "Compiler/GNUARM-ASM")
+elseif (_ASM_COMPILER_NAME MATCHES "^.*iasmarm(\\.exe)?$")
+	set(ARM_TOOLCHAIN_FILE "Compiler/IARARM-ASM")
 else()
 	message(FATAL_ERROR "ASM Compiler executable ${_ASM_COMPILER_NAME} is \
 unknown. Please add needed settings to ${CMAKE_CURRENT_LIST_FILE}")

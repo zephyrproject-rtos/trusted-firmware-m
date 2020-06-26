@@ -42,8 +42,8 @@ if (NOT DEFINED TFM_PARTITION_AUDIT_LOG)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_AUDIT_LOG is undefined.")
 endif()
 
-if (NOT DEFINED TFM_PARTITION_SECURE_STORAGE)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_SECURE_STORAGE is undefined.")
+if (NOT DEFINED TFM_PARTITION_PROTECTED_STORAGE)
+	message(FATAL_ERROR "Incomplete build configuration: TFM_PARTITION_PROTECTED_STORAGE is undefined.")
 endif()
 
 if (NOT DEFINED TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -94,9 +94,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/TestConfig.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.inc)
 
-if (ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_SECURE_STORAGE_SERVICE_TESTS APPEND)
-	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_SECURE_STORAGE_SERVICE_TESTS APPEND)
+if (ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES ENABLE_PROTECTED_STORAGE_SERVICE_TESTS APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ENABLE_PROTECTED_STORAGE_SERVICE_TESTS APPEND)
 endif()
 
 if (ENABLE_INTERNAL_TRUSTED_STORAGE_SERVICE_TESTS)
@@ -159,10 +159,13 @@ if (TFM_BUILD_IN_SPE)
 	endif()
 
 	#Set common compiler and linker flags
+	if (DEFINED CMSE_FLAGS)
+		embedded_set_target_compile_flags(TARGET tfm_secure_tests LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+	endif()
 	config_setting_shared_compiler_flags(tfm_secure_tests)
 	config_setting_shared_linker_flags(tfm_secure_tests)
 
-	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL} APPEND)
+	embedded_set_target_compile_defines(TARGET tfm_secure_tests LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL} APPEND)
 
 	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 		set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE
@@ -191,7 +194,7 @@ else ()
 	config_setting_shared_linker_flags(tfm_non_secure_tests)
 
 	#Set macro definitions
-	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS __ARM_FEATURE_CMSE=${ARM_FEATURE_CMSE} TFM_LVL=${TFM_LVL})
+	set(TARGET_COMPILE_DEFINITIONS __thumb2__ __DOMAIN_NS=1 DOMAIN_NS=__DOMAIN_NS TFM_LVL=${TFM_LVL})
 	embedded_set_target_compile_defines(TARGET tfm_non_secure_tests LANGUAGE C DEFINES ${TARGET_COMPILE_DEFINITIONS} APPEND)
 
 	if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -204,8 +207,8 @@ else ()
 			DESTINATION export/tfm/test/lib
 			PUBLIC_HEADER DESTINATION export/tfm/test/inc)
 
-	if(ENABLE_SECURE_STORAGE_SERVICE_TESTS)
-		#only SST tests are using semaphore and thread APIs
+	if(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS)
+		#only PS tests are using semaphore and thread APIs
 		install(FILES ${TFM_ROOT_DIR}/interface/include/os_wrapper/semaphore.h
 				${TFM_ROOT_DIR}/interface/include/os_wrapper/thread.h
 			DESTINATION export/tfm/include/os_wrapper)

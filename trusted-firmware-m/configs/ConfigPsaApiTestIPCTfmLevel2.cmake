@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -17,10 +17,16 @@ if(NOT DEFINED TARGET_PLATFORM)
 	message(FATAL_ERROR "ERROR: TARGET_PLATFORM is not set in command line")
 elseif(${TARGET_PLATFORM} STREQUAL "AN521")
 	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps2AN521.cmake")
+elseif(${TARGET_PLATFORM} STREQUAL "AN539")
+	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps2AN539.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_A")
 	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/musca_a.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_B1")
 	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/musca_b1.cmake")
+elseif(${TARGET_PLATFORM} STREQUAL "MUSCA_S1")
+	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/musca_s1.cmake")
+elseif(${TARGET_PLATFORM} STREQUAL "LPC55S69")
+	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/lpc55s69.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "AN524")
 	set(PLATFORM_CMAKE_FILE "${TFM_ROOT_DIR}/platform/ext/Mps3AN524.cmake")
 elseif(${TARGET_PLATFORM} STREQUAL "psoc64")

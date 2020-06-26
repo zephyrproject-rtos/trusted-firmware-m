@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "core/tfm_core_svc.h"
+#include "tfm/tfm_core_svc.h"
 #include "psa/client.h"
 #include "psa/service.h"
 

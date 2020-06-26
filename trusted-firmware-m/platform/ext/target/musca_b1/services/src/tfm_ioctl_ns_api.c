@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "tfm_platform_api.h"
-#include "services/include/tfm_ioctl_api.h"
+#include "tfm_ioctl_api.h"
 
 enum tfm_platform_err_t
 tfm_platform_set_pin_alt_func(uint32_t alt_func, uint64_t pin_mask,

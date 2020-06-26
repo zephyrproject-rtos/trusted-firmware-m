@@ -70,7 +70,7 @@ The code structure of the service will be as follows:
 ``secure_fw/ns_callable/tfm_veneers.c`` - ITS veneers (auto-generated from
 manifest)
 
-``secure_fw/services/internal_trusted_storage/``
+``secure_fw/partitions/internal_trusted_storage/``
 
 - ``tfm_internal_trusted_storage.yaml`` - Partition manifest
 - ``tfm_its_secure_api.c`` - PSA ITS API implementation for SPE

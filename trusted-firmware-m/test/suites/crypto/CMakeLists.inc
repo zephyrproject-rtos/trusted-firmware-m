@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,6 +31,51 @@ elseif (ENABLE_CRYPTO_SERVICE_TESTS)
                           "${CRYPTO_TEST_DIR}/crypto_tests_common.c")
   list(APPEND ALL_SRC_C_NS "${CRYPTO_TEST_DIR}/non_secure/crypto_ns_interface_testsuite.c"
                            "${CRYPTO_TEST_DIR}/crypto_tests_common.c")
+
+  #Enable the test cases by default
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_CBC)
+    set(TFM_CRYPTO_TEST_ALG_CBC ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_CCM)
+    set(TFM_CRYPTO_TEST_ALG_CCM ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_CFB)
+    set(TFM_CRYPTO_TEST_ALG_CFB ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_CTR)
+    set(TFM_CRYPTO_TEST_ALG_CTR ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_GCM)
+    set(TFM_CRYPTO_TEST_ALG_GCM ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_ALG_SHA_512)
+    set(TFM_CRYPTO_TEST_ALG_SHA_512 ON)
+  endif()
+  if (NOT DEFINED TFM_CRYPTO_TEST_HKDF)
+    set(TFM_CRYPTO_TEST_HKDF ON)
+  endif()
+
+  if (TFM_CRYPTO_TEST_ALG_CBC)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_CBC)
+  endif()
+  if (TFM_CRYPTO_TEST_ALG_CCM)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_CCM)
+  endif()
+  if (TFM_CRYPTO_TEST_ALG_CFB)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_CFB)
+  endif()
+  if (TFM_CRYPTO_TEST_ALG_CTR)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_CTR)
+  endif()
+  if (TFM_CRYPTO_TEST_ALG_GCM)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_GCM)
+  endif()
+  if (TFM_CRYPTO_TEST_ALG_SHA_512)
+    add_definitions(-DTFM_CRYPTO_TEST_ALG_SHA_512)
+  endif()
+  if (TFM_CRYPTO_TEST_HKDF)
+    add_definitions(-DTFM_CRYPTO_TEST_HKDF)
+  endif()
 
   #Setting include directories
   embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
