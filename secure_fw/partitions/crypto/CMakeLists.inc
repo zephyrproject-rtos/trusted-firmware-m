@@ -64,7 +64,6 @@ if (ENABLE_CRYPTO)
   #Setting include directories
   embedded_include_directories(PATH ${TFM_ROOT_DIR} ABSOLUTE)
   embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)
-  embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/core/include ABSOLUTE)
   if (CRYPTO_ENGINE_MBEDTLS)
     embedded_include_directories(PATH ${MBEDCRYPTO_INSTALL_DIR}/include ABSOLUTE)
   endif()

@@ -84,8 +84,8 @@ embedded_include_directories(PATH "${PLATFORM_DIR}/target/cypress/psoc64/mailbox
 embedded_include_directories(PATH "${PLATFORM_DIR}/target/cypress/psoc64/partition" ABSOLUTE)
 embedded_include_directories(PATH "${TFM_ROOT_DIR}/interface/include" ABSOLUTE)
 embedded_include_directories(PATH "${TFM_ROOT_DIR}/platform/include" ABSOLUTE)
-embedded_include_directories(PATH "${TFM_ROOT_DIR}/secure_fw/core/arch/include" ABSOLUTE)
-embedded_include_directories(PATH "${TFM_ROOT_DIR}/secure_fw/core/ipc/include" ABSOLUTE)
+embedded_include_directories(PATH "${TFM_ROOT_DIR}/secure_fw/spm/arch" ABSOLUTE)
+embedded_include_directories(PATH "${TFM_ROOT_DIR}/secure_fw/spm/model_ipc/include" ABSOLUTE)
 
 #Gather all source files we need.
 list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/cypress/psoc64/mailbox/platform_multicore.c")
