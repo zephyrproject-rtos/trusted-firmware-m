@@ -179,23 +179,23 @@ static void tfm_ipc_test_1005(struct test_result_t *ret)
     handle = psa_connect(IPC_CLIENT_TEST_BASIC_SID,
                          IPC_CLIENT_TEST_BASIC_VERSION);
     if (handle > 0) {
-        TEST_LOG("Connect success!");
+        TEST_LOG("Connect success!\r\n");
     } else {
-        TEST_LOG("The RoT Service has refused the connection!");
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
         ret->val = TEST_FAILED;
         return;
     }
 
     status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
-        TEST_LOG("Call success!");
+        TEST_LOG("Call success!\r\n");
         if (test_result > 0) {
             ret->val = TEST_PASSED;
         } else {
             ret->val = TEST_FAILED;
         }
     } else {
-        TEST_LOG("Call failed!");
+        TEST_LOG("Call failed!\r\n");
         ret->val = TEST_FAILED;
     }
 
@@ -216,23 +216,23 @@ static void tfm_ipc_test_1006(struct test_result_t *ret)
     handle = psa_connect(IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_SID,
                          IPC_CLIENT_TEST_PSA_ACCESS_APP_MEM_VERSION);
     if (handle > 0) {
-        TEST_LOG("Connect success!");
+        TEST_LOG("Connect success!\r\n");
     } else {
-        TEST_LOG("The RoT Service has refused the connection!");
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
         ret->val = TEST_FAILED;
         return;
     }
 
     status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
     if (status >= 0) {
-        TEST_LOG("Call success!");
+        TEST_LOG("Call success!\r\n");
         if (test_result > 0) {
             ret->val = TEST_PASSED;
         } else {
             ret->val = TEST_FAILED;
         }
     } else {
-        TEST_LOG("Call failed!");
+        TEST_LOG("Call failed!\r\n");
         ret->val = TEST_FAILED;
     }
 
@@ -253,9 +253,9 @@ static void tfm_ipc_test_1007(struct test_result_t *ret)
     handle = psa_connect(IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID,
                          IPC_CLIENT_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_VERSION);
     if (handle > 0) {
-        TEST_LOG("Connect success!");
+        TEST_LOG("Connect success!\r\n");
     } else {
-        TEST_LOG("The RoT Service has refused the connection!");
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
         ret->val = TEST_FAILED;
         return;
     }
@@ -282,9 +282,9 @@ static void tfm_ipc_test_1008(struct test_result_t *ret)
     handle = psa_connect(IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_SID,
                          IPC_CLIENT_TEST_APP_ACCESS_PSA_MEM_VERSION);
     if (handle > 0) {
-        TEST_LOG("Connect success!");
+        TEST_LOG("Connect success!\r\n");
     } else {
-        TEST_LOG("The RoT Service has refused the connection!");
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
         ret->val = TEST_FAILED;
         return;
     }
@@ -311,9 +311,9 @@ static void tfm_ipc_test_1009(struct test_result_t *ret)
     handle = psa_connect(IPC_CLIENT_TEST_MEM_CHECK_SID,
                          IPC_CLIENT_TEST_MEM_CHECK_VERSION);
     if (handle > 0) {
-        TEST_LOG("Connect success!");
+        TEST_LOG("Connect success!\r\n");
     } else {
-        TEST_LOG("The RoT Service has refused the connection!");
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
         ret->val = TEST_FAILED;
         return;
     }
