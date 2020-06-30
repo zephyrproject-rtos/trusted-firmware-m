@@ -48,58 +48,79 @@ extern "C" {
  * \note The active_swap_count must be the last member to allow it to be
  *       programmed last.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_metadata_block_header_t {
-    uint32_t scratch_dblock;    /*!< Physical block ID of the data
-                                 *   section's scratch block
-                                 */
-    uint8_t fs_version;         /*!< ITS system version */
+#define _T1 \
+    uint32_t scratch_dblock;    /*!< Physical block ID of the data \
+                                 *   section's scratch block \
+                                 */ \
+    uint8_t fs_version;         /*!< ITS system version */ \
     uint8_t active_swap_count;  /*!< Physical block ID of the data */
+
+struct its_metadata_block_header_t {
+    _T1
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T1 }) -
+                    sizeof(struct { _T1 })];
+#endif
 };
+#undef _T1
 
 /*!
  * \struct its_block_meta_t
  *
  * \brief Structure to store information about each physical flash memory block.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_block_meta_t {
-    uint32_t phy_id;    /*!< Physical ID of this logical block */
-    size_t data_start;  /*!< Offset from the beginning of the block to the
-                         *   location where the data starts
+#define _T2 \
+    uint32_t phy_id;    /*!< Physical ID of this logical block */ \
+    size_t data_start;  /*!< Offset from the beginning of the block to the \
+                         *   location where the data starts \
+                         */ \
+    size_t free_size;   /*!< Number of bytes free at end of block (set during \
+                         *   block compaction for gap reuse) \
                          */
-    size_t free_size;   /*!< Number of bytes free at end of block (set during
-                         *   block compaction for gap reuse)
-                         */
+
+struct its_block_meta_t {
+    _T2
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T2 }) -
+                    sizeof(struct { _T2 })];
+#endif
 };
+#undef _T2
 
 /*!
  * \struct its_file_meta_t
  *
  * \brief Structure to store file metadata.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_file_meta_t {
-    uint32_t lblock;               /*!< Logical datablock where file is
-                                    *   stored
-                                    */
-    size_t data_idx;               /*!< Offset in the logical data block */
-    size_t cur_size;               /*!< Size in storage system for this #
-                                    *   fragment
-                                    */
-    size_t max_size;               /*!< Maximum size of this file */
-    uint32_t flags;                /*!< Flags set when the file was created */
+#define _T3 \
+    uint32_t lblock;               /*!< Logical datablock where file is \
+                                    *   stored \
+                                    */ \
+    size_t data_idx;               /*!< Offset in the logical data block */ \
+    size_t cur_size;               /*!< Size in storage system for this # \
+                                    *   fragment \
+                                    */ \
+    size_t max_size;               /*!< Maximum size of this file */ \
+    uint32_t flags;                /*!< Flags set when the file was created */ \
     uint8_t id[ITS_FILE_ID_SIZE];  /*!< ID of this file */
+
+struct its_file_meta_t {
+    _T3
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T3 }) -
+                    sizeof(struct { _T3 })];
+#endif
 };
+#undef _T3
 
 /**
  * \struct its_flash_fs_ctx_t
