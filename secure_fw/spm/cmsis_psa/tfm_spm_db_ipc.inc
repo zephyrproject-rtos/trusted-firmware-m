@@ -345,7 +345,7 @@ REGION_DECLARE(Image$$, TFM_SP_MULTI_CORE_TEST_LINKER, _STACK$$ZI$$Limit);
 /** Dependencies array for Secure Partition */
 /**************************************************************************/
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-static int32_t dependencies_TFM_SP_PS[] =
+static uint32_t dependencies_TFM_SP_PS[] =
 {
     TFM_CRYPTO_SID,
     TFM_ITS_SET_SID,
@@ -357,7 +357,7 @@ static int32_t dependencies_TFM_SP_PS[] =
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_CRYPTO
-static int32_t dependencies_TFM_SP_CRYPTO[] =
+static uint32_t dependencies_TFM_SP_CRYPTO[] =
 {
     TFM_ITS_SET_SID,
     TFM_ITS_GET_SID,
@@ -367,14 +367,14 @@ static int32_t dependencies_TFM_SP_CRYPTO[] =
 #endif /* TFM_PARTITION_CRYPTO */
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
-static int32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
+static uint32_t dependencies_TFM_SP_INITIAL_ATTESTATION[] =
 {
     TFM_CRYPTO_SID,
 };
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
 #ifdef TFM_PARTITION_TEST_CORE
-static int32_t dependencies_TFM_SP_CORE_TEST[] =
+static uint32_t dependencies_TFM_SP_CORE_TEST[] =
 {
     SPM_CORE_TEST_2_INVERT_SID,
     SPM_CORE_TEST_2_GET_EVERY_SECOND_BYTE_SID,
@@ -383,7 +383,7 @@ static int32_t dependencies_TFM_SP_CORE_TEST[] =
 #endif /* TFM_PARTITION_TEST_CORE */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
+static uint32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
 {
     TFM_SECURE_CLIENT_2_SID,
     TFM_CRYPTO_SID,
@@ -406,7 +406,7 @@ static int32_t dependencies_TFM_SP_SECURE_TEST_PARTITION[] =
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 #ifdef TFM_PARTITION_TEST_CORE_IPC
-static int32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
+static uint32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
 {
     IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SID,
     IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM_SID,
@@ -416,7 +416,7 @@ static int32_t dependencies_TFM_SP_IPC_CLIENT_TEST[] =
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
 #ifdef TFM_PARTITION_TEST_PS
-static int32_t dependencies_TFM_SP_PS_TEST[] =
+static uint32_t dependencies_TFM_SP_PS_TEST[] =
 {
     TFM_CRYPTO_SID,
     TFM_ITS_GET_SID,
@@ -425,7 +425,7 @@ static int32_t dependencies_TFM_SP_PS_TEST[] =
 #endif /* TFM_PARTITION_TEST_PS */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-static int32_t dependencies_TFM_SP_SECURE_CLIENT_2[] =
+static uint32_t dependencies_TFM_SP_SECURE_CLIENT_2[] =
 {
     TFM_ITS_GET_SID,
     TFM_CRYPTO_SID,
@@ -435,7 +435,7 @@ static int32_t dependencies_TFM_SP_SECURE_CLIENT_2[] =
 /**************************************************************************/
 /** The static data of the partition list */
 /**************************************************************************/
-const struct spm_partition_static_data_t static_data_list[] =
+const struct partition_static_t static_data_list[] =
 {
     {
         .psa_framework_version = 0x0100,
@@ -1008,7 +1008,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 /** The partition list for the DB */
 /**************************************************************************/
-static struct spm_partition_desc_t partition_list [] =
+static struct partition_t partition_list [] =
 {
     {{0}}, /* placeholder for Non-secure internal partition */
 

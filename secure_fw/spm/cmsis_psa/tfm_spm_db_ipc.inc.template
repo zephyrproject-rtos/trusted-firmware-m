@@ -83,7 +83,7 @@ REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit);
         {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
         {% endif %}
-static int32_t dependencies_{{manifest.manifest.name}}[] =
+static uint32_t dependencies_{{manifest.manifest.name}}[] =
 {
         {% for dependence in manifest.manifest.dependencies %}
             {% for service in manifest.manifest.services %}
@@ -103,7 +103,7 @@ static int32_t dependencies_{{manifest.manifest.name}}[] =
 /**************************************************************************/
 /** The static data of the partition list */
 /**************************************************************************/
-const struct spm_partition_static_data_t static_data_list[] =
+const struct partition_static_t static_data_list[] =
 {
     {
         .psa_framework_version = 0x0100,
@@ -241,7 +241,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 /** The partition list for the DB */
 /**************************************************************************/
-static struct spm_partition_desc_t partition_list [] =
+static struct partition_t partition_list [] =
 {
     {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
 

@@ -29,7 +29,7 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
     bool ns_caller = false;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
     uint32_t veneer_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
     uint32_t veneer_limit =

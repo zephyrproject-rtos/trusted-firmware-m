@@ -74,23 +74,30 @@ struct spm_partition_runtime_data_t {
  * these fields are calculated at compile time, and set during initialisation
  * phase.
  */
-struct spm_partition_static_data_t {
+struct partition_static_t {
     uint32_t psa_framework_version;
     uint32_t partition_id;
     uint32_t partition_flags;
     uint32_t partition_priority;
     sp_entry_point partition_init;
+    uintptr_t stack_base;
+    size_t stack_size;
+    uintptr_t heap_base;
+    size_t heap_size;
     uint32_t dependencies_num;
-    int32_t *p_dependencies;
+    uint32_t *p_dependencies;
 };
 
 /**
  * Holds the fields that define a partition for SPM. The fields are further
  * divided to structures, to keep the related fields close to each other.
  */
-struct spm_partition_desc_t {
+struct partition_t {
     struct spm_partition_runtime_data_t runtime_data;
-    const struct spm_partition_static_data_t *static_data;
+    const struct partition_static_t *static_data;
+    void *p_platform;
+    void *p_interrupts;
+    void *p_metadata;
     /** A list of platform_data pointers */
     const struct tfm_spm_partition_platform_data_t **platform_data_list;
     const struct tfm_spm_partition_memory_data_t *memory_data;
@@ -99,7 +106,7 @@ struct spm_partition_desc_t {
 struct spm_partition_db_t {
     uint32_t is_init;
     uint32_t partition_count;
-    struct spm_partition_desc_t *partitions;
+    struct partition_t *partitions;
 };
 
 /* Service database defined by manifest */
@@ -116,7 +123,7 @@ struct tfm_spm_service_db_t {
 /* RoT Service data */
 struct tfm_spm_service_t {
     const struct tfm_spm_service_db_t *service_db;/* Service database pointer */
-    struct spm_partition_desc_t *partition;  /*
+    struct partition_t *partition;           /*
                                               * Point to secure partition
                                               * data
                                               */
@@ -142,8 +149,8 @@ struct tfm_conn_handle_t {
                                          *  - non secure client endpoint id.
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct tfm_spm_service_t *service;  /* RoT service pointer               */
-    struct tfm_list_node_t list;        /* list node                         */
+    struct tfm_spm_service_t *service;  /* RoT service pointer                */
+    struct tfm_list_node_t list;        /* list node                          */
 };
 
 enum tfm_memory_access_e {
@@ -216,9 +223,9 @@ int32_t tfm_spm_validate_conn_handle(
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Return the parttion context pointer
- *                          \ref spm_partition_desc_t structures
+ *                          \ref partition_t structures
  */
-struct spm_partition_desc_t *tfm_spm_get_running_partition(void);
+struct partition_t *tfm_spm_get_running_partition(void);
 
 /**
  * \brief                   Get the service context by service ID.
@@ -643,9 +650,8 @@ void tfm_spm_disable_irq(uint32_t *args);
  *
  * \retval void                 Success.
  */
-void tfm_spm_validate_caller(struct spm_partition_desc_t *p_cur_sp,
-                             uint32_t *p_ctx, uint32_t exc_return,
-                             bool ns_caller);
+void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
+                             uint32_t exc_return, bool ns_caller);
 
 /**
  * \brief Terminate execution within the calling Secure Partition and will not

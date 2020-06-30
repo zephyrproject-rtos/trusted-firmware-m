@@ -260,7 +260,7 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  * \brief                   Get the service context by signal.
  *
  * \param[in] partition     Partition context pointer
- *                          \ref spm_partition_desc_t structures
+ *                          \ref partition_t structures
  * \param[in] signal        Signal associated with inputs to the Secure
  *                          Partition, \ref psa_signal_t
  *
@@ -269,7 +269,7 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  *                          \ref tfm_spm_service_t structures
  */
 static struct tfm_spm_service_t *
-    tfm_spm_get_service_by_signal(struct spm_partition_desc_t *partition,
+    tfm_spm_get_service_by_signal(struct partition_t *partition,
                                   psa_signal_t signal)
 {
     struct tfm_list_node_t *node, *head;
@@ -403,10 +403,9 @@ struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target partition context pointer,
- *                          \ref spm_partition_desc_t structures
+ *                          \ref partition_t structures
  */
-static struct spm_partition_desc_t *
-    tfm_spm_get_partition_by_id(int32_t partition_id)
+static struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 {
     uint32_t idx = get_partition_idx(partition_id);
 
@@ -416,15 +415,15 @@ static struct spm_partition_desc_t *
     return NULL;
 }
 
-struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
+struct partition_t *tfm_spm_get_running_partition(void)
 {
     struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
-    struct spm_partition_desc_t *partition;
+    struct partition_t *partition;
     struct spm_partition_runtime_data_t *rt_data;
 
     rt_data = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_runtime_data_t,
                                     sp_thrd);
-    partition = TFM_GET_CONTAINER_PTR(rt_data, struct spm_partition_desc_t,
+    partition = TFM_GET_CONTAINER_PTR(rt_data, struct partition_t,
                                       runtime_data);
     return partition;
 }
@@ -455,7 +454,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct tfm_spm_service_t *service,
                                     bool ns_caller)
 {
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
     int32_t i;
 
     TFM_CORE_ASSERT(service);
@@ -634,7 +633,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    struct spm_partition_desc_t *partition;
+    struct partition_t *partition;
 
     partition = tfm_spm_get_running_partition();
     if (partition && partition->static_data) {
@@ -680,7 +679,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 uint32_t tfm_spm_init(void)
 {
     uint32_t i, j, num;
-    struct spm_partition_desc_t *partition;
+    struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct tfm_spm_partition_platform_data_t **platform_data_p;
 
@@ -797,7 +796,7 @@ uint32_t tfm_spm_init(void)
 void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL == 2
-    struct spm_partition_desc_t *p_next_partition;
+    struct partition_t *p_next_partition;
     struct spm_partition_runtime_data_t *r_data;
     uint32_t is_privileged;
 #endif
@@ -810,7 +809,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
                                        struct spm_partition_runtime_data_t,
                                        sp_thrd);
         p_next_partition = TFM_GET_CONTAINER_PTR(r_data,
-                                                 struct spm_partition_desc_t,
+                                                 struct partition_t,
                                                  runtime_data);
 
         if (p_next_partition->static_data->partition_flags &
@@ -868,7 +867,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     psa_invec *inptr;
     psa_outvec *outptr;
     size_t in_num, out_num;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
     uint32_t privileged;
     int32_t type;
     struct tfm_control_parameter_t ctrl_param;
@@ -937,7 +936,7 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
 {
     psa_signal_t signal_mask;
     uint32_t timeout;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
     signal_mask = (psa_signal_t)args[0];
@@ -989,7 +988,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
     psa_msg_t *msg = NULL;
     struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *tmp_msg = NULL;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
     uint32_t privileged;
 
     TFM_CORE_ASSERT(args != NULL);
@@ -1100,7 +1099,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
     size_t bytes;
     struct tfm_msg_body_t *msg = NULL;
     uint32_t privileged;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -1223,7 +1222,7 @@ void tfm_spm_psa_write(uint32_t *args)
     size_t num_bytes;
     struct tfm_msg_body_t *msg = NULL;
     uint32_t privileged;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
     msg_handle = (psa_handle_t)args[0];
@@ -1418,7 +1417,7 @@ void tfm_spm_psa_reply(uint32_t *args)
  */
 static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 {
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     /*
      * The value of partition_id must be greater than zero as the target of
@@ -1479,7 +1478,7 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
 
 void tfm_spm_psa_clear(void)
 {
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
@@ -1539,7 +1538,7 @@ void tfm_spm_psa_eoi(uint32_t *args)
     psa_signal_t irq_signal;
     IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];
@@ -1578,7 +1577,7 @@ void tfm_spm_enable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->r0;
     IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1606,7 +1605,7 @@ void tfm_spm_disable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->r0;
     IRQn_Type irq_line = (IRQn_Type) 0;
     int32_t ret;
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1628,9 +1627,8 @@ void tfm_spm_disable_irq(uint32_t *args)
     tfm_spm_hal_disable_irq(irq_line);
 }
 
-void tfm_spm_validate_caller(struct spm_partition_desc_t *p_cur_sp,
-                             uint32_t *p_ctx, uint32_t exc_return,
-                             bool ns_caller)
+void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
+                             uint32_t exc_return, bool ns_caller)
 {
     uintptr_t stacked_ctx_pos;
 
@@ -1674,7 +1672,7 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 {
     uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
     uint32_t running_partition_flags = 0;
-    const struct spm_partition_desc_t *partition = NULL;
+    const struct partition_t *partition = NULL;
 
     /* Check permissions on request type basis */
 

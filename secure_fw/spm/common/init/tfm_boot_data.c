@@ -150,7 +150,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                 tfm_spm_partition_get_running_partition_idx();
     uint32_t res;
 #else
-    struct spm_partition_desc_t *partition = NULL;
+    struct partition_t *partition = NULL;
     uint32_t privileged;
 #endif
 
