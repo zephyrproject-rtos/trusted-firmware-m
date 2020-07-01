@@ -180,6 +180,75 @@ TFM_HAL_ERROR_MEM_FAULT
 -----------------------
 Status code to indicate that the memory check failed.
 
+***************************
+API Definition for TF-M SPM
+***************************
+This section describes the APIs defined for :term:`TF-M` :term:`SPM`.
+
+Log API
+=======
+The log API is used by the :term:`TF-M` :doc:`log system <tfm_log_system_design_document>`.
+The log device could be uart, memory, usb, etc.
+
+APIs
+----
+tfm_hal_output_partition_log()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  int32_t tfm_hal_output_partition_log(const unsigned char *str, uint32_t len)
+
+**Description**
+
+This API is called by Secure Partition to output logs.
+
+**Parameter**
+
+- ``str`` - The string to output.
+- ``len`` - Length of the string in bytes.
+
+**Return Values**
+
+- Positive values - Number of bytes output.
+- ``TFM_HAL_ERROR_NOT_INIT`` - The log device has not been initialized.
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - Invalid inputs when ``str`` is ``NULL`` or
+  ``len`` is zero.
+
+**Note**
+
+None.
+
+tfm_hal_output_spm_log()
+^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  int32_t tfm_hal_output_spm_log(const unsigned char *str, uint32_t len)
+
+**Description**
+
+This API is called by :term:`SPM` to output logs.
+
+**Parameter**
+
+- ``str`` - The string to output.
+- ``len`` - Length of the string in bytes.
+
+**Return Values**
+
+- Positive numbers - Number of bytes output.
+- ``TFM_HAL_ERROR_NOT_INIT`` - The log device has not been initialized.
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - Invalid inputs when ``str`` is ``NULL``
+  or ``len`` is zero.
+
+**Note**
+
+Please check :doc:`TF-M log system <tfm_log_system_design_document>` for more
+information.
+
 --------------
 
 *Copyright (c) 2020, Arm Limited. All rights reserved.*
