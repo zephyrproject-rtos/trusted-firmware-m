@@ -127,9 +127,9 @@ Platforms supported
 
     - Cortex-M33 system:
 
-        - `FPGA image loaded on MPS2 board.
+        - `FPGA image loaded on MPS2 board (AN521).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
-        - `Fast model FVP_MPS2_AEMv8M.
+        - `Fast model FVP_MPS2_AEMv8M (AN521).
           <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`_
         - `Musca-A test chip board.
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`_
@@ -137,7 +137,7 @@ Platforms supported
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`_
         - `Musca-S1 test chip board.
           <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
-        - `FPGA image loaded on MPS3 board.
+        - `FPGA image loaded on MPS3 board (AN524).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
         - `Arm DesignStart FPGA on AWS Cloud.
           <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
@@ -150,7 +150,7 @@ Platforms supported
 
     - Cortex-M23 system:
 
-        - `FPGA image loaded on MPS2 board.
+        - `FPGA image loaded on MPS2 board (AN519, AN539).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
 
     - Dual Core Cortex-M system:
