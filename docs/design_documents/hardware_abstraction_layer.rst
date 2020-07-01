@@ -185,6 +185,63 @@ API Definition for TF-M SPM
 ***************************
 This section describes the APIs defined for :term:`TF-M` :term:`SPM`.
 
+Platform API
+============
+The platform API is a higher-level abstraction layer of the platform, other than
+a dedicated API set for the special hardware devices.
+
+APIs
+----
+tfm_hal_platform_init()
+^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_platform_init(void)
+
+**Description**
+
+This API performs the platform-specific initialization.
+
+This API is called after architecture and platform common initialization has
+finished during system early startup.
+
+**Parameter**
+
+- ``void`` - None.
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - Init success.
+- ``TFM_HAL_ERROR_GENERIC`` - Generic errors.
+
+tfm_hal_system_reset()
+^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  void tfm_hal_system_reset(void)
+
+**Description**
+
+This API performs a system reset.
+
+The platform can uninitialize some resources before reset.
+
+**Parameter**
+
+- ``void`` - None
+
+**Return Values**
+
+- ``void`` - None
+
+**Note**
+
+This API should not return.
+
 Isolation API
 =============
 The :term:`PSA-FF-M` defines three isolation levels and a memory access rule to
