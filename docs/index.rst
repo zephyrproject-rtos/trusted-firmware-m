@@ -96,6 +96,7 @@ Trusted Firmware-M Documentation
     :hidden:
     :caption: Quick Links
 
+    Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
     docs/reference/changelog
     docs/reference/glossary
     docs/contributing/lic

@@ -4,7 +4,6 @@ Reference
 .. toctree::
     :maxdepth: 1
     :glob:
-    :numbered:
 
     changelog
     glossary
