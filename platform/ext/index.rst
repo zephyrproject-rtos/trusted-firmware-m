@@ -7,6 +7,7 @@ Platforms
 
     readme
     /platform/readme
+    /docs/contributing/platform_deprecation.rst
 
 .. toctree::
     :maxdepth: 4
