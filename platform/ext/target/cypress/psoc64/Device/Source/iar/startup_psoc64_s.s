@@ -96,8 +96,7 @@ __Vectors_End
 __Vectors       EQU     __vector_table
 __Vectors_Size  EQU     __Vectors_End - __Vectors
 
-;                AREA    RESET_RAM, READWRITE, NOINIT
-                DATA
+                SECTION  .data:DATA(2)
 __ramVectors
                 DS8   __Vectors_Size
 
