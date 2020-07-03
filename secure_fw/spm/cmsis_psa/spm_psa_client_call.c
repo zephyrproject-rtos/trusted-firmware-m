@@ -10,7 +10,6 @@
 #include "tfm_core_utils.h"
 #include "tfm_internal_defines.h"
 #include "tfm_memory_utils.h"
-#include "tfm_message_queue.h"
 #include "spm_psa_client_call.h"
 #include "utilities.h"
 #include "tfm_wait.h"

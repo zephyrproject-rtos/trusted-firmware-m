@@ -13,7 +13,6 @@
 #include "tfm_arch.h"
 #include "tfm_list.h"
 #include "tfm_wait.h"
-#include "tfm_message_queue.h"
 #include "tfm_secure_api.h"
 #include "tfm_thread.h"
 #include "psa/service.h"
@@ -45,6 +44,8 @@
 #define TFM_PRIORITY_LOW                THRD_PRIOR_LOWEST
 #define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
 
+#define TFM_MSG_MAGIC                   0x15154343
+
 enum spm_err_t {
     SPM_ERR_OK = 0,
     SPM_ERR_PARTITION_DB_NOT_INIT,
@@ -54,19 +55,41 @@ enum spm_err_t {
     SPM_ERR_INVALID_CONFIG,
 };
 
+/* Message struct to collect parameter from client */
+struct tfm_msg_body_t {
+    int32_t magic;
+    struct tfm_spm_service_t *service; /* RoT service pointer            */
+    struct tfm_event_t ack_evnt;       /* Event for ack reponse          */
+    psa_msg_t msg;                     /* PSA message body               */
+    psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
+    psa_outvec outvec[PSA_MAX_IOVEC];
+    psa_outvec *caller_outvec;         /*
+                                        * Save caller outvec pointer for
+                                        * write length update
+                                        */
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+    const void *caller_data;           /*
+                                        * Pointer to the private data of the
+                                        * caller. It identifies the NSPE PSA
+                                        * client calls in multi-core topology
+                                        */
+#endif
+    struct tfm_list_node_t msg_node;   /* For list operators             */
+};
+
 /**
  * \brief Runtime context information of a partition
  */
 struct spm_partition_runtime_data_t {
     uint32_t signals;                   /* Service signals had been triggered*/
     struct tfm_event_t signal_evnt;     /* Event signal                      */
-    struct tfm_list_node_t service_list;/* Service list                      */
     struct tfm_core_thread_t sp_thrd;   /* Thread object                     */
     uint32_t assigned_signals;          /* All assigned signals              */
     uint32_t signal_mask;               /*
                                          * Service signal mask passed by
                                          * psa_wait()
                                          */
+    struct tfm_list_node_t msg_list;    /* Message list                      */
 };
 
 /**
@@ -128,7 +151,6 @@ struct tfm_spm_service_t {
                                               * data
                                               */
     struct tfm_list_node_t handle_list;      /* Service handle list          */
-    struct tfm_msg_queue_t msg_queue;        /* Message queue                */
     struct tfm_list_node_t list;             /* For list operation           */
 };
 

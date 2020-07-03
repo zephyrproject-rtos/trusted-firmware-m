@@ -22,7 +22,7 @@
 #include "psa/service.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
-#include "tfm_message_queue.h"
+#include "spm_ipc.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)

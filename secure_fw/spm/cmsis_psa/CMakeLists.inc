@@ -40,7 +40,6 @@ set (SFW_IPC_SPM_SRC
 		"${SFW_IPC_SPM_DIR}/spm_ipc.c"
 		"${SFW_IPC_SPM_DIR}/spm_psa_client_call.c"
 		"${SFW_IPC_SPM_DIR}/tfm_core_svcalls_ipc.c"
-		"${SFW_IPC_SPM_DIR}/tfm_message_queue.c"
 		"${SFW_SPM_RUNTIME_DIR}/utilities.c"
 		"${SFW_SPM_RUNTIME_DIR}/tfm_core_utils.c"
 		"${SFW_IPC_SPM_DIR}/tfm_pools.c"

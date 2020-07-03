@@ -14,7 +14,6 @@
 #include "tfm_wait.h"
 #include "utilities.h"
 #include "tfm_internal_defines.h"
-#include "tfm_message_queue.h"
 #include "tfm_spm_hal.h"
 #include "tfm_irq_list.h"
 #include "tfm_api.h"
@@ -257,7 +256,7 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 /* Partition management functions */
 
 /**
- * \brief                   Get the service context by signal.
+ * \brief                   Get the msg context by signal.
  *
  * \param[in] partition     Partition context pointer
  *                          \ref partition_t structures
@@ -266,29 +265,40 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
- *                          \ref tfm_spm_service_t structures
+ *                          \ref tfm_msg_body_t structures
  */
-static struct tfm_spm_service_t *
-    tfm_spm_get_service_by_signal(struct partition_t *partition,
-                                  psa_signal_t signal)
+static struct tfm_msg_body_t *
+    tfm_spm_get_msg_by_signal(struct partition_t *partition,
+                              psa_signal_t signal)
 {
     struct tfm_list_node_t *node, *head;
-    struct tfm_spm_service_t *service;
+    struct tfm_msg_body_t *tmp_msg, *msg = NULL;
 
     TFM_CORE_ASSERT(partition);
 
-    if (tfm_list_is_empty(&partition->runtime_data.service_list)) {
-        tfm_core_panic();
+    head = &partition->runtime_data.msg_list;
+
+    if (tfm_list_is_empty(head)) {
+        return NULL;
     }
 
-    head = &partition->runtime_data.service_list;
+    /*
+     * There may be multiple messages for this RoT Service signal, do not clear
+     * partition mask until no remaining message. Search may be optimized.
+     */
     TFM_LIST_FOR_EACH(node, head) {
-        service = TFM_GET_CONTAINER_PTR(node, struct tfm_spm_service_t, list);
-        if (service->service_db->signal == signal) {
-            return service;
+        tmp_msg = TFM_GET_CONTAINER_PTR(node, struct tfm_msg_body_t, msg_node);
+        if (tmp_msg->service->service_db->signal == signal && msg) {
+            return msg;
+        } else if (tmp_msg->service->service_db->signal == signal) {
+            msg = tmp_msg;
+            tfm_list_del_node(node);
         }
     }
-    return NULL;
+
+    partition->runtime_data.signals &= ~signal;
+
+    return msg;
 }
 
 /**
@@ -609,10 +619,8 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(msg);
 
-    /* Enqueue message to service message queue */
-    if (tfm_msg_enqueue(&service->msg_queue, msg) != IPC_SUCCESS) {
-        return IPC_ERROR_GENERIC;
-    }
+    /* Add message to partition message list tail */
+    tfm_list_add_tail(&p_runtime_data->msg_list, &msg->msg_node);
 
     /* Messages put. Update signals */
     p_runtime_data->signals |= service->service_db->signal;
@@ -733,7 +741,7 @@ uint32_t tfm_spm_init(void)
         }
 
         tfm_event_init(&partition->runtime_data.signal_evnt);
-        tfm_list_init(&partition->runtime_data.service_list);
+        tfm_list_init(&partition->runtime_data.msg_list);
 
         pth = &partition->runtime_data.sp_thrd;
         if (!pth) {
@@ -773,8 +781,6 @@ uint32_t tfm_spm_init(void)
         partition->runtime_data.assigned_signals |= service[i].service_db->signal;
 
         tfm_list_init(&service[i].handle_list);
-        tfm_list_add_tail(&partition->runtime_data.service_list,
-                          &service[i].list);
     }
 
     /*
@@ -984,7 +990,6 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
 {
     psa_signal_t signal;
     psa_msg_t *msg = NULL;
-    struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *tmp_msg = NULL;
     struct partition_t *partition = NULL;
     uint32_t privileged;
@@ -1034,15 +1039,10 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
     }
 
     /*
-     * Get RoT service by signal from partition. It is a fatal error if getting
+     * Get message by signal from partition. It is a fatal error if getting
      * failed, which means the input signal is not correspond to an RoT service.
      */
-    service = tfm_spm_get_service_by_signal(partition, signal);
-    if (!service) {
-        tfm_core_panic();
-    }
-
-    tmp_msg = tfm_msg_dequeue(&service->msg_queue);
+    tmp_msg = tfm_spm_get_msg_by_signal(partition, signal);
     if (!tmp_msg) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
@@ -1052,14 +1052,6 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
                            internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
 
     spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
-
-    /*
-     * There may be multiple messages for this RoT Service signal, do not clear
-     * its mask until no remaining message.
-     */
-    if (tfm_msg_queue_is_empty(&service->msg_queue)) {
-        partition->runtime_data.signals &= ~signal;
-    }
 
     return PSA_SUCCESS;
 }
