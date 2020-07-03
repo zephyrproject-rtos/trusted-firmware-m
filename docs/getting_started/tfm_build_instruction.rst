@@ -261,7 +261,7 @@ line arguments:
             ``-DTARGET_PLATFORM=STM_DISCO_L562QE``
             See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
           - NUCLEO_L552ZE_Q (Cortex-M33 STM32L552)
-            ``-DTARGET_PLATFORM=SSTM_NUCLEO_L552ZE_Q``
+            ``-DTARGET_PLATFORM=STM_NUCLEO_L552ZE_Q``
             See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
 
    * - -DCOMPILER=<compiler name>
