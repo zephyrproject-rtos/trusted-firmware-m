@@ -220,11 +220,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         /* Create local copy to avoid unaligned access */
         (void)spm_memcpy(&tlv_entry, (const void *)offset,
                          SHARED_DATA_ENTRY_HEADER_SIZE);
-#ifdef LEGACY_TFM_TLV_HEADER
-        next_tlv_offset = tlv_entry.tlv_len;
-#else
+
         next_tlv_offset = SHARED_DATA_ENTRY_HEADER_SIZE + tlv_entry.tlv_len;
-#endif
+
         if (GET_MAJOR(tlv_entry.tlv_type) == tlv_major) {
             /* Check buffer overflow */
             if (((ptr - buf_start) + next_tlv_offset) > buf_size) {

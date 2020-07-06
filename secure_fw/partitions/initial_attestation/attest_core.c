@@ -209,12 +209,9 @@ static int32_t attest_get_tlv_by_module(uint8_t    module,
     } else {
         /* Any subsequent call set to the next TLV entry */
         (void)tfm_memcpy(&tlv_entry, *tlv_ptr, SHARED_DATA_ENTRY_HEADER_SIZE);
-#ifdef LEGACY_TFM_TLV_HEADER
-        tlv_curr  = (*tlv_ptr) + tlv_entry.tlv_len;
-#else
+
         tlv_curr  = (*tlv_ptr) + SHARED_DATA_ENTRY_HEADER_SIZE
                     + tlv_entry.tlv_len;
-#endif
     }
 
     /* Iterates over the TLV section and returns the address and size of TLVs
@@ -229,11 +226,8 @@ static int32_t attest_get_tlv_by_module(uint8_t    module,
             *tlv_len = tlv_entry.tlv_len;
             return 1;
         }
-#ifdef LEGACY_TFM_TLV_HEADER
-        tlv_curr += tlv_entry.tlv_len;
-#else
+
         tlv_curr += (SHARED_DATA_ENTRY_HEADER_SIZE + tlv_entry.tlv_len);
-#endif
     }
 
     return 0;
@@ -303,21 +297,7 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
 
     cbor_encode_ctx = attest_token_encode_borrow_cbor_cntxt(token_ctx);
 
-    /* Starting from module 1, because module 0 contains general claims which
-     * are not related to SW module(i.e: boot_seed, etc.)
-     */
-    /* TODO: When TF-M's MCUboot fork is used as the bootloader
-     *       (LEGACY_TFM_TLV_HEADER is defined) it uses different SW module
-     *       identifiers in the shared data entry headers than the upstream
-     *       MCUboot. This is a workaround to be able to get all the claims
-     *       of every SW components, until this discrepancy is handled properly.
-     */
-#ifdef LEGACY_TFM_TLV_HEADER
-    module = 1;
-#else
-    module = 0;
-#endif
-    for ( ; module < SW_MAX; ++module) {
+    for (module = 0; module < SW_MAX; ++module) {
         /* Indicates to restart the look up from the beginning of the shared
          * data section
          */
@@ -340,9 +320,6 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
 
             encoded.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
             encoded.len = tlv_len;
-#ifdef LEGACY_TFM_TLV_HEADER
-            encoded.len -= SHARED_DATA_ENTRY_HEADER_SIZE;
-#endif
             QCBOREncode_AddEncoded(cbor_encode_ctx, encoded);
         }
     }
@@ -384,9 +361,6 @@ attest_add_boot_seed_claim(struct attest_token_encode_ctx *token_ctx)
     if (found == 1) {
         claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
         claim_value.len = tlv_len;
-#ifdef LEGACY_TFM_TLV_HEADER
-        claim_value.len -= SHARED_DATA_ENTRY_HEADER_SIZE;
-#endif
     } else {
         /* If not found in boot status then use callback function to get it
          * from runtime SW
@@ -514,9 +488,6 @@ attest_add_security_lifecycle_claim(struct attest_token_encode_ctx *token_ctx)
     if (found == 1) {
         claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
         claim_value.len = tlv_len;
-#ifdef LEGACY_TFM_TLV_HEADER
-        claim_value.len -= SHARED_DATA_ENTRY_HEADER_SIZE;
-#endif
         res = get_uint(claim_value.ptr, claim_value.len, &slc_value);
         if (res) {
             return PSA_ATTEST_ERR_GENERAL;
@@ -637,9 +608,6 @@ attest_add_hw_version_claim(struct attest_token_encode_ctx *token_ctx)
     if (found == 1) {
         claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
         claim_value.len = tlv_len;
-#ifdef LEGACY_TFM_TLV_HEADER
-        claim_value.len -= SHARED_DATA_ENTRY_HEADER_SIZE;
-#endif
     } else {
         /* If not found in boot status then use callback function to get it
          * from runtime SW

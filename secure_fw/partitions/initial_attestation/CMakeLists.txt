@@ -41,7 +41,6 @@ target_link_libraries(tfm_partition_attestation
 
 target_compile_definitions(tfm_partition_attestation
     PRIVATE
-        $<$<BOOL:${TFM_INTERNAL_MCUBOOT}>:LEGACY_TFM_TLV_HEADER>
         $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${ATTEST_INCLUDE_OPTIONAL_CLAIMS}>:INCLUDE_OPTIONAL_CLAIMS>

@@ -77,7 +77,6 @@ target_compile_definitions(tfm_spm
     PRIVATE
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
-        $<$<BOOL:${TFM_INTERNAL_MCUBOOT}>:LEGACY_TFM_TLV_HEADER>
 )
 
 # With constant optimizations on tfm_nspc_func emits a symbol that the linker
