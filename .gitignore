@@ -15,3 +15,8 @@ cmake_build*/
 *.orig
 **/__pycache__
 *.pyc
+
+# TF-Fuzz build artifacts
+*.o
+*_grammar.*
+tfz
