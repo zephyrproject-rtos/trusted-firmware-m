@@ -51,7 +51,7 @@
  *
  * Flash layout on Musca-S1 without BL2:
  * 0x0A00_0000 Secure     image
- * 0x0A07_0000 Non-secure image
+ * 0x0A08_0000 Non-secure image
  */
 
 /* This header file is included from linker scatter file as well, where only a

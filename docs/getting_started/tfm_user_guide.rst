@@ -314,11 +314,11 @@ and ``tfm_ns.bin``:
 
 - Windows::
 
-    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 - Linux::
 
-    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards
