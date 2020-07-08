@@ -21,6 +21,14 @@ embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
 project(mcuboot LANGUAGES ASM C)
 embedded_project_fixup()
 
+#Check input variables
+if (NOT DEFINED BL2)
+   message(FATAL ERROR "Incomplete build configuration: BL2 is undefined.")
+elseif(NOT BL2)
+    #If mcuboot is not need to be built then stop further processing.
+    return()
+endif()
+
 #Set the appropriate MCUBoot path
 if (MCUBOOT_REPO STREQUAL "TF-M")
 	get_filename_component(MCUBOOT_DIR ${CMAKE_CURRENT_LIST_DIR} ABSOLUTE)
@@ -29,14 +37,6 @@ else()
 	if (NOT EXISTS ${MCUBOOT_DIR})
 		message(FATAL_ERROR "Missing MCUBoot. Please clone the MCUBoot repo to directory \"${MCUBOOT_DIR}\".")
 	endif()
-endif()
-
-#Check input variables
-if (NOT DEFINED BL2)
-   message(FATAL ERROR "Incomplete build configuration: BL2 is undefined.")
-elseif(NOT BL2)
-    #If mcuboot is not need to be built then stop further processing.
-    return()
 endif()
 
 if (NOT DEFINED MBEDCRYPTO_C_FLAGS_BL2)

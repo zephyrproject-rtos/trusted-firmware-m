@@ -30,6 +30,7 @@ Getting the source-code
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
     git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-3.0.1
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
+    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.6.0
 
 .. Note::
    For building with Armclang compiler version 6.10.0, please follow the note
@@ -260,7 +261,7 @@ line arguments:
             ``-DTARGET_PLATFORM=STM_DISCO_L562QE``
             See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
           - NUCLEO_L552ZE_Q (Cortex-M33 STM32L552)
-            ``-DTARGET_PLATFORM=SSTM_NUCLEO_L552ZE_Q``
+            ``-DTARGET_PLATFORM=STM_NUCLEO_L552ZE_Q``
             See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
 
    * - -DCOMPILER=<compiler name>
