@@ -22,7 +22,6 @@
 #include "tfm_memory_utils.h"
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
-#include "spm_db.h"
 #include "tfm_core_utils.h"
 #include "spm_psa_client_call.h"
 #include "tfm_rpc.h"

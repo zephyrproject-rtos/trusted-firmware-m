@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include "region.h"
-#include "spm_db.h"
+#include "spm_ipc.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_core_trustzone.h"

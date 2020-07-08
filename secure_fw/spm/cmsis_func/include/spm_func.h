@@ -9,6 +9,7 @@
 #define __SPM_FUNC_H__
 
 #include <stdint.h>
+#include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "psa/client.h"
 
@@ -34,6 +35,11 @@
 #define SPM_PART_FLAG_APP_ROT           0x01
 #define SPM_PART_FLAG_PSA_ROT           0x02
 #define SPM_PART_FLAG_IPC               0x04
+
+#define TFM_PRIORITY_HIGH               0
+#define TFM_PRIORITY_NORMAL             0x7F
+#define TFM_PRIORITY_LOW                0xFF
+#define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
 
 enum spm_err_t {
     SPM_ERR_OK = 0,
@@ -89,6 +95,38 @@ struct spm_partition_runtime_data_t {
                                          * Service signal mask passed by
                                          * psa_wait()
                                          */
+};
+
+/**
+ * Holds the fields of the partition DB used by the SPM code. The values of
+ * these fields are calculated at compile time, and set during initialisation
+ * phase.
+ */
+struct spm_partition_static_data_t {
+    uint32_t partition_id;
+    uint32_t partition_flags;
+    uint32_t partition_priority;
+    sp_entry_point partition_init;
+    uint32_t dependencies_num;
+    int32_t *p_dependencies;
+};
+
+/**
+ * Holds the fields that define a partition for SPM. The fields are further
+ * divided to structures, to keep the related fields close to each other.
+ */
+struct spm_partition_desc_t {
+    struct spm_partition_runtime_data_t runtime_data;
+    const struct spm_partition_static_data_t *static_data;
+    /** A list of platform_data pointers */
+    const struct tfm_spm_partition_platform_data_t **platform_data_list;
+};
+
+struct spm_partition_db_t {
+    uint32_t is_init;
+    uint32_t partition_count;
+    uint32_t running_partition_idx;
+    struct spm_partition_desc_t *partitions;
 };
 
 /**

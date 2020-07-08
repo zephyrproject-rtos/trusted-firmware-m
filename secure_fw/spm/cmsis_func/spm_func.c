@@ -18,7 +18,6 @@
 #include "tfm_secure_api.h"
 #include "tfm_spm_hal.h"
 #include "spm_func.h"
-#include "spm_db.h"
 #include "region_defs.h"
 #include "region.h"
 #include "spm_partition_defs.h"

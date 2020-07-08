@@ -9,6 +9,7 @@
 #define __SPM_IPC_H__
 
 #include <stdint.h>
+#include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "tfm_list.h"
 #include "tfm_wait.h"
@@ -24,6 +25,9 @@
 #define TFM_HANDLE_STATUS_ACTIVE        1
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
 
+#define PART_REGION_ADDR(partition, region) \
+    (uint32_t)&REGION_NAME(Image$$, partition, region)
+
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
@@ -35,6 +39,11 @@
 #define SPM_PART_FLAG_APP_ROT           0x01
 #define SPM_PART_FLAG_PSA_ROT           0x02
 #define SPM_PART_FLAG_IPC               0x04
+
+#define TFM_PRIORITY_HIGH               THRD_PRIOR_HIGHEST
+#define TFM_PRIORITY_NORMAL             THRD_PRIOR_MEDIUM
+#define TFM_PRIORITY_LOW                THRD_PRIOR_LOWEST
+#define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
 
 enum spm_err_t {
     SPM_ERR_OK = 0,
@@ -58,6 +67,39 @@ struct spm_partition_runtime_data_t {
                                          * Service signal mask passed by
                                          * psa_wait()
                                          */
+};
+
+/**
+ * Holds the fields of the partition DB used by the SPM code. The values of
+ * these fields are calculated at compile time, and set during initialisation
+ * phase.
+ */
+struct spm_partition_static_data_t {
+    uint32_t psa_framework_version;
+    uint32_t partition_id;
+    uint32_t partition_flags;
+    uint32_t partition_priority;
+    sp_entry_point partition_init;
+    uint32_t dependencies_num;
+    int32_t *p_dependencies;
+};
+
+/**
+ * Holds the fields that define a partition for SPM. The fields are further
+ * divided to structures, to keep the related fields close to each other.
+ */
+struct spm_partition_desc_t {
+    struct spm_partition_runtime_data_t runtime_data;
+    const struct spm_partition_static_data_t *static_data;
+    /** A list of platform_data pointers */
+    const struct tfm_spm_partition_platform_data_t **platform_data_list;
+    const struct tfm_spm_partition_memory_data_t *memory_data;
+};
+
+struct spm_partition_db_t {
+    uint32_t is_init;
+    uint32_t partition_count;
+    struct spm_partition_desc_t *partitions;
 };
 
 /* Service database defined by manifest */

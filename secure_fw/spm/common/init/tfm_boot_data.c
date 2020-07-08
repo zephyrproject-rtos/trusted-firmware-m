@@ -21,7 +21,6 @@
 #include "tfm_wait.h"
 #include "tfm_message_queue.h"
 #include "tfm_spm_hal.h"
-#include "spm_db.h"
 #include "spm_ipc.h"
 #else
 #include "spm_func.h"
