@@ -19,15 +19,18 @@
 
 /* Flash layout on Musca-S1 with BL2(multiple image boot, boot from MRAM):
  * 0x0A00_0000 BL2 - MCUBoot(128 KB)
- * 0x0A02_0000 Secure     image primary (320 KB)
- * 0x0A07_0000 Non-secure image primary (512 KB)
- * 0x0A0F_0000 Secure     image secondary (320 KB)
- * 0x0A14_0000 Non-secure image secondary (512 KB)
- * 0x0A1C_0000 Scratch Area (16 KB)
- * 0x0A1C_4000 Protected Storage Area (20 KB)
- * 0x0A1C_9000 Internal Trusted Storage Area (16 KB)
- * 0x0A1C_D000 NV counters area (4 KB)
- * 0x0A1C_E000 Unused
+ * 0x0A02_0000 Secure     image primary (384 KB)
+ * 0x0A08_0000 Non-secure image primary (512 KB)
+ * 0x0A10_0000 Secure     image secondary (384 KB)
+ * 0x0A16_0000 Non-secure image secondary (512 KB)
+ * 0x0A1E_0000 Scratch Area (16 KB)
+ * 0x0A1E_4000 Protected Storage Area (20 KB)
+ * 0x0A1E_9000 Internal Trusted Storage Area (16 KB)
+ * 0x0A1E_D000 NV counters area (4 KB)
+ * 0x0A1E_E000 TF-M key area (256 bytes) This area is referred to in
+ *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
+ *             dx_reg_base_host.h Do not change one without changing the other.
+ * 0x0A1E_E100 Unused
  *
  * Flash layout on Musca-S1 with BL2(single image boot):
  * 0x0A00_0000 BL2 - MCUBoot(128 KB)
@@ -37,13 +40,14 @@
  * 0x0A10_0000 Secondary image area (896 KB):
  *    0x0A10_0000 Secure     image secondary (384 KB)
  *    0x0A16_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Protected Storage Area (20 KB)
- * 0x0A1E_5000 Internal Trusted Storage Area (16 KB)
- * 0x0A1E_9000 NV counters area (4 KB)
- * 0x0A1E_A000 TF-M key area (256 bytes) This area is referred to in
+ * 0x0A1E_0000 Scratch Area (16 KB)
+ * 0x0A1E_4000 Protected Storage Area (20 KB)
+ * 0x0A1E_9000 Internal Trusted Storage Area (16 KB)
+ * 0x0A1E_D000 NV counters area (4 KB)
+ * 0x0A1E_E000 TF-M key area (256 bytes) This area is referred to in
  *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
  *             dx_reg_base_host.h Do not change one without changing the other.
- * 0x0A1E_A100 Unused
+ * 0x0A1E_E100 Unused
  *
  * Flash layout on Musca-S1 without BL2:
  * 0x0A00_0000 Secure     image

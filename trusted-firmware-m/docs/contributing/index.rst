@@ -5,9 +5,10 @@ Contributing
     :maxdepth: 1
     :caption: Contents
     :glob:
-    :numbered:
 
     *
+    Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
+
 
 --------------
 

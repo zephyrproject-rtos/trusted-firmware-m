@@ -18,6 +18,7 @@ set(CMAKE_EXECUTABLE_SUFFIX ".axf")
 if(NOT DEFINED GNUARM_PREFIX)
 	get_filename_component(__c_bin ${CMAKE_C_COMPILER} NAME)
 	string(REPLACE "-gcc" "" GNUARM_PREFIX ${__c_bin})
+	string(REPLACE ".exe" "" GNUARM_PREFIX ${GNUARM_PREFIX})
 endif()
 
 find_program(CMAKE_GNUARM_LINKER  ${GNUARM_PREFIX}-gcc     HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" )

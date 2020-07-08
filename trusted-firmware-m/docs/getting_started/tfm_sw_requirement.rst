@@ -128,6 +128,8 @@ In order to build TF-M the following external projects are required:
 
     - `Mbed Crypto library <https://github.com/ARMmbed/mbed-crypto>`__ v3.0.1
       is used as crypto library on the secure side
+    - `MCUboot <https://github.com/JuulLabs-OSS/mcuboot>`__ v1.6.0 is used as
+      the default bootloader in TF-M
 
 And the following TF-M projects as well:
     - `TF-M tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git>`__
@@ -139,6 +141,7 @@ with trustedfirmware-m
 
     .
     ├── mbed-crypto
+    ├── mcuboot
     ├── tf-m-tests
     └── trusted-firmware-m
 
@@ -482,6 +485,7 @@ To build the TF-M firmware the following tools are needed:
    "GNU Make",See `Supported GNU make versions`_,
    "tf-m-tests",See `External dependencies`_,
    "mbed-crypto",See `External dependencies`_,
+   "MCUboot",See `External dependencies`_,
    "Python",3.x,"Firmware, User Guide"
    "yaml",,"Firmware"
    "pyasn1",,"Firmware"

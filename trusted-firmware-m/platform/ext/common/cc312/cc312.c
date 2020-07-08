@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -204,6 +204,7 @@ int crypto_hw_accelerator_get_attestation_private_key(uint8_t  *buf,
     return 0;
 }
 
+#ifdef BL2
 int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,
                                          uint8_t *rotpk_hash,
                                          uint32_t *rotpk_hash_size)
@@ -240,3 +241,4 @@ int crypto_hw_accelerator_get_rotpk_hash(uint8_t image_id,
 
     return 0;
 }
+#endif  /* BL2 */
