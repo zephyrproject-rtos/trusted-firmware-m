@@ -17,7 +17,6 @@
 
 #include "mcuboot_config/mcuboot_config.h"
 #include <assert.h>
-#include "bl2_util.h"
 #include "target.h"
 #include "tfm_hal_device_header.h"
 #include "Driver_Flash.h"
@@ -27,7 +26,7 @@
 #include "bootutil/bootutil.h"
 #include "flash_map_backend/flash_map_backend.h"
 #include "bootutil/boot_record.h"
-#include "security_cnt.h"
+#include "bootutil/security_cnt.h"
 #include "boot_hal.h"
 #include "region.h"
 #if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF

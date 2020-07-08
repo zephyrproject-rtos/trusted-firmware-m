@@ -126,7 +126,6 @@ set(CMSIS_5_PATH                        "DOWNLOAD"  CACHE PATH      "Path to CMS
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
 set(MCUBOOT_VERSION                     "b2a1a48"   CACHE STRING    "The version of MCUboot to use")
-set(TFM_INTERNAL_MCUBOOT                OFF         CACHE BOOL      "Use internal MCUboot files instead of upstream repo")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "master"    CACHE STRING    "The version of PSA arch tests to use")

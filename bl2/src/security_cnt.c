@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "../ext/mcuboot/include/security_cnt.h"
+#include "bootutil/security_cnt.h"
 #include "../../platform/include/tfm_plat_nv_counters.h"
 #include "../../platform/include/tfm_plat_defs.h"
 #include <stdint.h>

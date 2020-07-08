@@ -33,8 +33,8 @@
  * - RSA signature verification
  */
 
-#ifndef MCUBOOT_MBEDTLS_CONFIG_RSA
-#define MCUBOOT_MBEDTLS_CONFIG_RSA
+#ifndef __MCUBOOT_MBEDTLS_CFG__
+#define __MCUBOOT_MBEDTLS_CFG__
 
 /* System support */
 #define MBEDTLS_PLATFORM_C
@@ -85,4 +85,4 @@
 
 #include "mbedtls/check_config.h"
 
-#endif /* MCUBOOT_MBEDTLS_CONFIG_RSA */
+#endif /* __MCUBOOT_MBEDTLS_CFG__ */

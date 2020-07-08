@@ -8,10 +8,6 @@
 cmake_minimum_required(VERSION 3.13)
 cmake_policy(SET CMP0079 NEW)
 
-if(TFM_INTERNAL_MCUBOOT)
-    set(MCUBOOT_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Path to mcuboot (or DOWNLOAD to get automatically" FORCE)
-endif()
-
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
 
 target_include_directories(bl2
@@ -34,10 +30,10 @@ target_sources(bl2
         ${MCUBOOT_PATH}/boot/bootutil/src/image_rsa.c
         ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
         ${MCUBOOT_PATH}/boot/bootutil/src/boot_record.c
-        $<$<NOT:$<BOOL:${TFM_INTERNAL_MCUBOOT}>>:${MCUBOOT_PATH}/boot/bootutil/src/swap_scratch.c>
-        $<$<NOT:$<BOOL:${TFM_INTERNAL_MCUBOOT}>>:${MCUBOOT_PATH}/boot/bootutil/src/swap_move.c>
-        $<$<NOT:$<BOOL:${TFM_INTERNAL_MCUBOOT}>>:${MCUBOOT_PATH}/boot/bootutil/src/swap_misc.c>
-        $<$<NOT:$<BOOL:${TFM_INTERNAL_MCUBOOT}>>:${MCUBOOT_PATH}/boot/bootutil/src/encrypted.c>
+        ${MCUBOOT_PATH}/boot/bootutil/src/swap_scratch.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/swap_move.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/swap_misc.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/encrypted.c
 )
 
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)

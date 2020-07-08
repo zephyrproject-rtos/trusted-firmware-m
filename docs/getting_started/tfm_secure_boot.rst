@@ -27,12 +27,14 @@ of an immutable bootloader and a public key (ROTPK).
 *******************************
 Second stage bootloader in TF-M
 *******************************
-To implement secure boot functionality an external project MCUBoot has been
-integrated to TF-M. For further information please refer to the
-`MCUBoot homepage <https://www.mcuboot.com/>`__. Original source-code is
-available at `GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__. This document
-contains information about MCUBoot modifications and how MCUBoot has been
-integrated to TF-M.
+By default, the MCUboot project from
+`GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__ is used as the secure
+bootloader in TF-M. The repository is going to be automatically downloaded by
+CMake. The version downloaded can be controlled by the ``MCUBOOT_VERSION``
+CMake variable. If you wish to use a locally downloaded copy, the CMake variable
+``MCUBOOT_PATH`` can be set to its location. This document contains information
+about how MCUboot has been integrated to TF-M. For further information about
+MCUboot design please refer to the `MCUBoot homepage <https://www.mcuboot.com/>`__.
 
 Bootloader is started when CPU is released from reset. It runs in secure mode.
 It authenticates the firmware image by hash (SHA-256) and digital signature
@@ -49,8 +51,10 @@ and private key is in ``root-RSA-3072.pem``.
 .. Warning::
     DO NOT use them in production code, they are exclusively for testing!
 
-Private key must be stored in a safe place outside of the repository.
-``Imgtool.py`` can be used to generate new key pairs.
+The private key must be stored in a safe place outside of the repository.
+``imgtool.py`` (found in the ``scripts`` directory in the MCUBoot repository,
+or installed through the pip package manager) can be used to generate new key
+pairs.
 
 The bootloader can handle the secure and non-secure images independently
 (multiple image boot) or together (single image boot). In case of multiple image
@@ -270,22 +274,6 @@ modes are supported by which platforms:
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
-*******
-MCUBoot
-*******
-By default, the original MCUBoot from
-`GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__ is used as the bootloader
-in TF-M. The repository will be automatically downloaded by cmake. The version
-downloaded can be controlled by the ``MCUBOOT_VERSION`` cmake variable. If you
-wish to use a locally downloaded copy, the cmake variable ``MCUBOOT_PATH`` can
-be set to its location.
-
-Upstream MCUboot does not support the ``direct-xip`` and ``RAM loading`` upgrade
-strategies, therefore the platforms that don't support other upgrade strategies
-(e.g. ``Overwrite``) cannot be used with the original MCUBoot at the moment. To
-use the TF-M project's fork, set the ``TFM_INTERNAL_MCUBOOT`` cmake variable to
-``ON``.
-
 *******************
 Multiple image boot
 *******************
@@ -350,12 +338,6 @@ MCUBoot related compile time switches can be set by cmake variables.
     - **False:** TF-M built without bootloader. Secure image linked to the
       beginning of the device memory and executed after reset. If it is false
       then using any of the further compile time switches is invalid.
-- TFM_INTERNAL_MCUBOOT (default: False):
-    - **"True":** Use TF-M's MCUBoot fork as bootloader which is located in the
-      bl2/ext/mcuboot folder.
-    - **"False":** Use the original (upstream) MCUBoot as bootloader. Before
-      selecting this option please read the `MCUBoot`_ section for more
-      information and the limitations of using this option.
 - MCUBOOT_UPGRADE_STRATEGY (default: "OVERWRITE_ONLY"):
     - **"OVERWRITE_ONLY":** Default firmware upgrade operation with overwrite.
     - **"SWAP":** Activate swapping firmware upgrade operation.
@@ -495,7 +477,8 @@ Signing the images manually
 Normally the build system handles the signing (computing hash over the image
 and security critical manifest data and then signing the hash) of the firmware
 images. However, the images also can be signed manually by using the ``imgtool``
-Python program which is located in the ``bl2/ext/mcuboot/scripts`` directory.
+Python program which is located in the MCUboot repository  in the ``scripts``
+folder or can be installed with the pip package manager.
 Issue the ``python3 imgtool.py sign --help`` command in the directory for more
 information about the mandatory and optional arguments. The tool takes an image
 in binary or Intel Hex format and adds a header and trailer that MCUBoot is
