@@ -15,7 +15,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 set(APP_DIR ${CMAKE_CURRENT_LIST_DIR})
 get_filename_component(TFM_ROOT_DIR ${APP_DIR}/.. ABSOLUTE)
 set(INTERFACE_DIR ${TFM_ROOT_DIR}/interface)
-set(TEST_DIR ${TFM_ROOT_DIR}/test)
 
 #Include common stuff to control cmake.
 include("Common/BuildSys")
@@ -216,7 +215,7 @@ elseif (TFM_NS_CLIENT_IDENTIFICATION)
 	target_compile_definitions(${PROJECT_OBJ_LIB} PRIVATE TFM_NS_CLIENT_IDENTIFICATION)
 endif()
 
-add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/non_secure_test)
+add_subdirectory(${TEST_DIR} ${CMAKE_BINARY_DIR}/test/non_secure_test)
 
 # For the non-swapping BL2 configuration two executables need to be built.
 # One can be executed from the primary slot flash partition and other from the
@@ -420,7 +419,7 @@ if(NOT TARGET tfm_non_secure_tests)
 	#Add the test source to the build.
 	#As of today since secure_fw is built as a sub-project this code will never execute.
 	option(ENABLE_PROTECTED_STORAGE_SERVICE_TESTS "" TRUE)
-	include(../test/CMakeLists.inc)
+	include(${TEST_DIR}/CMakeLists.inc)
 	target_sources(${PROJECT_OBJ_LIB} PUBLIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
 endif()
 

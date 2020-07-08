@@ -21,6 +21,8 @@ elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUA
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
+
 #Configure the default build type
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (i.e. Debug)")
 
@@ -312,7 +314,7 @@ if (CORE_IPC)
 	set(TFM_PARTITION_AUDIT_LOG OFF)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/test/TestConfig.cmake)
+include(${TEST_DIR}/TestConfig.cmake)
 
 if (TFM_PARTITION_AUDIT_LOG)
 	add_definitions(-DTFM_PARTITION_AUDIT_LOG)

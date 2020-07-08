@@ -14,7 +14,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 
 set(SECURE_FW_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(TFM_ROOT_DIR  "${SECURE_FW_DIR}/..")
-set(TEST_DIR      "${TFM_ROOT_DIR}/test")
 set(INTERFACE_DIR "${TFM_ROOT_DIR}/interface")
 
 #Include common stuff to control cmake.
@@ -513,7 +512,7 @@ function(set_up_secure_fw_build)
 endfunction()
 
 #Adds the test directory
-add_subdirectory(${TFM_ROOT_DIR}/test ${CMAKE_BINARY_DIR}/test/secure_test)
+add_subdirectory(${TEST_DIR} ${CMAKE_BINARY_DIR}/test/secure_test)
 
 #Add the crypto library target
 if (TFM_PARTITION_CRYPTO)
