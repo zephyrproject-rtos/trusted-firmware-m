@@ -21,7 +21,7 @@ elseif((NOT ${COMPILER} STREQUAL "ARMCLANG") AND (NOT ${COMPILER} STREQUAL "GNUA
 	message(FATAL_ERROR "ERROR: Compiler \"${COMPILER}\" is not supported.")
 endif()
 
-set(TEST_DIR ${CMAKE_SOURCE_DIR}/test)
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/../tf-m-tests/test)
 
 #Configure the default build type
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (i.e. Debug)")

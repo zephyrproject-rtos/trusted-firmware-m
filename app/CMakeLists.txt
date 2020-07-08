@@ -208,6 +208,7 @@ embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TFM_ROOT_DI
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/Include ABSOLUTE APPEND)
 embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${CMSIS_DIR}/RTOS2/RTX/Config  ABSOLUTE APPEND)
+embedded_target_include_directories(TARGET ${PROJECT_OBJ_LIB} PATH ${TEST_DIR}/..  ABSOLUTE APPEND)
 
 if (NOT DEFINED TFM_NS_CLIENT_IDENTIFICATION)
 	message(FATAL_ERROR "Incomplete build configuration: TFM_NS_CLIENT_IDENTIFICATION is undefined.")
