@@ -81,6 +81,9 @@ Some open issues exist and will not be fixed in this release.
        | toolchain and Minsizerel build type.
      - Issue: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95646
 
+  *  - | PSA Arch Crypto tests have several known failures.
+     - See this link for detailed analysis of the failures : https://github.com/ARM-software/psa-arch-tests/blob/master/api-tests/docs/test_failure_analysis.md
+
   *  - | AN521 FVP soft reset via AIRCR does not reset MPC / PPC / MPU and will
        | cause boot failure. This is known issue for AN521 FVP. This will cause
        | the system to not boot after a warm reset during PSA Arch FF testing.
@@ -107,9 +110,6 @@ Issues fixed since 1.0
 ======================
 
 .. list-table::
-
-  *  - | PSA Arch Crypto tests have several known failures.
-     - See this link for detailed analysis of the failures : https://github.com/ARM-software/psa-arch-tests/blob/master/api-tests/docs/test_failure_analysis.md
 
   *  - | The eflash driver on Musca-B1 can return random failures hence
        | triggering random failures during PSA Arch ITS and PSA Arch PS tests.
