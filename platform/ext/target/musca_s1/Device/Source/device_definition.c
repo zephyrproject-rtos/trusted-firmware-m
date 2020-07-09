@@ -488,3 +488,9 @@ static const struct musca_s1_scc_dev_cfg_t MUSCA_S1_SCC_DEV_CFG_S = {
 struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_S = {&(MUSCA_S1_SCC_DEV_CFG_S)};
 #endif
 
+/* SSE-200 Cache driver structure */
+#ifdef SSE_200_CACHE_S
+static const struct arm_cache_dev_cfg_t SSE_200_CACHE_CFG_S = {
+    .base = MUSCA_S1_CPU_ELEMENT_S_BASE};
+struct arm_cache_dev_t SSE_200_CACHE_DEV_S = {&(SSE_200_CACHE_CFG_S)};
+#endif

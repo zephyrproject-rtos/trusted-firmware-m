@@ -22,6 +22,7 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
+#include "cmsis_driver_config.h"
 
 #define MIN(A, B) (((A) < (B)) ? (A) : (B))
 #define MAX(A, B) (((A) > (B)) ? (A) : (B))
@@ -672,4 +673,13 @@ void ppc_clear_irq(void)
     Driver_APB_PPC1.ClearInterrupt();
     Driver_APB_PPCEXP0.ClearInterrupt();
     Driver_APB_PPCEXP1.ClearInterrupt();
+}
+
+enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void)
+{
+    musca_s1_scc_mram_fast_read_enable(&MUSCA_S1_SCC_DEV);
+
+    arm_cache_enable_blocking(&SSE_200_CACHE_DEV);
+
+    return TFM_PLAT_ERR_SUCCESS;
 }

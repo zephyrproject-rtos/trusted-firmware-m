@@ -59,10 +59,13 @@
 #define CMSDK_TIMER1_S
 #define CMSDK_TIMER1_NS
 
-/* Default UART baud rate */
-#define DEFAULT_UART_BAUDRATE 115200
-
 /* ARM SCC */
 #define MUSCA_S1_SCC_S
+
+/* Cache */
+#define SSE_200_CACHE_S
+
+/* Default UART baud rate */
+#define DEFAULT_UART_BAUDRATE 115200
 
 #endif  /* __DEVICE_CFG_H__ */
