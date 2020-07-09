@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include("Common/BuildSys")
 
 add_subdirectory(secure_fw)
-add_subdirectory(app)
+add_subdirectory(../tf-m-tests/app ${CMAKE_CURRENT_BINARY_DIR}/app)
 if (BL2)
     add_subdirectory(bl2/ext/mcuboot)
 endif()
