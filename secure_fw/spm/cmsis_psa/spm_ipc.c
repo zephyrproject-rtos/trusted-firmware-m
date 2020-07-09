@@ -276,7 +276,7 @@ static struct tfm_msg_body_t *
 
     TFM_CORE_ASSERT(partition);
 
-    head = &partition->runtime_data.msg_list;
+    head = &partition->msg_list;
 
     if (tfm_list_is_empty(head)) {
         return NULL;
@@ -296,7 +296,7 @@ static struct tfm_msg_body_t *
         }
     }
 
-    partition->runtime_data.signals &= ~signal;
+    partition->signals_asserted &= ~signal;
 
     return msg;
 }
@@ -429,12 +429,9 @@ struct partition_t *tfm_spm_get_running_partition(void)
 {
     struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
     struct partition_t *partition;
-    struct spm_partition_runtime_data_t *rt_data;
 
-    rt_data = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_runtime_data_t,
-                                    sp_thrd);
-    partition = TFM_GET_CONTAINER_PTR(rt_data, struct partition_t,
-                                      runtime_data);
+    partition = TFM_GET_CONTAINER_PTR(pth, struct partition_t, sp_thread);
+
     return partition;
 }
 
@@ -613,20 +610,19 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
 int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
                            struct tfm_msg_body_t *msg)
 {
-    struct spm_partition_runtime_data_t *p_runtime_data =
-                                            &service->partition->runtime_data;
+    struct partition_t *partition = service->partition;
 
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(msg);
 
     /* Add message to partition message list tail */
-    tfm_list_add_tail(&p_runtime_data->msg_list, &msg->msg_node);
+    tfm_list_add_tail(&partition->msg_list, &msg->msg_node);
 
     /* Messages put. Update signals */
-    p_runtime_data->signals |= service->service_db->signal;
+    partition->signals_asserted |= service->service_db->signal;
 
-    tfm_event_wake(&p_runtime_data->signal_evnt, (p_runtime_data->signals &
-                                                  p_runtime_data->signal_mask));
+    tfm_event_wake(&partition->event,
+                   (partition->signals_asserted & partition->signals_waiting));
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -727,7 +723,7 @@ uint32_t tfm_spm_init(void)
         }
 
         /* Add PSA_DOORBELL signal to assigned_signals */
-        partition->runtime_data.assigned_signals |= PSA_DOORBELL;
+        partition->signals_allowed |= PSA_DOORBELL;
 
         /* TODO: This can be optimized by generating the assigned signal
          *       in code generation time.
@@ -735,15 +731,15 @@ uint32_t tfm_spm_init(void)
         for (j = 0; j < tfm_core_irq_signals_count; ++j) {
             if (tfm_core_irq_signals[j].partition_id ==
                                         partition->static_data->partition_id) {
-                partition->runtime_data.assigned_signals |=
+                partition->signals_allowed |=
                                         tfm_core_irq_signals[j].signal_value;
             }
         }
 
-        tfm_event_init(&partition->runtime_data.signal_evnt);
-        tfm_list_init(&partition->runtime_data.msg_list);
+        tfm_event_init(&partition->event);
+        tfm_list_init(&partition->msg_list);
 
-        pth = &partition->runtime_data.sp_thrd;
+        pth = &partition->sp_thread;
         if (!pth) {
             tfm_core_panic();
         }
@@ -778,7 +774,7 @@ uint32_t tfm_spm_init(void)
             tfm_core_panic();
         }
         service[i].partition = partition;
-        partition->runtime_data.assigned_signals |= service[i].service_db->signal;
+        partition->signals_allowed |= service[i].service_db->signal;
 
         tfm_list_init(&service[i].handle_list);
     }
@@ -803,7 +799,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL == 2
     struct partition_t *p_next_partition;
-    struct spm_partition_runtime_data_t *r_data;
     uint32_t is_privileged;
 #endif
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next_thread();
@@ -811,12 +806,9 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL == 2
-        r_data = TFM_GET_CONTAINER_PTR(pth_next,
-                                       struct spm_partition_runtime_data_t,
-                                       sp_thrd);
-        p_next_partition = TFM_GET_CONTAINER_PTR(r_data,
+        p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
                                                  struct partition_t,
-                                                 runtime_data);
+                                                 sp_thread);
 
         if (p_next_partition->static_data->partition_flags &
             SPM_PART_FLAG_PSA_ROT) {
@@ -961,7 +953,7 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
      * It is a PROGRAMMER ERROR if the signal_mask does not include any assigned
      * signals.
      */
-    if ((partition->runtime_data.assigned_signals & signal_mask) == 0) {
+    if ((partition->signals_allowed & signal_mask) == 0) {
         tfm_core_panic();
     }
 
@@ -970,7 +962,7 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
      * should not be set and affect caller thread state. Save this mask for
      * further checking while signals are ready to be set.
      */
-    partition->runtime_data.signal_mask = signal_mask;
+    partition->signals_waiting = signal_mask;
 
     /*
      * tfm_event_wait() blocks the caller thread if no signals are available.
@@ -979,11 +971,11 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
      * is updated with the available signal(s) and blocked thread gets to run.
      */
     if (timeout == PSA_BLOCK &&
-        (partition->runtime_data.signals & signal_mask) == 0) {
-        tfm_event_wait(&partition->runtime_data.signal_evnt);
+        (partition->signals_asserted & signal_mask) == 0) {
+        tfm_event_wait(&partition->event);
     }
 
-    return partition->runtime_data.signals & signal_mask;
+    return partition->signals_asserted & signal_mask;
 }
 
 psa_status_t tfm_spm_psa_get(uint32_t *args)
@@ -1027,14 +1019,14 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
      * been set. The caller must call this function after an RoT Service signal
      * is returned by psa_wait().
      */
-    if (partition->runtime_data.signals == 0) {
+    if (partition->signals_asserted == 0) {
         tfm_core_panic();
     }
 
     /*
      * It is a fatal error if the RoT Service signal is not currently asserted.
      */
-    if ((partition->runtime_data.signals & signal) == 0) {
+    if ((partition->signals_asserted & signal) == 0) {
         tfm_core_panic();
     }
 
@@ -1427,16 +1419,15 @@ static void notify_with_signal(int32_t partition_id, psa_signal_t signal)
         tfm_core_panic();
     }
 
-    partition->runtime_data.signals |= signal;
+    partition->signals_asserted |= signal;
 
     /*
      * The target partition may be blocked with waiting for signals after
      * called psa_wait(). Set the return value with the available signals
      * before wake it up with tfm_event_signal().
      */
-    tfm_event_wake(&partition->runtime_data.signal_evnt,
-                   partition->runtime_data.signals &
-                   partition->runtime_data.signal_mask);
+    tfm_event_wake(&partition->event,
+                   partition->signals_asserted & partition->signals_waiting);
 }
 
 void tfm_spm_psa_notify(uint32_t *args)
@@ -1479,10 +1470,10 @@ void tfm_spm_psa_clear(void)
      * It is a fatal error if the Secure Partition's doorbell signal is not
      * currently asserted.
      */
-    if ((partition->runtime_data.signals & PSA_DOORBELL) == 0) {
+    if ((partition->signals_asserted & PSA_DOORBELL) == 0) {
         tfm_core_panic();
     }
-    partition->runtime_data.signals &= ~PSA_DOORBELL;
+    partition->signals_asserted &= ~PSA_DOORBELL;
 }
 
 void tfm_spm_psa_panic(void)
@@ -1551,11 +1542,11 @@ void tfm_spm_psa_eoi(uint32_t *args)
     }
 
     /* It is a fatal error if passed signal is not currently asserted */
-    if ((partition->runtime_data.signals & irq_signal) == 0) {
+    if ((partition->signals_asserted & irq_signal) == 0) {
         tfm_core_panic();
     }
 
-    partition->runtime_data.signals &= ~irq_signal;
+    partition->signals_asserted &= ~irq_signal;
 
     tfm_spm_hal_clear_pending_irq(irq_line);
     tfm_spm_hal_enable_irq(irq_line);
@@ -1650,7 +1641,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
             stacked_ctx_pos += TFM_BASIC_FP_CONTEXT_WORDS * sizeof(uint32_t);
         }
 
-        if (stacked_ctx_pos != p_cur_sp->runtime_data.sp_thrd.stk_top) {
+        if (stacked_ctx_pos != p_cur_sp->sp_thread.stk_top) {
             tfm_core_panic();
         }
     } else if (p_cur_sp->static_data->partition_id <= 0) {

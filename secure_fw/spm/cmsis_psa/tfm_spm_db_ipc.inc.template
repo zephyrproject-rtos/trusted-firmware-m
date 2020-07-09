@@ -243,7 +243,7 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 static struct partition_t partition_list [] =
 {
-    {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
+    {{'{0}'}}, /* placeholder for Non-secure internal partition */
 
 {% for manifest in manifests %}
     /* -----------------------------------------------------------------------*/
@@ -252,12 +252,7 @@ static struct partition_t partition_list [] =
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-    {{'{'}}
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    {{'},'}}
+    {{'{0}'}},
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}

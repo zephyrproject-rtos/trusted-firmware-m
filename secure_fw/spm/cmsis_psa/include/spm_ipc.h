@@ -78,21 +78,6 @@ struct tfm_msg_body_t {
 };
 
 /**
- * \brief Runtime context information of a partition
- */
-struct spm_partition_runtime_data_t {
-    uint32_t signals;                   /* Service signals had been triggered*/
-    struct tfm_event_t signal_evnt;     /* Event signal                      */
-    struct tfm_core_thread_t sp_thrd;   /* Thread object                     */
-    uint32_t assigned_signals;          /* All assigned signals              */
-    uint32_t signal_mask;               /*
-                                         * Service signal mask passed by
-                                         * psa_wait()
-                                         */
-    struct tfm_list_node_t msg_list;    /* Message list                      */
-};
-
-/**
  * Holds the fields of the partition DB used by the SPM code. The values of
  * these fields are calculated at compile time, and set during initialisation
  * phase.
@@ -116,11 +101,16 @@ struct partition_static_t {
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    struct spm_partition_runtime_data_t runtime_data;
     const struct partition_static_t *static_data;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;
+    struct tfm_core_thread_t sp_thread;
+    struct tfm_event_t event;
+    struct tfm_list_node_t msg_list;
+    uint32_t signals_allowed;
+    uint32_t signals_waiting;
+    uint32_t signals_asserted;
     /** A list of platform_data pointers */
     const struct tfm_spm_partition_platform_data_t **platform_data_list;
     const struct tfm_spm_partition_memory_data_t *memory_data;

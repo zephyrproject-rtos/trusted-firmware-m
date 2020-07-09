@@ -956,174 +956,104 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 /**************************************************************************/
 static struct partition_t partition_list [] =
 {
-    {{0}}, /* placeholder for Non-secure internal partition */
+    {0}, /* placeholder for Non-secure internal partition */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_PS */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_ITS */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_AUDIT_LOG */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_AUDIT_LOG
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_AUDIT_LOG */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_CRYPTO */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_CRYPTO
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_CRYPTO */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_PLATFORM */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_PLATFORM
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_PLATFORM */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_INITIAL_ATTESTATION */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_CORE_TEST */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_CORE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_CORE_TEST_2 */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_CORE */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_SECURE_TEST_PARTITION */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_IPC_SERVICE_TEST */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE_IPC
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_IPC_CLIENT_TEST */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_CORE_IPC
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_IRQ_TEST_1 */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_ENABLE_IRQ_TEST
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_ENABLE_IRQ_TEST */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_PS_TEST */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_PS
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_PS */
 
     /* -----------------------------------------------------------------------*/
     /* - Partition DB record for TFM_SP_SECURE_CLIENT_2 */
     /* -----------------------------------------------------------------------*/
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    {
-    /* Runtime data */
-        .runtime_data             = {0},
-        .static_data              = NULL,
-        .platform_data_list       = NULL,
-    },
+    {0},
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
 };
