@@ -119,6 +119,12 @@ if(BL2)
             tfm_arch
     )
 
+    if (NOT DEFINED MCUBOOT_UPGRADE_STRATEGY)
+        message(FATAL_ERROR "MCUBOOT_UPGRADE_STRATEGY is undefined")
+    else()
+        string(CONCAT UPGRADE_STRATEGY "MCUBOOT_" ${MCUBOOT_UPGRADE_STRATEGY})
+    endif()
+
     target_compile_definitions(platform_bl2
         PUBLIC
             BL2
