@@ -33,6 +33,7 @@ set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot me
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
+set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 
 # Note - If either SIGNATURE_TYPE or KEY_LEN are changed, the entries for KEY_S
 # and KEY_NS will either have to be updated manually or removed from the cache.
@@ -125,7 +126,7 @@ set(TFM_TEST_REPO_PATH                  "DOWNLOAD"  CACHE PATH      "Path to TFM
 set(CMSIS_5_PATH                        "DOWNLOAD"  CACHE PATH      "Path to CMSIS_5 (or DOWNLOAD to fetch automatically")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "b2a1a48"   CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "e8fe6cf"   CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "master"    CACHE STRING    "The version of PSA arch tests to use")

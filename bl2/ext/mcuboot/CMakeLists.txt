@@ -34,6 +34,8 @@ target_sources(bl2
         ${MCUBOOT_PATH}/boot/bootutil/src/swap_move.c
         ${MCUBOOT_PATH}/boot/bootutil/src/swap_misc.c
         ${MCUBOOT_PATH}/boot/bootutil/src/encrypted.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening_delay_rng_mbedtls.c
 )
 
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)

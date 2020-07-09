@@ -25,6 +25,7 @@
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "bootutil/boot_record.h"
+#include "bootutil/fault_injection_hardening.h"
 #include "flash_map_backend/flash_map_backend.h"
 #include "boot_hal.h"
 #include "uart_stdout.h"
@@ -83,7 +84,7 @@ static void do_boot(struct boot_rsp *rsp)
 int main(void)
 {
     struct boot_rsp rsp;
-    int rc;
+    fih_int fih_rc = FIH_FAILURE;
 
     /* Initialise the mbedtls static memory allocator so that mbedtls allocates
      * memory from the provided static buffer instead of from the heap.
@@ -97,24 +98,21 @@ int main(void)
     /* Perform platform specific initialization */
     if (boot_platform_init() != 0) {
         BOOT_LOG_ERR("Platform init failed");
-        while (1)
-            ;
+        FIH_PANIC;
     }
 
     BOOT_LOG_INF("Starting bootloader");
 
-    rc = boot_nv_security_counter_init();
-    if (rc != 0) {
+    FIH_CALL(boot_nv_security_counter_init, fih_rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BOOT_LOG_ERR("Error while initializing the security counter");
-        while (1)
-            ;
+        FIH_PANIC;
     }
 
-    rc = boot_go(&rsp);
-    if (rc != 0) {
+    FIH_CALL(boot_go, fih_rc, &rsp);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BOOT_LOG_ERR("Unable to find bootable image");
-        while (1)
-            ;
+        FIH_PANIC;
     }
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
@@ -123,6 +121,5 @@ int main(void)
     do_boot(&rsp);
 
     BOOT_LOG_ERR("Never should get here");
-    while (1)
-        ;
+    FIH_PANIC;
 }
