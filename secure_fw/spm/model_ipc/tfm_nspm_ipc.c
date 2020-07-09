@@ -11,13 +11,11 @@
 #include "tfm_nspm.h"
 #include "utilities.h"
 #include "tfm_internal.h"
+#include "ext/tz_context.h"
 #include "log/tfm_assert.h"
 #include "log/tfm_log.h"
 
 #define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
-
-typedef uint32_t TZ_ModuleId_t;
-typedef uint32_t TZ_MemoryId_t;
 
 int32_t tfm_nspm_get_current_client_id(void)
 {

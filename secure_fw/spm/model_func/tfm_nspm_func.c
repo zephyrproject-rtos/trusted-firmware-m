@@ -13,6 +13,7 @@
 #include "tfm_api.h"
 #include "tfm_internal.h"
 #include "tfm_nspm.h"
+#include "ext/tz_context.h"
 
 #ifndef TFM_MAX_NS_THREAD_COUNT
 #define TFM_MAX_NS_THREAD_COUNT 8
@@ -23,9 +24,6 @@
 
 #define INVALID_NS_CLIENT_IDX (-1)
 #define DEFAULT_NS_CLIENT_IDX   0
-
-typedef uint32_t TZ_ModuleId_t;
-typedef uint32_t TZ_MemoryId_t;
 
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
 static struct ns_client_list_t {

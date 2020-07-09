@@ -374,6 +374,9 @@ function(set_up_secure_fw_build)
 						${INTERFACE_INC_DIR}/tfm_ns_svc.h
 			DESTINATION ${EXPORT_INC_DIR})
 
+	install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
+			DESTINATION ${EXPORT_INC_DIR}/ext)
+
 	if (TFM_MULTI_CORE_TOPOLOGY)
 		install(FILES       ${INTERFACE_INC_DIR}/tfm_multi_core_api.h
 							${INTERFACE_INC_DIR}/tfm_ns_mailbox.h
