@@ -23,9 +23,6 @@ donotedit_warning = \
                     "WARNING: This is an auto-generated file. Do not edit!" + \
                     " ***********/"
 
-DEFAULT_MANIFEST_LIST = os.path.join('tools', 'tfm_manifest_list.yaml')
-DEFAULT_GEN_FILE_LIST = os.path.join('tools', 'tfm_generated_file_list.yaml')
-
 OUT_DIR = None # The root directory that files are generated to
 
 class TemplateLoader(BaseLoader):
@@ -53,17 +50,15 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def process_manifest(manifest_list_file, append):
+def process_manifest(manifest_list_files):
     """
     Parse the input manifest, generate the data base for genereated files
     and generate manifest header files.
 
     Parameters
     ----------
-    manifest_list_file:
-        The manifest list to parse.
-    append:
-        To append the manifest to original or not.
+    manifest_list_files:
+        The manifest lists to parse.
 
     Returns
     -------
@@ -74,15 +69,10 @@ def process_manifest(manifest_list_file, append):
     manifest_header_list = []
     manifest_list = []
 
-    if append:
-        # Load the default manifest first
-        with open(DEFAULT_MANIFEST_LIST) as default_manifest_list_yaml_file:
-            manifest_dic = yaml.safe_load(default_manifest_list_yaml_file)
+    for f in manifest_list_files:
+        with open(f) as manifest_list_yaml_file:
+            manifest_dic = yaml.safe_load(manifest_list_yaml_file)
             manifest_list.extend(manifest_dic["manifest_list"])
-
-    with open(manifest_list_file) as manifest_list_yaml_file:
-        manifest_dic = yaml.safe_load(manifest_list_yaml_file)
-        manifest_list.extend(manifest_dic["manifest_list"])
 
     templatefile_name = 'secure_fw/partitions/manifestfilename.template'
     template = ENV.get_template(templatefile_name)
@@ -125,29 +115,21 @@ def process_manifest(manifest_list_file, append):
 
     return manifest_header_list, db
 
-def gen_files(context, gen_file_list, append):
+def gen_files(context, gen_file_lists):
     """
     Generate files according to the gen_file_list
 
     Parameters
     ----------
-    gen_file_list:
-        The list of files to generate
-    append:
-        To append the manifest to original or not
+    gen_file_lists:
+        The lists of files to generate
     """
     file_list = []
 
-    if append:
-        # read default file list first
-        with open(DEFAULT_GEN_FILE_LIST) as file_list_yaml_file:
+    for f in gen_file_lists:
+        with open(f) as file_list_yaml_file:
             file_list_yaml = yaml.safe_load(file_list_yaml_file)
             file_list.extend(file_list_yaml["file_list"])
-
-    with open(gen_file_list) as file_list_yaml_file:
-        # read list of files that need to be generated from templates using db
-        file_list_yaml = yaml.safe_load(file_list_yaml_file)
-        file_list.extend(file_list_yaml["file_list"])
 
     print("Start to generate file from the generated list:")
     for file in file_list:
@@ -181,40 +163,22 @@ def parse_args():
                         , help='The root directory for generated files, the default is TF-M root folder.')
 
     parser.add_argument('-m', '--manifest'
-                        , nargs='*'
+                        , nargs='+'
                         , dest='manifest_args'
-                        , required=False
-                        , default=[]
+                        , required=True
                         , metavar='manifest'
-                        , help='The secure partition manifest list file to parse, the default is '+ DEFAULT_MANIFEST_LIST + '. \
-                                Or the manifest can be append to the default one by explicitly \"append\" it:\
-                                -m manifest_to_append append')
+                        , help='A set of secure partition manifest lists to parse')
 
     parser.add_argument('-f', '--file-list'
-                        , nargs='*'
+                        , nargs='+'
                         , dest='gen_file_args'
-                        , required=False
-                        , default=[]
+                        , required=True
                         , metavar='file-list'
-                        , help='The file descripes the file list to generate, the default is ' + DEFAULT_GEN_FILE_LIST + '. \
-                                Or the file list can be append to the default one by explicitly \"append\" it:\
-                                -f files_to_append append')
+                        , help='These files descripe the file list to generate')
 
     args = parser.parse_args()
     manifest_args = args.manifest_args
     gen_file_args = args.gen_file_args
-
-    if len(manifest_args) > 2 or len(gen_file_args) > 2:
-        parser.print_help()
-        exit(1)
-
-    if len(manifest_args) == 2 and (manifest_args[1] != 'append' and manifest_args[1] != ''):
-        parser.print_help()
-        exit(1)
-
-    if len(gen_file_args) == 2 and (gen_file_args[1] != 'append' and gen_file_args[1] != ''):
-        parser.print_help()
-        exit(1)
 
     return args
 
@@ -240,14 +204,6 @@ def main():
     manifest_args = args.manifest_args
     gen_file_args = args.gen_file_args
     OUT_DIR = args.outdir
-    append_manifest = False
-    append_gen_file = False
-
-    if len(manifest_args) == 2 and manifest_args[1] == 'append':
-        append_manifest = True
-
-    if len(gen_file_args) == 2 and gen_file_args[1] == 'append':
-        append_gen_file = True
 
     if len(manifest_args) == 0:
         manifest_list = DEFAULT_MANIFEST_LIST
@@ -258,11 +214,11 @@ def main():
         it will be various to different execution path if converted to absolute path.
         The same for gen_file_list
         """
-        manifest_list = os.path.abspath(args.manifest_args[0])
+        manifest_list = [os.path.abspath(x) for x in args.manifest_args]
     if len(gen_file_args) == 0:
         gen_file_list = DEFAULT_GEN_FILE_LIST
     else:
-        gen_file_list = os.path.abspath(args.gen_file_args[0])
+        gen_file_list = [os.path.abspath(x) for x in args.gen_file_args]
 
     # Arguments could be relative path.
     # Convert to absolute path as we are going to change diretory later
@@ -278,7 +234,7 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    manifest_header_list, db = process_manifest(manifest_list, append_manifest)
+    manifest_header_list, db = process_manifest(manifest_list)
 
     utilities = {}
     context = {}
@@ -289,7 +245,7 @@ def main():
     context['manifests'] = db
     context['utilities'] = utilities
 
-    gen_files(context, gen_file_list, append_gen_file)
+    gen_files(context, gen_file_list)
 
 if __name__ == "__main__":
     main()

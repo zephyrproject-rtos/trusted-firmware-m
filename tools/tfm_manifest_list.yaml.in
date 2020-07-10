@@ -22,7 +22,7 @@
       "pid": 256,
       "linker_pattern": {
         "library_list": [
-           "*tfm_storage*"
+           "*tfm_partition_ps.*"
          ],
          "object_list": [
            "*test_ps_nv_counters.*",
@@ -40,7 +40,7 @@
       "pid": 257,
       "linker_pattern": {
         "library_list": [
-           "*tfm_internal_trusted_storage*"
+           "*tfm_partition_its.*"
          ]
       }
     },
@@ -55,7 +55,7 @@
       "pid": 258,
       "linker_pattern": {
         "library_list": [
-           "*tfm_audit*"
+           "*tfm_partition_audit.*"
          ]
       }
     },
@@ -70,7 +70,7 @@
       "pid": 259,
       "linker_pattern": {
         "library_list": [
-           "*tfm_crypto*"
+           "*tfm_partition_crypto.*"
          ]
       }
     },
@@ -85,7 +85,7 @@
       "pid": 260,
       "linker_pattern": {
         "library_list": [
-           "*tfm_platform*"
+           "*tfm_partition_platform.*"
          ]
       }
     },
@@ -100,14 +100,14 @@
       "pid": 261,
       "linker_pattern": {
         "library_list": [
-           "*tfm_attest*"
+           "*tfm_partition_attestation.*"
          ]
       }
     },
     {
       "name": "TFM Core Test Service",
       "short_name": "TFM_SP_CORE_TEST",
-      "manifest": "../tf-m-tests/test/test_services/tfm_core_test/tfm_test_core.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test/tfm_test_core.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
@@ -122,7 +122,7 @@
     {
       "name": "TFM Core Test Service 2",
       "short_name": "TFM_SP_CORE_TEST_2",
-      "manifest": "../tf-m-tests/test/test_services/tfm_core_test_2/tfm_test_core_2.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test_2/tfm_test_core_2.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
@@ -137,7 +137,7 @@
     {
       "name": "TFM Secure Client Service",
       "short_name": "TFM_SP_SECURE_TEST_PARTITION",
-      "manifest": "../tf-m-tests/test/test_services/tfm_secure_client_service/tfm_test_client_service.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_secure_client_service/tfm_test_client_service.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
@@ -160,7 +160,7 @@
     {
       "name": "TFM IPC Service Test",
       "short_name": "TFM_SP_IPC_SERVICE_TEST",
-      "manifest": "../tf-m-tests/test/test_services/tfm_ipc_service/tfm_ipc_service_partition.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_service/tfm_ipc_service_partition.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
@@ -175,7 +175,7 @@
     {
       "name": "TFM IPC Client Service",
       "short_name": "TFM_SP_IPC_CLIENT_TEST",
-      "manifest": "../tf-m-tests/test/test_services/tfm_ipc_client/tfm_ipc_client_partition.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_client/tfm_ipc_client_partition.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
@@ -190,7 +190,7 @@
     {
       "name": "TFM IRQ Test Service 1",
       "short_name": "TFM_IRQ_TEST_1",
-      "manifest": "../tf-m-tests/test/test_services/tfm_irq_test_service_1/tfm_irq_test_service_1.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_irq_test_service_1/tfm_irq_test_service_1.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_ENABLE_IRQ_TEST",
       "version_major": 0,
@@ -206,7 +206,7 @@
     {
       "name": "TF-M PS Test Service",
       "short_name": "TFM_SP_PS_TEST",
-      "manifest": "../tf-m-tests/test/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_PS",
       "version_major": 0,
@@ -221,7 +221,7 @@
     {
       "name": "TF-M Secure Client 2 Service",
       "short_name": "TFM_SP_SECURE_CLIENT_2",
-      "manifest": "../tf-m-tests/test/test_services/tfm_secure_client_2/tfm_secure_client_2.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_secure_client_2/tfm_secure_client_2.yaml",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
