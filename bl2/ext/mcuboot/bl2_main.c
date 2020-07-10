@@ -26,7 +26,7 @@
 #include "bootutil/image.h"
 #include "bootutil/bootutil.h"
 #include "flash_map_backend/flash_map_backend.h"
-#include "boot_record.h"
+#include "bootutil/boot_record.h"
 #include "security_cnt.h"
 #include "boot_hal.h"
 #include "region.h"

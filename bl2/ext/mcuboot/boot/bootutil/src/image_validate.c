@@ -46,7 +46,7 @@
 #include "bootutil_priv.h"
 
 #ifdef MCUBOOT_HW_KEY
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_crypto_keys.h"
 #endif
 
 /*

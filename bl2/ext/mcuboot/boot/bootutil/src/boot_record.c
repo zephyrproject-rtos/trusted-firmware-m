@@ -6,11 +6,11 @@
  */
 
 #include "mcuboot_config/mcuboot_config.h"
-#include "boot_record.h"
+#include "bootutil/boot_record.h"
 #include "region_defs.h"
 #include "tfm_boot_status.h"
 #include "target.h"
-#include "../ext/mcuboot/bootutil/src/bootutil_priv.h"
+#include "bootutil_priv.h"
 #include "bootutil/image.h"
 #include "bootutil/sha256.h"
 #include "flash_map/flash_map.h"

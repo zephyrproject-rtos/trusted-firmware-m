@@ -11,9 +11,15 @@ import re
 import os
 import sys
 import click
+
+# Add the cwd to the path so that if there is a version of imgtool in there then
+# it gets used over the system imgtool. Used so that imgtool from upstream
+# mcuboot is preferred over system imgtool
+cwd = os.getcwd()
+sys.path = [cwd] + sys.path
 import imgtool
 import imgtool.main
-# Import macro_parser script
+
 parser_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(parser_path)
 import macro_parser
@@ -86,9 +92,9 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
     slot_size = macro_parser.evaluate_macro(layout, sign_bin_size_re, 0, 1)
     load_addr = macro_parser.evaluate_macro(layout, load_addr_re, 0, 1)
 
-    if "_s.c" in layout:
+    if "_s" in layout:
         boot_record = "SPE"
-    elif "_ns.c" in layout:
+    elif "_ns" in layout:
         boot_record = "NSPE"
     else:
         boot_record = "NSPE_SPE"

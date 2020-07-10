@@ -27,7 +27,7 @@
 #include <stddef.h>
 #include <bootutil/sign_key.h>
 #include "mcuboot_config/mcuboot_config.h"
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "tfm_plat_crypto_keys.h"
 
 #ifdef MCUBOOT_ENC_IMAGES
 unsigned char enc_priv_key[] = {
