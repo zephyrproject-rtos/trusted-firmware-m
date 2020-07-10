@@ -272,7 +272,6 @@ function(set_up_app_build)
 	if(NOT DEFINED RTX_LIB_PATH)
 		message(FATAL_ERROR "ERROR: Incomplete Configuration: RTX_LIB_PATH is not defined.")
 	endif()
-	target_link_libraries(${EXE_NAME} "${RTX_LIB_PATH}")
 
 	#Add the PSA API compliance test libraries
 	if(PSA_API_TEST_NS)
@@ -358,6 +357,8 @@ function(set_up_app_build)
 		#Ensure library is built first.
 		add_dependencies(${EXE_NAME} tfm_non_secure_tests)
 	endif()
+
+	target_link_libraries(${EXE_NAME} "${RTX_LIB_PATH}")
 
 	#Ensure secure_fw is built before our executable.
 	add_dependencies(${EXE_NAME} ${S_BIN})

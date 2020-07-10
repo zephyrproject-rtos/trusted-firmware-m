@@ -182,6 +182,9 @@ else ()
 	#Build the non-secure library
 	set(CMAKE_STATIC_LIBRARY_PREFIX_C "lib")
 	add_library(tfm_non_secure_tests STATIC ${ALL_SRC_C} ${ALL_SRC_C_NS})
+
+	embedded_target_include_directories(TARGET tfm_non_secure_tests PATH ${CMSIS_DIR}/RTOS2/Include ABSOLUTE APPEND)
+
 	if (ENABLE_ATTESTATION_SERVICE_TESTS OR ENABLE_T_COSE_TESTS)
 		target_sources(tfm_non_secure_tests PRIVATE $<TARGET_OBJECTS:tfm_t_cose_verify> PRIVATE $<TARGET_OBJECTS:tfm_t_cose_sign>)
 	endif()
