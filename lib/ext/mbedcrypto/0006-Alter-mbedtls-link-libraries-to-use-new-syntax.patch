@@ -1,0 +1,35 @@
+From d5114f2cff5551726f5a6e86000f2eaf603021a9 Mon Sep 17 00:00:00 2001
+From: Raef Coles <raef.coles@arm.com>
+Date: Wed, 2 Sep 2020 10:59:00 +0100
+Subject: [PATCH 6/6] Alter mbedtls link libraries to use new syntax
+
+Signed-off-by: Raef Coles <raef.coles@arm.com>
+---
+ library/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/library/CMakeLists.txt b/library/CMakeLists.txt
+index 36d6c999a..45de8b785 100644
+--- a/library/CMakeLists.txt
++++ b/library/CMakeLists.txt
+@@ -202,7 +202,7 @@ if(USE_STATIC_MBEDTLS_LIBRARY)
+ 
+     add_library(${mbedtls_static_target} STATIC ${src_tls})
+     set_target_properties(${mbedtls_static_target} PROPERTIES OUTPUT_NAME mbedtls)
+-    target_link_libraries(${mbedtls_static_target} ${libs} ${mbedx509_static_target})
++    target_link_libraries(${mbedtls_static_target} PUBLIC ${libs} ${mbedx509_static_target})
+ 
+     if(INSTALL_MBEDTLS)
+         install(TARGETS ${mbedtls_static_target} ${mbedx509_static_target} ${mbedcrypto_static_target}
+@@ -229,7 +229,7 @@ if(USE_SHARED_MBEDTLS_LIBRARY)
+ 
+     add_library(${mbedtls_target} SHARED ${src_tls})
+     set_target_properties(${mbedtls_target} PROPERTIES VERSION 2.23.0 SOVERSION 13)
+-    target_link_libraries(${mbedtls_target} ${libs} ${mbedx509_target})
++    target_link_libraries(${mbedtls_target} PUBLIC ${libs} ${mbedx509_target})
+     target_include_directories(${mbedtls_target}
+         PUBLIC ${${mbedtls_target}_DIR}/include/)
+ 
+-- 
+2.20.1
+

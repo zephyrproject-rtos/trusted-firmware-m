@@ -1,0 +1,44 @@
+From 53f18f73c9cee3253c19f67ad0753315eea6a688 Mon Sep 17 00:00:00 2001
+From: Raef Coles <raef.coles@arm.com>
+Date: Mon, 15 Jun 2020 10:16:44 +0100
+Subject: [PATCH 2/6] Make api documentation target optional
+
+Adds a cmake variable BUILD_API_DOCS which controls whether the cmake
+target for the docs will be generated. This can be used to avoid cmake
+target clashes or to otherwise customise the cmake build.
+
+Signed-off-by: Raef Coles <raef.coles@arm.com>
+---
+ CMakeLists.txt | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1f675c1ee..5d970b9fd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,7 @@ option(USE_PKCS11_HELPER_LIBRARY "Build mbed TLS with the pkcs11-helper library.
+ option(ENABLE_ZLIB_SUPPORT "Build mbed TLS with zlib library." OFF)
+ 
+ option(ENABLE_PROGRAMS "Build mbed TLS programs." ON)
++option(ENABLE_DOCS "Build api documentation." ON)
+ 
+ option(UNSAFE_BUILD "Allow unsafe builds. These builds ARE NOT SECURE." OFF)
+ option(MBEDTLS_FATAL_WARNINGS "Compiler warnings treated as errors" ON)
+@@ -229,9 +230,11 @@ if(ENABLE_PROGRAMS)
+     add_subdirectory(programs)
+ endif()
+ 
+-ADD_CUSTOM_TARGET(apidoc
+-    COMMAND doxygen mbedtls.doxyfile
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
++if(ENABLE_DOCS)
++    ADD_CUSTOM_TARGET(apidoc
++        COMMAND doxygen mbedtls.doxyfile
++        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doxygen)
++endif()
+ 
+ if(ENABLE_TESTING)
+     enable_testing()
+-- 
+2.20.1
+
