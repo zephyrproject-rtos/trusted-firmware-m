@@ -7,7 +7,7 @@
  */
 
 #include "its_flash_nand.h"
-#include "Driver_Flash.h"
+#include "driver/Driver_Flash.h"
 #include "tfm_memory_utils.h"
 
 static uint32_t buf_block_id = ITS_BLOCK_INVALID_ID;

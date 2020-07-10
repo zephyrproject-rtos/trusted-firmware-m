@@ -1,44 +1,63 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.7)
-
-#Tell cmake where our modules can be found
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../../cmake)
-
-###Some project global settings
-set (AUDIT_LOGGING_DIR "${CMAKE_CURRENT_LIST_DIR}")
-get_filename_component(TFM_ROOT_DIR "${AUDIT_LOGGING_DIR}/../../.." ABSOLUTE)
-
-#Include common stuff to control cmake.
-include("Common/BuildSys")
-
-#Start an embedded project.
-embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
-project(tfm_audit LANGUAGES ASM C)
-embedded_project_fixup()
-
-###Get the definition of what files we need to build
-include(CMakeLists.inc)
-
-if (NOT DEFINED TFM_LVL)
-	message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
+if (NOT TFM_PARTITION_AUDIT_LOG)
+    return()
 endif()
 
-#Specify what we build (for the audit logging service, build as a static library)
-add_library(tfm_audit STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
-embedded_set_target_compile_defines(TARGET tfm_audit LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL})
-
-if (DEFINED CMSE_FLAGS)
-	embedded_set_target_compile_flags(TARGET tfm_audit LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
+#TODO AUDIT should support IPC
+if(TFM_PSA_API)
+    return()
 endif()
 
-#Set common compiler and linker flags
-config_setting_shared_compiler_flags(tfm_audit)
-config_setting_shared_linker_flags(tfm_audit)
+cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0079 NEW)
 
-embedded_project_end(tfm_audit)
+add_library(tfm_partition_audit STATIC)
+
+target_sources(tfm_partition_audit
+    PRIVATE
+        audit_core.c
+)
+
+target_include_directories(tfm_partition_audit
+    PUBLIC
+        .
+)
+
+target_link_libraries(tfm_partition_audit
+    PRIVATE 
+        platform_s
+        tfm_secure_api
+        psa_interface
+)
+
+############################ Secure API ########################################
+
+target_sources(tfm_secure_api
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_audit_secure_api.c
+)
+
+# The veneers give warnings about not being properly declared so they get hidden
+# to not overshadow _real_ warnings.
+set_source_files_properties(tfm_audit_secure_api.c
+    PROPERTIES
+        COMPILE_FLAGS -Wno-implicit-function-declaration
+)
+
+############################ Partition Defs ####################################
+
+target_link_libraries(tfm_partitions
+    INTERFACE
+        tfm_partition_audit
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_AUDIT_LOG
+)

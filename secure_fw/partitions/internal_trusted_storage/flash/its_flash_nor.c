@@ -7,7 +7,7 @@
  */
 
 #include "its_flash_nor.h"
-#include "Driver_Flash.h"
+#include "driver/Driver_Flash.h"
 
 /**
  * \brief Gets physical address of the given block ID.
