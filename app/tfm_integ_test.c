@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,14 +34,14 @@
         enum tfm_status_e res = (enum tfm_status_e) fn(__VA_ARGS__); \
         switch(res) { \
             case TFM_SUCCESS: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") successful!");\
+                TEST_LOG("Secure call to " #fn "(" #__VA_ARGS__") successful!");\
                 break; \
             case TFM_ERROR_SECURE_DOMAIN_LOCKED: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                TEST_LOG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
                                                            "S domain locked!");\
                 break; \
             default: \
-                LOG_MSG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
+                TEST_LOG("Secure call to " #fn "(" #__VA_ARGS__") failed, " \
                                                                    "generic!");\
         } \
     } while(0)
@@ -87,7 +87,7 @@ void secure_decrement_ns_lock_1(void)
                           SPM_CORE_TEST_BLOCK_VERSION,
                           NULL, 0, NULL, 0);
     if (err != PSA_SUCCESS) {
-        LOG_MSG("Secure call to sfn block failed, generic!");
+        TEST_LOG("Secure call to sfn block failed, generic!");
     }
 #endif
 }
@@ -110,7 +110,7 @@ void secure_decrement_ns_lock_2(void)
                           SPM_CORE_TEST_BLOCK_VERSION,
                           NULL, 0, NULL, 0);
     if (err != PSA_SUCCESS) {
-        LOG_MSG("Secure call to sfn block failed, generic!");
+        TEST_LOG("Secure call to sfn block failed, generic!");
     }
 #endif
 }
@@ -200,7 +200,7 @@ static void tfm_service_request(void(*fn)(void),
 #define LOG_MSG_THREAD(MSG_THREAD) \
   do { \
       sprintf(buffer,"%s [%s]", MSG_THREAD, osThreadGetName(osThreadGetId())); \
-      LOG_MSG(buffer); \
+      TEST_LOG(buffer); \
   } \
   while(0)
 
@@ -274,18 +274,18 @@ static void mid_task(void *argument)
     thread_pri_state = osThreadGetState(thread_id_pri);
 
     if (thread_pri_state == osThreadBlocked) {
-        LOG_MSG("Running [mid_task] while [pri_task] is blocked");
+        TEST_LOG("Running [mid_task] while [pri_task] is blocked");
     } else if (thread_pri_state == osThreadTerminated) {
-        LOG_MSG("Running [mid_task] while [pri_task] is terminated");
+        TEST_LOG("Running [mid_task] while [pri_task] is terminated");
     } else {
-        LOG_MSG("Running [mid_task]");
+        TEST_LOG("Running [mid_task]");
     }
 
     /* Do non TFM related, non blocking, operations */
     for (idx=0; idx<0x3ffffff; idx++) {
     }
 
-    LOG_MSG("Exiting [mid_task]");
+    TEST_LOG("Exiting [mid_task]");
 
     osThreadExit();
 }
@@ -334,27 +334,27 @@ static void seq_task(void *argument)
     test_type = *((enum test_type *)argument);
 
     if (test_type == TEST_TYPE_1) {
-        LOG_MSG("Scenario 1 - Sequential");
+        TEST_LOG("Scenario 1 - Sequential");
     } else if (test_type == TEST_TYPE_2) {
-        LOG_MSG("Scenario 2 - Priority");
+        TEST_LOG("Scenario 2 - Priority");
         thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
     } else if (test_type == TEST_TYPE_3) {
-        LOG_MSG("Scenario 3 - Priority inversion");
+        TEST_LOG("Scenario 3 - Priority inversion");
         thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
         thread_id_mid = osThreadNew(mid_task, &thread_id, &tattr_mid);
     } else if (test_type == TEST_TYPE_4) {
-        LOG_MSG("Scenario 4 - non-NS lock");
+        TEST_LOG("Scenario 4 - non-NS lock");
         ns_lock_opt.use_ns_lock = false;
     } else if (test_type == TEST_TYPE_5) {
-        LOG_MSG("Scenario 5 - non-NS lock, core locked");
+        TEST_LOG("Scenario 5 - non-NS lock, core locked");
         ns_lock_opt_pri.use_ns_lock = false;
         thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
     } else if (test_type == TEST_TYPE_6) {
-        LOG_MSG("Scenario 6 - Core prioritization effects on NS world");
+        TEST_LOG("Scenario 6 - Core prioritization effects on NS world");
         ns_lock_opt_pri.timeout = 0x10000; /* timed_wait for NS lock */
         thread_id = osThreadNew(pri_task, &ns_lock_opt_pri, &tattr_pri);
     } else {
-        LOG_MSG("Scenario not supported");
+        TEST_LOG("Scenario not supported");
         osThreadExit();
     }
 
@@ -362,22 +362,22 @@ static void seq_task(void *argument)
     tfm_service_request(secure_decrement_ns_lock_1, &ns_lock_opt);
 
     if (test_type == TEST_TYPE_1) {
-        LOG_MSG("Scenario 1 - test finished\n");
+        TEST_LOG("Scenario 1 - test finished\n");
     } else if (test_type == TEST_TYPE_2) {
         osThreadJoin(thread_id);
-        LOG_MSG("Scenario 2 - test finished\n");
+        TEST_LOG("Scenario 2 - test finished\n");
     } else if (test_type == TEST_TYPE_3) {
         osThreadJoin(thread_id);
         osThreadJoin(thread_id_mid);
-        LOG_MSG("Scenario 3 - test finished\n");
+        TEST_LOG("Scenario 3 - test finished\n");
     } else if (test_type == TEST_TYPE_4) {
-        LOG_MSG("Scenario 4 - test finished\n");
+        TEST_LOG("Scenario 4 - test finished\n");
     } else if (test_type == TEST_TYPE_5) {
         osThreadJoin(thread_id);
-        LOG_MSG("Scenario 5 - test finished\n");
+        TEST_LOG("Scenario 5 - test finished\n");
     } else if (test_type == TEST_TYPE_6) {
         osThreadJoin(thread_id);
-        LOG_MSG("Scenario 6 - test finished\n");
+        TEST_LOG("Scenario 6 - test finished\n");
     }
 
     osThreadExit();

@@ -9,6 +9,7 @@
 #include "tfm_ss_core_test.h"
 #include "tfm_api.h"
 #include "test/test_services/tfm_core_test/core_test_defs.h"
+#include "test/framework/test_framework.h"
 #include "tfm_veneers.h"
 #include "tfm_secure_api.h"
 #include "secure_fw/include/tfm/tfm_spm_services.h"
@@ -359,9 +360,9 @@ static void wait_button_event(void)
 
 psa_status_t test_wait_button(void)
 {
-    LOG_MSG("Inside the service, press button to continue...");
+    TEST_LOG("Inside the service, press button to continue...");
     wait_button_event();
-    LOG_MSG("Leaving the service");
+    TEST_LOG("Leaving the service");
     return CORE_TEST_ERRNO_SUCCESS;
 }
 #endif /* defined(CORE_TEST_INTERACTIVE) */
