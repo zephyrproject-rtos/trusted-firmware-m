@@ -130,18 +130,11 @@ if (NOT ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "OVERWRITE_ONLY")
   message(WARNING "OVERWRITE ONLY upgrade strategy is preferred on target '${TARGET_PLATFORM}'. Your choice was overriden.")
   set(MCUBOOT_UPGRADE_STRATEGY "OVERWRITE_ONLY")
 endif()
-#install files reuqired for flashing and performing regression
+#install files required for flashing and performing regression
 install(FILES
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool.py
+        ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/stm_tool.py
         ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/macro_parser.py
         DESTINATION ./scripts/ )
-install(FILES
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool_lib/image.py
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool_lib/boot_record.py
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool_lib/keys.py
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool_lib/version.py
-        ${PLATFORM_DIR}/../../bl2/ext/mcuboot/scripts/imgtool_lib/__init__.py
-        DESTINATION ./scripts/imgtool_lib )
 install(FILES ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/stm32l562e_dk/flash_layout.h
         ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/stm32l562e_dk/region_defs.h
         DESTINATION ./ )

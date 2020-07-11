@@ -25,7 +25,7 @@ updatesh=$projectdir/TFM_UPDATE.sh
 basedir=$projectdir
 echo preprocess bl2 file
 arm-none-eabi-gcc -E -P -xc -I$projectdir -o$preprocess_bl2_file $bl2_file_to_preprocess
-imgtool=$basedir"/scripts/imgtool.py"
+stm_tool=$basedir"/scripts/stm_tool.py"
 #determine/check python version command
 cmd="python3"
 $cmd --version  &> /dev/null
@@ -45,7 +45,7 @@ if [ $ret != 0 ]; then
   fi
 fi
 
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b secbootadd0 -m  RE_BL2_BOOT_ADDRESS  -d 0x80  -s 0 "$regressionsh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b secbootadd0 -m  RE_BL2_BOOT_ADDRESS  -d 0x80  -s 0 "$regressionsh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -54,7 +54,7 @@ echo $command
 exit 1
 fi
 
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_PERSO_ADDRESS -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_PERSO_ADDRESS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -63,7 +63,7 @@ echo $command
 exit 1
 fi
 
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b slot0 -m  RE_IMAGE_FLASH_ADDRESS_SECURE -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot0 -m  RE_IMAGE_FLASH_ADDRESS_SECURE -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -73,7 +73,7 @@ exit 1
 fi
 
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b slot1 -m  RE_IMAGE_FLASH_ADDRESS_NON_SECURE -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot1 -m  RE_IMAGE_FLASH_ADDRESS_NON_SECURE -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -82,7 +82,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b slot2 -m  RE_IMAGE_FLASH_SECURE_UPDATE -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot2 -m  RE_IMAGE_FLASH_SECURE_UPDATE -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -91,7 +91,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b slot3 -m  RE_IMAGE_FLASH_NON_SECURE_UPDATE -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot3 -m  RE_IMAGE_FLASH_NON_SECURE_UPDATE -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -100,7 +100,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b scratch -m  RE_IMAGE_FLASH_SCRATCH -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b scratch -m  RE_IMAGE_FLASH_SCRATCH -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -109,7 +109,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b nvcounter -m  RE_IMAGE_FLASH_NV_COUNTERS -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b nvcounter -m  RE_IMAGE_FLASH_NV_COUNTERS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -118,7 +118,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b sst -m  RE_IMAGE_FLASH_NV_PS -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b sst -m  RE_IMAGE_FLASH_NV_PS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -127,7 +127,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b its -m  RE_IMAGE_FLASH_NV_ITS -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b its -m  RE_IMAGE_FLASH_NV_ITS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -136,7 +136,7 @@ echo $command
 exit 1
 fi
 echo $updatebat" updated"
-command=$cmd" "$imgtool" flash --layout "$preprocess_bl2_file" -b unused -m  RE_IMAGE_FLASH_UNUSED -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b unused -m  RE_IMAGE_FLASH_UNUSED -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
