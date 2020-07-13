@@ -185,6 +185,164 @@ API Definition for TF-M SPM
 ***************************
 This section describes the APIs defined for :term:`TF-M` :term:`SPM`.
 
+Isolation API
+=============
+The :term:`PSA-FF-M` defines three isolation levels and a memory access rule to
+provide diverse levels of securitiy. The isolation API provides the functions to
+implement these requirements.
+
+Memory Access Attributes
+------------------------
+The memory access attributes are encoded as bit fields, you can logic OR them to
+have a combination of the atrributes, for example
+``TFM_HAL_MEM_ATTR_UNPRIVILEGED | TFM_HAL_MEM_ATTR_READABLE`` is unprivileged
+readable. The data type is `uint32_t`.
+
+TFM_HAL_MEM_ATTR_EXECUTABLE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The memory is executable.
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_EXECUTABLE (1UL << 0)
+
+TFM_HAL_MEM_ATTR_READABLE
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The memory is readable.
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_READABLE (1UL << 1)
+
+TFM_HAL_MEM_ATTR_WRITABLE
+^^^^^^^^^^^^^^^^^^^^^^^^^
+The memory is writable.
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_WRITABLE (1UL << 2)
+
+TFM_HAL_MEM_ATTR_UNPRIVILEGED
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The memory is unprivileged mode accessible.
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_UNPRIVILEGED (1UL << 3)
+
+TFM_HAL_MEM_ATTR_DEVICE
+^^^^^^^^^^^^^^^^^^^^^^^
+The memory is a MMIO device.
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_DEVICE (1UL << 4)
+
+TFM_HAL_MEM_ATTR_NS
+^^^^^^^^^^^^^^^^^^^
+The memory is accessible from :term:`NSPE`
+
+.. code-block:: c
+
+  #define TFM_HAL_MEM_ATTR_NS (1UL << 5)
+
+APIs
+----
+tfm_hal_set_up_static_boundaries()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+
+**Description**
+
+This API sets up the static isolation boundaries which are constant throughout
+the runtime of the system.
+
+The boundaries include:
+
+- The SPE boundary between the :term:`SPE` and the :term:`NSPE`
+- The PSA RoT isolation boundary between the PSA Root of Trust and the
+  Application Root of Trust which is for isolation level 2 and 3 only.
+
+Please refer to the :term:`PSA-FF-M` for the definitions of the isolation
+boundaries.
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - the isolation boundaries have been set up.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to set up the isolation boundaries.
+
+tfm_hal_mpu_update_partition_boundary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_mpu_update_partition_boundary(uintptr_t start,
+                                                              uintptr_t end);
+
+**Description**
+
+This API updates the partition isolation boundary for isolation level 3.
+Inside the partition isolation boundary is the private data of the running
+Secure Partition.
+This boundary is updated dynamically when :term:`SPM` switches Partitions in
+isolation level 3.
+
+The access permissions of the boundary is all privileged mode read-write.
+
+Platforms decide which :term:`MPU` region the paritition boundary uses.
+
+**Parameter**
+
+- ``start`` - start address of the partition boundary.
+- ``end`` - end address of the partition boundary.
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - the isolation boundary has been set up.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to set upthe isolation boundary.
+
+**Note**
+
+This API is only for platforms using :term:`MPU` as isolation hardwares.
+A generic API for all platforms will be introduced in future versions.
+
+tfm_hal_memory_has_access()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  tfm_hal_status_t tfm_hal_memory_has_access(const uintptr_t base,
+                                             size_t size,
+                                             uint32_t attr)
+
+**Description**
+
+This API checks if the memory region defined by ``base`` and ``size`` has the
+given access atrributes - ``attr``.
+
+The Attributes include :term:`NSPE` access, privileged mode, and read-write
+permissions.
+
+**Parameter**
+
+- ``base`` - The base address of the region.
+- ``size`` - The size of the region.
+- ``attr`` - The `Memory Access Attributes`_.
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - The memory region has the access permissions.
+- ``TFM_HAL_ERROR_MEM_FAULT`` - The memory region does not have the access
+  permissions.
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - Invalid inputs.
+- ``TFM_HAL_ERROR_GENERIC`` - An error occurred.
+
 Log API
 =======
 The log API is used by the :term:`TF-M` :doc:`log system <tfm_log_system_design_document>`.
