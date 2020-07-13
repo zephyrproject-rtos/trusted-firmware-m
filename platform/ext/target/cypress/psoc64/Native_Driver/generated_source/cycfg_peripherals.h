@@ -8,7 +8,7 @@
 * Device Support Library (../../../../output/libs/COMPONENT_PSOC6/psoc6pdl): 1.5.0.1837
 *
 ********************************************************************************
-* Copyright 2017-2019 Cypress Semiconductor Corporation
+* Copyright 2017-2020 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,6 @@
 #define CYCFG_PERIPHERALS_H
 
 #include "cycfg_notices.h"
-#include "cy_scb_uart.h"
 #include "cy_sysclk.h"
 #include "cy_csd.h"
 
@@ -73,7 +72,6 @@ extern "C" {
 #define CYBSP_CSD_HW CSD0
 #define CYBSP_CSD_IRQ csd_interrupt_IRQn
 
-extern const cy_stc_scb_uart_config_t KITPROG_UART_config;
 extern cy_stc_csd_context_t cy_csd_0_context;
 
 void init_cycfg_peripherals(void);

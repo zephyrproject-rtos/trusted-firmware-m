@@ -97,18 +97,38 @@ void system_reset_cfg(void)
 extern void Cy_Platform_Init(void);
 void platform_init(void)
 {
+    cy_en_sysclk_status_t clk_rc;
 #ifdef TFM_ENABLE_IRQ_TEST
-    cy_en_sysint_status_t rc;
+    cy_en_sysint_status_t int_rc;
 #endif
 
     Cy_PDL_Init(CY_DEVICE_CFG);
 
     init_cycfg_all();
+
+    /* UART clock */
+    clk_rc = Cy_SysClk_PeriphDisableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure UART clock\n");
+    }
+    clk_rc = Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 54U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure UART clock\n");
+    }
+    clk_rc = Cy_SysClk_PeriphEnableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure UART clock\n");
+    }
+    clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_SCB5_CLOCK, CY_SYSCLK_DIV_8_BIT, 1U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure UART clock\n");
+    }
+
     Cy_Platform_Init();
 
 #ifdef TFM_ENABLE_IRQ_TEST
-    rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
-    if (rc != CY_SYSINT_SUCCESS) {
+    int_rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
+    if (int_rc != CY_SYSINT_SUCCESS) {
         printf("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\n");
     }
 #endif /* TFM_ENABLE_IRQ_TEST */
