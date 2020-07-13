@@ -42,7 +42,6 @@ set (SFW_IPC_SPM_SRC
 		"${SFW_IPC_SPM_DIR}/tfm_message_queue.c"
 		"${SFW_IPC_SPM_DIR}/../runtime/utilities.c"
 		"${SFW_IPC_SPM_DIR}/../runtime/tfm_core_utils.c"
-		"${SFW_IPC_SPM_DIR}/../runtime/spm_api.c"
 		"${SFW_IPC_SPM_DIR}/../runtime/tfm_spm_services.c"
 		"${SFW_IPC_SPM_DIR}/tfm_pools.c"
 		"${SFW_IPC_SPM_DIR}/tfm_thread.c"

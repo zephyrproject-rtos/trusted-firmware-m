@@ -305,6 +305,46 @@ static struct iovec_args_t *get_iovec_args_stack_address(uint32_t partition_idx)
     return &REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
 }
 
+/**
+ * \brief Returns the index of the partition with the given partition ID.
+ *
+ * \param[in] partition_id     Partition id
+ *
+ * \return the partition idx if partition_id is valid,
+ *         \ref SPM_INVALID_PARTITION_IDX othervise
+ */
+static uint32_t get_partition_idx(uint32_t partition_id)
+{
+    uint32_t i;
+
+    if (partition_id == INVALID_PARTITION_ID) {
+        return SPM_INVALID_PARTITION_IDX;
+    }
+
+    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
+        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
+            partition_id) {
+            return i;
+        }
+    }
+    return SPM_INVALID_PARTITION_IDX;
+}
+
+/**
+ * \brief Get the flags associated with a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Flags associated with the partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data->
+           partition_flags;
+}
+
 static enum tfm_status_e tfm_start_partition(
                                            const struct tfm_sfn_req_s *desc_ptr,
                                            uint32_t excReturn)
@@ -603,6 +643,29 @@ static enum tfm_status_e tfm_core_check_sfn_req_rules(
     }
 
     return TFM_SUCCESS;
+}
+
+uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data->
+           partition_id;
+}
+
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
+{
+    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
+        return TFM_PARTITION_PRIVILEGED_MODE;
+    } else {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
+}
+
+bool tfm_is_partition_privileged(uint32_t partition_idx)
+{
+    uint32_t flags = tfm_spm_partition_get_flags(partition_idx);
+
+    return tfm_spm_partition_get_privileged_mode(flags) ==
+           TFM_PARTITION_PRIVILEGED_MODE;
 }
 
 void tfm_spm_secure_api_init_done(void)

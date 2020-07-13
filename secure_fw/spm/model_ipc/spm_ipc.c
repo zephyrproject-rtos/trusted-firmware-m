@@ -290,6 +290,97 @@ static struct tfm_spm_service_t *
     return NULL;
 }
 
+/**
+ * \brief Returns the index of the partition with the given partition ID.
+ *
+ * \param[in] partition_id     Partition id
+ *
+ * \return the partition idx if partition_id is valid,
+ *         \ref SPM_INVALID_PARTITION_IDX othervise
+ */
+static uint32_t get_partition_idx(uint32_t partition_id)
+{
+    uint32_t i;
+
+    if (partition_id == INVALID_PARTITION_ID) {
+        return SPM_INVALID_PARTITION_IDX;
+    }
+
+    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
+        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
+            partition_id) {
+            return i;
+        }
+    }
+    return SPM_INVALID_PARTITION_IDX;
+}
+
+/**
+ * \brief Get the flags associated with a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Flags associated with the partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data->
+           partition_flags;
+}
+
+#if TFM_LVL != 1
+/**
+ * \brief Change the privilege mode for partition thread mode.
+ *
+ * \param[in] privileged        Privileged mode,
+ *                                \ref TFM_PARTITION_PRIVILEGED_MODE
+ *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *
+ * \note Barrier instructions are not called by this function, and if
+ *       it is called in thread mode, it might be necessary to call
+ *       them after this function returns.
+ */
+static void tfm_spm_partition_change_privilege(uint32_t privileged)
+{
+    CONTROL_Type ctrl;
+
+    ctrl.w = __get_CONTROL();
+
+    if (privileged == TFM_PARTITION_PRIVILEGED_MODE) {
+        ctrl.b.nPRIV = 0;
+    } else {
+        ctrl.b.nPRIV = 1;
+    }
+
+    __set_CONTROL(ctrl.w);
+}
+#endif /* if(TFM_LVL != 1) */
+
+uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data->
+           partition_id;
+}
+
+uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
+{
+    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
+        return TFM_PARTITION_PRIVILEGED_MODE;
+    } else {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
+}
+
+bool tfm_is_partition_privileged(uint32_t partition_idx)
+{
+    uint32_t flags = tfm_spm_partition_get_flags(partition_idx);
+
+    return tfm_spm_partition_get_privileged_mode(flags) ==
+           TFM_PARTITION_PRIVILEGED_MODE;
+}
+
 struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
     uint32_t i, num;

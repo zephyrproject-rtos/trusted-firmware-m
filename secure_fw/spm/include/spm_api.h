@@ -173,17 +173,6 @@ enum tfm_memory_access_e {
 #endif /* ifdef(TFM_PSA_API) */
 
 /*********************** common definitions ***********************/
-
-/**
- * \brief Returns the index of the partition with the given partition ID.
- *
- * \param[in] partition_id     Partition id
- *
- * \return the partition idx if partition_id is valid,
- *         \ref SPM_INVALID_PARTITION_IDX othervise
- */
-uint32_t get_partition_idx(uint32_t partition_id);
-
 /**
  * \brief Get the id of the partition for its index from the db
  *
@@ -196,35 +185,11 @@ uint32_t get_partition_idx(uint32_t partition_id);
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
 
 /**
- * \brief Get the flags associated with a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Flags associated with the partition
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
-
-/**
  * \brief Initialize partition database
  *
  * \return Error code \ref spm_err_t
  */
 enum spm_err_t tfm_spm_db_init(void);
-
-/**
- * \brief Change the privilege mode for partition thread mode.
- *
- * \param[in] privileged        Privileged mode,
- *                                \ref TFM_PARTITION_PRIVILEGED_MODE
- *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *
- * \note Barrier instructions are not called by this function, and if
- *       it is called in thread mode, it might be necessary to call
- *       them after this function returns.
- */
-void tfm_spm_partition_change_privilege(uint32_t privileged);
 
 /**
  * \brief                   Get the current partition mode.
