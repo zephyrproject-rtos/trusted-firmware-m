@@ -123,6 +123,16 @@ void platform_init(void)
     if (clk_rc != CY_SYSCLK_SUCCESS) {
         printf("WARNING: Failed to configure UART clock\n");
     }
+    /* Secure: TIMER0 clock */
+    clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS0, CY_SYSCLK_DIV_8_BIT, 1U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure timer0 clock\n");
+    }
+    /* Non-Secure: TIMER1 clock */
+    clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS1, CY_SYSCLK_DIV_8_BIT, 1U);
+    if (clk_rc != CY_SYSCLK_SUCCESS) {
+        printf("WARNING: Failed to configure timer1 clock\n");
+    }
 
     Cy_Platform_Init();
 
