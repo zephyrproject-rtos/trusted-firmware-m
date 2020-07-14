@@ -274,6 +274,22 @@ Example application with BL2 bootloader
 
 Regression tests with BL2 bootloader
 ====================================
+.. note::
+
+    As the Internal Trusted Storage and Protected Storage tests use persistent
+    storage, it is recommended to erase the storage area before running the
+    tests. Existing data may prevent the tests from running to completion if,
+    for example, there is not enough free space for the test data or the UIDs
+    used by the tests have already been created with the write-once flag set.
+    Repeated test runs can be done without erasing between runs.
+
+    To erase the storage when flashing an image, ``-fill 0xFF <start_addr>
+    <end_addr>`` can be added to the ``srec_cat`` command used to create the
+    combined hex file. The ``<start_addr>`` and ``<end_addr>`` are the start and
+    end addresses of the storage area, found in the board's ``flash_layout.h``
+    file. The board's flash can also be erased via a debugger; see your IDE's
+    documentation for instructions.
+
 After completing the procedure you should see the following messages on the
 DAPLink UART (baud 115200 8n1)::
 
@@ -314,11 +330,11 @@ and ``tfm_ns.bin``:
 
 - Windows::
 
-    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 - Linux::
 
-    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA060000 -o tfm.hex -Intel
+    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards

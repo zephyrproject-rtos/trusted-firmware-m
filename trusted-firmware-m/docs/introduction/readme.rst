@@ -1,16 +1,45 @@
 ##################
 Trusted Firmware M
 ##################
-Trusted Firmware M provides a reference implementation of secure world software
-for Arm M-profile architecture.
 
-.. Note::
-    The software implementation contained in this project is designed to be a
-    reference implementation of the Platform Security Architecture (PSA).
+Trusted Firmware-M (TF-M) implements the Secure Processing Environment (SPE)
+for Armv8-M, Armv8.1-M architectures (e.g. the `Cortex-M33`_, `Cortex-M23`_,
+`Cortex-M55`_ processors) or dual-core platforms.
+It is the Platform Security Architecture (PSA) reference implementation
+aligning with `PSA Certified`_ guidelines, enabling chips,
+Real Time Operating Systems and devices to become PSA Certified.
+
+TF-M relies on an isolation boundary between the Non-secure Processing
+Environment (NSPE) and the Secure Processing Environment (SPE). It can but is
+not limited to using the `Arm TrustZone technology`_ on Armv8-M and Armv8.1-M
+architectures. In pre-Armv8-M architectures physical core isolation is required.
+
+**Trusted Firmware-M consists of:**
+
+- Secure Boot to authenticate integrity of NSPE and SPE images
+- TF-M Core responsible for controlling the isolation, communication and
+  execution within SPE and with NSPE
+- Crypto, Internal Trusted Storage (ITS), Protected Storage (PS) and
+  Attestation secure services
+
+.. figure:: readme_tfm_v8.png
+   :scale: 65 %
+   :align: center
+
+   PSA FF compiant design with TF-M
+
+Applications and Libraries in the Non-secure Processing Environment can
+utilize these secure services with a standardized set of PSA Functional APIs.
+Applications running on Cortex-M devices can leverage TF-M services to ensure
+secure connection with edge gateways and IoT cloud services. It also protects
+the critical security assets such as sensitive data, keys and certificates on
+the platform. TF-M is supported on several Cortex-M based
+:doc:`Microcontrollers </platform/ext/index>` and Real Time Operating
+Systems (RTOS).
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
-refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/reference/glossary>` has the list
-of terms and abbreviations.
+refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/reference/glossary>`
+has the list of terms and abbreviations.
 
 #######
 License
@@ -112,7 +141,7 @@ Platforms supported
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
         - `Arm DesignStart FPGA on AWS Cloud.
           <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
-        - `NXP LPC55S69.
+        - `LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
         - `NUCLEO L552ZE Q.
           <https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-l552ze-q.html>`_
@@ -126,7 +155,7 @@ Platforms supported
 
     - Dual Core Cortex-M system:
 
-        - `Cypress PSoc64.
+        - `PSoc64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
 
 ####################
@@ -138,19 +167,27 @@ For this release, feedback is requested via email to
 ###############
 Version history
 ###############
-+-------------+--------------+--------------------+---------------+
-| Version     | Date         | Description        | PSA-arch tag  |
-+=============+==============+====================+===============+
-| v1.0-beta   | 2019-02-15   | 1.0-beta release   |       -       |
-+-------------+--------------+--------------------+---------------+
-| v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    | v19.06_API0.9 |
-+-------------+--------------+--------------------+---------------+
-| v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    | v19.06_API0.9 |
-+-------------+--------------+--------------------+---------------+
-| v1.0-RC3    | 2019-11-29   | 1.0-RC3 release    | v19.06_API0.9 |
-+-------------+--------------+--------------------+---------------+
-| v1.0        | 2020-03-27   | 1.0 release        | v20.03_API1.0 |
-+-------------+--------------+--------------------+---------------+
++-------------+--------------+--------------------+-------------------+
+| Version     | Date         | Description        | PSA-arch tag/hash |
++=============+==============+====================+===================+
+| v1.0-beta   | 2019-02-15   | 1.0-beta release   |       -           |
++-------------+--------------+--------------------+-------------------+
+| v1.0-RC1    | 2019-05-31   | 1.0-RC1 release    | v19.06_API0.9     |
++-------------+--------------+--------------------+-------------------+
+| v1.0-RC2    | 2019-10-09   | 1.0-RC2 release    | v19.06_API0.9     |
++-------------+--------------+--------------------+-------------------+
+| v1.0-RC3    | 2019-11-29   | 1.0-RC3 release    | v19.06_API0.9     |
++-------------+--------------+--------------------+-------------------+
+| v1.0        | 2020-03-27   | 1.0 release        | v20.03_API1.0     |
++-------------+--------------+--------------------+-------------------+
+| v1.1        | 2020-07-15   | 1.1 release        | 1f960947          |
++-------------+--------------+--------------------+-------------------+
+
+.. _Cortex-M33: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m33
+.. _Cortex-M23: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m23
+.. _Cortex-M55: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m55
+.. _PSA Certified: https://www.psacertified.org/about/developing-psa-certified/
+.. _Arm TrustZone technology: https://developer.arm.com/ip-products/security-ip/trustzone/trustzone-for-cortex-m
 
 --------------
 
