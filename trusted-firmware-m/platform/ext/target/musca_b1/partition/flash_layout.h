@@ -48,7 +48,7 @@
  *
  * Flash layout on Musca-B1 without BL2:
  * 0x0A00_0000 Secure     image
- * 0x0A07_0000 Non-secure image
+ * 0x0A08_0000 Non-secure image
  *
  * QSPI Flash layout
  * 0x0000_0000 Protected Storage Area (20 KB)
