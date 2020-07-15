@@ -14,14 +14,20 @@ This module in Zephyr has include TF-M and it's dependencies, they are:
 
 TF-M:
     repo: https://git.trustedfirmware.org/trusted-firmware-m.git
-    tag: TF-Mv1.0
-    commit: 0768982ea41b5e7d207445f19ee23e5d67d9c89b
+    tag: TF-Mv1.1
+    commit: a6b336c1509fd5f5522450e3cec0fcd6c060f9c8
     BSD-3-Clause
 
-CMSIS:
-    repo: https://github.com/ARM-software/CMSIS_5.git
-    tag: 5.5.0
-    commit: a82c293bfb9f07285dcdf93507e5559acc0f92af
+TF-M Tests:
+    repo: https://git.trustedfirmware.org/TF-M/tf-m-tests.git
+    tag: TF-Mv1.1
+    commit: 5a571808e7841f15cc966661a64dd6adb3b40f6c
+    license: Apache 2.0
+
+mcuboot:
+    repo: https://github.com/JuulLabs-OSS/mcuboot.git
+    tag: v1.6.0
+    commit: 50d24a57516f558dac72bef634723b60c5cfb46b
     license: Apache 2.0
 
 mbed-crypto:
