@@ -15,7 +15,7 @@ Attestation in TF-M.
 
 Symmetric key algorithm based Initial Attestation
 (*symmetric Initial Attestation* for short) signs and verifies Initial
-Attestation Token (IAT) with a symmetric crypotgraphy signature scheme, such as
+Attestation Token (IAT) with a symmetric cryptography signature scheme, such as
 HMAC.
 It can reduce TF-M binary size and memory footprint on ultra-constrained devices
 without integrating asymmetric ciphers.

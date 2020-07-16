@@ -6,8 +6,8 @@ Trusted Firmware-M Source Structure
 :Contact: tf-m@lists.trustedfirmware.org
 
 .. note::
-  Refernce the document :doc:`Glossary </docs/reference/glossary>` for terms and
-  abbreviations.
+  Reference the document :doc:`Glossary </docs/reference/glossary>` for terms
+  and abbreviations.
 
 ************
 Introduction
@@ -29,7 +29,7 @@ Source Structure
 The description of the source structure is broken down into subsections, each
 subsection introduces one detailed folder.
 
-Root Direcotry
+Root Directory
 ==============
 This table describes the structure under the root directory with part of
 possible folders. Note that the ``Detailed`` field indicates if the folder is
