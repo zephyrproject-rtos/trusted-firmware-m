@@ -36,8 +36,8 @@ if (CRYPTO_ENGINE_MBEDTLS)
 		set (MBEDTLS_CONFIG_PATH "${PLATFORM_DIR}/common")
 	endif()
 
-	#Define location of Mbed Crypto source, build, and installation directory.
-	get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
+	#Define location of Mbed-Crypto(MbedTLS) source, build, and installation directory.
+	get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbedtls" ABSOLUTE)
 	set (MBEDCRYPTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbed-crypto/build")
 	set (MBEDCRYPTO_INSTALL_DIR ${MBEDCRYPTO_BINARY_DIR}/../install)
 	set (MBEDCRYPTO_TARGET_NAME "mbedcrypto_lib")

@@ -853,6 +853,86 @@ psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
 }
 
 __attribute__((section("SFN")))
+psa_status_t psa_hash_compute(psa_algorithm_t alg,
+                              const uint8_t *input,
+                              size_t input_length,
+                              uint8_t *hash,
+                              size_t hash_size,
+                              size_t *hash_length)
+{
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_HASH_COMPUTE_SID,
+        .alg = alg,
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+    };
+
+    psa_outvec out_vec[] = {
+        {.base = hash, .len = hash_size}
+    };
+
+#ifdef TFM_PSA_API
+    PSA_CONNECT(TFM_CRYPTO);
+#endif
+
+    status = API_DISPATCH(tfm_crypto_hash_compute,
+                          TFM_CRYPTO_HASH_COMPUTE);
+
+    *hash_length = out_vec[0].len;
+
+#ifdef TFM_PSA_API
+    PSA_CLOSE();
+#endif
+
+    return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
+}
+
+__attribute__((section("SFN")))
+psa_status_t psa_hash_compare(psa_algorithm_t alg,
+                              const uint8_t *input,
+                              size_t input_length,
+                              const uint8_t *hash,
+                              size_t hash_length)
+{
+#if (TFM_CRYPTO_HASH_MODULE_DISABLED != 0)
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_HASH_COMPARE_SID,
+        .alg = alg,
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+        {.base = hash, .len = hash_length},
+    };
+
+#ifdef TFM_PSA_API
+    PSA_CONNECT(TFM_CRYPTO);
+#endif
+
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_hash_compare,
+                          TFM_CRYPTO_HASH_COMPARE);
+
+#ifdef TFM_PSA_API
+    PSA_CLOSE();
+#endif
+
+    return status;
+#endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
+}
+
+__attribute__((section("SFN")))
 psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
                                 psa_key_handle_t handle,
                                 psa_algorithm_t alg)
@@ -1737,20 +1817,6 @@ psa_status_t psa_get_key_domain_parameters(
 }
 
 __attribute__((section("SFN")))
-psa_status_t psa_hash_compare(psa_algorithm_t alg,
-                              const uint8_t *input,
-                              size_t input_length,
-                              const uint8_t *hash,
-                              const size_t hash_length)
-{
-    psa_status_t status;
-
-    status = PSA_ERROR_NOT_SUPPORTED;
-
-    return status;
-}
-
-__attribute__((section("SFN")))
 psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
                                 const uint8_t *input,
                                 size_t input_length)
@@ -2050,21 +2116,6 @@ psa_status_t psa_key_derivation_output_key(
 
     return status;
 #endif /* TFM_CRYPTO_GENERATOR_MODULE_DISABLED */
-}
-
-__attribute__((section("SFN")))
-psa_status_t psa_hash_compute(psa_algorithm_t alg,
-                              const uint8_t *input,
-                              size_t input_length,
-                              uint8_t *hash,
-                              size_t hash_size,
-                              size_t *hash_length)
-{
-    psa_status_t status;
-
-    status = PSA_ERROR_NOT_SUPPORTED;
-
-    return status;
 }
 
 __attribute__((section("SFN")))

@@ -109,13 +109,13 @@ else()
 	)
 endif()
 
-#Define location of Mbed Crypto source, build, and installation directory.
+#Define location of Mbed-Crypto(MbedTLS) source, build, and installation directory.
 set(MBEDTLS_CONFIG_FILE "config-rsa.h")
 set(MBEDTLS_CONFIG_PATH "${TFM_ROOT_DIR}/bl2/ext/mcuboot/include")
 
-get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbed-crypto" ABSOLUTE)
+get_filename_component(MBEDCRYPTO_SOURCE_DIR "${TFM_ROOT_DIR}/../mbedtls" ABSOLUTE)
 if(NOT EXISTS ${MBEDCRYPTO_SOURCE_DIR})
-    message(FATAL_ERROR "Missing mbed-crypto. Please clone the mbed-crypto repo to directory \"${MBEDCRYPTO_SOURCE_DIR}\".")
+    message(FATAL_ERROR "Missing mbed-crypto(mbedtls). Please clone the mbedtls repo to directory \"${MBEDCRYPTO_SOURCE_DIR}\".")
 endif()
 set (MBEDCRYPTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mbed-crypto/build")
 set (MBEDCRYPTO_INSTALL_DIR ${MBEDCRYPTO_BINARY_DIR}/../install)

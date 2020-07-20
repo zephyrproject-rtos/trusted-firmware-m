@@ -28,7 +28,7 @@ Getting the source-code
 
     cd <base folder>
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
-    git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-3.0.1
+    git clone https://github.com/ARMmbed/mbedtls.git -b mbedtls-2.23.0
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
     git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.6.0
 
@@ -279,9 +279,9 @@ line arguments:
          - ``Relwithdebinfo``
          - ``Minsizerel``
    * - -DMBEDCRYPTO_DEBUG=<ON|OFF>
-     - Enables debug symbols for Mbed Crypto library. If a cryptographic
-       accelerator is enabled then this will also enable debug symbols and
-       logging for any accelerator libraries.
+     - Enables debug symbols for Mbed Crypto(MbedTLS) library. If a
+       cryptographic accelerator is enabled then this will also enable
+       debug symbols and logging for any accelerator libraries.
    * - -DBUILD_DWARF_VERSION=<dwarf version>
      - Configures DWARF version.
        The possible values are:

@@ -41,7 +41,7 @@ endif()
 
 #Based on preinclude input variables, decide if preinclude flags need to be appended
 if((NOT DEFINED MBEDCRYPTO_PREINCLUDE_PREFIX) OR (NOT DEFINED MBEDCRYPTO_PREINCLUDE_HEADER))
-    message(STATUS "Building mbed-crypto without pre-included headers and global symbols prefixing.")
+    message(STATUS "Building mbed-crypto(mbedtls) without pre-included headers and global symbols prefixing.")
 else()
     compiler_get_preinclude_option_string(${MBEDCRYPTO_PREINCLUDE_HEADER} _PRE_INC_STRING)
     set(MBEDCRYPTO_PREINCLUDE_C_FLAGS " -DLIB_PREFIX_NAME=${MBEDCRYPTO_PREINCLUDE_PREFIX} ${_PRE_INC_STRING}")
@@ -81,6 +81,7 @@ externalproject_add(${MBEDCRYPTO_TARGET_NAME}
     SOURCE_DIR ${MBEDCRYPTO_SOURCE_DIR}
     #Set Mbed Crypto features
     CMAKE_ARGS -DENABLE_TESTING=OFF -DENABLE_PROGRAMS=OFF
+    CMAKE_ARGS -DMBEDTLS_FATAL_WARNINGS=OFF
     #Enforce our build system's settings.
     CMAKE_ARGS -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
     #Inherit the build setting of this project
@@ -111,7 +112,7 @@ add_custom_target(${MBEDCRYPTO_TARGET_NAME}_install
     COMMAND ${CMAKE_COMMAND} --build ${MBEDCRYPTO_BINARY_DIR}  -- install
     BYPRODUCTS ${MBEDCRYPTO_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX_C}mbedcrypto${CMAKE_STATIC_LIBRARY_SUFFIX_C}
     WORKING_DIRECTORY ${MBEDCRYPTO_BINARY_DIR}
-    COMMENT "Installing Mbed Crypto to ${MBEDCRYPTO_INSTALL_DIR}"
+    COMMENT "Installing Mbed Crypto(MbedTLS) to ${MBEDCRYPTO_INSTALL_DIR}"
     VERBATIM)
 #Make install rule depend on Mbed Crypto library build
 add_dependencies(${MBEDCRYPTO_TARGET_NAME}_install ${MBEDCRYPTO_TARGET_NAME})
