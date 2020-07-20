@@ -83,17 +83,17 @@ struct tfm_msg_body_t {
  * phase.
  */
 struct partition_static_t {
-    uint32_t psa_framework_version;
-    uint32_t partition_id;
-    uint32_t partition_flags;
-    uint32_t partition_priority;
-    sp_entry_point partition_init;
-    uintptr_t stack_base;
-    size_t stack_size;
-    uintptr_t heap_base;
-    size_t heap_size;
-    uint32_t dependencies_num;
-    uint32_t *p_dependencies;
+    uint32_t psa_ff_ver;                /* PSA-FF version                   */
+    uint32_t pid;                       /* Partition ID                     */
+    uint32_t flags;                     /* Flags of the partition           */
+    uint32_t priority;                  /* Priority of the partition thread */
+    sp_entry_point entry;               /* Entry point of the partition     */
+    uintptr_t stack_base_addr;          /* Stack base of the partition      */
+    size_t stack_size;                  /* Stack size of the partition      */
+    uintptr_t heap_base_addr;           /* Heap base of the partition       */
+    size_t heap_size;                   /* Heap size of the partition       */
+    uint32_t ndeps;                     /* Numbers of depended services     */
+    uint32_t *deps;                     /* Pointer to dependency arrays     */
 };
 
 /**
@@ -101,7 +101,7 @@ struct partition_static_t {
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    const struct partition_static_t *static_data;
+    const struct partition_static_t *p_static;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;

@@ -76,7 +76,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data->partition_flags);
+        partition->p_static->flags);
 
     /*
      * Read parameters from the arguments. It is a PROGRAMMER ERROR if the
@@ -192,7 +192,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data->partition_flags);
+        partition->p_static->flags);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -286,7 +286,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data->partition_flags);
+        partition->p_static->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -409,7 +409,7 @@ void tfm_spm_psa_write(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->static_data->partition_flags);
+        partition->p_static->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -601,7 +601,7 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->static_data->partition_id,
+    ret = get_irq_line_for_signal(partition->p_static->pid,
                                   irq_signal, &irq_line);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (ret != IPC_SUCCESS) {

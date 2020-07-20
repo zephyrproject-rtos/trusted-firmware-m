@@ -172,8 +172,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         tfm_core_panic();
     }
     privileged =
-        tfm_spm_partition_get_privileged_mode(partition->static_data->
-                                              partition_flags);
+        tfm_spm_partition_get_privileged_mode(partition->p_static->flags);
 
     if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
         privileged) != IPC_SUCCESS) {
