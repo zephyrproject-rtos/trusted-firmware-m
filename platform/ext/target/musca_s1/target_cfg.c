@@ -576,12 +576,6 @@ int32_t ppc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-    ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_S1_SCC_APB_PPC_POS,
-                                 ARM_PPC_NONSECURE_ONLY,
-                                 ARM_PPC_PRIV_AND_NONPRIV);
-    if (ret != ARM_DRIVER_OK) {
-        return ret;
-    }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_S1_GPTIMER1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_AND_NONPRIV);

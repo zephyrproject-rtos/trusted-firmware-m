@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,5 +39,7 @@
 #define APB_PPC1_DEV        APB_PPC1_DEV_S
 #define APB_PPCEXP0_DEV     APB_PPCEXP0_DEV_S
 #define APB_PPCEXP1_DEV     APB_PPCEXP1_DEV_S
+
+#define MUSCA_S1_SCC_DEV    MUSCA_S1_SCC_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

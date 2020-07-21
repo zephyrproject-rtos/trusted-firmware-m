@@ -12,12 +12,55 @@
 #include "device_definition.h"
 #include "psa/client.h"
 #include "tfm_ioctl_api.h"
+#include "cmsis_driver_config.h"
 
 void tfm_platform_hal_system_reset(void)
 {
     /* Reset the system */
     NVIC_SystemReset();
 }
+
+static enum tfm_platform_err_t
+musca_s1_pin_service(const psa_invec  *in_vec,
+                     const psa_outvec *out_vec)
+{
+    struct tfm_pin_service_args_t *args;
+    uint32_t *result;
+    enum gpio_altfunc_t altfunc;
+    enum pinmode_select_t pin_mode;
+
+    if (in_vec->len != sizeof(struct tfm_pin_service_args_t) ||
+                                         out_vec->len != sizeof(uint32_t)) {
+        return TFM_PLATFORM_ERR_INVALID_PARAM;
+    }
+
+    args = (struct tfm_pin_service_args_t *)in_vec->base;
+    result = (uint32_t *)out_vec->base;
+    switch (args->type) {
+    case TFM_PIN_SERVICE_TYPE_SET_ALTFUNC:
+        altfunc = (enum gpio_altfunc_t)args->u.set_altfunc.alt_func;
+        musca_s1_scc_set_alt_func(&MUSCA_S1_SCC_DEV, altfunc,
+                                  args->u.set_altfunc.pin_mask);
+        break;
+    case TFM_PIN_SERVICE_TYPE_SET_DEFAULT_IN:
+        altfunc = (enum gpio_altfunc_t)args->u.set_altfunc.alt_func;
+        musca_s1_scc_set_default_in(&MUSCA_S1_SCC_DEV, altfunc,
+                                   args->u.set_default_in.pin_value,
+                                   args->u.set_default_in.default_in_value);
+        break;
+    case TFM_PIN_SERVICE_TYPE_SET_PIN_MODE:
+        pin_mode = (enum pinmode_select_t)args->u.set_pin_mode.pin_mode;
+        musca_s1_scc_set_pinmode(&MUSCA_S1_SCC_DEV,
+                                 args->u.set_pin_mode.pin_mask,
+                                 pin_mode);
+        break;
+     default:
+        break;
+    }
+
+    return TFM_PLATFORM_ERR_SUCCESS;
+}
+
 
 enum tfm_platform_err_t
 tfm_platform_hal_gpio_service(const psa_invec  *in_vec,
@@ -97,6 +140,8 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
                                                psa_outvec *out_vec)
 {
     switch (request) {
+    case TFM_PLATFORM_IOCTL_PIN_SERVICE:
+        return musca_s1_pin_service(in_vec, out_vec);
     case TFM_PLATFORM_IOCTL_GPIO_SERVICE:
         return tfm_platform_hal_gpio_service(in_vec, out_vec);
     default:
