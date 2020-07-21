@@ -20,12 +20,6 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 endif()
 
-message(FATAL_ERROR "This commit is inside the patch chain for convertion of the
-old cmake buildsystem to the modern one. TFM will not build unless all of these
-patches have been applied, these commits are split only for ease of
-understanding. If you wish to build TFM, please checkout the commit
-\"Build: Convert docs directory to modern cmake\"")
-
 ############################ CONFIGURATION #####################################
 
 # First load defaults.
@@ -61,6 +55,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 add_subdirectory(lib/ext)
 add_subdirectory(tools)
+add_subdirectory(docs)
 if(NS)
     # Set to ${TFM_TEST_REPO_PATH}/app by default
     add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)

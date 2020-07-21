@@ -211,7 +211,6 @@ if cmake_env is None:
                  "SPHINXCFG_TFM_VERSION_FULL": tfm_def_tfm_ver_full,
                  "Java_JAVA_EXECUTABLE": tfm_def_java_binary,
                  "DOXYCFG_OUTPUT_PATH": tfm_def_doxy_output_dir,
-                 "DOXYCFG_ECLIPSE_DOCID": "org.arm.tf-m-refman",
                  "DOXYCFG_TFM_VERSION": tfm_def_tfm_ver_full,
                  }
 # Only Override the version

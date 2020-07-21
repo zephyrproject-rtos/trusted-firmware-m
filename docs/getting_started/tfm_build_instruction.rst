@@ -188,8 +188,8 @@ There are currently two ways of building the documentation:
 Using the CMake build-system
 ----------------------------
 
-Building PDF output is optional and can be disabled by removing LaTex from the
-PATH.
+Building PDF output can be requested by invoking `tfm_docs_userguide_pdf/
+tfm_docs_userguide_pdf`
 
 .. Note::
    For building the documentation all tools needed to build the firmware must
@@ -202,12 +202,13 @@ Building the Reference Manual
     cd <TF-M base folder>
     mkdir cmake_doc
     cd cmake_doc
-    cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=GNUARM
-    cmake --build ./ -- install_doc
+    cmake -S .. -B . -G "Unix Makefiles" -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    make tfm_docs_refman_html
+    make tfm_docs_refman_pdf
 
 The documentation files will be available under the directory::
 
-    cmake_doc/install/doc/reference_manual
+    cmake_doc/docs/reference_manual
 
 Building the User Guide
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -216,12 +217,13 @@ Building the User Guide
     cd <TF-M base folder>
     mkdir cmake_doc
     cd cmake_doc
-    cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG
-    cmake --build ./ -- install_userguide
+    cmake -S .. -B . -G "Unix Makefiles" -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    make tfm_docs_userguide_html
+    make tfm_docs_userguide_pdf
 
 The documentation files will be available under the directory::
 
-    cmake_doc/install/doc/user_guide
+    cmake_doc/docs/user_guide
 
 Manually using documentation generation tools
 ---------------------------------------------
