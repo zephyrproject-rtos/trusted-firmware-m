@@ -217,7 +217,12 @@
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  (0x4)
 /* The maximum asset size to be stored in the ITS area */
+#ifdef PSA_API_TEST_CRYPTO
+/* Need larger asset size for PSA API Crypto compliance suite */
+#define ITS_MAX_ASSET_SIZE      (1229)
+#else
 #define ITS_MAX_ASSET_SIZE      (512)
+#endif
 /* The maximum number of assets to be stored in the ITS area */
 #define ITS_NUM_ASSETS          (10)
 

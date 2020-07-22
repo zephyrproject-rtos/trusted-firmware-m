@@ -276,6 +276,11 @@ function(set_up_secure_fw_build)
 		embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "PSA_API_TEST_IPC")
 	endif()
 
+	#Add the PSA API CRYPTO compliance test define if enabled
+	if(PSA_API_TEST_CRYPTO)
+		add_definitions(-DPSA_API_TEST_CRYPTO)
+	endif()
+
 	target_link_libraries(${EXE_NAME} libtfmsprt)
 
 	embedded_set_target_link_defines(TARGET ${EXE_NAME} DEFINES "TFM_LVL=${TFM_LVL}")
