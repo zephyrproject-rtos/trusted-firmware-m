@@ -30,9 +30,13 @@
 
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 /* Place code in a specific section */
-#if defined(__GNUC__)
+#if defined(__ICCARM__)
+#pragma default_function_attributes = @ ".BL2_NoHdp_Code"
+#elif defined(__CC_ARM)
+#pragma arm section code = ".BL2_NoHdp_Code"
+#else
 __attribute__((section(".BL2_NoHdp_Code")))
-#endif /* __GNUC__ */
+#endif /* __ICCARM__ */
 __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
 {
     __ASM volatile(
@@ -57,10 +61,21 @@ __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
         "bx      r7                      \n" /* Jump to Reset_handler */
     );
 }
+/* Stop placing data in specified section */
+#if defined(__ICCARM__)
+#pragma default_function_attributes =
+#elif defined(__CC_ARM)
+#pragma arm section code
+#endif /* __ICCARM__ */
+
 /* Place code in a specific section */
-#if defined(__GNUC__)
+#if defined(__ICCARM__)
+#pragma default_function_attributes = @ ".BL2_NoHdp_Code"
+#elif defined(__CC_ARM)
+#pragma arm section code = ".BL2_NoHdp_Code"
+#else
 __attribute__((section(".BL2_NoHdp_Code")))
-#endif /* __GNUC__ */
+#endif /* __ICCARM__ */
 /**
   * @brief This function is called to clear all RAM area before jumping in
   * in Secure application .
@@ -92,12 +107,21 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 
     boot_jump_to_next_image(vt_cpy->reset);
 }
+/* Stop placing data in specified section */
+#if defined(__ICCARM__)
+#pragma default_function_attributes =
+#elif defined(__CC_ARM)
+#pragma arm section code
+#endif /* __ICCARM__ */
 
 /* Place code in a specific section */
-#if defined(__GNUC__)
+#if defined(__ICCARM__)
+#pragma default_function_attributes = @ ".BL2_NoHdp_Code"
+#elif defined(__CC_ARM)
+#pragma arm section code = ".BL2_NoHdp_Code"
+#else
 __attribute__((section(".BL2_NoHdp_Code")))
-#endif /* __GNUC__ */
-
+#endif /* __ICCARM__ */
 /**
   * @brief This function is called to clear all RAM area before jumping in
   * in Secure application .

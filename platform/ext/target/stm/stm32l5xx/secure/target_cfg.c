@@ -15,6 +15,7 @@
  */
 
 #include "cmsis.h"
+#include "region.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "region_defs.h"
@@ -23,10 +24,6 @@
 /*  fix me to move to a CMSIS driver */
 #include "stm32l5xx_hal.h"
 #include <stdio.h>
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);

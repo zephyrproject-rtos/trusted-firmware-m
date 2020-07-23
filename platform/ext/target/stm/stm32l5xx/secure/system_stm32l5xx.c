@@ -190,8 +190,8 @@
 void SystemInit(void)
 {
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-extern uint32_t __Vectors;
-  SCB->VTOR = (uint32_t) &__Vectors;
+  extern uint32_t __VECTOR_TABLE;
+  SCB->VTOR = (uint32_t) &__VECTOR_TABLE;
 #endif
   /* FPU settings ------------------------------------------------------------*/
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)

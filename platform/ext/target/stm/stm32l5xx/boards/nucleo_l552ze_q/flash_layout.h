@@ -63,12 +63,12 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0xF000)
+#define FLASH_AREA_BL2_SIZE             (0xF800)
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
 /* area for BL2 code not protected by hdp */
 #define FLASH_AREA_BL2_NOHDP_OFFSET     (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE)
-#define FLASH_AREA_BL2_NOHDP_SIZE       (0x1000)
+#define FLASH_AREA_BL2_NOHDP_SIZE       (0x800)
 
 /* scratch area */
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE)

@@ -24,14 +24,32 @@ add_definitions("-DSTM32L562xx")
 add_definitions("-DTFM_OB_RDP_LEVEL_VALUE=0xAA")
 include ("${PLATFORM_DIR}/target/stm/stm32l5xx/stm32l5xx.cmake")
 #Specify the location of platform specific build dependencies.
-
-if(COMPILER STREQUAL "GNUARM")
+if (COMPILER STREQUAL "GNUARM")
   set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_bl2.ld")
   set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
   set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_ns.ld")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/gcc/preprocess.sh")
   if (DEFINED CMSIS_DIR)
     # not all project defines CMSIS_DIR, only the ones that use it.
     set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+  endif()
+elseif(COMPILER STREQUAL "ARMCLANG")
+  set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
+  set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/armclang/stm32l5xx_bl2.sct")
+  set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/armclang/stm32l5xx_ns.sct")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/armclang/preprocess.sh")
+  if (DEFINED CMSIS_DIR)
+    # Not all projects define CMSIS_5_DIR, only the ones that use it.
+    set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+  endif()
+elseif(COMPILER STREQUAL "IARARM")
+  set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/iar/tfm_common_s.icf")
+  set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/iar/stm32l5xx_bl2.icf")
+  set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/iar/stm32l5xx_flash_ns.icf")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/iar/preprocess.sh")
+  if (DEFINED CMSIS_DIR)
+    # not all project defines CMSIS_5_DIR, only the ones that use it.
+    set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/IAR/RTX_V8MMN.a")
   endif()
 else()
   message(FATAL_ERROR "'${COMPILER}' is not supported.")
@@ -74,19 +92,7 @@ endif()
 if (NOT DEFINED BUILD_TIME)
   message(FATAL_ERROR "Configuration variable BUILD_TIME (true|false) is undefined!")
 elseif(BUILD_TIME)
-  #fix me add a cmsis_driver for L5
-endif()
-
-if (NOT DEFINED BUILD_STARTUP)
-  message(FATAL_ERROR "Configuration variable BUILD_STARTUP (true|false) is undefined!")
-elseif(BUILD_STARTUP)
-  list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l562xx_s.S")
-  list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l562xx_ns.S")
-  list(APPEND ALL_SRC_ASM_BL2 "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l562xx_bl2.S")
-  set_property(SOURCE "${ALL_SRC_ASM_S}"   APPEND
-  PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
-  set_property(SOURCE "${ALL_SRC_ASM_NS}"   APPEND
-  PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
+#fix me add a cmsis_driver for L5
 endif()
 
 if (NOT DEFINED BUILD_FLASH)
@@ -141,5 +147,6 @@ install(FILES ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/stm32l562e_dk/flash_la
 install(FILES ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/regression.sh
         ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/TFM_UPDATE.sh
         ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/postbuild.sh
+        ${PREPROCESS_BL2_FILE}
         PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
         DESTINATION ./ )

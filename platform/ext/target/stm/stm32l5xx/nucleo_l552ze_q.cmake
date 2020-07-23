@@ -28,13 +28,33 @@ if(COMPILER STREQUAL "GNUARM")
   set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_bl2.ld")
   set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/gcc/tfm_common_s.ld")
   set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/stm32l5xx_ns.ld")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/gcc/preprocess.sh")
   if (DEFINED CMSIS_DIR)
     # not all project defines CMSIS_DIR, only the ones that use it.
-    set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a")
+    set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/GCC/RTX_V8MMN.a")
+  endif()
+elseif(COMPILER STREQUAL "ARMCLANG")
+  set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/armclang/tfm_common_s.sct")
+  set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/armclang/stm32l5xx_bl2.sct")
+  set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/armclang/stm32l5xx_ns.sct")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/armclang/preprocess.sh")
+  if (DEFINED CMSIS_DIR)
+    # Not all projects define CMSIS_5_DIR, only the ones that use it.
+    set(RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib")
+  endif()
+elseif(COMPILER STREQUAL "IARARM")
+  set(S_SCATTER_FILE_NAME   "${PLATFORM_DIR}/common/iar/tfm_common_s.icf")
+  set(BL2_SCATTER_FILE_NAME "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/iar/stm32l5xx_bl2.icf")
+  set(NS_SCATTER_FILE_NAME  "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/iar/stm32l5xx_flash_ns.icf")
+  set(PREPROCESS_BL2_FILE "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/iar/preprocess.sh")
+  if (DEFINED CMSIS_DIR)
+    # not all project defines CMSIS_5_DIR, only the ones that use it.
+    set (RTX_LIB_PATH "${CMSIS_DIR}/RTOS2/RTX/Library/IAR/RTX_V8MMN.a")
   endif()
 else()
   message(FATAL_ERROR "'${COMPILER}' is not supported.")
 endif()
+
 if (REGRESSION OR CORE_TEST OR IPC_TEST OR PSA_API_TEST)
   set(FLASH_LAYOUT          "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/nucleo_l552ze_q/flash_layout_test.h")
 else()
@@ -45,7 +65,7 @@ set(PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/stm/stm32l5xx/boards/nucleo_l
 
 
 if (BL2)
-  set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
+  set(BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
 endif()
 
 embedded_include_directories(PATH "${PLATFORM_DIR}/cmsis" ABSOLUTE)
@@ -78,22 +98,10 @@ elseif(BUILD_TIME)
 #fix me add a cmsis_driver for L5
 endif()
 
-if (NOT DEFINED BUILD_STARTUP)
-  message(FATAL_ERROR "Configuration variable BUILD_STARTUP (true|false) is undefined!")
-elseif(BUILD_STARTUP)
-  list(APPEND ALL_SRC_ASM_S "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l552xx_s.S")
-  list(APPEND ALL_SRC_ASM_NS "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l552xx_ns.S")
-  list(APPEND ALL_SRC_ASM_BL2 "${PLATFORM_DIR}/target/stm/stm32l5xx/Device/Source/gcc/startup_stm32l552xx_bl2.S")
-  set_property(SOURCE "${ALL_SRC_ASM_S}"   APPEND
-  PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
-  set_property(SOURCE "${ALL_SRC_ASM_NS}"   APPEND
-  PROPERTY COMPILE_DEFINITIONS "__STARTUP_CLEAR_BSS_MULTIPLE" "__STARTUP_COPY_MULTIPLE")
-endif()
-
 if (NOT DEFINED BUILD_FLASH)
   message(FATAL_ERROR "Configuration variable BUILD_FLASH (true|false) is undefined!")
 elseif(BUILD_FLASH)
-#list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/stm/stm32l5xx/CMSIS_Driver/Driver_Flash.c")
+  #list(APPEND ALL_SRC_C "${PLATFORM_DIR}/target/stm/stm32l5xx/CMSIS_Driver/Driver_Flash.c")
   # As the PS area is going to be in RAM, it is required to set PS_CREATE_FLASH_LAYOUT
   # to be sure the PS service knows that when it starts the PS area does not contain any
   # valid PS flash layout and it needs to create one.
@@ -142,5 +150,6 @@ install(FILES ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/stm32l562e_dk/flash_la
 install(FILES ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/regression.sh
         ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/TFM_UPDATE.sh
         ${PLATFORM_DIR}/target/stm/stm32l5xx/boards/scripts/postbuild.sh
+        ${PREPROCESS_BL2_FILE}
         PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-        DESTINATION ./ PERMISSIONS WORLD_EXECUTE)
+        DESTINATION ./ )
