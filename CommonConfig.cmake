@@ -94,6 +94,12 @@ else()
 	set (TFM_MULTI_CORE_TEST OFF)
 endif()
 
+if(NOT ${COMPILER} STREQUAL "GNUARM")
+	if(CODE_COVERAGE_EN)
+		message(WARNING "CODE COVERAGE for '${COMPILER}' is not supported.")
+	endif()
+endif()
+
 if(${COMPILER} STREQUAL "ARMCLANG")
 	#Use any ARMCLANG version found on PATH. Note: Only versions supported by the
 	#build system will work. A file cmake/Common/CompilerArmClangXY.cmake
@@ -119,9 +125,17 @@ elseif(${COMPILER} STREQUAL "GNUARM")
 	include("Common/${GNUARM_MODULE}")
 
 	set (COMMON_COMPILE_FLAGS -fshort-enums -fshort-wchar -funsigned-char -msoft-float -ffunction-sections -fdata-sections --specs=nano.specs -fno-builtin)
+
+	#Code coverage required
+	if(CODE_COVERAGE_EN)
+		set (CODE_COVERAGE_FLAGS -g)
+	else()
+		unset (CODE_COVERAGE_FLAGS)
+	endif()
+
 	##Shared compiler and linker settings.
 	function(config_setting_shared_compiler_flags tgt)
-		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
+		embedded_set_target_compile_flags(TARGET ${tgt} LANGUAGE C APPEND FLAGS -xc -std=c99 ${COMMON_COMPILE_FLAGS} ${CODE_COVERAGE_FLAGS} -Wall -Werror -Wno-format -Wno-return-type -Wno-unused-but-set-variable)
 	endfunction()
 
 	##Shared linker settings.
