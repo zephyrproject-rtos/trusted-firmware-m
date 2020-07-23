@@ -220,9 +220,8 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
      */
     for (; offset < tlv_end; offset += next_tlv_offset) {
         /* Create local copy to avoid unaligned access */
-        (void)tfm_core_util_memcpy(&tlv_entry,
-                                   (const void *)offset,
-                                   SHARED_DATA_ENTRY_HEADER_SIZE);
+        (void)spm_memcpy(&tlv_entry, (const void *)offset,
+                         SHARED_DATA_ENTRY_HEADER_SIZE);
 #ifdef LEGACY_TFM_TLV_HEADER
         next_tlv_offset = tlv_entry.tlv_len;
 #else
@@ -235,8 +234,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                 return;
             }
 
-            (void)tfm_core_util_memcpy(ptr, (const void *)offset,
-                                       next_tlv_offset);
+            (void)spm_memcpy(ptr, (const void *)offset, next_tlv_offset);
             ptr += next_tlv_offset;
             boot_data->header.tlv_tot_len += next_tlv_offset;
         }

@@ -36,7 +36,7 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     }
 
     /* Buffer should be BSS cleared but clear it again */
-    tfm_core_util_memset(pool, 0, poolsz);
+    spm_memset(pool, 0, poolsz);
 
     /* Chain pool chunks */
     tfm_list_init(&pool->chunks_list);

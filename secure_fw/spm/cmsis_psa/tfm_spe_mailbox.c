@@ -133,7 +133,7 @@ static void mailbox_clean_queue_slot(uint8_t idx)
         return;
     }
 
-    tfm_core_util_memset(&spe_mailbox_queue.queue[idx], 0,
+    spm_memset(&spe_mailbox_queue.queue[idx], 0,
                          sizeof(spe_mailbox_queue.queue[idx]));
     set_spe_queue_empty_status(idx);
 }
@@ -158,8 +158,8 @@ static void mailbox_direct_reply(uint8_t idx, uint32_t result)
 
     /* Get reply address */
     reply_ptr = get_nspe_reply_addr(idx);
-    tfm_core_util_memcpy(&reply_ptr->return_val, &ret_result,
-                         sizeof(reply_ptr->return_val));
+    spm_memcpy(&reply_ptr->return_val, &ret_result,
+               sizeof(reply_ptr->return_val));
 
     mailbox_clean_queue_slot(idx);
 
@@ -220,8 +220,7 @@ int32_t tfm_mailbox_handle_msg(void)
         spe_mailbox_queue.queue[idx].ns_slot_idx = idx;
 
         msg_ptr = &spe_mailbox_queue.queue[idx].msg;
-        tfm_core_util_memcpy(msg_ptr, &ns_queue->queue[idx].msg,
-                             sizeof(*msg_ptr));
+        spm_memcpy(msg_ptr, &ns_queue->queue[idx].msg, sizeof(*msg_ptr));
 
         if (check_mailbox_msg(msg_ptr) != MAILBOX_SUCCESS) {
             mailbox_clean_queue_slot(idx);
@@ -377,7 +376,7 @@ int32_t tfm_mailbox_init(void)
 {
     int32_t ret;
 
-    tfm_core_util_memset(&spe_mailbox_queue, 0, sizeof(spe_mailbox_queue));
+    spm_memset(&spe_mailbox_queue, 0, sizeof(spe_mailbox_queue));
 
     spe_mailbox_queue.empty_slots =
             (mailbox_queue_status_t)((1UL << (NUM_MAILBOX_QUEUE_SLOT - 1)) - 1);

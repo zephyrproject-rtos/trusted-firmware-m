@@ -181,12 +181,12 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         tfm_core_panic();
     }
 
-    tfm_core_util_memset(invecs, 0, sizeof(invecs));
-    tfm_core_util_memset(outvecs, 0, sizeof(outvecs));
+    spm_memset(invecs, 0, sizeof(invecs));
+    spm_memset(outvecs, 0, sizeof(outvecs));
 
     /* Copy the address out to avoid TOCTOU attacks. */
-    tfm_core_util_memcpy(invecs, inptr, in_num * sizeof(psa_invec));
-    tfm_core_util_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
+    spm_memcpy(invecs, inptr, in_num * sizeof(psa_invec));
+    spm_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
 
     /*
      * For client input vector, it is a fatal error if the provided payload

@@ -25,9 +25,10 @@ if(NOT DEFINED TFM_ROOT_DIR)
 endif()
 
 set (LIBSPRT_C_SRC
-    "${LIBSPRT_DIR}/tfm_libsprt_c_memcpy.c"
-    "${LIBSPRT_DIR}/tfm_libsprt_c_memmove.c"
-    "${LIBSPRT_DIR}/tfm_libsprt_c_memcmp.c"
+    "${LIBSPRT_DIR}/crt_memcpy.c"
+    "${LIBSPRT_DIR}/crt_memmove.c"
+    "${LIBSPRT_DIR}/crt_memcmp.c"
+    "${LIBSPRT_DIR}/crt_memset.c"
     "${LIBSPRT_DIR}/service_api.c"
     "${TFM_ROOT_DIR}/interface/src/log/tfm_log_raw.c")
 

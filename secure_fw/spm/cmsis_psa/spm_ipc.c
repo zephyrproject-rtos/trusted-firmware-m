@@ -562,7 +562,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    tfm_core_util_memset(msg, 0, sizeof(struct tfm_msg_body_t));
+    spm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
 
     tfm_event_init(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;
@@ -892,9 +892,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
         tfm_core_panic();
     }
 
-    tfm_core_util_memcpy(&ctrl_param,
-                         (const void *)args[1],
-                         sizeof(ctrl_param));
+    spm_memcpy(&ctrl_param, (const void *)args[1], sizeof(ctrl_param));
 
     type = ctrl_param.type;
     in_num = ctrl_param.in_len;
@@ -1053,7 +1051,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
                            struct tfm_conn_handle_t,
                            internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
 
-    tfm_core_util_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
+    spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
     /*
      * There may be multiple messages for this RoT Service signal, do not clear
@@ -1150,7 +1148,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
     bytes = num_bytes > msg->msg.in_size[invec_idx] ?
                         msg->msg.in_size[invec_idx] : num_bytes;
 
-    tfm_core_util_memcpy(buffer, msg->invec[invec_idx].base, bytes);
+    spm_memcpy(buffer, msg->invec[invec_idx].base, bytes);
 
     /* There maybe some remaining data */
     msg->invec[invec_idx].base = (char *)msg->invec[invec_idx].base + bytes;
@@ -1274,8 +1272,8 @@ void tfm_spm_psa_write(uint32_t *args)
         tfm_core_panic();
     }
 
-    tfm_core_util_memcpy((char *)msg->outvec[outvec_idx].base +
-                         msg->outvec[outvec_idx].len, buffer, num_bytes);
+    spm_memcpy((char *)msg->outvec[outvec_idx].base +
+               msg->outvec[outvec_idx].len, buffer, num_bytes);
 
     /* Update the write number */
     msg->outvec[outvec_idx].len += num_bytes;

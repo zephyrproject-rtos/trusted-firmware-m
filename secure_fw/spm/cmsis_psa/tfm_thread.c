@@ -161,8 +161,8 @@ void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,
      * First, update latest context into the current thread context.
      * Then, update background context with next thread's context.
      */
-    tfm_core_util_memcpy(&prev->arch_ctx, p_actx, sizeof(*p_actx));
-    tfm_core_util_memcpy(p_actx, &next->arch_ctx, sizeof(next->arch_ctx));
+    spm_memcpy(&prev->arch_ctx, p_actx, sizeof(*p_actx));
+    spm_memcpy(p_actx, &next->arch_ctx, sizeof(next->arch_ctx));
 
     /* Update current thread indicator */
     CURR_THRD = next;

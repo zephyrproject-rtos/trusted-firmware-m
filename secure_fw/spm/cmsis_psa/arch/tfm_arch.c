@@ -76,10 +76,10 @@ void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
     p_stat_ctx--;
 
     /* State context is considerate at thread start.*/
-    tfm_core_util_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
+    spm_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
     tfm_arch_init_state_ctx(p_stat_ctx, param, pfn);
 
     /* Initialize architecture context */
-    tfm_core_util_memset(p_actx, 0, sizeof(*p_actx));
+    spm_memset(p_actx, 0, sizeof(*p_actx));
     tfm_arch_init_actx(p_actx, (uint32_t)p_stat_ctx, (uint32_t)stk_btm);
 }
