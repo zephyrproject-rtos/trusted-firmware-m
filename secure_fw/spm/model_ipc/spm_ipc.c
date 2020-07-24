@@ -326,11 +326,15 @@ static struct spm_partition_desc_t *
 
 struct spm_partition_desc_t *tfm_spm_get_running_partition(void)
 {
-    uint32_t spid;
+    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
+    struct spm_partition_desc_t *partition;
+    struct spm_partition_runtime_data_t *rt_data;
 
-    spid = tfm_spm_partition_get_running_partition_id();
-
-    return tfm_spm_get_partition_by_id(spid);
+    rt_data = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_runtime_data_t,
+                                    sp_thrd);
+    partition = TFM_GET_CONTAINER_PTR(rt_data, struct spm_partition_desc_t,
+                                      runtime_data);
+    return partition;
 }
 
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
@@ -536,65 +540,16 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     return IPC_SUCCESS;
 }
 
-/**
- * \brief Get bottom of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region bottom value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-static uint32_t tfm_spm_partition_get_stack_bottom(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].
-            memory_data->stack_bottom;
-}
-
-/**
- * \brief Get top of stack region for a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Stack region top value
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-static uint32_t tfm_spm_partition_get_stack_top(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].memory_data->stack_top;
-}
-
 uint32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
     struct spm_partition_desc_t *partition;
-    struct spm_partition_runtime_data_t *r_data;
 
-    r_data = TFM_GET_CONTAINER_PTR(pth, struct spm_partition_runtime_data_t,
-                                   sp_thrd);
-    partition = TFM_GET_CONTAINER_PTR(r_data, struct spm_partition_desc_t,
-                                      runtime_data);
-    return partition->static_data->partition_id;
-}
-
-static struct tfm_core_thread_t *
-    tfm_spm_partition_get_thread_info(uint32_t partition_idx)
-{
-    return &g_spm_partition_db.partitions[partition_idx].runtime_data.sp_thrd;
-}
-
-static tfm_core_thrd_entry_t
-    tfm_spm_partition_get_init_func(uint32_t partition_idx)
-{
-    return (tfm_core_thrd_entry_t)(g_spm_partition_db.partitions[partition_idx].
-                             static_data->partition_init);
-}
-
-static uint32_t tfm_spm_partition_get_priority(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].static_data->
-                    partition_priority;
+    partition = tfm_spm_get_running_partition();
+    if (partition && partition->static_data) {
+        return partition->static_data->partition_id;
+    } else {
+        return INVALID_PARTITION_ID;
+    }
 }
 
 int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
@@ -646,10 +601,18 @@ uint32_t tfm_spm_init(void)
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         partition = &g_spm_partition_db.partitions[i];
 
+        if (!partition || !partition->memory_data || !partition->static_data) {
+            tfm_core_panic();
+        }
+
+        if (!(partition->static_data->partition_flags & SPM_PART_FLAG_IPC)) {
+            tfm_core_panic();
+        }
+
         /* Check if the PSA framework version matches. */
         if (partition->static_data->psa_framework_version !=
             PSA_FRAMEWORK_VERSION) {
-            ERROR_MSG("Warning: PSA Framework Verison is not matched!");
+            ERROR_MSG("Warning: PSA Framework Verison does not match!");
             continue;
         }
 
@@ -662,10 +625,6 @@ uint32_t tfm_spm_init(void)
                 }
                 ++platform_data_p;
             }
-        }
-
-        if ((tfm_spm_partition_get_flags(i) & SPM_PART_FLAG_IPC) == 0) {
-            continue;
         }
 
         /* Add PSA_DOORBELL signal to assigned_signals */
@@ -685,18 +644,19 @@ uint32_t tfm_spm_init(void)
         tfm_event_init(&partition->runtime_data.signal_evnt);
         tfm_list_init(&partition->runtime_data.service_list);
 
-        pth = tfm_spm_partition_get_thread_info(i);
+        pth = &partition->runtime_data.sp_thrd;
         if (!pth) {
             tfm_core_panic();
         }
 
         tfm_core_thrd_init(pth,
-                           tfm_spm_partition_get_init_func(i),
+                           (tfm_core_thrd_entry_t)
+                                         partition->static_data->partition_init,
                            NULL,
-                           (uintptr_t)tfm_spm_partition_get_stack_top(i),
-                           (uintptr_t)tfm_spm_partition_get_stack_bottom(i));
+                           (uintptr_t)partition->memory_data->stack_top,
+                           (uintptr_t)partition->memory_data->stack_bottom);
 
-        pth->prior = tfm_spm_partition_get_priority(i);
+        pth->prior = partition->static_data->partition_priority;
 
         if (partition->static_data->partition_id == TFM_SP_NON_SECURE_ID) {
             p_ns_entry_thread = pth;
