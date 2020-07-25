@@ -20,6 +20,8 @@ void jump_to_ns_code(void)
 {
     /* Calls the non-secure Reset_Handler to jump to the non-secure binary */
     ns_entry();
+
+    tfm_core_panic();
 }
 
 __attribute__((naked))
