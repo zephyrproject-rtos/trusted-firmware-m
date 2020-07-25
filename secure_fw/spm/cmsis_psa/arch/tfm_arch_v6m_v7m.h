@@ -107,11 +107,11 @@ __STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
 }
 
 /**
- * \brief Set MSP limit value.
+ * \brief Secure the MSP
  *
  * \param[in] msplim        MSP limit value to be written.
  */
-__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
 {
     /*
      * Defined as an empty function now.

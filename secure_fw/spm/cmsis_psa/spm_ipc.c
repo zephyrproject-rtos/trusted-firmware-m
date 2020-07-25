@@ -941,7 +941,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
          */
         stacked_ctx_pos = (uintptr_t)p_ctx +
                           sizeof(struct tfm_state_context_t) +
-                          TFM_VENEER_STACK_GUARD_SIZE;
+                          TFM_STACK_SEALED_SIZE;
 
         if (is_stack_alloc_fp_space(exc_return)) {
 #if defined (__FPU_USED) && (__FPU_USED == 1U)

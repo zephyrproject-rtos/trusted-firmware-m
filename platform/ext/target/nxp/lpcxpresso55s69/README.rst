@@ -183,7 +183,7 @@ device (``monitor reset``), and continue (``c``) execution.
 
     Breakpoint 1, main ()
         at [path]/secure_fw/core/tfm_core.c:189
-    189     tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+    189     tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
 
 Commonly used GDB commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
