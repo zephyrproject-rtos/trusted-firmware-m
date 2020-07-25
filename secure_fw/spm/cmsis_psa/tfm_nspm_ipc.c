@@ -104,7 +104,6 @@ void tfm_nspm_thread_entry(void)
         "mov      r10, r4        \n"
         "mov      r11, r4        \n"
         "mov      r12, r4        \n"
-        "push     {r0, r1}       \n"
         "bxns     r0             \n"
     );
 }

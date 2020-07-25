@@ -110,6 +110,26 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
+ * \brief Seal the thread stack.
+ *
+ * This function must be called only when the caller is using MSP.
+ *
+ * \param[in] stk        Thread stack address.
+ *
+ * \retval stack         Updated thread stack address.
+ */
+__STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
+{
+    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    stk -= TFM_STACK_SEALED_SIZE;
+
+    *((uint32_t *)stk)       = TFM_STACK_SEAL_VALUE;
+    *((uint32_t *)(stk + 4)) = TFM_STACK_SEAL_VALUE;
+
+    return stk;
+}
+
+/**
  * \brief Update architecture context value into hardware
  *
  * \param[in] p_actx        Pointer of context data

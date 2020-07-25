@@ -62,8 +62,8 @@ void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
      * For security consideration, set unused registers into ZERO;
      * and only necessary registers are set here.
      */
-    struct tfm_state_context_t *p_stat_ctx =
-                            (struct tfm_state_context_t *)stk_top;
+    struct tfm_state_context_t *p_stat_ctx=
+            (struct tfm_state_context_t *)tfm_arch_seal_thread_stack(stk_top);
 
     /*
      * Shift back SP to leave space for holding base context

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "cmsis_compiler.h"
+#include "utilities.h"
 
 #if !TFM_MULTI_CORE_TOPOLOGY
 #error "Armv6-M/Armv7-M can only support multi-core TF-M now."
@@ -94,6 +95,19 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
      * The PSP limit value can be used in more strict memory check.
      */
     (void)psplim;
+}
+
+/**
+ * \brief Seal the thread stack.
+ *
+ * \param[in] stk        Thread stack address.
+ *
+ * \retval stack         Updated thread stack address.
+ */
+__STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
+{
+    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    return stk;
 }
 
 /**
