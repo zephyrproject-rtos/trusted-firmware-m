@@ -299,36 +299,42 @@ void tfm_arch_configure_coprocessors(void)
 #endif
 }
 
-#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+#if defined(__ARM_ARCH_8M_BASE__) || defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MRS     r2, MSP                        \n"
-    /* Check store SP in thread mode to r0 */
-    "TST     lr, #4                         \n"
-    "ITE     EQ                             \n"
-    "MOVEQ   r0, r2                         \n"
-    "MRSNE   r0, PSP                        \n"
-    "MOV     r1, lr                         \n"
-    "BL      tfm_core_svc_handler           \n"
-    "BX      r0                             \n"
-    );
-}
-#elif defined(__ARM_ARCH_8M_BASE__)
-__attribute__((naked)) void SVC_Handler(void)
-{
-    __ASM volatile(
+#if !defined(__ICCARM__)
+    ".syntax unified                        \n"
+#endif
+    "MRS     r0, PSP                        \n"
     "MRS     r2, MSP                        \n"
     "MOVS    r1, #4                         \n"
     "MOV     r3, lr                         \n"
-    "MOV     r0, r2                         \n"
     "TST     r1, r3                         \n"
-    "BEQ     handler                        \n"
-    /* If SVC was made from thread mode, overwrite r0 with PSP */
-    "MRS     r0, PSP                        \n"
-    "handler:                               \n"
+    "BNE     from_thread                    \n"
+    /*
+     * This branch is taken when the code is being invoked from handler mode.
+     * This happens when a de-privileged interrupt handler is to be run. Seal
+     * the stack before de-privileging.
+     */
+    "LDR     r0, =0xFEF5EDA5                \n"
+    "MOVS    r3, r0                         \n"
+    "PUSH    {r0, r3}                       \n"
+    /* Overwrite r0 with MSP */
+    "MOV     r0, r2                         \n"
+    "from_thread:                           \n"
     "MOV     r1, lr                         \n"
     "BL      tfm_core_svc_handler           \n"
+    "MOVS    r1, #4                         \n"
+    "TST     r1, r0                         \n"
+    "BNE     to_thread                      \n"
+    /*
+     * This branch is taken when the code is going to return to handler mode.
+     * This happens after a de-privileged interrupt handler had been run. Pop
+     * the sealing from the stack.
+     */
+    "POP     {r1, r2}                       \n"
+    "to_thread:                             \n"
     "BX      r0                             \n"
     );
 }

@@ -976,8 +976,12 @@ uint32_t tfm_spm_partition_return_handler(uint32_t lr)
 uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
 {
     enum tfm_status_e res;
-    struct tfm_state_context_t *irq_svc_ctx =
-                                    (struct tfm_state_context_t *)irq_svc_args;
+    struct tfm_state_context_t *irq_svc_ctx;
+
+    /* Take into account the sealed stack*/
+    irq_svc_args += 2;
+
+    irq_svc_ctx = (struct tfm_state_context_t *)irq_svc_args;
 
     if (!(lr & EXC_RETURN_STACK_PROCESS)) {
         /* Partition request SVC called with MSP active.
