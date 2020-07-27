@@ -422,8 +422,21 @@ Compile time switches:
     - **False:** Doesn't add encrypted image support and doesn't encrypt the
       image.
 
+    .. Note::
+        The decryption takes place during the upgrade process, when the images
+        are being moved between the slots. This means that boards that don't
+        already have an image on them with MCUBoot that has been compiled with
+        ``MCUBOOT_ENCRYPT_RSA`` enabled need special treatment. In order to load
+        an encrypted image to such boards, an upgrade needs to be executed. This
+        can be done by using MCUBoot, putting an image in the secondary image
+        area, and setting ``MCUBOOT_ENCRYPT_RSA`` to ``ON``. When using the
+        ``OVERWRITE_ONLY`` upgrade strategy, this is enough. When using
+        ``SWAP``, an image is needed in the primary image area as well, to
+        trigger the update.
+
     .. Warning::
-        DO NOT use this key in production code, it is exclusively for testing!
+        DO NOT use the ``enc-rsa2048-pub.pem`` key in production code, it is
+        exclusively for testing!
 
 Image versioning
 ================
