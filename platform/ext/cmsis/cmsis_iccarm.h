@@ -248,11 +248,11 @@ __packed struct  __iar_u32 { uint32_t v; };
 #endif
 
 #ifndef __INITIAL_SP
-#define __INITIAL_SP              CSTACK$$Limit
+#define __INITIAL_SP              ARM_LIB_STACK$$Limit
 #endif
 
 #ifndef __STACK_LIMIT
-#define __STACK_LIMIT             CSTACK$$Base
+#define __STACK_LIMIT             ARM_LIB_STACK$$Base
 #endif
 
 #ifndef __VECTOR_TABLE
