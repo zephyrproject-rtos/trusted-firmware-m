@@ -281,7 +281,7 @@ By default, the original MCUBoot from
 in TF-M. The repository must be cloned into the base folder (into which TF-M
 was cloned previously).::
 
-    cd <TF-M base folder>
+    cd <base folder>
     git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.6.0
     cd <TF-M build folder>
     cmake -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG -DMCUBOOT_REPO=UPSTREAM ../

@@ -43,7 +43,7 @@ Build steps:
 ============
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
@@ -56,7 +56,7 @@ Regression Tests for the AN521 target platform
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
     mkdir cmake_test
     cd cmake_test
@@ -67,7 +67,7 @@ Regression Tests for the AN521 target platform
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
     mkdir cmake_test
     cd cmake_test

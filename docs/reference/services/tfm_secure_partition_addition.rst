@@ -315,7 +315,7 @@ files from manifest by using TF-M tools.
 
 .. code-block:: bash
 
-   cd <TF-M base folder>
+   cd <base folder>
    cd trusted-firmware-m
    python ./tools/tfm_parse_manifest_list.py
 
