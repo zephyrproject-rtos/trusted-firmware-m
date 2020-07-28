@@ -53,6 +53,7 @@ struct test_params {
 /* List of tests */
 static void multi_client_call_light_test(struct test_result_t *ret);
 static void multi_client_call_heavy_test(struct test_result_t *ret);
+static void multi_client_call_ooo_test(struct test_result_t *ret);
 
 static struct test_t multi_core_tests[] = {
     {&multi_client_call_light_test,
@@ -62,6 +63,10 @@ static struct test_t multi_core_tests[] = {
     {&multi_client_call_heavy_test,
      "MULTI_CLIENT_CALL_HEAVY_TEST",
      "Multiple outstanding NS PSA client calls heavyweight test",
+     {TEST_PASSED}},
+    {&multi_client_call_ooo_test,
+     "MULTI_CLIENT_CALL_OOO_TEST",
+     "Multiple outstanding NS PSA client calls test with out-of-order calls",
      {TEST_PASSED}},
 };
 
@@ -103,7 +108,8 @@ static void wait_child_thread_completion(struct test_params *params_array,
 static void multi_client_call_test(struct test_result_t *ret,
                                    os_wrapper_thread_func test_runner,
                                    int32_t stack_size,
-                                   int32_t nr_rounds)
+                                   int32_t nr_rounds,
+                                   bool is_mixed)
 {
     uint8_t i, nr_child;
     void *current_thread_handle;
@@ -166,7 +172,9 @@ static void multi_client_call_test(struct test_result_t *ret,
 
     nr_child = i;
     TEST_LOG("Totally %d threads for test start\r\n", nr_child + 1);
-    TEST_LOG("Each thread run 0x%x rounds tests\r\n", nr_rounds);
+    if (!is_mixed) {
+        TEST_LOG("Each thread run 0x%x rounds tests\r\n", nr_rounds);
+    }
 
     /*
      * Activate test threads one by one.
@@ -252,7 +260,8 @@ static void multi_client_call_light_test(struct test_result_t *ret)
 {
     multi_client_call_test(ret, multi_client_call_light_runner,
                            MULTI_CALL_LIGHT_TEST_STACK_SIZE,
-                           MAX_NR_LIGHT_TEST_ROUND);
+                           MAX_NR_LIGHT_TEST_ROUND,
+                           false);
 }
 
 static inline enum test_status_t multi_client_call_heavy_loop(
@@ -320,5 +329,43 @@ static void multi_client_call_heavy_test(struct test_result_t *ret)
 {
     multi_client_call_test(ret, multi_client_call_heavy_runner,
                            MULTI_CALL_HEAVY_TEST_STACK_SIZE,
-                           MAX_NR_HEAVY_TEST_ROUND);
+                           MAX_NR_HEAVY_TEST_ROUND,
+                           false);
+}
+
+static void multi_client_call_ooo_runner(void *argument)
+{
+    struct test_params *params = (struct test_params *)argument;
+    const psa_storage_uid_t uid = TEST_UID_1 + params->child_idx;
+
+    if (!params->is_parent) {
+        /* Wait for the signal to kick-off the test */
+        os_wrapper_thread_wait_flag(TEST_CHILD_EVENT_FLAG(params->child_idx),
+                                    OS_WRAPPER_WAIT_FOREVER);
+    }
+
+    if (!params->child_idx % 2) {
+        params->ret = multi_client_call_heavy_loop(uid, params->nr_rounds);
+    } else {
+        params->ret = multi_client_call_light_loop(params->nr_rounds * 20);
+    }
+
+    if (!params->is_parent) {
+        /* Mark this child thread has completed */
+        os_wrapper_mutex_acquire(params->mutex_handle, OS_WRAPPER_WAIT_FOREVER);
+        params->is_complete = true;
+        os_wrapper_mutex_release(params->mutex_handle);
+    }
+}
+
+/**
+ * \brief Mix lightweight test and heavyweight test to verify multiple
+ *        outstanding PSA client calls feature with out-of-order calls.
+ */
+static void multi_client_call_ooo_test(struct test_result_t *ret)
+{
+    multi_client_call_test(ret, multi_client_call_ooo_runner,
+                           MULTI_CALL_HEAVY_TEST_STACK_SIZE,
+                           MAX_NR_HEAVY_TEST_ROUND,
+                           true);
 }
