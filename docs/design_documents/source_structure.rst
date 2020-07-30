@@ -45,7 +45,6 @@ docs          The documentations.                  No.
 lib           The 3rd party library.               No.
 **platform**  Platform intermedia files.           See `'platform'`_.
 **secure_fw** The secure firmware.                 See `'secure_fw'`_.
-test          Tests.                               No.
 tools         Tools in scripts for building.       No.
 ============= ==================================== ====================
 
