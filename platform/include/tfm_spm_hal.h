@@ -286,4 +286,22 @@ void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s,
 
 #endif /*TFM_MULTI_CORE_TOPOLOGY*/
 
+#if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
+/**
+ * \brief Platform-specific check whether the current partition has access to a memory range
+ *
+ * The function checks whether the current partition has access to a memory range,
+ * taking into consideration the implementation-defined attribution unit that is
+ * present on a particular platform.
+ *
+ * \param[in] p      The start address of the range to check
+ * \param[in] s      The size of the range to check
+ * \param[in] flags  The flags to pass to the cmse_check_address_range func
+ *
+ * \return True if the access is granted, false otherwise.
+ */
+bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
+                                              int flags);
+#endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
+
 #endif /* __TFM_SPM_HAL_H__ */

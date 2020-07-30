@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "region_defs.h"
 #include "tfm_arch.h"
+#include "tfm_spm_hal.h"
 #include "tfm_api.h"
 #ifdef TFM_PSA_API
 #include "spm_ipc.h"
@@ -40,6 +41,25 @@ static enum tfm_status_e has_access_to_region(const void *p, size_t s,
     /* Use the TT instruction to check access to the partition's regions*/
     range_access_allowed_by_mpu =
                           cmse_check_address_range((void *)p, s, flags) != NULL;
+
+#if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
+    if (!range_access_allowed_by_mpu) {
+        /*
+         * Verification failure may be due to address range crossing
+         * one or multiple IDAU boundaries. In this case request a
+         * platform-specific check for access permissions.
+         */
+        cmse_address_info_t addr_info_base = cmse_TT((void *)p);
+        cmse_address_info_t addr_info_last = cmse_TT((void *)((uint32_t)p + s - 1));
+
+        if ((addr_info_base.flags.idau_region_valid != 0) &&
+            (addr_info_last.flags.idau_region_valid != 0) &&
+            (addr_info_base.flags.idau_region != addr_info_last.flags.idau_region)) {
+                range_access_allowed_by_mpu =
+                    tfm_spm_hal_has_access_to_region(p, s, flags);
+            }
+    }
+#endif
 
     if (range_access_allowed_by_mpu) {
         return TFM_SUCCESS;
