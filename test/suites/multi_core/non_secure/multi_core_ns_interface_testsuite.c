@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include "os_wrapper/mutex.h"
 #include "os_wrapper/thread.h"
+#include "os_wrapper/tick.h"
 #include "psa/client.h"
 #include "psa/internal_trusted_storage.h"
 #include "psa_manifest/sid.h"
@@ -44,8 +45,10 @@ struct test_params {
     void *parent_handle;            /* The thread handle of parent thread */
     uint32_t child_idx;             /* The index of current child thread */
     uint32_t nr_rounds;             /* The number of test rounds */
+    uint32_t nr_calls;              /* The number of PSA client calls */
     void *mutex_handle;             /* Mutex to protect is_complete flag */
     enum test_status_t ret;         /* The test result */
+    uint32_t total_ticks;           /* The total ticks cost to complete tests */
     bool is_complete;               /* Whether current test thread completes */
     bool is_parent;                 /* Whether executed in parent thread */
 };
@@ -113,7 +116,7 @@ static void multi_client_call_test(struct test_result_t *ret,
 {
     uint8_t i, nr_child;
     void *current_thread_handle;
-    uint32_t current_thread_priority, err;
+    uint32_t current_thread_priority, err, total_ticks, total_calls, avg_ticks;
     void *mutex_handle;
     void *child_ids[NR_MULTI_CALL_CHILD];
     struct ns_mailbox_stats_res_t stats_res;
@@ -200,12 +203,18 @@ static void multi_client_call_test(struct test_result_t *ret,
         return;
     }
 
+    total_ticks = parent_params.total_ticks;
+    total_calls = parent_params.nr_calls;
+
     /* Check the test result of each child thread */
     for (i = 0; i < nr_child; i++) {
         if (params[i].ret != TEST_PASSED) {
             ret->val = TEST_FAILED;
             return;
         }
+
+        total_ticks += params[i].total_ticks;
+        total_calls += params[i].nr_calls;
     }
 
     tfm_ns_mailbox_stats_avg_slot(&stats_res);
@@ -213,13 +222,22 @@ static void multi_client_call_test(struct test_result_t *ret,
     TEST_LOG("%d.%d NS mailbox queue slots are occupied each time in average.\r\n",
              stats_res.avg_nr_slots, stats_res.avg_nr_slots_tenths);
 
+    TEST_LOG("Cost %d ticks totally\r\n", total_ticks);
+    avg_ticks = total_ticks / total_calls;
+    total_ticks %= total_calls;
+    TEST_LOG("Each PSA client call cost %d.%d ticks in average\r\n", avg_ticks,
+             total_ticks * 10 / total_calls);
+
     ret->val = TEST_PASSED;
 }
 
 static inline
-enum test_status_t multi_client_call_light_loop(uint32_t nr_rounds)
+enum test_status_t multi_client_call_light_loop(struct test_params *params)
 {
-    uint32_t i, version;
+    uint32_t i, version, total_ticks;
+    uint32_t nr_rounds = params->nr_rounds;
+
+    total_ticks = os_wrapper_get_tick();
 
     for (i = 0; i < nr_rounds; i++) {
         version = psa_framework_version();
@@ -228,6 +246,9 @@ enum test_status_t multi_client_call_light_loop(uint32_t nr_rounds)
             return TEST_FAILED;
         }
     }
+
+    params->total_ticks = os_wrapper_get_tick() - total_ticks;
+    params->nr_calls = nr_rounds;
 
     return TEST_PASSED;
 }
@@ -242,7 +263,7 @@ static void multi_client_call_light_runner(void *argument)
                                     OS_WRAPPER_WAIT_FOREVER);
     }
 
-    params->ret = multi_client_call_light_loop(params->nr_rounds);
+    params->ret = multi_client_call_light_loop(params);
 
     if (!params->is_parent) {
         /* Mark this child thread has completed */
@@ -264,15 +285,17 @@ static void multi_client_call_light_test(struct test_result_t *ret)
                            false);
 }
 
-static inline enum test_status_t multi_client_call_heavy_loop(
-                                                    const psa_storage_uid_t uid,
-                                                    uint32_t rounds)
+static inline
+enum test_status_t multi_client_call_heavy_loop(const psa_storage_uid_t uid,
+                                                struct test_params *params)
 {
-    uint32_t i;
+    uint32_t i, total_ticks, rounds = params->nr_rounds;
     psa_status_t status;
     size_t rd_data_len;
     char rd_data[ITS_DATA_LEN];
     const psa_storage_create_flags_t flags = PSA_STORAGE_FLAG_NONE;
+
+    total_ticks = os_wrapper_get_tick();
 
     for (i = 0; i < rounds; i++) {
         /* Set a data in the asset */
@@ -297,6 +320,9 @@ static inline enum test_status_t multi_client_call_heavy_loop(
         }
     }
 
+    params->total_ticks = os_wrapper_get_tick() - total_ticks;
+    params->nr_calls = rounds * 3;
+
     return TEST_PASSED;
 }
 
@@ -311,7 +337,7 @@ static void multi_client_call_heavy_runner(void *argument)
                                     OS_WRAPPER_WAIT_FOREVER);
     }
 
-    params->ret = multi_client_call_heavy_loop(uid, params->nr_rounds);
+    params->ret = multi_client_call_heavy_loop(uid, params);
 
     if (!params->is_parent) {
         /* Mark this child thread has completed */
@@ -345,9 +371,10 @@ static void multi_client_call_ooo_runner(void *argument)
     }
 
     if (!params->child_idx % 2) {
-        params->ret = multi_client_call_heavy_loop(uid, params->nr_rounds);
+        params->ret = multi_client_call_heavy_loop(uid, params);
     } else {
-        params->ret = multi_client_call_light_loop(params->nr_rounds * 20);
+        params->nr_rounds *= 20;
+        params->ret = multi_client_call_light_loop(params);
     }
 
     if (!params->is_parent) {

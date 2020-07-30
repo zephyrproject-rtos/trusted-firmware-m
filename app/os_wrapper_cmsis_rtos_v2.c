@@ -210,3 +210,8 @@ uint32_t os_wrapper_thread_wait_flag(uint32_t flags, uint32_t timeout)
 
     return OS_WRAPPER_SUCCESS;
 }
+
+uint32_t os_wrapper_get_tick(void)
+{
+    return osKernelGetTickCount();
+}
