@@ -147,8 +147,8 @@ Folder name                         Purpose
 =================================== ===========================================
 include/\*                          SPM public headers.
 common/\*                           SPM common logic complies PSA-FF-M.
-psa_cmsis/\*                        CMSIS implementation for PSA-FF-M SPM. [1]
-func_cmsis/\*                       The library model implementation. [2]
+cmsis_psa/\*                        CMSIS implementation for PSA-FF-M SPM. [1]
+cmsis_func/\*                       The library model implementation. [2]
 \*                                  Implementation sources.
 =================================== ===========================================
 
