@@ -30,7 +30,6 @@ LR_CODE S_CODE_START {
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
-        tfm_spm_services.o (+RO)
         platform_retarget_dev.o (+RO)
         device_definition.o (+RO)
         *(SFN)

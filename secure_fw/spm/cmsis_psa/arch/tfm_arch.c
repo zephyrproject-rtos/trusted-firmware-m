@@ -7,8 +7,43 @@
 
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
+#include "tfm/tfm_core_svc.h"
+#include "tfm/tfm_spm_services.h"
 
-#ifdef TFM_PSA_API
+__attribute__((naked))
+int32_t tfm_spm_request(void)
+{
+    __ASM volatile(
+        "SVC    %0\n"
+        "BX     lr\n"
+        : : "I" (TFM_SVC_SPM_REQUEST));
+}
+
+__attribute__((naked))
+int32_t tfm_spm_request_reset_vote(void)
+{
+    __ASM volatile(
+        "MOVS   R0, %0\n"
+        "B      tfm_spm_request\n"
+        : : "I" (TFM_SPM_REQUEST_RESET_VOTE));
+}
+
+__attribute__((naked))
+void tfm_enable_irq(psa_signal_t irq_signal)
+{
+    __ASM("SVC %0\n"
+          "BX LR\n"
+          : : "I" (TFM_SVC_ENABLE_IRQ));
+}
+
+__attribute__((naked))
+void tfm_disable_irq(psa_signal_t irq_signal)
+{
+    __ASM("SVC %0\n"
+          "BX LR\n"
+          : : "I" (TFM_SVC_DISABLE_IRQ));
+}
+
 static void tfm_arch_init_state_ctx(struct tfm_state_context_t *p_stat_ctx,
                                     void *param, uintptr_t pfn)
 {
@@ -48,5 +83,3 @@ void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
     tfm_core_util_memset(p_actx, 0, sizeof(*p_actx));
     tfm_arch_init_actx(p_actx, (uint32_t)p_stat_ctx, (uint32_t)stk_btm);
 }
-
-#endif /* TFM_PSA_API */

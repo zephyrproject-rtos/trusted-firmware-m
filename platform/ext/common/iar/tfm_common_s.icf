@@ -25,7 +25,6 @@ define memory mem with size = 4G;
 define block ER_TFM_CODE          with fixed order, alignment = 8 {readonly section .intvec, readonly};
 
 define block TFM_UNPRIV_CODE with alignment = 32 {
-       ro object tfm_spm_services.o,
        ro object platform_retarget_dev.o,
        ro object device_definition.o,
        section SFN,
@@ -179,7 +178,6 @@ define block TFM_SECURE_STACK   with size = 0x2000, alignment = 128 {};
 #endif /* !defined(TFM_PSA_API) */
 
 define block TFM_UNPRIV_DATA with alignment = 32 {
-       rw object tfm_spm_services.o,
        rw object platform_retarget_dev.o,
        rw object device_definition.o,
        };

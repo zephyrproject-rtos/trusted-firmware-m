@@ -57,4 +57,3 @@ unset(TFM_ARCH_C_SRC)
 #Setting include directories
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/platform/ext/cmsis ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/secure_fw/include ABSOLUTE)
-embedded_include_directories(PATH ${TFM_ARCH_DIR}/include ABSOLUTE)

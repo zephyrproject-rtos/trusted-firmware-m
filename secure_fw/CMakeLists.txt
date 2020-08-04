@@ -98,12 +98,10 @@ endif()
 
 #Involve all IPC related sources in ipc's CMakeLists.inc, and switch core between IPC and Library.
 if(TFM_PSA_API)
-	include(${SECURE_FW_DIR}/spm/model_ipc/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/cmsis_psa/CMakeLists.inc)
 else()
-	include(${SECURE_FW_DIR}/spm/model_func/CMakeLists.inc)
+	include(${SECURE_FW_DIR}/spm/cmsis_func/CMakeLists.inc)
 endif()
-
-include(${SECURE_FW_DIR}/spm/arch/CMakeLists.inc)
 
 set(BUILD_CMSIS_CORE On)
 set(BUILD_RETARGET On)

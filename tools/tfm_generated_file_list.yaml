@@ -18,14 +18,14 @@
     {
         "name": "Secure Partition declarations for library",
         "short_name": "tfm_partition_list_lib",
-        "template": "secure_fw/spm/model_func/tfm_spm_db_func.inc.template",
-        "output": "secure_fw/spm/model_func/tfm_spm_db_func.inc"
+        "template": "secure_fw/spm/cmsis_func/tfm_spm_db_func.inc.template",
+        "output": "secure_fw/spm/cmsis_func/tfm_spm_db_func.inc"
     },
     {
         "name": "Secure Partition declarations for IPC",
         "short_name": "tfm_partition_list_ipc",
-        "template": "secure_fw/spm/model_ipc/tfm_spm_db_ipc.inc.template",
-        "output": "secure_fw/spm/model_ipc/tfm_spm_db_ipc.inc"
+        "template": "secure_fw/spm/cmsis_psa/tfm_spm_db_ipc.inc.template",
+        "output": "secure_fw/spm/cmsis_psa/tfm_spm_db_ipc.inc"
     },
     {
         "name": "Secure Service list",
@@ -54,8 +54,8 @@
     {
         "name": "Secure Veneers C file",
         "short_name": "tfm_veneers_c",
-        "template": "secure_fw/spm/model_func/tfm_veneers.c.template",
-        "output": "secure_fw/spm/model_func/tfm_veneers.c"
+        "template": "secure_fw/spm/cmsis_func/tfm_veneers.c.template",
+        "output": "secure_fw/spm/cmsis_func/tfm_veneers.c"
     },
     {
         "name": "Secure Veneers H file",
@@ -66,14 +66,14 @@
     {
         "name": "Secure IRQ handlers",
         "short_name": "tfm_secure_irq_handlers",
-        "template": "secure_fw/spm/model_func/tfm_secure_irq_handlers.inc.template",
-        "output": "secure_fw/spm/model_func/tfm_secure_irq_handlers.inc"
+        "template": "secure_fw/spm/cmsis_func/tfm_secure_irq_handlers.inc.template",
+        "output": "secure_fw/spm/cmsis_func/tfm_secure_irq_handlers.inc"
     },
     {
         "name": "Secure IRQ handlers for PSA API",
         "short_name": "tfm_secure_irq_handlers_ipc",
-        "template": "secure_fw/spm/model_ipc/tfm_secure_irq_handlers_ipc.inc.template",
-        "output": "secure_fw/spm/model_ipc/tfm_secure_irq_handlers_ipc.inc"
+        "template": "secure_fw/spm/cmsis_psa/tfm_secure_irq_handlers_ipc.inc.template",
+        "output": "secure_fw/spm/cmsis_psa/tfm_secure_irq_handlers_ipc.inc"
     },
     {
         "name": "SID H file",

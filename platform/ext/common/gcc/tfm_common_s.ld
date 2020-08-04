@@ -291,8 +291,6 @@ SECTIONS
     {
         *libc_nano*:*(.text*)
         *libc_nano*:*(.rodata*)
-        *tfm_spm_services.*(.text*)
-        *tfm_spm_services.*(.rodata*)
         *platform_retarget_dev.*(.text*)
         *platform_retarget_dev.*(.rodata*)
         *device_definition.*(.text*)
