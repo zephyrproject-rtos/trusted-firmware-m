@@ -27,7 +27,7 @@ int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
 }
 
 __attribute__((naked))
-int32_t tfm_spm_request(void)
+static int32_t tfm_spm_request(int32_t request_type)
 {
     __ASM volatile(
         "SVC    %0\n"
@@ -35,13 +35,9 @@ int32_t tfm_spm_request(void)
         : : "I" (TFM_SVC_SPM_REQUEST));
 }
 
-__attribute__((naked))
 int32_t tfm_spm_request_reset_vote(void)
 {
-    __ASM volatile(
-        "MOVS   R0, %0\n"
-        "B      tfm_spm_request\n"
-        : : "I" (TFM_SPM_REQUEST_RESET_VOTE));
+    return tfm_spm_request((int32_t)TFM_SPM_REQUEST_RESET_VOTE);
 }
 
 __attribute__((naked))
