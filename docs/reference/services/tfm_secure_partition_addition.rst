@@ -100,7 +100,7 @@ Here is a manifest reference example for the IPC model, please refer to
     "name": "TFM_SP_EXAMPLE",
     "type": "PSA-ROT",
     "priority": "HIGH",
-    "entry_point": "EXAMPLE_main",
+    "entry_point": "example_main",
     "stack_size": "0x0200",
     "services" : [
       {
@@ -273,6 +273,10 @@ Two CMake configure files need to be added:
    The CMakeLists.inc is not mandatory, the user can put everything in
    CMakeLists.txt.
 
+The current CMake configuration should also be updated, by updating
+CommonConfig.cmake to include the definition of the newly introduced partition
+and adding the relevant subdirectoy in ``secure_fw/CMakeLists.txt``.
+
 Please refer to the source code of TF-M for more detail.
 
 Update manifest list
@@ -301,7 +305,7 @@ Reference configuration example:
       "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/EXAMPLE/tfm_example.yaml",
       "tfm_partition_ipc": true,
-      "conditional": "TFM_PARTITION_EXAMPLE_ENABLE",
+      "conditional": "TFM_PARTITION_EXAMPLE",
       "version_major": 0,
       "version_minor": 1,
       "pid": 256
@@ -320,8 +324,135 @@ files from manifest by using TF-M tools.
 
 Implement the RoT services
 ==========================
-The following not-binding rules, as currently implemented, can be used as
-guidelines:
+To implement RoT services, the partition needs a source file which contains the
+implementations of the services, as well as the partition entry point. The user
+can create this source file under
+``<TF-M base folder>/secure_fw/partitions/EXAMPLE/EXAMPLE.c``. The linker
+detects source files according to the pattern matching defined by the
+"linker_pattern" attribute in the ``tfm_manifest_list.yaml`` file.
+
+As an example, the RoT service with SID **ROT_A** will be implemented.
+
+Entry point function
+--------------------
+This function acts as a main() function for the partition.
+On incoming signals for service calls, the entry point function handles
+signals by calling the relevant service function.
+An example entry point is given
+
+.. code-block:: c
+
+    void example_main(void)
+    {
+        psa_signal_t signals = 0;
+
+        while (1) {
+            signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
+            if (signals & ROT_A_SIGNAL) {
+                rot_A();
+            } else {
+                /* Should not come here */
+                psa_panic();
+            }
+        }
+    }
+
+Service implementation
+----------------------
+The service is implemented by the ``rot_A()`` function, which is called upon an
+incoming signal. This implementation is up to the user, however an example
+service has been included for reference. The following example sends a message
+"Hello World" when called.
+
+.. code-block:: c
+
+    static void rot_A(void)
+    {
+        const int BUFFER_LEN = 32;
+        psa_msg_t msg;
+        psa_status_t r;
+        int i;
+        uint8_t rec_buf[BUFFER_LEN];
+        uint8_t send_buf[BUFFER_LEN] = "Hello World";
+
+        psa_get(ROT_A_SIGNAL, &msg);
+        switch (msg.type) {
+        case PSA_IPC_CONNECT:
+            if (service_in_use & ROT_A_SIGNAL) {
+                r = PSA_ERROR_CONNECTION_REFUSED;
+            } else {
+                service_in_use |= ROT_A_SIGNAL;
+                r = PSA_SUCCESS;
+            }
+            psa_reply(msg.handle, r);
+            break;
+        case PSA_IPC_CALL:
+            for (i = 0; i < PSA_MAX_IOVEC; i++) {
+                if (msg.in_size[i] != 0) {
+                    psa_read(msg.handle, i, rec_buf, BUFFER_LEN);
+                }
+                if (msg.out_size[i] != 0) {
+                    psa_write(msg.handle, i, send_buf, BUFFER_LEN);
+                }
+            }
+            psa_reply(msg.handle, PSA_SUCCESS);
+            break;
+        case PSA_IPC_DISCONNECT:
+            assert((service_in_use & ROT_A_SIGNAL) != 0);
+            service_in_use &= ~ROT_A_SIGNAL;
+            psa_reply(msg.handle, PSA_SUCCESS);
+            break;
+        default:
+            /* cannot get here [broken SPM] */
+            psa_panic();
+            break;
+        }
+    }
+
+Test connection
+---------------
+To test that the service has been implemented correctly, the user needs to call
+it from somewhere. One option is to create a new testsuite, such as
+``<TF-M-test base folder>/test/suites/example/non_secure/example_ns_interface_testsuite.c``.
+
+.. code-block:: c
+
+    static void tfm_example_test_1001(struct test_result_t *ret)
+    {
+        char str1[] = "str1";
+        char str2[] = "str2";
+        char str3[128], str4[128];
+        struct psa_invec invecs[2] = {{str1, sizeof(str1)},
+                                      {str2, sizeof(str2)}};
+        struct psa_outvec outvecs[2] = {{str3, sizeof(str3)},
+                                        {str4, sizeof(str4)}};
+        psa_handle_t handle;
+        psa_status_t status;
+        uint32_t version;
+
+        version = psa_version(ROT_A_SID);
+        TEST_LOG("TFM service support version is %d.\r\n", version);
+        handle = psa_connect(ROT_A_SID, ROT_A_VERSION);
+        status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);
+        if (status >= 0) {
+            TEST_LOG("psa_call is successful!\r\n");
+        } else {
+            TEST_FAIL("psa_call is failed!\r\n");
+            return;
+        }
+
+        TEST_LOG("outvec1 is: %s\r\n", outvecs[0].base);
+        TEST_LOG("outvec2 is: %s\r\n", outvecs[1].base);
+        psa_close(handle);
+        ret->val = TEST_PASSED;
+    }
+
+Once the test and service has been implemented, the project can be built and
+executed. The user should see the "Hello World" message in the console as
+received by the testsuite.
+
+Further Notes
+-------------
 
 - In the IPC model, Use PSA FF proposed memory accessing mechanism. SPM
   provides APIs and checking between isolation boundaries, a free accessing
