@@ -160,6 +160,10 @@ Platforms supported
         - `PSoc64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
 
+    - Secure Enclave system:
+
+        - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1_secure_enclave/readme>`
+
 The document :doc:`Platform Deprecation and Removal </docs/contributing/platform_deprecation>`
 lists the deprecated platforms planned to be removed from upstream.
 

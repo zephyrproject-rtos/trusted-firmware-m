@@ -427,6 +427,12 @@ and ``tfm_ns.bin``:
 
     srec_cat bin/tfm_s.bin -Binary -offset 0xA000000 bin/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
+Example application or regression tests on Musca-B1 using the Secure Enclave
+============================================================================
+
+Follow the above procedures, but to create a unified hex please check the
+:doc:`Musca-B1 Secure Enclave readme </platform/ext/target/musca_b1_secure_enclave/readme>`.
+
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards
 ********************************************************
