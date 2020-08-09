@@ -80,17 +80,45 @@ static inline void clear_queue_slot_woken(uint8_t idx)
     }
 }
 
+#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+/*
+ * When NSPE mailbox only covers a single non-secure core, spinlock only
+ * requires to disable IRQ.
+ */
+static inline void ns_mailbox_spin_lock(void)
+{
+    __disable_irq();
+}
+
+/*
+ * It is assumed that IRQ is always enabled when spinlock is acquired.
+ * Otherwise, the waiting thread won't be woken up.
+ */
+static inline void ns_mailbox_spin_unlock(void)
+{
+    __enable_irq();
+}
+#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+/*
+ * Local spinlock is implemented as a dummy one when multiple PSA client call
+ * feature is disabled, since interrupt is not required in NS mailbox.
+ */
+#define ns_mailbox_spin_lock()   do {} while (0)
+
+#define ns_mailbox_spin_unlock() do {} while (0)
+#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+
 static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 {
     uint8_t idx;
     mailbox_queue_status_t status;
 
-    tfm_ns_mailbox_hal_enter_critical();
+    ns_mailbox_spin_lock();
     status = queue->empty_slots;
+    ns_mailbox_spin_unlock();
 
     if (!status) {
         /* No empty slot */
-        tfm_ns_mailbox_hal_exit_critical();
         return NUM_MAILBOX_QUEUE_SLOT;
     }
 
@@ -100,9 +128,9 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
         }
     }
 
+    ns_mailbox_spin_lock();
     clear_queue_slot_empty(idx);
-
-    tfm_ns_mailbox_hal_exit_critical();
+    ns_mailbox_spin_unlock();
 
     return idx;
 }
@@ -115,20 +143,6 @@ static void set_msg_owner(uint8_t idx, const void *owner)
 }
 
 #ifdef TFM_MULTI_CORE_TEST
-/*
- * When NSPE mailbox only covers a single non-secure core, spinlock is only
- * required to disable IRQ.
- */
-static inline void ns_mailbox_spin_lock(void)
-{
-    __disable_irq();
-}
-
-static inline void ns_mailbox_spin_unlock(void)
-{
-    __enable_irq();
-}
-
 void tfm_ns_mailbox_tx_stats_init(void)
 {
     if (!mailbox_queue_ptr) {
@@ -148,10 +162,10 @@ static void mailbox_tx_stats_update(struct ns_mailbox_queue_t *ns_queue)
         return;
     }
 
-    tfm_ns_mailbox_hal_enter_critical();
+    ns_mailbox_spin_lock();
     /* Count the number of used slots when this tx arrives */
     empty_status = ns_queue->empty_slots;
-    tfm_ns_mailbox_hal_exit_critical();
+    ns_mailbox_spin_unlock();
 
     if (empty_status) {
         for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
@@ -234,14 +248,14 @@ static int32_t mailbox_rx_client_reply(uint8_t idx, int32_t *reply)
     /* Clear up the owner field */
     set_msg_owner(idx, NULL);
 
-    tfm_ns_mailbox_hal_enter_critical();
+    ns_mailbox_spin_lock();
     clear_queue_slot_woken(idx);
     /*
      * Make sure that the empty flag is set after all the other status flags are
      * re-initialized.
      */
     set_queue_slot_empty(idx);
-    tfm_ns_mailbox_hal_exit_critical();
+    ns_mailbox_spin_unlock();
 
     return MAILBOX_SUCCESS;
 }
@@ -332,7 +346,66 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 
     return MAILBOX_SUCCESS;
 }
-#endif
+
+static inline bool mailbox_wait_reply_signal(uint8_t idx)
+{
+    bool is_set = false;
+
+    ns_mailbox_spin_lock();
+
+    if (is_queue_slot_woken(idx)) {
+        clear_queue_slot_woken(idx);
+        is_set = true;
+    }
+
+    ns_mailbox_spin_unlock();
+
+    return is_set;
+}
+#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+static inline bool mailbox_wait_reply_signal(uint8_t idx)
+{
+    bool is_set = false;
+
+    tfm_ns_mailbox_hal_enter_critical();
+
+    if (is_queue_slot_replied(idx)) {
+        clear_queue_slot_replied(idx);
+        is_set = true;
+    }
+
+    tfm_ns_mailbox_hal_exit_critical();
+
+    return is_set;
+}
+#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+
+static int32_t mailbox_wait_reply(uint8_t idx)
+{
+    bool is_replied;
+
+    while (1) {
+        tfm_ns_mailbox_os_wait_reply();
+
+        /*
+         * Woken up from sleep
+         * Check the completed flag to make sure that the current thread is
+         * woken up by reply event, rather than other events.
+         */
+        /*
+         * It requires SVCall to access NS mailbox flags if NS mailbox is put
+         * in privileged mode.
+         * An alternative is to let NS thread allocate its own is_woken flag.
+         * But a spinlock-like mechanism is still required.
+         */
+        is_replied = mailbox_wait_reply_signal(idx);
+        if (is_replied) {
+            break;
+        }
+    }
+
+    return MAILBOX_SUCCESS;
+}
 
 int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 {
@@ -370,40 +443,4 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
 #endif
 
     return ret;
-}
-
-static int32_t mailbox_wait_reply(uint8_t idx)
-{
-    while (1) {
-        tfm_ns_mailbox_os_wait_reply();
-
-        /*
-         * Woken up from sleep
-         * Check the completed flag to make sure that the current thread is
-         * woken up by reply event, rather than other events.
-         */
-        tfm_ns_mailbox_hal_enter_critical();
-        /*
-         * It requires SVCall to access NS mailbox flags if NS mailbox is put
-         * in privileged mode.
-         * An alternative is to let NS thread allocate its own is_woken flag.
-         * But a spinlock-like mechanism is still required.
-         */
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
-        if (is_queue_slot_woken(idx)) {
-            clear_queue_slot_woken(idx);
-            break;
-        }
-#else
-        if (is_queue_slot_replied(idx)) {
-            clear_queue_slot_replied(idx);
-            break;
-        }
-#endif
-        tfm_ns_mailbox_hal_exit_critical();
-    }
-
-    tfm_ns_mailbox_hal_exit_critical();
-
-    return MAILBOX_SUCCESS;
 }
