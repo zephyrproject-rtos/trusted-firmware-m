@@ -63,6 +63,27 @@ Service source files
   Mbed Crypto functions. Decryption code is skipped in AES CCM mode in Profile
   Small by default.
 
+****************************
+Crypto Backend configuration
+****************************
+
+The Crypto service can use either a hardware crypto accelerator backend like
+CC-312 or a software crypto library which by default is MbedTLS. If using
+MbedTLS as backend, then the library configuration is supplied using the
+MBEDTLS_CONFIG_FILE header option. TF-M Crypto provides a default
+configuration header ``tfm_mbedcrypto_config.h`` and this can be overridden
+based on TF-M configuration or platform. Platforms can also use
+``MBEDTLS_USER_CONFIG_FILE`` to override specific options from default.
+
+.. Note::
+
+    The default entropy source configured for MbedTLS is
+    MBEDTLS_TEST_NULL_ENTROPY and this does not provide randomness
+    for production devices. It is must for production devices to select
+    either a hardware entropy source via MBEDTLS_ENTROPY_HARDWARE_ALT or
+    provision a unique seed for the device during production and use
+    MBEDTLS_ENTROPY_NV_SEED option.
+
 **************************
 Crypto service integration
 **************************
