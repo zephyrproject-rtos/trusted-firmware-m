@@ -9,7 +9,6 @@
 #include "tfm_boot_status.h"
 #include "region_defs.h"
 #include "tfm_memory_utils.h"
-#include "tfm_internal.h"
 #include "tfm_api.h"
 #include "tfm_core_utils.h"
 #include "spm_partition_defs.h"

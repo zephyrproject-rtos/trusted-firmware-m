@@ -11,10 +11,10 @@
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_internal.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "tfm/tfm_core_svc.h"
+#include "common/tfm_boot_data.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);

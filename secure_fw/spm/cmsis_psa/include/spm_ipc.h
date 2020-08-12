@@ -683,4 +683,9 @@ psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance);
  */
 struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
 
+/**
+ * \brief Move to handler mode by a SVC for specific purpose
+ */
+void tfm_core_handler_mode(void);
+
 #endif /* __SPM_IPC_H__ */

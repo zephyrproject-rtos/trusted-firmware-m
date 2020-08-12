@@ -6,7 +6,6 @@
 
 #include "tfm_spm_hal.h"
 #include "psa/client.h"
-#include "tfm_internal.h"
 #include "tfm_nspm.h"
 #include "tfm_spe_mailbox.h"
 #include "utilities.h"

@@ -11,9 +11,9 @@
 #include "tfm_spm_hal.h"
 #include "tfm_arch.h"
 #include "tfm_api.h"
-#include "tfm_internal.h"
 #include "tfm_nspm.h"
 #include "ext/tz_context.h"
+#include "arch.h"
 
 #ifndef TFM_MAX_NS_THREAD_COUNT
 #define TFM_MAX_NS_THREAD_COUNT 8

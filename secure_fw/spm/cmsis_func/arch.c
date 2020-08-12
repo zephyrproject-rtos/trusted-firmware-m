@@ -5,8 +5,8 @@
  *
  */
 
+#include "arch.h"
 #include "tfm_secure_api.h"
-#include "tfm_internal.h"
 #include "tfm/tfm_spm_services.h"
 
 nsfptr_t ns_entry;

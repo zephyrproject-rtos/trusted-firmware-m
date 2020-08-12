@@ -13,11 +13,11 @@
 #include "spm_func.h"
 #include "spm_partition_defs.h"
 #include "tfm_api.h"
-#include "tfm_internal.h"
 #include "tfm_memory_utils.h"
 #include "tfm_arch.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
+#include "common/tfm_boot_data.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,

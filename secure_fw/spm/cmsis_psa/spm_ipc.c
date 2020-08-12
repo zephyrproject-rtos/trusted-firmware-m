@@ -24,7 +24,6 @@
 #include "tfm_core_utils.h"
 #include "spm_psa_client_call.h"
 #include "tfm_rpc.h"
-#include "tfm_internal.h"
 #include "tfm_core_trustzone.h"
 #include "tfm_core_mem_check.h"
 #include "tfm_list.h"

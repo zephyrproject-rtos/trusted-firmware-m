@@ -52,6 +52,7 @@ list(APPEND ALL_SRC_C ${SFW_FUNC_SPM_SRC})
 unset(SFW_FUNC_SPM_SRC)
 
 #Setting include directories
+embedded_include_directories(PATH ${SFW_SPM_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${SFW_FUNC_SPM_DIR} ABSOLUTE)
 embedded_include_directories(PATH ${SFW_FUNC_SPM_DIR}/include ABSOLUTE)
 embedded_include_directories(PATH ${TFM_ROOT_DIR}/interface/include ABSOLUTE)

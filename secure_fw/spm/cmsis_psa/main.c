@@ -5,11 +5,11 @@
  *
  */
 
+#include "common/tfm_boot_data.h"
 #include "log/tfm_log.h"
 #include "region.h"
 #include "spm_ipc.h"
 #include "tfm_hal_platform.h"
-#include "tfm_internal.h"
 #include "tfm_irq_list.h"
 #include "tfm_nspm.h"
 #include "tfm_spm_hal.h"

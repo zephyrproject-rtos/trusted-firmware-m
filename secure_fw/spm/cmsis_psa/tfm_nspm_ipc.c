@@ -10,7 +10,6 @@
 #include "psa/error.h"
 #include "tfm_nspm.h"
 #include "utilities.h"
-#include "tfm_internal.h"
 #include "ext/tz_context.h"
 #include "log/tfm_assert.h"
 #include "log/tfm_log.h"
