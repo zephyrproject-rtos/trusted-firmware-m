@@ -327,8 +327,7 @@ enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
 
 enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
 {
-/*    return nvic_interrupt_target_state_cfg();*/
-    return TFM_PLAT_ERR_SUCCESS;
+    return nvic_interrupt_target_state_cfg();
 }
 
 enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
