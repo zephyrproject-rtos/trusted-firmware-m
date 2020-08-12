@@ -12,12 +12,7 @@
 #include "tfm_spm_hal.h"
 #include "tfm_version.h"
 #include "log/tfm_log.h"
-#ifdef TFM_PSA_API
 #include "spm_ipc.h"
-#else
-#include "spm_func.h"
-#include "spm_partition_defs.h"
-#endif
 
 /*
  * Avoids the semihosting issue
@@ -31,14 +26,8 @@ __asm("  .global __ARM_use_no_argv\n");
 #error TFM_LVL is not defined!
 #endif
 
-#ifdef TFM_PSA_API
 #if (TFM_LVL != 1) && (TFM_LVL != 2)
 #error Only TFM_LVL 1 and 2 are supported for IPC model!
-#endif
-#else
-#if (TFM_LVL != 1)
-#error Only TFM_LVL 1 is supported for library model!
-#endif
 #endif
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
@@ -164,43 +153,6 @@ int main(void)
     }
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-#ifndef TFM_PSA_API
-    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
-
-    REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base)[];
-    uint32_t psp_stack_bottom =
-                      (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
-
-    tfm_arch_set_psplim(psp_stack_bottom);
-
-    if (tfm_spm_partition_init() != SPM_ERR_OK) {
-        /* Certain systems might refuse to boot altogether if partitions fail
-         * to initialize. This is a placeholder for such an error handler
-         */
-    }
-
-    /*
-     * Prioritise secure exceptions to avoid NS being able to pre-empt
-     * secure SVC or SecureFault. Do it before PSA API initialization.
-     */
-    if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
-        tfm_core_panic();
-    }
-
-    /* We close the TFM_SP_CORE_ID partition, because its only purpose is
-     * to be able to pass the state checks for the tests started from secure.
-     */
-    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
-    tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
-                                SPM_PARTITION_STATE_RUNNING);
-
-#ifdef TFM_CORE_DEBUG
-    /* Jumps to non-secure code */
-    LOG_MSG("\033[1;34mJumping to non-secure code...\033[0m\r\n");
-#endif
-
-    jump_to_ns_code();
-#else /* !defined(TFM_PSA_API) */
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
@@ -211,5 +163,4 @@ int main(void)
 
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
-#endif /* !defined(TFM_PSA_API) */
 }

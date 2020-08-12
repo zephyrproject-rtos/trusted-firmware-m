@@ -36,7 +36,7 @@ set(SFW_SPM_RUNTIME_DIR "${SFW_SPM_DIR}/common/runtime")
 
 set (SFW_IPC_SPM_SRC
 		"${SFW_SPM_INIT_DIR}/tfm_boot_data.c"
-		"${SFW_SPM_INIT_DIR}/tfm_core.c"
+		"${SFW_IPC_SPM_DIR}/main.c"
 		"${SFW_IPC_SPM_DIR}/spm_ipc.c"
 		"${SFW_IPC_SPM_DIR}/spm_psa_client_call.c"
 		"${SFW_IPC_SPM_DIR}/tfm_core_svcalls_ipc.c"
