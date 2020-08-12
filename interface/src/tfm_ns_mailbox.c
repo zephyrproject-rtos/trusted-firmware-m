@@ -89,20 +89,6 @@ static inline void clear_queue_slot_woken(uint8_t idx)
     }
 }
 
-/*
- * When NSPE mailbox only covers a single non-secure core, spinlock is only
- * required to disable IRQ.
- */
-static inline void ns_mailbox_spin_lock(void)
-{
-    __disable_irq();
-}
-
-static inline void ns_mailbox_spin_unlock(void)
-{
-    __enable_irq();
-}
-
 static uint8_t acquire_empty_slot(const struct ns_mailbox_queue_t *queue)
 {
     uint8_t idx;
@@ -138,6 +124,20 @@ static void set_msg_owner(uint8_t idx, const void *owner)
 }
 
 #ifdef TFM_MULTI_CORE_TEST
+/*
+ * When NSPE mailbox only covers a single non-secure core, spinlock is only
+ * required to disable IRQ.
+ */
+static inline void ns_mailbox_spin_lock(void)
+{
+    __disable_irq();
+}
+
+static inline void ns_mailbox_spin_unlock(void)
+{
+    __enable_irq();
+}
+
 void tfm_ns_mailbox_tx_stats_init(void)
 {
     if (!mailbox_queue_ptr) {
