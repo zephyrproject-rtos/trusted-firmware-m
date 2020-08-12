@@ -5,15 +5,14 @@
  *
  */
 
+#include "log/tfm_log.h"
 #include "region.h"
+#include "spm_func.h"
 #include "tfm_internal.h"
 #include "tfm_irq_list.h"
 #include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_version.h"
-#include "log/tfm_log.h"
-#include "spm_func.h"
-#include "spm_partition_defs.h"
 
 /*
  * Avoids the semihosting issue
@@ -25,9 +24,7 @@ __asm("  .global __ARM_use_no_argv\n");
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
-#endif
-
-#if (TFM_LVL != 1)
+#elif (TFM_LVL != 1)
 #error Only TFM_LVL 1 is supported for library model!
 #endif
 
