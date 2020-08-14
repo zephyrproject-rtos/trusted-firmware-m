@@ -1,12 +1,12 @@
-Tools
-=====
+TF-Fuzz
+=======
 
 .. toctree::
     :maxdepth: 1
+    :caption: Contents
     :glob:
 
-    iat-verifier/*
-    tf_fuzz/docs/index
+    *
 
 --------------
 
