@@ -147,6 +147,20 @@ void tfm_arch_prioritize_secure_exception(void)
 {
 }
 
+void tfm_arch_configure_coprocessors(void)
+{
+    /* There are no coprocessors in Armv6-M implementations */
+#ifndef __ARM_ARCH_6M__
+#if defined (__FPU_USED) && (__FPU_USED == 1U)
+    /* Enable privileged and unprivilged access to the floating-point
+     * coprocessor.
+     */
+    SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
+                  | (3U << 11U*2U);  /* enable CP11 full access */
+#endif
+#endif
+}
+
 /* There is no FPCA in v6m */
 #ifndef __ARM_ARCH_6M__
 __attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)

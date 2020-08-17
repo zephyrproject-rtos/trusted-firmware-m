@@ -154,6 +154,11 @@ void tfm_arch_prioritize_secure_exception(void)
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 }
 
+/* There are no coprocessors in Armv8-M Baseline implementations */
+void tfm_arch_configure_coprocessors(void)
+{
+}
+
 /* There is no FPCA in baseline. */
 void tfm_arch_clear_fp_status(void)
 {

@@ -251,6 +251,39 @@ void tfm_arch_prioritize_secure_exception(void)
 }
 #endif
 
+void tfm_arch_configure_coprocessors(void)
+{
+#if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)
+    /* Configure Secure access to the FPU only if the secure image is being
+     * built with the FPU in use. This avoids introducing extra interrupt
+     * latency when the FPU is not used by the SPE.
+     */
+#if defined (__FPU_USED) && (__FPU_USED == 1U)
+    /* Enable Secure privileged and unprivilged access to the FP Extension */
+    SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
+                  | (3U << 11U*2U);  /* enable CP11 full access */
+
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+    /* If the SPE will ever use the floating-point registers for sensitive data,
+     * then FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS must be set at
+     * initialisation and not changed again afterwards.
+     */
+    FPU->FPCCR |= FPU_FPCCR_TS_Msk
+                  | FPU_FPCCR_CLRONRET_Msk
+                  | FPU_FPCCR_CLRONRETS_Msk;
+#endif
+#endif
+
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+    /* Permit Non-secure access to the Floating-point Extension.
+     * Note: It is still necessary to set CPACR_NS to enable the FP Extension in
+     * the NSPE. This configuration is left to NS privileged software.
+     */
+    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+#endif
+#endif
+}
+
 #if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
 __attribute__((naked)) void SVC_Handler(void)
 {

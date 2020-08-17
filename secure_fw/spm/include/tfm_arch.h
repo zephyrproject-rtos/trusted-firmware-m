@@ -118,6 +118,11 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
  */
 void tfm_arch_prioritize_secure_exception(void);
 
+/**
+ * \brief Configure coprocessors
+ */
+void tfm_arch_configure_coprocessors(void);
+
 /*
  * Clear float point status.
  */
