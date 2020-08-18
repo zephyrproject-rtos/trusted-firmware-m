@@ -60,12 +60,11 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit);
 #if TFM_LVL == 3
 REGION_DECLARE(Image$$, PT_{{manifest.manifest.name}}_PRIVATE, _DATA_START$$Base);
 REGION_DECLARE(Image$$, PT_{{manifest.manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
+extern uint8_t {{manifest.manifest.name.lower()}}_stack[];
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -223,8 +222,8 @@ const struct tfm_spm_partition_memory_data_t memory_data_list[] =
         .data_start           = PART_REGION_ADDR(PT_{{manifest.manifest.name}}_PRIVATE, _DATA_START$$Base),
         .data_limit           = PART_REGION_ADDR(PT_{{manifest.manifest.name}}_PRIVATE, _DATA_END$$Base),
 #endif
-        .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base),
-        .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit),
+        .stack_bottom         = (uint32_t){{manifest.manifest.name.lower()}}_stack,
+        .stack_top            = (uint32_t)({{manifest.manifest.name.lower()}}_stack + {{manifest.manifest.stack_size}}),
     {{'},'}}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */

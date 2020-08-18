@@ -164,15 +164,6 @@ define block {{manifest.manifest.name}}_LINKER_DATA with alignment = 32 {
     {% endif %}
     };
 
-    {% if manifest.attr.tfm_partition_ipc %}
-#if defined (TFM_PSA_API)
-define block {{manifest.manifest.name}}_LINKER_STACK with alignment = 128, size = {{manifest.manifest.stack_size}} { };
-#endif
-    {% else %}
-#if defined (TFM_PSA_API)
-define block {{manifest.manifest.name}}_LINKER_STACK with alignment =  128, size = 0 { };
-#endif
-    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -243,15 +234,6 @@ define block {{manifest.manifest.name}}_LINKER_DATA with alignment = 32 {
     {% endif %}
     };
 
-    {% if manifest.attr.tfm_partition_ipc %}
-#if defined (TFM_PSA_API)
-define block {{manifest.manifest.name}}_LINKER_STACK with alignment = 128, size = {{manifest.manifest.stack_size}} { };
-#endif
-    {% else %}
-#if defined (TFM_PSA_API)
-define block {{manifest.manifest.name}}_LINKER_STACK with alignment = 128, size = 0 { };
-#endif
-    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -381,9 +363,6 @@ define block DATA with fixed order {
     {% endif %}
     block {{manifest.manifest.name}}_LINKER_DATA,
 
-#if defined (TFM_PSA_API)
-    block {{manifest.manifest.name}}_LINKER_STACK,
-#endif
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -432,9 +411,6 @@ define block PRIV_DATA with fixed order {
     {% endif %}
     block {{manifest.manifest.name}}_LINKER_DATA,
 
-#if defined (TFM_PSA_API)
-    block {{manifest.manifest.name}}_LINKER_STACK,
-#endif
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}

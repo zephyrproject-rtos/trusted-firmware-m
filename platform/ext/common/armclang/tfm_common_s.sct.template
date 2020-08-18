@@ -207,17 +207,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *({{manifest.manifest.name}}_ATTR_ZI)
     }
 
-    {% if manifest.attr.tfm_partition_ipc %}
-#if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
-    }
-#endif
-    {% else %}
-#if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
-    }
-#endif
-    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -290,17 +279,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *({{manifest.manifest.name}}_ATTR_ZI)
     }
 
-    {% if manifest.attr.tfm_partition_ipc %}
-#if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
-    }
-#endif
-    {% else %}
-#if defined (TFM_PSA_API)
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
-    }
-#endif
-    {% endif %}
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
