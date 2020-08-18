@@ -34,12 +34,12 @@ nvcounter=
 boot=0x0c001000
 unused=
 
-$stm32programmercli $connect -d $SCRIPTPATH/../tfm_s_signed.bin $slot0 -v
+$stm32programmercli $connect -d $SCRIPTPATH/../../tfm_s_signed.bin $slot0 -v
 echo "TFM_Appli Secure Written"
 echo "Write TFM_Appli NonSecure"
-$stm32programmercli $connect -d $SCRIPTPATH/../tfm_ns_signed.bin $slot1 -v
+$stm32programmercli $connect -d $SCRIPTPATH/../../zephyr_ns_signed.bin $slot1 -v
 echo "TFM_Appli NonSecure Written"
 echo "Write TFM_SBSFU_Boot"
-$stm32programmercli $connect -d $SCRIPTPATH/../bl2/ext/mcuboot/mcuboot.bin $boot -v
+$stm32programmercli $connect -d $SCRIPTPATH/../../mcuboot.bin $boot -v
 echo "TFM_SBSFU_Boot Written"
 echo "TFM_UPDATE Done"
