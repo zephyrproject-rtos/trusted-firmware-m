@@ -242,7 +242,7 @@ line arguments:
             ``-DTARGET_PLATFORM=AN519``
           - Arm SSE-123 Example Subsystem for MPS2+ (AN539)
             ``-DTARGET_PLATFORM=AN539``
-          - Cortex-M55 SSE-300 subsystem for MPS2+ FVP
+          - Corstone-300 Ecosystem FVP (Cortex-M55 SSE-300 MPS2+)
             ``-DTARGET_PLATFORM=FVP_SSE300_MPS2``
           - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
             ``-DTARGET_PLATFORM=MUSCA_A``
