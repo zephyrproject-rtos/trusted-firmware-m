@@ -42,7 +42,7 @@ REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        BL2_HEADER_SIZE,
+        CYBL_HEADER_SIZE,
 
     .non_secure_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base),
