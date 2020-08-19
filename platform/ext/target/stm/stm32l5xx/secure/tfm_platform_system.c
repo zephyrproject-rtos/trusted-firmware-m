@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,7 +40,7 @@ enum tfm_plat_err_t tfm_spm_hal_post_init(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-__WEAK void tfm_spm_hal_system_reset(void)
+__WEAK void tfm_hal_system_reset(void)
 {
     NVIC_SystemReset();
 }

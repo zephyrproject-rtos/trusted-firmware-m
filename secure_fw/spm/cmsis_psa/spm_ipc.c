@@ -37,6 +37,7 @@
 
 #include "secure_fw/partitions/tfm_service_list.inc"
 #include "tfm_spm_db_ipc.inc"
+#include "tfm_hal_platform.h"
 
 /* Extern service variable */
 extern struct tfm_spm_service_t service[];
@@ -1482,7 +1483,7 @@ void tfm_spm_psa_panic(void)
      * PSA FF recommends that the SPM causes the system to restart when a secure
      * partition panics.
      */
-    tfm_spm_hal_system_reset();
+    tfm_hal_system_reset();
 }
 
 /**

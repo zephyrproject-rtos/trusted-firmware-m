@@ -164,11 +164,6 @@ enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void);
 enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void);
 
 /**
- * \brief System reset
- */
-void tfm_spm_hal_system_reset(void);
-
-/**
  * \brief Configures all external interrupts to target the
  *        NS state, apart for the ones associated to secure
  *        peripherals (plus MPC and PPC)

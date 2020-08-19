@@ -6,7 +6,7 @@
  */
 #include <inttypes.h>
 #include "utilities.h"
-#include "tfm_spm_hal.h"
+#include "tfm_hal_platform.h"
 
 void tfm_core_panic(void)
 {
@@ -18,7 +18,7 @@ void tfm_core_panic(void)
      * those error codes back to the calling task or to use its own
      * functionality for terminating an execution context.
      */
-    tfm_spm_hal_system_reset();
+    tfm_hal_system_reset();
 }
 
 bool tfm_is_one_bit_set(uint32_t n)
