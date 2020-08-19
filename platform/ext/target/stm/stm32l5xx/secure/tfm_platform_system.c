@@ -10,6 +10,8 @@
 #include "tfm_spm_hal.h"
 #include "uart_stdout.h"
 #include "tfm_platform_system.h"
+#include "tfm_hal_platform.h"
+
 void tfm_platform_hal_system_reset(void)
 {
     /* Reset the system */
@@ -23,29 +25,18 @@ tfm_platform_hal_pin_service(const psa_invec  *in_vec,  uint32_t num_invec,
      return TFM_PLAT_ERR_SYSTEM_ERR;
 }
 
-__WEAK enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void)
+enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
-     return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_post_init(void)
-{
-    if (tfm_spm_hal_post_init_platform() != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
     __enable_irq();
     stdio_init();
 
-    return TFM_PLAT_ERR_SUCCESS;
+    return TFM_HAL_SUCCESS;
 }
 
 __WEAK void tfm_hal_system_reset(void)
 {
     NVIC_SystemReset();
 }
-
-
 
 enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
                                                psa_invec  *in_vec,

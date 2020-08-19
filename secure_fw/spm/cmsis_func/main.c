@@ -8,6 +8,7 @@
 #include "log/tfm_log.h"
 #include "region.h"
 #include "spm_func.h"
+#include "tfm_hal_platform.h"
 #include "tfm_internal.h"
 #include "tfm_irq_list.h"
 #include "tfm_nspm.h"
@@ -33,6 +34,7 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
 static int32_t tfm_core_init(void)
 {
     size_t i;
+    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
     enum irq_target_state_t irq_target_state = TFM_IRQ_TARGET_STATE_SECURE;
 
@@ -64,8 +66,8 @@ static int32_t tfm_core_init(void)
     }
 
     /* Performs platform specific initialization */
-    plat_err = tfm_spm_hal_post_init();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+    hal_status = tfm_hal_platform_init();
+    if (hal_status != TFM_HAL_SUCCESS) {
         return TFM_ERROR_GENERIC;
     }
 

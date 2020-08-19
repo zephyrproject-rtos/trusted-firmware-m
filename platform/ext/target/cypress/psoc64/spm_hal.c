@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "tfm_spm_hal.h"
+#include "tfm_hal_platform.h"
 
 #include "device_definition.h"
 #include "region_defs.h"
@@ -417,12 +418,15 @@ void mock_tfm_shared_data(void)
     memcpy(boot_data, mock_data, sizeof(mock_data));
 }
 
-enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void)
+enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
     platform_init();
 
     /* FIXME: Use the actual data from mcuboot */
     mock_tfm_shared_data();
 
-    return TFM_PLAT_ERR_SUCCESS;
+    __enable_irq();
+    stdio_init();
+
+    return TFM_HAL_SUCCESS;
 }
