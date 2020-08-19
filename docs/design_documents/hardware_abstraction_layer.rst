@@ -54,8 +54,6 @@ Here lists a minimal set of necessary functionalities:
     to check the permissions of memory access.
   - **Platform API**: Provides the platform initialization, platform-specific
     memory information, system reset, etc.
-  - **Loader API**: Provides the functions to load partitions and services and
-    provides the necessary data to :term:`SPM`.
   - **Log dev API**: Provides the log system functions.
   - **Interrupt API**: Provides the interrupt functions.
 
