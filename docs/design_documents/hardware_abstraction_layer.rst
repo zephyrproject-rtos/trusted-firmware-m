@@ -129,7 +129,16 @@ This is a status code to be used as the return type of :term:`HAL` APIs.
 
 .. code-block:: c
 
-  typedef int32_t tfm_hal_status_t
+  enum tfm_hal_status_t {
+      TFM_HAL_ERROR_MEM_FAULT = CHAR_MIN,
+      TFM_HAL_ERROR_MAX_VALUE,
+      TFM_HAL_ERROR_BAD_STATE,
+      TFM_HAL_ERROR_NOT_SUPPORTED,
+      TFM_HAL_ERROR_INVALID_INPUT,
+      TFM_HAL_ERROR_NOT_INIT,
+      TFM_HAL_ERROR_GENERIC,
+      TFM_HAL_SUCCESS = 0
+  };
 
 Error Codes
 ===========
@@ -142,68 +151,36 @@ TFM_HAL_SUCCESS
 ---------------
 Status code to indicate general success.
 
-.. code-block:: c
-
-  #define TFM_HAL_SUCCESS ((tfm_hal_status_t)0)
-
 TFM_HAL_ERROR_GENERIC
 ---------------------
 Status code to indicate an error that does not correspond to any defined failure
 cause.
 
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_GENERIC ((tfm_hal_status_t)-1)
-
 TFM_HAL_ERROR_NOT_INIT
 ----------------------
 Status code to indicate that the module is not initialed.
 
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_NOT_INIT ((tfm_hal_status_t)-2)
-
 TFM_HAL_ERROR_INVALID_INPUT
 ---------------------------
 Status code to indicate that the input is invalid.
-
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_INVALID_INPUT ((tfm_hal_status_t)-3)
 
 TFM_HAL_ERROR_NOT_SUPPORTED
 ---------------------------
 Status code to indicate that the requested operation or a parameter is not
 supported.
 
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_NOT_SUPPORTED ((tfm_hal_status_t)-4)
-
 TFM_HAL_ERROR_BAD_STATE
 -----------------------
 Status code to indicate that the requested action cannot be performed in the
 current state.
 
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_BAD_STATE ((tfm_hal_status_t)-5)
-
 TFM_HAL_ERROR_MAX_VALUE
 -----------------------
 Status code to indicate that the current number has got the max value.
 
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_MAX_VALUE ((tfm_hal_status_t)-6)
-
 TFM_HAL_ERROR_MEM_FAULT
 -----------------------
 Status code to indicate that the memory check failed.
-
-.. code-block:: c
-
-  #define TFM_HAL_ERROR_MEM_FAULT ((tfm_hal_status_t)-7)
 
 --------------
 
