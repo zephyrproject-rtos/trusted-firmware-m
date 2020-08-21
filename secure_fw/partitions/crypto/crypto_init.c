@@ -268,7 +268,7 @@ static void tfm_crypto_ipc_handler(void)
  *        Crypto for its dynamic allocations
  */
 #ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
-#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x2000) /* 8KB for EC signing in attest */
+#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x2010) /* >8KB for EC signing in attest */
 #endif
 
 /**
