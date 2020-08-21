@@ -27,11 +27,6 @@ void BOARD_InitHardware(void)
 
 void SystemInitHook(void)
 {
-/* Coprocessor Access Control Register */
-#if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
-    SCB_NS->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10, CP11 Full Access */
-#endif                                                    /* ((__FPU_PRESENT == 1) && (__FPU_USED == 1)) */
-
     SCB_NS->CPACR |= ((3UL << 0 * 2) | (3UL << 1 * 2)); /* set CP0, CP1 Full Access (enable PowerQuad) */
 
     BOARD_InitHardware();

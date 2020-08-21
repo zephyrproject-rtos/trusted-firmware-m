@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,6 @@ void SystemInit (void)
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
   extern uint32_t __Vectors;
   SCB->VTOR = (uint32_t) &__Vectors;
-#endif
-
-#if defined (__FPU_USED) && (__FPU_USED == 1U)
-  SCB->CPACR |= ((3U << 10U*2U) |           /* set CP10 Full Access */
-                 (3U << 11U*2U)  );         /* set CP11 Full Access */
 #endif
 
 #ifdef UNALIGNED_SUPPORT_DISABLE
