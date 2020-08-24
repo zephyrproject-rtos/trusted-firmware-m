@@ -34,12 +34,12 @@ set(SFW_SPM_ARCH_DIR "${SFW_IPC_SPM_DIR}/arch")
 set(SFW_SPM_COMMON_DIR "${SFW_SPM_DIR}/common")
 
 set (SFW_IPC_SPM_SRC
+		"${SFW_SPM_COMMON_DIR}/spm_psa_client_call.c"
 		"${SFW_SPM_COMMON_DIR}/tfm_boot_data.c"
 		"${SFW_SPM_COMMON_DIR}/tfm_core_utils.c"
 		"${SFW_SPM_COMMON_DIR}/utilities.c"
 		"${SFW_IPC_SPM_DIR}/main.c"
 		"${SFW_IPC_SPM_DIR}/spm_ipc.c"
-		"${SFW_IPC_SPM_DIR}/spm_psa_client_call.c"
 		"${SFW_IPC_SPM_DIR}/tfm_core_svcalls_ipc.c"
 		"${SFW_IPC_SPM_DIR}/tfm_pools.c"
 		"${SFW_IPC_SPM_DIR}/tfm_thread.c"

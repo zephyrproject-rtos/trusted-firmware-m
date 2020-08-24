@@ -22,7 +22,7 @@
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
-#include "spm_psa_client_call.h"
+#include "common/spm_psa_client_call.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
 #include "tfm_core_mem_check.h"
