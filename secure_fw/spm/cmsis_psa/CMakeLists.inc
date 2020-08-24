@@ -31,17 +31,16 @@ endif()
 set(SFW_IPC_SPM_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(SFW_SPM_DIR "${SFW_IPC_SPM_DIR}/..")
 set(SFW_SPM_ARCH_DIR "${SFW_IPC_SPM_DIR}/arch")
-set(SFW_SPM_INIT_DIR "${SFW_SPM_DIR}/common/init")
-set(SFW_SPM_RUNTIME_DIR "${SFW_SPM_DIR}/common/runtime")
+set(SFW_SPM_COMMON_DIR "${SFW_SPM_DIR}/common")
 
 set (SFW_IPC_SPM_SRC
-		"${SFW_SPM_INIT_DIR}/tfm_boot_data.c"
+		"${SFW_SPM_COMMON_DIR}/tfm_boot_data.c"
+		"${SFW_SPM_COMMON_DIR}/tfm_core_utils.c"
+		"${SFW_SPM_COMMON_DIR}/utilities.c"
 		"${SFW_IPC_SPM_DIR}/main.c"
 		"${SFW_IPC_SPM_DIR}/spm_ipc.c"
 		"${SFW_IPC_SPM_DIR}/spm_psa_client_call.c"
 		"${SFW_IPC_SPM_DIR}/tfm_core_svcalls_ipc.c"
-		"${SFW_SPM_RUNTIME_DIR}/utilities.c"
-		"${SFW_SPM_RUNTIME_DIR}/tfm_core_utils.c"
 		"${SFW_IPC_SPM_DIR}/tfm_pools.c"
 		"${SFW_IPC_SPM_DIR}/tfm_thread.c"
 		"${SFW_IPC_SPM_DIR}/tfm_wait.c"
@@ -56,7 +55,7 @@ if (DEFINED TFM_MULTI_CORE_TOPOLOGY AND TFM_MULTI_CORE_TOPOLOGY)
 else ()
 	list(APPEND SFW_IPC_SPM_SRC "${SFW_IPC_SPM_DIR}/tfm_nspm_ipc.c"
 			"${SFW_IPC_SPM_DIR}/tfm_psa_api_veneers.c"
-			"${SFW_SPM_RUNTIME_DIR}/tfm_core_mem_check.c"
+			"${SFW_SPM_COMMON_DIR}/tfm_core_mem_check.c"
 			)
 endif ()
 
