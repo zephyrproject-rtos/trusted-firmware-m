@@ -15,6 +15,7 @@
 #include "utilities.h"
 #include "tfm/tfm_core_svc.h"
 #include "common/tfm_boot_data.h"
+#include "common/psa_client_service_apis.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
