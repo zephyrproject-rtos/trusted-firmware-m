@@ -15,6 +15,7 @@ cmake_minimum_required(VERSION 3.13.1)
 # CFGFILE: The TF-M config file to use, without the .cmake extension
 # IPC: Build TFM IPC library. This library allows a non-secure application to
 #      interface to secure domain using IPC.
+# BL2: Boolean if build uses MCUboot.
 #
 # The following output values can also be used:
 #
@@ -28,11 +29,16 @@ cmake_minimum_required(VERSION 3.13.1)
 #                        BOARD ${TFMBOARD}
 #                        CFGFILE "ConfigRegressionIPC"
 #                        OUT_VENEERS_FILE VENEERS_FILE
-#                        OUT_INCLUDE_PATH TFM_INCLUDE_PATH)
+#                        OUT_INCLUDE_PATH TFM_INCLUDE_PATH
+#                        BL2 True)
 function(trusted_firmware_build)
   set(options IPC)
-  set(oneValueArgs BINARY_DIR BOARD CFGFILE OUT_VENEERS_FILE OUT_INCLUDE_PATH)
+  set(oneValueArgs BINARY_DIR BOARD CFGFILE OUT_VENEERS_FILE OUT_INCLUDE_PATH BL2)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
+
+  if(DEFINED TFM_BL2)
+    set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
+  endif()
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/install/export/tfm/veneers/s_veneers.o)
   set(${TFM_OUT_VENEERS_FILE} ${VENEERS_FILE} PARENT_SCOPE)
@@ -61,7 +67,7 @@ function(trusted_firmware_build)
     BINARY_DIR ${TFM_BINARY_DIR}
     CMAKE_ARGS -DPROJ_CONFIG=${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/configs/${TFM_CFGFILE}.cmake
                -DTARGET_PLATFORM=${TFM_BOARD}
-               -DBL2=True
+               ${TFM_BL2_ARG}
                -DCOMPILER=${TFM_TOOLCHAIN}
                -DGNUARM_PREFIX=${TFM_TOOLCHAIN_PREFIX}
                -DGNUARM_PATH=${TFM_TOOLCHAIN_PATH}
