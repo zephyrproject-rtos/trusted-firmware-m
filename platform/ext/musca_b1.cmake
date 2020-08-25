@@ -216,10 +216,9 @@ elseif (BUILD_FLASH)
     embedded_include_directories(PATH "${PLATFORM_DIR}/driver" ABSOLUTE)
 endif()
 
-#Default for Musca-B1 is to disable the CC312 due to Windows build not being
-#supported.
+#The CC312 is enabled by default
 if (NOT DEFINED CRYPTO_HW_ACCELERATOR)
-    set (CRYPTO_HW_ACCELERATOR OFF)
+    set (CRYPTO_HW_ACCELERATOR ON)
 endif()
 
 if (NOT DEFINED CRYPTO_HW_ACCELERATOR_OTP_STATE)
