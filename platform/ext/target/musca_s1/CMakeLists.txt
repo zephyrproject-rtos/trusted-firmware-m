@@ -86,8 +86,10 @@ target_sources(platform_s
         Native_Driver/musca_s1_scc_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

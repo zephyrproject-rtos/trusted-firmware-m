@@ -84,6 +84,7 @@ target_sources(platform_s
     PRIVATE
         target_cfg.c
         spm_hal.c
+        tfm_hal_isolation.c
         Native_Driver/project_template/s/board.c
         Native_Driver/project_template/s/clock_config.c
         Native_Driver/project_template/s/peripherals.c
@@ -112,6 +113,7 @@ target_sources(platform_s
         ../common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ../common/Native_Driver/utilities/str/fsl_str.c
         ../common/Native_Driver/mpu_armv8m_drv.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

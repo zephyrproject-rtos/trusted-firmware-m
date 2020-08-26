@@ -93,6 +93,7 @@ target_sources(platform_s
         services/src/tfm_platform_system.c
         target_cfg.c
         spm_hal.c
+        tfm_hal_isolation.c
         boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/template/attest_hal.c
@@ -101,6 +102,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/common/template/tfm_rotpk.c
         ${PLATFORM_DIR}/ext/common/template/crypto_keys.c
         ${PLATFORM_DIR}/ext/common/template/nv_counters.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

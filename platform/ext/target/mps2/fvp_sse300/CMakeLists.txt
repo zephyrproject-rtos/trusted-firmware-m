@@ -97,9 +97,11 @@ target_sources(platform_s
         native_drivers/mpc_sie_drv.c
         native_drivers/ppc_sse300_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         native_drivers/mpu_armv8m_drv.c
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_SSE300_PPC.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

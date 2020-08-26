@@ -17,12 +17,13 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
+#include "tfm_hal_defs.h"
+#include "tfm_hal_isolation.h"
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_core_mem_check.h"
 #include "tfm_list.h"
 #include "tfm_pools.h"
 #include "region.h"
@@ -595,7 +596,8 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged)
 {
-    enum tfm_status_e err;
+    enum tfm_hal_status_t err;
+    uint32_t attr = 0;
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {
@@ -611,13 +613,24 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     }
 
     if (access == TFM_MEMORY_ACCESS_RW) {
-        err = tfm_core_has_write_access_to_region(buffer, len, ns_caller,
-                                                  privileged);
+        attr |= (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE);
     } else {
-        err = tfm_core_has_read_access_to_region(buffer, len, ns_caller,
-                                                 privileged);
+        attr |= TFM_HAL_ACCESS_READABLE;
     }
-    if (err == TFM_SUCCESS) {
+
+    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+        attr |= TFM_HAL_ACCESS_UNPRIVILEGED;
+    } else {
+        attr &= ~TFM_HAL_ACCESS_UNPRIVILEGED;
+    }
+
+    if (ns_caller) {
+        attr |= TFM_HAL_ACCESS_NS;
+    }
+
+    err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
+
+    if (err == TFM_HAL_SUCCESS) {
         return IPC_SUCCESS;
     }
 

@@ -9,6 +9,7 @@
 #include "region.h"
 #include "spm_ipc.h"
 #include "tfm_hal_platform.h"
+#include "tfm_hal_isolation.h"
 #include "tfm_irq_list.h"
 #include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
@@ -60,8 +61,8 @@ static int32_t tfm_core_init(void)
      * Access to any peripheral should be performed after programming
      * the necessary security components such as PPC/SAU.
      */
-    plat_err = tfm_spm_hal_init_isolation_hw();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+    hal_status = tfm_hal_set_up_static_boundaries();
+    if (hal_status != TFM_HAL_SUCCESS) {
         return TFM_ERROR_GENERIC;
     }
 
@@ -132,12 +133,6 @@ int main(void)
     if (tfm_spm_db_init() != SPM_ERR_OK) {
         tfm_core_panic();
     }
-
-#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-    if (tfm_spm_hal_setup_isolation_hw() != TFM_PLAT_ERR_SUCCESS) {
-        tfm_core_panic();
-    }
-#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt

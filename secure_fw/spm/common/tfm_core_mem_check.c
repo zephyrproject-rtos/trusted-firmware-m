@@ -11,11 +11,7 @@
 #include "tfm_arch.h"
 #include "tfm_spm_hal.h"
 #include "tfm_api.h"
-#ifdef TFM_PSA_API
-#include "spm_ipc.h"
-#else
 #include "spm_func.h"
-#endif
 
 /**
  * \brief Check whether the current partition has access to a memory range
