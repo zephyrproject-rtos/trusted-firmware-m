@@ -6,8 +6,7 @@
  *
  */
 
-#include "attestation_key.h"
-#include "attestation.h"
+#include "attest_key.h"
 #include <stdint.h>
 #include <stddef.h>
 #include "tfm_plat_defs.h"

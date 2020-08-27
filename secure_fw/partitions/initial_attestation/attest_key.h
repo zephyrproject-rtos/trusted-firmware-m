@@ -5,10 +5,10 @@
  *
  */
 
-#ifndef __ATTESTATION_KEY_H__
-#define __ATTESTATION_KEY_H__
+#ifndef __ATTEST_KEY_H__
+#define __ATTEST_KEY_H__
 
-#include "attestation.h"
+#include "attest.h"
 #include "psa/initial_attestation.h"
 #include "psa/crypto.h"
 #include "q_useful_buf.h"
@@ -115,4 +115,4 @@ attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 }
 #endif
 
-#endif /* __ATTESTATION_KEY_H__ */
+#endif /* __ATTEST_KEY_H__ */

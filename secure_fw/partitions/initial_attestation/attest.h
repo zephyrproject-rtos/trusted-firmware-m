@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __ATTESTATION_H__
-#define __ATTESTATION_H__
+#ifndef __ATTEST_H__
+#define __ATTEST_H__
 
 #include "psa/initial_attestation.h"
 #include "tfm_client.h"
@@ -129,4 +129,4 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
 }
 #endif
 
-#endif /* __ATTESTATION_H__ */
+#endif /* __ATTEST_H__ */

@@ -9,8 +9,8 @@
 #include <string.h>
 #include <stddef.h>
 #include "tfm_client.h"
-#include "attestation.h"
-#include "attestation_key.h"
+#include "attest.h"
+#include "attest_key.h"
 #include "tfm_boot_status.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
