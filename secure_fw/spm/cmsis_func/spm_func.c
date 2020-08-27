@@ -131,6 +131,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
     struct psa_outvec *out_vec = (psa_outvec *)desc_ptr->args[2];
     size_t out_len;
     uint32_t i;
+    uint32_t privileged_mode = TFM_PARTITION_UNPRIVILEGED_MODE;
 
     if ((desc_ptr->args[1] < 0) || (desc_ptr->args[3] < 0)) {
         return TFM_ERROR_INVALID_PARAMETER;
@@ -138,6 +139,17 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
 
     in_len = (size_t)(desc_ptr->args[1]);
     out_len = (size_t)(desc_ptr->args[3]);
+
+    /*
+     * Get caller's privileged mode:
+     * The privileged mode of NS Secure Service caller will be decided by the
+     * tfm_core_has_xxx_access_to_region functions.
+     * Secure caller can be only privileged mode because the whole SPE is
+     * running under privileged mode
+     */
+    if (!desc_ptr->ns_caller) {
+        privileged_mode = TFM_PARTITION_PRIVILEGED_MODE;
+    }
 
     /* The number of vectors are within range. Extra checks to avoid overflow */
     if ((in_len > PSA_MAX_IOVEC) || (out_len > PSA_MAX_IOVEC) ||
@@ -152,7 +164,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
         if ((in_vec == NULL) ||
             (tfm_core_has_write_access_to_region(in_vec,
                             sizeof(psa_invec)*in_len, desc_ptr->ns_caller,
-                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
+                            privileged_mode) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -164,7 +176,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
         if ((out_vec == NULL) ||
             (tfm_core_has_write_access_to_region(out_vec,
                             sizeof(psa_outvec)*out_len, desc_ptr->ns_caller,
-                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
+                            privileged_mode) != TFM_SUCCESS)) {
             return TFM_ERROR_INVALID_PARAMETER;
         }
     } else {
@@ -181,7 +193,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
             if ((in_vec[i].base == NULL) ||
                 (tfm_core_has_read_access_to_region(in_vec[i].base,
                             in_vec[i].len, desc_ptr->ns_caller,
-                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
+                            privileged_mode) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
@@ -191,7 +203,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
             if ((out_vec[i].base == NULL) ||
                 (tfm_core_has_write_access_to_region(out_vec[i].base,
                             out_vec[i].len, desc_ptr->ns_caller,
-                            TFM_PARTITION_UNPRIVILEGED_MODE) != TFM_SUCCESS)) {
+                            privileged_mode) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
