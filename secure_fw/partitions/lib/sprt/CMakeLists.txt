@@ -21,6 +21,8 @@ target_sources(tfm_sprt
         ./crt_memmove.c
         ./crt_memset.c
         ./service_api.c
+        ./tfm_sp_log_raw.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_sp_logdev_periph.c
 )
 
 target_link_libraries(tfm_sprt

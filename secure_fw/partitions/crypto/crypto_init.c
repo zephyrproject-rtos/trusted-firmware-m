@@ -9,7 +9,7 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
-#include "log/tfm_log.h"
+#include "tfm_sp_log.h"
 
 /*
  * \brief This Mbed TLS include is needed to initialise the memory allocator
@@ -278,7 +278,7 @@ static psa_status_t tfm_crypto_engine_init(void)
 {
     /* Log unsafe entropy source */
 #if defined (MBEDTLS_TEST_NULL_ENTROPY)
-    LOG_MSG("\033[1;34m[Crypto] MBEDTLS_TEST_NULL_ENTROPY is not suitable for production!\033[0m\r\n");
+    LOG_INFFMT("\033[1;34m[Crypto] MBEDTLS_TEST_NULL_ENTROPY is not suitable for production!\033[0m\r\n");
 #endif
 
     /* Initialise the Mbed Crypto memory allocator to use static

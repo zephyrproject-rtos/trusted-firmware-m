@@ -47,6 +47,7 @@ target_link_libraries(tfm_partition_crypto
         platform_s
         crypto_service_mbedcrypto
         psa_interface
+        tfm_sprt
 )
 target_compile_definitions(tfm_partition_crypto
     PUBLIC
