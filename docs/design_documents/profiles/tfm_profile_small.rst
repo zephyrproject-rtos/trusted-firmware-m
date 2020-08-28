@@ -331,146 +331,68 @@ Implementation
 Overview
 ========
 
-The basic idea is to add dedicated top-level CMake configuration files under
-folder ``configs`` for TF-M Profile Small default configuration.
+The basic idea is to add dedicated profile CMake configuration files under
+folder ``config/profile`` for TF-M Profile Small default configuration.
 
-The top-level Profile Small config file collects all the necessary configuration
-flags and set them to default values, to explicitly enable the features required
-in TF-M Profile Small and disable the unnecessary ones, during TF-M build.
-
-An alternative option is to set only a global flag in top-level Profile Small
-CMake file and configure the remaining configurations in dedicated CMake files
-of each module/secure service. However, since configuration flags are
-distributed in multiple CMake files, it will become difficult for a platform/use
-case to overwrite default configurations.
-Therefore it is more reasonable to explicitly set all critical configurations in
-a top-level CMake file.
+The top-level Profile Small config file collects all the necessary
+configuration flags and set them to default values, to explicitly enable the
+features required in Profile Small and disable the unnecessary ones, during
+TF-M build.
 
 A platform/use case can provide a configuration extension file to overwrite
 Profile Small default setting and append other configurations.
 This configuration extension file can be added via parameter
-``TFM_PROFILE_CONFIG_EXT`` in build command line. The top-level config file will
-include the device configuration extension file to load platform/use case
-specific configurations.
+``TFM_EXTRA_CONFIG_PATH`` in build command line.
 
-The overall build flow of Profile Small is shown as the flowchart below.
+The behaviour of the Profile Small build flow (particularly the order of
+configuration loading and overriding) can be found at
+:ref:`tfm_cmake_configuration`
 
-.. uml::
-
-    @startuml
-
-    title Overall build flow
-
-    start
-
-    :Profile Small CMake file;
-    note left
-        Top-level CMake config file under ""configs"".
-        Set configurations to default values.
-    endnote
-
-    if (Platform config\nextension specified?) then (Yes)
-        :Include platform specific\nconfig extension file;
-        note left
-            Platform specific configuration extension file
-            is provided via ""TFM_PROFILE_CONFIG_EXT"" in
-            build command line.
-        endnote
-
-        :Overwrite default configurations;
-    else (No)
-    endif
-
-    :CommonConfig.cmake;
-    note left
-        Normal building sequence
-    endnote
-
-    stop
-
-    @enduml
-
-The control flags set in the top-level Profile Small config file are listed
-below.
-The details will be covered in each module in `Implementation details`_.
-
-.. list-table:: Config flags in Profile S top-level CMake config file
-   :widths: 20 15 30
-   :header-rows: 1
-
-   * - Configs
-     - Default value
-     - Descriptions
-   * - ``CORE_IPC``
-     - ``False``
-     - Library model is selected
-   * - ``TFM_LVL``
-     - ``1``
-     - Level 1 isolation
-   * - ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE``
-     - ``ON``
-     - Enable ITS SP
-   * - ``ITS_BUF_SIZE``
-     - ``32``
-     - ITS internal transient buffer size
-   * - ``TFM_PARTITION_CRYPTO``
-     - ``ON``
-     - Enable Crypto service
-   * - ``CRYPTO_ASYMMETRIC_MODULE_DISABLED``
-     - ``ON``
-     - Disable asymmetric cipher in Crypto service
-   * - ``CRYPTO_AEAD_MODULE_DISABLED``
-     - ``OFF``
-     - Enable AEAD in Crypto service
-   * - ``MBEDTLS_CONFIG_FILE``
-     - ``tfm_profile_s_mbedcrypto_config``
-     - Default mbed-crypto config file for Profile Small under
-       ``platform/ext/common``
-   * - ``TFM_PARTITION_AUDIT_LOG``
-     - ``OFF``
-     - Disable Audit Logging Logging service
-   * - ``TFM_PARTITION_SECURE_STORAGE``
-     - ``OFF``
-     - Disable Protected Storage service
-   * - ``TFM_PARTITION_INITIAL_ATTESTATION``
-     - ``ON``
-     - Enable Initial Attestation service
-   * - ``SYMMETRIC_INITIAL_ATTESTATION``
-     - ``ON``
-     - Select Initial Attestation based on symmetric key algorithms
-   * - ``TFM_PARTITION_PLATFORM``
-     - ``OFF``
-     - Disable Platform service
-
-Test cases settings in top-level Profile Small config files are listed below.
-The ``Default config`` stands for configuration without tests and the
-``Regression config`` stands for configuration with regression tests.
-
-.. list-table:: Test config flags in Profile S top-level CMake config file
-   :widths: 20 20 15 15
-   :header-rows: 1
-
-   * - Test cases
-     - Configs
-     - Default config
-     - Regression config
-   * - Regression test
-     - ``REGRESSION``
-     - ``OFF``
-     - ``ON``
-   * - Core test
-     - ``CORE_TEST``
-     - ``OFF``
-     - ``ON``
-   * - PSA API test
-     - ``PSA_API_TEST``
-     - ``OFF``
-     - ``OFF``
+The details of configurations will be covered in each module in
+`Implementation details`_.
 
 Implementation details
 ======================
 
 This section discusses the details of Profile Small implementation.
+
+Top-level configuration files
+-----------------------------
+
+The firmware framework configurations in ``config/profile/profile_small`` are
+shown below.
+
+.. table:: TFM options in Profile Small top-level CMake config file
+   :widths: auto
+   :align: center
+
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``TFM_ISOLATION_LEVEL``                    | ``1``                                                                                               | Select level 2 isolation            |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PSA_API``                            | ``FALSE``                                                                                           | Select IPC model                    |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` | ``ON``                                                                                              | Enable ITS SP                       |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``ITS_BUF_SIZE``                           | ``32``                                                                                              | ITS internal transient buffer size  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_CRYPTO``                   | ``ON``                                                                                              | Enable Crypto service               |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h``  | Mbed Crypto config file path        |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``CRYPTO_ASYMMETRIC_MODULE_DISABLED``      | ``ON``                                                                                              | Disable asymmetric crypto           |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                                                                                              | Enable Initial Attestation service  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``SYMMETRIC_INITIAL_ATTESTATION``          | ``ON``                                                                                              | Enable symmetric attestation        |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_PROTECTED_STORAGE``        | ``OFF``                                                                                             | Enable PS service                   |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_PLATFORM``                 | ``OFF``                                                                                             | Enable TF-M Platform SP             |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_AUDIT_LOG``                | ``OFF``                                                                                             | Disable TF-M audit logging service  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 .. note ::
 
@@ -480,29 +402,48 @@ This section discusses the details of Profile Small implementation.
     setting.
     Dedicated optimization on memory footprint is not covered in this document.
 
-Top-level Profile Small CMake config file
------------------------------------------
+Test configuration
+^^^^^^^^^^^^^^^^^^
 
-There are two top-level Profile Small CMake config files under folder
-``configs``.
+Standard regression test configuration applies. This means that enabling
+regression testing via
 
-- ``ConfigDefaultProfileS.cmake`` completes Profile Small default configurations
-  without test cases.
-- ``ConfigRegressionProfileS.cmake`` enables regression and core test cases for
-  the features defined Profile Small, besides default configurations.
+``-DTEST_S=ON -DTEST_NS=ON``
 
-The details of configuration control flags set in top-level configuration file
-are listed in following sections.
+Will enable testing for all enabled partitions. See above for details of enabled
+partitions. Because Profile Small does not enable IPC mode, the IPC tests are
+not enabled.
+
+Some cryptography tests are disabled due to the reduced Mbed Crypto config.
+
+.. table:: TFM options in Profile Small top-level CMake config file
+   :widths: auto
+   :align: center
+
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``                                                                                             | Test CBC cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``                                                                                              | Test CCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``                                                                                             | Test CFB cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``                                                                                             | Test CTR cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``                                                                                             | Test GCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To overwrite default configurations and add platform specific configurations,
-a platform can set the path to its own configuration extension file in parameter
-``TFM_PROFILE_CONFIG_EXT`` in command line.
-
-A platform can also add its device specific configurations into its specific
-CMake file under ``platform/ext/`` folder.
+To change default configurations and add platform specific configurations,
+a platform can add a platform configuration file at
+``platform/ext<TFM_PLATFORM>/config.cmake``
 
 TF-M framework setting
 ----------------------
@@ -531,10 +472,9 @@ Mbed Crypto configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TF-M Profile Small adds a dedicated Mbed Crypto config file
-``tfm_profile_s_mbedcrypto_config.h`` under ``platform/ext/common``.
-TF-M Profile Small specifies ``tfm_profile_s_mbedcrypto_config.h`` as the
-default Mbed Crypto config in ``MBEDTLS_CONFIG_FILE`` in top-level CMake config
-file, instead of the common one ``tfm_mbedcrypto_config.h`` [10]_.
+``tfm_mbedcrypto_config_profile_small.h`` at
+``/lib/ext/mbedcrypto/mbedcrypto_config``
+file, instead of the common one ``tfm_mbedcrypto_config_default.h`` [10]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
@@ -549,10 +489,12 @@ Major Mbed Crypto configurations are set as listed below:
 Other configurations can be selected to optimize the memory footprint of Crypto
 module.
 
-A device/use case can replace Profile Small default Mbed Crypto config file with
-its specific one to overwrite the default configurations. Alternatively, a
-device can overwrite the configurations by appending a config file via
-``MBEDTLS_USER_CONFIG_FILE``.
+A device/use case can append an extra config header to the  Profile Small
+default Mbed Crypto config file. This can be done by setting the
+``TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH`` cmake variable in the platform
+config file ``platform/ext<TFM_PLATFORM>/config.cmake``. This cmake variable is
+a wrapper around the ``MBEDTLS_USER_CONFIG_FILE`` options, but is preferred as
+it keeps all configuration in cmake.
 
 Internal Trusted Storage configurations
 ---------------------------------------
@@ -601,44 +543,35 @@ BL2 setting
 
 Profile Small enables MCUBoot provided by TF-M by default. A platform can
 overwrite this configuration by disabling MCUBoot in its configuration extension
-file or in its specific CMake file under ``platform/ext/`` folder.
+file ``platform/ext<TFM_PLATFORM>/config.cmake``.
 
 If MCUBoot provided by TF-M is enabled, single image boot is selected in TF-M
 Profile Small top-level CMake config file.
 
-The following table lists the configurations specified in Profile Small
-top-level config file for MCUBoot provided by TF-M.
-
-.. list-table:: MCUBoot config flags in Profile S top-level CMake config file
-   :widths: 30 15 30
-   :header-rows: 1
-
-   * - Configs
-     - Default value
-     - Descriptions
-   * - ``BL2``
-     - ``True``
-     - MCUBoot is enabled
-   * - ``MCUBOOT_IMAGE_NUMBER``
-     - ``1``
-     - Single image boot
-
 If a device implements its own boot loader, the configurations are
 implementation defined.
+
+.. table:: BL2 options in Profile Small top-level CMake config file
+   :widths: auto
+   :align: center
+
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``BL2``                                    | ``ON``                                                                                              | Enable MCUBoot bootloader           |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``MCUBOOT_IMAGE_NUMBER``                   | ``1``                                                                                               | Combine S and NS images             |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 ****************
 Platform support
 ****************
 
-To enable Profile Small on a platform, the platform specific CMake file should
-be added into the platform support list in top-level Profile Small CMake config
-file.
-
 Building Profile Small
 ======================
 
-To build Profile Small, argument ``PROJ_CONFIG`` in build command line should be
-set to ``ConfigRegressionProfileS.cmake`` or ``ConfigRegressionProfileS.cmake``.
+To build Profile Small, argument ``TFM_PROFILE`` in build command line should be
+set to ``profile_small``.
 
 Take AN521 as an example.
 
@@ -647,38 +580,39 @@ build type **MinSizeRel**, built by **Armclang**.
 
 .. code-block:: bash
 
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigDefaultProfileS.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+   cd <TFM root dir>
+   mkdir build && cd build
+   cmake -DTFM_PLATFORM=mps2/an521 \
+         -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+         -DTFM_PROFILE=profile_small \
+         -DCMAKE_BUILD_TYPE=MinSizeRel \
+         ../
+   cmake --build ./ -- install
 
 The following commands build Profile Small with regression test cases on **AN521**
 with build type **MinSizeRel**, built by **Armclang**.
 
 .. code-block:: bash
 
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigRegressionProfileS.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+   cd <TFM root dir>
+   mkdir build && cd build
+   cmake -DTFM_PLATFORM=mps2/an521 \
+         -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+         -DTFM_PROFILE=profile_small \
+         -DCMAKE_BUILD_TYPE=MinSizeRel \
+         -DTEST_S=ON -DTEST_NS=ON \
+         ../
+   cmake --build ./ -- install
+
+.. Note::
+
+ - For devices with more contrained memory and flash requirements, it is
+   possible to build with either only TEST_S enabled or only TEST_NS enabled.
+   This will decrease the size of the test images. Note that both test suites
+   must still be run to ensure correct operation.
 
 More details of building instructions and parameters can be found TF-M build
 instruction guide [11]_.
-
-The following commands include platform specific configuration extension file
-via ``TFM_PROFILE_CONFIG_EXT`` in command line. ``TFM_PROFILE_CONFIG_EXT`` can
-be an absolute path or a relative one to TF-M code root directory.
-
-.. code-block:: bash
-
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigDefaultProfileS.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG           \
-                             -DTFM_PROFILE_CONFIG_EXT=path/to/config_ext_file ../
-    cmake --build ./ -- install
 
 *********
 Reference

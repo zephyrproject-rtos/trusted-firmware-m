@@ -204,9 +204,9 @@ Implementation
 Overview
 ========
 
-The basic idea is to add dedicated top-level CMake configuration files under
-folder ``configs`` for TF-M Profile Medium default configuration, as the same as
-Profile Small does.
+The basic idea is to add dedicated profile CMake configuration files under
+folder ``config/profile`` for TF-M Profile Medium default configuration, the
+same as Profile Small does.
 
 The top-level Profile Medium config file collects all the necessary
 configuration flags and set them to default values, to explicitly enable the
@@ -216,46 +216,11 @@ TF-M build.
 A platform/use case can provide a configuration extension file to overwrite
 Profile Medium default setting and append other configurations.
 This configuration extension file can be added via parameter
-``TFM_PROFILE_CONFIG_EXT`` in build command line. The top-level config file will
-include the device configuration extension file to load platform/use case
-specific configurations.
+``TFM_EXTRA_CONFIG_PATH`` in build command line.
 
-The overall build flow of Profile Medium is shown as the flowchart below.
-
-.. uml::
-
-    @startuml
-
-    title Overall build flow
-
-    start
-
-    :Profile Medium CMake file;
-    note left
-        Top-level CMake config file under ""configs"".
-        Set configurations to default values.
-    endnote
-
-    if (Platform config\nextension specified?) then (Yes)
-        :Include platform specific\nconfig extension file;
-        note left
-            Platform specific configuration extension file
-            is provided via ""TFM_PROFILE_CONFIG_EXT"" in
-            build command line.
-        endnote
-
-        :Overwrite default configurations;
-    else (No)
-    endif
-
-    :CommonConfig.cmake;
-    note left
-        Normal building sequence
-    endnote
-
-    stop
-
-    @enduml
+The behaviour of the Profile Medium build flow (particularly the order of
+configuration loading and overriding) can be found at
+:ref:`tfm_cmake_configuration`
 
 The details of configurations will be covered in each module in
 `Implementation details`_.
@@ -268,80 +233,89 @@ This section discusses the details of Profile Medium implementation.
 Top-level configuration files
 -----------------------------
 
-Profile Medium provides ``ConfigDefaultProfileM`` as a default top-level
-configuration file without test cases.
-
-The firmware framework configurations in ``ConfigDefaultProfileM`` are shown
-below.
+The firmware framework configurations in ``config/profile/profile_medium`` are
+shown below.
 
 .. table:: Config flags in Profile Medium top-level CMake config file
    :widths: auto
    :align: center
 
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | Configs                                    | Default value                       | Descriptions                        |
-   +============================================+=====================================+=====================================+
-   | ``TFM_LVL``                                | ``2``                               | Select level 2 isolation            |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``CORE_IPC``                               | ``True``                            | Select IPC model                    |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` | ``ON``                              | Enable ITS SP                       |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``ITS_BUF_SIZE``                           | ``32``                              | ITS internal transient buffer size  |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_CRYPTO``                   | ``ON``                              | Enable Crypto service               |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``MBEDTLS_CONFIG_FILE``                    | ``tfm_profile_m_mbedcrypto_config`` | Default Mbed Crypto config file for |
-   |                                            |                                     | Profile Medium under                |
-   |                                            |                                     | ``platform/ext/common``             |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                              | Enable Initial Attestation service  |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_PROTECTED_STORAGE`` [1]_   | ``ON``                              | Enable PS service                   |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_PLATFORM``                 | ``ON``                              | Enable TF-M Platform SP             |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_AUDIT_LOG``                | ``OFF``                             | Disable TF-M audit logging service  |
-   +--------------------------------------------+-------------------------------------+-------------------------------------+
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``TFM_ISOLATION_LEVEL``                    | ``2``                                                                                               | Select level 2 isolation            |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PSA_API``                            | ``True``                                                                                            | Select IPC model                    |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` | ``ON``                                                                                              | Enable ITS SP                       |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``ITS_BUF_SIZE``                           | ``32``                                                                                              | ITS internal transient buffer size  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_CRYPTO``                   | ``ON``                                                                                              | Enable Crypto service               |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Mbed Crypto config file path        |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                                                                                              | Enable Initial Attestation service  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_PROTECTED_STORAGE`` [1]_   | ``ON``                                                                                              | Enable PS service                   |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_PLATFORM``                 | ``ON``                                                                                              | Enable TF-M Platform SP             |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_PARTITION_AUDIT_LOG``                | ``OFF``                                                                                             | Disable TF-M audit logging service  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 .. [1] PS service is enabled by default. Platforms without off-chip storage
        devices can turn off ``TFM_PARTITION_PROTECTED_STORAGE`` to disable PS
        service. See `Protected Storage Secure Partition`_ for details.
 
-Profile Medium provides ``ConfigRegressionProfileM`` as the default top-level
-configuration file with regression tests.
+.. Note::
 
-The table below collects ``ConfigRegressionProfileM`` major configurations
-which are not covered or different from those in ``ConfigDefaultProfileM``.
+   Where a configuration is the same as the default in
+   ``config/config_default.cmake``, it is omitted from the profile configuration
+   file.
 
-.. table:: Major config flags in Profile Medium top-level CMake config file with tests
+Test configuration
+^^^^^^^^^^^^^^^^^^
+
+Standard regression test configuration applies. This means that enabling
+regression testing via
+
+``-DTEST_S=ON -DTEST_NS=ON``
+
+Will enable testing for all enabled partitions. See above for details of enabled
+partitions. Because Profile Medium enables IPC mode, the IPC tests are also
+enabled.
+
+Some cryptography tests are disabled due to the reduced Mbed Crypto config.
+
+.. table:: TFM options in Profile Medium top-level CMake config file
    :widths: auto
    :align: center
 
-   +------------------+---------------+------------------------+
-   | Configs          | Default value | Descriptions           |
-   +==================+===============+========================+
-   | ``REGRESSION``   | ``ON``        | Enable Regression test |
-   +------------------+---------------+------------------------+
-   | ``CORE_TEST``    | ``ON``        | Enable Core test       |
-   +------------------+---------------+------------------------+
-   | ``IPC_TEST``     | ``ON``        | Enable IPC test        |
-   +------------------+---------------+------------------------+
-   | ``PSA_API_TEST`` | ``OFF``       | Disable PSA API test   |
-   +------------------+---------------+------------------------+
-
-The test cases should be disabled in ``ConfigRegressionProfileM`` if the
-corresponding feature is not selected in Profile Medium by default.
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``                                                                                             | Test CBC cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``                                                                                              | Test CCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``                                                                                             | Test CFB cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``                                                                                             | Test CTR cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``                                                                                             | Test GCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To change default configurations and add platform specific configurations,
-a platform can set the path to its own configuration extension file in parameter
-``TFM_PROFILE_CONFIG_EXT`` in command line.
-
-A platform can also add its device specific configurations into its specific
-CMake file under ``platform/ext/`` folder.
+a platform can add a platform configuration file at
+``platform/ext<TFM_PLATFORM>/config.cmake``
 
 Crypto service configurations
 -----------------------------
@@ -356,10 +330,9 @@ Mbed Crypto configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TF-M Profile Medium adds a dedicated Mbed Crypto config file
-``tfm_profile_m_mbedcrypto_config.h`` under ``platform/ext/common``.
-TF-M Profile Medium specifies ``tfm_profile_m_mbedcrypto_config.h`` as the
-default Mbed Crypto config in ``MBEDTLS_CONFIG_FILE`` in top-level CMake config
-file, instead of the common one ``tfm_mbedcrypto_config.h`` [CRYPTO-DESIGN]_.
+``tfm_mbedcrypto_config_profile_medium.h`` at
+``/lib/ext/mbedcrypto/mbedcrypto_config``
+file, instead of the common one ``tfm_mbedcrypto_config_default.h`` [CRYPTO-DESIGN]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
@@ -376,10 +349,12 @@ Major Mbed Crypto configurations are set as listed below:
 Other configurations can be selected to optimize the memory footprint of Crypto
 module.
 
-A device/use case can replace Profile Medium default Mbed Crypto config file
-with its specific one to overwrite the default configurations. Alternatively, a
-device can overwrite the configurations by appending a config file via
-``MBEDTLS_USER_CONFIG_FILE``.
+A device/use case can append an extra config header to the  Profile Medium
+default Mbed Crypto config file. This can be done by setting the
+``TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH`` cmake variable in the platform
+config file ``platform/ext<TFM_PLATFORM>/config.cmake``. This cmake variable is
+a wrapper around the ``MBEDTLS_USER_CONFIG_FILE`` options, but is preferred as
+it keeps all configuration in cmake.
 
 Internal Trusted Storage configurations
 ---------------------------------------
@@ -405,16 +380,14 @@ enable PS implementation to select diverse AEAD algorithm.
 
 If platforms don't integrate any off-chip storage device, platforms can disable
 PS in platform specific configuration extension file via
-``TFM_PROFILE_CONFIG_EXT``.
-Profile Medium provides a configuration extension file example
-``profile_m_config_ext_ps_disabled.cmake`` which disables PS service.
+``platform/ext<TFM_PLATFORM>/config.cmake``.
 
 BL2 setting
 -----------
 
 Profile Medium enables MCUBoot provided by TF-M by default. A platform can
 overwrite this configuration by disabling MCUBoot in its configuration extension
-file or in its specific CMake file under ``platform/ext/`` folder.
+file ``platform/ext<TFM_PLATFORM>/config.cmake``.
 
 If MCUBoot provided by TF-M is enabled, multiple image boot is selected by
 default in TF-M Profile Medium top-level CMake config file.
@@ -433,11 +406,8 @@ file.
 Building Profile Medium
 =======================
 
-To build Profile Medium, argument ``PROJ_CONFIG`` in build command line should
-be set to following config files
-
-    - ``ConfigDefaultProfileM.cmake``
-    - ``ConfigRegressionProfileM.cmake``.
+To build Profile Medium, argument ``TFM_PROFILE`` in build command line should be
+set to ``profile_medium``.
 
 Take AN521 as an example:
 
@@ -446,41 +416,39 @@ build type **MinSizeRel**, built by **Armclang**.
 
 .. code-block:: bash
 
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigDefaultProfileM.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+   cd <TFM root dir>
+   mkdir build && cd build
+   cmake -DTFM_PLATFORM=mps2/an521 \
+         -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+         -DTFM_PROFILE=profile_medium \
+         -DCMAKE_BUILD_TYPE=MinSizeRel \
+         ../
+   cmake --build ./ -- install
 
 The following commands build Profile Medium with regression test cases on
 **AN521** with build type **MinSizeRel**, built by **Armclang**.
 
 .. code-block:: bash
 
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigRegressionProfileM.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+   cd <TFM root dir>
+   mkdir build && cd build
+   cmake -DTFM_PLATFORM=mps2/an521 \
+         -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+         -DTFM_PROFILE=profile_medium \
+         -DCMAKE_BUILD_TYPE=MinSizeRel \
+         -DTEST_S=ON -DTEST_NS=ON \
+         ../
+   cmake --build ./ -- install
+
+.. Note::
+
+ - For devices with more contrained memory and flash requirements, it is
+   possible to build with either only TEST_S enabled or only TEST_NS enabled.
+   This will decrease the size of the test images. Note that both test suites
+   must still be run to ensure correct operation.
 
 More details of building instructions and parameters can be found TF-M build
 instruction guide [TFM-BUILD]_.
-
-The following commands include platform specific configuration extension file
-via ``TFM_PROFILE_CONFIG_EXT`` in command line. ``TFM_PROFILE_CONFIG_EXT`` can
-be an absolute path or a relative one to TF-M code root directory.
-The configuration extension file ``profile_m_config_ext_ps_disabled.cmake`` in
-the example below overwrites and disables PS service.
-
-.. code-block:: bash
-
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigDefaultProfileM.cmake` \
-                             -DTARGET_PLATFORM=AN521       \
-                             -DCMAKE_BUILD_TYPE=MinSizeRel \
-                             -DCOMPILER=ARMCLANG           \
-                             -DTFM_PROFILE_CONFIG_EXT=configs/profile_m_config_ext_ps_disabled.cmake ../
-    cmake --build ./ -- install
-
 
 *********
 Reference

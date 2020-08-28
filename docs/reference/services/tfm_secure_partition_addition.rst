@@ -59,7 +59,6 @@ The main steps to add a secure partition are as follows:
 - `Add source folder`_
 - `Add manifest`_
 - `Add configuration`_
-- `Generate files`_
 - `Implement the RoT services`_
 
 Add source folder
@@ -263,20 +262,11 @@ partition:
 
 Add CMake configure files
 -------------------------
-Two CMake configure files need to be added:
-
-- CMakeLists.inc, which is used to add the definition of what files are needed
-  to build.
 - CMakeLists.txt, which is the compilation configuration for this module.
 
-.. Note::
-   The CMakeLists.inc is not mandatory, the user can put everything in
-   CMakeLists.txt.
-
 The current CMake configuration should also be updated, by updating
-CommonConfig.cmake to include the definition of the newly introduced partition
+config_default.cmake to include the definition of the newly introduced partition
 and adding the relevant subdirectoy in ``secure_fw/CMakeLists.txt``.
-
 Please refer to the source code of TF-M for more detail.
 
 Update manifest list
@@ -311,16 +301,10 @@ Reference configuration example:
       "pid": 256
     }
 
-Generate files
-==============
-After finishing the configuration works, the user needs to generate necessary
-files from manifest by using TF-M tools.
-
-.. code-block:: bash
-
-   cd <base folder>
-   cd trusted-firmware-m
-   python ./tools/tfm_parse_manifest_list.py
+.. Note::
+   The manifest configuration can be placed in a different external manifest
+   list. In this case, the cmake variable TFM_EXTRA_MANIFEST_LIST_PATH should be
+   set to the path of the external manifest list.
 
 Implement the RoT services
 ==========================

@@ -45,51 +45,21 @@ Configuring the build
 =====================
 
 The build configuration for TF-M is provided to the build system using command
-line arguments:
+line arguments. Required arguments are noted below.
 
-.. list-table::
-   :widths: 20 80
-
-   * - -DPROJ_CONFIG=<file>
-     - Specifies the way the application is built.
-
-       | <file> is the absolute path to configurations file
-         named as ``Config<APP_NAME>.cmake``.
-       | e.g. On Linux:
-         ``-DPROJ_CONFIG=`readlink -f ../configs/ConfigRegressionIPC.cmake```
-       | Supported configurations files
-
-           - IPC model without regression test suites in Isolation Level 1
-             ``ConfigCoreIPC.cmake``
-           - IPC model with regression test suites in Isolation Level 1
-             ``ConfigRegressionIPC.cmake``
-           - IPC model with PSA API test suite in Isolation Level 1
-             ``ConfigPsaApiTestIPC.cmake``
-           - IPC model without regression test suites in Isolation Level 2
-             ``ConfigCoreIPCTfmLevel2.cmake``
-           - IPC model with regression test suites in Isolation Level 2
-             ``ConfigRegressionIPCTfmLevel2.cmake``
-           - IPC model with PSA API test suite in Isolation Level 2
-             ``ConfigPsaApiTestIPCTfmLevel2.cmake``
-
-   * - -DTARGET_PLATFORM=psoc64
+   * - -DTFM_PLATFORM=cypress/psoc64
      - Specifies target platform name ``psoc64``
 
-   * - -DCOMPILER=<compiler name>
+   * - -DCMAKE_TOOLCHAIN_FILE=<path to toolchain file>
      - Specifies the compiler toolchain
        The possible values are:
 
-         - ``ARMCLANG``
-         - ``GNUARM``
-         - ``IARARM``
+         - ``<TFM root dir>/toolchain_ARMCLANG.cmake``
+         - ``<TFM root dir>/toolchain_GNUARM.cmake``
+         - ``<TFM root dir>/toolchain_IARARM.cmake``
 
-   * - -DCMAKE_BUILD_TYPE=<build type>
-     - Configures debugging support.
-       The possible values are:
-
-         - ``Debug``
-         - ``Release``
-
+see :ref:`tfm_cmake_configuration` for
+more information.
 
 Build Instructions
 ==================
@@ -106,11 +76,8 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink \
-          -f ../configs/ConfigCoreIPC.cmake` \
-          -DTARGET_PLATFORM=psoc64 \
-          -DCOMPILER=ARMCLANG \
-          -DCMAKE_BUILD_TYPE=Release \
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
@@ -127,11 +94,10 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink \
-          -f ../configs/ConfigRegressionIPC.cmake` \
-          -DTARGET_PLATFORM=psoc64 \
-          -DCOMPILER=ARMCLANG \
-          -DCMAKE_BUILD_TYPE=Release ../
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTEST_S=ON -DTEST_NS=ON \
+          ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
 
@@ -140,24 +106,6 @@ the attestation service in Isolation Level 1 on Linux.
 Both the compiler and the debugging type can be changed to other configurations
 listed above.
 
-.. list-table::
-   :widths: 20 80
-
-   * - -DPSA_API_TEST_BUILD_PATH=<path> (optional)
-     - Specifies the path to the PSA API build directory
-
-         - ``${TFM_ROOT_DIR}/../psa-arch-tests/api-tests/BUILD`` (default)
-
-   * - -D<PSA_API_TEST_xxx>=1 (choose exactly one)
-     - Specifies the service to support
-       The possible values are:
-
-         - ``PSA_API_TEST_INITIAL_ATTESTATION``
-         - ``PSA_API_TEST_CRYPTO``
-         - ``PSA_API_TEST_PROTECTED_STORAGE``
-         - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
-         - ``PSA_API_TEST_STORAGE``
-
 .. code-block:: bash
 
     cd <TF-M base folder>
@@ -165,14 +113,10 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake ../ \
-        -G"Unix Makefiles" \
-        -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPC.cmake` \
-        -DPSA_API_TEST_BUILD_PATH=../psa-arch-tests/api-tests/BUILD_ATT.GNUARM
-        -DPSA_API_TEST_INITIAL_ATTESTATION=1 \
-        -DTARGET_PLATFORM=psoc64 \
-        -DCOMPILER=ARMCLANG \
-        -DCMAKE_BUILD_TYPE=Release
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTEST_PSA_API=INITIAL_ATTESTATION \
+          ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
 
@@ -188,11 +132,9 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake -G"Unix Makefiles" \
-          -DPROJ_CONFIG=`readlink -f ../configs/ConfigCoreIPCTfmLevel2.cmake` \
-          -DTARGET_PLATFORM=psoc64 \
-          -DCOMPILER=ARMCLANG \
-          -DCMAKE_BUILD_TYPE=Release \
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_ISOLATION_LEVEL=2 \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
@@ -209,12 +151,10 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake -G"Unix Makefiles" \
-          -DPROJ_CONFIG=`readlink \
-          -f ../configs/ConfigRegressionIPCTfmLevel2.cmake` \
-          -DTARGET_PLATFORM=psoc64 \
-          -DCOMPILER=ARMCLANG \
-          -DCMAKE_BUILD_TYPE=Release \
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_ISOLATION_LEVEL=2 \
+          -DTEST_S=ON -DTEST_NS=ON \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
@@ -224,24 +164,6 @@ the protected storage service in Isolation Level 2 on Linux.
 Both the compiler and the debugging type can be changed to other configurations
 listed above.
 
-.. list-table::
-   :widths: 20 80
-
-   * - -DPSA_API_TEST_BUILD_PATH=<path> (optional)
-     - Specifies the path to the PSA API build directory
-
-         - ``${TFM_ROOT_DIR}/../psa-arch-tests/api-tests/BUILD`` (default)
-
-   * - -D<PSA_API_TEST_xxx>=1 (choose exactly one)
-     - Specifies the service to support
-       The possible values are:
-
-         - ``PSA_API_TEST_INITIAL_ATTESTATION``
-         - ``PSA_API_TEST_CRYPTO``
-         - ``PSA_API_TEST_PROTECTED_STORAGE``
-         - ``PSA_API_TEST_INTERNAL_TRUSTED_STORAGE``
-         - ``PSA_API_TEST_STORAGE``
-
 .. code-block:: bash
 
     cd <TF-M base folder>
@@ -249,14 +171,11 @@ listed above.
 
     mkdir <build folder>
     pushd <build folder>
-    cmake ../ \
-        -G"Unix Makefiles" \
-        -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPCTfmLevel2.cmake` \
-        -DPSA_API_TEST_BUILD_PATH=../psa-arch-tests/api-tests/BUILD_PS.GNUARM
-        -DPSA_API_TEST_PROTECTED_STORAGE=1 \
-        -DTARGET_PLATFORM=psoc64 \
-        -DCOMPILER=ARMCLANG \
-        -DCMAKE_BUILD_TYPE=Release
+    cmake -DTFM_PLATFORM=cypress/psoc64 \
+          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_ISOLATION_LEVEL=2 \
+          -DTEST_PSA_API=PROTECTED_STORAGE \
+          ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
 
@@ -264,37 +183,12 @@ listed above.
 Signing the images
 **********************
 
-###########################
-Converting axf files to hex
-###########################
-
-First, convert tfm_s.axf and tfm_ns.axf images to hex format. This also places
-resulting files one folder level up.
-
-GNUARM build:
-
-.. code-block:: bash
-
-    arm-none-eabi-objcopy -O ihex <build folder>/secure_fw/tfm_s.axf <build folder>/tfm_s.hex
-    arm-none-eabi-objcopy -O ihex <build folder>/app/tfm_ns.axf <build folder>/tfm_ns.hex
-
-ARMCLANG build:
-
-.. code-block:: bash
-
-    fromelf --i32 --output=<build folder>/tfm_s.hex <build folder>/secure_fw/tfm_s.axf
-    fromelf --i32 --output=<build folder>/tfm_ns.hex <build folder>/app/tfm_ns.axf
-
-IARARM build:
-
-.. code-block:: bash
-
-    ielftool --silent --ihex <build folder>/secure_fw/tfm_s.axf <build folder>/tfm_s.hex
-    ielftool --silent --ihex <build folder>/app/tfm_ns.axf <build folder>/tfm_ns.hex
-
 ############
 Signing keys
 ############
+
+Copy secure keys used in the board provisioning process to
+platform/ext/target/cypress/psoc64/security/keys:
 
 The keys included in the repository are for reference and development only.
 DO NOT USE THESE KEYS IN ANY ACTUAL DEPLOYMENT!
@@ -348,7 +242,7 @@ SPE image:
     --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
     --target cy8ckit-064s0s2-4343w \
     sign-image \
-    --hex <build folder>/tfm_s.hex \
+    --hex <build folder>/bin/tfm_s.hex \
     --image-type BOOT \
     --image-id 1
 
@@ -360,7 +254,7 @@ NSPE image:
     --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
     --target cy8ckit-064s0s2-4343w \
     sign-image \
-    --hex <build folder>/tfm_ns.hex \
+    --hex <build folder>/bin/tfm_ns.hex \
     --image-type BOOT \
     --image-id 16
 
@@ -397,8 +291,8 @@ Copy tfm hex files one by one to the DAPLINK device:
 
 .. code-block:: bash
 
-    cp <build folder>/tfm_ns.hex <mount point>/DAPLINK/; sync
-    cp <build folder>/tfm_s.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/bin/tfm_ns.hex <mount point>/DAPLINK/; sync
+    cp <build folder>/bin/tfm_s.hex <mount point>/DAPLINK/; sync
 
 OpenOCD
 =======
@@ -440,7 +334,7 @@ run the following commands:
             -f interface/kitprog3.cfg \
             -f target/psoc6_2m_secure.cfg \
             -c "init; reset init" \
-            -c "flash write_image erase ${BUILD_DIR}/tfm_s.hex" \
+            -c "flash write_image erase ${BUILD_DIR}/bin/tfm_s.hex" \
             -c "shutdown"
 
     ${OPENOCD_PATH}/bin/openocd \
@@ -448,7 +342,7 @@ run the following commands:
             -f interface/kitprog3.cfg \
             -f target/psoc6_2m_secure.cfg \
             -c "init; reset init" \
-            -c "flash write_image erase ${BUILD_DIR}/tfm_ns.hex" \
+            -c "flash write_image erase ${BUILD_DIR}/bin/tfm_ns.hex" \
             -c "reset run"
 
 PyOCD
@@ -471,9 +365,9 @@ run the following commands:
 
 .. code-block:: bash
 
-    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/tfm_s.hex
+    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/bin/tfm_s.hex
 
-    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/tfm_ns.hex
+    pyocd flash -b CY8CKIT-064S0S2-4343W ${BUILD_DIR}/bin/tfm_ns.hex
 
 
 ********************************

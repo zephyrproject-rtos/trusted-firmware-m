@@ -124,35 +124,9 @@ officially supported.
 External dependencies
 *********************
 
-In order to build TF-M the following external projects are required:
-
-    - `Mbed-crypto(MbedTLS) library <https://github.com/ARMmbed/mbedtls>`__ v2.23.0
-      is used as crypto library on the secure side.
-    - `MCUboot <https://github.com/JuulLabs-OSS/mcuboot>`__ v1.6.0 is used as
-      the default bootloader in TF-M
-
-And the following TF-M projects as well:
-
-    - `TF-M tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git>`__
-
-.. Note::
-
-    The development of Mbed-crypto has moved to MbedTLS project and hence
-    wherever mbed-crypto is referred to in TF-M, it refers to the component
-    within MbedTLS project. More details of the move can be found
-    `here <https://github.com/ARMmbed/mbed-crypto/issues/374>`__.
-
-
-Each of the listed dependencies should be placed in a common root directory
-with trustedfirmware-m
-
-.. code-block:: bash
-
-    .
-    ├── mbedtls
-    ├── mcuboot
-    ├── tf-m-tests
-    └── trusted-firmware-m
+Dependency management is now handled by cmake. If you wish to alter this
+behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
+dependency management`
 
 ********************************************
 Tools for configuring and programming boards
