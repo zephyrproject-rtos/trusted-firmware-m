@@ -12,7 +12,7 @@
 
 #ifdef TFM_PSA_API
 #include "psa_manifest/tfm_initial_attestation.h"
-#include "tfm_client.h"
+#include "psa/client.h"
 #include "psa/service.h"
 #include "region_defs.h"
 

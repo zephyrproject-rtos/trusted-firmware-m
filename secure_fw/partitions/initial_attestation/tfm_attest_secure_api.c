@@ -6,9 +6,9 @@
  */
 
 #include "psa/initial_attestation.h"
+#include "psa/client.h"
 #include "tfm_veneers.h"
 #include "tfm_memory_utils.h"
-#include "tfm_client.h"
 #include "tfm_secure_api.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"

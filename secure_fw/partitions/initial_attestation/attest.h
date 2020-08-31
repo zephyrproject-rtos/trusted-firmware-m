@@ -9,7 +9,7 @@
 #define __ATTEST_H__
 
 #include "psa/initial_attestation.h"
-#include "tfm_client.h"
+#include "psa/client.h"
 #include "tfm_boot_status.h"
 
 #ifdef __cplusplus

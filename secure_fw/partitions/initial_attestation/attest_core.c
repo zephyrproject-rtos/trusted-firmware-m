@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stddef.h>
-#include "tfm_client.h"
+#include "psa/client.h"
 #include "attest.h"
 #include "attest_key.h"
 #include "tfm_boot_status.h"
