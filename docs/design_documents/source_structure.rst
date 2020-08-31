@@ -145,7 +145,10 @@ services.
 Folder name                         Purpose
 =================================== ===========================================
 include/\*                          SPM public headers.
-common/\*                           SPM common logic complies PSA-FF-M.
+common/\*                           SPM common logic complies with PSA-FF-M and
+                                    its necessary supporting functionalities,
+                                    such as the runtime API and the thread
+                                    operation, etc.
 cmsis_psa/\*                        CMSIS implementation for PSA-FF-M SPM. [1]
 cmsis_func/\*                       The library model implementation. [2]
 \*                                  Implementation sources.
