@@ -22,7 +22,19 @@ LR_CODE NS_CODE_START {
         .ANY (+RO)
     }
 
-    ER_DATA NS_DATA_START {
+#ifdef RAM_VECTORS_SUPPORT
+    ER_RAM_VECTORS NS_DATA_START ALIGN 256 UNINIT {
+        * (RESET_RAM, +FIRST)
+    }
+#endif
+
+    /* Executable code allocated in RAM */
+    TFM_RAM_CODE +0 ALIGN 32 {
+        * (.ramfunc)
+    }
+
+    /* Use up the rest space of the NS_DATA area */
+    ER_DATA +0 {
         .ANY (+ZI +RW)
     }
 
@@ -31,17 +43,6 @@ LR_CODE NS_CODE_START {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY NS_HEAP_SIZE {
-    }
-
-#ifdef RAM_VECTORS_SUPPORT
-    ER_RAM_VECTORS +0 ALIGN 256 UNINIT {
-        * (RESET_RAM)
-    }
-#endif
-
-    /* Executable code allocated in RAM */
-    TFM_RAM_CODE +0 ALIGN 32 {
-        * (.ramfunc)
     }
 
 #if defined (NS_DATA_SHARED_START)
@@ -61,4 +62,3 @@ LR_CODE NS_CODE_START {
      */
     ScatterAssert(ImageLimit(SRAM_WATERMARK) <= NS_DATA_START + NS_DATA_SIZE)
 }
-
