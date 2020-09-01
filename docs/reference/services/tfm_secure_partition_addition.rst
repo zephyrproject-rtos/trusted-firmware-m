@@ -300,7 +300,6 @@ Reference configuration example:
       "name": "Example Service",
       "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/EXAMPLE/tfm_example.yaml",
-      "tfm_extensions": true,
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_EXAMPLE_ENABLE",
       "version_major": 0,
