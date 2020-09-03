@@ -66,7 +66,6 @@ def process_manifest(manifest_list_files):
     """
 
     db = []
-    manifest_header_list = []
     manifest_list = []
 
     for f in manifest_list_files:
@@ -83,8 +82,6 @@ def process_manifest(manifest_list_files):
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
         manifest = yaml.safe_load(file)
-
-        db.append({"manifest": manifest, "attr": manifest_item})
 
         utilities = {}
         utilities['donotedit_warning']=donotedit_warning
@@ -108,7 +105,7 @@ def process_manifest(manifest_list_files):
             source_path = os.path.expandvars(manifest_item['source_path'])
             outfile_name = os.path.relpath(outfile_name, start = source_path)
 
-        manifest_header_list.append(outfile_name)
+        db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
@@ -123,7 +120,7 @@ def process_manifest(manifest_list_files):
         outfile.write(template.render(context))
         outfile.close()
 
-    return manifest_header_list, db
+    return db
 
 def gen_files(context, gen_file_lists):
     """
@@ -236,13 +233,12 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    manifest_header_list, db = process_manifest(manifest_list)
+    db = process_manifest(manifest_list)
 
     utilities = {}
     context = {}
 
     utilities['donotedit_warning']=donotedit_warning
-    utilities['manifest_header_list']=manifest_header_list
 
     context['manifests'] = db
     context['utilities'] = utilities

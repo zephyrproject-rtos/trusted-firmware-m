@@ -7,8 +7,10 @@
 
 {{utilities.donotedit_warning}}
 
-{% for header in utilities.manifest_header_list %}
-#include "{{header}}"
+{% for manifest in manifests %}
+#ifdef {{manifest.attr.conditional}}
+#include "{{manifest.header_file}}"
+#endif /* {{manifest.attr.conditional}} */
 {% endfor %}
 #include "psa_manifest/pid.h"
 {% macro _irq_record(partition_name, signal, line, priority) -%}
