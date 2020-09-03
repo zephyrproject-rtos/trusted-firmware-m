@@ -101,6 +101,7 @@ __ramVectors
                 DS8   __Vectors_Size
 
 ; Reset Handler
+                PUBWEAK  Reset_Handler
                 SECTION  .text:CODE:REORDER:NOROOT(2)
 Reset_Handler
                 CPSID   i              ; Disable IRQs

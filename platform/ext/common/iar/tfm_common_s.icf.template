@@ -297,7 +297,7 @@ define block LR_CODE with fixed order {
        };
 
 do not initialize  { section .noinit };
-initialize by copy { readwrite };
+initialize by copy with packing = none { readwrite };
 if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 {
   // Required in a multi-threaded application

@@ -9,6 +9,11 @@
 #include "tfm_secure_api.h"
 #include "tfm/tfm_spm_services.h"
 
+#if defined(__ICCARM__)
+uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp);
+#pragma required=tfm_core_svc_handler
+#endif
+
 nsfptr_t ns_entry;
 
 void jump_to_ns_code(void)
