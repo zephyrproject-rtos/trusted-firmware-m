@@ -7,6 +7,7 @@
 
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 #========================= Platform region defs ===============================#
 
@@ -64,6 +65,10 @@ if(BL2)
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_bl2.sct>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
     )
+endif()
+
+if(BL0)
+    add_subdirectory(bl0)
 endif()
 
 #========================= Platform Secure ====================================#

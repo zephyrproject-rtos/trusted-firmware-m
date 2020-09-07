@@ -44,7 +44,7 @@ struct musca_b1_scc_reg_map_t {
     volatile uint32_t cpu0_vtor;                       /* 0x58 RW Reset vector for CPU0 */
     volatile uint32_t reserved4;                       /* 0x5C RW Reset vector for KX CPU */
     volatile uint32_t cpu1_vtor;                       /* 0x60 Reserved */
-    volatile uint32_t az_cpu_vtor;                     /* 0x64 RW Reset vector for AZ CPU */
+    volatile uint32_t az_cpu_vtor;                     /* 0x64 RW AZ_CPU_VTOR Register */
     volatile uint32_t iomux_main_insel_0;              /* 0x68 RW Main function in data select */
     volatile uint32_t iomux_main_insel_1;              /* 0x6C RW Main function in data select */
     volatile uint32_t iomux_main_outsel_0;             /* 0x70 RW Main function out data select */
@@ -120,6 +120,10 @@ struct musca_b1_scc_reg_map_t {
     volatile uint32_t reserved[119];                   /* 0x224 Reserved */
     volatile uint32_t chip_id;                         /* 0x400 RO Chip ID 0x07D00477 */
 };
+
+#define AZ_CONTROL_AZ_BOOT_REMAP   (1UL << 0U)
+#define AZ_CONTROL_DBGRESET_N      (1UL << 7U)
+#define AZ_CONTROL_HRESET_N        (1UL << 8U)
 
 /**
  * \brief Clears selected alternate functions for selected pins
@@ -392,6 +396,93 @@ musca_b1_scc_set_default_in(struct musca_b1_scc_dev_t* dev,
              */
             return SCC_INVALID_ARG;
     }
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_cpu_vtor(struct musca_b1_scc_dev_t* dev,
+                             uint8_t az_sys_remap, uint8_t az_code_remap,
+                             uint8_t az_rom_remap)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_cpu_vtor = ((az_rom_remap) |
+                             (az_code_remap << 8UL) |
+                             (az_sys_remap << 16UL));
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_rom_remap(struct musca_b1_scc_dev_t* dev,
+                              uint32_t offset, uint32_t mask)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_rom_remap_offset = offset;
+    scc_regs->az_rom_remap_mask = mask;
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_code_remap(struct musca_b1_scc_dev_t* dev,
+                               uint32_t offset, uint32_t mask)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_code_remap_offset = offset;
+    scc_regs->az_code_remap_mask = mask;
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_sys_remap(struct musca_b1_scc_dev_t* dev,
+                              uint32_t offset, uint32_t mask)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_sys_remap_offset = offset;
+    scc_regs->az_sys_remap_mask = mask;
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_enable_az_boot_remap(struct musca_b1_scc_dev_t* dev)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_ctrl |= AZ_CONTROL_AZ_BOOT_REMAP;
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_disable_az_boot_remap(struct musca_b1_scc_dev_t* dev)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_ctrl &= ~AZ_CONTROL_AZ_BOOT_REMAP;
+
+    return SCC_ERR_NONE;
+}
+
+enum musca_b1_scc_error_t
+musca_b1_scc_az_release_from_reset(struct musca_b1_scc_dev_t* dev)
+{
+    struct musca_b1_scc_reg_map_t* scc_regs =
+                                (struct musca_b1_scc_reg_map_t*) dev->cfg->base;
+
+    scc_regs->az_ctrl |= (AZ_CONTROL_DBGRESET_N | AZ_CONTROL_HRESET_N);
 
     return SCC_ERR_NONE;
 }

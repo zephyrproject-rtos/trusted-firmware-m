@@ -129,6 +129,105 @@ musca_b1_scc_set_default_in(struct musca_b1_scc_dev_t* dev,
                             enum gpio_altfunc_t altfunc,
                             uint32_t pin_num,
                             bool default_in_value);
+
+/**
+ * \brief Sets the AZ_CPU_VTOR register of SCC
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ * \param[in] az_sys_remap      Remap vector for System address space
+ * \param[in] az_code_remap     Remap vector for Code address space
+ * \param[in] az_rom_remap      Remap vector for ROM address space
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_cpu_vtor(struct musca_b1_scc_dev_t* dev,
+                             uint8_t az_sys_remap, uint8_t az_code_remap,
+                             uint8_t az_rom_remap);
+
+/**
+ * \brief Sets ROM address remap for AZ CPU
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ * \param[in] offset            ROM address offset
+ * \param[in] mask              Address mask for remap
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_rom_remap(struct musca_b1_scc_dev_t* dev,
+                              uint32_t offset, uint32_t mask);
+
+/**
+ * \brief Sets Code address remap for AZ CPU
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ * \param[in] offset            Code address offset
+ * \param[in] mask              Address mask for remap
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_code_remap(struct musca_b1_scc_dev_t* dev,
+                               uint32_t offset, uint32_t mask);
+
+/**
+ * \brief Sets System address remap for AZ CPU
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ * \param[in] offset            System address offset
+ * \param[in] mask              Address mask for remap
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_set_az_sys_remap(struct musca_b1_scc_dev_t* dev,
+                              uint32_t offset, uint32_t mask);
+
+/**
+ * \brief Enables address remap for AZ CPU at boot.
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_enable_az_boot_remap(struct musca_b1_scc_dev_t* dev);
+
+/**
+ * \brief Disables address remap for AZ CPU at boot.
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_disable_az_boot_remap(struct musca_b1_scc_dev_t* dev);
+
+/**
+ * \brief Releases AZ CPU from reset.
+ *
+ * \param[in] dev               SCC device pointer \ref musca_b1_scc_dev_t
+ *
+ * \return   Returns error code.     \ref musca_b1_scc_error_t
+ *
+ * \note This function doesn't check if scc_base is NULL.
+ */
+enum musca_b1_scc_error_t
+musca_b1_scc_az_release_from_reset(struct musca_b1_scc_dev_t* dev);
+
 #ifdef __cplusplus
 }
 #endif
