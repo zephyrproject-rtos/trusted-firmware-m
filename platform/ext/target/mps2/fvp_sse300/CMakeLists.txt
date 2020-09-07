@@ -1,0 +1,182 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2020, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+cmake_policy(SET CMP0076 NEW)
+set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+#========================= Platform region defs ===============================#
+
+target_include_directories(platform_region_defs
+    INTERFACE
+        partition
+)
+
+#========================= Platform common defs ===============================#
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+    message(FATAL_ERROR "gcc is currently not supported on the mps/fvp_sse300 due to a lack of scatter files")
+endif()
+
+# Specify the location of platform specific build dependencies.
+target_sources(tfm_s
+    PRIVATE
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_s.c>
+    # $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_s.c>
+)
+target_add_scatter_file(tfm_s
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    # $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
+)
+
+if(NS)
+    target_sources(tfm_ns
+        PRIVATE
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_ns.c>
+            # $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_ns.c>
+    )
+    target_add_scatter_file(tfm_ns
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/fvp_sse300_mps2_ns.sct>
+        # $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/fvp_sse300_mps2_ns.ld>
+    )
+    target_link_libraries(tfm_ns
+        PRIVATE
+            $<$<C_COMPILER_ID:ARMClang>:${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib>
+            # $<$<C_COMPILER_ID:GNU>:${CMSIS_5_PATH}/RTOS2/RTX/Library/GCC/libRTX_V8MBN.a>
+            # These libraries require linking to the veneers, so the veneers are
+            # marked again here as a link dependency to get the ordering right
+            tfm_s_veneers
+            tfm_spm
+    )
+endif()
+
+if(BL2)
+    target_sources(bl2
+        PRIVATE
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_bl2.c>
+            # $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps2_bl2.c>
+    )
+    target_add_scatter_file(bl2
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/fvp_sse300_mps2_bl2.sct>
+            # $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/fvp_sse300_mps2_bl2.ld>
+    )
+endif()
+
+#========================= Platform Secure ====================================#
+
+target_include_directories(platform_s
+    PUBLIC
+        .
+        ../common
+        cmsis_drivers
+        cmsis_drivers/config
+        device
+        device/config
+        device/include
+        device/source/armclang
+        native_drivers
+        partition
+        services/src
+        native_drivers
+        ${PLATFORM_DIR}/..
+)
+
+target_sources(platform_s
+    PRIVATE
+        device/source/system_core_init.c
+        device/source/device_definition.c
+        native_drivers/uart_cmsdk_drv.c
+        native_drivers/systimer_armv8-m_drv.c
+        target_cfg.c
+        cmsis_drivers/Driver_USART.c
+        cmsis_drivers/Driver_Flash.c
+        native_drivers/mpc_sie_drv.c
+        native_drivers/ppc_sse300_drv.c
+        spm_hal.c
+        native_drivers/mpu_armv8m_drv.c
+        cmsis_drivers/Driver_MPC.c
+        cmsis_drivers/Driver_SSE300_PPC.c
+        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+)
+
+target_link_libraries(platform_s
+    PRIVATE
+        tfm_utilities
+)
+
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
+        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
+)
+
+#========================= Platform Non-Secure ================================#
+
+target_sources(platform_ns
+    PRIVATE
+    device/source/system_core_init.c
+    device/source/device_definition.c
+    native_drivers/uart_cmsdk_drv.c
+    native_drivers/systimer_armv8-m_drv.c
+    cmsis_drivers/Driver_USART.c
+    cmsis_drivers/Driver_Flash.c
+)
+
+target_include_directories(platform_ns
+    PUBLIC
+        .
+        ${PLATFORM_DIR}/..
+        cmsis_drivers
+        cmsis_drivers/config
+        device
+        device/config
+        device/include
+        device/source/armclang
+        native_drivers
+        partition
+        services/src
+        native_drivers
+)
+
+#========================= Platform BL2 =======================================#
+
+if(BL2)
+    target_sources(platform_bl2
+        PRIVATE
+            boot_hal.c
+            device/source/device_definition.c
+            device/source/system_core_init.c
+            cmsis_drivers/Driver_Flash.c
+            native_drivers/uart_cmsdk_drv.c
+            cmsis_drivers/Driver_USART.c
+    )
+
+    target_include_directories(platform_bl2
+        PUBLIC
+            cmsis_drivers
+            cmsis_drivers/config
+            device
+            device/config
+            device/include
+            device/source/armclang
+            native_drivers
+            partition
+            services/src
+            native_drivers
+
+        PRIVATE
+            .
+            ${PLATFORM_DIR}/..
+            native_drivers
+    )
+endif()
