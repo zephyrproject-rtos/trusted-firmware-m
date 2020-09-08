@@ -72,11 +72,11 @@ target_sources(psa_api_ns
 
 if (${TFM_PSA_API})
     target_sources(psa_api_ns PRIVATE
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_ipc_api.c>
-        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_ipc_api.c>
-        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_its_ipc_api.c>
-        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_crypto_ipc_api.c>
-        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_initial_attestation_ipc_api.c>
+        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_PLATFORM}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_ipc_api.c>
+        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_ipc_api.c>
+        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_its_ipc_api.c>
+        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_crypto_ipc_api.c>
+        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_initial_attestation_ipc_api.c>
     )
 
     if (TFM_MULTI_CORE_TOPOLOGY)

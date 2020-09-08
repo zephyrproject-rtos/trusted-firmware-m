@@ -31,7 +31,7 @@ target_include_directories(tfm_spm
 
 target_sources(tfm_spm
     PRIVATE
-        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:common/tfm_boot_data.c>
+        common/tfm_boot_data.c
         common/tfm_core_utils.c
         common/utilities.c
         common/spm_log.c

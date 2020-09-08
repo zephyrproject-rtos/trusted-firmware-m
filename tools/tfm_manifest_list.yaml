@@ -240,6 +240,22 @@
            "*tfm_secure_client_2.*"
          ]
       }
+    },
+    {
+      "name": "TF-M PSA Proxy Service",
+      "short_name": "TFM_SP_PSA_PROXY",
+      "manifest": "secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_PSA_PROXY",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 270,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_psa_proxy*"
+         ]
+      }
     }
   ]
 }

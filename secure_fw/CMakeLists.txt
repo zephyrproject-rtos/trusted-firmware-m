@@ -25,6 +25,7 @@ add_subdirectory(partitions/initial_attestation)
 add_subdirectory(partitions/protected_storage)
 add_subdirectory(partitions/internal_trusted_storage)
 add_subdirectory(partitions/platform)
+add_subdirectory(partitions/psa_proxy)
 add_subdirectory(spm)
 
 target_include_directories(secure_fw

@@ -1,0 +1,69 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2020, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+if(NOT TFM_PARTITION_PSA_PROXY)
+    return()
+endif()
+
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0079 NEW)
+
+add_library(tfm_partition_psa_proxy STATIC)
+
+target_include_directories(tfm_partition_psa_proxy
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy
+    PUBLIC
+        # Required for spm_ipc.h
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../../spm/cmsis_psa
+)
+
+target_sources(tfm_partition_psa_proxy
+    PRIVATE
+        psa_proxy.c
+        psa_proxy_shared_mem_mngr.c
+        ../../../interface/src/tfm_ns_mailbox.c
+)
+
+target_link_libraries(tfm_partition_psa_proxy
+    PRIVATE
+        tfm_secure_api
+        psa_interface
+        secure_fw
+        platform_s
+)
+
+############################ Secure API ########################################
+
+target_sources(tfm_secure_api
+    PRIVATE
+        ../crypto/tfm_crypto_secure_api.c
+        ../initial_attestation/tfm_attest_secure_api.c
+        ../internal_trusted_storage/tfm_its_secure_api.c
+        ../platform/tfm_platform_secure_api.c
+        ../protected_storage/tfm_ps_secure_api.c
+)
+
+# The veneers give warnings about not being properly declared so they get hidden
+# to not overshadow _real_ warnings.
+set_source_files_properties(tfm_ps_secure_api.c
+    PROPERTIES
+        COMPILE_FLAGS -Wno-implicit-function-declaration
+)
+
+############################ Partition Defs ####################################
+
+target_link_libraries(tfm_partitions
+    INTERFACE
+        tfm_partition_psa_proxy
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_PSA_PROXY
+)
