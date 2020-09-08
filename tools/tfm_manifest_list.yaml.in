@@ -107,7 +107,7 @@
     {
       "name": "TFM Core Test Service",
       "short_name": "TFM_SP_CORE_TEST",
-      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test/tfm_test_core.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test/tfm_ss_core_test.yaml",
       "source_path": "@TFM_TEST_PATH@",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
@@ -123,7 +123,7 @@
     {
       "name": "TFM Core Test Service 2",
       "short_name": "TFM_SP_CORE_TEST_2",
-      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test_2/tfm_test_core_2.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_core_test_2/tfm_ss_core_test_2.yaml",
       "source_path": "@TFM_TEST_PATH@",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
@@ -139,7 +139,7 @@
     {
       "name": "TFM Secure Client Service",
       "short_name": "TFM_SP_SECURE_TEST_PARTITION",
-      "manifest": "@TFM_TEST_PATH@/test_services/tfm_secure_client_service/tfm_test_client_service.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_secure_client_service/tfm_secure_client_service.yaml",
       "source_path": "@TFM_TEST_PATH@",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
@@ -163,7 +163,7 @@
     {
       "name": "TFM IPC Service Test",
       "short_name": "TFM_SP_IPC_SERVICE_TEST",
-      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_service/tfm_ipc_service_partition.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_service/tfm_ipc_service_test.yaml",
       "source_path": "@TFM_TEST_PATH@",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
@@ -172,14 +172,14 @@
       "pid": 265,
       "linker_pattern": {
         "object_list": [
-           "*ipc_service_test.*"
+           "*tfm_ipc_service_test.*"
          ]
       }
     },
     {
       "name": "TFM IPC Client Service",
       "short_name": "TFM_SP_IPC_CLIENT_TEST",
-      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_client/tfm_ipc_client_partition.yaml",
+      "manifest": "@TFM_TEST_PATH@/test_services/tfm_ipc_client/tfm_ipc_client_test.yaml",
       "source_path": "@TFM_TEST_PATH@",
       "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
@@ -188,7 +188,7 @@
       "pid": 266,
       "linker_pattern": {
         "object_list": [
-           "*ipc_client_test.*"
+           "*tfm_ipc_client_test.*"
          ]
       }
     },
