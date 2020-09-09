@@ -15,12 +15,8 @@
             "permission" : "enabled",
             "control" : "firmware",
             "key" : 5,
-            "syscall": true,
-            "mmio": true,
-            "flash": true,
-            "workflash": true,
-            "sflash": true,
-            "sram": true
+            "flashw": true,
+            "flashr": true
         },
         "rma" : {
             "permission" : "allowed",
@@ -66,14 +62,17 @@
                 "boot_auth": [
                     5
                 ],
+                "bootloader_keys": [
+                    { "kid": 5, "key": "../keys/oem_state.json" }
+                ],
                 "id": 0,
                 "launch": 1,
+                "acq_win": 100,
                 "monotonic": 0,
                 "smif_id": 0,
+                "clock_flags": 578,
+                "protect_flags": 1,
                 "upgrade": false,
-                "upgrade_auth": [
-                    5
-                ],
                 "resources": [
                     {
                         "type": "FLASH_PC1_SPM",
@@ -82,8 +81,8 @@
                     },
                     {
                         "type": "SRAM_SPM_PRIV",
-                        "address": 135004160,
-                        "size": 262144
+                        "address": 135135232,
+                        "size": 65536
                     },
                     {
                         "type": "SRAM_DAP",
@@ -102,6 +101,7 @@
                 "id": 1,
                 "monotonic": 0,
                 "smif_id": 0,
+                "acq_win": 100,
                 "multi_image" : 1,
                 "upgrade": true,
                 "version": "0.1",
@@ -116,7 +116,6 @@
                 "upgrade_keys": [
                     { "kid": 6, "key": "./keys/TFM_S_KEY.json" }
                 ],
-                "backup": false,
                 "resources": [
                     {
                         "type": "BOOT",
@@ -138,7 +137,7 @@
                     { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
                 ],
                 "id": 16,
-                "monotonic": 0,
+                "monotonic": 8,
                 "smif_id": 1,
                 "multi_image" : 2,
                 "upgrade": true,
@@ -154,7 +153,6 @@
                 "upgrade_keys": [
                     { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
                 ],
-                "backup": false,
                 "resources": [
                     {
                         "type": "BOOT",
@@ -167,6 +165,12 @@
                         "size": 1179648
                     }
                 ]
+            }
+        ],
+        "reprogram": [
+            {
+                "start": 270336000,
+                "size": 65536
             }
         ],
         "reprovision": {
@@ -184,13 +188,14 @@
         "chain_of_trust": []
     },
     "pre_build": {
-        "oem_public_key": "./common/prebuilt/oem_state.json",
-        "hsm_public_key": "./common/prebuilt/hsm_state.json",
-        "hsm_private_key": "./common/prebuilt/hsm_state.json",
+        "oem_public_key": "./keys/oem_state.json",
+        "oem_private_key": "./keys/oem_state.json",
+        "hsm_public_key": "./keys/hsm_state.json",
+        "hsm_private_key": "./keys/hsm_state.json",
         "provision_group_private_key": false,
         "group_private_key": "./keys/grp_priv_key.json",
         "provision_device_private_key": false,
         "device_private_key": "./keys/dev_priv_key.json",
-        "cy_auth": "./common/prebuilt/cy_auth.jwt"
+        "cy_auth": "./packets/cy_auth_2m_s0_sample.jwt"
     }
 }
