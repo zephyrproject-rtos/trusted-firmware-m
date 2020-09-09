@@ -96,7 +96,7 @@
                     6
                 ],
                 "boot_keys": [
-                    { "kid": 6, "key": "./keys/TFM_S_KEY.json" }
+                    { "kid": 6, "key": "../keys/TFM_S_KEY.json" }
                 ],
                 "id": 1,
                 "monotonic": 0,
@@ -107,14 +107,14 @@
                 "version": "0.1",
                 "rollback_counter": 0,
                 "encrypt": false,
-                "encrypt_key": "./keys/image-aes-128.key",
+                "encrypt_key": "../keys/image-aes-128.key",
                 "encrypt_key_id": 1,
-                "encrypt_peer": "./keys/dev_pub_key.pem",
+                "encrypt_peer": "../keys/dev_pub_key.pem",
                 "upgrade_auth": [
                     6
                 ],
                 "upgrade_keys": [
-                    { "kid": 6, "key": "./keys/TFM_S_KEY.json" }
+                    { "kid": 6, "key": "../keys/TFM_S_KEY.json" }
                 ],
                 "resources": [
                     {
@@ -134,7 +134,7 @@
                     8
                 ],
                 "boot_keys": [
-                    { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
+                    { "kid": 8, "key": "../keys/TFM_NS_KEY.json" }
                 ],
                 "id": 16,
                 "monotonic": 8,
@@ -144,14 +144,14 @@
                 "version": "0.1",
                 "rollback_counter": 0,
                 "encrypt": false,
-                "encrypt_key": "./keys/image-aes-128.key",
+                "encrypt_key": "../keys/image-aes-128.key",
                 "encrypt_key_id": 1,
-                "encrypt_peer": "./keys/dev_pub_key.pem",
+                "encrypt_peer": "../keys/dev_pub_key.pem",
                 "upgrade_auth": [
                     8
                 ],
                 "upgrade_keys": [
-                    { "kid": 8, "key": "./keys/TFM_NS_KEY.json" }
+                    { "kid": 8, "key": "../keys/TFM_NS_KEY.json" }
                 ],
                 "resources": [
                     {
@@ -184,18 +184,18 @@
     },
     "provisioning":
     {
-        "packet_dir": "./packets",
+        "packet_dir": "../packets",
         "chain_of_trust": []
     },
     "pre_build": {
-        "oem_public_key": "./keys/oem_state.json",
-        "oem_private_key": "./keys/oem_state.json",
-        "hsm_public_key": "./keys/hsm_state.json",
-        "hsm_private_key": "./keys/hsm_state.json",
+        "oem_public_key": "../keys/oem_state.json",
+        "oem_private_key": "../keys/oem_state.json",
+        "hsm_public_key": "../keys/hsm_state.json",
+        "hsm_private_key": "../keys/hsm_state.json",
         "provision_group_private_key": false,
-        "group_private_key": "./keys/grp_priv_key.json",
+        "group_private_key": "../keys/grp_priv_key.json",
         "provision_device_private_key": false,
-        "device_private_key": "./keys/dev_priv_key.json",
-        "cy_auth": "./packets/cy_auth_2m_s0_sample.jwt"
+        "device_private_key": "../keys/dev_priv_key.json",
+        "cy_auth": "../packets/cy_auth_2m_s0_sample.jwt"
     }
 }

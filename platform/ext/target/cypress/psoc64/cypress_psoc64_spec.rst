@@ -312,7 +312,7 @@ policy_multi_img_CM0p_CM4_debug_2M_legacy.json:
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
+      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex \
       -n <build folder>/tfm_ns.hex
@@ -322,14 +322,14 @@ Note: each image can be signed individually, for example:
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
+      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -n <build folder>/tfm_ns.hex
 
 .. code-block:: bash
 
     ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
+      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
       -d cy8ckit-064b0s2-4343w \
       -s <build folder>/tfm_s.hex
 
@@ -352,7 +352,7 @@ SPE image:
 .. code-block:: bash
 
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M.json \
     --target cy8ckit-064b0s2-4343w \
     sign-image \
     --hex <build folder>/tfm_s.hex \
@@ -364,7 +364,7 @@ NSPE image:
 .. code-block:: bash
 
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M.json \
     --target cy8ckit-064b0s2-4343w \
     sign-image \
     --hex <build folder>/tfm_ns.hex \
