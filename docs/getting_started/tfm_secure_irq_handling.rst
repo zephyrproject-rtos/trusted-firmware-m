@@ -46,10 +46,14 @@ the list ``irqs`` has multiple elements in it.
 
 An IRQ handler is defined by the following nodes:
 
-- ``source``: The IRQ number or the name IRQ line. With the name of the IRQ
-  line, there must be defined a macro in ``tfm_peripherals_def.h`` which is
-  substituted to the IRQ line num.
-- ``signal`` The name of the signal for this IRQ
+- ``source``: The IRQ number or the name of the IRQ line. With the name of the
+  IRQ line, there must be defined a macro in ``tfm_peripherals_def.h`` which is
+  substituted to the IRQ line num. The IRQ line nums and sources are defined by
+  each platform: for example, they are defined in ``platform_irq.h`` for the
+  Musca-S1 platform. When defining new macros in ``tfm_peripherals_def.h``, it
+  is important the macro name matches the platform's handler function for that
+  IRQ source.
+- ``signal``: The name of the signal for this IRQ.
 - ``tfm_irq_priority``: The priority of the IRQ. This number must be in the
   range [0-255] inclusive. Please note that some of the less significant bits of
   this value might be dropped based on the number of priority bits implemented
@@ -65,8 +69,11 @@ An IRQ handler is defined by the following nodes:
   - In case ``source`` is defined IRQ macro, the name of the handler becomes
     ``void <macro>_Handler(void)``.
 
-  This is important, because the derived name have to be present in the vector
-  table as the handler of the IRQ.
+  This is important, because the derived name has to be present in the vector
+  table as the handler of the IRQ. The platform startup functions are specified
+  in the vector table defined in the platform secure startup file. The user
+  should verify the names of the generated handlers match for a given platform
+  IRQ.
 
 .. Note::
 
@@ -172,4 +179,4 @@ So the max stack size can be calculated as a function of the IRQ count of 'A':
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
