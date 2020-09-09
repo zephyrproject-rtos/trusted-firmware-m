@@ -46,14 +46,6 @@
     "wounding" :
     {
     },
-    "tfm_attestation_data":
-    {
-        "verification_service_url": "www.trustedfirmware.org",
-        "attestation_profile_definition": "PSA_IOT_PROFILE_1",
-        "hw_version": "060456527282910010",
-        "implementation_id": [170, 170, 170, 170, 170, 170, 170, 170, 187, 187, 187, 187, 187, 187, 187, 187,
-                              204, 204, 204, 204, 204, 204, 204, 204, 221, 221, 221, 221, 221, 221, 221, 221]
-    },
     "boot_upgrade" :
     {
         "title": "upgrade_policy",
@@ -197,5 +189,17 @@
         "provision_device_private_key": false,
         "device_private_key": "../keys/dev_priv_key.json",
         "cy_auth": "../packets/cy_auth_2m_s0_sample.jwt"
+    },
+    "custom_data_sections": ["tfm"],
+    "tfm":
+    {
+        "attestation_data":
+        {
+            "verification_service_url": "www.trustedfirmware.org",
+            "attestation_profile_definition": "PSA_IOT_PROFILE_1",
+            "hw_version": "060456527282910010",
+            "implementation_id": [170, 170, 170, 170, 170, 170, 170, 170, 187, 187, 187, 187, 187, 187, 187, 187,
+                                  204, 204, 204, 204, 204, 204, 204, 204, 221, 221, 221, 221, 221, 221, 221, 221]
+        }
     }
 }
