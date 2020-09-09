@@ -10,7 +10,7 @@ PSoC64 must first be provisioned with SecureBoot firmware and a provisioning pac
 containing policy and secure keys. Please refer to the guide at
 https://www.cypress.com/documentation/software-and-drivers/psoc-64-secure-mcu-secure-boot-sdk-user-guide
 Use the following policy file for provisioning and signing:
-policy_multi_img_CM0p_CM4_debug_2M.json
+policy_multi_CM0_CM4_tfm.json
 
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
@@ -310,7 +310,7 @@ SPE image:
 .. code-block:: bash
 
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
     --target cy8ckit-064b0s2-4343w \
     sign-image \
     --hex <build folder>/tfm_s.hex \
@@ -322,7 +322,7 @@ NSPE image:
 .. code-block:: bash
 
     cysecuretools \
-    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M.json \
+    --policy platform/ext/target/cypress/psoc64/security/policy/policy_multi_CM0_CM4_tfm.json \
     --target cy8ckit-064b0s2-4343w \
     sign-image \
     --hex <build folder>/tfm_ns.hex \
