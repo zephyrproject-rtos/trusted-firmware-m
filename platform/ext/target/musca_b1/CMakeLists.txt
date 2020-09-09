@@ -17,6 +17,10 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
+if (${CMAKE_C_COMPILER_ID} STREQUAL IAR AND FORWARD_PROT_MSG)
+    message(FATAL_ERROR "IAR is currently not supported if FORWARD_PROT_MSG is set.")
+endif()
+
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
@@ -75,12 +79,13 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
 )
 
 target_sources(platform_s
     PRIVATE
-        CMSIS_Driver/Driver_QSPI_Flash.c
-        CMSIS_Driver/Driver_GFC100_EFlash.c
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
         CMSIS_Driver/Driver_USART.c
@@ -90,10 +95,10 @@ target_sources(platform_s
         Native_Driver/mpu_armv8m_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/gpio_cmsdk_drv.c
-        Libraries/mt25ql_flash_lib.c
-        Native_Driver/qspi_ip6514e_drv.c
-        Native_Driver/gfc100_eflash_drv.c
-        Native_Driver/musca_b1_eflash_drv.c
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mt25ql_flash_lib.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/qspi_ip6514e_drv.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/gfc100_eflash_drv.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
         tfm_hal_isolation.c
@@ -105,11 +110,22 @@ target_sources(platform_s
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/mhu_v2_x.c>
 )
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:PSA_PROXY_ADDR_TRANSLATION=1>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:LINK_TO_EFLASH1=1>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:USE_SECURE_ENCLAVE_MAILBOX=1>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -145,7 +161,6 @@ if(BL2)
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
-            CMSIS_Driver/Driver_QSPI_Flash.c
             CMSIS_Driver/Driver_GFC100_EFlash.c
             Native_Driver/uart_pl011_drv.c
             CMSIS_Driver/Driver_USART.c

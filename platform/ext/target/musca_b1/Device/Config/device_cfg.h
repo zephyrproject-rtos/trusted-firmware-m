@@ -80,6 +80,14 @@
 #define MT25QL_S
 #define MT25QL_NS
 
+#ifdef USE_SECURE_ENCLAVE_MAILBOX
+/* SE MHU */
+#define SE_MHU_SENDER_S
+#define SE_MHU_SENDER_DEV      SE_MHU_SENDER_DEV_S
+#define SE_MHU_RECEIVER_S
+#define SE_MHU_RECEIVER_DEV    SE_MHU_RECEIVER_DEV_S
+#endif
+
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
 

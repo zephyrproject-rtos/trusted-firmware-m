@@ -117,6 +117,8 @@ set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Plat
 
 set(TFM_PARTITION_AUDIT_LOG             ON          CACHE BOOL      "Enable Audit Log partition")
 
+set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to forward all PSA RoT messages to a Secure Enclave")
+
 ################################## Tests #######################################
 
 set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")

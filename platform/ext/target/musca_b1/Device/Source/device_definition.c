@@ -442,6 +442,33 @@ struct qspi_ip6514e_dev_t QSPI_DEV_NS = {
 };
 #endif
 
+/* SE MHU */
+#ifdef SE_MHU_SENDER_S
+struct mhu_v2_x_dev_t SE_MHU_SENDER_DEV_S = {
+        .base = MUSCA_B1_SE_MHU_SND_S_BASE,
+        .frame = MHU_V2_X_SENDER_FRAME
+};
+#endif
+#ifdef SE_MHU_SENDER_NS
+struct mhu_v2_x_dev_t SE_MHU_SENDER_DEV_NS = {
+        .base = MUSCA_B1_SE_MHU_SND_NS_BASE,
+        .frame = MHU_V2_X_SENDER_FRAME
+};
+#endif
+
+#ifdef SE_MHU_RECEIVER_S
+struct mhu_v2_x_dev_t SE_MHU_RECEIVER_DEV_S = {
+        .base = MUSCA_B1_SE_MHU_RCV_S_BASE,
+        .frame = MHU_V2_X_RECEIVER_FRAME
+};
+#endif
+#ifdef SE_MHU_RECEIVER_NS
+struct mhu_v2_x_dev_t SE_MHU_RECEIVER_DEV_NS = {
+        .base = MUSCA_B1_SE_MHU_RCV_NS_BASE,
+        .frame = MHU_V2_X_RECEIVER_FRAME
+};
+#endif
+
 /* ======= External peripheral configuration structure definitions ======= */
 
 /* MT25QL Flash memory library structures */

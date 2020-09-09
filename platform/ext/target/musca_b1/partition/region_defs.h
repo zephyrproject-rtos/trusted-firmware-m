@@ -106,6 +106,12 @@
 /* CMSE Veneers region */
 #define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
 
+/* Shared memory used by PSA Proxy partition */
+#ifdef TFM_PARTITION_PSA_PROXY
+#define PSA_PROXY_SHARED_MEMORY_BASE (0x1A408000)
+#define PSA_PROXY_SHARED_MEMORY_SIZE (0x00078000) /* 476 KiB */
+#endif /* TFM_PARTITION_PSA_PROXY */
+
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
                         (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)

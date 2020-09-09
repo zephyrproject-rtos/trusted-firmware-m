@@ -63,7 +63,15 @@ const struct memory_region_limits memory_regions = {
 #define NSCCFG_CODENSC  1
 
 /* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC, Driver_EFLASH0_MPC;
+extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
+#ifndef LINK_TO_EFLASH1
+extern ARM_DRIVER_MPC Driver_EFLASH0_MPC;
+#define EFLASH_MPC Driver_EFLASH0_MPC
+#else
+extern ARM_DRIVER_MPC Driver_EFLASH1_MPC;
+#define EFLASH_MPC Driver_EFLASH1_MPC
+#endif
+
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC, Driver_ISRAM1_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM2_MPC, Driver_ISRAM3_MPC;
 
@@ -275,7 +283,7 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     int32_t ret = ARM_DRIVER_OK;
 
     /* MPC interrupt enabling */
-    ret = Driver_EFLASH0_MPC.EnableInterrupt();
+    ret = EFLASH_MPC.EnableInterrupt();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -380,28 +388,28 @@ int32_t mpc_init_cfg(void)
     ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
     ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
 
-    ret = Driver_EFLASH0_MPC.Initialize();
+    ret = EFLASH_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-    ret = Driver_EFLASH0_MPC.ConfigRegion(
-                                      memory_regions.non_secure_partition_base,
-                                      memory_regions.non_secure_partition_limit,
-                                      ARM_MPC_ATTR_NONSECURE);
+    ret = EFLASH_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+                                  memory_regions.non_secure_partition_limit,
+                                  ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
 
+#ifndef LINK_TO_EFLASH1
 #ifdef BL2
     /* Secondary image region */
-    ret = Driver_EFLASH0_MPC.ConfigRegion(
-                                       memory_regions.secondary_partition_base,
-                                       memory_regions.secondary_partition_limit,
-                                       ARM_MPC_ATTR_NONSECURE);
+    ret = EFLASH_MPC.ConfigRegion(memory_regions.secondary_partition_base,
+                                  memory_regions.secondary_partition_limit,
+                                  ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
 #endif /* BL2 */
+#endif
 
     /* SRAM MPC device needs to be initialialized so that the interrupt can be
      * enabled later. The default (secure only) config is used.
@@ -469,9 +477,9 @@ void mpc_revert_non_secure_to_secure_cfg(void)
     ARM_DRIVER_MPC* mpc_data_region2 = &Driver_ISRAM2_MPC;
     ARM_DRIVER_MPC* mpc_data_region3 = &Driver_ISRAM3_MPC;
 
-    Driver_EFLASH0_MPC.ConfigRegion(MPC_EFLASH0_RANGE_BASE_S,
-                                    MPC_EFLASH0_RANGE_LIMIT_S,
-                                    ARM_MPC_ATTR_SECURE);
+    EFLASH_MPC.ConfigRegion(MPC_EFLASH0_RANGE_BASE_S,
+                            MPC_EFLASH0_RANGE_LIMIT_S,
+                            ARM_MPC_ATTR_SECURE);
 
     mpc_data_region2->ConfigRegion(MPC_ISRAM2_RANGE_BASE_S,
                                    MPC_ISRAM2_RANGE_LIMIT_S,

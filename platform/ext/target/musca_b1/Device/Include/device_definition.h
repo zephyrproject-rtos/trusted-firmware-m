@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,6 +191,25 @@ extern struct qspi_ip6514e_dev_t QSPI_DEV_S;
 #ifdef QSPI_IP6514E_NS
 #include "qspi_ip6514e_drv.h"
 extern struct qspi_ip6514e_dev_t QSPI_DEV_NS;
+#endif
+
+/* SE MHU */
+#ifdef SE_MHU_SENDER_S
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t SE_MHU_SENDER_DEV_S;
+#endif
+#ifdef SE_MHU_SENDER_NS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t SE_MHU_SENDER_DEV_NS;
+#endif
+
+#ifdef SE_MHU_RECEIVER_S
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t SE_MHU_RECEIVER_DEV_S;
+#endif
+#ifdef SE_MHU_RECEIVER_NS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t SE_MHU_RECEIVER_DEV_NS;
 #endif
 
 /* ======= External peripheral configuration structure declarations ======= */

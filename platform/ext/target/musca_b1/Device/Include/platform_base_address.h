@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ extern "C" {
 #define MUSCA_B1_PVT_NS_BASE             (0x4010E000UL)           /*!< (Non-Secure PVT sensors            ) Base Address */
 #define MUSCA_B1_SDIO_NS_BASE            (0x4010F000UL)           /*!< (Non-Secure SDIO                   ) Base Address */
 #define MUSCA_B1_GPIO_NS_BASE            (0x41000000UL)           /*!< (Non-Secure GPIO                   ) Base Address */
-#define MUSCA_B1_CI_MHU_SND_NS_BASE      (0x42600000UL)           /*!< (Non-Secure CryptoIsland MHU Send  ) Base Address */
-#define MUSCA_B1_CI_MHU_RCV_NS_BASE      (0x42700000UL)           /*!< (Non-Secure CryptoIsland MHU Rcv   ) Base Address */
+#define MUSCA_B1_SE_MHU_SND_NS_BASE      (0x42600000UL)           /*!< (Non-Secure SE MHU Sender          ) Base Address */
+#define MUSCA_B1_SE_MHU_RCV_NS_BASE      (0x42700000UL)           /*!< (Non-Secure SE MHU Receiver        ) Base Address */
 #define MUSCA_B1_QSPI_REG_NS_BASE        (0x42800000UL)           /*!< (Non-Secure QSPI registers         ) Base Address */
 
 /* Secure Peripheral and SRAM base address */
@@ -118,10 +118,10 @@ extern "C" {
 #define MUSCA_B1_EFLASH1_MPC_S_BASE      (0x52300000UL)           /*!< (Secure Embedded Flash 1 MPC       ) Base Address */
 #define MUSCA_B1_EFLASH0_REG_MAP_S_BASE  (0x52400000UL)           /*!< (Secure GFC100 EFlash0 controller  ) Base Address */
 #define MUSCA_B1_EFLASH1_REG_MAP_S_BASE  (0x52500000UL)           /*!< (Secure GFC100 EFlash1 controller  ) Base Address */
-#define MUSCA_B1_CI_MHU_SND_S_BASE       (0x52600000UL)           /*!< (Secure CryptoIsland MHU Sender    ) Base Address */
-#define MUSCA_B1_CI_MHU_RCV_S_BASE       (0x52700000UL)           /*!< (Secure CryptoIsland MHU Receiver  ) Base Address */
+#define MUSCA_B1_SE_MHU_SND_S_BASE       (0x52600000UL)           /*!< (Secure SE MHU Sender              ) Base Address */
+#define MUSCA_B1_SE_MHU_RCV_S_BASE       (0x52700000UL)           /*!< (Secure SE MHU Receiver            ) Base Address */
 #define MUSCA_B1_QSPI_REG_S_BASE         (0x52800000UL)           /*!< (Secure QSPI registers             ) Base Address */
-#define MUSCA_B1_CRYPTO_MPC_S_BASE       (0x52E00000UL)           /*!< (Secure CryptoIsland MPC           ) Base Address */
+#define MUSCA_B1_SE_MPC_S_BASE           (0x52E00000UL)           /*!< (Secure SE MPC                     ) Base Address */
 
 /* MPC memory range bases and limits */
 /* Internal SRAM */
