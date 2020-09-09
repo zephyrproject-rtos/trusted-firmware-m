@@ -81,6 +81,12 @@ struct tfm_spm_partition_platform_data_t
 int32_t mpc_init_cfg(void);
 
 /**
+ * \brief Set to secure the initialized non-secure regions of
+ *        the Memory Protection Controller.
+ */
+void mpc_revert_non_secure_to_secure_cfg(void);
+
+/**
  * \brief Configures the Peripheral Protection Controller.
  */
 int32_t ppc_init_cfg(void);
