@@ -19,6 +19,6 @@
  * \retval >=0           Number of chars output.
  * \retval <0            TFM HAL error code.
  */
-int32_t tfm_hal_output_spm_log(const unsigned char *str, uint32_t len);
+int32_t tfm_hal_output_spm_log(const char *str, uint32_t len);
 
 #endif /* __TFM_HAL_SPM_LOGDEV_H__ */

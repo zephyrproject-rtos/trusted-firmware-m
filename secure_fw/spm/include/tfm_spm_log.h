@@ -60,6 +60,6 @@
  * \retval >=0        Number of chars output.
  * \retval <0         TFM HAL error code.
  */
-int32_t spm_log_msgval(const unsigned char *msg, size_t len, uint32_t value);
+int32_t spm_log_msgval(const char *msg, size_t len, uint32_t value);
 
 #endif /* __TFM_SPM_LOG_H__ */
