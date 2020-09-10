@@ -12,14 +12,14 @@ Use cysecuretools to generate the key pairs defined by the policy file, for exam
 
 .. code-block:: bash
     cd platform/ext/target/cypress/psoc64/security
-    cysecuretools -t cy8ckit-064b0s2-4343w init
-    cysecuretools -t cy8ckit-064b0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json create-keys
+    cysecuretools -t cy8ckit-064s0s2-4343w init
+    cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json create-keys
 
 
 Signing keys have to be provisioned to the board:
 
 .. code-block:: bash
-    cysecuretools -t cy8ckit-064b0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json re-provision-device
+    cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json re-provision-device
 
 
 Please refer to cysecuretools documentation and cypress_psoc64_spec.rst for more details.
