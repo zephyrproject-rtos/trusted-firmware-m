@@ -300,48 +300,6 @@ Note: provisioned board in SECURE claimed state is required, otherwise refer to
 Cypress documentation for details on the provisioning process.
 
 
-Depending on the used CySecureTools, signing process is different.
-
-CySecureTools 1.x.x
-===================
-
-Sign the images with a helper script (sign.py overwrites unsigned files with
-signed ones). For CySecureTools 1.x.x use policy
-policy_multi_img_CM0p_CM4_debug_2M_legacy.json:
-
-.. code-block:: bash
-
-    ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
-      -d cy8ckit-064b0s2-4343w \
-      -s <build folder>/tfm_s.hex \
-      -n <build folder>/tfm_ns.hex
-
-Note: each image can be signed individually, for example:
-
-.. code-block:: bash
-
-    ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
-      -d cy8ckit-064b0s2-4343w \
-      -n <build folder>/tfm_ns.hex
-
-.. code-block:: bash
-
-    ./platform/ext/target/cypress/psoc64/security/sign.py \
-      -p platform/ext/target/cypress/psoc64/security/policy/policy_multi_img_CM0p_CM4_debug_2M_legacy.json \
-      -d cy8ckit-064b0s2-4343w \
-      -s <build folder>/tfm_s.hex
-
-Running the sign.py script will result in creation of the following files:
-
-* tfm_<s/ns>_signed.hex    - signed image for programming
-* tfm_<s/ns>_unsigned.hex  - a copy of original unsigned hex file for reference
-* tfm_<s/ns>_upgrade.hex   - signed image for upgrade (if device policy
-  specifies upgrade slot). Flashing this image into device will
-  trigger the image update. Upgrade image from the
-  secondary slot will be moved to the primary slot.
-
 CySecureTools 2.x.x
 ===================
 
