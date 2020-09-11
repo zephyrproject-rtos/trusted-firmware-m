@@ -55,7 +55,7 @@ static struct boot_loader_state boot_data;
 #define IMAGES_ITER(x)
 #endif
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING) && \
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOADING) && \
     !defined(MCUBOOT_OVERWRITE_ONLY)
 
 #if defined(MCUBOOT_VALIDATE_PRIMARY_SLOT) && !defined(MCUBOOT_OVERWRITE_ONLY)
@@ -160,7 +160,7 @@ static const struct boot_status_table boot_status_tables[] = {
                  (state)->swap_type,                                \
                  (state)->copy_done,                                \
                  (state)->image_ok)
-#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_RAM_LOADING && !MCUBOOT_OVERWRITE_ONLY */
+#endif /* !MCUBOOT_DIRECT_XIP && !MCUBOOT_RAM_LOADING && !MCUBOOT_OVERWRITE_ONLY */
 
 /*
  * \brief Verifies the image header: magic value, flags, integer overflow.
@@ -537,7 +537,7 @@ done:
     return rc;
 }
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_OVERWRITE_ONLY)
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_OVERWRITE_ONLY)
 /*
  * Compute the total size of the given image.  Includes the size of
  * the TLVs.
@@ -598,9 +598,9 @@ done:
     flash_area_close(fap);
     return rc;
 }
-#endif /* !MCUBOOT_NO_SWAP && !MCUBOOT_OVERWRITE_ONLY */
+#endif /* !MCUBOOT_DIRECT_XIP && !MCUBOOT_OVERWRITE_ONLY */
 
-#if !defined(MCUBOOT_NO_SWAP) && !defined(MCUBOOT_RAM_LOADING)
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOADING)
 /*
  * Slots are compatible when all sectors that store up to to size of the image
  * round up to sector size, in both slot's are able to fit in the scratch
@@ -2395,7 +2395,7 @@ out:
     return rc;
 }
 
-#else /* MCUBOOT_NO_SWAP || MCUBOOT_RAM_LOADING */
+#else /* MCUBOOT_DIRECT_XIP || MCUBOOT_RAM_LOADING */
 
 #define BOOT_LOG_IMAGE_INFO(area, hdr, state)                               \
     BOOT_LOG_INF("Image %u: version=%u.%u.%u+%u, magic=%5s, image_ok=0x%x", \
@@ -2834,7 +2834,7 @@ out:
    }
    return rc;
 }
-#endif /* MCUBOOT_NO_SWAP || MCUBOOT_RAM_LOADING */
+#endif /* MCUBOOT_DIRECT_XIP || MCUBOOT_RAM_LOADING */
 
 int
 boot_go(struct boot_rsp *rsp)

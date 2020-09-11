@@ -126,10 +126,10 @@ the new firmware image, the content of the primary slot must be overwritten with
 the content of the secondary slot (the new firmware image). The second option is
 the image swapping strategy when the content of the two memory slots must be
 physically swapped. This needs the scratch area to be defined in the memory
-layout. The third option is the non-swapping version, which eliminates the
-complexity of image swapping and its administration. Active image can be
-executed from either memory slot, but new firmware must be linked to the address
-space of the proper (currently inactive) memory slot.
+layout. The third option is the direct execute-in-place version, which
+eliminates the complexity of image swapping and its administration. Active image
+can be executed from either memory slot, but new firmware must be linked to the
+address space of the proper (currently inactive) memory slot.
 
 Overwrite operation
 ===================
@@ -170,10 +170,10 @@ please refer to the MCUBoot
     therefore the bootloader will always perform a "revert" (swap the images
     back) during the next boot.
 
-Non-swapping operation
-======================
+Direct execute-in-place operation
+=================================
 This operation can be set with the ``MCUBOOT_UPGRADE_STRATEGY`` compile time
-switch (see `Build time configuration`_). When enabling non-swapping operation
+switch (see `Build time configuration`_). When enabling direct-xip operation
 then the active image flag is moved between slots during firmware upgrade. If
 firmware is executed-in-place (XIP), then two firmware images must be generated.
 One of them is linked to be executed from the primary slot memory region and the
@@ -194,13 +194,13 @@ dependencies cannot be reused due to changes in the flash layout.
 
 .. Note::
 
-    Only single image boot is supported with non-swapping upgrade mode.
+    Only single image boot is supported with direct-xip upgrade mode.
 
 RAM Loading firmware upgrade
 ============================
 Musca-A supports an image upgrade mode that is separate to the other (overwrite,
-swapping and non-swapping) modes. This is the ``RAM loading`` mode (please refer
-to the table below). Like the non-swapping mode, this selects the newest image
+swapping and dirext-xip) modes. This is the ``RAM loading`` mode (please refer
+to the table below). Like the direct-xip mode, this selects the newest image
 by reading the image version numbers in the image headers, but instead of
 executing it in place, the newest image is copied to RAM for execution. The load
 address, the location in RAM where the image is copied to, is stored in the
@@ -213,43 +213,43 @@ image header.
 Summary of different modes for image upgrade
 ============================================
 Different implementations of the image upgrade operation (whether through
-overwriting, swapping, non-swapping or loading into RAM and executing from
+overwriting, swapping, direct-xip or loading into RAM and executing from
 there) are supported by the platforms. The table below shows which of these
 modes are supported by which platforms:
 
-+---------------------+-----------------+----------------------------------------------------------+
-|                     | Without BL2 [1]_| With BL2 [2]_                                            |
-+=====================+=================+===============+==========+=============+=================+
-|                     | XIP             | XIP           | XIP      | XIP         | Not XIP         |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-|                     |                 | Overwrite [3]_| Swap [4]_| No-swap [5]_| RAM loading [6]_|
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| AN521               | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| AN519               | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| AN539               | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| FVP_SSE300_MPS2     | NO              | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| LPC55S69            | No              | No            | No       | No          | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| Musca-A             | No              | No            | No       | No          | Yes             |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| Musca-B1            | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| Musca-S1            | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| AN524               | Yes             | No            | No       | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| PSoC64              | Yes             | No            | No       | No          | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| SSE-200_AWS         | Yes             | Yes           | Yes      | Yes         | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| STM_DISCO_L562QE    | No              | Yes           | No       | No          | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
-| STM_NUCLEO_L552ZE_Q | No              | Yes           | No       | No          | No              |
-+---------------------+-----------------+---------------+----------+-------------+-----------------+
++---------------------+-----------------+-------------------------------------------------------------+
+|                     | Without BL2 [1]_| With BL2 [2]_                                               |
++=====================+=================+===============+==========+================+=================+
+|                     | XIP             | XIP           | XIP      | XIP            | Not XIP         |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+|                     |                 | Overwrite [3]_| Swap [4]_| direct-xip [5]_| RAM loading [6]_|
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| AN521               | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| AN519               | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| AN539               | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| FVP_SSE300_MPS2     | NO              | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| LPC55S69            | No              | No            | No       | No             | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| Musca-A             | No              | No            | No       | No             | Yes             |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| Musca-B1            | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| Musca-S1            | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| AN524               | Yes             | No            | No       | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| PSoC64              | Yes             | No            | No       | No             | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| SSE-200_AWS         | Yes             | Yes           | Yes      | Yes            | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| STM_DISCO_L562QE    | No              | Yes           | No       | No             | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
+| STM_NUCLEO_L552ZE_Q | No              | Yes           | No       | No             | No              |
++---------------------+-----------------+---------------+----------+----------------+-----------------+
 
 .. [1] To disable BL2, please set the ``BL2`` cmake option to ``OFF``
 
@@ -262,7 +262,7 @@ modes are supported by which platforms:
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
-.. [5] To enable XIP No-swap, assign the "NO_SWAP" string to the
+.. [5] To enable direct-xip, assign the "DIRECT_XIP" string to the
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
@@ -280,7 +280,7 @@ downloaded can be controlled by the ``MCUBOOT_VERSION`` cmake variable. If you
 wish to use a locally downloaded copy, the cmake variable ``MCUBOOT_PATH`` can
 be set to its location.
 
-Upstream MCUboot does not support the ``No-swap`` and ``RAM loading`` upgrade
+Upstream MCUboot does not support the ``direct-xip`` and ``RAM loading`` upgrade
 strategies, therefore the platforms that don't support other upgrade strategies
 (e.g. ``Overwrite``) cannot be used with the original MCUBoot at the moment. To
 use the TF-M project's fork, set the ``TFM_INTERNAL_MCUBOOT`` cmake variable to
@@ -359,7 +359,8 @@ MCUBoot related compile time switches can be set by cmake variables.
 - MCUBOOT_UPGRADE_STRATEGY (default: "OVERWRITE_ONLY"):
     - **"OVERWRITE_ONLY":** Default firmware upgrade operation with overwrite.
     - **"SWAP":** Activate swapping firmware upgrade operation.
-    - **"NO_SWAP":** Activate non-swapping firmware upgrade operation.
+    - **"DIRECT_XIP":** Activate direct execute-in-place firmware upgrade
+      operation.
     - **"RAM_LOADING":** Activate RAM loading firmware upgrade operation, where
       the latest image is copied to RAM and runs from there instead of being
       executed in-place.
@@ -433,9 +434,10 @@ MCUBoot related compile time switches can be set by cmake variables.
 Image versioning
 ================
 An image version number is written to its header by one of the Python scripts,
-and this number is used by the bootloader when the non-swapping or RAM loading
-mode is enabled. It is also used in case of multiple image boot when the
-bootloader checks the image dependencies if any have been added to the images.
+and this number is used by the bootloader when the direct execute-in-place or
+the RAM loading mode is enabled. It is also used in case of multiple image boot
+when the bootloader checks the image dependencies if any have been added to the
+images.
 
 The version number of the image (single image boot) can manually be passed in
 through the command line in the cmake configuration step::
@@ -666,12 +668,12 @@ swapped:
     Running Test Suite PSA protected storage S interface tests (TFM_PS_TEST_2XXX)...
     ...
 
-Non-swapping firmware upgrade
-=============================
+Direct execute-in-place firmware upgrade
+========================================
 Follow the same instructions and platform related configurations as in case of
 overwriting build including these changes:
 
-- Set the ``MCUBOOT_UPGRADE_STRATEGY`` compile time switch to "NO_SWAP"
+- Set the ``MCUBOOT_UPGRADE_STRATEGY`` compile time switch to "DIRECT_XIP"
   before build.
 - set ``MCUBOOT_EXECUTION_SLOT`` to ``1`` in the regression build dir.
 - Make sure the image version number was increased between the two build runs
