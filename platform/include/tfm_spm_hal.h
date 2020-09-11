@@ -43,26 +43,6 @@ enum irq_target_state_t {
  */
 struct tfm_spm_partition_memory_data_t
 {
-    uint32_t code_start;   /*!< Start of the code memory of this partition. */
-    uint32_t code_limit;   /*!< Address of the byte beyond the end of the code
-                            *   memory of this partition.
-                            */
-    uint32_t ro_start;     /*!< Start of the read only memory of this
-                            *   partition.
-                            */
-    uint32_t ro_limit;     /*!< Address of the byte beyond the end of the read
-                            *   only memory of this partition.
-                            */
-    uint32_t rw_start;     /*!< Start of the data region of this partition. */
-    uint32_t rw_limit;     /*!< Address of the byte beyond the end of the data
-                            *   region of this partition.
-                            */
-    uint32_t zi_start;     /*!< Start of the zero initialised data region of
-                            *   this partition.
-                            */
-    uint32_t zi_limit;     /*!< Address of the byte beyond the end of the zero
-                            *   initialised region of this partition.
-                            */
     uint32_t stack_bottom; /*!< The bottom of the stack for the partition. */
     uint32_t stack_top;    /*!< The top of the stack for the partition. */
 };
