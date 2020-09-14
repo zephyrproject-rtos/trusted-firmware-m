@@ -123,6 +123,22 @@ Raymond Ngun
     :github: `RaymondNgun <https://github.com/RaymondNgun>`__
 
 
+Nordic Semiconductor Platforms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ioannis Glaropoulos
+    :email: `ioannis.glaropoulos@nordicsemi.no <ioannis.glaropoulos@nordicsemi.no>`__
+    :github: `ioannisg <https://github.com/ioannisg>`__
+
+Andrzej Głąbek
+    :email: `andrzej.glabek@nordicsemi.no <andrzej.glabek@nordicsemi.no>`__
+    :github: `anangl <https://github.com/anangl>`__
+
+Øyvind Rønningstad
+    :email: `oyvind.ronningstad@nordicsemi.no <oyvind.ronningstad@nordicsemi.no>`__
+    :github: `oyvindronningstad <https://github.com/oyvindronningstad>`__
+
+
 =============
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

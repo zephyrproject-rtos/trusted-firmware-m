@@ -38,6 +38,13 @@ Platforms
 
     target/stm/**
 
+.. toctree::
+    :maxdepth: 4
+    :caption: Nordic
+    :glob:
+
+    target/nordic_nrf/**
+
 --------------
 
 *Copyright (c) 2020, Arm Limited. All rights reserved.*

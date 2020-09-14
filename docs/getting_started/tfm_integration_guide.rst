@@ -29,6 +29,8 @@ The hardware platforms currently supported are:
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
 - DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS)
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
+- nRF9160 DK (Cortex-M33)
+- nRF5340 PDK (Cortex-M33 Application MCU)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
@@ -56,6 +58,12 @@ More information about the SSE-200_AWS platform can be found in:
 
 More information about the STM32L5xx platform can be found in:
 `STM32L5 series product page <https://www.st.com/content/st_com/en/products/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus/stm32-ultra-low-power-mcus/stm32l5-series.html>`__
+
+More information about the nRF5340 PDK platform can be found in:
+`nRF5340 PDK product page <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`__
+
+More information about the nRF9160 DK platform can be found in:
+`nRF9160 DK product page <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`__
 
 Generic drivers and startup/scatter files
 =========================================
