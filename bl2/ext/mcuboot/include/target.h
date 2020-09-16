@@ -27,17 +27,17 @@
 #error "FLASH_AREA_IMAGE_SECTOR_SIZE must be defined by the target"
 #endif
 
-#ifdef MCUBOOT_RAM_LOADING
+#ifdef MCUBOOT_RAM_LOAD
 #ifndef IMAGE_EXECUTABLE_RAM_START
-#error "If MCUBOOT_RAM_LOADING is set then IMAGE_EXECUTABLE_RAM_START must be \
+#error "If MCUBOOT_RAM_LOAD is set then IMAGE_EXECUTABLE_RAM_START must be \
 defined by the target"
 #endif
 
 #ifndef IMAGE_EXECUTABLE_RAM_SIZE
-#error "If MCUBOOT_RAM_LOADING is set then IMAGE_EXECUTABLE_RAM_SIZE must be \
+#error "If MCUBOOT_RAM_LOAD is set then IMAGE_EXECUTABLE_RAM_SIZE must be \
 defined by the target"
 #endif
-#endif /* MCUBOOT_RAM_LOADING */
+#endif /* MCUBOOT_RAM_LOAD */
 
 #ifndef FLASH_AREA_0_OFFSET
 #error "FLASH_AREA_0_OFFSET must be defined by the target"

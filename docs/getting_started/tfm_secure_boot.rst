@@ -203,7 +203,7 @@ dependencies cannot be reused due to changes in the flash layout.
 RAM Loading firmware upgrade
 ============================
 Musca-A supports an image upgrade mode that is separate to the other (overwrite,
-swapping and dirext-xip) modes. This is the ``RAM loading`` mode (please refer
+swapping and dirext-xip) modes. This is the ``RAM load`` mode (please refer
 to the table below). Like the direct-xip mode, this selects the newest image
 by reading the image version numbers in the image headers, but instead of
 executing it in place, the newest image is copied to RAM for execution. The load
@@ -212,7 +212,7 @@ image header.
 
 .. Note::
 
-    Only single image boot is supported with RAM loading upgrade mode.
+    Only single image boot is supported with ``RAM load`` upgrade mode.
 
 Summary of different modes for image upgrade
 ============================================
@@ -221,39 +221,39 @@ overwriting, swapping, direct-xip or loading into RAM and executing from
 there) are supported by the platforms. The table below shows which of these
 modes are supported by which platforms:
 
-+---------------------+-----------------+-------------------------------------------------------------+
-|                     | Without BL2 [1]_| With BL2 [2]_                                               |
-+=====================+=================+===============+==========+================+=================+
-|                     | XIP             | XIP           | XIP      | XIP            | Not XIP         |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-|                     |                 | Overwrite [3]_| Swap [4]_| direct-xip [5]_| RAM loading [6]_|
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| AN521               | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| AN519               | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| AN539               | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| FVP_SSE300_MPS2     | NO              | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| LPC55S69            | No              | No            | No       | No             | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| Musca-A             | No              | No            | No       | No             | Yes             |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| Musca-B1            | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| Musca-S1            | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| AN524               | Yes             | No            | No       | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| PSoC64              | Yes             | No            | No       | No             | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| SSE-200_AWS         | Yes             | Yes           | Yes      | Yes            | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| STM_DISCO_L562QE    | No              | Yes           | No       | No             | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
-| STM_NUCLEO_L552ZE_Q | No              | Yes           | No       | No             | No              |
-+---------------------+-----------------+---------------+----------+----------------+-----------------+
++---------------------+-----------------+----------------------------------------------------------+
+|                     | Without BL2 [1]_| With BL2 [2]_                                            |
++=====================+=================+===============+==========+================+==============+
+|                     | XIP             | XIP           | XIP      | XIP            | Not XIP      |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+|                     |                 | Overwrite [3]_| Swap [4]_| direct-xip [5]_| RAM load [6]_|
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN521               | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN519               | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN539               | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| FVP_SSE300_MPS2     | NO              | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| LPC55S69            | No              | No            | No       | No             | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| Musca-A             | No              | No            | No       | No             | Yes          |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| Musca-B1            | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| Musca-S1            | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN524               | Yes             | No            | No       | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| PSoC64              | Yes             | No            | No       | No             | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| SSE-200_AWS         | Yes             | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| STM_DISCO_L562QE    | No              | Yes           | No       | No             | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| STM_NUCLEO_L552ZE_Q | No              | Yes           | No       | No             | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
 
 .. [1] To disable BL2, please set the ``BL2`` cmake option to ``OFF``
 
@@ -270,7 +270,7 @@ modes are supported by which platforms:
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
-.. [6] To enable RAM loading, assign the "RAM_LOADING" string to the
+.. [6] To enable RAM load, assign the "RAM_LOAD" string to the
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
     configuration file, or include this macro definition in the command line
 
@@ -343,7 +343,7 @@ MCUBoot related compile time switches can be set by cmake variables.
     - **"SWAP":** Activate swapping firmware upgrade operation.
     - **"DIRECT_XIP":** Activate direct execute-in-place firmware upgrade
       operation.
-    - **"RAM_LOADING":** Activate RAM loading firmware upgrade operation, where
+    - **"RAM_LOAD":** Activate RAM loading firmware upgrade operation, where
       the latest image is copied to RAM and runs from there instead of being
       executed in-place.
 - MCUBOOT_SIGNATURE_TYPE (default: RSA):
@@ -751,7 +751,7 @@ Executing firmware upgrade on CoreLink SSE-200 Subsystem for MPS3 (AN524)
 
 RAM loading firmware upgrade
 ============================
-To enable RAM loading, please set ``MCUBOOT_UPGRADE_STRATEGY`` to "RAM_LOADING"
+To enable RAM loading, please set ``MCUBOOT_UPGRADE_STRATEGY`` to "RAM_LOAD"
 (either in the configuration file or through the command line), and then specify
 a destination load address in RAM where the image can be copied to and executed
 from. The ``IMAGE_LOAD_ADDRESS`` macro must be specified in the target dependent
