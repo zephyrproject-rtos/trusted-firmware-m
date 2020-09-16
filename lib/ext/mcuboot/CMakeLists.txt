@@ -17,10 +17,12 @@ if ("${MCUBOOT_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(mcuboot
         GIT_REPOSITORY https://github.com/JuulLabs-OSS/mcuboot.git
         GIT_TAG ${MCUBOOT_VERSION}
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW FALSE
         GIT_PROGRESS TRUE
         GIT_SUBMODULES ""
     )
+    # ToDo: set GIT_SHALLOW to 'TRUE' when MCUBOOT_VERSION will be set to a tag
+    # (instead of a commit hash) with the new release.
 
     FetchContent_GetProperties(mcuboot)
     if(NOT mcuboot_POPULATED)
