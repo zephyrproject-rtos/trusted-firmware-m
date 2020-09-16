@@ -25,15 +25,8 @@ tfm_platform_hal_pin_service(const psa_invec  *in_vec,  uint32_t num_invec,
      return TFM_PLAT_ERR_SYSTEM_ERR;
 }
 
-enum tfm_hal_status_t tfm_hal_platform_init(void)
-{
-    __enable_irq();
-    stdio_init();
 
-    return TFM_HAL_SUCCESS;
-}
-
-__WEAK void tfm_hal_system_reset(void)
+void tfm_spm_hal_system_reset(void)
 {
     NVIC_SystemReset();
 }

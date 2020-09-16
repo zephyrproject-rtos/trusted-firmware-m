@@ -25,6 +25,7 @@
   *       In this implementation, nothing is done.
   * @retval HAL status
   */
+
 HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
   /* load 1Hz for timeout 1 second */

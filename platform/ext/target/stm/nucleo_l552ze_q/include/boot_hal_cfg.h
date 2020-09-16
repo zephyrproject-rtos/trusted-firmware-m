@@ -1,3 +1,4 @@
+
 /**
   ******************************************************************************
   * @file    boot_hal_cfg.h
@@ -41,7 +42,7 @@
 #define TFM_OB_BOOT_LOCK 0 /*!< BOOT Lock expected value  */
 /* run time protection */
 #define TFM_FLASH_PRIVONLY_ENABLE  /*!< Flash Command in Privileged only  */
-#define TFM_BOOT_MPU_PROTECTION    /*!< TFM_SBSFU_Boot uses MPU to prevent execution outside of TFM_SBSFU_Boot code  */
+/*#define TFM_BOOT_MPU_PROTECTION  *//*!< TFM_SBSFU_Boot uses MPU to prevent execution outside of TFM_SBSFU_Boot code  */
 #define TFM_ENABLE_SET_OB /*!< Option bytes are set by TFM_SBSFU_Boot when not correctly set  */
 #define TFM_ERROR_HANDLER_NON_SECURE /*!< Error handler is in Non Secure , this allows regression without jumping   */
 /* Exported types ------------------------------------------------------------*/

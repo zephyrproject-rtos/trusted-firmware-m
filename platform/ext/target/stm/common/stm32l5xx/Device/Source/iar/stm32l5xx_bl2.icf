@@ -15,7 +15,7 @@ define block ER_NOHDP_CODE with fixed order, alignment = 8 {
        readonly section .BL2_NoHdp_Code,
        readonly object mpu_armv8m_drv.o};
 
-define block LR_NOHDP_CODE with fixed order, maximum size = BL2_NOHDP_CODE_SIZE {block ER_NOHDP_CODE};	   
+define block LR_NOHDP_CODE with fixed order, maximum size = BL2_NOHDP_CODE_SIZE {block ER_NOHDP_CODE};
 place at address BL2_NOHDP_CODE_START {block LR_NOHDP_CODE};
 
 define block ER_DATA            with alignment = 32 {readwrite};

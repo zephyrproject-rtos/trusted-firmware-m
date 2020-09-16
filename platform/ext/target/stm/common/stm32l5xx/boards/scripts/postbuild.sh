@@ -18,8 +18,8 @@ SCRIPT=$(readlink -f $0)
 projectdir=`dirname $SCRIPT`
 source $projectdir/preprocess.sh
 # the file to preprocess is generated and present outside of install dir
-bl2_file_to_preprocess=$projectdir/../image_macros_to_preprocess_bl2.c
-preprocess_bl2_file=$projectdir/../image_macros_preprocessed_bl2.c
+bl2_file_to_preprocess=$projectdir/image_macros_to_preprocess_bl2.c
+preprocess_bl2_file=$projectdir/image_macros_preprocessed_bl2.c
 regressionsh=$projectdir/regression.sh
 updatesh=$projectdir/TFM_UPDATE.sh
 
