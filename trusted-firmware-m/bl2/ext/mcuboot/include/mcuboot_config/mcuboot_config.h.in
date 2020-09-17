@@ -45,6 +45,7 @@ extern "C" {
 #cmakedefine MCUBOOT_OVERWRITE_ONLY
 #cmakedefine MCUBOOT_NO_SWAP
 #cmakedefine MCUBOOT_RAM_LOADING
+#cmakedefine MCUBOOT_SWAP_USING_MOVE
 
 #cmakedefine MCUBOOT_HW_KEY
 #cmakedefine MCUBOOT_HW_ROLLBACK_PROT

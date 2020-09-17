@@ -230,6 +230,8 @@ elseif(${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "NO_SWAP")
 	set(MCUBOOT_NO_SWAP On)
 elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
 	set(MCUBOOT_RAM_LOADING On)
+elseif (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP_MOVE")
+	set(MCUBOOT_SWAP_USING_MOVE On)
 endif()
 
 #FixMe: This becomes unnecessary and can be deleted once the sign_key.c file

@@ -22,7 +22,7 @@ if (BL2)
 	validate_cache_value(MCUBOOT_IMAGE_NUMBER STRINGS)
 
 	set(MCUBOOT_UPGRADE_STRATEGY "OVERWRITE_ONLY" CACHE STRING "Configure BL2 which upgrade strategy to use")
-	set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;NO_SWAP;RAM_LOADING")
+	set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;NO_SWAP;RAM_LOADING;SWAP_MOVE")
 	validate_cache_value(MCUBOOT_UPGRADE_STRATEGY)
 
 	set(MCUBOOT_SIGNATURE_TYPE "RSA-3072" CACHE STRING "Algorithm used by MCUBoot to validate signatures.")
@@ -30,7 +30,7 @@ if (BL2)
 	validate_cache_value(MCUBOOT_SIGNATURE_TYPE)
 
 	#FixMe: These checks can be removed when the upgrade strategies in question are upstreamed to the original MCUBoot repo.
-	if (TARGET_PLATFORM STREQUAL "MUSCA_A" OR TARGET_PLATFORM STREQUAL "AN524")
+	if (TARGET_PLATFORM STREQUAL "MUSCA_A" OR TARGET_PLATFORM STREQUAL "AN524" OR TARGET_PLATFORM STREQUAL "LPC55S69")
 		if (MCUBOOT_REPO STREQUAL "UPSTREAM")
 		    message(WARNING "The 'UPSTREAM' MCUBoot repository cannot be used when building for ${TARGET_PLATFORM}. Your choice was overridden.")
 		endif()

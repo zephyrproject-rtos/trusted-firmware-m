@@ -51,7 +51,7 @@ set (FLASH_LAYOUT           "${PLATFORM_DIR}/target/nxp/lpcxpresso55s69/partitio
 set (PLATFORM_LINK_INCLUDES "${PLATFORM_DIR}/target/nxp/lpcxpresso55s69/partition/")
 
 if (BL2)
-  mcuboot_override_upgrade_strategy("OVERWRITE_ONLY")
+  mcuboot_override_upgrade_strategy("SWAP_MOVE")
   # Section below maintained for ref. with future BL2 support.
   set (BL2_LINKER_CONFIG ${BL2_SCATTER_FILE_NAME})
   if (${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "RAM_LOADING")
