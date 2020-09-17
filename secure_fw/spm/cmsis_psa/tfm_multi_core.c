@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "tfm_spm_hal.h"
 #include "psa/client.h"
+#include "tfm_assert.h"
 #include "tfm_nspm.h"
 #include "tfm_spe_mailbox.h"
+#include "tfm_spm_hal.h"
+#include "tfm_spm_log.h"
 #include "utilities.h"
-#include "log/tfm_assert.h"
-#include "log/tfm_log.h"
-#include "log/tfm_assert.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
 
@@ -24,7 +23,7 @@ void tfm_nspm_thread_entry(void)
 {
 #ifdef TFM_CORE_DEBUG
     /* Boot up non-secure core */
-    LOG_MSG("Enabling non-secure core...");
+    SPMLOG_DBGMSG("Enabling non-secure core...");
 #endif
 
     tfm_spm_hal_boot_ns_cpu(tfm_spm_hal_get_ns_VTOR());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#include "target_cfg.h"
+#include "device_definition.h"
 #include "Driver_Common.h"
 #include "platform_description.h"
-#include "device_definition.h"
 #include "region_defs.h"
+#include "tfm_assert.h"
+#include "target_cfg.h"
 #include "tfm_plat_defs.h"
-
-#include "log/tfm_assert.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 
 /* Macros to pick linker symbols */
 #define REGION(a, b, c) a##b##c
@@ -198,13 +197,20 @@ void sau_and_idau_cfg(void)
                 | SAU_RLAR_ENABLE_Msk;
 #endif /* BL2 */
 
-    LOG_MSG("=== [SAU NS] =======\r\n");
-    LOG_MSG("NS ROM [0x%x, 0x%x]\r\n", memory_regions.non_secure_partition_base, memory_regions.non_secure_partition_limit);
-    LOG_MSG("NS DATA [0x%x, 0x%x]\r\n", NS_DATA_START, NS_DATA_LIMIT);
-    LOG_MSG("NSC [0x%x, 0x%x]\r\n", memory_regions.veneer_base, memory_regions.veneer_limit);
-    LOG_MSG("PERIPHERALS [0x%x, 0x%x]\r\n", PERIPHERALS_BASE_NS_START, PERIPHERALS_BASE_NS_END);
+    SPMLOG_INFMSG("=== [SAU NS] =======\r\n");
+    SPMLOG_INFMSGVAL("NS ROM [", memory_regions.non_secure_partition_base);
+    SPMLOG_INFMSGVAL(",", memory_regions.non_secure_partition_limit);
+    SPMLOG_INFMSG("]\r\n");
+    SPMLOG_INFMSGVAL("NS DATA [", NS_DATA_START);
+    SPMLOG_INFMSGVAL(",", NS_DATA_LIMIT);
+    SPMLOG_INFMSG("]\r\n");
+    SPMLOG_INFMSGVAL("NSC [", memory_regions.veneer_base);
+    SPMLOG_INFMSGVAL(",", memory_regions.veneer_limit);
+    SPMLOG_INFMSG("]\r\n");
+    SPMLOG_INFMSGVAL("PERIPHERALS [", PERIPHERALS_BASE_NS_START);
+    SPMLOG_INFMSGVAL(",", PERIPHERALS_BASE_NS_END);
+    SPMLOG_INFMSG("]\r\n");
 }
-
 /*------------------- Memory configuration functions -------------------------*/
 
 int32_t ahb_secure_control_memory_init(void)
@@ -360,9 +366,13 @@ int32_t ahb_secure_control_memory_init(void)
         }
     }
 
-    LOG_MSG("=== [AHB MPC NS] =======\r\n");
-    LOG_MSG("NS ROM [0x%x, 0x%x]\r\n", memory_regions.non_secure_partition_base, memory_regions.non_secure_partition_limit);
-    LOG_MSG("NS DATA [0x%x, 0x%x]\r\n", NS_DATA_START, NS_DATA_LIMIT);
+    SPMLOG_INFMSG("=== [AHB MPC NS] =======\r\n");
+    SPMLOG_INFMSGVAL("NS ROM [", memory_regions.non_secure_partition_base);
+    SPMLOG_INFMSGVAL(",", memory_regions.non_secure_partition_limit);
+    SPMLOG_INFMSG("]\r\n");
+    SPMLOG_INFMSGVAL("NS DATA [", NS_DATA_START);
+    SPMLOG_INFMSGVAL(",", NS_DATA_LIMIT);
+    SPMLOG_INFMSG("]\r\n");
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.

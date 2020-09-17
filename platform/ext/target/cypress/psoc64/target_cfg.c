@@ -22,14 +22,14 @@
 #include "device_definition.h"
 #include "driver_ppu.h"
 #include "driver_smpu.h"
-#include "log/tfm_log.h"
 #include "pc_config.h"
 #include "platform_description.h"
+#include "region.h"
 #include "region_defs.h"
 #include "RTE_Device.h"
 #include "target_cfg.h"
 #include "tfm_plat_defs.h"
-#include "region.h"
+#include "tfm_spm_log.h"
 
 
 /* The section names come from the scatter file */
@@ -108,29 +108,29 @@ void platform_init(void)
     /* UART clock */
     clk_rc = Cy_SysClk_PeriphDisableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 108U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphEnableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_SCB5_CLOCK, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure UART clock\r\n");
     }
     /* Secure: TIMER0 clock */
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS0, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure timer0 clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure timer0 clock\r\n");
     }
     /* Non-Secure: TIMER1 clock */
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS1, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        LOG_MSG("WARNING: Failed to configure timer1 clock\r\n");
+        SPMLOG_INFMSG("WARNING: Failed to configure timer1 clock\r\n");
     }
 
     Cy_Platform_Init();
@@ -138,7 +138,7 @@ void platform_init(void)
 #ifdef TFM_ENABLE_IRQ_TEST
     int_rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
     if (int_rc != CY_SYSINT_SUCCESS) {
-        LOG_MSG("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\r\n");
+        SPMLOG_INFMSG("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\r\n");
     }
 #endif /* TFM_ENABLE_IRQ_TEST */
 
@@ -268,13 +268,14 @@ enum tfm_plat_err_t smpu_init_cfg(void)
 
 void smpu_print_config(void)
 {
-    LOG_MSG("\r\nSMPU config:\r\n");
-    LOG_MSG("memory_regions.non_secure_code_start = 0x%x\r\n",
+    SPMLOG_INFMSG("\r\nSMPU config:\r\n");
+    SPMLOG_INFMSGVAL("memory_regions.non_secure_code_start = ",
             memory_regions.non_secure_code_start);
-    LOG_MSG("memory_regions.non_secure_partition_base = 0x%x\r\n",
+    SPMLOG_INFMSGVAL("\r\nmemory_regions.non_secure_partition_base = ",
             memory_regions.non_secure_partition_base);
-    LOG_MSG("memory_regions.non_secure_partition_limit = 0x%x\r\n",
+    SPMLOG_INFMSGVAL("\r\nmemory_regions.non_secure_partition_limit = ",
             memory_regions.non_secure_partition_limit);
+    SPMLOG_INFMSG("\r\n");
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
