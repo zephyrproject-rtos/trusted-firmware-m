@@ -89,6 +89,7 @@ Trusted Firmware-M Documentation
     docs/reference/index
     docs/design_documents/index
     platform/ext/index
+    docs/threat_models/index
 
 
 .. toctree::
