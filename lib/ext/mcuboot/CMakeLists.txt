@@ -16,7 +16,7 @@ endif()
 if ("${MCUBOOT_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(mcuboot
         GIT_REPOSITORY https://github.com/JuulLabs-OSS/mcuboot.git
-        GIT_TAG v${MCUBOOT_VERSION}
+        GIT_TAG ${MCUBOOT_VERSION}
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         GIT_SUBMODULES ""
