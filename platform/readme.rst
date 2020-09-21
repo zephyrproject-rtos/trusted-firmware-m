@@ -43,6 +43,18 @@ This file contains the declarations of functions that a platform implementation
 has to provide for TF-M's Platform Service. For details see
 ``docs/user_guides/services/tfm_platform_integration_guide.rst``
 
+**************
+System Startup
+**************
+
+Before calling ``main()``, platform startup code should initialise all system
+clocks, perform runtime initialisation and other steps such as setting the
+vector table. Configuration of the following features is optional as TF-M
+architecture code will check and initialise them:
+
+  - The Security Extension.
+  - The Floating-point Extension.
+
 *****************************
 Debug authentication settings
 *****************************
