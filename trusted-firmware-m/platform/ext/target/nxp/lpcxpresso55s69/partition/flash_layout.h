@@ -37,8 +37,22 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE                (0x40000)       /* S partition: 256 kB*/
-#define FLASH_NS_PARTITION_SIZE               (0x40000)       /* NS partition: 256 kB*/
+#ifdef BL2
+#define FLASH_S_PARTITION_SIZE                (0x38000)       /* S partition: xxx kB*/
+#if defined(TEST_FRAMEWORK_NS)
+/* Not enough space to run TFM-S and TFM-NS with MCUboot updates.
+   Disable image 2 and 3 by setting them to 0.
+   */
+#define FLASH_NS_PARTITION_SIZE               (0x20000)       /* NS partition: xx kB*/
+#else
+/* Run a smaller image such as Zephyr NS image. */
+#define FLASH_NS_PARTITION_SIZE               (0x10000)       /* NS partition: xx kB*/
+#endif
+#else
+#define FLASH_S_PARTITION_SIZE                (0x40000)       /* S partition: xxx kB*/
+#define FLASH_NS_PARTITION_SIZE               (0x20000)       /* NS partition: xx kB*/
+#endif
+
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -48,7 +62,7 @@
 #define FLASH_AREA_IMAGE_SECTOR_SIZE        (512)           /* 512 B. Flash memory program/erase operations have a page granularity. */
 
 /* FLASH size */
-#define FLASH_TOTAL_SIZE                    (0x00098000)    /* 608 kB. The last 17 pages (10KB) are reserved on the 640KB flash. Sub-regiuon is 32KB, so avalble for application is 608KB. */
+#define FLASH_TOTAL_SIZE                    (0x0009D800)    /* 608 kB. The last 17 pages (10KB) are reserved on the 640KB flash. Sub-regiuon is 32KB, so avalble for application is 608KB. */
 
 /* Flash layout info for BL2 bootloader */
 #define FLASH_BASE_ADDRESS                  (0x00000000)
@@ -60,7 +74,7 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (0x20000) /* 128 KB */
+#define FLASH_AREA_BL2_SIZE        (0x8000) /* 32 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */
@@ -95,11 +109,19 @@
 /* Secure image secondary slot */
 #define FLASH_AREA_2_ID            (FLASH_AREA_1_ID + 1)
 #define FLASH_AREA_2_OFFSET        (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#if defined(TEST_FRAMEWORK_NS)
+#define FLASH_AREA_2_SIZE          (0)
+#else
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
+#endif
 /* Non-secure image secondary slot */
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#if defined(TEST_FRAMEWORK_NS)
+#define FLASH_AREA_3_SIZE          (0)
+#else
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
+#endif
 /* Not used, only the Non-swapping firmware upgrade operation
  * is supported on Musca-B1.
  */
