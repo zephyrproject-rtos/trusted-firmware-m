@@ -128,7 +128,7 @@ This is a status code to be used as the return type of :term:`HAL` APIs.
 .. code-block:: c
 
   enum tfm_hal_status_t {
-      TFM_HAL_ERROR_MEM_FAULT = CHAR_MIN,
+      TFM_HAL_ERROR_MEM_FAULT = SCHAR_MIN,
       TFM_HAL_ERROR_MAX_VALUE,
       TFM_HAL_ERROR_BAD_STATE,
       TFM_HAL_ERROR_NOT_SUPPORTED,
