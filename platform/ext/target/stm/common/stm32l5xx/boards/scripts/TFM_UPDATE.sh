@@ -17,6 +17,7 @@ echo "TFM UPDATE started"
 SCRIPT=$(readlink -f $0)
 # Absolute path this script
 SCRIPTPATH=`dirname $SCRIPT`
+BINPATH="$SCRIPTPATH/bin"
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
 connect_no_reset="-c port=SWD mode=HotPlug"
@@ -34,12 +35,12 @@ nvcounter=
 boot=0x0c001000
 unused=
 
-$stm32programmercli $connect -d $SCRIPTPATH/tfm_s_signed.bin $slot0 -v
+$stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v
 echo "TFM_Appli Secure Written"
 echo "Write TFM_Appli NonSecure"
-$stm32programmercli $connect -d $SCRIPTPATH/tfm_ns_signed.bin $slot1 -v
+$stm32programmercli $connect -d $BINPATH/tfm_ns_signed.bin $slot1 -v
 echo "TFM_Appli NonSecure Written"
 echo "Write TFM_SBSFU_Boot"
-$stm32programmercli $connect -d $SCRIPTPATH/bl2.bin $boot -v
+$stm32programmercli $connect -d $BINPATH/bl2.bin $boot -v
 echo "TFM_SBSFU_Boot Written"
 echo "TFM_UPDATE Done"

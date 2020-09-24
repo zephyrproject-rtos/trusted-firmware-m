@@ -152,7 +152,6 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_device.c
             ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_flash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_com.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash_ex.c
@@ -177,7 +176,7 @@ if(BL2)
     # object files. For this reason, the file mailbox_ipc_intr is linked directly to
     # the ns binary as an object file. This issue does not affect armclang, but the
     # fix is compatible.
-    target_sources(tfm_s
+    target_sources(bl2
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
     )
@@ -186,20 +185,29 @@ endif()
 install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/stm_tool.py
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bl2/ext/mcuboot/scripts/macro_parser.py
-        DESTINATION ./scripts/ )
+        DESTINATION ${CMAKE_BINARY_DIR}/scripts/ )
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/gcc/preprocess.sh)
+elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
+    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/armclang/preprocess.sh)
+else()
+    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/iar/preprocess.sh)
+endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
+         ${PREPROCESSOR_FILE}
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_UPDATE.sh
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/postbuild.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-         DESTINATION ./ )
+         DESTINATION ${CMAKE_BINARY_DIR} )
 
-if (TEST_S)
+if (${TEST_S} OR ${TEST_NS})
     #the define FLASH_LAYOUT_FOR_TEST
     #increase SECURE and NON SECURE IMAGE and modify the  content of  low_level_device.c from BL2 (low_level_flash.c)
     set(FLAGS_FOR_BL2_PREPROCESSING
         "#define FLASH_LAYOUT_FOR_TEST\n"
-            "#define BL2\n"
+        "#define BL2\n"
          )
     add_definitions("-DFLASH_LAYOUT_FOR_TEST")
 else()

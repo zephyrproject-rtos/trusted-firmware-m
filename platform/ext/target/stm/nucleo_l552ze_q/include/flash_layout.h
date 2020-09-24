@@ -27,24 +27,24 @@
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0001_2000 NV counters area (4 KB)
- * 0x0001_3000 Secure Storage Area (8 KB)
- * 0x0001_5000 Internal Trusted Storage Area (8 KB)
- * 0x0001_7000 Secure image     primary slot (172 KB)
- * 0x0004_1000 Non-secure image primary slot (36 KB)
- * 0x0004_a000 Secure image     secondary slot (176 KB)
+ * 0x0000_e000 NV counters area (4 KB)
+ * 0x0000_f000 Secure Storage Area (8 KB)
+ * 0x0001_1000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_3000 Secure image     primary slot (180 KB)
+ * 0x0004_0000 Non-secure image primary slot (36 KB)
+ * 0x0004_9000 Secure image     secondary slot (180 KB)
  * 0x0007_6000 Non-secure image secondary slot (36 KB)
  * 0x0007_F000 Unused (4 KB)
  *
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot, layout for test):
  * No Firmware update , ITS, PS in RAM.
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0001_2000 NV counters area (4 KB)
- * 0x0001_3000 Secure Storage Area (8 KB)
- * 0x0001_5000 Internal Trusted Storage Area (8 KB)
- * 0x0001_7000 Secure image     primary slot (224 KB)
- * 0x0004_F000 Non-secure image primary slot (168 KB)
- * 0x0007_9000 Unused (28K)
+ * 0x0000_e000 NV counters area (4 KB)
+ * 0x0000_f000 Secure Storage Area (8 KB)
+ * 0x0001_1000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_3000 Secure image     primary slot (224 KB)
+ * 0x0004_b000 Non-secure image primary slot (168 KB)
+ * 0x0007_5000 Unused (44K)
  * The size of a partition. This should be large enough to contain a S or NS
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
@@ -65,7 +65,7 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0x11000)
+#define FLASH_AREA_BL2_SIZE             (0xd800)
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
 /* area for BL2 code not protected by hdp */
@@ -113,7 +113,7 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-#define FLASH_S_PARTITION_SIZE          (0x2B000) /* S partition */
+#define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */

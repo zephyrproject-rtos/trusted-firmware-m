@@ -1,52 +1,60 @@
-#########
-stm32l5xx
-#########
-'platform/ext/stm/stm32l5xx' folder contains code that has been imported from
-other projects available on https://github.com/STMicroelectronics.
+STMicroelectronics
+##################
 
-***********
-Sub-folders
-***********
+TF-M is supported on STM32L5 family
 
-stm32l5xx_hal
+https://www.st.com/en/microcontrollers-microprocessors/stm32l5-series.html
+
+https://www.st.com/resource/en/user_manual/dm00678763-getting-started-with-stm32cubel5-tfm-application-stmicroelectronics.pdf
+
+
+*****************
+Directory content
+*****************
+
+stm/stm32l562e_dk: STM32L562E-DK
+===================
+Discovery kit with STM32L562QE MCU :
+https://www.st.com/en/evaluation-tools/stm32l562e-dk.html
+
+stm/nucleo_l552ze_q: NUCLEO-L552ZE-Q
+=================
+STM32 Nucleo-144 development board with STM32L552ZE MCU, SMPS, supports Arduino, ST Zio and morpho connectivity
+https://www.st.com/en/evaluation-tools/nucleo-l552ze-q.html
+
+
+stm/common/stm32l5xx/stm32l5xx_hal
 =============
 Content from https://github.com/STMicroelectronics/stm32l5xx_hal_driver.git
 
-Device
+stm/common/stm32l5xx/Device
 ======
 Content from https://github.com/STMicroelectronics/cmsis_device_l5.git
 
-bl2
-===
+stm/common/stm32l5xx/bl2
+======
 stm32l5xx bl2 code specific from https://github.com/STMicroelectronics/STM32CubeL5.git
 (Projects/STM32L562E-DK/Applications/TFM)
 
-Secure
+stm/common/stm32l5xx/secure
 ======
 stm32l5xx Secure porting adaptation from https://github.com/STMicroelectronics/STM32CubeL5.git
 (Projects/STM32L562E-DK/Applications/TFM)
 
-boards
+stm/common/stm32l5xx/boards
 ======
 Adaptation and tools specific to stm32 board using stm32l5xx soc
 from https://github.com/STMicroelectronics/STM32CubeL5.git
 (Projects/STM32L562E-DK/Applications/TFM)
 
-CMSIS_Driver
+stm/common/stm32l5xx/CMSIS_Driver
 ============
 Flash and uart driver for stm32l5xx platform
 
-Native Driver
+stm/common/stm32l5xx/Native_Driver
 =============
 random generator and tickless implementation
 
-***********************
-Documentation on boards
-***********************
-Following links provide information on the supported boards:
-https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-discovery-kits/stm32l562e-dk.html
-
-https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-l552ze-q.html
 
 ***************************************
 Building and running software on target
@@ -62,15 +70,21 @@ Configuration and Build
 GNUARM compilation is available for targets  STM_NUCLEO_L552ZE_Q and STM_DISCO_L562QE
 and build the selected configuration as follow.
 
-``>cmake --build ./  -- install``
+``> mkdir build && cd build``
+
+``> cmake .. -DTFM_PLATFORM=stm/nucleo_l552ze_q -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -G"Unix Makefiles"``
+
+``> cmake .. -DTFM_PLATFORM=stm/stm32l562e_dk -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -G"Unix Makefiles"``
+
+``> cmake --build ./  -- install``
 
 Write software on target
 ========================
-In install folder:
+In build folder:
 
-  - ``postbuild.sh``: Updates regression.sh and TFM_UPDATE.sh scripts according to flash_layout.h.
-  - ``regression.sh``: Sets platform option bytes config and erase platform.
-  - ``TFM_UPDATE.sh``: Writes bl2, secure, and non secure image in target.
+  - ``postbuild.sh``: Updates regression.sh and TFM_UPDATE.sh scripts according to flash_layout.h
+  - ``regression.sh``: Sets platform option bytes config and erase platform
+  - ``TFM_UPDATE.sh``: Writes bl2, secure, and non secure image in target
 
 
 Connect board to USB and Execute the 3 scripts in following order to update platform:
