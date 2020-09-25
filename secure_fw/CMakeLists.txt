@@ -81,7 +81,8 @@ set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/interface/src/psa/psa_client.c
     ${CMAKE_SOURCE_DIR}/interface/src/psa/psa_service.c
     PROPERTIES
-    COMPILE_FLAGS -Wno-unused-parameter
+    COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+    COMPILE_FLAGS $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
 ############################# Secure veneers ###################################

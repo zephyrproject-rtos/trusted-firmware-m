@@ -143,7 +143,8 @@ target_sources(mbedcrypto_crypto_service
 
 target_compile_options(mbedcrypto_crypto_service
     PRIVATE
-        -Wno-unused-parameter
+        $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+        $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
 target_link_libraries(mbedcrypto_crypto_service

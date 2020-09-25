@@ -20,6 +20,21 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 endif()
 
+if(
+    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU" AND
+    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "ARMclang" AND
+    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "IAR"
+)
+    Message(FATAL_ERROR "unsupported c compiler ${CMAKE_C_COMPILER_ID}")
+endif()
+
+if(
+    NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
+    NOT ${CMAKE_GENERATOR} STREQUAL "Ninja"
+)
+    Message(FATAL_ERROR "unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
+endif()
+
 ############################ CONFIGURATION #####################################
 
 # First load defaults.
