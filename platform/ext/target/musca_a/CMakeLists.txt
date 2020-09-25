@@ -80,6 +80,7 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        Libraries
 )
 
 target_sources(platform_s
@@ -103,6 +104,7 @@ target_sources(platform_s
         Native_Driver/timer_cmsdk_drv.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        Libraries/mt25ql_flash_lib.c
 )
 
 target_compile_options(platform_s
