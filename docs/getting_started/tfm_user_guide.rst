@@ -49,7 +49,7 @@ Example application and regression tests with BL2 bootloader
 ------------------------------------------------------------
 To test TF-M with bootloader, one must apply the following changes:
 
-- Add ``mcuboot.axf`` to symbol files in DS-5 in Debug Configuration
+- Add ``bl2.axf`` to symbol files in DS-5 in Debug Configuration
   menu.
 - Replace the last two lines of the previous command with this:
 

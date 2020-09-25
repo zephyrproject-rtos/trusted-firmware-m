@@ -541,7 +541,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
     --parameter fvp_mps2.telnetterminal0.quiet=0 \
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
-    --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
+    --application cpu0=<build_dir>/bin/bl2.axf \
     --data cpu0=<default_build_dir>/bin/tfm_s_ns_signed.bin@0x10080000 \
     --data cpu0=<regresssion_build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
 
@@ -554,7 +554,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 3                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sig1.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -591,7 +591,7 @@ Executing multiple firmware upgrades on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 4                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -684,7 +684,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
     --parameter fvp_mps2.telnetterminal0.quiet=0 \
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
-    --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
+    --application cpu0=<build_dir>/bin/bl2.axf \
     --data cpu0=<default_build_dir>/bin/tfm_s_ns_signed.bin@0x10080000 \
     --data cpu0=<regresssion_build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
 
@@ -697,7 +697,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 3                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -710,11 +710,11 @@ combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
+    srec_cat bin/bl2.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
+    srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade,
 notice that image with higher version number (``version=1.2.3.5``) is executed:
@@ -745,7 +745,7 @@ Executing firmware upgrade on CoreLink SSE-200 Subsystem for MPS3 (AN524)
 
     IMAGE0UPDATE: AUTO                 ;Image Update:NONE/AUTO/FORCE
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \SOFTWARE\mcuboot.bin  ;BL2 bootloader
+    IMAGE0FILE: \SOFTWARE\bl2.bin      ;BL2 bootloader
     IMAGE1UPDATE: AUTO
     IMAGE1ADDRESS: 0x00040000
     IMAGE1FILE: \SOFTWARE\tfm_sig0.bin ;TF-M example application binary blob
@@ -769,11 +769,11 @@ combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat bin/bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade when,
 RAM loading is enabled, notice that image with higher version number
