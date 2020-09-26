@@ -165,7 +165,7 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
                                      uint32_t cnt)
 {
-    static uint8_t prog_buf[CY_FLASH_SIZEOF_ROW];
+    __attribute__ ((aligned(4))) static uint8_t prog_buf[CY_FLASH_SIZEOF_ROW];
     uint8_t *data_ptr = (uint8_t *) data;
     uint32_t address = FLASH0_DEV->memory_base + addr;
     cy_en_flashdrv_status_t cy_status = CY_FLASH_DRV_ERR_UNC;
