@@ -7,6 +7,8 @@
 
 cmake_minimum_required(VERSION 3.15)
 
+set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
+
 SET(CMAKE_SYSTEM_NAME Generic)
 # This setting is overridden in ${TFM_PLATFORM}/preload.cmake. It can be set to
 # any value here.

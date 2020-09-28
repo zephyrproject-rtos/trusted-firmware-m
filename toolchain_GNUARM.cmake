@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
+
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 

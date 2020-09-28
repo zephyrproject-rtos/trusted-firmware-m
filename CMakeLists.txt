@@ -10,21 +10,27 @@ cmake_minimum_required(VERSION 3.13)
 project("Trusted Firmware M" VERSION 1.1.0 LANGUAGES C ASM)
 set(TFM_VERSION ${PROJECT_VERSION})
 
+if(NOT TFM_CMAKE_TOOLCHAIN_FILE_LOADED)
+    Message(FATAL_ERROR "Cmake toolchain file not set.")
+endif()
+
+if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
+   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
+    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
+endif()
+
 # Some compiler flags depend on the CPU / platform config. This include should
 # be run before anything else so the compiler can be configured properly.
-include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
+else()
+    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+endif()
 
 # The default build type is release. If debug symbols are needed then
 # -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
-endif()
-
-if(
-    NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
-    NOT ${CMAKE_GENERATOR} STREQUAL "Ninja"
-)
-    Message(FATAL_ERROR "unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
 endif()
 
 ############################ CONFIGURATION #####################################
