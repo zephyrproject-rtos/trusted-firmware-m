@@ -49,8 +49,8 @@
     .address = (void *)SMPU0_BASE, \
     .regionSize = (cy_en_prot_size_t) SMPU0_REGIONSIZE, \
     .subregions = SMPU0_SUBREGION_DIS, \
-    .userPermission = CY_PROT_PERM_RWX, \
-    .privPermission = CY_PROT_PERM_RWX, \
+    .userPermission = CY_PROT_PERM_RX, \
+    .privPermission = CY_PROT_PERM_RX, \
     .secure = false, \
     .pcMatch = false, \
     .pcMask = SECURE_PCS_MASK, \
