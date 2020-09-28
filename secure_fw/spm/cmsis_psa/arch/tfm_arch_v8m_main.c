@@ -163,6 +163,17 @@ void tfm_arch_prioritize_secure_exception(void)
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 }
 
+void tfm_arch_set_fault_priority(void)
+{
+    /* Set fault priority to less than 0x80 (with AIRCR.PRIS set) to prevent
+     * Non-secure from pre-empting faults that may indicate corruption of Secure
+     * state.
+     */
+    NVIC_SetPriority(MemoryManagement_IRQn, 0);
+    NVIC_SetPriority(BusFault_IRQn, 0);
+    NVIC_SetPriority(SecureFault_IRQn, 0);
+}
+
 void tfm_arch_configure_coprocessors(void)
 {
 #if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)

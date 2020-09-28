@@ -128,6 +128,7 @@ static int32_t tfm_core_set_secure_exception_priorities(void)
         return TFM_ERROR_GENERIC;
     }
 
+    tfm_arch_set_fault_priority();
     tfm_arch_set_pendsv_priority();
 
     return TFM_SUCCESS;

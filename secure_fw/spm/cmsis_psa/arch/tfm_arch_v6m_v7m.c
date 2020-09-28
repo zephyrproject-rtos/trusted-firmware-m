@@ -147,6 +147,15 @@ void tfm_arch_prioritize_secure_exception(void)
 {
 }
 
+void tfm_arch_set_fault_priority(void)
+{
+    /* Set fault priority to the highest */
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+    NVIC_SetPriority(MemoryManagement_IRQn, 0);
+    NVIC_SetPriority(BusFault_IRQn, 0);
+#endif
+}
+
 void tfm_arch_configure_coprocessors(void)
 {
     /* There are no coprocessors in Armv6-M implementations */

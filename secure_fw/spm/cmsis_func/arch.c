@@ -256,6 +256,23 @@ void tfm_arch_prioritize_secure_exception(void)
 }
 #endif
 
+void tfm_arch_set_fault_priority(void)
+{
+    /* For Armv8-M, set fault priority to less than 0x80 (with AIRCR.PRIS set)
+     * to prevent Non-secure from pre-empting faults that may indicate
+     * corruption of Secure state. For Armv7-M, also set fault priority to the
+     * highest for consistent behaviour.
+     */
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__) || \
+    defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+    NVIC_SetPriority(MemoryManagement_IRQn, 0);
+    NVIC_SetPriority(BusFault_IRQn, 0);
+#endif
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+    NVIC_SetPriority(SecureFault_IRQn, 0);
+#endif
+}
+
 void tfm_arch_configure_coprocessors(void)
 {
 #if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)

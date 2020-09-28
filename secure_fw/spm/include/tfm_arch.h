@@ -118,6 +118,11 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
  */
 void tfm_arch_prioritize_secure_exception(void);
 
+/*
+ * Set the priority of fault exceptions
+ */
+void tfm_arch_set_fault_priority(void);
+
 /**
  * \brief Configure coprocessors
  */
