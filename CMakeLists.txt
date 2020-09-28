@@ -21,14 +21,6 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(
-    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU" AND
-    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "ARMclang" AND
-    NOT ${CMAKE_C_COMPILER_ID} STREQUAL "IAR"
-)
-    Message(FATAL_ERROR "unsupported c compiler ${CMAKE_C_COMPILER_ID}")
-endif()
-
-if(
     NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
     NOT ${CMAKE_GENERATOR} STREQUAL "Ninja"
 )
