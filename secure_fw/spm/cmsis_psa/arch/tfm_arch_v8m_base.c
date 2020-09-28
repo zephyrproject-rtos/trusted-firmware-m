@@ -97,6 +97,11 @@ void HardFault_Handler(void)
      * a hard fault triggered directly, or another fault that has been
      * escalated.
      */
+    /* A HardFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
     while (1) {
         ;
     }

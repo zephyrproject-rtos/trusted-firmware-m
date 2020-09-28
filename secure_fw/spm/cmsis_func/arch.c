@@ -342,3 +342,43 @@ __attribute__((naked)) void SVC_Handler(void)
     );
 }
 #endif
+
+__attribute__((naked)) void HardFault_Handler(void)
+{
+    /* A HardFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}
+
+__attribute__((naked)) void MemManage_Handler(void)
+{
+    /* A MemManage fault may indicate corruption of secure state, so it is
+     * essential that Non-secure code does not regain control after one is
+     * raised. Returning from this exception could allow a pending NS exception
+     * to be taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}
+
+__attribute__((naked)) void BusFault_Handler(void)
+{
+    /* A BusFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}
+
+__attribute__((naked)) void SecureFault_Handler(void)
+{
+    /* A SecureFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}

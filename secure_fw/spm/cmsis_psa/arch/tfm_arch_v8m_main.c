@@ -83,6 +83,11 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
 void SecureFault_Handler(void)
 {
     ERROR_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    /* A SecureFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
     while (1) {
         ;
     }
@@ -109,15 +114,36 @@ __attribute__((naked)) void SVC_Handler(void)
 }
 
 /* Reserved for future usage */
+__attribute__((naked)) void HardFault_Handler(void)
+{
+    /* A HardFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}
+
 __attribute__((naked)) void MemManage_Handler(void)
 {
+    /* A MemManage fault may indicate corruption of secure state, so it is
+     * essential that Non-secure code does not regain control after one is
+     * raised. Returning from this exception could allow a pending NS exception
+     * to be taken, so the current solution is not to return.
+     */
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
+    /* A BusFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
     __ASM volatile("b    .");
 }
+
 __attribute__((naked)) void UsageFault_Handler(void)
 {
     __ASM volatile("b    .");
