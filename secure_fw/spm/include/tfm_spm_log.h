@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "tfm_hal_defs.h"
 #include "tfm_hal_spm_logdev.h"
 
 /* The SPM log levels */
@@ -30,8 +31,8 @@
 #endif
 
 #if (TFM_SPM_LOG_LEVEL == TFM_SPM_LOG_LEVEL_DEBUG)
-#define SPMLOG_DBGMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
-#define SPMLOG_DBGMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
+#define SPMLOG_DBGMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
+#define SPMLOG_DBGMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
 #define SPMLOG_DBGMSGVAL(msg, val)
 #define SPMLOG_DBGMSG(msg)
@@ -43,15 +44,15 @@
 #define SPMLOG_INFMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #define SPMLOG_ERRMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
-#define SPMLOG_INFMSGVAL(msg, val)
-#define SPMLOG_ERRMSGVAL(msg, val)
+#define SPMLOG_INFMSGVAL(msg, val)
+#define SPMLOG_ERRMSGVAL(msg, val)
 #define SPMLOG_INFMSG(msg)
 #define SPMLOG_ERRMSG(msg)
 #endif
 
 /**
- * \brief SPM output API to combine message and value together as a joint
- *        message, and call the log HAL API tfm_hal_output_spm_log.
+ * \brief SPM output API to convert digit number into HEX string and call the
+ *        HAL API tfm_hal_output_spm_log.
  *
  * \param[in]  msg    A string message
  * \param[in]  len    The length of the message
