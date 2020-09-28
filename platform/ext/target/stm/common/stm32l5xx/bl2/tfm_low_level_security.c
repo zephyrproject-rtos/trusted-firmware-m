@@ -234,9 +234,8 @@ void TFM_LL_SECU_CheckStaticProtections(void)
   if (end > PAGE_MAX_NUMBER_IN_BANK)
   {
     end = end - (PAGE_MAX_NUMBER_IN_BANK + 1);
-    if ((flash_option_bytes_bank2.WMSecStartPage > flash_option_bytes_bank2.WMSecEndPage)
-        || (start < flash_option_bytes_bank2.WMSecStartPage)
-        || (end > flash_option_bytes_bank2.WMSecEndPage))
+    if ((start != flash_option_bytes_bank2.WMSecStartPage)
+        || (end != flash_option_bytes_bank2.WMSecEndPage))
     {
       BOOT_LOG_INF("BANK 2 secure flash [%d, %d] : OB [%d, %d]", start, end, flash_option_bytes_bank2.WMSecStartPage,
                    flash_option_bytes_bank2.WMSecEndPage);
@@ -251,6 +250,22 @@ void TFM_LL_SECU_CheckStaticProtections(void)
       flash_option_bytes_bank2.WMSecConfig |= OB_WMSEC_AREA2 | OB_WMSEC_SECURE_AREA_CONFIG ;
 #endif /* TFM_ENABLE_SET_OB  */
     }
+  }
+  /* the bank 2 must be fully unsecure */
+  else if (flash_option_bytes_bank2.WMSecEndPage >= flash_option_bytes_bank2.WMSecStartPage)
+  {
+    BOOT_LOG_INF("BANK 2 secure flash [%d, %d] : OB [%d, %d]", 127, 0, flash_option_bytes_bank2.WMSecStartPage,
+                 flash_option_bytes_bank2.WMSecEndPage);
+#ifndef TFM_ENABLE_SET_OB
+    BOOT_LOG_ERR("Error while checking secure flash protection");
+    Error_Handler();
+#else
+    /* bank is not unsecured , modify option bytes */
+    flash_option_bytes_bank2.WMSecStartPage = 127;
+    flash_option_bytes_bank2.WMSecEndPage = 0;
+    flash_option_bytes_bank2.OptionType = OPTIONBYTE_WMSEC;
+    flash_option_bytes_bank2.WMSecConfig |= OB_WMSEC_AREA2 | OB_WMSEC_SECURE_AREA_CONFIG ;
+#endif /* TFM_ENABLE_SET_OB */
   }
 
 #ifdef  TFM_WRP_PROTECT_ENABLE
