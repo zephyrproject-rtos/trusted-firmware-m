@@ -67,9 +67,8 @@ if ("${TEST_PSA_API}" STREQUAL "IPC")
     )
 endif()
 
-add_custom_target(OUTPUT ${OUTPUT_FILES}
-    DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
-    DEPENDS ${MANIFEST_LISTS}
+add_custom_target(tfm_generated_files
+    SOURCES ${OUTPUT_FILES}
 )
 
 add_custom_command(OUTPUT ${OUTPUT_FILES}
@@ -83,14 +82,15 @@ add_custom_command(OUTPUT ${OUTPUT_FILES}
 
 # The files need to be generated before cmake will allow them to be used as
 # sources. Due to issue with custom_command scoping the easiest way to do this
-# is to run the script at cmake-time if any of the files don't exist.
-foreach(output_file ${OUTPUT_FILES})
-    if(NOT EXISTS ${output_file})
-        execute_process(
-            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
-                                          -m ${MANIFEST_LISTS}
-                                          -f ${GENERATED_FILE_LISTS}
-                                          -o ${CMAKE_BINARY_DIR}/generated
-            )
+# is to run the script at cmake-time.
+execute_process(
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
+                                  -m ${MANIFEST_LISTS}
+                                  -f ${GENERATED_FILE_LISTS}
+                                  -o ${CMAKE_BINARY_DIR}/generated
+    RESULT_VARIABLE RET
+)
+
+if(NOT RET EQUAL 0)
+    message(FATAL_ERROR "File generation failed")
 endif()
-endforeach()
