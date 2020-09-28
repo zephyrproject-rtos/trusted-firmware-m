@@ -125,21 +125,6 @@ __attribute__((naked)) void SVC_Handler(void)
     );
 }
 
-/* Reserved for future usage */
-__attribute__((naked)) void MemManage_Handler(void)
-{
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void BusFault_Handler(void)
-{
-    __ASM volatile("b    .");
-}
-__attribute__((naked)) void UsageFault_Handler(void)
-{
-    __ASM volatile("b    .");
-}
-
 void tfm_arch_prioritize_secure_exception(void)
 {
     uint32_t VECTKEY;
