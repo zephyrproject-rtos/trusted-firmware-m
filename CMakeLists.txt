@@ -60,7 +60,7 @@ function(trusted_firmware_build)
   endif()
 
   include(ExternalProject)
-  
+
   ExternalProject_Add(
     tfm
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
@@ -92,6 +92,77 @@ function(trusted_firmware_build)
     target_include_directories(tfm_ipc_psa_api PUBLIC ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include)
     target_compile_definitions(tfm_ipc_psa_api PUBLIC TFM_PSA_API TFM_PARTITION_TEST_CORE_IPC)
     target_link_libraries(tfm_ipc_psa_api PRIVATE zephyr_interface)
+  endif()
+
+endfunction()
+
+# Gets a list of commands to be performed after a successful Zephyr build that
+# involves trusted-firmware-m.
+function(trusted_firmware_get_post_build_commands out_commands)
+
+  if(NOT CONFIG_TFM_BL2_FALSE)
+
+    # Set default image versions if not defined elsewhere
+    if(NOT DEFINED TFM_IMAGE_VERSION_S)
+      set(TFM_IMAGE_VERSION_S 0.0.0+0)
+    endif()
+    if(NOT DEFINED TFM_IMAGE_VERSION_NS)
+      set(TFM_IMAGE_VERSION_NS 0.0.0+0)
+    endif()
+
+    set(TFM_MCUBOOT_DIR "${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/bl2/ext/mcuboot")
+    set(PREPROCESSED_FILE "${CMAKE_BINARY_DIR}/tfm/image_macros_preprocessed")
+
+    if(NOT DEFINED TFM_PUBLIC_KEY_FORMAT)
+      set(TFM_PUBLIC_KEY_FORMAT "full")
+    endif()
+
+    set(${out_commands}
+
+      # Sign secure binary image with public key
+      COMMAND ${PYTHON_EXECUTABLE} ${TFM_MCUBOOT_DIR}/scripts/imgtool.py
+        sign
+        --layout ${PREPROCESSED_FILE}_s.c
+        -k ${CONFIG_TFM_KEY_FILE_S}
+        --public-key-format ${TFM_PUBLIC_KEY_FORMAT}
+        --align 1
+        -v ${TFM_IMAGE_VERSION_S}
+        ${ADD_NS_IMAGE_MIN_VER}
+        ${ADD_SECURITY_COUNTER_S}
+        -H 0x400
+        ${CMAKE_BINARY_DIR}/tfm/install/outputs/${TFM_TARGET_PLATFORM}/tfm_s.bin
+        ${CMAKE_BINARY_DIR}/tfm_s_signed.bin
+
+      # Sign non-secure binary image with public key
+      COMMAND ${PYTHON_EXECUTABLE} ${TFM_MCUBOOT_DIR}/scripts/imgtool.py
+        sign
+        --layout ${PREPROCESSED_FILE}_ns.c
+        -k ${CONFIG_TFM_KEY_FILE_NS}
+        --public-key-format ${TFM_PUBLIC_KEY_FORMAT}
+        --align 1
+        -v ${TFM_IMAGE_VERSION_NS}
+        ${ADD_S_IMAGE_MIN_VER}
+        ${ADD_SECURITY_COUNTER_NS}
+        -H 0x400
+        --included-header
+        ${CMAKE_BINARY_DIR}/zephyr/${KERNEL_BIN_NAME}
+        ${CMAKE_BINARY_DIR}/zephyr_ns_signed.bin
+
+      # Create concatenated binary image from the two independently signed binary files
+      COMMAND ${PYTHON_EXECUTABLE} ${TFM_MCUBOOT_DIR}/scripts/assemble.py
+        --layout ${PREPROCESSED_FILE}_s.c
+        -s ${CMAKE_BINARY_DIR}/tfm_s_signed.bin
+        -n ${CMAKE_BINARY_DIR}/zephyr_ns_signed.bin
+        -o ${CMAKE_BINARY_DIR}/tfm_sign.bin
+
+      # Copy mcuboot.bin
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/tfm/install/outputs/${TFM_TARGET_PLATFORM}/mcuboot.bin
+        ${CMAKE_BINARY_DIR}
+
+      PARENT_SCOPE
+    )
+
   endif()
 
 endfunction()
