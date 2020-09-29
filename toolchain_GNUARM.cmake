@@ -130,10 +130,6 @@ macro(target_add_scatter_file target)
         )
     endforeach()
 
-    set_target_properties(${target}_scatter PROPERTIES
-        SUFFIX ".ld"
-    )
-
     target_link_libraries(${target}_scatter
         platform_region_defs
         psa_interface
