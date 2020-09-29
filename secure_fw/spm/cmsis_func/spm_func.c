@@ -17,6 +17,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_secure_api.h"
 #include "tfm_spm_hal.h"
+#include "tfm_core_trustzone.h"
 #include "spm_func.h"
 #include "region_defs.h"
 #include "region.h"
@@ -32,8 +33,53 @@
 #error TFM_LVL is not defined!
 #endif
 
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+#error Multi core is not supported by Function mode
+#endif
+
 REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Base, uint32_t);
 REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
+
+static uint32_t *tfm_secure_stack_seal =
+    ((uint32_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1]) - 2;
+
+REGION_DECLARE_T(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base, uint32_t);
+
+/*
+ * Function to seal the psp stacks for Function model of TF-M.
+ */
+void tfm_spm_seal_psp_stacks(void)
+{
+    /*
+     * The top of TFM_SECURE_STACK is used for iovec parameters, we need to
+     * place the seal between iovec parameters and partition stack.
+     *
+     * Image$$TFM_SECURE_STACK$$ZI$$Limit-> +-------------------------+
+     *                                      |                         |
+     *                                      | iovec parameters for    |
+     *                                      | partition               |
+     * (Image$$TFM_SECURE_STACK$$ZI$$Limit -|                         |
+     * sizeof(iovec_args_t)) ->             +-------------------------+
+     *                                      | Stack Seal              |
+     *                                      +-------------------------+
+     *                                      |                         |
+     *                                      |    Partition stack      |
+     *                                      |                         |
+     * Image$$TFM_SECURE_STACK$$ZI$$Base->  +-------------------------+
+     */
+    *(tfm_secure_stack_seal) = TFM_STACK_SEAL_VALUE;
+    *(tfm_secure_stack_seal + 1) = TFM_STACK_SEAL_VALUE;
+
+    /*
+     * Seal the ARM_LIB_STACK by writing the seal value to the reserved
+     * region.
+     */
+    uint32_t *arm_lib_stck_seal_base = (uint32_t *)&REGION_NAME(Image$$,
+                                       ARM_LIB_STACK_SEAL, $$ZI$$Base);
+
+    *(arm_lib_stck_seal_base) = TFM_STACK_SEAL_VALUE;
+    *(arm_lib_stck_seal_base + 1) = TFM_STACK_SEAL_VALUE;
+}
 
 /*
  * This is the "Big Lock" on the secure side, to guarantee single entry
@@ -406,11 +452,11 @@ static enum tfm_status_e tfm_start_partition(
 
     /* Prepare switch to shared secure partition stack */
     /* In case the call is coming from the non-secure world, we save the iovecs
-     * on the stop of the stack. So the memory area, that can actually be used
-     * as stack by the partitions starts at a lower address
+     * on the stop of the stack. Also the stack seal is present below this region.
+     * So the memory area, that can actually be used as stack by the partitions
+     * starts at a lower address.
      */
-    partition_psp =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
+    partition_psp = (uint32_t) tfm_secure_stack_seal;
     partition_psplim =
         (uint32_t)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Base);
 

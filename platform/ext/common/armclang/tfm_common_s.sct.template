@@ -149,9 +149,18 @@ LR_CODE S_CODE_START {
     ARM_LIB_STACK_MSP +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 
+# if !defined(TFM_PSA_API)
+    /* PSP is unprivileged in single-core topology. Reserve 8 bytes for seal */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE - 0x8 {
+    }
+
+    ARM_LIB_STACK_SEAL +0 EMPTY 0x8 {
+    }
+# else
     /* PSP is unprivileged in single-core topology */
     ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
     }
+# endif /* !defined(TFM_PSA_API) */
 #endif
 
 #if !defined(TFM_PSA_API)

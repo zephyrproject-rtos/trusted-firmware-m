@@ -116,7 +116,13 @@ define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
 define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
 
+# if !defined(TFM_PSA_API)
+    /* Reserve space for stack seal (8 bytes) */
+define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
+define block ARM_LIB_STACK_SEAL with size = 0x8 { };
+# else
 define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
+# endif
 #endif
 
 #if !defined(TFM_PSA_API)
@@ -326,6 +332,10 @@ define block DATA with fixed order {
     overlay STACK_DATA,
     /* PSP is unprivileged in single-core topology */
     block ARM_LIB_STACK,
+# if !defined(TFM_PSA_API)
+    /* Define stack seal block for Library mode */
+    block ARM_LIB_STACK_SEAL,
+# endif
 #endif
 
 #if !defined(TFM_PSA_API)
