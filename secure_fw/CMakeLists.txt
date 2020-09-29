@@ -58,6 +58,7 @@ target_link_options(tfm_s
         --entry=Reset_Handler
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_s.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
+        $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/tfm_s.map>
 )
 
 add_convert_to_bin_target(tfm_s)

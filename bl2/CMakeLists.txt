@@ -38,6 +38,7 @@ target_link_options(bl2
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
+        $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl2.map>
 )
 
 add_convert_to_bin_target(bl2)

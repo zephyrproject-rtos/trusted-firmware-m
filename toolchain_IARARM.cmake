@@ -103,7 +103,6 @@ macro(target_add_scatter_file target)
     target_link_options(${target}
         PRIVATE
         --config $<TARGET_OBJECTS:${target}_scatter>
-        --map $<TARGET_FILE:${target}>.map
     )
     add_dependencies(${target}
         ${target}_scatter
@@ -119,16 +118,12 @@ macro(target_add_scatter_file target)
         # set_source_file_properties command, so instead we just parse the regex
         # for the filename and set the property on all files, regardless of if
         # the generator expression would evaluate to true or not.
-        string(REGEX REPLACE ".*:(.*)>$" "\\1" SCATTER_FILE_PATH ${scatter_file})
+        string(REGEX REPLACE ".*>:(.*)>$" "\\1" SCATTER_FILE_PATH "${scatter_file}")
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
         )
     endforeach()
-
-    set_target_properties(${target}_scatter PROPERTIES
-        SUFFIX ".icf"
-    )
 
     target_link_libraries(${target}_scatter
         platform_region_defs
