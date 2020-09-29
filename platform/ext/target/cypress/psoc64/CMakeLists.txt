@@ -192,3 +192,11 @@ target_link_libraries(platform_ns
     PRIVATE
         psa_interface
 )
+
+########################### export sources #####################################
+
+set(EXPORT_SRC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/src)
+
+install(FILES   mailbox/platform_multicore.c
+                mailbox/platform_ns_mailbox.c
+    DESTINATION ${EXPORT_SRC_DIR}/platform)
