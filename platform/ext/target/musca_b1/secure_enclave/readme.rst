@@ -65,23 +65,32 @@ To produce all the images, TF-M build needs to be executed twice:
 
 - One build needed to create the SSE-200 images (BL0 and the combined SSE-200
   image containing TF-M and the non-secure application), target platform needs
-  to be set to ``MUSCA_B1`` and the ``FORWARD_PROT_MSG`` cmake flag also needs
-  to be set.
+  to be set to ``musca_b1/sse_200`` and the ``FORWARD_PROT_MSG`` cmake flag also
+  needs to be set.
 - One build needed to create the SE images (MCUBoot and TF-M), target platform
-  needs to be set to ``MUSCA_B1_SECURE_ENCLAVE``.
+  needs to be set to ``musca_b1/secure_enclave``.
 
 The order of the two builds is indifferent. The BL2 setting is mandatory for
-both builds, but MCUBoot image is only built for the SE platform.
+both builds, but MCUBoot image is only built for the SE platform. The cmake
+setup for the two builds must have the same debug profile (eg. debug, release).
 
 To create a unified hex file:
 
 - Windows::
 
-    srec_cat.exe TBD
+    srec_cat.exe <SE build dir>\bin\bl2.bin -Binary -offset 0x1A020000 ^
+                 <SE build dir>\bin\tfm_s_signed.bin -Binary -offset 0x1A200000 ^
+                 <SSE-200 build dir>\bin\bl0.bin -Binary -offset 0x1A000000 ^
+                 <SSE-200 build dir>\bin\tfm_s_ns_signed.bin -Binary -offset 0x1A260000 ^
+                 -o tfm_sse200_w_se.hex -Intel
 
 - Linux::
 
-    srec_cat TBD
+    srec_cat <SE build dir>/bin/bl2.bin -Binary -offset 0x1A020000 \
+             <SE build dir>/bin/tfm_s_signed.bin -Binary -offset 0x1A200000 \
+             <SSE-200 build dir>/bin/bl0.bin -Binary -offset 0x1A000000 \
+             <SSE-200 build dir>/bin/tfm_s_ns_signed.bin -Binary -offset 0x1A260000 \
+             -o tfm_sse200_w_se.hex -Intel
 
 *****************
 Known limitations

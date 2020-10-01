@@ -37,8 +37,8 @@ target_include_directories(bl0
 
 target_include_directories(bl0
     PUBLIC
-        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../cmsis
-        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../../include
+        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../../cmsis
+        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../../../include
 )
 
 target_compile_definitions(bl0
