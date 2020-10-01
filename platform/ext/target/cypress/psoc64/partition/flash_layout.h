@@ -29,15 +29,13 @@
  * 0x1017_0000 Secure     image secondary (320 KB)
  * 0x101c_0000 - 0x101f_ffff Reserved
  *  0x101c_0000 Internal Trusted Storage Area (16 KB)
- *  0x101c_4000 NV counters area (1 KB)
- *  0x101c_4400 Scratch area (27 KB)
- *  0x101c_b000 Protected Storage Area (20 KB)
+ *  0x101c_4000 Protected Storage Area (24 KB)
+ *  0x101c_a000 Unused area (23 KB)
+ *  0x101c_fc00 NV counters area (1 KB)
  *  0x101d_0000 Reserved (192 KB)
  * 0x101f_ffff End of Flash
  *
  */
-
-#define MAX(X, Y)                       (((X) > (Y)) ? (X) : (Y))
 
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
@@ -45,6 +43,10 @@
  * this some of the values are redefined here with different names, these are
  * marked with comment.
  */
+
+#ifdef BL2
+#error "BL2 configuration is not supported"
+#endif /* BL2 */
 
 /* The size of S partition */
 #define FLASH_S_PARTITION_SIZE          0x50000      /* 320 KB */
@@ -60,34 +62,30 @@
 #define FLASH_BASE_ADDRESS              (0x10000000U) /* same as FLASH0_BASE */
 
 /* Reserved areas */
-#define FLASH_RESERVED_AREA_OFFSET      (SECURE_IMAGE_OFFSET + \
+#define FLASH_DATA_AREA_OFFSET          (SECURE_IMAGE_OFFSET + \
                                          2*SECURE_IMAGE_MAX_SIZE + \
                                          NON_SECURE_IMAGE_MAX_SIZE)
 
 /* FixMe: implement proper mcuboot partitioning for CYBL */
 
 /* Internal Trusted Storage Area */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_RESERVED_AREA_OFFSET)
+#define FLASH_ITS_AREA_OFFSET           (FLASH_DATA_AREA_OFFSET)
 #define FLASH_ITS_AREA_SIZE             (0x4000)    /* 16 KB */
 
-/* Non-volatile Counters Area */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
-
-#ifdef BL2
-#error "BL2 configuration is not supported"
-#endif /* BL2 */
-
-/* Scratch Area - unused */
-#define FLASH_AREA_SCRATCH_OFFSET       (FLASH_NV_COUNTERS_AREA_OFFSET + \
-                                         FLASH_NV_COUNTERS_AREA_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE         (0x6c00)   /* 27 KB */
-
 /* Protected Storage Area */
-#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
-                                         FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
+#define FLASH_PS_AREA_OFFSET            (FLASH_ITS_AREA_OFFSET + \
+                                         FLASH_ITS_AREA_SIZE)
+#define FLASH_PS_AREA_SIZE              (0x6000)   /* 24 KB */
+
+/* Unused Area */
+#define FLASH_UNUSED_AREA_OFFSET        (FLASH_PS_AREA_OFFSET + \
+                                         FLASH_PS_AREA_SIZE)
+#define FLASH_UNUSED_AREA_SIZE          (0x5c00)   /* 23 KB */
+
+/* Non-volatile Counters Area */
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_UNUSED_AREA_OFFSET + \
+                                         FLASH_UNUSED_AREA_SIZE)
+#define FLASH_NV_COUNTERS_AREA_SIZE     (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 #define FLASH_AREA_SYSTEM_RESERVED_SIZE (0x30000) /* 192 KB */
 
@@ -105,20 +103,15 @@
 
 /* Check if it fits into available Flash*/
 
-#define FLASH_RESERVED_AREA_SIZE        (FLASH_ITS_AREA_SIZE + \
-                                         FLASH_NV_COUNTERS_AREA_SIZE + \
-                                         FLASH_AREA_SCRATCH_SIZE + \
+#define FLASH_DATA_AREA_SIZE            (FLASH_ITS_AREA_SIZE + \
                                          FLASH_PS_AREA_SIZE + \
+                                         FLASH_UNUSED_AREA_SIZE + \
+                                         FLASH_NV_COUNTERS_AREA_SIZE + \
                                          FLASH_AREA_SYSTEM_RESERVED_SIZE)
 
-#if (FLASH_RESERVED_AREA_OFFSET + FLASH_RESERVED_AREA_SIZE) > (FLASH_TOTAL_SIZE)
+#if (FLASH_DATA_AREA_OFFSET + FLASH_DATA_AREA_SIZE) > (FLASH_TOTAL_SIZE)
 #error "Out of Flash memory"
 #endif
-
-/* Flash device name used by BL2 and PS
- * Name is defined in flash driver file: Driver_Flash.c
- */
-#define FLASH_DEV_NAME Driver_FLASH0
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the

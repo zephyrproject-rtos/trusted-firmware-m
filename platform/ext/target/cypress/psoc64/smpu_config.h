@@ -120,11 +120,13 @@
 #endif
 
 /* SMPU3 - PS in Flash */
-#define SMPU3_BASE         S_ROM_ALIAS(0x1c8000)
-#define SMPU3_REGIONSIZE   PROT_SIZE_32KB_BIT_SHIFT
+#define SMPU3_BASE         S_ROM_ALIAS(0x1c0000)
+#define SMPU3_REGIONSIZE   PROT_SIZE_64KB_BIT_SHIFT
 #define SMPU3_SUBREGION_DIS (CY_PROT_SUBREGION_DIS0 | \
                              CY_PROT_SUBREGION_DIS1 | \
-                             CY_PROT_SUBREGION_DIS2)
+                             CY_PROT_SUBREGION_DIS5 | \
+                             CY_PROT_SUBREGION_DIS6 | \
+                             CY_PROT_SUBREGION_DIS7)
 #define SMPU3_SLAVE_CONFIG {\
     .address = (void *)SMPU3_BASE, \
     .regionSize = (cy_en_prot_size_t) SMPU3_REGIONSIZE, \
@@ -143,17 +145,17 @@
 #endif
 
 /*
- * PS_FLASH_AREA_ADDR must equal the base address of subregion 3 of
+ * PS_FLASH_AREA_ADDR must equal the base address of subregion 2 of
  * SMPU3
  */
 #if S_ROM_ALIAS(PS_FLASH_AREA_ADDR) != (SMPU3_BASE + \
-                          (3 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8))
-#error "Flash layout has changed - S_DATA_PRIV_START isn't subregion 3 of SMPU3"
+                          (2 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8))
+#error "Flash layout has changed - PS_FLASH_AREA_ADDR isn't subregion 2 of SMPU3"
 #endif
 
 /* Should exactly cover the PS region */
-#if FLASH_PS_AREA_SIZE != (5 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8)
-#error "Flash layout has changed - SMPU3_REGIONSIZE isn't FLASH_PS_AREA_SIZE"
+#if FLASH_PS_AREA_SIZE != (3 * REGIONSIZE_TO_BYTES(SMPU3_REGIONSIZE) / 8)
+#error "Flash layout has changed - 3/5 of SMPU3_REGIONSIZE isn't FLASH_PS_AREA_SIZE"
 #endif
 
 /* SMPU6 - 32KB of unprivileged secure data in SRAM */
