@@ -96,6 +96,7 @@ int main(void)
 
     /* Perform platform specific initialization */
     if (boot_platform_init() != 0) {
+        BOOT_LOG_ERR("Platform init failed");
         while (1)
             ;
     }

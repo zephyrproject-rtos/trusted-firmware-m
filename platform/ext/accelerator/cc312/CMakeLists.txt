@@ -16,6 +16,7 @@ endif()
 target_compile_definitions(platform_bl2
     PRIVATE
         $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:CRYPTO_HW_ACCELERATOR_OTP_ENABLED>
+        CRYPTO_HW_ACCELERATOR
 )
 
 ################################ BL2 ###########################################

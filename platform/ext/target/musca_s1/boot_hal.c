@@ -5,6 +5,7 @@
  *
  */
 
+#include <stdio.h>
 #include "cmsis.h"
 #include "region.h"
 #include "target_cfg.h"
@@ -60,7 +61,6 @@ int32_t boot_platform_init(void)
 #ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();
     if (result) {
-        BOOT_LOG_ERR("Error while initializing cryptographic accelerator.");
         return 1;
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
@@ -70,13 +70,13 @@ int32_t boot_platform_init(void)
  * this is usually done on the factory floor during chip manufacturing.
  */
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
-    BOOT_LOG_INF("OTP provisioning started.");
+    printf("OTP provisioning started.\r\n");
     result = crypto_hw_accelerator_otp_provisioning();
     if (result) {
-        BOOT_LOG_ERR("OTP provisioning FAILED: 0x%X", result);
+        printf("OTP provisioning FAILED: 0x%X\r\n", result);
         return 1;
     } else {
-        BOOT_LOG_INF("OTP provisioning succeeded. TF-M won't be loaded.");
+        printf("OTP provisioning succeeded. TF-M won't be loaded.\r\n");
 
         /* We don't need to boot - the only aim is provisioning. */
         while (1);

@@ -34,7 +34,7 @@ target_include_directories(platform_s
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/cmsis>
-        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerators/interface>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
 )
 
 target_sources(platform_s
@@ -97,7 +97,7 @@ if(BL2)
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/driver>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/common>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext>
-            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerators/interface>
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
     )
 
     target_sources(platform_bl2
