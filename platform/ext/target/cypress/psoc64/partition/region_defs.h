@@ -42,7 +42,7 @@
 #define NS_MSP_STACK_SIZE       (0x0000200)
 
 /* Relocation of vectors to RAM support */
-/* #define RAM_VECTORS_SUPPORT */
+#define RAM_VECTORS_SUPPORT
 
 /*
  * This size of buffer is big enough to store an attestation
