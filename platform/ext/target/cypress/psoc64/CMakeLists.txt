@@ -184,6 +184,8 @@ target_include_directories(platform_ns
 
 target_compile_definitions(platform_ns
     PUBLIC
+        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
+        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
         TFM_MULTI_CORE_MULTI_CLIENT_CALL
         RTE_USART5
 )
