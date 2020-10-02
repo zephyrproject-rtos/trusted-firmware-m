@@ -42,14 +42,9 @@ if(NS)
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an539_mps2_ns.ld>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an539_mps2_ns.icf>
     )
-    target_link_libraries(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib>
-            $<$<C_COMPILER_ID:GNU>:${CMSIS_5_PATH}/RTOS2/RTX/Library/GCC/libRTX_V8MBN.a>
-            $<$<C_COMPILER_ID:IAR>:${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MBN.a>
-            # These libraries require linking to the veneers, so the veneers are
-            # marked again here as a link dependency to get the ordering right
-            tfm_s_veneers
+    target_link_libraries(CMSIS_5_tfm_ns
+        INTERFACE
+            CMSIS_5_RTX_V8MBN
     )
 endif()
 
@@ -100,10 +95,12 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse123_drv.c
         native_drivers/uart_cmsdk_drv.c
+        native_drivers/systimer_armv8-m_drv.c
+        native_drivers/syscounter_armv8-m_cntrl_drv.c
         spm_hal.c
         target_cfg.c
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_compile_options(platform_s
@@ -125,11 +122,16 @@ target_sources(platform_ns
         device/source/device_definition.c
         native_drivers/uart_cmsdk_drv.c
         cmsis_drivers/Driver_USART.c
+        native_drivers/systimer_armv8-m_drv.c
+        native_drivers/syscounter_armv8-m_cntrl_drv.c
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns
     PUBLIC
         .
+        ../common
         ${PLATFORM_DIR}/..
         device/include
         device/config

@@ -43,14 +43,9 @@ if(NS)
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_ns.ld>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_ns.icf>
     )
-    target_link_libraries(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib>
-            $<$<C_COMPILER_ID:GNU>:${CMSIS_5_PATH}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a>
-            $<$<C_COMPILER_ID:IAR>:${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MMN.a>
-            # These libraries require linking to the veneers, so the veneers are
-            # marked again here as a link dependency to get the ordering right
-            tfm_s_veneers
+    target_link_libraries(CMSIS_5_tfm_ns
+        INTERFACE
+            CMSIS_5_RTX_V8MMN
     )
 endif()
 
@@ -101,8 +96,8 @@ target_sources(platform_s
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_compile_options(platform_s
@@ -121,10 +116,13 @@ target_compile_definitions(platform_s
 target_sources(platform_ns
     PRIVATE
         Native_Driver/uart_pl011_drv.c
+        Native_Driver/timer_cmsdk_drv.c
         Native_Driver/musca_a1_scc_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns
@@ -135,6 +133,7 @@ target_include_directories(platform_ns
         Device/Include
         Native_Driver
         Libraries
+        services/include
 )
 
 #========================= Platform BL2 =======================================#

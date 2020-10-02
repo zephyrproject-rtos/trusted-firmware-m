@@ -48,11 +48,10 @@ if(NS)
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/psoc6_ns.ld>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/psoc6_ns.icf>
     )
-    target_link_libraries(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_CM3.lib>
-            $<$<C_COMPILER_ID:GNU>:${CMSIS_5_PATH}/RTOS2/RTX/Library/GCC/libRTX_CM3.a>
-            $<$<C_COMPILER_ID:IAR>:${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_CM3.a>
+    target_link_libraries(CMSIS_5_tfm_ns
+        INTERFACE
+            # CM4 without FP support uses CM3 libs
+            CMSIS_5_RTX_CM3
     )
 endif()
 
@@ -108,6 +107,9 @@ target_sources(platform_s
         ./nv_counters.c
         ./services/src/tfm_platform_system.c
         ./dummy_crypto_keys.c
+        ./Device/Source/device_definition.c
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_compile_definitions(platform_s
@@ -165,6 +167,9 @@ target_sources(platform_ns
         ./Native_Driver/generated_source/cycfg_system.c
         ./mailbox/platform_multicore.c
         ./CMSIS_Driver/Driver_USART.c
+        ./Device/Source/device_definition.c
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns

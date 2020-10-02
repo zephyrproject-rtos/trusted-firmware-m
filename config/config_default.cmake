@@ -106,6 +106,8 @@ set(TFM_PARTITION_AUDIT_LOG             ON          CACHE BOOL      "Enable Audi
 
 ################################## Tests #######################################
 
+set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
+
 set(TFM_CRYPTO_TEST_ALG_CBC             ON          CACHE BOOL      "Test CBC cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CCM             ON          CACHE BOOL      "Test CCM cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CFB             ON          CACHE BOOL      "Test CFB cryptography mode")

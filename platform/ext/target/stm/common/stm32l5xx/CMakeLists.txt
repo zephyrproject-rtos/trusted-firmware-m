@@ -34,14 +34,9 @@ if(NS)
         $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/armclang/stm32l5xx_ns.sct>
         $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/iar/stm32l5xx_ns.icf>
     )
-    target_link_libraries(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_V8MMN.lib>
-            $<$<C_COMPILER_ID:GNU>:${CMSIS_5_PATH}/RTOS2/RTX/Library/GCC/libRTX_V8MMN.a>
-            $<$<C_COMPILER_ID:IAR>:${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MMN.a>
-            # These libraries require linking to the veneers, so the veneers are
-            # marked again here as a link dependency to get the ordering right
-            tfm_s_veneers
+    target_link_libraries(CMSIS_5_tfm_ns
+        INTERFACE
+            CMSIS_5_RTX_V8MMN
     )
 endif()
 
