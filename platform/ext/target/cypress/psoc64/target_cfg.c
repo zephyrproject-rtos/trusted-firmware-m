@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-#include <assert.h>
-#include <stdio.h> /* for debugging printfs */
 #include <inttypes.h>
 
 #include "cy_prot.h"
@@ -24,6 +22,7 @@
 #include "device_definition.h"
 #include "driver_ppu.h"
 #include "driver_smpu.h"
+#include "log/tfm_log.h"
 #include "pc_config.h"
 #include "platform_description.h"
 #include "region_defs.h"
@@ -109,29 +108,29 @@ void platform_init(void)
     /* UART clock */
     clk_rc = Cy_SysClk_PeriphDisableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure UART clock\n");
+        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 54U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure UART clock\n");
+        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphEnableDivider(CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure UART clock\n");
+        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_SCB5_CLOCK, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure UART clock\n");
+        LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
     /* Secure: TIMER0 clock */
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS0, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure timer0 clock\n");
+        LOG_MSG("WARNING: Failed to configure timer0 clock\r\n");
     }
     /* Non-Secure: TIMER1 clock */
     clk_rc = Cy_SysClk_PeriphAssignDivider(PCLK_TCPWM0_CLOCKS1, CY_SYSCLK_DIV_8_BIT, 1U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
-        printf("WARNING: Failed to configure timer1 clock\n");
+        LOG_MSG("WARNING: Failed to configure timer1 clock\r\n");
     }
 
     Cy_Platform_Init();
@@ -139,7 +138,7 @@ void platform_init(void)
 #ifdef TFM_ENABLE_IRQ_TEST
     int_rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
     if (int_rc != CY_SYSINT_SUCCESS) {
-        printf("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\n");
+        LOG_MSG("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\r\n");
     }
 #endif /* TFM_ENABLE_IRQ_TEST */
 
@@ -163,37 +162,26 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-static cy_en_prot_status_t set_bus_master_attr(void)
+enum tfm_plat_err_t bus_masters_cfg(void)
 {
-    cy_en_prot_status_t ret;
-
     /* Cortex-M4 - PC=6 */
-    ret = Cy_Prot_SetActivePC(CPUSS_MS_ID_CM4, CY_PROT_HOST_DEFAULT);
-    if (ret != CY_PROT_SUCCESS) {
-        return ret;
+    if (Cy_Prot_SetActivePC(CPUSS_MS_ID_CM4,
+                            CY_PROT_HOST_DEFAULT) != CY_PROT_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Test Controller - PC=7 */
-    ret = Cy_Prot_SetActivePC(CPUSS_MS_ID_TC, CY_PROT_TC);
-    if (ret != CY_PROT_SUCCESS) {
-        return ret;
+    if (Cy_Prot_SetActivePC(CPUSS_MS_ID_TC, CY_PROT_TC) != CY_PROT_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Cortex-M0+ - PC=1 */
-    ret = Cy_Prot_SetActivePC(CPUSS_MS_ID_CM0, CY_PROT_SPM_DEFAULT);
-    if (ret != CY_PROT_SUCCESS) {
-        return ret;
+    if (Cy_Prot_SetActivePC(CPUSS_MS_ID_CM0,
+                            CY_PROT_SPM_DEFAULT) != CY_PROT_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    return CY_PROT_SUCCESS;
-}
-
-void bus_masters_cfg(void)
-{
-    cy_en_prot_status_t ret;
-    ret = set_bus_master_attr();
-    assert(ret == CY_PROT_SUCCESS);
-    (void)ret;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 const SMPU_Resources *smpu_init_table[] = {
@@ -254,36 +242,39 @@ const SMPU_Resources *smpu_init_table[] = {
 #endif
 };
 
-void smpu_init_cfg(void)
+enum tfm_plat_err_t smpu_init_cfg(void)
 {
-    cy_en_prot_status_t ret;
+    enum tfm_plat_err_t ret = TFM_PLAT_ERR_SUCCESS;
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
     for (int i = (n - 1); i >= 0; i--)
     {
-        ret = SMPU_Configure(smpu_init_table[i]);
-        assert(ret == CY_PROT_SUCCESS);
+        if (SMPU_Configure(smpu_init_table[i]) != CY_PROT_SUCCESS) {
+            ret = TFM_PLAT_ERR_SYSTEM_ERR;
+        }
     }
 
     /* Now protect all unconfigured SMPUs */
-    ret = protect_unconfigured_smpus();
-    assert(ret == CY_PROT_SUCCESS);
-    (void)ret;
+    if(protect_unconfigured_smpus() != CY_PROT_SUCCESS) {
+        ret = TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     __DSB();
     __ISB();
+
+    return ret;
 }
 
 void smpu_print_config(void)
 {
-    printf("\nSMPU config:\n");
-    printf("memory_regions.non_secure_code_start = %#"PRIx32"\n",
-           memory_regions.non_secure_code_start);
-    printf("memory_regions.non_secure_partition_base = %#"PRIx32"\n",
-           memory_regions.non_secure_partition_base);
-    printf("memory_regions.non_secure_partition_limit = %#"PRIx32"\n",
-           memory_regions.non_secure_partition_limit);
+    LOG_MSG("\r\nSMPU config:\r\n");
+    LOG_MSG("memory_regions.non_secure_code_start = 0x%x\r\n",
+            memory_regions.non_secure_code_start);
+    LOG_MSG("memory_regions.non_secure_partition_base = 0x%x\r\n",
+            memory_regions.non_secure_partition_base);
+    LOG_MSG("memory_regions.non_secure_partition_limit = 0x%x\r\n",
+            memory_regions.non_secure_partition_limit);
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
@@ -1214,17 +1205,21 @@ const PPU_Resources *ppu_init_table[] = {
 #endif
 };
 
-void ppu_init_cfg(void)
+enum tfm_plat_err_t ppu_init_cfg(void)
 {
+    enum tfm_plat_err_t ret = TFM_PLAT_ERR_SUCCESS;
+
     size_t n = sizeof(ppu_init_table)/sizeof(ppu_init_table[0]);
 
     for (int i = 0; i < n; i++)
     {
-        cy_en_prot_status_t ret = PPU_Configure(ppu_init_table[i]);
-        assert(ret == CY_PROT_SUCCESS);
-        (void)ret;
+        if (PPU_Configure(ppu_init_table[i]) != CY_PROT_SUCCESS) {
+            ret = TFM_PLAT_ERR_SYSTEM_ERR;
+        }
     }
 
     __DSB();
     __ISB();
+
+    return ret;
 }

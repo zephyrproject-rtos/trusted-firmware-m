@@ -35,12 +35,21 @@ extern const struct memory_region_limits memory_regions;
 
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
-    Cy_PDL_Init(CY_DEVICE_CFG);
-    smpu_init_cfg();
-    ppu_init_cfg();
-    bus_masters_cfg();
+    enum tfm_plat_err_t ret;
 
-    return TFM_PLAT_ERR_SUCCESS;
+    Cy_PDL_Init(CY_DEVICE_CFG);
+
+    ret = smpu_init_cfg();
+
+    if (ret == TFM_PLAT_ERR_SUCCESS) {
+        ret = ppu_init_cfg();
+    }
+
+    if (ret == TFM_PLAT_ERR_SUCCESS) {
+        ret = bus_masters_cfg();
+    }
+
+    return ret;
 }
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
