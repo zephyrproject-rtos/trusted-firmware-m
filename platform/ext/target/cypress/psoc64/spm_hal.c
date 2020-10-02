@@ -26,6 +26,7 @@
 #include "cy_device_headers.h"
 #include "cy_ipc_drv.h"
 #include "cy_prot.h"
+#include "cy_pra.h"
 #include "pc_config.h"
 #include "driver_dap.h"
 #include "region.h"
@@ -429,6 +430,11 @@ void mock_tfm_shared_data(void)
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
     platform_init();
+
+#if defined(CY_DEVICE_SECURE)
+    /* Initialize Protected Register Access driver. */
+    Cy_PRA_Init();
+#endif /* defined(CY_DEVICE_SECURE) */
 
     /* FIXME: Use the actual data from mcuboot */
     mock_tfm_shared_data();

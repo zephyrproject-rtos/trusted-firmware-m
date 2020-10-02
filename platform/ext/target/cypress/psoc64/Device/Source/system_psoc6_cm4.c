@@ -38,6 +38,7 @@
         #include "cy_flash.h"
     #endif /* defined(CY_DEVICE_PSOC6ABLE2) */
 #endif /* !defined(CY_IPC_DEFAULT_CFG_DISABLE) */
+#include "cy_pra.h"
 
 #include "target_cfg.h"
 #include "Driver_USART.h"
@@ -573,6 +574,9 @@ void Cy_Platform_Init(void)
 int32_t tfm_ns_platform_init (void)
 {
     Cy_Platform_Init();
+#if defined(CY_DEVICE_SECURE)
+    Cy_PRA_Init();
+#endif
     return ARM_DRIVER_OK;
 }
 
