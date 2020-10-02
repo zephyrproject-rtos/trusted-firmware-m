@@ -81,14 +81,16 @@ Supported CMake versions
 
 The build-system is CMake based and supports the following versions:
 
-    - 3.7
-    - 3.10
-    - 3.11
-    - 3.12
     - 3.13
     - 3.14
+    - 3.15
+    - 3.16
+    - 3.17
+    - 3.18
 
 .. Note::
+    - IAR requires version 3.14 or later.
+    - ARMClang requires version 3.15 or later.
     - Please use the latest build version available (i.e. 3.7.2 instead of
       3.7.0).
       While it is preferable to use the newest version this is not required
@@ -98,7 +100,6 @@ The build-system is CMake based and supports the following versions:
       https://cmake.org/files.
     - For Cygwin users, please use a native windows CMake version
       instead of the version installed with Cygwin.
-    - IAR requires version 3.14 or later.
 
 ***************************
 Supported GNU make versions

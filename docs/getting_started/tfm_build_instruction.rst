@@ -10,6 +10,9 @@ TF-M build steps
 TF-M uses `cmake <https://cmake.org/overview/>`__ to provide an out-of-source
 build environment. The instructions are below.
 
+Cmake version ``3.13.0`` or higher is supported, but version ``3.15.0`` or
+higher is required for ARMclang support.
+
 Getting the source-code
 =======================
 .. code-block:: bash
@@ -82,7 +85,7 @@ types are:
 
 Both ``Debug`` and ``Relwithdebinfo`` will include debug symbols in the output
 files. ``Relwithdebinfo``, ``Release`` and ``Minsizerel`` have optimization
-turned on and hence will produce smaller, faster code. ``Relwithdebinfo`` will
+turned on and hence will produce smaller, faster code. ``Minsizerel`` will
 produce the smallest code, and hence is often a good idea on RAM or flash
 constrained systems.
 
@@ -436,28 +439,35 @@ targets.
 Manual dependency management
 ****************************
 
-TF-M build system will try to fetch all dependencies with appropriate versions
-and store them inside the build tree. If you have local copies already, or wish
-to avoid downloading whenever the build directory is completely cleaned, then
-the following paths can be set.
+The TF-M build system will by default fetch all dependencies with appropriate
+versions and store them inside the build tree. In this case, the build tree
+location is ``<build_dir>/lib/ext``, and the extra libraries can be cleaned by
+deleting that directory.
 
-+--------------+--------------------+-----------------------------------------------------+
-| Dependency   | Cmake variable     | Git repo URL                                        |
-+==============+====================+=====================================================+
-| mbedcrypto   | MBEDCRYPTO_PATH    | https://github.com/ARMmbed/mbedtls                  |
-+--------------+--------------------+-----------------------------------------------------+
-| tf-m-tests   | TFM_TEST_REPO_PATH | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
-+--------------+--------------------+-----------------------------------------------------+
-| mcuboot      | MCUBOOT_PATH       | https://github.com/JuulLabs-OSS/mcuboot             |
-+--------------+--------------------+-----------------------------------------------------+
+If you have local copies already, and wish to avoid having the libraries
+downloaded every time the build directory is deleted, then the following
+variables can be set to the paths to those local copies. This will disable the
+automatic downloading for that dependency.
+
++----------------+--------------------+-----------------------------------------------------+
+| Dependency     | Cmake variable     | Git repo URL                                        |
++================+====================+=====================================================+
+| Mbed Crypto    | MBEDCRYPTO_PATH    | https://github.com/ARMmbed/mbedtls                  |
++----------------+--------------------+-----------------------------------------------------+
+| tf-m-tests     | TFM_TEST_REPO_PATH | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
++----------------+--------------------+-----------------------------------------------------+
+| MCUboot        | MCUBOOT_PATH       | https://github.com/JuulLabs-OSS/mcuboot             |
++----------------+--------------------+-----------------------------------------------------+
+| psa-arch-tests | PSA_ARCH_TEST_PATH | https://github.com/ARM-software/psa-arch-tests      |
++----------------+--------------------+-----------------------------------------------------+
 
 For required versions of the dependencies, refer to ``config/config_default.cmake``.
 
 .. Note::
  - Some patches are required to the mbedtls repo to allow building it as part of
    TF-M. While these patches are being upstreamed they are stored in
-   lib/ext/mbedcrypo. In order to use a local copy of mbedcrypto it is required
-   to apply all patch files in this directory.
+   ``lib/ext/mbedcrypo``. In order to use a local copy of Mbed Crypto it is
+   required to apply all patch files in this directory.
 
 .. Note::
  - CMSIS 5 is provided by the TF-M tests repo. If you wish to use a different
@@ -465,6 +475,51 @@ For required versions of the dependencies, refer to ``config/config_default.cmak
 
 .. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
 .. _Doxygen: https://www.doxygen.nl
+
+Example: building TF-M for AN521 platform with local Mbed Crypto
+================================================================
+
+Prepare Mbed Crypto repository
+------------------------------
+
+This is only required to be done once. For dependencies that do not have any
+``.patch`` files in their ``lib/ext`` directory the only required step is
+cloning the repo and checking out the correct branch.
+
+.. code-block:: bash
+
+    cd <Mbed Crypto base folder>
+    git clone https://github.com/ARMmbed/mbedtls
+    cd mbedtls
+    git checkout <MBEDCRYPTO_VERSION from config_default.cmake>
+    git apply <TF-M base folder>/trusted-firmware-m/lib/ext/mbedcrypo/*.patch
+
+.. Note::
+ - <Mbed Crypto base folder> does not need to have any fixed posisition related
+   to the TF-M repo.
+
+Build TF-M
+----------
+
+With new cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
+    cd trusted-firmware-m
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake --build cmake_build -- install
+
+Alternately using traditional cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
+    cd trusted-firmware-m
+    mkdir cmake_build
+    cd cmake_build
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    make install
 
 --------------
 

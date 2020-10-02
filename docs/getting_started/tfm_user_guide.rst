@@ -42,8 +42,8 @@ menu.
     --parameter fvp_mps2.telnetterminal0.quiet=0 \
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
-    --application cpu0=<build_dir>/install/outputs/fvp/tfm_s.axf \
-    --data cpu0=<build_dir>/install/outputs/fvp/tfm_ns.bin@0x00100000
+    --application cpu0=<build_dir>/bin/tfm_s.axf \
+    --data cpu0=<build_dir>/bin/tfm_ns.bin@0x00100000
 
 Example application and regression tests with BL2 bootloader
 ------------------------------------------------------------
@@ -55,8 +55,8 @@ To test TF-M with bootloader, one must apply the following changes:
 
 .. code-block:: bash
 
-    --application cpu0=<build_dir>/install/outputs/fvp/mcuboot.axf \
-    --data cpu0=<build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10080000
+    --application cpu0=<build_dir>/bin/bl2.axf \
+    --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10080000
 
 Test software upgrade with BL2 bootloader
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +68,7 @@ line to the end of the previous chapter:
 
 .. code-block:: bash
 
-    --data cpu0=<build_dir>/install/outputs/fvp/tfm_s_ns_signed.bin@0x10180000
+    --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
 
 To run the example code on SSE 200 FPGA on MPS2 board
 =====================================================
@@ -88,8 +88,8 @@ The MPS2 board tested is HBI0263C referred also as MPS2+.
 
 Example application
 -------------------
-#. Copy ``mcuboot.bin`` and ``tfm_sign.bin`` files from
-   ``<build_dir>/install/outputs/AN521/`` to
+#. Copy ``bl2.bin`` and ``tfm_s_ns_signed.bin`` files from
+   ``<build_dir>/bin`` to
    ``<MPS2 device name>/SOFTWARE/``
 #. Open ``<MPS2 device name>/MB/HBI0263C/AN521/images.txt``
 #. Update the ``AN521/images.txt`` file as follows::
@@ -98,9 +98,9 @@ Example application
        [IMAGES]
        TOTALIMAGES: 2                     ;Number of Images (Max: 32)
        IMAGE0ADDRESS: 0x10000000
-       IMAGE0FILE: \Software\mcuboot.bin  ; BL2 bootloader
+       IMAGE0FILE: \Software\bl2.bin  ; BL2 bootloader
        IMAGE1ADDRESS: 0x10080000
-       IMAGE1FILE: \Software\tfm_sign.bin ; TF-M example application binary blob
+       IMAGE1FILE: \Software\tfm_s_ns_signed.bin ; TF-M example application binary blob
 
 #. Close ``<MPS2 device name>/MB/HBI0263C/AN521/images.txt``
 #. Unmount/eject the ``<MPS2 device name>`` unit
@@ -159,7 +159,7 @@ port (baud 115200 8n1) the following messages::
 Example application without BL2 bootloader
 ------------------------------------------
 #. Copy ``tfm_s.bin`` and ``tfm_ns.bin`` files from
-   ``<build_dir>/install/outputs/AN521/`` to
+   ``<build_dir>/bin`` to
    ``<MPS2 device name>/SOFTWARE/``
 #. Open ``<MPS2 device name>/MB/HBI0263C/AN521/images.txt``
 #. Update the ``AN521/images.txt`` file as follows::
@@ -220,38 +220,38 @@ Execute TF-M example and regression tests on Musca test chip boards
 Example application with BL2 bootloader
 =======================================
 
-#. Create a unified hex file comprising of both ``mcuboot.bin`` and
-   ``tfm_sign.bin``.
+#. Create a unified hex file comprising of both ``bl2.bin`` and
+   ``tfm_s_ns_signed.bin``.
 
     - For Musca-A
 
         - Windows::
 
-            srec_cat.exe install\outputs\MUSCA_A\mcuboot.bin -Binary -offset 0x200000 install\outputs\MUSCA_A\tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
+            srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 bin\tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat install/outputs/MUSCA_A/mcuboot.bin -Binary -offset 0x200000 install/outputs/MUSCA_A/tfm_sign.bin -Binary -offset 0x220000 -o tfm.hex -Intel
+            srec_cat bin/bl2.bin -Binary -offset 0x200000 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
 
     - For Musca-B1
 
         - Windows::
 
-            srec_cat.exe install\outputs\MUSCA_B1\mcuboot.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 bin\tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat install/outputs/MUSCA_B1/mcuboot.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat bin/bl2.bin -Binary -offset 0xA000000 bin/tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
     - For Musca-S1
 
         - Windows::
 
-            srec_cat.exe install\outputs\MUSCA_S1\mcuboot.bin -Binary -offset 0xA000000 install\outputs\MUSCA_S1\tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 bin\tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
         - Linux::
 
-            srec_cat install/outputs/MUSCA_S1/mcuboot.bin -Binary -offset 0xA000000 install/outputs/MUSCA_S1/tfm_sign.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+            srec_cat bin/bl2.bin -Binary -offset 0xA000000 bin/tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
 #. Power up the Musca board by connecting it to a computer with a USB lead.
    Press the ``PBON`` button if the green ``ON`` LED does not immediately turn
@@ -411,11 +411,11 @@ and ``tfm_ns.bin``:
 
 - Windows::
 
-    srec_cat.exe install\outputs\MUSCA_B1\tfm_s.bin -Binary -offset 0xA000000 install\outputs\MUSCA_B1\tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
+    srec_cat.exe bin\tfm_s.bin -Binary -offset 0xA000000 bin\tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 - Linux::
 
-    srec_cat install/outputs/MUSCA_B1/tfm_s.bin -Binary -offset 0xA000000 install/outputs/MUSCA_B1/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
+    srec_cat bin/tfm_s.bin -Binary -offset 0xA000000 bin/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards
@@ -446,7 +446,7 @@ The MPS3 board tested is HBI0309B.
 
 Example application
 -------------------
-#. Copy ``mcuboot.bin`` and ``tfm_sign.bin`` files from
+#. Copy ``bl2.bin`` and ``tfm_s_ns_signed.bin`` files from
    build dir to ``<MPS3 device name>/SOFTWARE/``
 #. Open ``<MPS3 device name>/MB/HBI0309B/AN524/images.txt``
 #. Update the ``images.txt`` file as follows::
@@ -458,10 +458,10 @@ Example application
 
     IMAGE0UPDATE: AUTO                 ;Image Update:NONE/AUTO/FORCE
     IMAGE0ADDRESS: 0x00000000          ;Please select the required executable program
-    IMAGE0FILE: \SOFTWARE\mcuboot.bin
+    IMAGE0FILE: \SOFTWARE\bl2.bin
     IMAGE1UPDATE: AUTO
     IMAGE1ADDRESS: 0x00040000
-    IMAGE1FILE: \SOFTWARE\tfm_sign.bin
+    IMAGE1FILE: \SOFTWARE\tfm_s_ns_signed.bin
 
 #. Close ``<MPS3 device name>/MB/HBI0309B/AN524/images.txt``
 #. Unmount/eject the ``<MPS3 device name>`` unit
