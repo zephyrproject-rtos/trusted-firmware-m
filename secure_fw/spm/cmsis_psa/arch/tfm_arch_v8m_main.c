@@ -19,17 +19,6 @@
 #error "Unsupported ARM Architecture."
 #endif
 
-struct tfm_fault_context_s {
-    uint32_t R0;
-    uint32_t R1;
-    uint32_t R2;
-    uint32_t R3;
-    uint32_t R12;
-    uint32_t LR;
-    uint32_t ReturnAddress;
-    uint32_t RETPSR;
-} tfm_fault_context;
-
 /*
  * Stack status at PendSV entry:
  *
@@ -93,33 +82,6 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
  */
 void SecureFault_Handler(void)
 {
-    /* figure out context from which we landed in fault handler */
-    uint32_t lr = __get_LR();
-    uint32_t sp;
-
-    if (lr & EXC_RETURN_SECURE_STACK) {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp = __get_PSP();
-        } else {
-            sp = __get_MSP();
-        }
-    } else {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp =  __TZ_get_PSP_NS();
-        } else {
-            sp = __TZ_get_MSP_NS();
-        }
-    }
-
-    /* Only save the context if sp is valid */
-    if ((sp >=  S_DATA_START &&
-         sp <=  (S_DATA_LIMIT - sizeof(tfm_fault_context)) + 1) ||
-        (sp >= NS_DATA_START &&
-         sp <= (NS_DATA_LIMIT - sizeof(tfm_fault_context)) + 1)) {
-        spm_memcpy(&tfm_fault_context, (const void *)sp,
-                   sizeof(tfm_fault_context));
-    }
-
     ERROR_MSG("Oops... Secure fault!!! You're not going anywhere!");
     while (1) {
         ;
