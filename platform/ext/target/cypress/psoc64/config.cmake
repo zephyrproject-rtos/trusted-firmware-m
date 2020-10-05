@@ -19,3 +19,7 @@ set(TFM_MULTI_CORE_MULTI_CLIENT_CALL    ON          CACHE BOOL      "Whether to 
 set(PLATFORM_DUMMY_ATTEST_HAL           FALSE       CACHE BOOL      "Use dummy attest hal implementation. Should not be used in production." FORCE)
 set(PLATFORM_DUMMY_NV_COUNTERS          FALSE       CACHE BOOL      "Use dummy nv counter implementation. Should not be used in production." FORCE)
 set(PLATFORM_DUMMY_CRYPTO_KEYS          FALSE       CACHE BOOL      "Use dummy crypto keys. Should not be used in production." FORCE)
+
+# Disable default PDL IPC configuration. Use Cy_Platform_Init() in
+# in psoc6_system_init_cm4.c and psoc6_system_init_cm0p.c instead.
+add_definitions(-DCY_IPC_DEFAULT_CFG_DISABLE)

@@ -79,6 +79,7 @@ target_sources(platform_s
         ./mailbox/platform_multicore.c
         ./mailbox/platform_spe_mailbox.c
         ./Device/Source/system_psoc6_cm0plus.c
+        ./Device/Source/psoc6_system_init_cm0p.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_device.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_flash.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_gpio.c
@@ -149,6 +150,7 @@ target_sources(platform_ns
     PRIVATE
         ./mailbox/platform_ns_mailbox.c
         ./Device/Source/system_psoc6_cm4.c
+        ./Device/Source/psoc6_system_init_cm4.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_device.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_flash.c
         ${CY_PDL_LIB_PATH}/drivers/source/cy_gpio.c
