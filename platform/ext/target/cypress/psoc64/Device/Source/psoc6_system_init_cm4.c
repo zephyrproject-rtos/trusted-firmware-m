@@ -39,6 +39,33 @@
     #include "cy_pra.h"
 #endif /* defined(CY_DEVICE_SECURE) */
 
+/* SCB->CPACR */
+#define SCB_CPACR_CP10_CP11_ENABLE      (0xFUL << 20u)
+
+/*******************************************************************************
+* Function Name: Cy_SystemInit
+****************************************************************************//**
+*
+* The function is called during device startup.
+*
+*******************************************************************************/
+void Cy_SystemInit(void)
+{
+#if defined(__ARMCC_VERSION)
+     /* FP registers are still accessed inside armclang RTX library
+      * RTX_CM3.lib even with __FPU_USED not defined.
+      * Enable FPU as a temp workaround*/
+      uint32_t  interruptState;
+      interruptState = Cy_SysLib_EnterCriticalSection();
+      SCB->CPACR |= SCB_CPACR_CP10_CP11_ENABLE;
+      __DSB();
+      __ISB();
+      Cy_SysLib_ExitCriticalSection(interruptState);
+#endif
+}
+
+
+
 #if defined(CY_IPC_DEFAULT_CFG_DISABLE)
 /*******************************************************************************
 * Function Name: Cy_SysIpcPipeIsrCm4

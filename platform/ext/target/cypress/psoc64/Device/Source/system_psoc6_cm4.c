@@ -167,13 +167,6 @@ uint32_t cy_delay32kMs    = CY_DELAY_MS_OVERFLOW_THRESHOLD *
 *******************************************************************************/
 void SystemInit(void)
 {
-    /*
-     * FIXME:
-     * Even if __FPU_USED is undefined or cleared, FP registers are still
-     * accessed inside armclang library. Not sure about why armclang doesn't
-     * care about the __FPU_USED.
-     */
-    SCB->CPACR |= SCB_CPACR_CP10_CP11_ENABLE;
 
 #ifdef __CM0P_PRESENT
     #if (__CM0P_PRESENT == 0)
