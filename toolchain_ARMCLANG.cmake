@@ -48,7 +48,6 @@ macro(_compiler_reload)
             -ffunction-sections
             -fno-builtin
             -fshort-enums
-            -fshort-wchar
             -funsigned-char
             -masm=auto
             -nostdlib
@@ -70,7 +69,6 @@ macro(_compiler_reload)
             $<$<COMPILE_LANGUAGE:C>:-ffunction-sections>
             $<$<COMPILE_LANGUAGE:C>:-fno-builtin>
             $<$<COMPILE_LANGUAGE:C>:-fshort-enums>
-            $<$<COMPILE_LANGUAGE:C>:-fshort-wchar>
             $<$<COMPILE_LANGUAGE:C>:-funsigned-char>
             $<$<COMPILE_LANGUAGE:C>:-masm=auto>
             $<$<COMPILE_LANGUAGE:C>:-nostdlib>
