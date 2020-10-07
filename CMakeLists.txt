@@ -1,4 +1,5 @@
 # Copyright (c) 2019, 2020 Linaro
+# Copyright (c) 2020, Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,9 +13,11 @@ cmake_minimum_required(VERSION 3.13.1)
 #
 # BINARY_DIR: The location where the build outputs will be written
 # BOARD: The string identifying the board target for TF-M (AN521, etc.)
-# CFGFILE: The TF-M config file to use, without the .cmake extension
+# CMAKE_BUILD_TYPE: The TF-M build type to use, (Debug, Release, etc.)
 # IPC: Build TFM IPC library. This library allows a non-secure application to
 #      interface to secure domain using IPC.
+# ISOLATION_LEVEL: The TF-M isolation level to use
+# REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
 # BL2: Boolean if build uses MCUboot.
 #
 # The following output values can also be used:
@@ -26,33 +29,58 @@ cmake_minimum_required(VERSION 3.13.1)
 # Example usage:
 #
 # trusted_firmware_build(BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
-#                        BOARD ${TFMBOARD}
-#                        CFGFILE "ConfigRegressionIPC"
-#                        OUT_VENEERS_FILE VENEERS_FILE
-#                        OUT_INCLUDE_PATH TFM_INCLUDE_PATH
-#                        BL2 True)
+#                        BOARD ${TFM_TARGET_PLATFORM}
+#                        CMAKE_BUILD_TYPE Release
+#                        IPC
+#                        ISOLATION_LEVEL 2
+#                        REGRESSION
+#                        BL2 True
 function(trusted_firmware_build)
-  set(options IPC)
-  set(oneValueArgs BINARY_DIR BOARD CFGFILE OUT_VENEERS_FILE OUT_INCLUDE_PATH BL2)
+  set(options IPC REGRESSION)
+  set(oneValueArgs BINARY_DIR BOARD OUT_INCLUDE_PATH BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
   if(DEFINED TFM_BL2)
     set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
   endif()
 
-  set(VENEERS_FILE ${TFM_BINARY_DIR}/install/export/tfm/veneers/s_veneers.o)
+  if(DEFINED TFM_IPC)
+    set(TFM_IPC_ARG -DTFM_PSA_API=ON)
+    # PSA API awareness for the Non-Secure application
+    target_compile_definitions(app PRIVATE "TFM_PSA_API")
+  endif()
+
+  if(DEFINED TFM_ISOLATION_LEVEL)
+    set(TFM_ISOLATION_LEVEL_ARG -DTFM_ISOLATION_LEVEL=${TFM_ISOLATION_LEVEL})
+  endif()
+
+  if(DEFINED TFM_REGRESSION)
+    set(TFM_REGRESSION_ARG -DTEST_S=ON -DTEST_NS=ON)
+  endif()
+
+  if(DEFINED TFM_CMAKE_BUILD_TYPE)
+    set(TFM_CMAKE_BUILD_TYPE_ARG -DCMAKE_BUILD_TYPE=${TFM_CMAKE_BUILD_TYPE})
+  else()
+    set(TFM_CMAKE_BUILD_TYPE_ARG -DCMAKE_BUILD_TYPE=RelWithDebInfo)
+  endif()
+
+  set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(${TFM_OUT_VENEERS_FILE} ${VENEERS_FILE} PARENT_SCOPE)
   set(${TFM_OUT_INCLUDE_PATH} ${TFM_BINARY_DIR}/install/export/tfm/include PARENT_SCOPE)
+
+  set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
 
   # Get the toolchain variant
   # TODO: Add support for cross-compile toolchain variant
   # TODO: Enforce GCC version check against TF-M compiler requirements
   if(${ZEPHYR_TOOLCHAIN_VARIANT} STREQUAL "zephyr")
     set(TFM_TOOLCHAIN "GNUARM")
+    set(CMAKE_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
     set(TFM_TOOLCHAIN_PREFIX "arm-zephyr-eabi")
     set(TFM_TOOLCHAIN_PATH ${ZEPHYR_SDK_INSTALL_DIR}/arm-zephyr-eabi)
   elseif(${ZEPHYR_TOOLCHAIN_VARIANT} STREQUAL "gnuarmemb")
     set(TFM_TOOLCHAIN "GNUARM")
+    set(CMAKE_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
     set(TFM_TOOLCHAIN_PREFIX "arm-none-eabi")
     set(TFM_TOOLCHAIN_PATH ${GNUARMEMB_TOOLCHAIN_PATH})
   else()
@@ -65,33 +93,37 @@ function(trusted_firmware_build)
     tfm
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
     BINARY_DIR ${TFM_BINARY_DIR}
-    CMAKE_ARGS -DPROJ_CONFIG=${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/configs/${TFM_CFGFILE}.cmake
-               -DTARGET_PLATFORM=${TFM_BOARD}
+    CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ZEPHYR_TFM_MODULE_DIR}/${CMAKE_TOOLCHAIN_FILE}
+               -DTFM_PLATFORM=${TFM_BOARD}
+               ${TFM_CMAKE_BUILD_TYPE_ARG}
                ${TFM_BL2_ARG}
-               -DCOMPILER=${TFM_TOOLCHAIN}
-               -DGNUARM_PREFIX=${TFM_TOOLCHAIN_PREFIX}
-               -DGNUARM_PATH=${TFM_TOOLCHAIN_PATH}
+               ${TFM_IPC_ARG}
+               ${TFM_ISOLATION_LEVEL_ARG}
+               ${TFM_REGRESSION_ARG}
+               -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
-    BUILD_BYPRODUCTS ${VENEERS_FILE}
+    BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH}
   )
 
-  set(TFM_INTERFACE_SOURCE ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/src)
-
   # IPC mode source dependencies
-  if(TFM_IPC)
-    add_library(tfm_ipc_psa_api
-                ${TFM_INTERFACE_SOURCE}/tfm_psa_ns_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_crypto_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_initial_attestation_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_its_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_platform_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_ps_ipc_api.c
-                ${TFM_INTERFACE_SOURCE}/tfm_ns_interface.c
-    )
-    target_include_directories(tfm_ipc_psa_api PUBLIC ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include)
-    target_compile_definitions(tfm_ipc_psa_api PUBLIC TFM_PSA_API TFM_PARTITION_TEST_CORE_IPC)
-    target_link_libraries(tfm_ipc_psa_api PRIVATE zephyr_interface)
-  endif()
+  add_library(tfm_api STATIC IMPORTED)
+  set_target_properties(tfm_api PROPERTIES
+    IMPORTED_LOCATION ${PSA_API_NS_PATH}
+  )
+
+  add_library(veneer_lib STATIC IMPORTED)
+  set_target_properties(veneer_lib PROPERTIES
+    IMPORTED_LOCATION ${VENEERS_FILE}
+  )
+
+  add_dependencies(tfm_api tfm)
+  file(MAKE_DIRECTORY ${TFM_BINARY_DIR}/generated/interface/include)
+  target_include_directories(tfm_api INTERFACE
+    ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include
+    ${TFM_BINARY_DIR}/generated/interface/include
+  )
+
+  target_link_libraries(tfm_api INTERFACE zephyr_interface veneer_lib)
 
 endfunction()
