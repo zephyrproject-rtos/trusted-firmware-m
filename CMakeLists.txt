@@ -61,6 +61,14 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/confi
     include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
 endif()
 
+# If CRYPTO_HW_ACCELERATOR is enabled by the platform, then load the
+# corresponding config if it exists
+if (CRYPTO_HW_ACCELERATOR)
+    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/accelerators/${CRYPTO_HW_ACCELERATOR_TYPE}/config.cmake)
+        include(platform/ext/accelerator/${CRYPTO_HW_ACCELERATOR_TYPE}/config.cmake)
+    endif()
+endif()
+
 # Optionally load extra config, overriding platform options, overriding profile,
 # build type config, defaults and command line.
 if (TFM_EXTRA_CONFIG_PATH)
