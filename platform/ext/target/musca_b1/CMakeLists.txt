@@ -160,5 +160,7 @@ if(BL2)
             Device/Config
             Native_Driver
             Libraries
+            ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
+            ${CMAKE_CURRENT_BINARY_DIR}/../../../../bl2/ext/mcuboot # for mcuboot_config.h only
     )
 endif()

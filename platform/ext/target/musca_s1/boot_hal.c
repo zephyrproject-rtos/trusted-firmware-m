@@ -12,6 +12,7 @@
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
+#include "bootutil/fault_injection_hardening.h"
 
 #if defined(CRYPTO_HW_ACCELERATOR) || \
     defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
