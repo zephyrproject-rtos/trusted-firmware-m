@@ -56,7 +56,7 @@ LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
  *        in bytes
  */
 #ifndef TFM_CRYPTO_IOVEC_BUFFER_SIZE
-#define TFM_CRYPTO_IOVEC_BUFFER_SIZE (5120)
+#error TFM_CRYPTO_IOVEC_BUFFER_SIZE is not defined
 #endif
 
 /**
@@ -269,7 +269,7 @@ static void tfm_crypto_ipc_handler(void)
  *        Crypto for its dynamic allocations
  */
 #ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
-#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x2040) /* >8KB for EC signing in attest */
+#error TFM_CRYPTO_ENGINE_BUF_SIZE is not defined
 #endif
 
 /**
