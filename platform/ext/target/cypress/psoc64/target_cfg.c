@@ -110,7 +110,7 @@ void platform_init(void)
     if (clk_rc != CY_SYSCLK_SUCCESS) {
         LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
-    clk_rc = Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 54U);
+    clk_rc = Cy_SysClk_PeriphSetDivider(CY_SYSCLK_DIV_8_BIT, 1U, 108U);
     if (clk_rc != CY_SYSCLK_SUCCESS) {
         LOG_MSG("WARNING: Failed to configure UART clock\r\n");
     }
