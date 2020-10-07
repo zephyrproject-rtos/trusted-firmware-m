@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "driver_smpu.h"
+#include "nv_counters.h"
 #include "pc_config.h"
 #include "region_defs.h"
 #include "RTE_Device.h"
@@ -232,6 +233,9 @@ static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
     if (smpu == ITS_SMPU_STRUCT) {
         /* Retrieve the ITS region definition */
         tfm_hal_its_fs_info(base, size);
+    } else if (smpu == NVC_SMPU_STRUCT) {
+        /* Retrieve the non-volatile counters region definition */
+        nvc_flash_block(base, size);
     } else if (smpu == PS_SMPU_STRUCT) {
         /* Retrieve the PS region definition */
         tfm_hal_ps_fs_info(base, size);

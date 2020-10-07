@@ -92,12 +92,12 @@
 #define SMPU1_MASTER_CONFIG COMMON_SMPU_MASTER_CONFIG
 
 /* SMPU2 - NV counters in Flash */
-#define SMPU2_BASE         S_ROM_ALIAS(FLASH_NV_COUNTERS_AREA_OFFSET)
-#define SMPU2_REGIONSIZE   PROT_SIZE_1KB_BIT_SHIFT
+/* Dynamically configured from provisioning data */
+#define NVC_SMPU_STRUCT     PROT_SMPU_SMPU_STRUCT2
 #define SMPU2_SLAVE_CONFIG {\
-    .address = (void *)SMPU2_BASE, \
-    .regionSize = (cy_en_prot_size_t) SMPU2_REGIONSIZE, \
-    .subregions = ALL_ENABLED, \
+    .address = SMPU_DYNAMIC_BASE, \
+    .regionSize = SMPU_DYNAMIC_REGIONSIZE, \
+    .subregions = SMPU_DYNAMIC_SUBREGIONS, \
     .userPermission = CY_PROT_PERM_DISABLED, \
     .privPermission = CY_PROT_PERM_RW, \
     .secure = false, \
@@ -105,16 +105,6 @@
     .pcMask = SECURE_PCS_MASK, \
 }
 #define SMPU2_MASTER_CONFIG COMMON_SMPU_MASTER_CONFIG
-
-/* SMPU requires base address aligned to size */
-#if SMPU2_BASE % REGIONSIZE_TO_BYTES(SMPU2_REGIONSIZE)
-#error "Flash layout has changed - SMPU2 needs updating"
-#endif
-
-/* Should exactly cover the NV Counters region */
-#if FLASH_NV_COUNTERS_AREA_SIZE != REGIONSIZE_TO_BYTES(SMPU2_REGIONSIZE)
-#error "Flash layout has changed - SMPU2_REGIONSIZE isn't FLASH_NV_COUNTERS_AREA_SIZE"
-#endif
 
 /* SMPU3 - PS in Flash */
 /* Dynamically configured from provisioning data */
