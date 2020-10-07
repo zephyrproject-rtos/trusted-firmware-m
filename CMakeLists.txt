@@ -44,6 +44,11 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.c
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
+# If configured for tests, load config specific to tests overriding defaults.
+if (TEST_PSA_API)
+    include(config/tests/config_test_psa_api.cmake)
+endif()
+
 # Then load the profile, overriding build type config, defaults and command
 # line.
 if (TFM_PROFILE)
