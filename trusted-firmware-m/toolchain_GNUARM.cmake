@@ -10,8 +10,8 @@ set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
+set(CMAKE_C_COMPILER "${TFM_TOOLCHAIN_PATH}/bin/${TFM_TOOLCHAIN_PREFIX}-gcc")
+set(CMAKE_ASM_COMPILER "${TFM_TOOLCHAIN_PATH}/bin/${TFM_TOOLCHAIN_PREFIX}-gcc")
 
 # Tell CMake not to try to link executables during its checks
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
