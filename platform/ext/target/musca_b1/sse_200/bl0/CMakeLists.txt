@@ -21,8 +21,8 @@ target_sources(bl0
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_bl2.s>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_bl2.S>
         bl0_main.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/mhu_v2_x.c
         ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Native_Driver/musca_b1_scc_drv.c
-        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Native_Driver/mhu_v2_x.c
         ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Device/Source/device_definition.c
         ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Device/Source/system_core_init.c
 )
@@ -33,6 +33,7 @@ target_include_directories(bl0
     PRIVATE
         .
         ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/Native_Driver
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
 )
 
 target_include_directories(bl0

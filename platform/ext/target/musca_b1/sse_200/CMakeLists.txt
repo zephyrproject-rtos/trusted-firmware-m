@@ -8,6 +8,7 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_MUSCA_B1_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 
 #========================= Platform region defs ===============================#
 
@@ -83,14 +84,15 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
-        Libraries
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
 )
 
 target_sources(platform_s
     PRIVATE
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
         CMSIS_Driver/Driver_USART.c
@@ -100,10 +102,10 @@ target_sources(platform_s
         Native_Driver/mpu_armv8m_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/gpio_cmsdk_drv.c
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mt25ql_flash_lib.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/qspi_ip6514e_drv.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/gfc100_eflash_drv.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/musca_b1_eflash_drv.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries/mt25ql_flash_lib.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/qspi_ip6514e_drv.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c>
+        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
         tfm_hal_isolation.c
@@ -117,7 +119,7 @@ target_sources(platform_s
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/mhu_v2_x.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/mhu_v2_x.c>
 )
 
 target_compile_options(platform_s
@@ -153,8 +155,9 @@ target_include_directories(platform_ns
         Device/Config
         Device/Include
         Native_Driver
-        Libraries
         services/include
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
 )
 
 #========================= Platform BL2 =======================================#
@@ -166,11 +169,11 @@ if(BL2)
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
-            CMSIS_Driver/Driver_GFC100_EFlash.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c
             Native_Driver/uart_pl011_drv.c
             CMSIS_Driver/Driver_USART.c
-            Native_Driver/gfc100_eflash_drv.c
-            Native_Driver/musca_b1_eflash_drv.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
             Native_Driver/musca_b1_scc_drv.c
     )
 
@@ -183,8 +186,9 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
-            Libraries
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_CURRENT_BINARY_DIR}/../../../../../bl2/ext/mcuboot # for mcuboot_config.h only
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
     )
 endif()

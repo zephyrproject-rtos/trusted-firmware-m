@@ -7,6 +7,7 @@
 
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(CMAKE_MUSCA_B1_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 
 #========================= Platform region defs ===============================#
 
@@ -55,19 +56,20 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
-        Libraries
         mailbox
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
 )
 
 target_sources(platform_s
     PRIVATE
-        CMSIS_Driver/Driver_GFC100_EFlash.c
-        Native_Driver/musca_b1_eflash_drv.c
-        Native_Driver/gfc100_eflash_drv.c
-        CMSIS_Driver/Driver_QSPI_Flash.c
-        Native_Driver/qspi_ip6514e_drv.c
-        Libraries/mt25ql_flash_lib.c
-        Native_Driver/mhu_v2_x.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/qspi_ip6514e_drv.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries/mt25ql_flash_lib.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/mhu_v2_x.c
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
         mailbox/platform_multicore.c
@@ -104,10 +106,10 @@ if(BL2)
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
-            CMSIS_Driver/Driver_GFC100_EFlash.c
-            Native_Driver/gfc100_eflash_drv.c
-            Native_Driver/musca_b1_eflash_drv.c
             uart_stdout.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
     )
 
     target_include_directories(platform_bl2
@@ -119,8 +121,9 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
-            Libraries
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_CURRENT_BINARY_DIR}/../../../../../bl2/ext/mcuboot # for mcuboot_con
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
     )
 endif()
