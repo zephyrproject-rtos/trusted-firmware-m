@@ -44,7 +44,7 @@ target_compile_definitions(${CC312_LIB_TARGET}
         DLLI_MAX_BUFF_SIZE=0x10000
         USE_MBEDTLS_CRYPTOCELL
         CC_MNG_MIN_BACKUP_SIZE_IN_BYTES=512
-        CC_PAL_MAX_LOG_LEVEL=3
+        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
     PUBLIC
         CC_IOT
 )
@@ -58,7 +58,7 @@ target_link_libraries(${CC312_LIB_TARGET}
 target_compile_definitions(${CC312_PAL_TARGET}
     PRIVATE
         CC_TRNG_MODE=0
-        CC_PAL_MAX_LOG_LEVEL=3
+        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
     PUBLIC
         CC_IOT
 )

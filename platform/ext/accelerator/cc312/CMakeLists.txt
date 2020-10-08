@@ -24,7 +24,7 @@ if(BL2)
     target_sources(crypto_hw_bl2
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c
+            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
             $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_provisioning.c>
     )
 
@@ -104,7 +104,7 @@ endif()
 target_sources(crypto_hw_crypto_service
     PRIVATE
         cc312.c
-        cc312_log.c
+        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
 target_include_directories(crypto_hw_crypto_service
