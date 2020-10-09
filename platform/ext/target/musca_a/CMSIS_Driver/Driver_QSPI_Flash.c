@@ -17,6 +17,7 @@
 #include "Driver_Flash.h"
 
 #include <stdbool.h>
+#include <string.h>
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 #include "flash_layout.h"
@@ -53,6 +54,13 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     EVENT_READY_NOT_AVAILABLE,
     DATA_WIDTH_32BIT,
     CHIP_ERASE_SUPPORTED
+};
+
+/* Valid entries for data item width */
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
 };
 
 /**
@@ -181,8 +189,13 @@ static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
 
 static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
+    /* Function includes a workaround for Musca-A QSPI flash when read data
+     * could be corrupted if read size is not 4 byte aligned.
+     */
     enum mt25ql_error_t err = MT25QL_ERR_NONE;
     bool is_valid = true;
+    uint32_t extra_bytes = 0;
+    uint32_t extra_word = 0;
 
     ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
@@ -195,7 +208,18 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 
     ARM_FLASH0_STATUS.busy = DRIVER_STATUS_BUSY;
 
+    if (cnt % data_width_byte[DriverCapabilities.data_width] != 0) {
+        extra_bytes = cnt % data_width_byte[DriverCapabilities.data_width];
+        cnt -= extra_bytes;
+    }
+
     err = mt25ql_command_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
+
+    if (extra_bytes != 0) {
+        err = mt25ql_command_read(ARM_FLASH0_DEV.dev, addr + cnt, &extra_word,
+                                data_width_byte[DriverCapabilities.data_width]);
+        memcpy(data + cnt, &extra_word, extra_bytes);
+    }
 
     ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
 
