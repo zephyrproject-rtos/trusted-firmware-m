@@ -35,7 +35,7 @@ achieves this by making the following configurations:
 
 1. ``AIRCR.PRIS`` is set to 1 during TF-M core initialisation. This
    de-prioritizes Non-secure exceptions compared to Secure exceptions, so that
-   they cannot interupt Secure Handler mode. the ``AIRCR.PRIS`` bit remains set
+   they cannot interrupt Secure Handler mode. the ``AIRCR.PRIS`` bit remains set
    during TF-M run. The bit is set in the function
 
 .. code-block:: c
@@ -233,8 +233,8 @@ it can be done in a global variable.
 The caller client ID can be saved in the function
 ``void tfm_psa_ipc_request_handler(uint32_t svc_ctx[])`` depending on the return
 value of the PSA API function. (Doesn't execute any Secure service code, only
-sets signals, and triggrs scheduling. If the return value is success, that means
-a scheduling is to happen, and a secure service is about to be entered.)
+sets signals, and triggers scheduling. If the return value is success, that
+means a scheduling is to happen, and a secure service is about to be entered.)
 
 Check client ID on Secure service return
 ----------------------------------------
@@ -312,7 +312,7 @@ CORE_TEST_2   execute test scenario  Busy wait until NS interrupt is
 NS            execute test scenario  Do nothing
 ============  =====================  ===========================================
 
-The test is successful if NS execute test scenario returns
+The test is successful if NS execute test scenario returns.
 
 Advanced scenarios
 ==================

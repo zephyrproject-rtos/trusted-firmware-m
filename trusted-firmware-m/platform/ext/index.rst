@@ -7,6 +7,7 @@ Platforms
 
     readme
     /platform/readme
+    /docs/contributing/platform_deprecation.rst
 
 .. toctree::
     :maxdepth: 4
@@ -36,6 +37,13 @@ Platforms
     :glob:
 
     target/stm/**
+
+.. toctree::
+    :maxdepth: 4
+    :caption: Nordic
+    :glob:
+
+    target/nordic_nrf/**
 
 --------------
 

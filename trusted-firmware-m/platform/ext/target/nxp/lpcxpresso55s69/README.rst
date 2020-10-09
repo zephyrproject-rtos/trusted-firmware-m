@@ -7,18 +7,11 @@ Building TF-M
 To build a S and NS application image for the LPCXpresso55S69 run the
 following commands:
 
-    **Note**: On OS X change ``readlink`` to ``greadlink``, available by
-    running ``brew install coreutils``.
-
 .. code:: bash
 
     $ mkdir build && cd build
-    $ cmake -G"Unix Makefiles" \
-            -DPROJ_CONFIG=`readlink -f ../configs/ConfigDefault.cmake` \
-            -DTARGET_PLATFORM=LPC55S69 \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DBL2=False \
-            -DCOMPILER=GNUARM \
+    $ cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
+            -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             ../
     $ make install
 
@@ -145,8 +138,7 @@ Debugging with GDB
     building TF-M so that debug information is available to GDB.
 
     **NOTE**: When debugging with the mbed-crypto library, you also require an
-    additional ``-DMBEDCRYPTO_DEBUG=ON`` compile-time switch, as defined here:
-    :ref:`docs/getting_started/tfm_build_instruction:Configuring the build`
+    additional ``-DMBEDCRYPTO_BUILD_TYPE=DEBUG`` compile-time switch.
 
 
 Start the GDB server, pointing to the secure application image:
@@ -223,4 +215,5 @@ common problems.
 --------------
 
 *Copyright (c) 2020, Linaro. All rights reserved.*
+*Copyright (c) 2020, Arm Limited. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*

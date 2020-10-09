@@ -172,18 +172,19 @@ Service source files
     - ``lib/ext/t_cose/crypto_adapters/t_cose_psa_crypto.c``: Implements the
       exposed API and ports ``t_cose`` to the PSA Crypto API.
 - Initial Attestation Service:
-    - ``attestation_core.c`` : Implements core functionalities such as
-      implementation of APIs, retrieval of claims and token creation.
-    - ``attest_token.c``: Implements the token creation function such as
+    - ``attest_core.c`` : Implements core functionalities such as implementation
+      of APIs, retrieval of claims and token creation.
+    - ``attest_token_encode.c``: Implements the token creation functions such as
       start and finish token creation and adding claims to the token.
-    - ``attestation_key.c``: Get the asymmetric attestation key from platform
-      layer and register it to the TF-M Crypto service for further usage.
-    - ``tfm_attestation.c``: Implements the SPM abstraction layer, and bind
-      the attestation service to the SPM implementation in TF-M project.
-    - ``tfm_attestation_secure_api.c``: Implements the secure API layer to
-      allow other services in the secure domain to request functionalities
+    - ``attest_asymmetric_key.c``: Get the asymmetric attestation key from
+      platform layer and register it to the TF-M Crypto service for further
+      usage.
+    - ``tfm_attest.c``: Implements the SPM abstraction layer, and bind the
+      attestation service to the SPM implementation in TF-M project.
+    - ``tfm_attest_secure_api.c``: Implements the secure API layer to allow
+      other services in the secure domain to request functionalities
       from the attestation service using the PSA API interface.
-    - ``tfm_attestation_req_mngr.c``: Includes the initialization entry of
+    - ``tfm_attest_req_mngr.c``: Includes the initialization entry of
       attestation service and handles attestation service requests in IPC
       model.
     - ``attest_symmetric_key.c``: Get the symmetric initial attestation key

@@ -20,8 +20,8 @@
 #include "device_definition.h"
 #include "platform_description.h"
 #include "region_defs.h"
+#include "utilities.h"
 #include "mpu_armv8m_drv.h"
-#include "secure_utilities.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
 

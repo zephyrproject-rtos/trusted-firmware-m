@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,13 +28,26 @@
 extern "C" {
 #endif
 
+/* Space reserved for user-defined flags. These are stored in the file metadata
+ * and can be retrieved by getting the file info.
+ */
+#define ITS_FLASH_FS_USER_FLAGS_MASK   ((1U << 16) - 1)
+
+/* Filesystem flags that can be provided when calling the write function */
+#define ITS_FLASH_FS_WRITE_FLAGS_MASK  ((1U << 24) - (1U << 16))
+/* Create the file if it does not already exist */
+#define ITS_FLASH_FS_FLAG_CREATE       (1U << 16)
+/* Remove existing file data if it exists */
+#define ITS_FLASH_FS_FLAG_TRUNCATE     (1U << 17)
+
 /**
- * \brief ITS flash filesytem context type, used to maintain state across FS
+ * \brief ITS flash filesystem context type, used to maintain state across FS
  *        operations.
  *
  * \details The user should allocate a variable of this type, initialised to
  *          zero, before calling its_flash_fs_prepare, and then pass it to each
- *          subsequent FS operation. The contents are internal to the filesytem.
+ *          subsequent FS operation. The contents are internal to the
+ *          filesystem.
  */
 typedef struct its_flash_fs_ctx_t its_flash_fs_ctx_t;
 
@@ -87,30 +101,6 @@ psa_status_t its_flash_fs_file_exist(its_flash_fs_ctx_t *fs_ctx,
                                      const uint8_t *fid);
 
 /**
- * \brief Creates a file in the filesystem.
- *
- * \param[in,out] fs_ctx     Filesystem context
- * \param[in]     fid        File ID
- * \param[in]     max_size   Size of the file to be created
- * \param[in]     data_size  Size of the incoming buffer. This parameter is set
- *                           to 0 when the file is empty after the creation.
- * \param[in]     flags      Flags of the file
- * \param[in]     data       Pointer to buffer containing the initial data.
- *                           This parameter is set to NULL when the file is
- *                           empty after the creation.
- *
- * \return Returns PSA_SUCCESS if the file has been created correctly. If the
- *         fid is in use, it returns PSA_ERROR_INVALID_ARGUMENT. Otherwise, it
- *         returns error code as specified in \ref psa_status_t.
- */
-psa_status_t its_flash_fs_file_create(its_flash_fs_ctx_t *fs_ctx,
-                                      const uint8_t *fid,
-                                      size_t max_size,
-                                      size_t data_size,
-                                      uint32_t flags,
-                                      const uint8_t *data);
-
-/**
  * \brief Gets the file information referenced by the file ID.
  *
  * \param[in,out] fs_ctx  Filesystem context
@@ -125,19 +115,25 @@ psa_status_t its_flash_fs_file_get_info(its_flash_fs_ctx_t *fs_ctx,
                                         struct its_file_info_t *info);
 
 /**
- * \brief Writes data to an existing file.
+ * \brief Writes data to a file.
  *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     fid     File ID
- * \param[in]     size    Size of the incoming buffer
- * \param[in]     offset  Offset in the file
- * \param[in]     data    Pointer to buffer containing data to be written
+ * \param[in,out] fs_ctx     Filesystem context
+ * \param[in]     fid        File ID
+ * \param[in]     flags      Flags of the file
+ * \param[in]     max_size   Maximum size of the file to be created. Ignored if
+ *                           the file is not being created.
+ * \param[in]     data_size  Size of the incoming write data.
+ * \param[in]     offset     Offset in the file to write. Must be less than or
+ *                           equal to the current file size.
+ * \param[in]     data       Pointer to buffer containing data to be written
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
 psa_status_t its_flash_fs_file_write(its_flash_fs_ctx_t *fs_ctx,
                                      const uint8_t *fid,
-                                     size_t size,
+                                     uint32_t flags,
+                                     size_t max_size,
+                                     size_t data_size,
                                      size_t offset,
                                      const uint8_t *data);
 
@@ -168,6 +164,18 @@ psa_status_t its_flash_fs_file_read(its_flash_fs_ctx_t *fs_ctx,
  */
 psa_status_t its_flash_fs_file_delete(its_flash_fs_ctx_t *fs_ctx,
                                       const uint8_t *fid);
+
+/**
+ * \brief Validates the configuration of the flash filesystem.
+ *
+ * This function checks that the flash block provided is compatible with the
+ * flash_fs described by the info parameter
+ *
+ * \param[in] info        Filesystem information
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t its_flash_fs_validate_params(const struct its_flash_info_t *info);
 
 #ifdef __cplusplus
 }

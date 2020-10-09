@@ -309,11 +309,14 @@ static inline psa_status_t its_mblock_validate_block_meta(
 /**
  * \brief Gets a free file metadata table entry.
  *
- * \param[in,out] fs_ctx  Filesystem context
+ * \param[in,out] fs_ctx     Filesystem context
+ * \param[in]     use_spare  If true then the spare file index will be used,
+ *                           otherwise at least one file index will be left free
  *
  * \return Return index of a free file meta entry
  */
-static uint32_t its_get_free_file_index(struct its_flash_fs_ctx_t *fs_ctx)
+static uint32_t its_get_free_file_index(struct its_flash_fs_ctx_t *fs_ctx,
+                                        bool use_spare)
 {
     psa_status_t err;
     uint32_t i;
@@ -329,6 +332,13 @@ static uint32_t its_get_free_file_index(struct its_flash_fs_ctx_t *fs_ctx)
          * invalid ID.
          */
         if (its_utils_validate_fid(tmp_metadata.id) != PSA_SUCCESS) {
+            if (!use_spare) {
+                /* Keep the first free file index as a spare, indicate that the
+                 * next free file index should be used and continue searching.
+                 */
+                use_spare = true;
+                continue;
+            }
             /* Found */
             return i;
         }
@@ -703,43 +713,21 @@ static psa_status_t its_init_get_active_metablock(
     return PSA_SUCCESS;
 }
 
-psa_status_t its_flash_fs_mblock_cp_remaining_file_meta(
-                                              struct its_flash_fs_ctx_t *fs_ctx,
-                                              uint32_t idx)
+psa_status_t its_flash_fs_mblock_cp_file_meta(struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t idx_start,
+                                              uint32_t idx_end)
 {
-    psa_status_t err;
-    size_t end;
-    uint32_t meta_block;
-    size_t pos;
-    uint32_t scratch_block;
+    /* Calculate the positions of the two indexes in the metadata block */
+    size_t pos_start = its_mblock_file_meta_offset(fs_ctx, idx_start);
+    size_t pos_end = its_mblock_file_meta_offset(fs_ctx, idx_end);
 
-    scratch_block = fs_ctx->scratch_metablock;
-    meta_block = fs_ctx->active_metablock;
-    /* Calculate the position */
-    pos = its_mblock_file_meta_offset(fs_ctx, 0);
-    /* Copy rest of the block data from previous block */
-    /* Data before updated content */
-    err = its_flash_block_to_block_move(fs_ctx->flash_info, scratch_block, pos,
-                                        meta_block, pos,
-                                        (idx * ITS_FILE_METADATA_SIZE));
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    /* Data after updated content */
-    pos = its_mblock_file_meta_offset(fs_ctx, idx + 1);
-
-    /* Get end of file meta position which is the position after the last
-     * byte of file meta.
+    /* Copy all data between the two positions from the scratch metadata block
+     * to the active metadata block.
      */
-    end = its_mblock_file_meta_offset(fs_ctx,
-                                      fs_ctx->flash_info->max_num_files);
-    if (end > pos) {
-        err = its_flash_block_to_block_move(fs_ctx->flash_info, scratch_block,
-                                            pos, meta_block, pos, (end - pos));
-    }
-
-    return err;
+    return its_flash_block_to_block_move(fs_ctx->flash_info,
+                                         fs_ctx->scratch_metablock, pos_start,
+                                         fs_ctx->active_metablock, pos_start,
+                                         pos_end - pos_start);
 }
 
 uint32_t its_flash_fs_mblock_cur_data_scratch_id(
@@ -770,6 +758,31 @@ psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
 
         /* ID with value 0x00 means end of file meta section */
         if (!tfm_memcmp(tmp_metadata.id, fid, ITS_FILE_ID_SIZE)) {
+            /* Found */
+            *idx = i;
+            return PSA_SUCCESS;
+        }
+    }
+
+    return PSA_ERROR_DOES_NOT_EXIST;
+}
+
+psa_status_t its_flash_fs_mblock_get_file_idx_flag(
+                                              struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t flags,
+                                              uint32_t *idx)
+{
+    psa_status_t err;
+    uint32_t i;
+    struct its_file_meta_t tmp_metadata;
+
+    for (i = 0; i < fs_ctx->flash_info->max_num_files; i++) {
+        err = its_flash_fs_mblock_read_file_meta(fs_ctx, i, &tmp_metadata);
+        if (err != PSA_SUCCESS) {
+            return PSA_ERROR_GENERIC_ERROR;
+        }
+
+        if (tmp_metadata.flags & flags) {
             /* Found */
             *idx = i;
             return PSA_SUCCESS;
@@ -899,6 +912,7 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
 psa_status_t its_flash_fs_mblock_reserve_file(
                                             struct its_flash_fs_ctx_t *fs_ctx,
                                             const uint8_t *fid,
+                                            bool use_spare,
                                             size_t size,
                                             uint32_t flags,
                                             uint32_t *idx,
@@ -910,7 +924,7 @@ psa_status_t its_flash_fs_mblock_reserve_file(
     err = its_mblock_reserve_file(fs_ctx, fid, size, flags, file_meta,
                                   block_meta);
 
-    *idx = its_get_free_file_index(fs_ctx);
+    *idx = its_get_free_file_index(fs_ctx, use_spare);
     if ((err != PSA_SUCCESS) ||
         (*idx == ITS_METADATA_INVALID_INDEX)) {
         return PSA_ERROR_INSUFFICIENT_STORAGE;

@@ -89,6 +89,7 @@ psa_status_t tfm_its_init(void)
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     /* Initialise the PS context */
     status = its_flash_fs_prepare(&fs_ctx_ps,
                                   its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
@@ -119,6 +120,8 @@ psa_status_t tfm_its_init(void)
     }
 #endif /* PS_CREATE_FLASH_LAYOUT */
 
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
+
     return status;
 }
 
@@ -130,6 +133,7 @@ psa_status_t tfm_its_set(int32_t client_id,
     psa_status_t status;
     size_t write_size;
     size_t offset;
+    uint32_t flags;
 
     /* Check that the UID is valid */
     if (uid == TFM_ITS_INVALID_UID) {
@@ -151,15 +155,10 @@ psa_status_t tfm_its_set(int32_t client_id,
                                         &g_file_info);
     if (status == PSA_SUCCESS) {
         /* If the object exists and has the write once flag set, then it
-         * cannot be modified. Otherwise it needs to be removed.
+         * cannot be modified.
          */
         if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
             return PSA_ERROR_NOT_PERMITTED;
-        } else {
-            status = its_flash_fs_file_delete(get_fs_ctx(client_id), g_fid);
-            if (status != PSA_SUCCESS) {
-                return status;
-            }
         }
     } else if (status != PSA_ERROR_DOES_NOT_EXIST) {
         /* If the file does not exist, then do nothing.
@@ -168,44 +167,34 @@ psa_status_t tfm_its_set(int32_t client_id,
         return status;
     }
 
-    /* Write as much of the data as will fit in the asset_data buffer */
-    write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
-
-    /* Read asset data from the caller */
-    (void)its_req_mngr_read(asset_data, write_size);
-
-    /* Create the file in the file system */
-    status = its_flash_fs_file_create(get_fs_ctx(client_id), g_fid, data_length,
-                                      write_size, (uint32_t)create_flags,
-                                      asset_data);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    offset = write_size;
-    data_length -= write_size;
+    offset = 0;
+    flags = (uint32_t)create_flags |
+            ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE;
 
     /* Iteratively read data from the caller and write it to the filesystem, in
      * chunks no larger than the size of the asset_data buffer.
      */
-    while (data_length > 0) {
+    do {
+        /* Write as much of the data as will fit in the asset_data buffer */
         write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
 
         /* Read asset data from the caller */
         (void)its_req_mngr_read(asset_data, write_size);
 
         /* Write to the file in the file system */
-        status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid,
-                                         write_size, offset, asset_data);
+        status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid, flags,
+                                         data_length, write_size, offset,
+                                         asset_data);
         if (status != PSA_SUCCESS) {
-            /* Delete the file to avoid leaving partial data */
-            (void)its_flash_fs_file_delete(get_fs_ctx(client_id), g_fid);
             return status;
         }
 
+        /* Do not create or truncate after the first iteration */
+        flags &= ~(ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE);
+
         offset += write_size;
         data_length -= write_size;
-    }
+    } while (data_length > 0);
 
     return PSA_SUCCESS;
 }

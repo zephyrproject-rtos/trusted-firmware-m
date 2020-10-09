@@ -47,7 +47,7 @@ The following requirements are mandatory for SPRTL implementation:
   - **Security first** - SPRTL is designed for security and it may come with
     some performance loss.
 
-API Catagories
+API Categories
 ==============
 Several known types of functions are included in SPRTL:
 
@@ -167,7 +167,7 @@ This would simplify the caller logic into this:
   }
 
 This is the simplest case of encapsulating PSA Client API. If a RoT Service API
-is contect heavy, then, the encapsulation can be changed to include a connection
+is connect heavy, then, the encapsulation can be changed to include a connection
 handle inside a context data structure. This context data structure type is
 defined in RoT Service headers and the instance is allocated by API caller since
 API implementation does not have private data.

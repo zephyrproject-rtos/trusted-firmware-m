@@ -72,7 +72,6 @@ struct tfm_spm_service_t service[] =
         .service_db = NULL,
         .partition = NULL,
         .handle_list = {0},
-        .msg_queue = {0},
         .list = {0},
     {{'}'}},
             {% endfor %}

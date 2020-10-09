@@ -149,13 +149,13 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
   extern const __zero_table_t __zero_table_end__;
 
   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<pTable->wlen; ++i) {
+    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
       pTable->dest[i] = pTable->src[i];
     }
   }
  
   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<pTable->wlen; ++i) {
+    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
       pTable->dest[i] = 0u;
     }
   }
@@ -167,11 +167,11 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
 #endif
 
 #ifndef __INITIAL_SP
-#define __INITIAL_SP              __StackTop
+#define __INITIAL_SP              Image$$ARM_LIB_STACK$$ZI$$Limit
 #endif
 
 #ifndef __STACK_LIMIT
-#define __STACK_LIMIT             __StackLimit
+#define __STACK_LIMIT             Image$$ARM_LIB_STACK$$ZI$$Base
 #endif
 
 #ifndef __VECTOR_TABLE

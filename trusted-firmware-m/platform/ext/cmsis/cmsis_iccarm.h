@@ -7,8 +7,8 @@
 
 //------------------------------------------------------------------------------
 //
-// Copyright (c) 2017-2019 IAR Systems
-// Copyright (c) 2017-2019 Arm Limited. All rights reserved. 
+// Copyright (c) 2017-2020 IAR Systems
+// Copyright (c) 2017-2019 Arm Limited. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -236,12 +236,11 @@ __packed struct  __iar_u32 { uint32_t v; };
   #endif
 #endif
 
-#ifndef   __WEAK
-  #if __ICCARM_V8
-    #define __WEAK __attribute__((weak))
-  #else
-    #define __WEAK _Pragma("__weak")
-  #endif
+#undef __WEAK                           /* undo the definition from DLib_Defaults.h */
+#if __ICCARM_V8
+  #define __WEAK __attribute__((weak))
+#else
+  #define __WEAK _Pragma("__weak")
 #endif
 
 #ifndef __PROGRAM_START
@@ -249,11 +248,11 @@ __packed struct  __iar_u32 { uint32_t v; };
 #endif
 
 #ifndef __INITIAL_SP
-#define __INITIAL_SP              CSTACK$$Limit
+#define __INITIAL_SP              ARM_LIB_STACK$$Limit
 #endif
 
 #ifndef __STACK_LIMIT
-#define __STACK_LIMIT             CSTACK$$Base
+#define __STACK_LIMIT             ARM_LIB_STACK$$Base
 #endif
 
 #ifndef __VECTOR_TABLE

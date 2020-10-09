@@ -12,7 +12,7 @@ Abstract
 
 The proposal is describing a mechanism to enable the use of larger flash
 devices, imposing a requirement for word-aligned full-block program operations,
-in Trusted Firmare-M.
+in Trusted Firmware-M.
 
 
 Requirements

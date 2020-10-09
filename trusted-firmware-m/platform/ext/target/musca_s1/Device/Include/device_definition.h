@@ -219,6 +219,22 @@ extern struct ppc_sse200_dev_t APB_PPCEXP0_DEV_S;
 extern struct ppc_sse200_dev_t APB_PPCEXP1_DEV_S;
 #endif
 
+/* ARM SCC driver structures */
+#ifdef MUSCA_S1_SCC_S
+#include "musca_s1_scc_drv.h"
+extern struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_S;
+#endif
+#ifdef MUSCA_S1_SCC_NS
+#include "musca_s1_scc_drv.h"
+extern struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_NS;
+#endif
+
+/* SSE-200 Cache driver structure */
+#ifdef SSE_200_CACHE_S
+#include "cache_drv.h"
+extern struct arm_cache_dev_t SSE_200_CACHE_DEV_S;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

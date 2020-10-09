@@ -9,7 +9,7 @@
 
 #include "tfm_platform_system.h"
 #include "tfm_plat_nv_counters.h"
-#include "tfm/tfm_spm_services_api.h"
+#include "tfm/tfm_spm_services.h"
 #include "tfm_secure_api.h"
 #include "psa_manifest/pid.h"
 
@@ -50,7 +50,7 @@ static bool nv_counter_access_grant(int32_t client_id,
 
     /* Boundary check the input argument */
     if (nv_counter_no >= NV_COUNTER_MAP_SIZE ||
-        nv_counter_no < 0 || nv_counter_no >= PLAT_NV_COUNTER_MAX) {
+        (int32_t)nv_counter_no < 0 || nv_counter_no >= PLAT_NV_COUNTER_MAX) {
         return false;
     }
 

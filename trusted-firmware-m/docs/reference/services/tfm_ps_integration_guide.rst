@@ -211,10 +211,6 @@ Protected Storage Service Definitions
 =====================================
 The PS service requires the following platform definitions:
 
-- ``PS_FLASH_AREA_ADDR`` - Defines the flash address where the protected storage
-  area starts.
-- ``PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for protected storage in bytes.
 - ``PS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
   erasable unit) in bytes.
 - ``PS_SECTORS_PER_BLOCK`` - Defines the number of contiguous PS_SECTOR_SIZE
@@ -248,6 +244,16 @@ above.
 More information about the ``flash_layout.h`` content, not PS related, is
 available in :doc:`platform readme </platform/ext/readme>` along with other
 platform information.
+
+The following optional platform definitions may also be defined in
+``flash_layout.h`` or set at build time in ``platform/ext/<TARGET_NAME>.cmake``:
+
+- ``PS_FLASH_AREA_ADDR`` - Defines the flash address where the protected storage
+  area starts.
+  If not defined, the platform must implement ``tfm_hal_ps_fs_info()``.
+- ``PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
+  for protected storage in bytes.
+  If not defined, the platform must implement ``tfm_hal_ps_fs_info()``.
 
 TF-M NV Counter Interface
 =========================
@@ -332,6 +338,8 @@ needs. The list of PS services flags are:
   service. This flag is ``OFF`` by default. The PS regression tests write/erase
   storage multiple time, so enabling this flag can increase the life of flash
   memory when testing.
+  If this flag is set to ``ON``, PS_RAM_FS_SIZE must also be provided. This
+  specifies the size of the block of RAM to be used to simulate the flash.
 
   .. Note::
     If this flag is disabled when running the regression tests, then it is
@@ -359,3 +367,4 @@ needs. The list of PS services flags are:
 --------------
 
 *Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

@@ -69,32 +69,6 @@ struct tfm_spm_partition_memory_data_t
 #endif
 
 /**
- * \brief This function initializes peripherals common to all platforms.
- *
- * Contrarily to SystemInit() intended for a high-priority hw initialization
- * (for example clock and power subsystems), and called on a very early boot
- * stage from startup code, this function is called from C code, hence variables
- * and other drivers data are protected from being cleared up by the C library
- * init.
- * In addition to performing initialization common to all platforms, it also
- * calls tfm_spm_hal_post_init_platform() function which implements
- * initialization of platform-specific peripherals and other hw.
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_post_init(void);
-
-/**
- * \brief This function initializes platform-specific peripherals and hardware.
- *
- * Called from tfm_spm_hal_post_init(), this function is intended for
- * platform-specific portion of hardware initialization.
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_post_init_platform(void);
-
-/**
  * \brief This function initialises the HW used for isolation, and sets the
  *        default configuration for them.
  *
@@ -162,11 +136,6 @@ enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void);
-
-/**
- * \brief System reset
- */
-void tfm_spm_hal_system_reset(void);
 
 /**
  * \brief Configures all external interrupts to target the
@@ -316,5 +285,23 @@ void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s,
                                     struct mem_attr_info_t *p_attr);
 
 #endif /*TFM_MULTI_CORE_TOPOLOGY*/
+
+#if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
+/**
+ * \brief Platform-specific check whether the current partition has access to a memory range
+ *
+ * The function checks whether the current partition has access to a memory range,
+ * taking into consideration the implementation-defined attribution unit that is
+ * present on a particular platform.
+ *
+ * \param[in] p      The start address of the range to check
+ * \param[in] s      The size of the range to check
+ * \param[in] flags  The flags to pass to the cmse_check_address_range func
+ *
+ * \return True if the access is granted, false otherwise.
+ */
+bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
+                                              int flags);
+#endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
 
 #endif /* __TFM_SPM_HAL_H__ */

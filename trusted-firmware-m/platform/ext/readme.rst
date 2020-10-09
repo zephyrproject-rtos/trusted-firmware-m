@@ -174,11 +174,11 @@ updatable images with the related flash areas that hold the firmware images:
 
 - ``IMAGE_EXECUTABLE_RAM_START`` - Defines the start of the region to which
   images are allowed to be loaded. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is
-  configured to be ``RAM_LOADING``.
+  configured to be ``RAM_LOAD``.
 
 - ``IMAGE_EXECUTABLE_RAM_SIZE`` - Defines the size of the region to which images
   are allowed to be loaded. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is
-  configured to be ``RAM_LOADING``.
+  configured to be ``RAM_LOAD``.
 
 Assemble tool
 ^^^^^^^^^^^^^
@@ -200,7 +200,7 @@ binary. It requires the following definition:
 
 - ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded and
   is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to
-  be ``RAM_LOADING``.
+  be ``RAM_LOAD``.
 
 Protected Storage (PS) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -226,6 +226,8 @@ The PS service requires the following definitions:
 .. Note::
 
     The sectors must be consecutive.
+    The platform may implement ``tfm_hal_ps_fs_info()`` as an alternative
+    to defining ``PS_FLASH_AREA_ADDR`` and ``PS_FLASH_AREA_SIZE``.
 
 Internal Trusted Storage (ITS) Service definitions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -251,6 +253,8 @@ The ITS service requires the following definitions:
 .. Note::
 
     The sectors must be consecutive.
+    The platform may implement ``tfm_hal_its_fs_info()`` as an alternative
+    to defining ``ITS_FLASH_AREA_ADDR`` and ``ITS_FLASH_AREA_SIZE``.
 
 ***************************************
 Expose target support for HW components
@@ -266,3 +270,4 @@ HW components:
 --------------
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

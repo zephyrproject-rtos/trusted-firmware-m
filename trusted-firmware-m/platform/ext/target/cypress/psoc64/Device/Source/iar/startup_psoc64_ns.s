@@ -236,7 +236,7 @@ __Vectors_End
 __Vectors       EQU     __vector_table
 __Vectors_Size  EQU     __Vectors_End - __Vectors
 
-                DATA
+                SECTION  .data:DATA(2)
                 EXPORT  __ramVectors
 __ramVectors
                 DS8     __Vectors_Size

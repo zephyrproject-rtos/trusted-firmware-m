@@ -1,44 +1,87 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.7)
-
-# Tell cmake where our modules can be found
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../../cmake)
-
-###Some project global settings
-set (INTERNAL_TRUSTED_STORAGE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-get_filename_component(TFM_ROOT_DIR "${INTERNAL_TRUSTED_STORAGE_DIR}/../../.." ABSOLUTE)
-
-#Include common stuff to control cmake.
-include("Common/BuildSys")
-
-#Start an embedded project.
-embedded_project_start(CONFIG "${TFM_ROOT_DIR}/configs/ConfigDefault.cmake")
-project(tfm_internal_trusted_storage LANGUAGES ASM C)
-embedded_project_fixup()
-
-###Get the definition of what files we need to build
-include(CMakeLists.inc)
-
-if (NOT DEFINED TFM_LVL)
-    message(FATAL_ERROR "Incomplete build configuration: TFM_LVL is undefined. ")
+if (NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+    return()
 endif()
 
-# Specify what we build (for the internal trusted storage service, build as a static library)
-add_library(tfm_internal_trusted_storage STATIC ${ALL_SRC_ASM} ${ALL_SRC_C})
+cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0079 NEW)
 
-#Set common compiler and linker flags
-if (DEFINED CMSE_FLAGS)
-    embedded_set_target_compile_flags(TARGET tfm_internal_trusted_storage LANGUAGE C APPEND FLAGS ${CMSE_FLAGS})
-endif()
-config_setting_shared_compiler_flags(tfm_internal_trusted_storage)
-config_setting_shared_linker_flags(tfm_internal_trusted_storage)
+add_library(tfm_partition_its STATIC)
 
-embedded_set_target_compile_defines(TARGET tfm_internal_trusted_storage LANGUAGE C DEFINES __thumb2__ TFM_LVL=${TFM_LVL})
+target_include_directories(tfm_partition_its
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    PUBLIC
+        # Required for ps_object_defs.h
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../protected_storage
+)
 
-embedded_project_end(tfm_internal_trusted_storage)
+target_sources(tfm_partition_its
+    PRIVATE
+        tfm_its_req_mngr.c
+        tfm_internal_trusted_storage.c
+        its_utils.c
+        flash/its_flash.c
+        flash/its_flash_nand.c
+        flash/its_flash_nor.c
+        flash/its_flash_ram.c
+        flash/its_flash_info_internal.c
+        flash/its_flash_info_external.c
+        flash_fs/its_flash_fs.c
+        flash_fs/its_flash_fs_dblock.c
+        flash_fs/its_flash_fs_mblock.c
+)
+
+target_link_libraries(tfm_partition_its
+    PRIVATE
+        tfm_secure_api
+        platform_s
+        psa_interface
+)
+
+target_compile_definitions(tfm_partition_its
+    PUBLIC
+        $<$<BOOL:${PS_CREATE_FLASH_LAYOUT}>:PS_CREATE_FLASH_LAYOUT>
+        $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
+        $<$<BOOL:${PS_RAM_FS}>:PS_RAM_FS>
+        $<$<BOOL:${PS_ROLLBACK_PROTECTION}>:PS_ROLLBACK_PROTECTION>
+        $<$<BOOL:${PS_VALIDATE_METADATA_FROM_FLASH}>:PS_VALIDATE_METADATA_FROM_FLASH>
+        $<$<BOOL:${PS_CRYPTO_AEAD_ALG}>:PS_CRYPTO_AEAD_ALG=${PS_CRYPTO_AEAD_ALG}>
+    PRIVATE
+        $<$<BOOL:${ITS_CREATE_FLASH_LAYOUT}>:ITS_CREATE_FLASH_LAYOUT>
+        $<$<BOOL:${ITS_RAM_FS}>:ITS_RAM_FS>
+        $<$<OR:$<BOOL:${ITS_VALIDATE_METADATA_FROM_FLASH}>,$<BOOL:PS_VALIDATE_METADATA_FROM_FLASH>>:ITS_VALIDATE_METADATA_FROM_FLASH>
+        $<$<BOOL:${ITS_BUF_SIZE}>:ITS_BUF_SIZE>
+)
+
+############################ Secure API ########################################
+
+target_sources(tfm_secure_api
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_its_secure_api.c
+)
+
+# The veneers give warnings about not being properly declared so they get hidden
+# to not overshadow _real_ warnings.
+set_source_files_properties(tfm_its_secure_api.c
+    PROPERTIES
+        COMPILE_FLAGS -Wno-implicit-function-declaration
+)
+
+############################ Partition Defs ####################################
+
+target_link_libraries(tfm_partitions
+    INTERFACE
+        tfm_partition_its
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+)

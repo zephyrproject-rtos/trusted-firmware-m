@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "attestation_key.h"
-#include "platform/include/tfm_plat_crypto_keys.h"
+#include "attest_key.h"
+#include "tfm_plat_crypto_keys.h"
 #include "psa/crypto.h"
 #include "tfm_memory_utils.h"
 

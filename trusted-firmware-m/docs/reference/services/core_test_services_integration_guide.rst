@@ -11,23 +11,10 @@ multiple services that are used by the core test suites. The services are
 defined in the ``test/test_services`` folder.
 
 Currently there are two test suites, *interactive* and *positive*. The positive
-test suite can be run, by building using ``ConfigCoreTest.cmake`` as cmake
-config file. The interactive test suite is only available by manually setting
-CORE_TEST_INTERACTIVE to ON in the following block in ``CommonConfig.cmake``:
-
-.. code-block:: cmake
-
-	if (CORE_TEST)
-		set(CORE_TEST_POSITIVE ON)
-		set(CORE_TEST_INTERACTIVE OFF)
-	endif()
-
-A platform can skip Core Test by setting ``CORE_TEST`` to ``OFF`` in its cmake
-configuration file, even though ``CORE_TEST`` is enabled by default in current
-configuration.
-
-After making the change, the tests can be run by building using
-``ConfigCoreTest.cmake`` as cmake config file.
+test suite can be run by building using non-secure regression tests using
+``-DTEST_NS``. The interactive test suite is only available by setting
+``-DTFM_INTERACTIVE_TEST=ON`` while the non-secure regression testsuite is
+enabled.
 
 **************************
 Platform specific features
@@ -115,4 +102,4 @@ script in the `IRQ testing tool <https://git.trustedfirmware.org/TF-M/tf-m-tools
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

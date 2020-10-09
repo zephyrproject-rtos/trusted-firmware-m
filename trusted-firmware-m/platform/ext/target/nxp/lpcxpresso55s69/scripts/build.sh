@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright (c) 2020, Linaro. All rights reserved.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Exit on error
@@ -17,19 +18,11 @@ else
     readlink=readlink
 fi
 
-# Set the config file to use
-configfile=ConfigDefault
-# configfile=ConfigCoreIPC
-# configfile=ConfigRegression
-
 # Generate the S and NS makefiles
-cmake -G"Unix Makefiles" \
-        -DPROJ_CONFIG=`$readlink -f ../configs/$configfile.cmake` \
-        -DTARGET_PLATFORM=LPC55S69 \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DBL2=False \
-        -DCOMPILER=GNUARM \
-        ../
+cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
+      -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+      -DCMAKE_BUILD_TYPE=Debug \
+      ../
 
 # Build the binaries
 make install

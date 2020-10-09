@@ -1,12 +1,13 @@
 /*
  * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "its_flash_nand.h"
-#include "Driver_Flash.h"
+#include "driver/Driver_Flash.h"
 #include "tfm_memory_utils.h"
 
 static uint32_t buf_block_id = ITS_BLOCK_INVALID_ID;
@@ -25,7 +26,8 @@ static uint8_t write_buf[ITS_SECTOR_SIZE * ITS_SECTORS_PER_BLOCK];
 static uint32_t get_phys_address(const struct its_flash_info_t *info,
                                  uint32_t block_id, size_t offset)
 {
-    return info->flash_area_addr + (block_id * info->block_size) + offset;
+    return info->fs_info.flash_area_addr + (block_id * info->block_size)
+            + offset;
 }
 
 psa_status_t its_flash_nand_init(const struct its_flash_info_t *info)

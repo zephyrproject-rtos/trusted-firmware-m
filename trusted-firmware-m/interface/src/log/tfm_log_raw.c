@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "log/tfm_log_raw.h"
-#include "uart_stdout.h"
+#include "common/uart_stdout.h"
 
 #define PRINT_BUFF_SIZE 32
 #define NUM_BUFF_SIZE 12

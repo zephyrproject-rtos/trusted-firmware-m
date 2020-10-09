@@ -81,14 +81,16 @@ Supported CMake versions
 
 The build-system is CMake based and supports the following versions:
 
-    - 3.7
-    - 3.10
-    - 3.11
-    - 3.12
     - 3.13
     - 3.14
+    - 3.15
+    - 3.16
+    - 3.17
+    - 3.18
 
 .. Note::
+    - IAR requires version 3.14 or later.
+    - ARMClang requires version 3.15 or later.
     - Please use the latest build version available (i.e. 3.7.2 instead of
       3.7.0).
       While it is preferable to use the newest version this is not required
@@ -98,7 +100,6 @@ The build-system is CMake based and supports the following versions:
       https://cmake.org/files.
     - For Cygwin users, please use a native windows CMake version
       instead of the version installed with Cygwin.
-    - IAR requires version 3.14 or later.
 
 ***************************
 Supported GNU make versions
@@ -124,26 +125,9 @@ officially supported.
 External dependencies
 *********************
 
-In order to build TF-M the following external projects are required:
-
-    - `Mbed Crypto library <https://github.com/ARMmbed/mbed-crypto>`__ v3.0.1
-      is used as crypto library on the secure side
-    - `MCUboot <https://github.com/JuulLabs-OSS/mcuboot>`__ v1.6.0 is used as
-      the default bootloader in TF-M
-
-And the following TF-M projects as well:
-    - `TF-M tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git>`__
-
-Each of the listed dependencies should be placed in a common root directory
-with trustedfirmware-m
-
-.. code-block:: bash
-
-    .
-    ├── mbed-crypto
-    ├── mcuboot
-    ├── tf-m-tests
-    └── trusted-firmware-m
+Dependency management is now handled by cmake. If you wish to alter this
+behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
+dependency management`
 
 ********************************************
 Tools for configuring and programming boards
@@ -170,11 +154,11 @@ Install the following tools:
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
 - Python3 and the pip package manager (from Python 3.4 it's included)
-- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0*
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click, imgtool v1.6.0*
 
   .. code-block:: bash
 
-    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
 - SRecord v1.58 (for Musca test chip boards)
 
@@ -230,11 +214,11 @@ Install the following tools:
   installation.
 - Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
   the pip package manager (from Python 3.4 it's included)
-- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0*
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click imgtool v1.6.0*
 
   .. code-block:: bash
 
-    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
 - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
   chip boards)
@@ -492,6 +476,8 @@ To build the TF-M firmware the following tools are needed:
    "jinja2",,"Firmware"
    "cryptography",,"Firmware"
    "cbor",,"Firmware"
+   "click",,"Firmware"
+   "imgtool",,"Firmware"
    "Doxygen",">1.8","Reference manual"
    "Sphinx",">1.4","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
@@ -542,11 +528,15 @@ Dependency chain:
     fw --> yaml
     fw --> jinja2
     fw --> cbor
+    fw --> click
+    fw --> imgtool
     cryptography --> Python3
     pyasn1 --> Python3
     yaml --> Python3
     jinja2 --> Python3
     cbor --> Python3
+    click --> Python3
+    imgtool --> Python3
 
     [*] --> u_guide
     u_guide --> Sphinx

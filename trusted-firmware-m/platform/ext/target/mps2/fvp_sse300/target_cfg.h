@@ -65,7 +65,7 @@ struct memory_region_limits {
 struct tfm_spm_partition_platform_data_t {
     uint32_t periph_start;
     uint32_t periph_limit;
-    int16_t periph_ppc_bank;
+    enum ppc_bank_e periph_ppc_bank;
     int16_t periph_ppc_mask;
 };
 

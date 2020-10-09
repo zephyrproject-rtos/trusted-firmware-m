@@ -82,7 +82,7 @@ Implementation of security counter
 The value of the security counter is a security critical data. Any change in
 its value has a security implication. Therefore it must be in the integrity
 protected part of the image manifest. Because the image header is almost fully
-utilised (few unused fields) and the change of image header structure could
+utilized (few unused fields) and the change of image header structure could
 lead to compatibility issues between boot loader and runtime software, it is
 proposed to extend the integrity protection to some part of the TLV section.
 One of the unused fields in the image header can be used to store the size of
@@ -200,4 +200,4 @@ of the TLV section.
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
