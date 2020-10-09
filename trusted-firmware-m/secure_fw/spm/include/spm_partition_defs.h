@@ -37,4 +37,6 @@
  */
 #define SPM_MAX_PARTITIONS (TFM_MAX_USER_PARTITIONS + TFM_INTERNAL_PARTITIONS)
 
+typedef void(*sp_entry_point)(void);
+
 #endif /* __SPM_PARTITION_DEFS_H__ */

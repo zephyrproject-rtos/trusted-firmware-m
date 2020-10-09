@@ -1,0 +1,47 @@
+From b3374d25ef8a478996b5980f98f03c6b0abbd66d Mon Sep 17 00:00:00 2001
+From: Raef Coles <raef.coles@arm.com>
+Date: Wed, 2 Sep 2020 10:12:45 +0100
+Subject: [PATCH 4/6] Add variable to disable install targets
+
+Signed-off-by: Raef Coles <raef.coles@arm.com>
+---
+ library/CMakeLists.txt | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/library/CMakeLists.txt b/library/CMakeLists.txt
+index 02cd157bb..36d6c999a 100644
+--- a/library/CMakeLists.txt
++++ b/library/CMakeLists.txt
+@@ -204,9 +204,11 @@ if(USE_STATIC_MBEDTLS_LIBRARY)
+     set_target_properties(${mbedtls_static_target} PROPERTIES OUTPUT_NAME mbedtls)
+     target_link_libraries(${mbedtls_static_target} ${libs} ${mbedx509_static_target})
+ 
+-    install(TARGETS ${mbedtls_static_target} ${mbedx509_static_target} ${mbedcrypto_static_target}
+-            DESTINATION ${LIB_INSTALL_DIR}
+-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
++    if(INSTALL_MBEDTLS)
++        install(TARGETS ${mbedtls_static_target} ${mbedx509_static_target} ${mbedcrypto_static_target}
++                DESTINATION ${LIB_INSTALL_DIR}
++                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
++    endif()
+ endif(USE_STATIC_MBEDTLS_LIBRARY)
+ 
+ if(USE_SHARED_MBEDTLS_LIBRARY)
+@@ -231,9 +233,11 @@ if(USE_SHARED_MBEDTLS_LIBRARY)
+     target_include_directories(${mbedtls_target}
+         PUBLIC ${${mbedtls_target}_DIR}/include/)
+ 
+-    install(TARGETS ${mbedtls_target} ${mbedx509_target} ${mbedcrypto_target}
+-            DESTINATION ${LIB_INSTALL_DIR}
+-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
++    if(INSTALL_MBEDTLS)
++        install(TARGETS ${mbedtls_target} ${mbedx509_target} ${mbedcrypto_target}
++                DESTINATION ${LIB_INSTALL_DIR}
++                PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
++    endif()
+ endif(USE_SHARED_MBEDTLS_LIBRARY)
+ 
+ if(NOT DEFINED lib_target)
+-- 
+2.20.1
+

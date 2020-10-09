@@ -7,7 +7,6 @@
 
 #include <stdbool.h>
 #include "target.h"
-#include "bl2_util.h"
 #include "flash_map/flash_map.h"
 #include "flash_map_backend/flash_map_backend.h"
 #include "bootutil/bootutil_log.h"
@@ -15,6 +14,8 @@
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
 static const struct flash_area flash_map[] = {
     {

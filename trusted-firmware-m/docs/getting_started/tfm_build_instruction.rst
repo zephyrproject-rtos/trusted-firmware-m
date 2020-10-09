@@ -4,345 +4,522 @@ Build instructions
 Please make sure you have all required software installed as explained in the
 :doc:`software requirements <tfm_sw_requirement>`.
 
-The external dependecies are briefly listed in the
-:ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
-
-The configuration-table
-:ref:`docs/getting_started/tfm_build_instruction:Configuring the build` section
-explains all the supported build parameters:
-
 ****************
 TF-M build steps
 ****************
 TF-M uses `cmake <https://cmake.org/overview/>`__ to provide an out-of-source
 build environment. The instructions are below.
 
-.. Note::
-
-    It is recommended to build each different build configurations in separate
-    directories.
+Cmake version ``3.13.0`` or higher is supported, but version ``3.15.0`` or
+higher is required for ARMclang support.
 
 Getting the source-code
 =======================
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
-    git clone https://github.com/ARMmbed/mbed-crypto.git -b mbedcrypto-3.0.1
-    git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.6.0
+
+Dependency management is now handled by cmake. If you wish to alter this
+behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
+dependency management`
 
 .. Note::
-   For building with Armclang compiler version 6.10.0, please follow the note
+
+ - For building with Armclang compiler version 6.10.0, please follow the note
    in :ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
-
-.. Note::
-   For building with the IAR toolchain, please see the notes in
+ - For building with the IAR toolchain, please see the notes in
    :doc:`software requirements <tfm_build_instruction_iar>`
 
-Build steps for the AN521 target platform:
-==========================================
+.. _tfm_cmake_configuration:
+
+Cmake configuration
+===================
+
+All configuration options are provided by cmake variables, and their default
+values, with docstrings, can be found in ``config/config_default.cmake``.
+
+Configuration is provided in multiple stages, with multiple priorities.
+
+   1. ``config/config_default.cmake`` is loaded.
+   2. Command-line variable settings are applied, overriding all previous settings.
+   3. If it exists, CMAKE_BUILD_TYPE specific config is applied from ``config/build_type/<build_type>.cmake``, overriding all previous settings.
+   4. If it exists, TFM Profile specific config is applied from ``config/profile/<tfm_profile>.cmake``, overriding all previous settings.
+   5. Target specific config from ``platform/ext/target/<target_platform>/config.cmake`` is applied, overriding all previous settings.
+   6. If the ``TFM_EXTRA_CONFIG_PATH`` variable has been set, that file is loaded and overrides all previous settings.
+
+.. Warning::
+    This means that command-line settings are not applied when they conflict
+    with required platform settings. If it is required to override platform
+    settings (this is not usually a good idea) then TFM_EXTRA_CONFIG_PATH should be
+    used.
+
+Required cmake parameters for building TF-M
+-------------------------------------------
+
++----------------------+-------------------------------------------------------+
+| Parameter            | Description                                           |
++======================+=======================================================+
+| TFM_PLATFORM         | The target platform as a path from the base directory |
+|                      | ``/platform/ext/target``                              |
++----------------------+-------------------------------------------------------+
+| CMAKE_TOOLCHAIN_FILE | The path to the toolchain file that corresponds to    |
+|                      | the desired compiler.                                 |
++----------------------+-------------------------------------------------------+
+
+By default release configuration builds. Alternate build types can be controlled
+by the CMAKE_BUILD_TYPE variable.
+
+Build type
+----------
+
+Build type is controlled by the ``CMAKE_BUILD_TYPE`` variable. The possible
+types are:
+
+ - ``Debug``
+ - ``Relwithdebinfo``
+ - ``Release``
+ - ``Minsizerel``
+
+``Release`` is default.
+
+Both ``Debug`` and ``Relwithdebinfo`` will include debug symbols in the output
+files. ``Relwithdebinfo``, ``Release`` and ``Minsizerel`` have optimization
+turned on and hence will produce smaller, faster code. ``Minsizerel`` will
+produce the smallest code, and hence is often a good idea on RAM or flash
+constrained systems.
+
+Other cmake parameters
+----------------------
+
+The full list of default options is in ``config/config_default.cmake``. Several
+important options are listed below.
+
+
++---------------------+----------------------------------------+---------------+
+| Parameter           | Description                            | Default value |
++=====================+========================================+===============+
+| BL2                 | Build level 2 secure bootloader.       | ON            |
++---------------------+----------------------------------------+---------------+
+| NS                  | Build NS app. Required for test code.  | ON            |
++---------------------+----------------------------------------+---------------+
+| TFM_PSA_API         | Use PSA api (IPC mode) instead of      | OFF           |
+|                     | secure library mode.                   |               |
++---------------------+----------------------------------------+---------------+
+| TFM_ISOLATION_LEVEL | Set TFM isolation level.               | 1             |
++---------------------+----------------------------------------+---------------+
+| TFM_PROFILE         | Set TFM profile.                       |               |
++---------------------+----------------------------------------+---------------+
+| TEST_S              | Build secure regression tests.         | OFF           |
++---------------------+----------------------------------------+---------------+
+| TEST_NS             | Build non-secure regression tests.     | OFF           |
++---------------------+----------------------------------------+---------------+
+| TEST_PSA_API        | Build PSA API TESTS for the given      |               |
+|                     | suite. Takes a PSA api ``SUITE`` as an |               |
+|                     | argument (``CRYPTO`` etc).             |               |
++---------------------+----------------------------------------+---------------+
+
+Regression test configuration
+-----------------------------
+
+Regression test configuration is controlled entirely by the ``TEST_S`` and
+``TEST_NS`` cmake variables.
+
+If regression testing is enabled, it will then enable all tests for the enabled
+secure partitions. If IPC mode is enabled via ``TFM_PSA_API`` the IPC tests will
+be enabled. QCBOR and T_COSE tests are linked to the Initial Attestation
+partition, as they are only used there. Multicore tests will be enabled if
+``TFM_MULTI_CORE_TOPOLOGY`` is enabled.
+
+Some cryptographic tests can be enabled and disabled. This is done to prevent
+false failures from being reported when a smaller Mbed Crypto config is being
+used which does not support all features.
+
++-----------------------------+-------------------------------------+---------------+
+| Parameter                   | Description                         | Default value |
++=============================+=====================================+===============+
+| TFM_CRYPTO_TEST_ALG_CBC     | Test CBC cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CCM     | Test CCM cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CFB     | Test CFB cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CTR     | Test CTR cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_GCM     | Test GCM cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_SHA_512 | Test SHA-512 cryptography algorithm | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
++-----------------------------+-------------------------------------+---------------+
+
+
+PSA test configuration
+----------------------
+
+PSA tests are configured by using the ``TEST_PSA_API`` cmake variable. The
+variable should be set to the name of the test suite that is desired. It is
+_not_ supported to set both ``TEST_PSA_API`` and ``TEST_S`` or ``TEST_NS``.
+
+The Functional API tests are:
+ - ``CRYPTO``
+ - ``INITIAL_ATTESTATION``
+ - ``STORAGE`` (INTERNAL_TRUSTED_STORAGE and PROTECTED_STORAGE)
+ - ``INTERNAL_TRUSTED_STORAGE``
+ - ``PROTECTED_STORAGE``
+
+The Firmware Framework test suites are:
+ - ``IPC``
+
+Note that these map directly to the ``SUITE`` cmake variable used in the
+psa-arch-tests documentation.
+
+Migration from legacy buildsystem
+---------------------------------
+
+The previous (legacy) cmake buildsystem made use of separate configuration
+files, where now build options are controlled by variables. For ease of
+transition, a table below is provided that maps the legacy files to the current
+variables, in the format of cmake command line parameters.
+
++------------------------------------------+-----------------------------------+
+| File                                     | Cmake command line                |
++==========================================+===================================+
+| ConfigDefault.cmake                      | <No options>                      |
++------------------------------------------+-----------------------------------+
+| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                  |
++------------------------------------------+-----------------------------------+
+| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                  |
+|                                          | -DTFM_ISOLATION_LEVEL=2           |
++------------------------------------------+-----------------------------------+
+| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small       |
++------------------------------------------+-----------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
++------------------------------------------+-----------------------------------+
+| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON          |
++------------------------------------------+-----------------------------------+
+| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON          |
+|                                          | -DTFM_PSA_API=ON                  |
++------------------------------------------+-----------------------------------+
+| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON          |
+|                                          | -DTFM_PSA_API=ON                  |
+|                                          | -DTFM_ISOLATION_LEVEL=2           |
++------------------------------------------+-----------------------------------+
+| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small       |
+|                                          | -DTEST_NS=ON -DTEST_S=ON          |
++------------------------------------------+-----------------------------------+
+| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium      |
+|                                          | -DTEST_NS=ON -DTEST_S=ON          |
++------------------------------------------+-----------------------------------+
+| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>       |
++------------------------------------------+-----------------------------------+
+| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>       |
+|                                          | -DTFM_PSA_API=ON                  |
++------------------------------------------+-----------------------------------+
+| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>       |
+|                                          | -DTFM_PSA_API=ON                  |
+|                                          | -DTFM_ISOLATION_LEVEL=2           |
++------------------------------------------+-----------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
+| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PS=OFF            |
++------------------------------------------+-----------------------------------+
+
+There has also been some changes to the PSA manifest file generation. The files
+are now generated into a seperate tree in the ``<tfm build dir>/generated``
+directory. Therefore they have been removed from the source tree. Any changes
+should be made only to the template files.
+
+The api for the ``tools/tfm_parse_manifest_list.py`` script has also changed
+slightly. It is no longer required to be run manually as it is run as part of
+cmake.
+
+*******************
+TF-M build examples
+*******************
+
+Example: building TF-M for AN521 platform using GCC:
+====================================================
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
+    cd trusted-firmware-m
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake --build cmake_build -- install
+
+Alternately using traditional cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG
-    cmake --build ./ -- install
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    make install
+
+.. Note::
+   Unix Makefiles is the default generator. Ninja is also supported by setting
+   -GNinja
+
+.. Note::
+
+    It is recommended to build each different build configuration in a separate
+    build directory.
 
 Regression Tests for the AN521 target platform
 ==============================================
-*TF-M build regression tests on Linux*
+
+Regression tests can be build by using the TEST_S and TEST_NS settings. Either
+can be used in isolation or both can be used to enable both suites. All tests
+for all enabled partitions are run, along with IPC and Multicore tests if those
+features are enabled.
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
-    mkdir cmake_test
-    cd cmake_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake --build cmake_build -- install
 
-*TF-M build regression tests on Windows*
+Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
-    mkdir cmake_test
-    cd cmake_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`cygpath -am ../configs/ConfigRegression.cmake` -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+    mkdir cmake_build
+    cd cmake_build
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    make install
 
-Build for PSA Developer API compliance tests
-============================================
-The build system provides the support for linking with prebuilt PSA Developer
-API compliance NS test libraries when using the ``ConfigPsaApiTest.cmake``,
-``ConfigPsaApiTestIPC.cmake`` or ``ConfigPsaApiTestIPCTfmLevel2.cmake`` config
-file. The build system assumes that the PSA API compliance test suite is checked
-out at the same level of the TF-M root folder and the default name for the build
-folder has been used when compiling the PSA API compliance tests. Each set of
-tests for the Internal Trusted Storage, Protected Storage, Crypto and Attestation
-services needs to be enabled at the build configuration step by defining::
+Build for PSA Functional API compliance tests
+=============================================
+The build system provides support for building and integrating the PSA API tests
+from https://github.com/ARM-software/psa-arch-tests. PSA API tests are
+controlled using the TEST_PSA_API variable. Enabling both regression tests and
+PSA API tests simultaneously is **not** supported.
 
-    -DPSA_API_TEST_INTERNAL_TRUSTED_STORAGE=ON
-    -DPSA_API_TEST_PROTECTED_STORAGE=ON
-    -DPSA_API_TEST_STORAGE=ON
-    -DPSA_API_TEST_CRYPTO=ON
-    -DPSA_API_TEST_INITIAL_ATTESTATION=ON
+The value of the TEST_PSA_API variable is the suite to be run.
 
-respectively for the corresponding service. For example, to enable the PSA API
-tests for the Crypto service only:
+.. code-block::
+
+    -DTEST_PSA_API=INTERNAL_TRUSTED_STORAGE
+    -DTEST_PSA_API=PROTECTED_STORAGE
+    -DTEST_PSA_API=STORAGE
+    -DTEST_PSA_API=CRYPTO
+    -DTEST_PSA_API=INITIAL_ATTESTATION
+
+Respectively for the corresponding service. For example, to enable the PSA API
+tests for the Crypto service:
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
-    mkdir cmake_psa_test
-    cd cmake_psa_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTest.cmake` -DPSA_API_TEST_CRYPTO=ON -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    cmake --build cmake_build -- install
+
+Alternately using traditional cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
+    cd trusted-firmware-m
+    mkdir cmake_build
+    cd cmake_build
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    make install
 
 Build for PSA FF (IPC) compliance tests
 =======================================
 
-The build system assumes that the PSA FF compliance test suite is checked out
-at the same level of the TF-M root folder and the default name for the build
-folder has been used when compiling the PSA FF compliance tests.
+The build system provides support for building and integrating the PSA FF
+compliance test. This support is controlled by the TEST_PSA_API variable:
 
-Parse the PSA FF compliance tests partition manifests using a tool script named
-as ``tfm_parse_manifest_list.py``. This tool updates the TFM partitions data
-structure with PSA test suite partitions detail and creates the manifest output
-files that are required for the PSA test suite build. Using these manifest
-output files, build the PSA FF compliance tests as per the instructions
-given in the PSA FF compliance tests README.
+.. code-block::
+
+    -DTEST_PSA_API=IPC
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
-    python tools/tfm_parse_manifest_list.py -m tools/tfm_psa_ff_test_manifest_list.yaml append
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake --build cmake_build -- install
 
-The build system provides the support for linking with prebuilt PSA FF
-compliance NS and S test libraries when using the ``ConfigPsaApiTestIPC.cmake``
-or ``ConfigPsaApiTestIPCTfmLevel2.cmake`` config file.  The PSA FF compliance
-tests need to be enabled at the build configuration step by defining::
-
-    -DPSA_API_TEST_IPC=ON.
-
-For example, to enable the PSA FF tests for ConfigPsaApiTestIPCTfmLevel2.cmake
-config :
+Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <TF-M base folder>
+    cd <base folder>
     cd trusted-firmware-m
-    mkdir cmake_psa_test
-    cd cmake_psa_test
-    cmake -G"Unix Makefiles" -DPROJ_CONFIG=`readlink -f ../configs/ConfigPsaApiTestIPCTfmLevel2.cmake` -DPSA_API_TEST_IPC=ON -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG ../
-    cmake --build ./ -- install
+    mkdir cmake_build
+    cd cmake_build
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    make install
 
 Location of build artifacts
 ===========================
-The build system defines an API which allow easy usage of build
-artifacts. The ``install`` build target copies all files which might be needed
-as a dependency by external tools or build systems to the
-``<build_dir>/install/outputs``
-directory, with the following directory hierarchy:
 
-::
+All build artifacts are provided in the ``<build_dir>/bin`` directory. It is
+**not** required to run ``make install`` to generate artifacts in this location.
 
-    <build_dir>/install/outputs/fvp/
-    <build_dir>/install/outputs/<target_platform>/
 
-There is one folder for FVP testing, with more elaborate naming and
-there is an other for testing on target hardware platform (AN521, etc.), where
-naming convention is aligned with 8.3 format. The dependency tree of
-``install`` build target ensures a proper update (i.e. build) of all output
-files before the actual installation step takes place. As such it is suggested
-to use this build target to build TF-M.
-
-Export dependency files for NS applications
--------------------------------------------
-An NS application requires a number of files to interface with TF-M.
-The build system exports these files as part of the ``install`` target and
-places them in to a single directory::
-
-    <build_dir>/install/export/tfm
-
-Further details on how to integrate a new NS app with TF-M are available in the
-:doc:`integration guide <tfm_integration_guide>`.
+For the purposes of maintaining compatibility with the legacy cmake build
+system, they are also provided in
+``<build_dir>/install/outputs/<target_platform>/``. In order to generate the
+artifacts in this location ``make install`` must be run.
 
 Building the documentation
 ==========================
-Please ensure the dependencies for building the firmware and the
-documentation are installed as explained in the
-:doc:`software requirements <tfm_sw_requirement>`.
+Please ensure the dependencies for building the documentation are installed
+as explained in the :doc:`software requirements <tfm_sw_requirement>`. The
+requirements to build the firmware, are only required when using the CMAKE
+method
 
-Building PDF output is optional and can be disabled by removing LaTex from the
-PATH.
+There are currently two ways of building the documentation:
+- Using the CMake build system as custom targets
+- Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
+
+Using the CMake build-system
+----------------------------
+
+Building PDF output can be requested by invoking `tfm_docs_userguide_pdf/
+tfm_docs_userguide_pdf`
 
 .. Note::
    For building the documentation all tools needed to build the firmware must
    be available.
 
 Building the Reference Manual
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
     cd <TF-M base folder>
-    mkdir cmake_doc
-    cd cmake_doc
-    cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=GNUARM
-    cmake --build ./ -- install_doc
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
 
 The documentation files will be available under the directory::
 
-    cmake_doc/install/doc/reference_manual
+    cmake_doc/docs/reference_manual
 
 Building the User Guide
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
     cd <TF-M base folder>
-    mkdir cmake_doc
-    cd cmake_doc
-    cmake ../ -G"Unix Makefiles" -DTARGET_PLATFORM=AN521 -DCOMPILER=ARMCLANG
-    cmake --build ./ -- install_userguide
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
 The documentation files will be available under the directory::
 
-    cmake_doc/install/doc/user_guide
+    cmake_doc/docs/user_guide
 
-*********************
-Configuring the build
-*********************
-The build configuration for TF-M is provided to the build system using command
-line arguments:
+Manually using documentation generation tools
+---------------------------------------------
 
-.. list-table::
-   :widths: 20 80
+Invoking Sphinx-build will build both user_guide and reference_manual
+targets.
 
-   * - -DPROJ_CONFIG=<file>
-     - Specifies the way the application is built.
+.. code-block:: bash
 
-       | <file> is the absolute path to configurations file
-         named as ``Config<APP_NAME>.cmake``.
-       | i.e. On Linux:
-         ``-DPROJ_CONFIG=`readlink -f ../configs/ConfigRegression.cmake```
+    # Build the documentation from build_docs directory
+    cd <TF-M base folder>/ build_docs/
+    sphinx-build ./ user_guide
 
-   * - -DTARGET_PLATFORM=<target platform name>
-     - Specifies the target platform.
-       Supported platforms:
+    # Build the documentation from a custom location
+    # setting the build_docs as input
 
-          - Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
-            ``-DTARGET_PLATFORM=AN521``
-          - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-            ``-DTARGET_PLATFORM=AN519``
-          - Arm SSE-123 Example Subsystem for MPS2+ (AN539)
-            ``-DTARGET_PLATFORM=AN539``
-          - Cortex-M55 SSE-300 subsystem for MPS2+ FVP
-            ``-DTARGET_PLATFORM=FVP_SSE300_MPS2``
-          - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
-            ``-DTARGET_PLATFORM=MUSCA_A``
-          - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
-            ``-DTARGET_PLATFORM=MUSCA_B1``
-          - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
-            ``-DTARGET_PLATFORM=MUSCA_S1``
-          - Cortex-M33 SSE-200 subsystem for MPS3 (AN524)
-            ``-DTARGET_PLATFORM=AN524``
-          - Cypress CYS0644ABZI-S2D44 board (PSoC64 platform)
-            ``-DTARGET_PLATFORM=psoc64``
-            See :doc:`Cypress PSoC 64 platform specifics </platform/ext/target/cypress/psoc64/cypress_psoc64_spec>`
-          - DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS platform)
-            ``-DTARGET_PLATFORM=SSE-200_AWS``
-          - DISCO_L562QE board (Cortex-M33 STM32L562)
-            ``-DTARGET_PLATFORM=STM_DISCO_L562QE``
-            See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
-          - NUCLEO_L552ZE_Q (Cortex-M33 STM32L552)
-            ``-DTARGET_PLATFORM=STM_NUCLEO_L552ZE_Q``
-            See :doc:`STM32L5xx platform specifics </platform/ext/target/stm/stm32l5xx/readme>`
+    # Note that using this method will still generate the reference manual
+    # to the  <TF-M base folder>/build_docs/reference_manual
+    cd <TF-M base folder>/OTHER_DIR/OTHER_DIR2
+    sphinx-build  <TF-M base folder>/build_docs/ DESIRED_OUTPUT_DIR
 
-   * - -DCOMPILER=<compiler name>
-     - Specifies the compiler toolchain
-       The possible values are:
+****************************
+Manual dependency management
+****************************
 
-         - ``ARMCLANG``
-         - ``GNUARM``
-   * - -DCMAKE_BUILD_TYPE=<build type>
-     - Configures debugging support.
-       The possible values are:
+The TF-M build system will by default fetch all dependencies with appropriate
+versions and store them inside the build tree. In this case, the build tree
+location is ``<build_dir>/lib/ext``, and the extra libraries can be cleaned by
+deleting that directory.
 
-         - ``Debug``
-         - ``Release``
-         - ``Relwithdebinfo``
-         - ``Minsizerel``
-   * - -DMBEDCRYPTO_DEBUG=<ON|OFF>
-     - Enables debug symbols for Mbed Crypto library. If a cryptographic
-       accelerator is enabled then this will also enable debug symbols and
-       logging for any accelerator libraries.
-   * - -DBUILD_DWARF_VERSION=<dwarf version>
-     - Configures DWARF version.
-       The possible values are:
+If you have local copies already, and wish to avoid having the libraries
+downloaded every time the build directory is deleted, then the following
+variables can be set to the paths to those local copies. This will disable the
+automatic downloading for that dependency.
 
-         - 2
-         - 3
-         - 4
++----------------+--------------------+-----------------------------------------------------+
+| Dependency     | Cmake variable     | Git repo URL                                        |
++================+====================+=====================================================+
+| Mbed Crypto    | MBEDCRYPTO_PATH    | https://github.com/ARMmbed/mbedtls                  |
++----------------+--------------------+-----------------------------------------------------+
+| tf-m-tests     | TFM_TEST_REPO_PATH | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
++----------------+--------------------+-----------------------------------------------------+
+| MCUboot        | MCUBOOT_PATH       | https://github.com/JuulLabs-OSS/mcuboot             |
++----------------+--------------------+-----------------------------------------------------+
+| psa-arch-tests | PSA_ARCH_TEST_PATH | https://github.com/ARM-software/psa-arch-tests      |
++----------------+--------------------+-----------------------------------------------------+
+
+For required versions of the dependencies, refer to ``config/config_default.cmake``.
 
 .. Note::
-    Follow :doc:`secure boot <./tfm_secure_boot>` to build the binaries with or
-    without BL2 bootloader.
+ - Some patches are required to the mbedtls repo to allow building it as part of
+   TF-M. While these patches are being upstreamed they are stored in
+   ``lib/ext/mbedcrypo``. In order to use a local copy of Mbed Crypto it is
+   required to apply all patch files in this directory.
 
-**************
-Configurations
-**************
-Configurations files under `configs` are TF-M provided configurations for building.
-They are used by the `-DPROJ_CONFIG` argument for the build command line.
-The following table describes the differences between the configurations:
+.. Note::
+ - CMSIS 5 is provided by the TF-M tests repo. If you wish to use a different
+   source for CMSIS 5, it can be configured using CMSIS_5_PATH.
 
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-|     Configuration      | Model [1]_ | TF-M LVL [2]_ | Regression [3]_ | Core Test [4]_ | IPC Test [5]_ | PSA API Test [6]_ |        Comment          |
-+========================+============+===============+=================+================+===============+===================+=========================+
-| Default                | Library    | 1             | No              | No             | No            | No                | TF-M, no tests          |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| Regression             | Library    | 1             | Yes             | Yes            | No            | No                | TF-M & Regression tests |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| CoreIPC                | IPC        | 1             | No              | No             | No            | No                | TF-M, no tests          |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| CoreIPCTfmLevel2       | IPC        | 2             | No              | No             | No            | No                | TF-M, no tests          |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| RegressionIPC          | IPC        | 1             | Yes             | Yes            | Yes           | No                | TF-M & Regression tests |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| RegressionIPCTfmLevel2 | IPC        | 2             | Yes             | Yes            | Yes           | No                | TF-M & Regression tests |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| PsaApiTest             | Library    | 1             | No              | No             | No            | Yes               | TF-M & PSA API tests    |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| PsaApiTestIPC          | IPC        | 1             | No              | No             | No            | Yes               | TF-M & PSA API tests    |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| PsaApiTestIPCTfmLevel2 | IPC        | 2             | No              | No             | No            | Yes               | TF-M & PSA API tests    |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| DefaultProfileS        | Library    | 1             | No              | No             | No            | No                | TF-M Profile Small,     |
-|                        |            |               |                 |                |               |                   | no tests [7]_           |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
-| RegressionProfileS     | Library    | 1             | Yes             | Yes            | No            | No                | TF-M Profile Small &    |
-|                        |            |               |                 |                |               |                   | Regression tests [7]_   |
-+------------------------+------------+---------------+-----------------+----------------+---------------+-------------------+-------------------------+
+.. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
+.. _Doxygen: https://www.doxygen.nl
 
-.. [1] Which TF-M Model is set: `CORE_IPC`. If `CORE_IPC` is set to true then the model is IPC model, otherwise it's library model.
+Example: building TF-M for AN521 platform with local Mbed Crypto
+================================================================
 
-.. [2] The TF-M isolation level `TFM_LVL`. Currently Library model supports level 1. IPC model supports level 1 and 2.
+Prepare Mbed Crypto repository
+------------------------------
 
-.. [3] Build regression tests or not: `REGRESSION`.
+This is only required to be done once. For dependencies that do not have any
+``.patch`` files in their ``lib/ext`` directory the only required step is
+cloning the repo and checking out the correct branch.
 
-.. [4] Build core tests or not: `CORE_TEST`.
+.. code-block:: bash
 
-.. [5] Build IPC tests or not: `IPC_TEST`. It can be only enabled in IPC model
+    cd <Mbed Crypto base folder>
+    git clone https://github.com/ARMmbed/mbedtls
+    cd mbedtls
+    git checkout <MBEDCRYPTO_VERSION from config_default.cmake>
+    git apply <TF-M base folder>/trusted-firmware-m/lib/ext/mbedcrypo/*.patch
 
-.. [6] Build for PSA API compliance tests or not: `PSA_API_TEST`.
+.. Note::
+ - <Mbed Crypto base folder> does not need to have any fixed posisition related
+   to the TF-M repo.
 
-.. [7] Profile Small config doesn't cover all the platforms. Please check
-       Profile Small config files to find out the supported platforms.
+Build TF-M
+----------
+
+With new cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
+    cd trusted-firmware-m
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake --build cmake_build -- install
+
+Alternately using traditional cmake syntax
+
+.. code-block:: bash
+
+    cd <base folder>
+    cd trusted-firmware-m
+    mkdir cmake_build
+    cd cmake_build
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    make install
 
 --------------
 

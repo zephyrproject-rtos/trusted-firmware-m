@@ -96,12 +96,12 @@ __Vectors_End
 __Vectors       EQU     __vector_table
 __Vectors_Size  EQU     __Vectors_End - __Vectors
 
-;                AREA    RESET_RAM, READWRITE, NOINIT
-                DATA
+                SECTION  .data:DATA(2)
 __ramVectors
                 DS8   __Vectors_Size
 
 ; Reset Handler
+                PUBWEAK  Reset_Handler
                 SECTION  .text:CODE:REORDER:NOROOT(2)
 Reset_Handler
                 CPSID   i              ; Disable IRQs

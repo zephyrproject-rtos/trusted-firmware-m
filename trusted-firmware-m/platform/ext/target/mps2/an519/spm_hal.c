@@ -8,13 +8,12 @@
 #include <stdio.h>
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
-#include "spm_api.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
-#include "secure_utilities.h"
+#include "utilities.h"
 #include "region.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
@@ -150,7 +149,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
            }
        };
 
-static enum spm_err_t tfm_spm_mpu_init(void)
+static enum tfm_plat_err_t tfm_spm_mpu_init(void)
 {
     int32_t i;
 
@@ -160,19 +159,19 @@ static enum spm_err_t tfm_spm_mpu_init(void)
         if (mpu_armv8m_region_enable(&dev_mpu_s,
             (struct mpu_armv8m_region_cfg_t *)&region_cfg[i])
             != MPU_ARMV8M_OK) {
-            return SPM_ERR_INVALID_CONFIG;
+            return TFM_PLAT_ERR_SYSTEM_ERR;
         }
     }
 
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);
 
-    return SPM_ERR_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 {
-    if (tfm_spm_mpu_init() != SPM_ERR_OK) {
+    if (tfm_spm_mpu_init() != TFM_PLAT_ERR_SUCCESS) {
         ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

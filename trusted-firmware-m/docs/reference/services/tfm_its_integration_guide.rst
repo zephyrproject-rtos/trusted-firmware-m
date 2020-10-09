@@ -197,10 +197,6 @@ Internal Trusted Storage Service Definitions
 ============================================
 The ITS service requires the following platform definitions:
 
-- ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
-  storage area starts.
-- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
-  internal trusted storage in bytes.
 - ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
   erasable unit) in bytes.
 - ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
@@ -234,6 +230,12 @@ platform information.
 The following optional platform definitions may also be defined in
 ``flash_layout.h`` or set at build time in ``platform/ext/<TARGET_NAME>.cmake``:
 
+- ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
+  storage area starts.
+  If not defined, the platform must implement ``tfm_hal_its_fs_info()``.
+- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
+  internal trusted storage in bytes.
+  If not defined, the platform must implement ``tfm_hal_its_fs_info()``.
 - ``ITS_BUF_SIZE``- Defines the size of the partition's internal data transfer
   buffer. If not provided, then ``ITS_MAX_ASSET_SIZE`` is used to allow asset
   data to be copied between the client and the filesystem in one iteration.
@@ -282,6 +284,8 @@ needs. The list of ITS services flags are:
   service. This flag is ``OFF`` by default. The ITS regression tests write/erase
   storage multiple time, so enabling this flag can increase the life of flash
   memory when testing.
+  If this flag is set to ``ON``, ITS_RAM_FS_SIZE must also be provided. This
+  specifies the size of the block of RAM to be used to simulate the flash.
 
   .. Note::
     If this flag is disabled when running the regression tests, then it is

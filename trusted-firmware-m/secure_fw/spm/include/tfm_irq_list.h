@@ -8,6 +8,7 @@
 #ifndef __TFM_IRQ_LIST_H__
 #define __TFM_IRQ_LIST_H__
 
+#include "tfm_hal_device_header.h"
 #include "psa/service.h"
 
 #define TFM_DEFAULT_SECURE_IRQ_PRIOTITY 128

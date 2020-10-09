@@ -920,7 +920,7 @@ psa_status_t psa_hash_compare(psa_algorithm_t alg,
                               const uint8_t *input,
                               size_t input_length,
                               const uint8_t *hash,
-                              const size_t hash_length);
+                              size_t hash_length);
 
 /** The type of the state data structure for multipart hash operations.
  *
@@ -1288,7 +1288,7 @@ psa_status_t psa_mac_verify(psa_key_handle_t handle,
                             const uint8_t *input,
                             size_t input_length,
                             const uint8_t *mac,
-                            const size_t mac_length);
+                            size_t mac_length);
 
 /** The type of the state data structure for multipart MAC operations.
  *
@@ -3490,10 +3490,10 @@ psa_status_t psa_key_derivation_output_bytes(
  *   length is determined by the curve, and sets the mandatory bits
  *   accordingly. That is:
  *
- *     - #PSA_ECC_CURVE_CURVE25519: draw a 32-byte string
- *       and process it as specified in RFC 7748 &sect;5.
- *     - #PSA_ECC_CURVE_CURVE448: draw a 56-byte string
- *       and process it as specified in RFC 7748 &sect;5.
+ *     - Curve25519 (#PSA_ECC_CURVE_MONTGOMERY, 255 bits): draw a 32-byte
+ *       string and process it as specified in RFC 7748 &sect;5.
+ *     - Curve448 (#PSA_ECC_CURVE_MONTGOMERY, 448 bits): draw a 56-byte
+ *       string and process it as specified in RFC 7748 &sect;5.
  *
  * - For key types for which the key is represented by a single sequence of
  *   \p bits bits with constraints as to which bit sequences are acceptable,

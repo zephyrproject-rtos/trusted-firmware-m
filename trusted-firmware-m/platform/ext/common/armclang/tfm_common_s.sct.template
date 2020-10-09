@@ -1,5 +1,3 @@
-#! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
-
 /*
  * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  *
@@ -30,12 +28,14 @@ LR_CODE S_CODE_START {
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
-        tfm_spm_services.o (+RO)
         platform_retarget_dev.o (+RO)
         device_definition.o (+RO)
         *(SFN)
         *armlib*
-        *libtfmsprt.a (+RO)
+        *libtfm_sprt.a (+RO)
+        *psa_client.* (+RO)
+        *psa_service.* (+RO)
+        *psa_lifecycle.* (+RO)
     }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */

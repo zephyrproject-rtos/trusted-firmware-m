@@ -27,7 +27,7 @@
 #include "bootutil/bootutil_log.h"
 #include "flash_map/flash_map.h"
 #include <inttypes.h>
-#include <target.h>
+#include "target.h"
 
 /*
  * Lookup the sector map for a given flash area.  This should fill in

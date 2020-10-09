@@ -22,6 +22,7 @@
  */
 
 #include "cmsis.h"
+#include "region.h"
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler Function Prototype
@@ -32,8 +33,8 @@ typedef void( *pFunc )( void );
   External References
  *----------------------------------------------------------------------------*/
 
-#define __MSP_INITIAL_SP              Image$$ARM_LIB_STACK_MSP$$ZI$$Limit
-#define __MSP_STACK_LIMIT             Image$$ARM_LIB_STACK_MSP$$ZI$$Base
+#define __MSP_INITIAL_SP              REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit)
+#define __MSP_STACK_LIMIT             REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base)
 
 extern uint32_t __MSP_INITIAL_SP;
 extern uint32_t __MSP_STACK_LIMIT;

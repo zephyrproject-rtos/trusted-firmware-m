@@ -480,3 +480,17 @@ static struct spi_ip6524_dev_data_t SPI0_DEV_DATA_NS = {
 struct spi_ip6524_dev_t SPI0_DEV_NS = {&(SPI0_DEV_CFG_NS),
                                        &(SPI0_DEV_DATA_NS)};
 #endif
+
+/* MUSCA S1 SCC driver structures */
+#ifdef MUSCA_S1_SCC_S
+static const struct musca_s1_scc_dev_cfg_t MUSCA_S1_SCC_DEV_CFG_S = {
+    .base = MUSCA_S1_SCC_S_BASE};
+struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_S = {&(MUSCA_S1_SCC_DEV_CFG_S)};
+#endif
+
+/* SSE-200 Cache driver structure */
+#ifdef SSE_200_CACHE_S
+static const struct arm_cache_dev_cfg_t SSE_200_CACHE_CFG_S = {
+    .base = MUSCA_S1_CPU_ELEMENT_S_BASE};
+struct arm_cache_dev_t SSE_200_CACHE_DEV_S = {&(SSE_200_CACHE_CFG_S)};
+#endif

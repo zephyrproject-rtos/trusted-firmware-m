@@ -9,6 +9,7 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
+#include "log/tfm_log.h"
 
 /*
  * \brief This Mbed TLS include is needed to initialise the memory allocator
@@ -268,7 +269,7 @@ static void tfm_crypto_ipc_handler(void)
  *        Crypto for its dynamic allocations
  */
 #ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
-#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x2000) /* 8KB for EC signing in attest */
+#define TFM_CRYPTO_ENGINE_BUF_SIZE (0x2040) /* >8KB for EC signing in attest */
 #endif
 
 /**
@@ -279,6 +280,11 @@ static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
+    /* Log unsafe entropy source */
+#if defined (MBEDTLS_TEST_NULL_ENTROPY)
+    LOG_MSG("\033[1;34m[Crypto] MBEDTLS_TEST_NULL_ENTROPY is not suitable for production!\033[0m\r\n");
+#endif
+
     /* Initialise the Mbed Crypto memory allocator to use static
      * memory allocation from the provided buffer instead of using
      * the heap

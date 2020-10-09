@@ -62,6 +62,8 @@ Code structure
 ==============
 The code structure of the service will be as follows:
 
+TF-M repo:
+
 ``interface/``
 
 - ``include/psa/internal_trusted_storage.h`` - PSA ITS API
@@ -80,6 +82,8 @@ manifest)
   flash_fs as a backend
 - ``flash_fs/`` - Filesystem
 - ``flash/`` - Flash interface
+
+tf-m-tests repo:
 
 ``test/suites/its/``
 

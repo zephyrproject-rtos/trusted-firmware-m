@@ -8,13 +8,12 @@
 #include <stdio.h>
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
-#include "spm_api.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "region_defs.h"
-#include "secure_utilities.h"
+#include "utilities.h"
 #include "Driver_Common.h"
 
 /* Get address of memory regions to configure MPU */
@@ -109,7 +108,7 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
-static enum spm_err_t tfm_spm_mpu_init(void)
+static enum tfm_plat_err_t tfm_spm_mpu_init(void)
 {
     struct mpu_armv8m_region_cfg_t region_cfg;
 
@@ -124,7 +123,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* TFM Core unprivileged code region */
@@ -138,7 +137,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* TFM Core unprivileged data region */
@@ -152,7 +151,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* NSPM PSP */
@@ -166,7 +165,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* RO region */
@@ -180,7 +179,7 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* RW, ZI and stack as one region */
@@ -194,18 +193,18 @@ static enum spm_err_t tfm_spm_mpu_init(void)
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
     if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return SPM_ERR_INVALID_CONFIG;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);
 
-    return SPM_ERR_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
 {
-    if (tfm_spm_mpu_init() != SPM_ERR_OK) {
+    if (tfm_spm_mpu_init() != TFM_PLAT_ERR_SUCCESS) {
         ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

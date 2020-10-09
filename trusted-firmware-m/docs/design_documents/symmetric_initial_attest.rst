@@ -15,7 +15,7 @@ Attestation in TF-M.
 
 Symmetric key algorithm based Initial Attestation
 (*symmetric Initial Attestation* for short) signs and verifies Initial
-Attestation Token (IAT) with a symmetric crypotgraphy signature scheme, such as
+Attestation Token (IAT) with a symmetric cryptography signature scheme, such as
 HMAC.
 It can reduce TF-M binary size and memory footprint on ultra-constrained devices
 without integrating asymmetric ciphers.
@@ -588,7 +588,7 @@ Reference
 
 .. [1] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [2] :doc:`Trusted Firmware-M Profile Small Design </docs/design_documents/tfm_profile_small>`
+.. [2] :doc:`Trusted Firmware-M Profile Small Design </docs/design_documents/profiles/tfm_profile_small>`
 
 .. [3] :doc:`Initial Attestation Service Integration Guide </docs/reference/services/tfm_attestation_integration_guide>`
 

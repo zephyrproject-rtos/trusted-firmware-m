@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,6 +178,7 @@
 #define PS_FLASH_AREA_ADDR     FLASH_PS_AREA_OFFSET
 /* Dedicated flash area for PS */
 #define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
+#define PS_RAM_FS_SIZE         PS_FLASH_AREA_SIZE
 #define PS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of PS_SECTOR_SIZE per block */
 #define PS_SECTORS_PER_BLOCK   (0x1)
@@ -201,13 +203,19 @@
 #define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
 /* Dedicated flash area for ITS */
 #define ITS_FLASH_AREA_SIZE     FLASH_ITS_AREA_SIZE
+#define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of ITS_SECTOR_SIZE per block */
 #define ITS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  (0x1)
 /* The maximum asset size to be stored in the ITS area */
+#ifdef PSA_API_TEST_CRYPTO
+/* Need larger asset size for PSA API Crypto compliance suite */
+#define ITS_MAX_ASSET_SIZE      (1229)
+#else
 #define ITS_MAX_ASSET_SIZE      (512)
+#endif
 /* The maximum number of assets to be stored in the ITS area */
 #define ITS_NUM_ASSETS          (10)
 

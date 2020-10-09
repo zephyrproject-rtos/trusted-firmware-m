@@ -65,7 +65,8 @@
  *
  * 0x0800_0000 - 0x0802_FFFF Secure (192KB)
  *    0x0800_0000 - 0x0800_7FFF Secure unprivileged data (S_UNPRIV_DATA_SIZE, 32KB)
- *    0x0800_8000 - 0x0802_FFFF Secure priviliged data (S_PRIV_DATA_SIZE, 160KB)
+ *    0x0800_8000 - 0x0802_F7FF Secure priviliged data (S_PRIV_DATA_SIZE, 158KB)
+ *    0x0802_F800 - 0x0802_FFFF Secure priv code executable from RAM (S_RAM_CODE_SIZE, 2KB)
  *
  * 0x0803_0000 - 0x080E_7FFF Non-secure (736KB)
  *    0x0803_0000 - 0x080E_6FFF Non-secure OS/App (732KB)
@@ -118,10 +119,12 @@
 
 #define S_DATA_START    (S_RAM_ALIAS(0))
 #define S_UNPRIV_DATA_SIZE  0x08000
-#define S_PRIV_DATA_SIZE    0x28000
+#define S_PRIV_DATA_SIZE    0x27800
+/* Reserve 2KB for RAM-based executable code */
+#define S_RAM_CODE_SIZE     0x800
 
 /* Secure data area */
-#define S_DATA_SIZE  (S_UNPRIV_DATA_SIZE + S_PRIV_DATA_SIZE)
+#define S_DATA_SIZE  (S_UNPRIV_DATA_SIZE + S_PRIV_DATA_SIZE + S_RAM_CODE_SIZE)
 #define S_DATA_LIMIT (S_DATA_START + S_DATA_SIZE - 1)
 
 /* We need the privileged data area to be aligned so that an SMPU
@@ -141,6 +144,11 @@
 
 #define S_DATA_PRIV_OFFSET   (S_DATA_UNPRIV_OFFSET + S_UNPRIV_DATA_SIZE)
 #define S_DATA_PRIV_START    S_RAM_ALIAS(S_DATA_PRIV_OFFSET)
+
+/* Reserve area for RAM-based executable code right after secure unprivileged
+ * and privileged data areas*/
+#define S_RAM_CODE_OFFSET    (S_DATA_PRIV_OFFSET + S_PRIV_DATA_SIZE)
+#define S_RAM_CODE_START     S_RAM_ALIAS(S_RAM_CODE_OFFSET)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \

@@ -98,6 +98,10 @@
         PSA_FUNCTION_NAME(psa_hash_abort)
 #define psa_hash_clone \
         PSA_FUNCTION_NAME(psa_hash_clone)
+#define psa_hash_compute \
+        PSA_FUNCTION_NAME(psa_hash_compute)
+#define psa_hash_compare \
+        PSA_FUNCTION_NAME(psa_hash_compare)
 #define psa_mac_operation_init \
         PSA_FUNCTION_NAME(psa_mac_operation_init)
 #define psa_mac_sign_setup \

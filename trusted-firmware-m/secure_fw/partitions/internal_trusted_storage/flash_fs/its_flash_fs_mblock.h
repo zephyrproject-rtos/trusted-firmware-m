@@ -8,6 +8,7 @@
 #ifndef __ITS_FLASH_FS_MBLOCK_H__
 #define __ITS_FLASH_FS_MBLOCK_H__
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -48,58 +49,79 @@ extern "C" {
  * \note The active_swap_count must be the last member to allow it to be
  *       programmed last.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_metadata_block_header_t {
-    uint32_t scratch_dblock;    /*!< Physical block ID of the data
-                                 *   section's scratch block
-                                 */
-    uint8_t fs_version;         /*!< ITS system version */
+#define _T1 \
+    uint32_t scratch_dblock;    /*!< Physical block ID of the data \
+                                 *   section's scratch block \
+                                 */ \
+    uint8_t fs_version;         /*!< ITS system version */ \
     uint8_t active_swap_count;  /*!< Physical block ID of the data */
+
+struct its_metadata_block_header_t {
+    _T1
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T1 }) -
+                    sizeof(struct { _T1 })];
+#endif
 };
+#undef _T1
 
 /*!
  * \struct its_block_meta_t
  *
  * \brief Structure to store information about each physical flash memory block.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_block_meta_t {
-    uint32_t phy_id;    /*!< Physical ID of this logical block */
-    size_t data_start;  /*!< Offset from the beginning of the block to the
-                         *   location where the data starts
+#define _T2 \
+    uint32_t phy_id;    /*!< Physical ID of this logical block */ \
+    size_t data_start;  /*!< Offset from the beginning of the block to the \
+                         *   location where the data starts \
+                         */ \
+    size_t free_size;   /*!< Number of bytes free at end of block (set during \
+                         *   block compaction for gap reuse) \
                          */
-    size_t free_size;   /*!< Number of bytes free at end of block (set during
-                         *   block compaction for gap reuse)
-                         */
+
+struct its_block_meta_t {
+    _T2
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T2 }) -
+                    sizeof(struct { _T2 })];
+#endif
 };
+#undef _T2
 
 /*!
  * \struct its_file_meta_t
  *
  * \brief Structure to store file metadata.
  *
- * \note This structure is programmed to flash, so it must be aligned to the
- *       maximum required flash program unit.
+ * \note This structure is programmed to flash, so its size must be padded
+ *       to a multiple of the maximum required flash program unit.
  */
-struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT)))
-its_file_meta_t {
-    uint32_t lblock;               /*!< Logical datablock where file is
-                                    *   stored
-                                    */
-    size_t data_idx;               /*!< Offset in the logical data block */
-    size_t cur_size;               /*!< Size in storage system for this #
-                                    *   fragment
-                                    */
-    size_t max_size;               /*!< Maximum size of this file */
-    uint32_t flags;                /*!< Flags set when the file was created */
+#define _T3 \
+    uint32_t lblock;               /*!< Logical datablock where file is \
+                                    *   stored \
+                                    */ \
+    size_t data_idx;               /*!< Offset in the logical data block */ \
+    size_t cur_size;               /*!< Size in storage system for this # \
+                                    *   fragment \
+                                    */ \
+    size_t max_size;               /*!< Maximum size of this file */ \
+    uint32_t flags;                /*!< Flags set when the file was created */ \
     uint8_t id[ITS_FILE_ID_SIZE];  /*!< ID of this file */
+
+struct its_file_meta_t {
+    _T3
+#if ((ITS_FLASH_MAX_ALIGNMENT) > 4)
+    uint8_t roundup[sizeof(struct __attribute__((__aligned__(ITS_FLASH_MAX_ALIGNMENT))) { _T3 }) -
+                    sizeof(struct { _T3 })];
+#endif
 };
+#undef _T3
 
 /**
  * \struct its_flash_fs_ctx_t
@@ -125,17 +147,18 @@ struct its_flash_fs_ctx_t {
 psa_status_t its_flash_fs_mblock_init(struct its_flash_fs_ctx_t *fs_ctx);
 
 /**
- * \brief Copies rest of the file metadata, except for the one pointed by
- *        index.
+ * \brief Copies the file metadata entries between two indexes from the active
+ *        metadata block to the scratch metadata block.
  *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     idx     File metadata entry index to skip
+ * \param[in,out] fs_ctx     Filesystem context
+ * \param[in]     idx_start  File metadata entry index to start copy, inclusive
+ * \param[in]     idx_end    File metadata entry index to end copy, exclusive
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_mblock_cp_remaining_file_meta(
-                                              struct its_flash_fs_ctx_t *fs_ctx,
-                                              uint32_t idx);
+psa_status_t its_flash_fs_mblock_cp_file_meta(struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t idx_start,
+                                              uint32_t idx_end);
 
 /**
  * \brief Gets current scratch datablock physical ID.
@@ -160,6 +183,20 @@ uint32_t its_flash_fs_mblock_cur_data_scratch_id(
  */
 psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
                                               const uint8_t *fid,
+                                              uint32_t *idx);
+/**
+ * \brief Gets file metadata entry index of the first file with one of the
+ *        provided flags set.
+ *
+ * \param[in,out] fs_ctx  Filesystem context
+ * \param[in]     flags   Flags to search for
+ * \param[out]    idx     Index of the file metadata in the file system
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t its_flash_fs_mblock_get_file_idx_flag(
+                                              struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t flags,
                                               uint32_t *idx);
 
 /**
@@ -223,6 +260,8 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
  *
  * \param[in,out] fs_ctx         Filesystem context
  * \param[in]     fid            File ID
+ * \param[in]     use_spare      If true then the spare file will be used,
+ *                               otherwise at least one file will be left free
  * \param[in]     size           Size of the file for which space is reserve
  * \param[in]     flags          Flags set when the file was created
  * \param[out]    file_meta_idx  File metadata entry index
@@ -234,6 +273,7 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
 psa_status_t its_flash_fs_mblock_reserve_file(
                                            struct its_flash_fs_ctx_t *fs_ctx,
                                            const uint8_t *fid,
+                                           bool use_spare,
                                            size_t size,
                                            uint32_t flags,
                                            uint32_t *file_meta_idx,

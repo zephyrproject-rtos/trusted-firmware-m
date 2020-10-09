@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,7 +22,7 @@
  * \note                    The function is used for copying same-sized object
  *                          only.
  */
-void *tfm_core_util_memcpy(void *dest, const void *src, size_t n);
+void *spm_memcpy(void *dest, const void *src, size_t n);
 
 /**
  * \brief   Memory set function for TF-M core
@@ -33,6 +33,6 @@ void *tfm_core_util_memcpy(void *dest, const void *src, size_t n);
  *
  * \retval                  Destination address of memory
  */
-void *tfm_core_util_memset(void *s, int c, size_t n);
+void *spm_memset(void *s, int c, size_t n);
 
 #endif /* __TFM_CORE_UTILS_H__ */
