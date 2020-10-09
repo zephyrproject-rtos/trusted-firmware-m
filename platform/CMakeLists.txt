@@ -155,4 +155,5 @@ target_compile_definitions(platform_region_defs
         DAUTH_${DEBUG_AUTHENTICATION}
         $<$<BOOL:${BL2}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
 )
