@@ -106,6 +106,7 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_pins.c
         ./Native_Driver/generated_source/cycfg_routing.c
         ./Native_Driver/generated_source/cycfg_system.c
+        ./Native_Driver/generated_source/cycfg_qspi_memslot.c
         ./spm_hal.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
@@ -177,6 +178,7 @@ target_sources(platform_ns
         ./Native_Driver/generated_source/cycfg_pins.c
         ./Native_Driver/generated_source/cycfg_routing.c
         ./Native_Driver/generated_source/cycfg_system.c
+        ./Native_Driver/generated_source/cycfg_qspi_memslot.c
         ./mailbox/platform_multicore.c
         ./CMSIS_Driver/Driver_USART.c
         ./Device/Source/device_definition.c
