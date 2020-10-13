@@ -71,6 +71,9 @@ target_link_libraries(tfm_spm
         tfm_boot_status
         tfm_secure_api
         tfm_partitions
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:driver_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:client_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:server_partition>
 )
 
 target_compile_definitions(tfm_spm
@@ -92,6 +95,13 @@ set_source_files_properties(tfm_nspm_func.c
 set_source_files_properties(tfm_secure_api.c
     PROPERTIES
         COMPILE_FLAGS -Wno-implicit-function-declaration
+)
+
+############################ Partition Defs ####################################
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:PSA_API_TEST_IPC>
 )
 
 ############################ TFM arch ##########################################
