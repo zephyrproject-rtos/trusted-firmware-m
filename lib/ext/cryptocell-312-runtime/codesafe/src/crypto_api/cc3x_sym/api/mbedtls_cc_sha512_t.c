@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 
 #include "cc_pal_abort.h"
 #include "mbedtls_cc_sha512_t.h"
-#include "sha512.h"
+#include "mbedtls/sha512.h"
 #include "cc_pal_mem.h"
 
 #if defined(MBEDTLS_SHA512_C)

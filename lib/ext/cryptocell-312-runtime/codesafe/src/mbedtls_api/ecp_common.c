@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -8,7 +8,7 @@
 #include "cc_pal_log.h"
 #include "cc_ecpki_error.h"
 #include "mbedtls_cc_ec_mont_edw_error.h"
-#include "ecp.h"
+#include "mbedtls/ecp.h"
 #include "ecp_common.h"
 #include "cc_bitops.h"
 

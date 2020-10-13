@@ -38,7 +38,7 @@ target_link_libraries(tfm_partition_crypto
     PRIVATE
         tfm_secure_api
         platform_s
-        mbedcrypto_crypto_service
+        crypto_service_mbedcrypto
         psa_interface
 )
 target_compile_definitions(tfm_partition_crypto
@@ -101,9 +101,9 @@ target_compile_definitions(tfm_partition_defs
 
 ############################### MBEDCRYPTO #####################################
 
-add_library(mbedcrypto_crypto_service_config INTERFACE)
+add_library(crypto_service_mbedcrypto_config INTERFACE)
 
-target_compile_definitions(mbedcrypto_crypto_service_config
+target_compile_definitions(crypto_service_mbedcrypto_config
     INTERFACE
         MBEDTLS_CONFIG_FILE="${TFM_MBEDCRYPTO_CONFIG_PATH}"
         $<$<BOOL:${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}>:MBEDTLS_USER_CONFIG_FILE="${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}">
@@ -119,17 +119,14 @@ set(ENABLE_TESTING OFF)
 set(ENABLE_PROGRAMS OFF)
 set(MBEDTLS_FATAL_WARNINGS OFF)
 set(ENABLE_DOCS OFF)
-set(INSTALL_MBEDTLS OFF)
 set(INSTALL_MBEDTLS_HEADERS OFF)
+set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
 
-# Current variables
-set(mbedcrypto_static_target mbedcrypto_crypto_service)
-set(mbedcrypto_lib_target mbedcrypto_lib_crypto_service)
-# Future variables
-set(lib_target lib_crypto_service)
-set(mbedcrypto_target mbedcrypto_crypto_service)
-set(mbedtls_target mbedtls_crypto_service)
-set(mbedx509_target mbedx509_crypto_service)
+set(lib_target crypto_service_mbedcrypto_libs)
+set(mbedcrypto_target crypto_service_mbedcrypto)
+set(mbedtls_target crypto_service_mbedtls)
+set(mbedx509_target crypto_service_mbedx509)
+set(MBEDTLS_TARGET_PREFIX crypto_service_)
 
 # Mbedcrypto is quite a large lib, and it uses too much memory for it to be
 # reasonable to build it in debug info. As a compromise, if `debug` build type
@@ -140,37 +137,32 @@ set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
-if(NOT TARGET mbedcrypto_crypto_service)
-    message(FATAL_ERROR "Target mbedcrypto_crypto_service does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
+if(NOT TARGET crypto_service_mbedcrypto)
+    message(FATAL_ERROR "Target crypto_service_mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
     Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
 endif()
 
-set_target_properties(${mbedtls_target} ${mbedx509_target}
-    PROPERTIES
-        EXCLUDE_FROM_ALL TRUE
-)
-
-target_include_directories(mbedcrypto_crypto_service
+target_include_directories(crypto_service_mbedcrypto
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_sources(mbedcrypto_crypto_service
+target_sources(crypto_service_mbedcrypto
     PRIVATE
         $<$<NOT:$<BOOL:${CRYPTO_HW_ACCELERATOR}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_mbedcrypto_alt.c>
 )
 
-target_compile_options(mbedcrypto_crypto_service
+target_compile_options(crypto_service_mbedcrypto
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
-target_link_libraries(mbedcrypto_crypto_service
+target_link_libraries(crypto_service_mbedcrypto
     PRIVATE
         psa_interface
         tfm_secure_api
         platform_s
     PUBLIC
-        mbedcrypto_crypto_service_config
+        crypto_service_mbedcrypto_config
 )

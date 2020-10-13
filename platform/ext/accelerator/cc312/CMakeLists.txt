@@ -21,71 +21,71 @@ target_compile_definitions(platform_bl2
 
 ################################ BL2 ###########################################
 if(BL2)
-    target_sources(crypto_hw_bl2
+    target_sources(bl2_crypto_hw
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
             $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
             $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_provisioning.c>
     )
 
-    target_include_directories(crypto_hw_bl2
+    target_include_directories(bl2_crypto_hw
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    target_link_libraries(crypto_hw_bl2
+    target_link_libraries(bl2_crypto_hw
         PUBLIC
-            cc312_bl2
+            bl2_cc312
         PRIVATE
-            mbedcrypto_bl2
+            bl2_mbedcrypto
             platform_bl2
             $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:cc312_cdmpu>
     )
 
-    set(CC312_LIB_TARGET cc312_bl2)
+    set(CC312_LIB_TARGET bl2_cc312)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/cc312_bl2)
+    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/bl2_cc312)
     set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
     # Adding two targets as link-time dependencies of each other seems bad, but
     # in reality it just means that they'll share headers and compile defs.
-    target_link_libraries(cc312_bl2
+    target_link_libraries(bl2_cc312
         PRIVATE
-            mbedcrypto_bl2
+            bl2_mbedcrypto
     )
-    target_link_libraries(mbedcrypto_bl2
+    target_link_libraries(bl2_mbedcrypto
         PRIVATE
-            cc312_bl2
+            bl2_cc312
         PUBLIC
-            crypto_hw_bl2
+            bl2_crypto_hw
     )
 
     #Link utils to PAL for logging
     target_link_libraries(cc312_pal
         PRIVATE
-            crypto_hw_bl2
+            bl2_crypto_hw
     )
 
     target_link_libraries(cc312_cdmpu
         PRIVATE
-            mbedcrypto_bl2
+            bl2_mbedcrypto
     )
 
-    target_compile_definitions(mbedcrypto_bl2
+    target_compile_definitions(bl2_mbedcrypto
         PUBLIC
             CRYPTO_HW_ACCELERATOR
             MBEDTLS_ECDH_LEGACY_CONTEXT
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
     )
 
-    target_compile_options(mbedcrypto_bl2
+    target_compile_options(bl2_mbedcrypto
         PRIVATE
             -Wno-unused-parameter
     )
 
     #Include platform specific defs (registers etc)
-    target_include_directories(cc312_bl2
+    target_include_directories(bl2_cc312
         BEFORE
         PUBLIC
             ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
@@ -100,64 +100,64 @@ endif()
 
 ############################ Crypto Service ####################################
 
-target_sources(crypto_hw_crypto_service
+target_sources(crypto_service_crypto_hw
     PRIVATE
         cc312.c
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
-target_include_directories(crypto_hw_crypto_service
+target_include_directories(crypto_service_crypto_hw
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(crypto_hw_crypto_service
+target_link_libraries(crypto_service_crypto_hw
     PUBLIC
-        cc312_crypto_service
+        crypto_service_cc312
     PRIVATE
-        mbedcrypto_crypto_service
+        crypto_service_mbedcrypto
         platform_s
 )
 
 target_link_libraries(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_hw_crypto_service>
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:cc312_crypto_service>
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_crypto_hw>
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_cc312>
 )
 
-set(CC312_LIB_TARGET cc312_crypto_service)
+set(CC312_LIB_TARGET crypto_service_cc312)
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/cc312_crypto_service)
+add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/crypto_service_cc312)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
 # Adding two targets as link-time dependencies of each other seems bad, but
 # in reality it just means that they'll share headers and compile defs.
-target_link_libraries(cc312_crypto_service
+target_link_libraries(crypto_service_cc312
     PRIVATE
-        mbedcrypto_crypto_service
+        crypto_service_mbedcrypto
 )
-target_link_libraries(mbedcrypto_crypto_service
+target_link_libraries(crypto_service_mbedcrypto
     PRIVATE
-        cc312_crypto_service
+        crypto_service_cc312
     PUBLIC
-        crypto_hw_crypto_service
+        crypto_service_crypto_hw
 )
 
-target_compile_definitions(mbedcrypto_crypto_service
+target_compile_definitions(crypto_service_mbedcrypto
     PUBLIC
         CRYPTO_HW_ACCELERATOR
         MBEDTLS_ECDH_LEGACY_CONTEXT
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
 )
 
-target_compile_options(mbedcrypto_crypto_service
+target_compile_options(crypto_service_mbedcrypto
     PRIVATE
         -Wno-unused-parameter
 )
 
 #Include platform specific defs (registers etc)
-target_include_directories(cc312_crypto_service
+target_include_directories(crypto_service_cc312
     BEFORE
     PUBLIC
     ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}

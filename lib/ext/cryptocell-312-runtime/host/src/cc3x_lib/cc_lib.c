@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -25,9 +25,9 @@
 #include "dx_id_registers.h"
 #include "cc_util_pm.h"
 #include "dx_nvm.h"
-#include "ctr_drbg.h"
-#include "entropy.h"
-#include "threading.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/threading.h"
 #include "mbedtls_cc_mng_int.h"
 #include "mbedtls_cc_mng.h"
 #include "cc_rnd_common.h"

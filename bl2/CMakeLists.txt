@@ -31,7 +31,7 @@ target_link_libraries(bl2
     PRIVATE
         platform_bl2
         tfm_boot_status
-        mbedcrypto_bl2
+        bl2_mbedcrypto
 )
 
 target_link_options(bl2
@@ -54,9 +54,9 @@ target_include_directories(bl2_hal
 
 ############################### MBEDCRYPTO #####################################
 
-add_library(mbedcrypto_bl2_config INTERFACE)
+add_library(bl2_mbedcrypto_config INTERFACE)
 
-target_compile_definitions(mbedcrypto_bl2_config
+target_compile_definitions(bl2_mbedcrypto_config
     INTERFACE
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
@@ -73,17 +73,14 @@ set(ENABLE_TESTING OFF)
 set(ENABLE_PROGRAMS OFF)
 set(MBEDTLS_FATAL_WARNINGS OFF)
 set(ENABLE_DOCS OFF)
-set(INSTALL_MBEDTLS OFF)
 set(INSTALL_MBEDTLS_HEADERS OFF)
+set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
 
-# Current variables
-set(mbedcrypto_static_target mbedcrypto_bl2)
-set(mbedcrypto_lib_target mbedcrypto_lib_bl2)
-# Future variables
-set(lib_target lib_bl2)
-set(mbedcrypto_target mbedcrypto_bl2)
-set(mbedtls_target mbedtls_bl2)
-set(mbedx509_target mbedx509_bl2)
+set(lib_target bl2_mbedcrypto_libs)
+set(mbedcrypto_target bl2_mbedcrypto)
+set(mbedtls_target bl2_mbedtls)
+set(mbedx509_target bl2_mbedx509)
+set(MBEDTLS_TARGET_PREFIX bl2_)
 
 # Mbedcrypto is quite a large lib, and it uses too much memory for it to be
 # reasonable to build it in debug info. As a compromise, if `debug` build type
@@ -94,17 +91,12 @@ set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
-if(NOT TARGET mbedcrypto_bl2)
-    message(FATAL_ERROR "Target mbedcrypto_bl2 does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
+if(NOT TARGET bl2_mbedcrypto)
+    message(FATAL_ERROR "Target bl2_mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
     Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
 endif()
 
-set_target_properties(${mbedtls_target} ${mbedx509_target}
-    PROPERTIES
-        EXCLUDE_FROM_ALL TRUE
-)
-
-target_link_libraries(mbedcrypto_bl2
+target_link_libraries(bl2_mbedcrypto
     PUBLIC
-        mbedcrypto_bl2_config
+        bl2_mbedcrypto_config
 )

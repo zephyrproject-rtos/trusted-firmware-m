@@ -8,44 +8,44 @@
 cmake_policy(SET CMP0079 NEW)
 
 if(BL2)
-    add_library(crypto_hw_bl2 STATIC)
+    add_library(bl2_crypto_hw STATIC)
 endif()
-add_library(crypto_hw_crypto_service STATIC)
+add_library(crypto_service_crypto_hw STATIC)
 
 add_subdirectory(${CRYPTO_HW_ACCELERATOR_TYPE})
 
 ################################ BL2 ###########################################
 
 if(BL2)
-    target_include_directories(crypto_hw_bl2
+    target_include_directories(bl2_crypto_hw
         PUBLIC
             interface
     )
 
-    target_compile_definitions(crypto_hw_bl2
+    target_compile_definitions(bl2_crypto_hw
         PUBLIC
             CRYPTO_HW_ACCELERATOR
     )
 
     target_link_libraries(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_hw_bl2>
+            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:bl2_crypto_hw>
     )
 endif()
 
 ############################ Crypto Service ####################################
 
-target_include_directories(crypto_hw_crypto_service
+target_include_directories(crypto_service_crypto_hw
     PUBLIC
         interface
 )
 
-target_compile_definitions(crypto_hw_crypto_service
+target_compile_definitions(crypto_service_crypto_hw
     PUBLIC
         CRYPTO_HW_ACCELERATOR
 )
 
 target_link_libraries(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_hw_crypto_service>
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_crypto_hw>
 )
