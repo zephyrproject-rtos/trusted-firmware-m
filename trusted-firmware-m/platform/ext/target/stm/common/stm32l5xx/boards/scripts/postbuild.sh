@@ -17,6 +17,8 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script
 projectdir=`dirname $SCRIPT`
 source $projectdir/preprocess.sh
+# Compiler full name & path is passed as argument
+compiler_full_path=$1
 # the file to preprocess is generated and present outside of install dir
 bl2_file_to_preprocess=$projectdir/image_macros_to_preprocess_bl2.c
 preprocess_bl2_file=$projectdir/image_macros_preprocessed_bl2.c
@@ -25,7 +27,7 @@ updatesh=$projectdir/TFM_UPDATE.sh
 
 basedir=$projectdir
 echo preprocess bl2 file
-preprocess $projectdir $bl2_file_to_preprocess $preprocess_bl2_file
+preprocess $projectdir $bl2_file_to_preprocess $preprocess_bl2_file $compiler_full_path
 stm_tool=$basedir"/scripts/stm_tool.py"
 #determine/check python version command
 cmd="python3"
