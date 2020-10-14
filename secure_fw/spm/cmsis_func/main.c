@@ -117,24 +117,6 @@ static int32_t tfm_core_init(void)
     return TFM_SUCCESS;
 }
 
-static int32_t tfm_core_set_secure_exception_priorities(void)
-{
-    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-
-    tfm_arch_prioritize_secure_exception();
-
-    /* Explicitly set Secure SVC priority to highest */
-    plat_err = tfm_spm_hal_set_secure_irq_priority(SVCall_IRQn, 0);
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-
-    tfm_arch_set_fault_priority();
-    tfm_arch_set_pendsv_priority();
-
-    return TFM_SUCCESS;
-}
-
 int main(void)
 {
     /* set Main Stack Pointer limit */
@@ -176,9 +158,7 @@ int main(void)
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
-    if (tfm_core_set_secure_exception_priorities() != TFM_SUCCESS) {
-        tfm_core_panic();
-    }
+    tfm_arch_set_secure_exception_priorities();
 
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is
      * to be able to pass the state checks for the tests started from secure.

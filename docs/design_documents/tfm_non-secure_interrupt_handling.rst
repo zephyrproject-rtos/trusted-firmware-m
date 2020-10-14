@@ -40,7 +40,7 @@ achieves this by making the following configurations:
 
 .. code-block:: c
 
-    static int32_t tfm_core_set_secure_exception_priorities(void);
+    static void tfm_arch_set_secure_exception_priorities(void);
 
 .. Note::
 
@@ -154,13 +154,7 @@ Exception priorities
 --------------------
 
 The priority of the Secure SVC and the Secure faults must be higher than any
-Secure exception in the system. Once this is done, the following fixme can be
-removed from ``secure_fw\core\tfm_core.c``:
-``tfm_core_set_secure_exception_priorities``:
-
-.. code-block:: c
-
-    /* FixMe: Explicitly set secure fault and Secure SVC priority to highest */
+Secure exception in the system.
 
 .. note::
 
