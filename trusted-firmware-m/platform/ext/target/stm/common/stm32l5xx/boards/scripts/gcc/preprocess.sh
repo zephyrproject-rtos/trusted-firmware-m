@@ -14,7 +14,9 @@
 # arg1 is the build directory
 # arg2 is the file to preprocess
 # arg3 is output file beeing preprocessed
+# arg4 is the GCC compiler full path
+
 function preprocess
 (
-arm-none-eabi-gcc -E -P -xc -I$1 -o$3 $2
+$4 -E -P -xc -I$1 -o$3 $2
 )
