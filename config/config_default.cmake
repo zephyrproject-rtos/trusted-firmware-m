@@ -54,6 +54,8 @@ set(MCUBOOT_NS_IMAGE_MIN_VER            0.0.0+0     CACHE STRING    "Minimum ver
 ############################ Platform ##########################################
 
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
+set(TFM_MULTI_CORE_MULTI_CLIENT_CALL    OFF         CACHE BOOL      "Whether to enable multiple PSA client calls feature")
+
 set(DEBUG_AUTHENTICATION                CHIP_DEFAULT CACHE STRING   "Debug authentication setting. [CHIP_DEFAULT, NONE, NS_ONLY, FULL")
 set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secure UART1")
 

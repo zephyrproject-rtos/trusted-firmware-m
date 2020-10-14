@@ -46,6 +46,7 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
+        $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
 )
 
 ###################### PSA api (S lib) #########################################

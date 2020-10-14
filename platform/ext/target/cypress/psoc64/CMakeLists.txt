@@ -188,6 +188,13 @@ target_compile_definitions(platform_ns
         RTE_USART5
 )
 
+# device_cfg.h defines the number of mailbox queue slots to support multiple
+# PSA client calls feature.
+target_include_directories(psa_interface
+    INTERFACE
+        Device/Config
+)
+
 target_link_libraries(platform_ns
     PRIVATE
         psa_interface
