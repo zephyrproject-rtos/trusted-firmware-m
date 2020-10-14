@@ -115,8 +115,8 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
 {
     psa_status_t status = PSA_SUCCESS;
     size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i;
-    psa_invec in_vec[PSA_MAX_IOVEC] = { {0} };
-    psa_outvec out_vec[PSA_MAX_IOVEC] = { {0} };
+    psa_invec in_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
+    psa_outvec out_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
     void *alloc_buf_ptr = NULL;
 
     /* Check the number of in_vec filled */

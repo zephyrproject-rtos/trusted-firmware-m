@@ -17,6 +17,7 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
+#include "tfm_crypto_private.h"
 
 /*!
  * \defgroup public_psa Public functions, PSA
@@ -32,15 +33,13 @@ psa_status_t tfm_crypto_sign_hash(psa_invec in_vec[],
 #ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
-    if ((in_len != 2) || (out_len != 1)) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 0, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_key_handle_t handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *hash = in_vec[1].base;
@@ -66,13 +65,12 @@ psa_status_t tfm_crypto_verify_hash(psa_invec in_vec[],
 #ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
-    if ((in_len != 3) || (out_len != 0)) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 0);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
+
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_handle_t handle = iov->key_handle;
@@ -102,31 +100,24 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
 #else
     psa_status_t status;
 
-    if (!((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_key_handle_t handle = iov->key_handle;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *input = in_vec[1].base;
     size_t input_length = in_vec[1].len;
-    const uint8_t *salt = NULL;
-    size_t salt_length = 0;
+    const uint8_t *salt = in_vec[2].base;
+    size_t salt_length = in_vec[2].len;
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
     psa_key_type_t type;
     size_t key_bits;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-
-    if (in_len == 3) {
-        salt = in_vec[2].base;
-        salt_length = in_vec[2].len;
-    }
 
     status = tfm_crypto_check_handle_owner(handle, NULL);
     if (status != PSA_SUCCESS) {
@@ -162,9 +153,8 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
 #ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
-    if (!((in_len == 2) || (in_len == 3)) || (out_len != 1)) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
+
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
         return PSA_ERROR_CONNECTION_REFUSED;
@@ -175,16 +165,11 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
     psa_algorithm_t alg = iov->alg;
     const uint8_t *input = in_vec[1].base;
     size_t input_length = in_vec[1].len;
-    const uint8_t *salt = NULL;
-    size_t salt_length = 0;
+    const uint8_t *salt = in_vec[2].base;
+    size_t salt_length = in_vec[2].len;
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
     psa_status_t status;
-
-    if (in_len == 3) {
-        salt = in_vec[2].base;
-        salt_length = in_vec[2].len;
-    }
 
     status = tfm_crypto_check_handle_owner(handle, NULL);
     if (status != PSA_SUCCESS) {
