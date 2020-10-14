@@ -65,7 +65,7 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0x11000)
+#define FLASH_AREA_BL2_SIZE             (0xd800)
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
 /* area for BL2 code not protected by hdp */
@@ -113,7 +113,7 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-#define FLASH_S_PARTITION_SIZE          (0x2B000) /* S partition */
+#define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
