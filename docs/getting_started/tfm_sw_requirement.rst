@@ -2,9 +2,8 @@
 Software requirements
 #####################
 
-.. |DS5_VERSION| replace:: v5.29.1
 .. |KEIL_VERSION| replace:: v5.25.2
-.. |DEV_STUDIO_VERSION| replace:: 2018.0
+.. |DEV_STUDIO_VERSION| replace:: 2019.1
 
 A quick reference table is included in the
 :ref:`docs/getting_started/tfm_sw_requirement:Tool & Dependency overview` section
@@ -42,7 +41,7 @@ versions are:
 
 .. Note::
     - The Arm compilers above are provided via Keil uVision |KEIL_VERSION|
-      or greater, DS-5 |DS5_VERSION| or greater, and Development Studio
+      or greater and Arm Development Studio
       |DEV_STUDIO_VERSION| or greater, or they can be downloaded as standalone
       packages from
       `here <https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6>`__.
@@ -108,7 +107,7 @@ Ubuntu
 
 Install the following tools:
 
-    - DS-5 |DS5_VERSION|.
+    - Arm DS |DEV_STUDIO_VERSION|.
     - Git tools v2.10.0
     - CMake (see the `CMake`_ chapter)
     - GNU Make (see the `GNU make`_ chapter)
@@ -125,13 +124,13 @@ Install the following tools:
 Setup environment variables in Linux
 ------------------------------------
 
-To import Arm Compiler v6.10 in your bash shell console:
+To import Arm Compiler v6.13 in your bash shell console:
 
 .. code-block:: bash
 
-    export PATH=<DS-5_PATH>/sw/ARMCompiler6.10/bin:$PATH
+    export PATH=<ARM_DS_PATH>/sw/ARMCompiler6.13/bin:$PATH
     export ARM_TOOL_VARIANT=ult
-    export ARM_PRODUCT_PATH=<DS-5_PATH>/sw/mappings
+    export ARM_PRODUCT_PATH=<ARM_DS_PATH>/sw/mappings
     export ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
 
 To import CMake in your bash shell console:
@@ -157,7 +156,7 @@ Windows
 
 Install the following tools:
 
-    - uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition)
+    - uVision |KEIL_VERSION| or Arm DS |DEV_STUDIO_VERSION| (Arm DS Ultimate Edition)
       or GNU Arm compiler v6.3.1.
     - Git client latest version (https://git-scm.com/download/win)
     - CMake (`native Windows version <https://cmake.org/download/>`__,
@@ -186,12 +185,12 @@ Add CMake to your PATH variable:
 There are several configurations depending on a toolset you are using.
 The typical cases are listed below.
 
-Armclang + DS-5
-^^^^^^^^^^^^^^^
+Armclang + Arm DS
+^^^^^^^^^^^^^^^^^
 .. code-block:: bash
 
-    set PATH=<DS-5_PATH>\sw\ARMCompiler6.10\bin;$PATH
-    set ARM_PRODUCT_PATH=<DS-5_PATH>\sw\mappings
+    set PATH=<ARM_DS_PATH>\sw\ARMCompiler6.13\bin;$PATH
+    set ARM_PRODUCT_PATH=<ARM_DS_PATH>\sw\mappings
     set ARM_TOOL_VARIANT=ult
     set ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
 
@@ -258,7 +257,7 @@ Download and install the following tools:
       1.8.8 <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download>`__
     - `Graphviz
       2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-    - The Java runtime is part of the DS5 installation or can be
+    - The Java runtime is part of the Arm DS installation or can be
       `downloaded from here <https://www.java.com/en/download/>`__
     - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
     -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
@@ -266,12 +265,12 @@ Download and install the following tools:
 Set the environment variables, assuming that:
 
     - doxygen, dot, and MikTeX binaries are available on the PATH.
-    - Java JVM is used from DS5 installation.
+    - Java JVM is used from Arm DS installation.
 
 ::
 
     set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<DS-5_Path>\sw\java\bin
+    set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
 
 To compile the TF-M User Guide
 ==============================
@@ -312,7 +311,7 @@ Set-up the tools and environment in Windows
 Download and install the following tools:
 
     - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-    - The Java runtime is part of the DS5 installation or can be `downloaded from here <https://www.java.com/en/download/>`__
+    - The Java runtime is part of the Arm DS installation or can be `downloaded from here <https://www.java.com/en/download/>`__
     - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
     -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
     - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
@@ -337,7 +336,7 @@ Set the environment variables, assuming that:
 .. code-block:: bash
 
     set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<DS-5_Path>\sw\java\bin
+    set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
 
 ****************************
 Exceptions and special cases
@@ -473,4 +472,3 @@ Dependency chain:
 --------------
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
-

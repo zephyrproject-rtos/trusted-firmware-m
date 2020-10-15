@@ -529,7 +529,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
 ---------------------------------------------
 .. code-block:: bash
 
-    <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <ARM_DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \
@@ -672,7 +672,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
 
 .. code-block:: bash
 
-    <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <ARM_DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \

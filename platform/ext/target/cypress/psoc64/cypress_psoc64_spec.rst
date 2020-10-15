@@ -179,9 +179,9 @@ listed above.
     popd
     cmake --build <build folder> -- -j VERBOSE=1
 
-**********************
-Signing the images
-**********************
+*******
+Signing
+*******
 
 ############
 Signing keys
