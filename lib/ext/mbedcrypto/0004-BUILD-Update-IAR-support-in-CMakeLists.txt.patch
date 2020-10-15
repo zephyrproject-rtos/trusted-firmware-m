@@ -1,7 +1,7 @@
-From d80105c296b616f7fa113fac8d73b0a5622a59d8 Mon Sep 17 00:00:00 2001
+From 2d0f9e77a1165aa78f78436a2f5c185cc65ad6c1 Mon Sep 17 00:00:00 2001
 From: TTornblom <thomas.tornblom@iar.com>
 Date: Thu, 16 Apr 2020 13:53:38 +0200
-Subject: [PATCH] BUILD: Update IAR support in CMakeLists.txt
+Subject: [PATCH 4/4] BUILD: Update IAR support in CMakeLists.txt
 
 Applied the same change as in mbed-crypto for using this as a sub
 project with the IAR toolchain.
@@ -12,10 +12,10 @@ Signed-off-by: TTornblom <thomas.tornblom@iar.com>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1e3098cd91..b71230aad3 100644
+index a671575b7..3e59a47ba 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -159,7 +159,10 @@ if(CMAKE_COMPILER_IS_CLANG)
+@@ -193,7 +193,10 @@ if(CMAKE_COMPILER_IS_CLANG)
  endif(CMAKE_COMPILER_IS_CLANG)
  
  if(CMAKE_COMPILER_IS_IAR)
@@ -27,3 +27,6 @@ index 1e3098cd91..b71230aad3 100644
  endif(CMAKE_COMPILER_IS_IAR)
  
  if(CMAKE_COMPILER_IS_MSVC)
+-- 
+2.20.1
+

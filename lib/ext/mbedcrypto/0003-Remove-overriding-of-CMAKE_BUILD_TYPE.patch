@@ -1,7 +1,7 @@
-From 59cbaee5e961f205c6b62c2f750a3759cb90d2b3 Mon Sep 17 00:00:00 2001
+From 1c4af63fc32e16022f884e29ad3ccbdb8c3ed2f2 Mon Sep 17 00:00:00 2001
 From: Raef Coles <raef.coles@arm.com>
 Date: Wed, 2 Sep 2020 10:15:02 +0100
-Subject: [PATCH 5/6] Remove overriding of CMAKE_BUILD_TYPE
+Subject: [PATCH 3/4] Remove overriding of CMAKE_BUILD_TYPE
 
 Signed-off-by: Raef Coles <raef.coles@arm.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Raef Coles <raef.coles@arm.com>
  1 file changed, 4 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 949a50b2b..436ee653d 100644
+index ba9227ff3..a671575b7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -95,10 +95,6 @@ option: \n\
+@@ -112,10 +112,6 @@ option: \n\
      endif()
  endif()
  
