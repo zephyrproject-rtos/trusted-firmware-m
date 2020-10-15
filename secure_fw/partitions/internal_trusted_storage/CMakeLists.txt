@@ -39,6 +39,13 @@ target_sources(tfm_partition_its
         flash_fs/its_flash_fs_mblock.c
 )
 
+# The generated sources
+target_sources(tfm_partition_its
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/internal_trusted_storage/auto_generated/intermedia_tfm_internal_trusted_storage.c>
+)
+
 target_link_libraries(tfm_partition_its
     PRIVATE
         tfm_secure_api

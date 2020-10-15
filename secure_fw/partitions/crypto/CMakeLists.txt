@@ -27,6 +27,13 @@ target_sources(tfm_partition_crypto
         crypto_key_derivation.c
 )
 
+# The generated sources
+target_sources(tfm_partition_crypto
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/intermedia_tfm_crypto.c>
+)
+
 target_include_directories(tfm_partition_crypto
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

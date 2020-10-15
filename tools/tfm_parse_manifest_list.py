@@ -73,8 +73,8 @@ def process_manifest(manifest_list_files):
             manifest_dic = yaml.safe_load(manifest_list_yaml_file)
             manifest_list.extend(manifest_dic["manifest_list"])
 
-    templatefile_name = 'secure_fw/partitions/manifestfilename.template'
-    template = ENV.get_template(templatefile_name)
+    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
+    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
 
     print("Start to generate PSA manifests:")
     for manifest_item in manifest_list:
@@ -95,6 +95,7 @@ def process_manifest(manifest_list_files):
         outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
         context['file_name'] = outfile_name.replace('.h', '')
         outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
+        intermediafile_name = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + context['file_name'] + '.c').replace('\\', '/')
 
         """
         Remove the `source_path` portion of the filepaths, so that it can be
@@ -104,11 +105,13 @@ def process_manifest(manifest_list_files):
             # Replace environment variables in the source path
             source_path = os.path.expandvars(manifest_item['source_path'])
             outfile_name = os.path.relpath(outfile_name, start = source_path)
+            intermediafile_name = os.path.relpath(intermediafile_name, start = source_path)
 
         db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
+            intermediafile_name = os.path.join(OUT_DIR, intermediafile_name)
 
         outfile_path = os.path.dirname(outfile_name)
         if not os.path.exists(outfile_path):
@@ -117,8 +120,18 @@ def process_manifest(manifest_list_files):
         print ("Generating " + outfile_name)
 
         outfile = io.open(outfile_name, "w", newline=None)
-        outfile.write(template.render(context))
+        outfile.write(manifesttemplate.render(context))
         outfile.close()
+
+        intermediafile_path = os.path.dirname(intermediafile_name)
+        if not os.path.exists(intermediafile_path):
+            os.makedirs(intermediafile_path)
+
+        print ("Generating " + intermediafile_name)
+
+        memoutfile = io.open(intermediafile_name, "w", newline=None)
+        memoutfile.write(memorytemplate.render(context))
+        memoutfile.close()
 
     return db
 

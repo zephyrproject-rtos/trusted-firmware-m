@@ -64,6 +64,16 @@ target_sources(tfm_spm
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
 
+#workaround for arch-test
+if (TEST_PSA_API STREQUAL IPC)
+    target_sources(driver_partition PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
+    target_sources(client_partition PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
+    target_sources(server_partition PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
+endif()
+
 target_link_libraries(tfm_spm
     PUBLIC
         tfm_arch

@@ -43,6 +43,13 @@ target_sources(tfm_partition_ps
         $<$<NOT:$<AND:$<BOOL:${TEST_S}>,$<BOOL:${PS_TEST_NV_COUNTERS}>>>:nv_counters/ps_nv_counters.c>
 )
 
+# The generated sources
+target_sources(tfm_partition_ps
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage/auto_generated/intermedia_tfm_protected_storage.c>
+)
+
 target_link_libraries(tfm_partition_ps
     PRIVATE
         tfm_secure_api

@@ -30,6 +30,12 @@ target_sources(tfm_partition_psa_proxy
         ../../../interface/src/tfm_ns_mailbox.c
 )
 
+# The generated sources
+target_sources(tfm_partition_psa_proxy
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/intermedia_tfm_psa_proxy.c
+)
+
 target_link_libraries(tfm_partition_psa_proxy
     PRIVATE
         tfm_secure_api

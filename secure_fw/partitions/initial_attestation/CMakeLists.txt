@@ -31,6 +31,13 @@ target_sources(tfm_partition_attestation PRIVATE
     attest_token_encode.c
 )
 
+# The generated sources
+target_sources(tfm_partition_attestation
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation/auto_generated/intermedia_tfm_initial_attestation.c>
+)
+
 target_include_directories(tfm_partition_attestation
     PUBLIC
         .

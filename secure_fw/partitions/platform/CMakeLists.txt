@@ -16,6 +16,13 @@ add_library(tfm_partition_platform STATIC
     platform_sp.c
 )
 
+# The generated sources
+target_sources(tfm_partition_platform
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/intermedia_tfm_platform.c>
+)
+
 target_include_directories(tfm_partition_platform
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
