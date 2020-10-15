@@ -30,6 +30,7 @@ target_sources(tfm_partition_crypto
 target_include_directories(tfm_partition_crypto
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto
 )
 
 # Linking to external interfaces

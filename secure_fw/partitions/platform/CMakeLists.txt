@@ -19,6 +19,7 @@ add_library(tfm_partition_platform STATIC
 target_include_directories(tfm_partition_platform
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform
 )
 
 target_link_libraries(tfm_partition_platform

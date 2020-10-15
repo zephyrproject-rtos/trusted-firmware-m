@@ -17,6 +17,8 @@ add_library(tfm_partition_ps STATIC)
 target_include_directories(tfm_partition_ps
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage
 )
 
 target_sources(tfm_partition_ps

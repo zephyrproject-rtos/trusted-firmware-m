@@ -26,6 +26,8 @@ target_sources(tfm_partition_attestation PRIVATE
 target_include_directories(tfm_partition_attestation
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation
 )
 
 target_link_libraries(tfm_partition_attestation

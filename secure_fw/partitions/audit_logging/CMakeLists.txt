@@ -27,10 +27,12 @@ target_sources(tfm_partition_audit
 target_include_directories(tfm_partition_audit
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/audit_logging
 )
 
 target_link_libraries(tfm_partition_audit
-    PRIVATE 
+    PRIVATE
         platform_s
         tfm_secure_api
         psa_interface
