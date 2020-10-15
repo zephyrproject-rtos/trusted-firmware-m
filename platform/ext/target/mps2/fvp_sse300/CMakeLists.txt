@@ -48,7 +48,7 @@ if(NS)
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            CMSIS_5_RTX_V8MBN
+            CMSIS_5_RTX_V8MMN
     )
 endif()
 

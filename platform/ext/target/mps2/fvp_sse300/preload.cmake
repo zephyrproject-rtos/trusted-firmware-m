@@ -11,8 +11,8 @@
 # variables related to hardware.
 
 # Set architecture and CPU
-set(TFM_SYSTEM_PROCESSOR cortex-m33)
-set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
+set(TFM_SYSTEM_PROCESSOR cortex-m55)
+set(TFM_SYSTEM_ARCHITECTURE armv8.1-m.main)
 set(TFM_SYSTEM_DSP OFF)
 
 # Reload compiler to generate options from the CPU and architecture
