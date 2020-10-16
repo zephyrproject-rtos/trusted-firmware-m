@@ -150,6 +150,8 @@ Platforms supported
 
         - `FPGA image loaded on MPS2 board (AN519, AN539).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
+        - `M2351.
+          <https://www.nuvoton.com/products/iot-solution/iot-platform/numaker-pfm-m2351/>`_
 
     - Dual Core Cortex-M system:
 

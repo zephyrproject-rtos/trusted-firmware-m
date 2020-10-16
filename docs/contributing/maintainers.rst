@@ -111,7 +111,7 @@ Michel JAOUEN
     :github: `jamike <https://github.com/jamike>`__
 
 
-Cypress Platform: 
+Cypress Platform:
 ~~~~~~~~~~~~~~~~~
 
 Chris Brand
@@ -138,6 +138,13 @@ Andrzej Głąbek
     :email: `oyvind.ronningstad@nordicsemi.no <oyvind.ronningstad@nordicsemi.no>`__
     :github: `oyvindronningstad <https://github.com/oyvindronningstad>`__
 
+
+Nuvoton Platform:
+~~~~~~~~~~~~~~~~~
+
+WS Chang
+    :email: `MS20 WSChang0@nuvoton.com <wschang0@nuvoton.com>`__
+    :github: `wschang0 <https://github.com/wschang0>`__
 
 =============
 
