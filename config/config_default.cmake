@@ -22,6 +22,8 @@ set(TFM_EXTRA_CONFIG_PATH               ""          CACHE PATH      "Path to ext
 set(TFM_EXTRA_MANIFEST_LIST_PATH        ""          CACHE PATH      "Path to extra manifest file, used to declare extra partitions. Appended to standard TFM manifest")
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
 
+set(TFM_SPM_LOG_LEVEL                   2           CACHE STRING    "Set SPM log level as INFO level")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

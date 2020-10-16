@@ -44,6 +44,7 @@ target_sources(platform_s
         ext/common/tfm_hal_its.c
         ext/common/tfm_platform.c
         ext/common/uart_stdout.c
+        ext/common/tfm_hal_spm_logdev_peripheral.c
         $<$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
@@ -61,6 +62,8 @@ target_link_libraries(platform_s
 )
 
 target_compile_definitions(platform_s
+    PUBLIC
+        TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
 )
