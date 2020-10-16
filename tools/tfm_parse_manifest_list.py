@@ -98,6 +98,13 @@ def process_manifest(manifest_list_files):
         context['file_name'] = outfile_name.replace('.h', '')
         outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
 
+        """
+        Remove the `source_path` portion of the filepaths, so that it can be
+        interpreted as a relative path from the OUT_DIR.
+        """
+        if 'source_path' in manifest_item:
+            outfile_name = os.path.relpath(outfile_name, start = manifest_item['source_path'])
+
         manifest_header_list.append(outfile_name)
 
         if OUT_DIR is not None:
