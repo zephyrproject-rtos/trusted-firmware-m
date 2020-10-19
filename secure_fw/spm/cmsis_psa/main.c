@@ -29,12 +29,6 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Only TFM_LVL 1 and 2 are supported for IPC model!
 #endif
 
-#define PRINT_TFM_VERSION  SPMLOG_INFMSGVAL("Booting TFM v", VERSION_MAJOR); \
-                           SPMLOG_INFMSGVAL(".", VERSION_MINOR); \
-                           SPMLOG_INFMSG(" "); \
-                           SPMLOG_INFMSG(VERSION_STRING); \
-                           SPMLOG_INFMSG("\r\n")
-
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
 
 static int32_t tfm_core_init(void)
@@ -133,7 +127,7 @@ int main(void)
         tfm_core_panic();
     }
     /* Print the TF-M version */
-    PRINT_TFM_VERSION;
+    SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
 
     if (tfm_spm_db_init() != SPM_ERR_OK) {
         tfm_core_panic();
