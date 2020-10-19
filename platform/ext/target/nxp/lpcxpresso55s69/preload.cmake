@@ -14,8 +14,6 @@
 set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 
-# Reload compiler to generate options from the CPU and architecture
-_compiler_reload()
 
 # Set processor type for NXP SDK
 add_definitions(-DCPU_LPC55S69JBD100_cm33_core0)

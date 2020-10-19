@@ -14,7 +14,7 @@ if(TFM_PSA_API)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_partition_audit STATIC)

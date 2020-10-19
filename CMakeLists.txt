@@ -5,33 +5,9 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
-project("Trusted Firmware M" VERSION 1.1.0 LANGUAGES C ASM)
-set(TFM_VERSION ${PROJECT_VERSION})
-
-if(NOT TFM_CMAKE_TOOLCHAIN_FILE_LOADED)
-    Message(FATAL_ERROR "Cmake toolchain file not set.")
-endif()
-
-if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
-   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
-    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
-endif()
-
-# Some compiler flags depend on the CPU / platform config. This include should
-# be run before anything else so the compiler can be configured properly.
-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
-else()
-    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-endif()
-
-# The default build type is release. If debug symbols are needed then
-# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
-endif()
+set(TFM_VERSION 1.1.0)
 
 ############################ CONFIGURATION #####################################
 
@@ -76,6 +52,43 @@ if (TFM_EXTRA_CONFIG_PATH)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
+   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
+    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
+endif()
+
+# The default build type is release. If debug symbols are needed then
+# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+############################### Compiler configuration #########################
+
+# Some compiler flags depend on the CPU / platform config. This include should
+# be run before the toolchain file so the compiler can be configured properly.
+if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
+else()
+    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+endif()
+
+#Legacy compat option - load CMAKE_TOOLCHAIN_FILE as a TFM_TOOLCHAIN_FILE
+if (CMAKE_TOOLCHAIN_FILE)
+    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
+    message(DEPRECATION "INTERPRETING -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} as -DTFM_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+    set(TFM_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
+    unset(CMAKE_TOOLCHAIN_FILE)
+endif()
+
+include(${TFM_TOOLCHAIN_FILE})
+set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_SOURCE_DIR}/cmake/disable_compiler_detection.cmake)
+
+project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C ASM)
+tfm_toolchain_reload_compiler()
 
 ################################################################################
 

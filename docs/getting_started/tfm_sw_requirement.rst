@@ -81,12 +81,7 @@ Supported CMake versions
 
 The build-system is CMake based and supports the following versions:
 
-    - 3.13
-    - 3.14
-    - 3.15
-    - 3.16
-    - 3.17
-    - 3.18
+The build-system is CMake based and supports the versions 3.15 or higher.
 
 .. Note::
     - IAR requires version 3.14 or later.

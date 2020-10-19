@@ -37,7 +37,9 @@ following commands:
 
     $ mkdir build && cd build
     $ cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
-            -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DBL2=OFF ../
+            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+            -DBL2=OFF \
+            ../
     $ make install
 
 Flashing and debugging with Segger J-Link

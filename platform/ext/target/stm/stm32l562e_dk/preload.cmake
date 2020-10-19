@@ -14,8 +14,6 @@
 set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 
-# Reload compiler to generate options from the CPU and architecture
-_compiler_reload()
 
 add_compile_definitions(
     STM32L562xx

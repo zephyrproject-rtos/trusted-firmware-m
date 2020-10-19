@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_spm STATIC)
 add_library(tfm_boot_status INTERFACE)

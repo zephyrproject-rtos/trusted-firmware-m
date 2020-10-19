@@ -4,21 +4,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-
 cmake_minimum_required(VERSION 3.15)
 
-set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
+# Don't load this file if it is specified as a cmake toolchain file
+if(NOT TFM_TOOLCHAIN_FILE)
+    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
+    return()
+endif()
 
 SET(CMAKE_SYSTEM_NAME Generic)
-# This setting is overridden in ${TFM_PLATFORM}/preload.cmake. It can be set to
-# any value here.
-set(CMAKE_SYSTEM_PROCESSOR cortex-m23)
 
 set(CMAKE_C_COMPILER armclang)
-set(CMAKE_ASM_COMPILER armclang)
+set(CMAKE_ASM_COMPILER armasm)
 
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out=)
-set(COMPILER_CMSE_FLAG -mcmse)
+set(COMPILER_CMSE_FLAG $<$<COMPILE_LANGUAGE:C>:-mcmse>)
 
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
@@ -26,61 +26,35 @@ set(COMPILER_CMSE_FLAG -mcmse)
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
-# Cmake makes it _really_ hard to dynamically set the cmake_system_processor
-# (used for setting mcpu flags etc). Instead we load
-# platform/ext/target/${TFM_PLATFORM}/preload.cmake, which should run this macro
-# to reload the compiler autoconfig. Note that it can't be loaded in this file
-# as cmake does not allow the use of command-line defined variables in toolchain
-# files and the path is platform dependent.
-macro(_compiler_reload)
-    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
-    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
-
+macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
+    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
+
+    add_compile_options(
+        $<$<COMPILE_LANGUAGE:C>:-Wno-ignored-optimization-argument>
+        $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:C>:-Wall>
+        # Don't error when the MBEDTLS_NULL_ENTROPY warning is shown
+        $<$<COMPILE_LANGUAGE:C>:-Wno-error=cpp>
+        $<$<COMPILE_LANGUAGE:C>:-c>
+        $<$<COMPILE_LANGUAGE:C>:-fdata-sections>
+        $<$<COMPILE_LANGUAGE:C>:-ffunction-sections>
+        $<$<COMPILE_LANGUAGE:C>:-fno-builtin>
+        $<$<COMPILE_LANGUAGE:C>:-fshort-enums>
+        $<$<COMPILE_LANGUAGE:C>:-fshort-wchar>
+        $<$<COMPILE_LANGUAGE:C>:-funsigned-char>
+        $<$<COMPILE_LANGUAGE:C>:-masm=auto>
+        $<$<COMPILE_LANGUAGE:C>:-nostdlib>
+        $<$<COMPILE_LANGUAGE:C>:-std=c99>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
+        $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
+    )
+endmacro()
+
+macro(tfm_toolchain_reset_linker_flags)
     set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
-    if(${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL "6.11")
-        add_compile_options(
-            --target=arm-arm-none-eabi
-            -Wno-ignored-optimization-argument
-            -Wno-unused-command-line-argument
-            -c
-            -fdata-sections
-            -ffunction-sections
-            -fno-builtin
-            -fshort-enums
-            -fshort-wchar
-            -funsigned-char
-            -masm=auto
-            -nostdlib
-            -std=c99
-            $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:-mfpu=none>
-        )
-    else()
-        # Compile options for legacy compiler 6.10.1. To be removed as soon that
-        # that compiler can be deprecated.
-        add_compile_options(
-            $<$<COMPILE_LANGUAGE:C>:--target=arm-arm-none-eabi>
-            $<$<COMPILE_LANGUAGE:C>:-Wno-ignored-optimization-argument>
-            $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
-            $<$<COMPILE_LANGUAGE:C>:-Wall>
-            # Don't error when the MBEDTLS_NULL_ENTROPY warning is shown
-            $<$<COMPILE_LANGUAGE:C>:-Wno-error=cpp>
-            $<$<COMPILE_LANGUAGE:C>:-c>
-            $<$<COMPILE_LANGUAGE:C>:-fdata-sections>
-            $<$<COMPILE_LANGUAGE:C>:-ffunction-sections>
-            $<$<COMPILE_LANGUAGE:C>:-fno-builtin>
-            $<$<COMPILE_LANGUAGE:C>:-fshort-enums>
-            $<$<COMPILE_LANGUAGE:C>:-fshort-wchar>
-            $<$<COMPILE_LANGUAGE:C>:-funsigned-char>
-            $<$<COMPILE_LANGUAGE:C>:-masm=auto>
-            $<$<COMPILE_LANGUAGE:C>:-nostdlib>
-            $<$<COMPILE_LANGUAGE:C>:-std=c99>
-            $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
-            $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_SYSTEM_PROCESSOR}>
-            $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
-        )
-        set(COMPILER_CMSE_FLAG $<$<COMPILE_LANGUAGE:C>:-mcmse>)
-    endif()
+
     add_link_options(
         --info=summarysizes,sizes,totals,unused,veneers
         --strict
@@ -97,32 +71,40 @@ macro(_compiler_reload)
         --diag_suppress=6304
         $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
     )
+endmacro()
 
-    if (DEFINED TFM_SYSTEM_FP)
-        if(TFM_SYSTEM_FP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding +fp
-            # will cause compile failures on systems that already have fp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR "+fp")
-        else()
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-        endif()
-    endif()
+macro(tfm_toolchain_set_processor_arch)
+    set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
+    set(CMAKE_SYSTEM_ARCHITECTURE    ${TFM_SYSTEM_ARCHITECTURE})
+
+    set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
+    set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
     if (DEFINED TFM_SYSTEM_DSP)
-        if(TFM_SYSTEM_DSP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding +dsp
-            # will cause compile failures on systems that already have dsp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR "+dsp")
-        else()
+        if(NOT TFM_SYSTEM_DSP)
             string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
         endif()
+
+    include(Compiler/ARMClang)
+    # cmake does not allow the use of +dsp / +nofpu syntax. An override is added
+    # here to enable it. First reset the supported CPU list in case this has
+    # already been run.
+    __armclang_set_processor_list(C CMAKE_C_COMPILER_PROCESSOR_LIST)
+    __armclang_set_processor_list(ASM CMAKE_ASM_COMPILER_PROCESSOR_LIST)
+    # Then use regex to add +dsp +nodsp +fpu and +nofp options
+    # TODO generate this combinatorially
+    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp")
+    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp")
+    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp")
+    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp")
+    set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_C_COMPILER_PROCESSOR_LIST} CACHE INTERNAL "" FORCE)
     endif()
+endmacro()
+
+macro(tfm_toolchain_reload_compiler)
+    tfm_toolchain_set_processor_arch()
+    tfm_toolchain_reset_compiler_flags()
+    tfm_toolchain_reset_linker_flags()
 
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_C_LINK_FLAGS)
@@ -131,43 +113,31 @@ macro(_compiler_reload)
     unset(__mcpu_flag_set)
     unset(__march_flag_set)
 
-    # cmake does not allow the use of +dsp / +nofpu syntax. An override is added
-    # here to enable it. First reset the supported CPU list in case this has
-    # already been run.
-    __armclang_set_processor_list(C CMAKE_C_COMPILER_PROCESSOR_LIST)
-    __armclang_set_processor_list(ASM CMAKE_ASM_COMPILER_PROCESSOR_LIST)
-    # Then use regex to add +dsp +nodsp +fpu and +nofp options
-    # TODO generate this combinatorially
-    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp;")
-    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp;")
-    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp;")
-    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp;")
-
+    include(Compiler/ARMClang)
     __compiler_armclang(C)
-
-    if(${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL "6.11")
-        __compiler_armclang(ASM)
-    else()
-        # Because armclang<6.11 does not have an integrated assembler that
-        # supports the ASM syntax used by the CMSIS startup files, it is
-        # required to manuall invoke armasm. CMake does not support that when
-        # using armclang as the declared compiler, so instead we use some of the
-        # internals from ArmCC which uses armasm by default.
-        find_program(ARMASM_PATH armasm HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}")
-        set(CMAKE_ASM_COMPILER ${ARMASM_PATH})
-        include(${CMAKE_ROOT}/Modules/Compiler/ARMCC.cmake)
-        include(${CMAKE_ROOT}/Modules/Compiler/ARMCC-ASM.cmake)
-        __compiler_armcc(ASM)
-    endif()
+    include(Compiler/ARMCC)
+    __compiler_armcc(ASM)
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     # But armlink doesn't support this +dsp syntax, so take the cpu flag and
     # throw away the plus and everything after.
-    string(REGEX REPLACE "(--cpu=.*)\\+[a-z\\+]*[ ]?" "\\1" CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "(--cpu=.*)\\+[a-z\\+]*[ ]?" "\\1" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
+    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+
+    # Workaround for issues with --depend-single-line with armasm and Ninja
+    if (CMAKE_GENERATOR STREQUAL "Ninja")
+        set( CMAKE_DEPFILE_FLAGS_ASM "--depend=<OBJECT>.d")
+    endif()
 endmacro()
+
+# Configure environment for the compiler setup run by cmake at the first
+# `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
+# done, all further compiler setup is done via tfm_toolchain_reload_compiler()
+tfm_toolchain_set_processor_arch()
+tfm_toolchain_reset_compiler_flags()
+tfm_toolchain_reset_linker_flags()
 
 # Behaviour for handling scatter files is so wildly divergent between compilers
 # that this macro is required.

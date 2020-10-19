@@ -6,20 +6,31 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 
-set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
+# Don't load this file if it is specified as a cmake toolchain file
+if(NOT TFM_TOOLCHAIN_FILE)
+    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
+    return()
+endif()
 
 SET(CMAKE_SYSTEM_NAME Generic)
-# This setting is overridden in ${TFM_PLATFORM}/preload.cmake. It can be set to
-# any value here.
-set(CMAKE_SYSTEM_PROCESSOR cortex-m23)
+set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
+set(CMAKE_SYSTEM_ARCHITECTURE    ${TFM_SYSTEM_ARCHITECTURE})
+
+if(CROSS_COMPILE)
+    set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
+    set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
+else()
+    set(CMAKE_C_COMPILER_TARGET      arm-arm-none-eabi)
+    set(CMAKE_ASM_COMPILER_TARGET    arm-arm-none-eabi)
+endif()
 
 set(CMAKE_C_COMPILER iccarm)
 set(CMAKE_ASM_COMPILER iasmarm)
 
-set(COMPILER_CMSE_FLAG --cmse)
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out= )
+set(COMPILER_CMSE_FLAG --cmse)
 
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
@@ -27,46 +38,9 @@ set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out= )
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
-# Cmake makes it _really_ hard to dynamically set the cmake_system_processor
-# (used for setting mcpu flags etc). Instead we load
-# platform/ext/target/${TFM_PLATFORM}/preload.cmake, which should run this macro
-# to reload the compiler autoconfig. Note that it can't be loaded in this file
-# as cmake does not allow the use of command-line defined variables in toolchain
-# files and the path is platform dependent.
-macro(_compiler_reload)
-    if(${TFM_SYSTEM_PROCESSOR} STREQUAL "cortex-m0plus")
-      set(CMAKE_SYSTEM_PROCESSOR Cortex-M0+)
-    else()
-      set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
-    endif()
-    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
-
-    if (DEFINED TFM_SYSTEM_FP)
-        if(TFM_SYSTEM_FP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding .fp
-            # will cause compile failures on systems that already have fp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR ".fp")
-        endif()
-    endif()
-
-    if (DEFINED TFM_SYSTEM_DSP)
-        if(TFM_SYSTEM_DSP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding .dsp
-            # will cause compile failures on systems that already have dsp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR ".dsp")
-        else()
-            string(APPEND CMAKE_SYSTEM_PROCESSOR ".no_dsp")
-        endif()
-    endif()
-
+macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
-    set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C,CXX>:-e>
         $<$<COMPILE_LANGUAGE:C,CXX>:--dlib_config=full>
@@ -76,12 +50,34 @@ macro(_compiler_reload)
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
     )
+endmacro()
+
+macro(tfm_toolchain_reset_linker_flags)
+    set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+
     add_link_options(
       --silent
       --semihosting
       --redirect __write=__write_buffered
     )
+endmacro()
 
+macro(tfm_toolchain_set_processor_arch)
+    if(${TFM_SYSTEM_PROCESSOR} STREQUAL "cortex-m0plus")
+      set(CMAKE_SYSTEM_PROCESSOR Cortex-M0+)
+    else()
+      set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+    endif()
+    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
+
+    if (DEFINED TFM_SYSTEM_DSP)
+        if(NOT TFM_SYSTEM_DSP)
+            string(APPEND CMAKE_SYSTEM_PROCESSOR ".no_dsp")
+        endif()
+    endif()
+endmacro()
+
+macro(tfm_toolchain_reload_compiler)
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_C_LINK_FLAGS)
     unset(CMAKE_ASM_FLAGS_INIT)
@@ -94,8 +90,12 @@ macro(_compiler_reload)
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
-
 endmacro()
+
+# Configure environment for the compiler setup run by cmake at the first
+# `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
+# done, all further compiler setup is done via tfm_toolchain_reload_compiler()
+tfm_toolchain_reload_compiler()
 
 # Behaviour for handling scatter files is so wildly divergent between compilers
 # that this macro is required.

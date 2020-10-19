@@ -31,7 +31,7 @@ following commands:
 
     $ mkdir build && cd build
     $ cmake -DTFM_PLATFORM=nordic_nrf/nrf9160dk_nrf9160 \
-            -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             ../
     $ make install
 
@@ -125,4 +125,5 @@ Non-Secure console output is available via USART0.
 
 --------------
 
+*Copyright (c) 2020, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Nordic Semiconductor. All rights reserved.*

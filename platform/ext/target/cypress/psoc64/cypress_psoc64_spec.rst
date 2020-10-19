@@ -50,7 +50,7 @@ line arguments. Required arguments are noted below.
    * - -DTFM_PLATFORM=cypress/psoc64
      - Specifies target platform name ``psoc64``
 
-   * - -DCMAKE_TOOLCHAIN_FILE=<path to toolchain file>
+   * - -DTFM_TOOLCHAIN_FILE=<path to toolchain file>
      - Specifies the compiler toolchain
        The possible values are:
 
@@ -77,7 +77,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
@@ -95,7 +95,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTEST_S=ON -DTEST_NS=ON \
           ../
     popd
@@ -114,7 +114,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTEST_PSA_API=INITIAL_ATTESTATION \
           ../
     popd
@@ -133,7 +133,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           ../
     popd
@@ -152,7 +152,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           -DTEST_S=ON -DTEST_NS=ON \
           ../
@@ -172,7 +172,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           -DTEST_PSA_API=PROTECTED_STORAGE \
           ../

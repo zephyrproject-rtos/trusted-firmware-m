@@ -5,6 +5,10 @@
 #
 #-------------------------------------------------------------------------------
 
+set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cmake CACHE FILEPATH    "Path to TFM compiler toolchain file")
+set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for")
+set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
+
 set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
