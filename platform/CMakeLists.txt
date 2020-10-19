@@ -43,7 +43,7 @@ target_sources(platform_s
         ext/common/tfm_hal_ps.c
         ext/common/tfm_hal_its.c
         ext/common/tfm_platform.c
-        ext/common/uart_stdout.c
+        $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
         ext/common/tfm_hal_spm_logdev_peripheral.c
         $<$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
@@ -82,7 +82,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ext/common/uart_stdout.c
+        $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
 )
 
 target_link_libraries(platform_ns
@@ -113,8 +113,8 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ext/common/uart_stdout.c
             ext/common/boot_hal.c
+            $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
             $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
             $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
