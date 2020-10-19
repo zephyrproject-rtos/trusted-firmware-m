@@ -13,6 +13,8 @@
 #include "region_defs.h"
 #include "platform_description.h"
 #include "region.h"
+#include "tfm_hal_platform.h"
+#include "interface/include/log/tfm_log.h"
 
 /* Debug configuration flags */
 #define SPNIDEN_SEL_STATUS (0x01u << 7)
@@ -341,4 +343,13 @@ void tfm_spm_hal_enable_irq(IRQn_Type irq_line)
 void tfm_spm_hal_disable_irq(IRQn_Type irq_line)
 {
     NVIC_DisableIRQ(irq_line);
+}
+
+enum tfm_hal_status_t tfm_hal_platform_init(void)
+{
+    __enable_irq();
+    stdio_init();
+    LOG_MSG("\033[1;34m[Platform] AN539 is marked for deprecation!\033[0m\r\n");
+
+    return TFM_HAL_SUCCESS;
 }
