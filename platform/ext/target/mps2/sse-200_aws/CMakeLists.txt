@@ -102,11 +102,6 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
-target_compile_definitions(platform_s PUBLIC
-    __STARTUP_CLEAR_BSS_MULTIPLE
-    __STARTUP_COPY_MULTIPLE
-)
-
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns

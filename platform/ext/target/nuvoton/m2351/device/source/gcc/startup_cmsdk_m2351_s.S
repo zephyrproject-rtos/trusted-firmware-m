@@ -18,6 +18,8 @@
 ; * This file is derivative of CMSIS V5.3.1 startup_ARMCM23.S
 ; */
 
+#include "tfm_plat_config.h"
+
     .syntax    unified
     .arch    armv8-m.base
 

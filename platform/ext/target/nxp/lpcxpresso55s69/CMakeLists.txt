@@ -121,12 +121,6 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
-)
-
 # GNU ld has some strange behaviour to do with weak functions, and does not deal
 # well with strong functions in static libraries overriding weak functions in
 # object files. For this reason, the file hardware_init is linked directly to

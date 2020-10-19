@@ -61,11 +61,6 @@ if(BL2)
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_bl2.icf>
     )
-    target_compile_definitions(bl2
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
-    )
 endif()
 
 #========================= Platform Secure ====================================#
@@ -110,12 +105,6 @@ target_sources(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#

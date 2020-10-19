@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -21,6 +21,7 @@
    startup_psoc6_02_cm0plus.S*/
 
 #include "region_defs.h"
+#include "tfm_plat_config.h"
 
     /* Address of the NMI handler */
     #define CY_NMI_HANLDER_ADDR         0x0000000D

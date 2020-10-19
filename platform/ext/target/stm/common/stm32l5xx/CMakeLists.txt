@@ -99,12 +99,6 @@ target_sources(tfm_s
         ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
 )
 
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
-)
-
 #========================= Platform Non-Secure ================================#
 
 target_include_directories(platform_ns

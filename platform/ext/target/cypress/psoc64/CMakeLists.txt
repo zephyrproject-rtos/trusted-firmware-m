@@ -123,9 +123,6 @@ target_sources(platform_s
 )
 
 target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
     PRIVATE
         RTE_USART5
 )
