@@ -8,11 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* FixMe: Use PSA_ERROR_CONNECTION_REFUSED when performing parameter
- *        integrity checks but this will have to be revised
- *        when the full set of error codes mandated by PSA FF
- *        is available.
- */
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
@@ -38,7 +33,7 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
@@ -83,7 +78,7 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
-        return PSA_ERROR_CONNECTION_REFUSED;
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
