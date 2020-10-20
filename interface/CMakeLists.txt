@@ -67,7 +67,6 @@ target_sources(psa_api_ns
     PRIVATE
         $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_svc_handler.c>
         $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_api.c>
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
 
 if (${TFM_PSA_API})

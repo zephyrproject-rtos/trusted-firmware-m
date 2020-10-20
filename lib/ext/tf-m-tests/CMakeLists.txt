@@ -38,3 +38,7 @@ endif()
 if (NOT TFM_TEST_PATH)
     set(TFM_TEST_PATH ${TFM_TEST_REPO_PATH}/test CACHE PATH "Path to TFM tests" FORCE)
 endif()
+
+if (NOT TFM_NS_LOG_PATH)
+    set(TFM_NS_LOG_PATH ${TFM_TEST_REPO_PATH}/log CACHE PATH "Path to NS log" FORCE)
+endif()

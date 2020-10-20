@@ -85,6 +85,7 @@ add_subdirectory(docs)
 if(NS)
     # Set to ${TFM_TEST_REPO_PATH}/app by default
     add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)
+    add_subdirectory(${TFM_NS_LOG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/ns_log)
 endif()
 add_subdirectory(secure_fw)
 add_subdirectory(interface)
