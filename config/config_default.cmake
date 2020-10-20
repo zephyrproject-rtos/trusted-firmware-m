@@ -75,13 +75,13 @@ set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flas
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
 set(PS_RAM_FS                           OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition")
 set(PS_ROLLBACK_PROTECTION              ON          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
-set(PS_VALIDATE_METADATA_FROM_FLASH     OFF         CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
+set(PS_VALIDATE_METADATA_FROM_FLASH     ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in protected storage")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash fs if it doesn't exist for Interal Trusted Storage partition")
 set(ITS_RAM_FS                          OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Interal Trusted Storage partition")
-set(ITS_VALIDATE_METADATA_FROM_FLASH    OFF         CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
+set(ITS_VALIDATE_METADATA_FROM_FLASH    ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
 set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
