@@ -353,7 +353,7 @@ compliance test. This support is controlled by the TEST_PSA_API variable:
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -364,7 +364,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts
