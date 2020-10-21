@@ -21,7 +21,6 @@
 #include "region_defs.h"
 #include "RTE_Device.h"
 #include "smpu_config.h"
-#include "log/tfm_log.h"
 
 #include "cy_prot.h"
 
