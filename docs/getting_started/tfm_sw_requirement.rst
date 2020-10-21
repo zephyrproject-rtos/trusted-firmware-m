@@ -153,7 +153,7 @@ Install the following tools:
 - Git tools v2.10.0
 - CMake (see the "Supported CMake versions" chapter)
 - GNU Make (see the "Supported make versions" chapter)
-- Python3 and the pip package manager (from Python 3.4 it's included)
+- Python3 (3.6 or newer)
 - Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click, imgtool v1.6.0*
 
   .. code-block:: bash
@@ -212,8 +212,7 @@ Install the following tools:
 - GNU make should be installed by selecting appropriate package during
   cygwin
   installation.
-- Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
-  the pip package manager (from Python 3.4 it's included)
+- Python3 (3.6 or newer) `(native Windows version) <https://www.python.org/downloads/>`__
 - Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click imgtool v1.6.0*
 
   .. code-block:: bash
