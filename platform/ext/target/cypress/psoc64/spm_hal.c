@@ -7,7 +7,6 @@
  */
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "tfm_spm_hal.h"
@@ -20,6 +19,7 @@
 #include "target_cfg.h"
 #include "tfm_multi_core.h"
 #include "tfm_platform_core_api.h"
+#include "log/tfm_log.h"
 
 #include "cycfg.h"
 #include "cy_device.h"
@@ -223,10 +223,10 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
         /* The delay is required after Access port was enabled for
         * debugger/programmer to connect and set TEST BIT */
         Cy_SysLib_Delay(100);
-        printf("Enabled CM4_AP DAP control\r\n");
+        LOG_MSG("Enabled CM4_AP DAP control\r\n");
     }
 
-    printf("Starting Cortex-M4 at 0x%x\r\n", start_addr);
+    LOG_MSG("Starting Cortex-M4 at 0x%x\r\n", start_addr);
     Cy_SysEnableCM4(start_addr);
 }
 
@@ -257,7 +257,7 @@ void tfm_spm_hal_wait_for_ns_cpu_ready(void)
                 Cy_IPC_Drv_ReleaseNotify(Cy_IPC_Drv_GetIpcBaseAddress(IPC_RX_CHAN),
                                          IPC_RX_RELEASE_MASK);
                 if (data == ~IPC_SYNC_MAGIC) {
-                    printf("\n\rCores sync success.\r\n");
+                    LOG_MSG("\n\rCores sync success.\r\n");
                     break;
                 }
             }
