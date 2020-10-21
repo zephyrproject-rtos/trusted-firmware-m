@@ -48,7 +48,6 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         const struct tfm_spm_partition_platform_data_t *platform_data)
 {
     (void) partition_idx; /* Unused parameter */
-    printf("In %s()\n", __func__);
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
@@ -224,7 +223,7 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
         /* The delay is required after Access port was enabled for
         * debugger/programmer to connect and set TEST BIT */
         Cy_SysLib_Delay(100);
-        printf("Enabled CM4_AP DAP control\n");
+        printf("Enabled CM4_AP DAP control\r\n");
     }
 
     printf("Starting Cortex-M4 at 0x%x\r\n", start_addr);

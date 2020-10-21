@@ -222,7 +222,7 @@ cy_en_prot_status_t PPU_Configure(const PPU_Resources *ppu_dev)
 #endif
 
     default:
-        printf("Unexpected peripheral type %d\n", ppu_dev->ppu_type);
+        printf("Unexpected peripheral type %d\r\n", ppu_dev->ppu_type);
         return CY_PROT_BAD_PARAM;
     }
 
