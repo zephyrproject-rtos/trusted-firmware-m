@@ -162,6 +162,14 @@ used which does not support all features.
 | TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
 +-----------------------------+-------------------------------------+---------------+
 
+TF-M Profiles
+-------------
+
+TF-M Profiles are implemented as a single cmake configuration file, under the
+``config/profile`` directory. A good understanding can be gained quickly by
+looking at the Profile configuration files, but the ultimate reference for
+Profiles are the design documents in the ``docs/design_documents/profiles/``
+directory.
 
 PSA test configuration
 ----------------------
