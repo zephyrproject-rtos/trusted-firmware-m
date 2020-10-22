@@ -128,6 +128,8 @@ macro(_compiler_reload)
     unset(CMAKE_C_LINK_FLAGS)
     unset(CMAKE_ASM_FLAGS_INIT)
     unset(CMAKE_ASM_LINK_FLAGS)
+    unset(__mcpu_flag_set)
+    unset(__march_flag_set)
 
     # cmake does not allow the use of +dsp / +nofpu syntax. An override is added
     # here to enable it. First reset the supported CPU list in case this has
