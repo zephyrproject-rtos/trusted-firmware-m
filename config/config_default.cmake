@@ -112,6 +112,8 @@ set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable inte
 set(TFM_IRQ_TEST                        OFF         CACHE BOOL      "Enable IRQ tests")
 set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
 
+set(PS_TEST_NV_COUNTERS                 OFF         CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
+
 set(TFM_CRYPTO_TEST_ALG_CBC             ON          CACHE BOOL      "Test CBC cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CCM             ON          CACHE BOOL      "Test CCM cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CFB             ON          CACHE BOOL      "Test CFB cryptography mode")
