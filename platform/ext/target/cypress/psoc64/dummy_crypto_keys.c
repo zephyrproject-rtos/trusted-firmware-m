@@ -30,7 +30,7 @@ static const uint8_t sample_tfm_key[TFM_KEY_LEN_BYTES] =
              {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
-extern const psa_ecc_curve_t initial_attestation_curve_type;
+extern const psa_ecc_family_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
 extern const uint32_t initial_attestation_private_key_size;
 
@@ -81,7 +81,7 @@ enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
-                                psa_ecc_curve_t  *curve_type)
+                                psa_ecc_family_t *curve_type)
 {
     uint8_t *key_dst;
     const uint8_t *key_src;

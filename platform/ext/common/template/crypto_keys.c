@@ -38,7 +38,7 @@ extern const uint8_t initial_attestation_hmac_sha256_key[];
 extern const size_t initial_attestation_hmac_sha256_key_size;
 extern const char *initial_attestation_kid;
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
-extern const psa_ecc_curve_t initial_attestation_curve_type;
+extern const psa_ecc_family_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
 extern const uint32_t initial_attestation_private_key_size;
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
@@ -131,7 +131,7 @@ enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
-                                psa_ecc_curve_t  *curve_type)
+                                psa_ecc_family_t *curve_type)
 {
     uint8_t *key_dst;
     const uint8_t *key_src;

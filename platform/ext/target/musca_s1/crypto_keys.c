@@ -34,7 +34,7 @@
 #define CC312_NULL_CONTEXT "NO SALT!"
 #define CC_BITS_IN_32BIT_WORD 32
 
-extern const psa_ecc_curve_t initial_attestation_curve_type;
+extern const psa_ecc_family_t initial_attestation_curve_type;
 extern const uint8_t  initial_attestation_private_key[];
 extern const uint32_t initial_attestation_private_key_size;
 
@@ -131,7 +131,7 @@ enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
-                                psa_ecc_curve_t  *curve_type)
+                                psa_ecc_family_t *curve_type)
 {
     uint32_t key_size = initial_attestation_private_key_size;
     int rc;

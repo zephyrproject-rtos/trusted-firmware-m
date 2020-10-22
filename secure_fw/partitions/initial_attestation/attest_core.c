@@ -926,7 +926,7 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
     struct q_useful_buf key_buffer;
     uint8_t *key_source;
     size_t key_len;
-    psa_ecc_curve_t curve_type;
+    psa_ecc_family_t curve_type;
 
     (void)in_vec;
 
@@ -958,7 +958,7 @@ initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
 
     (void)tfm_memcpy(key_buffer.ptr, key_source, key_len);
 
-    *(psa_ecc_curve_t *)out_vec[1].base = curve_type;
+    *(psa_ecc_family_t *)out_vec[1].base = curve_type;
 
     *(size_t *)out_vec[2].base = key_len;
 

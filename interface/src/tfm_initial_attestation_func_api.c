@@ -60,10 +60,10 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
 }
 
 psa_status_t
-tfm_initial_attest_get_public_key(uint8_t         *public_key,
-                                  size_t           public_key_buf_size,
-                                  size_t          *public_key_len,
-                                  psa_ecc_curve_t *elliptic_curve_type)
+tfm_initial_attest_get_public_key(uint8_t          *public_key,
+                                  size_t            public_key_buf_size,
+                                  size_t           *public_key_len,
+                                  psa_ecc_family_t *elliptic_curve_type)
 {
     int32_t res;
 
