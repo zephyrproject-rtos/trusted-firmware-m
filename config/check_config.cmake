@@ -12,11 +12,16 @@ function(tfm_invalid_config)
         string (REPLACE "GREATER"  ">" ARGV_STRING "${ARGV_STRING}")
         string (REPLACE "LESS"     "<" ARGV_STRING "${ARGV_STRING}")
         string (REPLACE "EQUAL"    "=" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "IN_LIST"  "in" ARGV_STRING "${ARGV_STRING}")
 
         message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
     endif()
 endfunction()
 
+set (TFM_L3_PLATFORM_LISTS mps2/an521 musca_b1)
+
+tfm_invalid_config(TFM_ISOLATION_LEVEL LESS 1 OR TFM_ISOLATION_LEVEL GREATER 3)
+tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND NOT TFM_PLATFORM IN_LIST TFM_L3_PLATFORM_LISTS)
 tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND NOT TFM_PSA_API)
 
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
