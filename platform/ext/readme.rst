@@ -218,10 +218,6 @@ The PS service requires the following definitions:
   data.
 - ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes.
-- ``PS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  PS area.
-- ``PS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  PS area.
 
 .. Note::
 
@@ -245,10 +241,6 @@ The ITS service requires the following definitions:
   store the data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes.
-- ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  ITS area.
-- ``ITS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  ITS area.
 
 .. Note::
 

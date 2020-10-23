@@ -53,13 +53,43 @@ target_compile_definitions(tfm_partition_its
         $<$<BOOL:${PS_RAM_FS}>:PS_RAM_FS>
         $<$<BOOL:${PS_ROLLBACK_PROTECTION}>:PS_ROLLBACK_PROTECTION>
         $<$<BOOL:${PS_VALIDATE_METADATA_FROM_FLASH}>:PS_VALIDATE_METADATA_FROM_FLASH>
-        $<$<BOOL:${PS_CRYPTO_AEAD_ALG}>:PS_CRYPTO_AEAD_ALG=${PS_CRYPTO_AEAD_ALG}>
+        PS_MAX_ASSET_SIZE=${PS_MAX_ASSET_SIZE}
+        PS_NUM_ASSETS=${PS_NUM_ASSETS}
+        PS_CRYPTO_AEAD_ALG=${PS_CRYPTO_AEAD_ALG}
     PRIVATE
         $<$<BOOL:${ITS_CREATE_FLASH_LAYOUT}>:ITS_CREATE_FLASH_LAYOUT>
         $<$<BOOL:${ITS_RAM_FS}>:ITS_RAM_FS>
         $<$<OR:$<BOOL:${ITS_VALIDATE_METADATA_FROM_FLASH}>,$<BOOL:PS_VALIDATE_METADATA_FROM_FLASH>>:ITS_VALIDATE_METADATA_FROM_FLASH>
-        $<$<BOOL:${ITS_BUF_SIZE}>:ITS_BUF_SIZE>
+        ITS_MAX_ASSET_SIZE=${ITS_MAX_ASSET_SIZE}
+        ITS_NUM_ASSETS=${ITS_NUM_ASSETS}
+        $<$<BOOL:${ITS_BUF_SIZE}>:ITS_BUF_SIZE=${ITS_BUF_SIZE}>
 )
+
+################ Display the configuration being applied #######################
+
+message(STATUS "----------- Display storage configuration - start ------------")
+
+message(STATUS "PS_CREATE_FLASH_LAYOUT is set to ${PS_CREATE_FLASH_LAYOUT}")
+message(STATUS "PS_ENCRYPTION is set to ${PS_ENCRYPTION}")
+message(STATUS "PS_RAM_FS is set to ${PS_RAM_FS}")
+message(STATUS "PS_ROLLBACK_PROTECTION is set to ${PS_ROLLBACK_PROTECTION}")
+message(STATUS "PS_VALIDATE_METADATA_FROM_FLASH is set to ${PS_VALIDATE_METADATA_FROM_FLASH}")
+message(STATUS "PS_MAX_ASSET_SIZE is set to ${PS_MAX_ASSET_SIZE}")
+message(STATUS "PS_NUM_ASSETS is set to ${PS_NUM_ASSETS}")
+message(STATUS "PS_CRYPTO_AEAD_ALG is set to ${PS_CRYPTO_AEAD_ALG}")
+
+message(STATUS "ITS_CREATE_FLASH_LAYOUT is set to ${ITS_CREATE_FLASH_LAYOUT}")
+message(STATUS "ITS_RAM_FS is set to ${ITS_RAM_FS}")
+message(STATUS "ITS_VALIDATE_METADATA_FROM_FLASH is set to ${ITS_VALIDATE_METADATA_FROM_FLASH}")
+message(STATUS "ITS_MAX_ASSET_SIZE is set to ${ITS_MAX_ASSET_SIZE}")
+message(STATUS "ITS_NUM_ASSETS is set to ${ITS_NUM_ASSETS}")
+if (${ITS_BUF_SIZE})
+    message(STATUS "ITS_BUF_SIZE is set to ${ITS_BUF_SIZE}")
+else()
+    message(STATUS "ITS_BUF_SIZE is not set (defaults to ITS_MAX_ASSET_SIZE)")
+endif()
+
+message(STATUS "----------- Display storage configuration - stop -------------")
 
 ############################ Secure API ########################################
 

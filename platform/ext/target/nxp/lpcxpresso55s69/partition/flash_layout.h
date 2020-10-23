@@ -211,11 +211,6 @@
 /* Specifies the smallest flash programmable unit in bytes */
 #define PS_FLASH_PROGRAM_UNIT  FLASH_AREA_IMAGE_SECTOR_SIZE
 
-/* The maximum asset size to be stored in the PS area */
-#define PS_MAX_ASSET_SIZE      (2048)
-/* The maximum number of assets to be stored in the PS area */
-#define PS_NUM_ASSETS          (5)
-
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
@@ -236,16 +231,6 @@
 #define ITS_SECTORS_PER_BLOCK   (0x2)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  FLASH_AREA_IMAGE_SECTOR_SIZE
-
-/* The maximum asset size to be stored in the ITS area */
-#ifdef PSA_API_TEST_CRYPTO
-/* Need larger asset size for PSA API Crypto compliance suite */
-#define ITS_MAX_ASSET_SIZE      (1229)
-#else
-#define ITS_MAX_ASSET_SIZE      (512)
-#endif
-/* The maximum number of assets to be stored in the ITS area */
-#define ITS_NUM_ASSETS          (5)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
