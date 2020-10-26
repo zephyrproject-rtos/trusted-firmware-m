@@ -1,0 +1,25 @@
+# -----------------------------------------------------------
+# Copyright (c) 2020, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# -----------------------------------------------------------
+mbedtls_internal
+mbedtls_sha256
+mbedtls_rsa
+mpi
+mbedtls_mpi_write_binary
+mbedtls_asn1_get_len
+mbedtls_asn1_get_tag
+mbedtls_mpi_bitlen
+mbedtls_cmp_abs
+mbedtls_cmp_int
+mbedtls_cmp_mpi
+mbedtls_mpi_get_bit
+mbedtls_mpi_init
+mbedtls_mpi_size
+mbedtls_aes_free
+mbedtls_aes_init
+mbedtls_entropy_free
+mbedtls_ctr_drbg_free
+mbedtls_mpi_cmp_mpi

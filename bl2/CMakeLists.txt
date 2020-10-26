@@ -100,3 +100,9 @@ target_link_libraries(bl2_mbedcrypto
     PUBLIC
         bl2_mbedcrypto_config
 )
+
+############################### CODE SHARING ###################################
+
+if (TFM_CODE_SHARING)
+    compiler_create_shared_code(bl2 ${CMAKE_CURRENT_SOURCE_DIR}/src/shared_symbol_template.txt)
+endif()

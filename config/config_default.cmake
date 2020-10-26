@@ -28,6 +28,9 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to ext
 
 set(TFM_SPM_LOG_LEVEL                   2           CACHE STRING    "Set default SPM log level as INFO level")
 
+set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
+set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to repo which shares code with secure firmware")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

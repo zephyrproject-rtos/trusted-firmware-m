@@ -114,3 +114,33 @@ if(NOT (TFM_PSA_API AND TFM_MULTI_CORE_TOPOLOGY))
             ${LINKER_VENEER_OUTPUT_FLAG}${CMAKE_CURRENT_BINARY_DIR}/s_veneers.o
     )
 endif()
+
+############################### CODE SHARING ###################################
+if (TFM_CODE_SHARING)
+    set(LIB_LIST mbedcrypto
+                 crypto_service_cc312
+                 platform_s
+                 tfm_partition_crypto
+                 tfm_partition_audit
+                 tfm_partition_attestation
+                 tfm_partition_ps
+                 tfm_partition_its
+                 tfm_partition_platform
+                 platform_s
+                 tfm_sprt
+                 tfm_spm
+    )
+    if (TFM_CODE_SHARING_PATH)
+        compiler_link_shared_code(tfm_s
+                                  ${TFM_CODE_SHARING_PATH} # Path to shared code
+                                  EXTERNAL_TARGET # Not produced by tf-m build
+                                  "${LIB_LIST}"
+        )
+    else()
+        compiler_link_shared_code(tfm_s
+                                  ${CMAKE_CURRENT_BINARY_DIR}/../bl2
+                                  bl2
+                                  "${LIB_LIST}"
+        )
+    endif()
+endif()
