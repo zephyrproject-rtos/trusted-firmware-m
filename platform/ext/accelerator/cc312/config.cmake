@@ -8,6 +8,6 @@
 ############ Override defaults for CC312 Accelerator ##############################
 
 # The CC312 needs atleast 0x4000 of heap size to work properly
-if(CRYPTO_ENGINE_BUF_SIZE LESS 0x4000)
-    set(CRYPTO_ENGINE_BUF_SIZE              0x4000      CACHE STRING    "Heap size for the crypto backend" FORCE)
+if(NOT (CRYPTO_ENGINE_BUF_SIZE GREATER 0x4000))
+    set(CRYPTO_ENGINE_BUF_SIZE              0x4000      CACHE STRING    "Heap size for the crypto backend")
 endif()

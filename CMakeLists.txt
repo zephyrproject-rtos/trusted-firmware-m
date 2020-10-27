@@ -11,6 +11,14 @@ set(TFM_VERSION 1.1.0)
 
 ############################ CONFIGURATION #####################################
 
+# Some compiler flags depend on the CPU / platform config. This include should
+# be run before the toolchain file so the compiler can be configured properly.
+if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
+else()
+    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+endif()
+
 include(config/set_config.cmake)
 
 if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
@@ -27,14 +35,6 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ############################### Compiler configuration #########################
-
-# Some compiler flags depend on the CPU / platform config. This include should
-# be run before the toolchain file so the compiler can be configured properly.
-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
-else()
-    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-endif()
 
 #Legacy compat option - load CMAKE_TOOLCHAIN_FILE as a TFM_TOOLCHAIN_FILE
 if (CMAKE_TOOLCHAIN_FILE)

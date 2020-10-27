@@ -38,23 +38,23 @@ Cmake configuration
 All configuration options are provided by cmake variables, and their default
 values, with docstrings, can be found in ``config/config_default.cmake``.
 
-Configuration is provided in multiple stages, and each subsequent stage
-can override settings of the previous stage.
+Configuration is provided in multiple stages. Each stage will not override any
+config that has already been set at any of the prior stages.
 
-   1. ``config/config_default.cmake`` is loaded.
-   2. Command-line variable settings are applied.
-   3. If it exists, CMAKE_BUILD_TYPE specific config is applied from
-      ``config/build_type/<build_type>.cmake``.
-   4. If TEST_PSA_TEST is set, then PSA API test related config is applied from
-      ``config/tests/config_test_psa_api.cmake``.
-   5. If it exists, TFM Profile specific config is applied from
-      ``config/profile/<tfm_profile>.cmake``.
-   6. Target specific config from ``platform/ext/target/<target_platform>/config.cmake``
-      is applied.
-   7. If CRYPTO_HW_ACCELERATOR is set, then a config specific to the
-      accelerator type is applied if it exists.
-   8. If the ``TFM_EXTRA_CONFIG_PATH`` variable has been set, that file is
+   1. Command-line variable settings are applied.
+   2. If the ``TFM_EXTRA_CONFIG_PATH`` variable has been set, that file is
       loaded.
+   3. If TEST_PSA_TEST is set, then PSA API test related config is applied from
+      ``config/tests/config_test_psa_api.cmake``.
+   4. If it exists, CMAKE_BUILD_TYPE specific config is applied from
+      ``config/build_type/<build_type>.cmake``.
+   5. Target specific config from ``platform/ext/target/<target_platform>/config.cmake``
+      is applied.
+   6. If CRYPTO_HW_ACCELERATOR is set, then a config specific to the
+      accelerator type is applied if it exists.
+   7. If it exists, TFM Profile specific config is applied from
+      ``config/profile/<tfm_profile>.cmake``.
+   8. ``config/config_default.cmake`` is loaded.
 
 .. Warning::
     This means that command-line settings are not applied when they conflict
