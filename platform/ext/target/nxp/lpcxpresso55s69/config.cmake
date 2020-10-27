@@ -4,5 +4,3 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-
-set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2" FORCE)
