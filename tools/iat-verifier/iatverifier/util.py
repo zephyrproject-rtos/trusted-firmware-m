@@ -47,7 +47,7 @@ def convert_map_to_token_files(mapfile, keyfile, outfile, method='sign'):
             signing_key = fh.read()
 
     with open(outfile, 'wb') as wfh:
-        convert_map_to_token(token_map, signing_key, wfh, raw)
+        convert_map_to_token(token_map, signing_key, wfh, method)
 
 
 def convert_map_to_token(token_map, signing_key, wfh, method='sign'):
@@ -172,6 +172,7 @@ def read_sign1_key(keyfile):
 
             msg = 'Bad key file "{}":\n\tpubkey error: {}\n\tprikey error: {}'
             raise ValueError(msg.format(keyfile, verifying_key_error, signing_key_error))
+    return key
 
 
 def read_hmac_key(keyfile):
