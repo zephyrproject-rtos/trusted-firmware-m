@@ -14,8 +14,8 @@
    {
       "name": "PSA FF Test Client Partition",
       "short_name": "PSA_FF_TEST_CLIENT",
-      "manifest": "@PSA_ARCH_TESTS_PATH@/api-tests/platform/manifests/client_partition_psa.json",
-      "source_path":"@PSA_ARCH_TESTS_PATH@",
+      "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/client_partition_psa.json",
+      "source_path":"${PSA_ARCH_TESTS_PATH}",
       "tfm_partition_ipc": true,
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,
@@ -30,8 +30,8 @@
     {
       "name": "PSA FF Test Server Partition",
       "short_name": "PSA_FF_TEST_SERVER",
-      "manifest": "@PSA_ARCH_TESTS_PATH@/api-tests/platform/manifests/server_partition_psa.json",
-      "source_path":"@PSA_ARCH_TESTS_PATH@",
+      "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/server_partition_psa.json",
+      "source_path":"${PSA_ARCH_TESTS_PATH}",
       "tfm_partition_ipc": true,
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,
@@ -46,8 +46,8 @@
     {
       "name": "PSA FF Test Driver Partition",
       "short_name": "PSA_FF_TEST_DRIVER",
-      "manifest": "@PSA_ARCH_TESTS_PATH@/api-tests/platform/manifests/driver_partition_psa.json",
-      "source_path":"@PSA_ARCH_TESTS_PATH@",
+      "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/driver_partition_psa.json",
+      "source_path":"${PSA_ARCH_TESTS_PATH}",
       "tfm_partition_ipc": true,
       "conditional": "PSA_API_TEST_IPC",
       "version_major": 0,

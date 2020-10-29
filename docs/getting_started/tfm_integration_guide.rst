@@ -162,6 +162,24 @@ to NS interrupts to the lower half of available priorities so that it wouldn't
 be possible for any non-secure interrupt to preempt a higher-priority secure
 interrupt.
 
+**********************************
+Integration with non-Cmake systems
+**********************************
+
+Generated Files
+===============
+
+Files that are derived from PSA manifests are generated at build-time by cmake.
+For integration with systems that do no use cmake, the files must be generated
+manually.
+
+The ``tools/tfm_parse_manifest_list.py`` script can be invoked manually. Some
+arguments will be needed to be provided. Please refer to
+``tfm_parse_manifest_list.py --help`` for more details.
+
+Some variables are used in the template files, these will need to be set in the
+environment before the script will succeed when the script is not run via cmake.
+
 --------------
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

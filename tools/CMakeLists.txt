@@ -10,15 +10,15 @@ find_package(Python3)
 
 ############################### Manifest declaration ###########################
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_manifest_list.yaml.in
-               ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_manifest_list.yaml
+               ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
 
 set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
 set(MANIFEST_LISTS ${MANIFEST_LISTS} ${TFM_EXTRA_MANIFEST_LIST_PATH})
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
+                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
 
     set(MANIFEST_LISTS ${MANIFEST_LISTS} ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
 endif()

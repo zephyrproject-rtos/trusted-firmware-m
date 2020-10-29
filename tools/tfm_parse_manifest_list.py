@@ -79,6 +79,7 @@ def process_manifest(manifest_list_files):
 
     print("Start to generate PSA manifests:")
     for manifest_item in manifest_list:
+        # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
         manifest = yaml.safe_load(file)
@@ -103,7 +104,9 @@ def process_manifest(manifest_list_files):
         interpreted as a relative path from the OUT_DIR.
         """
         if 'source_path' in manifest_item:
-            outfile_name = os.path.relpath(outfile_name, start = manifest_item['source_path'])
+            # Replace environment variables in the source path
+            source_path = os.path.expandvars(manifest_item['source_path'])
+            outfile_name = os.path.relpath(outfile_name, start = source_path)
 
         manifest_header_list.append(outfile_name)
 
@@ -140,7 +143,9 @@ def gen_files(context, gen_file_lists):
 
     print("Start to generate file from the generated list:")
     for file in file_list:
+        # Replace environment variables in the output filepath
         outfile_name = os.path.expandvars(file["output"])
+        # Replace environment variables in the template filepath
         templatefile_name = os.path.expandvars(file["template"])
 
         if OUT_DIR is not None:
@@ -161,7 +166,9 @@ def gen_files(context, gen_file_lists):
     print ("Generation of files done")
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list')
+    parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list',
+                                     epilog='Note that environment variables in template files will be replaced with their values')
+
     parser.add_argument('-o', '--outdir'
                         , dest='outdir'
                         , required=False
@@ -212,20 +219,8 @@ def main():
     gen_file_args = args.gen_file_args
     OUT_DIR = args.outdir
 
-    if len(manifest_args) == 0:
-        manifest_list = DEFAULT_MANIFEST_LIST
-    else:
-        """
-        Only convert to abs path when value is not default
-        Because the default value is a fixed relative path to TF-M root folder,
-        it will be various to different execution path if converted to absolute path.
-        The same for gen_file_list
-        """
-        manifest_list = [os.path.abspath(x) for x in args.manifest_args]
-    if len(gen_file_args) == 0:
-        gen_file_list = DEFAULT_GEN_FILE_LIST
-    else:
-        gen_file_list = [os.path.abspath(x) for x in args.gen_file_args]
+    manifest_list = [os.path.abspath(x) for x in args.manifest_args]
+    gen_file_list = [os.path.abspath(x) for x in args.gen_file_args]
 
     # Arguments could be relative path.
     # Convert to absolute path as we are going to change diretory later
