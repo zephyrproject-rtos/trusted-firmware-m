@@ -65,11 +65,15 @@ function(trusted_firmware_build)
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
+  set(TFM_GENERATED_INCLUDES ${TFM_BINARY_DIR}/generated/interface/include)
+
+  set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
 
   set(BUILD_BYPRODUCTS
     ${VENEERS_FILE}
     ${PSA_API_NS_PATH}
     ${BL2_HEX_FILE}
+    ${TFM_GENERATED_INCLUDES}/psa_manifest/sid.h
     )
 
   # Get the toolchain variant
@@ -88,7 +92,7 @@ function(trusted_firmware_build)
   endif()
 
   include(ExternalProject)
-  
+
   ExternalProject_Add(
     tfm
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
@@ -110,23 +114,27 @@ function(trusted_firmware_build)
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
   )
 
-  add_library(tfm_api STATIC IMPORTED)
-  set_target_properties(tfm_api PROPERTIES
-    IMPORTED_LOCATION ${PSA_API_NS_PATH}
+  add_library(tfm_api
+    ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c
   )
 
-  add_library(veneer_lib STATIC IMPORTED)
-  set_target_properties(veneer_lib PROPERTIES
-    IMPORTED_LOCATION ${VENEERS_FILE}
+  target_include_directories(tfm_api
+    PRIVATE
+    ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/CMSIS/RTOS2/Include
+    PUBLIC
+    ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include
+    INTERFACE
+    ${TFM_GENERATED_INCLUDES}
+  )
+
+  target_link_libraries(tfm_api
+    PUBLIC
+    zephyr_interface
+    INTERFACE
+    ${PSA_API_NS_PATH}
+    ${VENEERS_FILE}
+    $<TARGET_FILE:tfm_api>
   )
 
   add_dependencies(tfm_api tfm)
-  file(MAKE_DIRECTORY ${TFM_BINARY_DIR}/generated/interface/include)
-  target_include_directories(tfm_api INTERFACE
-    ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m/interface/include
-    ${TFM_BINARY_DIR}/generated/interface/include
-  )
-
-  target_link_libraries(tfm_api INTERFACE zephyr_interface veneer_lib)
-
 endfunction()
