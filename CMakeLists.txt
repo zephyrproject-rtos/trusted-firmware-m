@@ -62,6 +62,12 @@ function(trusted_firmware_build)
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
 
+  set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
+  set_property(GLOBAL PROPERTY
+    bl2_PM_HEX_FILE
+    ${BL2_HEX_FILE}
+    )
+
   set(BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH} ${BL2_HEX_FILE})
 
   # Get the toolchain variant
