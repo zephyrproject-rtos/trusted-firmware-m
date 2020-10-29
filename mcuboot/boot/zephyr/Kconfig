@@ -58,8 +58,17 @@ config NRF_CC310_BL
 
 menu "MCUBoot settings"
 
+config SINGLE_APPLICATION_SLOT
+	bool "Single slot bootloader"
+	default n
+	help
+	  Single image area is used for application which means that
+	  uploading a new application overwrites the one that previously
+	  occupied the area.
+
 choice
 	prompt "Signature type"
+	default BOOT_SIGNATURE_TYPE_ECDSA_P256 if HAS_HW_NRF_CC310
 	default BOOT_SIGNATURE_TYPE_RSA
 
 config BOOT_SIGNATURE_TYPE_NONE
@@ -84,17 +93,21 @@ config BOOT_SIGNATURE_TYPE_ECDSA_P256
 if BOOT_SIGNATURE_TYPE_ECDSA_P256
 choice
 	prompt "Ecdsa implementation"
+	default BOOT_ECDSA_CC310 if HAS_HW_NRF_CC310
 	default BOOT_ECDSA_TINYCRYPT
+
 config BOOT_ECDSA_TINYCRYPT
 	bool "Use tinycrypt"
 	select BOOT_USE_TINYCRYPT
-config BOOT_CC310
+
+config BOOT_ECDSA_CC310
 	bool "Use CC310"
-	select BOOT_USE_NRF_CC310_BL if HAS_HW_NRF_CC310
-	select NRF_CC310_BL if HAS_HW_NRF_CC310
-	select NRFXLIB_CRYPTO if SOC_FAMILY_NRF
+	depends on HAS_HW_NRF_CC310
+	select BOOT_USE_NRF_CC310_BL
+	select NRF_CC310_BL
+	select NRFXLIB_CRYPTO
 	select BOOT_USE_CC310
-endchoice
+endchoice # Ecdsa implementation
 endif
 
 config BOOT_SIGNATURE_TYPE_ED25519
@@ -118,8 +131,17 @@ endchoice
 
 config BOOT_SIGNATURE_KEY_FILE
 	string "PEM key file"
+	default "root-ec-p256.pem" if BOOT_SIGNATURE_TYPE_ECDSA_P256
+	default "root-ed25519.pem" if BOOT_SIGNATURE_TYPE_ED25519
+	default "root-rsa-3072.pem" if BOOT_SIGNATURE_TYPE_RSA && BOOT_SIGNATURE_TYPE_RSA_LEN=3072
+	default "root-rsa-2048.pem" if BOOT_SIGNATURE_TYPE_RSA && BOOT_SIGNATURE_TYPE_RSA_LEN=2048
 	default ""
 	help
+	  You can use either absolute or relative path.
+	  In case relative path is used, the build system assumes that it starts
+	  from the directory where the MCUBoot KConfig configuration file is
+	  located. If the key file is not there, the build system uses relative
+	  path that starts from the MCUBoot repository root directory.
 	  The key file will be parsed by imgtool's getpub command and a .c source
 	  with the public key information will be written in a format expected by
 	  MCUboot.
@@ -150,9 +172,20 @@ config BOOT_VALIDATE_SLOT0
 	  every boot, but can mitigate against some changes that are
 	  able to modify the flash image itself.
 
+if !SINGLE_APPLICATION_SLOT
+choice
+	prompt "Image upgrade modes"
+	default BOOT_SWAP_USING_MOVE if SOC_FAMILY_NRF
+	default BOOT_SWAP_USING_SCRATCH
+
+config BOOT_SWAP_USING_SCRATCH
+	bool "Swap mode that run with the scratch partition"
+	help
+	  This is the most conservative swap mode but it can work even on
+	  devices with heterogeneous flash page layout.
+
 config BOOT_UPGRADE_ONLY
 	bool "Overwrite image updates instead of swapping"
-	default n
 	help
 	  If y, overwrite the primary slot with the upgrade image instead
 	  of swapping them. This prevents the fallback recovery, but
@@ -160,8 +193,6 @@ config BOOT_UPGRADE_ONLY
 
 config BOOT_SWAP_USING_MOVE
 	bool "Swap mode that can run without a scratch partition"
-	default y if SOC_FAMILY_NRF
-	default n
 	help
 	  If y, the swap upgrade is done in two steps, where first every
 	  sector of the primary slot is moved up one sector, then for
@@ -172,6 +203,19 @@ config BOOT_SWAP_USING_MOVE
 	  but is currently limited to all sectors in both slots being of
 	  the same size.
 
+config BOOT_DIRECT_XIP
+	bool "Run the latest image directly from its slot"
+	help
+	  If y, mcuboot selects the newest valid image based on the image version
+	  numbers, thereafter the selected image can run directly from its slot
+	  without having to move/copy it into the primary slot. For this reason the
+	  images must be linked to be executed from the given image slot. Using this
+	  mode results in a simpler code path and smaller code size.
+
+endchoice
+endif
+
+if !SINGLE_APPLICATION_SLOT
 config BOOT_BOOTSTRAP
 	bool "Bootstrap erased the primary slot from the secondary slot"
 	default n
@@ -221,6 +265,7 @@ config BOOT_ENCRYPT_X25519
 	  back when swapping from the primary slot to the secondary slot. The
 	  encryption mechanism used in this case is ECIES using primitives
 	  described under "ECIES-X25519 encryption" in docs/encrypted_images.md.
+endif
 
 config BOOT_MAX_IMG_SECTORS
 	int "Maximum number of sectors per image slot"
@@ -376,6 +421,46 @@ config RECOVERY_UART_DEV_NAME
 
 endif # MCUBOOT_SERIAL
 
+config BOOT_INTR_VEC_RELOC
+	bool "Relocate the interrupt vector to the application"
+	default n
+	depends on SW_VECTOR_RELAY || CPU_CORTEX_M_HAS_VTOR
+	help
+	  Relocate the interrupt vector to the application before it is started.
+	  Select this option if application requires vector relocation,
+	  but it doesn't relocate vector in its reset handler.
+
+config UPDATEABLE_IMAGE_NUMBER
+	int "Number of updateable images"
+	default 1
+	range 1 1 if SINGLE_APPLICATION_SLOT
+	help
+	  Enables support of multi image update.
+
+choice
+	prompt "Downgrade prevention"
+	optional
+
+config MCUBOOT_DOWNGRADE_PREVENTION
+	bool "SW based downgrade prevention"
+	depends on BOOT_UPGRADE_ONLY
+	help
+	  Prevent downgrades by enforcing incrementing version numbers.
+	  When this option is set, any upgrade must have greater major version
+	  or greater minor version with equal major version. This mechanism
+	  only protects against some attacks against version downgrades (for
+	  example, a JTAG could be used to write an older version).
+
+config MCUBOOT_HW_DOWNGRADE_PREVENTION
+	bool "HW based downgrade prevention"
+	help
+	  Prevent undesirable/malicious software downgrades. When this option is
+	  set, any upgrade must have greater or equal security counter value.
+	  Because of the acceptance of equal values it allows for software
+	  downgrade to some extent.
+
+endchoice
+
 endmenu
 
 config MCUBOOT_DEVICE_SETTINGS
@@ -419,35 +504,5 @@ config LOG_PROCESS_THREAD
 # override USB device name
 config USB_DEVICE_PRODUCT
 	default "MCUBOOT"
-
-config UPDATEABLE_IMAGE_NUMBER
-	int "Number of updateable images"
-	default 1
-	help
-	  Enables support of multi image update.
-
-choice
-	prompt "Downgrade prevention"
-	optional
-
-config MCUBOOT_DOWNGRADE_PREVENTION
-	bool "SW based downgrade prevention"
-	depends on BOOT_UPGRADE_ONLY
-	help
-	  Prevent downgrades by enforcing incrementing version numbers.
-	  When this option is set, any upgrade must have greater major version
-	  or greater minor version with equal major version. This mechanism
-	  only protects against some attacks against version downgrades (for
-	  example, a JTAG could be used to write an older version).
-
-config MCUBOOT_HW_DOWNGRADE_PREVENTION
-	bool "HW based downgrade prevention"
-	help
-	  Prevent undesirable/malicious software downgrades. When this option is
-	  set, any upgrade must have greater or equal security counter value.
-	  Because of the acceptance of equal values it allows for software
-	  downgrade to some extent.
-
-endchoice
 
 source "Kconfig.zephyr"

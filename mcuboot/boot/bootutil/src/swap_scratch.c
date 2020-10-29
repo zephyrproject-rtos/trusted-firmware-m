@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <inttypes.h>
@@ -82,6 +81,7 @@ done:
     return rc;
 }
 
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD)
 /**
  * Reads the status of a partially-completed swap, if any.  This is necessary
  * to recover in case the boot lodaer was reset in the middle of a swap
@@ -541,7 +541,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
             /* Write a trailer to the scratch area, even if we don't need the
              * scratch area for status.  We need a temporary place to store the
              * `swap-type` while we erase the primary trailer.
-             */ 
+             */
             rc = swap_status_init(state, fap_scratch, bs);
             assert(rc == 0);
 
@@ -721,6 +721,8 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     }
 
 }
-#endif
+#endif /* !MCUBOOT_OVERWRITE_ONLY */
 
-#endif
+#endif /* !MCUBOOT_DIRECT_XIP && !MCUBOOT_RAM_LOAD */
+
+#endif /* !MCUBOOT_SWAP_USING_MOVE */

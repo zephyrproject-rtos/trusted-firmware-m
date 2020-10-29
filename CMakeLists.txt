@@ -101,6 +101,7 @@ function(trusted_firmware_build)
                ${TFM_ISOLATION_LEVEL_ARG}
                ${TFM_REGRESSION_ARG}
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
+               -DMCUBOOT_PATH=${ZEPHYR_TFM_MODULE_DIR}/mcuboot
                -DTFM_TOOLCHAIN_PATH=${TFM_TOOLCHAIN_PATH}
                -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
     BUILD_ALWAYS True

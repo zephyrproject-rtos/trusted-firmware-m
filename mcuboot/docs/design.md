@@ -1,7 +1,7 @@
 <!--
   - SPDX-License-Identifier: Apache-2.0
 
-  - Copyright (c) 2017 Linaro LTD
+  - Copyright (c) 2017-2020 Linaro LTD
   - Copyright (c) 2017-2019 JUUL Labs
   - Copyright (c) 2019-2020 Arm Limited
 
@@ -166,13 +166,15 @@ working).
 
 A portion of the flash memory can be partitioned into multiple image areas, each
 contains two image slots: a primary slot and a secondary slot.
-The boot loader will only run an image from the primary slot, so images must be
-built such that they can run from that fixed location in flash.  If the boot
-loader needs to run the image resident in the secondary slot, it must copy its
-contents into the primary slot before doing so, either by swapping the two
-images or by overwriting the contents of the primary slot. The bootloader
-supports either swap- or overwrite-based image upgrades, but must be configured
-at build time to choose one of these two strategies.
+Normally, the boot loader will only run an image from the primary slot, so
+images must be built such that they can run from that fixed location in flash
+(the exception to this is the [direct-xip](#direct-xip) and the
+[ram-load](#ram-load) upgrade mode). If the boot loader needs to run the
+image resident in the secondary slot, it must copy its contents into the primary
+slot before doing so, either by swapping the two images or by overwriting the
+contents of the primary slot. The bootloader supports either swap- or
+overwrite-based image upgrades, but must be configured at build time to choose
+one of these two strategies.
 
 In addition to the slots of image areas, the boot loader requires a scratch
 area to allow for reliable image swapping. The scratch area must have a size
@@ -215,11 +217,62 @@ and during development, as well as any desired safety margin on the
 manufacturer's specified number of erase cycles. In general, using a ratio that
 allows hundreds to thousands of field upgrades in production is recommended.
 
-The overwrite upgrade strategy is substantially simpler to implement than the
-image swapping strategy, especially since the bootloader must work properly
-even when it is reset during the middle of an image swap. For this reason, the
-rest of the document describes its behavior when configured to swap images
-during an upgrade.
+### [Equal slots (direct-xip)](#direct-xip)
+
+When the direct-xip mode is enabled the active image flag is "moved" between the
+slots during image upgrade and in contrast to the above, the bootloader can
+run an image directly from either the primary or the secondary slot (without
+having to move/copy it into the primary slot). Therefore the image update
+client, which downloads the new images must be aware, which slot contains the
+active image and which acts as a staging area and it is responsible for loading
+the proper images into the proper slot. All this requires that the images be
+built to be executed from the corresponding slot. At boot time the bootloader
+first looks for images in the slots and then inspects the version numbers in the
+image headers. It selects the newest image (with the highest version number) and
+then checks its validity (integrity check, signature verification etc.). If the
+image is invalid MCUboot erases its memory slot and starts to validate the other
+image. After a successful validation of the selected image the bootloader
+chain-loads it.
+Handling the primary and secondary slots as equals has its drawbacks. Since the
+images are not moved between the slots, the on-the-fly image
+encryption/decryption can't be supported (it only applies to storing the image
+in an external flash on the device, the transport of encrypted image data is
+still feasible).
+
+The overwrite and the direct-xip upgrade strategies are substantially simpler to
+implement than the image swapping strategy, especially since the bootloader must
+work properly even when it is reset during the middle of an image swap. For this
+reason, the rest of the document describes its behavior when configured to swap
+images during an upgrade.
+
+### [RAM Loading](#ram-load)
+
+In ram-load mode the slots are equal. Like the direct-xip mode, this mode
+also selects the newest image by reading the image version numbers in the image
+headers. But instead of executing it in place, the newest image is copied to the
+RAM for execution. The load address, the location in RAM where the image is
+copied to, is stored in the image header. The ram-load upgrade mode can be
+useful when there is no internal flash in the SoC, but there is a big enough
+internal RAM to hold the images. Usually in this case the images are stored
+in an external storage device. Execution from external storage has some
+drawbacks (lower execution speed, image is exposed to attacks) therefore the
+image is always copied to the internal RAM before the authentication and
+execution. Ram-load mode requires the image to be built to be executed from
+the RAM address range instead of the storage device address range. If
+ram-load is enabled then platform must define the following parameters:
+
+```c
+#define IMAGE_EXECUTABLE_RAM_START    <area_base_addr>
+#define IMAGE_EXECUTABLE_RAM_SIZE     <area_size_in_bytes>
+```
+
+When ram-load is enabled, the `--load-addr <addr>` option of the `imgtool`
+script must also be used when signing the images. This option set the `RAM_LOAD`
+flag in the image header which indicates that the image should be loaded to the
+RAM and also set the load address in the image header.
+
+The ram-load mode currently supports only the single image boot and the image
+encryption feature is not supported.
 
 ## [Boot Swap Types](#boot-swap-types)
 
@@ -889,6 +942,9 @@ producing signed images, see: [signed_images](signed_images.md).
 
 If you want to enable and use encrypted images, see:
 [encrypted_images](encrypted_images.md).
+
+Note: Image encryption is not supported when the direct-xip or the ram-load
+upgrade strategy is selected.
 
 ### [Using Hardware Keys for Verification](#hw-key-support)
 

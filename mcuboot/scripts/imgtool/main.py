@@ -140,10 +140,11 @@ def getpriv(key, minimal):
 @click.command(help="Check that signed image can be verified by given key")
 def verify(key, imgfile):
     key = load_key(key) if key else None
-    ret, version = image.Image.verify(imgfile, key)
+    ret, version, digest = image.Image.verify(imgfile, key)
     if ret == image.VerifyResult.OK:
         print("Image was correctly validated")
         print("Image version: {}.{}.{}+{}".format(*version))
+        print("Image digest: {}".format(digest.hex()))
         return
     elif ret == image.VerifyResult.INVALID_MAGIC:
         print("Invalid image magic; is this an MCUboot image?")
@@ -225,6 +226,12 @@ class BasedIntParamType(click.ParamType):
 
 @click.argument('outfile')
 @click.argument('infile')
+@click.option('--custom-tlv', required=False, nargs=2, default=[],
+              multiple=True, metavar='[tag] [value]',
+              help='Custom TLV that will be placed into protected area. '
+                   'Add "0x" prefix if the value should be interpreted as an '
+                   'integer, otherwise it will be interpreted as a string. '
+                   'Specify the option multiple times to add multiple TLVs.')
 @click.option('-R', '--erased-val', type=click.Choice(['0', '0xff']),
               required=False,
               help='The value that is read back from erased flash.')
@@ -237,7 +244,8 @@ class BasedIntParamType(click.ParamType):
                    'keys. Enable when BOOT_SWAP_SAVE_ENCTLV config option '
                    'was set.')
 @click.option('-E', '--encrypt', metavar='filename',
-              help='Encrypt image using the provided public key')
+              help='Encrypt image using the provided public key. '
+                   '(Not supported in direct-xip or ram-load mode.)')
 @click.option('-e', '--endian', type=click.Choice(['little', 'big']),
               default='little', help="Select little or big endian")
 @click.option('--overwrite-only', default=False, is_flag=True,
@@ -250,11 +258,13 @@ class BasedIntParamType(click.ParamType):
               help='When padding allow for this amount of sectors (defaults '
                    'to 128)')
 @click.option('--confirm', default=False, is_flag=True,
-              help='When padding the image, mark it as confirmed')
+              help='When padding the image, mark it as confirmed (implies '
+                   '--pad)')
 @click.option('--pad', default=False, is_flag=True,
               help='Pad image to --slot-size bytes, adding trailer magic')
 @click.option('-S', '--slot-size', type=BasedIntParamType(), required=True,
-              help='Size of the slot where the image will be written')
+              help='Size of the slot. If the slots have different sizes, use '
+              'the size of the secondary slot.')
 @click.option('--pad-header', default=False, is_flag=True,
               help='Add --header-size zeroed bytes at the beginning of the '
                    'image')
@@ -282,7 +292,12 @@ class BasedIntParamType(click.ParamType):
 def sign(key, public_key_format, align, version, pad_sig, header_size,
          pad_header, slot_size, pad, confirm, max_sectors, overwrite_only,
          endian, encrypt, infile, outfile, dependencies, load_addr, hex_addr,
-         erased_val, save_enctlv, security_counter, boot_record):
+         erased_val, save_enctlv, security_counter, boot_record, custom_tlv):
+
+    if confirm:
+        # Confirmed but non-padded images don't make much sense, because
+        # otherwise there's no trailer area for writing the confirmed status.
+        pad = True
     img = image.Image(version=decode_version(version), header_size=header_size,
                       pad_header=pad_header, pad=pad, confirm=confirm,
                       align=int(align), slot_size=slot_size,
@@ -305,7 +320,26 @@ def sign(key, public_key_format, align, version, pad_sig, header_size,
     if pad_sig and hasattr(key, 'pad_sig'):
         key.pad_sig = True
 
-    img.create(key, public_key_format, enckey, dependencies, boot_record)
+    # Get list of custom protected TLVs from the command-line
+    custom_tlvs = {}
+    for tlv in custom_tlv:
+        tag = int(tlv[0], 0)
+        if tag in custom_tlvs:
+            raise click.UsageError('Custom TLV %s already exists.' % hex(tag))
+        if tag in image.TLV_VALUES.values():
+            raise click.UsageError(
+                'Custom TLV %s conflicts with predefined TLV.' % hex(tag))
+
+        value = tlv[1]
+        if value.startswith('0x'):
+            if len(value[2:]) % 2:
+                raise click.UsageError('Custom TLV length is odd.')
+            custom_tlvs[tag] = bytes.fromhex(value[2:])
+        else:
+            custom_tlvs[tag] = value.encode('utf-8')
+
+    img.create(key, public_key_format, enckey, dependencies, boot_record,
+               custom_tlvs)
     img.save(outfile, hex_addr)
 
 

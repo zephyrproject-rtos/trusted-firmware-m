@@ -39,9 +39,9 @@ macro(app_set_runner_args)
   endif()
 endmacro()
 
-# Standard Zephyr application boilerplate:
+# find_package(Zephyr) in order to load application boilerplate:
 # http://docs.zephyrproject.org/application/application.html
-include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(NONE)
 
 # Path to "boot" subdirectory of repository root.
@@ -62,7 +62,7 @@ assert_exists(MBEDTLS_ASN1_DIR)
 set(NRF_DIR "${MCUBOOT_DIR}/ext/nrf")
 
 if(CONFIG_BOOT_USE_NRF_CC310_BL)
-set(NRFXLIB_DIR $ENV{ZEPHYR_BASE}/../nrfxlib)
+set(NRFXLIB_DIR ${ZEPHYR_BASE}/../nrfxlib)
 assert_exists(NRFXLIB_DIR)
 # Don't include this if we are using west
  add_subdirectory(${NRFXLIB_DIR} ${PROJECT_BINARY_DIR}/nrfxlib)
@@ -93,19 +93,30 @@ endif()
 # Generic bootutil sources and includes.
 zephyr_library_include_directories(${BOOT_DIR}/bootutil/include)
 zephyr_library_sources(
-  ${BOOT_DIR}/bootutil/src/loader.c
-  ${BOOT_DIR}/bootutil/src/swap_misc.c
-  ${BOOT_DIR}/bootutil/src/swap_scratch.c
-  ${BOOT_DIR}/bootutil/src/swap_move.c
-  ${BOOT_DIR}/bootutil/src/bootutil_misc.c
   ${BOOT_DIR}/bootutil/src/image_validate.c
+  ${BOOT_DIR}/bootutil/src/tlv.c
   ${BOOT_DIR}/bootutil/src/encrypted.c
   ${BOOT_DIR}/bootutil/src/image_rsa.c
   ${BOOT_DIR}/bootutil/src/image_ec256.c
   ${BOOT_DIR}/bootutil/src/image_ed25519.c
-  ${BOOT_DIR}/bootutil/src/caps.c
-  ${BOOT_DIR}/bootutil/src/tlv.c
+  ${BOOT_DIR}/bootutil/src/bootutil_misc.c
   )
+
+if(CONFIG_SINGLE_APPLICATION_SLOT)
+zephyr_library_sources(
+  ${BOOT_DIR}/zephyr/single_loader.c
+  )
+zephyr_library_include_directories(${BOOT_DIR}/bootutil/src)
+else()
+zephyr_library_sources(
+  ${BOOT_DIR}/bootutil/src/loader.c
+  ${BOOT_DIR}/bootutil/src/swap_misc.c
+  ${BOOT_DIR}/bootutil/src/swap_scratch.c
+  ${BOOT_DIR}/bootutil/src/swap_move.c
+  ${BOOT_DIR}/bootutil/src/caps.c
+  )
+endif()
+
 
 if(CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256 OR CONFIG_BOOT_ENCRYPT_EC256)
   zephyr_library_include_directories(
@@ -220,12 +231,30 @@ if(CONFIG_MCUBOOT_SERIAL)
     )
 endif()
 
+# CONF_FILE points to the KConfig configuration files of the bootloader.
+foreach (filepath ${CONF_FILE})
+  file(READ ${filepath} temp_text)
+  string(FIND "${temp_text}" ${CONFIG_BOOT_SIGNATURE_KEY_FILE} match)
+  if (${match} GREATER_EQUAL 0)
+    if (NOT DEFINED CONF_DIR)
+      get_filename_component(CONF_DIR ${filepath} DIRECTORY)
+    else()
+      message(FATAL_ERROR "Signature key file defined in multiple conf files")
+    endif()
+  endif()
+endforeach()
+
 if(NOT CONFIG_BOOT_SIGNATURE_KEY_FILE STREQUAL "")
   if(IS_ABSOLUTE ${CONFIG_BOOT_SIGNATURE_KEY_FILE})
     set(KEY_FILE ${CONFIG_BOOT_SIGNATURE_KEY_FILE})
+  elseif((DEFINED CONF_DIR) AND
+	 (EXISTS ${CONF_DIR}/${CONFIG_BOOT_SIGNATURE_KEY_FILE}))
+    set(KEY_FILE ${CONF_DIR}/${CONFIG_BOOT_SIGNATURE_KEY_FILE})
   else()
     set(KEY_FILE ${MCUBOOT_DIR}/${CONFIG_BOOT_SIGNATURE_KEY_FILE})
   endif()
+  message("MCUBoot bootloader key file: ${KEY_FILE}")
+
   set(GENERATED_PUBKEY ${ZEPHYR_BINARY_DIR}/autogen-pubkey.c)
   add_custom_command(
     OUTPUT ${GENERATED_PUBKEY}

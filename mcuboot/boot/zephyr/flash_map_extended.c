@@ -27,9 +27,9 @@ MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 #error "FLASH_DEVICE_ID could not be determined"
 #endif
 
-static struct device *flash_dev;
+static const struct device *flash_dev;
 
-struct device *flash_device_get_binding(char *dev_name)
+const struct device *flash_device_get_binding(char *dev_name)
 {
     if (!flash_dev) {
         flash_dev = device_get_binding(dev_name);
@@ -57,9 +57,11 @@ int flash_area_id_from_multi_image_slot(int image_index, int slot)
 {
     switch (slot) {
     case 0: return FLASH_AREA_IMAGE_PRIMARY(image_index);
+#if !defined(CONFIG_SINGLE_APPLICATION_SLOT)
     case 1: return FLASH_AREA_IMAGE_SECONDARY(image_index);
 #if !defined(CONFIG_BOOT_SWAP_USING_MOVE)
     case 2: return FLASH_AREA_IMAGE_SCRATCH;
+#endif
 #endif
     }
 
@@ -76,9 +78,11 @@ int flash_area_id_to_multi_image_slot(int image_index, int area_id)
     if (area_id == FLASH_AREA_IMAGE_PRIMARY(image_index)) {
         return 0;
     }
+#if !defined(CONFIG_SINGLE_APPLICATION_SLOT)
     if (area_id == FLASH_AREA_IMAGE_SECONDARY(image_index)) {
         return 1;
     }
+#endif
 
     BOOT_LOG_ERR("invalid flash area ID");
     return -1;

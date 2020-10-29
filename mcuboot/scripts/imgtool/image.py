@@ -1,5 +1,5 @@
 # Copyright 2018 Nordic Semiconductor ASA
-# Copyright 2017 Linaro Limited
+# Copyright 2017-2020 Linaro Limited
 # Copyright 2019-2020 Arm Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -109,7 +109,10 @@ class TLV():
         Add a TLV record.  Kind should be a string found in TLV_VALUES above.
         """
         e = STRUCT_ENDIAN_DICT[self.endian]
-        buf = struct.pack(e + 'BBH', TLV_VALUES[kind], 0, len(payload))
+        if isinstance(kind, int):
+            buf = struct.pack(e + 'BBH', kind, 0, len(payload))
+        else:
+            buf = struct.pack(e + 'BBH', TLV_VALUES[kind], 0, len(payload))
         self.buf += buf
         self.buf += payload
 
@@ -216,9 +219,12 @@ class Image():
                                                   self.save_enctlv,
                                                   self.enctlv_len)
                 trailer_addr = (self.base_addr + self.slot_size) - trailer_size
-                padding = bytes([self.erased_val] *
-                                (trailer_size - len(boot_magic))) + boot_magic
-                h.puts(trailer_addr, padding)
+                padding = bytearray([self.erased_val] * 
+                                    (trailer_size - len(boot_magic)))
+                if self.confirm and not self.overwrite_only:
+                    padding[-MAX_ALIGN] = 0x01  # image_ok = 0x01
+                padding += boot_magic
+                h.puts(trailer_addr, bytes(padding))
             h.tofile(path, 'hex')
         else:
             if self.pad:
@@ -273,7 +279,7 @@ class Image():
         return cipherkey, ciphermac, pubk
 
     def create(self, key, public_key_format, enckey, dependencies=None,
-               sw_type=None):
+               sw_type=None, custom_tlvs=None):
         self.enckey = enckey
 
         # Calculate the hash of the public key
@@ -324,12 +330,24 @@ class Image():
             dependencies_num = len(dependencies[DEP_IMAGES_KEY])
             protected_tlv_size += (dependencies_num * 16)
 
+        if custom_tlvs is not None:
+            for value in custom_tlvs.values():
+                protected_tlv_size += TLV_SIZE + len(value)
+
         if protected_tlv_size != 0:
             # Add the size of the TLV info header
             protected_tlv_size += TLV_INFO_SIZE
 
-        # At this point the image is already on the payload, this adds
-        # the header to the payload as well
+        # At this point the image is already on the payload
+        #
+        # This adds the padding if image is not aligned to the 16 Bytes
+        # in encrypted mode
+        if self.enckey is not None:
+            pad_len = len(self.payload) % 16
+            if pad_len > 0:
+                self.payload += bytes(16 - pad_len)
+
+        # This adds the header to the payload as well
         self.add_header(enckey, protected_tlv_size)
 
         prot_tlv = TLV(self.endian, TLV_PROT_INFO_MAGIC)
@@ -359,6 +377,10 @@ class Image():
                                     dependencies[DEP_VERSIONS_KEY][i].build
                                     )
                     prot_tlv.add('DEPENDENCY', payload)
+
+            if custom_tlvs is not None:
+                for tag, value in custom_tlvs.items():
+                    prot_tlv.add(tag, value)
 
             protected_tlv_off = len(self.payload)
             self.payload += prot_tlv.get()
@@ -511,12 +533,12 @@ class Image():
         version = struct.unpack('BBHI', b[20:28])
 
         if magic != IMAGE_MAGIC:
-            return VerifyResult.INVALID_MAGIC, None
+            return VerifyResult.INVALID_MAGIC, None, None
 
         tlv_info = b[header_size+img_size:header_size+img_size+TLV_INFO_SIZE]
         magic, tlv_tot = struct.unpack('HH', tlv_info)
         if magic != TLV_INFO_MAGIC:
-            return VerifyResult.INVALID_TLV_INFO_MAGIC, None
+            return VerifyResult.INVALID_TLV_INFO_MAGIC, None, None
 
         sha = hashlib.sha256()
         sha.update(b[:header_size+img_size])
@@ -532,9 +554,9 @@ class Image():
                 off = tlv_off + TLV_SIZE
                 if digest == b[off:off+tlv_len]:
                     if key is None:
-                        return VerifyResult.OK, version
+                        return VerifyResult.OK, version, digest
                 else:
-                    return VerifyResult.INVALID_HASH, None
+                    return VerifyResult.INVALID_HASH, None, None
             elif key is not None and tlv_type == TLV_VALUES[key.sig_tlv()]:
                 off = tlv_off + TLV_SIZE
                 tlv_sig = b[off:off+tlv_len]
@@ -544,9 +566,9 @@ class Image():
                         key.verify(tlv_sig, payload)
                     else:
                         key.verify_digest(tlv_sig, digest)
-                    return VerifyResult.OK, version
+                    return VerifyResult.OK, version, digest
                 except InvalidSignature:
                     # continue to next TLV
                     pass
             tlv_off += TLV_SIZE + tlv_len
-        return VerifyResult.INVALID_SIGNATURE, None
+        return VerifyResult.INVALID_SIGNATURE, None, None
