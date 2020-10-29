@@ -5,8 +5,9 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
-# Adds trusted-firmware-m as an external project, and provides output values
-# that are required to link against the secure TF-M binary.
+# Adds trusted-firmware-m as an external project.
+# Also creates a target called 'tfm_api'
+# which can be linked into the app.
 #
 # When called from a Zephyr module, the following input values can be provided
 # to configure the TF-M build:
@@ -20,12 +21,6 @@ cmake_minimum_required(VERSION 3.13.1)
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
 # BL2: Boolean if build uses MCUboot.
 #
-# The following output values can also be used:
-#
-# OUT_VENEERS_FILE: The path and filename of the veneer library to link against,
-#                   which identifies where the veneer functions are in memory.
-#                   Should be added via "target_link_libraries"
-#
 # Example usage:
 #
 # trusted_firmware_build(BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
@@ -34,10 +29,10 @@ cmake_minimum_required(VERSION 3.13.1)
 #                        IPC
 #                        ISOLATION_LEVEL 2
 #                        REGRESSION
-#                        BL2 True
+#                        BL2 True)
 function(trusted_firmware_build)
   set(options IPC REGRESSION)
-  set(oneValueArgs BINARY_DIR BOARD OUT_INCLUDE_PATH BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
+  set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
   if(DEFINED TFM_BL2)
@@ -65,10 +60,9 @@ function(trusted_firmware_build)
   endif()
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
-  set(${TFM_OUT_VENEERS_FILE} ${VENEERS_FILE} PARENT_SCOPE)
-  set(${TFM_OUT_INCLUDE_PATH} ${TFM_BINARY_DIR}/install/export/tfm/include PARENT_SCOPE)
-
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
+
+  set(BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH} ${BL2_HEX_FILE})
 
   # Get the toolchain variant
   # TODO: Add support for cross-compile toolchain variant
@@ -105,10 +99,9 @@ function(trusted_firmware_build)
                -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
-    BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH}
+    BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
   )
 
-  # IPC mode source dependencies
   add_library(tfm_api STATIC IMPORTED)
   set_target_properties(tfm_api PROPERTIES
     IMPORTED_LOCATION ${PSA_API_NS_PATH}
