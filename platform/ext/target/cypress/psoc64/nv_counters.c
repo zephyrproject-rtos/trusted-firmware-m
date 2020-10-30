@@ -83,7 +83,7 @@ static void set_checksum(struct nv_counters_t *nv_counters)
     nv_counters->checksum = sum;
 }
 
-void nvc_flash_block(uint32_t *base, uint32_t *size)
+void nvc_flash_block(uint32_t *base, size_t *size)
 {
     *base = FLASH_NV_COUNTERS_AREA_OFFSET;
     *size = FLASH_NV_COUNTERS_AREA_SIZE;
@@ -94,7 +94,7 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     int32_t  err;
     uint32_t i;
     struct nv_counters_t nv_counters;
-    uint32_t size;
+    size_t size;
 
     /* Get the base address and size */
     nvc_flash_block(&nv_counters_offset, &size);

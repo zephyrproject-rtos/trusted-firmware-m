@@ -84,18 +84,18 @@ static bool is_runtime(const SMPU_Resources *smpu_dev)
     return false;
 }
 
-static bool is_whole_power_of_two(uint32_t size)
+static bool is_whole_power_of_two(size_t size)
 {
     return ((size - 1) & size) == 0;
 }
 
-static bool is_aligned(uint32_t base, uint32_t size)
+static bool is_aligned(uint32_t base, size_t size)
 {
     return (base % size) == 0;
 }
 
 /* size must be a whole power of two, >= 4 */
-static cy_en_prot_size_t bytes_to_regionsize(uint32_t size)
+static cy_en_prot_size_t bytes_to_regionsize(size_t size)
 {
     int ret = 1;
 
@@ -143,7 +143,7 @@ static uint32_t subregion_num_to_mask(int num) {
 #define NUM_SUBREGIONS 8
 
 static cy_en_prot_status_t calc_smpu_params(uint32_t base,
-                                            uint32_t size,
+                                            size_t size,
                                             cy_stc_smpu_cfg_t *slave_config)
 {
     /* Simplest case - base is a multiple of the size,
@@ -225,7 +225,7 @@ static cy_en_prot_status_t calc_smpu_params(uint32_t base,
 }
 
 static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
-                                      uint32_t *base, uint32_t *size)
+                                      uint32_t *base, size_t *size)
 {
     cy_en_prot_status_t ret = CY_PROT_SUCCESS;
 
@@ -256,7 +256,7 @@ static cy_en_prot_status_t populate_region(const PROT_SMPU_SMPU_STRUCT_Type *smp
 {
     cy_en_prot_status_t ret;
     uint32_t base;
-    uint32_t size;
+    size_t size;
 
     ret = get_region(smpu, &base, &size);
 
@@ -274,11 +274,11 @@ static void print_smpu_config(const char *name,
     LOG_MSG("%s - address = %p, size = 0x%x bytes, %s subregions enabled\r\n",
            name,
            slave_config->address,
-           (uint32_t)REGIONSIZE_TO_BYTES(slave_config->regionSize),
+           REGIONSIZE_TO_BYTES(slave_config->regionSize),
            slave_config->subregions == ALL_ENABLED ? "all" : "some");
     if (slave_config->subregions != ALL_ENABLED) {
         LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
-                (uint32_t)REGIONSIZE_TO_BYTES(slave_config->regionSize)/8);
+                REGIONSIZE_TO_BYTES(slave_config->regionSize)/8);
         for (int i=0; i<8; i++) {
             LOG_MSG("\tsubregion %d %s\r\n",
                     i,
@@ -290,7 +290,7 @@ static void print_smpu_config(const char *name,
 static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
 {
     uint32_t base;
-    uint32_t size;
+    size_t size;
     uint32_t reg = smpu->ATT0;
 
     if (CY_PROT_SUCCESS == get_region(smpu, &base, &size)) {
@@ -312,7 +312,7 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
                 subregions == ALL_ENABLED ? "all" : "some");
         if (subregions != ALL_ENABLED) {
             LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
-                    (uint32_t)REGIONSIZE_TO_BYTES(size)/8);
+                    REGIONSIZE_TO_BYTES(size)/8);
             for (int i=0; i<8; i++) {
                 LOG_MSG("\tsubregion %d %s\r\n",
                         i,

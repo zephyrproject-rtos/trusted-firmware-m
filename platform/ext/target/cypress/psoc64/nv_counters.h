@@ -22,6 +22,6 @@
  *
  * \return void
  */
-void nvc_flash_block(uint32_t *base, uint32_t *size);
+void nvc_flash_block(uint32_t *base, size_t *size);
 
 #endif /* __NV_COUNTERS_H__ */
