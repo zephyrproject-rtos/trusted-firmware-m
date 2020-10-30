@@ -3,6 +3,7 @@
 TFM_GIT_SHA=8bebd05745a8b27dccc6403f0215fa6e39de3bc1
 TFM_TESTS_GIT_SHA=652bb8a1502c95bfd1ee8e44ccd1126ce74ae41f
 MCUBOOT_GIT_SHA=v1.6.0
+MBEDTLS_GIT_SHA=2.23.0
 PSA_ARCH_TESTS_GIT_SHA=v20.03_API1.0
 
 if [ ! -d trusted-firmware-m/.git ]; then
@@ -26,6 +27,15 @@ if [ ! -d tf-m-tests/.git ]; then
    cd tf-m-tests
    git init
    git checkout -f
+   cd ..
+fi
+
+if [ ! -d mbedtls/.git ]; then
+   git clone https://github.com/ARMmbed/mbedtls.git -b ${MBEDTLS_GIT_SHA} --bare tf-m-tests/.git
+   cd tf-m-tests
+   git init
+   git checkout -f
+   git apply ../trusted-firmware-m/lib/ext/mbedcrypto/*.patch
    cd ..
 fi
 
