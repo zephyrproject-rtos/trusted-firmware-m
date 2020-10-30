@@ -193,7 +193,7 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/drivers
         PRIVATE
             .
-            Device/config
+            Device/Config
             ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver
             ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/serial_manager
             ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/uart
