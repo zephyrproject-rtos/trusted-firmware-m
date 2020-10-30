@@ -50,9 +50,6 @@
  * marked with comment.
  */
 
-/* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE                (0x40000)       /* S partition: 256 kB*/
-#define FLASH_NS_PARTITION_SIZE               (0x30000)       /* NS partition: 192 kB*/
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -74,7 +71,6 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (0x10000) /* 64 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */
@@ -217,15 +213,37 @@
 
 /* Use Flash memory to store Code data */
 #define FLASH_BASE_ADDRESS (0x00000000)
-#define S_ROM_ALIAS_BASE   FLASH_BASE_ADDRESS
-#define NS_ROM_ALIAS_BASE  FLASH_BASE_ADDRESS
+#define S_ROM_ALIAS_BASE   FLASH_AREA_START
+#define NS_ROM_ALIAS_BASE  FLASH_AREA_START
 
 /* Use SRAM memory to store RW data */
 #define SRAM_BASE_ADDRESS (0x20000000)
-#define S_RAM_ALIAS_BASE  SRAM_BASE_ADDRESS
-#define NS_RAM_ALIAS_BASE SRAM_BASE_ADDRESS
+#define S_RAM_ALIAS_BASE  SRAM_AREA_START
+#define NS_RAM_ALIAS_BASE SRAM_AREA_START
 
 #define TOTAL_ROM_SIZE FLASH_TOTAL_SIZE
 #define TOTAL_RAM_SIZE (0x00040000)     /* 256 kB */
+
+#if FLASH_AREA_START < FLASH_BASE_ADDRESS
+        #error Flash area starts out of bounds.
+#endif
+
+#if FLASH_AREA_END > (FLASH_BASE_ADDRESS + TOTAL_ROM_SIZE)
+        #error Flash area extends out of bounds.
+#endif
+
+#if FLASH_AREA_END < (FLASH_AREA_START + FLASH_NV_COUNTERS_AREA_OFFSET + \
+                                         FLASH_NV_COUNTERS_AREA_SIZE)
+        #error Flash area reserved for TF-M is too small
+#endif
+
+#if SRAM_AREA_START < SRAM_BASE_ADDRESS
+        #error SRAM area starts out of bounds.
+#endif
+
+#if (SRAM_AREA_START + SRAM_S_PARTITON_SIZE + SRAM_NS_PARTITON_SIZE) \
+     > (SRAM_BASE_ADDRESS + TOTAL_RAM_SIZE)
+        #error SRAM area extends out of bounds.
+#endif
 
 #endif /* __FLASH_LAYOUT_H__ */

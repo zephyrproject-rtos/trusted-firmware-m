@@ -87,6 +87,9 @@ function(trusted_firmware_build)
     message(FATAL_ERROR "Unsupported ZEPHYR_TOOLCHAIN_VARIANT: ${ZEPHYR_TOOLCHAIN_VARIANT}")
   endif()
 
+  #math(EXPR flash_end "${PM_TFM_EXTRA_ADDRESS}+${PM_TFM_EXTRA_SIZE}")
+  set(flash_end 0x100000)
+
   include(ExternalProject)
   
   ExternalProject_Add(
@@ -103,6 +106,15 @@ function(trusted_firmware_build)
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
                -DTFM_TOOLCHAIN_PATH=${TFM_TOOLCHAIN_PATH}
                -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
+
+               -DFLASH_AREA_START=$<TARGET_PROPERTY:partition_manager,PM_BL2_ADDRESS>
+               -DFLASH_AREA_BL2_SIZE=$<TARGET_PROPERTY:partition_manager,PM_BL2_SIZE>
+               -DFLASH_S_PARTITION_SIZE=$<TARGET_PROPERTY:partition_manager,PM_TFM_SIZE>
+               -DFLASH_NS_PARTITION_SIZE=$<TARGET_PROPERTY:partition_manager,PM_APP_SIZE>
+               -DFLASH_AREA_END=$<TARGET_PROPERTY:partition_manager,PM_TFM_EXTRA_END_ADDRESS>
+               -DSRAM_AREA_START=$<TARGET_PROPERTY:partition_manager,PM_TFM_RAM_ADDRESS>
+               -DSRAM_S_PARTITION_SIZE=$<TARGET_PROPERTY:partition_manager,PM_TFM_RAM_SIZE>
+               -DSRAM_NS_PARTITION_SIZE=$<TARGET_PROPERTY:partition_manager,PM_SRAM_PRIMARY_SIZE>
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
     BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH}
