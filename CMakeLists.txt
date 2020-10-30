@@ -138,3 +138,35 @@ function(trusted_firmware_build)
 
   add_dependencies(tfm_api tfm)
 endfunction()
+
+if (CONFIG_BUILD_WITH_TFM)
+  if (CONFIG_TFM_IPC)
+    set(TFM_IPC_ARG IPC)
+  endif()
+  if (CONFIG_TFM_REGRESSION)
+    set(TFM_REGRESSION_ARG REGRESSION)
+  endif()
+  if (CONFIG_TFM_BL2_TRUE)
+    set(TFM_BL2_ARG BL2 True)
+  elseif (CONFIG_TFM_BL2_FALSE)
+    set(TFM_BL2_ARG BL2 False)
+  endif()
+  if (CONFIG_TFM_ISOLATION_LEVEL)
+    set(TFM_ISOLATION_LEVEL_ARG ISOLATION_LEVEL ${CONFIG_TFM_ISOLATION_LEVEL})
+  endif()
+  if (CONFIG_TFM_PROFILE)
+    set(TFM_PROFILE_ARG BUILD_PROFILE ${CONFIG_TFM_PROFILE})
+  endif()
+
+  trusted_firmware_build(
+    BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
+    BOARD ${CONFIG_TFM_BOARD}
+    ${TFM_ISOLATION_LEVEL_ARG}
+    ${TFM_PROFILE_ARG}
+    ${TFM_BL2_ARG}
+    ${TFM_IPC_ARG}
+    ${TFM_REGRESSION_ARG}
+  )
+
+  zephyr_link_libraries(tfm_api)
+endif()
