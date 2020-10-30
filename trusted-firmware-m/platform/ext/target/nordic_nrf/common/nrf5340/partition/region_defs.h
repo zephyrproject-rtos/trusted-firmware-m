@@ -104,7 +104,7 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
-#define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)
+#define S_DATA_SIZE     (SRAM_S_PARTITION_SIZE)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* The CMSE veneers shall be placed in an NSC region
@@ -130,7 +130,7 @@
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
 #define NS_DATA_START   (NS_RAM_ALIAS(S_DATA_SIZE))
-#define NS_DATA_SIZE    (TOTAL_RAM_SIZE - S_DATA_SIZE)
+#define NS_DATA_SIZE    (SRAM_NS_PARTITION_SIZE)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for SPU configuration */
@@ -151,7 +151,7 @@
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
 #define BL2_DATA_START    (S_RAM_ALIAS(0x0))
-#define BL2_DATA_SIZE     (TOTAL_RAM_SIZE)
+#define BL2_DATA_SIZE     (SRAM_S_PARTITION_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 #endif /* BL2 */
 
