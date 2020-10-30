@@ -1,0 +1,16 @@
+menuconfig TFM
+	bool "Build with TFM"
+
+if TFM
+config TFM_BOARD
+	string
+	default "nordic_nrf/nrf9160dk_nrf9160" if BOARD_NRF9160DK_NRF9160NS
+	default "nordic_nrf/nrf5340pdk_nrf5340_cpuapp" if BOARD_NRF5340PDK_NRF5340_CPUAPPNS
+config TFM_IPC
+	bool "IPC"
+config TFM_REGRESSION
+	bool "Regression tests"
+config TFM_BL2
+	bool "Build with MCUboot"
+	default y
+endif

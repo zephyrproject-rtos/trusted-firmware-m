@@ -139,4 +139,28 @@ function(trusted_firmware_build)
 
 endfunction()
 
+if (CONFIG_TFM)
+  if (CONFIG_TFM_IPC)
+    set(TFM_IPC_ARG IPC)
+  endif()
+  if (CONFIG_TFM_REGRESSION)
+    set(TFM_REGRESSION_ARG REGRESSION)
+  endif()
+  if (CONFIG_TFM_BL2)
+    set(TFM_BL2_ARG BL2 True)
+  else()
+    set(TFM_BL2_ARG BL2 False)
+  endif()
 
+  message("CONFIG_TFM_BOARD: ${CONFIG_TFM_BOARD}")
+  trusted_firmware_build(
+    BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
+    BOARD ${CONFIG_TFM_BOARD}
+    ISOLATION_LEVEL ${CONFIG_TFM_ISOLATION_LEVEL}
+    ${TFM_BL2_ARG}
+    ${TFM_IPC_ARG}
+    ${TFM_REGRESSION_ARG}
+  )
+
+  zephyr_link_libraries(tfm_api)
+endif()
