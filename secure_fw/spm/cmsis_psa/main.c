@@ -26,8 +26,8 @@ __asm("  .global __ARM_use_no_argv\n");
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
-#elif (TFM_LVL != 1) && (TFM_LVL != 2)
-#error Only TFM_LVL 1 and 2 are supported for IPC model!
+#elif (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
+#error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
 #endif
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
