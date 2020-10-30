@@ -14,10 +14,14 @@
 #include "tfm_hal_spm_logdev.h"
 
 /* The SPM log levels */
-#define TFM_SPM_LOG_LEVEL_DEBUG    2  /* All log APIs output */
-#define TFM_SPM_LOG_LEVEL_RELEASE  1  /*
+#define TFM_SPM_LOG_LEVEL_DEBUG    3  /* All log APIs output */
+#define TFM_SPM_LOG_LEVEL_INFO     2  /*
                                        * All log APIs output except SPMLOG_DBG
                                        * and SPMLOG_DBGMSGVAL
+                                       */
+#define TFM_SPM_LOG_LEVEL_ERROR    1  /*
+                                       * Only SPMLOG_ERRMSG and SPMLOG_ERRMSGVAL
+                                       * APIs output.
                                        */
 #define TFM_SPM_LOG_LEVEL_SILENCE  0  /* All log APIs are suppressed */
 
@@ -38,15 +42,19 @@
 #define SPMLOG_DBGMSG(msg)
 #endif
 
-#if (TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_RELEASE)
+#if (TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_INFO)
 #define SPMLOG_INFMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
-#define SPMLOG_ERRMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
 #define SPMLOG_INFMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
-#define SPMLOG_ERRMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
 #define SPMLOG_INFMSGVAL(msg, val)
-#define SPMLOG_ERRMSGVAL(msg, val)
 #define SPMLOG_INFMSG(msg)
+#endif
+
+#if (TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_ERROR)
+#define SPMLOG_ERRMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
+#define SPMLOG_ERRMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
+#else
+#define SPMLOG_ERRMSGVAL(msg, val)
 #define SPMLOG_ERRMSG(msg)
 #endif
 

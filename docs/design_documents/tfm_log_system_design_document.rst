@@ -46,11 +46,12 @@ Level Control
 Three log levels for SPM log system are defined:
 
   - TFM_SPM_LOG_LEVEL_DEBUG
-  - TFM_SPM_LOG_LEVEL_RELEASE
+  - TFM_SPM_LOG_LEVEL_INFO
+  - TFM_SPM_LOG_LEVEL_ERROR
   - TFM_SPM_LOG_LEVEL_SILENCE
 
 Then a macro ``TFM_SPM_LOG_LEVEL`` is defined as an indicator, it should
-be equal to one of the three log levels.
+be equal to one of the four log levels.
 
 API Definition
 --------------
@@ -97,21 +98,21 @@ The following three APIs output a message in string.
 
 Here is a table about the effective APIs with different SPM log level.
 
-+------------------+-------------------------+---------------------------+---------------------------+
-|                  | TFM_SPM_LOG_LEVEL_DEBUG | TFM_SPM_LOG_LEVEL_RELEASE | TFM_SPM_LOG_LEVEL_SILENCE |
-+==================+=========================+===========================+===========================+
-| SPMLOG_DBGMSGVAL |           Yes           |             No            |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_INFMSGVAL |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_ERRMSGVAL |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_DBGMSG    |           Yes           |             No            |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_INFMSG    |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_ERRMSG    |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+|                  | TFM_SPM_LOG_LEVEL_DEBUG | TFM_SPM_LOG_LEVEL_INFO    | TFM_SPM_LOG_LEVEL_ERROR   | TFM_SPM_LOG_LEVEL_SILENCE   |
++==================+=========================+===========================+===========================+=============================+
+| SPMLOG_DBGMSGVAL |           Yes           |             No            |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_INFMSGVAL |           Yes           |             Yes           |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_ERRMSGVAL |           Yes           |             Yes           |             Yes           |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_DBGMSG    |           Yes           |             No            |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_INFMSG    |           Yes           |             Yes           |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_ERRMSG    |           Yes           |             Yes           |             Yes           |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
 
 HAL API
 -------
@@ -141,11 +142,12 @@ Level Control
 Three log levels for partition log system are defined:
 
   - TFM_PARTITION_LOG_LEVEL_DEBUG
-  - TFM_PARTITION_LOG_LEVEL_RELEASE
+  - TFM_PARTITION_LOG_LEVEL_INFO
+  - TFM_PARTITION_LOG_LEVEL_ERROR
   - TFM_PARTITION_LOG_LEVEL_SILENCE
 
 Then a macro ``TFM_PARTITION_LOG_LEVEL`` is defined as an indicator. It should
-be equal to one of the three log levels and it is an overall setting for all
+be equal to one of the four log levels and it is an overall setting for all
 partitions.
 
 Log Format
@@ -173,15 +175,15 @@ Define partition log APIs:
 
 Here is a table about the effective APIs with different partition log level.
 
-+------------+-------------------------------+---------------------------------+---------------------------------+
-|            | TFM_PARTITION_LOG_LEVEL_DEBUG | TFM_PARTITION_LOG_LEVEL_RELEASE | TFM_PARTITION_LOG_LEVEL_SILENCE |
-+============+===============================+=================================+=================================+
-| LOG_DBGFMT |              Yes              |                No               |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
-| LOG_INFFMT |              Yes              |                Yes              |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
-| LOG_ERRFMT |              Yes              |                Yes              |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+|            | TFM_PARTITION_LOG_LEVEL_DEBUG | TFM_PARTITION_LOG_LEVEL_INFO    | TFM_PARTITION_LOG_LEVEL_ERROR   | TFM_PARTITION_LOG_LEVEL_SILENCE |
++============+===============================+=================================+=================================+---------------------------------+
+| LOG_DBGFMT |              Yes              |                No               |                No               |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+| LOG_INFFMT |              Yes              |                Yes              |                No               |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+| LOG_ERRFMT |              Yes              |                Yes              |                Yes              |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
 
 HAL API
 -------
