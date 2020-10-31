@@ -346,6 +346,32 @@ the integration with NS software.
     metal environment. NS mailbox simply loops mailbox message status while
     waiting for results.
 
+  .. _mailbox_os_thread_flag:
+
+  - ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD``
+
+    When ``TFM_MULTI_CORE_NS_OS`` is enabled, this flag can be selected to
+    enable another NS mailbox thread model which relies on a NS mailbox
+    dedicated thread.
+
+    - It requires NS OS to create a dedicated thread to perform NS mailbox
+      functionalities. This dedicated thread invokes
+      ``tfm_ns_mailbox_thread_runner()`` to handle PSA Client calls.
+      ``tfm_ns_mailbox_thread_runner()`` constructs mailbox messages and sends
+      them to SPE mailbox.
+
+    - ``tfm_ns_mailbox_client_call()`` sends PSA Client calls to the dedicated
+      mailbox thread. It doesn't directly deal with mailbox messages.
+
+    - It also relies on NS OS to provide thread management and inter-thread
+      communication. Please refer to `NSPE mailbox RTOS abstraction APIs`_ for
+      details.
+
+    - It also requires dual-cpu platform to implement NS Inter-Processor
+      Communication interrupts. The interrupt handler invokes
+      ``tfm_ns_mailbox_wake_reply_owner_isr()`` to deal with PSA Client call
+      replies and notify the waiting threads.
+
 Multiple outstanding PSA Client call feature
 --------------------------------------------
 
@@ -377,6 +403,11 @@ To implement this feature in NS OS:
 
     For more details, refer to
     :ref:`TFM_MULTI_CORE_NS_OS<mailbox_os_flag>`.
+
+    ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` can be enabled to select another NS
+    mailbox working model.
+    See :ref:`TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD<mailbox_os_thread_flag>` for
+    details.
 
 Critical section protection between cores
 =========================================
@@ -636,7 +667,10 @@ mailbox in non-secure memory.
 .. code-block:: c
 
   struct mailbox_reply_t {
-      int32_t return_val;
+      int32_t    return_val;
+      const void *owner;
+      int32_t    *reply;
+      uint8_t    *woken_flag;
   };
 
 Mailbox queue status bitmask
@@ -660,15 +694,6 @@ NSPE mailbox queue structure
   struct ns_mailbox_slot_t {
       struct mailbox_msg_t   msg;
       struct mailbox_reply_t reply;
-
-      /* Handle of the owner task of this slot */
-      const void             *owner;
-
-      /*
-       * Indicate that owner task has been or should be woken up, after the
-       * reply is received.
-       */
-      bool                   is_woken;
   };
 
 ``ns_mailbox_queue_t`` describes the NSPE mailbox queue and its members in
@@ -680,6 +705,7 @@ non-secure memory.
 - ``replied_slots`` is the bitmask of slots whose PSA Client result is returned
   but not extracted yet.
 - ``queue`` is the NSPE mailbox queue of slots.
+- ``is_full`` indicates whether NS mailbox queue is full.
 
 .. code-block:: c
 
@@ -689,6 +715,8 @@ non-secure memory.
       mailbox_queue_status_t   replied_slots;
 
       struct ns_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
+
+      bool                     is_full;
   };
 
 SPE mailbox queue structure
@@ -807,9 +835,37 @@ result.
 
 **Usage**
 
-``tfm_ns_mailbox_client_call()`` can set the owner of the mailbox message to
-identify the non-secure client to support multiple outstanding NS PSA Client
-calls.
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is enabled,
+``tfm_ns_mailbox_client_call()`` will forward PSA Client calls to the dedicated
+mailbox thread via NS OS message queue.
+Otherwise, ``tfm_ns_mailbox_client_call()`` directly deals with PSA Client calls
+and perform NS mailbox functionalities.
+
+``tfm_ns_mailbox_thread_runner()``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function handles PSA Client call inside a dedicated NS mailbox thread.
+It constructs mailbox messages and transmits them to SPE mailbox.
+
+.. code-block:: c
+
+  void tfm_ns_mailbox_thread_runner(void *args);
+
+**Parameters**
+
++----------+-------------------------------------------------------------+
+| ``args`` | The pointer to the structure of PSA Client call parameters. |
++----------+-------------------------------------------------------------+
+
+**Usage**
+
+``tfm_ns_mailbox_thread_runner()`` should be executed inside the dedicated
+mailbox thread.
+
+.. note::
+
+  ``tfm_ns_mailbox_thread_runner()`` is implemented as an empty function when
+  ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled.
 
 ``tfm_ns_mailbox_wake_reply_owner_isr()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1006,6 +1062,8 @@ call(s). The actual implementation depends on the non-secure use scenario.
 **Usage**
 
 ``tfm_ns_mailbox_init()`` invokes this function to initialize the lock.
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is enabled,
+``tfm_ns_mailbox_os_lock_init()`` is defined as a dummy one.
 
 ``tfm_ns_mailbox_os_lock_acquire()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1027,7 +1085,10 @@ The actual implementation depends on the non-secure use scenario.
 
 **Usage**
 
-``tfm_ns_mailbox_client_call()`` invokes this function to acquire the lock.
+``tfm_ns_mailbox_client_call()`` invokes this function to acquire the lock when
+``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is enabled,
+``tfm_ns_mailbox_os_lock_acquire()`` is defined as a dummy one.
 
 ``tfm_ns_mailbox_os_lock_release()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1049,7 +1110,10 @@ The actual implementation depends on the non-secure use scenario.
 
 **Usage**
 
-``tfm_ns_mailbox_client_call()`` invokes this function to release the lock.
+``tfm_ns_mailbox_client_call()`` invokes this function to release the lock when
+``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is enabled,
+``tfm_ns_mailbox_os_lock_release()`` is defined as a dummy one.
 
 ``tfm_ns_mailbox_os_get_task_handle()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1066,12 +1130,6 @@ functionalities.
 +-------------+-----------------------------------------------------------+
 | Task handle | The non-secure task handle waiting for PSA Client result. |
 +-------------+-----------------------------------------------------------+
-
-**Usage**
-
-If NSPE OS enforces non-secure tasks isolation, it is recommended to invoke
-``tfm_ns_mailbox_os_get_task_handle()`` in privileged mode to protect owner
-value from disclosure or tampering.
 
 ``tfm_ns_mailbox_os_wait_reply()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1103,6 +1161,105 @@ result, via RTOS-specific wake-up mechanism.
 +-----------------+----------------------------------------+
 | ``task_handle`` | The handle to the task to be woken up. |
 +-----------------+----------------------------------------+
+
+``tfm_ns_mailbox_os_mq_create()``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function creates and initializes a NS OS message queue.
+
+.. code-block:: c
+
+  void *tfm_ns_mailbox_os_mq_create(ize_t msg_size, uint8_t msg_count);
+
+**Parameters**
+
++---------------+------------------------------------------+
+| ``msg_size``  | The maximum message size in bytes.       |
++---------------+------------------------------------------+
+| ``msg_count`` | The maximum number of messages in queue. |
++---------------+------------------------------------------+
+
+**Return**
+
++----------------------+-----------------------------------------------------+
+| message queue handle | The handle of the message queue created, or NULL in |
+|                      | case of error.                                      |
++----------------------+-----------------------------------------------------+
+
+**Usage**
+
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled,
+``tfm_ns_mailbox_os_mq_create()`` is defined as a dummy one.
+
+``tfm_ns_mailbox_os_mq_send()``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function sends PSA Client call request via NS OS message queue.
+
+.. code-block:: c
+
+  int32_t tfm_ns_mailbox_os_mq_send(void *mq_handle,
+                                    const void *msg_ptr);
+
+**Parameters**
+
++---------------+----------------------------------------+
+| ``mq_handle`` | The handle of message queue.           |
++---------------+----------------------------------------+
+| ``msg_ptr``   | The pointer to the message to be sent. |
++---------------+----------------------------------------+
+
+**Return**
+
++---------------------+-------------------------------------+
+| ``MAILBOX_SUCCESS`` | The message is successfully sent.   |
++---------------------+-------------------------------------+
+| Other return code   | Operation fails with an error code. |
++---------------------+-------------------------------------+
+
+**Usage**
+
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled,
+``tfm_ns_mailbox_os_mq_send()`` is defined as a dummy one.
+
+``tfm_ns_mailbox_os_mq_receive()``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function receives PSA Client call requests via NS OS message queue.
+
+.. code-block:: c
+
+  int32_t tfm_ns_mailbox_os_mq_receive(void *mq_handle,
+                                       void *msg_ptr);
+
+**Parameters**
+
++---------------+---------------------------------------------------+
+| ``mq_handle`` | The handle of message queue.                      |
++---------------+---------------------------------------------------+
+| ``msg_ptr``   | The pointer to buffer for message to be received. |
++---------------+---------------------------------------------------+
+
+**Return**
+
++---------------------+-------------------------------------+
+| ``MAILBOX_SUCCESS`` | A message is successfully received. |
++---------------------+-------------------------------------+
+| Other return code   | Operation fails with an error code. |
++---------------------+-------------------------------------+
+
+**Usage**
+
+The buffer size must be large enough to contain the request whose size is set
+in ``msg_size `` in ``tfm_ns_mailbox_os_mq_create()``.
+
+If ``TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD`` is disabled,
+``tfm_ns_mailbox_os_mq_receive()`` is defined as a dummy one.
+
+.. note::
+
+  The function caller should be blocked until a PSA Client call request is
+  received from message queue, unless a fatal error occurs.
 
 SPE mailbox APIs
 ================
