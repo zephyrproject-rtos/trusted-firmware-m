@@ -38,6 +38,15 @@ target_link_libraries(tfm_partition_audit
         psa_interface
 )
 
+########################### Audit defs #########################################
+
+add_library(tfm_audit_logging_defs INTERFACE)
+
+target_include_directories(tfm_audit_logging_defs
+    INTERFACE
+        .
+)
+
 ############################ Secure API ########################################
 
 target_sources(tfm_secure_api
