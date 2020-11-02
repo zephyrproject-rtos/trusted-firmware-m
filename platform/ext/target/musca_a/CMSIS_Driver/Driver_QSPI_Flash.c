@@ -218,7 +218,7 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     if (extra_bytes != 0) {
         err = mt25ql_command_read(ARM_FLASH0_DEV.dev, addr + cnt, &extra_word,
                                 data_width_byte[DriverCapabilities.data_width]);
-        memcpy(data + cnt, &extra_word, extra_bytes);
+        memcpy((char *) data + cnt, &extra_word, extra_bytes);
     }
 
     ARM_FLASH0_STATUS.busy = DRIVER_STATUS_IDLE;
