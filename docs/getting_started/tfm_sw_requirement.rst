@@ -26,19 +26,32 @@ The following environments are supported:
 
     - Ubuntu 16.04 x64
     - Ubuntu 18.04 x64
-    - Windows 10 x64
+    - Windows 10 x64 + git-bash (MinGW) + gnumake from DS-5 or msys2.
+    - Windows 10 x64 + Cygwin x64 (example configuration is provided for
+      this Windows setup only).
 
-***********
-C compilers
-***********
+.. note::
+    Some tools (i.e. python3 and CMake) must NOT be installed from
+    Cygwin and instead a native windows version is needed. Please see the
+    chapter `Windows + Cygwin setup`_ below.
+    IAR requires Ubuntu 18.04 or later.
+
+*********************
+Supported C compilers
+*********************
 
 To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1+, v6.11, v6.12, v6.13
-    - GNU Arm compiler v6.3.1, v7.3
-    - IAR Arm compiler v8.42.x, v8.50.x
+    - Arm Compiler v6.10
+    - Arm Compiler v6.11
+    - Arm Compiler v6.12
+    - Arm Compiler v6.13
+    - GNU Arm compiler v6.3.1
+    - GNU Arm compiler v7.3
+    - IAR Arm compiler v8.42.x
+    - IAR Arm compiler v8.50.x
 
 .. Note::
     - The Arm compilers above are provided via Keil uVision |KEIL_VERSION|
@@ -46,6 +59,10 @@ versions are:
       |DEV_STUDIO_VERSION| or greater, or they can be downloaded as standalone
       packages from
       `here <https://developer.arm.com/products/software-development-tools/compilers/arm-compiler/downloads/version-6>`__.
+
+    - Arm compiler specific environment variable may need updating based
+      on specific products and licenses as explained in
+      `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
 
     - The GNU Arm compiler can be downloaded from
       `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
@@ -58,74 +75,102 @@ versions are:
       `here <https://www.iar.com/iar-embedded-workbench/#!?architecture=Arm>`__ or
       `here <https://www.iar.com/iar-embedded-workbench/build-tools-for-linux/>`__.
 
-*****
-CMake
-*****
+************************
+Supported CMake versions
+************************
 
-The build-system is CMake based and supports the versions 3.13 or higher.
-Please check `Exceptions and special cases`_ section if you need a higher
-version of CMake.
+The build-system is CMake based and supports the following versions:
 
-    - Please use the latest build version available.
+    - 3.13
+    - 3.14
+    - 3.15
+    - 3.16
+    - 3.17
+    - 3.18
+
+.. Note::
+    - IAR requires version 3.14 or later.
+    - ARMClang requires version 3.15 or later.
+    - Please use the latest build version available (i.e. 3.7.2 instead of
+      3.7.0).
+      While it is preferable to use the newest version this is not required
+      and any version from the above list should work.
     - Recent versions of CMake can be downloaded from
       https://cmake.org/download/, and older releases are available from
       https://cmake.org/files.
+    - For Cygwin users, please use a native windows CMake version
+      instead of the version installed with Cygwin.
 
-CMake handles all external dependencies, but if you wish to alter this
+***************************
+Supported GNU make versions
+***************************
+
+The TF-M team builds using the "Unix Makefiles" generator of CMake and
+thus GNU make is needed for the build. On Linux please use the version
+available from the official repository of your distribution.
+
+On Windows the following binaries are supported:
+
+    - GNU make v4.2.1 executable from Cygwin
+    - GNU make v4.2.1 executable from msys2
+    - GNU make v4.2 executable from DS5 |DS5_VERSION| (see <DS5 directory>/bin)
+
+CMake is quite tolerant to GNU make versions and basically any
+"reasonably recent" GNU make version should work.
+
+CMake generators other than "Unix Makefiles" may work, but are not
+officially supported.
+
+*********************
+External dependencies
+*********************
+
+Dependency management is now handled by cmake. If you wish to alter this
 behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
 dependency management`
-
-********
-GNU make
-********
-
-TF-M project builds using the "Unix Makefiles" generator of CMake
-and thus GNU make is needed for the build.
-
-    - On Linux please use the version available in your distribution.
-    - On Windows, GNU make v3.81 or higher shall work fine.
-
-CMake generators other than "Unix Makefiles" may work too, but are not
-officially supported. You may have a good luck with Ninja.
 
 ********************************************
 Tools for configuring and programming boards
 ********************************************
 
-Please follow a board secific documentation for building and programming
-tools.
+For stm32l5xx boards, `STM32_Programmer_CLI  <https://www.st.com/en/development-tools/stm32cubeprog.html>`__
+is used to configure security protections and to write the code in internal flash.
+A version is available for Linux and Windows host machine.
 
 **************
-Typical setups
+Example setups
 **************
 
-This section lists steps to set-up TF-M build environment under Linux and Windows.
-Please also check the `Exceptions and special cases`_  chapter for any special
-requirements depending on the tools you are using.
+This section lists dependencies and some exact and tested steps to set-up a
+TF-M-m build environment under various OSes.
 
-Ubuntu
-======
+Ubuntu setup
+============
 
 Install the following tools:
 
-    - DS-5 |DS5_VERSION|.
-    - Git tools v2.10.0
-    - CMake (see the `CMake`_ chapter)
-    - GNU Make (see the `GNU make`_ chapter)
-    - SRecord v1.58 (for Musca test chip boards)
-    - Python3 and the pip package manager (from Python 3.4 it's included)
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed just do:
+- DS-5 |DS5_VERSION|.
+- Git tools v2.10.0
+- CMake (see the "Supported CMake versions" chapter)
+- GNU Make (see the "Supported make versions" chapter)
+- Python3 (3.6 or newer)
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click, imgtool v1.6.0*
 
-.. code-block:: bash
+  .. code-block:: bash
 
-    pip install -r tools/requirements.txt
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
+- SRecord v1.58 (for Musca test chip boards)
 
-Setup environment variables in Linux
-------------------------------------
+Setup a shell to enable compiler toolchain and CMake after installation.
+------------------------------------------------------------------------
 
 To import Arm Compiler v6.10 in your bash shell console:
+
+.. Warning::
+    Arm compiler specific environment variable may need updating based on
+    specific products and licenses as explained in
+    `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
 
 .. code-block:: bash
 
@@ -146,83 +191,107 @@ To import GNU Arm in your bash shell console:
 
     export PATH=<bash path>/bin:$PATH
 
-To import IAR Arm compiler in your bash shell console:
+    To import IAR Arm compiler in your bash shell console:
 
 .. code-block:: bash
 
     export PATH=<IAR compiler path>/bin:$PATH
 
-Windows
-=======
+Windows + Cygwin setup
+======================
 
 Install the following tools:
 
-    - uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition)
-      or GNU Arm compiler v6.3.1.
-    - Git client latest version (https://git-scm.com/download/win)
-    - CMake (`native Windows version <https://cmake.org/download/>`__,
-      see the `CMake`_ chapter)
-    - GNU make
-    - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
-      chip boards)
-    - Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
-      the pip package manager (from Python 3.4 it's included)
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed just do:
+- uVision |KEIL_VERSION| or DS-5 |DS5_VERSION| (DS-5 Ultimate Edition) which
+  provides the Arm Compiler v6.10 compiler or GNU Arm compiler v6.3.1.
+- Git client latest version (https://git-scm.com/download/win)
+- CMake (`native Windows version <https://cmake.org/download/>`__,
+  see the `Supported CMake versions`_ chapter)
+- `Cygwin <https://www.cygwin.com/>`__. Tests done with version 2.877
+  (64 bits)
+- GNU make should be installed by selecting appropriate package during
+  cygwin
+  installation.
+- Python3 (3.6 or newer) `(native Windows version) <https://www.python.org/downloads/>`__
+- Python3 packages: *cryptography, pyasn1, yaml, jinja2 v2.10, cbor v1.0.0, click imgtool v1.6.0*
 
-.. code-block:: bash
+  .. code-block:: bash
 
-    pip install -r tools\requirements.txt
+    pip3 install --user cryptography pyasn1 pyyaml jinja2 cbor click imgtool
 
-Setup environment variables in Windows
---------------------------------------
+- `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
+  chip boards)
 
-Add CMake to your PATH variable:
+Setup Cygwin to enable a compiler toolchain and CMake after installation.
+-------------------------------------------------------------------------
 
-.. code-block:: bash
-
-    set PATH=<CMake_Path>\bin;$PATH
-
-There are several configurations depending on a toolset you are using.
-The typical cases are listed below.
+If applicable, import Arm Compiler v6.10 in your shell console. To make this
+change permanent, add the command line into ~/.bashrc
 
 Armclang + DS-5
 ^^^^^^^^^^^^^^^
+.. Note::
+
+    - Arm compiler specific environment variable may need updating based on
+      specific products and licenses as explained in
+      `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
+    - Arm licensing related environment variables must use Windows paths, and not
+      the Cygwin specific one relative to */cygrive*.
+
 .. code-block:: bash
 
-    set PATH=<DS-5_PATH>\sw\ARMCompiler6.10\bin;$PATH
-    set ARM_PRODUCT_PATH=<DS-5_PATH>\sw\mappings
-    set ARM_TOOL_VARIANT=ult
-    set ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
+    export PATH=/cygdrive/c/<DS-5_PATH>/sw/ARMCompiler6.10/bin:$PATH
+    export ARM_PRODUCT_PATH=C:/<DS-5_PATH>/sw/mappings
+    export ARM_TOOL_VARIANT=ult
+    export ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
 
 Armclang + Keil MDK Arm
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+.. Note::
+
+    - Arm compiler specific environment variable may need updating based
+      on specific products and licenses as explained in
+      `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
+
 .. code-block:: bash
 
-    set PATH=<uVision path>\ARM\ARMCLANG\bin;$PATH
+    export PATH=/cygdrive/c/<uVision path>/ARM/ARMCLANG/bin:$PATH
 
 GNU Arm
 ^^^^^^^
 
+If applicable, import GNU Arm compiler v6.3.1 in your shell console. To make
+this change permanent, add the command line into ~/.bashrc
+
 .. code-block:: bash
 
-    set PATH=<GNU Arm path>\bin;$PATH
+    export PATH=<GNU Arm path>/bin:$PATH
 
-**************************
+CMake
+^^^^^
+
+To import CMake in your bash shell console:
+
+.. code-block:: bash
+
+    export PATH=/cygdrive/c/<CMake path>/bin:$PATH
+
 Building the documentation
-**************************
+==========================
 
-The build system is prepared to support generation of two documents:
-The Reference Manual and the User Guide.
-The Reference Manual is Doxygen based, while the User Guide is
+The build system is prepared to support generation of two documents.
+The Reference Manual which is Doxygen based, and the User Guide which is
 Sphinx based. Both document can be generated in HTML and PDF format.
 
-Support for document generation in the build environment is not mandatory.
-Missing document generation tools will not block building the TF-M firmware.
+.. Note::
+
+    Support for document generation in the build environment is not mandatory.
+    Missing document generation tools will not block building the TF-M
+    firmware.
 
 To compile the TF-M Reference Manual
-====================================
+------------------------------------
 
 The following additional tools are needed:
 
@@ -230,18 +299,23 @@ The following additional tools are needed:
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
     - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
 
-Set-up the needed tools and environment in Linux
-------------------------------------------------
+For PDF generation the following tools are needed in addition to the
+above list:
 
+    - LaTeX
+    - PdfLaTeX
+
+Set-up the needed tools
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Linux
+"""""
 .. code-block:: bash
 
     sudo apt-get install -y doxygen graphviz default-jre
     mkdir ~/plantuml
     curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
-    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
 
 For PDF generation:
 
@@ -249,11 +323,10 @@ For PDF generation:
 
     sudo apt-get install -y doxygen-latex
 
-Set-up the needed tools and environment in Windows
---------------------------------------------------
+Windows + Cygwin
+""""""""""""""""
 
 Download and install the following tools:
-
     - `Doxygen
       1.8.8 <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download>`__
     - `Graphviz
@@ -261,20 +334,42 @@ Download and install the following tools:
     - The Java runtime is part of the DS5 installation or can be
       `downloaded from here <https://www.java.com/en/download/>`__
     - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-    -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
 
-Set the environment variables, assuming that:
+For PDF generation:
 
+    -  `MikTeX <https://miktex.org/download>`__
+
+    .. Note::
+        When building the documentation the first time, MikTeX might prompt for
+        installing missing LaTeX components. Please allow the MikTeX package
+        manager to set-up these.
+
+Configure the shell
+^^^^^^^^^^^^^^^^^^^
+
+Linux
+"""""
+
+::
+
+    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
+
+Windows + Cygwin
+""""""""""""""""
+
+Assumptions for the settings below:
+
+    - plantuml.jar is available at c:\\plantuml\\plantuml.jar
     - doxygen, dot, and MikTeX binaries are available on the PATH.
     - Java JVM is used from DS5 installation.
 
 ::
 
-    set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<DS-5_Path>\sw\java\bin
+    export PLANTUML_JAR_PATH=c:/plantuml/plantuml.jar
+    export PATH=$PATH:/cygdrive/c/<DS-5 path>/sw/java/bin
 
 To compile the TF-M User Guide
-==============================
+------------------------------
 
 The following additional tools are needed:
 
@@ -286,16 +381,23 @@ The following additional tools are needed:
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
     - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
 
-Set-up the tools and environment in Linux
------------------------------------------
+For PDF generation the following tools are needed in addition to the
+above list:
+
+    - LaTeX
+    - PdfLaTeX
+
+Set-up the needed tools
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Linux
+"""""
 
 .. code-block:: bash
 
     sudo apt-get install -y python3 graphviz default-jre
-    pip install -r tools/requirements.txt
+    pip --user install m2r Sphinx sphinx-rtd-theme sphinxcontrib-plantuml
     mkdir ~/plantuml
     curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
 
@@ -304,31 +406,44 @@ For PDF generation:
 .. code-block:: bash
 
     sudo apt-get install -y doxygen-latex
-    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
 
-Set-up the tools and environment in Windows
--------------------------------------------
-
+Windows + Cygwin
+""""""""""""""""
 Download and install the following tools:
+    - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
+    - Pip packages *m2r, Sphinx, sphinx-rtd-theme sphinxcontrib-plantuml*
+
+      .. code-block:: bash
+
+        pip --user install m2r Sphinx sphinx-rtd-theme sphinxcontrib-plantuml
 
     - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-    - The Java runtime is part of the DS5 installation or can be `downloaded from here <https://www.java.com/en/download/>`__
+    - The Java runtime is part of the DS5 installation or can be
+      `downloaded from here <https://www.java.com/en/download/>`__
     - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-    -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
-    - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed packages just do:
 
-.. code-block:: bash
+For PDF generation:
 
-    pip install -r tools\requirements.txt
+-  `MikTeX <https://miktex.org/download>`__
 
 .. Note::
      When building the documentation the first time, MikTeX might
      prompt for installing missing LaTeX components. Please allow the MikTeX
      package manager to set-up these.
 
-Set the environment variables, assuming that:
+Configure the shell
+^^^^^^^^^^^^^^^^^^^
+
+Linux
+"""""
+.. code-block:: bash
+
+    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
+
+Windows + Cygwin
+""""""""""""""""
+
+Assumptions for the settings below:
 
     - plantuml.jar is available at c:\\plantuml\\plantuml.jar
     - doxygen, dot, and MikTeX binaries are available on the PATH.
@@ -336,30 +451,8 @@ Set the environment variables, assuming that:
 
 .. code-block:: bash
 
-    set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<DS-5_Path>\sw\java\bin
-
-****************************
-Exceptions and special cases
-****************************
-
-ArmClang
-========
-    - Arm compiler specific environment variable may need updating based on
-      specific products and licenses as explained in
-      `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
-
-    - ARMClang requires CMake version 3.15 or higher
-
-IAR toolchain
-=============
-    - IAR requires CMake version 3.14 or higher.
-
-MikTeX
-======
-    - When building the documentation the first time, MikTeX might prompt for
-      installing missing LaTeX components. Please allow the MikTeX package
-      manager to set-up these.
+    export PLANTUML_JAR_PATH=c:/plantuml/plantuml.jar
+    export PATH=$PATH:/cygdrive/c/<DS-5 path>/sw/java/bin
 
 **************************
 Tool & Dependency overview
@@ -370,12 +463,12 @@ To build the TF-M firmware the following tools are needed:
 .. csv-table:: Tool dependencies
    :header: "Name", "Version", "Component"
 
-   "C compiler",See `C compilers`_,"Firmware"
-   "CMake",See `CMake`_,
-   "GNU Make",See `GNU make`_,
-   "tf-m-tests",`CMake`_ handles it,
-   "mbed-crypto",`CMake`_ handles it,
-   "MCUboot",`CMake`_ handles it,
+   "C compiler",See `Supported C compilers`_,"Firmware"
+   "CMake",See `Supported CMake versions`_,
+   "GNU Make",See `Supported GNU make versions`_,
+   "tf-m-tests",See `External dependencies`_,
+   "mbed-crypto",See `External dependencies`_,
+   "MCUboot",See `External dependencies`_,
    "Python",3.x,"Firmware, User Guide"
    "yaml",,"Firmware"
    "pyasn1",,"Firmware"
@@ -473,4 +566,3 @@ Dependency chain:
 --------------
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
-

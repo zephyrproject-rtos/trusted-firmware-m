@@ -27,7 +27,7 @@ dependency management`
 .. Note::
 
  - For building with Armclang compiler version 6.10.0, please follow the note
-   in :ref:`docs/getting_started/tfm_sw_requirement:ArmClang` section.
+   in :ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
  - For building with the IAR toolchain, please see the notes in
    :doc:`software requirements <tfm_build_instruction_iar>`
 
@@ -162,6 +162,14 @@ used which does not support all features.
 | TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
 +-----------------------------+-------------------------------------+---------------+
 
+TF-M Profiles
+-------------
+
+TF-M Profiles are implemented as a single cmake configuration file, under the
+``config/profile`` directory. A good understanding can be gained quickly by
+looking at the Profile configuration files, but the ultimate reference for
+Profiles are the design documents in the ``docs/design_documents/profiles/``
+directory.
 
 PSA test configuration
 ----------------------
@@ -353,7 +361,7 @@ compliance test. This support is controlled by the TEST_PSA_API variable:
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -364,7 +372,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts
