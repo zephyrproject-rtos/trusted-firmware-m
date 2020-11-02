@@ -190,15 +190,13 @@ target_include_directories(platform_ns
         Device/Include
         ${CY_PDL_LIB_PATH}/drivers/include
         ${CY_PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-	${CY_CORE_LIB_PATH}/include
+        ${CY_CORE_LIB_PATH}/include
         Native_Driver/generated_source
         ./CMSIS_Driver/Config
 )
 
 target_compile_definitions(platform_ns
     PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
         TFM_MULTI_CORE_MULTI_CLIENT_CALL
         RTE_USART5
 )

@@ -21,6 +21,7 @@
    startup_psoc6_02_cm4.S*/
 
 #include "region_defs.h"
+#include "tfm_plat_config.h"
 
     /* The CPU VTOR register */
     #define CY_CPU_VTOR_ADDR            0xE000ED08
