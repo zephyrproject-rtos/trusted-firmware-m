@@ -133,7 +133,7 @@ set(TFM_TEST_REPO_VERSION               "master"    CACHE PATH      "The version
 set(CMSIS_5_PATH                        "DOWNLOAD"  CACHE PATH      "Path to CMSIS_5 (or DOWNLOAD to fetch automatically")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "e8fe6cf"   CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "1.7.0-rc1" CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "master"    CACHE STRING    "The version of PSA arch tests to use")
