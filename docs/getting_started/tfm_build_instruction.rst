@@ -26,7 +26,7 @@ dependency management`
 .. Note::
 
  - For building with Armclang compiler version 6.10.0, please follow the note
-   in :ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
+   in :ref:`docs/getting_started/tfm_sw_requirement`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`software requirements <tfm_build_instruction_iar>`
 
