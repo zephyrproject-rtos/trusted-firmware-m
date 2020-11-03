@@ -16,20 +16,20 @@ Build TF-M with M2351 by following commands:
             -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             -DTEST_NS=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DMCUBOOT_IMAGE_NUMBER=1
     $ make install
 
 Define TEST_NS=ON or TEST_S=ON for non-secure or secure regression test.
 CMAKE_BUILD_TYPE could be "Release", "RelWithDebInfo" or "Minsizerel"
-TFM_PSA_API=ON and TFM_ISOLATION_LEVEL=2 can also be set but them cannot be defined with
-TEST_S=ON or TEST_NS=ON at the same time due to limited RAM size of M2351.
-Other cmake parameters should not be changed.
+TFM_PSA_API=ON and TFM_ISOLATION_LEVEL=2 can also be set but them cannot be
+defined with TEST_S=ON or TEST_NS=ON at the same time due to limited RAM size
+of M2351. Other cmake parameters should not be changed.
 
 Flashing Image with Nuvoton NuLink Tool
 ---------------------------------------
 
 NuMaker-PFM-M2351 board supports on board ICE called NuLink.
-Connect NuLink to PC with USB cable and using `NuLink Command Tool <https://github.com/OpenNuvoton/Nuvoton_Tools>`__
+Connect NuLink to PC with USB cable and using
+`NuLink Command Tool <https://github.com/OpenNuvoton/Nuvoton_Tools>`__
 to flashing the image.
 
 The commands are as follows:
@@ -40,7 +40,7 @@ The commands are as follows:
     > NuLink_M2351_M261 -E ALL
     > NuLink_M2351_M261 -W APROM ./build/bin/bl2.bin 0
     > NuLink_M2351_M261 -W APROM ./build/bin/tfm_s_ns_signed.bin 0 0x10000
-    > NuLink_M2351_M261 -W NSCBA 0x40000
+    > NuLink_M2351_M261 -W NSCBA 0x50000
 
 --------------
 

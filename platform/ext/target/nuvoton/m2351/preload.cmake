@@ -14,7 +14,6 @@
 set(TFM_SYSTEM_PROCESSOR cortex-m23)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.base)
 
-set(MCUBOOT_IMAGE_NUMBER 1)
 
 # Reload compiler to generate options from the CPU and architecture
 _compiler_reload()
