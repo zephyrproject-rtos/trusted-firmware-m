@@ -78,6 +78,10 @@ macro(tfm_toolchain_set_processor_arch)
 endmacro()
 
 macro(tfm_toolchain_reload_compiler)
+    tfm_toolchain_set_processor_arch()
+    tfm_toolchain_reset_compiler_flags()
+    tfm_toolchain_reset_linker_flags()
+
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_C_LINK_FLAGS)
     unset(CMAKE_ASM_FLAGS_INIT)
