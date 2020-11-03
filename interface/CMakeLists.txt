@@ -12,6 +12,7 @@ cmake_policy(SET CMP0079 NEW)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+    tfm_toolchain_reload_compiler()
     # The platform target is created in this directory/file so that it has the
     # same settings as the main ns target.
     add_library(platform_ns STATIC)
