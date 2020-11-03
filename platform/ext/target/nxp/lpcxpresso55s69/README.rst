@@ -11,9 +11,8 @@ LPCXpresso55S69 run the following commands:
 
     $ mkdir build && cd build
     $ cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
-            -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
-            -DCMAKE_BUILD_TYPE=Relwithdebinfo \
-            -DTFM_PROFILE=profile_medium ../
+            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+            -DCMAKE_BUILD_TYPE=Relwithdebinfo ../
     $ make install
 
 .. Note::
@@ -131,7 +130,8 @@ folder can be saved in the ``build`` folder to rebuild and flash the BL2,
 the TF-M S and NS binaries in one step.
 
 The scripts assumes they are being run inside the ``build`` folder, which
-you have previously created at ``trusted-firmware-m/build``.
+you have previously created at ``trusted-firmware-m/build``. The build
+script must be run in an empty ``build`` folder for the first time.
 
 Debugging with Segger Ozone
 ---------------------------

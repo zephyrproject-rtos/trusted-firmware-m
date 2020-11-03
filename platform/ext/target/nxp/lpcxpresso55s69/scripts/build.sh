@@ -7,13 +7,13 @@
 set -e
 
 # Cleanup previous build artifacts
-rm -rf app bin bl2 CMakeFiles generated install interface platform secure_fw tools cmake_install.cmake CMakeCache.txt
+find . \! -path './lib*' \! -name '*.sh' -delete
 
 # Generate the S and NS makefiles
 cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
       -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
       -DCMAKE_BUILD_TYPE=Relwithdebinfo \
-      -DTFM_PROFILE=profile_medium ../
+      -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=1 ../
 
 # Build the binaries
 make install
