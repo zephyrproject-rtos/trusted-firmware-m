@@ -6,3 +6,4 @@
 #-------------------------------------------------------------------------------
 
 set(MBEDCRYPTO_BUILD_TYPE               relwithdebinfo CACHE STRING "Build type of Mbed Crypto library")
+set(TFM_SPM_LOG_LEVEL                   3              CACHE STRING "Set debug SPM log level as Debug level" FORCE)

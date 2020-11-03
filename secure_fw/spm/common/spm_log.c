@@ -7,7 +7,7 @@
 
 #include "tfm_spm_log.h"
 
-#define MAX_DIGIT_BITS 10  /* Max bits of uint32_t value 0xFFFFFFFF add '0x' */
+#define MAX_DIGIT_BITS 12  /* 8 char for number, 2 for '0x' and 2 for '\r\n' */
 const static char HEX_TABLE[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                  '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
@@ -22,13 +22,15 @@ const static char HEX_TABLE[] = {'0', '1', '2', '3', '4', '5', '6', '7',
 
 static void to_hex(uint32_t value, char msg[])
 {
-    int i;
+    int i = MAX_DIGIT_BITS - 1;
 
-    msg[0] = '0';
-    msg[1] = 'x';
-    for (i = MAX_DIGIT_BITS - 1; i >= 2; i--, value >>= 4) {
+    msg[i--] = '\n';
+    msg[i--] = '\r';
+    for (; i > 1; i--, value >>= 4) {
         msg[i] = HEX_TABLE[value & 0xF];
     }
+    msg[i--] = 'x';
+    msg[i--] = '0';
 }
 
 int32_t spm_log_msgval(const char *msg, size_t len, uint32_t value)

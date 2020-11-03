@@ -77,10 +77,7 @@ static int32_t tfm_core_init(void)
 
     SPMLOG_INFMSG("\033[1;34m[Sec Thread] Secure image initializing!\033[0m\r\n");
 
-#ifdef TFM_CORE_DEBUG
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
-    SPMLOG_DBGMSG("\r\n");
-#endif
 
     tfm_core_validate_boot_data();
 

@@ -271,11 +271,10 @@ void smpu_print_config(void)
     SPMLOG_INFMSG("\r\nSMPU config:\r\n");
     SPMLOG_INFMSGVAL("memory_regions.non_secure_code_start = ",
             memory_regions.non_secure_code_start);
-    SPMLOG_INFMSGVAL("\r\nmemory_regions.non_secure_partition_base = ",
+    SPMLOG_INFMSGVAL("memory_regions.non_secure_partition_base = ",
             memory_regions.non_secure_partition_base);
-    SPMLOG_INFMSGVAL("\r\nmemory_regions.non_secure_partition_limit = ",
+    SPMLOG_INFMSGVAL("memory_regions.non_secure_partition_limit = ",
             memory_regions.non_secure_partition_limit);
-    SPMLOG_INFMSG("\r\n");
 
     size_t n = sizeof(smpu_init_table)/sizeof(smpu_init_table[0]);
 
