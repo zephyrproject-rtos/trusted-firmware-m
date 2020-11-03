@@ -208,6 +208,7 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
+    spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_REGULATORS, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_CLOCK, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM0, false);
@@ -216,6 +217,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM1, false);
 #endif
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM4, false);
+#ifndef NRF5340_ENG_A
+    spu_peripheral_config_non_secure((uint32_t)NRF_SPIM2, false);
+    spu_peripheral_config_non_secure((uint32_t)NRF_SPIM3, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_SAADC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_TIMER0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_TIMER1, false);
@@ -224,6 +229,9 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_RTC1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_DPPIC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT0, false);
+#ifndef NRF5340_ENG_A
+    spu_peripheral_config_non_secure((uint32_t)NRF_WDT1, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_COMP, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU1, false);
@@ -234,6 +242,9 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM2, false);
+#ifndef NRF5340_ENG_A
+    spu_peripheral_config_non_secure((uint32_t)NRF_PWM3, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_PDM0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_I2S0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_IPC, false);
@@ -241,6 +252,12 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_NFCT, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_GPIOTE1_NS, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_MUTEX, false);
+#ifndef NRF5340_ENG_A
+    spu_peripheral_config_non_secure((uint32_t)NRF_QDEC0, false);
+    spu_peripheral_config_non_secure((uint32_t)NRF_QDEC1, false);
+    spu_peripheral_config_non_secure((uint32_t)NRF_USBD, false);
+    spu_peripheral_config_non_secure((uint32_t)NRF_USBREGULATOR, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_NVMC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_P0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_P1, false);

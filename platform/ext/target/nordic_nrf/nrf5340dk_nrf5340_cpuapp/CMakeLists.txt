@@ -17,6 +17,3 @@ target_include_directories(platform_ns PUBLIC .)
 if(BL2)
     target_include_directories(platform_bl2 PRIVATE .)
 endif()
-
-target_compile_definitions(platform_s PUBLIC NRF5340_ENG_A)
-target_compile_definitions(platform_ns PUBLIC NRF5340_ENG_A)

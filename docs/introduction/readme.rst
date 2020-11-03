@@ -145,6 +145,8 @@ Platforms supported
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`_
         - `nRF5340 PDK (nordic_nrf/nrf5340pdk_nrf5340_cpuapp).
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
+        - `nRF5340 DK (nordic_nrf/nrf5340dk_nrf5340_cpuapp).
+          <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
 
     - Cortex-M23 system:
 
