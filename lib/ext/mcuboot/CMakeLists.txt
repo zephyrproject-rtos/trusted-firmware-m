@@ -19,9 +19,7 @@ if ("${MCUBOOT_PATH}" STREQUAL "DOWNLOAD")
         GIT_TAG ${MCUBOOT_VERSION}
         GIT_SHALLOW FALSE
         GIT_PROGRESS TRUE
-        GIT_SUBMODULES "docs" # Workaround for
-                              # https://gitlab.kitware.com/cmake/cmake/-/issues/20579
-                              # in cmake 3.17 and below.
+        GIT_SUBMODULES ""
     )
     # ToDo: set GIT_SHALLOW to 'TRUE' when MCUBOOT_VERSION will be set to a tag
     # (instead of a commit hash) with the new release.
