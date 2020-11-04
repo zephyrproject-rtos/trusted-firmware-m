@@ -198,14 +198,14 @@ void sau_and_idau_cfg(void)
 #endif /* BL2 */
 
     SPMLOG_INFMSG("=== [SAU NS] =======\r\n");
-    SPMLOG_INFMSGVAL("NS ROM Base:", memory_regions.non_secure_partition_base);
-    SPMLOG_INFMSGVAL("NS ROM Limit:", memory_regions.non_secure_partition_limit);
-    SPMLOG_INFMSGVAL("NS DATA Base:", NS_DATA_START);
-    SPMLOG_INFMSGVAL("NS DATA Limit:", NS_DATA_LIMIT);
-    SPMLOG_INFMSGVAL("NSC Base:", memory_regions.veneer_base);
-    SPMLOG_INFMSGVAL("NSC Limit:", memory_regions.veneer_limit);
-    SPMLOG_INFMSGVAL("PERIPHERALS Base:", PERIPHERALS_BASE_NS_START);
-    SPMLOG_INFMSGVAL("PERIPHERALS Limit:", PERIPHERALS_BASE_NS_END);
+    SPMLOG_INFMSGVAL("NS ROM Base: ", memory_regions.non_secure_partition_base);
+    SPMLOG_INFMSGVAL("NS ROM Limit: ", memory_regions.non_secure_partition_limit);
+    SPMLOG_INFMSGVAL("NS DATA Base: ", NS_DATA_START);
+    SPMLOG_INFMSGVAL("NS DATA Limit: ", NS_DATA_LIMIT);
+    SPMLOG_INFMSGVAL("NSC Base: ", memory_regions.veneer_base);
+    SPMLOG_INFMSGVAL("NSC Limit: ", memory_regions.veneer_limit);
+    SPMLOG_INFMSGVAL("PERIPHERALS Base: ", PERIPHERALS_BASE_NS_START);
+    SPMLOG_INFMSGVAL("PERIPHERALS Limit: ", PERIPHERALS_BASE_NS_END);
 }
 /*------------------- Memory configuration functions -------------------------*/
 
@@ -363,10 +363,10 @@ int32_t ahb_secure_control_memory_init(void)
     }
 
     SPMLOG_INFMSG("=== [AHB MPC NS] =======\r\n");
-    SPMLOG_INFMSGVAL("NS ROM Base:", memory_regions.non_secure_partition_base);
-    SPMLOG_INFMSGVAL("NS ROM Limit:", memory_regions.non_secure_partition_limit);
-    SPMLOG_INFMSGVAL("NS DATA Base:", NS_DATA_START);
-    SPMLOG_INFMSGVAL("NS DATA Limit:", NS_DATA_LIMIT);
+    SPMLOG_INFMSGVAL("NS ROM Base: ", memory_regions.non_secure_partition_base);
+    SPMLOG_INFMSGVAL("NS ROM Limit: ", memory_regions.non_secure_partition_limit);
+    SPMLOG_INFMSGVAL("NS DATA Base: ", NS_DATA_START);
+    SPMLOG_INFMSGVAL("NS DATA Limit: ", NS_DATA_LIMIT);
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
