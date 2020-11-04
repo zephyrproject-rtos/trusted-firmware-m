@@ -18,10 +18,10 @@
 
 #include "region_defs.h"
 
-LR_CODE S_CODE_START {
+LR_CODE S_CODE_START S_CODE_SIZE {
 
     /****  This initial section contains common code for secure binary */
-    ER_TFM_CODE S_CODE_START S_CODE_SIZE {
+    ER_TFM_CODE S_CODE_START {
         *.o (RESET +First)
         * (+RO)
     }
