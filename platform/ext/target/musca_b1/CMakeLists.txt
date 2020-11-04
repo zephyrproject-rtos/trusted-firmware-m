@@ -92,6 +92,9 @@ target_sources(platform_s
         Native_Driver/gpio_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
         Native_Driver/qspi_ip6514e_drv.c
+        Native_Driver/gfc100_eflash_drv.c
+        Native_Driver/musca_b1_eflash_drv.c
+        Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
         tfm_hal_isolation.c
         attest_hal.c
@@ -117,7 +120,6 @@ target_sources(platform_ns
         Native_Driver/timer_cmsdk_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
-        Native_Driver/musca_b1_scc_drv.c
         Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>

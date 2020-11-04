@@ -115,7 +115,6 @@ target_sources(platform_ns
     PRIVATE
         Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
-        Native_Driver/musca_a1_scc_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
