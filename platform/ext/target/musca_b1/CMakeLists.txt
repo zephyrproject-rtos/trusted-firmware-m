@@ -132,6 +132,7 @@ if(BL2)
     target_sources(platform_bl2
         PRIVATE
             $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
+            $<$<BOOL:${PLATFORM_DUMMY_IAK}>:${CMAKE_CURRENT_SOURCE_DIR}/../../common/template/tfm_initial_attestation_key_material.c>
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
