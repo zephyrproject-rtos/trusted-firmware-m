@@ -19,6 +19,7 @@ set(TEST_PSA_API                        ""          CACHE STRING    "Which (if a
 set(TFM_PSA_API                         OFF         CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
+set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 
 set(TFM_NS_CLIENT_IDENTIFICATION        OFF         CACHE BOOL      "Enable NS client identification")
 
@@ -182,3 +183,7 @@ set(PSA_ARCH_TESTS_VERSION              "8644bd0"  CACHE STRING    "The version 
 ########################## BL2 #################################################
 
 set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;DIRECT_XIP;RAM_LOAD")
+
+########################## FIH #################################################
+
+set_property(CACHE TFM_FIH_PROFILE PROPERTY STRINGS "OFF;LOW;MEDIUM;HIGH")

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -82,6 +82,7 @@ endif()
 ################################################################################
 
 add_subdirectory(lib/ext)
+add_subdirectory(lib/fih)
 add_subdirectory(tools)
 add_subdirectory(docs)
 if(NS)
