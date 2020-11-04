@@ -198,47 +198,47 @@ files, where now build options are controlled by variables. For ease of
 transition, a table below is provided that maps the legacy files to the current
 variables, in the format of cmake command line parameters.
 
-+------------------------------------------+-----------------------------------+
-| File                                     | Cmake command line                |
-+==========================================+===================================+
-| ConfigDefault.cmake                      | <No options>                      |
-+------------------------------------------+-----------------------------------+
-| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small       |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
-+------------------------------------------+-----------------------------------+
-| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON          |
-|                                          | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON          |
-|                                          | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small       |
-|                                          | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium      |
-|                                          | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>       |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>       |
-|                                          | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>       |
-|                                          | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
-| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PS=OFF            |
-+------------------------------------------+-----------------------------------+
++------------------------------------------+---------------------------------------+
+| File                                     | Cmake command line                    |
++==========================================+=======================================+
+| ConfigDefault.cmake                      | <No options>                          |
++------------------------------------------+---------------------------------------+
+| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small           |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
++------------------------------------------+---------------------------------------+
+| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON              |
+|                                          | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON              |
+|                                          | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small           |
+|                                          | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium          |
+|                                          | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>           |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>           |
+|                                          | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>           |
+|                                          | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
+| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PROTECTED_STORAGE=OFF |
++------------------------------------------+---------------------------------------+
 
 There has also been some changes to the PSA manifest file generation. The files
 are now generated into a seperate tree in the ``<tfm build dir>/generated``
