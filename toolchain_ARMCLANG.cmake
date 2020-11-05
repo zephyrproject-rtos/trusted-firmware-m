@@ -134,6 +134,8 @@ macro(tfm_toolchain_reload_compiler)
     if (CMAKE_GENERATOR STREQUAL "Ninja")
         set( CMAKE_DEPFILE_FLAGS_ASM "--depend=<OBJECT>.d")
     endif()
+
+    set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
