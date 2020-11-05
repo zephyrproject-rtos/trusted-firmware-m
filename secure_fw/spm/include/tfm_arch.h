@@ -51,6 +51,7 @@ __STATIC_INLINE void tfm_arch_trigger_pendsv(void)
  * \details Returns the value of the Link Register (LR)
  * \return LR value
  */
+#if !defined ( __ICCARM__ )
 __attribute__ ((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
 {
     register uint32_t result;
@@ -58,6 +59,7 @@ __attribute__ ((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
     __ASM volatile ("MOV %0, LR\n" : "=r" (result));
     return result;
 }
+#endif
 
 __attribute__ ((always_inline))
 __STATIC_INLINE uint32_t __get_active_exc_num(void)
