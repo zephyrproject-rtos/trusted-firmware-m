@@ -112,10 +112,15 @@ void tfm_nspm_thread_entry(void)
 void configure_ns_code(void)
 {
     /* SCB_NS.VTOR points to the Non-secure vector table base address */
-    SCB_NS->VTOR = tfm_spm_hal_get_ns_VTOR();
+    uint32_t ns_VTOR = tfm_spm_hal_get_ns_VTOR();
 
     /* Setups Main stack pointer of the non-secure code */
     uint32_t ns_msp = tfm_spm_hal_get_ns_MSP();
 
+    uint32_t ns_entry_point = tfm_spm_hal_get_ns_entry_point();
+    LOG_MSG("NS entry point: 0x%x, VTOR: 0x%x, MSP: 0x%x\r\n", ns_entry_point,
+            ns_VTOR, ns_msp);
+
+    SCB_NS->VTOR = ns_VTOR;
     __TZ_set_MSP_NS(ns_msp);
 }
