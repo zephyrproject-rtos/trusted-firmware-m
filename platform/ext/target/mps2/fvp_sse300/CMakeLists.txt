@@ -18,8 +18,19 @@ target_include_directories(platform_region_defs
 #========================= Platform common defs ===============================#
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    message(FATAL_ERROR "gcc is currently not supported on the mps/fvp_sse300 due to a lack of scatter files")
+    message(FATAL_ERROR "GCC is currently not supported on the mps2/fvp_sse300 because TFM build system does not support the Coretex-M55 with GNUARM")
 endif()
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL IAR)
+    message(FATAL_ERROR "IAR is currently not supported on the mps2/fvp_sse300 due to a lack of scatter files")
+endif()
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
+    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.14")
+        message(FATAL_ERROR "CPU (Cortex-M55) is only supported in ARMCLANG version 6.14 or newer.")
+    endif()
+endif()
+
 
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
