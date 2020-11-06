@@ -121,10 +121,14 @@ macro(tfm_toolchain_reload_compiler)
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
-    # But armlink doesn't support this +dsp syntax, so take the cpu flag and
-    # throw away the plus and everything after.
-    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+    # But armlink doesn't support this +dsp syntax
+    string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+    string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    # And uses different syntax for +nofp
+    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
     # Workaround for issues with --depend-single-line with armasm and Ninja
     if (CMAKE_GENERATOR STREQUAL "Ninja")
