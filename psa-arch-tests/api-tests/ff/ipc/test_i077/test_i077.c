@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@
 
 #define DATA_VALUE1 0x1234
 
-client_test_t test_i077_client_tests_list[] = {
+const client_test_t test_i077_client_tests_list[] = {
     NULL,
     client_test_nspe_read_psa_rot_stack,
     client_test_nspe_write_psa_rot_stack,
@@ -72,7 +72,7 @@ static void close_driver_fn(psa_handle_t *handle)
 }
 
 
-int32_t client_test_nspe_read_psa_rot_stack(caller_security_t caller)
+int32_t client_test_nspe_read_psa_rot_stack(caller_security_t caller __UNUSED)
 {
    addr_t       psa_rot_addr;
    uint32_t     data = DATA_VALUE1;
@@ -115,7 +115,7 @@ int32_t client_test_nspe_read_psa_rot_stack(caller_security_t caller)
    return VAL_STATUS_SPM_FAILED;
 }
 
-int32_t client_test_nspe_write_psa_rot_stack(caller_security_t caller)
+int32_t client_test_nspe_write_psa_rot_stack(caller_security_t caller __UNUSED)
 {
    addr_t       psa_rot_addr;
    uint32_t     data = DATA_VALUE1;

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 
 #include "test_i072.h"
 
-client_test_t test_i072_client_tests_list[] = {
+const client_test_t test_i072_client_tests_list[] = {
     NULL,
     client_test_nspe_read_app_rot_variable,
     client_test_nspe_write_app_rot_variable,
@@ -57,7 +57,7 @@ static int32_t get_secure_partition_address(addr_t *addr)
    return VAL_STATUS_SUCCESS;
 }
 
-int32_t client_test_nspe_read_app_rot_variable(caller_security_t caller)
+int32_t client_test_nspe_read_app_rot_variable(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint32_t data = 0x1234;
@@ -95,7 +95,7 @@ int32_t client_test_nspe_read_app_rot_variable(caller_security_t caller)
    return VAL_STATUS_SPM_FAILED;
 }
 
-int32_t client_test_nspe_write_app_rot_variable(caller_security_t caller)
+int32_t client_test_nspe_write_app_rot_variable(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint32_t data = 0x1234;

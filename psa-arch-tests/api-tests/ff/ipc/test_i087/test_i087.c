@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@
 
 #define DATA_VALUE 0x1234
 
-client_test_t test_i087_client_tests_list[] = {
+const client_test_t test_i087_client_tests_list[] = {
     NULL,
     client_test_sp_read_other_sp_mmio,
     client_test_sp_write_other_sp_mmio,
@@ -59,7 +59,7 @@ static int32_t get_secure_partition_address(addr_t *addr)
    return VAL_STATUS_SUCCESS;
 }
 
-int32_t client_test_sp_read_other_sp_mmio(caller_security_t caller)
+int32_t client_test_sp_read_other_sp_mmio(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint32_t data = DATA_VALUE;
@@ -97,7 +97,7 @@ int32_t client_test_sp_read_other_sp_mmio(caller_security_t caller)
    return VAL_STATUS_SPM_FAILED;
 }
 
-int32_t client_test_sp_write_other_sp_mmio(caller_security_t caller)
+int32_t client_test_sp_write_other_sp_mmio(caller_security_t caller __UNUSED)
 {
    addr_t   app_rot_addr;
    uint32_t data = DATA_VALUE;
