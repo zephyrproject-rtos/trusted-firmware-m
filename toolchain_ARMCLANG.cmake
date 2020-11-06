@@ -85,19 +85,14 @@ macro(tfm_toolchain_set_processor_arch)
             string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
         endif()
 
+    # Cmake's ARMClang support has several issues with compiler validation. To
+    # avoid these, we set the list of supported -mcpu and -march variables to
+    # the ones we intend to use so that the validation will never fail.
     include(Compiler/ARMClang)
-    # cmake does not allow the use of +dsp / +nofpu syntax. An override is added
-    # here to enable it. First reset the supported CPU list in case this has
-    # already been run.
-    __armclang_set_processor_list(C CMAKE_C_COMPILER_PROCESSOR_LIST)
-    __armclang_set_processor_list(ASM CMAKE_ASM_COMPILER_PROCESSOR_LIST)
-    # Then use regex to add +dsp +nodsp +fpu and +nofp options
-    # TODO generate this combinatorially
-    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp")
-    list(TRANSFORM CMAKE_C_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp")
-    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+fp;\\1+nofp")
-    list(TRANSFORM CMAKE_ASM_COMPILER_PROCESSOR_LIST REPLACE "^(.+)$" "\\1;\\1+dsp;\\1+nodsp")
-    set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_C_COMPILER_PROCESSOR_LIST} CACHE INTERNAL "" FORCE)
+    set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_ASM_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
     endif()
 endmacro()
 
@@ -118,7 +113,9 @@ macro(tfm_toolchain_reload_compiler)
     include(Compiler/ARMCC)
     __compiler_armcc(ASM)
 
-    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
+    # Cmake's armclang support will set either mcpu or march, but march gives
+    # better code size so we manually set it.
+    set(CMAKE_C_FLAGS   "-march=${CMAKE_SYSTEM_ARCHITECTURE}")
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
