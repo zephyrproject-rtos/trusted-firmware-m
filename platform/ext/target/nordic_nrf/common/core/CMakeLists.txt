@@ -66,7 +66,7 @@ target_sources(platform_s
         native_drivers/spu.c
         spm_hal.c
         tfm_hal_isolation.c
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        plat_test.c
 )
 
 target_compile_options(platform_s
@@ -81,6 +81,7 @@ target_sources(platform_ns
         cmsis_drivers/Driver_USART.c
         nrfx/drivers/src/nrfx_uarte.c
         nrfx_glue.c
+        plat_test.c
 )
 
 target_include_directories(platform_ns
@@ -90,6 +91,8 @@ target_include_directories(platform_ns
         nrfx/mdk
         nrfx/drivers/include
         ${PLATFORM_DIR}/..
+    PRIVATE
+        ${PLATFORM_DIR}/../interface/include
 )
 
 #========================= Platform BL2 =======================================#
