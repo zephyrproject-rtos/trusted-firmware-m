@@ -21,7 +21,9 @@ endif()
 if(TEST_PSA_API)
     set(SUITE ${TEST_PSA_API})
 
-    string(REGEX REPLACE ".*/" "" PSA_API_TEST_TARGET ${TFM_PLATFORM})
+    if (NOT PSA_API_TEST_TARGET)
+        string(REGEX REPLACE ".*/" "" PSA_API_TEST_TARGET ${TFM_PLATFORM})
+    endif()
 
     if (NOT "${TEST_PSA_API}" STREQUAL "IPC")
         set(TARGET tgt_dev_apis_tfm_${PSA_API_TEST_TARGET})
