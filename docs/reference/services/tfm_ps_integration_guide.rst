@@ -350,12 +350,12 @@ definitions is:
   RAM (fast access) and flash (persistent storage). The memory used by the
   object table is allocated statically as PS does not use dynamic memory
   allocation.
-- ``PS_TEST_NV_COUNTERS``- this flag enables the virtual
-  implementation of the PS NV counters interface in
-  ``test/suites/ps/secure/nv_counters``, which emulates NV counters in
+- ``PS_TEST_NV_COUNTERS``- this flag enables the virtual implementation of the
+  PS NV counters interface in ``test/suites/ps/secure/nv_counters`` of the
+  ``tf-m-tests`` repo, which emulates NV counters in
   RAM, and disables the hardware implementation of NV counters provided by
-  the secure service. This flag is enabled by default when building the
-  regression tests and disabled by default otherwise.  This flag can be
+  the secure service. This flag is enabled by default, but has no effect when
+  the regression tests are disabled. This flag can be
   overridden to ``OFF`` when building the regression tests. In this case,
   the PS rollback protection test suite will not be built, as it relies
   on extra functionality provided by the virtual NV counters to simulate

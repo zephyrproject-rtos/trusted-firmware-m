@@ -30,7 +30,9 @@ target_sources(tfm_partition_ps
         ps_utils.c
         $<$<BOOL:${PS_ENCRYPTION}>:crypto/ps_crypto_interface.c>
         $<$<BOOL:${PS_ENCRYPTION}>:ps_encrypted_object.c>
-        $<$<NOT:$<BOOL:${PS_TEST_NV_COUNTERS}>>:nv_counters/ps_nv_counters.c>
+        # The test_ps_nv_counters.c will be used instead, when either NS and S
+        # test is ON and PS_TEST_NV_COUNTERS ON
+        $<$<NOT:$<AND:$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>,$<BOOL:${PS_TEST_NV_COUNTERS}>>>:nv_counters/ps_nv_counters.c>
 )
 
 target_link_libraries(tfm_partition_ps
