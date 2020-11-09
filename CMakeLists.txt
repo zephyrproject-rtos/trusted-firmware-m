@@ -61,6 +61,7 @@ function(trusted_firmware_build)
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
+  set(PLATFORM_NS_PATH ${TFM_BINARY_DIR}/platform/libplatform_ns.a)
 
   set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
   set_property(GLOBAL PROPERTY
@@ -71,6 +72,7 @@ function(trusted_firmware_build)
   set(BUILD_BYPRODUCTS
     ${VENEERS_FILE}
     ${PSA_API_NS_PATH}
+    ${PLATFORM_NS_PATH}
     ${BL2_HEX_FILE}
     )
 
@@ -122,6 +124,12 @@ function(trusted_firmware_build)
   )
   target_link_libraries(interface_lib INTERFACE tfm_api)
 
+  add_library(platform_lib STATIC IMPORTED)
+  set_target_properties(platform_lib PROPERTIES
+    IMPORTED_LOCATION ${PLATFORM_NS_PATH}
+  )
+  target_link_libraries(platform_lib INTERFACE tfm_api)
+
   add_library(veneer_lib STATIC IMPORTED)
   set_target_properties(veneer_lib PROPERTIES
     IMPORTED_LOCATION ${VENEERS_FILE}
@@ -143,6 +151,7 @@ function(trusted_firmware_build)
     PUBLIC
     zephyr_interface
     interface_lib
+    platform_lib
     veneer_lib
   )
 
