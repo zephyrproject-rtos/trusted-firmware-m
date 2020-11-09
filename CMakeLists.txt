@@ -18,6 +18,7 @@
 # ISOLATION_LEVEL: The TF-M isolation level to use
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
 # BL2: Boolean if the TF-M build uses MCUboot.
+# NATIVE_NS: Use the TF-M-built NS app instead of the Zephyr app.
 #
 # Example usage:
 #
@@ -30,7 +31,7 @@
 #                        BL2 True
 #                        BUILD_PROFILE profile_small)
 function(trusted_firmware_build)
-  set(options IPC REGRESSION)
+  set(options IPC REGRESSION NATIVE_NS)
   set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE BUILD_PROFILE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
@@ -68,10 +69,14 @@ function(trusted_firmware_build)
   set(TFM_GENERATED_INCLUDES ${TFM_BINARY_DIR}/generated/interface/include)
 
   set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
+  set(NATIVE_NS_BIN_FILE ${CMAKE_BINARY_DIR}/tfm/bin/tfm_ns.bin)
+  set(NATIVE_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/tfm/bin/tfm_s_ns_signed.bin)
 
   set(BUILD_BYPRODUCTS
     ${VENEERS_FILE}
     ${PSA_API_NS_PATH}
+    ${NATIVE_NS_BIN_FILE}
+    ${NATIVE_SIGNED_BIN_FILE}
     ${BL2_HEX_FILE}
     ${TFM_GENERATED_INCLUDES}/psa_manifest/sid.h
     )
@@ -113,6 +118,9 @@ function(trusted_firmware_build)
     USES_TERMINAL_BUILD True
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
   )
+
+  set_target_properties(tfm PROPERTIES NATIVE_SIGNED_BIN_PATH ${NATIVE_SIGNED_BIN_FILE})
+  set_target_properties(tfm PROPERTIES NATIVE_NS_BIN_PATH ${NATIVE_NS_BIN_FILE})
 
   add_library(tfm_api
     ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c
@@ -157,6 +165,9 @@ if (CONFIG_BUILD_WITH_TFM)
   if (CONFIG_TFM_PROFILE)
     set(TFM_PROFILE_ARG BUILD_PROFILE ${CONFIG_TFM_PROFILE})
   endif()
+  if (CONFIG_TFM_NATIVE_NS)
+    set(TFM_NATIVE_NS_ARG NATIVE_NS)
+  endif()
 
   trusted_firmware_build(
     BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
@@ -166,6 +177,7 @@ if (CONFIG_BUILD_WITH_TFM)
     ${TFM_BL2_ARG}
     ${TFM_IPC_ARG}
     ${TFM_REGRESSION_ARG}
+    ${TFM_NATIVE_NS_ARG}
   )
 
   zephyr_link_libraries(tfm_api)
