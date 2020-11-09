@@ -167,4 +167,7 @@
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
 
+/* Area used by PSA tests to keep state. */
+#define PSA_TEST_SCRATCH_AREA_SIZE (0x400)
+
 #endif /* __REGION_DEFS_H__ */
