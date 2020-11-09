@@ -36,7 +36,7 @@ be available in the build environment. The currently supported compiler
 versions are:
 
     - Arm Compiler v6.10.1+, v6.11, v6.12, v6.13
-    - GNU Arm compiler v6.3.1, v7.3
+    - GNU Arm compiler v7.3.1+
     - IAR Arm compiler v8.42.x, v8.50.x
 
 .. Note::
@@ -157,7 +157,7 @@ Windows
 Install the following tools:
 
     - uVision |KEIL_VERSION| or Arm DS |DEV_STUDIO_VERSION| (Arm DS Ultimate Edition)
-      or GNU Arm compiler v6.3.1.
+      or GNU Arm compiler v7.3.1+
     - Git client latest version (https://git-scm.com/download/win)
     - CMake (`native Windows version <https://cmake.org/download/>`__,
       see the `CMake`_ chapter)

@@ -8,15 +8,18 @@
 function(tfm_invalid_config)
     if (${ARGV})
         string (REPLACE ";" " " ARGV_STRING "${ARGV}")
-        string (REPLACE "STREQUAL" "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "GREATER"  ">" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "LESS"     "<" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "EQUAL"    "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "IN_LIST"  "in" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "STREQUAL"     "=" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "GREATER"      ">" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "LESS"         "<" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "VERSION_LESS" "<" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "EQUAL"        "=" ARGV_STRING "${ARGV_STRING}")
+        string (REPLACE "IN_LIST"      "in" ARGV_STRING "${ARGV_STRING}")
 
         message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
     endif()
 endfunction()
+
+tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "7.3.1")
 
 set (TFM_L3_PLATFORM_LISTS mps2/an521 musca_b1)
 
