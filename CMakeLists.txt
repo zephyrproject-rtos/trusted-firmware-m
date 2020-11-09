@@ -20,6 +20,7 @@ cmake_minimum_required(VERSION 3.13.1)
 # ISOLATION_LEVEL: The TF-M isolation level to use
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
 # BL2: Boolean if build uses MCUboot.
+# NATIVE_NS: Use the TF-M-built NS app instead of the Zephyr app.
 #
 # Example usage:
 #
@@ -31,7 +32,7 @@ cmake_minimum_required(VERSION 3.13.1)
 #                        REGRESSION
 #                        BL2 True)
 function(trusted_firmware_build)
-  set(options IPC REGRESSION)
+  set(options IPC REGRESSION NATIVE_NS)
   set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
@@ -61,6 +62,7 @@ function(trusted_firmware_build)
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
+  set(PLATFORM_NS_PATH ${TFM_BINARY_DIR}/platform/libplatform_ns.a)
 
   set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
   set_property(GLOBAL PROPERTY
@@ -68,7 +70,13 @@ function(trusted_firmware_build)
     ${BL2_HEX_FILE}
     )
 
-  set(BUILD_BYPRODUCTS ${VENEERS_FILE} ${PSA_API_NS_PATH} ${BL2_HEX_FILE})
+  set(BUILD_BYPRODUCTS
+    ${VENEERS_FILE}
+    ${PSA_API_NS_PATH}
+    ${PLATFORM_NS_PATH}
+    ${BL2_HEX_FILE}
+    ${NATIVE_NS_BIN_FILE}
+    )
 
   # Get the toolchain variant
   # TODO: Add support for cross-compile toolchain variant
@@ -87,7 +95,6 @@ function(trusted_firmware_build)
     message(FATAL_ERROR "Unsupported ZEPHYR_TOOLCHAIN_VARIANT: ${ZEPHYR_TOOLCHAIN_VARIANT}")
   endif()
 
-  #math(EXPR flash_end "${PM_TFM_EXTRA_ADDRESS}+${PM_TFM_EXTRA_SIZE}")
   set(flash_end 0x100000)
 
   include(ExternalProject)
@@ -120,10 +127,61 @@ function(trusted_firmware_build)
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
   )
 
+  if (TFM_NATIVE_NS)
+    set(NATIVE_NS_BIN_FILE ${CMAKE_BINARY_DIR}/tfm/bin/tfm_s_ns_signed.bin)
+    set(NATIVE_NS_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/tfm_s_ns_signed.hex)
+
+    # Set srec_cat binary name
+    find_program(SREC_CAT srec_cat)
+    if(${SREC_CAT} STREQUAL SREC_CAT-NOTFOUND)
+        message(FATAL_ERROR "'srec_cat' not found. Please install it, or add it to $PATH.")
+    endif()
+
+    # Generate an intel hex file from the signed output binary
+    add_custom_command(
+      OUTPUT ${NATIVE_NS_HEX_FILE}
+      COMMAND srec_cat ${NATIVE_NS_BIN_FILE}
+        -binary
+        -offset 0x10000
+        -o ${NATIVE_NS_HEX_FILE}
+        -intel
+      )
+    add_custom_target(tfm_native_ns DEPENDS ${NATIVE_NS_HEX_FILE} tfm)
+
+    set_property(GLOBAL PROPERTY
+      signed_tfm_app_PM_HEX_FILE
+      ${NATIVE_NS_HEX_FILE}
+      )
+    set_property(GLOBAL PROPERTY
+      signed_tfm_app_PM_TARGET
+      tfm_native_ns
+      )
+  endif()
+
+  add_library(tfm_api
+    ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c
+    ${ZEPHYR_TFM_MODULE_DIR}/src/zephyr_tfm_log.c
+  )
+
+  if (TFM_PSA_TEST_SUITE)
+    add_library(psa_test_lib STATIC IMPORTED)
+    set_target_properties(psa_test_lib PROPERTIES
+      IMPORTED_LOCATION ${PSA_TESTS_NS_PATH}
+    )
+    target_link_libraries(psa_test_lib INTERFACE tfm_api)
+  endif()
+
   add_library(interface_lib STATIC IMPORTED)
   set_target_properties(interface_lib PROPERTIES
     IMPORTED_LOCATION ${PSA_API_NS_PATH}
   )
+  target_link_libraries(interface_lib INTERFACE tfm_api)
+
+  add_library(platform_lib STATIC IMPORTED)
+  set_target_properties(platform_lib PROPERTIES
+    IMPORTED_LOCATION ${PLATFORM_NS_PATH}
+  )
+  target_link_libraries(platform_lib INTERFACE tfm_api)
 
   add_library(veneer_lib STATIC IMPORTED)
   set_target_properties(veneer_lib PROPERTIES
@@ -132,8 +190,6 @@ function(trusted_firmware_build)
 
   add_dependencies(interface_lib tfm)
   file(MAKE_DIRECTORY ${TFM_BINARY_DIR}/generated/interface/include)
-
-  add_library(tfm_api ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c)
 
   target_include_directories(tfm_api
     PRIVATE
@@ -145,9 +201,12 @@ function(trusted_firmware_build)
   )
   add_dependencies(tfm_api tfm)
 
-  target_link_libraries(interface_lib INTERFACE tfm_api)
-
-  target_link_libraries(tfm_api PUBLIC zephyr_interface interface_lib veneer_lib)
+  target_link_libraries(tfm_api PUBLIC
+    zephyr_interface
+    interface_lib
+    platform_lib
+    veneer_lib
+  )
 
 endfunction()
 
@@ -163,6 +222,9 @@ if (CONFIG_TFM)
   else()
     set(TFM_BL2_ARG BL2 False)
   endif()
+  if (CONFIG_TFM_NATIVE_NS)
+    set(TFM_NATIVE_NS_ARG NATIVE_NS)
+  endif()
 
   message("CONFIG_TFM_BOARD: ${CONFIG_TFM_BOARD}")
   trusted_firmware_build(
@@ -172,6 +234,7 @@ if (CONFIG_TFM)
     ${TFM_BL2_ARG}
     ${TFM_IPC_ARG}
     ${TFM_REGRESSION_ARG}
+    ${TFM_NATIVE_NS_ARG}
   )
 
   zephyr_link_libraries(tfm_api)

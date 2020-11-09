@@ -13,4 +13,9 @@ config TFM_REGRESSION
 config TFM_BL2
 	bool "Build with MCUboot"
 	default y
+config TFM_NATIVE_NS
+	bool "Use the TF-M-built NS app"
+	help
+	  Use the TF-M-built NS app instead of the Zephyr. E.g. for running
+	  TF-M's tests.
 endif
