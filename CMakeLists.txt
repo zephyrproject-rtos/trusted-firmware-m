@@ -15,6 +15,8 @@ cmake_minimum_required(VERSION 3.13.1)
 # BINARY_DIR: The location where the build outputs will be written
 # BOARD: The string identifying the board target for TF-M (AN521, etc.)
 # CMAKE_BUILD_TYPE: The TF-M build type to use, (Debug, Release, etc.)
+# PSA_TEST_SUITE: A PSA test suite to add, choose one of
+#                 STORAGE/CRYPTO/INITIAL_ATTESTATION
 # IPC: Build TFM IPC library. This library allows a non-secure application to
 #      interface to secure domain using IPC.
 # ISOLATION_LEVEL: The TF-M isolation level to use
@@ -32,7 +34,7 @@ cmake_minimum_required(VERSION 3.13.1)
 #                        BL2 True)
 function(trusted_firmware_build)
   set(options IPC REGRESSION)
-  set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
+  set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE PSA_TEST_SUITE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
   if(DEFINED TFM_BL2)
@@ -59,9 +61,17 @@ function(trusted_firmware_build)
     set(TFM_CMAKE_BUILD_TYPE_ARG -DCMAKE_BUILD_TYPE=RelWithDebInfo)
   endif()
 
+  if(DEFINED TFM_PSA_TEST_SUITE)
+    set(PSA_TEST_ARG -DTEST_PSA_API=${TFM_PSA_TEST_SUITE})
+  endif()
+
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
   set(PLATFORM_NS_PATH ${TFM_BINARY_DIR}/platform/libplatform_ns.a)
+
+  if (TFM_PSA_TEST_SUITE)
+    set(PSA_TESTS_NS_PATH ${TFM_BINARY_DIR}/app/libtfm_ns_psa_test.a)
+  endif()
 
   set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
   set_property(GLOBAL PROPERTY
@@ -72,6 +82,7 @@ function(trusted_firmware_build)
   set(BUILD_BYPRODUCTS
     ${VENEERS_FILE}
     ${PSA_API_NS_PATH}
+    ${PSA_TESTS_NS_PATH}
     ${PLATFORM_NS_PATH}
     ${BL2_HEX_FILE}
     )
@@ -106,6 +117,7 @@ function(trusted_firmware_build)
                ${TFM_IPC_ARG}
                ${TFM_ISOLATION_LEVEL_ARG}
                ${TFM_REGRESSION_ARG}
+               ${PSA_TEST_ARG}
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
                -DTFM_TOOLCHAIN_PATH=${TFM_TOOLCHAIN_PATH}
                -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
@@ -116,7 +128,16 @@ function(trusted_firmware_build)
 
   add_library(tfm_api
     ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c
+    ${ZEPHYR_TFM_MODULE_DIR}/src/zephyr_tfm_log.c
   )
+
+  if (TFM_PSA_TEST_SUITE)
+    add_library(psa_test_lib STATIC IMPORTED)
+    set_target_properties(psa_test_lib PROPERTIES
+      IMPORTED_LOCATION ${PSA_TESTS_NS_PATH}
+    )
+    target_link_libraries(psa_test_lib INTERFACE tfm_api)
+  endif()
 
   add_library(interface_lib STATIC IMPORTED)
   set_target_properties(interface_lib PROPERTIES
@@ -150,6 +171,7 @@ function(trusted_firmware_build)
   target_link_libraries(tfm_api
     PUBLIC
     zephyr_interface
+    $<$<BOOL:${TFM_PSA_TEST_SUITE}>:psa_test_lib>
     interface_lib
     platform_lib
     veneer_lib
@@ -169,6 +191,13 @@ if (CONFIG_TFM)
   else()
     set(TFM_BL2_ARG BL2 False)
   endif()
+  if (CONFIG_TFM_PSA_TEST_CRYPTO)
+    set(TFM_PSA_TEST_ARG PSA_TEST_SUITE CRYPTO)
+  elseif (CONFIG_TFM_PSA_TEST_STORAGE)
+    set(TFM_PSA_TEST_ARG PSA_TEST_SUITE STORAGE)
+  elseif (CONFIG_TFM_PSA_TEST_INITIAL_ATTESTATION)
+    set(TFM_PSA_TEST_ARG PSA_TEST_SUITE INITIAL_ATTESTATION)
+  endif()
 
   message("CONFIG_TFM_BOARD: ${CONFIG_TFM_BOARD}")
   trusted_firmware_build(
@@ -178,6 +207,7 @@ if (CONFIG_TFM)
     ${TFM_BL2_ARG}
     ${TFM_IPC_ARG}
     ${TFM_REGRESSION_ARG}
+    ${TFM_PSA_TEST_ARG}
   )
 
   zephyr_link_libraries(tfm_api)

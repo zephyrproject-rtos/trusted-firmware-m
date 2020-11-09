@@ -13,4 +13,11 @@ config TFM_REGRESSION
 config TFM_BL2
 	bool "Build with MCUboot"
 	default y
+
+config TFM_PSA_TEST_CRYPTO
+	bool "Crypto tests"
+config TFM_PSA_TEST_STORAGE
+	bool "Storage tests"
+config TFM_PSA_TEST_INITIAL_ATTESTATION
+	bool "Initial attestation tests"
 endif
