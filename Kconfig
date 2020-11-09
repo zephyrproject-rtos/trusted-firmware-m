@@ -18,4 +18,11 @@ config TFM_NATIVE_NS
 	help
 	  Use the TF-M-built NS app instead of the Zephyr. E.g. for running
 	  TF-M's tests.
+
+config TFM_PSA_TEST_CRYPTO
+	bool "Crypto tests"
+config TFM_PSA_TEST_STORAGE
+	bool "Storage tests"
+config TFM_PSA_TEST_INITIAL_ATTESTATION
+	bool "Initial attestation tests"
 endif
