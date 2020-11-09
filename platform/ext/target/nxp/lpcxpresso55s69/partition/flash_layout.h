@@ -26,31 +26,30 @@
  * 0x0003_0000 Non-secure image primary slot (96 KB)
  * 0x0004_8000 Secure image     secondary slot (160 KB)
  * 0x0007_0000 Non-secure image secondary slot (96 KB)
- * 0x0008_8000 Protected Storage Area (8 KB)
- * 0x0008_A000 Internal Trusted Storage Area (2 KB)
- * 0x0008_A800 NV counters area (512 B)
- * 0x0008_AA00 Unused (53.5 KB)
+ * 0x0008_8000 Protected Storage Area (10 KB)
+ * 0x0008_A800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_C800 NV counters area (512 B)
+ * 0x0008_CA00 Unused (45.5 KB)
  *
  * Flash layout on LPC55S69 with BL2 (single image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (32 KB)
  * 0x0000_8000 Primary image area   (Secure + Non-secure images) (256 KB)
  * 0x0004_8000 Secondary image area (Secure + Non-secure images) (256 KB)
- * 0x0008_8000 Protected Storage Area (8 KB)
- * 0x0008_A000 Internal Trusted Storage Area (2 KB)
- * 0x0008_A800 NV counters area (512 B)
- * 0x0008_AA00 Unused (53.5 KB)
+ * 0x0008_8000 Protected Storage Area (10 KB)
+ * 0x0008_A800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_C800 NV counters area (512 B)
+ * 0x0008_CA00 Unused (45.5 KB)
  *
  * Flash layout on LPC55S69 without BL2:
  *
  * 0x0000_0000 Secure + Non-secure image area (512 KB):
  *    0x0000_0000 Secure     image (256 KB)
  *    0x0004_0000 Non-secure image (256 KB)
- * 0x0008_0000 Secondary image area (0 KB):
- * 0x0008_0000 Protected Storage Area (16 KB)
- * 0x0008_4000 Internal Trusted Storage Area (8 KB)
- * 0x0008_6000 NV counters area (512 B)
- * 0x0008_6200 Unused (71.5 KB)
+ * 0x0008_0000 Protected Storage Area (10 KB)
+ * 0x0008_2800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_4800 NV counters area (512 B)
+ * 0x0008_4A00 Unused (77.5 KB)
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -167,12 +166,12 @@
  */
 #define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_PS_AREA_SIZE              (0x2000)   /* 8 KB */
+#define FLASH_PS_AREA_SIZE              (0x2800)   /* 10 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
-#define FLASH_ITS_AREA_SIZE             (0x800)   /* 2 KB */
+#define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
@@ -228,13 +227,13 @@
 #define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of ITS_SECTOR_SIZE per block */
-#define ITS_SECTORS_PER_BLOCK   (0x2)
+#define ITS_SECTORS_PER_BLOCK   (0x8)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_AREA_IMAGE_SECTOR_SIZE
+#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
 #define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 
