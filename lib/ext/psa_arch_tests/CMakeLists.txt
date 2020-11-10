@@ -21,7 +21,7 @@ if ("${PSA_ARCH_TESTS_PATH}" STREQUAL "DOWNLOAD")
         FetchContent_Declare(psa_arch_tests
             GIT_REPOSITORY https://github.com/ARM-software/psa-arch-tests.git
             GIT_TAG ${PSA_ARCH_TESTS_VERSION}
-            GIT_SHALLOW TRUE
+            GIT_SHALLOW FALSE
             GIT_PROGRESS TRUE
             GIT_SUBMODULES ""
             PATCH_COMMAND ${GIT_EXECUTABLE} apply ${PATCH_FILES}
@@ -30,7 +30,7 @@ if ("${PSA_ARCH_TESTS_PATH}" STREQUAL "DOWNLOAD")
         FetchContent_Declare(psa_arch_tests
             GIT_REPOSITORY https://github.com/ARM-software/psa-arch-tests.git
             GIT_TAG ${PSA_ARCH_TESTS_VERSION}
-            GIT_SHALLOW TRUE
+            GIT_SHALLOW FALSE
             GIT_PROGRESS TRUE
             GIT_SUBMODULES ""
         )
