@@ -44,8 +44,3 @@ endif()
 
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
-
-
-############################ Sanity Check ######################################
-
-include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)

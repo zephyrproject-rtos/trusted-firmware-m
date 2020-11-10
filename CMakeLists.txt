@@ -54,6 +54,14 @@ set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_SOURCE_DIR}/cmake/disable_compiler_dete
 project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C ASM)
 tfm_toolchain_reload_compiler()
 
+############################ Config Check ######################################
+
+include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+endif()
+
 ################################################################################
 
 add_subdirectory(lib/ext)
