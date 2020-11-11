@@ -16,7 +16,7 @@
 #include "psa/service.h"
 #include "tfm_plat_test.h"
 #include "psa_manifest/pid.h"
-#include "psa_manifest/tfm_test_core.h"
+#include "psa_manifest/tfm_ss_core_test.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
 #endif

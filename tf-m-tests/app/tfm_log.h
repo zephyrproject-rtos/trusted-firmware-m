@@ -8,7 +8,7 @@
 #ifndef __TFM_LOG_H__
 #define __TFM_LOG_H__
 
-#include "log/tfm_log_raw.h"
+#include "tfm_log_raw.h"
 
 /* Functions and macros in this file is for 'thread mode' usage. */
 

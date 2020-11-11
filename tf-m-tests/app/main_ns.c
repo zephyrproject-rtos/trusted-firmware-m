@@ -24,7 +24,6 @@
 #include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
 #endif
-#include "log/tfm_assert.h"
 #include "tfm_log.h"
 #include "uart_stdout.h"
 #include "region.h"

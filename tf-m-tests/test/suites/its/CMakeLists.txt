@@ -29,6 +29,7 @@ target_include_directories(tfm_test_suite_its_ns
 target_compile_definitions(tfm_test_suite_its_ns
     PRIVATE
         DOMAIN_NS=1
+        ITS_MAX_ASSET_SIZE=${ITS_MAX_ASSET_SIZE}
 )
 
 target_link_libraries(tfm_test_suite_its_ns
@@ -45,28 +46,35 @@ target_link_libraries(tfm_ns_tests
 
 ####################### Secure #################################################
 
-target_sources(tfm_test_suite_its_s
-    PRIVATE
-       ${CMAKE_CURRENT_SOURCE_DIR}/its_tests_common.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_its_s_interface_testsuite.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_its_s_reliability_testsuite.c
-)
+if (TEST_S)
+    target_sources(tfm_test_suite_its_s
+        PRIVATE
+           ${CMAKE_CURRENT_SOURCE_DIR}/its_tests_common.c
+           ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_its_s_interface_testsuite.c
+           ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_its_s_reliability_testsuite.c
+    )
 
-target_include_directories(tfm_test_suite_its_s
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure
-)
+    target_include_directories(tfm_test_suite_its_s
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure
+    )
 
-target_link_libraries(tfm_test_suite_its_s
-    PRIVATE
-        tfm_secure_api
-        tfm_test_framework
-        platform_region_defs
-        tfm_partition_secure_client_2
-        platform_s
-)
+    target_compile_definitions(tfm_test_suite_its_s
+        PRIVATE
+            ITS_MAX_ASSET_SIZE=${ITS_MAX_ASSET_SIZE}
+    )
 
-target_link_libraries(tfm_s_tests
-    INTERFACE
-        tfm_test_suite_its_s
-)
+    target_link_libraries(tfm_test_suite_its_s
+        PRIVATE
+            tfm_secure_api
+            tfm_test_framework
+            platform_region_defs
+            tfm_partition_secure_client_2
+            platform_s
+    )
+
+    target_link_libraries(tfm_s_tests
+        INTERFACE
+            tfm_test_suite_its_s
+    )
+endif()

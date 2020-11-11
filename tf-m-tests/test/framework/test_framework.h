@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "log/tfm_log_raw.h"
+#include "tfm_log_raw.h"
 #include "test_framework_helpers.h"
 
 #ifdef __cplusplus

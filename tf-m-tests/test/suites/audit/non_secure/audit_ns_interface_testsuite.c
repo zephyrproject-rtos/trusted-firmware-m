@@ -68,6 +68,7 @@ void register_testsuite_ns_audit_interface(struct test_suite_t *p_test_suite)
                   audit_veneers_tests, list_size, p_test_suite);
 }
 
+#if AUDIT_TEST_S_ENABLE
 /**
  * \brief Functional test of NS API
  *
@@ -254,3 +255,19 @@ static void tfm_audit_test_1001(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
+#else
+/**
+ * \brief Functional test of NS API
+ *
+ * \note This test case relies on Secure audit logging test to prepare the
+ *       loggings. If Secure audit logging test is disabled, this test case
+ *       will always fail. Therefore skip this test case when Secure audit
+ *       logging is disabled.
+ */
+static void tfm_audit_test_1001(struct test_result_t *ret)
+{
+    TEST_LOG("Skipped when Secure audit logging test is disabled.\r\n");
+
+    ret->val = TEST_PASSED;
+}
+#endif /* AUDIT_TEST_S_ENABLE */

@@ -13,7 +13,6 @@
 #include "ns_test_helpers.h"
 #include "psa/protected_storage.h"
 #include "test_framework_helpers.h"
-#include "flash_layout.h"
 
 /* Test UIDs */
 #define WRITE_ONCE_UID  1U /* Cannot be modified or deleted once created */

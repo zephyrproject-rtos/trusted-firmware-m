@@ -40,27 +40,29 @@ target_link_libraries(tfm_ns_tests
 
 ####################### Secure #################################################
 
-target_sources(tfm_test_suite_platform_s
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/platform_tests_common.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/platform_s_interface_testsuite.c
-)
+if (TEST_S)
+    target_sources(tfm_test_suite_platform_s
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/platform_tests_common.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure/platform_s_interface_testsuite.c
+    )
 
-target_include_directories(tfm_test_suite_platform_s
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-)
+    target_include_directories(tfm_test_suite_platform_s
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
-target_link_libraries(tfm_test_suite_platform_s
-    PRIVATE
-        tfm_test_framework
-        tfm_secure_api
-        platform_s
-)
+    target_link_libraries(tfm_test_suite_platform_s
+        PRIVATE
+            tfm_test_framework
+            tfm_secure_api
+            platform_s
+    )
 
-target_link_libraries(tfm_s_tests
-    INTERFACE
-        tfm_test_suite_platform_s
-)
+    target_link_libraries(tfm_s_tests
+        INTERFACE
+            tfm_test_suite_platform_s
+    )
+endif()

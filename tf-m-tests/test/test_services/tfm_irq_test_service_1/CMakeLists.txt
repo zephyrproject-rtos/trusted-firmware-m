@@ -6,42 +6,46 @@
 #-------------------------------------------------------------------------------
 cmake_policy(SET CMP0079 NEW)
 
-if (NOT TFM_MULTI_CORE_TOPOLOGY)
-    return()
-endif()
+add_library(tfm_partition_irq_test_1 STATIC)
 
-add_library(tfm_partition_multi_core_test STATIC)
-
-target_sources(tfm_partition_multi_core_test
+target_sources(tfm_partition_irq_test_1
     PRIVATE
-        tfm_multi_core_test.c
+        ./tfm_irq_test_service_1.c
 )
 
-target_include_directories(tfm_partition_multi_core_test
+target_include_directories(tfm_partition_irq_test_1
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/test_services/tfm_irq_test_service_1
 )
 
-target_link_libraries(tfm_partition_multi_core_test
+target_link_libraries(tfm_partition_irq_test_1
     PRIVATE
-        psa_interface
         tfm_secure_api
+        psa_interface
         platform_s
+        tfm_test_framework
 )
 
 target_link_libraries(tfm_spm
     PRIVATE
-        tfm_partition_multi_core_test
+        tfm_partition_irq_test_1
+)
+
+target_include_directories(tfm_test_framework
+    INTERFACE
+        .
 )
 
 ############################ Partition Defs ####################################
 
 target_link_libraries(tfm_partitions
     INTERFACE
-        tfm_partition_multi_core_test
+        tfm_partition_irq_test_1
 )
 
 target_compile_definitions(tfm_partition_defs
     INTERFACE
-        TFM_PARTITION_TEST_MULTI_CORE
+        $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
 )
