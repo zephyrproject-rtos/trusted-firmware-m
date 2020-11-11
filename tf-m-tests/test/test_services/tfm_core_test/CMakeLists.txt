@@ -16,6 +16,8 @@ target_sources(tfm_partition_core_test
 target_include_directories(tfm_partition_core_test
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/test_services/tfm_core_test
 )
 
 target_link_libraries(tfm_partition_core_test

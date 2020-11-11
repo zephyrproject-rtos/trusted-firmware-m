@@ -42,7 +42,7 @@ attest_register_initial_attestation_public_key(psa_key_handle_t *public_key)
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     uint8_t public_key_buff[ECC_CURVE_SECP256R1_PUBLIC_KEY_LENGTH] = {0};
     size_t public_key_len;
-    psa_ecc_curve_t ecc_curve;
+    psa_ecc_family_t ecc_curve;
 
     /* Public key should be unregistered at this point */
     if (public_key_registered != 0) {

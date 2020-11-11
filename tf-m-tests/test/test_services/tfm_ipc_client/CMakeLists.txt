@@ -17,6 +17,8 @@ target_sources(tfm_partition_ipc_client
 target_include_directories(tfm_partition_ipc_client
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/test_services/tfm_ipc_client
 )
 
 target_link_libraries(tfm_partition_ipc_client

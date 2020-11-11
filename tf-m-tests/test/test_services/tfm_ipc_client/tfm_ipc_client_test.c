@@ -9,7 +9,7 @@
 #include <assert.h>
 #include "psa/client.h"
 #include "psa/service.h"
-#include "psa_manifest/tfm_ipc_client_partition.h"
+#include "psa_manifest/tfm_ipc_client_test.h"
 #include "utilities.h"
 #include "psa_manifest/sid.h"
 

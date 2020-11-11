@@ -14,41 +14,57 @@ project(tfm_ns LANGUAGES ASM C)
 # anything loaded from or declared in this dir.
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+    tfm_toolchain_reload_compiler()
 endif()
 
 ############################# PSA test integration #############################
 
-if(TEST_PSA_API)
-    set(SUITE ${TEST_PSA_API})
+if(TEST_PSA_API AND NOT PSA_ARCH_TESTS_BINARY_PATH)
+    if(NOT SUITE)
+        set(SUITE ${TEST_PSA_API})
+    endif()
 
     string(REGEX REPLACE ".*/" "" PSA_API_TEST_TARGET ${TFM_PLATFORM})
 
-    if (NOT "${TEST_PSA_API}" STREQUAL "IPC")
-        set(TARGET tgt_dev_apis_tfm_${PSA_API_TEST_TARGET})
-    else()
-        set(TARGET tgt_ff_tfm_${PSA_API_TEST_TARGET})
+    if(NOT TARGET)
+        if (NOT "${TEST_PSA_API}" STREQUAL "IPC")
+            set(TARGET tgt_dev_apis_tfm_${PSA_API_TEST_TARGET})
+        else()
+            set(TARGET tgt_ff_tfm_${PSA_API_TEST_TARGET})
+        endif()
     endif()
 
-    set(PSA_INCLUDE_PATHS ${CMAKE_SOURCE_DIR}/interface/include/
-                          ${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/
-                          ${CMAKE_BINARY_DIR}/generated/interface/include
-    )
 
-    set(SP_HEAP_MEM_SUPP=0)
-    set(PLATFORM_PSA_ISOLATION_LEVEL ${TFM_ISOLATION_LEVEL})
-
-    if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-        set(TOOLCHAIN GNUARM)
-    elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
-        set(TOOLCHAIN ARMCLANG)
+    if(NOT PSA_INCLUDE_PATHS)
+        set(PSA_INCLUDE_PATHS ${CMAKE_SOURCE_DIR}/interface/include/
+                              ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/
+                              ${CMAKE_BINARY_DIR}/generated/interface/include
+        )
     endif()
 
-    if (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.main)
-        set(CPU_ARCH armv8m_ml)
-    elseif (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.base)
-        set(CPU_ARCH armv8m_bl)
-    elseif (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv7-m)
-        set(CPU_ARCH armv7m)
+    if(NOT SP_HEAP_MEM_SUPP)
+        set(SP_HEAP_MEM_SUPP 0)
+    endif()
+    if(NOT PLATFORM_PSA_ISOLATION_LEVEL)
+        set(PLATFORM_PSA_ISOLATION_LEVEL ${TFM_ISOLATION_LEVEL})
+    endif()
+
+    if (NOT TOOLCHAIN)
+        if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+            set(TOOLCHAIN GNUARM)
+        elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
+            set(TOOLCHAIN ARMCLANG)
+        endif()
+    endif()
+
+    if (NOT CPU_ARCH)
+        if (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.main)
+            set(CPU_ARCH armv8m_ml)
+        elseif (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv8-m.base)
+            set(CPU_ARCH armv8m_bl)
+        elseif (${CMAKE_SYSTEM_ARCHITECTURE} STREQUAL armv7-m)
+            set(CPU_ARCH armv7m)
+        endif()
     endif()
 
     add_subdirectory(${PSA_ARCH_TESTS_PATH}/api-tests ${CMAKE_CURRENT_BINARY_DIR}/psa_api_tests)
@@ -74,7 +90,6 @@ target_link_libraries(tfm_ns_integration_test
         tfm_test_framework
     PRIVATE
         psa_interface
-        $<TARGET_PROPERTY:platform_ns,PLATFORM_RTX_LIB_PATH>
         psa_api_ns
         CMSIS_5_tfm_ns
 )
@@ -105,6 +120,7 @@ target_link_libraries(tfm_ns
         $<$<BOOL:${TEST_PSA_API}>:test_combine>
         $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:tfm_s_veneers>
         psa_api_ns
+        tfm_ns_log
 )
 
 target_compile_definitions(tfm_ns
@@ -121,6 +137,7 @@ target_link_options(tfm_ns
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_ns.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
+        $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/tfm_ns.map>
 )
 
 add_convert_to_bin_target(tfm_ns)

@@ -16,6 +16,7 @@ add_library(tfm_test_framework INTERFACE)
 # anything loaded from or declared in this dir.
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+    tfm_toolchain_reload_compiler()
 endif()
 
 add_subdirectory(test_services)
@@ -51,6 +52,7 @@ target_include_directories(tfm_test_framework
 target_link_libraries(tfm_test_framework
     INTERFACE
         psa_interface
+        tfm_ns_log
 )
 
 target_sources(tfm_ns_tests
@@ -67,18 +69,27 @@ target_link_libraries(tfm_ns_tests
 target_compile_definitions(tfm_ns_tests
     INTERFACE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+        $<$<BOOL:${TFM_INTERACTIVE_TEST}>:CORE_TEST_INTERACTIVE>
+        $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
 )
 
 ####################### Secure #################################################
 
-target_sources(tfm_s_tests
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/framework/secure_suites.c
-)
+if (TEST_S)
+    target_sources(tfm_s_tests
+        INTERFACE
+            ${CMAKE_CURRENT_SOURCE_DIR}/framework/secure_suites.c
+    )
 
-target_link_libraries(tfm_s_tests
-    INTERFACE
-        tfm_test_framework
-        tfm_partition_defs
-        tfm_spm
-)
+    target_link_libraries(tfm_s_tests
+        INTERFACE
+            tfm_test_framework
+            tfm_partition_defs
+            tfm_spm
+    )
+
+    target_compile_definitions(tfm_s_tests
+        INTERFACE
+            $<$<BOOL:${PS_TEST_NV_COUNTERS}>:PS_TEST_NV_COUNTERS>
+    )
+endif()

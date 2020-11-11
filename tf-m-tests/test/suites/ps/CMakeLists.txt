@@ -29,6 +29,7 @@ target_include_directories(tfm_test_suite_ps_ns
 target_compile_definitions(tfm_test_suite_ps_ns
     PRIVATE
         DOMAIN_NS=1
+        PS_MAX_ASSET_SIZE=${PS_MAX_ASSET_SIZE}
 )
 
 target_link_libraries(tfm_test_suite_ps_ns
@@ -46,32 +47,39 @@ target_link_libraries(tfm_ns_tests
 
 ####################### Secure #################################################
 
-target_sources(tfm_test_suite_ps_s
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/nv_counters/test_ps_nv_counters.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_ps_s_interface_testsuite.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_ps_s_reliability_testsuite.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/ps_rollback_protection_testsuite.c
-)
+if (TEST_S)
+    target_sources(tfm_test_suite_ps_s
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_ps_s_interface_testsuite.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure/psa_ps_s_reliability_testsuite.c
+            $<$<BOOL:${PS_TEST_NV_COUNTERS}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/ps_rollback_protection_testsuite.c>
+            $<$<BOOL:${PS_TEST_NV_COUNTERS}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/nv_counters/test_ps_nv_counters.c>
+    )
 
-target_include_directories(tfm_test_suite_ps_s
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/nv_counters
-)
+    target_include_directories(tfm_test_suite_ps_s
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure/nv_counters
+    )
 
-target_link_libraries(tfm_test_suite_ps_s
-    PRIVATE
-        tfm_test_framework
-        platform_region_defs
-        tfm_partition_ps
-        tfm_partition_ps_test
-        tfm_spm
-        platform_s
-)
+    target_compile_definitions(tfm_test_suite_ps_s
+        PRIVATE
+            PS_MAX_ASSET_SIZE=${PS_MAX_ASSET_SIZE}
+    )
 
-target_link_libraries(tfm_s_tests
-    INTERFACE
-        tfm_test_suite_ps_s
-)
+    target_link_libraries(tfm_test_suite_ps_s
+        PRIVATE
+            tfm_test_framework
+            platform_region_defs
+            tfm_partition_ps
+            tfm_partition_ps_test
+            tfm_spm
+            platform_s
+    )
+
+    target_link_libraries(tfm_s_tests
+        INTERFACE
+            tfm_test_suite_ps_s
+    )
+endif()

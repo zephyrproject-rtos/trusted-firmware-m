@@ -12,7 +12,6 @@
 #else
 #include "tfm_memory_utils.h"
 #endif
-#include "flash_layout.h"
 
 #define TEST_019_CYCLES    3U
 

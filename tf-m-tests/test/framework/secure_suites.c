@@ -70,7 +70,7 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_audit_interface, 0, 0, 0},
 #endif
 
-#ifdef ENABLE_IPC_TEST
+#ifdef TFM_PSA_API
     /* Secure IPC test cases */
     {&register_testsuite_s_ipc_interface, 0, 0, 0},
 #endif

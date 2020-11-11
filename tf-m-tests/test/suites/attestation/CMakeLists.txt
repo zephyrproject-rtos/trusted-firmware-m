@@ -58,42 +58,44 @@ target_link_libraries(tfm_ns_tests
 
 ####################### Secure #################################################
 
-target_sources(tfm_test_suite_attestation_s
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/attest_public_key.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/attest_token_test.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_common.c
-        $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_symmetric.c>
-        $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/attest_symmetric_s_interface_testsuite.c>
-        $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_asymmetric.c>
-        $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/secure/attest_asymmetric_s_interface_testsuite.c>
-)
+if (TEST_S)
+    target_sources(tfm_test_suite_attestation_s
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/attest_public_key.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/attest_token_test.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_common.c
+            $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_symmetric.c>
+            $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/attest_symmetric_s_interface_testsuite.c>
+            $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/attest_token_decode_asymmetric.c>
+            $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/secure/attest_asymmetric_s_interface_testsuite.c>
+    )
 
-target_include_directories(tfm_test_suite_attestation_s
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-)
+    target_include_directories(tfm_test_suite_attestation_s
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/secure
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
-target_compile_definitions(tfm_test_suite_attestation_s
-    PRIVATE
-        $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
-        $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
-)
+    target_compile_definitions(tfm_test_suite_attestation_s
+        PRIVATE
+            $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
+            $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+    )
 
-target_link_libraries(tfm_test_suite_attestation_s
-    PRIVATE
-        tfm_qcbor
-        tfm_t_cose
-        tfm_test_framework
-        tfm_partition_attestation
-        tfm_boot_status
-        tfm_partition_crypto
-        platform_s
-)
+    target_link_libraries(tfm_test_suite_attestation_s
+        PRIVATE
+            tfm_qcbor
+            tfm_t_cose
+            tfm_test_framework
+            tfm_partition_attestation
+            tfm_boot_status
+            tfm_partition_crypto
+            platform_s
+    )
 
-target_link_libraries(tfm_s_tests
-    INTERFACE
-        tfm_test_suite_attestation_s
-)
+    target_link_libraries(tfm_s_tests
+        INTERFACE
+            tfm_test_suite_attestation_s
+    )
+endif()

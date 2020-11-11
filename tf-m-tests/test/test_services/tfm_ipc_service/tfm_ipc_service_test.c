@@ -12,7 +12,7 @@
 #include "psa/service.h"
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
-#include "psa_manifest/tfm_ipc_service_partition.h"
+#include "psa_manifest/tfm_ipc_service_test.h"
 
 #define IPC_SERVICE_BUFFER_LEN                          32
 
