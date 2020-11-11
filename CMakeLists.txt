@@ -3,8 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-cmake_minimum_required(VERSION 3.13.1)
-
 # Adds trusted-firmware-m as an external project, and provides output values
 # that are required to link against the secure TF-M binary.
 #
@@ -18,7 +16,7 @@ cmake_minimum_required(VERSION 3.13.1)
 #      interface to secure domain using IPC.
 # ISOLATION_LEVEL: The TF-M isolation level to use
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
-# BL2: Boolean if build uses MCUboot.
+# BL2: Boolean if the TF-M build uses MCUboot.
 #
 # The following output values can also be used:
 #
@@ -74,15 +72,13 @@ function(trusted_firmware_build)
   # TODO: Add support for cross-compile toolchain variant
   # TODO: Enforce GCC version check against TF-M compiler requirements
   if(${ZEPHYR_TOOLCHAIN_VARIANT} STREQUAL "zephyr")
-    set(TFM_TOOLCHAIN "GNUARM")
-    set(CMAKE_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
+    set(TFM_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
     set(TFM_TOOLCHAIN_PREFIX "arm-zephyr-eabi")
-    set(TFM_TOOLCHAIN_PATH ${ZEPHYR_SDK_INSTALL_DIR}/arm-zephyr-eabi)
+    set(TFM_TOOLCHAIN_PATH ${ZEPHYR_SDK_INSTALL_DIR}/arm-zephyr-eabi/bin)
   elseif(${ZEPHYR_TOOLCHAIN_VARIANT} STREQUAL "gnuarmemb")
-    set(TFM_TOOLCHAIN "GNUARM")
-    set(CMAKE_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
+    set(TFM_TOOLCHAIN_FILE "trusted-firmware-m/toolchain_GNUARM.cmake")
     set(TFM_TOOLCHAIN_PREFIX "arm-none-eabi")
-    set(TFM_TOOLCHAIN_PATH ${GNUARMEMB_TOOLCHAIN_PATH})
+    set(TFM_TOOLCHAIN_PATH ${GNUARMEMB_TOOLCHAIN_PATH}/bin)
   else()
     message(FATAL_ERROR "Unsupported ZEPHYR_TOOLCHAIN_VARIANT: ${ZEPHYR_TOOLCHAIN_VARIANT}")
   endif()
@@ -93,8 +89,9 @@ function(trusted_firmware_build)
     tfm
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
     BINARY_DIR ${TFM_BINARY_DIR}
-    CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ZEPHYR_TFM_MODULE_DIR}/${CMAKE_TOOLCHAIN_FILE}
+    CMAKE_ARGS -DTFM_TOOLCHAIN_FILE=${ZEPHYR_TFM_MODULE_DIR}/${TFM_TOOLCHAIN_FILE}
                -DTFM_PLATFORM=${TFM_BOARD}
+               -DCROSS_COMPILE=${TFM_TOOLCHAIN_PATH}/${TFM_TOOLCHAIN_PREFIX}
                ${TFM_CMAKE_BUILD_TYPE_ARG}
                ${TFM_BL2_ARG}
                ${TFM_IPC_ARG}
