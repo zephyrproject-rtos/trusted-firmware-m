@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,8 +121,10 @@
 #define MPC_ISRAM3_RANGE_BASE_S    0x30018000
 #define MPC_ISRAM3_RANGE_LIMIT_S   0x3001FFFF
 
-#ifdef REMAP_QSPI
-/* REMAP: QSPI memory map */
+/*
+ * TF-M only supports booting up from QSPI flash.
+ * The following addresses for BRAM and QSPI are for QSPI boot.
+ */
 /* FPGA BRAM memory */
 #define MPC_BRAM_RANGE_BASE_NS     0x28000000
 #define MPC_BRAM_RANGE_LIMIT_NS    0x2807FFFF
@@ -134,22 +136,6 @@
 #define MPC_QSPI_RANGE_LIMIT_NS    0x007FFFFF
 #define MPC_QSPI_RANGE_BASE_S      0x10000000
 #define MPC_QSPI_RANGE_LIMIT_S     0x107FFFFF
-
-#else
-/* Default BRAM remap memory map*/
-/*  BRAM memory */
-#define MPC_BRAM_RANGE_BASE_NS     0x00000000
-#define MPC_BRAM_RANGE_LIMIT_NS    0x0007FFFF
-#define MPC_BRAM_RANGE_BASE_S      0x10000000
-#define MPC_BRAM_RANGE_LIMIT_S     0x1007FFFF
-
-/* QSPI flash memory */
-#define MPC_QSPI_RANGE_BASE_NS     0x28000000
-#define MPC_QSPI_RANGE_LIMIT_NS    0x287FFFFF
-#define MPC_QSPI_RANGE_BASE_S      0x38000000
-#define MPC_QSPI_RANGE_LIMIT_S     0x387FFFFF
-
-#endif /* REMAP_QSPI */
 
 /* DDR4 memory */
 #define MPC_DDR4_RANGE0_BASE_NS    0x60000000

@@ -11,8 +11,6 @@
 #include "tfm_nspm.h"
 #include "utilities.h"
 #include "ext/tz_context.h"
-#include "log/tfm_assert.h"
-#include "log/tfm_log.h"
 
 #define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
 
@@ -104,7 +102,6 @@ void tfm_nspm_thread_entry(void)
         "mov      r10, r4        \n"
         "mov      r11, r4        \n"
         "mov      r12, r4        \n"
-        "push     {r0, r1}       \n"
         "bxns     r0             \n"
     );
 }

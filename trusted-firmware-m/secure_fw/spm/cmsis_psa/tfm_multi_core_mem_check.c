@@ -9,6 +9,7 @@
 #include "tfm_spm_hal.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
+#include "tfm_hal_isolation.h"
 #include "tfm_multi_core.h"
 #include "tfm_secure_api.h"
 #include "utilities.h"
@@ -418,20 +419,11 @@ static enum tfm_status_e mem_attr_check(struct mem_attr_info_t attr,
     return secure_mem_attr_check(attr, flags);
 }
 
-/**
- * \brief Check whether a memory access is allowed to access to a memory range
- *
- * \param[in] p      The start address of the range to check
- * \param[in] s      The size of the range to check
- * \param[in] flags  The flags indicating the access permissions.
- *
- * \return TFM_SUCCESS if the access is allowed,
- *         TFM_ERROR_GENERIC otherwise.
- */
-static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
+int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
 {
     struct security_attr_info_t security_attr;
     struct mem_attr_info_t mem_attr;
+    uint8_t flags = 0;
 
     if (!p) {
         return (int32_t)TFM_ERROR_GENERIC;
@@ -444,6 +436,22 @@ static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
     /* Abort if not in Handler mode */
     if (!__get_IPSR()) {
         tfm_core_panic();
+    }
+
+    if (attr & TFM_HAL_ACCESS_UNPRIVILEGED) {
+        flags |= MEM_CHECK_MPU_UNPRIV;
+    }
+
+    if (attr & TFM_HAL_ACCESS_NS) {
+        flags |= MEM_CHECK_NONSECURE;
+    }
+
+    if ((attr & TFM_HAL_ACCESS_WRITABLE) && (attr & TFM_HAL_ACCESS_READABLE)) {
+        flags |= MEM_CHECK_MPU_READWRITE;
+    } else if (attr & TFM_HAL_ACCESS_READABLE) {
+        flags |= MEM_CHECK_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
     }
 
     security_attr_init(&security_attr);
@@ -473,42 +481,4 @@ static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
     }
 
     return (int32_t)mem_attr_check(mem_attr, flags);
-}
-
-int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                           bool ns_caller,
-                                           uint32_t privileged)
-{
-    uint8_t flags = MEM_CHECK_MPU_READ;
-
-    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-        flags |= MEM_CHECK_MPU_UNPRIV;
-    } else if (privileged != TFM_PARTITION_PRIVILEGED_MODE) {
-        return TFM_ERROR_GENERIC;
-    }
-
-    if (ns_caller) {
-        flags |= MEM_CHECK_NONSECURE;
-    }
-
-    return has_access_to_region(p, s, flags);
-}
-
-int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                            bool ns_caller,
-                                            uint32_t privileged)
-{
-    uint8_t flags = MEM_CHECK_MPU_READWRITE;
-
-    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-        flags |= MEM_CHECK_MPU_UNPRIV;
-    } else if (privileged != TFM_PARTITION_PRIVILEGED_MODE) {
-        return TFM_ERROR_GENERIC;
-    }
-
-    if (ns_caller) {
-        flags |= MEM_CHECK_NONSECURE;
-    }
-
-    return has_access_to_region(p, s, flags);
 }

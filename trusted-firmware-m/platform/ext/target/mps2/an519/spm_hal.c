@@ -14,17 +14,12 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "utilities.h"
-#include "region.h"
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 /* Import MPC driver */
 extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
 {
@@ -62,122 +57,6 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     }
     return TFM_PLAT_ERR_SUCCESS;
 }
-
-#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-
-#define MPU_REGION_VENEERS           0
-#define MPU_REGION_TFM_UNPRIV_CODE   1
-#define MPU_REGION_TFM_UNPRIV_DATA   2
-#define MPU_REGION_NS_STACK          3
-#define PARTITION_REGION_RO          4
-#define PARTITION_REGION_RW_STACK    5
-#define PARTITION_REGION_PERIPH      6
-
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$RW$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
-REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
-
-const struct mpu_armv8m_region_cfg_t region_cfg[] = {
-           /* Veneer region */
-           {
-               MPU_REGION_VENEERS,
-               (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-               (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-               MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-               MPU_ARMV8M_XN_EXEC_OK,
-               MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           },
-           /* TFM Core unprivileged code region */
-           {
-               MPU_REGION_TFM_UNPRIV_CODE,
-               (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
-               (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit),
-               MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-               MPU_ARMV8M_XN_EXEC_OK,
-               MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           },
-           /* TFM Core unprivileged data region */
-           {
-               MPU_REGION_TFM_UNPRIV_DATA,
-               (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_DATA, $$RW$$Base),
-               (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit),
-               MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-               MPU_ARMV8M_XN_EXEC_NEVER,
-               MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           },
-           /* NSPM PSP */
-           {
-               MPU_REGION_NS_STACK,
-               (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base),
-               (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit),
-               MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-               MPU_ARMV8M_XN_EXEC_NEVER,
-               MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           },
-           /* RO region */
-           {
-               PARTITION_REGION_RO,
-               (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-               (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base),
-               MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-               MPU_ARMV8M_XN_EXEC_OK,
-               MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           },
-           /* RW, ZI and stack as one region */
-           {
-               PARTITION_REGION_RW_STACK,
-               (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
-               (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
-               MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-               MPU_ARMV8M_XN_EXEC_NEVER,
-               MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-               MPU_ARMV8M_SH_NONE
-           }
-       };
-
-static enum tfm_plat_err_t tfm_spm_mpu_init(void)
-{
-    int32_t i;
-
-    mpu_armv8m_clean(&dev_mpu_s);
-
-    for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
-        if (mpu_armv8m_region_enable(&dev_mpu_s,
-            (struct mpu_armv8m_region_cfg_t *)&region_cfg[i])
-            != MPU_ARMV8M_OK) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
-    }
-
-    mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
-                      HARDFAULT_NMI_ENABLE);
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void)
-{
-    if (tfm_spm_mpu_init() != TFM_PLAT_ERR_SUCCESS) {
-        ERROR_MSG("Failed to set up initial MPU configuration! Halting.");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
-#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 void MPC_Handler(void)
 {

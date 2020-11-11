@@ -148,7 +148,7 @@ enum tfm_plat_err_t tfm_plat_get_symmetric_iak_id(void *kid_buf,
  *                             about the initial attestation key, which is
  *                             stored in key_buf.
  * \param[out]     curve_type  The type of the EC curve, which the key belongs
- *                             to according to \ref psa_ecc_curve_t
+ *                             to according to \ref psa_ecc_family_t
  *
  * \return Returns error code specified in \ref tfm_plat_err_t
  */
@@ -156,7 +156,7 @@ enum tfm_plat_err_t
 tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
                                 uint32_t          size,
                                 struct ecc_key_t *ecc_key,
-                                psa_ecc_curve_t  *curve_type);
+                                psa_ecc_family_t *curve_type);
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
 
 /**

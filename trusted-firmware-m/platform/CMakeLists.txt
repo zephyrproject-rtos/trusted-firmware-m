@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
@@ -44,9 +44,11 @@ target_sources(platform_s
         ext/common/tfm_hal_its.c
         ext/common/tfm_platform.c
         ext/common/uart_stdout.c
+        ext/common/tfm_hal_spm_logdev_peripheral.c
         $<$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
+        $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
 )
 
@@ -56,11 +58,12 @@ target_link_libraries(platform_s
     PRIVATE
         psa_interface
         tfm_secure_api
-        $<$<BOOL:${BL2}>:platform_bl2>
         tfm_arch
 )
 
 target_compile_definitions(platform_s
+    PUBLIC
+        TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
 )
@@ -88,6 +91,13 @@ target_link_libraries(platform_ns
         psa_interface
 )
 
+target_compile_definitions(platform_ns
+    PRIVATE
+        $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
+        $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
+        $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
+)
+
 #========================= Platform BL2 =======================================#
 if(BL2)
     #TODO import policy
@@ -106,7 +116,6 @@ if(BL2)
             ext/common/uart_stdout.c
             ext/common/boot_hal.c
             $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
-            $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
             $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
             $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
     )
@@ -129,9 +138,6 @@ if(BL2)
     target_compile_definitions(platform_bl2
         PUBLIC
             BL2
-            MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
-            $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>
-            $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
             MCUBOOT_${MCUBOOT_UPGRADE_STRATEGY}
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
             $<$<BOOL:${MCUBOOT_HW_KEY}>:MCUBOOT_HW_KEY>
@@ -147,6 +153,9 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}
-        $<$<BOOL:${BL2}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+        MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
+        $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>
+        $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
 )

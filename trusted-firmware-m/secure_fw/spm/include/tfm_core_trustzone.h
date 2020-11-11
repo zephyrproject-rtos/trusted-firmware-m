@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,13 +11,13 @@
 /* This file holds specification or design defined TrustZone settings. */
 
 /*
- * The non-secure entry stack guard words. To avoid fuzzing jump to
- * FNC_RETURN in NSPE, the non-secure entry address is stacked into
- * bottom (high end address) of secure stack. This would lead the
- * fuzzing jump of FNC_RETURN to the non-secure entry. Define a size
- * here for code reference.
+ * To avoid faking jump with FNC_RETURN or EXC_RETURN in NSPE, seal the secure
+ * stack by putting two words (8 bytes) at the start of stack (higher address)
+ * of it. The Armv8-M Architecture Reference Manual recommends to use seal value
+ * 0xFEF5EDA5.
  */
-#define TFM_VENEER_STACK_GUARD_SIZE     8
+#define TFM_STACK_SEALED_SIZE           8
+#define TFM_STACK_SEAL_VALUE            0xFEF5EDA5
 
 /*
  * The numbers in 32bit words while basic FP involved in preempted context:

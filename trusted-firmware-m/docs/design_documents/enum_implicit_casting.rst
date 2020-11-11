@@ -135,7 +135,6 @@ create too much change in the code base.
   returning the enumeration constants, but implicitly casted to an integer type
   like ``int32_t``.
 
-  * ``int32_t tfm_core_set_secure_exception_priorities``
   * ``int32_t check_address_range``
   * ``int32_t has_access_to_region``
   * ``int32_t tfm_core_check_sfn_parameters``

@@ -395,4 +395,10 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
  */
 void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
 
+/**
+ * \brief                   Function to seal the PSP stacks for Function mode.
+ */
+void tfm_spm_seal_psp_stacks(void);
+
+
 #endif /* __SPM_FUNC_H__ */

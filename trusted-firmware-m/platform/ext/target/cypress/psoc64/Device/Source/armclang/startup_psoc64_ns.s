@@ -26,6 +26,9 @@
 
                 IMPORT |Image$$ARM_LIB_STACK$$ZI$$Limit|
 
+; The CPU VTOR register
+CY_CPU_VTOR_ADDR EQU    0xE000ED08
+
 ; Vector Table Mapped to Address 0 at Reset
 
                 AREA    RESET, DATA, READONLY
@@ -239,6 +242,34 @@ Reset_Handler   PROC
                 IMPORT  Cy_SystemInitFpuEnable
                 IMPORT  SystemInit
                 IMPORT  __main
+; Update Vector Table Offset Register
+                EXTERN RAM_VECTORS_SUPPORT
+                IF :DEF:RAM_VECTORS_SUPPORT
+
+                ; Copy vectors from ROM to RAM
+                LDR R1, =__Vectors
+                LDR R0, =__ramVectors
+                LDR R2, =__Vectors_Size
+Vectors_Copy
+                LDR R3, [R1]
+                STR R3, [R0]
+                ADDS R0, R0, #4
+                ADDS R1, R1, #4
+                SUBS R2, R2, #1
+                CMP R2, #0
+                BNE Vectors_Copy
+                LDR     R0, =__ramVectors
+
+                ELSE
+
+                LDR     R0, =__Vectors
+
+                ENDIF
+
+                LDR     R1, =CY_CPU_VTOR_ADDR
+                STR     R0, [R1]
+                DSB     0xF
+
                 LDR     R0, =Cy_SystemInitFpuEnable
                 BLX     R0
                 LDR     R0, =SystemInit

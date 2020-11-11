@@ -45,6 +45,13 @@ Platforms
 
     target/nordic_nrf/**
 
+.. toctree::
+    :maxdepth: 4
+    :caption: Nuvoton
+    :glob:
+
+    target/nuvoton/**
+
 --------------
 
 *Copyright (c) 2020, Arm Limited. All rights reserved.*

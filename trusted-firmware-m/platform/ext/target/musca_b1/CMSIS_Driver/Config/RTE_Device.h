@@ -61,7 +61,7 @@
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define   RTE_USART0                      1
+#define   RTE_USART0                      0
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]

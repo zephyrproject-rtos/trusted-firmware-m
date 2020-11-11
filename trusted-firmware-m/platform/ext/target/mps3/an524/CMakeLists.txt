@@ -91,8 +91,10 @@ target_sources(platform_s
         native_drivers/uart_cmsdk_drv.c
         native_drivers/timer_cmsdk_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         target_cfg.c
         native_drivers/ppc_sse200_drv.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -100,12 +102,6 @@ target_sources(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#

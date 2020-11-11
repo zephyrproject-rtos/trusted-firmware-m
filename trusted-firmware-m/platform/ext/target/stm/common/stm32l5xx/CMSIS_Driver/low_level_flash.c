@@ -522,19 +522,20 @@ ARM_DRIVER_FLASH TFM_Driver_FLASH0 =
   * @param  None.
   * @retval LR Register value
   */
+#if !defined ( __ICCARM__ )
 __attribute__((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
 {
   register uint32_t result;
 
-#if defined ( __ICCARM__ ) || ( __GNUC__ )
+#if defined ( __GNUC__ )
   __ASM volatile("MOV %0, LR" : "=r"(result));
 #elif defined ( __CC_ARM )
   __ASM volatile("MOV result, __return_address()");
-#endif /* ( __ICCARM__ ) || ( __GNUC__ )  */
+#endif /* ( __GNUC__ )  */
 
   return result;
 }
-
+#endif
 
 /*
    As this handler code relies on stack pointer position to manipulate the PC return value, it is important

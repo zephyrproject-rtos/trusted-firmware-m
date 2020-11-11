@@ -104,7 +104,7 @@ static psa_status_t tfm_attest_get_public_key(const psa_msg_t *msg)
     psa_status_t status = PSA_SUCCESS;
     uint8_t key_buf[ECC_P256_PUBLIC_KEY_SIZE];
     size_t key_len;
-    psa_ecc_curve_t curve_type;
+    psa_ecc_family_t curve_type;
 
     psa_outvec out_vec[] = {
         {.base = key_buf,     .len = sizeof(key_buf)},

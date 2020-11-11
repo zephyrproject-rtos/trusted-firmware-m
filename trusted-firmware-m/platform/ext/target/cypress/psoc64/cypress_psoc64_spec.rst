@@ -50,7 +50,7 @@ line arguments. Required arguments are noted below.
    * - -DTFM_PLATFORM=cypress/psoc64
      - Specifies target platform name ``psoc64``
 
-   * - -DCMAKE_TOOLCHAIN_FILE=<path to toolchain file>
+   * - -DTFM_TOOLCHAIN_FILE=<path to toolchain file>
      - Specifies the compiler toolchain
        The possible values are:
 
@@ -77,7 +77,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
@@ -95,7 +95,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTEST_S=ON -DTEST_NS=ON \
           ../
     popd
@@ -114,7 +114,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTEST_PSA_API=INITIAL_ATTESTATION \
           ../
     popd
@@ -133,7 +133,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           ../
     popd
@@ -152,7 +152,7 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           -DTEST_S=ON -DTEST_NS=ON \
           ../
@@ -172,16 +172,16 @@ listed above.
     mkdir <build folder>
     pushd <build folder>
     cmake -DTFM_PLATFORM=cypress/psoc64 \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
+          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
           -DTFM_ISOLATION_LEVEL=2 \
           -DTEST_PSA_API=PROTECTED_STORAGE \
           ../
     popd
     cmake --build <build folder> -- -j VERBOSE=1
 
-**********************
-Signing the images
-**********************
+*******
+Signing
+*******
 
 ############
 Signing keys
@@ -201,10 +201,17 @@ If the board was previously provisioned with signing keys and policy, copy
 secure signing keys used in the board provisioning process to
 platform/ext/target/cypress/psoc64/security/keys:
 
-TFM_S_KEY.json      - private OEM key for signing CM0P image
-TFM_S_KEY_PRIV.pem  - private OEM key for signing CM0P image in PEM format
-TFM_NS_KEY.json     - private OEM key for signing CM4 image
-TFM_NS_KEY_PRIV.pem - private OEM key for signing CM4 image in PEM format
+TFM_S_KEY.json
+  Private OEM key for signing CM0P image
+
+TFM_S_KEY_PRIV.pem
+  Private OEM key for signing CM0P image in PEM format
+
+TFM_NS_KEY.json
+  Private OEM key for signing CM4 image
+
+TFM_NS_KEY_PRIV.pem
+  Private OEM key for signing CM4 image in PEM format
 
 Alternatively, you can generate a new set of signing keys using cysecuretools
 create-keys command and provision the keys to the board, if the previously
@@ -213,17 +220,20 @@ provisioned policy allows board's re-provisioning.
 Initialize cysecuretools environment:
 
 .. code-block:: bash
+
     cd platform/ext/target/cypress/psoc64/security
     cysecuretools -t cy8ckit-064s0s2-4343w init
 
 Generate a new set of keys:
 
 .. code-block:: bash
+
     cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json create-keys
 
 Re-provision the new keys to the board:
 
 .. code-block:: bash
+
     cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json re-provision-device
 
 ##################
@@ -376,7 +386,9 @@ Provisioning device certificates
 
 1. If not done yet, change to the psoc64 security directory and initialize
    cysecuretools environment:
+
 .. code-block:: bash
+
     cd platform/ext/target/cypress/psoc64/security
     cysecuretools -t cy8ckit-064s0s2-4343w init
 
@@ -386,12 +398,16 @@ Provisioning device certificates
 3. Switch the board in DAPLink mode by pressing the mode button or by issuing
    the following fw-loader command (fw-loader comes with Modus ToolBox software).
    Mode LED should be slowly blinking:
+
 .. code-block:: bash
+
     fw-loader --mode kp3-daplink
 
 4. Run reprov_helper.py. If running the script with default parameters,
    the script can be run as is:
+
 .. code-block:: bash
+
     python3 reprov_helper.py
 
    Otherwise, run it with --help parameter to get the full list of options.
@@ -419,7 +435,9 @@ The process is the following:
 
 1. If not done yet, change to the psoc64 security directory and initialize
    cysecuretools environment:
+
 .. code-block:: bash
+
     cd platform/ext/target/cypress/psoc64/security
     cysecuretools -t cy8ckit-064s0s2-4343w init
 
@@ -429,12 +447,16 @@ The process is the following:
 3. Switch the board in DAPLink mode by pressing the mode button or by issuing
    the following fw-loader command (fw-loader comes with Modus ToolBox software).
    Mode LED should be slowly blinking:
+
 .. code-block:: bash
+
     fw-loader --mode kp3-daplink
 
 4. Run reprov_helper.py. If running the script with default parameters,
    the script can be run as is:
+
 .. code-block:: bash
+
     python3 reprov_helper.py
 
    Otherwise, run it with --help parameter to get the full list of options.

@@ -9,7 +9,7 @@ if (NOT TFM_PARTITION_PLATFORM)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_partition_platform STATIC
@@ -19,6 +19,7 @@ add_library(tfm_partition_platform STATIC
 target_include_directories(tfm_partition_platform
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform
 )
 
 target_link_libraries(tfm_partition_platform

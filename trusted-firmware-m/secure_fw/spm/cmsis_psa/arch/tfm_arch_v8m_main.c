@@ -19,17 +19,6 @@
 #error "Unsupported ARM Architecture."
 #endif
 
-struct tfm_fault_context_s {
-    uint32_t R0;
-    uint32_t R1;
-    uint32_t R2;
-    uint32_t R3;
-    uint32_t R12;
-    uint32_t LR;
-    uint32_t ReturnAddress;
-    uint32_t RETPSR;
-} tfm_fault_context;
-
 /*
  * Stack status at PendSV entry:
  *
@@ -93,34 +82,12 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
  */
 void SecureFault_Handler(void)
 {
-    /* figure out context from which we landed in fault handler */
-    uint32_t lr = __get_LR();
-    uint32_t sp;
-
-    if (lr & EXC_RETURN_SECURE_STACK) {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp = __get_PSP();
-        } else {
-            sp = __get_MSP();
-        }
-    } else {
-        if (lr & EXC_RETURN_STACK_PROCESS) {
-            sp =  __TZ_get_PSP_NS();
-        } else {
-            sp = __TZ_get_MSP_NS();
-        }
-    }
-
-    /* Only save the context if sp is valid */
-    if ((sp >=  S_DATA_START &&
-         sp <=  (S_DATA_LIMIT - sizeof(tfm_fault_context)) + 1) ||
-        (sp >= NS_DATA_START &&
-         sp <= (NS_DATA_LIMIT - sizeof(tfm_fault_context)) + 1)) {
-        spm_memcpy(&tfm_fault_context, (const void *)sp,
-                   sizeof(tfm_fault_context));
-    }
-
     ERROR_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    /* A SecureFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
     while (1) {
         ;
     }
@@ -147,21 +114,42 @@ __attribute__((naked)) void SVC_Handler(void)
 }
 
 /* Reserved for future usage */
+__attribute__((naked)) void HardFault_Handler(void)
+{
+    /* A HardFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
+    __ASM volatile("b    .");
+}
+
 __attribute__((naked)) void MemManage_Handler(void)
 {
+    /* A MemManage fault may indicate corruption of secure state, so it is
+     * essential that Non-secure code does not regain control after one is
+     * raised. Returning from this exception could allow a pending NS exception
+     * to be taken, so the current solution is not to return.
+     */
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
+    /* A BusFault may indicate corruption of secure state, so it is essential
+     * that Non-secure code does not regain control after one is raised.
+     * Returning from this exception could allow a pending NS exception to be
+     * taken, so the current solution is not to return.
+     */
     __ASM volatile("b    .");
 }
+
 __attribute__((naked)) void UsageFault_Handler(void)
 {
     __ASM volatile("b    .");
 }
 
-void tfm_arch_prioritize_secure_exception(void)
+void tfm_arch_set_secure_exception_priorities(void)
 {
     uint32_t VECTKEY;
     SCB_Type *scb = SCB;
@@ -173,6 +161,35 @@ void tfm_arch_prioritize_secure_exception(void)
     scb->AIRCR = SCB_AIRCR_PRIS_Msk |
                  VECTKEY |
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
+    /* Set fault priority to less than 0x80 (with AIRCR.PRIS set) to prevent
+     * Non-secure from pre-empting faults that may indicate corruption of Secure
+     * state.
+     */
+    NVIC_SetPriority(MemoryManagement_IRQn, 0);
+    NVIC_SetPriority(BusFault_IRQn, 0);
+    NVIC_SetPriority(SecureFault_IRQn, 0);
+
+    NVIC_SetPriority(SVCall_IRQn, 0);
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+#else
+    /*
+     * Set secure PendSV priority to the lowest in SECURE state.
+     *
+     * IMPORTANT NOTE:
+     *
+     * Although the priority of the secure PendSV must be the lowest possible
+     * among other interrupts in the Secure state, it must be ensured that
+     * PendSV is not preempted nor masked by Non-Secure interrupts to ensure
+     * the integrity of the Secure operation.
+     * When AIRCR.PRIS is set, the Non-Secure execution can act on
+     * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
+     * number up to the value 0x80.
+     * For this reason, set the priority of the PendSV interrupt to the next
+     * priority level configurable on the platform, just below 0x80.
+     */
+    NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
+#endif
 }
 
 void tfm_arch_configure_coprocessors(void)

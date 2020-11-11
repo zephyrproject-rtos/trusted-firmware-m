@@ -5,26 +5,25 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
-project("Trusted Firmware M" VERSION 1.1.0 LANGUAGES C ASM)
-set(TFM_VERSION ${PROJECT_VERSION})
+set(TFM_VERSION 1.1.0)
 
-if(NOT TFM_CMAKE_TOOLCHAIN_FILE_LOADED)
-    Message(FATAL_ERROR "Cmake toolchain file not set.")
-endif()
-
-if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
-   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
-    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
-endif()
+############################ CONFIGURATION #####################################
 
 # Some compiler flags depend on the CPU / platform config. This include should
-# be run before anything else so the compiler can be configured properly.
+# be run before the toolchain file so the compiler can be configured properly.
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
     Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
 else()
     include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+endif()
+
+include(config/set_config.cmake)
+
+if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
+   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
+    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
 endif()
 
 # The default build type is release. If debug symbols are needed then
@@ -33,36 +32,35 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 endif()
 
-############################ CONFIGURATION #####################################
-
-# First load defaults.
-include(config/config_default.cmake)
-
-# Then load the build type config, overriding defaults and command line.
-string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
-if (EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
-    include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
-endif()
-
-# Then load the profile, overriding build type config, defaults and command
-# line.
-if (TFM_PROFILE)
-    include(config/profile/${TFM_PROFILE}.cmake)
-endif()
-
-# Then load the platform options, overriding profile, build type config,
-# defaults and command line.
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
-endif()
-
-# Optionally load extra config, overriding platform options, overriding profile,
-# build type config, defaults and command line.
-if (TFM_EXTRA_CONFIG_PATH)
-    include(${TFM_EXTRA_CONFIG_PATH})
-endif()
-
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+############################### Compiler configuration #########################
+
+#Legacy compat option - load CMAKE_TOOLCHAIN_FILE as a TFM_TOOLCHAIN_FILE
+if (CMAKE_TOOLCHAIN_FILE)
+    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
+    message(DEPRECATION "INTERPRETING -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} as -DTFM_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+    set(TFM_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
+    unset(CMAKE_TOOLCHAIN_FILE)
+endif()
+
+if (NOT IS_ABSOLUTE ${TFM_TOOLCHAIN_FILE})
+    message(FATAL_ERROR "SETTING CMAKE_TOOLCHAIN_FILE no longer accepts relative paths. Please supply an absolute path or instead use TFM_TOOLCHAIN_FILE (which does accept relative paths)")
+endif()
+
+include(${TFM_TOOLCHAIN_FILE})
+set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_SOURCE_DIR}/cmake/disable_compiler_detection.cmake)
+
+project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C ASM)
+tfm_toolchain_reload_compiler()
+
+############################ Config Check ######################################
+
+include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+endif()
 
 ################################################################################
 
@@ -72,6 +70,7 @@ add_subdirectory(docs)
 if(NS)
     # Set to ${TFM_TEST_REPO_PATH}/app by default
     add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)
+    add_subdirectory(${TFM_NS_LOG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/ns_log)
 endif()
 add_subdirectory(secure_fw)
 add_subdirectory(interface)

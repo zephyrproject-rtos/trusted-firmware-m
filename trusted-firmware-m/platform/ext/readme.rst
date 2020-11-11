@@ -13,6 +13,46 @@ to BSD 3.0 license applied to the parent TF-M project.
 Sub-folders
 ***********
 
+accelerator
+===========
+This folder contains cmake and code files to interact cryptographic
+accelerators.
+
+In order to use a cryptographic accelerator, a platform must set
+``CRYPTO_HW_ACCELERATOR_TYPE`` in preload.cmake. This option maps directly to
+the subdirectories of the accelerator directory. Currently the only available
+accelerator is the CryptoCell ``cc312``.
+
+A minimal API is exposed to interact with accelerators, the details of this api
+are in ``accelerator/interface/crypto_hw.h``. Implementation of the API is
+inside the subdirectory of the individual accelerator.
+
+To configure a cryptographic accelerator at build time, two cmake options can be
+specified.
+
+- ``CRYPTO_HW_ACCELERATOR``
+   - ``ON`` All possible mbedtls cryptographic operations will be offloaded to
+     the accelerator. This mode is required for
+     ``CRYPTO_HW_ACCELERATOR_OTP_STATE`` to have an effect.
+   - ``OFF`` The cryptographic accelerator will be ignored and software
+     cryptography will be used.
+
+- ``CRYPTO_HW_ACCELERATOR_OTP_STATE``
+   - ``DISABLED`` The HW accelerator will not use any data from its onboard OTP
+     (One Time Programmable) memory.
+   - ``PROVISIONING`` This special mode is used to program cryptographic
+     material into the OTP memory. When the flag is set TF-M will not boot, but
+     will instead program the hardware unique key, the root of trust private key
+     and the attestation private key into the OTP memory.
+   - ``ENABLED`` The HW accelerator will use the previously programmed data as
+     the hardware unique key, the root of trust private key and the attestation
+     private key.
+
+.. Warning::
+
+   Provisioning **can not** be reversed, and data in the OTP memory **can not**
+   be changed once set.
+
 cmsis
 =====
 This folder contains core and compiler specific header files imported from the
@@ -26,40 +66,6 @@ armclang and gcc
 These contain the linker scripts used to configure the memory regions in TF-M
 regions.
 
-cc312
------
-This folder contains cmake and code files to interact with the CC312
-cryptographic accelerator. Integrating a platform with the CC312 requires some
-configuration, of which an example can be seen in the
-``platform/ext/musca_b1.cmake`` file.
-
-To configure the CC312 at build time, a few cmake arguments can be specified.
-
-- ``CRYPTO_HW_ACCELERATOR``
-   - ``ON`` All possible mbedtls cryptographic operations will be offloaded to
-     the CC312 accelerator.
-   - ``OFF`` The cryptographic accelerator will be ignored and software
-     cryptography will be used.
-
-- ``CRYPTO_HW_ACCELERATOR_OTP_STATE``
-   - ``DISABLED`` The HW accelerator will not use any data from its onboard OTP
-     (One Time Programmable) memory.
-   - ``PROVISIONING`` This special mode is used to program cryptographic
-     material into the OTP memory. When the flag is set TF-M will not boot, but
-     will instead program the hardware unique key, the root of trust private key
-     and the attestation private key into the OTP memory. This mode is not
-     compatible with
-     ``CRYPTO_HW_ACCELERATOR=ON``.
-   - ``ENABLED`` The HW accelerator will use the previously programmed data as
-     the hardware unique key, the root of trust private key and the attestation
-     private key. This mode requires ``CRYPTO_HW_ACCELERATOR=ON``.
-
-
-.. Warning::
-
-   Provisioning **can not** be reversed, and data in the OTP memory **can not**
-   be changed once set.
-
 template
 --------
 This directory contains platform-independent dummy implementations of the
@@ -68,13 +74,8 @@ for initial testing of a platform port, or used as a basic template for a real
 implementation for a particular target. They **must not** be used in production
 systems.
 
-other
------
-This folder also contains stdout redirection to UART and
-``tfm_mbedcrypto_config.h`` for all the targets.
-
-drivers
-=======
+driver
+======
 This folder contains the headers with CMSIS compliant driver definitions that
 that TF-M project expects a target to provide.
 
@@ -91,7 +92,98 @@ This file is expected to define the following macros respectively.
 
 target
 ======
-This folder contains the files for individual target.
+This folder contains the files for individual target. For a buildable target,
+the directory path from the ``target`` directory to its ``CMakeLists.txt`` file
+is the argument that would be given to ``-DTFM_PLATFORM=``.
+
+The standard directory structure is as follows:
+
+- target
+   - <Vendor name>
+      - common
+      - <buildable target 1>
+      - <buildable target 2>
+      - <buildable target 3>
+
+Each buildable target must contain the cmake files mandated in the section
+below.
+
+The ``common`` directory is not required, but can be used to contain code that
+is used by multiple targets.
+
+There must not be any directories inside the vendor directory that is not either
+the ``common`` directory or a buildable platform, to avoid confusion about what
+directories are a valid ``TFM_PLATFORM``.
+
+Buildable target required cmake files
+-------------------------------------
+
+A buildable target must provide 3 mandatory cmake files. These files must all be
+placed in the root of the buildable target directory.
+
+preload.cmake
+^^^^^^^^^^^^^
+
+This file contains variable definitions that relate to the underlying hardware
+of the target.
+
+- ``TFM_SYSTEM_PROCESSOR``: The processor used by the target. The format is that
+  same as the format used in the ``-mcpu=`` argument of GNUARM or ARMCLANG. The
+  special ``+modifier`` syntax must not be used.
+
+- ``TFM_SYSTEM_ARCHITECTURE``: The architecture used by the target. The format is
+  that same as the format used in the ``-march=`` argument of GNUARM or ARMCLANG.
+  The special ``+modifier`` syntax must not be used.
+
+- ``TFM_SYSTEM_DSP``: Whether the target has the DSP feature of the given
+  ``TFM_SYSTEM_PROCESSOR``
+- ``CRYPTO_HW_ACCELERATOR_TYPE``: The type of cryptographic accelerator the
+  target has, if it has one. This maps exactly to the subdirectories of
+  ``platform/ext/accelerator``
+
+Other than these particular cmake variables, it is permissible for the
+``preload.cmake`` file to contain ``add_definitions`` statements, in order for
+set compile definitions that are global for the hardware. This is commonly used
+to select a particular set of code from a vendor SDK.
+
+It is not permissible to contains code other than the above in a
+``preload.cmake`` file, any general cmake code should be placed in
+``CMakeLists.txt`` and any configuration options should be contained in
+``config.cmake``
+
+config.cmake
+^^^^^^^^^^^^
+
+This file collects platform-specific overrides to the configuration options.
+This should only contain cmake options that are included in
+``config_default.cmake``. These options should be set as ``CACHE`` variables, as
+they are in ``config_default.cmake``.
+
+CMakeLists.txt
+^^^^^^^^^^^^^^
+
+This file should contain all other required cmake code for the platform. This
+primarily consists of the following:
+
+- Adding an include directory to the target ``platform_region_defs``, which
+  contains the headers ``flash_layout.h`` and ``region_defs.h``
+
+- Adding startup and scatter files to the ``tfm_s``, ``tfm_ns`` and ``bl2``
+  targets.
+
+- linking ``CMSIS_5_tfm_ns`` to the correct version of the CMSIS RTX libraries,
+  as defined in ``lib/ext/CMSIS_5/CMakeLists.txt``
+
+- Adding required source files, include directories and compile definitions to
+  the ``platform_s``, ``platform_ns`` and ``platform_bl2`` targets.
+
+preload_ns.cmake
+^^^^^^^^^^^^^^^^
+
+This optional 4th cmake file is required only if the target is utilising
+``TFM_MULTI_CORE_TOPOLOGY``. This file has the same format as ``preload.cmake``,
+but instead details the hardware of the NS core that is **not** running the main
+TF-M secure code.
 
 Flash layout header file
 ------------------------
@@ -218,10 +310,6 @@ The PS service requires the following definitions:
   data.
 - ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes.
-- ``PS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  PS area.
-- ``PS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  PS area.
 
 .. Note::
 
@@ -245,10 +333,6 @@ The ITS service requires the following definitions:
   store the data.
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes.
-- ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  ITS area.
-- ``ITS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  ITS area.
 
 .. Note::
 

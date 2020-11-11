@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Nordic Semiconductor ASA.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,6 +16,3 @@ set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 set(TFM_SYSTEM_DSP OFF)
 set(SECURE_UART1 ON)
-
-# Reload compiler to generate options from the CPU and architecture
-_compiler_reload()

@@ -188,10 +188,6 @@
 #define PS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
 #define PS_FLASH_PROGRAM_UNIT  (0x1)
-/* The maximum asset size to be stored in the PS area */
-#define PS_MAX_ASSET_SIZE      (2048)
-/* The maximum number of assets to be stored in the PS area */
-#define PS_NUM_ASSETS          (10)
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -213,15 +209,6 @@
 #define ITS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  (0x1)
-/* The maximum asset size to be stored in the ITS area */
-#ifdef PSA_API_TEST_CRYPTO
-/* Need larger asset size for PSA API Crypto compliance suite */
-#define ITS_MAX_ASSET_SIZE      (1229)
-#else
-#define ITS_MAX_ASSET_SIZE      (512)
-#endif
-/* The maximum number of assets to be stored in the ITS area */
-#define ITS_NUM_ASSETS          (10)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

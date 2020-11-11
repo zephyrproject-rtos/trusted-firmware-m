@@ -145,11 +145,15 @@ Platforms supported
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`_
         - `nRF5340 PDK (nordic_nrf/nrf5340pdk_nrf5340_cpuapp).
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
+        - `nRF5340 DK (nordic_nrf/nrf5340dk_nrf5340_cpuapp).
+          <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
 
     - Cortex-M23 system:
 
         - `FPGA image loaded on MPS2 board (AN519, AN539).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
+        - `M2351.
+          <https://www.nuvoton.com/products/iot-solution/iot-platform/numaker-pfm-m2351/>`_
 
     - Dual Core Cortex-M system:
 

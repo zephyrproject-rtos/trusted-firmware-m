@@ -65,18 +65,13 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
         spm_hal.c
+        tfm_hal_isolation.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#

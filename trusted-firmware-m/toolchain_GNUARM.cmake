@@ -5,16 +5,19 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_CMAKE_TOOLCHAIN_FILE_LOADED YES)
+# Don't load this file if it is specified as a cmake toolchain file
+if(NOT TFM_TOOLCHAIN_FILE)
+    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
+    return()
+endif()
 
 set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(CMAKE_C_COMPILER "${TFM_TOOLCHAIN_PATH}/bin/${TFM_TOOLCHAIN_PREFIX}-gcc")
-set(CMAKE_ASM_COMPILER "${TFM_TOOLCHAIN_PATH}/bin/${TFM_TOOLCHAIN_PREFIX}-gcc")
+set(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)
+set(CMAKE_ASM_COMPILER ${CROSS_COMPILE}-gcc)
 
-# Tell CMake not to try to link executables during its checks
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(LINKER_VENEER_OUTPUT_FLAG -Wl,--cmse-implib,--out-implib=)
+set(COMPILER_CMSE_FLAG -mcmse)
 
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
@@ -22,44 +25,9 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
-# Cmake makes it _really_ hard to dynamically set the cmake_system_processor
-# (used for setting mcpu flags etc). Instead we load
-# platform/ext/target/${TFM_PLATFORM}/preload.cmake, which should run this macro
-# to reload the compiler autoconfig. Note that it can't be loaded in this file
-# as cmake does not allow the use of command-line defined variables in toolchain
-# files and the path is platform dependent.
-macro(_compiler_reload)
-    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
-    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
-
-    if (DEFINED TFM_SYSTEM_FP)
-        if(TFM_SYSTEM_FP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding +fp
-            # will cause compile failures on systems that already have fp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR "+fp")
-        else()
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-        endif()
-    endif()
-
-    if (DEFINED TFM_SYSTEM_DSP)
-        if(TFM_SYSTEM_DSP)
-            # TODO Whether a system requires these extensions appears to depend
-            # on the system in question, with no real rule. Since adding +dsp
-            # will cause compile failures on systems that already have dsp
-            # enabled, this is commented out for now to avoid those failures. In
-            # future, better handling should be implemented.
-            # string(APPEND CMAKE_SYSTEM_PROCESSOR "+dsp")
-        else()
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
-        endif()
-    endif()
-
+macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
-    set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+
     add_compile_options(
         --specs=nano.specs
         -Wall
@@ -77,6 +45,11 @@ macro(_compiler_reload)
         -std=c99
         $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:-msoft-float>
     )
+endmacro()
+
+macro(tfm_toolchain_reset_linker_flags)
+    set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+
     add_link_options(
         --entry=Reset_Handler
         --specs=nano.specs
@@ -86,6 +59,23 @@ macro(_compiler_reload)
         LINKER:--no-wchar-size-warning
         LINKER:--print-memory-usage
     )
+endmacro()
+
+macro(tfm_toolchain_set_processor_arch)
+    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
+
+    if (DEFINED TFM_SYSTEM_DSP)
+        if(NOT TFM_SYSTEM_DSP)
+            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+        endif()
+    endif()
+endmacro()
+
+macro(tfm_toolchain_reload_compiler)
+    tfm_toolchain_set_processor_arch()
+    tfm_toolchain_reset_compiler_flags()
+    tfm_toolchain_reset_linker_flags()
 
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
@@ -99,8 +89,10 @@ macro(_compiler_reload)
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 endmacro()
 
-set(LINKER_VENEER_OUTPUT_FLAG -Wl,--cmse-implib,--out-implib=)
-set(COMPILER_CMSE_FLAG -mcmse)
+# Configure environment for the compiler setup run by cmake at the first
+# `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
+# done, all further compiler setup is done via tfm_toolchain_reload_compiler()
+tfm_toolchain_reload_compiler()
 
 macro(target_add_scatter_file target)
     target_link_options(${target}

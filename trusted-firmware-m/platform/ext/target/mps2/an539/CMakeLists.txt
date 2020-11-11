@@ -8,6 +8,9 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+
+message(DEPRECATION "${TFM_PLATFORM} has been marked for deprecation.")
+
 #========================= Platform region defs ===============================#
 
 target_include_directories(platform_region_defs
@@ -98,7 +101,9 @@ target_sources(platform_s
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         target_cfg.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -106,12 +111,6 @@ target_sources(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#

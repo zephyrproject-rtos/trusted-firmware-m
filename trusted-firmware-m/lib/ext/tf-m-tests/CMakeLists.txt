@@ -16,6 +16,7 @@ endif()
 if ("${TFM_TEST_REPO_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(tfm_test_repo
         GIT_REPOSITORY https://git.trustedfirmware.org/TF-M/tf-m-tests.git
+        GIT_TAG ${TFM_TEST_REPO_VERSION}
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
     )
@@ -37,4 +38,8 @@ endif()
 
 if (NOT TFM_TEST_PATH)
     set(TFM_TEST_PATH ${TFM_TEST_REPO_PATH}/test CACHE PATH "Path to TFM tests" FORCE)
+endif()
+
+if (NOT TFM_NS_LOG_PATH)
+    set(TFM_NS_LOG_PATH ${TFM_TEST_REPO_PATH}/log CACHE PATH "Path to NS log" FORCE)
 endif()

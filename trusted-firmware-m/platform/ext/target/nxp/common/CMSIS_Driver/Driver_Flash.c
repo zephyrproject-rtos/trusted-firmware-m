@@ -26,7 +26,6 @@
 #include "platform_base_address.h"
 #include "flash_layout.h"
 #include "fsl_iap.h"
-#include "log/tfm_log.h"
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)

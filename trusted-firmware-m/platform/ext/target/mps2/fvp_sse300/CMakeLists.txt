@@ -18,8 +18,19 @@ target_include_directories(platform_region_defs
 #========================= Platform common defs ===============================#
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    message(FATAL_ERROR "gcc is currently not supported on the mps/fvp_sse300 due to a lack of scatter files")
+    message(FATAL_ERROR "GCC is currently not supported on the mps2/fvp_sse300 because TFM build system does not support the Coretex-M55 with GNUARM")
 endif()
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL IAR)
+    message(FATAL_ERROR "IAR is currently not supported on the mps2/fvp_sse300 due to a lack of scatter files")
+endif()
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
+    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.14")
+        message(FATAL_ERROR "CPU (Cortex-M55) is only supported in ARMCLANG version 6.14 or newer.")
+    endif()
+endif()
+
 
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
@@ -48,7 +59,7 @@ if(NS)
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            CMSIS_5_RTX_V8MBN
+            CMSIS_5_RTX_V8MMN
     )
 endif()
 
@@ -97,9 +108,11 @@ target_sources(platform_s
         native_drivers/mpc_sie_drv.c
         native_drivers/ppc_sse300_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         native_drivers/mpu_armv8m_drv.c
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_SSE300_PPC.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -112,12 +125,6 @@ target_link_libraries(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#

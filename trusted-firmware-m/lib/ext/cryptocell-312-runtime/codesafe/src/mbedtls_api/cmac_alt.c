@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -50,7 +50,7 @@
 #include "cc_aes_error.h"
 #include "mbedtls_common.h"
 #include "mbedtls/cmac.h"
-#include "memory_buffer_alloc.h"
+#include "mbedtls/memory_buffer_alloc.h"
 
 
 /**

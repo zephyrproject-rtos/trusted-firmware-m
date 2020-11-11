@@ -66,6 +66,7 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/mpu_armv8m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_flash.c
@@ -80,7 +81,12 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_gtzc.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system>
 )
 
@@ -97,12 +103,6 @@ target_compile_options(platform_s
 target_sources(tfm_s
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -189,6 +189,10 @@ install(FILES
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
     set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/gcc/preprocess.sh)
+elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
+    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/armclang/preprocess.sh)
+else()
+    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/iar/preprocess.sh)
 endif()
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
@@ -196,9 +200,9 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_UPDATE.sh
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/postbuild.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-         DESTINATION ${CMAKE_BINARY_DIR}/ )
+         DESTINATION ${CMAKE_BINARY_DIR} )
 
-if (TEST_S OR TEST_NS)
+if (${TEST_S} OR ${TEST_NS})
     #the define FLASH_LAYOUT_FOR_TEST
     #increase SECURE and NON SECURE IMAGE and modify the  content of  low_level_device.c from BL2 (low_level_flash.c)
     set(FLAGS_FOR_BL2_PREPROCESSING

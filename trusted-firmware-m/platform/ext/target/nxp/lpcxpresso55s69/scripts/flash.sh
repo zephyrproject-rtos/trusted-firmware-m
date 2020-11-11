@@ -10,7 +10,12 @@ FILE=flash.jlink
 if test -f "$FILE"; then
     rm $FILE
 fi
-echo "loadfile tfm_s.hex
-loadfile tfm_ns.hex
+echo "r
+erase
+loadfile bin/bl2.hex
+loadfile bin/tfm_s_signed.bin 0x8000
+loadfile bin/tfm_ns_signed.bin 0x30000
+r
+go
 exit" >> $FILE
-jlinkexe -device lpc55s69 -if swd -speed 2000 -autoconnect 1 -commanderscript $FILE
+JLinkExe -device lpc55s69 -if swd -speed 2000 -autoconnect 1 -commanderscript $FILE

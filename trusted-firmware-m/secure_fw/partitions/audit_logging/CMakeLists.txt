@@ -14,7 +14,7 @@ if(TFM_PSA_API)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_partition_audit STATIC)
@@ -27,13 +27,24 @@ target_sources(tfm_partition_audit
 target_include_directories(tfm_partition_audit
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/audit_logging
 )
 
 target_link_libraries(tfm_partition_audit
-    PRIVATE 
+    PRIVATE
         platform_s
         tfm_secure_api
         psa_interface
+)
+
+########################### Audit defs #########################################
+
+add_library(tfm_audit_logging_defs INTERFACE)
+
+target_include_directories(tfm_audit_logging_defs
+    INTERFACE
+        .
 )
 
 ############################ Secure API ########################################

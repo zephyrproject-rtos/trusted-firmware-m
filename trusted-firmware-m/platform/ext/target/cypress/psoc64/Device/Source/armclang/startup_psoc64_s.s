@@ -30,6 +30,9 @@
 ; Address of the NMI handler in ROM
 CY_NMI_HANLDER_ADDR    EQU    0x0000000D
 
+; Address of CPU VTOR register
+CY_CPU_VTOR_ADDR       EQU    0xE000ED08
+
                 PRESERVE8
 
                 IMPORT |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|
@@ -99,6 +102,35 @@ Reset_Handler   PROC
                 IMPORT  SystemInit
                 IMPORT  __main
                 CPSID   i              ; Disable IRQs
+
+                EXTERN RAM_VECTORS_SUPPORT
+                IF :DEF:RAM_VECTORS_SUPPORT
+                ; Copy vectors from ROM to RAM
+                LDR r1, =__Vectors
+                LDR r0, =__ramVectors
+                LDR r2, =__Vectors_Size
+Vectors_Copy
+                LDR r3, [r1]
+                STR r3, [r0]
+                ADDS r0, r0, #4
+                ADDS r1, r1, #4
+                SUBS r2, r2, #1
+                CMP r2, #0
+                BNE Vectors_Copy
+
+                ; Update Vector Table Offset Register. */
+                LDR r0, =__ramVectors
+
+                ELSE
+
+                LDR     R0, =__Vectors
+
+                ENDIF
+
+                LDR r1, =CY_CPU_VTOR_ADDR
+                STR r0, [r1]
+                DSB 0xF
+
                 LDR     R0, =SystemInit
                 BLX     R0
                 MOV     R3, SP

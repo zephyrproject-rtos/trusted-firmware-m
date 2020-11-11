@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -21,6 +21,7 @@
    startup_psoc6_02_cm0plus.S*/
 
 #include "region_defs.h"
+#include "tfm_plat_config.h"
 
     /* Address of the NMI handler */
     #define CY_NMI_HANLDER_ADDR         0x0000000D
@@ -261,10 +262,12 @@ Reset_Handler:
 #ifdef RAM_VECTORS_SUPPORT
     /* Update Vector Table Offset Register. */
     ldr r0, =__ramVectors
+#else
+    ldr r0, =__Vectors
+#endif
     ldr r1, =CY_CPU_VTOR_ADDR
     str r0, [r1]
     dsb 0xF
-#endif
 
 #ifndef __NO_SYSTEM_INIT
     bl    SystemInit

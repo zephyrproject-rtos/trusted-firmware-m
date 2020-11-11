@@ -9,7 +9,7 @@
 #include "flash_layout.h"
 #include "tfm_hal_its.h"
 
-__WEAK void tfm_hal_its_fs_info(uint32_t *flash_area_addr, uint32_t *flash_area_size)
+__WEAK void tfm_hal_its_fs_info(uint32_t *flash_area_addr, size_t *flash_area_size)
 {
     if (!flash_area_addr || !flash_area_size) {
         return;

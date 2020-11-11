@@ -7,28 +7,13 @@
 set -e
 
 # Cleanup previous build artifacts
-rm -rf CMakeCache.txt CMakeFiles cmake_install.cmake install bl2 secure_fw app unit_test test
-
-# Set the readlink binary name:
-if [ "$(uname)" == "Darwin" ]; then
-    # For OS X this should be be 'greadlink' (brew install coreutils)
-    readlink=greadlink
-else
-    # For Linux this should be 'readlink'
-    readlink=readlink
-fi
+find . \! -path './lib*' \! -name '*.sh' -delete
 
 # Generate the S and NS makefiles
 cmake -DTFM_PLATFORM=nxp/lpcxpresso55s69 \
-      -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
-      -DCMAKE_BUILD_TYPE=Debug \
-      ../
+      -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+      -DCMAKE_BUILD_TYPE=Relwithdebinfo \
+      -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=1 ../
 
 # Build the binaries
 make install
-
-# Convert S and NS binaries to .hex file
-arm-none-eabi-objcopy -S --gap-fill 0xff -O ihex \
-        install/outputs/LPC55S69/tfm_s.axf tfm_s.hex
-arm-none-eabi-objcopy -S --gap-fill 0xff -O ihex \
-        install/outputs/LPC55S69/tfm_ns.axf tfm_ns.hex

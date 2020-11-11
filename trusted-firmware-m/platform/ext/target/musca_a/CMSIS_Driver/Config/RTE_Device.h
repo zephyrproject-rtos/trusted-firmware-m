@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define   RTE_USART0                      1
+#define   RTE_USART0                      0
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]

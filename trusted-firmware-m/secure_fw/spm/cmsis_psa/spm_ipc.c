@@ -17,13 +17,15 @@
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
+#include "tfm_hal_defs.h"
+#include "tfm_hal_isolation.h"
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_core_mem_check.h"
 #include "tfm_list.h"
+#include "tfm_hal_isolation.h"
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
@@ -595,7 +597,8 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged)
 {
-    enum tfm_status_e err;
+    enum tfm_hal_status_t err;
+    uint32_t attr = 0;
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {
@@ -611,13 +614,24 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     }
 
     if (access == TFM_MEMORY_ACCESS_RW) {
-        err = tfm_core_has_write_access_to_region(buffer, len, ns_caller,
-                                                  privileged);
+        attr |= (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE);
     } else {
-        err = tfm_core_has_read_access_to_region(buffer, len, ns_caller,
-                                                 privileged);
+        attr |= TFM_HAL_ACCESS_READABLE;
     }
-    if (err == TFM_SUCCESS) {
+
+    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+        attr |= TFM_HAL_ACCESS_UNPRIVILEGED;
+    } else {
+        attr &= ~TFM_HAL_ACCESS_UNPRIVILEGED;
+    }
+
+    if (ns_caller) {
+        attr |= TFM_HAL_ACCESS_NS;
+    }
+
+    err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
+
+    if (err == TFM_HAL_SUCCESS) {
         return IPC_SUCCESS;
     }
 
@@ -741,7 +755,7 @@ uint32_t tfm_spm_init(void)
 
 void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
-#if TFM_LVL == 2
+#if TFM_LVL != 1
     struct partition_t *p_next_partition;
     uint32_t is_privileged;
 #endif
@@ -749,7 +763,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
     struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr_thread();
 
     if (pth_next != NULL && pth_curr != pth_next) {
-#if TFM_LVL == 2
+#if TFM_LVL != 1
         p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
                                                  struct partition_t,
                                                  sp_thread);
@@ -762,7 +776,23 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
         }
 
         tfm_spm_partition_change_privilege(is_privileged);
-#endif
+#if TFM_LVL == 3
+        /*
+         * FIXME: To implement isolations among partitions in isolation level 3,
+         * each partition needs to run in unprivileged mode. Currently some
+         * PRoTs cannot work in unprivileged mode, make them privileged now.
+         */
+        if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+            /* FIXME: only MPU-based implementations are supported currently */
+            if (tfm_hal_mpu_update_partition_boundary(
+                                      p_next_partition->memory_data->data_start,
+                                      p_next_partition->memory_data->data_limit)
+                                                           != TFM_HAL_SUCCESS) {
+                tfm_core_panic();
+            }
+        }
+#endif /* TFM_LVL == 3 */
+#endif /* TFM_LVL != 1 */
 
         tfm_core_thrd_switch_context(p_actx, pth_curr, pth_next);
     }
@@ -941,7 +971,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
          */
         stacked_ctx_pos = (uintptr_t)p_ctx +
                           sizeof(struct tfm_state_context_t) +
-                          TFM_VENEER_STACK_GUARD_SIZE;
+                          TFM_STACK_SEALED_SIZE;
 
         if (is_stack_alloc_fp_space(exc_return)) {
 #if defined (__FPU_USED) && (__FPU_USED == 1U)

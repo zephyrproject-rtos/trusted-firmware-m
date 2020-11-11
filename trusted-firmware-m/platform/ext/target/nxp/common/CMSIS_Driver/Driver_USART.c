@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2020 Linaro. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -183,12 +184,14 @@ static int32_t ARM_USART0_Transfer(const void *data_out, void *data_in,
 
 static uint32_t ARM_USART0_GetTxCount(void)
 {
-    return ARM_DRIVER_ERROR_UNSUPPORTED;
+    /* This operation is not supported. */
+    return ARM_DRIVER_OK;
 }
 
 static uint32_t ARM_USART0_GetRxCount(void)
 {
-    return ARM_DRIVER_ERROR_UNSUPPORTED;
+    /* This operation is not supported. */
+    return ARM_DRIVER_OK;
 }
 
 static int32_t ARM_USART0_Control(uint32_t control, uint32_t arg)

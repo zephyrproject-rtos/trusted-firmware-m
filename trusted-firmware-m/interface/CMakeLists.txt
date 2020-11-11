@@ -5,13 +5,14 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+    tfm_toolchain_reload_compiler()
     # The platform target is created in this directory/file so that it has the
     # same settings as the main ns target.
     add_library(platform_ns STATIC)
@@ -46,6 +47,7 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
+        $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
 )
 
 ###################### PSA api (S lib) #########################################
@@ -66,7 +68,6 @@ target_sources(psa_api_ns
     PRIVATE
         $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_svc_handler.c>
         $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_api.c>
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
 
 if (${TFM_PSA_API})

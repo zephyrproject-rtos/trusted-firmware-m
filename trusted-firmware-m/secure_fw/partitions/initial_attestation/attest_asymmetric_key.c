@@ -46,7 +46,7 @@ static psa_key_handle_t attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
  */
 static uint8_t  attestation_public_key[ECC_P256_PUBLIC_KEY_SIZE]; /* 65bytes */
 static size_t   attestation_public_key_len = 0;
-static psa_ecc_curve_t attestation_key_curve;
+static psa_ecc_family_t attestation_key_curve;
 
 #ifdef INCLUDE_COSE_KEY_ID
 static uint8_t attestation_key_id[PSA_HASH_SIZE(PSA_ALG_SHA_256)]; /* 32bytes */
@@ -60,7 +60,7 @@ enum psa_attest_err_t
 attest_register_initial_attestation_key()
 {
     enum tfm_plat_err_t plat_res;
-    psa_ecc_curve_t psa_curve;
+    psa_ecc_family_t psa_curve;
     struct ecc_key_t attest_key = {0};
     uint8_t key_buf[3 * ECC_P256_COORD_SIZE]; /* priv + x_coord + y_coord */
     psa_key_handle_t key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
@@ -147,7 +147,7 @@ attest_get_signing_key_handle(psa_key_handle_t *handle)
 enum psa_attest_err_t
 attest_get_initial_attestation_public_key(uint8_t **public_key,
                                           size_t *public_key_len,
-                                          psa_ecc_curve_t *public_key_curve)
+                                          psa_ecc_family_t *public_key_curve)
 {
 
     /* If the public key length is 0 then it hasn't been loaded */
@@ -173,7 +173,7 @@ static enum psa_attest_err_t attest_calc_instance_id(void)
     enum psa_attest_err_t attest_res;
     uint8_t *public_key;
     size_t key_len;
-    psa_ecc_curve_t psa_curve;
+    psa_ecc_family_t psa_curve;
     psa_hash_operation_t hash = psa_hash_operation_init();
 
     attest_res = attest_get_initial_attestation_public_key(&public_key,
@@ -240,13 +240,13 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
  * \brief     Map PSA curve types to the curve type defined by RFC 8152
  *            chapter 13.1.
  *
- * \param[in]  psa_curve  PSA curve type definition \ref psa_ecc_curve_t.
+ * \param[in]  psa_curve  PSA curve type definition \ref psa_ecc_family_t.
  *
  * \return    Return COSE curve type. If mapping is not possible then return
  *            with -1.
  */
 static inline int32_t
-attest_map_psa_ecc_curve_to_cose_ecc_curve(psa_ecc_curve_t psa_curve)
+attest_map_psa_ecc_curve_to_cose_ecc_curve(psa_ecc_family_t psa_curve)
 {
     int32_t cose_curve;
 
@@ -284,7 +284,7 @@ attest_map_psa_ecc_curve_to_cose_ecc_curve(psa_ecc_curve_t psa_curve)
  * expressed as an X and Y coordinate.
  */
 static enum psa_attest_err_t
-attest_encode_key_to_cose_key(psa_ecc_curve_t         psa_ecc_curve,
+attest_encode_key_to_cose_key(psa_ecc_family_t        psa_ecc_curve,
                               struct q_useful_buf_c   attest_public_key,
                               struct q_useful_buf     buffer_for_cose_key,
                               struct q_useful_buf_c  *cose_key)
@@ -373,7 +373,7 @@ attest_encode_key_to_cose_key(psa_ecc_curve_t         psa_ecc_curve,
  * \return This returns one of the error codes defined by \ref psa_attest_err_t.
  */
 enum psa_attest_err_t
-attest_get_cose_key_id(psa_ecc_curve_t         psa_ecc_curve,
+attest_get_cose_key_id(psa_ecc_family_t        psa_ecc_curve,
                        struct q_useful_buf_c   attest_public_key,
                        struct q_useful_buf     buffer_for_attest_key_id,
                        struct q_useful_buf_c  *attest_key_id)
