@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2020 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,39 +22,6 @@
 
 #define TFM_DRIVER_STDIO    Driver_USART0
 #define NS_DRIVER_STDIO     Driver_USART0
-
-/*
-// <o>Floating Point Unit usage
-//     <0=> Secure state only
-//     <3=> Secure and Non-Secure state
-//   <i> Value for SCB->NSACR register bits CP10, CP11
-*/
-#define SCB_NSACR_CP10_11_VAL       3
-
-/*
-// <o>Treat floating-point registers as Secure
-//     <0=> Disabled
-//     <1=> Enabled
-//   <i> Value for FPU->FPCCR register bit TS
-*/
-#define FPU_FPCCR_TS_VAL            0
-
-/*
-// <o>Clear on return (CLRONRET) accessibility
-//     <0=> Secure and Non-Secure state
-//     <1=> Secure state only
-//   <i> Value for FPU->FPCCR register bit CLRONRETS
-*/
-#define FPU_FPCCR_CLRONRETS_VAL     0
-
-/*
-// <o>Clear floating-point caller saved registers on exception return
-//     <0=> Disabled
-//     <1=> Enabled
-//   <i> Value for FPU->FPCCR register bit CLRONRET
-*/
-#define FPU_FPCCR_CLRONRET_VAL      1
-
 
 /**
  * \brief Store the addresses of memory regions

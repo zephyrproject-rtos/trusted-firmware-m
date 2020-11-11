@@ -24,6 +24,13 @@ install(TARGETS psa_api_ns
         DESTINATION ${CMAKE_BINARY_DIR}/install/export/tfm/lib
 )
 
+# export veneer lib
+if (NOT TFM_MULTI_CORE_TOPOLOGY)
+    install(TARGETS tfm_s_veneers
+            ARCHIVE
+            DESTINATION ${CMAKE_BINARY_DIR}/install/export/tfm/lib)
+endif()
+
 ####################### export headers #########################################
 
 install(FILES       ${INTERFACE_INC_DIR}/psa/client.h

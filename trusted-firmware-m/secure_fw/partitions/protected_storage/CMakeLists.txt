@@ -9,7 +9,7 @@ if (NOT TFM_PARTITION_PROTECTED_STORAGE)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_partition_ps STATIC)
@@ -17,6 +17,8 @@ add_library(tfm_partition_ps STATIC)
 target_include_directories(tfm_partition_ps
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage
 )
 
 target_sources(tfm_partition_ps
@@ -28,7 +30,9 @@ target_sources(tfm_partition_ps
         ps_utils.c
         $<$<BOOL:${PS_ENCRYPTION}>:crypto/ps_crypto_interface.c>
         $<$<BOOL:${PS_ENCRYPTION}>:ps_encrypted_object.c>
-        $<$<NOT:$<BOOL:${PS_TEST_NV_COUNTERS}>>:nv_counters/ps_nv_counters.c>
+        # The test_ps_nv_counters.c will be used instead, when either NS and S
+        # test is ON and PS_TEST_NV_COUNTERS ON
+        $<$<NOT:$<AND:$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>,$<BOOL:${PS_TEST_NV_COUNTERS}>>>:nv_counters/ps_nv_counters.c>
 )
 
 target_link_libraries(tfm_partition_ps

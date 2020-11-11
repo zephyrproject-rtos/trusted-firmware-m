@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2020 Linaro. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +19,37 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on LPC55S69 without BL2:
+/* Flash layout on LPC55S69 with BL2 (multiple image boot):
  *
- * 0x0000_0000 Primary image area(576 kB):
- *    0x0000_0000 Secure     image primary
- *    0x0005_0000 Non-secure image primary
- * 0x0009_0000 Secondary image area (0 KB):
- * 0x0009_0000 Protected Storage Area (16 KB)
- * 0x0009_4000 Internal Trusted Storage Area (8 KB)
- * 0x0009_6000 NV counters area (512 B)
- * 0x0006_6200 Unused
+ * 0x0000_0000 BL2 - MCUBoot (32 KB)
+ * 0x0000_8000 Secure image     primary slot (160 KB)
+ * 0x0003_0000 Non-secure image primary slot (96 KB)
+ * 0x0004_8000 Secure image     secondary slot (160 KB)
+ * 0x0007_0000 Non-secure image secondary slot (96 KB)
+ * 0x0008_8000 Protected Storage Area (10 KB)
+ * 0x0008_A800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_C800 NV counters area (512 B)
+ * 0x0008_CA00 Unused (45.5 KB)
+ *
+ * Flash layout on LPC55S69 with BL2 (single image boot):
+ *
+ * 0x0000_0000 BL2 - MCUBoot (32 KB)
+ * 0x0000_8000 Primary image area   (Secure + Non-secure images) (256 KB)
+ * 0x0004_8000 Secondary image area (Secure + Non-secure images) (256 KB)
+ * 0x0008_8000 Protected Storage Area (10 KB)
+ * 0x0008_A800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_C800 NV counters area (512 B)
+ * 0x0008_CA00 Unused (45.5 KB)
+ *
+ * Flash layout on LPC55S69 without BL2:
+ *
+ * 0x0000_0000 Secure + Non-secure image area (512 KB):
+ *    0x0000_0000 Secure     image (256 KB)
+ *    0x0004_0000 Non-secure image (256 KB)
+ * 0x0008_0000 Protected Storage Area (10 KB)
+ * 0x0008_2800 Internal Trusted Storage Area (8 KB)
+ * 0x0008_4800 NV counters area (512 B)
+ * 0x0008_4A00 Unused (77.5 KB)
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -38,21 +60,26 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE                (0x40000)       /* S partition: 256 kB*/
-#define FLASH_NS_PARTITION_SIZE               (0x40000)       /* NS partition: 256 kB*/
+#ifdef BL2
+#define FLASH_S_PARTITION_SIZE          (0x28000) /* S partition: 160 KB */
+#define FLASH_NS_PARTITION_SIZE         (0x18000) /* NS partition: 96 KB */
+#else
+#define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition:  256 KB*/
+#define FLASH_NS_PARTITION_SIZE         (0x40000) /* NS partition: 256 KB*/
+#endif /* BL2 */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
                                          FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the embedded flash hardware (erase/program) */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE        (512)           /* 512 B. Flash memory program/erase operations have a page granularity. */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (512)        /* 512 B. Flash memory program/erase operations have a page granularity. */
 
-/* FLASH size */
-#define FLASH_TOTAL_SIZE                    (0x00098000)    /* 608 kB. The last 17 pages (10KB) are reserved on the 640KB flash. Sub-regiuon is 32KB, so avalble for application is 608KB. */
+/* Flash size, same as FLASH0_SIZE */
+#define FLASH_TOTAL_SIZE                (0x00098000) /* 608 KB. The last 17 pages (10 KB) are reserved on the 640 KB flash. Sub-region is 32KB, so available for application is 608 KB. */
 
 /* Flash layout info for BL2 bootloader */
-#define FLASH_BASE_ADDRESS                  (0x00000000)
+#define FLASH_BASE_ADDRESS              (0x00000000)
 
 #ifdef BL2
 /* Offset and size definitions of the flash partitions that are handled by the
@@ -61,7 +88,7 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (0x20000) /* 128 KB */
+#define FLASH_AREA_BL2_SIZE        (0x8000) /* 32 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */
@@ -74,8 +101,8 @@
 #define FLASH_AREA_2_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1.
+/* Not used (scratch area), the 'Swap' firmware upgrade operation is not
+ * supported on LPC55S69.
  */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
@@ -101,8 +128,8 @@
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1.
+/* Not used (scratch area), the 'Swap' firmware upgrade operation is not
+ * supported on LPC55S69.
  */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
@@ -114,15 +141,14 @@
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
 
-/* Not used, only the Non-swapping firmware upgrade operation
- * is supported on Musca-B1. The maximum number of status entries
- * supported by the bootloader.
+/* Not used, the 'Swap' firmware upgrade operation is not supported on LPC55S69.
+ * The maximum number of status entries supported by the bootloader.
  */
-#define MCUBOOT_STATUS_MAX_ENTRIES      (0)
+#define MCUBOOT_STATUS_MAX_ENTRIES (0)
 
-#else
+#else /* NO BL2 */
 
-/* Secure + Non-secure image primary slot */
+/* Secure + Non-secure image slot */
 #define FLASH_AREA_0_ID            (1)
 #define FLASH_AREA_0_OFFSET        (0x0)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
@@ -138,14 +164,14 @@
  * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes
  * to these addresses are redirected to Code SRAM by Driver_Flash.c.
  */
-#define FLASH_PS_AREA_OFFSET           (FLASH_AREA_SCRATCH_OFFSET + \
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_PS_AREA_SIZE             (0x2000)   /* 8 KB */
+#define FLASH_PS_AREA_SIZE              (0x2800)   /* 10 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
-#define FLASH_ITS_AREA_SIZE             (0x800)   /* 2 KB */
+#define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
@@ -184,11 +210,6 @@
 /* Specifies the smallest flash programmable unit in bytes */
 #define PS_FLASH_PROGRAM_UNIT  FLASH_AREA_IMAGE_SECTOR_SIZE
 
-/* The maximum asset size to be stored in the PS area */
-#define PS_MAX_ASSET_SIZE      (2048)
-/* The maximum number of assets to be stored in the PS area */
-#define PS_NUM_ASSETS          (5)
-
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
@@ -206,19 +227,9 @@
 #define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
 #define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
 /* Number of ITS_SECTOR_SIZE per block */
-#define ITS_SECTORS_PER_BLOCK   (0x2)
+#define ITS_SECTORS_PER_BLOCK   (0x8)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  FLASH_AREA_IMAGE_SECTOR_SIZE
-
-/* The maximum asset size to be stored in the ITS area */
-#ifdef PSA_API_TEST_CRYPTO
-/* Need larger asset size for PSA API Crypto compliance suite */
-#define ITS_MAX_ASSET_SIZE      (1229)
-#else
-#define ITS_MAX_ASSET_SIZE      (512)
-#endif
-/* The maximum number of assets to be stored in the ITS area */
-#define ITS_NUM_ASSETS          (5)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

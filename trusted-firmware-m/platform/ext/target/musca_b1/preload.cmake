@@ -14,8 +14,6 @@
 set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 
-# Reload compiler to generate options from the CPU and architecture
-_compiler_reload()
 
 # The MUSCA_S1 has a CryptoCell-312 as an accelerator.
 set(CRYPTO_HW_ACCELERATOR_TYPE cc312)

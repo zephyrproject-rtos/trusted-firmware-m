@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Linaro. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -7,6 +8,12 @@
 
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
+if (BL2 AND ${BUILD_TYPE_LOWER} STREQUAL "debug")
+    Message(FATAL_ERROR "If BL2 is enabled, \"${CMAKE_BUILD_TYPE}\" build type cannot be selected as it is currently not \
+                         supported on ${TFM_PLATFORM}. For more information please refer to the platform's README file.")
+endif()
 
 #========================= Platform region defs ===============================#
 
@@ -17,6 +24,7 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
+# Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_s.S>
@@ -43,6 +51,16 @@ if(NS)
     )
 endif()
 
+if(BL2)
+    target_sources(bl2
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_bl2.S>
+    )
+    target_add_scatter_file(bl2
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/LPC55S69_cm33_core0_bl2.ld>
+    )
+endif()
+
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
@@ -53,23 +71,22 @@ target_include_directories(platform_s
         Device/Config
         Device/Include
         partition
-        ${PLATFORM_DIR}/ext/common
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/lists
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/serial_manager
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/uart
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/drivers
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/debug_console
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/str
-        ${PLATFORM_DIR}/include
 )
 
 target_sources(platform_s
     PRIVATE
         target_cfg.c
         spm_hal.c
+        tfm_hal_isolation.c
         Native_Driver/project_template/s/board.c
         Native_Driver/project_template/s/clock_config.c
-        Native_Driver/project_template/s/hardware_init.c
         Native_Driver/project_template/s/peripherals.c
         Native_Driver/project_template/s/pin_mux.c
         Native_Driver/system_LPC55S69_cm33_core0.c
@@ -96,27 +113,7 @@ target_sources(platform_s
         ../common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ../common/Native_Driver/utilities/str/fsl_str.c
         ../common/Native_Driver/mpu_armv8m_drv.c
-        ../common/Native_Driver/components/lists/generic_list.c
-        ../common/Native_Driver/components/serial_manager/serial_manager.c
-        ../common/Native_Driver/components/serial_manager/serial_port_uart.c
-        ../common/Native_Driver/components/uart/usart_adapter.c
-        ../common/Native_Driver/drivers/fsl_casper.c
-        ../common/Native_Driver/drivers/fsl_clock.c
-        ../common/Native_Driver/drivers/fsl_common.c
-        ../common/Native_Driver/drivers/fsl_ctimer.c
-        ../common/Native_Driver/drivers/fsl_flexcomm.c
-        ../common/Native_Driver/drivers/fsl_gpio.c
-        ../common/Native_Driver/drivers/fsl_hashcrypt.c
-        ../common/Native_Driver/drivers/fsl_iap.c
-        ../common/Native_Driver/drivers/fsl_power.c
-        ../common/Native_Driver/drivers/fsl_reset.c
-        ../common/Native_Driver/drivers/fsl_rng.c
-        ../common/Native_Driver/drivers/fsl_usart.c
-        ../common/Native_Driver/utilities/fsl_assert.c
-        ../common/Native_Driver/utilities/fsl_sbrk.c
-        ../common/Native_Driver/utilities/debug_console/fsl_debug_console.c
-        ../common/Native_Driver/utilities/str/fsl_str.c
-        ../lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -126,13 +123,32 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
+# GNU ld has some strange behaviour to do with weak functions, and does not deal
+# well with strong functions in static libraries overriding weak functions in
+# object files. For this reason, the file hardware_init is linked directly to
+# the s binary as an object file. This issue does not affect armclang, but the
+# fix is compatible.
+target_sources(tfm_s
+    PRIVATE
+        Native_Driver/project_template/s/hardware_init.c
 )
 
 #========================= Platform Non-Secure ================================#
+
+target_include_directories(platform_ns
+    PUBLIC
+        .
+        Device/Config
+        Device/Include
+        Native_Driver
+        Native_Driver/project_template/ns
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/lists
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/serial_manager
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/uart
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/drivers
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/debug_console
+        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/str
+)
 
 target_sources(platform_ns
     PRIVATE
@@ -167,18 +183,60 @@ target_sources(platform_ns
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
-target_include_directories(platform_ns
-    PUBLIC
-        .
-        Device/Config
-        Device/Include
-        Native_Driver
-        Native_Driver/project_template/ns
-        ${PLATFORM_DIR}/ext/common
-        ${PLATFORM_DIR}/ext/driver
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/uart
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/serial_manager
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/drivers
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/debug_console
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/str
-)
+#========================= Platform BL2 =======================================#
+if(BL2)
+
+    target_include_directories(platform_bl2
+        PUBLIC
+            partition
+            Device/Include
+            Native_Driver
+            Native_Driver/project_template/bl2
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/drivers
+        PRIVATE
+            .
+            Device/Config
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/serial_manager
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/components/uart
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/debug_console
+            ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver/utilities/str
+    )
+    target_sources(platform_bl2
+        PRIVATE
+            boot_hal.c
+            Native_Driver/project_template/bl2/board.c
+            Native_Driver/project_template/bl2/clock_config.c
+            Native_Driver/project_template/bl2/pin_mux.c
+            Native_Driver/system_LPC55S69_cm33_core0.c
+            ../common/CMSIS_Driver/Driver_Flash.c
+            ../common/CMSIS_Driver/Driver_USART.c
+            ../common/Native_Driver/components/serial_manager/serial_manager.c
+            ../common/Native_Driver/components/serial_manager/serial_port_uart.c
+            ../common/Native_Driver/components/uart/usart_adapter.c
+            ../common/Native_Driver/drivers/fsl_casper.c
+            ../common/Native_Driver/drivers/fsl_clock.c
+            ../common/Native_Driver/drivers/fsl_common.c
+            ../common/Native_Driver/drivers/fsl_flexcomm.c
+            ../common/Native_Driver/drivers/fsl_hashcrypt.c
+            ../common/Native_Driver/drivers/fsl_iap.c
+            ../common/Native_Driver/drivers/fsl_power.c
+            ../common/Native_Driver/drivers/fsl_reset.c
+            ../common/Native_Driver/drivers/fsl_rng.c
+            ../common/Native_Driver/drivers/fsl_usart.c
+            ../common/Native_Driver/utilities/fsl_assert.c
+            ../common/Native_Driver/utilities/fsl_sbrk.c
+            ../common/Native_Driver/utilities/debug_console/fsl_debug_console.c
+            ../common/Native_Driver/utilities/str/fsl_str.c
+    )
+
+    # GNU ld has some strange behaviour to do with weak functions, and does not deal
+    # well with strong functions in static libraries overriding weak functions in
+    # object files. For this reason, the file hardware_init is linked directly to
+    # the s binary as an object file. This issue does not affect armclang, but the
+    # fix is compatible.
+    target_sources(bl2
+    PRIVATE
+        Native_Driver/project_template/bl2/hardware_init.c
+    )
+endif()

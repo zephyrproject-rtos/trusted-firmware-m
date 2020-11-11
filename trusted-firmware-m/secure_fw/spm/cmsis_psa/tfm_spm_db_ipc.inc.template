@@ -60,16 +60,12 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$RO$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, $$RO$$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$RW$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$RW$$Limit);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Base);
-REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Limit);
 REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base);
 REGION_DECLARE(Image$$, {{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit);
+#if TFM_LVL == 3
+REGION_DECLARE(Image$$, PT_{{manifest.manifest.name}}_PRIVATE, _DATA_START$$Base);
+REGION_DECLARE(Image$$, PT_{{manifest.manifest.name}}_PRIVATE, _DATA_END$$Base);
+#endif
     {% if manifest.attr.conditional %}
 #endif /* {{manifest.attr.conditional}} */
     {% endif %}
@@ -211,23 +207,22 @@ const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
 const struct tfm_spm_partition_memory_data_t memory_data_list[] =
 {
     {
+#if TFM_LVL == 3
+        .data_start           = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+        .data_limit           = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
+#endif
         .stack_bottom         = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
         .stack_top            = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
-        .rw_start             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
     },
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
     {% endif %}
     {{'{'}}
-        .code_start           = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$Base),
-        .code_limit           = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$Limit),
-        .ro_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$RO$$Base),
-        .ro_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, $$RO$$Limit),
-        .rw_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$RW$$Base),
-        .rw_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$RW$$Limit),
-        .zi_start             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Base),
-        .zi_limit             = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _DATA$$ZI$$Limit),
+#if TFM_LVL == 3
+        .data_start           = PART_REGION_ADDR(PT_{{manifest.manifest.name}}_PRIVATE, _DATA_START$$Base),
+        .data_limit           = PART_REGION_ADDR(PT_{{manifest.manifest.name}}_PRIVATE, _DATA_END$$Base),
+#endif
         .stack_bottom         = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Base),
         .stack_top            = PART_REGION_ADDR({{manifest.manifest.name}}_LINKER, _STACK$$ZI$$Limit),
     {{'},'}}

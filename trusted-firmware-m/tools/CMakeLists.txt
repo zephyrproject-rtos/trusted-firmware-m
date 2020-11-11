@@ -5,20 +5,20 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 find_package(Python3)
 
 ############################### Manifest declaration ###########################
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_manifest_list.yaml.in
-               ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_manifest_list.yaml
+               ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
 
 set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
 set(MANIFEST_LISTS ${MANIFEST_LISTS} ${TFM_EXTRA_MANIFEST_LIST_PATH})
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
+                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
 
     set(MANIFEST_LISTS ${MANIFEST_LISTS} ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
 endif()
@@ -47,15 +47,15 @@ endfunction()
 
 parse_field_from_yaml("${GENERATED_FILE_LISTS}" template TEMPLATE_FILES)
 # Replace relative paths with absolute paths
-list(TRANSFORM TEMPLATE_FILES REPLACE "^([^/\\].*)" "${CMAKE_SOURCE_DIR}/\\1")
+list(TRANSFORM TEMPLATE_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_SOURCE_DIR}/\\1")
 
 parse_field_from_yaml("${GENERATED_FILE_LISTS}" output OUTPUT_FILES)
 # Replace relative paths with absolute paths
-list(TRANSFORM OUTPUT_FILES REPLACE "^([^/\\].*)" "${CMAKE_BINARY_DIR}/generated/\\1")
+list(TRANSFORM OUTPUT_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_BINARY_DIR}/generated/\\1")
 
 parse_field_from_yaml("${MANIFEST_LISTS}" manifest MANIFEST_FILES)
 # Replace relative paths with absolute paths
-list(TRANSFORM MANIFEST_FILES REPLACE "^([^/\\].*)" "${CMAKE_SOURCE_DIR}/\\1")
+list(TRANSFORM MANIFEST_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_SOURCE_DIR}/\\1")
 
 ############################### Command declaration ############################
 

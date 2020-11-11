@@ -193,8 +193,8 @@ Maximum Asset Size
 An asset is stored in a contiguous space in a block/sector. The maximum size of
 an asset can be up-to the size of the data block/sector.
 
-Internal Trusted Storage Service Definitions
-============================================
+Internal Trusted Storage Service Platform Definitions
+=====================================================
 The ITS service requires the following platform definitions:
 
 - ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
@@ -206,15 +206,6 @@ The ITS service requires the following platform definitions:
 - ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes. Valid values are powers of two between 1 and ``ITS_SECTOR_SIZE``
   inclusive.
-- ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  ITS area. This size is used to define the temporary buffers used by ITS to
-  read/write the asset content from/to flash. The memory used by the temporary
-  buffers is allocated statically as ITS does not use dynamic memory allocation.
-- ``ITS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  ITS area. This number is used to dimension statically the filesystem metadata
-  tables in RAM (fast access) and flash (persistent storage). The memory used by
-  the filesystem metadata tables is allocated statically as ITS does not use
-  dynamic memory allocation.
 
 The sectors reserved to be used as internal trusted storage **must** be
 contiguous sectors starting at ``ITS_FLASH_AREA_ADDR``.
@@ -236,13 +227,6 @@ The following optional platform definitions may also be defined in
 - ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
   internal trusted storage in bytes.
   If not defined, the platform must implement ``tfm_hal_its_fs_info()``.
-- ``ITS_BUF_SIZE``- Defines the size of the partition's internal data transfer
-  buffer. If not provided, then ``ITS_MAX_ASSET_SIZE`` is used to allow asset
-  data to be copied between the client and the filesystem in one iteration.
-  Reducing the buffer size will decrease the RAM usage of the partition at the
-  expense of latency, as data will be copied in multiple iterations. *Note:*
-  when data is copied in multiple iterations, the atomicity property of the
-  filesystem is lost in the case of an asynchronous power failure.
 - ``ITS_MAX_BLOCK_DATA_COPY`` - Defines the buffer size used when copying data
   between blocks, in bytes. If not provided, defaults to 256. Increasing this
   value will increase the memory footprint of the service.
@@ -258,13 +242,15 @@ update operations.
 For API specification, please check:
 ``secure_fw/partitions/internal_trusted_storage/flash/its_flash.h``
 
-ITS Service Features Flags
-==========================
-ITS service defines a set of flags that can be used to compile in/out certain
-ITS service features. The ``CommonConfig.cmake`` file sets the default values
-of those flags. However, those flags values can be overwritten by setting them
-in ``platform/ext/<TARGET_NAME>.cmake`` based on the target capabilities or
-needs. The list of ITS services flags are:
+ITS Service Build Definitions
+=============================
+The ITS service uses a set of C definitions to compile in/out certain features,
+as well as to configure certain service parameters. When using the TF-M build
+system, these definitions are controlled by build flags of the same name. The
+``config/config_default.cmake`` file sets the default values of those flags, but
+they can be overwritten based on platform capabilities by setting them in
+``platform/ext/target/<TARGET_NAME>/config.cmake``. The list of ITS service
+build definitions is:
 
 - ``ITS_CREATE_FLASH_LAYOUT``- this flag indicates that it is required
   to create an ITS flash layout. If this flag is set, ITS service will
@@ -293,6 +279,23 @@ needs. The list of ITS services flags are:
     tests to ensure that all tests can run to completion. The type of persistent
     storage area is platform specific (eFlash, MRAM, etc.) and it is described
     in corresponding flash_layout.h
+
+- ``ITS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
+  ITS area. This size is used to define the temporary buffers used by ITS to
+  read/write the asset content from/to flash. The memory used by the temporary
+  buffers is allocated statically as ITS does not use dynamic memory allocation.
+- ``ITS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
+  ITS area. This number is used to dimension statically the filesystem metadata
+  tables in RAM (fast access) and flash (persistent storage). The memory used by
+  the filesystem metadata tables is allocated statically as ITS does not use
+  dynamic memory allocation.
+- ``ITS_BUF_SIZE``- Defines the size of the partition's internal data transfer
+  buffer. If not provided, then ``ITS_MAX_ASSET_SIZE`` is used to allow asset
+  data to be copied between the client and the filesystem in one iteration.
+  Reducing the buffer size will decrease the RAM usage of the partition at the
+  expense of latency, as data will be copied in multiple iterations. *Note:*
+  when data is copied in multiple iterations, the atomicity property of the
+  filesystem is lost in the case of an asynchronous power failure.
 
 --------------
 

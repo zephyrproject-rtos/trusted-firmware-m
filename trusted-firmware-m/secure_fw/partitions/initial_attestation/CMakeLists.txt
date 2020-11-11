@@ -9,7 +9,7 @@ if (NOT TFM_PARTITION_INITIAL_ATTESTATION)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_partition_attestation STATIC)
@@ -26,6 +26,8 @@ target_sources(tfm_partition_attestation PRIVATE
 target_include_directories(tfm_partition_attestation
     PUBLIC
         .
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation
 )
 
 target_link_libraries(tfm_partition_attestation

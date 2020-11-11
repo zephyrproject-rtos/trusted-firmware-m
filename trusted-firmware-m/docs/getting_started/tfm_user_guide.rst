@@ -11,17 +11,27 @@ without BL2 bootloader.
 ****************************************************************
 Execute TF-M example and regression tests on MPS2 boards and FVP
 ****************************************************************
-The BL2 bootloader and TF-M example application and tests run correctly on
-SMM-SSE-200 for MPS2 (AN521) and on the Fixed Virtual Platform model
-FVP_MPS2_AEMv8M version 11.2.23.
-
-To run the example code on FVP_MPS2_AEMv8M
-==========================================
-Using FVP_MPS2_AEMv8M provided by DS-5 v5.27.1.
+The BL2 bootloader and TF-M example application and tests have been verified
+using the reference model for MPS2 (AN521), in  `Keil MDK`_ ,
+`Fixed Virtual Platforms`_ and `Arm Development Studio`_ .
 
 .. Note::
-    FVP reference guide can be found
-    `here <https://developer.arm.com/docs/100966/latest>`__
+    The name of the reference model's executable can vary depending on toolchain.
+
+    - SMM-SSE-200 for `Keil MDK`_
+
+    - FVP_MPS2_AEMv8M for `Fixed Virtual Platforms`_ and `Arm Development Studio`_
+
+    For more information please refer to the appropriate toolchain's
+    documentation:  `Keil MDK Documentation`_ ,
+    `Fixed Virtual Platforms Documentation`_ ,
+    `Arm Development Studio Documentation`_
+
+To run the example code on an SSE-200 Fast-Model
+================================================
+Using FVP_MPS2_AEMv8M provided by `Arm Development Studio`_ 2019.1.
+
+
 
 Example application and regression tests without BL2 bootloader
 ---------------------------------------------------------------
@@ -30,7 +40,7 @@ menu.
 
 .. code-block:: bash
 
-    <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \
@@ -49,7 +59,7 @@ Example application and regression tests with BL2 bootloader
 ------------------------------------------------------------
 To test TF-M with bootloader, one must apply the following changes:
 
-- Add ``mcuboot.axf`` to symbol files in DS-5 in Debug Configuration
+- Add ``bl2.axf`` to symbol files in DS-5 in Debug Configuration
   menu.
 - Replace the last two lines of the previous command with this:
 
@@ -567,5 +577,12 @@ High level operation of BL2 bootloader and instructions for testing firmware
 upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
 
 --------------
+
+.. _Arm Development Studio: https://developer.arm.com/tools-and-software/embedded/arm-development-studio
+.. _Arm Development Studio Documentation: https://developer.arm.com/tools-and-software/embedded/arm-development-studio/learn/docs
+.. _Fixed Virtual Platforms: https://developer.arm.com/tools-and-software/simulation-models/fixed-virtual-platforms
+.. _Fixed Virtual Platforms Documentation: https://developer.arm.com/documentation/100966/latest
+.. _Keil MDK: http://www2.keil.com/mdk5
+.. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
 *Copyright (c) 2017-2020, Arm Limited. All rights reserved.*

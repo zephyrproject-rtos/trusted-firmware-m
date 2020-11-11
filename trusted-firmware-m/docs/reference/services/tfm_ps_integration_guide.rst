@@ -207,8 +207,8 @@ header size (``PS_OBJECT_HEADER_SIZE``) which is defined in
 ``ps_object_defs.h``. The ``PS_OBJECT_HEADER_SIZE`` changes based on the
 ``PS_ENCRYPTION`` flag status.
 
-Protected Storage Service Definitions
-=====================================
+Protected Storage Service Platform Definitions
+==============================================
 The PS service requires the following platform definitions:
 
 - ``PS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
@@ -220,15 +220,6 @@ The PS service requires the following platform definitions:
 - ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
   bytes. Valid values are powers of two between 1 and ``PS_SECTOR_SIZE``
   inclusive.
-- ``PS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
-  PS area. This size is used to define the temporary buffers used by PS to
-  read/write the asset content from/to flash. The memory used by the temporary
-  buffers is allocated statically as PS does not use dynamic memory allocation.
-- ``PS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
-  PS area. This number is used to dimension statically the object table size in
-  RAM (fast access) and flash (persistent storage). The memory used by the
-  object table is allocated statically as PS does not use dynamic memory
-  allocation.
 
 The sectors reserved to be used as protected storage **must** be contiguous
 sectors starting at ``PS_FLASH_AREA_ADDR``.
@@ -305,13 +296,15 @@ The PS service cryptographic operations are implemented in
 ``secure_fw/partitions/protected_storage/crypto/ps_crypto_interface.c``, using
 calls to the TF-M Crypto service.
 
-PS Service Features Flags
-=========================
-PS service defines a set of flags that can be used to compile in/out certain
-PS service features. The ``CommonConfig.cmake`` file sets the default values
-of those flags. However, those flags values can be overwritten by setting them
-in ``platform/ext/<TARGET_NAME>.cmake`` based on the target capabilities or
-needs. The list of PS services flags are:
+PS Service Build Definitions
+============================
+The PS service uses a set of C definitions to compile in/out certain features,
+as well as to configure certain service parameters. When using the TF-M build
+system, these definitions are controlled by build flags of the same name. The
+``config/config_default.cmake`` file sets the default values of those flags, but
+they can be overwritten based on platform capabilities by setting them in
+``platform/ext/target/<TARGET_NAME>/config.cmake``. The list of PS service build
+definitions is:
 
 - ``PS_ENCRYPTION``- this flag allows to enable/disable encryption
   option to encrypt the protected storage data.
@@ -348,12 +341,21 @@ needs. The list of PS services flags are:
     storage area is platform specific (eFlash, MRAM, etc.) and it is described
     in corresponding flash_layout.h
 
-- ``PS_TEST_NV_COUNTERS``- this flag enables the virtual
-  implementation of the PS NV counters interface in
-  ``test/suites/ps/secure/nv_counters``, which emulates NV counters in
+- ``PS_MAX_ASSET_SIZE`` - Defines the maximum asset size to be stored in the
+  PS area. This size is used to define the temporary buffers used by PS to
+  read/write the asset content from/to flash. The memory used by the temporary
+  buffers is allocated statically as PS does not use dynamic memory allocation.
+- ``PS_NUM_ASSETS`` - Defines the maximum number of assets to be stored in the
+  PS area. This number is used to dimension statically the object table size in
+  RAM (fast access) and flash (persistent storage). The memory used by the
+  object table is allocated statically as PS does not use dynamic memory
+  allocation.
+- ``PS_TEST_NV_COUNTERS``- this flag enables the virtual implementation of the
+  PS NV counters interface in ``test/suites/ps/secure/nv_counters`` of the
+  ``tf-m-tests`` repo, which emulates NV counters in
   RAM, and disables the hardware implementation of NV counters provided by
-  the secure service. This flag is enabled by default when building the
-  regression tests and disabled by default otherwise.  This flag can be
+  the secure service. This flag is enabled by default, but has no effect when
+  the regression tests are disabled. This flag can be
   overridden to ``OFF`` when building the regression tests. In this case,
   the PS rollback protection test suite will not be built, as it relies
   on extra functionality provided by the virtual NV counters to simulate

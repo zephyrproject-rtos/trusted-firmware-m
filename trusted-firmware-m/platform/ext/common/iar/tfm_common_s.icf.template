@@ -20,9 +20,13 @@
 
 #include "region_defs.h"
 
-define memory mem with size = 4G;
-
-define block ER_TFM_CODE          with fixed order, alignment = 8 {readonly section .intvec, readonly};
+define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_SIZE {
+       readonly section .intvec,
+#ifndef S_RAM_CODE_START
+       rw section .textrw object *.o,           /* place __ramfunc in ROM if no TFM_RAM_CODE block */
+#endif
+       readonly
+};
 
 define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object platform_retarget_dev.o,
@@ -109,18 +113,26 @@ define block TFM_APP_CODE_END with alignment = 32, size = 0 { };
     /**** Base address of secure data area */
 define block TFM_SECURE_DATA_START with size = 0 { };
 
-#if !TFM_MULTI_CORE_TOPOLOGY
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Shared area between BL2 and runtime to exchange data */
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
 define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
 
+# if !defined(TFM_PSA_API)
+    /* Reserve space for stack seal (8 bytes) */
+define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
+define block ARM_LIB_STACK_SEAL with size = 0x8 { };
+# else
 define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
+# endif
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
 #endif
 
 #if !defined(TFM_PSA_API)
 define block TFM_SECURE_STACK   with size = 0x2000, alignment = 128 {};
+keep {block TFM_SECURE_STACK};
 #endif /* !defined(TFM_PSA_API) */
 
 define block TFM_UNPRIV_DATA with alignment = 32 {
@@ -191,12 +203,14 @@ define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
 
     /* PSP is privileged in multi-core topology */
 define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
 #endif
 
 define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
 define block ARM_LIB_HEAP with alignment = 8, size = S_HEAP_SIZE { };
 define overlay HEAP_OVL {block HEAP};
 define overlay HEAP_OVL {block ARM_LIB_HEAP};
+keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
@@ -246,6 +260,13 @@ define block {{manifest.manifest.name}}_LINKER_STACK with alignment = 128, size 
      * of PSA RoT RW and Stack.
      */
 define block TFM_PSA_RW_STACK_END with alignment = 32, size = 0x0 { };
+
+#if defined (S_RAM_CODE_START)
+define block TFM_RAM_CODE with alignment = 8 {
+       rw section .textrw,               /* __ramfunc */
+};
+place at address S_RAM_CODE_START      { block TFM_RAM_CODE };
+#endif
 
     /* This empty, zero long execution region is here to mark the limit address
      * of the last execution region that is allocated in SRAM.
@@ -297,7 +318,11 @@ define block LR_CODE with fixed order {
        };
 
 do not initialize  { section .noinit };
-initialize by copy with packing = none { readwrite };
+initialize by copy with packing = none { readwrite }
+#ifndef S_RAM_CODE_START
+       except { section .textrw }
+#endif
+       ;
 if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 {
   // Required in a multi-threaded application
@@ -326,6 +351,10 @@ define block DATA with fixed order {
     overlay STACK_DATA,
     /* PSP is unprivileged in single-core topology */
     block ARM_LIB_STACK,
+# if !defined(TFM_PSA_API)
+    /* Define stack seal block for Library mode */
+    block ARM_LIB_STACK_SEAL,
+# endif
 #endif
 
 #if !defined(TFM_PSA_API)
@@ -413,15 +442,6 @@ define block PRIV_DATA with fixed order {
      * of PSA RoT RW and Stack.
      */
     block TFM_PSA_RW_STACK_END,
-
-#if 0
-#if defined (S_RAM_CODE_START)
-    /* Executable code allocated in RAM */
-    TFM_RAM_CODE S_RAM_CODE_START {
-        * (.ramfunc)
-    }
-#endif
-#endif
 
     /* This empty, zero long execution region is here to mark the limit address
      * of the last execution region that is allocated in SRAM.

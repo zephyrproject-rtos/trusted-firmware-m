@@ -15,6 +15,3 @@ set(TFM_SYSTEM_PROCESSOR cortex-m0plus)
 set(TFM_SYSTEM_ARCHITECTURE armv6-m)
 
 add_definitions(-DCYB0644ABZI_S2D44)
-
-# Reload compiler to generate options from the CPU and architecture
-_compiler_reload()

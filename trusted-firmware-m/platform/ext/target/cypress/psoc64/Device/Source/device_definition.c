@@ -29,6 +29,37 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_plat_defs.h"
 
+/* UART configuration */
+const cy_stc_scb_uart_config_t KITPROG_UART_config =
+{
+    .uartMode = CY_SCB_UART_STANDARD,
+    .enableMutliProcessorMode = false,
+    .smartCardRetryOnNack = false,
+    .irdaInvertRx = false,
+    .irdaEnableLowPowerReceiver = false,
+    .oversample = 8,
+    .enableMsbFirst = false,
+    .dataWidth = 8UL,
+    .parity = CY_SCB_UART_PARITY_NONE,
+    .stopBits = CY_SCB_UART_STOP_BITS_1,
+    .enableInputFilter = false,
+    .breakWidth = 11UL,
+    .dropOnFrameError = false,
+    .dropOnParityError = false,
+    .receiverAddress = 0x0UL,
+    .receiverAddressMask = 0x0UL,
+    .acceptAddrInFifo = false,
+    .enableCts = false,
+    .ctsPolarity = CY_SCB_UART_ACTIVE_LOW,
+    .rtsRxFifoLevel = 0UL,
+    .rtsPolarity = CY_SCB_UART_ACTIVE_LOW,
+    .rxFifoTriggerLevel = 63UL,
+    .rxFifoIntEnableMask = 0UL,
+    .txFifoTriggerLevel = 63UL,
+    .txFifoIntEnableMask = 0UL,
+};
+
+
 /* TCPWM Timer driver structures */
 #if defined(CY_TCPWM0_TIMER0_S) || defined(CY_TCPWM0_TIMER1_NS)
 /* Sharing the tcpwm configuration data, as the IRQ test runs in sequence */

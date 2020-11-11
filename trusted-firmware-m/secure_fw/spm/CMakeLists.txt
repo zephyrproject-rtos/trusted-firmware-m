@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_spm STATIC)
 add_library(tfm_boot_status INTERFACE)
@@ -34,11 +34,12 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:common/tfm_boot_data.c>
         common/tfm_core_utils.c
         common/utilities.c
+        common/spm_log.c
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_rpc.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_spe_mailbox.c>
-        $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:common/tfm_core_mem_check.c>
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:common/tfm_core_mem_check.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
@@ -56,6 +57,7 @@ target_sources(tfm_spm
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_nspm_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
@@ -71,6 +73,9 @@ target_link_libraries(tfm_spm
         tfm_boot_status
         tfm_secure_api
         tfm_partitions
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:driver_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:client_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:server_partition>
 )
 
 target_compile_definitions(tfm_spm
@@ -92,6 +97,13 @@ set_source_files_properties(tfm_nspm_func.c
 set_source_files_properties(tfm_secure_api.c
     PROPERTIES
         COMPILE_FLAGS -Wno-implicit-function-declaration
+)
+
+############################ Partition Defs ####################################
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:PSA_API_TEST_IPC>
 )
 
 ############################ TFM arch ##########################################

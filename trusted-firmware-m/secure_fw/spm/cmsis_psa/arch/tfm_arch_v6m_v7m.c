@@ -143,8 +143,16 @@ __attribute__((naked)) void UsageFault_Handler(void)
     __ASM volatile("b    .");
 }
 
-void tfm_arch_prioritize_secure_exception(void)
+void tfm_arch_set_secure_exception_priorities(void)
 {
+    /* Set fault priority to the highest */
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+    NVIC_SetPriority(MemoryManagement_IRQn, 0);
+    NVIC_SetPriority(BusFault_IRQn, 0);
+#endif
+
+    NVIC_SetPriority(SVCall_IRQn, 0);
+    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 }
 
 void tfm_arch_configure_coprocessors(void)

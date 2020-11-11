@@ -10,8 +10,7 @@ TF-M build steps
 TF-M uses `cmake <https://cmake.org/overview/>`__ to provide an out-of-source
 build environment. The instructions are below.
 
-Cmake version ``3.13.0`` or higher is supported, but version ``3.15.0`` or
-higher is required for ARMclang support.
+Cmake version ``3.15.0`` or higher is required.
 
 Getting the source-code
 =======================
@@ -26,10 +25,10 @@ dependency management`
 
 .. Note::
 
- - For building with Armclang compiler version 6.10.0, please follow the note
-   in :ref:`docs/getting_started/tfm_sw_requirement:External dependencies` section.
+ - For building with Armclang compiler version 6.10.0+, please follow the note
+   in :doc:`software requirements <tfm_sw_requirement>`.
  - For building with the IAR toolchain, please see the notes in
-   :doc:`software requirements <tfm_build_instruction_iar>`
+   :doc:`IAR software requirements <tfm_build_instruction_iar>`
 
 .. _tfm_cmake_configuration:
 
@@ -39,14 +38,23 @@ Cmake configuration
 All configuration options are provided by cmake variables, and their default
 values, with docstrings, can be found in ``config/config_default.cmake``.
 
-Configuration is provided in multiple stages, with multiple priorities.
+Configuration is provided in multiple stages. Each stage will not override any
+config that has already been set at any of the prior stages.
 
-   1. ``config/config_default.cmake`` is loaded.
-   2. Command-line variable settings are applied, overriding all previous settings.
-   3. If it exists, CMAKE_BUILD_TYPE specific config is applied from ``config/build_type/<build_type>.cmake``, overriding all previous settings.
-   4. If it exists, TFM Profile specific config is applied from ``config/profile/<tfm_profile>.cmake``, overriding all previous settings.
-   5. Target specific config from ``platform/ext/target/<target_platform>/config.cmake`` is applied, overriding all previous settings.
-   6. If the ``TFM_EXTRA_CONFIG_PATH`` variable has been set, that file is loaded and overrides all previous settings.
+   1. Command-line variable settings are applied.
+   2. If the ``TFM_EXTRA_CONFIG_PATH`` variable has been set, that file is
+      loaded.
+   3. If TEST_PSA_TEST is set, then PSA API test related config is applied from
+      ``config/tests/config_test_psa_api.cmake``.
+   4. If it exists, CMAKE_BUILD_TYPE specific config is applied from
+      ``config/build_type/<build_type>.cmake``.
+   5. Target specific config from ``platform/ext/target/<target_platform>/config.cmake``
+      is applied.
+   6. If CRYPTO_HW_ACCELERATOR is set, then a config specific to the
+      accelerator type is applied if it exists.
+   7. If it exists, TFM Profile specific config is applied from
+      ``config/profile/<tfm_profile>.cmake``.
+   8. ``config/config_default.cmake`` is loaded.
 
 .. Warning::
     This means that command-line settings are not applied when they conflict
@@ -63,7 +71,7 @@ Required cmake parameters for building TF-M
 | TFM_PLATFORM         | The target platform as a path from the base directory |
 |                      | ``/platform/ext/target``                              |
 +----------------------+-------------------------------------------------------+
-| CMAKE_TOOLCHAIN_FILE | The path to the toolchain file that corresponds to    |
+| TFM_TOOLCHAIN_FILE   | The path to the toolchain file that corresponds to    |
 |                      | the desired compiler.                                 |
 +----------------------+-------------------------------------------------------+
 
@@ -153,6 +161,14 @@ used which does not support all features.
 | TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
 +-----------------------------+-------------------------------------+---------------+
 
+TF-M Profiles
+-------------
+
+TF-M Profiles are implemented as a single cmake configuration file, under the
+``config/profile`` directory. A good understanding can be gained quickly by
+looking at the Profile configuration files, but the ultimate reference for
+Profiles are the design documents in the ``docs/design_documents/profiles/``
+directory.
 
 PSA test configuration
 ----------------------
@@ -182,47 +198,47 @@ files, where now build options are controlled by variables. For ease of
 transition, a table below is provided that maps the legacy files to the current
 variables, in the format of cmake command line parameters.
 
-+------------------------------------------+-----------------------------------+
-| File                                     | Cmake command line                |
-+==========================================+===================================+
-| ConfigDefault.cmake                      | <No options>                      |
-+------------------------------------------+-----------------------------------+
-| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small       |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
-+------------------------------------------+-----------------------------------+
-| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON          |
-|                                          | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON          |
-|                                          | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small       |
-|                                          | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium      |
-|                                          | -DTEST_NS=ON -DTEST_S=ON          |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>       |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>       |
-|                                          | -DTFM_PSA_API=ON                  |
-+------------------------------------------+-----------------------------------+
-| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>       |
-|                                          | -DTFM_PSA_API=ON                  |
-|                                          | -DTFM_ISOLATION_LEVEL=2           |
-+------------------------------------------+-----------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium      |
-| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PS=OFF            |
-+------------------------------------------+-----------------------------------+
++------------------------------------------+---------------------------------------+
+| File                                     | Cmake command line                    |
++==========================================+=======================================+
+| ConfigDefault.cmake                      | <No options>                          |
++------------------------------------------+---------------------------------------+
+| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small           |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
++------------------------------------------+---------------------------------------+
+| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON              |
+|                                          | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON              |
+|                                          | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small           |
+|                                          | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium          |
+|                                          | -DTEST_NS=ON -DTEST_S=ON              |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>           |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>           |
+|                                          | -DTFM_PSA_API=ON                      |
++------------------------------------------+---------------------------------------+
+| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>           |
+|                                          | -DTFM_PSA_API=ON                      |
+|                                          | -DTFM_ISOLATION_LEVEL=2               |
++------------------------------------------+---------------------------------------+
+| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
+| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PROTECTED_STORAGE=OFF |
++------------------------------------------+---------------------------------------+
 
 There has also been some changes to the PSA manifest file generation. The files
 are now generated into a seperate tree in the ``<tfm build dir>/generated``
@@ -243,7 +259,7 @@ Example: building TF-M for AN521 platform using GCC:
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -254,7 +270,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
     make install
 
 .. Note::
@@ -278,7 +294,7 @@ features are enabled.
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -289,7 +305,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
     make install
 
 Build for PSA Functional API compliance tests
@@ -316,7 +332,7 @@ tests for the Crypto service:
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -327,7 +343,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
     make install
 
 Build for PSA FF (IPC) compliance tests
@@ -344,7 +360,7 @@ compliance test. This support is controlled by the TEST_PSA_API variable:
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -355,7 +371,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts
@@ -396,7 +412,7 @@ Building the Reference Manual
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
     cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
 
 The documentation files will be available under the directory::
@@ -408,7 +424,7 @@ Building the User Guide
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
     cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
 The documentation files will be available under the directory::
@@ -507,7 +523,7 @@ With new cmake syntax
 
     cd <base folder>
     cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -518,7 +534,7 @@ Alternately using traditional cmake syntax
     cd trusted-firmware-m
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     make install
 
 --------------

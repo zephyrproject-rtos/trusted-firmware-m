@@ -36,8 +36,8 @@ endif()
 
 install(FILES ${NUCLEO_L552ZE_Q_DIR}/include/flash_layout.h
               ${NUCLEO_L552ZE_Q_DIR}/include/region_defs.h
-        DESTINATION ${CMAKE_BINARY_DIR}/ )
+        DESTINATION  ${CMAKE_BINARY_DIR} )
 set (BL2_FILE_TO_PREPROCESS ${CMAKE_CURRENT_BINARY_DIR}/image_macros_to_preprocess_bl2.c)
 file(WRITE ${BL2_FILE_TO_PREPROCESS} ${BL2_PREPROCESSING})
 install(FILES ${BL2_FILE_TO_PREPROCESS}
-        DESTINATION ${CMAKE_BINARY_DIR}/ )
+        DESTINATION ${CMAKE_BINARY_DIR} )

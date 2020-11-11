@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
  * This file is derivative of CMSIS V5.01 startup_ARMCM33.S
  * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
  */
+
+#include "tfm_plat_config.h"
 
     .syntax   unified
     .arch     armv8-m.main

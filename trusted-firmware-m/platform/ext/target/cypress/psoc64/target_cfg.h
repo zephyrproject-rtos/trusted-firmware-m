@@ -46,8 +46,10 @@ struct tfm_spm_partition_platform_data_t
 
 /**
  * \brief Configures the Shared Memory Protection Units.
+ *
+ * \return Returns values as specified by the \ref enum tfm_plat_err_t
  */
-void smpu_init_cfg(void);
+enum tfm_plat_err_t smpu_init_cfg(void);
 
 /**
  * \brief Prints out the Shared Memory Protection Units config.
@@ -56,13 +58,17 @@ void smpu_print_config(void);
 
 /**
  * \brief Configures the Peripheral Protection Units.
+ *
+ * \return Returns values as specified by the \ref enum tfm_plat_err_t
  */
-void ppu_init_cfg(void);
+enum tfm_plat_err_t ppu_init_cfg(void);
 
 /**
  * \brief Configure bus masters/Protectoin Contexts.
+ *
+ * \return Returns values as specified by the \ref enum tfm_plat_err_t
  */
-void bus_masters_cfg(void);
+enum tfm_plat_err_t bus_masters_cfg(void);
 
 /**
  * \brief Performs platform specific hw initialization.

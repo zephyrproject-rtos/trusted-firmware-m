@@ -59,6 +59,12 @@ SECTIONS
     .copy.table : ALIGN(4)
     {
         __copy_table_start__ = .;
+#ifdef RAM_VECTORS_SUPPORT
+        /* Copy interrupt vectors from flash to RAM */
+        LONG (__vectors_start__)                            /* From */
+        LONG (__ram_vectors_start__)                        /* To   */
+        LONG (__vectors_end__ - __vectors_start__)          /* Size */
+#endif
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
@@ -317,10 +323,23 @@ SECTIONS
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
-        . += __psp_stack_size__;
+# if !defined(TFM_PSA_API)
+        . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
+# else
+        . += (__psp_stack_size__);
+# endif
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+
+# if !defined(TFM_PSA_API)
+    .psp_stack_seal_res :
+    {
+        . += 0x8;
+    } > RAM
+    Image$$ARM_LIB_STACK_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
+    Image$$ARM_LIB_STACK_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
+# endif
 #endif
 
 #if !defined(TFM_PSA_API)
@@ -576,7 +595,18 @@ SECTIONS
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    .TFM_DATA : ALIGN(4)
+#ifdef RAM_VECTORS_SUPPORT
+    .ramVectors (NOLOAD) : ALIGN(256)
+    {
+        __ram_vectors_start__ = .;
+        KEEP(*(.ram_vectors))
+        __ram_vectors_end__   = .;
+    } > RAM
+    .TFM_DATA __ram_vectors_end__ : ALIGN(4)
+#else
+
+     .TFM_DATA : ALIGN(4)
+#endif
     {
         *(.data*)
 

@@ -36,8 +36,8 @@ endif()
 
 install(FILES ${STM32L563E_DK_DIR}/include/flash_layout.h
               ${STM32L563E_DK_DIR}/include/region_defs.h
-        DESTINATION ./ )
+        DESTINATION ${CMAKE_BINARY_DIR} )
 set (BL2_FILE_TO_PREPROCESS ${CMAKE_CURRENT_BINARY_DIR}/image_macros_to_preprocess_bl2.c)
 file(WRITE ${BL2_FILE_TO_PREPROCESS} ${BL2_PREPROCESSING})
 install(FILES ${BL2_FILE_TO_PREPROCESS}
-        DESTINATION ./ )
+        DESTINATION ${CMAKE_BINARY_DIR} )

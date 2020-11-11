@@ -5,4 +5,4 @@
 #
 #-------------------------------------------------------------------------------
 
-set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2" FORCE)
+set(PS_NUM_ASSETS                       "5"         CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")

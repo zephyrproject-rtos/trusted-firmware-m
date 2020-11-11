@@ -21,6 +21,7 @@
    startup_psoc6_02_cm4.S*/
 
 #include "region_defs.h"
+#include "tfm_plat_config.h"
 
     /* The CPU VTOR register */
     #define CY_CPU_VTOR_ADDR            0xE000ED08
@@ -403,10 +404,12 @@ Reset_Handler:
 #ifdef RAM_VECTORS_SUPPORT
     /* Update Vector Table Offset Register. */
     ldr r0, =__ramVectors
+#else
+    ldr r0, =__Vectors
+#endif
     ldr r1, =CY_CPU_VTOR_ADDR
     str r0, [r1]
     dsb 0xF
-#endif
 
     /* Enable the FPU if used */
     bl Cy_SystemInitFpuEnable

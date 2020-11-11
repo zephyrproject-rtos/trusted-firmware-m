@@ -234,9 +234,11 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN539               | Yes             | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| FVP_SSE300_MPS2     | NO              | Yes           | Yes      | Yes            | No           |
+| FVP_SSE300_MPS2     | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| LPC55S69            | No              | No            | No       | No             | No           |
+| FVP_SSE300_MPS3     | No              | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| LPC55S69            | Yes             | Yes           | No       | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | Musca-A             | No              | No            | No       | No             | Yes          |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
@@ -256,7 +258,7 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | nRF9160 DK          | Yes             | Yes           | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| nRF5340 PDK         | Yes             | Yes           | No       | No             | No           |
+| nRF5340 PDK/DK      | Yes             | Yes           | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 
 .. [1] To disable BL2, please set the ``BL2`` cmake option to ``OFF``
@@ -309,7 +311,7 @@ compile time switches:
 
 Example of how to provide the secure image minimum version::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
 
 ********************
 Signature algorithms
@@ -428,7 +430,7 @@ images.
 The version number of the image (single image boot) can manually be passed in
 through the command line in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DIMAGE_VERSION_S=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DIMAGE_VERSION_S=1.2.3+4 ..
 
 Alternatively, the version number can be less specific (e.g 1, 1.2, or 1.2.3),
 where the missing numbers are automatically set to zero. The image version
@@ -462,7 +464,7 @@ and its value should always be increased if a security flaw was fixed in the
 current image version. The value of the security counter (single image boot) can
 be specified at build time in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DSECURITY_COUNTER_S=42 ../
+    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DSECURITY_COUNTER_S=42 ../
 
 The security counter can be independent from the image version, but not
 necessarily. Alternatively, if it is not specified at build time with the
@@ -529,7 +531,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
 ---------------------------------------------
 .. code-block:: bash
 
-    <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <ARM_DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \
@@ -541,7 +543,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
     --parameter fvp_mps2.telnetterminal0.quiet=0 \
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
-    --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
+    --application cpu0=<build_dir>/bin/bl2.axf \
     --data cpu0=<default_build_dir>/bin/tfm_s_ns_signed.bin@0x10080000 \
     --data cpu0=<regresssion_build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
 
@@ -554,7 +556,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 3                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sig1.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -591,7 +593,7 @@ Executing multiple firmware upgrades on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 4                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -672,7 +674,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
 
 .. code-block:: bash
 
-    <DS5_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <ARM_DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \
@@ -684,7 +686,7 @@ Executing firmware upgrade on FVP_MPS2_AEMv8M
     --parameter fvp_mps2.telnetterminal0.quiet=0 \
     --parameter fvp_mps2.telnetterminal1.quiet=1 \
     --parameter fvp_mps2.telnetterminal2.quiet=1 \
-    --application cpu0=<build_dir>/bl2/ext/mcuboot/mcuboot.axf \
+    --application cpu0=<build_dir>/bin/bl2.axf \
     --data cpu0=<default_build_dir>/bin/tfm_s_ns_signed.bin@0x10080000 \
     --data cpu0=<regresssion_build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
 
@@ -697,7 +699,7 @@ Executing firmware upgrade on SSE 200 FPGA on MPS2 board
     [IMAGES]
     TOTALIMAGES: 3                     ;Number of Images (Max: 32)
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \Software\mcuboot.axf  ; BL2 bootloader
+    IMAGE0FILE: \Software\bl2.axf      ; BL2 bootloader
     IMAGE1ADDRESS: 0x10080000
     IMAGE1FILE: \Software\tfm_sign.bin ; TF-M default test binary blob
     IMAGE2ADDRESS: 0x10180000
@@ -710,11 +712,11 @@ combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
+    srec_cat bin/bl2.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
+    srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 tfm_sign.bin -Binary -offset 0xA020000 tfm_sign_1.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade,
 notice that image with higher version number (``version=1.2.3.5``) is executed:
@@ -745,7 +747,7 @@ Executing firmware upgrade on CoreLink SSE-200 Subsystem for MPS3 (AN524)
 
     IMAGE0UPDATE: AUTO                 ;Image Update:NONE/AUTO/FORCE
     IMAGE0ADDRESS: 0x00000000
-    IMAGE0FILE: \SOFTWARE\mcuboot.bin  ;BL2 bootloader
+    IMAGE0FILE: \SOFTWARE\bl2.bin      ;BL2 bootloader
     IMAGE1UPDATE: AUTO
     IMAGE1ADDRESS: 0x00040000
     IMAGE1FILE: \SOFTWARE\tfm_sig0.bin ;TF-M example application binary blob
@@ -769,11 +771,11 @@ combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bl2/ext/mcuboot/mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat bin/bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bl2\ext\mcuboot\mcuboot.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade when,
 RAM loading is enabled, notice that image with higher version number

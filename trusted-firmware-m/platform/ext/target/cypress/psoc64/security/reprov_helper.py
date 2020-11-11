@@ -36,8 +36,8 @@ from cysecuretools.execute.programmer.pyocd_wrapper import ResetType
 # ./reprov_helper.py
 #
 # non-interactive:
-# ./reprov_helper.py -d cys06xxa \
-#                    -p policy/policy_multi_CM0_CM4_jitp.json \
+# ./reprov_helper.py -d cy8ckit-064s0s2-4343w \
+#                    -p policy/policy_multi_CM0_CM4_tfm_dev_certs.json \
 #                    -[existing-keys|new-keys] -s <serial number> -y
 
 
@@ -222,7 +222,7 @@ def main(argv):
         exit(1)
 
     if not options.device:
-        options.device = "cys06xxa"
+        options.device = "cy8ckit-064s0s2-4343w"
         answer = input("\r\nDevice is not provided, use default {}? (Y/n): "
                         .format(options.device))
         if answer == 'N' or answer == 'n':

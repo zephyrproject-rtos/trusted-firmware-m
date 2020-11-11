@@ -22,12 +22,6 @@
 
 #include "region_defs.h"
 
-define memory mem with size = 4G;
-
-define region BL2_CODE_region  =   mem:[from BL2_CODE_START size BL2_CODE_SIZE];
-
-define region BL2_RAM_region   =  mem:[from BL2_DATA_START size BL2_DATA_SIZE];
-
 do not initialize  { section .noinit };
 initialize by copy { readwrite };
 
@@ -35,18 +29,18 @@ define block ER_CODE        with fixed order, alignment = 8 {
        section .intvec,
        readonly
        };
+define block LR_CODE with fixed order, maximum size = BL2_CODE_SIZE {block ER_CODE};
+place at address BL2_CODE_START {block LR_CODE};
 
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
-keep {block TFM_SHARED_DATA};
-
-define block ER_DATA        with maximum size = BL2_DATA_SIZE, alignment = 32 {readwrite};
-    /* MSP */
-
-define block ARM_LIB_STACK      with alignment = 32, size = BL2_MSP_STACK_SIZE { };
-define block HEAP               with alignment = 8, size = BL2_HEAP_SIZE { };
-define block ARM_LIB_HEAP       with alignment = 8, size = BL2_HEAP_SIZE { };
-define overlay HEAP_OVL         {block HEAP};
-define overlay HEAP_OVL         {block ARM_LIB_HEAP};
+define block ER_DATA         with  alignment = 32 {readwrite};
+define block ARM_LIB_STACK   with alignment = 32, size = BL2_MSP_STACK_SIZE { };
+define block HEAP            with alignment = 8, size = BL2_HEAP_SIZE { };
+define block ARM_LIB_HEAP    with alignment = 8, size = BL2_HEAP_SIZE { };
+define overlay HEAP_OVL      {block HEAP};
+define overlay HEAP_OVL      {block ARM_LIB_HEAP};
+keep {block TFM_SHARED_DATA, block ER_DATA, block ARM_LIB_STACK,
+      block HEAP, block ARM_LIB_HEAP};
 
 if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 {
@@ -54,11 +48,10 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
   initialize by copy with packing = none { section __DLIB_PERTHREAD };
 }
 
-define block LR_CODE with fixed order {block ER_CODE};
-define block DATA with fixed order {block TFM_SHARED_DATA,
-                                    block ER_DATA,
-                                    block ARM_LIB_STACK,
-                                    overlay HEAP_OVL};
-
-place in BL2_CODE_region         { block LR_CODE };
-place in BL2_RAM_region          { block DATA};
+define block DATA with fixed order, maximum size = BL2_DATA_SIZE {
+       block TFM_SHARED_DATA,
+       block ER_DATA,
+       block ARM_LIB_STACK,
+       overlay HEAP_OVL
+};
+place at address BL2_DATA_START {block DATA};

@@ -8,6 +8,8 @@
 #ifndef __TFM_HAL_PS_H__
 #define __TFM_HAL_PS_H__
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,7 +27,7 @@ extern "C" {
  * If an error is detected within this function, is should leave the
  * content of the parameters unchanged.
  */
-void tfm_hal_ps_fs_info(uint32_t *flash_area_addr, uint32_t *flash_area_size);
+void tfm_hal_ps_fs_info(uint32_t *flash_area_addr, size_t *flash_area_size);
 
 #ifdef __cplusplus
 }

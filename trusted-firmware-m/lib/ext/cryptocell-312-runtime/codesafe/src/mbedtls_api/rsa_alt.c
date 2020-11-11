@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -17,7 +17,7 @@
 #include "mbedtls/rsa_internal.h"
 #include "mbedtls/oid.h"
 #include "mbedtls_common.h"
-#include "bignum.h"
+#include "mbedtls/bignum.h"
 
 #include <string.h>
 
@@ -62,7 +62,7 @@
 #include "pki.h"
 #include "rsa.h"
 
-#include "ctr_drbg.h"
+#include "mbedtls/ctr_drbg.h"
 #include "pka.h"
 #include "cc_pal_abort.h"
 

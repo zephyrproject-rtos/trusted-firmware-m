@@ -11,6 +11,8 @@
 #include <stdbool.h>
 
 #include "cmsis_compiler.h"
+#include "tfm_core_trustzone.h"
+#include "utilities.h"
 
 #define EXC_RETURN_INDICATOR                    (0xFF << 24)
 #define EXC_RETURN_RES1                         (0x1FFFF << 7)
@@ -108,6 +110,26 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
+ * \brief Seal the thread stack.
+ *
+ * This function must be called only when the caller is using MSP.
+ *
+ * \param[in] stk        Thread stack address.
+ *
+ * \retval stack         Updated thread stack address.
+ */
+__STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
+{
+    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    stk -= TFM_STACK_SEALED_SIZE;
+
+    *((uint32_t *)stk)       = TFM_STACK_SEAL_VALUE;
+    *((uint32_t *)(stk + 4)) = TFM_STACK_SEAL_VALUE;
+
+    return stk;
+}
+
+/**
  * \brief Update architecture context value into hardware
  *
  * \param[in] p_actx        Pointer of context data
@@ -119,12 +141,29 @@ __STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
 }
 
 /**
- * \brief Set MSPLIM register.
+ * \brief Set MSPLIM register and seal the MSP.
+ *
+ * This function assumes that the caller is using PSP when calling this
+ * function.
  *
  * \param[in] msplim        Register value to be written into MSPLIM.
  */
-__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
 {
+    uint32_t mstk_adr = __get_MSP();
+
+    /*
+     * Seal the main stack and update MSP to point below the stack seal.
+     * Set MSPLIM. As the initial 'main()' code is running under privileged PSP
+     * manipulating MSP works here.
+     */
+    TFM_CORE_ASSERT((mstk_adr & 0x7) == 0);
+    mstk_adr -= TFM_STACK_SEALED_SIZE;
+
+    *((uint32_t *)mstk_adr)       = TFM_STACK_SEAL_VALUE;
+    *((uint32_t *)(mstk_adr + 4)) = TFM_STACK_SEAL_VALUE;
+
+    __set_MSP(mstk_adr);
     __set_MSPLIM(msplim);
 }
 

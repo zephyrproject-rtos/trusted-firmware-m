@@ -61,7 +61,7 @@ enum its_flash_id_t {
 struct flash_fs_info_t {
     /* TODO - move flash_dev here from struct its_flash_info_t */
     uint32_t flash_area_addr; /**< base address of the flash region */
-    uint32_t flash_area_size; /**< size in bytes of the flash region */
+    size_t   flash_area_size; /**< size in bytes of the flash region */
 };
 
 /**

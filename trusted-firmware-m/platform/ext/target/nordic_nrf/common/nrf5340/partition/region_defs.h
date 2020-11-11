@@ -33,7 +33,11 @@
 #define NS_PSP_STACK_SIZE       (0x00000140)
 
 /* Size of nRF SPU (Nordic IDAU) regions */
+#ifdef NRF5340_ENG_A
 #define SPU_FLASH_REGION_SIZE   (0x00008000)
+#else
+#define SPU_FLASH_REGION_SIZE   (0x00004000)
+#endif
 #define SPU_SRAM_REGION_SIZE    (0x00002000)
 
 /* This size of buffer is big enough to store an attestation

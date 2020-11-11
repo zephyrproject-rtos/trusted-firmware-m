@@ -5,6 +5,10 @@
 #
 #-------------------------------------------------------------------------------
 
+set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cmake CACHE FILEPATH    "Path to TFM compiler toolchain file")
+set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for")
+set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
+
 set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
@@ -21,6 +25,8 @@ set(TFM_NS_CLIENT_IDENTIFICATION        OFF         CACHE BOOL      "Enable NS c
 set(TFM_EXTRA_CONFIG_PATH               ""          CACHE PATH      "Path to extra cmake config file")
 set(TFM_EXTRA_MANIFEST_LIST_PATH        ""          CACHE PATH      "Path to extra manifest file, used to declare extra partitions. Appended to standard TFM manifest")
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
+
+set(TFM_SPM_LOG_LEVEL                   2           CACHE STRING    "Set default SPM log level as INFO level")
 
 ########################## BL2 #################################################
 
@@ -54,6 +60,8 @@ set(MCUBOOT_NS_IMAGE_MIN_VER            0.0.0+0     CACHE STRING    "Minimum ver
 ############################ Platform ##########################################
 
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
+set(TFM_MULTI_CORE_MULTI_CLIENT_CALL    OFF         CACHE BOOL      "Whether to enable multiple PSA client calls feature")
+
 set(DEBUG_AUTHENTICATION                CHIP_DEFAULT CACHE STRING   "Debug authentication setting. [CHIP_DEFAULT, NONE, NS_ONLY, FULL")
 set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secure UART1")
 
@@ -69,31 +77,35 @@ set(PLATFORM_DUMMY_IAK                  TRUE        CACHE BOOL      "Use dummy i
 ############################ Partitions ########################################
 
 set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
-set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash fs if it doesn't exist for Protected Storage partition")
+set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
 set(PS_RAM_FS                           OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition")
 set(PS_ROLLBACK_PROTECTION              ON          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
-set(PS_VALIDATE_METADATA_FROM_FLASH     OFF         CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
-set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in protected storage")
+set(PS_VALIDATE_METADATA_FROM_FLASH     ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
+set(PS_MAX_ASSET_SIZE                   "2048"      CACHE STRING    "The maximum asset size to be stored in the Protected Storage area")
+set(PS_NUM_ASSETS                       "10"        CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
+set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
-set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash fs if it doesn't exist for Interal Trusted Storage partition")
-set(ITS_RAM_FS                          OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Interal Trusted Storage partition")
-set(ITS_VALIDATE_METADATA_FROM_FLASH    OFF         CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
+set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash FS if it doesn't exist for Internal Trusted Storage partition")
+set(ITS_RAM_FS                          OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Internal Trusted Storage partition")
+set(ITS_VALIDATE_METADATA_FROM_FLASH    ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
+set(ITS_MAX_ASSET_SIZE                  "512"       CACHE STRING    "The maximum asset size to be stored in the Internal Trusted Storage area")
+set(ITS_NUM_ASSETS                      "10"        CACHE STRING    "The maximum number of assets to be stored in the Internal Trusted Storage area")
 set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
-set(CRYPTO_ENGINE_BUF_SIZE              0x2000      CACHE STRING    "TODO Soby Matthew")
-set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "TODO Soby Matthew")
-set(CRYPTO_KEY_MODULE_DISABLED          FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_AEAD_MODULE_DISABLED         FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_MAC_MODULE_DISABLED          FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_HASH_MODULE_DISABLED         FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_CIPHER_MODULE_DISABLED       FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_GENERATOR_MODULE_DISABLED    FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_GENERATOR_MODULE_DISABLED    TRUE        CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   FALSE       CACHE BOOL      "TODO Soby Matthew")
-set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE BOOL      "TODO Soby Matthew")
+# CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
+set(CRYPTO_ENGINE_BUF_SIZE              0x2080      CACHE STRING    "Heap size for the crypto backend")
+set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
+set(CRYPTO_KEY_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto Key module")
+set(CRYPTO_AEAD_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto AEAD module")
+set(CRYPTO_MAC_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto MAC module")
+set(CRYPTO_HASH_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto Hash module")
+set(CRYPTO_CIPHER_MODULE_DISABLED       FALSE       CACHE BOOL      "Disable PSA Crypto Cipher module")
+set(CRYPTO_GENERATOR_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto Key Derivation module")
+set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   FALSE       CACHE BOOL      "Disable PSA Crypto Asymmetric key module")
+set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default size of the internal scratch buffer used for PSA FF IOVec allocations")
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
@@ -107,6 +119,10 @@ set(TFM_PARTITION_AUDIT_LOG             ON          CACHE BOOL      "Enable Audi
 ################################## Tests #######################################
 
 set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
+set(TFM_IRQ_TEST                        OFF         CACHE BOOL      "Enable IRQ tests")
+set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
+
+set(PS_TEST_NV_COUNTERS                 ON          CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
 
 set(TFM_CRYPTO_TEST_ALG_CBC             ON          CACHE BOOL      "Test CBC cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CCM             ON          CACHE BOOL      "Test CCM cryptography mode")
@@ -119,16 +135,17 @@ set(TFM_CRYPTO_TEST_HKDF                ON          CACHE BOOL      "Test SHA-51
 ################################## Dependencies ################################
 
 set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbed Crypto (or DOWNLOAD to fetch automatically")
-set(MBEDCRYPTO_VERSION                  "2.23.0"    CACHE STRING    "The version of Mbed Crypto to use")
+set(MBEDCRYPTO_VERSION                  "mbedtls-2.24.0" CACHE STRING "The version of Mbed Crypto to use")
 set(MBEDCRYPTO_BUILD_TYPE               "${CMAKE_BUILD_TYPE}" CACHE STRING "Build type of Mbed Crypto library")
 set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h" CACHE PATH "Config to use for Mbed Crypto")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH "" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(TFM_TEST_REPO_PATH                  "DOWNLOAD"  CACHE PATH      "Path to TFM-TEST repo (or DOWNLOAD to fetch automatically")
+set(TFM_TEST_REPO_VERSION               "master"    CACHE PATH      "The version of tf-m-tests to use")
 set(CMSIS_5_PATH                        "DOWNLOAD"  CACHE PATH      "Path to CMSIS_5 (or DOWNLOAD to fetch automatically")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "e8fe6cf"   CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "1.7.0-rc1" CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "master"    CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "5c0399f2"  CACHE STRING    "The version of PSA arch tests to use")

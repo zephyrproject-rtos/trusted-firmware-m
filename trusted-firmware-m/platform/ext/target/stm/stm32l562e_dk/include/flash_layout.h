@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,24 +27,24 @@
  * Flash layout on stm23l562e_dk with BL2 (multiple image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0001_2000 NV counters area (4 KB)
- * 0x0001_3000 Secure Storage Area (8 KB)
- * 0x0001_5000 Internal Trusted Storage Area (8 KB)
- * 0x0001_7000 Secure image     primary slot (172 KB)
- * 0x0004_1000 Non-secure image primary slot (36 KB)
- * 0x0004_a000 Secure image     secondary slot (176 KB)
+ * 0x0000_e000 NV counters area (4 KB)
+ * 0x0000_f000 Secure Storage Area (8 KB)
+ * 0x0001_1000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_3000 Secure image     primary slot (180 KB)
+ * 0x0004_0000 Non-secure image primary slot (36 KB)
+ * 0x0004_9000 Secure image     secondary slot (180 KB)
  * 0x0007_6000 Non-secure image secondary slot (36 KB)
  * 0x0007_F000 Unused (4 KB)
  *
  * Flash layout on  stm23l562e_dk with BL2 (multiple image boot, layout for test):
  * No Firmware update
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0001_2000 NV counters area (4 KB)
- * 0x0001_3000 Secure Storage Area (8 KB)
- * 0x0001_5000 Internal Trusted Storage Area (8 KB)
- * 0x0001_7000 Secure image     primary slot (224 KB)
- * 0x0004_F000 Non-secure image primary slot (168 KB)
- * 0x0007_9000 Unused (28K)
+ * 0x0000_e000 NV counters area (4 KB)
+ * 0x0000_f000 Secure Storage Area (8 KB)
+ * 0x0001_1000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_3000 Secure image     primary slot (224 KB)
+ * 0x0004_b000 Non-secure image primary slot (168 KB)
+ * 0x0007_5000 Unused (44K)
  * The size of a partition. This should be large enough to contain a S or NS
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
@@ -65,7 +65,7 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
-#define FLASH_AREA_BL2_SIZE             (0x11000)
+#define FLASH_AREA_BL2_SIZE             (0xd800)
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
 /* area for BL2 code not protected by hdp */
@@ -113,7 +113,7 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-#define FLASH_S_PARTITION_SIZE          (0x2B000) /* S partition */
+#define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
@@ -179,10 +179,6 @@
 #define PS_NBR_OF_SECTORS  (FLASH_PS_AREA_SIZE / PS_SECTOR_SIZE)
 /* Specifies the smallest flash programmable unit in bytes */
 #define PS_FLASH_PROGRAM_UNIT  0x8
-/* The maximum asset size to be stored in the PS area */
-#define PS_MAX_ASSET_SIZE      2048
-/* The maximum number of assets to be stored in the PS area */
-#define PS_NUM_ASSETS          10
 
 #define ITS_FLASH_DEV_NAME TFM_Driver_FLASH0
 
@@ -198,15 +194,6 @@
 #define ITS_SECTORS_PER_BLOCK   (0x1)
 /* Specifies the smallest flash programmable unit in bytes */
 #define ITS_FLASH_PROGRAM_UNIT  (0x8)
-/* The maximum asset size to be stored in the ITS area */
-#ifdef PSA_API_TEST_CRYPTO
-/* Need larger asset size for PSA API Crypto compliance suite */
-#define ITS_MAX_ASSET_SIZE      (1229)
-#else
-#define ITS_MAX_ASSET_SIZE      (512)
-#endif
-/* The maximum number of assets to be stored in the ITS area */
-#define ITS_NUM_ASSETS          (10)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

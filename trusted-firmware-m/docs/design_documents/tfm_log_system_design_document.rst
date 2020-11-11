@@ -46,17 +46,20 @@ Level Control
 Three log levels for SPM log system are defined:
 
   - TFM_SPM_LOG_LEVEL_DEBUG
-  - TFM_SPM_LOG_LEVEL_RELEASE
+  - TFM_SPM_LOG_LEVEL_INFO
+  - TFM_SPM_LOG_LEVEL_ERROR
   - TFM_SPM_LOG_LEVEL_SILENCE
 
 Then a macro ``TFM_SPM_LOG_LEVEL`` is defined as an indicator, it should
-be equal to one of the three log levels.
+be equal to one of the four log levels.
 
 API Definition
 --------------
-The following three APIs output a combined message with 'msg' and 'val' in HEX
-string. This is useful for outputting digits. As SPM is a constrained module,
-rich formatting is not supported in it.
+The following three APIs LOG APIs output the given 'msg' with hexadecimal
+formatted 'val' together. These APIs provide constrained ability to output
+numbers inside SPM. The 'msg' can be skipped with giving an empty string like
+"". And these APIs supports constant 'msg' string only, giving a runtime string
+as parameter 'msg' would potentially cause a runtime error.
 
   SPMLOG_DBGMSGVAL(msg, val);
 
@@ -64,21 +67,28 @@ rich formatting is not supported in it.
 
   SPMLOG_ERRMSGVAL(msg, val);
 
-A wrapper layer API is added to combine the message and the value, and call the
-HAL API ``tfm_hal_output_spm_log``.
+A C-function needs to work as an underlayer for these APIs as string formatting
+is required. Check 'spm_log_msgval' for details.
 
 .. code-block:: c
 
-  /*
-   * SPM output API to combine message and value together as a joint message,
-   * and call the HAL API tfm_hal_output_spm_log.
-   * msg:   a message in HEX string
-   * len:   the length of the message
-   * value: a value need to be output
+  /**
+   * brief Output the given message plus one value as hexadecimal. The message
+   *       can be skipped if the 'msg' is 'NULL' or 'len' equals 0. The
+   *       formatted hexadecimal string for 'value' has a '0x' prefix and
+   *       leading zeros are not stripped. This function rely on HAL API
+   *       'tfm_hal_output_spm_log' to output the formatted string.
+   *
+   * \param[in]  msg    A string message
+   * \param[in]  len    The length of the message
+   * \param[in]  value  A value need to be output
+   *
+   * \retval >=0        Number of chars output.
+   * \retval <0         TFM HAL error code.
    */
-  spm_log_msgval(const char *msg, size_t len, uint32_t value)
+  int32_t  spm_log_msgval(const char *msg, size_t len, uint32_t value)
 
-The following three APIs output a message in HEX string.
+The following three APIs output a message in string.
 
   SPMLOG_DBGMSG(msg);
 
@@ -88,21 +98,21 @@ The following three APIs output a message in HEX string.
 
 Here is a table about the effective APIs with different SPM log level.
 
-+------------------+-------------------------+---------------------------+---------------------------+
-|                  | TFM_SPM_LOG_LEVEL_DEBUG | TFM_SPM_LOG_LEVEL_RELEASE | TFM_SPM_LOG_LEVEL_SILENCE |
-+==================+=========================+===========================+===========================+
-| SPMLOG_DBGMSGVAL |           Yes           |             No            |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_INFMSGVAL |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_ERRMSGVAL |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_DBGMSG    |           Yes           |             No            |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_INFMSG    |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
-| SPMLOG_ERRMSG    |           Yes           |             Yes           |             No            |
-+------------------+-------------------------+---------------------------+---------------------------+
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+|                  | TFM_SPM_LOG_LEVEL_DEBUG | TFM_SPM_LOG_LEVEL_INFO    | TFM_SPM_LOG_LEVEL_ERROR   | TFM_SPM_LOG_LEVEL_SILENCE   |
++==================+=========================+===========================+===========================+=============================+
+| SPMLOG_DBGMSGVAL |           Yes           |             No            |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_INFMSGVAL |           Yes           |             Yes           |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_ERRMSGVAL |           Yes           |             Yes           |             Yes           |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_DBGMSG    |           Yes           |             No            |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_INFMSG    |           Yes           |             Yes           |             No            |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
+| SPMLOG_ERRMSG    |           Yes           |             Yes           |             Yes           |            No               |
++------------------+-------------------------+---------------------------+---------------------------+-----------------------------+
 
 HAL API
 -------
@@ -111,7 +121,7 @@ Define HAL API for SPM log system:
 .. code-block:: c
 
   /* SPM log HAL API */
-  int32_t tfm_hal_output_spm_log(const unsigned char *str, uint32_t len);
+  int32_t tfm_hal_output_spm_log(const char *str, uint32_t len);
 
 Take debug message as an example:
 
@@ -132,11 +142,12 @@ Level Control
 Three log levels for partition log system are defined:
 
   - TFM_PARTITION_LOG_LEVEL_DEBUG
-  - TFM_PARTITION_LOG_LEVEL_RELEASE
+  - TFM_PARTITION_LOG_LEVEL_INFO
+  - TFM_PARTITION_LOG_LEVEL_ERROR
   - TFM_PARTITION_LOG_LEVEL_SILENCE
 
 Then a macro ``TFM_PARTITION_LOG_LEVEL`` is defined as an indicator. It should
-be equal to one of the three log levels and it is an overall setting for all
+be equal to one of the four log levels and it is an overall setting for all
 partitions.
 
 Log Format
@@ -164,15 +175,15 @@ Define partition log APIs:
 
 Here is a table about the effective APIs with different partition log level.
 
-+------------+-------------------------------+---------------------------------+---------------------------------+
-|            | TFM_PARTITION_LOG_LEVEL_DEBUG | TFM_PARTITION_LOG_LEVEL_RELEASE | TFM_PARTITION_LOG_LEVEL_SILENCE |
-+============+===============================+=================================+=================================+
-| LOG_DBGFMT |              Yes              |                No               |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
-| LOG_INFFMT |              Yes              |                Yes              |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
-| LOG_ERRFMT |              Yes              |                Yes              |                No               |
-+------------+-------------------------------+---------------------------------+---------------------------------+
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+|            | TFM_PARTITION_LOG_LEVEL_DEBUG | TFM_PARTITION_LOG_LEVEL_INFO    | TFM_PARTITION_LOG_LEVEL_ERROR   | TFM_PARTITION_LOG_LEVEL_SILENCE |
++============+===============================+=================================+=================================+=================================+
+| LOG_DBGFMT |              Yes              |                No               |                No               |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+| LOG_INFFMT |              Yes              |                Yes              |                No               |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
+| LOG_ERRFMT |              Yes              |                Yes              |                Yes              |               No                |
++------------+-------------------------------+---------------------------------+---------------------------------+---------------------------------+
 
 HAL API
 -------

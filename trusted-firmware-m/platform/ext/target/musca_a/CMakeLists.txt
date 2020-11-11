@@ -61,11 +61,6 @@ if(BL2)
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_bl2.icf>
     )
-    target_compile_definitions(bl2
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
-    )
 endif()
 
 #========================= Platform Secure ====================================#
@@ -80,6 +75,7 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        Libraries
 )
 
 target_sources(platform_s
@@ -97,23 +93,20 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/musca_a1_scc_drv.c
         spm_hal.c
+        tfm_hal_isolation.c
         target_cfg.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        Libraries/mt25ql_flash_lib.c
 )
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_CLEAR_BSS_MULTIPLE>
-        $<$<C_COMPILER_ID:GNU>:__STARTUP_COPY_MULTIPLE>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -122,7 +115,6 @@ target_sources(platform_ns
     PRIVATE
         Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
-        Native_Driver/musca_a1_scc_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c

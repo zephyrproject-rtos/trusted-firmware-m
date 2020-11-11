@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -76,5 +76,17 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
  */
 void tfm_get_ns_mem_region_attr(const void *p, size_t s,
                                 struct mem_attr_info_t *p_attr);
+
+/**
+ * \brief Check whether a memory access is allowed to access to a memory range
+ *
+ * \param[in] p      The start address of the range to check
+ * \param[in] s      The size of the range to check
+ * \param[in] attr   The attributes indicating the access permissions.
+ *
+ * \return TFM_SUCCESS if the access is allowed,
+ *         TFM_ERROR_GENERIC otherwise.
+ */
+int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr);
 
 #endif /* __TFM_MULTI_CORE_H__ */

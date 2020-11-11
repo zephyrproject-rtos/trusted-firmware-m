@@ -75,4 +75,42 @@ const struct tfm_plat_rotpk_t device_rotpk[] = {
 #endif
 };
 const uint32_t rotpk_key_cnt = MCUBOOT_IMAGE_NUMBER;
+
+/**
+ * \brief Copy the key to the destination buffer
+ *
+ * \param[out]  p_dst  Pointer to buffer where to store the key
+ * \param[in]   p_src  Pointer to the key
+ * \param[in]   size   Length of the key
+ */
+static inline void copy_key(uint8_t *p_dst, const uint8_t *p_src, size_t size)
+{
+    uint32_t i;
+
+    for (i = size; i > 0; i--) {
+        *p_dst = *p_src;
+        p_src++;
+        p_dst++;
+    }
+}
+
+enum tfm_plat_err_t
+tfm_plat_get_rotpk_hash(uint8_t image_id,
+                        uint8_t *rotpk_hash,
+                        uint32_t *rotpk_hash_size)
+{
+    if(*rotpk_hash_size < ROTPK_HASH_LEN) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    if (image_id >= rotpk_key_cnt) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    *rotpk_hash_size = ROTPK_HASH_LEN;
+    copy_key(rotpk_hash, device_rotpk[image_id].key_hash, *rotpk_hash_size);
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 #endif /* BL2 */

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "cmsis_compiler.h"
+#include "utilities.h"
 
 #if !TFM_MULTI_CORE_TOPOLOGY
 #error "Armv6-M/Armv7-M can only support multi-core TF-M now."
@@ -97,6 +98,19 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
+ * \brief Seal the thread stack.
+ *
+ * \param[in] stk        Thread stack address.
+ *
+ * \retval stack         Updated thread stack address.
+ */
+__STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
+{
+    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    return stk;
+}
+
+/**
  * \brief Update architecture context value into hardware
  *
  * \param[in] p_actx        Pointer of context data
@@ -107,11 +121,11 @@ __STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
 }
 
 /**
- * \brief Set MSP limit value.
+ * \brief Secure the MSP
  *
  * \param[in] msplim        MSP limit value to be written.
  */
-__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
 {
     /*
      * Defined as an empty function now.
