@@ -61,9 +61,7 @@ versions are:
 CMake
 *****
 
-The build-system is CMake based and supports the versions 3.13 or higher.
-Please check `Exceptions and special cases`_ section if you need a higher
-version of CMake.
+The build-system is CMake based and supports the version 3.15 or higher.
 
     - Please use the latest build version available.
     - Recent versions of CMake can be downloaded from
@@ -347,12 +345,6 @@ ArmClang
     - Arm compiler specific environment variable may need updating based on
       specific products and licenses as explained in
       `product-and-toolkit-configuration <https://developer.arm.com/products/software-development-tools/license-management/resources/product-and-toolkit-configuration>`__.
-
-    - ARMClang requires CMake version 3.15 or higher
-
-IAR toolchain
-=============
-    - IAR requires CMake version 3.14 or higher.
 
 MikTeX
 ======
