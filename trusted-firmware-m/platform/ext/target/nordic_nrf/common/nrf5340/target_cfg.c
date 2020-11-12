@@ -22,7 +22,10 @@
 
 #include <spu.h>
 #include <nrfx.h>
+#include <hal/nrf_gpio.h>
 
+#define PIN_XL1 0
+#define PIN_XL2 1
 
 struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
         NRF_TIMER0_S_BASE,
@@ -269,6 +272,14 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     /* GPIO pin configuration (P0 and P1 ports) */
     spu_gpio_config_non_secure(0, false);
     spu_gpio_config_non_secure(1, false);
+
+    /* Configure properly the XL1 and XL2 pins so that the low-frequency crystal
+     * oscillator (LFXO) can be used.
+     * This configuration can be done only from secure code, as otherwise those
+     * register fields are not accessible.  That's why it is placed here.
+     */
+    nrf_gpio_pin_mcu_select(PIN_XL1, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
+    nrf_gpio_pin_mcu_select(PIN_XL2, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
