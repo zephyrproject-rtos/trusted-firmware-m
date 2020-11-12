@@ -112,7 +112,7 @@ static psa_status_t ps_read_object(enum read_type_t type)
      */
     if (g_ps_object.header.fid != g_obj_tbl_info.fid ||
         g_ps_object.header.version != g_obj_tbl_info.version) {
-        return PSA_PS_ERROR_DATA_CORRUPT;
+        return PSA_ERROR_DATA_CORRUPT;
     }
 
     /* Read object data if any */
