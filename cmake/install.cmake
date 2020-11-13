@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,6 +34,9 @@ install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
 
 install(FILES       ${INTERFACE_INC_DIR}/os_wrapper/common.h
                     ${INTERFACE_INC_DIR}/os_wrapper/mutex.h
+                    ${INTERFACE_INC_DIR}/os_wrapper/semaphore.h
+                    ${INTERFACE_INC_DIR}/os_wrapper/thread.h
+                    ${INTERFACE_INC_DIR}/os_wrapper/tick.h
         DESTINATION ${EXPORT_INC_DIR}/os_wrapper)
 
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest/sid.h
