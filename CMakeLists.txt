@@ -33,9 +33,10 @@
 #                        ISOLATION_LEVEL 2
 #                        REGRESSION
 #                        BL2 True
+#                        BUILD_PROFILE profile_small
 function(trusted_firmware_build)
   set(options IPC REGRESSION)
-  set(oneValueArgs BINARY_DIR BOARD OUT_INCLUDE_PATH BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE)
+  set(oneValueArgs BINARY_DIR BOARD OUT_INCLUDE_PATH BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE BUILD_PROFILE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
   if(DEFINED TFM_BL2)
@@ -61,6 +62,11 @@ function(trusted_firmware_build)
   else()
     set(TFM_CMAKE_BUILD_TYPE_ARG -DCMAKE_BUILD_TYPE=RelWithDebInfo)
   endif()
+
+  if(DEFINED TFM_BUILD_PROFILE)
+    set(TFM_PROFILE_ARG -DTFM_PROFILE=${TFM_BUILD_PROFILE})
+  endif()
+
 
   set(VENEERS_FILE ${TFM_BINARY_DIR}/secure_fw/s_veneers.o)
   set(${TFM_OUT_VENEERS_FILE} ${VENEERS_FILE} PARENT_SCOPE)
@@ -97,6 +103,7 @@ function(trusted_firmware_build)
                ${TFM_IPC_ARG}
                ${TFM_ISOLATION_LEVEL_ARG}
                ${TFM_REGRESSION_ARG}
+               ${TFM_PROFILE_ARG}
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
                -DTFM_TOOLCHAIN_PATH=${TFM_TOOLCHAIN_PATH}
                -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
