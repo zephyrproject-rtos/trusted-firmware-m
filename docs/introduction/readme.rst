@@ -188,6 +188,10 @@ Version history
 | v1.1        | 2020-07-15   | 1.1 release        | 1f960947          |
 +-------------+--------------+--------------------+-------------------+
 
+Please refer to
+:ref:`docs/contributing/release_process:Release Version Scheme` for interpreting
+version numbers.
+
 .. _Cortex-M33: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m33
 .. _Cortex-M23: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m23
 .. _Cortex-M55: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m55

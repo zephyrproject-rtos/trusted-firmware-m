@@ -25,6 +25,18 @@ issues found, additional release candidates may be created to fix the issues.
 Although this document specifies the release cadence, this does not preclude
 an adhoc release for specific project requirements.
 
+Release Version Scheme
+----------------------
+
+Trusted Firmware-M uses a semantic versioning scheme. A version number is
+compiled as a dot separated set of numbers:
+
+**TF-Mv<MAJOR>.<MINOR>.<HOTFIX>**
+
+- <MAJOR>: Major release version for significant feature and API changes.
+- <MINOR>: Minor release version for incremental features and API changes.
+- <HOTFIX>: Used only for backporting **critical bug fix/security patches**.
+
 --------------
 
 *Copyright (c) 2020, Arm Limited. All rights reserved.*
