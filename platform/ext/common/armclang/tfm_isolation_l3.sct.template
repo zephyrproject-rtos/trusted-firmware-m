@@ -100,7 +100,7 @@ LR_CODE S_CODE_START {
         device_definition.o (+RO)
         *(SFN)
         *armlib* (+RO)
-        *libtfmsprt.a (+RO)
+        *libtfm_sprt.a (+RO)
         *psa_client.* (+RO)
         *psa_service.* (+RO)
         *psa_lifecycle.* (+RO)

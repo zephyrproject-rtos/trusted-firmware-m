@@ -308,17 +308,14 @@ of SPM and SPRTL implementation. The pseudo code of a tooling result:
 Implementation
 ==============
 The SPRTL C Runtime sources are put under:
-'$TFM_ROOT/secure_fw/lib/sprt/'
+'$TFM_ROOT/secure_fw/partitions/lib/sprt/'
 
-All sources with the fixed prefix for easy symbol collecting:
-'tfm\_libsprt\_c\_'
-
-The output of this folder is a static library named as 'libtfmsprt.a'. The code
-of 'libtfmsprt.a' is put into a dedicated section so that a hardware protected
+The output of this folder is a static library named as 'libtfm_sprt.a'. The code
+of 'libtfm_sprt.a' is put into a dedicated section so that a hardware protected
 region can be applied to contain it.
 
 The RoT Service API are put under service interface folder. These APIs are
-marked with the same section attribute where 'libtfmsprt.a' is put.
+marked with the same section attribute where 'libtfm_sprt.a' is put.
 
 The Formatting API - 'printf' and variants
 ------------------------------------------
