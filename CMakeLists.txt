@@ -34,6 +34,25 @@ function(trusted_firmware_build)
   set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE BUILD_PROFILE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
+  # Determine TF-M platform target
+  if(CONFIG_TFM_BOARD_LPCXPRESSO55S69)
+    set(TFM_PLATFORM_DIR "nxp/lpcxpresso55s69")
+  elseif(CONFIG_TFM_BOARD_MPS2_AN521)
+    set(TFM_PLATFORM_DIR "mps2/an521")
+  elseif(CONFIG_TFM_BOARD_MUSCA_B1)
+    set(TFM_PLATFORM_DIR "musca_b1")
+  elseif(CONFIG_TFM_BOARD_NRF5340DK_NRF5340)
+    set(TFM_PLATFORM_DIR "nordic_nrf/nrf5340dk_nrf5340_cpuapp")
+  elseif(CONFIG_TFM_BOARD_NRF5340PDK_NRF5340)
+    set(TFM_PLATFORM_DIR "nordic_nrf/nrf5340pdk_nrf5340_cpuapp")
+  elseif(CONFIG_TFM_BOARD_NRF9160DK_NRF9160)
+    set(TFM_PLATFORM_DIR "nordic_nrf/nrf9160dk_nrf9160")
+  elseif(CONFIG_TFM_BOARD_BOARD_NUCLEO_L552ZE_Q)
+    set(TFM_PLATFORM_DIR "stm/nucleo_l552ze_q")
+  else()
+    message(FATAL_ERROR "Unsupported TFM BOARD")
+  endif()
+
   if(DEFINED TFM_BL2)
     set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
   endif()
@@ -98,7 +117,7 @@ function(trusted_firmware_build)
     SOURCE_DIR ${ZEPHYR_TFM_MODULE_DIR}/trusted-firmware-m
     BINARY_DIR ${TFM_BINARY_DIR}
     CMAKE_ARGS -DTFM_TOOLCHAIN_FILE=${ZEPHYR_TFM_MODULE_DIR}/${TFM_TOOLCHAIN_FILE}
-               -DTFM_PLATFORM=${TFM_BOARD}
+               -DTFM_PLATFORM=${TFM_PLATFORM_DIR}
                -DCROSS_COMPILE=${TFM_TOOLCHAIN_PATH}/${TFM_TOOLCHAIN_PREFIX}
                ${TFM_CMAKE_BUILD_TYPE_ARG}
                ${TFM_BL2_ARG}
