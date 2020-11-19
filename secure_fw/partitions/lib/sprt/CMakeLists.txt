@@ -31,3 +31,8 @@ target_link_libraries(tfm_sprt
     tfm_boot_status
     tfm_secure_api
 )
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_LOG_LEVEL=${TFM_PARTITION_LOG_LEVEL}
+)

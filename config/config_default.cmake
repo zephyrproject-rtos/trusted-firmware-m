@@ -27,6 +27,7 @@ set(TFM_EXTRA_MANIFEST_LIST_PATH        ""          CACHE PATH      "Path to ext
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
 
 set(TFM_SPM_LOG_LEVEL                   2           CACHE STRING    "Set default SPM log level as INFO level")
+set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_INFO    CACHE STRING    "Set default Secure Partition log level as INFO level")
 
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
 set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to repo which shares code with secure firmware")
