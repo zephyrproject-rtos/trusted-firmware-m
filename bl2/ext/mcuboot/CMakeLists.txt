@@ -173,7 +173,6 @@ endif()
 
 if(NS)
     add_custom_target(tfm_s_ns_signed_bin
-        ALL
         SOURCES tfm_s_ns_signed.bin
     )
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
@@ -221,5 +220,5 @@ endif()
 
 add_custom_target(signed_images
     ALL
-    DEPENDS $<$<BOOL:${NS}>:tfm_s_ns_signed_bin>
+    DEPENDS $<IF:$<BOOL:${NS}>,tfm_s_ns_signed_bin,tfm_s_signed_bin>
 )
