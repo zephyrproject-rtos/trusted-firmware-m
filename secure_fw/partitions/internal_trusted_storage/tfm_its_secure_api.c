@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,7 +17,6 @@
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-__attribute__((section("SFN")))
 psa_status_t psa_its_set(psa_storage_uid_t uid,
                          size_t data_length,
                          const void *p_data,
@@ -60,7 +59,6 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_its_get(psa_storage_uid_t uid,
                          size_t data_offset,
                          size_t data_size,
@@ -116,7 +114,6 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_its_get_info(psa_storage_uid_t uid,
                               struct psa_storage_info_t *p_info)
 {
@@ -160,7 +157,6 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_its_remove(psa_storage_uid_t uid)
 {
     psa_status_t status;

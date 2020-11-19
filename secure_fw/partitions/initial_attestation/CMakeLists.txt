@@ -69,7 +69,7 @@ target_include_directories(tfm_attestation_defs
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_attest_secure_api.c
 )

@@ -76,7 +76,7 @@ message(STATUS "---------- Display crypto configuration - stop ---------------")
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_crypto_secure_api.c
 )
@@ -90,7 +90,7 @@ set_source_files_properties(tfm_partition_crypto_secure_api.c
 
 # Pick up configuration definitions
 target_link_libraries(tfm_secure_api
-    PRIVATE
+    INTERFACE
         tfm_partition_crypto
 )
 

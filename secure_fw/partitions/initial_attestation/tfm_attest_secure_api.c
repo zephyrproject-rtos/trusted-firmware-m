@@ -17,7 +17,6 @@
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-__attribute__((section("SFN")))
 psa_status_t
 psa_initial_attest_get_token(const uint8_t *auth_challenge,
                              size_t         challenge_size,
@@ -56,7 +55,6 @@ psa_initial_attest_get_token(const uint8_t *auth_challenge,
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t
 psa_initial_attest_get_token_size(size_t challenge_size,
                                   size_t *token_size)
@@ -90,7 +88,6 @@ psa_initial_attest_get_token_size(size_t challenge_size,
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t
 tfm_initial_attest_get_public_key(uint8_t          *public_key,
                                   size_t            public_key_buf_size,

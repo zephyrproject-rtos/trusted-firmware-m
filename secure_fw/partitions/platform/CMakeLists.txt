@@ -33,7 +33,7 @@ target_link_libraries(tfm_partition_platform
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_platform_secure_api.c
 )

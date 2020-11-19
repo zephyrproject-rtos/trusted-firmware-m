@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.15)
 
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)
-add_library(tfm_secure_api STATIC)
+add_library(tfm_secure_api INTERFACE)
 add_library(tfm_partitions INTERFACE)
 # Lots of seperate things need to know which partitions are enabled, so this
 # meta-target is provided so the related compile definitions can be collected in
@@ -67,16 +67,13 @@ add_convert_to_bin_target(tfm_s)
 ############################ Secure API ########################################
 
 target_include_directories(tfm_secure_api
-    PUBLIC
+    INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 target_link_libraries(tfm_secure_api
-    PUBLIC
+    INTERFACE
         tfm_arch
-    PRIVATE
-        psa_interface
-        platform_s
 )
 
 set_source_files_properties(

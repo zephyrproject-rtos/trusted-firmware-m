@@ -49,7 +49,7 @@ target_include_directories(tfm_audit_logging_defs
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_audit_secure_api.c
 )
