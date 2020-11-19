@@ -80,10 +80,23 @@ macro(tfm_toolchain_set_processor_arch)
     set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
     set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
+    if (DEFINED TFM_SYSTEM_MVE)
+        if(NOT TFM_SYSTEM_MVE)
+            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+        endif()
+    endif()
+
+    if (DEFINED TFM_SYSTEM_FP)
+        if(NOT TFM_SYSTEM_FP)
+            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+        endif()
+    endif()
+
     if (DEFINED TFM_SYSTEM_DSP)
         if(NOT TFM_SYSTEM_DSP)
             string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
         endif()
+    endif()
 
     # Cmake's ARMClang support has several issues with compiler validation. To
     # avoid these, we set the list of supported -mcpu and -march variables to
@@ -93,7 +106,6 @@ macro(tfm_toolchain_set_processor_arch)
     set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_ASM_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
-    endif()
 endmacro()
 
 macro(tfm_toolchain_reload_compiler)
@@ -126,6 +138,9 @@ macro(tfm_toolchain_reload_compiler)
     # And uses different syntax for +nofp
     string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
     string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+
+    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
     # Workaround for issues with --depend-single-line with armasm and Ninja
     if (CMAKE_GENERATOR STREQUAL "Ninja")
