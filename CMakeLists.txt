@@ -49,7 +49,7 @@ function(trusted_firmware_build)
   endif()
 
   if(DEFINED TFM_REGRESSION)
-    set(TFM_REGRESSION_ARG -DTEST_S=ON -DTEST_NS=ON)
+    set(TFM_REGRESSION_ARG -DTEST_S=ON)
   endif()
 
   if(DEFINED TFM_CMAKE_BUILD_TYPE)
