@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,14 @@ enum ppc_bank_e
     PPC_SP_MAIN0 = 0,
     PPC_SP_MAIN_EXP0 = 1,
     PPC_SP_MAIN_EXP1 = 2,
-    PPC_SP_PERIPH0 = 3,
-    PPC_SP_PERIPH1 = 4,
-    PPC_SP_PERIPH_EXP0 = 5,
-    PPC_SP_PERIPH_EXP1 = 6,
-    PPC_SP_PERIPH_EXP2 = 7,
+    PPC_SP_MAIN_EXP2 = 3,
+    PPC_SP_MAIN_EXP3 = 4,
+    PPC_SP_PERIPH0 = 5,
+    PPC_SP_PERIPH1 = 6,
+    PPC_SP_PERIPH_EXP0 = 7,
+    PPC_SP_PERIPH_EXP1 = 8,
+    PPC_SP_PERIPH_EXP2 = 9,
+    PPC_SP_PERIPH_EXP3 = 10,
 };
 
 /**

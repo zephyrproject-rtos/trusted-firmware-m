@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2021 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 /**
  * \file platform_base_address.h
- * \brief This file defines all the peripheral base addresses for MPS3 SSE-300
- *        Ethos-U55 FVP platform.
+ * \brief This file defines all the peripheral base addresses for AN547 MPS3 SSE-300 +
+ *        Ethos-U55 platform.
  */
 
 #ifndef __PLATFORM_BASE_ADDRESS_H__
@@ -28,11 +28,11 @@
 #define ITCM_BASE_NS                     0x00000000 /* Instruction TCM Non-Secure base address */
 #define SRAM_BASE_NS                     0x01000000 /* CODE SRAM Non-Secure base address */
 #define DTCM0_BASE_NS                    0x20000000 /* Data TCM block 0 Non-Secure base address */
-#define DTCM1_BASE_NS                    0x20100000 /* Data TCM block 1 Non-Secure base address */
-#define DTCM2_BASE_NS                    0x20200000 /* Data TCM block 2 Non-Secure base address */
-#define DTCM3_BASE_NS                    0x20300000 /* Data TCM block 3 Non-Secure base address */
+#define DTCM1_BASE_NS                    0x20020000 /* Data TCM block 1 Non-Secure base address */
+#define DTCM2_BASE_NS                    0x20040000 /* Data TCM block 2 Non-Secure base address */
+#define DTCM3_BASE_NS                    0x20060000 /* Data TCM block 3 Non-Secure base address */
 #define ISRAM0_BASE_NS                   0x21000000 /* Internal SRAM Area Non-Secure base address */
-#define ISRAM1_BASE_NS                   0x21040000 /* Internal SRAM Area Non-Secure base address */
+#define ISRAM1_BASE_NS                   0x21200000 /* Internal SRAM Area Non-Secure base address */
 #define QSPI_SRAM_BASE_NS                0x28000000 /* QSPI SRAM Non-Secure base address */
 /* Non-Secure Subsystem peripheral region */
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
@@ -71,7 +71,8 @@
 #define SYSCNTR_READ_BASE_NS             0x48101000 /* System Counter Read Secure base address */
 /* Non-Secure MSTEXPPIHL Peripheral region */
 #define ETHOS_U55_APB_BASE_NS            0x48102000 /* Ethos-U55 APB Non-Secure base address */
-#define U55_TIMING_ADAPTER_BASE_NS       0x48103000 /* Ethos-U55 Timing Adapter registers Non-Secure base address */
+#define U55_TIMING_ADAPTER_0_BASE_NS     0x48103000 /* Ethos-U55 Timing Adapter 0 APB registers Non-Secure base address */
+#define U55_TIMING_ADAPTER_1_BASE_NS     0x48103200 /* Ethos-U55 Timing Adapter 1 APB registers Non-Secure base address */
 #define FPGA_SBCon_I2C_TOUCH_BASE_NS     0x49200000 /* FPGA - SBCon I2C (Touch) Non-Secure base address */
 #define FPGA_SBCon_I2C_AUDIO_BASE_NS     0x49201000 /* FPGA - SBCon I2C (Audio Conf) Non-Secure base address */
 #define FPGA_SPI_ADC_BASE_NS             0x49202000 /* FPGA - PL022 (SPI ADC) Non-Secure base address */
@@ -93,19 +94,19 @@
 #define CLCD_Config_Reg_BASE_NS          0x4930A000 /* CLCD Config Reg Non-Secure base address */
 #define RTC_BASE_NS                      0x4930B000 /* RTC Non-Secure base address */
 #define DDR4_BLK0_BASE_NS                0x60000000 /* DDR4 block 0 Non-Secure base address */
-#define DDR4_BLK1_BASE_NS                0x80000000 /* DDR4 block 1 Non-Secure base address */
-#define DDR4_BLK2_BASE_NS                0xA0000000 /* DDR4 block 2 Non-Secure base address */
-#define DDR4_BLK3_BASE_NS                0xC0000000 /* DDR4 block 3 Non-Secure base address */
+#define DDR4_BLK2_BASE_NS                0x80000000 /* DDR4 block 2 Non-Secure base address */
+#define DDR4_BLK4_BASE_NS                0xA0000000 /* DDR4 block 4 Non-Secure base address */
+#define DDR4_BLK6_BASE_NS                0xC0000000 /* DDR4 block 6 Non-Secure base address */
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
 #define SRAM_BASE_S                      0x11000000 /* CODE SRAM Secure base address */
 #define DTCM0_BASE_S                     0x30000000 /* Data TCM block 0 Secure base address */
-#define DTCM1_BASE_S                     0x30100000 /* Data TCM block 1 Secure base address */
-#define DTCM2_BASE_S                     0x30200000 /* Data TCM block 2 Secure base address */
-#define DTCM3_BASE_S                     0x30300000 /* Data TCM block 3 Secure base address */
+#define DTCM1_BASE_S                     0x30020000 /* Data TCM block 1 Secure base address */
+#define DTCM2_BASE_S                     0x30040000 /* Data TCM block 2 Secure base address */
+#define DTCM3_BASE_S                     0x30060000 /* Data TCM block 3 Secure base address */
 #define ISRAM0_BASE_S                    0x31000000 /* Internal SRAM Area Secure base address */
-#define ISRAM1_BASE_S                    0x31040000 /* Internal SRAM Area Secure base address */
+#define ISRAM1_BASE_S                    0x31200000 /* Internal SRAM Area Secure base address */
 #define QSPI_SRAM_BASE_S                 0x38000000 /* QSPI SRAM Secure base address */
 /* Secure Subsystem peripheral region */
 #define CPU0_SECCTRL_BASE_S              0x50011000 /* CPU 0 Local Security Control Block Secure base address */
@@ -157,7 +158,8 @@
 #define SYSCNTR_READ_BASE_S              0x58101000 /* System Counter Read Secure base address */
 /* Secure MSTEXPPIHL Peripheral region */
 #define ETHOS_U55_APB_BASE_S             0x58102000 /* Ethos-U55 APB Secure base address */
-#define U55_TIMING_ADAPTER_BASE_S        0x58103000 /* Ethos-U55 Timing Adapter registers Secure base address */
+#define U55_TIMING_ADAPTER_0_BASE_S      0x58103000 /* Ethos-U55 Timing Adapter 0 APB registers Secure base address */
+#define U55_TIMING_ADAPTER_1_BASE_S      0x58103200 /* Ethos-U55 Timing Adapter 1 APB registers Secure base address */
 #define FPGA_SBCon_I2C_TOUCH_BASE_S      0x59200000 /* FPGA - SBCon I2C (Touch) Secure base address */
 #define FPGA_SBCon_I2C_AUDIO_BASE_S      0x59201000 /* FPGA - SBCon I2C (Audio Conf) Secure base address */
 #define FPGA_SPI_ADC_BASE_S              0x59202000 /* FPGA - PL022 (SPI ADC) Secure base address */
@@ -178,10 +180,10 @@
 #define UART5_BASE_S                     0x59308000 /* UART 5 Secure base address */
 #define CLCD_Config_Reg_BASE_S           0x5930A000 /* CLCD Config Reg Secure base address */
 #define RTC_BASE_S                       0x5930B000 /* RTC Secure base address */
-#define DDR4_BLK0_BASE_S                 0x70000000 /* DDR4 block 0 Secure base address */
-#define DDR4_BLK1_BASE_S                 0x90000000 /* DDR4 block 1 Secure base address */
-#define DDR4_BLK2_BASE_S                 0xB0000000 /* DDR4 block 2 Secure base address */
-#define DDR4_BLK3_BASE_S                 0xD0000000 /* DDR4 block 3 Secure base address */
+#define DDR4_BLK1_BASE_S                 0x70000000 /* DDR4 block 1 Secure base address */
+#define DDR4_BLK3_BASE_S                 0x90000000 /* DDR4 block 3 Secure base address */
+#define DDR4_BLK5_BASE_S                 0xB0000000 /* DDR4 block 5 Secure base address */
+#define DDR4_BLK7_BASE_S                 0xD0000000 /* DDR4 block 7 Secure base address */
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define SSE300_EWIC_BASE                 0xE0047000 /* External Wakeup Interrupt Controller
@@ -189,43 +191,73 @@
                                                      * if AIRCR.BFHFNMINS is set to 1 */
 
 /* Memory size definitions */
-#define ITCM_SIZE       (0x00100000) /* 1 MB */
-#define DTCM_BLK_SIZE   (0x00100000) /* 1 MB */
+#define ITCM_SIZE       (0x00080000) /* 512 kB */
+#define DTCM_BLK_SIZE   (0x00020000) /* 128 kB */
+#define DTCM_BLK_NUM    (0x4)        /* Number of DTCM blocks */
 #define SRAM_SIZE       (0x00200000) /* 2 MB */
-#define ISRAM0_SIZE     (0x00040000) /* 256 kB */
-#define ISRAM1_SIZE     (0x00040000) /* 256 kB */
+#define ISRAM0_SIZE     (0x00200000) /* 2 MB */
+#define ISRAM1_SIZE     (0x00200000) /* 2 MB */
 #define QSPI_SRAM_SIZE  (0x00800000) /* 8 MB */
 #define DDR4_BLK_SIZE   (0x10000000) /* 256 MB */
+#define DDR4_BLK_NUM    (0x8)        /* Number of DDR4 blocks */
 
 /* Defines for Driver MPC's */
 /* SRAM -- 2 MB */
 #define MPC_SRAM_RANGE_BASE_NS   (SRAM_BASE_NS)
 #define MPC_SRAM_RANGE_LIMIT_NS  (SRAM_BASE_NS + SRAM_SIZE-1)
+#define MPC_SRAM_RANGE_OFFSET_NS (0x0)
 #define MPC_SRAM_RANGE_BASE_S    (SRAM_BASE_S)
 #define MPC_SRAM_RANGE_LIMIT_S   (SRAM_BASE_S + SRAM_SIZE-1)
+#define MPC_SRAM_RANGE_OFFSET_S  (0x0)
 
 /* QSPI -- 8 MB*/
 #define MPC_QSPI_RANGE_BASE_NS   (QSPI_SRAM_BASE_NS)
 #define MPC_QSPI_RANGE_LIMIT_NS  (QSPI_SRAM_BASE_NS + QSPI_SRAM_SIZE-1)
+#define MPC_QSPI_RANGE_OFFSET_NS (0x0)
 #define MPC_QSPI_RANGE_BASE_S    (QSPI_SRAM_BASE_S)
 #define MPC_QSPI_RANGE_LIMIT_S   (QSPI_SRAM_BASE_S + QSPI_SRAM_SIZE-1)
+#define MPC_QSPI_RANGE_OFFSET_S  (0x0)
 
-/* ISRAM0 -- 256 kB*/
+/* ISRAM0 -- 2 MB*/
 #define MPC_ISRAM0_RANGE_BASE_NS   (ISRAM0_BASE_NS)
 #define MPC_ISRAM0_RANGE_LIMIT_NS  (ISRAM0_BASE_NS + ISRAM0_SIZE-1)
+#define MPC_ISRAM0_RANGE_OFFSET_NS (0x0)
 #define MPC_ISRAM0_RANGE_BASE_S    (ISRAM0_BASE_S)
 #define MPC_ISRAM0_RANGE_LIMIT_S   (ISRAM0_BASE_S + ISRAM0_SIZE-1)
+#define MPC_ISRAM0_RANGE_OFFSET_S  (0x0)
 
-/* ISRAM1 -- 256 kB*/
+/* ISRAM1 -- 2 MB*/
 #define MPC_ISRAM1_RANGE_BASE_NS   (ISRAM1_BASE_NS)
 #define MPC_ISRAM1_RANGE_LIMIT_NS  (ISRAM1_BASE_NS + ISRAM1_SIZE-1)
+#define MPC_ISRAM1_RANGE_OFFSET_NS (0x0)
 #define MPC_ISRAM1_RANGE_BASE_S    (ISRAM1_BASE_S)
 #define MPC_ISRAM1_RANGE_LIMIT_S   (ISRAM1_BASE_S + ISRAM1_SIZE-1)
+#define MPC_ISRAM1_RANGE_OFFSET_S  (0x0)
 
-/* DDR4_BLK0 -- 256 MB */
-#define MPC_DDR4_RANGE_BASE_NS   (DDR4_BLK0_BASE_NS)
-#define MPC_DDR4_RANGE_LIMIT_NS  (DDR4_BLK0_BASE_NS + ((DDR4_BLK_SIZE)-1))
-#define MPC_DDR4_RANGE_BASE_S    (DDR4_BLK0_BASE_S)
-#define MPC_DDR4_RANGE_LIMIT_S   (DDR4_BLK0_BASE_S + ((DDR4_BLK_SIZE)-1))
+/* DDR4 -- 2GB (8 * 256 MB) */
+#define MPC_DDR4_BLK0_RANGE_BASE_NS   (DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK0_RANGE_LIMIT_NS  (DDR4_BLK0_BASE_NS + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK0_RANGE_OFFSET_NS (0x0)
+#define MPC_DDR4_BLK1_RANGE_BASE_S    (DDR4_BLK1_BASE_S)
+#define MPC_DDR4_BLK1_RANGE_LIMIT_S   (DDR4_BLK1_BASE_S + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK1_RANGE_OFFSET_S  (DDR4_BLK1_BASE_S - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK2_RANGE_BASE_NS   (DDR4_BLK2_BASE_NS)
+#define MPC_DDR4_BLK2_RANGE_LIMIT_NS  (DDR4_BLK2_BASE_NS + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK2_RANGE_OFFSET_NS (DDR4_BLK2_BASE_NS - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK3_RANGE_BASE_S    (DDR4_BLK3_BASE_S)
+#define MPC_DDR4_BLK3_RANGE_LIMIT_S   (DDR4_BLK3_BASE_S + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK3_RANGE_OFFSET_S  (DDR4_BLK3_BASE_S - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK4_RANGE_BASE_NS   (DDR4_BLK4_BASE_NS)
+#define MPC_DDR4_BLK4_RANGE_LIMIT_NS  (DDR4_BLK4_BASE_NS + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK4_RANGE_OFFSET_NS (DDR4_BLK4_BASE_NS - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK5_RANGE_BASE_S    (DDR4_BLK5_BASE_S)
+#define MPC_DDR4_BLK5_RANGE_LIMIT_S   (DDR4_BLK5_BASE_S + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK5_RANGE_OFFSET_S  (DDR4_BLK5_BASE_S - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK6_RANGE_BASE_NS   (DDR4_BLK6_BASE_NS)
+#define MPC_DDR4_BLK6_RANGE_LIMIT_NS  (DDR4_BLK6_BASE_NS + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK6_RANGE_OFFSET_NS (DDR4_BLK6_BASE_NS - DDR4_BLK0_BASE_NS)
+#define MPC_DDR4_BLK7_RANGE_BASE_S    (DDR4_BLK7_BASE_S)
+#define MPC_DDR4_BLK7_RANGE_LIMIT_S   (DDR4_BLK7_BASE_S + ((DDR4_BLK_SIZE)-1))
+#define MPC_DDR4_BLK7_RANGE_OFFSET_S  (DDR4_BLK7_BASE_S - DDR4_BLK0_BASE_NS)
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

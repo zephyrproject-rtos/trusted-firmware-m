@@ -27,6 +27,7 @@ The hardware platforms currently supported are:
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
+- Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
 - nRF9160 DK (Cortex-M33)
 - nRF5340 PDK/DK (Cortex-M33 Application MCU)
@@ -39,6 +40,9 @@ is used to store source and header files which are platform generic.
 
 More information about subsystems supported by the MPS2+ board can be found in:
 `MPS2+ homepage <https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2>`__
+
+More information about subsystems supported by the MPS3 board can be found in:
+`MPS3 homepage <https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps3>`__
 
 More information about the Musca-A test chip board can be found in:
 `Musca-A homepage <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__

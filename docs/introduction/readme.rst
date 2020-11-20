@@ -116,6 +116,8 @@ Platforms supported
 ###################
     - Cortex-M55 system:
 
+        - `FPGA image loaded on MPS3 board (AN547).
+          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps3>`_
         - `Fast model FVP_SSE300_MPS2.
           <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
 

@@ -19,7 +19,7 @@
 
 #include "platform_base_address.h"
 
-/* Flash layout on fvp_sse300_mps3 with BL2 (multiple image boot):
+/* Flash layout on AN547 with BL2 (multiple image boot):
  *
  * 0x0000_0000 Secure image     primary slot (384 KB)
  * 0x0006_0000 Non-secure image primary slot (384 KB)
@@ -27,11 +27,11 @@
  * 0x0012_0000 Non-secure image secondary slot (384 KB)
  * 0x0018_0000 Scratch area (384 KB)
  * 0x001E_0000 Protected Storage Area (20 KB)
- * 0x001E_8000 Internal Trusted Storage Area (16 KB)
- * 0x001E_D800 NV counters area (4 KB)
+ * 0x001E_5000 Internal Trusted Storage Area (16 KB)
+ * 0x001E_9000 NV counters area (4 KB)
  * 0x001E_E800 Unused
  *
- * Flash layout on fvp_sse300_mps3 with BL2 (single image boot):
+ * Flash layout on AN547 with BL2 (single image boot):
  *
  * 0x0000_0000 Primary image area (768 KB):
  *    0x0000_0000 Secure     image primary (384 KB)
@@ -134,9 +134,9 @@
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
 
-/* mpc_init_cfg function in target_cfg.c expects that all the images are located
- * in SSRAM2 device, and those do not overlap to SSRAM3. */
-#if ( FLASH_AREA_SCRATCH_OFFSET > SRAM_SIZE)
+/* mpc_init_cfg function in target_cfg.c expects that all the images can fit
+ * in SRAM area. */
+#if ( FLASH_AREA_SCRATCH_OFFSET + FLASH_AREA_SCRATCH_SIZE > SRAM_SIZE)
 #error "Out of SRAM memory!"
 #endif
 

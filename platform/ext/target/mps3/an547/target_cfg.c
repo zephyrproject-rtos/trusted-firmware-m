@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,6 @@
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -67,6 +62,8 @@ const struct memory_region_limits memory_regions = {
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */
 #define RAMNSC  0x2
+/* Configures the CODE region to NS callable in sacfg block's nsccfg register */
+#define CODENSC  0x1
 
 /* Import MPC drivers */
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC;
@@ -78,11 +75,14 @@ extern ARM_DRIVER_MPC Driver_QSPI_MPC;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_MAIN0;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_MAIN_EXP0;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_MAIN_EXP1;
+extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_MAIN_EXP2;
+extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_MAIN_EXP3;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH0;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH1;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP0;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP1;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP2;
+extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
@@ -134,11 +134,14 @@ static DRIVER_PPC_SSE300 *const ppc_bank_drivers[] = {
     &Driver_PPC_SSE300_MAIN0,
     &Driver_PPC_SSE300_MAIN_EXP0,
     &Driver_PPC_SSE300_MAIN_EXP1,
+    &Driver_PPC_SSE300_MAIN_EXP2,
+    &Driver_PPC_SSE300_MAIN_EXP3,
     &Driver_PPC_SSE300_PERIPH0,
     &Driver_PPC_SSE300_PERIPH1,
     &Driver_PPC_SSE300_PERIPH_EXP0,
     &Driver_PPC_SSE300_PERIPH_EXP1,
     &Driver_PPC_SSE300_PERIPH_EXP2,
+    &Driver_PPC_SSE300_PERIPH_EXP3,
 };
 
 #define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
@@ -214,11 +217,7 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
         ERROR_MSG("Failed to Enable MPC interrupt for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_ISRAM1_MPC.EnableInterrupt();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Enable MPC interrupt for ISRAM1!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+
     ret = Driver_SRAM_MPC.EnableInterrupt();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Enable MPC interrupt for SRAM!");
@@ -234,7 +233,7 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     for (i = 0; i < PPC_BANK_COUNT; i++)  {
         ret = ppc_bank_drivers[i]->EnableInterrupt();
         if (ret != ARM_DRIVER_OK) {
-            //ERROR_MSG("Failed to Enable interrupt on PPC bank number %d!", i);
+            ERROR_MSG("Failed to Enable interrupt on PPC");
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
     }
@@ -325,8 +324,8 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (memory_regions.secondary_partition_limit
                  & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
-    /* Allows SAU to define the RAM region as a NSC */
-    sacfg->nsccfg |= RAMNSC;
+    /* Allows SAU to define the CODE region as a NSC */
+    sacfg->nsccfg |= CODENSC;
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -334,8 +333,8 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    /* ISRAM0 and ISRAM1 memories allocated for NS data, so whole range set to
-     * non-secure accesible. */
+    /* ISRAM0 is allocated for NS data, so whole range is set to non-secure
+     * accesible. */
     ret = Driver_ISRAM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
@@ -346,19 +345,6 @@ enum tfm_plat_err_t mpc_init_cfg(void)
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Configure MPC for ISRAM0!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    ret = Driver_ISRAM1_MPC.Initialize();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for ISRAM1!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    ret = Driver_ISRAM1_MPC.ConfigRegion(MPC_ISRAM1_RANGE_BASE_NS,
-                                      MPC_ISRAM1_RANGE_LIMIT_NS,
-                                      ARM_MPC_ATTR_NONSECURE);
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for ISRAM1!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -393,11 +379,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         ERROR_MSG("Failed to Lock down MPC for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_ISRAM1_MPC.LockDown();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Lock down MPC for ISRAM1!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+
     ret = Driver_SRAM_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Lock down MPC for SRAM!");
@@ -406,6 +388,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 
     /* Lock down not used MPC's */
     Driver_QSPI_MPC.LockDown();
+    Driver_ISRAM1_MPC.LockDown();
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -419,7 +402,6 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 void mpc_clear_irq(void)
 {
     Driver_ISRAM0_MPC.ClearInterrupt();
-    Driver_ISRAM1_MPC.ClearInterrupt();
     Driver_SRAM_MPC.ClearInterrupt();
 }
 
@@ -526,8 +508,11 @@ enum tfm_plat_err_t ppc_init_cfg(void)
 
     /* Initialize not used PPC drivers */
     err |= Driver_PPC_SSE300_MAIN0.Initialize();
+    err |= Driver_PPC_SSE300_MAIN_EXP2.Initialize();
+    err |= Driver_PPC_SSE300_MAIN_EXP3.Initialize();
     err |= Driver_PPC_SSE300_PERIPH_EXP0.Initialize();
     err |= Driver_PPC_SSE300_PERIPH_EXP1.Initialize();
+    err |= Driver_PPC_SSE300_PERIPH_EXP3.Initialize();
 
     /*
      * Configure the response to a security violation as a

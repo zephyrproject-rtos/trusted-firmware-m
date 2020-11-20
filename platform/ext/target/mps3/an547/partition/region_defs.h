@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,6 @@
  * token produced by initial attestation service
  */
 #define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
-
-/*
- * MPC granularity is 4 KB on SSE300_MPS3 FVP. Alignment
- * of partitions is defined in accordance with this constraint.
- */
 
 #ifdef BL2
 #ifndef LINK_TO_SECONDARY_PARTITION
@@ -91,14 +86,14 @@
 /* Secure regions */
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
-/* Secure Code stored in SSRAM2 */
+/* Secure Code stored in Code SRAM */
 #define S_CODE_START    ((SRAM_BASE_S) +  (S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 /* Secure Data stored in DTCM */
 #define S_DATA_START    (DTCM0_BASE_S)
-#define S_DATA_SIZE     (DTCM_BLK_SIZE)
+#define S_DATA_SIZE     (DTCM_BLK_SIZE * DTCM_BLK_NUM)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* CMSE Veneers region */
@@ -107,7 +102,7 @@
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
                         (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
-/* Non-Secure Code stored in SSRAM2 memory */
+/* Non-Secure Code stored in Code SRAM memory */
 #define NS_CODE_START   (SRAM_BASE_NS + (NS_IMAGE_PRIMARY_AREA_OFFSET))
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)

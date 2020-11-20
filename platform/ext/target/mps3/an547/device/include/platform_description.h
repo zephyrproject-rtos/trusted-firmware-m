@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2021 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include "cmsis.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
+#include "platform_pins.h"
 #include "system_core_init.h"
 
 #endif  /* __PLATFORM_DESCRIPTION_H__ */

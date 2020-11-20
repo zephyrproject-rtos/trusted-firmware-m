@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,38 +28,40 @@ typedef enum _IRQn_Type {
     DebugMonitor_IRQn                  = -4,   /* Debug Monitor Interrupt */
     PendSV_IRQn                        = -2,   /* Pend SV Interrupt */
     SysTick_IRQn                       = -1,   /* System Tick Interrupt */
-    NONSEC_WATCHDOG_RESET_IRQn         = 0,    /* Non-Secure Watchdog Reset
-                                                * Interrupt
+    NONSEC_WATCHDOG_RESET_REQ_IRQn     = 0,    /* Non-Secure Watchdog Reset
+                                                * Request Interrupt
                                                 */
     NONSEC_WATCHDOG_IRQn               = 1,    /* Non-Secure Watchdog Interrupt */
-    S32K_TIMER_IRQn                    = 2,    /* S32K Timer Interrupt */
+    SLOWCLK_TIMER_IRQn                 = 2,    /* SLOWCLK Timer Interrupt */
     TIMER0_IRQn                        = 3,    /* TIMER 0 Interrupt */
     TIMER1_IRQn                        = 4,    /* TIMER 1 Interrupt */
-    DUALTIMER_IRQn                     = 5,    /* Dual Timer Interrupt */
-    MHU0_IRQn                          = 6,    /* Message Handling Unit 0 */
-    MHU1_IRQn                          = 7,    /* Message Handling Unit 1 */
+    TIMER2_IRQn                        = 5,    /* TIMER 2 Interrupt */
+    /* Reserved                        = 6,       Reserved */
+    /* Reserved                        = 7,       Reserved */
+    /* Reserved                        = 8,       Reserved */
     MPC_IRQn                           = 9,    /* MPC Combined (Secure) Interrupt */
     PPC_IRQn                           = 10,   /* PPC Combined (Secure) Interrupt */
     MSC_IRQn                           = 11,   /* MSC Combined (Secure) Interrput */
     BRIDGE_ERROR_IRQn                  = 12,   /* Bridge Error Combined
                                                 * (Secure) Interrupt
                                                 */
-    INVALID_INSTR_CACHE_IRQn           = 13,   /* CPU Instruction Cache Invalidation
-                                                * Interrupt
-                                                */
+    /* Reserved                        = 13,      Reserved */
+    MGMT_PPU_IRQn                      = 14,   /* MGMT PPU */
     SYS_PPU_IRQn                       = 15,   /* SYS PPU */
     CPU0_PPU_IRQn                      = 16,   /* CPU0 PPU */
-    CPU1_PPU_IRQn                      = 17,   /* CPU1 PPU */
-    CPU0_DBG_PPU_IRQn                  = 18,   /* CPU0 DBG PPU */
-    CPU1_DBG_PPU_IRQn                  = 19,   /* CPU1 DBG PPU */
+    /* Reserved                        = 17,      Reserved */
+    /* Reserved                        = 18,      Reserved */
+    /* Reserved                        = 19,      Reserved */
     /* Reserved                        = 20,      Reserved */
-    RAM0_PPU_IRQn                      = 22,   /* RAM0 PPU */
-    RAM1_PPU_IRQn                      = 23,   /* RAM1 PPU */
-    RAM2_PPU_IRQn                      = 24,   /* RAM2 PPU */
-    RAM3_PPU_IRQn                      = 25,   /* RAM3 PPU */
+    /* Reserved                        = 21,      Reserved */
+    /* Reserved                        = 22,      Reserved */
+    /* Reserved                        = 23,      Reserved */
+    /* Reserved                        = 24,      Reserved */
+    /* Reserved                        = 25,      Reserved */
     DEBUG_PPU_IRQn                     = 26,   /* DEBUG PPU */
-    CPUx_CTI_IRQ0                      = 28,   /* CPUx CTI 0 */
-    CPUx_CTI_IRQ1                      = 29,   /* CPUx CTI 1 */
+    TIMER3_AON_IRQn                    = 27,   /* TIMER 3 AON Interrupt */
+    CPU0_CTI_0_IRQn                    = 28,   /* CPU0 CTI IRQ 0 */
+    CPU0_CTI_1_IRQn                    = 29,   /* CPU0 CTI IRQ 1 */
     /* Reserved                        = 30,      Reserved */
     /* Reserved                        = 31,      Reserved */
     System_Timestamp_Counter_IRQn      = 32,   /* System timestamp counter Interrupt */

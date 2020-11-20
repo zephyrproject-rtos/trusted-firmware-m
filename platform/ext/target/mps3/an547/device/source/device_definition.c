@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@
 #include "device_definition.h"
 #include "platform_base_address.h"
 
-#define INIT_TO_ZERO_VALUE 0
-
 /* UART CMSDK driver structures */
 #ifdef UART0_CMSDK_S
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
@@ -35,9 +33,9 @@ static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
 struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S = {
     &(UART0_CMSDK_DEV_CFG_S),
@@ -50,9 +48,9 @@ static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
 struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS = {
     &(UART0_CMSDK_DEV_CFG_NS),
@@ -66,11 +64,11 @@ static const struct uart_cmsdk_dev_cfg_t UART1_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART1_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART1_DEV_S = {
+struct uart_cmsdk_dev_t UART1_CMSDK_DEV_S = {
     &(UART1_CMSDK_DEV_CFG_S),
     &(UART1_CMSDK_DEV_DATA_S)
 };
@@ -81,11 +79,11 @@ static const struct uart_cmsdk_dev_cfg_t UART1_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART1_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART1_DEV_NS = {
+struct uart_cmsdk_dev_t UART1_CMSDK_DEV_NS = {
     &(UART1_CMSDK_DEV_CFG_NS),
     &(UART1_CMSDK_DEV_DATA_NS)
 };
@@ -97,11 +95,11 @@ static const struct uart_cmsdk_dev_cfg_t UART2_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART2_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART2_DEV_S = {
+struct uart_cmsdk_dev_t UART2_CMSDK_DEV_S = {
     &(UART2_CMSDK_DEV_CFG_S),
     &(UART2_CMSDK_DEV_DATA_S)
 };
@@ -112,11 +110,11 @@ static const struct uart_cmsdk_dev_cfg_t UART2_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART2_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART2_DEV_NS = {
+struct uart_cmsdk_dev_t UART2_CMSDK_DEV_NS = {
     &(UART2_CMSDK_DEV_CFG_NS),
     &(UART2_CMSDK_DEV_DATA_NS)
 };
@@ -128,11 +126,11 @@ static const struct uart_cmsdk_dev_cfg_t UART3_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART3_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART3_DEV_S = {
+struct uart_cmsdk_dev_t UART3_CMSDK_DEV_S = {
     &(UART3_CMSDK_DEV_CFG_S),
     &(UART3_CMSDK_DEV_DATA_S)
 };
@@ -143,11 +141,11 @@ static const struct uart_cmsdk_dev_cfg_t UART3_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART3_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART3_DEV_NS = {
+struct uart_cmsdk_dev_t UART3_CMSDK_DEV_NS = {
     &(UART3_CMSDK_DEV_CFG_NS),
     &(UART3_CMSDK_DEV_DATA_NS)
 };
@@ -159,11 +157,11 @@ static const struct uart_cmsdk_dev_cfg_t UART4_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART4_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART4_DEV_S = {
+struct uart_cmsdk_dev_t UART4_CMSDK_DEV_S = {
     &(UART4_CMSDK_DEV_CFG_S),
     &(UART4_CMSDK_DEV_DATA_S)
 };
@@ -174,11 +172,11 @@ static const struct uart_cmsdk_dev_cfg_t UART4_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART4_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART4_DEV_NS = {
+struct uart_cmsdk_dev_t UART4_CMSDK_DEV_NS = {
     &(UART4_CMSDK_DEV_CFG_NS),
     &(UART4_CMSDK_DEV_DATA_NS)
 };
@@ -190,11 +188,11 @@ static const struct uart_cmsdk_dev_cfg_t UART5_CMSDK_DEV_CFG_S = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART5_CMSDK_DEV_DATA_S = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART5_DEV_S = {
+struct uart_cmsdk_dev_t UART5_CMSDK_DEV_S = {
     &(UART5_CMSDK_DEV_CFG_S),
     &(UART5_CMSDK_DEV_DATA_S)
 };
@@ -205,11 +203,11 @@ static const struct uart_cmsdk_dev_cfg_t UART5_CMSDK_DEV_CFG_NS = {
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART5_CMSDK_DEV_DATA_NS = {
-    .state = INIT_TO_ZERO_VALUE,
-    .system_clk = INIT_TO_ZERO_VALUE,
-    .baudrate = INIT_TO_ZERO_VALUE
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART5_DEV_NS = {
+struct uart_cmsdk_dev_t UART5_CMSDK_DEV_NS = {
     &(UART5_CMSDK_DEV_CFG_NS),
     &(UART5_CMSDK_DEV_DATA_NS)
 };
@@ -222,10 +220,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_MAIN0_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_MAIN0};
 static struct ppc_sse300_dev_data_t PPC_SSE300_MAIN0_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_MAIN0_DEV_S = {
     &PPC_SSE300_MAIN0_CFG_S,
@@ -238,10 +236,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_MAIN_EXP0_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_MAIN_EXP0};
 static struct ppc_sse300_dev_data_t PPC_SSE300_MAIN_EXP0_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_MAIN_EXP0_DEV_S = {
     &PPC_SSE300_MAIN_EXP0_CFG_S,
@@ -254,10 +252,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_MAIN_EXP1_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_MAIN_EXP1};
 static struct ppc_sse300_dev_data_t PPC_SSE300_MAIN_EXP1_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_MAIN_EXP1_DEV_S = {
     &PPC_SSE300_MAIN_EXP1_CFG_S,
@@ -270,10 +268,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_MAIN_EXP2_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_MAIN_EXP2};
 static struct ppc_sse300_dev_data_t PPC_SSE300_MAIN_EXP2_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_MAIN_EXP2_DEV_S = {
     &PPC_SSE300_MAIN_EXP2_CFG_S,
@@ -286,10 +284,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_MAIN_EXP3_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_MAIN_EXP3};
 static struct ppc_sse300_dev_data_t PPC_SSE300_MAIN_EXP3_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_MAIN_EXP3_DEV_S = {
     &PPC_SSE300_MAIN_EXP3_CFG_S,
@@ -302,10 +300,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH0_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH0};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH0_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH0_DEV_S = {
     &PPC_SSE300_PERIPH0_CFG_S,
@@ -318,10 +316,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH1_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH1};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH1_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH1_DEV_S = {
     &PPC_SSE300_PERIPH1_CFG_S,
@@ -334,10 +332,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH_EXP0_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH_EXP0};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH_EXP0_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH_EXP0_DEV_S = {
     &PPC_SSE300_PERIPH_EXP0_CFG_S,
@@ -350,10 +348,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH_EXP1_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH_EXP1};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH_EXP1_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH_EXP1_DEV_S = {
     &PPC_SSE300_PERIPH_EXP1_CFG_S,
@@ -366,10 +364,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH_EXP2_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH_EXP2};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH_EXP2_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH_EXP2_DEV_S = {
     &PPC_SSE300_PERIPH_EXP2_CFG_S,
@@ -382,10 +380,10 @@ static struct ppc_sse300_dev_cfg_t PPC_SSE300_PERIPH_EXP3_CFG_S = {
     .nsacfg_base = SSE300_NSACFG_BASE_NS,
     .ppc_name = PPC_SSE300_PERIPH_EXP3};
 static struct ppc_sse300_dev_data_t PPC_SSE300_PERIPH_EXP3_DATA_S = {
-    .sacfg_ns_ppc  = INIT_TO_ZERO_VALUE,
-    .sacfg_sp_ppc  = INIT_TO_ZERO_VALUE,
-    .nsacfg_nsp_ppc = INIT_TO_ZERO_VALUE,
-    .int_bit_mask = INIT_TO_ZERO_VALUE,
+    .sacfg_ns_ppc  = 0,
+    .sacfg_sp_ppc  = 0,
+    .nsacfg_nsp_ppc = 0,
+    .int_bit_mask = 0,
     .is_initialized = false };
 struct ppc_sse300_dev_t PPC_SSE300_PERIPH_EXP3_DEV_S = {
     &PPC_SSE300_PERIPH_EXP3_CFG_S,
@@ -604,8 +602,8 @@ struct syswdog_armv8_m_dev_t SYSWDOG_ARMV8_M_DEV_NS = {
 static const struct mpc_sie_dev_cfg_t MPC_SRAM_DEV_CFG_S = {
     .base = MPC_SRAM_BASE_S};
 static struct mpc_sie_dev_data_t MPC_SRAM_DEV_DATA_S = {
-    .range_list = INIT_TO_ZERO_VALUE,
-    .nbr_of_ranges = INIT_TO_ZERO_VALUE,
+    .range_list = 0,
+    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_SRAM_DEV_S = {
     &(MPC_SRAM_DEV_CFG_S),
@@ -616,8 +614,8 @@ struct mpc_sie_dev_t MPC_SRAM_DEV_S = {
 static const struct mpc_sie_dev_cfg_t MPC_QSPI_DEV_CFG_S = {
     .base = MPC_QSPI_BASE_S};
 static struct mpc_sie_dev_data_t MPC_QSPI_DEV_DATA_S = {
-    .range_list = INIT_TO_ZERO_VALUE,
-    .nbr_of_ranges = INIT_TO_ZERO_VALUE,
+    .range_list = 0,
+    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_QSPI_DEV_S = {
     &(MPC_QSPI_DEV_CFG_S),
@@ -628,8 +626,8 @@ struct mpc_sie_dev_t MPC_QSPI_DEV_S = {
 static const struct mpc_sie_dev_cfg_t MPC_DDR4_DEV_CFG_S = {
     .base = MPC_DDR4_BASE_S};
 static struct mpc_sie_dev_data_t MPC_DDR4_DEV_DATA_S = {
-    .range_list = INIT_TO_ZERO_VALUE,
-    .nbr_of_ranges = INIT_TO_ZERO_VALUE,
+    .range_list = 0,
+    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_DDR4_DEV_S = {
     &(MPC_DDR4_DEV_CFG_S),
@@ -640,8 +638,8 @@ struct mpc_sie_dev_t MPC_DDR4_DEV_S = {
 static const struct mpc_sie_dev_cfg_t MPC_ISRAM0_DEV_CFG_S = {
     .base = MPC_ISRAM0_BASE_S};
 static struct mpc_sie_dev_data_t MPC_ISRAM0_DEV_DATA_S = {
-    .range_list = INIT_TO_ZERO_VALUE,
-    .nbr_of_ranges = INIT_TO_ZERO_VALUE,
+    .range_list = 0,
+    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_ISRAM0_DEV_S = {
     &(MPC_ISRAM0_DEV_CFG_S),
@@ -652,8 +650,8 @@ struct mpc_sie_dev_t MPC_ISRAM0_DEV_S = {
 static const struct mpc_sie_dev_cfg_t MPC_ISRAM1_DEV_CFG_S = {
     .base = MPC_ISRAM1_BASE_S};
 static struct mpc_sie_dev_data_t MPC_ISRAM1_DEV_DATA_S = {
-    .range_list = INIT_TO_ZERO_VALUE,
-    .nbr_of_ranges = INIT_TO_ZERO_VALUE,
+    .range_list = 0,
+    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_ISRAM1_DEV_S = {
     &(MPC_ISRAM1_DEV_CFG_S),

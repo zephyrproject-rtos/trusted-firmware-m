@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,47 +45,47 @@ extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
 
 #ifdef UART1_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART1_DEV_S;
+extern struct uart_cmsdk_dev_t UART1_CMSDK_DEV_S;
 #endif
 #ifdef UART1_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART1_DEV_NS;
+extern struct uart_cmsdk_dev_t UART1_CMSDK_DEV_NS;
 #endif
 
 #ifdef UART2_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART2_DEV_S;
+extern struct uart_cmsdk_dev_t UART2_CMSDK_DEV_S;
 #endif
 #ifdef UART2_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART2_DEV_NS;
+extern struct uart_cmsdk_dev_t UART2_CMSDK_DEV_NS;
 #endif
 
 #ifdef UART3_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART3_DEV_S;
+extern struct uart_cmsdk_dev_t UART3_CMSDK_DEV_S;
 #endif
 #ifdef UART3_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART3_DEV_NS;
+extern struct uart_cmsdk_dev_t UART3_CMSDK_DEV_NS;
 #endif
 
 #ifdef UART4_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART4_DEV_S;
+extern struct uart_cmsdk_dev_t UART4_CMSDK_DEV_S;
 #endif
 #ifdef UART4_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART4_DEV_NS;
+extern struct uart_cmsdk_dev_t UART4_CMSDK_DEV_NS;
 #endif
 
 #ifdef UART5_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART5_DEV_S;
+extern struct uart_cmsdk_dev_t UART5_CMSDK_DEV_S;
 #endif
 #ifdef UART5_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART5_DEV_NS;
+extern struct uart_cmsdk_dev_t UART5_CMSDK_DEV_NS;
 #endif
 
 /* ARM PPC driver structures */

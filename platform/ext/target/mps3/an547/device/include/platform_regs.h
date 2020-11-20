@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@
 
 /* Secure Access Configuration Register Block */
 struct sse300_sacfg_t {
-    volatile uint32_t spcsecctrl;     /* 0x000 (R/W) Secure Configuration
-                                       *             Control Register */
+    volatile uint32_t spcsecctrl;     /* 0x000 (R/W) Secure Privilege Controller
+                                                     Secure Configuration Control
+                                                     register */
     volatile uint32_t buswait;        /* 0x004 (R/W) Bus Access wait control */
     volatile uint32_t reserved0[2];
     volatile uint32_t secrespcfg;     /* 0x010 (R/W) Security Violation Response
@@ -450,17 +451,25 @@ struct sse300_ewic_t {
     volatile uint32_t ewic_maska;     /* 0x200 (R/W) Set which internal events
                                        *             cause wakeup */
     volatile uint32_t ewic_mask[15];  /* 0x204 (R/W) Set which external
-                                       *             interrupts cause wakeup */
+                                       *             interrupts cause wakeup
+                                       *             Only the first (total
+                                       *             system IRQ number)/32
+                                       *             registers are implemented
+                                       *             in array */
     volatile uint32_t reserved1[112];
     volatile uint32_t ewic_penda;     /* 0x400 (R/ ) Shows which internal
                                        *             interrupts were pended
                                        *             while the EWIC was
                                        *             enabled */
 
-    volatile uint32_t ewic_pend[15];  /* 0x404 (R/W) Shows which external
+    volatile uint32_t ewic_pend[15];   /* 0x404 (R/W) Shows which external
                                        *             interrupts were pended
                                        *             while the EWIC was
-                                       *             enabled */
+                                       *             enabled
+                                       *             Only the first (total
+                                       *             system IRQ number)/32
+                                       *             registers are implemented
+                                       *             in array */
     volatile uint32_t reserved2[112];
     volatile uint32_t ewic_psr;       /* 0x600 (R/ ) Pending Summary */
     volatile uint32_t reserved3[575];

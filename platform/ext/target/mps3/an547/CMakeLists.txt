@@ -18,11 +18,11 @@ target_include_directories(platform_region_defs
 #========================= Platform common defs ===============================#
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    message(FATAL_ERROR "GCC is currently not supported on the mps3/fvp_sse300_mps3 because TFM build system does not support the Coretex-M55 with GNUARM")
+    message(FATAL_ERROR "GCC is currently not supported on the mps3/an547 because TFM build system does not support the Coretex-M55 with GNUARM")
 endif()
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL IAR)
-    message(FATAL_ERROR "IAR is currently not supported on the mps3/fvp_sse300_mps3 due to a lack of scatter files")
+    message(FATAL_ERROR "IAR is currently not supported on the mps3/an547 due to a lack of scatter files")
 endif()
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
@@ -34,7 +34,7 @@ endif()
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps3_s.c>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_s.c>
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -43,10 +43,10 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps3_ns.c>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_ns.c>
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/fvp_sse300_mps3_ns.sct>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_ns.sct>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -57,10 +57,10 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_fvp_sse300_mps3_bl2.c>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_bl2.c>
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/fvp_sse300_mps3_bl2.sct>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_bl2.sct>
     )
 endif()
 
@@ -85,7 +85,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_FVP_SSE300_MPC.c
+        cmsis_drivers/Driver_AN547_MPC.c
         cmsis_drivers/Driver_SSE300_PPC.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
