@@ -198,7 +198,6 @@ target_include_directories(platform_ns
 
 target_compile_definitions(platform_ns
     PUBLIC
-        TFM_MULTI_CORE_MULTI_CLIENT_CALL
         RTE_USART5
 )
 

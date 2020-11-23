@@ -28,7 +28,6 @@
 
 static void *ns_lock_handle = NULL;
 
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
 const void *tfm_ns_mailbox_os_get_task_handle(void)
 {
     return os_wrapper_thread_get_handle();
@@ -43,7 +42,6 @@ void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle)
 {
     os_wrapper_thread_set_flag_isr((void *)task_handle, MAILBOX_THREAD_FLAG);
 }
-#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
 
 int32_t tfm_ns_mailbox_os_lock_init(void)
 {

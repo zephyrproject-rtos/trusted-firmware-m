@@ -18,6 +18,10 @@
 extern "C" {
 #endif
 
+#if !defined(TFM_MULTI_CORE_NS_OS) && (NUM_MAILBOX_QUEUE_SLOT > 1)
+#error "NUM_MAILBOX_QUEUE_SLOT should be set to 1 for NS bare metal environment"
+#endif
+
 #ifdef TFM_MULTI_CORE_TEST
 /**
  * \brief The structure to hold the statistics result of NSPE mailbox
@@ -64,6 +68,7 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
                                    int32_t client_id,
                                    int32_t *reply);
 
+#ifdef TFM_MULTI_CORE_NS_OS
 /**
  * \brief Go through mailbox messages already replied by SPE mailbox and
  *        wake up the owner tasks of replied mailbox messages.
@@ -76,6 +81,12 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
  * \return Other return code     Failed with an error code
  */
 int32_t tfm_ns_mailbox_wake_reply_owner_isr(void);
+#else
+static inline int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
+{
+    return MAILBOX_NO_PEND_EVENT;
+}
+#endif
 
 /**
  * \brief Platform specific NSPE mailbox initialization.
@@ -127,22 +138,7 @@ void tfm_ns_mailbox_hal_enter_critical_isr(void);
  */
 void tfm_ns_mailbox_hal_exit_critical_isr(void);
 
-#ifdef FORWARD_PROT_MSG
-static inline int32_t tfm_ns_mailbox_os_lock_init(void)
-{
-    return MAILBOX_SUCCESS;
-}
-
-static inline uint32_t tfm_ns_mailbox_os_lock_acquire(void)
-{
-    return MAILBOX_SUCCESS;
-}
-
-static inline uint32_t tfm_ns_mailbox_os_lock_release(void)
-{
-    return MAILBOX_SUCCESS;
-}
-#else /* FORWARD_PROT_MSG */
+#ifdef TFM_MULTI_CORE_NS_OS
 /**
  * \brief Initialize the multi-core lock for synchronizing PSA client call(s)
  *        The actual implementation depends on the non-secure use scenario.
@@ -169,9 +165,7 @@ int32_t tfm_ns_mailbox_os_lock_acquire(void);
  * \return \ref MAILBOX_GENERIC_ERROR on error
  */
 int32_t tfm_ns_mailbox_os_lock_release(void);
-#endif /* FORWARD_PROT_MSG */
 
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
 /**
  * \brief Get the handle of the current non-secure task executing mailbox
  *        functionalities
@@ -208,16 +202,31 @@ void tfm_ns_mailbox_os_wait_reply(void);
  * \param[in] task_handle       The handle to the task to be woken up.
  */
 void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle);
-#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#else /* TFM_MULTI_CORE_NS_OS */
 #define tfm_ns_mailbox_os_wait_reply()         do {} while (0)
+
+#define tfm_ns_mailbox_os_wake_task_isr(task)  do {} while (0)
+
+static inline int32_t tfm_ns_mailbox_os_lock_init(void)
+{
+    return MAILBOX_SUCCESS;
+}
+
+static inline int32_t tfm_ns_mailbox_os_lock_acquire(void)
+{
+    return MAILBOX_SUCCESS;
+}
+
+static inline int32_t tfm_ns_mailbox_os_lock_release(void)
+{
+    return MAILBOX_SUCCESS;
+}
 
 static inline const void *tfm_ns_mailbox_os_get_task_handle(void)
 {
     return NULL;
 }
-
-#define tfm_ns_mailbox_os_wake_task_isr(task)  do {} while (0)
-#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#endif /* TFM_MULTI_CORE_NS_OS */
 
 #ifdef TFM_MULTI_CORE_TEST
 /**

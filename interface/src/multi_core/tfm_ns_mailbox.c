@@ -80,7 +80,7 @@ static inline void clear_queue_slot_woken(uint8_t idx)
     }
 }
 
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+#ifdef TFM_MULTI_CORE_NS_OS
 /*
  * When NSPE mailbox only covers a single non-secure core, spinlock only
  * requires to disable IRQ.
@@ -98,15 +98,15 @@ static inline void ns_mailbox_spin_unlock(void)
 {
     __enable_irq();
 }
-#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#else /* TFM_MULTI_CORE_NS_OS */
 /*
- * Local spinlock is implemented as a dummy one when multiple PSA client call
- * feature is disabled, since interrupt is not required in NS mailbox.
+ * Local spinlock is implemented as a dummy one when integrating with NS bare
+ * metal environment since interrupt is not required in NS mailbox.
  */
 #define ns_mailbox_spin_lock()   do {} while (0)
 
 #define ns_mailbox_spin_unlock() do {} while (0)
-#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#endif /* TFM_MULTI_CORE_NS_OS */
 
 static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 {
@@ -303,7 +303,7 @@ exit:
     return ret;
 }
 
-#ifdef TFM_MULTI_CORE_MULTI_CLIENT_CALL
+#ifdef TFM_MULTI_CORE_NS_OS
 int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 {
     uint8_t idx;
@@ -362,7 +362,7 @@ static inline bool mailbox_wait_reply_signal(uint8_t idx)
 
     return is_set;
 }
-#else /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#else /* TFM_MULTI_CORE_NS_OS */
 static inline bool mailbox_wait_reply_signal(uint8_t idx)
 {
     bool is_set = false;
@@ -378,7 +378,7 @@ static inline bool mailbox_wait_reply_signal(uint8_t idx)
 
     return is_set;
 }
-#endif /* TFM_MULTI_CORE_MULTI_CLIENT_CALL */
+#endif /* TFM_MULTI_CORE_NS_OS */
 
 static int32_t mailbox_wait_reply(uint8_t idx)
 {
