@@ -26,8 +26,7 @@ install(TARGETS psa_api_ns
 
 # export veneer lib
 if (NOT TFM_MULTI_CORE_TOPOLOGY)
-    install(TARGETS tfm_s_veneers
-            ARCHIVE
+    install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o
             DESTINATION ${CMAKE_BINARY_DIR}/install/export/tfm/lib)
 endif()
 
