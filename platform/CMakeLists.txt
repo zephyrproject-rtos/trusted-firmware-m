@@ -153,4 +153,5 @@ target_compile_definitions(platform_region_defs
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
+        $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
 )

@@ -313,6 +313,16 @@ SECTIONS
      * beginning of privileged data region in multi-core topology.
      */
 #ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime requires to share the
+     * global variables.
+     */
+    .TFM_SHARED_SYMBOLS : ALIGN(32)
+    {
+        . += SHARED_SYMBOL_AREA_SIZE;
+    } > RAM
+#endif
+
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
