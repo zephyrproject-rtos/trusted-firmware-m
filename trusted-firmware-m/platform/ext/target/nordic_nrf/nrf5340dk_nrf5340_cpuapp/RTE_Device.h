@@ -40,13 +40,13 @@
 #define   RTE_USART1                    1
 //   <h> Pin Selection (0xFFFFFFFF means Disconnected)
 //     <o> TXD
-#define   RTE_USART1_TXD_PIN            25
+#define   RTE_USART1_TXD_PIN            33
 //     <o> RXD
-#define   RTE_USART1_RXD_PIN            26
+#define   RTE_USART1_RXD_PIN            32
 //     <o> RTS
-#define   RTE_USART1_RTS_PIN            0xFFFFFFFF
+#define   RTE_USART1_RTS_PIN            11
 //     <o> CTS
-#define   RTE_USART1_CTS_PIN            0xFFFFFFFF
+#define   RTE_USART1_CTS_PIN            10
 //   </h> Pin Configuration
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]
 
