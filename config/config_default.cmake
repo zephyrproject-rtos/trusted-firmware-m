@@ -31,6 +31,8 @@ set(TFM_SPM_LOG_LEVEL                   2           CACHE STRING    "Set default
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
 set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to repo which shares code with secure firmware")
 
+set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "Path to which to install TF-M files")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

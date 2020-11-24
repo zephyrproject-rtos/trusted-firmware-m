@@ -117,9 +117,9 @@ ranges.
 Interface with TF-M
 ===================
 The files needed for the interface with TF-M are exported at the
-``<build_dir>/install/export/tfm`` path. The NS side is only allowed to call
+``<install_dir>/export/tfm`` path. The NS side is only allowed to call
 TF-M secure functions (veneers) from the NS Thread mode. For this reason, the
-API is a collection of functions in the ``<build_dir>/install/export/tfm/inc``
+API is a collection of functions in the ``<install_dir>/export/tfm/inc``
 directory. For example, the interface for the Protected Storage (PS) service
 is described in the file ``psa_ps_api.h`` as a collection of functions that
 call service veneer functions. This API is a wrapper for the secure veneers,
@@ -182,4 +182,4 @@ environment before the script will succeed when the script is not run via cmake.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

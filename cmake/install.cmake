@@ -12,18 +12,19 @@ string(REGEX REPLACE "-" "_" TFM_PLATFORM_UPPERCASE_UNDERSCORE ${TFM_PLATFORM_UP
 string(REGEX REPLACE "^(\\.\\.([\\/\\\\]))+" "EXTERNAL\\2" TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR ${TFM_PLATFORM_UPPERCASE_UNDERSCORE})
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        DESTINATION ${CMAKE_BINARY_DIR}/install/outputs/${TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR}
+        DESTINATION ${TFM_INSTALL_PATH}/outputs/${TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR}
 )
 
 set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)
 set(INTERFACE_SRC_DIR ${CMAKE_SOURCE_DIR}/interface/src)
-set(EXPORT_INC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/include)
-set(EXPORT_SRC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/src)
+set(EXPORT_INC_DIR    ${TFM_INSTALL_PATH}/export/tfm/include)
+set(EXPORT_SRC_DIR    ${TFM_INSTALL_PATH}/export/tfm/src)
+set(EXPORT_LIB_DIR    ${TFM_INSTALL_PATH}/export/tfm/lib)
 
 # export veneer lib
 if (NOT TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o
-            DESTINATION ${CMAKE_BINARY_DIR}/install/export/tfm/lib)
+            DESTINATION ${EXPORT_LIB_DIR})
 endif()
 
 ####################### export headers #########################################
