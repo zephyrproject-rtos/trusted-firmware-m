@@ -34,7 +34,7 @@ set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to 
 set(MCUBOOT_EXECUTION_SLOT              1           CACHE STRING    "Slot from which to execute the image, used for XIP mode")
 set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]")
 set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
-set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images [OVERWRITE_ONLY, SWAP, DIRECT_XIP, RAM_LOAD]")
+set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
 set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
@@ -149,3 +149,13 @@ set(MCUBOOT_VERSION                     "v1.7.0"    CACHE STRING    "The version
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "90c8e680"  CACHE STRING    "The version of PSA arch tests to use")
+
+################################################################################
+################################################################################
+
+# Specifying the accepted values for certain configuration options to facilitate
+# their later validation.
+
+########################## BL2 #################################################
+
+set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;DIRECT_XIP;RAM_LOAD")
