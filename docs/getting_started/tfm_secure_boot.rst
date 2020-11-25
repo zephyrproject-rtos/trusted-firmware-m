@@ -383,19 +383,18 @@ MCUBoot related compile time switches can be set by cmake variables.
     Can be used to configure the level of logging in MCUBoot. The possible
     values are the following:
 
-    - **LOG_LEVEL_OFF**
-    - **LOG_LEVEL_ERROR**
-    - **LOG_LEVEL_WARNING**
-    - **LOG_LEVEL_INFO**
-    - **LOG_LEVEL_DEBUG**
+    - **OFF**
+    - **ERROR**
+    - **WARNING**
+    - **INFO**
+    - **DEBUG**
 
     The logging in MCUBoot can be disabled and thus the code size can be reduced
-    by setting it to ``LOG_LEVEL_OFF``. Its value depends on the build type. If
-    the build type is ``Debug`` and a value has been provided (e.g. through the
-    command line or the CMake GUI) then that value will be used, otherwise it is
-    ``LOG_LEVEL_INFO`` by default. In case of different kinds of ``Release``
-    builds its value is set to ``LOG_LEVEL_OFF`` (any other value will be
-    overridden).
+    by setting it to ``OFF``. Its value depends on the build type. If the build
+    type is ``Debug`` then default value is ``INFO``. In case of different kinds
+    of ``Release`` builds the default value is ``OFF``. The default value can
+    be overridden through the command line or in the CMake GUI regardless of the
+    build type.
 - MCUBOOT_ENC_IMAGES (default: False):
     - **True:** Adds encrypted image support in the source and encrypts the
       resulting image using the ``enc-rsa2048-pub.pem`` key found in the MCUBoot
