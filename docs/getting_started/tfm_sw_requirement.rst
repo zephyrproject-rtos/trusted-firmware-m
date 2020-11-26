@@ -48,8 +48,8 @@ versions are:
 
     - The GNU Arm compiler can be downloaded from
       `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
-      On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
-      or *GNU Arm Embedded Toolchain: 7-2018-q2-update*
+      On the page select *GNU Arm Embedded Toolchain: 7-2018-q2-update* or an
+      above version.
 
     - The IAR Arm compilers above are provided via IAR Embedded Workbench (Windows) or
       IAR build tools for linux.
