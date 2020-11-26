@@ -68,13 +68,31 @@ function(trusted_firmware_build)
   set(PSA_API_NS_PATH ${TFM_BINARY_DIR}/interface/libpsa_api_ns.a)
   set(TFM_GENERATED_INCLUDES ${TFM_BINARY_DIR}/generated/interface/include)
 
-  set(BL2_HEX_FILE ${CMAKE_BINARY_DIR}/tfm/bin/bl2.hex)
+  if(TFM_BL2)
+    set(BL2_BIN_FILE ${TFM_BINARY_DIR}/bin/bl2.bin)
+    set(BL2_HEX_FILE ${TFM_BINARY_DIR}/bin/bl2.hex)
+  endif()
+  set(TFM_S_BIN_FILE ${TFM_BINARY_DIR}/bin/tfm_s.bin)
+  set(TFM_S_HEX_FILE ${TFM_BINARY_DIR}/bin/tfm_s.hex)
+  set(TFM_NS_BIN_FILE ${TFM_BINARY_DIR}/bin/tfm_ns.bin)
+  set(TFM_NS_HEX_FILE ${TFM_BINARY_DIR}/bin/tfm_ns.hex)
+  set(TFM_S_SIGNED_BIN_FILE ${TFM_BINARY_DIR}/bin/tfm_s_signed.bin)
+  set(TFM_NS_SIGNED_BIN_FILE ${TFM_BINARY_DIR}/bin/tfm_ns_signed.bin)
+  set(TFM_S_NS_SIGNED_BIN_FILE ${TFM_BINARY_DIR}/bin/tfm_s_ns_signed.bin)
 
   set(BUILD_BYPRODUCTS
     ${VENEERS_FILE}
     ${PSA_API_NS_PATH}
-    ${BL2_HEX_FILE}
     ${TFM_GENERATED_INCLUDES}/psa_manifest/sid.h
+    ${BL2_BIN_FILE}
+    ${BL2_HEX_FILE}
+    ${TFM_S_BIN_FILE}
+    ${TFM_S_HEX_FILE}
+    ${TFM_NS_BIN_FILE}
+    ${TFM_NS_HEX_FILE}
+    ${TFM_S_SIGNED_BIN_FILE}
+    ${TFM_NS_SIGNED_BIN_FILE}
+    ${TFM_S_NS_SIGNED_BIN_FILE}
     )
 
   # Get the toolchain variant
@@ -114,6 +132,29 @@ function(trusted_firmware_build)
     USES_TERMINAL_BUILD True
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
   )
+
+  # Set BL2 (MCUboot) executable file paths as target properties on 'tfm'
+  # These files are produced by the TFM build system.
+  if(TFM_BL2)
+    set_target_properties(tfm PROPERTIES
+      BL2_BIN_FILE ${BL2_BIN_FILE}
+      BL2_HEX_FILE ${BL2_HEX_FILE}
+      )
+  endif()
+
+  # Set TFM S/NS executable file paths as target properties on 'tfm'
+  # These files are produced by the TFM build system.
+  # Note that the Nonsecure FW is replaced by the Zephyr app in regular Zephyr
+  # builds.
+  set_target_properties(tfm PROPERTIES
+    TFM_S_BIN_FILE ${TFM_S_BIN_FILE} # TFM Secure FW (unsigned)
+    TFM_S_HEX_FILE ${TFM_S_HEX_FILE} # TFM Secure FW (unsigned)
+    TFM_NS_BIN_FILE ${TFM_NS_BIN_FILE} # TFM Nonsecure FW (unsigned)
+    TFM_NS_HEX_FILE ${TFM_NS_HEX_FILE} # TFM Nonsecure FW (unsigned)
+    TFM_S_SIGNED_BIN_FILE ${TFM_S_SIGNED_BIN_FILE} # TFM Secure FW (signed)
+    TFM_NS_SIGNED_BIN_FILE ${TFM_NS_SIGNED_BIN_FILE} # TFM Nonsecure FW (signed)
+    TFM_S_NS_SIGNED_BIN_FILE ${TFM_S_NS_SIGNED_BIN_FILE} # Merged TFM Secure/Nonsecure FW (signed)
+    )
 
   add_library(tfm_api
     ${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests/app/os_wrapper_cmsis_rtos_v2.c
