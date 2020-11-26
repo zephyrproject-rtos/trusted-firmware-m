@@ -12,6 +12,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "cmsis_compiler.h"
 #include "tfm_mailbox.h"
 
 #ifdef __cplusplus
@@ -87,6 +89,20 @@ static inline int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
     return MAILBOX_NO_PEND_EVENT;
 }
 #endif
+
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+/**
+ * \brief Handling PSA client calls in a dedicated NS mailbox thread.
+ *        This function constructs NS mailbox messages, transmits them to SPE
+ *        mailbox and returns the results to NS PSA client.
+ *
+ * \param[in] args              The pointer to the structure of PSA client call
+ *                              parameters.
+ */
+void tfm_ns_mailbox_thread_runner(void *args);
+#else /* TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD */
+#define tfm_ns_mailbox_thread_runner(args)        do {} while (0)
+#endif /* TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD */
 
 /**
  * \brief Platform specific NSPE mailbox initialization.
@@ -202,6 +218,47 @@ void tfm_ns_mailbox_os_wait_reply(void);
  * \param[in] task_handle       The handle to the task to be woken up.
  */
 void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle);
+
+/**
+ * \brief Create and initialize a message queue
+ *
+ * \param[in] msg_size        The maximum message size in bytes
+ * \param[in] msg_count       The maximum number of messages in queue
+ *
+ * \return Returns handle of the message queue created, or NULL in case of error
+ */
+void *tfm_ns_mailbox_os_mq_create(size_t msg_size, uint8_t msg_count);
+
+/**
+ * \brief Send a request via message queue
+ *
+ * \param[in] mq_handle       The handle of message queue
+ * \param[in] msg_ptr         The pointer to the message to be sent
+ *
+ * \note The message size must be the same as the value set in
+ *       \ref tfm_ns_mailbox_os_mq_create.
+ *
+ * \return \ref MAILBOX_SUCCESS if the message is successfully sent, or
+ *         other return code in case of error
+ */
+int32_t tfm_ns_mailbox_os_mq_send(void *mq_handle, const void *msg_ptr);
+
+/**
+ * \brief Receive a request from message queue
+ *
+ * \param[in] mq_handle       The handle of message queue
+ * \param[in] msg_ptr         The pointer to buffer for message to be received
+ *
+ * \return \ref MAILBOX_SUCCESS if the message is successfully received, or
+ *         other return code in case of error
+ *
+ * \note The message size is the same as the value set in
+ *       \ref tfm_ns_mailbox_os_mq_create.
+ *
+ * \note The function should be blocked until a message is received from message
+ *       queue, unless a fatal error occurs.
+ */
+int32_t tfm_ns_mailbox_os_mq_receive(void *mq_handle, void *msg_ptr);
 #else /* TFM_MULTI_CORE_NS_OS */
 #define tfm_ns_mailbox_os_wait_reply()         do {} while (0)
 
@@ -233,8 +290,28 @@ static inline const void *tfm_ns_mailbox_os_get_task_handle(void)
  * \brief Initialize the statistics module in TF-M NSPE mailbox.
  *
  * \note This function is only available when multi-core tests are enabled.
+ *
+ * \param[in] ns_queue          The NSPE mailbox queue to be tracked.
  */
-void tfm_ns_mailbox_tx_stats_init(void);
+void tfm_ns_mailbox_tx_stats_init(struct ns_mailbox_queue_t *ns_queue);
+
+/**
+ * \brief Re-initialize the statistics module in TF-M NSPE mailbox.
+ *        Clean up statistics data.
+ *
+ * \note This function is only available when multi-core tests are enabled.
+ *
+ * \return \ref MAILBOX_SUCCESS if the operation succeeded, or other return code
+           in case of error
+ */
+int32_t tfm_ns_mailbox_tx_stats_reinit(void);
+
+/**
+ * \brief Update the statistics result of NSPE mailbox message transmission.
+ *
+ * \note This function is only available when multi-core tests are enabled.
+ */
+void tfm_ns_mailbox_tx_stats_update(void);
 
 /**
  * \brief Calculate the average number of used NS mailbox queue slots each time
@@ -250,6 +327,58 @@ void tfm_ns_mailbox_tx_stats_init(void);
  */
 void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res);
 #endif
+
+#ifdef TFM_MULTI_CORE_NS_OS
+/*
+ * When NSPE mailbox only covers a single non-secure core, spinlock only
+ * requires to disable IRQ.
+ */
+static inline void ns_mailbox_spin_lock(void)
+{
+    __disable_irq();
+}
+
+/*
+ * It is assumed that IRQ is always enabled when spinlock is acquired.
+ * Otherwise, the waiting thread won't be woken up.
+ */
+static inline void ns_mailbox_spin_unlock(void)
+{
+    __enable_irq();
+}
+#else /* TFM_MULTI_CORE_NS_OS */
+/*
+ * Local spinlock is implemented as a dummy one when integrating with NS bare
+ * metal environment since interrupt is not required in NS mailbox.
+ */
+#define ns_mailbox_spin_lock()   do {} while (0)
+
+#define ns_mailbox_spin_unlock() do {} while (0)
+#endif /* TFM_MULTI_CORE_NS_OS */
+
+/* The following inline functions configure non-secure mailbox queue status */
+static inline void clear_queue_slot_empty(struct ns_mailbox_queue_t *queue_ptr,
+                                          uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        queue_ptr->empty_slots &= ~(1UL << idx);
+    }
+}
+
+static inline void set_queue_slot_pend(struct ns_mailbox_queue_t *queue_ptr,
+                                       uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        queue_ptr->pend_slots |= (1UL << idx);
+    }
+}
+
+static inline void clear_queue_slot_all_replied(
+                                           struct ns_mailbox_queue_t *queue_ptr,
+                                           mailbox_queue_status_t status)
+{
+    queue_ptr->replied_slots &= ~status;
+}
 
 #ifdef __cplusplus
 }

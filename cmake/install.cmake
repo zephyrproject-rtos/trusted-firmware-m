@@ -118,6 +118,8 @@ if (TFM_MULTI_CORE_TOPOLOGY)
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_rtos_api.c
+                        ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_thread.c
+                        ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_test.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 else()
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c

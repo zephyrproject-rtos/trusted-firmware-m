@@ -93,20 +93,28 @@ struct mailbox_msg_t {
  * to hold the PSA client call return result from SPE
  */
 struct mailbox_reply_t {
-    int32_t return_val;
+    int32_t    return_val;
+    const void *owner;                      /* Handle of owner task. */
+    int32_t    *reply;                      /* Address of reply value belonging
+                                             * to owner task.
+                                             */
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+    uint8_t    *woken_flag;                 /* Indicate that owner task has been
+                                             * or should be woken up, after the
+                                             * reply is received.
+                                             */
+#else
+    bool        is_woken;                   /* Indicate that owner task has been
+                                             * or should be woken up, after the
+                                             * reply is received.
+                                             */
+#endif
 };
 
 /* A single slot structure in NSPE mailbox queue */
 struct ns_mailbox_slot_t {
     struct mailbox_msg_t   msg;
     struct mailbox_reply_t reply;
-    const void             *owner;          /* Handle of the owner task of this
-                                             * slot
-                                             */
-    bool                   is_woken;        /* Indicate that owner task has been
-                                             * or should be woken up, after the
-                                             * replied is received.
-                                             */
 };
 
 typedef uint32_t   mailbox_queue_status_t;
@@ -135,6 +143,8 @@ struct ns_mailbox_queue_t {
                                                  * NS thread requests a mailbox
                                                  * queue slot.
                                                  */
+
+    bool                     is_full;           /* Queue if full */
 #endif
 };
 

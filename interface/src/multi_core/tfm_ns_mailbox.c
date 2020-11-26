@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-#include "cmsis_compiler.h"
 #include "tfm_ns_mailbox.h"
 
 /* The pointer to NSPE mailbox queue */
@@ -15,37 +14,41 @@ static struct ns_mailbox_queue_t *mailbox_queue_ptr = NULL;
 
 static int32_t mailbox_wait_reply(uint8_t idx);
 
-static inline void clear_queue_slot_empty(uint8_t idx)
-{
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->empty_slots &= ~(1 << idx);
-    }
-}
-
 static inline void set_queue_slot_empty(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->empty_slots |= (1 << idx);
+        mailbox_queue_ptr->empty_slots |= (1UL << idx);
     }
 }
 
-static inline void set_queue_slot_pend(uint8_t idx)
+static inline void set_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->pend_slots |= (1 << idx);
+        mailbox_queue_ptr->queue[idx].reply.is_woken = true;
+    }
+}
+
+static inline bool is_queue_slot_woken(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        return mailbox_queue_ptr->queue[idx].reply.is_woken;
+    }
+
+    return false;
+}
+
+static inline void clear_queue_slot_woken(uint8_t idx)
+{
+    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        mailbox_queue_ptr->queue[idx].reply.is_woken = false;
     }
 }
 
 static inline void clear_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->replied_slots &= ~(1 << idx);
+        mailbox_queue_ptr->replied_slots &= ~(1UL << idx);
     }
-}
-
-static inline void clear_queue_slot_all_replied(mailbox_queue_status_t status)
-{
-    mailbox_queue_ptr->replied_slots &= ~status;
 }
 
 static inline bool is_queue_slot_replied(uint8_t idx)
@@ -56,57 +59,6 @@ static inline bool is_queue_slot_replied(uint8_t idx)
 
     return false;
 }
-
-static inline void set_queue_slot_woken(uint8_t idx)
-{
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].is_woken = true;
-    }
-}
-
-static inline bool is_queue_slot_woken(uint8_t idx)
-{
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        return mailbox_queue_ptr->queue[idx].is_woken;
-    }
-
-    return false;
-}
-
-static inline void clear_queue_slot_woken(uint8_t idx)
-{
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].is_woken = false;
-    }
-}
-
-#ifdef TFM_MULTI_CORE_NS_OS
-/*
- * When NSPE mailbox only covers a single non-secure core, spinlock only
- * requires to disable IRQ.
- */
-static inline void ns_mailbox_spin_lock(void)
-{
-    __disable_irq();
-}
-
-/*
- * It is assumed that IRQ is always enabled when spinlock is acquired.
- * Otherwise, the waiting thread won't be woken up.
- */
-static inline void ns_mailbox_spin_unlock(void)
-{
-    __enable_irq();
-}
-#else /* TFM_MULTI_CORE_NS_OS */
-/*
- * Local spinlock is implemented as a dummy one when integrating with NS bare
- * metal environment since interrupt is not required in NS mailbox.
- */
-#define ns_mailbox_spin_lock()   do {} while (0)
-
-#define ns_mailbox_spin_unlock() do {} while (0)
-#endif /* TFM_MULTI_CORE_NS_OS */
 
 static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 {
@@ -129,7 +81,7 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
     }
 
     ns_mailbox_spin_lock();
-    clear_queue_slot_empty(idx);
+    clear_queue_slot_empty(queue, idx);
     ns_mailbox_spin_unlock();
 
     return idx;
@@ -138,65 +90,9 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 static void set_msg_owner(uint8_t idx, const void *owner)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].owner = owner;
+        mailbox_queue_ptr->queue[idx].reply.owner = owner;
     }
 }
-
-#ifdef TFM_MULTI_CORE_TEST
-void tfm_ns_mailbox_tx_stats_init(void)
-{
-    if (!mailbox_queue_ptr) {
-        return;
-    }
-
-    mailbox_queue_ptr->nr_tx = 0;
-    mailbox_queue_ptr->nr_used_slots = 0;
-}
-
-static void mailbox_tx_stats_update(struct ns_mailbox_queue_t *ns_queue)
-{
-    mailbox_queue_status_t empty_status;
-    uint8_t idx, nr_empty = 0;
-
-    if (!ns_queue) {
-        return;
-    }
-
-    ns_mailbox_spin_lock();
-    /* Count the number of used slots when this tx arrives */
-    empty_status = ns_queue->empty_slots;
-    ns_mailbox_spin_unlock();
-
-    if (empty_status) {
-        for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
-            if (empty_status & (0x1UL << idx)) {
-                nr_empty++;
-            }
-        }
-    }
-
-    ns_mailbox_spin_lock();
-    ns_queue->nr_used_slots += (NUM_MAILBOX_QUEUE_SLOT - nr_empty);
-    ns_queue->nr_tx++;
-    ns_mailbox_spin_unlock();
-}
-
-void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res)
-{
-    uint32_t nr_used_slots, nr_tx;
-
-    if (!mailbox_queue_ptr || !stats_res) {
-        return;
-    }
-
-    nr_used_slots = mailbox_queue_ptr->nr_used_slots;
-    nr_tx = mailbox_queue_ptr->nr_tx;
-
-    stats_res->avg_nr_slots = nr_used_slots / nr_tx;
-    nr_used_slots %= nr_tx;
-    stats_res->avg_nr_slots_tenths = nr_used_slots * 10 / nr_tx;
-}
-#endif
 
 static int32_t mailbox_tx_client_req(uint32_t call_type,
                                      const struct psa_client_params_t *params,
@@ -213,7 +109,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
     }
 
 #ifdef TFM_MULTI_CORE_TEST
-    mailbox_tx_stats_update(mailbox_queue_ptr);
+    tfm_ns_mailbox_tx_stats_update();
 #endif
 
     /* Fill the mailbox message */
@@ -231,7 +127,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
     set_msg_owner(idx, task_handle);
 
     tfm_ns_mailbox_hal_enter_critical();
-    set_queue_slot_pend(idx);
+    set_queue_slot_pend(mailbox_queue_ptr, idx);
     tfm_ns_mailbox_hal_exit_critical();
 
     tfm_ns_mailbox_hal_notify_peer();
@@ -315,7 +211,7 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 
     tfm_ns_mailbox_hal_enter_critical_isr();
     replied_status = mailbox_queue_ptr->replied_slots;
-    clear_queue_slot_all_replied(replied_status);
+    clear_queue_slot_all_replied(mailbox_queue_ptr, replied_status);
     tfm_ns_mailbox_hal_exit_critical_isr();
 
     if (!replied_status) {
@@ -336,7 +232,8 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
         set_queue_slot_woken(idx);
         tfm_ns_mailbox_hal_exit_critical_isr();
 
-        tfm_ns_mailbox_os_wake_task_isr(mailbox_queue_ptr->queue[idx].owner);
+        tfm_ns_mailbox_os_wake_task_isr(
+                                     mailbox_queue_ptr->queue[idx].reply.owner);
 
         replied_status &= ~(0x1UL << idx);
         if (!replied_status) {
@@ -439,7 +336,7 @@ int32_t tfm_ns_mailbox_init(struct ns_mailbox_queue_t *queue)
     ret = tfm_ns_mailbox_os_lock_init();
 
 #ifdef TFM_MULTI_CORE_TEST
-    tfm_ns_mailbox_tx_stats_init();
+    tfm_ns_mailbox_tx_stats_init(queue);
 #endif
 
     return ret;

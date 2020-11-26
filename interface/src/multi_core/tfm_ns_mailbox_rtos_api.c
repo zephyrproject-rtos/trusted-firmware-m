@@ -11,12 +11,14 @@
  * It can be replaced by RTOS specific implementation.
  */
 
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+#include "os_wrapper/msg_queue.h"
+#else
 #include "os_wrapper/semaphore.h"
+#endif
 #include "os_wrapper/thread.h"
 
 #include "tfm_ns_mailbox.h"
-
-#define MAX_SEMAPHORE_COUNT            NUM_MAILBOX_QUEUE_SLOT
 
 /*
  * Thread flag to manage wait/wake mechanism in mailbox.、
@@ -26,7 +28,11 @@
  */
 #define MAILBOX_THREAD_FLAG            0x5FCA0000
 
+#ifndef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+#define MAX_SEMAPHORE_COUNT            NUM_MAILBOX_QUEUE_SLOT
+
 static void *ns_lock_handle = NULL;
+#endif
 
 const void *tfm_ns_mailbox_os_get_task_handle(void)
 {
@@ -43,6 +49,48 @@ void tfm_ns_mailbox_os_wake_task_isr(const void *task_handle)
     os_wrapper_thread_set_flag_isr((void *)task_handle, MAILBOX_THREAD_FLAG);
 }
 
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+void *tfm_ns_mailbox_os_mq_create(size_t msg_size, uint8_t msg_count)
+{
+    return os_wrapper_msg_queue_create(msg_size, msg_count);
+}
+
+int32_t tfm_ns_mailbox_os_mq_send(void *mq_handle, const void *msg_ptr)
+{
+    int32_t ret;
+
+    if (!mq_handle || !msg_ptr) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    while (1) {
+        ret = os_wrapper_msg_queue_send(mq_handle, msg_ptr);
+        if (ret == OS_WRAPPER_SUCCESS) {
+            return MAILBOX_SUCCESS;
+        }
+    }
+
+    return MAILBOX_GENERIC_ERROR;
+}
+
+int32_t tfm_ns_mailbox_os_mq_receive(void *mq_handle, void *msg_ptr)
+{
+    int32_t ret;
+
+    if (!mq_handle || !msg_ptr) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    while (1) {
+        ret = os_wrapper_msg_queue_receive(mq_handle, msg_ptr);
+        if (ret == OS_WRAPPER_SUCCESS) {
+            return MAILBOX_SUCCESS;
+        }
+    }
+
+    return MAILBOX_GENERIC_ERROR;
+}
+#else /* TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD */
 int32_t tfm_ns_mailbox_os_lock_init(void)
 {
     ns_lock_handle = os_wrapper_semaphore_create(MAX_SEMAPHORE_COUNT,
@@ -65,3 +113,4 @@ int32_t tfm_ns_mailbox_os_lock_release(void)
 {
     return os_wrapper_semaphore_release(ns_lock_handle);
 }
+#endif /* TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD */
