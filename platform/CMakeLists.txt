@@ -56,6 +56,7 @@ target_sources(platform_s
 target_link_libraries(platform_s
     PUBLIC
         platform_region_defs
+        tfm_fih
     PRIVATE
         psa_interface
         tfm_secure_api
