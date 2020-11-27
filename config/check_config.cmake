@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,6 +29,7 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND NOT TFM_PSA_API)
 
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
 tfm_invalid_config(TFM_MULTI_CORE_MULTI_CLIENT_CALL AND NOT TFM_MULTI_CORE_TOPOLOGY)
+tfm_invalid_config(NUM_MAILBOX_QUEUE_SLOT GREATER 1 AND NOT TFM_MULTI_CORE_MULTI_CLIENT_CALL)
 
 tfm_invalid_config(TEST_S  AND TEST_PSA_API)
 tfm_invalid_config(TEST_NS AND TEST_PSA_API)

@@ -56,6 +56,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
+                        ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 else()
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h

@@ -61,3 +61,12 @@ target_sources(tfm_secure_api
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_lifecycle.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
+
+###################### Export configurations to NS #############################
+
+if (TFM_MULTI_CORE_TOPOLOGY OR FORWARD_PROT_MSG)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h.in
+                   ${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h
+                   NEWLINE_STYLE UNIX
+    )
+endif()
