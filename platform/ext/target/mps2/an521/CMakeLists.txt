@@ -122,6 +122,11 @@ target_sources(platform_ns
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
+target_link_libraries(platform_ns
+    PRIVATE
+        tfm_fih # To expand include path
+)
+
 target_include_directories(platform_ns
     PUBLIC
         .
@@ -144,6 +149,11 @@ if(BL2)
             cmsis_drivers/Driver_Flash.c
             native_drivers/arm_uart_drv.c
             cmsis_drivers/Driver_USART.c
+    )
+
+    target_link_libraries(platform_bl2
+        PRIVATE
+            tfm_fih # To expand include path
     )
 
     target_include_directories(platform_bl2

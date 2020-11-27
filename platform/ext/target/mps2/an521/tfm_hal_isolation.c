@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include "cmsis.h"
 #include "Driver_Common.h"
+#include "fih.h"
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "target_cfg.h"
@@ -149,6 +150,103 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
 #endif /* TFM_LVL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
+#ifdef TFM_FIH_PROFILE_ON
+fih_int tfm_hal_set_up_static_boundaries(void)
+{
+    fih_int fih_rc = fih_int_encode(TFM_HAL_ERROR_GENERIC);
+
+    /* Set up isolation boundaries between SPE and NSPE */
+    FIH_CALL(sau_and_idau_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+        FIH_PANIC;
+    }
+
+    FIH_CALL(mpc_init_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+        FIH_PANIC;
+    }
+
+    FIH_CALL(ppc_init_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+        FIH_PANIC;
+    }
+
+    /* Set up static isolation boundaries inside SPE */
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+    int32_t i;
+    struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
+
+    FIH_CALL(mpu_armv8m_clean, fih_rc, &dev_mpu_s);
+    if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+        FIH_PANIC;
+    }
+
+#if TFM_LVL == 3
+    uint32_t cnt;
+
+    /* Update MPU region numbers. The numbers start from 0 and are continuous */
+    cnt = sizeof(isolation_regions) / sizeof(isolation_regions[0]);
+    g_static_region_cnt = cnt;
+    for (i = 0; i < cnt; i++) {
+        /* Update region number */
+        isolation_regions[i].region_nr = i;
+        /* Enable regions */
+        FIH_CALL(mpu_armv8m_region_enable, fih_rc, &dev_mpu_s,
+                 &isolation_regions[i]);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+        }
+    }
+#else /* TFM_LVL == 3 */
+    for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
+
+        FIH_CALL(mpu_armv8m_region_enable, fih_rc, &dev_mpu_s,
+                 (struct mpu_armv8m_region_cfg_t *)&region_cfg[i]);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+        }
+    }
+#endif /* TFM_LVL == 3 */
+
+    /* Enable MPU */
+    FIH_CALL(mpu_armv8m_enable, fih_rc, &dev_mpu_s,
+             PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
+    fih_rc = fih_int_encode(TFM_HAL_SUCCESS);
+    FIH_RET(fih_rc);
+}
+
+#if TFM_LVL == 3
+fih_int tfm_hal_mpu_update_partition_boundary(uintptr_t start,
+                                              uintptr_t end)
+{
+    fih_int fih_rc = fih_int_encode(TFM_HAL_ERROR_GENERIC);
+    struct mpu_armv8m_region_cfg_t cfg;
+    struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
+
+    /* Partition boundary regions is right after static regions */
+    cfg.region_nr = g_static_region_cnt;
+    cfg.region_base = start;
+    cfg.region_limit = end;
+    cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
+    cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
+    cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
+    cfg.attr_sh = MPU_ARMV8M_SH_NONE;
+
+    FIH_CALL(mpu_armv8m_region_enable, fih_rc, &dev_mpu_s, &cfg);
+    if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+
+    fih_rc = fih_int_encode(TFM_HAL_SUCCESS);
+    FIH_RET(fih_rc);
+}
+#endif /* TFM_LVL == 3 */
+#else /* TFM_FIH_PROFILE_ON */
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 {
     /* Set up isolation boundaries between SPE and NSPE */
@@ -224,3 +322,4 @@ enum tfm_hal_status_t tfm_hal_mpu_update_partition_boundary(uintptr_t start,
     return TFM_HAL_SUCCESS;
 }
 #endif /* TFM_LVL == 3 */
+#endif /* TFM_FIH_PROFILE_ON */
