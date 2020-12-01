@@ -23,7 +23,7 @@ endif()
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(ext/target/${TFM_PLATFORM})
+add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
 #========================= Platform Secure ====================================#
 
