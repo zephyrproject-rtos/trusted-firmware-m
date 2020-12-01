@@ -11,9 +11,27 @@ set(NRF_BOARD_SELECTED True)
 
 add_subdirectory(../common/nrf9160 nrf9160)
 
-target_include_directories(platform_s PUBLIC .)
-target_include_directories(platform_ns PUBLIC .)
+target_include_directories(platform_region_defs
+    INTERFACE
+        ../common/nrf9160/partition
+)
+
+target_include_directories(platform_s
+    PUBLIC
+        .
+        ../common/nrf9160/partition
+)
+
+target_include_directories(platform_ns
+    PUBLIC
+        .
+)
 
 if(BL2)
-    target_include_directories(platform_bl2 PRIVATE .)
+    target_include_directories(platform_bl2
+        PUBLIC
+            ../common/nrf9160/partition
+        PRIVATE
+            .
+    )
 endif()
