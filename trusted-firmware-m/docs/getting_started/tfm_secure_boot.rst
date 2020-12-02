@@ -28,7 +28,7 @@ of an immutable bootloader and a public key (ROTPK).
 Second stage bootloader in TF-M
 *******************************
 By default, the MCUboot project from
-`GitHub <https://github.com/JuulLabs-OSS/mcuboot>`__ is used as the secure
+`GitHub <https://github.com/mcu-tools/mcuboot>`__ is used as the secure
 bootloader in TF-M. The repository is going to be automatically downloaded by
 CMake. The version downloaded can be controlled by the ``MCUBOOT_VERSION``
 CMake variable. If you wish to use a locally downloaded copy, the CMake variable

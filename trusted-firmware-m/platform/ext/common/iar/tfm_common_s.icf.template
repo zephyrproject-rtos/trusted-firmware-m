@@ -35,7 +35,11 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro section .rodata object tfm_*_secure_api.o,
        ro object *6M_tl*.a,
        ro object *7M_tl*.a,
-       ro object *libtfmsprt.a
+       ro object *libtfm_sprt.a,
+       ro object psa_client.o,
+       ro object psa_service.o,
+       ro object psa_lifecycle.o,
+       ro object tfm_log_raw.o
        };
 
     /**** PSA RoT RO part (CODE + RODATA) start here */

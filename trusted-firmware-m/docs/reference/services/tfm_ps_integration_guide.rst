@@ -355,7 +355,7 @@ definitions is:
   ``tf-m-tests`` repo, which emulates NV counters in
   RAM, and disables the hardware implementation of NV counters provided by
   the secure service. This flag is enabled by default, but has no effect when
-  the regression tests are disabled. This flag can be
+  the secure regression test is disabled. This flag can be
   overridden to ``OFF`` when building the regression tests. In this case,
   the PS rollback protection test suite will not be built, as it relies
   on extra functionality provided by the virtual NV counters to simulate

@@ -15,6 +15,7 @@ Platforms
     :glob:
 
     target/musca_*/**
+    target/mps*/**
     otp_provisioning.rst
 
 .. toctree::

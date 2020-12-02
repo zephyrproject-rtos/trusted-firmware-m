@@ -19,7 +19,7 @@
 
 /*
  * Original code taken from mcuboot project at:
- * https://github.com/JuulLabs-OSS/mcuboot
+ * https://github.com/mcu-tools/mcuboot
  * Git SHA of the original version: 50d24a57516f558dac72bef634723b60c5cfb46b
  *
  * This file is only here for compatibility and build purposes, and was emptied

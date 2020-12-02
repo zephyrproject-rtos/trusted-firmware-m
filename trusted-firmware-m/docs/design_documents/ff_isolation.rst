@@ -380,9 +380,11 @@ The requirement the software need to do are these:
 - It is also a requirement that the platform needs to help to check if the
   caller of the PSA APIs is permitted to access some memory ranges.
 
-The design document ``TF-M Hardware Abstraction Layer``_ gives a detail design,
-include the platform initialization, isolation interfaces. Please refer to it
-for more detail.
+
+The design document
+:doc:`TF-M Hardware Abstraction Layer <hardware_abstraction_layer>`
+gives a detail design, include the platform initialization, isolation
+interfaces. Please refer to it for more detail.
 
 Appendix
 ========
@@ -397,4 +399,3 @@ Appendix
 --------------
 
 *Copyright (c) 2020, Arm Limited. All rights reserved.*
-
