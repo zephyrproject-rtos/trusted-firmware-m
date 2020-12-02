@@ -472,7 +472,7 @@ automatic downloading for that dependency.
 +----------------+--------------------+-----------------------------------------------------+
 | tf-m-tests     | TFM_TEST_REPO_PATH | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
 +----------------+--------------------+-----------------------------------------------------+
-| MCUboot        | MCUBOOT_PATH       | https://github.com/JuulLabs-OSS/mcuboot             |
+| MCUboot        | MCUBOOT_PATH       | https://github.com/mcu-tools/mcuboot                |
 +----------------+--------------------+-----------------------------------------------------+
 | psa-arch-tests | PSA_ARCH_TEST_PATH | https://github.com/ARM-software/psa-arch-tests      |
 +----------------+--------------------+-----------------------------------------------------+

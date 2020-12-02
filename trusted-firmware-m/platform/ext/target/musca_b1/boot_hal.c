@@ -74,7 +74,7 @@ int32_t boot_platform_init(void)
     printf("OTP provisioning started.\r\n");
     result = crypto_hw_accelerator_otp_provisioning();
     if (result) {
-        printf("OTP provisioning FAILED: 0x%X"\r\n, result);
+        printf("OTP provisioning FAILED: 0x%X\r\n", result);
         return 1;
     } else {
         printf("OTP provisioning succeeded. TF-M won't be loaded.\r\n");

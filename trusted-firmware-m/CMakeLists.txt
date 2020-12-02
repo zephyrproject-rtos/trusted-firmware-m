@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-set(TFM_VERSION 1.1.0)
+set(TFM_VERSION 1.2.0)
 
 ############################ CONFIGURATION #####################################
 
@@ -17,6 +17,16 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/p
     Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
 else()
     include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+endif()
+
+if(TFM_SYSTEM_FP)
+    message(FATAL_ERROR "Hardware FPU is currently not supported in TF-M")
+endif()
+if(TFM_SYSTEM_MVE)
+    message(FATAL_ERROR "Hardware MVE is currently not supported in TF-M")
+endif()
+if(TFM_SYSTEM_DSP)
+    message(FATAL_ERROR "Hardware DSP is currently not supported in TF-M")
 endif()
 
 include(config/set_config.cmake)

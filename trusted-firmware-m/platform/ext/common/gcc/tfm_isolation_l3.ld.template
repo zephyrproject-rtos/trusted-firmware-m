@@ -181,11 +181,12 @@ SECTIONS
         *(SFN)
         *armlib*:*(.text*)
         *armlib*:*(.rodata*)
-        *libtfmsprt*:*(.text*)
-        *libtfmsprt*:*(.rodata*)
+        *libtfm_sprt*:*(.text*)
+        *libtfm_sprt*:*(.rodata*)
         *psa_client.*(.text*)              /* NXP */
         *psa_client.*(.rodata*)
         *psa_service.*(.text*)             /* NXP */
+        *psa_service.*(.rodata*)
         *psa_lifecycle.*(.text*)             /* NXP */
         *psa_lifecycle.*(.rodata*)
         . = ALIGN(32);

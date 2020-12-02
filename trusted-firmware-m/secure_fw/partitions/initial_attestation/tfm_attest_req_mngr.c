@@ -35,13 +35,15 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
         {challenge_buff, challenge_size}
     };
     psa_outvec out_vec[] = {
-        {token_buff, token_size}
+        {token_buff, sizeof(token_buff)}
     };
 
     if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
-
+    if (token_size < sizeof(token_buff)) {
+        out_vec[0].len = token_size;
+    }
     /* store the client ID here for later use in service */
     g_attest_caller_id = msg->client_id;
 
@@ -50,9 +52,6 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
     if (bytes_read != challenge_size) {
         return PSA_ERROR_GENERIC_ERROR;
     }
-
-    token_size = (token_size < PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE) ?
-                  token_size : PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE;
 
     status = initial_attest_get_token(in_vec, IOVEC_LEN(in_vec),
                                       out_vec, IOVEC_LEN(out_vec));

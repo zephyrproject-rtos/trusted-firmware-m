@@ -12,13 +12,14 @@
  * Defines for TFM version.
  */
 #define VERSION_MAJOR    1
-#define VERSION_MINOR    1
+#define VERSION_MINOR    2
+#define VERSION_HOTFIX   0
 #define VERSION_STRING   ""
 
 #define VERSTR(x)      #x
-#define VERCON(major, minor) VERSTR(major)"."VERSTR(minor)
+#define VERCON(major, minor, hotfix) VERSTR(major)"."VERSTR(minor)"."VERSTR(hotfix)
 
-#define VERSION_FULLSTR VERCON(VERSION_MAJOR, VERSION_MINOR)""VERSION_STRING
+#define VERSION_FULLSTR VERCON(VERSION_MAJOR, VERSION_MINOR, VERSION_HOTFIX)""VERSION_STRING
 
 
 
