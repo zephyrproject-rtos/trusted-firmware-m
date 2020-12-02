@@ -234,28 +234,6 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
 void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
                                             int32_t caller_client_id);
 
-
-/**
- * \brief Set the iovec parameters for the partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] args           The arguments of the secure function
- *
- * args is expected to be of type int32_t[4] where:
- *   args[0] is in_vec
- *   args[1] is in_len
- *   args[2] is out_vec
- *   args[3] is out_len
- *
- * \return Error code \ref spm_err_t
- *
- * \note This function doesn't check if partition_idx is valid.
- * \note This function assumes that the iovecs that are passed in args are
- *       valid, and does no sanity check on them at all.
- */
-enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
-                                           const int32_t *args);
-
 /**
  * \brief Execute partition init function
  *
