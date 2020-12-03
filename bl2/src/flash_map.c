@@ -12,41 +12,80 @@
 #include "bootutil/bootutil_log.h"
 #include "Driver_Flash.h"
 
-/* Flash device name must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+/* When undefined FLASH_DEV_NAME_0 or FLASH_DEVICE_ID_0 , default */
+#if !defined(FLASH_DEV_NAME_0) || !defined(FLASH_DEVICE_ID_0)
+#define FLASH_DEV_NAME_0  FLASH_DEV_NAME
+#define FLASH_DEVICE_ID_0 FLASH_DEVICE_ID
+#endif
+
+/* When undefined FLASH_DEV_NAME_1 or FLASH_DEVICE_ID_1 , default */
+#if !defined(FLASH_DEV_NAME_1) || !defined(FLASH_DEVICE_ID_1)
+#define FLASH_DEV_NAME_1  FLASH_DEV_NAME
+#define FLASH_DEVICE_ID_1 FLASH_DEVICE_ID
+#endif
+
+/* When undefined FLASH_DEV_NAME_2 or FLASH_DEVICE_ID_2 , default */
+#if !defined(FLASH_DEV_NAME_2) || !defined(FLASH_DEVICE_ID_2)
+#define FLASH_DEV_NAME_2  FLASH_DEV_NAME
+#define FLASH_DEVICE_ID_2 FLASH_DEVICE_ID
+#endif
+
+/* When undefined FLASH_DEV_NAME_3 or FLASH_DEVICE_ID_3 , default */
+#if !defined(FLASH_DEV_NAME_3) || !defined(FLASH_DEVICE_ID_3)
+#define FLASH_DEV_NAME_3  FLASH_DEV_NAME
+#define FLASH_DEVICE_ID_3 FLASH_DEVICE_ID
+#endif
+
+/* When undefined FLASH_DEV_NAME_SCRATCH or FLASH_DEVICE_ID_SCRATCH , default */
+#if !defined(FLASH_DEV_NAME_SCRATCH) || !defined(FLASH_DEVICE_ID_SCRATCH)
+#define FLASH_DEV_NAME_SCRATCH  FLASH_DEV_NAME
+#define FLASH_DEVICE_ID_SCRATCH FLASH_DEVICE_ID
+#endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
+
+/* Flash device names must be specified by target */
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_0;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_1;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_2;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_3;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_SCRATCH;
 
 static const struct flash_area flash_map[] = {
     {
         .fa_id = FLASH_AREA_0_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_device_id = FLASH_DEVICE_ID_0,
+        .fa_driver = &FLASH_DEV_NAME_0,
         .fa_off = FLASH_AREA_0_OFFSET,
         .fa_size = FLASH_AREA_0_SIZE,
     },
     {
         .fa_id = FLASH_AREA_2_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_device_id = FLASH_DEVICE_ID_2,
+        .fa_driver = &FLASH_DEV_NAME_2,
         .fa_off = FLASH_AREA_2_OFFSET,
         .fa_size = FLASH_AREA_2_SIZE,
     },
 #if (MCUBOOT_IMAGE_NUMBER == 2)
     {
         .fa_id = FLASH_AREA_1_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_device_id = FLASH_DEVICE_ID_1,
+        .fa_driver = &FLASH_DEV_NAME_1,
         .fa_off = FLASH_AREA_1_OFFSET,
         .fa_size = FLASH_AREA_1_SIZE,
     },
     {
         .fa_id = FLASH_AREA_3_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_device_id = FLASH_DEVICE_ID_3,
+        .fa_driver = &FLASH_DEV_NAME_3,
         .fa_off = FLASH_AREA_3_OFFSET,
         .fa_size = FLASH_AREA_3_SIZE,
     },
 #endif
     {
         .fa_id = FLASH_AREA_SCRATCH_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_device_id = FLASH_DEVICE_ID_SCRATCH,
+        .fa_driver = &FLASH_DEV_NAME_SCRATCH,
         .fa_off = FLASH_AREA_SCRATCH_OFFSET,
         .fa_size = FLASH_AREA_SCRATCH_SIZE,
     },
@@ -86,14 +125,14 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
                     uint32_t len)
 {
     BOOT_LOG_DBG("read area=%d, off=%#x, len=%#x", area->fa_id, off, len);
-    return FLASH_DEV_NAME.ReadData(area->fa_off + off, dst, len);
+    return DRV_FLASH_AREA(area)->ReadData(area->fa_off + off, dst, len);
 }
 
 int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len)
 {
     BOOT_LOG_DBG("write area=%d, off=%#x, len=%#x", area->fa_id, off, len);
-    return FLASH_DEV_NAME.ProgramData(area->fa_off + off, src, len);
+    return DRV_FLASH_AREA(area)->ProgramData(area->fa_off + off, src, len);
 }
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
@@ -103,12 +142,12 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     int32_t rc = 0;
 
     BOOT_LOG_DBG("erase area=%d, off=%#x, len=%#x", area->fa_id, off, len);
-    flash_info = FLASH_DEV_NAME.GetInfo();
+    flash_info = DRV_FLASH_AREA(area)->GetInfo();
 
     if (flash_info->sector_info == NULL) {
         /* Uniform sector layout */
         while (deleted_len < len) {
-            rc = FLASH_DEV_NAME.EraseSector(area->fa_off + off);
+            rc = DRV_FLASH_AREA(area)->EraseSector(area->fa_off + off);
             if (rc != 0) {
                 break;
             }
@@ -128,6 +167,6 @@ uint32_t flash_area_align(const struct flash_area *area)
 {
     ARM_FLASH_INFO *flash_info;
 
-    flash_info = FLASH_DEV_NAME.GetInfo();
+    flash_info = DRV_FLASH_AREA(area)->GetInfo();
     return flash_info->program_unit;
 }
