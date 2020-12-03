@@ -17,7 +17,7 @@
 #      interface to secure domain using IPC.
 # ISOLATION_LEVEL: The TF-M isolation level to use
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
-# BL2: Boolean if the TF-M build uses MCUboot.
+# BL2: Boolean if the TF-M build uses MCUboot. Default: True
 #
 # Example usage:
 #
@@ -34,9 +34,10 @@ function(trusted_firmware_build)
   set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE BUILD_PROFILE)
   cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
 
-  if(DEFINED TFM_BL2)
-    set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
+  if(NOT DEFINED TFM_BL2)
+    set(TFM_BL2 True)
   endif()
+  set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
 
   if(DEFINED TFM_IPC)
     set(TFM_IPC_ARG -DTFM_PSA_API=ON)
