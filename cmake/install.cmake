@@ -19,12 +19,6 @@ set(INTERFACE_SRC_DIR ${CMAKE_SOURCE_DIR}/interface/src)
 set(EXPORT_INC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/include)
 set(EXPORT_SRC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/src)
 
-# export NS static lib
-install(TARGETS psa_api_ns
-        ARCHIVE
-        DESTINATION ${CMAKE_BINARY_DIR}/install/export/tfm/lib
-)
-
 # export veneer lib
 if (NOT TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o

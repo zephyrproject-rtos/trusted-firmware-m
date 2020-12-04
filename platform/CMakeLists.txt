@@ -88,7 +88,7 @@ target_sources(platform_ns
 target_link_libraries(platform_ns
     PUBLIC
         platform_region_defs
-        psa_interface
+        tfm_ns_interface
 )
 
 target_compile_definitions(platform_ns

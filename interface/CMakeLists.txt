@@ -51,6 +51,17 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
 )
 
+# A dummy interface library to make sure platform NS build can proceed when NS
+# is disabled, if a platform doesn't use NS flag to control platform NS build.
+if (NOT NS)
+    add_library(tfm_ns_interface INTERFACE)
+
+    target_link_libraries(tfm_ns_interface
+        INTERFACE
+            psa_interface
+    )
+endif()
+
 ###################### PSA api (S lib) #########################################
 
 target_sources(tfm_secure_api
@@ -59,63 +70,4 @@ target_sources(tfm_secure_api
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_service.c>
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_lifecycle.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
-)
-
-###################### PSA api (NS lib) ########################################
-
-add_library(psa_api_ns STATIC)
-
-target_sources(psa_api_ns
-    PRIVATE
-        $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_svc_handler.c>
-        $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:src/tfm_nspm_api.c>
-)
-
-if (${TFM_PSA_API})
-    target_sources(psa_api_ns PRIVATE
-        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_PLATFORM}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_ipc_api.c>
-        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_ipc_api.c>
-        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_its_ipc_api.c>
-        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_crypto_ipc_api.c>
-        $<$<OR:$<BOOL:{$FORWARD_PROT_MSG}>,$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_initial_attestation_ipc_api.c>
-    )
-
-    if (TFM_MULTI_CORE_TOPOLOGY)
-        target_sources(psa_api_ns PRIVATE
-            src/tfm_ns_mailbox.c
-            src/tfm_multi_core_api.c
-            src/tfm_multi_core_psa_ns_api.c
-        )
-    else()
-        target_sources(psa_api_ns PRIVATE
-           src/tfm_ns_interface.c
-           src/tfm_psa_ns_api.c
-        )
-    endif()
-else()
-    target_sources(psa_api_ns PRIVATE
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_func_api.c>
-        $<$<BOOL:${TFM_PARTITION_AUDIT_LOG}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_audit_func_api.c>
-        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_func_api.c>
-        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_its_func_api.c>
-        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_crypto_func_api.c>
-        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_initial_attestation_func_api.c>
-        src/tfm_psa_ns_api.c
-    )
-    if (NOT TFM_MULTI_CORE_TOPOLOGY)
-        target_sources(psa_api_ns PRIVATE
-           src/tfm_ns_interface.c
-        )
-    endif()
-
-endif()
-
-target_link_libraries(psa_api_ns
-    PUBLIC
-        psa_interface
-    PRIVATE
-        platform_ns
-        # CMSIS is currently only required to provide the NS client IDs. In
-        # future, this should probably be made more OS agnostic
-        $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:CMSIS_5_tfm_ns>
 )
