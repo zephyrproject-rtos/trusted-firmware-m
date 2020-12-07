@@ -66,6 +66,7 @@ target_compile_definitions(platform_s
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+        $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
 )
 
 #========================= Platform Non-Secure ================================#
