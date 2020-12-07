@@ -24,7 +24,7 @@ if ("${MBEDCRYPTO_PATH}" STREQUAL "DOWNLOAD")
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
             GIT_SUBMODULES ""
-            PATCH_COMMAND ${GIT_EXECUTABLE} apply ${PATCH_FILES}
+            PATCH_COMMAND ${GIT_EXECUTABLE} am ${PATCH_FILES}
         )
     else()
         FetchContent_Declare(mbedcrypto
