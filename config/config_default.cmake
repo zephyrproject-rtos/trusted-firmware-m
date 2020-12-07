@@ -89,6 +89,7 @@ set(PLATFORM_DUMMY_CRYPTO_KEYS          TRUE        CACHE BOOL      "Use dummy c
 set(PLATFORM_DUMMY_ROTPK                TRUE        CACHE BOOL      "Use dummy root of trust public key. Dummy key is the public key for the default keys in bl2. Should not be used in production.")
 set(PLATFORM_DUMMY_IAK                  TRUE        CACHE BOOL      "Use dummy initial attestation_key. Should not be used in production.")
 set(PLATFORM_DEFAULT_UART_STDOUT        TRUE        CACHE BOOL      "Use default uart stdout implementation.")
+set(PLATFORM_DUMMY_NV_SEED              FALSE       CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
 
 ############################ Partitions ########################################
 
