@@ -17,7 +17,6 @@ if ("${TFM_TEST_REPO_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(tfm_test_repo
         GIT_REPOSITORY https://git.trustedfirmware.org/TF-M/tf-m-tests.git
         GIT_TAG ${TFM_TEST_REPO_VERSION}
-        GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
     )
 
