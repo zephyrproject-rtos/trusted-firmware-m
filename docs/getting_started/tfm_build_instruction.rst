@@ -492,6 +492,27 @@ For required versions of the dependencies, refer to ``config/config_default.cmak
 .. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
 .. _Doxygen: https://www.doxygen.nl
 
+TF-M Tests
+==========
+
+Dependency auto downloading is used by default.
+The TF-M build system downloads the tf-m-tests repo with a fixed version
+specified by ``TFM_TEST_REPO_VERSION`` in ``config/config_default.cmake``.
+The version can be a release tag or a commit hash.
+
+Developers who want a different version of tf-m-tests can override
+``TFM_TEST_REPO_PATH`` to a local copy with the desired version.
+
+As the test repo is part of the TF-M project and coupled with TF-M repo a lot,
+The version should be updated when there are dependency changes between the TF-M
+repo and the test repo and when there is a complete change merged in test repo.
+
+A complete change is one or more patches that are for the same purpose, for
+example a new test suite or enhancements on the test cases.
+Patches in one change can be merge individually provided they do not break
+anything or cause any regressions.
+But the version in the TF-M gets updated only when all the patches are merged.
+
 Example: building TF-M for AN521 platform with local Mbed Crypto
 ================================================================
 
