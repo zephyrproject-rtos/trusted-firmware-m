@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -32,12 +32,12 @@ static psa_status_t its_flash_fs_file_write_aligned_data(
 {
 #if (ITS_FLASH_MAX_ALIGNMENT != 1)
     /* Check that the offset is aligned with the flash program unit */
-    if (!ITS_UTILS_IS_ALIGNED(offset, fs_ctx->flash_info->program_unit)) {
+    if (!ITS_UTILS_IS_ALIGNED(offset, fs_ctx->cfg->program_unit)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Set the size to be aligned with the flash program unit */
-    size = ITS_UTILS_ALIGN(size, fs_ctx->flash_info->program_unit);
+    size = ITS_UTILS_ALIGN(size, fs_ctx->cfg->program_unit);
 #endif
 
     /* It is not permitted to create gaps in the file */
@@ -55,19 +55,113 @@ static psa_status_t its_flash_fs_file_write_aligned_data(
                                           size, data);
 }
 
-psa_status_t its_flash_fs_prepare(struct its_flash_fs_ctx_t *fs_ctx,
-                                  const struct its_flash_info_t *flash_info)
+/* TODO This is very similar to (static) its_num_active_dblocks() */
+static uint32_t its_flash_fs_num_active_dblocks(
+                                        const struct its_flash_fs_config_t *cfg)
+{
+    /* Total number of datablocks is the number of dedicated datablocks plus
+     * logical datablock 0 stored in the metadata block.
+     */
+    if (cfg->num_blocks == 2) {
+        /* Metadata and data are stored in the same physical block, and the
+         * other block is required for power failure safe operation.
+         */
+        /* There are no dedicated data blocks when only two blocks are available
+         */
+        return 1;
+    } else {
+        /* One metadata block and two scratch blocks are reserved. One scratch
+         * block for metadata operations and the other for file data operations.
+         */
+        return cfg->num_blocks - 2;
+    }
+}
+
+static size_t its_flash_fs_all_metadata_size(
+                                        const struct its_flash_fs_config_t *cfg)
+{
+    return sizeof(struct its_metadata_block_header_t)
+           + (its_flash_fs_num_active_dblocks(cfg)
+              * sizeof(struct its_block_meta_t))
+           + (cfg->max_num_files * sizeof(struct its_file_meta_t));
+}
+
+/**
+ * \brief Validates the configuration of the flash filesystem.
+ *
+ * This function checks that the flash block provided is compatible with the
+ * flash_fs described by the cfg parameter.
+ *
+ * \param[in] cfg  Filesystem config
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+static psa_status_t its_flash_fs_validate_config(
+                                        const struct its_flash_fs_config_t *cfg)
+{
+    psa_status_t ret = PSA_SUCCESS;
+
+    if (!cfg) {
+        return PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    /* The minimum number of blocks is 2. In this case, metadata and data are
+     * stored in the same physical block, and the other block is required for
+     * power failure safe operation.
+     * If at least 1 data block is available, 1 data scratch block is required
+     * for power failure safe operation. So, in this case, the minimum number of
+     * blocks is 4 (2 metadata block + 2 data blocks).
+     */
+    if ((cfg->num_blocks < 2) || (cfg->num_blocks == 3)) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    if (cfg->num_blocks == 2) {
+        /* Metadata and data are stored in the same physical block */
+        if (cfg->max_file_size >
+                        cfg->block_size - its_flash_fs_all_metadata_size(cfg)) {
+            ret = PSA_ERROR_STORAGE_FAILURE;
+        }
+    }
+
+    /* It is not required that all files fit in ITS flash area at the same time.
+     * So, it is possible that a create action fails because flash is full.
+     * However, the larger file must have enough space in the ITS flash area to
+     * be created, at least, when the ITS flash area is empty.
+     */
+    if (cfg->max_file_size > cfg->block_size) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    /* Metadata must fit in a flash block */
+    if (its_flash_fs_all_metadata_size(cfg) > cfg->block_size) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    /* Only an erase value of OxFF (the typical value) is currently supported */
+    if (cfg->erase_val != 0xFFU) {
+        ret = PSA_ERROR_STORAGE_FAILURE;
+    }
+
+    return ret;
+}
+
+psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx,
+                                  const struct its_flash_fs_config_t *fs_cfg,
+                                  const struct its_flash_fs_ops_t *fs_ops)
 {
     psa_status_t err;
     uint32_t idx;
 
-    /* Check for valid flash_info */
-    if (!flash_info) {
-        return PSA_ERROR_STORAGE_FAILURE;
+    /* Check for valid filesystem configuration */
+    err = its_flash_fs_validate_config(fs_cfg);
+    if (err != PSA_SUCCESS) {
+        return err;
     }
 
-    /* Associate the flash device info with the context */
-    fs_ctx->flash_info = flash_info;
+    /* Associate the filesystem config and operations with the context */
+    fs_ctx->cfg = fs_cfg;
+    fs_ctx->ops = fs_ops;
 
     /* Initialize metadata block with the valid/active metablock */
     err = its_flash_fs_mblock_init(fs_ctx);
@@ -165,7 +259,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
 
 #if (ITS_FLASH_MAX_ALIGNMENT != 1)
     /* Set the max_size to be aligned with the flash program unit */
-    max_size = ITS_UTILS_ALIGN(max_size, fs_ctx->flash_info->program_unit);
+    max_size = ITS_UTILS_ALIGN(max_size, fs_ctx->cfg->program_unit);
 #endif
 
     /* Check if the file already exists */
@@ -215,7 +309,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
     /* If the existing file was not reused, then a new one must be reserved */
     if (new_idx == ITS_METADATA_INVALID_INDEX) {
         /* Check that the file's maximum size is valid */
-        if (max_size > fs_ctx->flash_info->max_file_size) {
+        if (max_size > fs_ctx->cfg->max_file_size) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
@@ -301,7 +395,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
 
     /* Copy rest of the file metadata entries */
     err = its_flash_fs_mblock_cp_file_meta(fs_ctx, idx + 1,
-                                           fs_ctx->flash_info->max_num_files);
+                                           fs_ctx->cfg->max_num_files);
     if (err != PSA_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
@@ -346,7 +440,7 @@ static psa_status_t its_flash_fs_delete_idx(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t del_file_lblock;
     size_t del_file_max_size;
     psa_status_t err;
-    size_t src_offset = fs_ctx->flash_info->block_size;
+    size_t src_offset = fs_ctx->cfg->block_size;
     size_t nbr_bytes_to_move = 0;
     uint32_t idx;
     struct its_file_meta_t file_meta;
@@ -376,7 +470,7 @@ static psa_status_t its_flash_fs_delete_idx(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Read all file metadata */
-    for (idx = 0; idx < fs_ctx->flash_info->max_num_files; idx++) {
+    for (idx = 0; idx < fs_ctx->cfg->max_num_files; idx++) {
         if (idx == del_file_idx) {
             /* Skip deleted file */
             continue;
@@ -507,73 +601,4 @@ psa_status_t its_flash_fs_file_read(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     return PSA_SUCCESS;
-}
-
-/* TODO This is very similar to (static) its_num_active_dblocks() */
-static uint32_t its_flash_fs_num_active_dblocks(const struct its_flash_info_t *info)
-{
-    /* Total number of datablocks is the number of dedicated datablocks plus
-     * logical datablock 0 stored in the metadata block.
-     */
-    if (info->num_blocks == 2) {
-        /* Metadata and data are stored in the same physical block, and the other
-         * block is required for power failure safe operation.
-         */
-        /* There are no dedicated data blocks when only two blocks are available */
-        return 1;
-    }
-    else {
-        /* One metadata block and two scratch blocks are reserved. One scratch block
-         * for metadata operations and the other for files data operations.
-         */
-        return info->num_blocks - 2;
-    }
-}
-
-static size_t its_flash_fs_all_metadata_size(const struct its_flash_info_t *info)
-{
-    return (sizeof(struct its_metadata_block_header_t)
-            + (its_flash_fs_num_active_dblocks(info)
-                * sizeof(struct its_block_meta_t))
-            + (info->max_num_files * sizeof(struct its_file_meta_t)));
-}
-
-psa_status_t its_flash_fs_validate_params(const struct its_flash_info_t *info)
-{
-    psa_status_t ret = PSA_SUCCESS;
-
-    /* The minimum number of blocks is 2. In this case, metadata and data are
-      * stored in the same physical block, and the other block is required for
-      * power failure safe operation.
-      * If at least 1 data block is available, 1 data scratch block is required for
-      * power failure safe operation. So, in this case, the minimum number of
-      * blocks is 4 (2 metadata block + 2 data blocks).
-      */
-    if ((info->num_blocks < 2) || (info->num_blocks == 3)) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
-    }
-
-    if (info->num_blocks == 2) {
-        /* Metadata and data are stored in the same physical block */
-        if (info->max_file_size > info->block_size
-                                   - its_flash_fs_all_metadata_size(info)) {
-            ret = PSA_ERROR_STORAGE_FAILURE;
-        }
-    }
-
-    /* It is not required that all files fit in ITS flash area at the same time.
-     * So, it is possible that a create action fails because flash is full.
-     * However, the larger file must have enough space in the ITS flash area to be
-     * created, at least, when the ITS flash area is empty.
-     */
-    if (info->max_file_size > info->block_size) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
-    }
-
-    /* Metadata must fit in a flash block */
-    if (its_flash_fs_all_metadata_size(info) > info->block_size) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
-    }
-
-    return ret;
 }

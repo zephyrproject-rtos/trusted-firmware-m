@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,10 @@
 
 #include "psa/storage_common.h"
 #include "tfm_memory_utils.h"
+
+#ifndef ITS_MAX_BLOCK_DATA_COPY
+#define ITS_MAX_BLOCK_DATA_COPY 256
+#endif
 
 /* Physical ID of the two metadata blocks */
 /* NOTE: the earmarked area may not always start at block number 0.
@@ -47,7 +51,7 @@ static inline uint32_t its_init_scratch_dblock(
      * is the scratch metadata block. Otherwise, the initial position of scratch
      * data block is immediately after the metadata blocks.
      */
-    return fs_ctx->flash_info->num_blocks == 2 ? 1 : 2;
+    return fs_ctx->cfg->num_blocks == 2 ? 1 : 2;
 }
 
 /**
@@ -65,7 +69,7 @@ static inline uint32_t its_init_dblock_start(struct its_flash_fs_ctx_t *fs_ctx)
      * Otherwise, one metadata block and two scratch blocks are reserved. One
      * scratch block for metadata operations and the other for data operations.
      */
-    return fs_ctx->flash_info->num_blocks == 2 ? 0 : 3;
+    return fs_ctx->cfg->num_blocks == 2 ? 0 : 3;
 }
 
 /**
@@ -82,8 +86,8 @@ static uint32_t its_num_dedicated_dblocks(struct its_flash_fs_ctx_t *fs_ctx)
      * Otherwise, the number of blocks dedicated just for data is the number of
      * blocks available beyond the initial datablock start index.
      */
-     return fs_ctx->flash_info->num_blocks == 2 ? 0 :
-                 fs_ctx->flash_info->num_blocks - its_init_dblock_start(fs_ctx);
+     return fs_ctx->cfg->num_blocks == 2 ? 0 :
+            fs_ctx->cfg->num_blocks - its_init_dblock_start(fs_ctx);
 }
 
 /**
@@ -224,7 +228,7 @@ static inline psa_status_t its_mblock_validate_file_meta(
      */
     if (its_utils_validate_fid(file_meta->id) == PSA_SUCCESS) {
         /* validate files values if file is in use */
-        if (file_meta->max_size > fs_ctx->flash_info->max_file_size) {
+        if (file_meta->max_size > fs_ctx->cfg->max_file_size) {
             return PSA_ERROR_DATA_CORRUPT;
         }
 
@@ -237,14 +241,15 @@ static inline psa_status_t its_mblock_validate_file_meta(
 
         if (file_meta->lblock == ITS_LOGICAL_DBLOCK0) {
             /* In block 0, data index must be located after the metadata */
-            if (file_meta->data_idx < its_mblock_file_meta_offset(fs_ctx,
-                                           fs_ctx->flash_info->max_num_files)) {
+            if (file_meta->data_idx <
+                its_mblock_file_meta_offset(fs_ctx,
+                                            fs_ctx->cfg->max_num_files)) {
                 return PSA_ERROR_DATA_CORRUPT;
             }
         }
 
         /* Boundary check the incoming request */
-        err = its_utils_check_contained_in(fs_ctx->flash_info->block_size,
+        err = its_utils_check_contained_in(fs_ctx->cfg->block_size,
                                            file_meta->data_idx,
                                            file_meta->max_size);
         if (err != PSA_SUCCESS) {
@@ -274,14 +279,14 @@ static inline psa_status_t its_mblock_validate_block_meta(
     /* Data block's data start at position 0 */
     size_t valid_data_start_value = 0;
 
-    if (block_meta->phy_id >= fs_ctx->flash_info->num_blocks) {
+    if (block_meta->phy_id >= fs_ctx->cfg->num_blocks) {
         return PSA_ERROR_DATA_CORRUPT;
     }
 
     /* Boundary check: block data start + free size can not be bigger
      * than max block size.
      */
-    err = its_utils_check_contained_in(fs_ctx->flash_info->block_size,
+    err = its_utils_check_contained_in(fs_ctx->cfg->block_size,
                                        block_meta->data_start,
                                        block_meta->free_size);
     if (err != PSA_SUCCESS) {
@@ -294,8 +299,8 @@ static inline psa_status_t its_mblock_validate_block_meta(
         /* For metadata + data block, data index must start after the
          * metadata area.
          */
-        valid_data_start_value = its_mblock_file_meta_offset(fs_ctx,
-                                             fs_ctx->flash_info->max_num_files);
+        valid_data_start_value =
+            its_mblock_file_meta_offset(fs_ctx, fs_ctx->cfg->max_num_files);
     }
 
     if (block_meta->data_start != valid_data_start_value) {
@@ -322,7 +327,7 @@ static uint32_t its_get_free_file_index(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t i;
     struct its_file_meta_t tmp_metadata;
 
-    for (i = 0; i < fs_ctx->flash_info->max_num_files; i++) {
+    for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
         err = its_flash_fs_mblock_read_file_meta(fs_ctx, i, &tmp_metadata);
         if (err != PSA_SUCCESS) {
             return ITS_METADATA_INVALID_INDEX;
@@ -364,8 +369,7 @@ static psa_status_t its_mblock_erase_scratch_blocks(
      * and power-failure-safe operation, it is necessary that
      * metadata scratch block is erased before data block.
      */
-    err = fs_ctx->flash_info->erase(fs_ctx->flash_info,
-                                    fs_ctx->scratch_metablock);
+    err = fs_ctx->ops->erase(fs_ctx->cfg, fs_ctx->scratch_metablock);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -375,11 +379,11 @@ static psa_status_t its_mblock_erase_scratch_blocks(
      * only data. Otherwise, if the number of blocks is equal to 2, it means
      * that all data is stored in the metadata block.
      */
-    if (fs_ctx->flash_info->num_blocks > 2) {
+    if (fs_ctx->cfg->num_blocks > 2) {
         scratch_datablock =
             its_flash_fs_mblock_cur_data_scratch_id(fs_ctx,
                                                     (ITS_LOGICAL_DBLOCK0 + 1));
-        err = fs_ctx->flash_info->erase(fs_ctx->flash_info, scratch_datablock);
+        err = fs_ctx->ops->erase(fs_ctx->cfg, scratch_datablock);
     }
 
     return err;
@@ -404,10 +408,9 @@ static psa_status_t its_mblock_update_scratch_block_meta(
 
     /* Calculate the position */
     pos = its_mblock_block_meta_offset(lblock);
-    return fs_ctx->flash_info->write(fs_ctx->flash_info,
-                                     fs_ctx->scratch_metablock,
-                                     (const uint8_t *)block_meta, pos,
-                                     ITS_BLOCK_METADATA_SIZE);
+    return fs_ctx->ops->write(fs_ctx->cfg, fs_ctx->scratch_metablock,
+                              (const uint8_t *)block_meta, pos,
+                              ITS_BLOCK_METADATA_SIZE);
 }
 
 /**
@@ -468,9 +471,8 @@ static psa_status_t its_mblock_copy_remaining_block_meta(
 
             /* Copy rest of the block data from previous block */
             /* Data before updated content */
-            err = its_flash_block_to_block_move(fs_ctx->flash_info,
-                                                scratch_block, pos, meta_block,
-                                                pos, size);
+            err = its_flash_fs_block_to_block_move(fs_ctx, scratch_block, pos,
+                                                   meta_block, pos, size);
             if (err != PSA_SUCCESS) {
                 return err;
             }
@@ -482,8 +484,8 @@ static psa_status_t its_mblock_copy_remaining_block_meta(
 
     size = its_mblock_file_meta_offset(fs_ctx, 0) - pos;
 
-    return its_flash_block_to_block_move(fs_ctx->flash_info, scratch_block, pos,
-                                         meta_block, pos, size);
+    return its_flash_fs_block_to_block_move(fs_ctx, scratch_block, pos,
+                                            meta_block, pos, size);
 }
 
 /**
@@ -511,7 +513,7 @@ static inline psa_status_t its_mblock_validate_swap_count(
      * wasn't complete. So, if the value is 0xFF..., revert
      * back to previous metablock instead.
      */
-    return (swap_count == fs_ctx->flash_info->erase_val)
+    return (swap_count == fs_ctx->cfg->erase_val)
            ? PSA_ERROR_GENERIC_ERROR
            : PSA_SUCCESS;
 }
@@ -580,10 +582,9 @@ static psa_status_t its_mblock_write_scratch_meta_header(
     }
 
     /* Write the metadata block header */
-    return fs_ctx->flash_info->write(fs_ctx->flash_info,
-                                     fs_ctx->scratch_metablock,
-                                     (uint8_t *)(&fs_ctx->meta_block_header),
-                                     0, ITS_BLOCK_META_HEADER_SIZE);
+    return fs_ctx->ops->write(fs_ctx->cfg, fs_ctx->scratch_metablock,
+                              (uint8_t *)(&fs_ctx->meta_block_header), 0,
+                              ITS_BLOCK_META_HEADER_SIZE);
 }
 
 /**
@@ -598,9 +599,9 @@ static psa_status_t its_mblock_read_meta_header(
 {
     psa_status_t err;
 
-    err = fs_ctx->flash_info->read(fs_ctx->flash_info, fs_ctx->active_metablock,
-                                   (uint8_t *)&fs_ctx->meta_block_header, 0,
-                                   ITS_BLOCK_META_HEADER_SIZE);
+    err = fs_ctx->ops->read(fs_ctx->cfg, fs_ctx->active_metablock,
+                            (uint8_t *)&fs_ctx->meta_block_header, 0,
+                            ITS_BLOCK_META_HEADER_SIZE);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -638,7 +639,7 @@ static psa_status_t its_mblock_reserve_file(struct its_flash_fs_ctx_t *fs_ctx,
         if (block_meta->free_size >= size) {
             /* Set file metadata */
             file_meta->lblock = i;
-            file_meta->data_idx = fs_ctx->flash_info->block_size
+            file_meta->data_idx = fs_ctx->cfg->block_size
                                   - block_meta->free_size;
             file_meta->max_size = size;
             tfm_memcpy(file_meta->id, fid, ITS_FILE_ID_SIZE);
@@ -677,9 +678,8 @@ static psa_status_t its_init_get_active_metablock(
      * attempt to validate the metadata header, otherwise assume that the block
      * update was incomplete
      */
-    err = fs_ctx->flash_info->read(fs_ctx->flash_info, ITS_METADATA_BLOCK0,
-                                   (uint8_t *)&h_meta0, 0,
-                                   ITS_BLOCK_META_HEADER_SIZE);
+    err = fs_ctx->ops->read(fs_ctx->cfg, ITS_METADATA_BLOCK0,
+                            (uint8_t *)&h_meta0, 0, ITS_BLOCK_META_HEADER_SIZE);
     if (err == PSA_SUCCESS) {
         if (its_mblock_validate_header_meta(fs_ctx, &h_meta0) == PSA_SUCCESS) {
             num_valid_meta_blocks++;
@@ -687,9 +687,8 @@ static psa_status_t its_init_get_active_metablock(
         }
     }
 
-    err = fs_ctx->flash_info->read(fs_ctx->flash_info, ITS_METADATA_BLOCK1,
-                                   (uint8_t *)&h_meta1, 0,
-                                   ITS_BLOCK_META_HEADER_SIZE);
+    err = fs_ctx->ops->read(fs_ctx->cfg, ITS_METADATA_BLOCK1,
+                            (uint8_t *)&h_meta1, 0, ITS_BLOCK_META_HEADER_SIZE);
     if (err == PSA_SUCCESS) {
         if (its_mblock_validate_header_meta(fs_ctx, &h_meta1) == PSA_SUCCESS) {
             num_valid_meta_blocks++;
@@ -724,10 +723,9 @@ psa_status_t its_flash_fs_mblock_cp_file_meta(struct its_flash_fs_ctx_t *fs_ctx,
     /* Copy all data between the two positions from the scratch metadata block
      * to the active metadata block.
      */
-    return its_flash_block_to_block_move(fs_ctx->flash_info,
-                                         fs_ctx->scratch_metablock, pos_start,
-                                         fs_ctx->active_metablock, pos_start,
-                                         pos_end - pos_start);
+    return its_flash_fs_block_to_block_move(fs_ctx, fs_ctx->scratch_metablock,
+                                            pos_start, fs_ctx->active_metablock,
+                                            pos_start, pos_end - pos_start);
 }
 
 uint32_t its_flash_fs_mblock_cur_data_scratch_id(
@@ -750,7 +748,7 @@ psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t i;
     struct its_file_meta_t tmp_metadata;
 
-    for (i = 0; i < fs_ctx->flash_info->max_num_files; i++) {
+    for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
         err = its_flash_fs_mblock_read_file_meta(fs_ctx, i, &tmp_metadata);
         if (err != PSA_SUCCESS) {
             return PSA_ERROR_GENERIC_ERROR;
@@ -776,7 +774,7 @@ psa_status_t its_flash_fs_mblock_get_file_idx_flag(
     uint32_t i;
     struct its_file_meta_t tmp_metadata;
 
-    for (i = 0; i < fs_ctx->flash_info->max_num_files; i++) {
+    for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
         err = its_flash_fs_mblock_read_file_meta(fs_ctx, i, &tmp_metadata);
         if (err != PSA_SUCCESS) {
             return PSA_ERROR_GENERIC_ERROR;
@@ -797,7 +795,7 @@ psa_status_t its_flash_fs_mblock_init(struct its_flash_fs_ctx_t *fs_ctx)
     psa_status_t err;
 
     /* Initialize Flash Interface */
-    err = fs_ctx->flash_info->init(fs_ctx->flash_info);
+    err = fs_ctx->ops->init(fs_ctx->cfg);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -828,7 +826,7 @@ psa_status_t its_flash_fs_mblock_meta_update_finalize(
     }
 
     /* Commit metadata block modifications to flash */
-    err = fs_ctx->flash_info->flush(fs_ctx->flash_info);
+    err = fs_ctx->ops->flush(fs_ctx->cfg);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -854,15 +852,13 @@ psa_status_t its_flash_fs_mblock_migrate_lb0_data_to_scratch(
     }
 
     /* Calculate data size stored in the B0 block */
-    data_size = (fs_ctx->flash_info->block_size - block_meta.data_start)
+    data_size = (fs_ctx->cfg->block_size - block_meta.data_start)
                 - block_meta.free_size;
 
-    return its_flash_block_to_block_move(fs_ctx->flash_info,
-                                         fs_ctx->scratch_metablock,
-                                         block_meta.data_start,
-                                         fs_ctx->active_metablock,
-                                         block_meta.data_start,
-                                         data_size);
+    return its_flash_fs_block_to_block_move(fs_ctx, fs_ctx->scratch_metablock,
+                                            block_meta.data_start,
+                                            fs_ctx->active_metablock,
+                                            block_meta.data_start, data_size);
 }
 
 psa_status_t its_flash_fs_mblock_read_file_meta(
@@ -874,9 +870,9 @@ psa_status_t its_flash_fs_mblock_read_file_meta(
     size_t offset;
 
     offset = its_mblock_file_meta_offset(fs_ctx, idx);
-    err = fs_ctx->flash_info->read(fs_ctx->flash_info, fs_ctx->active_metablock,
-                                   (uint8_t *)file_meta, offset,
-                                   ITS_FILE_METADATA_SIZE);
+    err = fs_ctx->ops->read(fs_ctx->cfg, fs_ctx->active_metablock,
+                            (uint8_t *)file_meta, offset,
+                            ITS_FILE_METADATA_SIZE);
 
 #ifdef ITS_VALIDATE_METADATA_FROM_FLASH
     if (err == PSA_SUCCESS) {
@@ -896,9 +892,9 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
     size_t pos;
 
     pos = its_mblock_block_meta_offset(lblock);
-    err = fs_ctx->flash_info->read(fs_ctx->flash_info, fs_ctx->active_metablock,
-                                   (uint8_t *)block_meta, pos,
-                                   ITS_BLOCK_METADATA_SIZE);
+    err = fs_ctx->ops->read(fs_ctx->cfg, fs_ctx->active_metablock,
+                            (uint8_t *)block_meta, pos,
+                            ITS_BLOCK_METADATA_SIZE);
 
 #ifdef ITS_VALIDATE_METADATA_FROM_FLASH
     if (err == PSA_SUCCESS) {
@@ -950,14 +946,13 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
         metablock_to_erase_first = fs_ctx->scratch_metablock;
     }
 
-    err = fs_ctx->flash_info->erase(fs_ctx->flash_info,
-                                    metablock_to_erase_first);
+    err = fs_ctx->ops->erase(fs_ctx->cfg, metablock_to_erase_first);
     if (err != PSA_SUCCESS) {
         return err;
     }
 
-    err = fs_ctx->flash_info->erase(fs_ctx->flash_info,
-                                ITS_OTHER_META_BLOCK(metablock_to_erase_first));
+    err = fs_ctx->ops->erase(fs_ctx->cfg,
+                             ITS_OTHER_META_BLOCK(metablock_to_erase_first));
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -973,9 +968,8 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
      * for data is from the end of the metadata to the end of the block.
      */
     block_meta.data_start =
-        its_mblock_file_meta_offset(fs_ctx, fs_ctx->flash_info->max_num_files);
-    block_meta.free_size = fs_ctx->flash_info->block_size
-                           - block_meta.data_start;
+        its_mblock_file_meta_offset(fs_ctx, fs_ctx->cfg->max_num_files);
+    block_meta.free_size = fs_ctx->cfg->block_size - block_meta.data_start;
     block_meta.phy_id = ITS_METADATA_BLOCK0;
     err = its_mblock_update_scratch_block_meta(fs_ctx, ITS_LOGICAL_DBLOCK0,
                                                &block_meta);
@@ -989,13 +983,13 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
      * data is the entire block.
      */
     block_meta.data_start = 0;
-    block_meta.free_size = fs_ctx->flash_info->block_size;
+    block_meta.free_size = fs_ctx->cfg->block_size;
     for (i = 0; i < its_num_dedicated_dblocks(fs_ctx); i++) {
         /* If a flash error is detected, the code erases the rest
          * of the blocks anyway to remove all data stored in them.
          */
-        err |= fs_ctx->flash_info->erase(fs_ctx->flash_info,
-                                         i + its_init_dblock_start(fs_ctx));
+        err |= fs_ctx->ops->erase(fs_ctx->cfg,
+                                  i + its_init_dblock_start(fs_ctx));
     }
 
     /* If an error is detected while erasing the flash, then return a
@@ -1016,7 +1010,7 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
     /* Initialize file metadata table */
     (void)tfm_memset(&file_metadata, ITS_DEFAULT_EMPTY_BUFF_VAL,
                      ITS_FILE_METADATA_SIZE);
-    for (i = 0; i < fs_ctx->flash_info->max_num_files; i++) {
+    for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
         /* In the beginning phys id is same as logical id */
         /* Update file metadata to reflect new attributes */
         err = its_flash_fs_mblock_update_scratch_file_meta(fs_ctx, i,
@@ -1032,7 +1026,7 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
     }
 
     /* Commit metadata block modifications to flash */
-    err = fs_ctx->flash_info->flush(fs_ctx->flash_info);
+    err = fs_ctx->ops->flush(fs_ctx->cfg);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -1083,8 +1077,49 @@ psa_status_t its_flash_fs_mblock_update_scratch_file_meta(
 
     /* Calculate the position */
     pos = its_mblock_file_meta_offset(fs_ctx, idx);
-    return fs_ctx->flash_info->write(fs_ctx->flash_info,
-                                     fs_ctx->scratch_metablock,
-                                     (const uint8_t *)file_meta, pos,
-                                     ITS_FILE_METADATA_SIZE);
+    return fs_ctx->ops->write(fs_ctx->cfg, fs_ctx->scratch_metablock,
+                              (const uint8_t *)file_meta, pos,
+                              ITS_FILE_METADATA_SIZE);
+}
+
+psa_status_t its_flash_fs_block_to_block_move(struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t dst_block,
+                                              size_t dst_offset,
+                                              uint32_t src_block,
+                                              size_t src_offset,
+                                              size_t size)
+{
+    psa_status_t status;
+    size_t bytes_to_move;
+    uint8_t dst_block_data_copy[ITS_MAX_BLOCK_DATA_COPY];
+
+    while (size > 0) {
+        /* Calculates the number of bytes to move */
+        bytes_to_move = ITS_UTILS_MIN(size, ITS_MAX_BLOCK_DATA_COPY);
+
+        /* Reads data from source block and store it in the in-memory copy of
+         * destination content.
+         */
+        status = fs_ctx->ops->read(fs_ctx->cfg, src_block, dst_block_data_copy,
+                                   src_offset, bytes_to_move);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+
+        /* Writes in flash the in-memory block content after modification */
+        status = fs_ctx->ops->write(fs_ctx->cfg, dst_block, dst_block_data_copy,
+                                    dst_offset, bytes_to_move);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+
+        /* Updates pointers to the source and destination flash regions */
+        dst_offset += bytes_to_move;
+        src_offset += bytes_to_move;
+
+        /* Decrement remaining size to move */
+        size -= bytes_to_move;
+    }
+
+    return PSA_SUCCESS;
 }

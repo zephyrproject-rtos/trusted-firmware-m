@@ -28,12 +28,9 @@ target_sources(tfm_psa_rot_partition_its
         tfm_its_req_mngr.c
         tfm_internal_trusted_storage.c
         its_utils.c
-        flash/its_flash.c
         flash/its_flash_nand.c
         flash/its_flash_nor.c
         flash/its_flash_ram.c
-        flash/its_flash_info_internal.c
-        flash/its_flash_info_external.c
         flash_fs/its_flash_fs.c
         flash_fs/its_flash_fs_dblock.c
         flash_fs/its_flash_fs_mblock.c
