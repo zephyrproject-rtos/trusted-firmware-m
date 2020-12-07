@@ -34,7 +34,7 @@ target_sources(tfm_spm
         common/tfm_boot_data.c
         common/tfm_core_utils.c
         common/utilities.c
-        common/spm_log.c
+        $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},${TFM_SPM_LOG_LEVEL_SILENCE}>>:common/spm_log.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_rpc.c>
