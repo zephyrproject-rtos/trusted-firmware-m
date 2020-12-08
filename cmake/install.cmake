@@ -186,3 +186,32 @@ if(TFM_PARTITION_PLATFORM)
                 DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
+
+
+##################### Export image signing information #########################
+
+set(INSTALL_IMAGE_SIGINING_DIR ${TFM_INSTALL_PATH}/image_signing)
+
+if(BL2)
+    install(DIRECTORY bl2/ext/mcuboot/scripts
+            DESTINATION ${INSTALL_IMAGE_SIGINING_DIR})
+
+    if (MCUBOOT_ENC_IMAGES)
+        install(FILES ${MCUBOOT_KEY_ENC}
+                DESTINATION ${INSTALL_IMAGE_SIGINING_DIR}/keys)
+    endif()
+
+    install(FILES $<TARGET_OBJECTS:signing_layout_s>
+            DESTINATION ${INSTALL_IMAGE_SIGINING_DIR}/layout_files)
+
+    if(MCUBOOT_IMAGE_NUMBER GREATER 1)
+        install(FILES $<TARGET_OBJECTS:signing_layout_ns>
+                DESTINATION ${INSTALL_IMAGE_SIGINING_DIR}/layout_files)
+
+        install(FILES ${MCUBOOT_KEY_NS}
+                DESTINATION ${INSTALL_IMAGE_SIGINING_DIR}/keys)
+    else()
+        install(FILES ${MCUBOOT_KEY_S}
+                DESTINATION ${INSTALL_IMAGE_SIGINING_DIR}/keys)
+    endif()
+endif()
