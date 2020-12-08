@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -17,65 +17,66 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
 
 set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)
 set(INTERFACE_SRC_DIR ${CMAKE_SOURCE_DIR}/interface/src)
-set(EXPORT_INC_DIR    ${TFM_INSTALL_PATH}/export/tfm/include)
-set(EXPORT_SRC_DIR    ${TFM_INSTALL_PATH}/export/tfm/src)
-set(EXPORT_LIB_DIR    ${TFM_INSTALL_PATH}/export/tfm/lib)
+
+set(INSTALL_INTERFACE_INC_DIR    ${TFM_INSTALL_PATH}/interface/include)
+set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
+set(INSTALL_INTERFACE_LIB_DIR    ${TFM_INSTALL_PATH}/interface/lib)
 
 # export veneer lib
 if (NOT TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o
-            DESTINATION ${EXPORT_LIB_DIR})
+            DESTINATION ${INSTALL_INTERFACE_LIB_DIR})
 endif()
 
 ####################### export headers #########################################
 
 install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
                     ${INTERFACE_INC_DIR}/psa/error.h
-        DESTINATION ${EXPORT_INC_DIR}/psa)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 
 install(FILES       ${INTERFACE_INC_DIR}/os_wrapper/common.h
                     ${INTERFACE_INC_DIR}/os_wrapper/mutex.h
                     ${INTERFACE_INC_DIR}/os_wrapper/semaphore.h
                     ${INTERFACE_INC_DIR}/os_wrapper/thread.h
                     ${INTERFACE_INC_DIR}/os_wrapper/tick.h
-        DESTINATION ${EXPORT_INC_DIR}/os_wrapper)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/os_wrapper)
 
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest/sid.h
-        DESTINATION ${EXPORT_INC_DIR}/psa_manifest)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa_manifest)
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
                     ${INTERFACE_INC_DIR}/tfm_ns_svc.h
-        DESTINATION ${EXPORT_INC_DIR})
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
-        DESTINATION ${EXPORT_INC_DIR}/ext)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/tfm_ns_mailbox.h
                         ${INTERFACE_INC_DIR}/tfm_mailbox.h
-            DESTINATION ${EXPORT_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 else()
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
-            DESTINATION ${EXPORT_INC_DIR}/tfm/veneers)
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/tfm/veneers)
 endif()
 
 if (TFM_NS_CLIENT_IDENTIFICATION)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_nspm_api.h
                         ${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
-            DESTINATION ${EXPORT_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
     install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
-            DESTINATION ${EXPORT_INC_DIR}/psa)
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
     install(FILES       ${INTERFACE_INC_DIR}/psa/internal_trusted_storage.h
                         ${INTERFACE_INC_DIR}/psa/storage_common.h
-            DESTINATION ${EXPORT_INC_DIR}/psa)
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 endif()
 
 if (TFM_PARTITION_CRYPTO)
@@ -87,25 +88,25 @@ if (TFM_PARTITION_CRYPTO)
                         ${INTERFACE_INC_DIR}/psa/crypto_struct.h
                         ${INTERFACE_INC_DIR}/psa/crypto_types.h
                         ${INTERFACE_INC_DIR}/psa/crypto_values.h
-            DESTINATION ${EXPORT_INC_DIR}/psa)
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_crypto_defs.h
-            DESTINATION ${EXPORT_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
     install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
-            DESTINATION ${EXPORT_INC_DIR}/psa)
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 endif()
 
 if(TFM_PARTITION_AUDIT_LOG)
     install(FILES       ${INTERFACE_INC_DIR}/psa_audit_api.h
                         ${INTERFACE_INC_DIR}/psa_audit_defs.h
-            DESTINATION ${EXPORT_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if(TFM_PARTITION_PLATFORM)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_platform_api.h
-            DESTINATION ${EXPORT_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 ####################### export sources #########################################
@@ -114,74 +115,74 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_mailbox.c
                         ${INTERFACE_SRC_DIR}/tfm_multi_core_api.c
                         ${INTERFACE_SRC_DIR}/tfm_multi_core_psa_ns_api.c
-            DESTINATION ${EXPORT_SRC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 else()
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c
-            DESTINATION ${EXPORT_SRC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 
     if(TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
 
 if (TFM_NS_CLIENT_IDENTIFICATION)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_nspm_api.c
                         ${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
-            DESTINATION ${EXPORT_SRC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
     if (TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_func_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
     if (TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_func_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
 
 if (TFM_PARTITION_CRYPTO)
     if (TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
     if (TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
 
 if(TFM_PARTITION_AUDIT_LOG)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_audit_func_api.c
-            DESTINATION ${EXPORT_SRC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if(TFM_PARTITION_PLATFORM)
     if(TFM_PSA_API)
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_func_api.c
-                DESTINATION ${EXPORT_SRC_DIR})
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
