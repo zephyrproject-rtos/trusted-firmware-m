@@ -504,10 +504,21 @@ static void sau_and_idau_cfg(void)
   SAU->RLAR = (((uint32_t)FLASH_NS + 0xffff) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 #endif /* TFM_ERROR_HANDLER_NON_SECURE */
   /* Allow non secure Flash base access */
+#if defined(EXTERNAL_FLASH)
+  SAU->RNR  = 3;
+  SAU->RBAR = ((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET) & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET
+                + FLASH_AREA_1_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+  SAU->RNR  = 4;
+  SAU->RBAR = ((uint32_t)OSPI_FLASH_BASE_ADDRESS + FLASH_AREA_2_OFFSET) & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (((uint32_t)OSPI_FLASH_BASE_ADDRESS + FLASH_AREA_3_OFFSET
+                + FLASH_AREA_3_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+#else
   SAU->RNR  = 3;
   SAU->RBAR = ((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET) & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = (((uint32_t)FLASH_BASE_NS + FLASH_AREA_3_OFFSET
                 + FLASH_AREA_3_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+#endif
   /* Force memory writes before continuing */
   __DSB();
   /* Flush and refill pipeline with updated permissions */

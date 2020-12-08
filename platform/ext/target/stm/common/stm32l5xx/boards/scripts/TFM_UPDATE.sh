@@ -20,19 +20,21 @@ SCRIPTPATH=`dirname $SCRIPT`
 BINPATH="$SCRIPTPATH/bin"
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
-connect_no_reset="-c port=SWD mode=HotPlug"
-connect="-c port=SWD mode=HotPlug --hardRst"
+external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
+connect_no_reset="-c port=SWD mode=UR -el $external_loader"
+connect="-c port=SWD mode=UR --hardRst -el $external_loader"
+
 echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
-slot0=0xc014000
-slot1=0xc038000
+slot0=
+slot1=
 slot2=
 slot3=
 its=
 sst=
 scratch=
 nvcounter=
-boot=0x0c001000
+boot=
 unused=
 
 $stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v

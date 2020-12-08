@@ -45,7 +45,7 @@ const struct memory_region_limits memory_regions =
   (uint32_t) &REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
   NS_PARTITION_SIZE - 1,
 #else /*  0 */
-  (uint32_t)(FLASH_BASE_NS + FLASH_AREA_3_OFFSET + FLASH_NS_PARTITION_SIZE - 1),
+  (uint32_t)(FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_NS_PARTITION_SIZE - 1),
 #endif /* 0 */
   .veneer_base =
   (uint32_t) &REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
