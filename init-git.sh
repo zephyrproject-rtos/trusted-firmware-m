@@ -2,20 +2,11 @@
 
 TFM_GIT_SHA=TF-Mv1.2.0
 TFM_TESTS_GIT_SHA=TF-Mv1.2.0
-MCUBOOT_GIT_SHA=v1.6.0
 PSA_ARCH_TESTS_GIT_SHA=v20.03_API1.0
 
 if [ ! -d trusted-firmware-m/.git ]; then
    git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git -b ${TFM_GIT_SHA} --bare trusted-firmware-m/.git
    cd trusted-firmware-m
-   git init
-   git checkout -f
-   cd ..
-fi
-
-if [ ! -d mcuboot/.git ]; then
-   git clone https://github.com/JuulLabs-OSS/mcuboot.git -b v1.4.0 -b ${MCUBOOT_GIT_SHA} --bare mcuboot/.git
-   cd mcuboot
    git init
    git checkout -f
    cd ..
