@@ -24,14 +24,10 @@ TF-M Tests:
     commit: ccda809801e529250b47c9ac470cf94daef1bb1b
     license: Apache 2.0
 
-mcuboot:
-    repo: https://github.com/JuulLabs-OSS/mcuboot.git
-    tag: v1.6.0
-    commit: 50d24a57516f558dac72bef634723b60c5cfb46b
-    license: Apache 2.0
-
 psa-arch-tests:
     repo: https://github.com/ARM-software/psa-arch-tests
     tag: v20.03_API1.0
     commit: 3d986e72d9e084bb45763849699718f474fb10ba
     license: Apache 2.0
+
+See also west.yml for more dependencies.
