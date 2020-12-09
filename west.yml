@@ -1,0 +1,11 @@
+# The west manifest file (west.yml) for the Zephyr Trusted Firmware-M module.
+#
+# This file specifies dependencies of TF-M, as can also be found referenced in
+# the trusted-firmware-m build system.
+
+manifest:
+  projects:
+    - name: tfm-mcuboot
+      url: https://github.com/zephyrproject-rtos/mcuboot
+      path: modules/tee/tfm-mcuboot
+      revision: 1.7.0-rc1
