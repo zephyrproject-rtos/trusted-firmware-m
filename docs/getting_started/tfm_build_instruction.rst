@@ -462,20 +462,20 @@ deleting that directory.
 
 If you have local copies already, and wish to avoid having the libraries
 downloaded every time the build directory is deleted, then the following
-variables can be set to the paths to those local copies. This will disable the
-automatic downloading for that dependency.
+variables can be set to the path to the root directory of the local repo. This
+will disable the automatic downloading for that dependency.
 
-+----------------+--------------------+-----------------------------------------------------+
-| Dependency     | Cmake variable     | Git repo URL                                        |
-+================+====================+=====================================================+
-| Mbed Crypto    | MBEDCRYPTO_PATH    | https://github.com/ARMmbed/mbedtls                  |
-+----------------+--------------------+-----------------------------------------------------+
-| tf-m-tests     | TFM_TEST_REPO_PATH | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
-+----------------+--------------------+-----------------------------------------------------+
-| MCUboot        | MCUBOOT_PATH       | https://github.com/mcu-tools/mcuboot                |
-+----------------+--------------------+-----------------------------------------------------+
-| psa-arch-tests | PSA_ARCH_TEST_PATH | https://github.com/ARM-software/psa-arch-tests      |
-+----------------+--------------------+-----------------------------------------------------+
++----------------+---------------------+-----------------------------------------------------+
+| Dependency     | Cmake variable      | Git repo URL                                        |
++================+=====================+=====================================================+
+| Mbed Crypto    | MBEDCRYPTO_PATH     | https://github.com/ARMmbed/mbedtls                  |
++----------------+---------------------+-----------------------------------------------------+
+| tf-m-tests     | TFM_TEST_REPO_PATH  | https://git.trustedfirmware.org/TF-M/tf-m-tests.git |
++----------------+---------------------+-----------------------------------------------------+
+| MCUboot        | MCUBOOT_PATH        | https://github.com/mcu-tools/mcuboot                |
++----------------+---------------------+-----------------------------------------------------+
+| psa-arch-tests | PSA_ARCH_TESTS_PATH | https://github.com/ARM-software/psa-arch-tests      |
++----------------+---------------------+-----------------------------------------------------+
 
 For required versions of the dependencies, refer to ``config/config_default.cmake``.
 
