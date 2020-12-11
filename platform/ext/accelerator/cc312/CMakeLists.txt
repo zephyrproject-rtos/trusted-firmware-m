@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -63,12 +63,12 @@ if(BL2)
 
     #Link utils to PAL for logging
     target_link_libraries(cc312_pal
-        PRIVATE
+        INTERFACE
             bl2_crypto_hw
     )
 
     target_link_libraries(cc312_cdmpu
-        PRIVATE
+        INTERFACE
             bl2_mbedcrypto
     )
 
@@ -93,8 +93,8 @@ if(BL2)
 
     target_include_directories(cc312_cdmpu
         BEFORE
-        PUBLIC
-        ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
+        INTERFACE
+            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
     )
 endif()
 
