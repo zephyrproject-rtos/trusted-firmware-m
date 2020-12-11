@@ -34,9 +34,11 @@ const struct its_flash_info_t *its_flash_get_info(enum its_flash_id_t id)
         tfm_hal_its_fs_info(&ret->fs_info.flash_area_addr, &ret->fs_info.flash_area_size);
         break;
 
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     case ITS_FLASH_ID_EXTERNAL:
         tfm_hal_ps_fs_info(&ret->fs_info.flash_area_addr, &ret->fs_info.flash_area_size);
         break;
+#endif
 
     default:
         return NULL;
