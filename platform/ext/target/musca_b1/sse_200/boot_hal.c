@@ -64,6 +64,8 @@ int32_t boot_platform_init(void)
     if (result) {
         return 1;
     }
+
+   (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 /* This is a workaround to program the TF-M related cryptographic keys
@@ -102,8 +104,6 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     if (result) {
         while (1);
     }
-
-    (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     result = FLASH_DEV_NAME.Uninitialize();
