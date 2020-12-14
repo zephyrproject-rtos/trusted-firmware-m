@@ -72,6 +72,7 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
         CMSIS_Driver/Driver_Flash_MRAM.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
