@@ -29,9 +29,7 @@ target_include_directories(bl2
 
 target_link_libraries(bl2
     PRIVATE
-        platform_bl2
         tfm_boot_status
-        bl2_mbedcrypto
 )
 
 target_link_options(bl2

@@ -8,14 +8,32 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
+add_library(mcuboot_config INTERFACE)
+
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
+
+add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
+
+target_include_directories(bootutil
+    PUBLIC
+        include
+)
+
+target_link_libraries(bootutil
+    PUBLIC
+        mcuboot_config
+        platform_bl2
+        bl2_mbedcrypto
+)
+
+target_include_directories(mcuboot_config
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # for mcuboot_config.h only
+)
 
 target_include_directories(bl2
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # for mcuboot_config.h only
-        $<BUILD_INTERFACE:${MCUBOOT_PATH}/boot/bootutil/include>
-        $<BUILD_INTERFACE:${MCUBOOT_PATH}/boot>
 )
 
 target_sources(bl2
@@ -24,18 +42,11 @@ target_sources(bl2
         ${CMAKE_CURRENT_SOURCE_DIR}/keys.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_extended.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_legacy.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/loader.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_misc.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/image_validate.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/image_rsa.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/boot_record.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_scratch.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_move.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_misc.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/encrypted.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening_delay_rng_mbedtls.c
+)
+
+target_link_libraries(bl2
+    PUBLIC
+        bootutil
 )
 
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)
