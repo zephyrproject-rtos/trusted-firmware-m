@@ -14,7 +14,7 @@ add_library(platform_region_defs INTERFACE)
 # under the multicore topology, NS is declared in the same place as the PSA
 # interface so that it picks up the compiler definitions for the NS CPU
 if(NOT TFM_MULTI_CORE_TOPOLOGY)
-    add_library(platform_ns STATIC)
+    add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
 endif()
 
 if (BL2)

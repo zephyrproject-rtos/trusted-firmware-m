@@ -15,7 +15,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     tfm_toolchain_reload_compiler()
     # The platform target is created in this directory/file so that it has the
     # same settings as the main ns target.
-    add_library(platform_ns STATIC)
+    add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
 endif()
 
 ###################### PSA interface (header only) #############################
@@ -50,17 +50,6 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
 )
-
-# A dummy interface library to make sure platform NS build can proceed when NS
-# is disabled, if a platform doesn't use NS flag to control platform NS build.
-if (NOT NS)
-    add_library(tfm_ns_interface INTERFACE)
-
-    target_link_libraries(tfm_ns_interface
-        INTERFACE
-            psa_interface
-    )
-endif()
 
 ###################### PSA api (S lib) #########################################
 
