@@ -163,8 +163,8 @@ The pseudo code of ``has_access_to_region()`` is shown below.
         struct security_attr_info_t security_attr;
         struct mem_attr_info_t mem_attr;
 
-        /* The memory access check should be executed inside TF-M SPM */
-        if (not in Handler mode) {
+        /* The memory access check should be executed inside TF-M PSA RoT */
+        if (not in privileged level) {
             abort;
         }
 
@@ -510,4 +510,4 @@ section.
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*

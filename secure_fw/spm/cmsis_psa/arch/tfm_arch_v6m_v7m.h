@@ -134,4 +134,28 @@ __STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
     (void)msplim;
 }
 
+/**
+ * \brief Whether in privileged level
+ *
+ * \retval true             If current execution runs in privileged level.
+ * \retval false            If current execution runs in unprivileged level.
+ */
+__STATIC_INLINE bool tfm_arch_is_priv(void)
+{
+    CONTROL_Type ctrl;
+
+    /* If in Handler mode */
+    if (__get_IPSR()) {
+        return true;
+    }
+
+    /* If in privileged Thread mode */
+    ctrl.w = __get_CONTROL();
+    if (!ctrl.b.nPRIV) {
+        return true;
+    }
+
+    return false;
+}
+
 #endif

@@ -433,8 +433,8 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
         return (int32_t)TFM_ERROR_GENERIC;
     }
 
-    /* Abort if not in Handler mode */
-    if (!__get_IPSR()) {
+    /* Abort if current check doesn't run in PSA RoT */
+    if (!tfm_arch_is_priv()) {
         tfm_core_panic();
     }
 
