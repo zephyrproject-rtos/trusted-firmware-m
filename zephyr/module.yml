@@ -1,2 +1,5 @@
+name: trusted-firmware-m
+
 build:
-  cmake: .
+  cmake-ext: True
+  kconfig-ext: True
