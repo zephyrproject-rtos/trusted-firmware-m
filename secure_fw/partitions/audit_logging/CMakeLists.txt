@@ -9,11 +9,6 @@ if (NOT TFM_PARTITION_AUDIT_LOG)
     return()
 endif()
 
-#TODO AUDIT should support IPC
-if(TFM_PSA_API)
-    return()
-endif()
-
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
