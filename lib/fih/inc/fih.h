@@ -138,7 +138,11 @@ extern fih_int FIH_FAILURE;
 __attribute__((noinline)) __attribute__((used)) void fih_panic_loop(void);
 #define FIH_PANIC fih_panic_loop()
 #else /* FIH_ENABLE_GLOBAL_FAIL */
-#define FIH_PANIC  while (1) {}
+#define FIH_PANIC  \
+        do { \
+            FIH_LABEL("FAILURE_LOOP"); \
+            while (1) {} \
+        } while (0)
 #endif  /* FIH_ENABLE_GLOBAL_FAIL */
 
 /*
@@ -437,7 +441,8 @@ void fih_cfi_decrement(void);
  * Label for interacting with FIH testing tool. Can be parsed from the elf file
  * after compilation. Does not require debug symbols.
  */
-#define FIH_LABEL(str) __asm volatile ("FIH_LABEL_" str "_%=:" ::);
+#define FIH_LABEL(str) __asm volatile ("FIH_LABEL_" str "_0_%=:" ::)
+#define FIH_LABEL_CRITICAL_POINT() FIH_LABEL("FIH_CRITICAL_POINT")
 
 /*
  * Main FIH calling macro. return variable is second argument. Does some setup
@@ -457,7 +462,7 @@ void fih_cfi_decrement(void);
  */
 #define FIH_CALL(f, ret, ...) \
     do { \
-        FIH_LABEL("FIH_CALL_START"); \
+        FIH_LABEL("FIH_CALL_START_" # f); \
         FIH_CFI_PRECALL_BLOCK; \
         ret = FIH_FAILURE; \
         fih_delay(); \
@@ -512,6 +517,8 @@ typedef int32_t fih_int;
 #define FIH_CFI_STEP_INIT(x)
 #define FIH_CFI_STEP_DECREMENT()
 #define FIH_CFI_STEP_ERR_RESET()
+
+#define FIH_LABEL_CRITICAL_POINT()
 
 #endif /* TFM_FIH_PROFILE_ON */
 

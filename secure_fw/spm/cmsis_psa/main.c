@@ -155,6 +155,9 @@ int main(void)
         tfm_core_panic();
     }
 
+    /* All isolation should have been set up at this point */
+    FIH_LABEL_CRITICAL_POINT();
+
     /* Print the TF-M version */
     SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
 

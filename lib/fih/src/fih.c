@@ -69,6 +69,7 @@ __attribute__((used))
 __attribute__((noinline))
 void fih_panic_loop(void)
 {
+    FIH_LABEL("FAILURE_LOOP");
     __asm volatile ("b fih_panic_loop");
     __asm volatile ("b fih_panic_loop");
     __asm volatile ("b fih_panic_loop");
