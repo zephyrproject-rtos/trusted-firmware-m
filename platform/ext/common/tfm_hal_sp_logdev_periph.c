@@ -7,9 +7,21 @@
 
 #include "tfm_hal_sp_logdev.h"
 #include "uart_stdout.h"
+#include "tfm/tfm_core_svc.h"
+
+__attribute__((naked))
+static int tfm_output_unpriv_string(const unsigned char *str, size_t len)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_OUTPUT_UNPRIV_STRING));
+}
 
 int32_t tfm_hal_output_sp_log(const unsigned char *str, size_t len)
 {
-    /* Peripheral based log function call the stdio_output_string directly */
-    return stdio_output_string(str, len);
+    /*
+     * Peripheral based log function call the tfm_output_unpriv_string
+     * directly.
+     */
+    return tfm_output_unpriv_string(str, len);
 }

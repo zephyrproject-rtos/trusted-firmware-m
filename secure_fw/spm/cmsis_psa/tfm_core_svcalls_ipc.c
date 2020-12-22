@@ -107,6 +107,8 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        return tfm_hal_output_spm_log(ctx[0], ctx[1]);
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
