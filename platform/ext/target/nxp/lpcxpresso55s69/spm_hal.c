@@ -28,22 +28,6 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    int32_t ret = ARM_DRIVER_OK;
-    /* Configures non-secure memory spaces in the target */
-    sau_and_idau_cfg();
-    ret = ahb_secure_control_memory_init();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    ret = ahb_secure_control_peripheral_init();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
                   const struct tfm_spm_partition_platform_data_t *platform_data)

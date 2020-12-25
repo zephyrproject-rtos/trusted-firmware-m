@@ -20,13 +20,6 @@
 /* Declared in target_cfg.c */
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    /* Nothing to do, there is no isolation HW in this platform to be
-     * configured by Secure Enclave */
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         uint32_t partition_idx,
         const struct tfm_spm_partition_platform_data_t *platform_data)

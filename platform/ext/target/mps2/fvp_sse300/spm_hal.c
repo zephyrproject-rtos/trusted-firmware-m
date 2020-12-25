@@ -26,27 +26,6 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
-
-    sau_and_idau_cfg();
-
-    err = ppc_init_cfg();
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        ERROR_MSG("Error during initial PPC configuration!");
-        return err;
-    }
-
-    err = mpc_init_cfg();
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        ERROR_MSG("Error during initial MPC configuration!");
-        return err;
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  uint32_t partition_idx,
                  const struct tfm_spm_partition_platform_data_t *platform_data)

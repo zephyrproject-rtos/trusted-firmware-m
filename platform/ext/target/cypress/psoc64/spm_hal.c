@@ -34,25 +34,6 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    enum tfm_plat_err_t ret;
-
-    Cy_PDL_Init(CY_DEVICE_CFG);
-
-    ret = smpu_init_cfg();
-
-    if (ret == TFM_PLAT_ERR_SUCCESS) {
-        ret = ppu_init_cfg();
-    }
-
-    if (ret == TFM_PLAT_ERR_SUCCESS) {
-        ret = bus_masters_cfg();
-    }
-
-    return ret;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         uint32_t partition_idx,
         const struct tfm_spm_partition_platform_data_t *platform_data)

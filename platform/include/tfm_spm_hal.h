@@ -57,16 +57,6 @@ struct tfm_spm_partition_memory_data_t
 };
 #endif
 
-/**
- * \brief This function initialises the HW used for isolation, and sets the
- *        default configuration for them.
- *
- * This function is called during TF-M core early startup, before DB init
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void);
-
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
  * \brief This function initialises the HW used for isolation, and sets the
