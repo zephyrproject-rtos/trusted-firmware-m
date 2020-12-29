@@ -38,7 +38,6 @@ target_sources(${CC312_PAL_TARGET}
         src/pal/cc_pal_trng.c
         src/pal/no_os/cc_pal_abort_plat.c
         src/pal/no_os/cc_pal_apbc.c
-        src/pal/no_os/cc_pal_buff_attr.c
         src/pal/no_os/cc_pal.c
         src/pal/no_os/cc_pal_dma.c
         src/pal/no_os/cc_pal_interrupt_ctrl.c
