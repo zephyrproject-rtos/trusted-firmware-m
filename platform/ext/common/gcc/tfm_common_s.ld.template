@@ -73,11 +73,6 @@ SECTIONS
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-#if defined(TFM_PSA_API)
-        LONG (LOADADDR(.TFM_UNPRIV_DATA))
-        LONG (ADDR(.TFM_UNPRIV_DATA))
-        LONG (SIZEOF(.TFM_UNPRIV_DATA))
-#endif /* defined(TFM_PSA_API) */
 {% for manifest in manifests %}
     {% if manifest.attr.conditional %}
 #ifdef {{manifest.attr.conditional}}
@@ -132,10 +127,6 @@ SECTIONS
     {
         *libc_nano*:*(.text*)
         *libc_nano*:*(.rodata*)
-        *platform_retarget_dev.*(.text*)
-        *platform_retarget_dev.*(.rodata*)
-        *device_definition.*(.text*)
-        *device_definition.*(.rodata*)
         *(SFN)
         *libgcc*:*(.text*)
         *libgcc*:*(.rodata*)
@@ -375,20 +366,6 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 #endif /* TFM_LVL == 1 */
-
-#if defined(TFM_PSA_API)
-    .TFM_UNPRIV_DATA : ALIGN(32)
-    {
-    } > RAM AT> FLASH
-    Image$$TFM_UNPRIV_DATA$$RW$$Base = ADDR(.TFM_UNPRIV_DATA);
-    Image$$TFM_UNPRIV_DATA$$RW$$Limit = ADDR(.TFM_UNPRIV_DATA) + SIZEOF(.TFM_UNPRIV_DATA);
-
-    .TFM_UNPRIV_BSS : ALIGN(32)
-    {
-    } > RAM AT> RAM
-    Image$$TFM_UNPRIV_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_BSS);
-    Image$$TFM_UNPRIV_DATA$$ZI$$Limit = ADDR(.TFM_UNPRIV_BSS) + SIZEOF(.TFM_UNPRIV_BSS);
-#endif /* defined(TFM_PSA_API) */
 
     /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;

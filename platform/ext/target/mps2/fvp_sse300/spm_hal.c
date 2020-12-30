@@ -20,8 +20,8 @@ extern const struct memory_region_limits memory_regions;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-#define PARTITION_REGION_PERIPH_START   6
-#define PARTITION_REGION_PERIPH_MAX_NUM 2
+#define PARTITION_REGION_PERIPH_START   5
+#define PARTITION_REGION_PERIPH_MAX_NUM 3
 
 uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */

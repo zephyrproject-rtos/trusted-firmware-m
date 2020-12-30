@@ -17,18 +17,15 @@
 
 #define MPU_REGION_VENEERS           0
 #define MPU_REGION_TFM_UNPRIV_CODE   1
-#define MPU_REGION_TFM_UNPRIV_DATA   2
-#define MPU_REGION_NS_STACK          3
-#define PARTITION_REGION_RO          4
-#define PARTITION_REGION_RW_STACK    5
-#define PARTITION_REGION_PERIPH      6
+#define MPU_REGION_NS_STACK          2
+#define PARTITION_REGION_RO          3
+#define PARTITION_REGION_RW_STACK    4
+#define PARTITION_REGION_PERIPH      5
 
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$RW$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -55,16 +52,6 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
-    },
-    /* TFM Core unprivileged data region */
-    {
-        MPU_REGION_TFM_UNPRIV_DATA,
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_DATA, $$RW$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
     /* NSPM PSP */

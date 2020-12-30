@@ -170,10 +170,6 @@ SECTIONS
     /**** Unprivileged Secure code starts here */
     .ER_UNPRIV_CODE : ALIGN(32)
     {
-        *platform_retarget_dev.*(.text*)
-        *platform_retarget_dev.*(.rodata*)
-        *device_definition.*(.text*)
-        *device_definition.*(.rodata*)
         *(SFN)
         *armlib*:*(.text*)
         *armlib*:*(.rodata*)
