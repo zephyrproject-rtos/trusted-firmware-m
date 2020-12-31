@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,26 +10,26 @@
 #ifndef __TFM_SERVICE_LIST_INC__
 #define __TFM_SERVICE_LIST_INC__
 
-{% for manifest in manifests %}
-#ifdef {{manifest.attr.conditional}}
-#include "{{manifest.header_file}}"
-#endif /* {{manifest.attr.conditional}} */
+{% for partition in partitions %}
+#ifdef {{partition.attr.conditional}}
+#include "{{partition.header_file}}"
+#endif /* {{partition.attr.conditional}} */
 
 {% endfor %}
 
 const struct tfm_spm_service_db_t service_db[] =
 {
-{% for manifest in manifests %}
-    {% if manifest.attr.tfm_partition_ipc %}
-        {% if manifest.manifest.services %}
-            {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.tfm_partition_ipc %}
+        {% if partition.manifest.services %}
+            {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
             {% endif %}
-    /******** {{manifest.manifest.name}} ********/
-            {% for service in manifest.manifest.services %}
+    /******** {{partition.manifest.name}} ********/
+            {% for service in partition.manifest.services %}
     {{'{'}}
         .name = "{{service.name}}",
-        .partition_id = {{manifest.manifest.name}},
+        .partition_id = {{partition.manifest.name}},
         .signal = {{service.name}}_SIGNAL,
         .sid = {{service.sid}},
             {% if service.non_secure_clients is sameas true %}
@@ -49,8 +49,8 @@ const struct tfm_spm_service_db_t service_db[] =
             {% endif %}
     {{'}'}},
             {% endfor %}
-            {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+            {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
             {% endif %}
         {% endif %}
 
@@ -63,14 +63,14 @@ const struct tfm_spm_service_db_t service_db[] =
 /**************************************************************************/
 struct tfm_spm_service_t service[] =
 {
-{% for manifest in manifests %}
-    {% if manifest.attr.tfm_partition_ipc %}
-        {% if manifest.manifest.services %}
-            {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.tfm_partition_ipc %}
+        {% if partition.manifest.services %}
+            {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
             {% endif %}
-    /******** {{manifest.manifest.name}} ********/
-            {% for service in manifest.manifest.services %}
+    /******** {{partition.manifest.name}} ********/
+            {% for service in partition.manifest.services %}
     {{'{'}}
         .service_db = NULL,
         .partition = NULL,
@@ -78,8 +78,8 @@ struct tfm_spm_service_t service[] =
         .list = {0},
     {{'}'}},
             {% endfor %}
-            {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+            {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
             {% endif %}
         {% endif %}
 

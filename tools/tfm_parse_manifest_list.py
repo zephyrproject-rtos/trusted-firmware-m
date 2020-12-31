@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -62,10 +62,10 @@ def process_manifest(manifest_list_files):
 
     Returns
     -------
-    The manifest header list and the data base.
+    The partition data base.
     """
 
-    db = []
+    partition_db = []
     manifest_list = []
 
     for f in manifest_list_files:
@@ -107,7 +107,7 @@ def process_manifest(manifest_list_files):
             outfile_name = os.path.relpath(outfile_name, start = source_path)
             intermediafile_name = os.path.relpath(intermediafile_name, start = source_path)
 
-        db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
+        partition_db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
@@ -133,7 +133,7 @@ def process_manifest(manifest_list_files):
         memoutfile.write(memorytemplate.render(context))
         memoutfile.close()
 
-    return db
+    return partition_db
 
 def gen_files(context, gen_file_lists):
     """
@@ -246,14 +246,14 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    db = process_manifest(manifest_list)
+    partition_db = process_manifest(manifest_list)
 
     utilities = {}
     context = {}
 
     utilities['donotedit_warning']=donotedit_warning
 
-    context['manifests'] = db
+    context['partitions'] = partition_db
     context['utilities'] = utilities
 
     gen_files(context, gen_file_list)
