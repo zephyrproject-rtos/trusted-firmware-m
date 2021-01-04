@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "psa/client.h"
+
+#define PROGRAMMER_ERROR_NULL
+#define TFM_PROGRAMMER_ERROR(ns_caller, error_status) \
+        do { \
+            if (ns_caller) { \
+                return error_status; \
+             } else { \
+                tfm_core_panic(); \
+             } \
+        } while (0)
 
 /* Common handlers for PSA client calls */
 

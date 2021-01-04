@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -53,10 +53,10 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     int32_t client_id;
     psa_handle_t handle;
 
-    /* It is a fatal error if the RoT Service does not exist on the platform */
+    /* It is a PROGRAMMER ERROR if the RoT Service does not exist on the platform */
     service = tfm_spm_get_service_by_sid(sid);
     if (!service) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
     if (ns_caller) {
@@ -66,11 +66,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     }
 
     /*
-     * It is a fatal error if the caller is not authorized to access the RoT
+     * It is a PROGRAMMER ERROR if the caller is not authorized to access the RoT
      * Service.
      */
     if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
     /*
@@ -83,11 +83,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     }
 
     /*
-     * It is a fatal error if the version of the RoT Service requested is not
+     * It is a PROGRAMMER ERROR if the version of the RoT Service requested is not
      * supported on the platform.
      */
     if (tfm_spm_check_client_version(service, version) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
@@ -123,11 +123,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     int i, j;
     int32_t client_id;
 
-    /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
+    /* It is a PROGRAMMER ERROR if in_len + out_len > PSA_MAX_IOVEC. */
     if ((in_num > PSA_MAX_IOVEC) ||
         (out_num > PSA_MAX_IOVEC) ||
         (in_num + out_num > PSA_MAX_IOVEC)) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     if (ns_caller) {
@@ -137,19 +137,20 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     }
 
     conn_handle = tfm_spm_to_handle_instance(handle);
-    /* It is a fatal error if an invalid handle was passed. */
+    /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
     if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
+
     service = conn_handle->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
 
-    /* It is a fatal error if the connection is currently handling a request. */
+    /* It is a PROGRAMMER ERROR if the connection is currently handling a request. */
     if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     /*
@@ -161,23 +162,23 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     }
 
     /*
-     * Read client invecs from the wrap input vector. It is a fatal error
+     * Read client invecs from the wrap input vector. It is a PROGRAMMER ERROR
      * if the memory reference for the wrap input vector is invalid or not
      * readable.
      */
     if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
         TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     /*
      * Read client outvecs from the wrap output vector and will update the
-     * actual length later. It is a fatal error if the memory reference for
+     * actual length later. It is a PROGRAMMER ERROR if the memory reference for
      * the wrap output vector is invalid or not read-write.
      */
     if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
         TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     spm_memset(invecs, 0, sizeof(invecs));
@@ -188,13 +189,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     spm_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
 
     /*
-     * For client input vector, it is a fatal error if the provided payload
+     * For client input vector, it is a PROGRAMMER ERROR if the provided payload
      * memory reference was invalid or not readable.
      */
     for (i = 0; i < in_num; i++) {
         if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
             TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
-            tfm_core_panic();
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
         }
     }
 
@@ -209,19 +210,19 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
                   (char *) invecs[i].base ||
                   (char *) invecs[j].base >=
                   (char *) invecs[i].base + invecs[i].len)) {
-                tfm_core_panic();
+                TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
             }
         }
     }
 
     /*
-     * For client output vector, it is a fatal error if the provided payload
-     * memory reference was invalid or not read-write.
+     * For client output vector, it is a PROGRAMMER ERROR if the provided
+     * payload memory reference was invalid or not read-write.
      */
     for (i = 0; i < out_num; i++) {
         if (tfm_memory_check(outvecs[i].base, outvecs[i].len,
             ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
-            tfm_core_panic();
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
         }
     }
 
@@ -232,7 +233,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
@@ -269,12 +270,13 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
 
     conn_handle = tfm_spm_to_handle_instance(handle);
     /*
-     * It is a fatal error if an invalid handle was provided that is not the
-     * null handle.
+     * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
+     * the null handle.
      */
     if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
+
     service = conn_handle->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
@@ -287,9 +289,12 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
         tfm_core_panic();
     }
 
-    /* It is a fatal error if the connection is currently handling a request. */
+    /*
+     * It is a PROGRAMMER ERROR if the connection is currently handling a
+     * request.
+     */
     if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-        tfm_core_panic();
+        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
     /* No input or output needed for close message */
