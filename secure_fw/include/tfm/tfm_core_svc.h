@@ -46,6 +46,10 @@ typedef enum {
 #if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
     TFM_SVC_OUTPUT_UNPRIV_STRING,
 #endif
+    /* Secure Partition API for interrupt control */
+    TFM_SVC_PSA_IRQ_ENABLE,
+    TFM_SVC_PSA_IRQ_DISABLE,
+
     TFM_SVC_PLATFORM_BASE = 50 /* leave room for additional Core handlers */
 } tfm_svc_number_t;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -264,5 +264,34 @@ void tfm_spm_psa_eoi(uint32_t *args);
  * \retval "Does not return"
  */
 void tfm_spm_psa_panic(void);
+
+/**
+ * \brief SVC handler for \ref psa_irq_enable.
+ *
+ * \param[in] args            Include all input arguments: irq_signal.
+ *
+ * \retval void
+ * \retval "Does not return"  The call is invalid, if one or more of the
+ *                            following are true:
+ *                            - irq_signal does not belong to the calling
+ *                              partition.
+ *                            - irq_signal indicates more than one signal.
+ */
+void tfm_spm_irq_enable(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_irq_disable.
+ *
+ * \param[in] args            Include all input arguments: irq_signal.
+ *
+ * \retval 0                  The interrupt was disabled prior to this call
+ *         1                  The interrupt was enabled prior to this call
+ * \retval "Does not return"  The call is invalid, if one or more of the
+ *                            following are true:
+ *                            - irq_signal does not belong to the calling
+ *                              partition.
+ *                            - irq_signal indicates more than one signal.
+ */
+psa_irq_status_t tfm_spm_irq_disable(uint32_t *args);
 
 #endif /* __PSA_CLIENT_SERVICE_APIS_H__ */

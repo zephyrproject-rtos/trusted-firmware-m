@@ -15,6 +15,7 @@
 #include "spm_func.h"
 #endif
 #include "tfm_core_utils.h"
+#include "tfm_hal_defs.h"
 #include "tfm_hal_platform.h"
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
@@ -620,4 +621,48 @@ void tfm_spm_psa_panic(void)
      * partition panics.
      */
     tfm_hal_system_reset();
+}
+
+void tfm_spm_irq_enable(uint32_t *args)
+{
+    struct partition_t *partition;
+    psa_signal_t irq_signal;
+    uint32_t irq_line;
+
+    irq_signal = (psa_signal_t)args[0];
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    if (irq_line < 0) {
+        tfm_core_panic();
+    }
+
+    tfm_spm_hal_enable_irq((IRQn_Type)irq_line);
+}
+
+psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
+{
+    struct partition_t *partition;
+    psa_signal_t irq_signal;
+    uint32_t irq_line;
+
+    irq_signal = (psa_signal_t)args[0];
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    if (irq_line < 0) {
+        tfm_core_panic();
+    }
+
+    tfm_spm_hal_disable_irq((IRQn_Type)irq_line);
+
+    return 1;
 }

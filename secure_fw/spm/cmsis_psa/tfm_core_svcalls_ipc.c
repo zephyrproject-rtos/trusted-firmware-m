@@ -112,6 +112,11 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
 #endif
+    case TFM_SVC_PSA_IRQ_ENABLE:
+        tfm_spm_irq_enable(ctx);
+        break;
+    case TFM_SVC_PSA_IRQ_DISABLE:
+        return tfm_spm_irq_disable(ctx);
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
