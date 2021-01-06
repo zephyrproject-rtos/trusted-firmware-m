@@ -127,8 +127,6 @@ function(trusted_firmware_build)
                ${TFM_PROFILE_ARG}
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
                -DMCUBOOT_PATH=${ZEPHYR_TFM_MODULE_DIR}/../tfm-mcuboot
-               -DTFM_TOOLCHAIN_PATH=${TFM_TOOLCHAIN_PATH}
-               -DTFM_TOOLCHAIN_PREFIX=${TFM_TOOLCHAIN_PREFIX}
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
