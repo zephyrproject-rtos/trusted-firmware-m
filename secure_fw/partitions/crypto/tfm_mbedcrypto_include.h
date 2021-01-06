@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +10,7 @@
 
 /* Define PSA_CRYPTO_SECURE to signal that we are compiling for the SPE */
 #define PSA_CRYPTO_SECURE 1
+
 /* Include the crypto_spe.h header before including the PSA Crypto header from
  * Mbed Crypto
  */

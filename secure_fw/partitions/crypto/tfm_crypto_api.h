@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -79,9 +79,9 @@ psa_status_t tfm_crypto_get_caller_id(int32_t *id);
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_key_attributes_from_client(
-                             const struct psa_client_key_attributes_s *client_key_attr,
-                             int32_t client_id,
-                             psa_key_attributes_t *key_attributes);
+                    const struct psa_client_key_attributes_s *client_key_attr,
+                    int32_t client_id,
+                    psa_key_attributes_t *key_attributes);
 
 /**
  * \brief Converts key attributes to client key attributes.
@@ -92,14 +92,14 @@ psa_status_t tfm_crypto_key_attributes_from_client(
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_key_attributes_to_client(
-                                  const psa_key_attributes_t *key_attributes,
-                                  struct psa_client_key_attributes_s *client_key_attr);
+                        const psa_key_attributes_t *key_attributes,
+                        struct psa_client_key_attributes_s *client_key_attr);
 
 /**
  * \brief Checks that the requested handle belongs to the requesting
  *        partition
  *
- * \param[in]  handle Handle given as input
+ * \param[in]  key    key given as input
  * \param[out] index  Optionally, pointer to hold the internal index
  *                    corresponding to the input handle. Valid only
  *                    on PSA_SUCCESS, it's returned only if the input
@@ -107,7 +107,7 @@ psa_status_t tfm_crypto_key_attributes_to_client(
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_check_handle_owner(psa_key_handle_t handle,
+psa_status_t tfm_crypto_check_handle_owner(psa_key_id_t key,
                                            uint32_t *index);
 
 /**
@@ -130,7 +130,7 @@ psa_status_t tfm_crypto_check_key_storage(uint32_t *index);
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_set_key_storage(uint32_t index,
-                                        psa_key_handle_t key_handle);
+                                        psa_key_id_t key_handle);
 /**
  * \brief Allocate an operation context in the backend
  *
@@ -164,6 +164,16 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle);
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          uint32_t handle,
                                          void **ctx);
+/**
+ * \brief Encodes the input key id and owner to output key
+ *
+ * \param[in]  key_id       Id of the key to encode
+ * \param[out] enc_key_ptr  Pointer to encoded key with id and owner
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
+                                            mbedtls_svc_key_id_t *enc_key_ptr);
 
 #define LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API \
     X(tfm_crypto_get_key_attributes)          \
@@ -174,6 +184,7 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
     X(tfm_crypto_destroy_key)                 \
     X(tfm_crypto_export_key)                  \
     X(tfm_crypto_export_public_key)           \
+    X(tfm_crypto_purge_key)                   \
     X(tfm_crypto_copy_key)                    \
     X(tfm_crypto_hash_compute)                \
     X(tfm_crypto_hash_compare)                \

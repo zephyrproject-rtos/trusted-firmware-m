@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -83,7 +83,7 @@ static psa_status_t tfm_crypto_huk_derivation_input_bytes(
 static psa_status_t tfm_crypto_huk_derivation_output_key(
                                       const psa_key_attributes_t *attributes,
                                       psa_key_derivation_operation_t *operation,
-                                      psa_key_handle_t *handle)
+                                      mbedtls_svc_key_id_t *key_id)
 {
     enum tfm_plat_err_t err;
     size_t bytes = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
@@ -103,7 +103,7 @@ static psa_status_t tfm_crypto_huk_derivation_output_key(
     }
 
     return psa_import_key(attributes, operation->ctx.tls12_prf.output_block,
-                          bytes, handle);
+                          bytes, key_id);
 }
 
 static psa_status_t tfm_crypto_huk_derivation_abort(
@@ -333,13 +333,13 @@ psa_status_t tfm_crypto_key_derivation_input_key(psa_invec in_vec[],
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-
     uint32_t handle = iov->op_handle;
-    psa_key_handle_t key_handle = iov->key_handle;
+    psa_key_id_t key_id = iov->key_id;
     psa_key_derivation_step_t step = iov->step;
     psa_key_derivation_operation_t *operation = NULL;
+    mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    status = tfm_crypto_check_handle_owner(key_id, NULL);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -352,7 +352,12 @@ psa_status_t tfm_crypto_key_derivation_input_key(psa_invec in_vec[],
         return status;
     }
 
-    return psa_key_derivation_input_key(operation, step, key_handle);
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_key_derivation_input_key(operation, step, encoded_key);
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 
@@ -370,7 +375,7 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (in_vec[1].len != sizeof(struct psa_client_key_attributes_s)) ||
-        (out_vec[0].len != sizeof(psa_key_handle_t))) {
+        (out_vec[0].len != sizeof(psa_key_id_t))) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
@@ -378,10 +383,11 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     uint32_t handle = iov->op_handle;
     const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_key_derivation_operation_t *operation = NULL;
-    psa_key_handle_t *key_handle = out_vec[0].base;
+    psa_key_id_t *key_handle = out_vec[0].base;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     int32_t partition_id;
     uint32_t index;
+    mbedtls_svc_key_id_t encoded_key;
 
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
@@ -410,11 +416,13 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
 
     if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
         status = tfm_crypto_huk_derivation_output_key(&key_attributes,
-                                                      operation, key_handle);
+                                                      operation, &encoded_key);
     } else {
         status = psa_key_derivation_output_key(&key_attributes, operation,
-                                               key_handle);
+                                               &encoded_key);
     }
+    *key_handle = encoded_key.key_id;
+
     if (status == PSA_SUCCESS) {
         status = tfm_crypto_set_key_storage(index, *key_handle);
     }
@@ -494,11 +502,12 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     uint32_t handle = iov->op_handle;
-    psa_key_handle_t private_key = iov->key_handle;
+    psa_key_id_t private_key = iov->key_id;
     const uint8_t *peer_key = in_vec[1].base;
     size_t peer_key_length = in_vec[1].len;
     psa_key_derivation_operation_t *operation = NULL;
     psa_key_derivation_step_t step = iov->step;
+    mbedtls_svc_key_id_t encoded_key;
 
     status = tfm_crypto_check_handle_owner(private_key, NULL);
     if (status != PSA_SUCCESS) {
@@ -513,8 +522,13 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
         return status;
     }
 
+    status = tfm_crypto_encode_id_and_owner(private_key, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     return psa_key_derivation_key_agreement(operation, step,
-                                            private_key,
+                                            encoded_key,
                                             peer_key,
                                             peer_key_length);
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
@@ -559,11 +573,23 @@ psa_status_t tfm_crypto_raw_key_agreement(psa_invec in_vec[],
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
     psa_algorithm_t alg = iov->alg;
-    psa_key_handle_t private_key = iov->key_handle;
+    psa_key_id_t private_key = iov->key_id;
     const uint8_t *peer_key = in_vec[1].base;
     size_t peer_key_length = in_vec[1].len;
+    mbedtls_svc_key_id_t encoded_key;
 
-    return psa_raw_key_agreement(alg, private_key, peer_key, peer_key_length,
+    psa_status_t status = tfm_crypto_check_handle_owner(private_key, NULL);
+
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = tfm_crypto_encode_id_and_owner(private_key, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_raw_key_agreement(alg, encoded_key, peer_key, peer_key_length,
                                  output, output_size, &out_vec[0].len);
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
