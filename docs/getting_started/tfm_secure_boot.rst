@@ -791,4 +791,20 @@ RAM loading is enabled, notice that image with higher version number
 
 --------------
 
+****************************************
+Integration with Firmware Update service
+****************************************
+The shim layer of the Firmware Update partition calls the APIs in
+bootutil_misc.c to control the image status.
+
+- Call ``boot_write_magic()`` to make the image as a candidate image for booting.
+- Call ``boot_set_confirmed()`` to make the image as a permanent image.
+
+.. Note::
+    Currently, in direct-xip mode and ram-load mode, TF-M cannot get the
+    information of which slot contains the running image from the bootloader.
+    So the Firmware Update partition cannot decide where to write the new
+    image. As a result, the firmware update service is not supported in
+    direct-xip mode and ram-load mode.
+
 *Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
