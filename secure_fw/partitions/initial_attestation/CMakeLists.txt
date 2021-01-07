@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -20,9 +20,9 @@ endif()
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
-add_library(tfm_partition_attestation STATIC)
+add_library(tfm_psa_rot_partition_attestation STATIC)
 
-target_sources(tfm_partition_attestation PRIVATE
+target_sources(tfm_psa_rot_partition_attestation PRIVATE
     tfm_attest.c
     tfm_attest_req_mngr.c
     attest_core.c
@@ -32,20 +32,20 @@ target_sources(tfm_partition_attestation PRIVATE
 )
 
 # The generated sources
-target_sources(tfm_partition_attestation
+target_sources(tfm_psa_rot_partition_attestation
     PRIVATE
         $<$<BOOL:${TFM_PSA_API}>:
             ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation/auto_generated/intermedia_tfm_initial_attestation.c>
 )
 
-target_include_directories(tfm_partition_attestation
+target_include_directories(tfm_psa_rot_partition_attestation
     PUBLIC
         .
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation
 )
 
-target_link_libraries(tfm_partition_attestation
+target_link_libraries(tfm_psa_rot_partition_attestation
     PRIVATE
         tfm_secure_api
         platform_s
@@ -56,7 +56,7 @@ target_link_libraries(tfm_partition_attestation
         tfm_sprt
 )
 
-target_compile_definitions(tfm_partition_attestation
+target_compile_definitions(tfm_psa_rot_partition_attestation
     PRIVATE
         $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
@@ -92,7 +92,7 @@ set_source_files_properties(tfm_attest_secure_api.c
 
 target_link_libraries(tfm_partitions
     INTERFACE
-        tfm_partition_attestation
+        tfm_psa_rot_partition_attestation
 )
 
 

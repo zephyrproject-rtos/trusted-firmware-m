@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -22,11 +22,8 @@
       "pid": 256,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_ps.*"
+           "*tfm_*partition_ps.*"
          ],
-         "object_list": [
-           "*test_ps_nv_counters.*",
-         ]
       }
     },
     {
@@ -40,7 +37,7 @@
       "pid": 257,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_its.*"
+           "*tfm_*partition_its.*"
          ]
       }
     },
@@ -55,7 +52,7 @@
       "pid": 258,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_audit.*"
+           "*tfm_*partition_audit.*"
          ]
       }
     },
@@ -70,7 +67,7 @@
       "pid": 259,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_crypto.*"
+           "*tfm_*partition_crypto.*"
          ]
       }
     },
@@ -85,7 +82,7 @@
       "pid": 260,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_platform.*"
+           "*tfm_*partition_platform.*"
          ]
       }
     },
@@ -100,7 +97,7 @@
       "pid": 261,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_attestation.*"
+           "*tfm_*partition_attestation.*"
          ]
       }
     },
@@ -115,8 +112,8 @@
       "version_minor": 1,
       "pid": 262,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ss_core_test.*"
+        "library_list": [
+           "*tfm_*partition_core_test.*"
          ]
       }
     },
@@ -131,8 +128,8 @@
       "version_minor": 1,
       "pid": 263,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ss_core_test_2.*"
+        "library_list": [
+           "*tfm_*partition_core_test_2.*"
          ]
       }
     },
@@ -147,11 +144,8 @@
       "version_minor": 1,
       "pid": 264,
       "linker_pattern": {
-        "object_list": [
-          "*tfm_secure_client_service.*",
-          "*test_framework*",
-          "*secure_suites.*",
-          "*attestation_s_interface_testsuite.*"
+        "library_list": [
+           "*tfm_*partition_secure_client_service.*"
          ]
       }
     },
@@ -166,8 +160,8 @@
       "version_minor": 1,
       "pid": 265,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ipc_service_test.*"
+        "library_list": [
+           "*tfm_*partition_ipc_service.*"
          ]
       }
     },
@@ -182,8 +176,8 @@
       "version_minor": 1,
       "pid": 266,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ipc_client_test.*"
+        "library_list": [
+           "*tfm_*partition_ipc_client.*"
          ]
       }
     },
@@ -198,9 +192,8 @@
       "version_minor": 1,
       "pid": 267,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_irq_test_service_1.*",
-           "*timer_cmsdk*",
+        "library_list": [
+           "*tfm_*partition_irq_test_1.*"
          ]
       }
     },
@@ -215,8 +208,8 @@
       "version_minor": 1,
       "pid": 268,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ps_test_service.*"
+        "library_list": [
+           "*tfm_*partition_ps_test.*"
          ]
       }
     },
@@ -231,8 +224,8 @@
       "version_minor": 1,
       "pid": 269,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_secure_client_2.*"
+        "library_list": [
+           "*tfm_*partition_secure_client_2.*"
          ]
       }
     },
@@ -248,7 +241,7 @@
       "pid": 270,
       "linker_pattern": {
         "library_list": [
-           "*tfm_psa_proxy*"
+           "*tfm_*partition_psa_proxy.*"
          ]
       }
     }

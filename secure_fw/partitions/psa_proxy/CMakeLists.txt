@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,9 +12,9 @@ endif()
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
-add_library(tfm_partition_psa_proxy STATIC)
+add_library(tfm_psa_rot_partition_psa_proxy STATIC)
 
-target_include_directories(tfm_partition_psa_proxy
+target_include_directories(tfm_psa_rot_partition_psa_proxy
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy
@@ -23,7 +23,7 @@ target_include_directories(tfm_partition_psa_proxy
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../../spm/cmsis_psa
 )
 
-target_sources(tfm_partition_psa_proxy
+target_sources(tfm_psa_rot_partition_psa_proxy
     PRIVATE
         psa_proxy.c
         psa_proxy_shared_mem_mngr.c
@@ -31,12 +31,12 @@ target_sources(tfm_partition_psa_proxy
 )
 
 # The generated sources
-target_sources(tfm_partition_psa_proxy
+target_sources(tfm_psa_rot_partition_psa_proxy
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/intermedia_tfm_psa_proxy.c
 )
 
-target_link_libraries(tfm_partition_psa_proxy
+target_link_libraries(tfm_psa_rot_partition_psa_proxy
     PRIVATE
         tfm_secure_api
         psa_interface
@@ -66,7 +66,7 @@ set_source_files_properties(tfm_ps_secure_api.c
 
 target_link_libraries(tfm_partitions
     INTERFACE
-        tfm_partition_psa_proxy
+        tfm_psa_rot_partition_psa_proxy
 )
 
 target_compile_definitions(tfm_partition_defs

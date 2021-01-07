@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -120,12 +120,12 @@ if (TFM_CODE_SHARING)
     set(LIB_LIST mbedcrypto
                  crypto_service_cc312
                  platform_s
-                 tfm_partition_crypto
-                 tfm_partition_audit
-                 tfm_partition_attestation
-                 tfm_partition_ps
-                 tfm_partition_its
-                 tfm_partition_platform
+                 tfm_psa_rot_partition_crypto
+                 tfm_psa_rot_partition_audit
+                 tfm_psa_rot_partition_attestation
+                 tfm_app_rot_partition_ps
+                 tfm_psa_rot_partition_its
+                 tfm_psa_rot_partition_platform
                  platform_s
                  tfm_sprt
                  tfm_spm
