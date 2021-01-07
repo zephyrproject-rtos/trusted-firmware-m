@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -32,24 +32,6 @@
         "short_name": "tfm_service_list",
         "template": "secure_fw/partitions/tfm_service_list.inc.template",
         "output": "secure_fw/partitions/tfm_service_list.inc"
-    },
-    {
-        "name": "Common secure ld file",
-        "short_name": "tfm_common_s.ld",
-        "template": "platform/ext/common/gcc/tfm_common_s.ld.template",
-        "output": "platform/ext/common/gcc/tfm_common_s.ld"
-    },
-    {
-        "name": "Common secure sct file",
-        "short_name": "tfm_common_s.sct",
-        "template": "platform/ext/common/armclang/tfm_common_s.sct.template",
-        "output": "platform/ext/common/armclang/tfm_common_s.sct"
-    },
-    {
-        "name": "Common secure icf file",
-        "short_name": "tfm_common_s.icf",
-        "template": "platform/ext/common/iar/tfm_common_s.icf.template",
-        "output": "platform/ext/common/iar/tfm_common_s.icf"
     },
     {
         "name": "Secure Veneers C file",

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 Arm Limited
+; * Copyright (c) 2009-2021 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ SECTIONS
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{manifest.manifest.name}}_PSA-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$${{manifest.manifest.name}}_RO$$Base = ADDR(.{{manifest.manifest.name}}_RO);
@@ -154,7 +154,7 @@ SECTIONS
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{manifest.manifest.name}}_APP-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
     Image$${{manifest.manifest.name}}_CODE$$Base = ADDR(.{{manifest.manifest.name}}_RO);
@@ -293,7 +293,7 @@ SECTIONS
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *({{manifest.manifest.name}}_PSA-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$ER_{{manifest.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{manifest.manifest.name}}_RWZI);
@@ -314,7 +314,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
+        *({{manifest.manifest.name}}_PSA-ROT_ATTR_ZI)
         . += (. - start_of_{{manifest.manifest.name}}_RWZI) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
@@ -368,7 +368,7 @@ SECTIONS
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *({{manifest.manifest.name}}_APP-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$.ER_{{manifest.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{manifest.manifest.name}}_RWZI);
@@ -389,7 +389,7 @@ SECTIONS
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
+        *({{manifest.manifest.name}}_APP-ROT_ATTR_ZI)
         . += (. - start_of_{{manifest.manifest.name}}_RWZI) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM

@@ -1,6 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 Arm Limited
-; * Copyright (c) 2020 Nordic Semiconductor ASA
+; * Copyright (c) 2009-2021 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -18,8 +17,6 @@
 ; * This file is derivative of CMSIS V5.00 gcc_arm.ld
 ; */
 
-{{utilities.donotedit_warning}}
-
 /* Linker script to configure memory regions. */
 /* This file will be run trough the pre-processor. */
 
@@ -32,40 +29,15 @@ MEMORY
 #if defined(S_CODE_SRAM_ALIAS_BASE)
   CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
 #endif
-}
-
-
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-#define VENEERS()
-#else
-#define VENEERS() \
-    /* \
-     * Place the CMSE Veneers (containing the SG instructions) in a correctly \
-     * aligned region so that the SAU can programmed to just set this region as \
-     * Non-Secure Callable. \
-     */ \
-    .gnu.sgstubs CMSE_VENEER_REGION_START_ALIGN : \
-    { \
-        Load$$LR$$LR_VENEER$$Base = ABSOLUTE(.); \
-        *(.gnu.sgstubs*) \
-    } > FLASH \
- \
-    /* \
-     * This is needed because the linker seems to place the veneers *after* the \
-     * .gnu.sgstubs output section, so any end alignment applied inside it are \
-     * placed before the veneers instead of after. Also, the end alignment seems \
-     * to be ignored if not done in an output section, so this cannot be placed \
-     * by itself after the .gnu.sgstubs section. \
-     */ \
-    .sg_end_dummy : ALIGN(32) \
-    { \
-        . = CMSE_VENEER_REGION_END_ALIGN; \
-        Load$$LR$$LR_VENEER$$Limit = ABSOLUTE(.); \
-    } > FLASH \
- \
-    ASSERT ((Load$$LR$$LR_VENEER$$Limit - Load$$LR$$LR_VENEER$$Base) \
-            <= CMSE_VENEER_REGION_SIZE, "Veneer region overflowed")
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+  VENEERS  (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 #endif
+
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+  PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
+#endif
+
+}
 
 __heap_size__  = S_HEAP_SIZE;
 __psp_stack_size__ = S_PSP_STACK_SIZE;
@@ -90,20 +62,24 @@ SECTIONS
     .copy.table : ALIGN(4)
     {
         __copy_table_start__ = .;
+#ifdef RAM_VECTORS_SUPPORT
+        /* Copy interrupt vectors from flash to RAM */
+        LONG (__vectors_start__)                            /* From */
+        LONG (__ram_vectors_start__)                        /* To   */
+        LONG (__vectors_end__ - __vectors_start__)          /* Size */
+#endif
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-        LONG (LOADADDR(.{{manifest.manifest.name}}_LINKER_DATA))
-        LONG (ADDR(.{{manifest.manifest.name}}_LINKER_DATA))
-        LONG (SIZEOF(.{{manifest.manifest.name}}_LINKER_DATA))
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-{% endfor %}
+
+        LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA))
+
+        LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA))
+
 #if defined (S_RAM_CODE_START)
         LONG (LOADADDR(.TFM_RAM_CODE))
         LONG (ADDR(.TFM_RAM_CODE))
@@ -126,16 +102,15 @@ SECTIONS
         LONG (ADDR(.TFM_SECURE_STACK))
         LONG (SIZEOF(.TFM_SECURE_STACK))
 #endif /* !defined(TFM_PSA_API) */
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-        LONG (ADDR(.{{manifest.manifest.name}}_LINKER_BSS))
-        LONG (SIZEOF(.{{manifest.manifest.name}}_LINKER_BSS))
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-{% endfor %}
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS))
+
+        LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+#endif
         __zero_table_end__ = .;
     } > FLASH
 
@@ -164,76 +139,38 @@ SECTIONS
     /**** PSA RoT RO part (CODE + RODATA) start here */
     Image$$TFM_PSA_CODE_START$$Base = .;
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    .{{manifest.manifest.name}}_LINKER : ALIGN(32)
+    .TFM_PSA_ROT_LINKER : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.text*)
-        {{pattern}}:*(.rodata*)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.text*)
-        {{pattern}}(.rodata*)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *tfm_psa_rot_partition*:*(.text*)
+        *tfm_psa_rot_partition*:*(.rodata*)
+        *(TFM_*_PSA-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$${{manifest.manifest.name}}_LINKER$$RO$$Base = ADDR(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$RO$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER) + SIZEOF(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$Base = ADDR(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER) + SIZEOF(.{{manifest.manifest.name}}_LINKER);
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
 
-    {% endif %}
-{% endfor %}
+    Image$$TFM_PSA_ROT_LINKER$$RO$$Base = ADDR(.TFM_PSA_ROT_LINKER);
+    Image$$TFM_PSA_ROT_LINKER$$RO$$Limit = ADDR(.TFM_PSA_ROT_LINKER) + SIZEOF(.TFM_PSA_ROT_LINKER);
+    Image$$TFM_PSA_ROT_LINKER$$Base = ADDR(.TFM_PSA_ROT_LINKER);
+    Image$$TFM_PSA_ROT_LINKER$$Limit = ADDR(.TFM_PSA_ROT_LINKER) + SIZEOF(.TFM_PSA_ROT_LINKER);
+
     /**** PSA RoT RO part (CODE + RODATA) end here */
     Image$$TFM_PSA_CODE_END$$Base = .;
 
     /**** APPLICATION RoT RO part (CODE + RODATA) start here */
     Image$$TFM_APP_CODE_START$$Base = .;
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    .{{manifest.manifest.name}}_LINKER : ALIGN(32)
+    .TFM_APP_ROT_LINKER : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.text*)
-        {{pattern}}:*(.rodata*)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.text*)
-        {{pattern}}(.rodata*)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *tfm_app_rot_partition*:*(.text*)
+        *tfm_app_rot_partition*:*(.rodata*)
+        *(TFM_*_APP-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$${{manifest.manifest.name}}_LINKER$$RO$$Base = ADDR(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$RO$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER) + SIZEOF(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$Base = ADDR(.{{manifest.manifest.name}}_LINKER);
-    Image$${{manifest.manifest.name}}_LINKER$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER) + SIZEOF(.{{manifest.manifest.name}}_LINKER);
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
 
-    {% endif %}
-{% endfor %}
+    Image$$TFM_APP_ROT_LINKER$$RO$$Base = ADDR(.TFM_APP_ROT_LINKER);
+    Image$$TFM_APP_ROT_LINKER$$RO$$Limit = ADDR(.TFM_APP_ROT_LINKER) + SIZEOF(.TFM_APP_ROT_LINKER);
+    Image$$TFM_APP_ROT_LINKER$$Base = ADDR(.TFM_APP_ROT_LINKER);
+    Image$$TFM_APP_ROT_LINKER$$Limit = ADDR(.TFM_APP_ROT_LINKER) + SIZEOF(.TFM_APP_ROT_LINKER);
+
     /**** APPLICATION RoT RO part (CODE + RODATA) end here */
     Image$$TFM_APP_CODE_END$$Base = .;
 
@@ -269,10 +206,6 @@ SECTIONS
 
 #endif /* TFM_LVL != 1 */
 
-#ifdef PSA_API_TEST_NS
-VENEERS()
-#endif
-
     .ER_TFM_CODE : ALIGN(4)
     {
         *(.text*)
@@ -295,16 +228,6 @@ VENEERS()
          *(SORT(.dtors.*))
          *(.dtors)
 
-        *(.rodata.service_db)
-        *(.rodata.memory_data_list)
-    } > FLASH
-
-#ifndef PSA_API_TEST_NS
-VENEERS()
-#endif
-
-    .tfm_rodata : ALIGN(4)
-    {
         *(.rodata*)
 
         KEEP(*(.eh_frame*))
@@ -328,6 +251,16 @@ VENEERS()
      * beginning of privileged data region in multi-core topology.
      */
 #ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime requires to share the
+     * global variables.
+     */
+    .TFM_SHARED_SYMBOLS : ALIGN(32)
+    {
+        . += SHARED_SYMBOL_AREA_SIZE;
+    } > RAM
+#endif
+
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
@@ -355,6 +288,7 @@ VENEERS()
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+
 # if !defined(TFM_PSA_API)
     .psp_stack_seal_res :
     {
@@ -389,57 +323,27 @@ VENEERS()
     /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    .{{manifest.manifest.name}}_LINKER_DATA : ALIGN(32)
+    .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.data*)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.data*)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *tfm_app_rot_partition*:*(.data*)
+        *(TFM_*_APP-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$RW$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_DATA);
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$RW$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_DATA) + SIZEOF(.{{manifest.manifest.name}}_LINKER_DATA);
+    Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_APP_ROT_LINKER_DATA);
+    Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_APP_ROT_LINKER_DATA) + SIZEOF(.TFM_APP_ROT_LINKER_DATA);
 
-    .{{manifest.manifest.name}}_LINKER_BSS : ALIGN(32)
+    .TFM_APP_ROT_LINKER_BSS : ALIGN(32)
     {
-        start_of_{{manifest.manifest.name}}_LINKER = .;
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.bss*)
-        {{pattern}}:*(COMMON)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.bss*)
-        {{pattern}}(COMMON)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
-        . += (. - start_of_{{manifest.manifest.name}}_LINKER) ? 0 : 4;
+        start_of_TFM_APP_ROT_LINKER = .;
+        *tfm_app_rot_partition*:*(.bss*)
+        *tfm_app_rot_partition*:*(COMMON)
+        *(TFM_*_APP-ROT_ATTR_ZI)
+        . += (. - start_of_TFM_APP_ROT_LINKER) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_BSS);
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_BSS) + SIZEOF(.{{manifest.manifest.name}}_LINKER_BSS);
+    Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_APP_ROT_LINKER_BSS);
+    Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_APP_ROT_LINKER_BSS) + SIZEOF(.TFM_APP_ROT_LINKER_BSS);
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
 
@@ -526,63 +430,45 @@ VENEERS()
 #endif
 
     /**** PSA RoT DATA start here */
+
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    .{{manifest.manifest.name}}_LINKER_DATA : ALIGN(32)
+    .TFM_PSA_ROT_LINKER_DATA : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.data*)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.data*)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *tfm_psa_rot_partition*:*(.data*)
+        *(TFM_*_PSA-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$RW$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_DATA);
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$RW$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_DATA) + SIZEOF(.{{manifest.manifest.name}}_LINKER_DATA);
+    Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_PSA_ROT_LINKER_DATA);
+    Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_PSA_ROT_LINKER_DATA) + SIZEOF(.TFM_PSA_ROT_LINKER_DATA);
 
-    .{{manifest.manifest.name}}_LINKER_BSS : ALIGN(32)
+    .TFM_PSA_ROT_LINKER_BSS : ALIGN(32)
     {
-        start_of_{{manifest.manifest.name}}_LINKER = .;
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.bss*)
-        {{pattern}}:*(COMMON)
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        {{pattern}}(.bss*)
-        {{pattern}}(COMMON)
-        {% endfor %}
-    {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
-        . += (. - start_of_{{manifest.manifest.name}}_LINKER) ? 0 : 4;
+        start_of_TFM_PSA_ROT_LINKER = .;
+        *tfm_psa_rot_partition*:*(.bss*)
+        *tfm_psa_rot_partition*:*(COMMON)
+        *(TFM_*_PSA-ROT_ATTR_ZI)
+        . += (. - start_of_TFM_PSA_ROT_LINKER) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_BSS);
-    Image$${{manifest.manifest.name}}_LINKER_DATA$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_BSS) + SIZEOF(.{{manifest.manifest.name}}_LINKER_BSS);
+    Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_PSA_ROT_LINKER_BSS);
+    Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_PSA_ROT_LINKER_BSS) + SIZEOF(.TFM_PSA_ROT_LINKER_BSS);
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    .TFM_DATA : ALIGN(4)
+#ifdef RAM_VECTORS_SUPPORT
+    .ramVectors (NOLOAD) : ALIGN(256)
+    {
+        __ram_vectors_start__ = .;
+        KEEP(*(.ram_vectors))
+        __ram_vectors_end__   = .;
+    } > RAM
+    .TFM_DATA __ram_vectors_end__ : ALIGN(4)
+#else
+
+     .TFM_DATA : ALIGN(4)
+#endif
     {
         *(.data*)
 
@@ -627,12 +513,38 @@ VENEERS()
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
 
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+    /* If a variable defined with __attribute__((section())) keyword the
+     * variable is treated like an initialized variable. To not waste memory
+     * NOLOAD attribute used here. The whole section is zero initialized by
+     * adding section information to .zero.table */
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    {
+        KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+    } > PSA_PROXY_SHARED_MEMORY_RAM
+#endif
+
 #if defined (S_RAM_CODE_START)
     /* Code executed from RAM */
     .TFM_RAM_CODE S_RAM_CODE_START :
     {
         KEEP(*(.ramfunc))
     } > RAM AT> FLASH
+#endif
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) after the code, in a
+     * separate 32 bytes aligned region so that the SAU can programmed to just set
+     * this region as Non-Secure Callable.
+     */
+    .gnu.sgstubs : ALIGN(32)
+    {
+        *(.gnu.sgstubs*)
+        . = ALIGN(32);
+    } > VENEERS AT> VENEERS
+    Load$$LR$$LR_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Load$$LR$$LR_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;

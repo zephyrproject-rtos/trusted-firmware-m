@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  *
  * This file is derivative of ../armclang/tfm_common_s.sct.template
  */
-
-{{utilities.donotedit_warning}}
 
 #include "region_defs.h"
 
@@ -47,29 +45,10 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
      */
 define block TFM_PSA_CODE_START with alignment = 32, size = 0 { };
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-define block {{manifest.manifest.name}}_LINKER with alignment = 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        ro object {{pattern}},
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        ro object {{pattern}},
-        {% endfor %}
-    {% endif %}
+    define block TFM_PSA_ROT_LINKER with alignment = 32 {
+        ro object *tfm_psa_rot_partition*,
     };
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
 
-    {% endif %}
-{% endfor %}
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT code.
@@ -83,29 +62,10 @@ define block TFM_PSA_CODE_END with alignment = 32, size = 0 { };
      */
 define block TFM_APP_CODE_START with alignment = 32, size = 0 { };
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-define block {{manifest.manifest.name}}_LINKER with alignment = 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        ro object {{pattern}},
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        ro object {{pattern}},
-        {% endfor %}
-    {% endif %}
+    define block TFM_APP_ROT_LINKER with alignment = 32 {
+        ro object *tfm_app_rot_partition*,
     };
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
 
-    {% endif %}
-{% endfor %}
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -139,30 +99,10 @@ keep {block TFM_SECURE_STACK};
 
 define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-define block {{manifest.manifest.name}}_LINKER_DATA with alignment = 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        rw object {{pattern}},
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        rw object {{pattern}},
-        {% endfor %}
-    {% endif %}
+    define block TFM_APP_ROT_LINKER_DATA with alignment = 32 {
+        rw object *tfm_app_rot_partition*,
     };
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -209,30 +149,10 @@ define block ER_TFM_DATA          with alignment = 8 {readwrite};
      */
 define block TFM_PSA_RW_STACK_START with alignment = 32, size = 0 { };
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-define block {{manifest.manifest.name}}_LINKER_DATA with alignment = 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
-        rw object {{pattern}},
-        {% endfor %}
-    {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
-        rw object {{pattern}},
-        {% endfor %}
-    {% endif %}
+    define block TFM_PSA_ROT_LINKER_DATA with alignment = 32 {
+        rw object *tfm_psa_rot_partition*,
     };
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -257,17 +177,7 @@ define block LR_CODE with fixed order {
        block TFM_UNPRIV_CODE,
        block TFM_PSA_CODE_START,
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-       block {{manifest.manifest.name}}_LINKER,
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-    {% endif %}
-{% endfor %}
+       block TFM_PSA_ROT_LINKER,
 
        block TFM_PSA_CODE_END,
 
@@ -277,18 +187,9 @@ define block LR_CODE with fixed order {
      * of APP RoT code.
      */
        block TFM_APP_CODE_START,
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-       block {{manifest.manifest.name}}_LINKER,
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
 
-    {% endif %}
-{% endfor %}
+       block TFM_APP_ROT_LINKER,
+
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
@@ -347,19 +248,8 @@ define block DATA with fixed order {
      */
     block TFM_APP_RW_STACK_START,
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    block {{manifest.manifest.name}}_LINKER_DATA,
+    block TFM_APP_ROT_LINKER_DATA,
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
     /*
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT RW and Stack.
@@ -395,19 +285,8 @@ define block PRIV_DATA with fixed order {
      */
     block TFM_PSA_RW_STACK_START,
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
-    {% endif %}
-    block {{manifest.manifest.name}}_LINKER_DATA,
+    block TFM_PSA_ROT_LINKER_DATA,
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
-    {% endif %}
-
-    {% endif %}
-{% endfor %}
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT RW and Stack.

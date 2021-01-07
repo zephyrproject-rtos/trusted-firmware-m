@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,7 +30,7 @@ const psa_algorithm_t tfm_attest_hmac_sign_alg = PSA_ALG_HMAC(PSA_ALG_SHA_256);
  * It is used in HMAC-SHA256.
  * It MUST be present on the device.
  */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const uint8_t initial_attestation_hmac_sha256_key[] =
 {
     0xA9, 0xB4, 0x54, 0xB2, 0x6D, 0x6F, 0x90, 0xA4,
@@ -39,11 +39,11 @@ const uint8_t initial_attestation_hmac_sha256_key[] =
     0x4B, 0x92, 0xA1, 0x93, 0x71, 0x34, 0x58, 0x5F
 };
 
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const size_t initial_attestation_hmac_sha256_key_size =
         sizeof(initial_attestation_hmac_sha256_key);
 
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const char *initial_attestation_kid = "kid@trustedfirmware.example";
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
 /*
@@ -59,14 +59,14 @@ const char *initial_attestation_kid = "kid@trustedfirmware.example";
  */
 
 /* Type of the EC curve which the key belongs to, in PSA curve ID form */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const psa_ecc_family_t initial_attestation_curve_type = PSA_ECC_CURVE_SECP256R1;
 
 /* Initial attestation private key in raw format, without any encoding.
  * It belongs to the ECDSA P-256 curve.
  * It MUST be present on the device.
  */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const uint8_t initial_attestation_private_key[] =
 {
     0xA9, 0xB4, 0x54, 0xB2, 0x6D, 0x6F, 0x90, 0xA4,
@@ -75,7 +75,7 @@ const uint8_t initial_attestation_private_key[] =
     0x4B, 0x92, 0xA1, 0x93, 0x71, 0x34, 0x58, 0x5F
 };
 
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION")
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
 const uint32_t initial_attestation_private_key_size =
         sizeof(initial_attestation_private_key);
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */

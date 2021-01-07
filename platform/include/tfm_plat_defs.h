@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,9 +36,12 @@ enum tfm_plat_err_t {
  *
  * \param[in] TFM_PARTITION_NAME  TF-M partition name assigned in the manifest
  *                                file "name" field.
+ * \param[in] TFM_PARTITION_TYPE  TF-M partition type assigned in the manifest
+ *                                file "type" field.
  */
-#define TFM_LINK_SET_RO_IN_PARTITION_SECTION(TFM_PARTITION_NAME) \
-                __attribute__((section(TFM_PARTITION_NAME"_ATTR_FN")))
+#define TFM_LINK_SET_RO_IN_PARTITION_SECTION(TFM_PARTITION_NAME, \
+                                             TFM_PARTITION_TYPE) \
+    __attribute__((section(TFM_PARTITION_NAME "_" TFM_PARTITION_TYPE "_ATTR_FN")))
 
 /*!
  * \def TFM_LINK_SET_RW_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
@@ -48,9 +51,12 @@ enum tfm_plat_err_t {
  *
  * \param[in] TFM_PARTITION_NAME  TF-M partition name assigned in the manifest
  *                                file "name" field.
+ * \param[in] TFM_PARTITION_TYPE  TF-M partition type assigned in the manifest
+ *                                file "type" field.
  */
-#define TFM_LINK_SET_RW_IN_PARTITION_SECTION(TFM_PARTITION_NAME) \
-                __attribute__((section(TFM_PARTITION_NAME"_ATTR_RW")))
+#define TFM_LINK_SET_RW_IN_PARTITION_SECTION(TFM_PARTITION_NAME, \
+                                             TFM_PARTITION_TYPE) \
+    __attribute__((section(TFM_PARTITION_NAME "_" TFM_PARTITION_TYPE "_ATTR_RW")))
 
 /*!
  * \def TFM_LINK_SET_ZI_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
@@ -60,12 +66,15 @@ enum tfm_plat_err_t {
  *
  * \param[in] TFM_PARTITION_NAME  TF-M partition name assigned in the manifest
  *                                file "name" field.
+ * \param[in] TFM_PARTITION_TYPE  TF-M partition type assigned in the manifest
+ *                                file "type" field.
  */
-#define TFM_LINK_SET_ZI_IN_PARTITION_SECTION(TFM_PARTITION_NAME) \
-                __attribute__((section(TFM_PARTITION_NAME"_ATTR_ZI")))
+#define TFM_LINK_SET_ZI_IN_PARTITION_SECTION(TFM_PARTITION_NAME, \
+                                             TFM_PARTITION_TYPE) \
+    __attribute__((section(TFM_PARTITION_NAME "_" TFM_PARTITION_TYPE "_ATTR_ZI")))
 #else
-#define TFM_LINK_SET_RO_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
-#define TFM_LINK_SET_RW_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
-#define TFM_LINK_SET_ZI_IN_PARTITION_SECTION(TFM_PARTITION_NAME)
+#define TFM_LINK_SET_RO_IN_PARTITION_SECTION(TFM_PARTITION_NAME, TFM_PARTITION_TYPE)
+#define TFM_LINK_SET_RW_IN_PARTITION_SECTION(TFM_PARTITION_NAME, TFM_PARTITION_TYPE)
+#define TFM_LINK_SET_ZI_IN_PARTITION_SECTION(TFM_PARTITION_NAME, TFM_PARTITION_TYPE)
 #endif
 #endif /* __TFM_PLAT_DEFS_H__ */
