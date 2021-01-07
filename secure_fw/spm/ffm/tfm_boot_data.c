@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -68,6 +68,7 @@ struct boot_data_access_policy {
  */
 static const struct boot_data_access_policy access_policy_table[] = {
     {TFM_SP_INITIAL_ATTESTATION, TLV_MAJOR_IAS},
+    {TFM_SP_FWU, TLV_MAJOR_FWU},
 };
 
 /*!

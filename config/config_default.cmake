@@ -131,6 +131,8 @@ set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Plat
 set(TFM_PARTITION_AUDIT_LOG             ON          CACHE BOOL      "Enable Audit Log partition")
 
 set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to forward all PSA RoT messages to a Secure Enclave")
+set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
+set(TFM_FWU_BOOTLOADER_LIB             ${CMAKE_SOURCE_DIR}/secure_fw/partitions/firmware_update/bootloader/mcuboot/mcuboot_utilities.cmake CACHE FILEPATH    "Bootloader configure file for Firmware Update partition")
 
 ################################## Tests #######################################
 

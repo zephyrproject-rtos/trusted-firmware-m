@@ -14,6 +14,12 @@ if (NOT FORWARD_PROT_MSG)
     if(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
         set(PLATFORM_DUMMY_CRYPTO_KEYS      FALSE       CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
     endif()
+
+    # Currently, Firmware Update Partition is not supported in IPC mode.
+    if(NOT TFM_PSA_API)
+        set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
+        set(TFM_PARTITION_FIRMWARE_UPDATE       ON         CACHE BOOL      "Enable firmware update partition")
+    endif()
     set(BL0 OFF)
 else()
     set(MCUBOOT_IMAGE_NUMBER                1           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

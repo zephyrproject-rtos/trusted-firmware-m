@@ -63,3 +63,10 @@ tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
 ####################### SP META Pointer ########################################
 
 tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND NOT TFM_PSA_API)
+
+####################### Firmware Update Parttion ###############################
+
+tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT TFM_PARTITION_PLATFORM)
+tfm_invalid_config((MCUBOOT_UPGRADE_STRATEGY STREQUAL "DIRECT_XIP" OR MCUBOOT_UPGRADE_STRATEGY STREQUAL "RAM_LOAD") AND TFM_PARTITION_FIRMWARE_UPDATE)
+tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
+tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND TFM_PSA_API)
