@@ -661,9 +661,9 @@ uint32_t tfm_spm_init(void)
         }
 
         /* Check if the PSA framework version matches. */
-        if (partition->p_static->psa_ff_ver !=
+        if (partition->p_static->psa_ff_ver >
             PSA_FRAMEWORK_VERSION) {
-            ERROR_MSG("Warning: PSA Framework Verison does not match!");
+            ERROR_MSG("Warning: Partition requires higher framework version!");
             continue;
         }
 
