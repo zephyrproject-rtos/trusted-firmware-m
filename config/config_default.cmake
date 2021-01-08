@@ -33,6 +33,8 @@ set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to rep
 
 set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "Path to which to install TF-M files")
 
+set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools by adding -g")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
