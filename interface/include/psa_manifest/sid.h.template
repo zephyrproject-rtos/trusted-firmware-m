@@ -27,6 +27,10 @@ extern "C" {
                 {% else %}
 #define {{"%-58s"|format(str)}} (1U)
                 {% endif %}
+                {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based == false %}
+                    {% set str = service.name + "_HANDLE" %}
+#define {{"%-58s"|format(str)}} ({{"%d"|format(service.stateless_handle)}}U)
+                {% endif %}
             {% endfor %}
         {% endif %}
 

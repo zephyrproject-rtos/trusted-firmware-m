@@ -151,6 +151,8 @@ const struct partition_static_t static_data_list[] =
     {{'{'}}
     {% if partition.manifest.psa_framework_version == 1.0 %}
         .psa_ff_ver            = 0x0100,
+    {% elif partition.manifest.psa_framework_version == 1.1 %}
+        .psa_ff_ver            = 0x0101,
     {% else %}
         .psa_ff_ver            = 0,
     {% endif %}
