@@ -687,6 +687,11 @@ uint32_t tfm_spm_init(void)
                 partition->p_static->pid) {
                 partition->signals_allowed |=
                                         tfm_core_irq_signals[j].signal_value;
+                if (partition->p_static->psa_ff_ver == 0x0100) {
+                    tfm_spm_hal_enable_irq(tfm_core_irq_signals[j].irq_line);
+                } else if (partition->p_static->psa_ff_ver == 0x0101) {
+                    tfm_spm_hal_disable_irq(tfm_core_irq_signals[j].irq_line);
+                }
             }
         }
 
