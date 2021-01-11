@@ -74,8 +74,8 @@ static int32_t tfm_core_init(void)
         return TFM_ERROR_GENERIC;
     }
 
-    /* Configures architecture-specific coprocessors */
-    tfm_arch_configure_coprocessors();
+    /* Configures architecture */
+    tfm_arch_config_extensions();
 
     SPMLOG_INFMSG("\033[1;34m[Sec Thread] Secure image initializing!\033[0m\r\n");
 

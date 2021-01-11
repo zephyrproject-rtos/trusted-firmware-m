@@ -425,6 +425,7 @@ void tfm_spm_enable_irq(uint32_t *args);
  */
 void tfm_spm_disable_irq(uint32_t *args);
 
+#if !defined(__ARM_ARCH_8_1M_MAIN__)
 /**
  * \brief Validate the whether NS caller re-enter.
  *
@@ -435,9 +436,29 @@ void tfm_spm_disable_irq(uint32_t *args);
  *                              Or from secure client.
  *
  * \retval void                 Success.
+ *
+ * Notes:
+ *  For architecture v8.1m and later, will use hardware re-entrant detection.
+ *  Otherwise will use the software solution to validate the caller.
  */
 void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                              uint32_t exc_return, bool ns_caller);
+#else
+/**
+ * In v8.1 mainline, will use hardware re-entrant detection instead.
+ */
+__STATIC_INLINE
+void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
+                             uint32_t exc_return, bool ns_caller)
+{
+    (void)p_cur_sp;
+    (void)p_ctx;
+    (void)exc_return;
+    (void)ns_caller;
+    return;
+}
+#endif
+
 
 /**
  * \brief Converts a handle instance into a corresponded user handle.

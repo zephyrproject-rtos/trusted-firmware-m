@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -160,7 +160,7 @@ void tfm_arch_set_secure_exception_priorities(void)
 }
 
 /* There are no coprocessors in Armv8-M Baseline implementations */
-void tfm_arch_configure_coprocessors(void)
+void tfm_arch_config_extensions(void)
 {
 }
 

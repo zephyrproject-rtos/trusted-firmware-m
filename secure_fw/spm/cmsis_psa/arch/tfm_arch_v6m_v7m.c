@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -148,7 +148,7 @@ void tfm_arch_set_secure_exception_priorities(void)
     NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 }
 
-void tfm_arch_configure_coprocessors(void)
+void tfm_arch_config_extensions(void)
 {
     /* There are no coprocessors in Armv6-M implementations */
 #ifndef __ARM_ARCH_6M__

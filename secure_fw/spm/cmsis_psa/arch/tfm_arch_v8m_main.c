@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -188,7 +188,7 @@ void tfm_arch_set_secure_exception_priorities(void)
 #endif
 }
 
-void tfm_arch_configure_coprocessors(void)
+void tfm_arch_config_extensions(void)
 {
 #if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)
     /* Configure Secure access to the FPU only if the secure image is being
@@ -214,6 +214,10 @@ void tfm_arch_configure_coprocessors(void)
      * the NSPE. This configuration is left to NS privileged software.
      */
     SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+
+#if defined(__ARM_ARCH_8_1M_MAIN__)
+    SCB->CCR |= SCB_CCR_TRD_Msk;
+#endif
 #endif
 }
 

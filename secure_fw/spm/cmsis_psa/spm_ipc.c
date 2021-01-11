@@ -932,6 +932,7 @@ void tfm_spm_disable_irq(uint32_t *args)
     tfm_spm_hal_disable_irq(irq_line);
 }
 
+#if !defined(__ARM_ARCH_8_1M_MAIN__)
 void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                              uint32_t exc_return, bool ns_caller)
 {
@@ -972,6 +973,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
         tfm_core_panic();
     }
 }
+#endif
 
 void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 {
