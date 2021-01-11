@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -574,7 +574,7 @@ static enum tfm_status_e tfm_start_partition_for_irq_handling(
     uint32_t handler_partition_id = svc_ctx->r0;
     sfn_t unpriv_handler = (sfn_t)svc_ctx->r1;
     uint32_t irq_signal = svc_ctx->r2;
-    IRQn_Type irq_line = (IRQn_Type) svc_ctx->r3;
+    uint32_t irq_line = svc_ctx->r3;
     enum tfm_status_e res;
     uint32_t psp = __get_PSP();
     uint32_t handler_partition_psp;
@@ -1082,7 +1082,7 @@ uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
  * \retval >=0     The IRQ line number associated with a signal in the partition
  * \retval <0      error
  */
-static IRQn_Type get_irq_line_for_signal(int32_t partition_id,
+static int32_t get_irq_line_for_signal(int32_t partition_id,
                                        psa_signal_t signal)
 {
     size_t i;
@@ -1093,7 +1093,7 @@ static IRQn_Type get_irq_line_for_signal(int32_t partition_id,
             return tfm_core_irq_signals[i].irq_line;
         }
     }
-    return (IRQn_Type) -1;
+    return -1;
 }
 
 void tfm_spm_enable_irq_handler(uint32_t *svc_args)
@@ -1105,7 +1105,7 @@ void tfm_spm_enable_irq_handler(uint32_t *svc_args)
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
-    IRQn_Type irq_line;
+    int32_t irq_line;
 
     /* Only a single signal is allowed */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1132,7 +1132,7 @@ void tfm_spm_disable_irq_handler(uint32_t *svc_args)
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
-    IRQn_Type irq_line;
+    int32_t irq_line;
 
     /* Only a single signal is allowed */
     if (!tfm_is_one_bit_set(irq_signal)) {
@@ -1190,7 +1190,7 @@ void tfm_spm_psa_eoi(uint32_t *svc_args)
     uint32_t running_partition_idx;
     uint32_t running_partition_id;
     const struct spm_partition_runtime_data_t *curr_part_data;
-    IRQn_Type irq_line;
+    int32_t irq_line;
 
     running_partition_idx = tfm_spm_partition_get_running_partition_idx();
     running_partition_id =

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -507,15 +507,11 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
  * \param[in]      partition_id    The ID of the partition in which we look for
  *                                 the signal.
  * \param[in]      signal          The signal we do the query for.
- * \param[out]     irq_line        The irq line associated with signal
  *
- * \retval IPC_SUCCESS          Execution successful, irq_line contains a valid
- *                              value.
- * \retval IPC_ERROR_GENERIC    There was an error finding the IRQ line for the
+ * \retval None-negative value  The irq line associated with signal
+ * \retval Negative value       There was an error finding the IRQ line for the
  *                              signal. irq_line is unchanged.
  */
-int32_t get_irq_line_for_signal(int32_t partition_id,
-                                psa_signal_t signal,
-                                IRQn_Type *irq_line);
+int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal);
 
 #endif /* __SPM_IPC_H__ */

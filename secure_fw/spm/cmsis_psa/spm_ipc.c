@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,7 +45,7 @@ TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     IRQn_Type irq_line);
+                     uint32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
@@ -868,34 +868,31 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
  * \retval "Does not return"    Partition ID is invalid
  */
 void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     IRQn_Type irq_line)
+                     uint32_t irq_line)
 {
     tfm_spm_hal_disable_irq(irq_line);
     notify_with_signal(partition_id, signal);
 }
 
-int32_t get_irq_line_for_signal(int32_t partition_id,
-                                psa_signal_t signal,
-                                IRQn_Type *irq_line)
+int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
 {
     size_t i;
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         if (tfm_core_irq_signals[i].partition_id == partition_id &&
             tfm_core_irq_signals[i].signal_value == signal) {
-            *irq_line = tfm_core_irq_signals[i].irq_line;
-            return IPC_SUCCESS;
+            return tfm_core_irq_signals[i].irq_line;
         }
     }
-    return IPC_ERROR_GENERIC;
+
+    return -1;
 }
 
 void tfm_spm_enable_irq(uint32_t *args)
 {
     struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
     psa_signal_t irq_signal = svc_ctx->r0;
-    IRQn_Type irq_line = (IRQn_Type) 0;
-    int32_t ret;
+    int32_t irq_line = 0;
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
@@ -908,10 +905,9 @@ void tfm_spm_enable_irq(uint32_t *args)
         tfm_core_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->p_static->pid,
-                                  irq_signal, &irq_line);
+    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (ret != IPC_SUCCESS) {
+    if (irq_line < 0) {
         tfm_core_panic();
     }
 
@@ -922,8 +918,7 @@ void tfm_spm_disable_irq(uint32_t *args)
 {
     struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
     psa_signal_t irq_signal = svc_ctx->r0;
-    IRQn_Type irq_line = (IRQn_Type) 0;
-    int32_t ret;
+    int32_t irq_line = 0;
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if passed signal indicates more than one signals. */
@@ -936,10 +931,9 @@ void tfm_spm_disable_irq(uint32_t *args)
         tfm_core_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->p_static->pid,
-                                  irq_signal, &irq_line);
+    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (ret != IPC_SUCCESS) {
+    if (irq_line < 0) {
         tfm_core_panic();
     }
 

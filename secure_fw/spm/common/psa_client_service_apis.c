@@ -584,8 +584,7 @@ void tfm_spm_psa_clear(void)
 void tfm_spm_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
-    IRQn_Type irq_line = (IRQn_Type) 0;
-    int32_t ret;
+    int32_t irq_line = 0;
     struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
@@ -601,10 +600,9 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
-    ret = get_irq_line_for_signal(partition->p_static->pid,
-                                  irq_signal, &irq_line);
+    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (ret != IPC_SUCCESS) {
+    if (irq_line < 0) {
         tfm_core_panic();
     }
 
