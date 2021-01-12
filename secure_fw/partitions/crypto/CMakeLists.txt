@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -91,7 +91,7 @@ target_sources(tfm_sprt
 
 # The veneers give warnings about not being properly declared so they get hidden
 # to not overshadow _real_ warnings.
-set_source_files_properties(tfm_partition_crypto_secure_api.c
+set_source_files_properties(tfm_crypto_secure_api.c
     PROPERTIES
         COMPILE_FLAGS -Wno-implicit-function-declaration
 )

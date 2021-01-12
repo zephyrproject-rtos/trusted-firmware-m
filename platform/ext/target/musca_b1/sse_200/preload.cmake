@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,5 +15,5 @@ set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 
 
-# The MUSCA_S1 has a CryptoCell-312 as an accelerator.
+# The Musca-B1 SSE 200 has a CryptoCell-312 as an accelerator.
 set(CRYPTO_HW_ACCELERATOR_TYPE cc312)
