@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Arm Limited. All rights reserved.
 # Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -20,27 +20,27 @@ target_include_directories(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2351_s.s>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2351_s.S>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2351_s.s>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2354_s.s>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2354_s.S>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2354_s.s>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2351_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2354_s.sct>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2351_ns.s>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2351_ns.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2351_ns.s>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2354_ns.s>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2354_ns.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2354_ns.s>
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2351_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/m2351_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/m2351_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2354_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/m2354_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/m2354_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -51,15 +51,15 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2351_bl2.s>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2351_bl2.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2351_bl2.s>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/startup_cmsdk_m2354_bl2.s>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/startup_cmsdk_m2354_bl2.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2354_bl2.s>
     )
 
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2351_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/m2351_bl2.ld>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/m2351_bl2.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2354_bl2.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/m2354_bl2.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/m2354_bl2.icf>
     )
 endif()
 
@@ -74,7 +74,7 @@ target_include_directories(platform_s
         partition
         device/include
         device/config
-        bsp/Device/Nuvoton/M2351/Include
+        bsp/Device/Nuvoton/M2354/Include
         bsp/Library/StdDriver/inc
         ../common/bsp/Include
         ../common/bsp/StdDriver/inc
@@ -94,10 +94,10 @@ target_sources(platform_s
         bsp/Library/StdDriver/src/timer.c
         bsp/Library/StdDriver/src/fmc.c
         ../common/services/src/tfm_platform_system.c
+        target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
         ../common/boot_hal.c
-        target_cfg.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/template/attest_hal.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
@@ -132,8 +132,9 @@ target_include_directories(platform_ns
         device/config
         device/include
         ../common/native_drivers
-        bsp/Device/Nuvoton/M2351/Include
+        bsp/Device/Nuvoton/M2354/Include
         bsp/Library/StdDriver/inc
+        ../common/bsp/StdDriver/inc
         ../common/bsp/Include
         ../common/bsp/StdDriver/inc
         ../common/cmsis_drivers/config
@@ -155,7 +156,7 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             partition
-            bsp/Device/Nuvoton/M2351/Include
+            bsp/Device/Nuvoton/M2354/Include
             bsp/Library/StdDriver/inc
             ../common/bsp/Include
             ../common/bsp/StdDriver/inc
