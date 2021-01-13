@@ -506,11 +506,13 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
  *
  * \param[in]      partition_id    The ID of the partition in which we look for
  *                                 the signal.
- * \param[in]      signal          The signal we do the query for.
+ * \param[in]      signal          The signal to query for.
  *
  * \retval None-negative value  The irq line associated with signal
- * \retval Negative value       There was an error finding the IRQ line for the
- *                              signal. irq_line is unchanged.
+ * \retval Negative value       if one of more the following are true:
+ *                              - the \ref signal indicates more than one signal
+ *                              - the \ref signal does not belong to the
+ *                                partition.
  */
 int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal);
 

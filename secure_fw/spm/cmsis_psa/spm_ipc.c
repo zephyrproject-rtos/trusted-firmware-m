@@ -25,7 +25,6 @@
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
 #include "tfm_list.h"
-#include "tfm_hal_isolation.h"
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
@@ -878,6 +877,10 @@ int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
 {
     size_t i;
 
+    if (!tfm_is_one_bit_set(signal)) {
+        return -1;
+    }
+
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         if (tfm_core_irq_signals[i].partition_id == partition_id &&
             tfm_core_irq_signals[i].signal_value == signal) {
@@ -894,11 +897,6 @@ void tfm_spm_enable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->r0;
     int32_t irq_line = 0;
     struct partition_t *partition = NULL;
-
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_core_panic();
-    }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
@@ -920,11 +918,6 @@ void tfm_spm_disable_irq(uint32_t *args)
     psa_signal_t irq_signal = svc_ctx->r0;
     int32_t irq_line = 0;
     struct partition_t *partition = NULL;
-
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_core_panic();
-    }
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {

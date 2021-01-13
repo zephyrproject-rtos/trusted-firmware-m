@@ -1087,6 +1087,10 @@ static int32_t get_irq_line_for_signal(int32_t partition_id,
 {
     size_t i;
 
+    if (!tfm_is_one_bit_set(signal)) {
+        return -1;
+    }
+
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         if (tfm_core_irq_signals[i].partition_id == partition_id &&
             tfm_core_irq_signals[i].signal_value == signal) {
@@ -1106,12 +1110,6 @@ void tfm_spm_enable_irq_handler(uint32_t *svc_args)
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
     int32_t irq_line;
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        /* FixMe: error severity TBD */
-        tfm_secure_api_error_handler();
-    }
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 
@@ -1133,12 +1131,6 @@ void tfm_spm_disable_irq_handler(uint32_t *svc_args)
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
     int32_t irq_line;
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        /* FixMe: error severity TBD */
-        tfm_secure_api_error_handler();
-    }
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 
@@ -1196,11 +1188,6 @@ void tfm_spm_psa_eoi(uint32_t *svc_args)
     running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
     curr_part_data = tfm_spm_partition_get_runtime_data(running_partition_idx);
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_secure_api_error_handler();
-    }
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 

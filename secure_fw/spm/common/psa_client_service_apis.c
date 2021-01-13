@@ -590,11 +590,6 @@ void tfm_spm_psa_eoi(uint32_t *args)
     TFM_CORE_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];
 
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_core_panic();
-    }
-
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_core_panic();
