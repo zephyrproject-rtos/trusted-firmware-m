@@ -30,6 +30,10 @@ MEMORY
 #if defined(S_CODE_SRAM_ALIAS_BASE)
   CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
 #endif
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+  PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
+#endif
+
 }
 
 
@@ -88,6 +92,12 @@ SECTIONS
     .copy.table : ALIGN(4)
     {
         __copy_table_start__ = .;
+#ifdef RAM_VECTORS_SUPPORT
+        /* Copy interrupt vectors from flash to RAM */
+        LONG (__vectors_start__)                            /* From */
+        LONG (__ram_vectors_start__)                        /* To   */
+        LONG (__vectors_end__ - __vectors_start__)          /* Size */
+#endif
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
@@ -127,6 +137,10 @@ SECTIONS
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+#endif
 #if defined(TFM_SP_META_PTR_ENABLE)
         LONG (LOADADDR(.TFM_SP_META_PTR))
         LONG (ADDR(.TFM_SP_META_PTR))
@@ -253,8 +267,6 @@ VENEERS()
          *(SORT(.dtors.*))
          *(.dtors)
 
-        *(.rodata.service_db)
-        *(.rodata.memory_data_list)
     } > FLASH
 
 #ifndef PSA_API_TEST_NS
@@ -286,6 +298,16 @@ VENEERS()
      * beginning of privileged data region in multi-core topology.
      */
 #ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime requires to share the
+     * global variables.
+     */
+    .TFM_SHARED_SYMBOLS : ALIGN(32)
+    {
+        . += SHARED_SYMBOL_AREA_SIZE;
+    } > RAM
+#endif
+
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
@@ -313,6 +335,7 @@ VENEERS()
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+
 # if !defined(TFM_PSA_API)
     .psp_stack_seal_res :
     {
@@ -463,6 +486,7 @@ VENEERS()
 #endif
 
     /**** PSA RoT DATA start here */
+
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
 
     .TFM_PSA_ROT_LINKER_DATA : ALIGN(32)
@@ -489,7 +513,18 @@ VENEERS()
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    .TFM_DATA : ALIGN(4)
+#ifdef RAM_VECTORS_SUPPORT
+    .ramVectors (NOLOAD) : ALIGN(256)
+    {
+        __ram_vectors_start__ = .;
+        KEEP(*(.ram_vectors))
+        __ram_vectors_end__   = .;
+    } > RAM
+    .TFM_DATA __ram_vectors_end__ : ALIGN(4)
+#else
+
+     .TFM_DATA : ALIGN(4)
+#endif
     {
         *(.data*)
 
@@ -533,6 +568,17 @@ VENEERS()
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
+
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+    /* If a variable defined with __attribute__((section())) keyword the
+     * variable is treated like an initialized variable. To not waste memory
+     * NOLOAD attribute used here. The whole section is zero initialized by
+     * adding section information to .zero.table */
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    {
+        KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+    } > PSA_PROXY_SHARED_MEMORY_RAM
+#endif
 
 #if defined (S_RAM_CODE_START)
     /* Code executed from RAM */
