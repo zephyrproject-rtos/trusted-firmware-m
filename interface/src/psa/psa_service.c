@@ -119,3 +119,11 @@ psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal)
                    "BX LR            \n"
                    : : "I" (TFM_SVC_PSA_IRQ_DISABLE));
 }
+
+__attribute__((naked))
+void psa_reset_signal(psa_signal_t irq_signal)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_PSA_RESET_SIGNAL));
+}

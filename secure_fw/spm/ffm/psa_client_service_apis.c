@@ -592,6 +592,11 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
+    if (irq_info->flih_func) {
+        /* This API is for SLIH IRQs only */
+        psa_panic();
+    }
+
     /* It is a fatal error if passed signal is not currently asserted */
     if ((partition->signals_asserted & irq_signal) == 0) {
         tfm_core_panic();
@@ -654,4 +659,39 @@ psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
     tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
 
     return 1;
+}
+
+void tfm_spm_psa_reset_signal(uint32_t *args)
+{
+    psa_signal_t irq_signal;
+    struct irq_load_info_t *irq_info;
+    struct partition_t *partition;
+
+    if (!args) {
+        tfm_core_panic();
+    }
+
+    irq_signal = (psa_signal_t)args[0];
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    if (!irq_info->flih_func) {
+        /* This API is for FLIH IRQs only */
+        tfm_core_panic();
+    }
+
+    if ((partition->signals_asserted & irq_signal) == 0) {
+        /* The signal is not asserted */
+        tfm_core_panic();
+    }
+
+    partition->signals_asserted &= ~irq_signal;
 }

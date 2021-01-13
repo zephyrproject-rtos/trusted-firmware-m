@@ -37,6 +37,7 @@
 #define TFM_SVC_PSA_LIFECYCLE           (0x10)
 #define TFM_SVC_PSA_IRQ_ENABLE          (0x11)
 #define TFM_SVC_PSA_IRQ_DISABLE         (0x12)
+#define TFM_SVC_PSA_RESET_SIGNAL        (0x13)
 /* TF-M specific, starts from 0x40 */
 #define TFM_SVC_SPM_REQUEST             (0x40)
 #define TFM_SVC_GET_BOOT_DATA           (0x41)

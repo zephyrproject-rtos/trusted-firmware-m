@@ -46,11 +46,18 @@ extern "C" {
 /* An IPC message type that indicates the end of a connection. */
 #define PSA_IPC_DISCONNECT      (-2)
 
+/* FLIH return types */
+#define PSA_FLIH_NO_SIGNAL      ((psa_flih_result_t) 0)
+#define PSA_FLIH_SIGNAL         ((psa_flih_result_t) 1)
+
 /* Store a set of one or more Secure Partition signals */
 typedef uint32_t psa_signal_t;
 
 /* A type used to temporarily store a previous interrupt state. */
 typedef uint32_t psa_irq_status_t;
+
+/* The type of the return value from an FLIH function */
+typedef uint32_t psa_flih_result_t;
 
 /**
  * Describe a message received by an RoT Service after calling \ref psa_get().
@@ -252,6 +259,7 @@ void psa_clear(void);
  * \arg                           irq_signal is not an interrupt signal.
  * \arg                           irq_signal indicates more than one signal.
  * \arg                           irq_signal is not currently asserted.
+ * \arg                           The interrupt is not using SLIH.
  */
 void psa_eoi(psa_signal_t irq_signal);
 
@@ -273,8 +281,8 @@ void psa_panic(void);
  *
  * \retval void
  * \retval "PROGRAMMER ERROR" If one or more of the following are true:
- *                            \ref irq_signal is not an interrupt signal.
- *                            \ref irq_signal indicates more than one signal.
+ * \arg                       \a irq_signal is not an interrupt signal.
+ * \arg                       \a irq_signal indicates more than one signal.
  */
 void psa_irq_enable(psa_signal_t irq_signal);
 
@@ -290,12 +298,30 @@ void psa_irq_enable(psa_signal_t irq_signal);
  * \retval 0                  The interrupt was disabled prior to this call.
  *         1                  The interrupt was enabled prior to this call.
  * \retval "PROGRAMMER ERROR" If one or more of the following are true:
- *                            \ref irq_signal is not an interrupt signal.
- *                            \ref irq_signal indicates more than one signal.
+ * \arg                       \a irq_signal is not an interrupt signal.
+ * \arg                       \a irq_signal indicates more than one signal.
  *
  * \note The current implementation always return 1. Do not use the return.
  */
 psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal);
+
+/**
+ * \brief Reset the signal for an interrupt that is using FLIH handling.
+ *
+ * \param[in] irq_signal    The interrupt signal to be reset.
+ *                          This must have a single bit set, corresponding to a
+ *                          currently asserted signal for an interrupt that is
+ *                          defined to use FLIH handling.
+ *
+ * \retval void
+ * \retval "Programmer Error" if one or more of the following are true:
+ * \arg                       \a irq_signal is not a signal for an interrupt
+ *                            that is specified with FLIH handling in the Secure
+ *                            Partition manifest.
+ * \arg                       \a irq_signal indicates more than one signal.
+ * \arg                       \a irq_signal is not currently asserted.
+ */
+void psa_reset_signal(psa_signal_t irq_signal);
 
 #ifdef __cplusplus
 }

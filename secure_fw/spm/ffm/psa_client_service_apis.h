@@ -273,9 +273,9 @@ void tfm_spm_psa_panic(void);
  * \retval void
  * \retval "Does not return"  The call is invalid, if one or more of the
  *                            following are true:
- *                            - irq_signal does not belong to the calling
- *                              partition.
- *                            - irq_signal indicates more than one signal.
+ *  \arg                      irq_signal does not belong to the calling
+ *                            partition.
+ *  \arg                      irq_signal indicates more than one signal.
  */
 void tfm_spm_irq_enable(uint32_t *args);
 
@@ -288,10 +288,25 @@ void tfm_spm_irq_enable(uint32_t *args);
  *         1                  The interrupt was enabled prior to this call
  * \retval "Does not return"  The call is invalid, if one or more of the
  *                            following are true:
- *                            - irq_signal does not belong to the calling
- *                              partition.
- *                            - irq_signal indicates more than one signal.
+ * \arg                       irq_signal does not belong to the calling
+ *                            partition.
+ * \arg                       irq_signal indicates more than one signal.
  */
 psa_irq_status_t tfm_spm_irq_disable(uint32_t *args);
+
+/**
+ * \brief SVC handler for \ref psa_reset_signal.
+ *
+ * \param[in] args           Include all input arguments: irq_signal.
+ *
+ * \retval void
+ * \retval "Does not return" if one or more of the following are true:
+ * \arg                      irq_signal is not a signal for an interrupt
+ *                           that is specified with FLIH handling in the Secure
+ *                           Partition manifest.
+ * \arg                      irq_signal indicates more than one signal.
+ * \arg                      irq_signal is not currently asserted.
+ */
+void tfm_spm_psa_reset_signal(uint32_t *args);
 
 #endif /* __PSA_CLIENT_SERVICE_APIS_H__ */
