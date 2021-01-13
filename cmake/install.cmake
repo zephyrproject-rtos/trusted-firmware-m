@@ -229,7 +229,10 @@ if(BL2)
 endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
-    if(NOT TFM_PSA_API)
+    if(TFM_PSA_API)
+        install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_ipc_api.c
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+    else()
         install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_func_api.c
                 DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()

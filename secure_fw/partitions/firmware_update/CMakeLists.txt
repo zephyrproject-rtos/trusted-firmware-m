@@ -24,7 +24,9 @@ target_sources(tfm_psa_rot_partition_fwu
     PRIVATE
         tfm_fwu_req_mngr.c
         tfm_fwu.c
-)
+        $<$<BOOL:${TFM_PSA_API}>:
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/intermedia_tfm_firmware_update.c>
+        )
 
 # Include the bootloader specific configuration.
 if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${TFM_FWU_BOOTLOADER_LIB}))
