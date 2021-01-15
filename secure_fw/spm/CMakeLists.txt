@@ -34,6 +34,7 @@ target_sources(tfm_spm
         ffm/tfm_boot_data.c
         ffm/tfm_core_utils.c
         ffm/utilities.c
+        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:cmsis_psa/exception_info.c>
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ffm/spm_log.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
@@ -93,6 +94,7 @@ target_compile_definitions(tfm_spm
     PRIVATE
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
+        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
 )
 
 # With constant optimizations on tfm_nspc_func emits a symbol that the linker

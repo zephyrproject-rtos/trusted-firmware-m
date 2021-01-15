@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
+#include "exception_info.h"
 
 #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && \
     !defined(__ARM_ARCH_7EM__)
@@ -106,12 +107,14 @@ __attribute__((naked)) void SVC_Handler(void)
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 void HardFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
     /* HFSR can be read to provide further information of cause of HardFault */
      __ASM volatile("b    .");
 }
 #elif defined(__ARM_ARCH_6M__)
 void HardFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
     /* In a baseline implementation there is no way, to find out whether this is
      * a hard fault triggered directly, or another fault that has been
      * escalated.
@@ -123,16 +126,19 @@ void HardFault_Handler(void)
 /* Reserved for future usage */
 __attribute__((naked)) void MemManage_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void UsageFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
     __ASM volatile("b    .");
 }
 

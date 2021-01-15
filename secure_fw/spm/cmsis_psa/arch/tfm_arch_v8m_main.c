@@ -11,6 +11,7 @@
 #include "tfm_arch.h"
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"
+#include "exception_info.h"
 #include "tfm_secure_api.h"
 #include "spm_ipc.h"
 #include "tfm/tfm_core_svc.h"
@@ -80,17 +81,16 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
 /**
  * \brief Overwrites default Secure fault handler.
  */
-void SecureFault_Handler(void)
+__attribute__((naked)) void SecureFault_Handler(void)
 {
-    ERROR_MSG("Oops... Secure fault!!! You're not going anywhere!");
+    EXCEPTION_INFO(EXCEPTION_TYPE_SECUREFAULT);
+
     /* A SecureFault may indicate corruption of secure state, so it is essential
      * that Non-secure code does not regain control after one is raised.
      * Returning from this exception could allow a pending NS exception to be
      * taken, so the current solution is not to return.
      */
-    while (1) {
-        ;
-    }
+    __ASM volatile("b    .");
 }
 
 #if defined(__ICCARM__)
@@ -112,6 +112,8 @@ __attribute__((naked)) void SVC_Handler(void)
 /* Reserved for future usage */
 __attribute__((naked)) void HardFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
+
     /* A HardFault may indicate corruption of secure state, so it is essential
      * that Non-secure code does not regain control after one is raised.
      * Returning from this exception could allow a pending NS exception to be
@@ -122,6 +124,8 @@ __attribute__((naked)) void HardFault_Handler(void)
 
 __attribute__((naked)) void MemManage_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
+
     /* A MemManage fault may indicate corruption of secure state, so it is
      * essential that Non-secure code does not regain control after one is
      * raised. Returning from this exception could allow a pending NS exception
@@ -132,6 +136,8 @@ __attribute__((naked)) void MemManage_Handler(void)
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
+
     /* A BusFault may indicate corruption of secure state, so it is essential
      * that Non-secure code does not regain control after one is raised.
      * Returning from this exception could allow a pending NS exception to be
@@ -142,6 +148,7 @@ __attribute__((naked)) void BusFault_Handler(void)
 
 __attribute__((naked)) void UsageFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
     __ASM volatile("b    .");
 }
 
