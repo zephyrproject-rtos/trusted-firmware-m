@@ -33,7 +33,7 @@ tfm_def_build_doxygen = True
 def find_tfm_root(start_dir=os.path.dirname(os.path.abspath(__file__)),
                   target_files=["license.rst",
                                 "dco.txt",
-                                "CommonConfig.cmake"],
+                                "toolchain_GNUARM.cmake"],
                   max_depth=5):
     """ Method which attempts to find the root of the project
     by traversing parent directoried and attempts to located each of the
