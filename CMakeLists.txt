@@ -3,6 +3,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+# List of all partitions supported by TF-M
+# Name must match name in 'trusted-firmware-m/config/config_default.cmake'
+set(TFM_VALID_PARTITIONS
+  TFM_PARTITION_PROTECTED_STORAGE
+  TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+  TFM_PARTITION_CRYPTO
+  TFM_PARTITION_INITIAL_ATTESTATION
+  TFM_PARTITION_PLATFORM
+  TFM_PARTITION_AUDIT_LOG
+  )
+
 # Adds trusted-firmware-m as an external project.
 # Also creates a target called 'tfm_api'
 # which can be linked into the app.
@@ -18,6 +29,7 @@
 # ISOLATION_LEVEL: The TF-M isolation level to use
 # REGRESSION: Boolean if TF-M build includes building the TF-M regression tests
 # BL2: Boolean if the TF-M build uses MCUboot. Default: True
+# ENABLED_PARTITIONS: List of TFM partitions to enable.
 #
 # Example usage:
 #
@@ -28,15 +40,24 @@
 #                        ISOLATION_LEVEL 2
 #                        REGRESSION
 #                        BL2 True
-#                        BUILD_PROFILE profile_small)
+#                        BUILD_PROFILE profile_small
+#                        ENABLED_PARTITIONS TFM_PARTITION_PLATFORM TFM_PARTITION_CRYPTO)
 function(trusted_firmware_build)
   set(options IPC REGRESSION)
   set(oneValueArgs BINARY_DIR BOARD BL2 ISOLATION_LEVEL CMAKE_BUILD_TYPE BUILD_PROFILE)
-  cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "" ${ARGN})
+  set(multiValueArgs ENABLED_PARTITIONS)
+  cmake_parse_arguments(TFM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  if(NOT DEFINED TFM_BL2)
-    set(TFM_BL2 True)
-  endif()
+  foreach(partition ${TFM_VALID_PARTITIONS})
+    list(FIND TFM_ENABLED_PARTITIONS ${partition} idx)
+    if (idx EQUAL -1)
+      set(val "OFF")
+    else()
+      set(val "ON")
+    endif()
+    list(APPEND TFM_PARTITIONS_ARGS -D${partition}=${val})
+  endforeach()
+
   set(TFM_BL2_ARG "-DBL2=${TFM_BL2}")
 
   if(DEFINED TFM_IPC)
@@ -127,6 +148,7 @@ function(trusted_firmware_build)
                ${TFM_PROFILE_ARG}
                -DTFM_TEST_REPO_PATH=${ZEPHYR_TFM_MODULE_DIR}/tf-m-tests
                -DMCUBOOT_PATH=${ZEPHYR_TFM_MODULE_DIR}/../tfm-mcuboot
+               ${TFM_PARTITIONS_ARGS}
     BUILD_ALWAYS True
     USES_TERMINAL_BUILD True
     BUILD_BYPRODUCTS ${BUILD_BYPRODUCTS}
@@ -199,6 +221,13 @@ if (CONFIG_BUILD_WITH_TFM)
     set(TFM_PROFILE_ARG BUILD_PROFILE ${CONFIG_TFM_PROFILE})
   endif()
 
+  # Enable TFM partitions as specified in Kconfig
+  foreach(partition ${TFM_VALID_PARTITIONS})
+    if (CONFIG_${partition})
+      list(APPEND TFM_ENABLED_PARTITIONS_ARG ${partition})
+    endif()
+  endforeach()
+
   trusted_firmware_build(
     BINARY_DIR ${CMAKE_BINARY_DIR}/tfm
     BOARD ${CONFIG_TFM_BOARD}
@@ -207,6 +236,7 @@ if (CONFIG_BUILD_WITH_TFM)
     ${TFM_BL2_ARG}
     ${TFM_IPC_ARG}
     ${TFM_REGRESSION_ARG}
+    ENABLED_PARTITIONS ${TFM_ENABLED_PARTITIONS_ARG}
   )
 
   zephyr_link_libraries(tfm_api)
