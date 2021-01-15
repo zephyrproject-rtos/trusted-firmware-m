@@ -133,27 +133,27 @@ add_custom_command(OUTPUT tfm_s_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin $<TARGET_FILE_DIR:bl2>
 )
 
+set(FLASH_AREA_NUM 1)
+configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
+
+add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
+target_compile_options(signing_layout_ns
+    PRIVATE
+        $<$<C_COMPILER_ID:GNU>:-E\;-xc>
+        $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
+        $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
+)
+target_compile_definitions(signing_layout_ns
+    PRIVATE
+        $<$<BOOL:${BL2}>:BL2>
+        $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+)
+target_link_libraries(signing_layout_ns
+    PRIVATE
+        platform_bl2
+)
+
 if(NS)
-    set(FLASH_AREA_NUM 1)
-    configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
-
-    add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
-    target_compile_options(signing_layout_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:-E\;-xc>
-            $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
-            $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
-    )
-    target_compile_definitions(signing_layout_ns
-        PRIVATE
-            $<$<BOOL:${BL2}>:BL2>
-            $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
-    )
-    target_link_libraries(signing_layout_ns
-        PRIVATE
-            platform_bl2
-    )
-
     add_custom_target(tfm_ns_signed_bin
         SOURCES tfm_ns_signed.bin
     )
