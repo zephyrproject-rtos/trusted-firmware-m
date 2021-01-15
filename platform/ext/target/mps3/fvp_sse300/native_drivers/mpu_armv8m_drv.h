@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -53,14 +53,20 @@ enum mpu_armv8m_attr_shared_t {
     MPU_ARMV8M_SH_INNER
 };
 
+enum mpu_armv8m_attr_priv_exec_t {
+    MPU_ARMV8M_PRIV_EXEC_OK,
+    MPU_ARMV8M_PRIV_EXEC_NEVER
+};
+
 struct mpu_armv8m_region_cfg_t {
     uint32_t region_nr;
     uint32_t region_base;
     uint32_t region_limit;
     uint32_t region_attridx;
-    enum mpu_armv8m_attr_exec_t     attr_exec;
-    enum mpu_armv8m_attr_access_t   attr_access;
-    enum mpu_armv8m_attr_shared_t   attr_sh;
+    enum mpu_armv8m_attr_exec_t      attr_exec;
+    enum mpu_armv8m_attr_access_t    attr_access;
+    enum mpu_armv8m_attr_shared_t    attr_sh;
+    enum mpu_armv8m_attr_priv_exec_t attr_pxn;
 };
 
 struct mpu_armv8m_region_cfg_raw_t {

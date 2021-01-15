@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -49,7 +49,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+        MPU_ARMV8M_PRIV_EXEC_OK
     },
     /* TFM Core unprivileged code region */
     {
@@ -59,7 +60,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+        MPU_ARMV8M_PRIV_EXEC_OK
     },
     /* NSPM PSP */
     {
@@ -69,7 +71,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+        MPU_ARMV8M_PRIV_EXEC_NEVER
     },
     /* RO region */
     {
@@ -79,7 +82,12 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+#if TFM_LVL == 1
+        MPU_ARMV8M_PRIV_EXEC_OK
+#else
+        MPU_ARMV8M_PRIV_EXEC_NEVER
+#endif
     },
    /* RW, ZI and stack as one region */
     {
@@ -89,7 +97,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+        MPU_ARMV8M_PRIV_EXEC_NEVER
     },
 #ifdef TFM_SP_META_PTR_ENABLE
     /* TFM partition metadata pointer region */
@@ -100,7 +109,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
+        MPU_ARMV8M_SH_NONE,
+        MPU_ARMV8M_PRIV_EXEC_NEVER
     }
 #endif
 };

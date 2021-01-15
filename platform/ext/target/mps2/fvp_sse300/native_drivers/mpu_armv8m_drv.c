@@ -96,6 +96,8 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     limit_cfg |= (region_cfg->region_attridx << MPU_RLAR_AttrIndx_Pos) &
                  MPU_RLAR_AttrIndx_Msk;
 
+    limit_cfg |= (region_cfg->attr_pxn << MPU_RLAR_PXN_Pos) & MPU_RLAR_PXN_Msk;
+
     limit_cfg |= MPU_RLAR_EN_Msk;
 
     mpu->RLAR = limit_cfg;
