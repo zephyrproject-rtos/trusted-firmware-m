@@ -160,12 +160,11 @@ information about the filesystem and flash interfaces can be found in the
 :doc:`ITS integration guide
 </docs/reference/services/tfm_its_integration_guide>`.
 
-The structure containing info about the external flash device, used by the ITS
-service to handle requests from the PS partition, is defined in
-``secure_fw/partitions/internal_trusted_storage/flash/its_flash_info_external.c``,
-which depends on target-specific definitions from
-``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``. Please see the
-`Protected Storage Service Definitions` section for details.
+The ITS service implementation in
+``secure_fw/partitions/internal_trusted_storage/tfm_internal_trusted_storage.c``,
+constructs a filesystem configuration for Protected Storage based on
+target-specific definitions from the Protected Storage HAL. Please see the
+`Protected Storage Service HAL` section for details of these.
 
 Cryptographic Interface
 =======================
@@ -207,44 +206,65 @@ header size (``PS_OBJECT_HEADER_SIZE``) which is defined in
 ``ps_object_defs.h``. The ``PS_OBJECT_HEADER_SIZE`` changes based on the
 ``PS_ENCRYPTION`` flag status.
 
-Protected Storage Service Platform Definitions
-==============================================
-The PS service requires the following platform definitions:
+Protected Storage Service HAL
+=============================
+The PS service requires the platform to implement the PS HAL, defined in
+``platform/include/tfm_hal_ps.h``.
 
-- ``PS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
-  erasable unit) in bytes.
-- ``PS_SECTORS_PER_BLOCK`` - Defines the number of contiguous PS_SECTOR_SIZE
-  to form a logical block in the filesystem.
-- ``PS_FLASH_DEV_NAME`` - Specifies the flash device used by PS to store the
-  data.
-- ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes. Valid values are powers of two between 1 and ``PS_SECTOR_SIZE``
-  inclusive.
+The following C definitions in the HAL are mandatory, and must be defined by the
+platform in a header named ``flash_layout.h``:
 
-The sectors reserved to be used as protected storage **must** be contiguous
-sectors starting at ``PS_FLASH_AREA_ADDR``.
+- ``TFM_HAL_PS_FLASH_DRIVER`` - Defines the identifier of the CMSIS Flash
+  ARM_DRIVER_FLASH object to use for PS. It must have been allocated by the
+  platform and will be declared extern in the HAL header.
+
+- ``TFM_HAL_PS_PROGRAM_UNIT`` - Defines the size of the PS flash device's
+  physical program unit (the smallest unit of data that can be individually
+  programmed to flash). It must be equal to
+  ``TFM_HAL_PS_FLASH_DRIVER.GetInfo()->program_unit``, but made available at
+  compile time so that filesystem structures can be statically sized. Valid
+  values are powers of two between 1 and the flash sector size, inclusive.
+
+The following C definitions in the HAL may optionally be defined by the platform
+in the ``flash_layout.h`` header:
+
+- ``TFM_HAL_PS_FLASH_AREA_ADDR`` - Defines the base address of the dedicated
+  flash area for PS.
+
+- ``TFM_HAL_PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
+  for PS in bytes.
+
+- ``TFM_HAL_PS_SECTORS_PER_BLOCK`` - Defines the number of contiguous physical
+  flash erase sectors that form a logical erase block in the filesystem. The
+  typical value is ``1``, but it may be increased so that the maximum required
+  asset size will fit in one logical block.
+
+If any of the above definitions are not provided by the platform, then the
+``tfm_hal_ps_fs_info()`` HAL API must be implemented instead. This function is
+documented in ``tfm_hal_ps.h``.
+
+The sectors reserved to be used for Protected Storage **must** be contiguous
+sectors starting at ``TFM_HAL_PS_FLASH_AREA_ADDR``.
 
 The design requires either 2 blocks, or any number of blocks greater than or
 equal to 4. Total number of blocks can not be 0, 1 or 3. This is a design choice
 limitation to provide power failure safe update operations.
 
-Target must provide a header file, called ``flash_layout.h``, which defines the
-information explained above. The defines must be named as they are specified
-above.
+Protected Storage Service Optional Platform Definitions
+=======================================================
+The following optional platform definitions may be defined in
+``flash_layout.h``:
+
+- ``PS_RAM_FS_SIZE`` - Defines the size of the RAM FS buffer when using the
+  RAM FS emulated flash implementation. The buffer must be at least as large as
+  the area earmarked for the filesystem by the HAL.
+- ``PS_FLASH_NAND_BUF_SIZE`` - Defines the size of the write buffer when using
+  the NAND flash implementation. The buffer must be at least as large as a
+  logical filesystem block.
 
 More information about the ``flash_layout.h`` content, not PS related, is
 available in :doc:`platform readme </platform/ext/readme>` along with other
 platform information.
-
-The following optional platform definitions may also be defined in
-``flash_layout.h`` or set at build time in ``platform/ext/<TARGET_NAME>.cmake``:
-
-- ``PS_FLASH_AREA_ADDR`` - Defines the flash address where the protected storage
-  area starts.
-  If not defined, the platform must implement ``tfm_hal_ps_fs_info()``.
-- ``PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for protected storage in bytes.
-  If not defined, the platform must implement ``tfm_hal_ps_fs_info()``.
 
 TF-M NV Counter Interface
 =========================
@@ -280,8 +300,8 @@ PS service uses that TF-M core API to retrieve the client ID and associate it
 as the owner of an asset. Only the owner can read, write or delete that asset
 based on the creation flags.
 
-The :doc:`integration guide </docs/getting_started/tfm_integration_guide>` provides further
-details of non-secure implementation requirements for TF-M.
+The :doc:`integration guide </docs/getting_started/tfm_integration_guide>`
+provides further details of non-secure implementation requirements for TF-M.
 
 Cryptographic Interface
 =======================
@@ -368,5 +388,5 @@ definitions is:
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*
