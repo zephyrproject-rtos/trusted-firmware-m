@@ -56,8 +56,10 @@ extern "C" {
     uint32_t scratch_dblock;    /*!< Physical block ID of the data \
                                  *   section's scratch block \
                                  */ \
-    uint8_t fs_version;         /*!< ITS system version */ \
-    uint8_t active_swap_count;  /*!< Physical block ID of the data */
+    uint8_t fs_version;         /*!< Filesystem version */ \
+    uint8_t active_swap_count;  /*!< Number of times the metadata blocks have \
+                                 *   been swapped \
+                                 */
 
 struct its_metadata_block_header_t {
     _T1
