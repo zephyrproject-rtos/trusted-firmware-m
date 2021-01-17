@@ -17,7 +17,6 @@
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_protected_storage.h"
-#include "flash_layout.h"
 #endif
 
 #ifndef TFM_PSA_API

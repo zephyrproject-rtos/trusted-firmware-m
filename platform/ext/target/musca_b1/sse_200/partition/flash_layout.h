@@ -275,18 +275,6 @@
 
 #define TOTAL_RAM_SIZE      (0x80000)     /* 512 KB */
 
-/* Macros needed for tests, these values are copied from Secure Enclave's flash
- * layout.
- */
-#ifdef PSA_API_TEST_CRYPTO
-/* Need larger asset size for PSA API Crypto compliance suite */
-#define ITS_MAX_ASSET_SIZE      (1229)
-#else
-#define ITS_MAX_ASSET_SIZE      (512)
-#endif
-
-#define PS_MAX_ASSET_SIZE      (2048)
-
 /* Macros needed for BL2 build with dummy values.
  * This BL2 instance is not used, but the BL2 macro needs to be set, and this
  * macro and BL2 build is entangled. If this is fixed the following macros can
