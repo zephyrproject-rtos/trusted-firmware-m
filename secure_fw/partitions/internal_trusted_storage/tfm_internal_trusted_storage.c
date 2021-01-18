@@ -177,6 +177,11 @@ psa_status_t tfm_its_init(void)
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
+    /* Check status of ITS initialisation before continuing with PS */
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
     /* Initialise the PS context */
     status = its_flash_fs_prepare(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
 #ifdef PS_CREATE_FLASH_LAYOUT
@@ -204,7 +209,6 @@ psa_status_t tfm_its_init(void)
         status = its_flash_fs_prepare(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
     }
 #endif /* PS_CREATE_FLASH_LAYOUT */
-
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
     return status;
