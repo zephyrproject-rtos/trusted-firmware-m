@@ -11,7 +11,7 @@
 #include "tfm_wait.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_internal_defines.h"
+#include "internal_errors.h"
 #include "cmsis_compiler.h"
 #include "utilities.h"
 #include "tfm_list.h"
@@ -26,13 +26,13 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     size_t i;
 
     if (!pool || num == 0) {
-        return IPC_ERROR_BAD_PARAMETERS;
+        return SPM_ERROR_BAD_PARAMETERS;
     }
 
     /* Ensure buffer is large enough */
     if (poolsz != ((chunksz + sizeof(struct tfm_pool_chunk_t)) * num +
         sizeof(struct tfm_pool_instance_t))) {
-        return IPC_ERROR_BAD_PARAMETERS;
+        return SPM_ERROR_BAD_PARAMETERS;
     }
 
     /* Buffer should be BSS cleared but clear it again */
@@ -52,7 +52,7 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     pool->chunksz = chunksz;
     pool->chunk_count = num;
 
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)

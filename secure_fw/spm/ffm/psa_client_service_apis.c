@@ -15,7 +15,7 @@
 #endif
 #include "tfm_core_utils.h"
 #include "tfm_hal_platform.h"
-#include "tfm_internal_defines.h"
+#include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 
@@ -84,7 +84,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
      */
     if (tfm_memory_check((const void *)args[1],
         sizeof(struct tfm_control_parameter_t), ns_caller,
-        TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
@@ -199,7 +199,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
      * input msg pointer is not a valid memory reference or not read-write.
      */
     if (tfm_memory_check(msg, sizeof(psa_msg_t), false, TFM_MEMORY_ACCESS_RW,
-        privileged) != IPC_SUCCESS) {
+        privileged) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -314,7 +314,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
      * if the memory reference for buffer is invalid or not read-write.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -441,7 +441,7 @@ void tfm_spm_psa_write(uint32_t *args)
      * if the memory reference for buffer is invalid or not readable.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+        TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 

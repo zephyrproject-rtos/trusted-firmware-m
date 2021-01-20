@@ -221,8 +221,8 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
  * \param[in] conn_handle   Handle to be validated
  * \param[in] client_id     Partition ID of the sender of the message
  *
- * \retval IPC_SUCCESS        Success
- * \retval IPC_ERROR_GENERIC  Invalid handle
+ * \retval SPM_SUCCESS        Success
+ * \retval SPM_ERROR_GENERIC  Invalid handle
  */
 int32_t tfm_spm_validate_conn_handle(
                                     const struct tfm_conn_handle_t *conn_handle,
@@ -235,8 +235,8 @@ int32_t tfm_spm_validate_conn_handle(
  * \param[in] conn_handle   Connection handle created by
  *                          tfm_spm_create_conn_handle()
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
 int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
@@ -337,9 +337,9 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
  * \param[in] msg           message created by tfm_spm_create_msg()
  *                          \ref tfm_msg_body_t structures
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
- * \retval IPC_ERROR_GENERIC Failed to enqueue message to service message queue
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
+ * \retval SPM_ERROR_GENERIC Failed to enqueue message to service message queue
  */
 int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
                            struct tfm_msg_body_t *msg);
@@ -352,9 +352,9 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
  *                          by partition management functions
  * \param[in] version       Client support version
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
- * \retval IPC_ERROR_VERSION Check failed
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
+ * \retval SPM_ERROR_VERSION Check failed
  */
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
                                      uint32_t version);
@@ -367,8 +367,8 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
  *                          by partition management functions
  * \param[in] ns_caller     Whether from NS caller
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_GENERIC Authorization check failed
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct tfm_spm_service_t *service,
@@ -386,9 +386,9 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
  *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
  *                             \ref TFM_PARTITION_PRIVILEGED_MODE
  *
- * \retval IPC_SUCCESS               Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval IPC_ERROR_MEMORY_CHECK    Check failed
+ * \retval SPM_SUCCESS               Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_ERROR_MEMORY_CHECK    Check failed
  */
 int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
@@ -479,8 +479,8 @@ void tfm_core_handler_mode(void);
  *                          tfm_spm_create_conn_handle()
  * \param[in] rhandle       rhandle need to save
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find handle node
  */
 int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,

@@ -77,8 +77,8 @@ struct tfm_pool_instance_t {
  * \param[in] chunksz           Size of chunks.
  * \param[in] num               Number of chunks.
  *
- * \retval IPC_SUCCESS          Success.
- * \retval IPC_ERROR_BAD_PARAMETERS Parameters error.
+ * \retval SPM_SUCCESS          Success.
+ * \retval SPM_ERROR_BAD_PARAMETERS Parameters error.
  */
 int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
                       size_t chunksz, size_t num);

@@ -8,12 +8,12 @@
 #include "psa/service.h"
 #include "spm_ipc.h"
 #include "tfm_core_utils.h"
-#include "tfm_internal_defines.h"
 #include "tfm_memory_utils.h"
 #include "spm_psa_client_call.h"
 #include "utilities.h"
 #include "tfm_wait.h"
 #include "tfm_nspm.h"
+#include "ffm/spm_error_base.h"
 
 uint32_t tfm_spm_client_psa_framework_version(void)
 {
@@ -37,7 +37,7 @@ uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller)
      * It should return PSA_VERSION_NONE if the caller is not authorized
      * to access the RoT Service.
      */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
         return PSA_VERSION_NONE;
     }
 
@@ -69,7 +69,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
      * It is a PROGRAMMER ERROR if the caller is not authorized to access the RoT
      * Service.
      */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != IPC_SUCCESS) {
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
@@ -86,7 +86,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
      * It is a PROGRAMMER ERROR if the version of the RoT Service requested is not
      * supported on the platform.
      */
-    if (tfm_spm_check_client_version(service, version) != IPC_SUCCESS) {
+    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
@@ -138,7 +138,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
 
     conn_handle = tfm_spm_to_handle_instance(handle);
     /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
-    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
@@ -167,7 +167,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * readable.
      */
     if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
-        TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+        TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
@@ -177,7 +177,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * the wrap output vector is invalid or not read-write.
      */
     if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
-        TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
@@ -194,7 +194,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      */
     for (i = 0; i < in_num; i++) {
         if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
-            TFM_MEMORY_ACCESS_RO, privileged) != IPC_SUCCESS) {
+            TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
             TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
         }
     }
@@ -221,7 +221,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      */
     for (i = 0; i < out_num; i++) {
         if (tfm_memory_check(outvecs[i].base, outvecs[i].len,
-            ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != IPC_SUCCESS) {
+            ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
             TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
         }
     }
@@ -243,7 +243,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * Send message and wake up the SP who is waiting on message queue,
      * and scheduler triggered
      */
-    if (tfm_spm_send_event(service, msg) != IPC_SUCCESS) {
+    if (tfm_spm_send_event(service, msg) != SPM_SUCCESS) {
         /* FixMe: Need to refine failure process here. */
         tfm_core_panic();
     }
@@ -273,7 +273,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != IPC_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 

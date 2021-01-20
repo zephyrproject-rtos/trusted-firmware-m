@@ -13,7 +13,7 @@
 #include "tfm_core_utils.h"
 #include "spm_partition_defs.h"
 #ifdef TFM_PSA_API
-#include "tfm_internal_defines.h"
+#include "internal_errors.h"
 #include "utilities.h"
 #include "psa/service.h"
 #include "tfm_thread.h"
@@ -175,7 +175,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         tfm_spm_partition_get_privileged_mode(partition->p_static->flags);
 
     if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
-        privileged) != IPC_SUCCESS) {
+        privileged) != SPM_SUCCESS) {
         /* Not in accessible range, return error */
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;

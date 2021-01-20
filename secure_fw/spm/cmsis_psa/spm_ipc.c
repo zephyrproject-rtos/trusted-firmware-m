@@ -11,7 +11,7 @@
 #include "psa/service.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
-#include "tfm_internal_defines.h"
+#include "internal_errors.h"
 #include "tfm_spm_hal.h"
 #include "tfm_irq_list.h"
 #include "tfm_api.h"
@@ -164,15 +164,15 @@ int32_t tfm_spm_validate_conn_handle(
     /* Check the handle address is validated */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
                                     (uint8_t *)conn_handle) != true) {
-        return IPC_ERROR_GENERIC;
+        return SPM_ERROR_GENERIC;
     }
 
     /* Check the handle caller is correct */
     if (conn_handle->client_id != client_id) {
-        return IPC_ERROR_GENERIC;
+        return SPM_ERROR_GENERIC;
     }
 
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
@@ -189,7 +189,7 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle);
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
@@ -201,7 +201,7 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
     TFM_CORE_ASSERT(conn_handle != NULL);
 
     conn_handle->rhandle = rhandle;
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 /**
@@ -396,18 +396,18 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
     switch (service->service_db->version_policy) {
     case TFM_VERSION_POLICY_RELAXED:
         if (version > service->service_db->version) {
-            return IPC_ERROR_VERSION;
+            return SPM_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
         if (version != service->service_db->version) {
-            return IPC_ERROR_VERSION;
+            return SPM_ERROR_VERSION;
         }
         break;
     default:
-        return IPC_ERROR_VERSION;
+        return SPM_ERROR_VERSION;
     }
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_check_authorization(uint32_t sid,
@@ -421,7 +421,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 
     if (ns_caller) {
         if (!service->service_db->non_secure_client) {
-            return IPC_ERROR_GENERIC;
+            return SPM_ERROR_GENERIC;
         }
     } else {
         partition = tfm_spm_get_running_partition();
@@ -436,10 +436,10 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
         }
 
         if (i == partition->p_static->ndeps) {
-            return IPC_ERROR_GENERIC;
+            return SPM_ERROR_GENERIC;
         }
     }
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 /* Message functions */
@@ -575,7 +575,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
         tfm_event_wait(&msg->ack_evnt);
     }
 
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
@@ -599,15 +599,15 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {
-        return IPC_SUCCESS;
+        return SPM_SUCCESS;
     }
 
     if (!buffer) {
-        return IPC_ERROR_BAD_PARAMETERS;
+        return SPM_ERROR_BAD_PARAMETERS;
     }
 
     if ((uintptr_t)buffer > (UINTPTR_MAX - len)) {
-        return IPC_ERROR_MEMORY_CHECK;
+        return SPM_ERROR_MEMORY_CHECK;
     }
 
     if (access == TFM_MEMORY_ACCESS_RW) {
@@ -629,10 +629,10 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
 
     if (err == TFM_HAL_SUCCESS) {
-        return IPC_SUCCESS;
+        return SPM_SUCCESS;
     }
 
-    return IPC_ERROR_MEMORY_CHECK;
+    return SPM_ERROR_MEMORY_CHECK;
 }
 
 uint32_t tfm_spm_init(void)
@@ -888,7 +888,7 @@ int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
         }
     }
 
-    return -1;
+    return SPM_ERROR_GENERIC;
 }
 
 void tfm_spm_enable_irq(uint32_t *args)
