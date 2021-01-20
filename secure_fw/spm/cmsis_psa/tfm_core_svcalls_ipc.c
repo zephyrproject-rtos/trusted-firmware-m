@@ -14,8 +14,8 @@
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "tfm/tfm_core_svc.h"
-#include "common/tfm_boot_data.h"
-#include "common/psa_client_service_apis.h"
+#include "ffm/tfm_boot_data.h"
+#include "ffm/psa_client_service_apis.h"
 #include "tfm_hal_spm_logdev.h"
 
 /* The section names come from the scatter file */

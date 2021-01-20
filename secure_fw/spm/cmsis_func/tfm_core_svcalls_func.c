@@ -17,7 +17,7 @@
 #include "tfm_arch.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
-#include "common/tfm_boot_data.h"
+#include "ffm/tfm_boot_data.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,

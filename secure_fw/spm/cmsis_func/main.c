@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "arch.h"
-#include "common/tfm_boot_data.h"
+#include "ffm/tfm_boot_data.h"
 #include "region.h"
 #include "spm_func.h"
 #include "tfm_hal_defs.h"

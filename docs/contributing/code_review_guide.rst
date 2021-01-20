@@ -78,7 +78,7 @@ Examples:
 
 .. code-block:: c
 
-  /* R3.1 FILE: s/spm/common/psa_client.c */
+  /* R3.1 FILE: s/spm/ffm/psa_client.c */
 
   /* R3.2 FILE: s/spm/cmsis_psa/tfm_secure_context.c */
 
@@ -86,10 +86,10 @@ Examples:
 
   /* R3.4 FILE: s/spm/cmsis_psa/main.c, 'main' is a good entry name. */
   void main(void);
-  /* R3.4 FILE: s/spm/common/spm.c, 'spm\_' as the namespace */
+  /* R3.4 FILE: s/spm/ffm/spm.c, 'spm\_' as the namespace */
   void spm_init(void);
 
-  /* R3.5 FILE: s/spm/common/main.c */
+  /* R3.5 FILE: s/spm/ffm/main.c */
   static void init_functions(void);
 
   /* R3.6 Not permitted: */
@@ -105,7 +105,7 @@ Assembler code
     external MACRO wrapped assembler code is allowed. Here is one example of the
     logic folder:
 
-    - 'secure_fw/spm/common'.
+    - 'secure_fw/spm/ffm'.
 
 Examples:
 
@@ -113,7 +113,7 @@ Examples:
 
   /*
    * R4.1 The following MACRO is allowed to be referenced under
-   * 'secure_fw/spm/common'
+   * 'secure_fw/spm/ffm'
    */
   #define SVC(code) __asm volatile("svc  %0", ::"I"(code))
 

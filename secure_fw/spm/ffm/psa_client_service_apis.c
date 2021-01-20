@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-#include "common/spm_psa_client_call.h"
+#include "spm_psa_client_call.h"
 #include "psa/lifecycle.h"
 #ifdef TFM_PSA_API
 #include "spm_ipc.h"
