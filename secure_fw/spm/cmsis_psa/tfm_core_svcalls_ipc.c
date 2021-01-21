@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,7 @@
 #include "tfm/tfm_core_svc.h"
 #include "common/tfm_boot_data.h"
 #include "common/psa_client_service_apis.h"
+#include "tfm_hal_spm_logdev.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
@@ -108,7 +109,7 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        return tfm_hal_output_spm_log(ctx[0], ctx[1]);
+        return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
