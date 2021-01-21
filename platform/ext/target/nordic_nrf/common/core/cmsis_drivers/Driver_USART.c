@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
- * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
+ * Copyright (c) 2020-2021 Nordic Semiconductor ASA. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,6 +20,7 @@
 #include <Driver_USART.h>
 #include <RTE_Device.h>
 #include <nrfx_uarte.h>
+#include <string.h>
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  (void)arg
@@ -104,6 +105,12 @@ static int32_t ARM_USARTx_PowerControl(ARM_POWER_STATE state,
     }
 }
 
+#ifndef MIN
+#define MIN(a,b) (((a) <= (b)) ? (a) : (b));
+#endif
+
+#define SEND_RAM_BUF_SIZE 64
+
 static int32_t ARM_USARTx_Send(const void *data, uint32_t num,
                                UARTx_Resources *uart_resources)
 {
@@ -111,14 +118,29 @@ static int32_t ARM_USARTx_Send(const void *data, uint32_t num,
         return ARM_DRIVER_ERROR;
     }
 
-    nrfx_err_t err_code = nrfx_uarte_tx(&uart_resources->uarte, data, num);
-    if (err_code == NRFX_ERROR_BUSY) {
-        return ARM_DRIVER_ERROR_BUSY;
-    } else if (err_code != NRFX_SUCCESS) {
-        return ARM_DRIVER_ERROR;
+    /* nrfx_uarte_tx() only supports input data from RAM. */
+    if (!nrfx_is_in_ram(data)) {
+        uint8_t ram_buf[SEND_RAM_BUF_SIZE];
+
+        for (uint32_t offs = 0; offs < num; offs += sizeof(ram_buf)) {
+            uint32_t len = MIN(num - offs, sizeof(ram_buf));
+            memcpy(ram_buf, data + offs, len);
+            int32_t cmsis_err = ARM_USARTx_Send(ram_buf, len, uart_resources);
+            if (cmsis_err != ARM_DRIVER_OK) {
+                return cmsis_err;
+            }
+        }
+    } else {
+        nrfx_err_t err_code = nrfx_uarte_tx(&uart_resources->uarte, data, num);
+        if (err_code == NRFX_ERROR_BUSY) {
+            return ARM_DRIVER_ERROR_BUSY;
+        } else if (err_code != NRFX_SUCCESS) {
+            return ARM_DRIVER_ERROR;
+        }
+
+        uart_resources->tx_count = num;
     }
 
-    uart_resources->tx_count = num;
     return ARM_DRIVER_OK;
 }
 
