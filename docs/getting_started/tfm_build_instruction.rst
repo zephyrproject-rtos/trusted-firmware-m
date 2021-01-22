@@ -69,7 +69,7 @@ Required cmake parameters for building TF-M
 | Parameter            | Description                                           |
 +======================+=======================================================+
 | TFM_PLATFORM         | The target platform as a path from the base directory |
-|                      | ``/platform/ext/target``                              |
+|                      | ``/platform/ext/target``, or as an absolute path.     |
 +----------------------+-------------------------------------------------------+
 | TFM_TOOLCHAIN_FILE   | The path to the toolchain file that corresponds to    |
 |                      | the desired compiler.                                 |

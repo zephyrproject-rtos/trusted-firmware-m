@@ -11,6 +11,13 @@ set(TFM_VERSION 1.2.0)
 
 ############################ CONFIGURATION #####################################
 
+if (IS_ABSOLUTE "${TFM_PLATFORM}")
+    file(RELATIVE_PATH TFM_PLATFORM_RELATIVE_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target"
+        ${TFM_PLATFORM})
+    set(TFM_PLATFORM "${TFM_PLATFORM_RELATIVE_PATH}" CACHE STRING "Target platform set as an absolute path." FORCE)
+endif()
+
 # Some compiler flags depend on the CPU / platform config. This include should
 # be run before the toolchain file so the compiler can be configured properly.
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
