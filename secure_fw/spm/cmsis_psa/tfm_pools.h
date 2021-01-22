@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 
-#include "tfm_list.h"
+#include "ffm/lists.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ extern "C" {
  *  [ Pool Instance ] + N * [ Pool Chunks ]
  */
 struct tfm_pool_chunk_t {
-    struct tfm_list_node_t list;        /* Chunk list                     */
+    struct bi_list_node_t list;         /* Chunk list                     */
     void *pool;                         /* Point to the parent pool       */
     uint8_t data[0];                    /* Data indicator                 */
 };
@@ -35,14 +35,14 @@ struct tfm_pool_chunk_t {
  * required for standards compliant C
  */
 struct tfm_pool_chunk_s_t {
-    struct tfm_list_node_t list;        /* Chunk list                     */
+    struct bi_list_node_t list;         /* Chunk list                     */
     void *pool;                         /* Point to the parent pool       */
 };
 
 struct tfm_pool_instance_t {
     size_t chunksz;                     /* Chunks size of pool member     */
     size_t chunk_count;                 /* A number of chunks in the pool */
-    struct tfm_list_node_t chunks_list; /* Chunk list head in pool        */
+    struct bi_list_node_t chunks_list;  /* Chunk list head in pool        */
     struct tfm_pool_chunk_s_t chunks[0]; /* Data indicator                */
 };
 

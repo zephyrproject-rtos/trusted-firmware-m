@@ -24,7 +24,7 @@
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_list.h"
+#include "ffm/lists.h"
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
@@ -152,7 +152,7 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
     p_handle->client_id = client_id;
 
     /* Add handle node to list for next psa functions */
-    tfm_list_add_tail(&service->handle_list, &p_handle->list);
+    BI_LIST_INSERT_BEFORE(&service->handle_list, &p_handle->list);
 
     return p_handle;
 }
@@ -185,7 +185,7 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
     conn_handle->internal_msg.magic = 0;
 
     /* Remove node from handle list */
-    tfm_list_del_node(&conn_handle->list);
+    BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle);
@@ -232,14 +232,14 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
                                                  psa_signal_t signal)
 {
-    struct tfm_list_node_t *node, *head;
+    struct bi_list_node_t *node, *head;
     struct tfm_msg_body_t *tmp_msg, *msg = NULL;
 
     TFM_CORE_ASSERT(partition);
 
     head = &partition->msg_list;
 
-    if (tfm_list_is_empty(head)) {
+    if (BI_LIST_IS_EMPTY(head)) {
         return NULL;
     }
 
@@ -247,13 +247,13 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      * There may be multiple messages for this RoT Service signal, do not clear
      * partition mask until no remaining message. Search may be optimized.
      */
-    TFM_LIST_FOR_EACH(node, head) {
+    BI_LIST_FOR_EACH(node, head) {
         tmp_msg = TFM_GET_CONTAINER_PTR(node, struct tfm_msg_body_t, msg_node);
         if (tmp_msg->service->service_db->signal == signal && msg) {
             return msg;
         } else if (tmp_msg->service->service_db->signal == signal) {
             msg = tmp_msg;
-            tfm_list_del_node(node);
+            BI_LIST_REMOVE_NODE(node);
         }
     }
 
@@ -559,7 +559,7 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     TFM_CORE_ASSERT(msg);
 
     /* Add message to partition message list tail */
-    tfm_list_add_tail(&partition->msg_list, &msg->msg_node);
+    BI_LIST_INSERT_BEFORE(&partition->msg_list, &msg->msg_node);
 
     /* Messages put. Update signals */
     partition->signals_asserted |= service->service_db->signal;
@@ -692,7 +692,7 @@ uint32_t tfm_spm_init(void)
         }
 
         tfm_event_init(&partition->event);
-        tfm_list_init(&partition->msg_list);
+        BI_LIST_INIT_NODE(&partition->msg_list);
 
         pth = &partition->sp_thread;
         if (!pth) {
@@ -730,7 +730,7 @@ uint32_t tfm_spm_init(void)
         service[i].partition = partition;
         partition->signals_allowed |= service[i].service_db->signal;
 
-        tfm_list_init(&service[i].handle_list);
+        BI_LIST_INIT_NODE(&service[i].handle_list);
     }
 
     /*

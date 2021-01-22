@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
-#include "tfm_list.h"
+#include "ffm/lists.h"
 #include "tfm_wait.h"
 #include "tfm_secure_api.h"
 #include "tfm_thread.h"
@@ -74,7 +74,7 @@ struct tfm_msg_body_t {
                                         * client calls in multi-core topology
                                         */
 #endif
-    struct tfm_list_node_t msg_node;   /* For list operators             */
+    struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
 /**
@@ -107,7 +107,7 @@ struct partition_t {
     void *p_metadata;
     struct tfm_core_thread_t sp_thread;
     struct tfm_event_t event;
-    struct tfm_list_node_t msg_list;
+    struct bi_list_node_t msg_list;
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
@@ -140,8 +140,8 @@ struct tfm_spm_service_t {
                                               * Point to secure partition
                                               * data
                                               */
-    struct tfm_list_node_t handle_list;      /* Service handle list          */
-    struct tfm_list_node_t list;             /* For list operation           */
+    struct bi_list_node_t handle_list;       /* Service handle list          */
+    struct bi_list_node_t list;              /* For list operation           */
 };
 
 /* RoT connection handle list */
@@ -162,7 +162,7 @@ struct tfm_conn_handle_t {
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
     struct tfm_spm_service_t *service;  /* RoT service pointer                */
-    struct tfm_list_node_t list;        /* list node                          */
+    struct bi_list_node_t list;         /* list node                          */
 };
 
 enum tfm_memory_access_e {
