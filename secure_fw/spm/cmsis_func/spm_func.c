@@ -1208,14 +1208,11 @@ void tfm_spm_psa_eoi(uint32_t *svc_args)
  * In case of an error in the error handling, a non-zero value have to be
  * returned.
  */
-static void tfm_spm_partition_err_handler(
-    const struct spm_partition_desc_t *partition,
-    int32_t err_code)
+static void tfm_spm_partition_err_handler(const uint32_t idx, int32_t errcode)
 {
-    (void)err_code;
+    (void)errcode;
 
-    tfm_spm_partition_set_state(partition->static_data->partition_id,
-                                SPM_PARTITION_STATE_CLOSED);
+    tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_CLOSED);
 }
 
 enum spm_err_t tfm_spm_partition_init(void)
@@ -1255,7 +1252,7 @@ enum spm_err_t tfm_spm_partition_init(void)
             if (res == TFM_SUCCESS) {
                 tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             } else {
-                tfm_spm_partition_err_handler(part, res);
+                tfm_spm_partition_err_handler(idx, res);
                 fail_cnt++;
             }
         }
