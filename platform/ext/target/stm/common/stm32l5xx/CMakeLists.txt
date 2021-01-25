@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -82,12 +83,16 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_gtzc.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system>
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng_ex.c
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pka.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
 )
 
 target_compile_options(platform_s
@@ -164,6 +169,9 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_gtzc.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pka.c
     )
 
     target_compile_options(platform_bl2

@@ -20,8 +20,9 @@ accelerators.
 
 In order to use a cryptographic accelerator, a platform must set
 ``CRYPTO_HW_ACCELERATOR_TYPE`` in preload.cmake. This option maps directly to
-the subdirectories of the accelerator directory. Currently the only available
-accelerator is the CryptoCell ``cc312``.
+the subdirectories of the accelerator directory. Currently available
+accelerators are : the CryptoCell ``cc312``, the STMicroelectronics accelerator
+``stm`` .
 
 A minimal API is exposed to interact with accelerators, the details of this api
 are in ``accelerator/interface/crypto_hw.h``. Implementation of the API is
