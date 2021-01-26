@@ -256,9 +256,24 @@
       "pid": 271,
       "linker_pattern": {
         "library_list": [
-           "*tfm_*partition_fwu*"
+          "*tfm_*partition_fwu*"
          ]
       }
-    }
+    },
+    {
+      "name": "TFM FFM11 Partition Service",
+      "short_name": "TFM_SP_FFM11",
+      "manifest": "secure_fw/partitions/tfm_ffm11_partition/tfm_ffm11_partition.yaml",
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_FFM11",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 272,
+      "linker_pattern": {
+        "library_list": [
+          "*tfm_*partition_ffm11.*"
+        ]
+      }
+    },
   ]
 }
