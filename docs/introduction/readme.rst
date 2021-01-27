@@ -150,7 +150,7 @@ Platforms supported
 
     - Cortex-M23 system:
 
-        - `FPGA image loaded on MPS2 board (AN519, AN539).
+        - `FPGA image loaded on MPS2 board (AN519).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
         - `M2351.
           <https://www.nuvoton.com/products/iot-solution/iot-platform/numaker-pfm-m2351/>`_
@@ -206,4 +206,4 @@ version numbers.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

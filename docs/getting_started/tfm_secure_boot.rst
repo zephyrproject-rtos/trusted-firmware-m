@@ -232,8 +232,6 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN519               | Yes             | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| AN539               | Yes             | Yes           | Yes      | Yes            | No           |
-+---------------------+-----------------+---------------+----------+----------------+--------------+
 | FVP_SSE300_MPS2     | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | FVP_SSE300_MPS3     | No              | Yes           | Yes      | Yes            | No           |
@@ -793,4 +791,4 @@ RAM loading is enabled, notice that image with higher version number
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
