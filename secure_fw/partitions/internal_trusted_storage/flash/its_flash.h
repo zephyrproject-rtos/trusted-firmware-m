@@ -16,10 +16,7 @@
 #ifdef ITS_RAM_FS
 /* RAM FS: use a buffer to emulate storage in RAM */
 #include "its_flash_ram.h"
-#ifndef ITS_RAM_FS_SIZE
-#error "ITS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
-#endif
-static uint8_t its_block_data[ITS_RAM_FS_SIZE];
+extern uint8_t its_block_data[];
 #define ITS_FLASH_DEV its_block_data
 #define ITS_FLASH_ALIGNMENT TFM_HAL_ITS_PROGRAM_UNIT
 #define ITS_FLASH_OPS its_flash_fs_ops_ram
@@ -29,16 +26,7 @@ static uint8_t its_block_data[ITS_RAM_FS_SIZE];
  * shot, so no filesystem data alignment is required.
  */
 #include "its_flash_nand.h"
-#ifndef ITS_FLASH_NAND_BUF_SIZE
-#error "ITS_FLASH_NAND_BUF_SIZE must be defined by the target in flash_layout.h"
-#endif
-static uint8_t its_write_buf[ITS_FLASH_NAND_BUF_SIZE];
-static struct its_flash_nand_dev_t its_flash_nand_dev = {
-    .driver = &TFM_HAL_ITS_FLASH_DRIVER,
-    .buf_block_id = ITS_BLOCK_INVALID_ID,
-    .write_buf = its_write_buf,
-    .buf_size = sizeof(its_write_buf),
-};
+extern struct its_flash_nand_dev_t its_flash_nand_dev;
 #define ITS_FLASH_DEV its_flash_nand_dev
 #define ITS_FLASH_ALIGNMENT 1
 #define ITS_FLASH_OPS its_flash_fs_ops_nand
@@ -58,10 +46,7 @@ static struct its_flash_nand_dev_t its_flash_nand_dev = {
 #ifdef PS_RAM_FS
 /* RAM FS: use a buffer to emulate storage in RAM */
 #include "its_flash_ram.h"
-#ifndef PS_RAM_FS_SIZE
-#error "PS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
-#endif
-static uint8_t ps_block_data[PS_RAM_FS_SIZE];
+extern uint8_t ps_block_data[];
 #define PS_FLASH_DEV ps_block_data
 #define PS_FLASH_ALIGNMENT TFM_HAL_PS_PROGRAM_UNIT
 #define PS_FLASH_OPS its_flash_fs_ops_ram
@@ -71,16 +56,7 @@ static uint8_t ps_block_data[PS_RAM_FS_SIZE];
  * shot, so no filesystem data alignment is required.
  */
 #include "its_flash_nand.h"
-#ifndef PS_FLASH_NAND_BUF_SIZE
-#error "PS_FLASH_NAND_BUF_SIZE must be defined by the target in flash_layout.h"
-#endif
-static uint8_t ps_write_buf[PS_FLASH_NAND_BUF_SIZE];
-static struct its_flash_nand_dev_t ps_flash_nand_dev = {
-    .driver = &TFM_HAL_PS_FLASH_DRIVER,
-    .buf_block_id = ITS_BLOCK_INVALID_ID,
-    .write_buf = ps_write_buf,
-    .buf_size = sizeof(ps_write_buf),
-};
+extern struct its_flash_nand_dev_t ps_flash_nand_dev;
 #define PS_FLASH_DEV ps_flash_nand_dev
 #define PS_FLASH_ALIGNMENT 1
 #define PS_FLASH_OPS its_flash_fs_ops_nand
