@@ -34,4 +34,16 @@
 extern struct uart_pl011_dev_t UART0_PL011_DEV;
 #endif
 
+/** ARM MHU1 SE to Host driver structures */
+#ifdef MHU1_SE_TO_HOST
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV;
+#endif
+
+/** ARM MHU1 Host to SE driver structures */
+#ifdef MHU1_HOST_TO_SE
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV;
+#endif
+
 #endif  /* __DEVICE_DEFINITION_H__ */

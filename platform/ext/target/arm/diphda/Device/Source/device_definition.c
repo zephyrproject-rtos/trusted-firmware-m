@@ -31,3 +31,13 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA = {
 struct uart_pl011_dev_t UART0_PL011_DEV = {&(UART0_PL011_DEV_CFG),
                                            &(UART0_PL011_DEV_DATA)};
 #endif
+
+#ifdef MHU1_SE_TO_HOST
+struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV = {(DIPHDA_SEH_1_SENDER_BASE),
+                                             (MHU_V2_X_SENDER_FRAME)};
+#endif
+
+#ifdef MHU1_HOST_TO_SE
+struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV = {(DIPHDA_HSE_1_RECEIVER_BASE),
+                                             (MHU_V2_X_RECEIVER_FRAME)};
+#endif

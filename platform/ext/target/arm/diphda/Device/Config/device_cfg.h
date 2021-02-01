@@ -23,4 +23,10 @@
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
 
+/*ARM MHU1 SE to Host*/
+#define MHU1_SE_TO_HOST
+
+/*ARM MHU1 Host to SE*/
+#define MHU1_HOST_TO_SE
+
 #endif  /* __DEVICE_CFG_H__ */

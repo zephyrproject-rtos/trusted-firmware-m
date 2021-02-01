@@ -36,6 +36,8 @@ target_add_scatter_file(bl2
 
 #========================= Platform Secure ====================================#
 
+add_subdirectory(openamp)
+
 target_include_directories(platform_s
     PUBLIC
         .
@@ -43,7 +45,6 @@ target_include_directories(platform_s
         CMSIS_Driver/Config
         Device/Config
         Device/Include
-        mailbox
         Native_Driver
         partition
         services/include
@@ -55,8 +56,8 @@ target_sources(platform_s
         CMSIS_Driver/Driver_USART.c
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
-        mailbox/platform_spe_mailbox.c
         Native_Driver/uart_pl011_drv.c
+        Native_Driver/mhu_v2_x.c
         spm_hal.c
         tfm_hal_isolation.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
