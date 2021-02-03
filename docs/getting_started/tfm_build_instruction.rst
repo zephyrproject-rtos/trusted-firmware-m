@@ -19,8 +19,11 @@ Getting the source-code
     cd <base folder>
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
 
-Dependency management is now handled by cmake. If you wish to alter this
-behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
+To simplify documentation commands, the new created repository under
+``trusted-firmware-m`` would be referenced as ``<TF-M base folder>`` and
+its parent, the ``<base folder>``. Dependency management is now handled by
+cmake. If you wish to alter this behaviour, see
+:ref:`docs/getting_started/tfm_build_instruction:Manual
 dependency management`
 
 .. Note::
@@ -257,8 +260,7 @@ Example: building TF-M for AN521 platform using GCC:
 ====================================================
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
     cmake --build cmake_build -- install
 
@@ -266,8 +268,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
@@ -292,8 +293,7 @@ features are enabled.
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
@@ -301,8 +301,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
@@ -330,8 +329,7 @@ tests for the Crypto service:
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
     cmake --build cmake_build -- install
 
@@ -339,8 +337,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
@@ -358,8 +355,7 @@ compliance test. This support is controlled by the TEST_PSA_API variable:
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
@@ -367,8 +363,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
@@ -545,8 +540,7 @@ With new cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     cmake --build cmake_build -- install
 
@@ -554,8 +548,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls

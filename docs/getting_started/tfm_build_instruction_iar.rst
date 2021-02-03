@@ -27,8 +27,7 @@ Example: building TF-M for AN521 platform using IAR:
 ====================================================
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_IARARM.cmake
     cmake --build cmake_build -- install
 
@@ -36,8 +35,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_IARARM.cmake
@@ -48,8 +46,7 @@ Regression Tests for the AN521 target platform
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_IARARM.cmake -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
@@ -57,8 +54,7 @@ Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_IARARM.cmake -DTEST_S=ON -DTEST_NS=ON
