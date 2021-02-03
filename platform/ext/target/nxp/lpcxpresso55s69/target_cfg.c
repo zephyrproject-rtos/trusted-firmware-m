@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +23,7 @@
 #include "target_cfg.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_log.h"
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+#include "region.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
