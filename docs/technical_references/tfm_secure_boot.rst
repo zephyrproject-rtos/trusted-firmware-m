@@ -307,7 +307,7 @@ compile time switches:
 
 Example of how to provide the secure image minimum version::
 
-    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
 
 ********************
 Signature algorithms
@@ -425,7 +425,7 @@ images.
 The version number of the image (single image boot) can manually be passed in
 through the command line in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DIMAGE_VERSION_S=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DIMAGE_VERSION_S=1.2.3+4 ..
 
 Alternatively, the version number can be less specific (e.g 1, 1.2, or 1.2.3),
 where the missing numbers are automatically set to zero. The image version
@@ -459,7 +459,7 @@ and its value should always be increased if a security flaw was fixed in the
 current image version. The value of the security counter (single image boot) can
 be specified at build time in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DSECURITY_COUNTER_S=42 ../
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DSECURITY_COUNTER_S=42 ../
 
 The security counter can be independent from the image version, but not
 necessarily. Alternatively, if it is not specified at build time with the
