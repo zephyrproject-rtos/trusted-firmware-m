@@ -83,7 +83,7 @@ It is assumed that the reader is familiar with specifications can be found at
 The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
 good understanding of the v8-M architecture is also necessary. A good place to
 get started with ARMv8-M is
-`developer.arm.com <https://developer.arm.com/technologies/trustzone>`__.
+`developer.arm.com <https://developer.arm.com/architectures/cpu-architecture/m-profile>`__.
 
 **********************
 Really getting started
