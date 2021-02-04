@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,62 @@ struct platform_data_t tfm_peripheral_timer0 = {
         PPC_SP_APB_PPC0,
         CMSDK_TIMER0_APB_PPC_POS
 };
+
+#ifdef PSA_API_TEST_IPC
+
+/* Below data structure are only used for PSA FF tests, and this pattern is
+ * definitely not to be followed for real life use cases, as it can break
+ * security.
+ */
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_UART_REGION = {
+        MUSCA_S1_UART1_NS_BASE,
+        MUSCA_S1_UART1_NS_BASE + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
+        MUSCA_S1_CMSDK_WATCHDOG_S_BASE,
+        MUSCA_S1_CMSDK_WATCHDOG_S_BASE + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+#define FF_TEST_NVMEM_REGION_START 0x0A1EE100
+#define FF_TEST_NVMEM_REGION_END 0x0A1EE4FF
+#define FF_TEST_SERVER_PARTITION_MMIO_START 0x0A1EE500
+#define FF_TEST_SERVER_PARTITION_MMIO_END 0x0A1EE600
+#define FF_TEST_DRIVER_PARTITION_MMIO_START 0x0A1EE700
+#define FF_TEST_DRIVER_PARTITION_MMIO_END 0x0A1EE800
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+#endif
 
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
@@ -265,6 +321,10 @@ enum tfm_plat_err_t nvic_interrupt_enable()
     }
 
     NVIC_EnableIRQ(S_PPC_COMBINED_IRQn);
+
+#ifdef PSA_API_TEST_IPC
+    NVIC_EnableIRQ(FF_TEST_UART_IRQ);
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
