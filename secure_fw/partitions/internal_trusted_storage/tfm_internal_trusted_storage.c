@@ -148,8 +148,14 @@ psa_status_t tfm_its_init(void)
         return status;
     }
 
-    /* Initialise the ITS context */
-    status = its_flash_fs_prepare(&fs_ctx_its, &fs_cfg_its, &ITS_FLASH_OPS);
+    /* Initialise the ITS filesystem context */
+    status = its_flash_fs_init_ctx(&fs_ctx_its, &fs_cfg_its, &ITS_FLASH_OPS);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Prepare the ITS filesystem */
+    status = its_flash_fs_prepare(&fs_ctx_its);
 #ifdef ITS_CREATE_FLASH_LAYOUT
     /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
      * create a ITS flash layout. ITS service will generate an empty and valid
@@ -171,8 +177,8 @@ psa_status_t tfm_its_init(void)
             return status;
         }
 
-        /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx_its, &fs_cfg_its, &ITS_FLASH_OPS);
+        /* Attempt to prepare again */
+        status = its_flash_fs_prepare(&fs_ctx_its);
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
@@ -182,8 +188,14 @@ psa_status_t tfm_its_init(void)
         return status;
     }
 
-    /* Initialise the PS context */
-    status = its_flash_fs_prepare(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
+    /* Initialise the PS filesystem context */
+    status = its_flash_fs_init_ctx(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Prepare the PS filesystem */
+    status = its_flash_fs_prepare(&fs_ctx_ps);
 #ifdef PS_CREATE_FLASH_LAYOUT
     /* If PS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
      * create a PS flash layout. PS service will generate an empty and valid
@@ -205,8 +217,8 @@ psa_status_t tfm_its_init(void)
             return status;
         }
 
-        /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
+        /* Attempt to prepare again */
+        status = its_flash_fs_prepare(&fs_ctx_ps);
     }
 #endif /* PS_CREATE_FLASH_LAYOUT */
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */

@@ -176,20 +176,31 @@ struct its_file_info_t {
 };
 
 /**
- * \brief Prepares the filesystem to accept operations on the files.
+ * \brief Initialises the filesystem context. Must be called successfully before
+ *        any other filesystem API is called.
  *
- * \param[in,out] fs_ctx      Filesystem context to prepare. Must have been
- *                            initialised by the caller.
- * \param[in]     fs_cfg      Filesystem configuration to associate with the
- *                            context.
- * \param[in]     fs_ops      Filesystem flash operations to associate with the
- *                            context.
+ * \param[in,out] fs_ctx  Filesystem context to initialise. Must have been
+ *                        allocated by the caller.
+ * \param[in]     fs_cfg  Filesystem configuration to associate with the
+ *                        context.
+ * \param[in]     fs_ops  Filesystem flash operations to associate with the
+ *                        context.
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx,
-                                  const struct its_flash_fs_config_t *fs_cfg,
-                                  const struct its_flash_fs_ops_t *fs_ops);
+psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
+                                   const struct its_flash_fs_config_t *fs_cfg,
+                                   const struct its_flash_fs_ops_t *fs_ops);
+
+/**
+ * \brief Prepares the filesystem to accept operations on the files.
+ *
+ * \param[in,out] fs_ctx  Filesystem context to prepare. Must have been
+ *                        initialised by its_flash_fs_init_ctx().
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx);
 
 /**
  * \brief Wipes all files from the filesystem.

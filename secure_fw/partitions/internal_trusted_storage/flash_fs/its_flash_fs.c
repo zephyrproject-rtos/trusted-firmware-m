@@ -101,10 +101,6 @@ static psa_status_t its_flash_fs_validate_config(
 {
     psa_status_t ret = PSA_SUCCESS;
 
-    if (!cfg) {
-        return PSA_ERROR_STORAGE_FAILURE;
-    }
-
     /* The minimum number of blocks is 2. In this case, metadata and data are
      * stored in the same physical block, and the other block is required for
      * power failure safe operation.
@@ -113,14 +109,14 @@ static psa_status_t its_flash_fs_validate_config(
      * blocks is 4 (2 metadata block + 2 data blocks).
      */
     if ((cfg->num_blocks < 2) || (cfg->num_blocks == 3)) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
+        ret = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (cfg->num_blocks == 2) {
         /* Metadata and data are stored in the same physical block */
         if (cfg->max_file_size >
                         cfg->block_size - its_flash_fs_all_metadata_size(cfg)) {
-            ret = PSA_ERROR_STORAGE_FAILURE;
+            ret = PSA_ERROR_INVALID_ARGUMENT;
         }
     }
 
@@ -130,28 +126,31 @@ static psa_status_t its_flash_fs_validate_config(
      * be created, at least, when the ITS flash area is empty.
      */
     if (cfg->max_file_size > cfg->block_size) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
+        ret = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Metadata must fit in a flash block */
     if (its_flash_fs_all_metadata_size(cfg) > cfg->block_size) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
+        ret = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Only an erase value of OxFF (the typical value) is currently supported */
     if (cfg->erase_val != 0xFFU) {
-        ret = PSA_ERROR_STORAGE_FAILURE;
+        ret = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     return ret;
 }
 
-psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx,
-                                  const struct its_flash_fs_config_t *fs_cfg,
-                                  const struct its_flash_fs_ops_t *fs_ops)
+psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
+                                   const struct its_flash_fs_config_t *fs_cfg,
+                                   const struct its_flash_fs_ops_t *fs_ops)
 {
     psa_status_t err;
-    uint32_t idx;
+
+    if (!fs_ctx || !fs_cfg || !fs_ops) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     /* Check for valid filesystem configuration */
     err = its_flash_fs_validate_config(fs_cfg);
@@ -159,9 +158,20 @@ psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx,
         return err;
     }
 
+    /* Zero the context */
+    tfm_memset(fs_ctx, 0, sizeof(*fs_ctx));
+
     /* Associate the filesystem config and operations with the context */
     fs_ctx->cfg = fs_cfg;
     fs_ctx->ops = fs_ops;
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx)
+{
+    psa_status_t err;
+    uint32_t idx;
 
     /* Initialize metadata block with the valid/active metablock */
     err = its_flash_fs_mblock_init(fs_ctx);
