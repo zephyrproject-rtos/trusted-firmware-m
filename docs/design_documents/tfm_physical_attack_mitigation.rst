@@ -396,7 +396,7 @@ harden it against physical attacks.
   enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void);
   enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  uint32_t partition_idx,
-                 const struct tfm_spm_partition_platform_data_t *platform_data);
+                 const struct platform_data_t *platform_data);
   enum tfm_hal_status_t tfm_hal_mpu_update_partition_boundary(uintptr_t start,
                                                               uintptr_t end);
 

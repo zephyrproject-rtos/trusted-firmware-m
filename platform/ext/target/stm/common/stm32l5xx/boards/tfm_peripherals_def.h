@@ -8,7 +8,7 @@
 #ifndef __TFM_PERIPHERALS_DEF_H__
 #define __TFM_PERIPHERALS_DEF_H__
 
-struct tfm_spm_partition_platform_data_t;
+struct platform_data_t;
 
 
 

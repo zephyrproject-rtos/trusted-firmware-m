@@ -119,7 +119,7 @@ struct spm_partition_desc_t {
     struct spm_partition_runtime_data_t runtime_data;
     const struct spm_partition_static_data_t *static_data;
     /** A list of platform_data pointers */
-    const struct tfm_spm_partition_platform_data_t **platform_data_list;
+    const struct platform_data_t **platform_data_list;
 };
 
 struct spm_partition_db_t {

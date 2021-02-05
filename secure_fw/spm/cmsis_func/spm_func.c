@@ -1222,7 +1222,7 @@ enum spm_err_t tfm_spm_partition_init(void)
     int32_t args[4] = {0};
     int32_t fail_cnt = 0;
     uint32_t idx;
-    const struct tfm_spm_partition_platform_data_t **platform_data_p;
+    const struct platform_data_t **platform_data_p;
 
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {

@@ -30,7 +30,7 @@ static uint32_t periph_num_count = 0;
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
-                  const struct tfm_spm_partition_platform_data_t *platform_data)
+                  const struct platform_data_t *platform_data)
 {
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;

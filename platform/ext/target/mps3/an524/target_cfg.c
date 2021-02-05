@@ -92,7 +92,7 @@ extern ARM_DRIVER_PPC Driver_APB_PPCEXP2;
  */
 #define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         UART1_BASE_S,
         UART1_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP2,
@@ -119,7 +119,7 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
 
 #define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         CMSDK_TIMER0_BASE_S,
         CMSDK_TIMER1_BASE_S - 1,
         PPC_SP_APB_PPC0,

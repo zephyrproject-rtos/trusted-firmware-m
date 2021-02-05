@@ -92,6 +92,7 @@ struct partition_static_t {
     size_t stack_size;                  /* Stack size of the partition      */
     uintptr_t heap_base_addr;           /* Heap base of the partition       */
     size_t heap_size;                   /* Heap size of the partition       */
+    uintptr_t platform_data;            /* Platform specific data           */
     uint32_t ndeps;                     /* Numbers of depended services     */
     uint32_t *deps;                     /* Pointer to dependency arrays     */
 };
@@ -112,7 +113,6 @@ struct partition_t {
     uint32_t signals_waiting;
     uint32_t signals_asserted;
     /** A list of platform_data pointers */
-    const struct tfm_spm_partition_platform_data_t **platform_data_list;
     const struct tfm_spm_partition_memory_data_t *memory_data;
 };
 

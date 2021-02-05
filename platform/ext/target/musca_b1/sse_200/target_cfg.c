@@ -103,7 +103,7 @@ extern ARM_DRIVER_PPC Driver_APB_PPCEXP0, Driver_APB_PPCEXP1;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         MUSCA_B1_UART1_NS_BASE,
         MUSCA_B1_UART1_NS_BASE + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
@@ -130,7 +130,7 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
 #define PPC_BANK_COUNT \
     (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         MUSCA_B1_CMSDK_TIMER0_S_BASE,
         MUSCA_B1_CMSDK_TIMER1_S_BASE - 1,
         PPC_SP_APB_PPC0,
@@ -144,7 +144,7 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
  * security.
  */
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_UART_REGION = {
         MUSCA_B1_UART1_NS_BASE,
         MUSCA_B1_UART1_NS_BASE + 0xFFF,
@@ -152,7 +152,7 @@ struct tfm_spm_partition_platform_data_t
         -1
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
         MUSCA_B1_CMSDK_WATCHDOG_S_BASE,
         MUSCA_B1_CMSDK_WATCHDOG_S_BASE + 0xFFF,
@@ -167,7 +167,7 @@ struct tfm_spm_partition_platform_data_t
 #define FF_TEST_DRIVER_PARTITION_MMIO_START   0x3003FE00
 #define FF_TEST_DRIVER_PARTITION_MMIO_END     0x3003FF00
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_NVMEM_REGION = {
         FF_TEST_NVMEM_REGION_START,
         FF_TEST_NVMEM_REGION_END,
@@ -175,7 +175,7 @@ struct tfm_spm_partition_platform_data_t
         -1
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
         FF_TEST_SERVER_PARTITION_MMIO_START,
         FF_TEST_SERVER_PARTITION_MMIO_END,
@@ -183,7 +183,7 @@ struct tfm_spm_partition_platform_data_t
         -1
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
         FF_TEST_DRIVER_PARTITION_MMIO_START,
         FF_TEST_DRIVER_PARTITION_MMIO_END,

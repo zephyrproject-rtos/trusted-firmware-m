@@ -29,7 +29,7 @@
  * platform in the header file tfm_peripherals_def.h. For details on this, see
  * the documentation of that file.
  */
-struct tfm_spm_partition_platform_data_t;
+struct platform_data_t;
 
 enum irq_target_state_t {
     TFM_IRQ_TARGET_STATE_SECURE,
@@ -84,7 +84,7 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
  */
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  uint32_t partition_idx,
-                 const struct tfm_spm_partition_platform_data_t *platform_data);
+                 const struct platform_data_t *platform_data);
 /**
  * \brief Configures the system debug properties.
  *        The default configuration of this function should disable secure debug

@@ -95,6 +95,36 @@ static uint32_t dependencies_{{partition.manifest.name}}[] =
 
     {% endif %}
 {% endfor %}
+
+/**************************************************************************/
+/** The platform data of the partition list */
+/**************************************************************************/
+{% for partition in partitions %}
+    {% if partition.manifest.mmio_regions %}
+        {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
+        {% endif %}
+const struct platform_data_t *
+    platform_data_list_{{partition.manifest.name}}[] =
+{
+        {% for region in partition.manifest.mmio_regions %}
+            {% if region.conditional %}
+#ifdef {{region.conditional}}
+            {% endif %}
+    {{region.name}},
+            {% if region.conditional %}
+#endif /* {{region.conditional}} */
+            {% endif %}
+        {% endfor %}
+    NULL
+};
+        {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
+        {% endif %}
+
+    {% endif %}
+{% endfor %}
+
 /**************************************************************************/
 /** The static data of the partition list */
 /**************************************************************************/
@@ -142,6 +172,11 @@ const struct partition_static_t static_data_list[] =
         .entry                = {{partition.manifest.entry_point}},
         .stack_base_addr      = 0,
         .stack_size           = 0,
+    {% if partition.manifest.mmio_regions %}
+        .platform_data        = (uintptr_t)platform_data_list_{{partition.manifest.name}},
+    {% else %}{# if partition.manifest.mmio_regions #}
+        .platform_data        = 0,
+    {% endif %}{# if partition.manifest.mmio_regions #}
         .ndeps                = {{partition.manifest.dependencies | length()}},
     {% if partition.manifest.dependencies %}
         .deps                 = dependencies_{{partition.manifest.name}},
@@ -149,54 +184,6 @@ const struct partition_static_t static_data_list[] =
         .deps                 = NULL,
     {% endif %}
     {{'},'}}
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
-
-{% endfor %}
-};
-
-/**************************************************************************/
-/** The platform data of the partition list */
-/**************************************************************************/
-{% for partition in partitions %}
-    {% if partition.manifest.mmio_regions %}
-        {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-        {% endif %}
-const struct tfm_spm_partition_platform_data_t *
-    platform_data_list_{{partition.manifest.name}}[] =
-{
-        {% for region in partition.manifest.mmio_regions %}
-            {% if region.conditional %}
-#ifdef {{region.conditional}}
-            {% endif %}
-    {{region.name}},
-            {% if region.conditional %}
-#endif /* {{region.conditional}} */
-            {% endif %}
-        {% endfor %}
-    NULL
-};
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-        {% endif %}
-
-    {% endif %}
-{% endfor %}
-const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
-{
-    NULL,
-
-{% for partition in partitions %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
-    {% if partition.manifest.mmio_regions %}
-    platform_data_list_{{partition.manifest.name}},
-    {% else %}{# if partition.manifest.mmio_regions #}
-    NULL,
-    {% endif %}{# if partition.manifest.mmio_regions #}
     {% if partition.attr.conditional %}
 #endif /* {{partition.attr.conditional}} */
     {% endif %}

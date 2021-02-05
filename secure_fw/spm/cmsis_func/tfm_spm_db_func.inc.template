@@ -179,7 +179,7 @@ const struct spm_partition_static_data_t static_data_list[] =
         {% if partition.attr.conditional %}
 #ifdef {{partition.attr.conditional}}
         {% endif %}
-const struct tfm_spm_partition_platform_data_t *
+const struct platform_data_t *
     platform_data_list_{{partition.manifest.name}}[] =
 {
         {% for region in partition.manifest.mmio_regions %}
@@ -199,7 +199,7 @@ const struct tfm_spm_partition_platform_data_t *
 
     {% endif %}
 {% endfor %}
-const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
+const struct platform_data_t **platform_data_list_list[] =
 {
     NULL,
     NULL,

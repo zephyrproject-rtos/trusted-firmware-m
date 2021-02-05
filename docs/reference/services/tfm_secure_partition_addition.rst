@@ -210,7 +210,7 @@ TF-M uses the below structure to indicate a peripheral memory.
 
 .. code-block:: c
 
-  struct tfm_spm_partition_platform_data_t {
+  struct platform_data_t {
     uint32_t periph_start;
     uint32_t periph_limit;
     int16_t periph_ppc_bank;
@@ -226,7 +226,7 @@ Here is a example for it:
 
 .. code-block:: c
 
-   struct tfm_spm_partition_platform_data_t tfm_peripheral_A;
+   struct platform_data_t tfm_peripheral_A;
    #define TFM_PERIPHERAL_A                 (&tfm_peripheral_A)
 
 linker_pattern

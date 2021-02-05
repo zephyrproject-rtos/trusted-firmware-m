@@ -112,14 +112,14 @@ static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
     (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
 
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         MUSCA_S1_UART1_NS_BASE,
         MUSCA_S1_UART1_NS_BASE + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         MUSCA_S1_CMSDK_TIMER0_S_BASE,
         MUSCA_S1_CMSDK_TIMER1_S_BASE - 1,
         PPC_SP_APB_PPC0,

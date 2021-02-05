@@ -95,21 +95,21 @@ extern DRIVER_PPC_SSE123 Driver_PPC_SSE123_APB_EXP3;
  */
 #define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         UART0_BASE_NS,
         UART0_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io = {
+struct platform_data_t tfm_peripheral_fpga_io = {
         MPS2_IO_FPGAIO_BASE_S,
         MPS2_IO_FPGAIO_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP3,
         FPGA_IO_APB_PPCEXP3_POS
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         SYSTEM_TIMER0_BASE_S,
         SYSTEM_TIMER1_BASE_S - 1,
         PPC_SP_APB_PPC,

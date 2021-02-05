@@ -640,7 +640,7 @@ uint32_t tfm_spm_init(void)
     uint32_t i, j, num;
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
-    const struct tfm_spm_partition_platform_data_t **platform_data_p;
+    const struct platform_data_t **platform_data_p;
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -666,7 +666,8 @@ uint32_t tfm_spm_init(void)
             continue;
         }
 
-        platform_data_p = partition->platform_data_list;
+        platform_data_p =
+            (const struct platform_data_t **)partition->p_static->platform_data;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
                 if (tfm_spm_hal_configure_default_isolation(i,
@@ -1016,8 +1017,6 @@ enum spm_err_t tfm_spm_db_init(void)
 
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         g_spm_partition_db.partitions[i].p_static = &static_data_list[i];
-        g_spm_partition_db.partitions[i].platform_data_list =
-                                                     platform_data_list_list[i];
         g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
     }
     g_spm_partition_db.is_init = 1;
