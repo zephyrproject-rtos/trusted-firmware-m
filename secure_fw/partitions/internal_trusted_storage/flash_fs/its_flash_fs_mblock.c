@@ -151,18 +151,30 @@ static void its_mblock_swap_metablocks(struct its_flash_fs_ctx_t *fs_ctx)
 /**
  * \brief Finds the potential most recent valid metablock.
  *
- * \param[in] h_meta0  Header metadata of meta block 0
- * \param[in] h_meta1  Header metadata of meta block 1
+ * \param[in,out] fs_ctx   Filesystem context
+ * \param[in]     h_meta0  Header metadata of meta block 0
+ * \param[in]     h_meta1  Header metadata of meta block 1
  *
  * \return most recent metablock
  */
 static uint8_t its_mblock_latest_meta_block(
+                              struct its_flash_fs_ctx_t *fs_ctx,
                               const struct its_metadata_block_header_t *h_meta0,
                               const struct its_metadata_block_header_t *h_meta1)
 {
+    uint8_t rollover_val;
     uint8_t cur_meta;
     uint8_t meta0_swap_count = h_meta0->active_swap_count;
     uint8_t meta1_swap_count = h_meta1->active_swap_count;
+
+    /* If the flash erase value is 0x00, then a swap count of 0 is skipped and
+     * so the rollover value becomes 1 instead of 0.
+     */
+    if (fs_ctx->cfg->erase_val == 0x00U) {
+        rollover_val = 1;
+    } else {
+        rollover_val = 0;
+    }
 
     /* Logic: if the swap count is 0, then it has rolled over. The metadata
      * block with a swap count of 0 is the latest one, unless the other block
@@ -170,13 +182,15 @@ static uint8_t its_mblock_latest_meta_block(
      * previous update. In all other cases, the block with the highest swap
      * count is the latest one.
      */
-    if ((meta1_swap_count == 0) && (meta0_swap_count != 1)) {
+    if ((meta1_swap_count == rollover_val) &&
+        (meta0_swap_count != (rollover_val + 1))) {
         /* Metadata block 1 swap count has rolled over and metadata block 0
          * swap count has not, so block 1 is the latest.
          */
         cur_meta = ITS_METADATA_BLOCK1;
 
-    } else if ((meta0_swap_count == 0) && (meta1_swap_count != 1)) {
+    } else if ((meta0_swap_count == rollover_val) &&
+               (meta1_swap_count != (rollover_val + 1))) {
         /* Metadata block 0 swap count has rolled over and metadata block 1
          * swap count has not, so block 0 is the latest.
          */
@@ -572,13 +586,13 @@ static psa_status_t its_mblock_write_scratch_meta_header(
     psa_status_t err;
 
     /* Increment the swap count */
-    fs_ctx->meta_block_header.active_swap_count += 1;
+    fs_ctx->meta_block_header.active_swap_count++;
 
     err = its_mblock_validate_swap_count(fs_ctx,
                                    fs_ctx->meta_block_header.active_swap_count);
     if (err != PSA_SUCCESS) {
-        /* Reset the swap count to 0 */
-        fs_ctx->meta_block_header.active_swap_count = 0;
+        /* Increment again to avoid using the erase val as the swap count */
+        fs_ctx->meta_block_header.active_swap_count++;
     }
 
     /* Write the metadata block header */
@@ -701,7 +715,8 @@ static psa_status_t its_init_get_active_metablock(
      * need to find out which one is potentially latest metablock.
      */
     if (num_valid_meta_blocks > 1) {
-        cur_meta_block = its_mblock_latest_meta_block(&h_meta0, &h_meta1);
+        cur_meta_block = its_mblock_latest_meta_block(fs_ctx, &h_meta0,
+                                                      &h_meta1);
     } else if (num_valid_meta_blocks == 0) {
         return PSA_ERROR_GENERIC_ERROR;
     }
@@ -957,7 +972,8 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
         return err;
     }
 
-    fs_ctx->meta_block_header.active_swap_count = 0;
+    fs_ctx->meta_block_header.active_swap_count =
+                                    (fs_ctx->cfg->erase_val == 0x00U) ? 1U : 0U;
     fs_ctx->meta_block_header.scratch_dblock = its_init_scratch_dblock(fs_ctx);
     fs_ctx->meta_block_header.fs_version = ITS_SUPPORTED_VERSION;
     fs_ctx->scratch_metablock = ITS_METADATA_BLOCK1;

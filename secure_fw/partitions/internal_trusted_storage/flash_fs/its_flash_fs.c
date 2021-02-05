@@ -134,11 +134,6 @@ static psa_status_t its_flash_fs_validate_config(
         ret = PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Only an erase value of OxFF (the typical value) is currently supported */
-    if (cfg->erase_val != 0xFFU) {
-        ret = PSA_ERROR_INVALID_ARGUMENT;
-    }
-
     return ret;
 }
 
