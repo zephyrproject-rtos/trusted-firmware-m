@@ -649,11 +649,12 @@ uint32_t tfm_spm_init(void)
 
     /* Init partition first for it will be used when init service */
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+
         partition = &g_spm_partition_db.partitions[i];
 
-        if (!partition || !partition->memory_data || !partition->p_static) {
-            tfm_core_panic();
-        }
+        /* Skip NULL checking on statically reserved arraries. */
+        partition->p_static = &static_data_list[i];
+        partition->memory_data = &memory_data_list[i];
 
         if (!(partition->p_static->flags & SPM_PART_FLAG_IPC)) {
             tfm_core_panic();
@@ -1007,19 +1008,4 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
     default:
         *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
-}
-
-enum spm_err_t tfm_spm_db_init(void)
-{
-    uint32_t i;
-
-    /* This function initialises partition db */
-
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        g_spm_partition_db.partitions[i].p_static = &static_data_list[i];
-        g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
-    }
-    g_spm_partition_db.is_init = 1;
-
-    return SPM_ERR_OK;
 }

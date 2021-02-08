@@ -127,10 +127,6 @@ int main(void)
     /* Print the TF-M version */
     SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
 
-    if (tfm_spm_db_init() != SPM_ERR_OK) {
-        tfm_core_panic();
-    }
-
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
      * secure SVC or SecureFault. Do it before PSA API initialization.

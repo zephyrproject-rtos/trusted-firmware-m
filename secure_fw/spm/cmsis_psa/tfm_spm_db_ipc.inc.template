@@ -246,7 +246,6 @@ static struct partition_t partition_list [] =
 };
 
 struct spm_partition_db_t g_spm_partition_db = {
-    .is_init = 0,
     .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
     .partitions = partition_list,
 };

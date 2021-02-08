@@ -117,7 +117,6 @@ struct partition_t {
 };
 
 struct spm_partition_db_t {
-    uint32_t is_init;
     uint32_t partition_count;
     struct partition_t *partitions;
 };
@@ -169,13 +168,6 @@ enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RO = 1,
     TFM_MEMORY_ACCESS_RW = 2,
 };
-
-/**
- * \brief Initialize partition database
- *
- * \return Error code \ref spm_err_t
- */
-enum spm_err_t tfm_spm_db_init(void);
 
 /**
  * \brief                   Get the current partition mode.
