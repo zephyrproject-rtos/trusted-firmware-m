@@ -46,15 +46,6 @@
 
 #define TFM_MSG_MAGIC                   0x15154343
 
-enum spm_err_t {
-    SPM_ERR_OK = 0,
-    SPM_ERR_PARTITION_DB_NOT_INIT,
-    SPM_ERR_PARTITION_ALREADY_ACTIVE,
-    SPM_ERR_PARTITION_NOT_AVAILABLE,
-    SPM_ERR_INVALID_PARAMETER,
-    SPM_ERR_INVALID_CONFIG,
-};
-
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
