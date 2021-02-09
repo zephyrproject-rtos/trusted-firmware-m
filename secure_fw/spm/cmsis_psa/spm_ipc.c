@@ -45,8 +45,10 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
-void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
-                        uint32_t irq_line);
+void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
+                           psa_signal_t signal,
+                           uint32_t irq_line,
+                           psa_flih_func flih_func);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
@@ -323,7 +325,7 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
  * \retval "Not NULL"       Target partition context pointer,
  *                          \ref partition_t structures
  */
-static struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
+struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 {
     struct partition_t *p_part;
 
@@ -876,25 +878,53 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
     }
 }
 
-/**
- * \brief Sets signal to partition for Second-Level Interrupt Handling mode IRQ
- *
- * \param[in] partition_id      The ID of the partition which handles this IRQ
- * \param[in] signal            The signal associated with this IRQ
- * \param[in] irq_line          The number of the IRQ line
- *
- * \retval void                 Success.
- * \retval "Does not return"    Partition ID is invalid
- */
-void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
-                        uint32_t irq_line)
+__attribute__((naked))
+static void tfm_flih_deprivileged_handling(uint32_t p_ldinf,
+                                           psa_flih_func flih_func,
+                                           psa_signal_t signal)
 {
-    __disable_irq();
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_PREPARE_DEPRIV_FLIH));
+}
 
-    tfm_spm_hal_disable_irq(irq_line);
-    notify_with_signal(partition_id, signal);
+void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
+                           psa_signal_t signal,
+                           uint32_t irq_line,
+                           psa_flih_func flih_func)
+{
+    uint32_t pid;
+    psa_flih_result_t flih_result;
 
-    __enable_irq();
+    pid = p_ldinf->pid;
+
+    if (flih_func == NULL) {
+        /* SLIH Model Handling */
+        __disable_irq();
+        tfm_spm_hal_disable_irq(irq_line);
+        notify_with_signal(pid, signal);
+        __enable_irq();
+        return;
+    }
+
+    /* FLIH Model Handling */
+    if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
+                                                TFM_PARTITION_PRIVILEGED_MODE) {
+        flih_result = flih_func();
+        if (flih_result == PSA_FLIH_SIGNAL) {
+            __disable_irq();
+            notify_with_signal(pid, signal);
+            __enable_irq();
+        } else if (flih_result != PSA_FLIH_NO_SIGNAL) {
+            /*
+             * Nothing needed to do for PSA_FLIH_NO_SIGNAL
+             * But if the flih_result is invalid, should panic.
+             */
+            tfm_core_panic();
+        }
+    } else {
+        tfm_flih_deprivileged_handling((uint32_t)p_ldinf, flih_func, signal);
+    }
 }
 
 struct irq_load_info_t *get_irq_info_for_signal(

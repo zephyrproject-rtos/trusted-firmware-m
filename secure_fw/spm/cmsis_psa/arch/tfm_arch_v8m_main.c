@@ -97,7 +97,8 @@ __attribute__((naked)) void SecureFault_Handler(void)
 }
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
+                              uint32_t *psp);
 #pragma required = tfm_core_svc_handler
 #endif
 
@@ -105,10 +106,37 @@ __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
     "MRS     r0, MSP                        \n"
-    "MRS     r1, PSP                        \n"
-    "MOV     r2, lr                         \n"
-    "BL      tfm_core_svc_handler           \n"
-    "BX      r0                             \n"
+    "MOV     r1, lr                         \n"
+    "MRS     r2, PSP                        \n"
+    "SUB     sp, #8                         \n" /* For FLIH PID and signal */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "BL      tfm_core_svc_handler           \n" /* New EXC_RET returned */
+    "MOV     lr, r0                         \n"
+    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "AND     r0, #8                         \n" /* Mode bit */
+    "AND     r1, #8                         \n"
+    "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
+    "BGT     to_flih_func                   \n"
+    "BLT     from_flih_func                 \n"
+    "ADD     sp, #16                        \n"
+    "BX      lr                             \n"
+    "to_flih_func:                          \n"
+    "PUSH    {r4-r11}                       \n"
+    "LDR     r4, =0xFEF5EDA5                \n" /* clear r4-r11 */
+    "MOV     r5, r4                         \n"
+    "MOV     r6, r4                         \n"
+    "MOV     r7, r4                         \n"
+    "MOV     r8, r4                         \n"
+    "MOV     r9, r4                         \n"
+    "MOV     r10, r4                        \n"
+    "MOV     r11, r4                        \n"
+    "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
+    "BX      lr                             \n"
+    "from_flih_func:                        \n"
+    "ADD     sp, #24                        \n"
+    "POP     {r4-r11}                       \n"
+    "ADD     sp, #16                        \n"
+    "BX      lr                             \n"
     );
 }
 

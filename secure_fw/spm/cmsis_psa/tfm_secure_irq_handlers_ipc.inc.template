@@ -14,6 +14,7 @@
 #ifdef {{partition.attr.conditional}}
         {% endif %}
 #include "{{partition.header_file}}"
+extern struct partition_{{partition.manifest.name|lower}}_load_info_t {{partition.manifest.name|lower}}_load;
         {% for irq in partition.manifest.irqs %}
             {% set irq_data = namespace() %}
             {% if partition.manifest.psa_framework_version == 1.0 %}
@@ -31,15 +32,15 @@ void {{irq.source}}_Handler(void)
 {
             {% if irq.source %}
                 {% if partition.manifest.psa_framework_version == 1.1 and irq.handling == "FLIH" %}
-#error "FLIH is not supported yet!"
+                    {% set irq_data.flih =  irq.name|lower + "_flih" %}
                 {% else %}
-    tfm_set_irq_signal({{partition.manifest.name}}, {{irq_data.signal}}, {{irq.source}});
+                    {% set irq_data.flih =  "NULL" %}
                 {% endif %}
+    spm_interrupt_handler((struct partition_load_info_t *)&{{partition.manifest.name|lower}}_load, {{irq_data.signal}}, {{irq.source}}, {{irq_data.flih}});
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
             {% endif %}
 }
-
         {% endfor %}
         {% if partition.attr.conditional %}
 #endif /* {{partition.attr.conditional}} */

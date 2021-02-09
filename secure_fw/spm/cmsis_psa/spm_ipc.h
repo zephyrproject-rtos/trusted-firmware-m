@@ -211,6 +211,18 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
                                                  psa_signal_t signal);
 
+
+/**
+ * \brief                   Get partition by Partition ID.
+ *
+ * \param[in] partition_id  The Partition ID of the partition to get
+ *
+ * \retval NULL             Failed
+ * \retval "Not NULL"       Return the parttion context pointer
+ *                          \ref partition_t structures
+ */
+struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
+
 /**
  * \brief                   Get current running partition context.
  *
