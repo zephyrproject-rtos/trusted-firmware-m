@@ -20,8 +20,3 @@ void tfm_core_panic(void)
      */
     tfm_hal_system_reset();
 }
-
-bool tfm_is_one_bit_set(uint32_t n)
-{
-    return ((n && !(n & (n-1))) ? true : false);
-}

@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 
-#include "ffm/lists.h"
+#include "lists.h"
 
 #ifdef __cplusplus
 extern "C" {

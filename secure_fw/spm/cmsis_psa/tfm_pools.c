@@ -14,7 +14,7 @@
 #include "internal_errors.h"
 #include "cmsis_compiler.h"
 #include "utilities.h"
-#include "ffm/lists.h"
+#include "lists.h"
 #include "tfm_pools.h"
 #include "tfm_memory_utils.h"
 #include "tfm_core_utils.h"

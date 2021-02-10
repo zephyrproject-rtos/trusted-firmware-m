@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <arm_cmse.h>
+#include "bitops.h"
 #include "tfm_nspm.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
@@ -1087,7 +1088,7 @@ static int32_t get_irq_line_for_signal(int32_t partition_id,
 {
     size_t i;
 
-    if (!tfm_is_one_bit_set(signal)) {
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
         return -1;
     }
 

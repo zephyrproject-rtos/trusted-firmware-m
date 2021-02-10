@@ -35,6 +35,4 @@ void tfm_core_panic(void);
 
 #define ERROR_MSG(msg)
 
-bool tfm_is_one_bit_set(uint32_t n);
-
 #endif /* __TFM_UTILS_H__ */

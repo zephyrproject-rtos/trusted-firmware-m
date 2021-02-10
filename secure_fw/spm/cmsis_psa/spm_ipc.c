@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "bitops.h"
 #include "psa/client.h"
 #include "psa/service.h"
 #include "tfm_thread.h"
@@ -24,7 +25,7 @@
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
-#include "ffm/lists.h"
+#include "lists.h"
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
@@ -879,7 +880,7 @@ int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
 {
     size_t i;
 
-    if (!tfm_is_one_bit_set(signal)) {
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
         return -1;
     }
 

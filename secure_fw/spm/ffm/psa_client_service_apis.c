@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "bitops.h"
 #include "spm_psa_client_call.h"
 #include "psa/lifecycle.h"
 #ifdef TFM_PSA_API
@@ -183,7 +184,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
      * Only one message could be retrieved every time for psa_get(). It is a
      * fatal error if the input signal has more than a signal bit set.
      */
-    if (!tfm_is_one_bit_set(signal)) {
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
         tfm_core_panic();
     }
 

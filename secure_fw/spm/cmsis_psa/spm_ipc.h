@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
-#include "ffm/lists.h"
+#include "lists.h"
 #include "tfm_wait.h"
 #include "tfm_secure_api.h"
 #include "tfm_thread.h"
