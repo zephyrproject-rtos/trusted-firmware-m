@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "bitops.h"
+#include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
 #include "tfm_thread.h"
@@ -642,6 +643,9 @@ uint32_t tfm_spm_init(void)
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct platform_data_t **platform_data_p;
+#ifdef TFM_FIH_PROFILE_ON
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -672,10 +676,18 @@ uint32_t tfm_spm_init(void)
             (const struct platform_data_t **)partition->p_static->platform_data;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
+#ifdef TFM_FIH_PROFILE_ON
+                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
+                         *platform_data_p);
+                if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+                    tfm_core_panic();
+                }
+#else /* TFM_FIH_PROFILE_ON */
                 if (tfm_spm_hal_configure_default_isolation(i,
                             *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                     tfm_core_panic();
                 }
+#endif /* TFM_FIH_PROFILE_ON */
                 ++platform_data_p;
             }
         }
@@ -765,6 +777,9 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 #endif
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
     struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
+#if defined(TFM_FIH_PROFILE_ON) && (TFM_LVL == 3)
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL != 1
@@ -787,12 +802,21 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
          */
         if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
             /* FIXME: only MPU-based implementations are supported currently */
+#ifdef TFM_FIH_PROFILE_ON
+            FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
+                     p_next_partition->memory_data->data_start,
+                     p_next_partition->memory_data->data_limit);
+            if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+                tfm_core_panic();
+            }
+#else /* TFM_FIH_PROFILE_ON */
             if (tfm_hal_mpu_update_partition_boundary(
                                       p_next_partition->memory_data->data_start,
                                       p_next_partition->memory_data->data_limit)
                                                            != TFM_HAL_SUCCESS) {
                 tfm_core_panic();
             }
+#endif /* TFM_FIH_PROFILE_ON */
         }
 #endif /* TFM_LVL == 3 */
 #endif /* TFM_LVL != 1 */
