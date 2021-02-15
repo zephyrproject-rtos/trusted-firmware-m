@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <arm_cmse.h>
 #include "bitops.h"
+#include "fih.h"
 #include "tfm_nspm.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
@@ -1216,14 +1217,17 @@ static void tfm_spm_partition_err_handler(const uint32_t idx, int32_t errcode)
     tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_CLOSED);
 }
 
-enum spm_err_t tfm_spm_partition_init(void)
+fih_int tfm_spm_partition_init(void)
 {
     struct spm_partition_desc_t *part;
     struct tfm_sfn_req_s desc;
     int32_t args[4] = {0};
-    int32_t fail_cnt = 0;
+    fih_int fail_cnt = FIH_INT_INIT(0);
     uint32_t idx;
     const struct platform_data_t **platform_data_p;
+#ifdef TFM_FIH_PROFILE_ON
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
@@ -1231,10 +1235,18 @@ enum spm_err_t tfm_spm_partition_init(void)
         platform_data_p = part->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
+#ifdef TFM_FIH_PROFILE_ON
+                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, idx,
+                         *platform_data_p);
+                if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+                    fail_cnt = fih_int_encode(fih_int_decode(fail_cnt) + 1);
+                }
+#else /* TFM_FIH_PROFILE_ON */
                 if (tfm_spm_hal_configure_default_isolation(idx,
                             *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                     fail_cnt++;
                 }
+#endif /* TFM_FIH_PROFILE_ON */
                 ++platform_data_p;
             }
         }
@@ -1254,18 +1266,19 @@ enum spm_err_t tfm_spm_partition_init(void)
                 tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             } else {
                 tfm_spm_partition_err_handler(idx, res);
-                fail_cnt++;
+                fail_cnt = fih_int_encode(fih_int_decode(fail_cnt) + 1);
             }
         }
     }
 
     tfm_spm_secure_api_init_done();
 
-    if (fail_cnt == 0) {
-        return SPM_ERR_OK;
-    } else {
-        return SPM_ERR_PARTITION_NOT_AVAILABLE;
+    fih_int_validate(fail_cnt);
+    if (fih_eq(fail_cnt, fih_int_encode(0))) {
+        FIH_RET(fih_int_encode(SPM_ERR_OK));
     }
+
+    FIH_RET(fih_int_encode(SPM_ERR_PARTITION_NOT_AVAILABLE));
 }
 
 void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)

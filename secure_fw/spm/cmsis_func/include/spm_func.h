@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #define __SPM_FUNC_H__
 
 #include <stdint.h>
+#include "fih.h"
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "psa/client.h"
@@ -43,11 +44,12 @@
 
 enum spm_err_t {
     SPM_ERR_OK = 0,
-    SPM_ERR_PARTITION_DB_NOT_INIT,
-    SPM_ERR_PARTITION_ALREADY_ACTIVE,
-    SPM_ERR_PARTITION_NOT_AVAILABLE,
-    SPM_ERR_INVALID_PARAMETER,
-    SPM_ERR_INVALID_CONFIG,
+    SPM_ERR_PARTITION_DB_NOT_INIT = 0x3A5C,
+    SPM_ERR_PARTITION_ALREADY_ACTIVE = 0x5C3A,
+    SPM_ERR_PARTITION_NOT_AVAILABLE = 0xA35C,
+    SPM_ERR_INVALID_PARAMETER = 0xCA35,
+    SPM_ERR_INVALID_CONFIG = 0x35A3C,
+    SPM_ERR_GENERIC_ERR = 0x5C3A5,
 };
 
 /**
@@ -237,9 +239,11 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
 /**
  * \brief Execute partition init function
  *
- * \return Error code \ref spm_err_t
+ * \return Error code \ref spm_err_t.
+ *         When FIH_ENABLE_DOUBLE_VARS is enabled, the return code will be
+ *         wrapped and protected in \ref fih_int structure.
  */
-enum spm_err_t tfm_spm_partition_init(void);
+fih_int tfm_spm_partition_init(void);
 
 /**
  * \brief Clears the context info from the database for a partition.

@@ -86,6 +86,7 @@ target_link_libraries(tfm_spm
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_psa_rot_partition_driver_partition>
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_client_partition>
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_server_partition>
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:tfm_fih>
 )
 
 target_compile_definitions(tfm_spm
