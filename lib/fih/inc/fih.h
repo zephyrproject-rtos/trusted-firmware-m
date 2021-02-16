@@ -334,13 +334,18 @@ fih_int fih_int_encode_zero_equality(int32_t x)
     }
 }
 
+#ifdef FIH_ENABLE_CFI
+/* Global Control Flow Integrity counter */
+extern fih_int _fih_cfi_ctr;
+
 /*
- * Increment the CFI counter by one, and return the value before the increment.
+ * Increment the CFI counter by input counter and return the value before the
+ * increment.
  *
  * NOTE
  * This function shall not be called directly.
  */
-fih_int fih_cfi_get_and_increment(void);
+fih_int fih_cfi_get_and_increment(uint8_t cnt);
 
 /*
  * Validate that the saved precall value is the same as the value of the global
@@ -361,10 +366,6 @@ void fih_cfi_validate(fih_int saved);
  */
 void fih_cfi_decrement(void);
 
-#ifdef FIH_ENABLE_CFI
-/* Global Control Flow Integrity counter */
-extern fih_int _fih_cfi_ctr;
-
 /*
  * Macro wrappers for functions - Even when the functions have zero body this
  * saves a few bytes on noop functions as it doesn't generate the call/ret
@@ -376,17 +377,60 @@ extern fih_int _fih_cfi_ctr;
  * called.
  */
 #define FIH_CFI_PRECALL_BLOCK \
-        fih_int _fih_cfi_precall_saved_value = fih_cfi_get_and_increment()
+        fih_int _fih_cfi_precall_saved_value = fih_cfi_get_and_increment(1)
 
 #define FIH_CFI_POSTCALL_BLOCK \
         fih_cfi_validate(_fih_cfi_precall_saved_value)
 
 #define FIH_CFI_PRERET \
         fih_cfi_decrement()
+
+/*
+ * Marcos to support protect the control flow integrity inside a function.
+ *
+ * The FIH_CFI_PRECALL_BLOCK/FIH_CFI_POSTCALL_BLOCK pair mainly protect function
+ * calls from fault injection. Fault injection may attack a function to skip its
+ * critical steps which are not function calls. It is difficult for the caller
+ * to dectect the injection as long as the function successfully returns.
+ *
+ * The following macros can be called in a function to track the critical steps,
+ * especially those which are not function calls.
+ */
+/*
+ * FIH_CFI_STEP_INIT() saves the CFI counter and increase the CFI counter by the
+ * number of the critical steps. It should be called before execution starts.
+ */
+#define FIH_CFI_STEP_INIT(x) \
+        fih_int _fih_cfi_step_saved_value = fih_cfi_get_and_increment(x)
+
+/*
+ * FIH_CFI_STEP_DECREMENT() decrease the CFI counter by one. It can be called
+ * after each critical step execution completes.
+ */
+#define FIH_CFI_STEP_DECREMENT() \
+        fih_cfi_decrement()
+
+/*
+ * FIH_CFI_STEP_ERR_RESET() resets the CFI counter to the previous value saved
+ * by FIH_CFI_STEP_INIT(). It shall be called only when a functionality error
+ * occurs and forces the function to exit. It can enable the caller to capture
+ * the functionality error other than being trapped in fault injection error
+ * handling.
+ */
+#define FIH_CFI_STEP_ERR_RESET() \
+        do { \
+            _fih_cfi_ctr = _fih_cfi_step_saved_value; \
+            fih_int_validate(_fih_cfi_ctr); \
+        } while(0)
+
 #else /* FIH_ENABLE_CFI */
 #define FIH_CFI_PRECALL_BLOCK
 #define FIH_CFI_POSTCALL_BLOCK
 #define FIH_CFI_PRERET
+
+#define FIH_CFI_STEP_INIT(x)
+#define FIH_CFI_STEP_DECREMENT()
+#define FIH_CFI_STEP_ERR_RESET()
 #endif /* FIH_ENABLE_CFI */
 
 /*
@@ -464,6 +508,10 @@ typedef int32_t fih_int;
     do { \
         return ret; \
     } while (0)
+
+#define FIH_CFI_STEP_INIT(x)
+#define FIH_CFI_STEP_DECREMENT()
+#define FIH_CFI_STEP_ERR_RESET()
 
 #endif /* TFM_FIH_PROFILE_ON */
 

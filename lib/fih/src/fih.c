@@ -17,7 +17,7 @@ fih_int FIH_FAILURE = FIH_INT_INIT(FIH_NEGATIVE_VALUE);
 #ifdef FIH_ENABLE_CFI
 fih_int _fih_cfi_ctr = FIH_INT_INIT(0);
 
-fih_int fih_cfi_get_and_increment(void)
+fih_int fih_cfi_get_and_increment(uint8_t cnt)
 {
     fih_int saved_ctr = _fih_cfi_ctr;
 
@@ -26,11 +26,11 @@ fih_int fih_cfi_get_and_increment(void)
     }
 
     /* Overflow */
-    if (fih_int_decode(_fih_cfi_ctr) > (fih_int_decode(_fih_cfi_ctr) + 1)) {
+    if (fih_int_decode(_fih_cfi_ctr) > (fih_int_decode(_fih_cfi_ctr) + cnt)) {
         FIH_PANIC;
     }
 
-    _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) + 1);
+    _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) + cnt);
 
     fih_int_validate(_fih_cfi_ctr);
     fih_int_validate(saved_ctr);
