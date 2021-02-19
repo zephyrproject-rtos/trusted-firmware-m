@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,3 +23,5 @@ set(TFM_ISOLATION_LEVEL                 1            CACHE STRING    "Isolation 
 
 # Crypto hardware accelerator is turned on by default
 set(CRYPTO_HW_ACCELERATOR               ON           CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+
+set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
