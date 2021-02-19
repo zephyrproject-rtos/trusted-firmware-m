@@ -15,7 +15,9 @@
 #ifndef __ITS_FLASH_NAND_H__
 #define __ITS_FLASH_NAND_H__
 
-#include "flash_fs/its_flash_fs.h"
+#include <stddef.h>
+#include <stdint.h>
+
 #include "driver/Driver_Flash.h"
 
 #ifdef __cplusplus

@@ -15,8 +15,6 @@
 #ifndef __ITS_FLASH_NOR_H__
 #define __ITS_FLASH_NOR_H__
 
-#include "flash_fs/its_flash_fs.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -7,6 +7,8 @@
  */
 
 #include "its_flash_nand.h"
+
+#include "flash_fs/its_flash_fs.h"
 #include "tfm_memory_utils.h"
 
 /**

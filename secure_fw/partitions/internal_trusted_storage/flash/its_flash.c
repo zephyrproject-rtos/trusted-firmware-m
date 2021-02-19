@@ -7,6 +7,8 @@
 
 #include "its_flash.h"
 
+#include "flash_fs/its_flash_fs.h"
+
 #ifdef ITS_RAM_FS
 #ifndef ITS_RAM_FS_SIZE
 #error "ITS_RAM_FS_SIZE must be defined by the target in flash_layout.h"

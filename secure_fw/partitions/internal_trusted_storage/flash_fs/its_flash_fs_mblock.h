@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "flash/its_flash.h"
 #include "its_flash_fs.h"
 #include "its_utils.h"
 #include "psa/error.h"

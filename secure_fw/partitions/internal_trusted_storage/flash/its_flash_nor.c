@@ -7,6 +7,8 @@
  */
 
 #include "its_flash_nor.h"
+
+#include "flash_fs/its_flash_fs.h"
 #include "driver/Driver_Flash.h"
 
 /**

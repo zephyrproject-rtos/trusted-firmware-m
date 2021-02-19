@@ -9,6 +9,7 @@
 #ifndef __ITS_FLASH_H__
 #define __ITS_FLASH_H__
 
+#include "its_utils.h"
 #include "tfm_hal_its.h"
 #include "tfm_hal_ps.h"
 
