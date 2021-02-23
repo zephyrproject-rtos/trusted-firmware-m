@@ -29,6 +29,10 @@
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
+/* Set a minimum for client handle. Reserve small values for static handle. */
+#define STATIC_HANDLE_VALUE_LIMIT       32
+#define CLIENT_HANDLE_VALUE_MIN         (STATIC_HANDLE_VALUE_LIMIT + 1)
+
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
 /* Privileged definitions for partition thread mode */

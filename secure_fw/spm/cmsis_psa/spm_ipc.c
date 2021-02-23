@@ -47,9 +47,6 @@ void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
 
 /*********************** Connection handle conversion APIs *******************/
 
-/* Set a minimal value here for feature expansion. */
-#define CLIENT_HANDLE_VALUE_MIN        32
-
 #define CONVERSION_FACTOR_BITOFFSET    3
 #define CONVERSION_FACTOR_VALUE        (1 << CONVERSION_FACTOR_BITOFFSET)
 /* Set 32 as the maximum */
