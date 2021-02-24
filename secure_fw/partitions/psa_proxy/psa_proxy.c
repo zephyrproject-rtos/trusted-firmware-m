@@ -40,7 +40,7 @@ static inline psa_handle_t * allocate_forward_handle(void)
 
 static inline void deallocate_forward_handle(psa_handle_t *h)
 {
-    tfm_pool_free(h);
+    tfm_pool_free(forward_handle_pool, h);
 }
 
 static psa_status_t forward_psa_call_to_secure_enclave(const psa_msg_t *msg)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -43,7 +43,6 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
 
     pchunk = (struct tfm_pool_chunk_t *)pool->chunks;
     for (i = 0; i < num; i++) {
-        pchunk->pool = pool;
         BI_LIST_INSERT_BEFORE(&pool->chunks_list, &pchunk->list);
         pchunk = (struct tfm_pool_chunk_t *)&pchunk->data[chunksz];
     }
@@ -77,13 +76,11 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
     return &pchunk->data;
 }
 
-void tfm_pool_free(void *ptr)
+void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
 {
     struct tfm_pool_chunk_t *pchunk;
-    struct tfm_pool_instance_t *pool;
 
     pchunk = TFM_GET_CONTAINER_PTR(ptr, struct tfm_pool_chunk_t, data);
-    pool = (struct tfm_pool_instance_t *)pchunk->pool;
     BI_LIST_INSERT_BEFORE(&pool->chunks_list, &pchunk->list);
 }
 

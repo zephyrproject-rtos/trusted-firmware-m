@@ -189,7 +189,7 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
     BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
-    tfm_pool_free(conn_handle);
+    tfm_pool_free(conn_handle_pool, conn_handle);
     return SPM_SUCCESS;
 }
 
