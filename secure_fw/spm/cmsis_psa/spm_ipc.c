@@ -741,6 +741,7 @@ uint32_t tfm_spm_init(void)
     /* Init Service */
     num = sizeof(service) / sizeof(struct tfm_spm_service_t);
     for (i = 0; i < num; i++) {
+        int32_t j = 0;
         service[i].service_db = &service_db[i];
         partition =
             tfm_spm_get_partition_by_id(service[i].service_db->partition_id);
@@ -749,6 +750,20 @@ uint32_t tfm_spm_init(void)
         }
         service[i].partition = partition;
         partition->signals_allowed |= service[i].service_db->signal;
+
+        /* Populate the p_service of stateless_service_ref[] */
+        if (service_db[i].connection_based == false) {
+            for (j = 0; j < STATIC_HANDLE_VALUE_LIMIT; j++) {
+                if (stateless_service_ref[j].sid == service_db[i].sid) {
+                    stateless_service_ref[j].p_service = &service[i];
+                    break;
+                }
+            }
+            /* Stateless service not found in tracking table */
+            if (j >= STATIC_HANDLE_VALUE_LIMIT) {
+                tfm_core_panic();
+            }
+        }
 
         BI_LIST_INIT_NODE(&service[i].handle_list);
     }

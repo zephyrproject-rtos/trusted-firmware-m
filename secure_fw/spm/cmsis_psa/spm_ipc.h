@@ -139,6 +139,12 @@ struct tfm_spm_service_t {
     struct bi_list_node_t list;              /* For list operation           */
 };
 
+/* Stateless RoT service tracking array item type. Indexed by static handle */
+struct stateless_service_tracking_t {
+    uint32_t                 sid;           /* Service ID */
+    struct tfm_spm_service_t *p_service;    /* Service instance */
+};
+
 /* RoT connection handle list */
 struct tfm_conn_handle_t {
     void *rhandle;                      /* Reverse handle value              */
