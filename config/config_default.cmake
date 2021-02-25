@@ -38,6 +38,8 @@ set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to 
 
 set(TFM_SP_META_PTR_ENABLE              OFF         CACHE BOOL      "Use Partition Metadata Pointer")
 
+set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
