@@ -68,11 +68,13 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        Libraries
 )
 
 target_sources(platform_s
     PRIVATE
         $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
+        CMSIS_Driver/Driver_QSPI_Flash.c
         CMSIS_Driver/Driver_Flash_MRAM.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
@@ -85,11 +87,13 @@ target_sources(platform_s
         Native_Driver/gpio_cmsdk_drv.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/musca_s1_scc_drv.c
+        Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
         tfm_hal_isolation.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
+        Libraries/mt25ql_flash_lib.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -121,6 +125,7 @@ target_include_directories(platform_ns
         Device/Include
         Native_Driver
         services/include
+        Libraries
 )
 
 #========================= Platform BL2 =======================================#
@@ -143,6 +148,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+            Libraries
         PRIVATE
             .
             CMSIS_Driver/Config

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -493,4 +493,48 @@ struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_S = {&(MUSCA_S1_SCC_DEV_CFG_S)};
 static const struct arm_cache_dev_cfg_t SSE_200_CACHE_CFG_S = {
     .base = MUSCA_S1_CPU_ELEMENT_S_BASE};
 struct arm_cache_dev_t SSE_200_CACHE_DEV_S = {&(SSE_200_CACHE_CFG_S)};
+#endif
+
+/* QSPI IP6514E driver structures */
+#ifdef QSPI_IP6514E_NS
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_NS = {
+    .base = MUSCA_S1_QSPI_REG_NS_BASE,
+    .addr_mask = (1U << 25) - 1,
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_NS = {
+    &QSPI_DEV_CFG_NS
+};
+#endif
+
+#ifdef QSPI_IP6514E_S
+static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_S = {
+    .base = MUSCA_S1_QSPI_REG_S_BASE,
+    .addr_mask = (1U << 25) - 1,
+};
+struct qspi_ip6514e_dev_t QSPI_DEV_S = {
+    &QSPI_DEV_CFG_S
+};
+#endif
+
+/* ======= External peripheral configuration structure definitions ======= */
+
+/* MT25QL Flash memory library structures */
+#if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
+struct mt25ql_dev_t MT25QL_DEV_NS = {
+    .controller = &QSPI_DEV_NS,
+    .direct_access_start_addr = MUSCA_S1_QSPI_FLASH_NS_BASE,
+    .baud_rate_div = 4U,
+    .size = 0x02000000U, /* 32 MiB */
+    .config_state = { MT25QL_FUNC_STATE_NOT_INITED },
+};
+#endif
+
+#if (defined(MT25QL_S) && defined(QSPI_IP6514E_S))
+struct mt25ql_dev_t MT25QL_DEV_S = {
+    .controller = &QSPI_DEV_S,
+    .direct_access_start_addr = MUSCA_S1_QSPI_FLASH_S_BASE,
+    .baud_rate_div = 4U,
+    .size = 0x02000000U, /* 32 MiB */
+    .config_state = { MT25QL_FUNC_STATE_NOT_INITED },
+};
 #endif
