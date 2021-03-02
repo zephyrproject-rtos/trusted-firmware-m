@@ -9,6 +9,8 @@ cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(NRF_BOARD_SELECTED True)
 
+message(DEPRECATION "${TFM_PLATFORM} has been marked for deprecation.")
+
 add_subdirectory(../common/nrf5340 nrf5340)
 
 target_include_directories(platform_region_defs
@@ -20,6 +22,11 @@ target_include_directories(platform_s
     PUBLIC
         .
         ../common/nrf5340/partition
+)
+
+target_sources(platform_s
+    PRIVATE
+        plat_init.c
 )
 
 target_include_directories(platform_ns
