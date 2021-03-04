@@ -78,6 +78,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
+    /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
+    if (!service->service_db->connection_based) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+    }
+
     if (ns_caller) {
         client_id = tfm_nspm_get_current_client_id();
     } else {
@@ -264,6 +269,11 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
     /* It will have no effect if called with the NULL handle */
     if (handle == PSA_NULL_HANDLE) {
         return;
+    }
+
+    /* It is a PROGRAMMER ERROR if called with a stateless handle. */
+    if (IS_STATIC_HANDLE(handle)) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
     if (ns_caller) {
