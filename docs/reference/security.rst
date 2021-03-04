@@ -46,11 +46,15 @@ Security Advisories
 |  |TFMV-1|  | NS world may cause the CPU to perform an unexpected return      |
 |            | operation due to unsealed stacks.                               |
 +------------+-----------------------------------------------------------------+
+|  |TFMV-2|  | Invoking Secure functions from handler mode may cause TF-M IPC  |
+|            | model to behave unexpectedly.                                   |
++------------+-----------------------------------------------------------------+
 
 .. _issue tracker: https://developer.trustedfirmware.org/project/view/2/
 .. _mailing list: https://lists.trustedfirmware.org/mailman/listinfo/tf-m
 
 .. |TFMV-1| replace:: :ref:`docs/reference/security_advisories/stack_seal_vulnerability:Advisory TFMV-1`
+.. |TFMV-2| replace:: :ref:`docs/reference/security_advisories/svc_caller_sp_fetching_vulnerability:Advisory TFMV-2`
 
 .. _TrustedFirmware.org security incident process: https://developer.trustedfirmware.org/w/collaboration/security_center/
 
