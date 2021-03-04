@@ -94,20 +94,16 @@ void SecureFault_Handler(void)
 }
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MRS     r2, MSP                        \n"
-    /* Check store SP in thread mode to r0 */
-    "TST     lr, #4                         \n"
-    "ITE     EQ                             \n"
-    "MOVEQ   r0, r2                         \n"
-    "MRSNE   r0, PSP                        \n"
-    "MOV     r1, lr                         \n"
+    "MRS     r0, MSP                        \n"
+    "MRS     r1, PSP                        \n"
+    "MOV     r2, lr                         \n"
     "BL      tfm_core_svc_handler           \n"
     "BX      r0                             \n"
     );

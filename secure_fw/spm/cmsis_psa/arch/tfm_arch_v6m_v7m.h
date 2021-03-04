@@ -23,6 +23,13 @@
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
 #define EXC_RETURN_THREAD_S_PSP                 0xFFFFFFFD
 
+/* Exception return behavior */
+
+/* stack pointer used to restore context: 0=MSP 1=PSP. */
+#define EXC_RETURN_SPSEL    (1UL << 2)
+/* processor mode for return: 0=Handler mode 1=Thread mod. */
+#define EXC_RETURN_MODE     (1UL << 3)
+
 struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;

@@ -10,7 +10,7 @@
 #include "tfm/tfm_spm_services.h"
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t lr, uint32_t *msp);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required=tfm_core_svc_handler
 #endif
 
@@ -308,26 +308,23 @@ __attribute__((naked)) void SVC_Handler(void)
 #if !defined(__ICCARM__)
     ".syntax unified                        \n"
 #endif
-    "MRS     r0, PSP                        \n"
-    "MRS     r2, MSP                        \n"
-    "MOVS    r1, #4                         \n"
-    "MOV     r3, lr                         \n"
-    "TST     r1, r3                         \n"
+    "MRS     r0, MSP                        \n"
+    "MOV     r2, lr                         \n"
+    "MOVS    r3, #8                         \n"
+    "TST     r2, r3                         \n"
     "BNE     from_thread                    \n"
     /*
      * This branch is taken when the code is being invoked from handler mode.
      * This happens when a de-privileged interrupt handler is to be run. Seal
      * the stack before de-privileging.
      */
-    "LDR     r0, =0xFEF5EDA5                \n"
-    "MOVS    r3, r0                         \n"
-    "PUSH    {r0, r3}                       \n"
-    /* Overwrite r0 with MSP */
-    "MOV     r0, r2                         \n"
+    "LDR     r1, =0xFEF5EDA5                \n"
+    "MOVS    r3, r1                         \n"
+    "PUSH    {r1, r3}                       \n"
     "from_thread:                           \n"
-    "MOV     r1, lr                         \n"
+    "MRS     r1, PSP                        \n"
     "BL      tfm_core_svc_handler           \n"
-    "MOVS    r1, #4                         \n"
+    "MOVS    r1, #8                         \n"
     "TST     r1, r0                         \n"
     "BNE     to_thread                      \n"
     /*
@@ -345,18 +342,11 @@ __attribute__((naked)) void SVC_Handler(void)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MOVS    r0, #4                \n" /* Check store SP in thread mode to r0 */
-    "MOV     r1, lr                \n"
-    "TST     r0, r1                \n"
-    "BEQ     handler               \n"
-    "MRS     r0, PSP               \n" /* Coming from thread mode */
-    "B       sp_stored             \n"
-    "handler:                      \n"
-    "BX      lr                    \n" /* Coming from handler mode */
-    "sp_stored:                    \n"
-    "MOV     r1, lr                \n"
-    "BL      tfm_core_svc_handler  \n"
-    "BX      r0                    \n"
+    "MRS     r0, MSP                        \n"
+    "MRS     r1, PSP                        \n"
+    "MOV     r2, lr                         \n"
+    "BL      tfm_core_svc_handler           \n"
+    "BX      r0                             \n"
     );
 }
 #endif

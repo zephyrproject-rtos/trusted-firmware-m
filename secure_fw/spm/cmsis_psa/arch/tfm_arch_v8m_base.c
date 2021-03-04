@@ -108,23 +108,16 @@ void HardFault_Handler(void)
 }
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MRS     r2, MSP                        \n"
-    "MOVS    r1, #4                         \n"
-    "MOV     r3, lr                         \n"
-    "MOV     r0, r2                         \n"
-    "TST     r1, r3                         \n"
-    "BEQ     handler                        \n"
-    /* If SVC was made from thread mode, overwrite r0 with PSP */
-    "MRS     r0, PSP                        \n"
-    "handler:                               \n"
-    "MOV     r1, lr                         \n"
+    "MRS     r0, MSP                        \n"
+    "MRS     r1, PSP                        \n"
+    "MOV     r2, lr                         \n"
     "BL      tfm_core_svc_handler           \n"
     "BX      r0                             \n"
     );

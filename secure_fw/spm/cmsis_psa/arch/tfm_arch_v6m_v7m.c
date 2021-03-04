@@ -85,25 +85,18 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
 }
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MOVS    r0, #4                \n" /* Check store SP in thread mode to r0 */
-    "MOV     r1, lr                \n"
-    "TST     r0, r1                \n"
-    "BEQ     handler               \n"
-    "MRS     r0, PSP               \n" /* Coming from thread mode */
-    "B       sp_stored             \n"
-    "handler:                      \n"
-    "BX      lr                    \n" /* Coming from handler mode */
-    "sp_stored:                    \n"
-    "MOV     r1, lr                \n"
-    "BL      tfm_core_svc_handler  \n"
-    "BX      r0                    \n"
+    "MRS     r0, MSP                        \n"
+    "MRS     r1, PSP                        \n"
+    "MOV     r2, lr                         \n"
+    "BL      tfm_core_svc_handler           \n"
+    "BX      r0                             \n"
     );
 }
 

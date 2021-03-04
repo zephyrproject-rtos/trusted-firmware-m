@@ -12,11 +12,12 @@
 /**
  * \brief The C source of SVCall handlers
  *
- * \param[in] svc_args          The arguments list.
+ * \param[in] msp               MSP at SVCall entry.
+ * \param[in] psp               PSP at SVCall entry.
  * \param[in] exc_return        EXC_RETURN value of the SVC.
  *
  * \returns                     EXC_RETURN value indicates where to return.
  */
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 
 #endif
