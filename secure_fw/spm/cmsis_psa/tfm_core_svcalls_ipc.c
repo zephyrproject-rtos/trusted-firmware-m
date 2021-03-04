@@ -129,6 +129,11 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     tfm_svc_number_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
     uint32_t *svc_args = msp;
 
+    if (!(exc_return & EXC_RETURN_MODE)) {
+        /* Calling SVC from Handler Mode is not supported */
+        tfm_core_panic();
+    }
+
     if ((exc_return & EXC_RETURN_MODE) && (exc_return & EXC_RETURN_SPSEL)) {
         /* Use PSP when both EXC_RETURN.MODE and EXC_RETURN.SPSEL are set */
         svc_args = psp;
