@@ -35,7 +35,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1+, v6.11, v6.12, v6.13
+    - Arm Compiler v6.10.1+
     - GNU Arm compiler v7.3.1+
     - IAR Arm compiler v8.42.x, v8.50.x
 
@@ -463,4 +463,4 @@ Dependency chain:
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
