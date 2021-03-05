@@ -522,6 +522,9 @@ void tfm_spm_psa_reply(uint32_t *args)
              * psa_call().
              */
             update_caller_outvec_len(msg);
+            if (!service->service_db->connection_based) {
+                tfm_spm_free_conn_handle(service, conn_handle);
+            }
         } else {
             tfm_core_panic();
         }

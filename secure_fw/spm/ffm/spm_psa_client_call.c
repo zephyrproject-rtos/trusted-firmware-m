@@ -15,6 +15,8 @@
 #include "tfm_nspm.h"
 #include "ffm/spm_error_base.h"
 
+extern struct stateless_service_tracking_t stateless_service_ref[];
+
 uint32_t tfm_spm_client_psa_framework_version(void)
 {
     return PSA_FRAMEWORK_VERSION;
@@ -130,6 +132,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     struct tfm_msg_body_t *msg;
     int i, j;
     int32_t client_id;
+    uint32_t sid;
 
     /* It is a PROGRAMMER ERROR if in_len + out_len > PSA_MAX_IOVEC. */
     if ((in_num > PSA_MAX_IOVEC) ||
@@ -144,32 +147,57 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         client_id = tfm_spm_partition_get_running_partition_id();
     }
 
-    conn_handle = tfm_spm_to_handle_instance(handle);
-    /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
-    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+    /* Allocate space from handle pool for static handle. */
+    if (IS_STATIC_HANDLE(handle)) {
+        service = stateless_service_ref[(uint32_t)handle-1].p_service;
+        sid = stateless_service_ref[(uint32_t)handle-1].sid;
+        /*
+         * It is a PROGRAMMER ERROR if the caller is not authorized to access
+         * the RoT Service.
+         */
+        if (tfm_spm_check_authorization(sid, service, ns_caller)
+            != SPM_SUCCESS) {
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+        }
+
+        conn_handle = tfm_spm_create_conn_handle(service, client_id);
+
+        if (!conn_handle) {
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_BUSY);
+        }
+
+        handle = tfm_spm_to_user_handle(conn_handle);
+    } else {
+        conn_handle = tfm_spm_to_handle_instance(handle);
+
+        /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
+        if (tfm_spm_validate_conn_handle(conn_handle, client_id)
+            != SPM_SUCCESS) {
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        }
+
+        /*
+         * It is a PROGRAMMER ERROR if the connection is currently
+         * handling a request.
+         */
+        if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        }
+
+        /*
+         * Return PSA_ERROR_PROGRAMMER_ERROR immediately for the connection
+         * has been terminated by the RoT Service.
+         */
+        if (conn_handle->status == TFM_HANDLE_STATUS_CONNECT_ERROR) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        service = conn_handle->service;
     }
 
-    service = conn_handle->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
-    }
-
-    /*
-     * It is a PROGRAMMER ERROR if the connection is currently handling a
-     * request.
-     */
-    if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
-    }
-
-    /*
-     * Return PSA_ERROR_PROGRAMMER_ERROR immediately for the connection
-     * has been terminated by the RoT Service.
-     */
-    if (conn_handle->status == TFM_HANDLE_STATUS_CONNECT_ERROR) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /*
