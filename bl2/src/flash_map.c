@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #include "target.h"
 #include "flash_map/flash_map.h"
 #include "flash_map_backend/flash_map_backend.h"
+#include "bootutil_priv.h"
 #include "bootutil/bootutil_log.h"
 #include "Driver_Flash.h"
 
@@ -94,6 +95,30 @@ static const struct flash_area flash_map[] = {
 static const int flash_map_entry_num = ARRAY_SIZE(flash_map);
 
 /*
+ * Check the target address in the flash_area_xxx operation.
+ */
+static bool is_range_valid(const struct flash_area *area,
+                           uint32_t off,
+                           uint32_t len)
+{
+    uint32_t size;
+
+    if (!area) {
+        return false;
+    }
+
+    if (!boot_u32_safe_add(&size, off, len)) {
+        return false;
+    }
+
+    if (area->fa_size < size) {
+        return false;
+    }
+
+    return true;
+}
+
+/*
  * `open` a flash area.  The `area` in this case is not the individual
  * sectors, but describes the particular flash area in question.
  */
@@ -125,6 +150,11 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
                     uint32_t len)
 {
     BOOT_LOG_DBG("read area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+
+    if (!is_range_valid(area, off, len)) {
+        return -1;
+    }
+
     return DRV_FLASH_AREA(area)->ReadData(area->fa_off + off, dst, len);
 }
 
@@ -132,6 +162,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len)
 {
     BOOT_LOG_DBG("write area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+
+    if (!is_range_valid(area, off, len)) {
+        return -1;
+    }
+
     return DRV_FLASH_AREA(area)->ProgramData(area->fa_off + off, src, len);
 }
 
@@ -142,6 +177,11 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     int32_t rc = 0;
 
     BOOT_LOG_DBG("erase area=%d, off=%#x, len=%#x", area->fa_id, off, len);
+
+    if (!is_range_valid(area, off, len)) {
+        return -1;
+    }
+
     flash_info = DRV_FLASH_AREA(area)->GetInfo();
 
     if (flash_info->sector_info == NULL) {
