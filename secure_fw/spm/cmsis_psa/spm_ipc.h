@@ -323,13 +323,9 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
  *                          obtained by partition management functions
  * \param[in] msg           message created by tfm_spm_create_msg()
  *                          \ref tfm_msg_body_t structures
- *
- * \retval SPM_SUCCESS      Success
- * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
- * \retval SPM_ERROR_GENERIC Failed to enqueue message to service message queue
  */
-int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
-                           struct tfm_msg_body_t *msg);
+void tfm_spm_send_event(struct tfm_spm_service_t *service,
+                        struct tfm_msg_body_t *msg);
 
 /**
  * \brief                   Check the client version according to

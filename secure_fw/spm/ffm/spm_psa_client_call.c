@@ -249,10 +249,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * Send message and wake up the SP who is waiting on message queue,
      * and scheduler triggered
      */
-    if (tfm_spm_send_event(service, msg) != SPM_SUCCESS) {
-        /* FixMe: Need to refine failure process here. */
-        tfm_core_panic();
-    }
+    tfm_spm_send_event(service, msg);
+
     return PSA_SUCCESS;
 }
 

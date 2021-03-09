@@ -149,13 +149,6 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
     }
 
     /*
-     * Expected signals are included in signal wait mask, ignored signals
-     * should not be set and affect caller thread state. Save this mask for
-     * further checking while signals are ready to be set.
-     */
-    partition->signals_waiting = signal_mask;
-
-    /*
      * tfm_event_wait() blocks the caller thread if no signals are available.
      * In this case, the return value of this function is temporary set into
      * runtime context. After new signal(s) are available, the return value
@@ -163,6 +156,7 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
      */
     if (timeout == PSA_BLOCK &&
         (partition->signals_asserted & signal_mask) == 0) {
+        partition->signals_waiting = signal_mask;
         tfm_event_wait(&partition->event);
     }
 

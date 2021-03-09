@@ -544,22 +544,31 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     }
 }
 
-int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
-                           struct tfm_msg_body_t *msg)
+void tfm_spm_send_event(struct tfm_spm_service_t *service,
+                        struct tfm_msg_body_t *msg)
 {
-    struct partition_t *partition = service->partition;
+    struct partition_t *partition = NULL;
+    psa_signal_t signal = 0;
 
-    TFM_CORE_ASSERT(service);
-    TFM_CORE_ASSERT(msg);
+    if (!msg || !service || !service->service_db || !service->partition) {
+        tfm_core_panic();
+    }
+
+    partition = service->partition;
+    signal = service->service_db->signal;
 
     /* Add message to partition message list tail */
     BI_LIST_INSERT_BEFORE(&partition->msg_list, &msg->msg_node);
 
     /* Messages put. Update signals */
-    partition->signals_asserted |= service->service_db->signal;
+    partition->signals_asserted |= signal;
 
-    tfm_event_wake(&partition->event,
-                   (partition->signals_asserted & partition->signals_waiting));
+    if (partition->signals_waiting & signal) {
+        tfm_event_wake(
+                    &partition->event,
+                    (partition->signals_asserted & partition->signals_waiting));
+        partition->signals_waiting &= ~signal;
+    }
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -568,8 +577,6 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     if (!is_tfm_rpc_msg(msg)) {
         tfm_event_wait(&msg->ack_evnt);
     }
-
-    return SPM_SUCCESS;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
@@ -848,13 +855,12 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 
     partition->signals_asserted |= signal;
 
-    /*
-     * The target partition may be blocked with waiting for signals after
-     * called psa_wait(). Set the return value with the available signals
-     * before wake it up with tfm_event_signal().
-     */
-    tfm_event_wake(&partition->event,
-                   partition->signals_asserted & partition->signals_waiting);
+    if (partition->signals_waiting & signal) {
+        tfm_event_wake(
+                      &partition->event,
+                      partition->signals_asserted & partition->signals_waiting);
+        partition->signals_waiting &= ~signal;
+    }
 }
 
 /**
