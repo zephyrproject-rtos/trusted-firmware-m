@@ -150,6 +150,10 @@ set(TFM_CRYPTO_TEST_ALG_GCM             ON          CACHE BOOL      "Test GCM cr
 set(TFM_CRYPTO_TEST_ALG_SHA_512         ON          CACHE BOOL      "Test SHA-512 cryptography algorithm")
 set(TFM_CRYPTO_TEST_HKDF                ON          CACHE BOOL      "Test SHA-512 cryptography algorithm")
 
+set(TFM_FWU_TEST_REQUEST_REBOOT         OFF         CACHE BOOL      "Test psa_fwu_request_reboot")
+set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_write with data block NULL")
+set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
+
 ################################## Dependencies ################################
 
 set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbed Crypto (or DOWNLOAD to fetch automatically")
