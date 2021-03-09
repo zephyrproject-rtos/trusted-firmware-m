@@ -377,7 +377,7 @@ static struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
+    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr();
     struct partition_t *partition;
 
     partition = TFM_GET_CONTAINER_PTR(pth, struct partition_t, sp_thread);
@@ -754,8 +754,8 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
     struct partition_t *p_next_partition;
     uint32_t is_privileged;
 #endif
-    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next_thread();
-    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr_thread();
+    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
+    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL != 1
