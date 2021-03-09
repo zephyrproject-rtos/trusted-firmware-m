@@ -53,9 +53,28 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     int32_t client_id;
     psa_handle_t handle;
 
-    /* It is a PROGRAMMER ERROR if the RoT Service does not exist on the platform */
+    /*
+     * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
+     * platform.
+     */
     service = tfm_spm_get_service_by_sid(sid);
     if (!service) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+    }
+
+    /*
+     * It is a PROGRAMMER ERROR if the caller is not authorized to access the
+     * RoT Service.
+     */
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+    }
+
+    /*
+     * It is a PROGRAMMER ERROR if the version of the RoT Service requested is
+     * not supported on the platform.
+     */
+    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
@@ -66,28 +85,12 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     }
 
     /*
-     * It is a PROGRAMMER ERROR if the caller is not authorized to access the RoT
-     * Service.
-     */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
-    }
-
-    /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
      */
     connect_handle = tfm_spm_create_conn_handle(service, client_id);
     if (!connect_handle) {
         return PSA_ERROR_CONNECTION_BUSY;
-    }
-
-    /*
-     * It is a PROGRAMMER ERROR if the version of the RoT Service requested is not
-     * supported on the platform.
-     */
-    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
@@ -148,7 +151,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         tfm_core_panic();
     }
 
-    /* It is a PROGRAMMER ERROR if the connection is currently handling a request. */
+    /*
+     * It is a PROGRAMMER ERROR if the connection is currently handling a
+     * request.
+     */
     if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
