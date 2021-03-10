@@ -94,12 +94,6 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_EOI:
         tfm_spm_psa_eoi(ctx);
         break;
-    case TFM_SVC_ENABLE_IRQ:
-        tfm_spm_enable_irq(ctx);
-        break;
-    case TFM_SVC_DISABLE_IRQ:
-        tfm_spm_disable_irq(ctx);
-        break;
     case TFM_SVC_PSA_PANIC:
         tfm_spm_psa_panic();
         break;

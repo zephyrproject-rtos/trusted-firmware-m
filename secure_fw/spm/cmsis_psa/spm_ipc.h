@@ -399,32 +399,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  */
 uint32_t tfm_spm_init(void);
 
-/**
- * \brief SVC handler of enabling irq_line of the specified irq_signal.
- *
- * \param[in] args              Include all input arguments: irq_signal.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- */
-void tfm_spm_enable_irq(uint32_t *args);
-
-/**
- * \brief SVC handler of disabling irq_line of the specified irq_signal.
- *
- * \param[in] args              Include all input arguments: irq_signal.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- */
-void tfm_spm_disable_irq(uint32_t *args);
-
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
 /**
  * \brief Validate the whether NS caller re-enter.

@@ -895,48 +895,6 @@ int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
     return SPM_ERROR_GENERIC;
 }
 
-void tfm_spm_enable_irq(uint32_t *args)
-{
-    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
-    psa_signal_t irq_signal = svc_ctx->r0;
-    int32_t irq_line = 0;
-    struct partition_t *partition = NULL;
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
-    /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (irq_line < 0) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_hal_enable_irq(irq_line);
-}
-
-void tfm_spm_disable_irq(uint32_t *args)
-{
-    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
-    psa_signal_t irq_signal = svc_ctx->r0;
-    int32_t irq_line = 0;
-    struct partition_t *partition = NULL;
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
-    /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (irq_line < 0) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_hal_disable_irq(irq_line);
-}
-
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
 void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                              uint32_t exc_return, bool ns_caller)

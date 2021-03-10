@@ -24,22 +24,6 @@ int32_t tfm_spm_request_reset_vote(void)
     return tfm_spm_request((int32_t)TFM_SPM_REQUEST_RESET_VOTE);
 }
 
-__attribute__((naked))
-void tfm_enable_irq(psa_signal_t irq_signal)
-{
-    __ASM("SVC %0\n"
-          "BX LR\n"
-          : : "I" (TFM_SVC_ENABLE_IRQ));
-}
-
-__attribute__((naked))
-void tfm_disable_irq(psa_signal_t irq_signal)
-{
-    __ASM("SVC %0\n"
-          "BX LR\n"
-          : : "I" (TFM_SVC_DISABLE_IRQ));
-}
-
 static void tfm_arch_init_state_ctx(struct tfm_state_context_t *p_stat_ctx,
                                     void *param, uintptr_t pfn)
 {
