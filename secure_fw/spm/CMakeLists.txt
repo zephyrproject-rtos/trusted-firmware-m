@@ -66,11 +66,11 @@ target_sources(tfm_spm
 
 #workaround for arch-test
 if (TEST_PSA_API STREQUAL IPC)
-    target_sources(driver_partition PRIVATE
+    target_sources(tfm_psa_rot_partition_driver_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
-    target_sources(client_partition PRIVATE
+    target_sources(tfm_app_rot_partition_client_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
-    target_sources(server_partition PRIVATE
+    target_sources(tfm_app_rot_partition_server_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
 endif()
 
@@ -83,9 +83,9 @@ target_link_libraries(tfm_spm
         tfm_boot_status
         tfm_secure_api
         tfm_partitions
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:driver_partition>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:client_partition>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:server_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_psa_rot_partition_driver_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_client_partition>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_server_partition>
 )
 
 target_compile_definitions(tfm_spm
