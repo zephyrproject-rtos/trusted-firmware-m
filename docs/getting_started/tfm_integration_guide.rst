@@ -27,7 +27,6 @@ The hardware platforms currently supported are:
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
-- DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS)
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
 - nRF9160 DK (Cortex-M33)
 - nRF5340 PDK/DK (Cortex-M33 Application MCU)
@@ -52,9 +51,6 @@ More information about the Musca-S1 test chip board can be found in:
 
 More information about subsystems supported by the MPS3 board can be found in:
 `MPS3 homepage <https://www.arm.com/products/development-tools/development-boards/mps3>`__
-
-More information about the SSE-200_AWS platform can be found in:
-`SSE-200_AWS product page <https://aws.amazon.com/marketplace/pp/ARM-DesignStart-FPGA-on-Cloud-Cortex-M33-based-pla/B082DMMTLW>`__
 
 More information about the Corstone-300 FVPs can be found in:
 `Arm Ecosystem FVPs homepage <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__

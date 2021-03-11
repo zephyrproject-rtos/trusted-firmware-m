@@ -133,8 +133,6 @@ Platforms supported
           <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
         - `FPGA image loaded on MPS3 board (AN524).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
-        - `Arm DesignStart FPGA on AWS Cloud.
-          <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
         - `LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
         - `NUCLEO L552ZE Q.
