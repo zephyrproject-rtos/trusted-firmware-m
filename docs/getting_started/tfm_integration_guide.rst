@@ -23,7 +23,6 @@ The hardware platforms currently supported are:
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
 - Corstone-300 Ecosystem FVP (Cortex-M55 SSE-300 MPS2+)
 - Corstone-300 Ethos-U55 FVP (Cortex-M55 plus Ethos-U55 SSE-300 MPS3)
-- Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
@@ -40,9 +39,6 @@ is used to store source and header files which are platform generic.
 
 More information about subsystems supported by the MPS2+ board can be found in:
 `MPS2+ homepage <https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2>`__
-
-More information about the Musca-A test chip board can be found in:
-`Musca-A homepage <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
 
 More information about the Musca-B1 test chip board can be found in:
 `Musca-B1 homepage <https://www.arm.com/products/development-tools/development-boards/musca-b1-iot>`__
