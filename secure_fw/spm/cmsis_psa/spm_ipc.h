@@ -123,6 +123,7 @@ struct tfm_spm_service_db_t {
     psa_signal_t signal;            /* Service signal                        */
     uint32_t sid;                   /* Service identifier                    */
     bool non_secure_client;         /* If can be called by non secure client */
+    bool connection_based;          /* 'true' for connection-based service   */
     uint32_t version;               /* Service version                       */
     uint32_t version_policy;        /* Service version policy                */
 };

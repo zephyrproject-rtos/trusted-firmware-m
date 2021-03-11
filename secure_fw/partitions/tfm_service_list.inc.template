@@ -37,6 +37,11 @@ const struct tfm_spm_service_db_t service_db[] =
             {% else %}
         .non_secure_client = false,
             {% endif %}
+            {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
+        .connection_based = false,
+            {% else %}
+        .connection_based = true,
+            {% endif %}
             {% if service.version %}
         .version = {{service.version}},
             {% else %}
