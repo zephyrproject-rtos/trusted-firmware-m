@@ -36,10 +36,6 @@
 #include "secure_fw/partitions/tfm_service_list.inc"
 #include "tfm_spm_db_ipc.inc"
 
-/* Extern service variable */
-extern struct tfm_spm_service_t service[];
-extern const struct tfm_spm_service_db_t service_db[];
-
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
