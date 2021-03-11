@@ -233,16 +233,6 @@ Example application with BL2 bootloader
 #. Create a unified hex file comprising of both ``bl2.bin`` and
    ``tfm_s_ns_signed.bin``.
 
-    - For Musca-A
-
-        - Windows::
-
-            srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 bin\tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
-
-        - Linux::
-
-            srec_cat bin/bl2.bin -Binary -offset 0x200000 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
-
     - For Musca-B1
 
         - Windows::
@@ -398,12 +388,7 @@ skipped but there should be no failed tests::
 
     Another way this can be achieved is by using ``srec_cat`` with the ``-fill``
     parameter to fill the corresponding area in the binary with the erase value
-    of the flash (``0xFF``). For example, for Musca-A the command for
-    concatenating the ``bl2`` and ``tfm_s_ns_signed`` binaries would become::
-
-        srec_cat bin/bl2.bin -Binary -offset 0x200000 \
-                 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 \
-                 -fill 0xFF 0x420000 0x425000 -o tfm.hex -Intel
+    of the flash (``0xFF``).
 
     Refer to the platform flash layout for appropriate addresses to erase on
     other platforms.

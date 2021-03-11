@@ -127,8 +127,6 @@ Platforms supported
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
         - `Fast model FVP_MPS2_AEMv8M (AN521).
           <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`_
-        - `Musca-A test chip board.
-          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`_
         - `Musca-B1 test chip board.
           <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`_
         - `Musca-S1 test chip board.

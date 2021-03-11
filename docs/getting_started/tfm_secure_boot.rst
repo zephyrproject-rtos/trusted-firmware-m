@@ -202,7 +202,7 @@ dependencies cannot be reused due to changes in the flash layout.
 
 RAM Loading firmware upgrade
 ============================
-Musca-A supports an image upgrade mode that is separate to the other (overwrite,
+Musca-S supports an image upgrade mode that is separate to the other (overwrite,
 swapping and dirext-xip) modes. This is the ``RAM load`` mode (please refer
 to the table below). Like the direct-xip mode, this selects the newest image
 by reading the image version numbers in the image headers, but instead of
@@ -237,8 +237,6 @@ modes are supported by which platforms:
 | FVP_SSE300_MPS3     | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | LPC55S69            | Yes             | Yes           | No       | Yes            | No           |
-+---------------------+-----------------+---------------+----------+----------------+--------------+
-| Musca-A             | No              | No            | No       | No             | Yes          |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | Musca-B1            | Yes             | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
@@ -758,21 +756,21 @@ To enable RAM loading, please set ``MCUBOOT_UPGRADE_STRATEGY`` to "RAM_LOAD"
 (either in the configuration file or through the command line), and then specify
 a destination load address in RAM where the image can be copied to and executed
 from. The ``IMAGE_LOAD_ADDRESS`` macro must be specified in the target dependent
-files, for example with Musca-A, its ``flash_layout.h`` file in the ``platform``
-folder should include ``#define IMAGE_LOAD_ADDRESS #0x10020000``
+files, for example with Musca-S, its ``flash_layout.h`` file in the ``platform``
+folder should include ``#define IMAGE_LOAD_ADDRESS #0xA0020000``
 
-Executing firmware upgrade on Musca-A board
+Executing firmware upgrade on Musca-S board
 --------------------------------------------
 After two images have been built, they can be concatenated to create the
 combined image using ``srec_cat``:
 
 - Linux::
 
-    srec_cat bin/bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat bin/bl2.bin -Binary -offset 0xA000000 tfm_sign_old.bin -Binary -offset 0xA020000 tfm_sign_new.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 - Windows::
 
-    srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 tfm_sign_old.bin -Binary -offset 0x220000 tfm_sign_new.bin -Binary -offset 0x320000 -o tfm.hex -Intel
+    srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 tfm_sign_old.bin -Binary -offset 0xA020000 tfm_sign_new.bin -Binary -offset 0xA100000 -o tfm.hex -Intel
 
 The following message will be shown in case of successful firmware upgrade when,
 RAM loading is enabled, notice that image with higher version number
@@ -783,8 +781,8 @@ RAM loading is enabled, notice that image with higher version number
     [INF] Starting bootloader
     [INF] Image 0: version=0.0.0.1, magic= good, image_ok=0x3
     [INF] Image 1: version=0.0.0.2, magic= good, image_ok=0x3
-    [INF] Image has been copied from the secondary slot in flash to SRAM address 0x10020000
-    [INF] Booting image from SRAM at address 0x10020000
+    [INF] Image has been copied from the secondary slot in flash to SRAM address 0xA0020000
+    [INF] Booting image from SRAM at address 0xA0020000
     [INF] Bootloader chainload address offset: 0x20000
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
