@@ -90,7 +90,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
-    msg = &(connect_handle->internal_msg);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
+    if (!msg) {
+        /* Have no enough resource to create message */
+        return PSA_ERROR_CONNECTION_BUSY;
+    }
 
     handle = tfm_spm_to_user_handle(connect_handle);
     /* No input or output needed for connect message */
@@ -226,7 +230,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
      * FixMe: Need to check if the message is unrecognized by the RoT
      * Service or incorrectly formatted.
      */
-    msg = &(conn_handle->internal_msg);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
+    if (!msg) {
+        /* FixMe: Need to implement one mechanism to resolve this failure. */
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+    }
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
@@ -275,7 +283,11 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
         tfm_core_panic();
     }
 
-    msg = &(conn_handle->internal_msg);
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
+    if (!msg) {
+        /* FixMe: Need to implement one mechanism to resolve this failure. */
+        tfm_core_panic();
+    }
 
     /*
      * It is a PROGRAMMER ERROR if the connection is currently handling a

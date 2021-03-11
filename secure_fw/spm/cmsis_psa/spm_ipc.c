@@ -485,6 +485,14 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
     return p_msg;
 }
 
+struct tfm_msg_body_t *
+ tfm_spm_get_msg_buffer_from_conn_handle(struct tfm_conn_handle_t *conn_handle)
+{
+    TFM_CORE_ASSERT(conn_handle != NULL);
+
+    return &(conn_handle->internal_msg);
+}
+
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       struct tfm_spm_service_t *service,
                       psa_handle_t handle,
