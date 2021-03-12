@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,6 +12,7 @@
 #include "utilities.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
+#include "tfm_multi_core.h"
 
 #define NS_CALLER_FLAG          (true)
 
@@ -403,4 +404,9 @@ int32_t tfm_mailbox_init(void)
     }
 
     return MAILBOX_SUCCESS;
+}
+
+int32_t tfm_inter_core_comm_init(void)
+{
+    return tfm_mailbox_init();
 }
