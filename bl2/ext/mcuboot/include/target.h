@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2017, Linaro Ltd
- *  Copyright (c) 2018-2020, Arm Limited.
+ *  Copyright (c) 2018-2021, Arm Limited.
  *
  *  SPDX-License-Identifier: Apache-2.0
  */
@@ -18,6 +18,9 @@
  * Comes from: platform/ext/target/<BOARD>/<SUBSYSTEM>/partition
  */
 #include "flash_layout.h"
+
+#ifdef DEFAULT_MCUBOOT_FLASH_MAP
+/* No need to check the platform defines if custom flash map is used */
 
 #ifndef FLASH_BASE_ADDRESS
 #error "FLASH_BASE_ADDRESS must be defined by the target"
@@ -117,5 +120,7 @@ or not by target"
 #ifndef MCUBOOT_MAX_IMG_SECTORS
 #error "MCUBOOT_MAX_IMG_SECTORS must be defined by the target"
 #endif
+
+#endif /* DEFAULT_MCUBOOT_FLASH_MAP */
 
 #endif /* H_TARGETS_TARGET_ */

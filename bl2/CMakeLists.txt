@@ -10,8 +10,9 @@ cmake_minimum_required(VERSION 3.15)
 project("Bootloader" VERSION 0.1.0 LANGUAGES C ASM)
 
 add_executable(bl2
-    src/security_cnt.c
     src/flash_map.c
+    $<$<BOOL:${DEFAULT_MCUBOOT_SECURITY_COUNTERS}>:src/security_cnt.c>
+    $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:src/default_flash_map.c>
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
 )
 
@@ -39,6 +40,11 @@ target_link_options(bl2
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl2.map>
+)
+
+target_compile_definitions(bl2
+    PRIVATE
+        $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
 )
 
 add_convert_to_bin_target(bl2)
