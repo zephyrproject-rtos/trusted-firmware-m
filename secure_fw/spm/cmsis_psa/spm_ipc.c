@@ -40,8 +40,8 @@
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
-void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     uint32_t irq_line);
+void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
+                        uint32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
@@ -858,7 +858,7 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 }
 
 /**
- * \brief assert signal for a given IRQ line.
+ * \brief Sets signal to partition for Second-Level Interrupt Handling mode IRQ
  *
  * \param[in] partition_id      The ID of the partition which handles this IRQ
  * \param[in] signal            The signal associated with this IRQ
@@ -867,11 +867,15 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
  * \retval void                 Success.
  * \retval "Does not return"    Partition ID is invalid
  */
-void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     uint32_t irq_line)
+void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
+                        uint32_t irq_line)
 {
+    __disable_irq();
+
     tfm_spm_hal_disable_irq(irq_line);
     notify_with_signal(partition_id, signal);
+
+    __enable_irq();
 }
 
 int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
