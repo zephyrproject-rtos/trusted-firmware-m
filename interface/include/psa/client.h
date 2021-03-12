@@ -21,9 +21,10 @@ extern "C" {
 
 /**
  * The version of the PSA Framework API that is being used to build the calling
- * firmware.
+ * firmware. Only part of features of FF-M v1.1 have been implemented. FF-M v1.1
+ * is compatible with v1.0.
  */
-#define PSA_FRAMEWORK_VERSION       (0x0100u)
+#define PSA_FRAMEWORK_VERSION       (0x0101u)
 
 /**
  * Return value from psa_version() if the requested RoT Service is not present
