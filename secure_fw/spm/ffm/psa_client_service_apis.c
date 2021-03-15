@@ -250,6 +250,11 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
         tfm_core_panic();
     }
 
+    /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
+    if (!msg->service->service_db->connection_based) {
+        tfm_core_panic();
+    }
+
     msg->msg.rhandle = rhandle;
     conn_handle = tfm_spm_to_handle_instance(msg_handle);
 

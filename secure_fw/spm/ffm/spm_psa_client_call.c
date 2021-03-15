@@ -166,6 +166,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
             TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_BUSY);
         }
 
+        conn_handle->rhandle = NULL;
         handle = tfm_spm_to_user_handle(conn_handle);
     } else {
         conn_handle = tfm_spm_to_handle_instance(handle);
