@@ -47,8 +47,8 @@
  * 0x0000_f000 Secure Storage Area (8 KB)
  * 0x0001_1000 Internal Trusted Storage Area (8 KB)
  * 0x0001_3000 Secure image     primary slot (224 KB)
- * 0x0004_b000 Non-secure image primary slot (168 KB)
- * 0x0007_5000 Unused (44K)
+ * 0x0004_b000 Non-secure image primary slot (172 KB)
+ * 0x0007_5000 Unused (32K)
  * The size of a partition. This should be large enough to contain a S or NS
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
@@ -62,12 +62,12 @@
  * 0x0001_3000 Secure Storage Area (8 KB)
  * 0x0001_5000 Internal Trusted Storage Area (8 KB)
  * 0x0001_7000 Secure image     primary slot (224 KB)
- * 0x0004_f000 Non-secure image primary slot (168 KB)
- * 0x0007_9000 Unused (24 KB)
+ * 0x0004_f000 Non-secure image primary slot (172 KB)
+ * 0x0007_b000 Unused (16 KB)
  * External flash
  * 0x0000_0000 Secure image     secondary slot (224 KB)
  * 0x0003_8000 unused (32 KB)
- * 0x0004_0000 Non-secure image secondary slot (168 KB)
+ * 0x0004_0000 Non-secure image secondary slot (172 KB)
  */
 
 /* Sector size of the flash hardware */
@@ -128,7 +128,7 @@
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
 #define FLASH_S_PARTITION_SIZE          (0x38000) /* S partition */
-#define FLASH_NS_PARTITION_SIZE         (0x2A000) /* NS partition */
+#define FLASH_NS_PARTITION_SIZE         (0x2C000) /* NS partition */
 
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
@@ -154,7 +154,7 @@
 
 #if defined(EXTERNAL_FLASH)
 #define FLASH_S_PARTITION_SIZE          (0x38000) /* S partition */
-#define FLASH_NS_PARTITION_SIZE         (0x2A000) /* NS partition */
+#define FLASH_NS_PARTITION_SIZE         (0x2C000) /* NS partition */
 #else
 #define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
