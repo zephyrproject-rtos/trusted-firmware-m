@@ -804,9 +804,9 @@ implementation and decrease latency.
   |               | implementation of RoT service request doesn't embed memory |
   |               | addresses.                                                 |
   +---------------+------------------------------------------------------------+
-  | CVSS Score    | 6.3 (Medium)                                               |
+  | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
-  | CVSS Vector   | CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:N/I:H/A:N               |
+  | CVSS Vector   | CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N               |
   | String        |                                                            |
   +---------------+------------------------------------------------------------+
 
@@ -848,9 +848,9 @@ implementation and decrease latency.
   |               | implementation of RoT service request doesn't embed memory |
   |               | addresses.                                                 |
   +---------------+------------------------------------------------------------+
-  | CVSS Score    | 6.3 (Medium)                                               |
+  | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
-  | CVSS Vector   | CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N               |
+  | CVSS Vector   | CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N               |
   | String        |                                                            |
   +---------------+------------------------------------------------------------+
 
@@ -1054,6 +1054,37 @@ above.
   | String        |                                                            |
   +---------------+------------------------------------------------------------+
 
+.. table:: TFM-GENERIC-SVC-CALL-SP-FETCH
+  :widths: 10 50
+
+  +---------------+------------------------------------------------------------+
+  | Index         | **TFM-GENERIC-SVC-CALL-SP-FETCH**                          |
+  +---------------+------------------------------------------------------------+
+  | Description   | Invoking Secure functions from handler mode may cause TF-M |
+  |               | IPC model to behave unexpectedly.                          |
+  +---------------+------------------------------------------------------------+
+  | Justification | On Armv8-M based processors with TrustZone, if NSPE calls  |
+  |               | a secure function via Secure Gateway (SG) from non-secure  |
+  |               | Handler mode , TF-M selects secure process stack by        |
+  |               | mistake for SVC handling.                                  |
+  |               | It will most likely trigger a crash in secure world or     |
+  |               | reset the whole system, with a very low likelihood of      |
+  |               | overwriting some memory contents.                          |
+  +---------------+------------------------------------------------------------+
+  | Category      | Denial of service/Tampering                                |
+  +---------------+------------------------------------------------------------+
+  | Mitigation    | TF-M has enhanced implementation to mitigate this          |
+  |               | vulnerability.                                             |
+  |               |                                                            |
+  |               | Refer to [ADVISORY-TFMV-2]_ for details on analysis and    |
+  |               | mitigation in TF-M.                                        |
+  +---------------+------------------------------------------------------------+
+  | CVSS Score    | 4.5 (Medium)                                               |
+  +---------------+------------------------------------------------------------+
+  | CVSS Vector   | CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:L/A:L               |
+  | String        |                                                            |
+  +---------------+------------------------------------------------------------+
+
 ***************
 Version control
 ***************
@@ -1064,6 +1095,8 @@ Version control
   | Version | Description                                      | TF-M version  |
   +=========+==================================================+===============+
   | v0.1    | Initial draft                                    | TF-M v1.1     |
+  +---------+--------------------------------------------------+---------------+
+  | v1.0    | First version                                    | TF-M v1.2.0   |
   +---------+--------------------------------------------------+---------------+
 
 *********
@@ -1090,6 +1123,8 @@ Reference
 
 .. [ADVISORY-TFMV-1] :doc:`Advisory TFMV-1 </docs/reference/security_advisories/stack_seal_vulnerability>`
 
+.. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </docs/reference/security_advisories/ssvc_caller_sp_fetching_vulnerability>`
+
 --------------------
 
-*Copyright (c) 2020 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2020-2021 Arm Limited. All Rights Reserved.*
