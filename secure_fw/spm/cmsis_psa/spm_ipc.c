@@ -753,14 +753,14 @@ uint32_t tfm_spm_init(void)
 
         /* Populate the p_service of stateless_service_ref[] */
         if (service_db[i].connection_based == false) {
-            for (j = 0; j < STATIC_HANDLE_VALUE_LIMIT; j++) {
+            for (j = 0; j < STATIC_HANDLE_NUM_LIMIT; j++) {
                 if (stateless_service_ref[j].sid == service_db[i].sid) {
                     stateless_service_ref[j].p_service = &service[i];
                     break;
                 }
             }
             /* Stateless service not found in tracking table */
-            if (j >= STATIC_HANDLE_VALUE_LIMIT) {
+            if (j >= STATIC_HANDLE_NUM_LIMIT) {
                 tfm_core_panic();
             }
         }

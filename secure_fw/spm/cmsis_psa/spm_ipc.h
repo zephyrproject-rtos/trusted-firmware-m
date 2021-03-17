@@ -29,11 +29,34 @@
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
-/* Set a minimum for client handle. Reserve small values for static handle. */
-#define STATIC_HANDLE_VALUE_LIMIT       32
-#define CLIENT_HANDLE_VALUE_MIN         (STATIC_HANDLE_VALUE_LIMIT + 1)
-#define IS_STATIC_HANDLE(h)             ((h) > 0 && \
-                                         (h) <= STATIC_HANDLE_VALUE_LIMIT)
+/*
+ * Set a number limit for stateless handle.
+ * Valid handle must be positive, set client handle minimum value to 1.
+ */
+#define STATIC_HANDLE_NUM_LIMIT         32
+#define CLIENT_HANDLE_VALUE_MIN         1
+
+#define STAIC_HANDLE_IDX_BIT_WIDTH      8
+#define STAIC_HANDLE_IDX_MASK \
+    (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
+#define GET_INDEX_FROM_STATIC_HANDLE(handle) \
+    (uint32_t)(((handle) & STAIC_HANDLE_IDX_MASK) - 1)
+
+#define STAIC_HANDLE_VER_BIT_WIDTH      8
+#define STAIC_HANDLE_VER_OFFSET         8
+#define STAIC_HANDLE_VER_MASK \
+    (uint32_t)((1UL << STAIC_HANDLE_VER_BIT_WIDTH) - 1)
+#define GET_VERSION_FROM_STATIC_HANDLE(handle) \
+    (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
+
+#define STAIC_HANDLE_INDICATOR_OFFSET   30
+/*
+ * A valid static handle must have indicator bit set, have a positive index,
+ * 1 <= index <= STATIC_HANDLE_NUM_LIMIT.
+ */
+#define IS_VALID_STATIC_HANDLE(handle)                      \
+    (((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET)) && \
+     (GET_INDEX_FROM_STATIC_HANDLE(handle) < STATIC_HANDLE_NUM_LIMIT))
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 

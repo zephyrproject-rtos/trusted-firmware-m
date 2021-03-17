@@ -231,12 +231,23 @@ def process_stateless_services(partitions, static_handle_max_num):
 
     # Auto-allocate stateless handle
     for i in range(0, static_handle_max_num):
-        if reordered_stateless_list[i] == None:
+        if reordered_stateless_list[i] == None and len(stateless_services) > 0:
             service = stateless_services.pop(0)
             service['stateless_handle'] = i + 1
             reordered_stateless_list[i] = service
-        if len(stateless_services) == 0:
-            break
+        """
+        Encode stateless flag and version into stateless handle
+        bit 30: stateless handle indicator
+        bit 15-8: stateless service version
+        bit 7-0: stateless handle index
+        """
+        if reordered_stateless_list[i] != None:
+            stateless_handle_value = reordered_stateless_list[i]['stateless_handle']
+            stateless_flag = 1 << 30
+            stateless_handle_value |= stateless_flag
+            stateless_version = (reordered_stateless_list[i]['version'] & 0xFF) << 8
+            stateless_handle_value |= stateless_version
+            reordered_stateless_list[i]['stateless_handle'] = '0x%08x' % stateless_handle_value
 
     return reordered_stateless_list
 
