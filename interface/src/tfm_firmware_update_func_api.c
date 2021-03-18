@@ -5,13 +5,11 @@
  *
  */
 
+#include "psa/client.h"
 #include "psa/update.h"
 #include "tfm_api.h"
-
 #include "tfm_ns_interface.h"
 #include "tfm_veneers.h"
-
-#define IOVEC_LEN(x) (uint32_t)(sizeof(x)/sizeof(x[0]))
 
 psa_status_t psa_fwu_write(uint32_t image_id,
                            size_t block_offset,

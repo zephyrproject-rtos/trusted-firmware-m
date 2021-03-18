@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "array.h"
 #include "psa/internal_trusted_storage.h"
 #include "tfm_api.h"
 
@@ -14,8 +15,6 @@
 #else
 #include "tfm_veneers.h"
 #endif
-
-#define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 psa_status_t psa_its_set(psa_storage_uid_t uid,
                          size_t data_length,

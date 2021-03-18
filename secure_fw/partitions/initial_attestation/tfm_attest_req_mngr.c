@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,13 +11,13 @@
 #include "attest.h"
 
 #ifdef TFM_PSA_API
-#include "psa_manifest/tfm_initial_attestation.h"
+#include "array.h"
 #include "psa/client.h"
 #include "psa/service.h"
+#include "psa_manifest/tfm_initial_attestation.h"
 #include "region_defs.h"
 
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
-#define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 typedef psa_status_t (*attest_func_t)(const psa_msg_t *msg);
 

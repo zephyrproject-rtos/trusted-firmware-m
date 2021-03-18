@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "array.h"
 #include "tfm_boot_status.h"
 #include "region_defs.h"
 #include "tfm_memory_utils.h"
@@ -84,8 +85,7 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
     uint32_t partition_id;
     uint32_t i;
     int32_t rc = -1;
-    const uint32_t array_size =
-            sizeof(access_policy_table) / sizeof(access_policy_table[0]);
+    const uint32_t array_size = ARRAY_SIZE(access_policy_table);
 
 #ifndef TFM_PSA_API
     uint32_t partition_idx = tfm_spm_partition_get_running_partition_idx();

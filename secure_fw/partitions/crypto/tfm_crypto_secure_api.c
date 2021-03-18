@@ -5,14 +5,13 @@
  *
  */
 
+#include "array.h"
 #include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
 #endif
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 #ifdef TFM_PSA_API
 #include "psa/client.h"

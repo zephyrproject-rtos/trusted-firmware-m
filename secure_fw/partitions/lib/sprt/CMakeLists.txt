@@ -12,6 +12,7 @@ add_library(tfm_sprt STATIC)
 target_include_directories(tfm_sprt
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        ${CMAKE_SOURCE_DIR}/secure_fw/include/tfm
 )
 
 target_sources(tfm_sprt

@@ -1,16 +1,14 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "psa/client.h"
 #include "psa/protected_storage.h"
-
 #include "tfm_ns_interface.h"
 #include "tfm_veneers.h"
-
-#define IOVEC_LEN(x) (uint32_t)(sizeof(x)/sizeof(x[0]))
 
 psa_status_t psa_ps_set(psa_storage_uid_t uid,
                         size_t data_length,

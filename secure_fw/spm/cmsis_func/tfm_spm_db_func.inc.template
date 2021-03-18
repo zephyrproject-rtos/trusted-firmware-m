@@ -10,6 +10,7 @@
 #ifndef __TFM_SPM_DB_FUNC_INC__
 #define __TFM_SPM_DB_FUNC_INC__
 
+#include "array.h"
 #include "psa_manifest/sid.h"
 
 {# Produce a build error if heap_size is presented in the manifest, because of the dynamic memory allocation is not supported now. #}
@@ -250,7 +251,7 @@ static struct spm_partition_desc_t partition_list [] =
 
 struct spm_partition_db_t g_spm_partition_db = {
     .is_init = 0,
-    .partition_count = sizeof(partition_list) / sizeof(partition_list[0]),
+    .partition_count = ARRAY_SIZE(partition_list),
     .running_partition_idx = 0,
     .partitions = partition_list,
 };
