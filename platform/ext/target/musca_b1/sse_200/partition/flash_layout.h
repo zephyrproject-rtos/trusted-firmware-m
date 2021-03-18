@@ -25,28 +25,28 @@
  * Flash layout on Musca-B1 with BL2 (multiple image boot, boot from eFlash 0):
  *
  * 0x0A00_0000 BL2 - MCUBoot (128 KB)
- * 0x0A02_0000 Secure image     primary slot (384 KB)
- * 0x0A08_0000 Non-secure image primary slot (512 KB)
- * 0x0A10_0000 Secure image     secondary slot (384 KB)
- * 0x0A16_0000 Non-secure image secondary slot (512 KB)
- * 0x0A1E_0000 Scratch area (64 KB)
- * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
- * 0x0A1F_8000 NV counters area (16 KB)
- * 0x0A1F_C000 Unused (32 KB)
+ * 0x0A02_0000 Secure image     primary slot (392 KB)
+ * 0x0A08_2000 Non-secure image primary slot (512 KB)
+ * 0x0A10_2000 Secure image     secondary slot (392 KB)
+ * 0x0A16_4000 Non-secure image secondary slot (512 KB)
+ * 0x0A1E_4000 Scratch area (64 KB)
+ * 0x0A1F_4000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1F_c000 NV counters area (16 KB)
+ * 0x0A20_0000 Unused (16 KB)
  *
  * Flash layout on Musca-B1 with BL2 (single image boot):
  *
  * 0x0A00_0000 BL2 - MCUBoot (128 KB)
- * 0x0A02_0000 Primary image area (896 KB):
- *    0x0A02_0000 Secure     image primary (384 KB)
- *    0x0A08_0000 Non-secure image primary (512 KB)
- * 0x0A10_0000 Secondary image area (896 KB):
- *    0x0A10_0000 Secure     image secondary (384 KB)
- *    0x0A16_0000 Non-secure image secondary (512 KB)
- * 0x0A1E_0000 Scratch area (64 KB)
- * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
- * 0x0A1F_8000 NV counters area (16 KB)
- * 0x0A1F_C000 Unused (32 KB)
+ * 0x0A02_0000 Primary image area (904 KB):
+ *    0x0A02_0000 Secure     image primary (392 KB)
+ *    0x0A08_2000 Non-secure image primary (512 KB)
+ * 0x0A10_2000 Secondary image area (904 KB):
+ *    0x0A10_2000 Secure     image secondary (392 KB)
+ *    0x0A16_4000 Non-secure image secondary (512 KB)
+ * 0x0A1E_4000 Scratch area (64 KB)
+ * 0x0A1F_4000 Internal Trusted Storage Area (32 KB)
+ * 0x0A1F_c000 NV counters area (16 KB)
+ * 0x0A20_0000 Unused (16 KB)
  *
  * Note: As eFlash is written at runtime, the eFlash driver code is placed
  * in code SRAM to avoid any interference.
@@ -67,7 +67,7 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE          (0x60000) /* S partition: 384 KB */
+#define FLASH_S_PARTITION_SIZE          (0x62000) /* S partition: 392 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS partition: 512 KB */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
