@@ -122,7 +122,6 @@ target_sources(platform_s
         ./driver_dap.c
         ./nv_counters.c
         ./services/src/tfm_platform_system.c
-        ./dummy_crypto_keys.c
         ./Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
