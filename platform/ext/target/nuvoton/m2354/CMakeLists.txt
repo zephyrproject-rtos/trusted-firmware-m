@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 # Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -99,12 +99,7 @@ target_sources(platform_s
         ../common/tfm_hal_isolation.c
         ../common/boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
-        ${PLATFORM_DIR}/ext/common/template/attest_hal.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
-        ${PLATFORM_DIR}/ext/common/template/tfm_initial_attestation_key_material.c
-        ${PLATFORM_DIR}/ext/common/template/tfm_rotpk.c
-        ${PLATFORM_DIR}/ext/common/template/crypto_keys.c
-        ${PLATFORM_DIR}/ext/common/template/nv_counters.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
