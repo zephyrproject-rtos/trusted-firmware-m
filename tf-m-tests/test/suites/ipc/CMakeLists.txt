@@ -32,7 +32,7 @@ target_compile_definitions(tfm_test_suite_ipc_ns
 
 target_link_libraries(tfm_test_suite_ipc_ns
     PRIVATE
-        tfm_test_framework
+        tfm_test_framework_ns
 )
 
 target_link_libraries(tfm_ns_tests
@@ -55,7 +55,7 @@ if (TEST_S)
 
     target_link_libraries(tfm_test_suite_ipc_s
         PRIVATE
-            tfm_test_framework
+            tfm_test_framework_s
     )
 
     target_link_libraries(tfm_s_tests

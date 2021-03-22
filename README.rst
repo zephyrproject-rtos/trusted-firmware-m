@@ -20,8 +20,8 @@ TF-M:
 
 TF-M Tests:
     repo: https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    tag: TF-Mv1.2.0
-    commit: ccda809801e529250b47c9ac470cf94daef1bb1b
+    tag: TF-Mv1.3.0-RC1
+    commit: e7430d13b388a106c9f4cfb534e7340ce1482575
     license: Apache 2.0
 
 psa-arch-tests:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #ifndef __INTEG_TEST_H__
 #define __INTEG_TEST_H__
 
-#include "test_framework.h"
+#include "test_framework_error_codes.h"
 
 #ifdef __cplusplus
 extern "C" {

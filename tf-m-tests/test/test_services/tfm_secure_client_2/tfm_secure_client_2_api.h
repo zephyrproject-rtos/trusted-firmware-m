@@ -19,6 +19,7 @@ extern "C" {
 
 #define TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL    1001
 #define TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL 2001
+#define TFM_SECURE_CLIENT_2_ID_RETRIEVE_APP_MEM   3001
 
 /**
  * \brief Calls the test function with the supplied ID within the execution

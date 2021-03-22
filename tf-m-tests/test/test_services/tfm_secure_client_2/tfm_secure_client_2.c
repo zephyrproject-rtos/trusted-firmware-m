@@ -16,7 +16,13 @@
 #include "psa/client.h"
 #endif
 
-#ifdef TFM_PARTITION_CRYPTO
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+/* Define the global variable for the TFM_SECURE_CLIENT_2_SID service. */
+uint8_t secure_client_2_data;
+uint8_t *secure_client_2_data_p = &secure_client_2_data;
+#endif
+
+#if defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG)
 /**
  * \brief Tests calling psa_destroy_key() with the supplied key handle.
  *
@@ -39,9 +45,9 @@ static psa_status_t secure_client_2_test_crypto_access_ctrl(const void *arg,
     /* Attempt to destroy the key handle */
     return psa_destroy_key(key_handle);
 }
-#endif /* TFM_PARTITION_CRYPTO */
+#endif /* defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG) */
 
-#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+#if defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) || defined(FORWARD_PROT_MSG)
 /**
  * \brief Tests calling psa_its_get() with the supplied uid.
  *
@@ -66,7 +72,27 @@ static psa_status_t secure_client_2_test_its_access_ctrl(const void *arg,
     /* Attempt to get one byte from the UID and return the resulting status */
     return psa_its_get(uid, 0, sizeof(data), data, &p_data_length);
 }
-#endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
+#endif /* defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) || defined(FORWARD_PROT_MSG) */
+
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+/**
+ * \brief Tests calling psa_write() to write a pointer to outvec.
+ *
+ * \param[in] msg    Pointer to the message of the test function
+ */
+static void secure_client_2_test_retrieve_app_mem(psa_msg_t *msg)
+{
+        if (msg->out_size[0] != 0) {
+            /*
+             * Write a pointer to outvec. The pointer points to a RW memory
+             * address in IPC service partition.
+             */
+            psa_write(msg->handle, 0, &secure_client_2_data_p,
+                      sizeof(secure_client_2_data_p));
+        }
+        psa_reply(msg->handle, PSA_SUCCESS);
+}
+#endif /* TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM */
 
 /**
  * \brief Calls the test function with the supplied ID and returns the result
@@ -82,11 +108,11 @@ static psa_status_t secure_client_2_dispatch(int32_t id, const void *arg,
                                              size_t arg_len)
 {
     switch (id) {
-#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+#if defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) || defined(FORWARD_PROT_MSG)
     case TFM_SECURE_CLIENT_2_ID_ITS_ACCESS_CTRL:
         return secure_client_2_test_its_access_ctrl(arg, arg_len);
 #endif
-#ifdef TFM_PARTITION_CRYPTO
+#if defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG)
     case TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL:
         return secure_client_2_test_crypto_access_ctrl(arg, arg_len);
 #endif
@@ -114,6 +140,11 @@ void tfm_secure_client_2_init(void)
         case PSA_IPC_DISCONNECT:
             psa_reply(msg.handle, PSA_SUCCESS);
             break;
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+        case TFM_SECURE_CLIENT_2_ID_RETRIEVE_APP_MEM:
+            secure_client_2_test_retrieve_app_mem(&msg);
+            break;
+#endif
         default:
             len = psa_read(msg.handle, 0, arg, SECURE_CLIENT_2_MAX_ARG_LEN);
             psa_reply(msg.handle, secure_client_2_dispatch(msg.type, arg, len));

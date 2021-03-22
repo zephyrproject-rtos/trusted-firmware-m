@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,7 +38,7 @@ target_compile_definitions(tfm_test_suite_audit_ns
 
 target_link_libraries(tfm_test_suite_audit_ns
     PRIVATE
-        tfm_test_framework
+        tfm_test_framework_ns
         tfm_audit_logging_defs
 )
 
@@ -62,8 +62,8 @@ if (TEST_S)
 
     target_link_libraries(tfm_test_suite_audit_s
         PRIVATE
-            tfm_test_framework
-            tfm_partition_audit
+            tfm_test_framework_s
+            tfm_psa_rot_partition_audit
     )
 
     target_link_libraries(tfm_s_tests

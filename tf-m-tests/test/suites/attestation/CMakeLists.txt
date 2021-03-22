@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -7,7 +7,7 @@
 
 cmake_policy(SET CMP0079 NEW)
 
-if (NOT TFM_PARTITION_INITIAL_ATTESTATION)
+if (NOT TFM_PARTITION_INITIAL_ATTESTATION AND NOT FORWARD_PROT_MSG)
     return()
 endif()
 
@@ -44,7 +44,7 @@ target_link_libraries(tfm_test_suite_attestation_ns
     PRIVATE
         tfm_qcbor
         tfm_t_cose
-        tfm_test_framework
+        tfm_test_framework_ns
         #TODO I'm not sure this should _really_ be linked here
         tfm_attestation_defs
         tfm_boot_status
@@ -87,10 +87,10 @@ if (TEST_S)
         PRIVATE
             tfm_qcbor
             tfm_t_cose
-            tfm_test_framework
-            tfm_partition_attestation
+            tfm_test_framework_s
+            tfm_attestation_defs
             tfm_boot_status
-            tfm_partition_crypto
+            $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:tfm_psa_rot_partition_crypto>
             platform_s
     )
 

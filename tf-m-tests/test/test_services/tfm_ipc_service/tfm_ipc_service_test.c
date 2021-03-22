@@ -6,13 +6,13 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_secure_api.h"
-#include "tfm_api.h"
 #include "psa_manifest/tfm_ipc_service_test.h"
+#include "tfm_api.h"
+#include "tfm_hal_isolation.h"
+#include "tfm_secure_api.h"
 
 #define IPC_SERVICE_BUFFER_LEN                          32
 
@@ -131,7 +131,7 @@ static void ipc_service_psa_access_app_readonly_mem(void)
     psa_msg_t msg;
     psa_status_t r;
     char rec_data;
-    uint32_t rec_buf;
+    uint32_t rec_buf, attr = 0;
 
     psa_get(IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM_SIGNAL, &msg);
     switch (msg.type) {
@@ -160,11 +160,14 @@ static void ipc_service_psa_access_app_readonly_mem(void)
                 psa_reply(msg.handle, -1);
                 break;
             }
-
-            /* Write the char type read only memory. */
-            *((char *)rec_buf) = 'B';
+            attr |= (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE
+                     | TFM_HAL_ACCESS_UNPRIVILEGED);
+            if (tfm_hal_memory_has_access((uintptr_t)rec_buf, 4, attr) !=
+                                                      TFM_HAL_ERROR_MEM_FAULT) {
+                psa_reply(msg.handle, PSA_ERROR_GENERIC_ERROR);
+                break;
+            }
         }
-
         psa_reply(msg.handle, PSA_SUCCESS);
         break;
     case PSA_IPC_DISCONNECT:

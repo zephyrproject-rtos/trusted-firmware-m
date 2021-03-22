@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -7,7 +7,7 @@
 
 cmake_policy(SET CMP0079 NEW)
 
-if (NOT TFM_PARTITION_CRYPTO)
+if (NOT TFM_PARTITION_CRYPTO AND NOT FORWARD_PROT_MSG)
     return()
 endif()
 
@@ -28,7 +28,7 @@ target_include_directories(tfm_test_suite_crypto_ns
 
 target_link_libraries(tfm_test_suite_crypto_ns
     PRIVATE
-        tfm_test_framework
+        tfm_test_framework_ns
 )
 
 target_link_libraries(tfm_ns_tests
@@ -65,8 +65,8 @@ if (TEST_S)
     target_link_libraries(tfm_test_suite_crypto_s
         PRIVATE
             tfm_secure_api
-            tfm_test_framework
-            tfm_partition_secure_client_2
+            tfm_test_framework_s
+            tfm_app_rot_partition_secure_client_2
             platform_s
     )
 
