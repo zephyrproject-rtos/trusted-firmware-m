@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -8,14 +8,32 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
+add_library(mcuboot_config INTERFACE)
+
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
+
+add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
+
+target_include_directories(bootutil
+    PUBLIC
+        include
+)
+
+target_link_libraries(bootutil
+    PUBLIC
+        mcuboot_config
+        platform_bl2
+        bl2_mbedcrypto
+)
+
+target_include_directories(mcuboot_config
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # for mcuboot_config.h only
+)
 
 target_include_directories(bl2
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # for mcuboot_config.h only
-        $<BUILD_INTERFACE:${MCUBOOT_PATH}/boot/bootutil/include>
-        $<BUILD_INTERFACE:${MCUBOOT_PATH}/boot>
 )
 
 target_sources(bl2
@@ -24,18 +42,11 @@ target_sources(bl2
         ${CMAKE_CURRENT_SOURCE_DIR}/keys.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_extended.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_legacy.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/loader.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_misc.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/image_validate.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/image_rsa.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/boot_record.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_scratch.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_move.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/swap_misc.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/encrypted.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/fault_injection_hardening_delay_rng_mbedtls.c
+)
+
+target_link_libraries(bl2
+    PUBLIC
+        bootutil
 )
 
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)
@@ -114,7 +125,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --pad-header
         -H 0x400
         -s ${MCUBOOT_SECURITY_COUNTER_S}
-        -d \"\(0,${MCUBOOT_S_IMAGE_MIN_VER}\)\"
+        -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
         $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
@@ -122,27 +133,27 @@ add_custom_command(OUTPUT tfm_s_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin $<TARGET_FILE_DIR:bl2>
 )
 
+set(FLASH_AREA_NUM 1)
+configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
+
+add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
+target_compile_options(signing_layout_ns
+    PRIVATE
+        $<$<C_COMPILER_ID:GNU>:-E\;-xc>
+        $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
+        $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
+)
+target_compile_definitions(signing_layout_ns
+    PRIVATE
+        $<$<BOOL:${BL2}>:BL2>
+        $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+)
+target_link_libraries(signing_layout_ns
+    PRIVATE
+        platform_bl2
+)
+
 if(NS)
-    set(FLASH_AREA_NUM 1)
-    configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
-
-    add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
-    target_compile_options(signing_layout_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:-E\;-xc>
-            $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
-            $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
-    )
-    target_compile_definitions(signing_layout_ns
-        PRIVATE
-            $<$<BOOL:${BL2}>:BL2>
-            $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
-    )
-    target_link_libraries(signing_layout_ns
-        PRIVATE
-            platform_bl2
-    )
-
     add_custom_target(tfm_ns_signed_bin
         SOURCES tfm_ns_signed.bin
     )
@@ -162,7 +173,7 @@ if(NS)
             --pad-header
             -H 0x400
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
-            -d \"\(1, ${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
+            -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
@@ -173,7 +184,6 @@ endif()
 
 if(NS)
     add_custom_target(tfm_s_ns_signed_bin
-        ALL
         SOURCES tfm_s_ns_signed.bin
     )
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
@@ -198,18 +208,19 @@ if(NS)
             DEPENDS tfm_s_ns_bin tfm_s_ns.bin
             DEPENDS signing_layout_s
 
+        # Use the non-secure key to sign the combined image if FORWARD_PROT_MSG is set.
+        # In such a configuration there is a subsystem with higher privileges controlling the
+        # the boot process and current implementation requires to use the non-secure key here.
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_S}
             --layout $<TARGET_OBJECTS:signing_layout_s>
-            -k ${MCUBOOT_KEY_S}
+            -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
             --align 1
             --pad
             --pad-header
             -H 0x400
             -s ${MCUBOOT_SECURITY_COUNTER_S}
-            -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
-            -d \"\(1, ${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             tfm_s_ns.bin
@@ -221,5 +232,5 @@ endif()
 
 add_custom_target(signed_images
     ALL
-    DEPENDS $<$<BOOL:${NS}>:tfm_s_ns_signed_bin>
+    DEPENDS $<IF:$<BOOL:${NS}>,tfm_s_ns_signed_bin,tfm_s_signed_bin>
 )

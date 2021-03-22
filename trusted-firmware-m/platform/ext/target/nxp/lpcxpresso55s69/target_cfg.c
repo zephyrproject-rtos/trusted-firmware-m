@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +23,7 @@
 #include "target_cfg.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_log.h"
-
-/* Macros to pick linker symbols */
-#define REGION(a, b, c) a##b##c
-#define REGION_NAME(a, b, c) REGION(a, b, c)
-#define REGION_DECLARE(a, b, c) extern uint32_t REGION_NAME(a, b, c)
+#include "region.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -79,14 +76,14 @@ const struct memory_region_limits memory_regions = {
  */
 #define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         USART0_BASE_NS,
         USART0_BASE_NS + 0xFFF,
         0,
         0
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         CTIMER2_BASE,
         CTIMER2_BASE + 0xFFF,
         &(AHB_SECURE_CTRL->SEC_CTRL_APB_BRIDGE[0].SEC_CTRL_APB_BRIDGE1_MEM_CTRL1),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,26 +41,26 @@ LR_CODE S_CODE_START {
     }
 
     /**** PSA RoT CODE + RO-data starts here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    ER_{{manifest.manifest.name}}_RO +0 ALIGN 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
     }
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -68,26 +68,26 @@ LR_CODE S_CODE_START {
     /**** PSA RoT CODE + RO-data ends here */
 
     /**** APPLICATION RoT CODE + RO-data starts here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    ER_{{manifest.manifest.name}}_RO +0 ALIGN 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}} (+RO)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
     }
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -96,8 +96,6 @@ LR_CODE S_CODE_START {
 
     /**** Unprivileged Secure code + RO-data starts here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
-        platform_retarget_dev.o (+RO)
-        device_definition.o (+RO)
         *(SFN)
         *armlib* (+RO)
         *libtfm_sprt.a (+RO)
@@ -135,45 +133,37 @@ LR_CODE S_CODE_START {
     }
 
     /**** PSA RoT RWZI starts here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
 
-    PT_{{manifest.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
         /* Position tag */
     }
 
-    ER_{{manifest.manifest.name}}_RWZI +0 ALIGN 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    ER_{{partition.manifest.name}}_RWZI +0 ALIGN 32 {
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
-        *({{manifest.manifest.name}}_ATTR_ZI)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
     }
 
-    {% if manifest.attr.tfm_partition_ipc %}
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
-    }
-    {% else %}
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
-    }
-    {% endif %}
-
-    PT_{{manifest.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
         /* Position tag */
     }
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -188,45 +178,37 @@ LR_CODE S_CODE_START {
     ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
     }
 
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
 
-    PT_{{manifest.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
         /* Position tag */
     }
 
-    ER_{{manifest.manifest.name}}_RWZI +0 ALIGN 32 {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    ER_{{partition.manifest.name}}_RWZI +0 ALIGN 32 {
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}} (+RW +ZI)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
-        *({{manifest.manifest.name}}_ATTR_ZI)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
     }
 
-    {% if manifest.attr.tfm_partition_ipc %}
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY {{manifest.manifest.stack_size}} {
-    }
-    {% else %}
-    {{manifest.manifest.name}}_LINKER_STACK +0 ALIGN 128 EMPTY 0 {
-    }
-    {% endif %}
-
-    PT_{{manifest.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
         /* Position tag */
     }
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}

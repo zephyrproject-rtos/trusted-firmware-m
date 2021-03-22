@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,5 +42,7 @@
 
 #define MUSCA_S1_SCC_DEV    MUSCA_S1_SCC_DEV_S
 #define SSE_200_CACHE_DEV   SSE_200_CACHE_DEV_S
+
+#define QSPI_FLASH0_DEV     MT25QL_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

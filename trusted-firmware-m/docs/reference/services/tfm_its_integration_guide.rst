@@ -114,8 +114,9 @@ Core Files
 
 - ``tfm_internal_trusted_storage.c`` - Contains the TF-M internal trusted
   storage API implementations which are the entry points to the ITS service.
-  Allocates a filesystem context for ITS and makes appropriate fs calls. Also
-  handles requests from the PS partition with a separate fs context.
+  Constructs a filesystem configuration using information from the ITS HAL,
+  allocates a filesystem context for ITS and makes appropriate FS calls. Also
+  handles requests from the PS partition with a separate FS config and context.
 
 - ``its_utils.c`` - Contains common and basic functionalities used across the
   ITS service code.
@@ -130,11 +131,11 @@ Flash Filesystem Interface
 - ``flash_fs/its_flash_fs.c`` - Contains the ``its_flash_fs`` implementation for
   the required interfaces.
 
-- ``flash_fs/its_flash_fs_mbloc.c`` - Contains the metadata block manipulation
+- ``flash_fs/its_flash_fs_mblock.c`` - Contains the metadata block manipulation
   functions required to implement the ``its_flash_fs`` interfaces in
   ``flash_fs/its_flash_fs.c``.
 
-- ``flash_fs/its_flash_fs_dbloc.c`` - Contains the data block manipulation
+- ``flash_fs/its_flash_fs_dblock.c`` - Contains the data block manipulation
   functions required to implement the ``its_flash_fs`` interfaces in
   ``flash_fs/its_flash_fs.c``.
 
@@ -143,13 +144,15 @@ flash filesystem implementation or filesystem proxy (supplicant).
 
 Flash Interface
 ===============
-- ``flash/its_flash.h`` - Abstracts the flash operations for the internal
-  trusted storage service. Defines the ``struct its_flash_info_t`` type, which
-  is used as a parameter to the filesystem to provide information about the
-  flash device in use, such as the block size and number of blocks available.
+The ITS filesystem flash interface is defined by ``struct its_flash_fs_ops_t``
+in ``flash_fs/its_flash_fs.h``.
 
-- ``flash/its_flash.c`` - Contains the ``its_flash`` implementations common to
-  all flash types.
+Implementations of the ITS filesystem flash interface for different types of
+storage can be found in the ```internal_trusted_storage/flash`` directory.
+
+- ``flash/its_flash.h`` - Helper header that includes the correct ITS flash
+  interface implementation for the target, and abstracts the allocation of
+  different flash device types.
 
 - ``flash/its_flash_nand.c`` - Implements the ITS flash interface for a NAND
   flash device, on top of the CMSIS flash interface implemented by the target.
@@ -164,21 +167,12 @@ Flash Interface
   flash device using RAM, on top of the CMSIS flash interface implemented by the
   target.
 
-- ``flash/its_flash_info_internal.c`` - Defines an instance of the
-  ``struct its_flash_info_t`` type for the internal flash device based on
-  target-specific definitions.
-
-- ``flash/its_flash_info_external.c`` - Defines an instance of the
-  ``struct its_flash_info_t`` type for the external flash device, used only to
-  handle requests from the PS partition.
-
 The CMSIS flash interface **must** be implemented for each target based on its
 flash controller.
 
 The ITS flash interface depends on target-specific definitions from
 ``platform/ext/target/<TARGET_NAME>/partition/flash_layout.h``.
-Please see the `Internal Trusted Storage Service Definitions` section for
-details.
+Please see the `Internal Trusted Storage Service HAL` section for details.
 
 *****************************
 ITS Service Integration Guide
@@ -188,49 +182,6 @@ This section describes mandatory (i.e. **must** implement) or optional
 to account in order to integrate the internal trusted storage service in a new
 platform.
 
-Maximum Asset Size
-==================
-An asset is stored in a contiguous space in a block/sector. The maximum size of
-an asset can be up-to the size of the data block/sector.
-
-Internal Trusted Storage Service Platform Definitions
-=====================================================
-The ITS service requires the following platform definitions:
-
-- ``ITS_SECTOR_SIZE`` - Defines the size of the flash sectors (the smallest
-  erasable unit) in bytes.
-- ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
-  to form a logical block in the filesystem.
-- ``ITS_FLASH_DEV_NAME`` - Specifies the flash device used by ITS to store the
-  data.
-- ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes. Valid values are powers of two between 1 and ``ITS_SECTOR_SIZE``
-  inclusive.
-
-The sectors reserved to be used as internal trusted storage **must** be
-contiguous sectors starting at ``ITS_FLASH_AREA_ADDR``.
-
-Target must provide a header file, called ``flash_layout.h``, which defines the
-information explained above. The defines must be named as they are specified
-above.
-
-More information about the ``flash_layout.h`` content, not ITS related, is
-available in :doc:`platform readme </platform/ext/readme>` along with other
-platform information.
-
-The following optional platform definitions may also be defined in
-``flash_layout.h`` or set at build time in ``platform/ext/<TARGET_NAME>.cmake``:
-
-- ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
-  storage area starts.
-  If not defined, the platform must implement ``tfm_hal_its_fs_info()``.
-- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
-  internal trusted storage in bytes.
-  If not defined, the platform must implement ``tfm_hal_its_fs_info()``.
-- ``ITS_MAX_BLOCK_DATA_COPY`` - Defines the buffer size used when copying data
-  between blocks, in bytes. If not provided, defaults to 256. Increasing this
-  value will increase the memory footprint of the service.
-
 Flash Interface
 ===============
 For ITS service operations, a contiguous set of blocks must be earmarked for
@@ -239,8 +190,72 @@ number of blocks greater than or equal to 4. Total number of blocks can not be
 0, 1 or 3. This is a design choice limitation to provide power failure safe
 update operations.
 
-For API specification, please check:
-``secure_fw/partitions/internal_trusted_storage/flash/its_flash.h``
+Maximum Asset Size
+==================
+An asset is stored in a contiguous space in a logical filesystem block. The
+maximum size of an asset can be up-to the size of the data block. Typically,
+each logical block corresponds to one physical flash erase sector (the smallest
+unit that can erased), but the ``TFM_HAL_ITS_SECTORS_PER_BLOCK`` configuration
+below allows a number of contiguous erase sectors to form one logical block.
+
+Internal Trusted Storage Service HAL
+====================================
+The ITS service requires the platform to implement the ITS HAL, defined in
+``platform/include/tfm_hal_its.h``.
+
+The following C definitions in the HAL are mandatory, and must be defined by the
+platform in a header named ``flash_layout.h``:
+
+- ``TFM_HAL_ITS_FLASH_DRIVER`` - Defines the identifier of the CMSIS Flash
+  ARM_DRIVER_FLASH object to use for ITS. It must have been allocated by the
+  platform and will be declared extern in the HAL header.
+
+- ``TFM_HAL_ITS_PROGRAM_UNIT`` - Defines the size of the ITS flash device's
+  physical program unit (the smallest unit of data that can be individually
+  programmed to flash). It must be equal to
+  ``TFM_HAL_ITS_FLASH_DRIVER.GetInfo()->program_unit``, but made available at
+  compile time so that filesystem structures can be statically sized. Valid
+  values are powers of two between 1 and the flash sector size, inclusive.
+
+The following C definitions in the HAL may optionally be defined by the platform
+in the ``flash_layout.h`` header:
+
+- ``TFM_HAL_ITS_FLASH_AREA_ADDR`` - Defines the base address of the dedicated
+  flash area for ITS.
+
+- ``TFM_HAL_ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
+  for ITS in bytes.
+
+- ``TFM_HAL_ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous physical
+  flash erase sectors that form a logical erase block in the filesystem. The
+  typical value is ``1``, but it may be increased so that the maximum required
+  asset size will fit in one logical block.
+
+If any of the above definitions are not provided by the platform, then the
+``tfm_hal_its_fs_info()`` HAL API must be implemented instead. This function is
+documented in ``tfm_hal_its.h``.
+
+The sectors reserved to be used for Internal Trusted Storage **must** be
+contiguous.
+
+Internal Trusted Storage Service Optional Platform Definitions
+==============================================================
+The following optional platform definitions may be defined in
+``flash_layout.h``:
+
+- ``ITS_RAM_FS_SIZE`` - Defines the size of the RAM FS buffer when using the
+  RAM FS emulated flash implementation. The buffer must be at least as large as
+  the area earmarked for the filesystem by the HAL.
+- ``ITS_FLASH_NAND_BUF_SIZE`` - Defines the size of the write buffer when using
+  the NAND flash implementation. The buffer must be at least as large as a
+  logical filesystem block.
+- ``ITS_MAX_BLOCK_DATA_COPY`` - Defines the buffer size used when copying data
+  between blocks, in bytes. If not provided, defaults to 256. Increasing this
+  value will increase the memory footprint of the service.
+
+More information about the ``flash_layout.h`` content, not ITS related, is
+available in :doc:`platform readme </platform/ext/readme>` along with other
+platform information.
 
 ITS Service Build Definitions
 =============================
@@ -299,5 +314,5 @@ build definitions is:
 
 --------------
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

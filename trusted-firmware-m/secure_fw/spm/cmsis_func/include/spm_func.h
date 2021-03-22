@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #define __SPM_FUNC_H__
 
 #include <stdint.h>
+#include "fih.h"
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "psa/client.h"
@@ -43,11 +44,12 @@
 
 enum spm_err_t {
     SPM_ERR_OK = 0,
-    SPM_ERR_PARTITION_DB_NOT_INIT,
-    SPM_ERR_PARTITION_ALREADY_ACTIVE,
-    SPM_ERR_PARTITION_NOT_AVAILABLE,
-    SPM_ERR_INVALID_PARAMETER,
-    SPM_ERR_INVALID_CONFIG,
+    SPM_ERR_PARTITION_DB_NOT_INIT = 0x3A5C,
+    SPM_ERR_PARTITION_ALREADY_ACTIVE = 0x5C3A,
+    SPM_ERR_PARTITION_NOT_AVAILABLE = 0xA35C,
+    SPM_ERR_INVALID_PARAMETER = 0xCA35,
+    SPM_ERR_INVALID_CONFIG = 0x35A3C,
+    SPM_ERR_GENERIC_ERR = 0x5C3A5,
 };
 
 /**
@@ -119,7 +121,7 @@ struct spm_partition_desc_t {
     struct spm_partition_runtime_data_t runtime_data;
     const struct spm_partition_static_data_t *static_data;
     /** A list of platform_data pointers */
-    const struct tfm_spm_partition_platform_data_t **platform_data_list;
+    const struct platform_data_t **platform_data_list;
 };
 
 struct spm_partition_db_t {
@@ -234,34 +236,14 @@ void tfm_spm_partition_set_caller_partition_idx(uint32_t partition_idx,
 void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
                                             int32_t caller_client_id);
 
-
-/**
- * \brief Set the iovec parameters for the partition
- *
- * \param[in] partition_idx  Partition index
- * \param[in] args           The arguments of the secure function
- *
- * args is expected to be of type int32_t[4] where:
- *   args[0] is in_vec
- *   args[1] is in_len
- *   args[2] is out_vec
- *   args[3] is out_len
- *
- * \return Error code \ref spm_err_t
- *
- * \note This function doesn't check if partition_idx is valid.
- * \note This function assumes that the iovecs that are passed in args are
- *       valid, and does no sanity check on them at all.
- */
-enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
-                                           const int32_t *args);
-
 /**
  * \brief Execute partition init function
  *
- * \return Error code \ref spm_err_t
+ * \return Error code \ref spm_err_t.
+ *         When FIH_ENABLE_DOUBLE_VARS is enabled, the return code will be
+ *         wrapped and protected in \ref fih_int structure.
  */
-enum spm_err_t tfm_spm_partition_init(void);
+fih_int tfm_spm_partition_init(void);
 
 /**
  * \brief Clears the context info from the database for a partition.

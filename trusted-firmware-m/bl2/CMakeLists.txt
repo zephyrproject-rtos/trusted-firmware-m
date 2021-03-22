@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,6 +12,7 @@ project("Bootloader" VERSION 0.1.0 LANGUAGES C ASM)
 add_executable(bl2
     src/security_cnt.c
     src/flash_map.c
+    $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
 )
 
 add_subdirectory(ext/mcuboot)
@@ -25,13 +26,12 @@ set_target_properties(bl2
 target_include_directories(bl2
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${MCUBOOT_PATH}/boot/bootutil/src>
 )
 
 target_link_libraries(bl2
     PRIVATE
-        platform_bl2
         tfm_boot_status
-        bl2_mbedcrypto
 )
 
 target_link_options(bl2
@@ -60,7 +60,7 @@ target_compile_definitions(bl2_mbedcrypto_config
     INTERFACE
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
-        MBEDTLS_CONFIG_FILE="$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/mcuboot/include/mcuboot-mbedtls-cfg.h>"
+        MBEDTLS_CONFIG_FILE="$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/mcuboot/config/mcuboot-mbedtls-cfg.h>"
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
 )
@@ -100,3 +100,16 @@ target_link_libraries(bl2_mbedcrypto
     PUBLIC
         bl2_mbedcrypto_config
 )
+
+############################### CODE SHARING ###################################
+
+if (TFM_CODE_SHARING)
+    compiler_create_shared_code(bl2 ${CMAKE_CURRENT_SOURCE_DIR}/src/shared_symbol_template.txt)
+
+    if (NOT EXISTS ${MBEDCRYPTO_PATH}/library/code_share.c)
+        message(FATAL_ERROR "File ${MBEDCRYPTO_PATH}/library/code_share.c does not exist.
+        Have the patch ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/0005-Enable-crypto-code-sharing-between-independent-binar.patch
+        been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH}?
+        Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
+    endif()
+endif()

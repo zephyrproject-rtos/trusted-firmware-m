@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -65,6 +65,13 @@
     {
       "name": "TFM_CRYPTO_EXPORT_PUBLIC_KEY",
       "signal": "TFM_CRYPTO_EXPORT_PUBLIC_KEY",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    {
+      "name": "TFM_CRYPTO_PURGE_KEY",
+      "signal": "TFM_CRYPTO_PURGE_KEY",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"

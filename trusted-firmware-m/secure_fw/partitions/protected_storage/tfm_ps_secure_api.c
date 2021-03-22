@@ -13,7 +13,6 @@
 
 #define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_set(psa_storage_uid_t uid,
                         size_t data_length,
                         const void *p_data,
@@ -44,20 +43,19 @@ psa_status_t psa_ps_set(psa_storage_uid_t uid,
 #else
     status = tfm_tfm_ps_set_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                        NULL, 0);
-#endif
 
-   /* A parameter with a buffer pointer pointer that has data length longer
-    * than maximum permitted is treated as a secure violation.
-    * TF-M framework rejects the request with TFM_ERROR_INVALID_PARAMETER.
-    */
+    /* A parameter with a buffer pointer pointer that has data length longer
+     * than maximum permitted is treated as a secure violation.
+     * TF-M framework rejects the request with TFM_ERROR_INVALID_PARAMETER.
+     */
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_get(psa_storage_uid_t uid,
                         size_t data_offset,
                         size_t data_size,
@@ -96,8 +94,6 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
     status = tfm_tfm_ps_get_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                         out_vec, IOVEC_LEN(out_vec));
 
-#endif
-
    /* A parameter with a buffer pointer pointer that has data length longer
     * than maximum permitted is treated as a secure violation.
     * TF-M framework rejects the request with TFM_ERROR_INVALID_PARAMETER.
@@ -105,13 +101,12 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
-
+#endif
     *p_data_length = out_vec[0].len;
 
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
                              struct psa_storage_info_t *p_info)
 {
@@ -142,15 +137,14 @@ psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
 #else
     status = tfm_tfm_ps_get_info_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                             out_vec, IOVEC_LEN(out_vec));
-#endif
-
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
+
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_remove(psa_storage_uid_t uid)
 {
     psa_status_t status;
@@ -176,16 +170,14 @@ psa_status_t psa_ps_remove(psa_storage_uid_t uid)
 #else
     status = tfm_tfm_ps_remove_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                            NULL, 0);
-
-#endif
-
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
+
     return status;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_create(psa_storage_uid_t uid, size_t size,
                            psa_storage_create_flags_t create_flags)
 {
@@ -196,7 +188,6 @@ psa_status_t psa_ps_create(psa_storage_uid_t uid, size_t size,
     return PSA_ERROR_NOT_SUPPORTED;
 }
 
-__attribute__((section("SFN")))
 psa_status_t psa_ps_set_extended(psa_storage_uid_t uid, size_t data_offset,
                                  size_t data_length, const void *p_data)
 {
@@ -208,7 +199,6 @@ psa_status_t psa_ps_set_extended(psa_storage_uid_t uid, size_t data_offset,
     return PSA_ERROR_NOT_SUPPORTED;
 }
 
-__attribute__((section("SFN")))
 uint32_t psa_ps_get_support(void)
 {
     /* Initialise support_flags to a sensible default, to avoid returning an

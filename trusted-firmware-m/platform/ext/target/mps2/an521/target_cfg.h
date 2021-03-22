@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited
+ * Copyright (c) 2017-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_plat_defs.h"
 #include "arm_uart_drv.h"
+#include "fih.h"
 
 #define TFM_DRIVER_STDIO    Driver_USART0
 #define NS_DRIVER_STDIO     Driver_USART0
@@ -68,7 +69,7 @@ struct memory_region_limits {
 /**
  * \brief Holds the data necessary to do isolation for a specific peripheral.
  */
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
 {
     uint32_t periph_start;
     uint32_t periph_limit;
@@ -81,32 +82,32 @@ struct tfm_spm_partition_platform_data_t
  *
  * \return  Returns error code.
  */
-int32_t mpc_init_cfg(void);
+fih_int mpc_init_cfg(void);
 
 /**
  * \brief Configures the Peripheral Protection Controller.
  */
-void ppc_init_cfg(void);
+fih_int ppc_init_cfg(void);
 
 /**
  * \brief Restict access to peripheral to secure
  */
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t loc);
+fih_int ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t loc);
 
 /**
  * \brief Allow non-secure access to peripheral
  */
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t loc);
+fih_int ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t loc);
 
 /**
  * \brief Enable secure unprivileged access to peripheral
  */
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
+fih_int ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
 
 /**
  * \brief Clear secure unprivileged access to peripheral
  */
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
+fih_int ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
 
 /**
  * \brief Clears PPC interrupt.
@@ -116,7 +117,7 @@ void ppc_clear_irq(void);
 /**
  * \brief Configures SAU and IDAU.
  */
-void sau_and_idau_cfg(void);
+fih_int sau_and_idau_cfg(void);
 
 /**
  * \brief Enables the fault handlers and sets priorities.
@@ -135,9 +136,9 @@ enum tfm_plat_err_t system_reset_cfg(void);
 /**
  * \brief Configures the system debug properties.
  *
- * \return Returns values as specified by the \ref tfm_plat_err_t
+ * \return Returns values as specified by the \ref fih_int
  */
-enum tfm_plat_err_t init_debug(void);
+fih_int init_debug(void);
 
 /**
  * \brief Configures all external interrupts to target the
@@ -156,5 +157,19 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t nvic_interrupt_enable(void);
+
+#ifdef TFM_FIH_PROFILE_ON
+/**
+ * \brief This function verifies the settings of HW used for memory isolation,
+ *        to make sure that important settings was not skipped due to fault
+ *        injection attacks.
+ *
+ * This function is called during TF-M core late startup, before passing
+ * execution to non-secure code.
+ *
+ * \return Returns values as specified by the \ref fih_int.
+ */
+fih_int verify_isolation_hw(void);
+#endif /* TFM_FIH_PROFILE_ON */
 
 #endif /* __TARGET_CFG_H__ */

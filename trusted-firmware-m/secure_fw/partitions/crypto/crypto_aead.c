@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,7 +38,7 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
 
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
-    psa_key_handle_t key_handle = iov->key_handle;
+    psa_key_id_t key_id = iov->key_id;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *nonce = aead_pack_input->nonce;
     size_t nonce_length = aead_pack_input->nonce_length;
@@ -48,20 +48,25 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     size_t ciphertext_size = out_vec[0].len;
     const uint8_t *additional_data = in_vec[2].base;
     size_t additional_data_length = in_vec[2].len;
+    mbedtls_svc_key_id_t encoded_key;
 
     /* Initialise ciphertext_length to zero. */
     out_vec[0].len = 0;
 
-    status = tfm_crypto_check_handle_owner(key_handle, NULL);
-    if (status == PSA_SUCCESS) {
-
-        status = psa_aead_encrypt(key_handle, alg, nonce, nonce_length,
-                                  additional_data, additional_data_length,
-                                  plaintext, plaintext_length,
-                                  ciphertext, ciphertext_size, &out_vec[0].len);
+    status = tfm_crypto_check_handle_owner(key_id, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
-    return status;
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_aead_encrypt(encoded_key, alg, nonce, nonce_length,
+                            additional_data, additional_data_length,
+                            plaintext, plaintext_length,
+                            ciphertext, ciphertext_size, &out_vec[0].len);
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -83,7 +88,7 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
 
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     const struct tfm_crypto_aead_pack_input *aead_pack_input = &iov->aead_in;
-    psa_key_handle_t key_handle = iov->key_handle;
+    psa_key_id_t key_id = iov->key_id;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *nonce = aead_pack_input->nonce;
     size_t nonce_length = aead_pack_input->nonce_length;
@@ -93,20 +98,25 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
     size_t plaintext_size = out_vec[0].len;
     const uint8_t *additional_data = in_vec[2].base;
     size_t additional_data_length = in_vec[2].len;
+    mbedtls_svc_key_id_t encoded_key;
 
     /* Initialise plaintext_length to zero. */
     out_vec[0].len = 0;
 
-    status = tfm_crypto_check_handle_owner(key_handle, NULL);
-    if (status == PSA_SUCCESS) {
-
-        status = psa_aead_decrypt(key_handle, alg, nonce, nonce_length,
-                                  additional_data, additional_data_length,
-                                  ciphertext, ciphertext_length,
-                                  plaintext, plaintext_size, &out_vec[0].len);
+    status = tfm_crypto_check_handle_owner(key_id, NULL);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
-    return status;
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_aead_decrypt(encoded_key, alg, nonce, nonce_length,
+                            additional_data, additional_data_length,
+                            ciphertext, ciphertext_length,
+                            plaintext, plaintext_size, &out_vec[0].len);
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 

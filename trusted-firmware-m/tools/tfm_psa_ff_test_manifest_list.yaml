@@ -24,6 +24,9 @@
       "linker_pattern": {
         "library_list":[
           "*client_partition.a"
+        ],
+        "object_list":[
+          "*intermedia_client_partition_psa.*"
         ]
       }
     },
@@ -40,6 +43,9 @@
       "linker_pattern": {
         "library_list":[
           "*server_partition.a"
+        ],
+         "object_list":[
+          "*intermedia_server_partition_psa.*"
         ]
       }
     },
@@ -56,6 +62,9 @@
       "linker_pattern": {
         "library_list":[
           "*driver_partition.a"
+        ],
+        "object_list":[
+          "*intermedia_driver_partition_psa.*"
         ]
       }
     }

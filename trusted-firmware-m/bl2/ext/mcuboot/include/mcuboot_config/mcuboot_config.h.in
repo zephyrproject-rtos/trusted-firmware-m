@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Open Source Foundries Limited
- * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2021 Arm Limited
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -35,6 +35,7 @@ extern "C" {
 
 #cmakedefine MCUBOOT_HW_ROLLBACK_PROT
 #cmakedefine MCUBOOT_MEASURED_BOOT
+#cmakedefine MCUBOOT_DATA_SHARING
 
 /*
  * Maximum size of the measured boot record.

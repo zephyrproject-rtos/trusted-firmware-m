@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,6 +10,13 @@ cmake_minimum_required(VERSION 3.15)
 set(TFM_VERSION 1.2.0)
 
 ############################ CONFIGURATION #####################################
+
+if (IS_ABSOLUTE "${TFM_PLATFORM}")
+    file(RELATIVE_PATH TFM_PLATFORM_RELATIVE_PATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target"
+        ${TFM_PLATFORM})
+    set(TFM_PLATFORM "${TFM_PLATFORM_RELATIVE_PATH}" CACHE STRING "Target platform set as an absolute path." FORCE)
+endif()
 
 # Some compiler flags depend on the CPU / platform config. This include should
 # be run before the toolchain file so the compiler can be configured properly.
@@ -75,6 +82,7 @@ endif()
 ################################################################################
 
 add_subdirectory(lib/ext)
+add_subdirectory(lib/fih)
 add_subdirectory(tools)
 add_subdirectory(docs)
 if(NS)

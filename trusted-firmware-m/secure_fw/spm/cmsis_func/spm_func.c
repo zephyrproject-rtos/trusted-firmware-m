@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <arm_cmse.h>
+#include "bitops.h"
+#include "fih.h"
 #include "tfm_nspm.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
@@ -25,6 +27,16 @@
 #include "psa_manifest/pid.h"
 #include "tfm/tfm_spm_services.h"
 #include "tfm_spm_db_func.inc"
+
+/* Structure to temporarily save iovec parameters from PSA client */
+struct iovec_params_t {
+    psa_invec in_vec[PSA_MAX_IOVEC];
+    size_t in_len;
+    psa_outvec out_vec[PSA_MAX_IOVEC];
+    size_t out_len;
+
+    psa_outvec *orig_outvec;
+};
 
 #define EXC_RETURN_SECURE_FUNCTION 0xFFFFFFFD
 #define EXC_RETURN_SECURE_HANDLER  0xFFFFFFF1
@@ -164,13 +176,15 @@ static void restore_caller_ctx(const struct tfm_state_context_t *svc_ctx,
  * \brief Check whether the iovec parameters are valid, and the memory ranges
  *        are in the possession of the calling partition.
  *
- * \param[in] desc_ptr  The secure function request descriptor
+ * \param[in]  desc_ptr  The secure function request descriptor
+ * \param[out] iovec_ptr The local buffer to store iovec arguments
  *
  * \return Return /ref TFM_SUCCESS if the iovec parameters are valid, error code
  *         otherwise as in /ref tfm_status_e
  */
 static enum tfm_status_e tfm_core_check_sfn_parameters(
-                                           const struct tfm_sfn_req_s *desc_ptr)
+                                           const struct tfm_sfn_req_s *desc_ptr,
+                                           struct iovec_params_t *iovec_ptr)
 {
     struct psa_invec *in_vec = (psa_invec *)desc_ptr->args[0];
     size_t in_len;
@@ -231,24 +245,37 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
         }
     }
 
+    /* Copy iovec parameters into a local buffer before validating them */
+    iovec_ptr->in_len = in_len;
+    for (i = 0; i < in_len; ++i) {
+        iovec_ptr->in_vec[i].base = in_vec[i].base;
+        iovec_ptr->in_vec[i].len = in_vec[i].len;
+    }
+    iovec_ptr->out_len = out_len;
+    for (i = 0; i < out_len; ++i) {
+        iovec_ptr->out_vec[i].base = out_vec[i].base;
+        iovec_ptr->out_vec[i].len = out_vec[i].len;
+    }
+    iovec_ptr->orig_outvec = out_vec;
+
     /* Check whether the caller partition has access to the data inside the
      * iovecs
      */
     for (i = 0; i < in_len; ++i) {
-        if (in_vec[i].len > 0) {
-            if ((in_vec[i].base == NULL) ||
-                (tfm_core_has_read_access_to_region(in_vec[i].base,
-                            in_vec[i].len, desc_ptr->ns_caller,
+        if (iovec_ptr->in_vec[i].len > 0) {
+            if ((iovec_ptr->in_vec[i].base == NULL) ||
+                (tfm_core_has_read_access_to_region(iovec_ptr->in_vec[i].base,
+                            iovec_ptr->in_vec[i].len, desc_ptr->ns_caller,
                             privileged_mode) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
         }
     }
     for (i = 0; i < out_len; ++i) {
-        if (out_vec[i].len > 0) {
-            if ((out_vec[i].base == NULL) ||
-                (tfm_core_has_write_access_to_region(out_vec[i].base,
-                            out_vec[i].len, desc_ptr->ns_caller,
+        if (iovec_ptr->out_vec[i].len > 0) {
+            if ((iovec_ptr->out_vec[i].base == NULL) ||
+                (tfm_core_has_write_access_to_region(iovec_ptr->out_vec[i].base,
+                            iovec_ptr->out_vec[i].len, desc_ptr->ns_caller,
                             privileged_mode) != TFM_SUCCESS)) {
                 return TFM_ERROR_INVALID_PARAMETER;
             }
@@ -390,6 +417,44 @@ static uint32_t get_partition_idx(uint32_t partition_id)
 }
 
 /**
+ * \brief Set the iovec parameters for the partition
+ *
+ * \param[in] partition_idx  Partition index
+ * \param[in] iovec_ptr      The arguments of the secure function
+ *
+ * \return Error code \ref spm_err_t
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ * \note This function assumes that the iovecs that are passed in iovec_ptr are
+ *       valid, and does no sanity check on them at all.
+ */
+static enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
+                                         const struct iovec_params_t *iovec_ptr)
+{
+    struct spm_partition_runtime_data_t *runtime_data =
+            &g_spm_partition_db.partitions[partition_idx].runtime_data;
+    size_t i;
+
+    if ((iovec_ptr->in_len < 0) || (iovec_ptr->out_len < 0)) {
+        return SPM_ERR_INVALID_PARAMETER;
+    }
+
+    runtime_data->iovec_args.in_len = iovec_ptr->in_len;
+    for (i = 0U; i < runtime_data->iovec_args.in_len; ++i) {
+        runtime_data->iovec_args.in_vec[i].base = iovec_ptr->in_vec[i].base;
+        runtime_data->iovec_args.in_vec[i].len = iovec_ptr->in_vec[i].len;
+    }
+    runtime_data->iovec_args.out_len = iovec_ptr->out_len;
+    for (i = 0U; i < runtime_data->iovec_args.out_len; ++i) {
+        runtime_data->iovec_args.out_vec[i].base = iovec_ptr->out_vec[i].base;
+        runtime_data->iovec_args.out_vec[i].len = iovec_ptr->out_vec[i].len;
+    }
+    runtime_data->orig_outvec = iovec_ptr->orig_outvec;
+
+    return SPM_ERR_OK;
+}
+
+/**
  * \brief Get the flags associated with a partition
  *
  * \param[in] partition_idx     Partition index
@@ -405,8 +470,9 @@ static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 }
 
 static enum tfm_status_e tfm_start_partition(
-                                           const struct tfm_sfn_req_s *desc_ptr,
-                                           uint32_t excReturn)
+                                         const struct tfm_sfn_req_s *desc_ptr,
+                                         const struct iovec_params_t *iovec_ptr,
+                                         uint32_t excReturn)
 {
     enum tfm_status_e res;
     uint32_t caller_partition_idx = desc_ptr->caller_part_idx;
@@ -480,7 +546,7 @@ static enum tfm_status_e tfm_start_partition(
      * handler mode
      */
     if ((desc_ptr->ns_caller) || (tfm_secure_api_initializing)) {
-        if (tfm_spm_partition_set_iovec(partition_idx, desc_ptr->args) !=
+        if (tfm_spm_partition_set_iovec(partition_idx, iovec_ptr) !=
             SPM_ERR_OK) {
             return TFM_ERROR_GENERIC;
         }
@@ -510,7 +576,7 @@ static enum tfm_status_e tfm_start_partition_for_irq_handling(
     uint32_t handler_partition_id = svc_ctx->r0;
     sfn_t unpriv_handler = (sfn_t)svc_ctx->r1;
     uint32_t irq_signal = svc_ctx->r2;
-    IRQn_Type irq_line = (IRQn_Type) svc_ctx->r3;
+    uint32_t irq_line = svc_ctx->r3;
     enum tfm_status_e res;
     uint32_t psp = __get_PSP();
     uint32_t handler_partition_psp;
@@ -736,6 +802,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
                              struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
 {
     enum tfm_status_e res;
+    struct iovec_params_t iovecs;
 
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {
@@ -747,7 +814,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
 
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
 
-    res = tfm_core_check_sfn_parameters(desc_ptr);
+    res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
     if (res != TFM_SUCCESS) {
         /* The sanity check of iovecs failed. */
         __enable_irq();
@@ -764,7 +831,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
         tfm_secure_api_error_handler();
     }
 
-    res = tfm_start_partition(desc_ptr, excReturn);
+    res = tfm_start_partition(desc_ptr, &iovecs, excReturn);
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
         __enable_irq();
@@ -782,8 +849,9 @@ int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     enum tfm_status_e res;
     int32_t *args;
     int32_t retVal;
+    struct iovec_params_t iovecs;
 
-    res = tfm_core_check_sfn_parameters(desc_ptr);
+    res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
     if (res != TFM_SUCCESS) {
         /* The sanity check of iovecs failed. */
         return (int32_t)res;
@@ -1016,10 +1084,14 @@ uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
  * \retval >=0     The IRQ line number associated with a signal in the partition
  * \retval <0      error
  */
-static IRQn_Type get_irq_line_for_signal(int32_t partition_id,
+static int32_t get_irq_line_for_signal(int32_t partition_id,
                                        psa_signal_t signal)
 {
     size_t i;
+
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
+        return -1;
+    }
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         if (tfm_core_irq_signals[i].partition_id == partition_id &&
@@ -1027,7 +1099,7 @@ static IRQn_Type get_irq_line_for_signal(int32_t partition_id,
             return tfm_core_irq_signals[i].irq_line;
         }
     }
-    return (IRQn_Type) -1;
+    return -1;
 }
 
 void tfm_spm_enable_irq_handler(uint32_t *svc_args)
@@ -1039,13 +1111,7 @@ void tfm_spm_enable_irq_handler(uint32_t *svc_args)
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
-    IRQn_Type irq_line;
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        /* FixMe: error severity TBD */
-        tfm_secure_api_error_handler();
-    }
+    int32_t irq_line;
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 
@@ -1066,13 +1132,7 @@ void tfm_spm_disable_irq_handler(uint32_t *svc_args)
                       tfm_spm_partition_get_running_partition_idx();
     uint32_t running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
-    IRQn_Type irq_line;
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        /* FixMe: error severity TBD */
-        tfm_secure_api_error_handler();
-    }
+    int32_t irq_line;
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 
@@ -1124,17 +1184,12 @@ void tfm_spm_psa_eoi(uint32_t *svc_args)
     uint32_t running_partition_idx;
     uint32_t running_partition_id;
     const struct spm_partition_runtime_data_t *curr_part_data;
-    IRQn_Type irq_line;
+    int32_t irq_line;
 
     running_partition_idx = tfm_spm_partition_get_running_partition_idx();
     running_partition_id =
                       tfm_spm_partition_get_partition_id(running_partition_idx);
     curr_part_data = tfm_spm_partition_get_runtime_data(running_partition_idx);
-
-    /* Only a single signal is allowed */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_secure_api_error_handler();
-    }
 
     irq_line = get_irq_line_for_signal(running_partition_id, irq_signal);
 
@@ -1155,24 +1210,24 @@ void tfm_spm_psa_eoi(uint32_t *svc_args)
  * In case of an error in the error handling, a non-zero value have to be
  * returned.
  */
-static void tfm_spm_partition_err_handler(
-    const struct spm_partition_desc_t *partition,
-    int32_t err_code)
+static void tfm_spm_partition_err_handler(const uint32_t idx, int32_t errcode)
 {
-    (void)err_code;
+    (void)errcode;
 
-    tfm_spm_partition_set_state(partition->static_data->partition_id,
-                                SPM_PARTITION_STATE_CLOSED);
+    tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_CLOSED);
 }
 
-enum spm_err_t tfm_spm_partition_init(void)
+fih_int tfm_spm_partition_init(void)
 {
     struct spm_partition_desc_t *part;
     struct tfm_sfn_req_s desc;
     int32_t args[4] = {0};
-    int32_t fail_cnt = 0;
+    fih_int fail_cnt = FIH_INT_INIT(0);
     uint32_t idx;
-    const struct tfm_spm_partition_platform_data_t **platform_data_p;
+    const struct platform_data_t **platform_data_p;
+#ifdef TFM_FIH_PROFILE_ON
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
@@ -1180,10 +1235,18 @@ enum spm_err_t tfm_spm_partition_init(void)
         platform_data_p = part->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
+#ifdef TFM_FIH_PROFILE_ON
+                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, idx,
+                         *platform_data_p);
+                if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+                    fail_cnt = fih_int_encode(fih_int_decode(fail_cnt) + 1);
+                }
+#else /* TFM_FIH_PROFILE_ON */
                 if (tfm_spm_hal_configure_default_isolation(idx,
                             *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                     fail_cnt++;
                 }
+#endif /* TFM_FIH_PROFILE_ON */
                 ++platform_data_p;
             }
         }
@@ -1202,19 +1265,20 @@ enum spm_err_t tfm_spm_partition_init(void)
             if (res == TFM_SUCCESS) {
                 tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);
             } else {
-                tfm_spm_partition_err_handler(part, res);
-                fail_cnt++;
+                tfm_spm_partition_err_handler(idx, res);
+                fail_cnt = fih_int_encode(fih_int_decode(fail_cnt) + 1);
             }
         }
     }
 
     tfm_spm_secure_api_init_done();
 
-    if (fail_cnt == 0) {
-        return SPM_ERR_OK;
-    } else {
-        return SPM_ERR_PARTITION_NOT_AVAILABLE;
+    fih_int_validate(fail_cnt);
+    if (fih_eq(fail_cnt, fih_int_encode(0))) {
+        FIH_RET(fih_int_encode(SPM_ERR_OK));
     }
+
+    FIH_RET(fih_int_encode(SPM_ERR_PARTITION_NOT_AVAILABLE));
 }
 
 void tfm_spm_partition_push_interrupted_ctx(uint32_t partition_idx)
@@ -1323,35 +1387,6 @@ void tfm_spm_partition_set_caller_client_id(uint32_t partition_idx,
 {
     g_spm_partition_db.partitions[partition_idx].runtime_data.
             caller_client_id = caller_client_id;
-}
-
-enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
-                                           const int32_t *args)
-{
-    struct spm_partition_runtime_data_t *runtime_data =
-            &g_spm_partition_db.partitions[partition_idx].runtime_data;
-    size_t i;
-
-    if ((args[1] < 0) || (args[3] < 0)) {
-        return SPM_ERR_INVALID_PARAMETER;
-    }
-
-    runtime_data->iovec_args.in_len = (size_t)args[1];
-    for (i = 0U; i < runtime_data->iovec_args.in_len; ++i) {
-        runtime_data->iovec_args.in_vec[i].base =
-                                                 ((psa_invec *)args[0])[i].base;
-        runtime_data->iovec_args.in_vec[i].len = ((psa_invec *)args[0])[i].len;
-    }
-    runtime_data->iovec_args.out_len = (size_t)args[3];
-    for (i = 0U; i < runtime_data->iovec_args.out_len; ++i) {
-        runtime_data->iovec_args.out_vec[i].base =
-                                                ((psa_outvec *)args[2])[i].base;
-        runtime_data->iovec_args.out_vec[i].len =
-                                                 ((psa_outvec *)args[2])[i].len;
-    }
-    runtime_data->orig_outvec = (psa_outvec *)args[2];
-
-    return SPM_ERR_OK;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_idx(void)

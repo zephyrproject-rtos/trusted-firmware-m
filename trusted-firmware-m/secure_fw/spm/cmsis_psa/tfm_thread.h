@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +14,7 @@
 
 /* State code */
 #define THRD_STATE_CREATING       0
-#define THRD_STATE_RUNNING        1
+#define THRD_STATE_RUNNABLE       1
 #define THRD_STATE_BLOCK          2
 #define THRD_STATE_DETACH         3
 #define THRD_STATE_INVALID        4
@@ -170,15 +170,15 @@ uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth);
  * Return :
  *  Current running thread context pointer.
  */
-struct tfm_core_thread_t *tfm_core_thrd_get_curr_thread(void);
+struct tfm_core_thread_t *tfm_core_thrd_get_curr(void);
 
 /*
- * Get next running thread in list.
+ * Get next thread to run in list.
  *
  * Return :
- *  Pointer of next thread to be run.
+ *  Pointer of next thread to run.
  */
-struct tfm_core_thread_t *tfm_core_thrd_get_next_thread(void);
+struct tfm_core_thread_t *tfm_core_thrd_get_next(void);
 
 /*
  * Start scheduler for existing threads

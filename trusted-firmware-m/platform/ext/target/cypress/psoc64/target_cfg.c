@@ -61,14 +61,14 @@ REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
  */
 #define SCB_AIRCR_WRITE_MASK ((0x5FAUL << SCB_AIRCR_VECTKEY_Pos))
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         SCB5_BASE,
         SCB5_BASE + 0xFFF,
         -1,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         TCPWM0_BASE,
         TCPWM0_BASE + (sizeof(TCPWM_Type) - 1),
         -1,

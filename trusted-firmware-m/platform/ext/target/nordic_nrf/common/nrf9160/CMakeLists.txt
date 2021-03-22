@@ -11,13 +11,6 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(../core nrf_common)
 
-#========================= Platform region defs ===============================#
-
-target_include_directories(platform_region_defs
-    INTERFACE
-        partition
-)
-
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
@@ -45,7 +38,6 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        partition
 )
 
 target_sources(platform_s
@@ -83,8 +75,6 @@ target_compile_definitions(platform_ns
 
 if(BL2)
     target_include_directories(platform_bl2
-        PUBLIC
-            partition
         PRIVATE
             .
     )

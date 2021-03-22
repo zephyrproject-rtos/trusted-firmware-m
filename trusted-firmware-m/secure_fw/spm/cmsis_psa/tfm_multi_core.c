@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "psa/client.h"
+#include "tfm_arch.h"
 #include "tfm_assert.h"
-#include "tfm_nspm.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
-#include "utilities.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
 
@@ -33,22 +31,14 @@ void tfm_nspm_thread_entry(void)
 
     /*
      * TODO
-     * The infinite-loop can be replaced with low-power sleep and resume
-     * operation. It may require privileged access to platform specific
-     * hardware.
+     * The infinite-loop can be replaced with platform-specific low-power sleep
+     * and resume operation.
+     * It requires privileged access to platform specific hardware.
      */
     while (1) {
+        __WFI();
     }
-
 
     /* NOTREACHED */
     TFM_ASSERT(false);
-}
-
-void tfm_psa_ipc_request_handler(const uint32_t svc_args[])
-{
-    (void)svc_args;
-
-    /* Should not receive any request from ns-callable in multi-core topology */
-    tfm_core_panic();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -23,7 +23,7 @@
  * domain the Core Test service can access it.
  */
 uint32_t led_status
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_CORE_TEST")
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
     = 0x02u;
 
 /**

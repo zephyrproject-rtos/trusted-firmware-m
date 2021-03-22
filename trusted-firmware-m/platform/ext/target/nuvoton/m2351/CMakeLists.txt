@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 # Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -26,8 +26,8 @@ target_sources(tfm_s
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2351_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(NS)
@@ -68,13 +68,16 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        cmsis_drivers/config
-        native_drivers
+        ../common/
+        ../common/cmsis_drivers/config
+        ../common/native_drivers
         partition
         device/include
         device/config
         bsp/Device/Nuvoton/M2351/Include
         bsp/Library/StdDriver/inc
+        ../common/bsp/Include
+        ../common/bsp/StdDriver/inc
         ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/driver
 )
@@ -83,28 +86,22 @@ target_sources(platform_s
     PRIVATE
         device/source/system_core_init.c
         device/source/device_definition.c
-        cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_USART.c
-        native_drivers/uart_cmsdk_drv.c
-        native_drivers/mpu_armv8m_drv.c
-        native_drivers/timer_cmsdk_drv.c
+        ../common/cmsis_drivers/Driver_Flash.c
+        ../common/cmsis_drivers/Driver_USART.c
+        ../common/native_drivers/uart_cmsdk_drv.c
+        ../common/native_drivers/mpu_armv8m_drv.c
+        ../common/native_drivers/timer_cmsdk_drv.c
         bsp/Library/StdDriver/src/timer.c
         bsp/Library/StdDriver/src/fmc.c
-        services/src/tfm_platform_system.c
+        ../common/services/src/tfm_platform_system.c
+        ../common/spm_hal.c
+        ../common/tfm_hal_isolation.c
+        ../common/boot_hal.c
         target_cfg.c
-        spm_hal.c
-        tfm_hal_isolation.c
-        boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
-        ${PLATFORM_DIR}/ext/common/template/attest_hal.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
-        ${PLATFORM_DIR}/ext/common/template/tfm_initial_attestation_key_material.c
-        ${PLATFORM_DIR}/ext/common/template/tfm_rotpk.c
-        ${PLATFORM_DIR}/ext/common/template/crypto_keys.c
-        ${PLATFORM_DIR}/ext/common/template/nv_counters.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_compile_options(platform_s
@@ -116,8 +113,8 @@ target_compile_options(platform_s
 
 target_sources(platform_ns
     PRIVATE
-        native_drivers/uart_cmsdk_drv.c
-        cmsis_drivers/Driver_USART.c
+        ../common/native_drivers/uart_cmsdk_drv.c
+        ../common/cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
 )
@@ -125,13 +122,16 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         .
+        ../common/
         ${PLATFORM_DIR}/..
         device/config
         device/include
-        native_drivers
+        ../common/native_drivers
         bsp/Device/Nuvoton/M2351/Include
         bsp/Library/StdDriver/inc
-        cmsis_drivers/config
+        ../common/bsp/Include
+        ../common/bsp/StdDriver/inc
+        ../common/cmsis_drivers/config
 )
 
 #========================= Platform BL2 =======================================#
@@ -139,12 +139,12 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
+            ../common/boot_hal.c
             device/source/device_definition.c
             device/source/system_core_init.c
-            cmsis_drivers/Driver_Flash.c
-            native_drivers/uart_cmsdk_drv.c
-            cmsis_drivers/Driver_USART.c
+            ../common/cmsis_drivers/Driver_Flash.c
+            ../common/native_drivers/uart_cmsdk_drv.c
+            ../common/cmsis_drivers/Driver_USART.c
             bsp/Library/StdDriver/src/fmc.c
     )
     target_include_directories(platform_bl2
@@ -152,13 +152,16 @@ if(BL2)
             partition
             bsp/Device/Nuvoton/M2351/Include
             bsp/Library/StdDriver/inc
+            ../common/bsp/Include
+            ../common/bsp/StdDriver/inc
             device/include
             device/config
-            cmsis_drivers/config
+            ../common/cmsis_drivers/config
         PRIVATE
             .
+            ../common/
             ${PLATFORM_DIR}/..
-            native_drivers
+            ../common/native_drivers
     )
     target_compile_options(platform_bl2
         PUBLIC

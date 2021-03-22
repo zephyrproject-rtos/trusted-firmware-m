@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,7 +33,7 @@ tfm_def_build_doxygen = True
 def find_tfm_root(start_dir=os.path.dirname(os.path.abspath(__file__)),
                   target_files=["license.rst",
                                 "dco.txt",
-                                "CommonConfig.cmake"],
+                                "toolchain_GNUARM.cmake"],
                   max_depth=5):
     """ Method which attempts to find the root of the project
     by traversing parent directoried and attempts to located each of the
@@ -186,8 +186,8 @@ try:
     tfm_def_tfm_ver_shrt = ".".join(version[:2])
 
     if (int(commit_no) > 0):
-        tfm_def_tfm_ver_full = "%s+ ( #%s )" % (tfm_def_tfm_ver_full, git_hash)
-        tfm_def_tfm_ver_shrt = "%s+ ( #%s )" % (tfm_def_tfm_ver_shrt, git_hash)
+        tfm_def_tfm_ver_full = "%s+ ( %s )" % (tfm_def_tfm_ver_full, git_hash)
+        tfm_def_tfm_ver_shrt = "%s+ ( %s )" % (tfm_def_tfm_ver_shrt, git_hash)
 
     tfm_def_tfm_ver_shrt = tfm_def_tfm_ver_full
 

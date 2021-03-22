@@ -23,8 +23,6 @@ void tfm_plat_test_secure_timer_start(void)
             CY_TCPWM0_TIMER0_DEV_S.tcpwm_counter_num
         );
 
-        CY_TCPWM0_TIMER0_DEV_S.tcpwm_config->period   = TIMER0_MATCH;
-        CY_TCPWM0_TIMER0_DEV_S.tcpwm_config->compare0 = TIMER0_MATCH;
         rc = Cy_TCPWM_Counter_Init(CY_TCPWM0_TIMER0_DEV_S.tcpwm_base,
                                    CY_TCPWM0_TIMER0_DEV_S.tcpwm_counter_num,
                                    CY_TCPWM0_TIMER0_DEV_S.tcpwm_config);
@@ -62,8 +60,6 @@ void tfm_plat_test_non_secure_timer_start(void)
             CY_TCPWM0_TIMER1_DEV_NS.tcpwm_counter_num
         );
 
-        CY_TCPWM0_TIMER1_DEV_NS.tcpwm_config->period   = TIMER1_MATCH;
-        CY_TCPWM0_TIMER1_DEV_NS.tcpwm_config->compare0 = TIMER1_MATCH;
         rc = Cy_TCPWM_Counter_Init(CY_TCPWM0_TIMER1_DEV_NS.tcpwm_base,
                                    CY_TCPWM0_TIMER1_DEV_NS.tcpwm_counter_num,
                                    CY_TCPWM0_TIMER1_DEV_NS.tcpwm_config);

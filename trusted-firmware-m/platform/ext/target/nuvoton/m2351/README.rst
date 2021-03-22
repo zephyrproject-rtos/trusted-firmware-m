@@ -13,7 +13,7 @@ Build TF-M with M2351 by following commands:
     $ cmake ../ \
             -G"Unix Makefiles" \
             -DTFM_PLATFORM=nuvoton/m2351 \
-            -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             -DTEST_NS=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     $ make install
@@ -44,4 +44,4 @@ The commands are as follows:
 
 --------------
 
-*Copyright (c) 2020, Nuvoton Technology Corp. All rights reserved.*
+*Copyright (c) 2020-2021, Nuvoton Technology Corp. All rights reserved.*

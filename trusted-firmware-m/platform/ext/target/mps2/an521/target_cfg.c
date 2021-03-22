@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited
+ * Copyright (c) 2017-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
+#include "fih.h"
+#ifdef TFM_FIH_PROFILE_ON
+#include "mpc_sie200_drv.h"
+#endif
 
 #ifdef PSA_API_TEST_IPC
 #define PSA_FF_TEST_SECURE_UART2
@@ -92,28 +96,28 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         UART0_BASE_NS,
         UART0_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1 = {
+struct platform_data_t tfm_peripheral_uart1 = {
         UART1_BASE_S,
         UART1_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP1,
         CMSDK_UART1_APB_PPC_POS
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io = {
+struct platform_data_t tfm_peripheral_fpga_io = {
         MPS2_IO_FPGAIO_BASE_S,
         MPS2_IO_FPGAIO_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP2,
         CMSDK_FPGA_IO_PPC_POS
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         CMSDK_TIMER0_BASE_S,
         CMSDK_TIMER1_BASE_S - 1,
         PPC_SP_APB_PPC0,
@@ -127,7 +131,7 @@ struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
  * security.
  */
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_UART_REGION = {
         UART2_BASE_S,
         UART2_BASE_S + 0xFFF,
@@ -135,7 +139,7 @@ struct tfm_spm_partition_platform_data_t
         CMSDK_UART2_APB_PPC_POS
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
         APB_WATCHDOG_BASE_S,
         APB_WATCHDOG_BASE_S + 0xFFF,
@@ -150,7 +154,7 @@ struct tfm_spm_partition_platform_data_t
 #define FF_TEST_DRIVER_PARTITION_MMIO_START   0x3801FE00
 #define FF_TEST_DRIVER_PARTITION_MMIO_END     0x3801FF00
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_NVMEM_REGION = {
         FF_TEST_NVMEM_REGION_START,
         FF_TEST_NVMEM_REGION_END,
@@ -158,7 +162,7 @@ struct tfm_spm_partition_platform_data_t
         -1
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
         FF_TEST_SERVER_PARTITION_MMIO_START,
         FF_TEST_SERVER_PARTITION_MMIO_END,
@@ -166,7 +170,7 @@ struct tfm_spm_partition_platform_data_t
         -1
 };
 
-struct tfm_spm_partition_platform_data_t
+struct platform_data_t
     tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
         FF_TEST_DRIVER_PARTITION_MMIO_START,
         FF_TEST_DRIVER_PARTITION_MMIO_END,
@@ -209,7 +213,7 @@ enum tfm_plat_err_t system_reset_cfg(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t init_debug(void)
+fih_int init_debug(void)
 {
     volatile struct sysctrl_t *sys_ctrl =
                                        (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
@@ -245,7 +249,8 @@ enum tfm_plat_err_t init_debug(void)
      * input signals.
      */
 #endif
-    return TFM_PLAT_ERR_SUCCESS;
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/
@@ -371,13 +376,23 @@ const struct sau_cfg_t sau_cfg[] = {
 #endif
 };
 
-void sau_and_idau_cfg(void)
+#define NR_SAU_INIT_STEP                 3
+
+fih_int sau_and_idau_cfg(void)
 {
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
     uint32_t i;
 
+    FIH_CFI_STEP_INIT(NR_SAU_INIT_STEP);
+
     /* Enables SAU */
+#ifdef TFM_FIH_PROFILE_ON
     TZ_SAU_Enable();
+    TZ_SAU_Enable();
+#endif
+    TZ_SAU_Enable();
+
+    FIH_CFI_STEP_DECREMENT();
 
     for (i = 0; i < ARRAY_SIZE(sau_cfg); i++) {
         SAU->RNR = i;
@@ -387,27 +402,53 @@ void sau_and_idau_cfg(void)
                     SAU_RLAR_ENABLE_Msk;
     }
 
+    FIH_CFI_STEP_DECREMENT();
+
     /* Allows SAU to define the code region as a NSC */
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    FIH_CFI_STEP_DECREMENT();
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
+
+    /*
+     * Dummy operation to avoid unused variable warning of the saved FIH counter
+     * variable.
+     */
+    FIH_CFI_STEP_ERR_RESET();
 }
 
 /*------------------- Memory configuration functions -------------------------*/
+#ifdef BL2
+#define NR_MPC_INIT_STEP                 7
+#else
+#define NR_MPC_INIT_STEP                 6
+#endif
 
-int32_t mpc_init_cfg(void)
+fih_int mpc_init_cfg(void)
 {
-    int32_t ret = ARM_DRIVER_OK;
+    int32_t ret = ARM_DRIVER_ERROR;
+    fih_int fih_rc = FIH_FAILURE;
+
+    FIH_CFI_STEP_INIT(NR_MPC_INIT_STEP);
 
     ret = Driver_SRAM1_MPC.Initialize();
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
     ret = Driver_SRAM1_MPC.ConfigRegion(
                                       memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
 #ifdef BL2
@@ -415,31 +456,46 @@ int32_t mpc_init_cfg(void)
     ret = Driver_SRAM1_MPC.ConfigRegion(memory_regions.secondary_partition_base,
                                   memory_regions.secondary_partition_limit,
                                   ARM_MPC_ATTR_NONSECURE);
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 #endif /* BL2 */
 
     ret = Driver_SRAM2_MPC.Initialize();
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
     ret = Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
                                         ARM_MPC_ATTR_NONSECURE);
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
     /* Lock down the MPC configuration */
     ret = Driver_SRAM1_MPC.LockDown();
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
     ret = Driver_SRAM2_MPC.LockDown();
+    FIH_CFI_STEP_DECREMENT();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        fih_rc = fih_int_encode(ret);
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
     }
 
     /* Add barriers to assure the MPC configuration is done before continue
@@ -448,15 +504,21 @@ int32_t mpc_init_cfg(void)
     __DSB();
     __ISB();
 
-    return ARM_DRIVER_OK;
+    fih_rc = fih_int_encode(ARM_DRIVER_OK);
+
+Done:
+    FIH_RET(fih_rc);
 }
 
 /*---------------------- PPC configuration functions -------------------------*/
+#define NR_PPC_INIT_STEP                 4
 
-void ppc_init_cfg(void)
+fih_int ppc_init_cfg(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     struct nspctrl_def* nspctrl = CMSDK_NSPCTRL;
+
+    FIH_CFI_STEP_INIT(NR_PPC_INIT_STEP);
 
     /* Grant non-secure access to peripherals in the PPC0
      * (timer0 and 1, dualtimer, watchdog, mhu 0 and 1)
@@ -497,6 +559,8 @@ void ppc_init_cfg(void)
                             (1U << CMSDK_FPGA_AUDIO_PPC_POS) |
                             (1U << CMSDK_FPGA_IO_PPC_POS);
 
+    FIH_CFI_STEP_DECREMENT();
+
     /* Grant non-secure access to all peripherals on AHB EXP:
      * Make sure that all possible peripherals are enabled by default
      */
@@ -512,6 +576,8 @@ void ppc_init_cfg(void)
                             (1U << CMSDK_DMA2_PPC_POS) |
                             (1U << CMSDK_DMA3_PPC_POS);
 
+    FIH_CFI_STEP_DECREMENT();
+
     /* in NS, grant un-privileged for UART0 */
     nspctrl->apbnspppcexp1 |= (1U << CMSDK_UART0_APB_PPC_POS);
 
@@ -519,36 +585,56 @@ void ppc_init_cfg(void)
     nspctrl->apbnspppcexp2 |= (1U << CMSDK_FPGA_SCC_PPC_POS) |
                               (1U << CMSDK_FPGA_IO_PPC_POS);
 
+    FIH_CFI_STEP_DECREMENT();
+
     /* Configure the response to a security violation as a
      * bus error instead of RAZ/WI
      */
     spctrl->secrespcfg |= 1U;
+
+    FIH_CFI_STEP_DECREMENT();
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
+
+    /*
+     * Dummy operation to avoid unused variable warning of the saved FIH counter
+     * variable.
+     */
+    FIH_CFI_STEP_ERR_RESET();
 }
 
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
+fih_int ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
 {
     /* Setting NS flag for peripheral to enable NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] |= (1U << pos);
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
+fih_int ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
 {
     /* Clear NS flag for peripheral to prevent NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] &= ~(1U << pos);
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+fih_int ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] |= (1U << pos);
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+fih_int ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] &= ~(1U << pos);
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
 void ppc_clear_irq(void)
@@ -557,3 +643,88 @@ void ppc_clear_irq(void)
     /* Clear APB PPC EXP2 IRQ */
     spctrl->secppcintclr = CMSDK_APB_PPCEXP2_INT_POS_MASK;
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+#ifdef BL2
+#define NR_VERIFY_STEP                 4
+#else
+#define NR_VERIFY_STEP                 3
+#endif
+
+fih_int verify_isolation_hw(void)
+{
+    enum tfm_plat_err_t ret = ARM_DRIVER_ERROR;
+    ARM_MPC_SEC_ATTR attr;
+    fih_int fih_rc = FIH_FAILURE;
+
+    FIH_CFI_STEP_INIT(NR_VERIFY_STEP);
+
+    /* Check SAU config */
+    if (!(SAU->CTRL & SAU_CTRL_ENABLE_Msk ||
+          SAU->CTRL | SAU_CTRL_ALLNS_Msk)) {
+        FIH_PANIC;
+    }
+
+    FIH_CFI_STEP_DECREMENT();
+
+    /* Check MPC config */
+    ret = Driver_SRAM1_MPC.GetRegionConfig(
+                                  memory_regions.non_secure_partition_base,
+                                  memory_regions.non_secure_partition_limit,
+                                  &attr);
+    FIH_CFI_STEP_DECREMENT();
+    if (ret != ARM_DRIVER_OK) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+
+    if (attr != ARM_MPC_ATTR_NONSECURE) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+
+#ifdef BL2
+    ret = Driver_SRAM1_MPC.GetRegionConfig(
+                                  memory_regions.secondary_partition_base,
+                                  memory_regions.secondary_partition_limit,
+                                  &attr);
+    FIH_CFI_STEP_DECREMENT();
+    if (ret != ARM_DRIVER_OK) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+
+    if (attr != ARM_MPC_ATTR_NONSECURE) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+#endif
+
+    ret = Driver_SRAM2_MPC.GetRegionConfig(NS_DATA_START, NS_DATA_LIMIT, &attr);
+    FIH_CFI_STEP_DECREMENT();
+    if (ret != ARM_DRIVER_OK) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+
+    if (attr != ARM_MPC_ATTR_NONSECURE) {
+        fih_rc = FIH_FAILURE;
+        FIH_CFI_STEP_ERR_RESET();
+        goto Done;
+    }
+
+    /* Todo: Check PPC config */
+
+    /* Todo: Check static MPU config */
+
+    fih_rc = FIH_SUCCESS;
+
+Done:
+    FIH_RET(fih_rc);
+}
+#endif /* TFM_FIH_PROFILE_ON */

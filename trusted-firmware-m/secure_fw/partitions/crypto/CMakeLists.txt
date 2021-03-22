@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,9 +12,9 @@ endif()
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
-add_library(tfm_partition_crypto STATIC)
+add_library(tfm_psa_rot_partition_crypto STATIC)
 
-target_sources(tfm_partition_crypto
+target_sources(tfm_psa_rot_partition_crypto
     PRIVATE
         crypto_init.c
         crypto_alloc.c
@@ -27,21 +27,29 @@ target_sources(tfm_partition_crypto
         crypto_key_derivation.c
 )
 
-target_include_directories(tfm_partition_crypto
+# The generated sources
+target_sources(tfm_psa_rot_partition_crypto
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/intermedia_tfm_crypto.c>
+)
+
+target_include_directories(tfm_psa_rot_partition_crypto
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto
 )
 
 # Linking to external interfaces
-target_link_libraries(tfm_partition_crypto
+target_link_libraries(tfm_psa_rot_partition_crypto
     PRIVATE
         tfm_secure_api
         platform_s
         crypto_service_mbedcrypto
         psa_interface
+        tfm_sprt
 )
-target_compile_definitions(tfm_partition_crypto
+target_compile_definitions(tfm_psa_rot_partition_crypto
     PUBLIC
         $<$<BOOL:${CRYPTO_KEY_MODULE_DISABLED}>:TFM_CRYPTO_KEY_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_AEAD_MODULE_DISABLED}>:TFM_CRYPTO_AEAD_MODULE_DISABLED>
@@ -50,6 +58,7 @@ target_compile_definitions(tfm_partition_crypto
         $<$<BOOL:${CRYPTO_HASH_MODULE_DISABLED}>:TFM_CRYPTO_HASH_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_GENERATOR_MODULE_DISABLED}>:TFM_CRYPTO_GENERATOR_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_ASYMMETRIC_MODULE_DISABLED}>:TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}>:TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED>
     PRIVATE
         $<$<BOOL:${CRYPTO_ENGINE_BUF_SIZE}>:TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE}>
         $<$<BOOL:${CRYPTO_CONC_OPER_NUM}>:TFM_CRYPTO_CONC_OPER_NUM=${CRYPTO_CONC_OPER_NUM}>
@@ -76,29 +85,29 @@ message(STATUS "---------- Display crypto configuration - stop ---------------")
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_crypto_secure_api.c
 )
 
 # The veneers give warnings about not being properly declared so they get hidden
 # to not overshadow _real_ warnings.
-set_source_files_properties(tfm_partition_crypto_secure_api.c
+set_source_files_properties(tfm_crypto_secure_api.c
     PROPERTIES
         COMPILE_FLAGS -Wno-implicit-function-declaration
 )
 
 # Pick up configuration definitions
 target_link_libraries(tfm_secure_api
-    PRIVATE
-        tfm_partition_crypto
+    INTERFACE
+        tfm_psa_rot_partition_crypto
 )
 
 ############################ Partition Defs ####################################
 
 target_link_libraries(tfm_partitions
     INTERFACE
-        tfm_partition_crypto
+        tfm_psa_rot_partition_crypto
 )
 
 target_compile_definitions(tfm_partition_defs

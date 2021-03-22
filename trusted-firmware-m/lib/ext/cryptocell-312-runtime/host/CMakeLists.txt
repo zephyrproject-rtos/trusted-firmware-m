@@ -29,16 +29,15 @@ target_sources(${CC312_LIB_TARGET}
 ########################## PAL #################################################
 
 target_include_directories(${CC312_PAL_TARGET}
-    PRIVATE
+    INTERFACE
         src/hal
 )
 
 target_sources(${CC312_PAL_TARGET}
-    PRIVATE
+    INTERFACE
         src/pal/cc_pal_trng.c
         src/pal/no_os/cc_pal_abort_plat.c
         src/pal/no_os/cc_pal_apbc.c
-        src/pal/no_os/cc_pal_buff_attr.c
         src/pal/no_os/cc_pal.c
         src/pal/no_os/cc_pal_dma.c
         src/pal/no_os/cc_pal_interrupt_ctrl.c
@@ -51,14 +50,14 @@ target_sources(${CC312_PAL_TARGET}
 ########################## CDMPU ###############################################
 
 target_include_directories(${CC312_CDMPU_TARGET}
-    PUBLIC
+    INTERFACE
         src/cc3x_productionlib/dmpu
         src/cc3x_productionlib/cmpu
         src/cc3x_productionlib/common
 )
 
 target_sources(${CC312_CDMPU_TARGET}
-    PRIVATE
+    INTERFACE
         src/cc3x_lib/cc_rng_plat.c
         src/cc3x_productionlib/cmpu/cmpu.c
         src/cc3x_productionlib/cmpu/cmpu_derivation.c

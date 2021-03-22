@@ -21,14 +21,13 @@ The hardware platforms currently supported are:
 
 - Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-- Arm SSE-123 Example Subsystem for MPS2+ (AN539)
 - Corstone-300 Ecosystem FVP (Cortex-M55 SSE-300 MPS2+)
 - Corstone-300 Ethos-U55 FVP (Cortex-M55 plus Ethos-U55 SSE-300 MPS3)
 - Musca-A test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
-- DesignStart FPGA on Cloud: Cortex-M33 based platform (SSE-200_AWS)
+- Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
 - nRF9160 DK (Cortex-M33)
 - nRF5340 PDK/DK (Cortex-M33 Application MCU)
@@ -42,6 +41,9 @@ is used to store source and header files which are platform generic.
 More information about subsystems supported by the MPS2+ board can be found in:
 `MPS2+ homepage <https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps2>`__
 
+More information about subsystems supported by the MPS3 board can be found in:
+`MPS3 homepage <https://developer.arm.com/products/system-design/development-boards/fpga-prototyping-boards/mps3>`__
+
 More information about the Musca-A test chip board can be found in:
 `Musca-A homepage <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-a-test-chip-board>`__
 
@@ -53,9 +55,6 @@ More information about the Musca-S1 test chip board can be found in:
 
 More information about subsystems supported by the MPS3 board can be found in:
 `MPS3 homepage <https://www.arm.com/products/development-tools/development-boards/mps3>`__
-
-More information about the SSE-200_AWS platform can be found in:
-`SSE-200_AWS product page <https://aws.amazon.com/marketplace/pp/ARM-DesignStart-FPGA-on-Cloud-Cortex-M33-based-pla/B082DMMTLW>`__
 
 More information about the Corstone-300 FVPs can be found in:
 `Arm Ecosystem FVPs homepage <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
@@ -117,9 +116,9 @@ ranges.
 Interface with TF-M
 ===================
 The files needed for the interface with TF-M are exported at the
-``<build_dir>/install/export/tfm`` path. The NS side is only allowed to call
+``<install_dir>/interface`` path. The NS side is only allowed to call
 TF-M secure functions (veneers) from the NS Thread mode. For this reason, the
-API is a collection of functions in the ``<build_dir>/install/export/tfm/inc``
+API is a collection of functions in the ``<install_dir>/interface/include``
 directory. For example, the interface for the Protected Storage (PS) service
 is described in the file ``psa_ps_api.h`` as a collection of functions that
 call service veneer functions. This API is a wrapper for the secure veneers,
@@ -182,4 +181,4 @@ environment before the script will succeed when the script is not run via cmake.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

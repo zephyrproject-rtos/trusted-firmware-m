@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,11 +7,13 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "bitops.h"
+#include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
 #include "tfm_thread.h"
 #include "tfm_wait.h"
-#include "tfm_internal_defines.h"
+#include "internal_errors.h"
 #include "tfm_spm_hal.h"
 #include "tfm_irq_list.h"
 #include "tfm_api.h"
@@ -24,8 +26,7 @@
 #include "tfm_core_utils.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_list.h"
-#include "tfm_hal_isolation.h"
+#include "lists.h"
 #include "tfm_pools.h"
 #include "region.h"
 #include "region_defs.h"
@@ -36,23 +37,16 @@
 #include "secure_fw/partitions/tfm_service_list.inc"
 #include "tfm_spm_db_ipc.inc"
 
-/* Extern service variable */
-extern struct tfm_spm_service_t service[];
-extern const struct tfm_spm_service_db_t service_db[];
-
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
-void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     IRQn_Type irq_line);
+void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
+                        uint32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
 /*********************** Connection handle conversion APIs *******************/
-
-/* Set a minimal value here for feature expansion. */
-#define CLIENT_HANDLE_VALUE_MIN        32
 
 #define CONVERSION_FACTOR_BITOFFSET    3
 #define CONVERSION_FACTOR_VALUE        (1 << CONVERSION_FACTOR_BITOFFSET)
@@ -153,7 +147,7 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
     p_handle->client_id = client_id;
 
     /* Add handle node to list for next psa functions */
-    tfm_list_add_tail(&service->handle_list, &p_handle->list);
+    BI_LIST_INSERT_BEFORE(&service->handle_list, &p_handle->list);
 
     return p_handle;
 }
@@ -165,15 +159,15 @@ int32_t tfm_spm_validate_conn_handle(
     /* Check the handle address is validated */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
                                     (uint8_t *)conn_handle) != true) {
-        return IPC_ERROR_GENERIC;
+        return SPM_ERROR_GENERIC;
     }
 
     /* Check the handle caller is correct */
     if (conn_handle->client_id != client_id) {
-        return IPC_ERROR_GENERIC;
+        return SPM_ERROR_GENERIC;
     }
 
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
@@ -186,11 +180,11 @@ int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
     conn_handle->internal_msg.magic = 0;
 
     /* Remove node from handle list */
-    tfm_list_del_node(&conn_handle->list);
+    BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
-    tfm_pool_free(conn_handle);
-    return IPC_SUCCESS;
+    tfm_pool_free(conn_handle_pool, conn_handle);
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
@@ -202,7 +196,7 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
     TFM_CORE_ASSERT(conn_handle != NULL);
 
     conn_handle->rhandle = rhandle;
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 /**
@@ -233,14 +227,14 @@ static void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
 struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
                                                  psa_signal_t signal)
 {
-    struct tfm_list_node_t *node, *head;
+    struct bi_list_node_t *node, *head;
     struct tfm_msg_body_t *tmp_msg, *msg = NULL;
 
     TFM_CORE_ASSERT(partition);
 
     head = &partition->msg_list;
 
-    if (tfm_list_is_empty(head)) {
+    if (BI_LIST_IS_EMPTY(head)) {
         return NULL;
     }
 
@@ -248,13 +242,13 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      * There may be multiple messages for this RoT Service signal, do not clear
      * partition mask until no remaining message. Search may be optimized.
      */
-    TFM_LIST_FOR_EACH(node, head) {
+    BI_LIST_FOR_EACH(node, head) {
         tmp_msg = TFM_GET_CONTAINER_PTR(node, struct tfm_msg_body_t, msg_node);
         if (tmp_msg->service->service_db->signal == signal && msg) {
             return msg;
         } else if (tmp_msg->service->service_db->signal == signal) {
             msg = tmp_msg;
-            tfm_list_del_node(node);
+            BI_LIST_REMOVE_NODE(node);
         }
     }
 
@@ -280,8 +274,7 @@ static uint32_t get_partition_idx(uint32_t partition_id)
     }
 
     for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
-        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
-            partition_id) {
+        if (g_spm_partition_db.partitions[i].p_static->pid == partition_id) {
             return i;
         }
     }
@@ -299,8 +292,7 @@ static uint32_t get_partition_idx(uint32_t partition_id)
  */
 static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].static_data->
-           partition_flags;
+    return g_spm_partition_db.partitions[partition_idx].p_static->flags;
 }
 
 #if TFM_LVL != 1
@@ -383,7 +375,7 @@ static struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr_thread();
+    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr();
     struct partition_t *partition;
 
     partition = TFM_GET_CONTAINER_PTR(pth, struct partition_t, sp_thread);
@@ -399,18 +391,18 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
     switch (service->service_db->version_policy) {
     case TFM_VERSION_POLICY_RELAXED:
         if (version > service->service_db->version) {
-            return IPC_ERROR_VERSION;
+            return SPM_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
         if (version != service->service_db->version) {
-            return IPC_ERROR_VERSION;
+            return SPM_ERROR_VERSION;
         }
         break;
     default:
-        return IPC_ERROR_VERSION;
+        return SPM_ERROR_VERSION;
     }
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 int32_t tfm_spm_check_authorization(uint32_t sid,
@@ -424,7 +416,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 
     if (ns_caller) {
         if (!service->service_db->non_secure_client) {
-            return IPC_ERROR_GENERIC;
+            return SPM_ERROR_GENERIC;
         }
     } else {
         partition = tfm_spm_get_running_partition();
@@ -432,17 +424,17 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             tfm_core_panic();
         }
 
-        for (i = 0; i < partition->static_data->dependencies_num; i++) {
-            if (partition->static_data->p_dependencies[i] == sid) {
+        for (i = 0; i < partition->p_static->ndeps; i++) {
+            if (partition->p_static->deps[i] == sid) {
                 break;
             }
         }
 
-        if (i == partition->static_data->dependencies_num) {
-            return IPC_ERROR_GENERIC;
+        if (i == partition->p_static->ndeps) {
+            return SPM_ERROR_GENERIC;
         }
     }
-    return IPC_SUCCESS;
+    return SPM_SUCCESS;
 }
 
 /* Message functions */
@@ -480,7 +472,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 
     /* Check that the running partition owns the message */
     partition_id = tfm_spm_partition_get_running_partition_id();
-    if (partition_id != p_msg->service->partition->static_data->partition_id) {
+    if (partition_id != p_msg->service->partition->p_static->pid) {
         return NULL;
     }
 
@@ -553,22 +545,31 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     }
 }
 
-int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
-                           struct tfm_msg_body_t *msg)
+void tfm_spm_send_event(struct tfm_spm_service_t *service,
+                        struct tfm_msg_body_t *msg)
 {
-    struct partition_t *partition = service->partition;
+    struct partition_t *partition = NULL;
+    psa_signal_t signal = 0;
 
-    TFM_CORE_ASSERT(service);
-    TFM_CORE_ASSERT(msg);
+    if (!msg || !service || !service->service_db || !service->partition) {
+        tfm_core_panic();
+    }
+
+    partition = service->partition;
+    signal = service->service_db->signal;
 
     /* Add message to partition message list tail */
-    tfm_list_add_tail(&partition->msg_list, &msg->msg_node);
+    BI_LIST_INSERT_BEFORE(&partition->msg_list, &msg->msg_node);
 
     /* Messages put. Update signals */
-    partition->signals_asserted |= service->service_db->signal;
+    partition->signals_asserted |= signal;
 
-    tfm_event_wake(&partition->event,
-                   (partition->signals_asserted & partition->signals_waiting));
+    if (partition->signals_waiting & signal) {
+        tfm_event_wake(
+                    &partition->event,
+                    (partition->signals_asserted & partition->signals_waiting));
+        partition->signals_waiting &= ~signal;
+    }
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -577,8 +578,6 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
     if (!is_tfm_rpc_msg(msg)) {
         tfm_event_wait(&msg->ack_evnt);
     }
-
-    return IPC_SUCCESS;
 }
 
 uint32_t tfm_spm_partition_get_running_partition_id(void)
@@ -586,8 +585,8 @@ uint32_t tfm_spm_partition_get_running_partition_id(void)
     struct partition_t *partition;
 
     partition = tfm_spm_get_running_partition();
-    if (partition && partition->static_data) {
-        return partition->static_data->partition_id;
+    if (partition && partition->p_static) {
+        return partition->p_static->pid;
     } else {
         return INVALID_PARTITION_ID;
     }
@@ -602,15 +601,15 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {
-        return IPC_SUCCESS;
+        return SPM_SUCCESS;
     }
 
     if (!buffer) {
-        return IPC_ERROR_BAD_PARAMETERS;
+        return SPM_ERROR_BAD_PARAMETERS;
     }
 
     if ((uintptr_t)buffer > (UINTPTR_MAX - len)) {
-        return IPC_ERROR_MEMORY_CHECK;
+        return SPM_ERROR_MEMORY_CHECK;
     }
 
     if (access == TFM_MEMORY_ACCESS_RW) {
@@ -632,10 +631,10 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
 
     if (err == TFM_HAL_SUCCESS) {
-        return IPC_SUCCESS;
+        return SPM_SUCCESS;
     }
 
-    return IPC_ERROR_MEMORY_CHECK;
+    return SPM_ERROR_MEMORY_CHECK;
 }
 
 uint32_t tfm_spm_init(void)
@@ -643,7 +642,10 @@ uint32_t tfm_spm_init(void)
     uint32_t i, j, num;
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
-    const struct tfm_spm_partition_platform_data_t **platform_data_p;
+    const struct platform_data_t **platform_data_p;
+#ifdef TFM_FIH_PROFILE_ON
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -652,30 +654,40 @@ uint32_t tfm_spm_init(void)
 
     /* Init partition first for it will be used when init service */
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
+
         partition = &g_spm_partition_db.partitions[i];
 
-        if (!partition || !partition->memory_data || !partition->static_data) {
-            tfm_core_panic();
-        }
+        /* Skip NULL checking on statically reserved arraries. */
+        partition->p_static = &static_data_list[i];
+        partition->memory_data = &memory_data_list[i];
 
-        if (!(partition->static_data->partition_flags & SPM_PART_FLAG_IPC)) {
+        if (!(partition->p_static->flags & SPM_PART_FLAG_IPC)) {
             tfm_core_panic();
         }
 
         /* Check if the PSA framework version matches. */
-        if (partition->static_data->psa_framework_version !=
+        if (partition->p_static->psa_ff_ver >
             PSA_FRAMEWORK_VERSION) {
-            ERROR_MSG("Warning: PSA Framework Verison does not match!");
+            ERROR_MSG("Warning: Partition requires higher framework version!");
             continue;
         }
 
-        platform_data_p = partition->platform_data_list;
+        platform_data_p =
+            (const struct platform_data_t **)partition->p_static->platform_data;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
+#ifdef TFM_FIH_PROFILE_ON
+                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
+                         *platform_data_p);
+                if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+                    tfm_core_panic();
+                }
+#else /* TFM_FIH_PROFILE_ON */
                 if (tfm_spm_hal_configure_default_isolation(i,
                             *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                     tfm_core_panic();
                 }
+#endif /* TFM_FIH_PROFILE_ON */
                 ++platform_data_p;
             }
         }
@@ -688,14 +700,19 @@ uint32_t tfm_spm_init(void)
          */
         for (j = 0; j < tfm_core_irq_signals_count; ++j) {
             if (tfm_core_irq_signals[j].partition_id ==
-                                        partition->static_data->partition_id) {
+                partition->p_static->pid) {
                 partition->signals_allowed |=
                                         tfm_core_irq_signals[j].signal_value;
+                if (partition->p_static->psa_ff_ver == 0x0100) {
+                    tfm_spm_hal_enable_irq(tfm_core_irq_signals[j].irq_line);
+                } else if (partition->p_static->psa_ff_ver == 0x0101) {
+                    tfm_spm_hal_disable_irq(tfm_core_irq_signals[j].irq_line);
+                }
             }
         }
 
         tfm_event_init(&partition->event);
-        tfm_list_init(&partition->msg_list);
+        BI_LIST_INIT_NODE(&partition->msg_list);
 
         pth = &partition->sp_thread;
         if (!pth) {
@@ -703,15 +720,14 @@ uint32_t tfm_spm_init(void)
         }
 
         tfm_core_thrd_init(pth,
-                           (tfm_core_thrd_entry_t)
-                                         partition->static_data->partition_init,
+                           (tfm_core_thrd_entry_t)partition->p_static->entry,
                            NULL,
                            (uintptr_t)partition->memory_data->stack_top,
                            (uintptr_t)partition->memory_data->stack_bottom);
 
-        pth->prior = partition->static_data->partition_priority;
+        pth->prior = partition->p_static->priority;
 
-        if (partition->static_data->partition_id == TFM_SP_NON_SECURE_ID) {
+        if (partition->p_static->pid == TFM_SP_NON_SECURE_ID) {
             p_ns_entry_thread = pth;
             pth->param = (void *)tfm_spm_hal_get_ns_entry_point();
         }
@@ -725,6 +741,7 @@ uint32_t tfm_spm_init(void)
     /* Init Service */
     num = sizeof(service) / sizeof(struct tfm_spm_service_t);
     for (i = 0; i < num; i++) {
+        int32_t j = 0;
         service[i].service_db = &service_db[i];
         partition =
             tfm_spm_get_partition_by_id(service[i].service_db->partition_id);
@@ -734,7 +751,21 @@ uint32_t tfm_spm_init(void)
         service[i].partition = partition;
         partition->signals_allowed |= service[i].service_db->signal;
 
-        tfm_list_init(&service[i].handle_list);
+        /* Populate the p_service of stateless_service_ref[] */
+        if (service_db[i].connection_based == false) {
+            for (j = 0; j < STATIC_HANDLE_NUM_LIMIT; j++) {
+                if (stateless_service_ref[j].sid == service_db[i].sid) {
+                    stateless_service_ref[j].p_service = &service[i];
+                    break;
+                }
+            }
+            /* Stateless service not found in tracking table */
+            if (j >= STATIC_HANDLE_NUM_LIMIT) {
+                tfm_core_panic();
+            }
+        }
+
+        BI_LIST_INIT_NODE(&service[i].handle_list);
     }
 
     /*
@@ -759,8 +790,11 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
     struct partition_t *p_next_partition;
     uint32_t is_privileged;
 #endif
-    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next_thread();
-    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr_thread();
+    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
+    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
+#if defined(TFM_FIH_PROFILE_ON) && (TFM_LVL == 3)
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL != 1
@@ -768,8 +802,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
                                                  struct partition_t,
                                                  sp_thread);
 
-        if (p_next_partition->static_data->partition_flags &
-            SPM_PART_FLAG_PSA_ROT) {
+        if (p_next_partition->p_static->flags & SPM_PART_FLAG_PSA_ROT) {
             is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
         } else {
             is_privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
@@ -784,12 +817,21 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
          */
         if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
             /* FIXME: only MPU-based implementations are supported currently */
+#ifdef TFM_FIH_PROFILE_ON
+            FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
+                     p_next_partition->memory_data->data_start,
+                     p_next_partition->memory_data->data_limit);
+            if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+                tfm_core_panic();
+            }
+#else /* TFM_FIH_PROFILE_ON */
             if (tfm_hal_mpu_update_partition_boundary(
                                       p_next_partition->memory_data->data_start,
                                       p_next_partition->memory_data->data_limit)
                                                            != TFM_HAL_SUCCESS) {
                 tfm_core_panic();
             }
+#endif /* TFM_FIH_PROFILE_ON */
         }
 #endif /* TFM_LVL == 3 */
 #endif /* TFM_LVL != 1 */
@@ -852,17 +894,16 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
 
     partition->signals_asserted |= signal;
 
-    /*
-     * The target partition may be blocked with waiting for signals after
-     * called psa_wait(). Set the return value with the available signals
-     * before wake it up with tfm_event_signal().
-     */
-    tfm_event_wake(&partition->event,
-                   partition->signals_asserted & partition->signals_waiting);
+    if (partition->signals_waiting & signal) {
+        tfm_event_wake(
+                      &partition->event,
+                      partition->signals_asserted & partition->signals_waiting);
+        partition->signals_waiting &= ~signal;
+    }
 }
 
 /**
- * \brief assert signal for a given IRQ line.
+ * \brief Sets signal to partition for Second-Level Interrupt Handling mode IRQ
  *
  * \param[in] partition_id      The ID of the partition which handles this IRQ
  * \param[in] signal            The signal associated with this IRQ
@@ -871,85 +912,36 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
  * \retval void                 Success.
  * \retval "Does not return"    Partition ID is invalid
  */
-void tfm_irq_handler(uint32_t partition_id, psa_signal_t signal,
-                     IRQn_Type irq_line)
+void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
+                        uint32_t irq_line)
 {
+    __disable_irq();
+
     tfm_spm_hal_disable_irq(irq_line);
     notify_with_signal(partition_id, signal);
+
+    __enable_irq();
 }
 
-int32_t get_irq_line_for_signal(int32_t partition_id,
-                                psa_signal_t signal,
-                                IRQn_Type *irq_line)
+int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
 {
     size_t i;
+
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
+        return -1;
+    }
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         if (tfm_core_irq_signals[i].partition_id == partition_id &&
             tfm_core_irq_signals[i].signal_value == signal) {
-            *irq_line = tfm_core_irq_signals[i].irq_line;
-            return IPC_SUCCESS;
+            return tfm_core_irq_signals[i].irq_line;
         }
     }
-    return IPC_ERROR_GENERIC;
+
+    return SPM_ERROR_GENERIC;
 }
 
-void tfm_spm_enable_irq(uint32_t *args)
-{
-    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
-    psa_signal_t irq_signal = svc_ctx->r0;
-    IRQn_Type irq_line = (IRQn_Type) 0;
-    int32_t ret;
-    struct partition_t *partition = NULL;
-
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_core_panic();
-    }
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    ret = get_irq_line_for_signal(partition->static_data->partition_id,
-                                  irq_signal, &irq_line);
-    /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (ret != IPC_SUCCESS) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_hal_enable_irq(irq_line);
-}
-
-void tfm_spm_disable_irq(uint32_t *args)
-{
-    struct tfm_state_context_t *svc_ctx = (struct tfm_state_context_t *)args;
-    psa_signal_t irq_signal = svc_ctx->r0;
-    IRQn_Type irq_line = (IRQn_Type) 0;
-    int32_t ret;
-    struct partition_t *partition = NULL;
-
-    /* It is a fatal error if passed signal indicates more than one signals. */
-    if (!tfm_is_one_bit_set(irq_signal)) {
-        tfm_core_panic();
-    }
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    ret = get_irq_line_for_signal(partition->static_data->partition_id,
-                                  irq_signal, &irq_line);
-    /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (ret != IPC_SUCCESS) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_hal_disable_irq(irq_line);
-}
-
+#if !defined(__ARM_ARCH_8_1M_MAIN__)
 void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                              uint32_t exc_return, bool ns_caller)
 {
@@ -961,7 +953,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
          * the preempted context of SP can be different with the one who
          * preempts veneer.
          */
-        if (p_cur_sp->static_data->partition_id != TFM_SP_NON_SECURE_ID) {
+        if (p_cur_sp->p_static->pid != TFM_SP_NON_SECURE_ID) {
             tfm_core_panic();
         }
 
@@ -986,10 +978,11 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
         if (stacked_ctx_pos != p_cur_sp->sp_thread.stk_top) {
             tfm_core_panic();
         }
-    } else if (p_cur_sp->static_data->partition_id <= 0) {
+    } else if (p_cur_sp->p_static->pid <= 0) {
         tfm_core_panic();
     }
 }
+#endif
 
 void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
 {
@@ -1005,7 +998,7 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
         if (!partition) {
             tfm_core_panic();
         }
-        running_partition_flags = partition->static_data->partition_flags;
+        running_partition_flags = partition->p_static->flags;
 
         /* Currently only PSA Root of Trust services are allowed to make Reset
          * vote request
@@ -1023,21 +1016,4 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
     default:
         *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
     }
-}
-
-enum spm_err_t tfm_spm_db_init(void)
-{
-    uint32_t i;
-
-    /* This function initialises partition db */
-
-    for (i = 0; i < g_spm_partition_db.partition_count; i++) {
-        g_spm_partition_db.partitions[i].static_data = &static_data_list[i];
-        g_spm_partition_db.partitions[i].platform_data_list =
-                                                     platform_data_list_list[i];
-        g_spm_partition_db.partitions[i].memory_data = &memory_data_list[i];
-    }
-    g_spm_partition_db.is_init = 1;
-
-    return SPM_ERR_OK;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,5 +67,11 @@
 
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
+
+/* Cadence QSPI Flash Controller */
+#define QSPI_IP6514E_S
+
+/* MT25QL Flash memory library */
+#define MT25QL_S
 
 #endif  /* __DEVICE_CFG_H__ */

@@ -1,6 +1,6 @@
 ;/*
 ; * Copyright (c) 2017-2018 ARM Limited
-; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -114,11 +114,11 @@ Vectors_Copy
                 STR r3, [r0]
                 ADDS r0, r0, #4
                 ADDS r1, r1, #4
-                SUBS r2, r2, #1
+                SUBS r2, r2, #4
                 CMP r2, #0
                 BNE Vectors_Copy
 
-                ; Update Vector Table Offset Register. */
+                ; Update Vector Table Offset Register.
                 LDR r0, =__ramVectors
 
                 ELSE

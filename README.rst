@@ -14,9 +14,9 @@ This module in Zephyr has included TF-M and it's dependencies, they are:
 
 TF-M:
     repo: https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
-    tag: TF-Mv1.2.0
-    commit: c78be620c0fee08888956646b8f02fd03ab88567
-    BSD-3-Clause
+    tag: TF-Mv1.3.0-RC1
+    commit: e02ce6382a537665fbdf4307cabe3d834e1d7a71
+    license: BSD-3-Clause
 
 TF-M Tests:
     repo: https://git.trustedfirmware.org/TF-M/tf-m-tests.git

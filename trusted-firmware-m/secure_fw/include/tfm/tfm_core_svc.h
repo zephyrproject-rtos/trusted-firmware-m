@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #define __TFM_CORE_SVC_H__
 
 #include "tfm_hal_device_header.h"
+#include "tfm_spm_log.h"
 
 typedef enum {
     TFM_SVC_SFN_REQUEST = 0,
@@ -18,8 +19,10 @@ typedef enum {
     TFM_SVC_GET_BOOT_DATA,
     TFM_SVC_DEPRIV_REQ,
     TFM_SVC_DEPRIV_RET,
+#ifndef TFM_PSA_API
     TFM_SVC_ENABLE_IRQ,
     TFM_SVC_DISABLE_IRQ,
+#endif
     TFM_SVC_PSA_WAIT,
     TFM_SVC_PSA_EOI,
     TFM_SVC_HANDLER_MODE,
@@ -42,6 +45,13 @@ typedef enum {
     TFM_SVC_PSA_PANIC,
     TFM_SVC_PSA_LIFECYCLE,
 #endif
+#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+    TFM_SVC_OUTPUT_UNPRIV_STRING,
+#endif
+    /* Secure Partition API for interrupt control */
+    TFM_SVC_PSA_IRQ_ENABLE,
+    TFM_SVC_PSA_IRQ_DISABLE,
+
     TFM_SVC_PLATFORM_BASE = 50 /* leave room for additional Core handlers */
 } tfm_svc_number_t;
 

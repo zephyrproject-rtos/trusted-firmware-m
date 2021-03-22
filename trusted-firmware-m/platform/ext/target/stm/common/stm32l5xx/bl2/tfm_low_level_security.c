@@ -234,9 +234,8 @@ void TFM_LL_SECU_CheckStaticProtections(void)
   if (end > PAGE_MAX_NUMBER_IN_BANK)
   {
     end = end - (PAGE_MAX_NUMBER_IN_BANK + 1);
-    if ((flash_option_bytes_bank2.WMSecStartPage > flash_option_bytes_bank2.WMSecEndPage)
-        || (start < flash_option_bytes_bank2.WMSecStartPage)
-        || (end > flash_option_bytes_bank2.WMSecEndPage))
+    if ((start != flash_option_bytes_bank2.WMSecStartPage)
+        || (end != flash_option_bytes_bank2.WMSecEndPage))
     {
       BOOT_LOG_INF("BANK 2 secure flash [%d, %d] : OB [%d, %d]", start, end, flash_option_bytes_bank2.WMSecStartPage,
                    flash_option_bytes_bank2.WMSecEndPage);
@@ -251,6 +250,22 @@ void TFM_LL_SECU_CheckStaticProtections(void)
       flash_option_bytes_bank2.WMSecConfig |= OB_WMSEC_AREA2 | OB_WMSEC_SECURE_AREA_CONFIG ;
 #endif /* TFM_ENABLE_SET_OB  */
     }
+  }
+  /* the bank 2 must be fully unsecure */
+  else if (flash_option_bytes_bank2.WMSecEndPage >= flash_option_bytes_bank2.WMSecStartPage)
+  {
+    BOOT_LOG_INF("BANK 2 secure flash [%d, %d] : OB [%d, %d]", 127, 0, flash_option_bytes_bank2.WMSecStartPage,
+                 flash_option_bytes_bank2.WMSecEndPage);
+#ifndef TFM_ENABLE_SET_OB
+    BOOT_LOG_ERR("Error while checking secure flash protection");
+    Error_Handler();
+#else
+    /* bank is not unsecured , modify option bytes */
+    flash_option_bytes_bank2.WMSecStartPage = 127;
+    flash_option_bytes_bank2.WMSecEndPage = 0;
+    flash_option_bytes_bank2.OptionType = OPTIONBYTE_WMSEC;
+    flash_option_bytes_bank2.WMSecConfig |= OB_WMSEC_AREA2 | OB_WMSEC_SECURE_AREA_CONFIG ;
+#endif /* TFM_ENABLE_SET_OB */
   }
 
 #ifdef  TFM_WRP_PROTECT_ENABLE
@@ -489,10 +504,21 @@ static void sau_and_idau_cfg(void)
   SAU->RLAR = (((uint32_t)FLASH_NS + 0xffff) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 #endif /* TFM_ERROR_HANDLER_NON_SECURE */
   /* Allow non secure Flash base access */
+#if defined(EXTERNAL_FLASH)
+  SAU->RNR  = 3;
+  SAU->RBAR = ((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET) & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET
+                + FLASH_AREA_1_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+  SAU->RNR  = 4;
+  SAU->RBAR = ((uint32_t)OSPI_FLASH_BASE_ADDRESS + FLASH_AREA_2_OFFSET) & SAU_RBAR_BADDR_Msk;
+  SAU->RLAR = (((uint32_t)OSPI_FLASH_BASE_ADDRESS + FLASH_AREA_3_OFFSET
+                + FLASH_AREA_3_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+#else
   SAU->RNR  = 3;
   SAU->RBAR = ((uint32_t)FLASH_BASE_NS + FLASH_AREA_1_OFFSET) & SAU_RBAR_BADDR_Msk;
   SAU->RLAR = (((uint32_t)FLASH_BASE_NS + FLASH_AREA_3_OFFSET
                 + FLASH_AREA_3_SIZE - 1) & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+#endif
   /* Force memory writes before continuing */
   __DSB();
   /* Flush and refill pipeline with updated permissions */

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020 ARM Limited
+ * Copyright (c) 2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,19 @@ LR_CODE NS_CODE_START {
         .ANY (+RO)
     }
 
-    ER_DATA NS_DATA_START {
+#ifdef RAM_VECTORS_SUPPORT
+    ER_RAM_VECTORS NS_DATA_START ALIGN 256 UNINIT {
+        * (RESET_RAM, +FIRST)
+    }
+#endif
+
+    /* Executable code allocated in RAM */
+    TFM_RAM_CODE +0 ALIGN 32 {
+        * (.ramfunc)
+    }
+
+    /* Use up the rest space of the NS_DATA area */
+    ER_DATA +0 {
         .ANY (+ZI +RW)
     }
 
@@ -33,16 +46,10 @@ LR_CODE NS_CODE_START {
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY NS_HEAP_SIZE {
     }
 
-#ifdef RAM_VECTORS_SUPPORT
-    ER_RAM_VECTORS +0 ALIGN 256 UNINIT {
-        * (RESET_RAM)
+#if defined(PSA_API_TEST_ENABLED)
+    PSA_API_TEST_NVMEM PSA_API_TEST_NVMEM_START EMPTY PSA_API_TEST_NVMEM_SIZE {
     }
 #endif
-
-    /* Executable code allocated in RAM */
-    TFM_RAM_CODE +0 ALIGN 32 {
-        * (.ramfunc)
-    }
 
 #if defined (NS_DATA_SHARED_START)
     /* Shared memory data */
@@ -61,4 +68,3 @@ LR_CODE NS_CODE_START {
      */
     ScatterAssert(ImageLimit(SRAM_WATERMARK) <= NS_DATA_START + NS_DATA_SIZE)
 }
-

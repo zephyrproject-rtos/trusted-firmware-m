@@ -28,8 +28,6 @@ LR_CODE S_CODE_START {
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
-        platform_retarget_dev.o (+RO)
-        device_definition.o (+RO)
         *(SFN)
         *armlib*
         *libtfm_sprt.a (+RO)
@@ -232,8 +230,11 @@ LR_CODE S_CODE_START {
     }
 #endif /* !defined(TFM_PSA_API) */
 
-    TFM_UNPRIV_DATA +0 ALIGN 32 {
+#if defined(TFM_SP_META_PTR_ENABLE)
+    TFM_SP_META_PTR +0 ALIGN 32 {
+        *(SP_META_PTR_SPRTL_INST)
     }
+#endif
 
     /**** APP RoT DATA start here */
     /*

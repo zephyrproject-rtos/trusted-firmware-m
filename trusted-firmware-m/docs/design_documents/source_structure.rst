@@ -145,7 +145,7 @@ services.
 Folder name                         Purpose
 =================================== ===========================================
 include/\*                          SPM public headers.
-common/\*                           SPM common logic complies with PSA-FF-M and
+ffm/\*                              SPM logic complies with PSA-FF-M and
                                     its necessary supporting functionalities,
                                     such as the runtime API and the thread
                                     operation, etc.

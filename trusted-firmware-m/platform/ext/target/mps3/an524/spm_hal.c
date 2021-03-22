@@ -32,25 +32,9 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    int32_t ret = ARM_DRIVER_OK;
-    /* Configures non-secure memory spaces in the target */
-    sau_and_idau_cfg();
-    ret = mpc_init_cfg();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    ret = ppc_init_cfg();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
-                  const struct tfm_spm_partition_platform_data_t *platform_data)
+                  const struct platform_data_t *platform_data)
 {
     bool privileged = tfm_is_partition_privileged(partition_idx);
 

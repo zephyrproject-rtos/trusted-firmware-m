@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -62,11 +62,10 @@ def process_manifest(manifest_list_files):
 
     Returns
     -------
-    The manifest header list and the data base.
+    The partition data base.
     """
 
-    db = []
-    manifest_header_list = []
+    partition_db = []
     manifest_list = []
 
     for f in manifest_list_files:
@@ -74,8 +73,8 @@ def process_manifest(manifest_list_files):
             manifest_dic = yaml.safe_load(manifest_list_yaml_file)
             manifest_list.extend(manifest_dic["manifest_list"])
 
-    templatefile_name = 'secure_fw/partitions/manifestfilename.template'
-    template = ENV.get_template(templatefile_name)
+    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
+    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
 
     print("Start to generate PSA manifests:")
     for manifest_item in manifest_list:
@@ -83,8 +82,6 @@ def process_manifest(manifest_list_files):
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
         manifest = yaml.safe_load(file)
-
-        db.append({"manifest": manifest, "attr": manifest_item})
 
         utilities = {}
         utilities['donotedit_warning']=donotedit_warning
@@ -98,6 +95,7 @@ def process_manifest(manifest_list_files):
         outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
         context['file_name'] = outfile_name.replace('.h', '')
         outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
+        intermediafile_name = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + context['file_name'] + '.c').replace('\\', '/')
 
         """
         Remove the `source_path` portion of the filepaths, so that it can be
@@ -107,11 +105,13 @@ def process_manifest(manifest_list_files):
             # Replace environment variables in the source path
             source_path = os.path.expandvars(manifest_item['source_path'])
             outfile_name = os.path.relpath(outfile_name, start = source_path)
+            intermediafile_name = os.path.relpath(intermediafile_name, start = source_path)
 
-        manifest_header_list.append(outfile_name)
+        partition_db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
+            intermediafile_name = os.path.join(OUT_DIR, intermediafile_name)
 
         outfile_path = os.path.dirname(outfile_name)
         if not os.path.exists(outfile_path):
@@ -120,10 +120,20 @@ def process_manifest(manifest_list_files):
         print ("Generating " + outfile_name)
 
         outfile = io.open(outfile_name, "w", newline=None)
-        outfile.write(template.render(context))
+        outfile.write(manifesttemplate.render(context))
         outfile.close()
 
-    return manifest_header_list, db
+        intermediafile_path = os.path.dirname(intermediafile_name)
+        if not os.path.exists(intermediafile_path):
+            os.makedirs(intermediafile_path)
+
+        print ("Generating " + intermediafile_name)
+
+        memoutfile = io.open(intermediafile_name, "w", newline=None)
+        memoutfile.write(memorytemplate.render(context))
+        memoutfile.close()
+
+    return partition_db
 
 def gen_files(context, gen_file_lists):
     """
@@ -164,6 +174,82 @@ def gen_files(context, gen_file_lists):
         outfile.close()
 
     print ("Generation of files done")
+
+def process_stateless_services(partitions, static_handle_max_num):
+    """
+    This function collects all stateless services together, and allocates
+    stateless handle for them.
+    If the stateless handle is set to a valid value in yaml file, it is used as
+    the index directly, if the stateless handle is set as "auto" or not set,
+    framework will allocate a valid index for the service.
+    After that, framework puts each service into a stateless service list at
+    position of its "index". Other elements in list are left None.
+    """
+    stateless_services = []
+
+    # Collect all stateless services first.
+    for partition in partitions:
+        # Skip the FF-M 1.0 partitions
+        if partition['manifest']['psa_framework_version'] < 1.1:
+            continue
+        # Skip the Non-IPC partitions
+        if partition['attr']['tfm_partition_ipc'] is not True:
+            continue
+        for service in partition['manifest']['services']:
+            if 'connection_based' not in service:
+                raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
+            if service['connection_based'] is False:
+                stateless_services.append(service)
+
+    if len(stateless_services) == 0:
+        return []
+
+    if len(stateless_services) > static_handle_max_num:
+        raise Exception("Stateless service numbers range exceed.")
+
+    """
+    Allocate an empty stateless service list to store services and find the
+    service easily by handle.
+    Use service stateless handle values as indexes. Put service in the list
+    at index "handle - 1", since handle value starts from 1 and list index
+    starts from 0.
+    """
+    reordered_stateless_list = [None] * static_handle_max_num
+
+    # Fill in services with specified stateless handle, index is "handle - 1".
+    for service in stateless_services:
+        if service['stateless_handle'] == "auto":
+            continue
+        try:
+            if reordered_stateless_list[service['stateless_handle']-1] is not None:
+                raise Exception("Duplicated stateless service handle.")
+            reordered_stateless_list[service['stateless_handle']-1] = service
+        except IndexError:
+            raise Exception("Stateless service index out of range.")
+        # Remove recorded node from the existing list
+        stateless_services.remove(service)
+
+    # Auto-allocate stateless handle
+    for i in range(0, static_handle_max_num):
+        if reordered_stateless_list[i] == None and len(stateless_services) > 0:
+            service = stateless_services.pop(0)
+            service['stateless_handle'] = i + 1
+            reordered_stateless_list[i] = service
+        """
+        Encode stateless flag and version into stateless handle
+        bit 30: stateless handle indicator
+        bit 15-8: stateless service version
+        bit 7-0: stateless handle index
+        """
+        if reordered_stateless_list[i] != None:
+            stateless_handle_value = reordered_stateless_list[i]['stateless_handle']
+            stateless_flag = 1 << 30
+            stateless_handle_value |= stateless_flag
+            stateless_version = (reordered_stateless_list[i]['version'] & 0xFF) << 8
+            stateless_handle_value |= stateless_version
+            reordered_stateless_list[i]['stateless_handle'] = '0x%08x' % stateless_handle_value
+
+    return reordered_stateless_list
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list',
@@ -236,16 +322,16 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    manifest_header_list, db = process_manifest(manifest_list)
+    partition_db = process_manifest(manifest_list)
 
     utilities = {}
     context = {}
 
-    utilities['donotedit_warning']=donotedit_warning
-    utilities['manifest_header_list']=manifest_header_list
+    utilities['donotedit_warning'] = donotedit_warning
 
-    context['manifests'] = db
+    context['partitions'] = partition_db
     context['utilities'] = utilities
+    context['stateless_services'] = process_stateless_services(partition_db, 32)
 
     gen_files(context, gen_file_list)
 

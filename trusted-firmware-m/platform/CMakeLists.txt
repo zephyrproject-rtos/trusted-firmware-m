@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,7 +14,7 @@ add_library(platform_region_defs INTERFACE)
 # under the multicore topology, NS is declared in the same place as the PSA
 # interface so that it picks up the compiler definitions for the NS CPU
 if(NOT TFM_MULTI_CORE_TOPOLOGY)
-    add_library(platform_ns STATIC)
+    add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
 endif()
 
 if (BL2)
@@ -23,7 +23,7 @@ endif()
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(ext/target/${TFM_PLATFORM})
+add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
 #========================= Platform Secure ====================================#
 
@@ -40,11 +40,12 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         ext/common/template/attest_hal.c
-        ext/common/tfm_hal_ps.c
-        ext/common/tfm_hal_its.c
+        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_ps.c>
+        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
         ext/common/tfm_platform.c
-        ext/common/uart_stdout.c
-        ext/common/tfm_hal_spm_logdev_peripheral.c
+        $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
+        $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ext/common/tfm_hal_spm_logdev_peripheral.c>
+        ext/common/tfm_hal_memory_symbols.c
         $<$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
@@ -55,6 +56,7 @@ target_sources(platform_s
 target_link_libraries(platform_s
     PUBLIC
         platform_region_defs
+        tfm_fih
     PRIVATE
         psa_interface
         tfm_secure_api
@@ -66,6 +68,8 @@ target_compile_definitions(platform_s
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+        $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
+        $<$<AND:$<BOOL:${TFM_PXN_ENABLE}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:TFM_PXN_ENABLE>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -82,20 +86,19 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ext/common/uart_stdout.c
+        $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
 )
 
 target_link_libraries(platform_ns
     PUBLIC
         platform_region_defs
-        psa_interface
+        tfm_ns_interface
 )
 
 target_compile_definitions(platform_ns
     PRIVATE
         $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
         $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
-        $<$<BOOL:${TFM_MULTI_CORE_MULTI_CLIENT_CALL}>:TFM_MULTI_CORE_MULTI_CLIENT_CALL>
 )
 
 #========================= Platform BL2 =======================================#
@@ -113,8 +116,8 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ext/common/uart_stdout.c
             ext/common/boot_hal.c
+            $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
             $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
             $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
@@ -128,12 +131,6 @@ if(BL2)
             bl2_hal
             tfm_arch
     )
-
-    if (NOT DEFINED MCUBOOT_UPGRADE_STRATEGY)
-        message(FATAL_ERROR "MCUBOOT_UPGRADE_STRATEGY is undefined")
-    else()
-        string(CONCAT UPGRADE_STRATEGY "MCUBOOT_" ${MCUBOOT_UPGRADE_STRATEGY})
-    endif()
 
     target_compile_definitions(platform_bl2
         PUBLIC
@@ -158,4 +155,6 @@ target_compile_definitions(platform_region_defs
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
+        $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
 )

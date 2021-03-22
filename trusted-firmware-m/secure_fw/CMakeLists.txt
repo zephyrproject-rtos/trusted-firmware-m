@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.15)
 
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)
-add_library(tfm_secure_api STATIC)
+add_library(tfm_secure_api INTERFACE)
 add_library(tfm_partitions INTERFACE)
 # Lots of seperate things need to know which partitions are enabled, so this
 # meta-target is provided so the related compile definitions can be collected in
@@ -25,6 +25,9 @@ add_subdirectory(partitions/initial_attestation)
 add_subdirectory(partitions/protected_storage)
 add_subdirectory(partitions/internal_trusted_storage)
 add_subdirectory(partitions/platform)
+add_subdirectory(partitions/psa_proxy)
+add_subdirectory(partitions/firmware_update)
+add_subdirectory(partitions/tfm_ffm11_partition)
 add_subdirectory(spm)
 
 target_include_directories(secure_fw
@@ -66,16 +69,13 @@ add_convert_to_bin_target(tfm_s)
 ############################ Secure API ########################################
 
 target_include_directories(tfm_secure_api
-    PUBLIC
+    INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 target_link_libraries(tfm_secure_api
-    PUBLIC
+    INTERFACE
         tfm_arch
-    PRIVATE
-        psa_interface
-        platform_s
 )
 
 set_source_files_properties(
@@ -115,4 +115,34 @@ if(NOT (TFM_PSA_API AND TFM_MULTI_CORE_TOPOLOGY))
         PRIVATE
             ${LINKER_VENEER_OUTPUT_FLAG}${CMAKE_CURRENT_BINARY_DIR}/s_veneers.o
     )
+endif()
+
+############################### CODE SHARING ###################################
+if (TFM_CODE_SHARING)
+    set(LIB_LIST mbedcrypto
+                 crypto_service_cc312
+                 platform_s
+                 tfm_psa_rot_partition_crypto
+                 tfm_psa_rot_partition_audit
+                 tfm_psa_rot_partition_attestation
+                 tfm_app_rot_partition_ps
+                 tfm_psa_rot_partition_its
+                 tfm_psa_rot_partition_platform
+                 platform_s
+                 tfm_sprt
+                 tfm_spm
+    )
+    if (TFM_CODE_SHARING_PATH)
+        compiler_link_shared_code(tfm_s
+                                  ${TFM_CODE_SHARING_PATH} # Path to shared code
+                                  EXTERNAL_TARGET # Not produced by tf-m build
+                                  "${LIB_LIST}"
+        )
+    else()
+        compiler_link_shared_code(tfm_s
+                                  ${CMAKE_CURRENT_BINARY_DIR}/../bl2
+                                  bl2
+                                  "${LIB_LIST}"
+        )
+    endif()
 endif()

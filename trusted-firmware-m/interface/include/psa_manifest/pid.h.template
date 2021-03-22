@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,15 +14,15 @@
 extern "C" {
 #endif
 
-{% for manifest in manifests %}
-    {% if manifest.attr.pid - 256 < 0 %}
-#error "Partition ID for '{{manifest.manifest.name}}' have to be at least TFM_SP_BASE"
+{% for partition in partitions %}
+    {% if partition.attr.pid - 256 < 0 %}
+#error "Partition ID for '{{partition.manifest.name}}' have to be at least TFM_SP_BASE"
     {% else %}
-#define {{"%-62s"|format(manifest.manifest.name)}} ({{manifest.attr.pid}})
+#define {{"%-62s"|format(partition.manifest.name)}} ({{partition.attr.pid}})
     {% endif %}
 {% endfor %}
 
-#define {{"%-62s"|format("TFM_MAX_USER_PARTITIONS")}} ({{manifests | length()}})
+#define {{"%-62s"|format("TFM_MAX_USER_PARTITIONS")}} ({{partitions | length()}})
 
 #ifdef __cplusplus
 }

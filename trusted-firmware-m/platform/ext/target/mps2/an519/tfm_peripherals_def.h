@@ -18,12 +18,12 @@ extern "C" {
 #define TFM_TIMER0_IRQ    (TIMER0_IRQn)
 #define TFM_TIMER1_IRQ    (TIMER1_IRQn)
 
-struct tfm_spm_partition_platform_data_t;
+struct platform_data_t;
 
-extern struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart;
-extern struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1;
-extern struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io;
-extern struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0;
+extern struct platform_data_t tfm_peripheral_std_uart;
+extern struct platform_data_t tfm_peripheral_uart1;
+extern struct platform_data_t tfm_peripheral_fpga_io;
+extern struct platform_data_t tfm_peripheral_timer0;
 
 #define TFM_PERIPHERAL_STD_UART  (&tfm_peripheral_std_uart)
 #define TFM_PERIPHERAL_UART1     (&tfm_peripheral_uart1)

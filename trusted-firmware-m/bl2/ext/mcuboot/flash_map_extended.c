@@ -14,16 +14,14 @@
 
 #include <errno.h>
 #include "target.h"
+#include "cmsis.h"
 #include "Driver_Flash.h"
 #include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"
 #include "flash_map_backend/flash_map_backend.h"
 #include "bootutil/bootutil_log.h"
 
-/* Flash device name must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
-
-int flash_device_base(uint8_t fd_id, uintptr_t *ret)
+__WEAK int flash_device_base(uint8_t fd_id, uintptr_t *ret)
 {
     if (fd_id != FLASH_DEVICE_ID) {
         BOOT_LOG_ERR("invalid flash ID %d; expected %d",
@@ -75,9 +73,7 @@ int flash_area_id_to_image_slot(int area_id)
 
 uint8_t flash_area_erased_val(const struct flash_area *fap)
 {
-    (void)fap;
-
-    return FLASH_DEV_NAME.GetInfo()->erased_value;
+    return DRV_FLASH_AREA(fap)->GetInfo()->erased_value;
 }
 
 int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
@@ -90,7 +86,7 @@ int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
     BOOT_LOG_DBG("read_is_empty area=%d, off=%#x, len=%#x",
                  fa->fa_id, off, len);
 
-    rc = FLASH_DEV_NAME.ReadData(fa->fa_off + off, dst, len);
+    rc = DRV_FLASH_AREA(fa)->ReadData(fa->fa_off + off, dst, len);
     if (rc) {
         return -1;
     }

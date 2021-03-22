@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
-#include "tfm_list.h"
+#include "lists.h"
 #include "tfm_wait.h"
 #include "tfm_secure_api.h"
 #include "tfm_thread.h"
@@ -29,6 +29,35 @@
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
+/*
+ * Set a number limit for stateless handle.
+ * Valid handle must be positive, set client handle minimum value to 1.
+ */
+#define STATIC_HANDLE_NUM_LIMIT         32
+#define CLIENT_HANDLE_VALUE_MIN         1
+
+#define STAIC_HANDLE_IDX_BIT_WIDTH      8
+#define STAIC_HANDLE_IDX_MASK \
+    (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
+#define GET_INDEX_FROM_STATIC_HANDLE(handle) \
+    (uint32_t)(((handle) & STAIC_HANDLE_IDX_MASK) - 1)
+
+#define STAIC_HANDLE_VER_BIT_WIDTH      8
+#define STAIC_HANDLE_VER_OFFSET         8
+#define STAIC_HANDLE_VER_MASK \
+    (uint32_t)((1UL << STAIC_HANDLE_VER_BIT_WIDTH) - 1)
+#define GET_VERSION_FROM_STATIC_HANDLE(handle) \
+    (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
+
+#define STAIC_HANDLE_INDICATOR_OFFSET   30
+/*
+ * A valid static handle must have indicator bit set, have a positive index,
+ * 1 <= index <= STATIC_HANDLE_NUM_LIMIT.
+ */
+#define IS_VALID_STATIC_HANDLE(handle)                      \
+    (((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET)) && \
+     (GET_INDEX_FROM_STATIC_HANDLE(handle) < STATIC_HANDLE_NUM_LIMIT))
+
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
 /* Privileged definitions for partition thread mode */
@@ -45,15 +74,6 @@
 #define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
 
 #define TFM_MSG_MAGIC                   0x15154343
-
-enum spm_err_t {
-    SPM_ERR_OK = 0,
-    SPM_ERR_PARTITION_DB_NOT_INIT,
-    SPM_ERR_PARTITION_ALREADY_ACTIVE,
-    SPM_ERR_PARTITION_NOT_AVAILABLE,
-    SPM_ERR_INVALID_PARAMETER,
-    SPM_ERR_INVALID_CONFIG,
-};
 
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
@@ -74,7 +94,7 @@ struct tfm_msg_body_t {
                                         * client calls in multi-core topology
                                         */
 #endif
-    struct tfm_list_node_t msg_node;   /* For list operators             */
+    struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
 /**
@@ -83,17 +103,18 @@ struct tfm_msg_body_t {
  * phase.
  */
 struct partition_static_t {
-    uint32_t psa_framework_version;
-    uint32_t partition_id;
-    uint32_t partition_flags;
-    uint32_t partition_priority;
-    sp_entry_point partition_init;
-    uintptr_t stack_base;
-    size_t stack_size;
-    uintptr_t heap_base;
-    size_t heap_size;
-    uint32_t dependencies_num;
-    uint32_t *p_dependencies;
+    uint32_t psa_ff_ver;                /* PSA-FF version                   */
+    uint32_t pid;                       /* Partition ID                     */
+    uint32_t flags;                     /* Flags of the partition           */
+    uint32_t priority;                  /* Priority of the partition thread */
+    sp_entry_point entry;               /* Entry point of the partition     */
+    uintptr_t stack_base_addr;          /* Stack base of the partition      */
+    size_t stack_size;                  /* Stack size of the partition      */
+    uintptr_t heap_base_addr;           /* Heap base of the partition       */
+    size_t heap_size;                   /* Heap size of the partition       */
+    uintptr_t platform_data;            /* Platform specific data           */
+    uint32_t ndeps;                     /* Numbers of depended services     */
+    uint32_t *deps;                     /* Pointer to dependency arrays     */
 };
 
 /**
@@ -101,23 +122,21 @@ struct partition_static_t {
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    const struct partition_static_t *static_data;
+    const struct partition_static_t *p_static;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;
     struct tfm_core_thread_t sp_thread;
     struct tfm_event_t event;
-    struct tfm_list_node_t msg_list;
+    struct bi_list_node_t msg_list;
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
     /** A list of platform_data pointers */
-    const struct tfm_spm_partition_platform_data_t **platform_data_list;
     const struct tfm_spm_partition_memory_data_t *memory_data;
 };
 
 struct spm_partition_db_t {
-    uint32_t is_init;
     uint32_t partition_count;
     struct partition_t *partitions;
 };
@@ -129,6 +148,7 @@ struct tfm_spm_service_db_t {
     psa_signal_t signal;            /* Service signal                        */
     uint32_t sid;                   /* Service identifier                    */
     bool non_secure_client;         /* If can be called by non secure client */
+    bool connection_based;          /* 'true' for connection-based service   */
     uint32_t version;               /* Service version                       */
     uint32_t version_policy;        /* Service version policy                */
 };
@@ -140,8 +160,14 @@ struct tfm_spm_service_t {
                                               * Point to secure partition
                                               * data
                                               */
-    struct tfm_list_node_t handle_list;      /* Service handle list          */
-    struct tfm_list_node_t list;             /* For list operation           */
+    struct bi_list_node_t handle_list;       /* Service handle list          */
+    struct bi_list_node_t list;              /* For list operation           */
+};
+
+/* Stateless RoT service tracking array item type. Indexed by static handle */
+struct stateless_service_tracking_t {
+    uint32_t                 sid;           /* Service ID */
+    struct tfm_spm_service_t *p_service;    /* Service instance */
 };
 
 /* RoT connection handle list */
@@ -162,20 +188,13 @@ struct tfm_conn_handle_t {
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
     struct tfm_spm_service_t *service;  /* RoT service pointer                */
-    struct tfm_list_node_t list;        /* list node                          */
+    struct bi_list_node_t list;         /* list node                          */
 };
 
 enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RO = 1,
     TFM_MEMORY_ACCESS_RW = 2,
 };
-
-/**
- * \brief Initialize partition database
- *
- * \return Error code \ref spm_err_t
- */
-enum spm_err_t tfm_spm_db_init(void);
 
 /**
  * \brief                   Get the current partition mode.
@@ -221,8 +240,8 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
  * \param[in] conn_handle   Handle to be validated
  * \param[in] client_id     Partition ID of the sender of the message
  *
- * \retval IPC_SUCCESS        Success
- * \retval IPC_ERROR_GENERIC  Invalid handle
+ * \retval SPM_SUCCESS        Success
+ * \retval SPM_ERROR_GENERIC  Invalid handle
  */
 int32_t tfm_spm_validate_conn_handle(
                                     const struct tfm_conn_handle_t *conn_handle,
@@ -235,8 +254,8 @@ int32_t tfm_spm_validate_conn_handle(
  * \param[in] conn_handle   Connection handle created by
  *                          tfm_spm_create_conn_handle()
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
 int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
@@ -336,13 +355,9 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
  *                          obtained by partition management functions
  * \param[in] msg           message created by tfm_spm_create_msg()
  *                          \ref tfm_msg_body_t structures
- *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
- * \retval IPC_ERROR_GENERIC Failed to enqueue message to service message queue
  */
-int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
-                           struct tfm_msg_body_t *msg);
+void tfm_spm_send_event(struct tfm_spm_service_t *service,
+                        struct tfm_msg_body_t *msg);
 
 /**
  * \brief                   Check the client version according to
@@ -352,9 +367,9 @@ int32_t tfm_spm_send_event(struct tfm_spm_service_t *service,
  *                          by partition management functions
  * \param[in] version       Client support version
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS Bad parameters input
- * \retval IPC_ERROR_VERSION Check failed
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
+ * \retval SPM_ERROR_VERSION Check failed
  */
 int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
                                      uint32_t version);
@@ -367,8 +382,8 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
  *                          by partition management functions
  * \param[in] ns_caller     Whether from NS caller
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_GENERIC Authorization check failed
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct tfm_spm_service_t *service,
@@ -386,9 +401,9 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
  *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
  *                             \ref TFM_PARTITION_PRIVILEGED_MODE
  *
- * \retval IPC_SUCCESS               Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval IPC_ERROR_MEMORY_CHECK    Check failed
+ * \retval SPM_SUCCESS               Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_ERROR_MEMORY_CHECK    Check failed
  */
 int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
@@ -416,32 +431,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  */
 uint32_t tfm_spm_init(void);
 
-/**
- * \brief SVC handler of enabling irq_line of the specified irq_signal.
- *
- * \param[in] args              Include all input arguments: irq_signal.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- */
-void tfm_spm_enable_irq(uint32_t *args);
-
-/**
- * \brief SVC handler of disabling irq_line of the specified irq_signal.
- *
- * \param[in] args              Include all input arguments: irq_signal.
- *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- */
-void tfm_spm_disable_irq(uint32_t *args);
-
+#if !defined(__ARM_ARCH_8_1M_MAIN__)
 /**
  * \brief Validate the whether NS caller re-enter.
  *
@@ -452,9 +442,29 @@ void tfm_spm_disable_irq(uint32_t *args);
  *                              Or from secure client.
  *
  * \retval void                 Success.
+ *
+ * Notes:
+ *  For architecture v8.1m and later, will use hardware re-entrant detection.
+ *  Otherwise will use the software solution to validate the caller.
  */
 void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                              uint32_t exc_return, bool ns_caller);
+#else
+/**
+ * In v8.1 mainline, will use hardware re-entrant detection instead.
+ */
+__STATIC_INLINE
+void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
+                             uint32_t exc_return, bool ns_caller)
+{
+    (void)p_cur_sp;
+    (void)p_ctx;
+    (void)exc_return;
+    (void)ns_caller;
+    return;
+}
+#endif
+
 
 /**
  * \brief Converts a handle instance into a corresponded user handle.
@@ -479,8 +489,8 @@ void tfm_core_handler_mode(void);
  *                          tfm_spm_create_conn_handle()
  * \param[in] rhandle       rhandle need to save
  *
- * \retval IPC_SUCCESS      Success
- * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
+ * \retval SPM_SUCCESS      Success
+ * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find handle node
  */
 int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
@@ -506,16 +516,14 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
  *
  * \param[in]      partition_id    The ID of the partition in which we look for
  *                                 the signal.
- * \param[in]      signal          The signal we do the query for.
- * \param[out]     irq_line        The irq line associated with signal
+ * \param[in]      signal          The signal to query for.
  *
- * \retval IPC_SUCCESS          Execution successful, irq_line contains a valid
- *                              value.
- * \retval IPC_ERROR_GENERIC    There was an error finding the IRQ line for the
- *                              signal. irq_line is unchanged.
+ * \retval None-negative value  The irq line associated with signal
+ * \retval Negative value       if one of more the following are true:
+ *                              - the \ref signal indicates more than one signal
+ *                              - the \ref signal does not belong to the
+ *                                partition.
  */
-int32_t get_irq_line_for_signal(int32_t partition_id,
-                                psa_signal_t signal,
-                                IRQn_Type *irq_line);
+int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal);
 
 #endif /* __SPM_IPC_H__ */

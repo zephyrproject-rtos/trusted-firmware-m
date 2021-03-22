@@ -1,6 +1,7 @@
 ;/*
 ; * Copyright (c) 2017-2018 ARM Limited
 ; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2020-2021 IAR Systems AB
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -22,13 +23,15 @@
 ;//-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
 ;*/
 
-
 ; <h> Stack Configuration
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
 ; Address of the NMI handler in ROM
 CY_NMI_HANLDER_ADDR    EQU    0x0000000D
+
+; Address of CPU VTOR register
+CY_CPU_VTOR_ADDR       EQU    0xE000ED08
 
                 PRESERVE8
 
@@ -77,7 +80,7 @@ __vector_table       ;Core Interrupts
                 DCD     NvicMux0_IRQHandler                   ; CPU User Interrupt #0
                 DCD     Cy_SysIpcPipeIsrCm0
                 DCD     NvicMux2_IRQHandler                   ; CPU User Interrupt #2
-                DCD     TFM_TIMER0_IRQ_Handler                ; CPU User Interrupt #3
+                DCD     TFM_TIMER0_IRQ_Handler                ; Secure Timer IRQ
                 DCD     NvicMux4_IRQHandler                   ; CPU User Interrupt #4
                 DCD     NvicMux5_IRQHandler                   ; CPU User Interrupt #5
                 DCD     NvicMux6_IRQHandler                   ; CPU User Interrupt #6
@@ -96,7 +99,7 @@ __Vectors_End
 __Vectors       EQU     __vector_table
 __Vectors_Size  EQU     __Vectors_End - __Vectors
 
-                SECTION  .data:DATA(2)
+                SECTION  .ramvec:DATA:NOROOT(2)
 __ramVectors
                 DS8   __Vectors_Size
 
@@ -105,6 +108,29 @@ __ramVectors
                 SECTION  .text:CODE:REORDER:NOROOT(2)
 Reset_Handler
                 CPSID   i              ; Disable IRQs
+#ifdef RAM_VECTORS_SUPPORT
+                ; Copy vectors from ROM to RAM
+                LDR     r1, =__Vectors
+                LDR     r0, =__ramVectors
+                LDR     r2, =__Vectors_Size
+Vectors_Copy
+                LDR     r3, [r1]
+                STR     r3, [r0]
+                ADDS    r0, r0, #4
+                ADDS    r1, r1, #4
+                SUBS    r2, r2, #4
+                CMP     r2, #0
+                BNE     Vectors_Copy
+
+                ; Update Vector Table Offset Register. */
+                LDR     r0, =__ramVectors
+#else
+                LDR     R0, =__Vectors
+#endif
+                LDR     r1, =CY_CPU_VTOR_ADDR
+                STR     r0, [r1]
+                DSB     #0xF
+
                 LDR     R0, =SystemInit
                 BLX     R0
                 LDR     R0, =sfe(ARM_LIB_STACK)      ; End of PROC_STACK

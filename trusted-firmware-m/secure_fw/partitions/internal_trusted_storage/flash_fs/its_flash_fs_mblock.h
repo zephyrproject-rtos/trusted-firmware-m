@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include "flash/its_flash.h"
+#include "its_flash_fs.h"
 #include "its_utils.h"
 #include "psa/error.h"
 
@@ -56,8 +57,10 @@ extern "C" {
     uint32_t scratch_dblock;    /*!< Physical block ID of the data \
                                  *   section's scratch block \
                                  */ \
-    uint8_t fs_version;         /*!< ITS system version */ \
-    uint8_t active_swap_count;  /*!< Physical block ID of the data */
+    uint8_t fs_version;         /*!< Filesystem version */ \
+    uint8_t active_swap_count;  /*!< Number of times the metadata blocks have \
+                                 *   been swapped \
+                                 */
 
 struct its_metadata_block_header_t {
     _T1
@@ -129,7 +132,8 @@ struct its_file_meta_t {
  * \brief Structure to store the ITS flash file system context.
  */
 struct its_flash_fs_ctx_t {
-    const struct its_flash_info_t *flash_info; /**< Info for the flash device */
+    const struct its_flash_fs_config_t *cfg; /**< Filesystem configuration */
+    const struct its_flash_fs_ops_t *ops;    /**< Filesystem flash operations */
     struct its_metadata_block_header_t meta_block_header; /**< Metadata block
                                                            *   header
                                                            */
@@ -327,6 +331,33 @@ psa_status_t its_flash_fs_mblock_update_scratch_file_meta(
                                        struct its_flash_fs_ctx_t *fs_ctx,
                                        uint32_t idx,
                                        const struct its_file_meta_t *file_meta);
+
+/**
+ * \brief Moves data from source block ID to destination block ID.
+ *
+ * \param[in] fs_ctx      Filesystem context
+ * \param[in] dst_block   Destination block ID
+ * \param[in] dst_offset  Destination offset position from the init of the
+ *                        destination block
+ * \param[in] src_block   Source block ID
+ * \param[in] src_offset  Source offset position from the init of the source
+ *                        block
+ * \param[in] size        Number of bytes to moves
+ *
+ * \note This function assumes all input values are valid. That is, the address
+ *       range, based on blockid, offset and size, is a valid range in flash.
+ *       It also assumes that the destination block is already erased and ready
+ *       to be written.
+ *
+ * \return Returns PSA_SUCCESS if the function is executed correctly. Otherwise,
+ *         it returns PSA_ERROR_STORAGE_FAILURE.
+ */
+psa_status_t its_flash_fs_block_to_block_move(struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t dst_block,
+                                              size_t dst_offset,
+                                              uint32_t src_block,
+                                              size_t src_offset,
+                                              size_t size);
 
 #ifdef __cplusplus
 }

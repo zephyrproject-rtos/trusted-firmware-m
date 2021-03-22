@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,12 @@
  * here the platform_retarget.h to access flash related defines. To resolve this
  * some of the values are redefined here with different names, these are marked
  * with comment.
- *
- * Flash layout on stm23l562e_dk with BL2 (multiple image boot):
+ */
+
+/* Flag for BL2 flash support  */
+#define EXTERNAL_FLASH /*  define EXTERNAL_FLASH to place slot 2/3 in external flash */
+
+ /* Flash layout (internal flash) on stm23l562e_dk with BL2 (multiple image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
  * 0x0000_e000 NV counters area (4 KB)
@@ -43,11 +47,27 @@
  * 0x0000_f000 Secure Storage Area (8 KB)
  * 0x0001_1000 Internal Trusted Storage Area (8 KB)
  * 0x0001_3000 Secure image     primary slot (224 KB)
- * 0x0004_b000 Non-secure image primary slot (168 KB)
- * 0x0007_5000 Unused (44K)
+ * 0x0004_b000 Non-secure image primary slot (172 KB)
+ * 0x0007_5000 Unused (32K)
  * The size of a partition. This should be large enough to contain a S or NS
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
+ */
+
+/* Flash layout (internal & external flash) on stm23l562e_dk with BL2 (multiple image boot):
+ *
+ * Internal flash
+ * 0x0000_0000 BL2 - MCUBoot (72 KB)
+ * 0x0001_2000 NV counters area (4 KB)
+ * 0x0001_3000 Secure Storage Area (8 KB)
+ * 0x0001_5000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_7000 Secure image     primary slot (224 KB)
+ * 0x0004_f000 Non-secure image primary slot (172 KB)
+ * 0x0007_b000 Unused (16 KB)
+ * External flash
+ * 0x0000_0000 Secure image     secondary slot (224 KB)
+ * 0x0003_8000 unused (32 KB)
+ * 0x0004_0000 Non-secure image secondary slot (172 KB)
  */
 
 /* Sector size of the flash hardware */
@@ -58,6 +78,9 @@
 /* Flash layout info for BL2 bootloader */
 #define FLASH_BASE_ADDRESS              (0x0c000000) /* same as FLASH0_BASE_S */
 
+#define OSPI_FLASH_TOTAL_SIZE           (0x4000000)  /* 64 MB same as MX25LM51245G_FLASH_SIZE */
+#define OSPI_FLASH_BASE_ADDRESS         (0x90000000) /* same as OCTOSPI1_BASE in stm32l562xx.h */
+
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_0 and IMAGE_1, SCRATCH
  * is used as a temporary storage during image swapping.
@@ -65,12 +88,21 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_AREA_BL2_SIZE             (0x10800)
+#else
 #define FLASH_AREA_BL2_SIZE             (0xd800)
+#endif /* EXTERNAL_FLASH */
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
+
 /* area for BL2 code not protected by hdp */
 #define FLASH_AREA_BL2_NOHDP_OFFSET     (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_AREA_BL2_NOHDP_SIZE       (0x1800)
+#else
 #define FLASH_AREA_BL2_NOHDP_SIZE       (0x800)
+#endif /* EXTERNAL_FLASH */
 
 /* scratch area */
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE)
@@ -79,8 +111,12 @@
 #if defined(FLASH_LAYOUT_FOR_TEST) || defined(TEST_FRAMEWORK_S) || defined(TEST_FRAMEWORK_NS)
 /* Non Volatile Counters definitions */
 #define FLASH_NV_COUNTERS_SECTOR_SIZE      (0x1000)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET+FLASH_AREA_SCRATCH_SIZE)
+#else
 /* fix me with overwrite scratch is not required */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET)
+#endif /* defined(EXTERNAL_FLASH) */
 
 /* fix me with test config PS and ITS in RAM */
 /* Secure Storage (PS) Service definitions */
@@ -92,7 +128,8 @@
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
 #define FLASH_S_PARTITION_SIZE          (0x38000) /* S partition */
-#define FLASH_NS_PARTITION_SIZE         (0x2A000) /* NS partition */
+#define FLASH_NS_PARTITION_SIZE         (0x2C000) /* NS partition */
+
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID                 (1)
@@ -101,10 +138,12 @@
 #else
 /* Non Volatile Counters definitions */
 #define FLASH_NV_COUNTERS_SECTOR_SIZE      (0x1000)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET+FLASH_AREA_SCRATCH_SIZE)
+#else
 /* fix me with overwrite scratch is not required */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET)
-
-/* fix me with test config PS and ITS in RAM */
+#endif /* defined(EXTERNAL_FLASH) */
 /* Secure Storage (PS) Service definitions */
 #define FLASH_PS_AREA_SIZE             (0x2000)
 #define FLASH_PS_AREA_OFFSET           (FLASH_NV_COUNTERS_AREA_OFFSET+FLASH_NV_COUNTERS_SECTOR_SIZE)
@@ -113,8 +152,14 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
+#if defined(EXTERNAL_FLASH)
+#define FLASH_S_PARTITION_SIZE          (0x38000) /* S partition */
+#define FLASH_NS_PARTITION_SIZE         (0x2C000) /* NS partition */
+#else
 #define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
+#endif /* defined(EXTERNAL_FLASH) */
+
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID                 (1)
@@ -127,11 +172,20 @@
 #define FLASH_AREA_1_SIZE               (FLASH_NS_PARTITION_SIZE)
 /* Secure image secondary slot */
 #define FLASH_AREA_2_ID                 (FLASH_AREA_1_ID + 1)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_AREA_2_OFFSET             (0x000000000)
+#else
 #define FLASH_AREA_2_OFFSET             (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#endif /* EXTERNAL_FLASH */
 #define FLASH_AREA_2_SIZE               (FLASH_S_PARTITION_SIZE)
 /* Non-secure image secondary slot */
 #define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
+#if defined(EXTERNAL_FLASH)
+/* Add 0x8000 to fix tools issue on external flash */
+#define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE + 0x8000)
+#else
 #define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#endif /* defined(EXTERNAL_FLASH) */
 #define FLASH_AREA_3_SIZE               (FLASH_NS_PARTITION_SIZE)
 
 #define FLASH_AREA_SCRATCH_ID           (FLASH_AREA_3_ID + 1)
@@ -153,47 +207,58 @@
 #define NON_SECURE_IMAGE_OFFSET         (SECURE_IMAGE_OFFSET + SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
+#if defined(EXTERNAL_FLASH)
+/* Config for Area Using External flash driver */
+#define OSPI_FLASH_DEV_ID          (FLASH_DEVICE_ID+1)
+#define FLASH_DEVICE_ID_2          (OSPI_FLASH_DEV_ID)
+#define FLASH_DEVICE_ID_3          (OSPI_FLASH_DEV_ID)
+#define OSPI_FLASH_DEV_NAME   TFM_Driver_OSPI_FLASH0
+#define FLASH_DEV_NAME_2 OSPI_FLASH_DEV_NAME
+#define FLASH_DEV_NAME_3 OSPI_FLASH_DEV_NAME
+#endif /* defined(EXTERNAL_FLASH) */
 /* Flash device name used by BL2 and NV Counter
   * Name is defined in flash driver file: Driver_Flash.c
   */
 
 #define FLASH_DEV_NAME TFM_Driver_FLASH0
 
-/* Secure Storage (PS) Service definitions
+/* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M PS Integration Guide.
  */
-#define PS_FLASH_DEV_NAME TFM_Driver_FLASH0
+#define TFM_HAL_PS_FLASH_DRIVER TFM_Driver_FLASH0
 
-/* Secure Storage (PS) Service definitions */
 /* In this target the CMSIS driver requires only the offset from the base
-  * address instead of the full memory address.
-  */
-#define PS_FLASH_AREA_ADDR  FLASH_PS_AREA_OFFSET
-#define PS_SECTOR_SIZE      FLASH_AREA_IMAGE_SECTOR_SIZE
-#define PS_SECTORS_PER_BLOCK   (0x1)
-#define PS_FLASH_AREA_SIZE     FLASH_PS_AREA_SIZE
-#define PS_RAM_FS_SIZE         PS_FLASH_AREA_SIZE
+ * address instead of the full memory address.
+ */
+/* Base address of dedicated flash area for PS */
+#define TFM_HAL_PS_FLASH_AREA_ADDR    FLASH_PS_AREA_OFFSET
+/* Size of dedicated flash area for PS */
+#define TFM_HAL_PS_FLASH_AREA_SIZE    FLASH_PS_AREA_SIZE
+#define PS_RAM_FS_SIZE                TFM_HAL_PS_FLASH_AREA_SIZE
+/* Number of physical erase sectors per logical FS block */
+#define TFM_HAL_PS_SECTORS_PER_BLOCK  (1)
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_PS_PROGRAM_UNIT       (0x8)
 
-/* The sectors must be in consecutive memory location */
-#define PS_NBR_OF_SECTORS  (FLASH_PS_AREA_SIZE / PS_SECTOR_SIZE)
-/* Specifies the smallest flash programmable unit in bytes */
-#define PS_FLASH_PROGRAM_UNIT  0x8
+/* Internal Trusted Storage (ITS) Service definitions
+ * Note: Further documentation of these definitions can be found in the
+ * TF-M ITS Integration Guide.
+ */
+#define TFM_HAL_ITS_FLASH_DRIVER TFM_Driver_FLASH0
 
-#define ITS_FLASH_DEV_NAME TFM_Driver_FLASH0
-
-#define ITS_FLASH_AREA_ADDR     FLASH_ITS_AREA_OFFSET
-#define ITS_FLASH_AREA_SIZE     FLASH_ITS_AREA_SIZE
-#define ITS_RAM_FS_SIZE         ITS_FLASH_AREA_SIZE
-
-#define ITS_SECTOR_SIZE         FLASH_AREA_IMAGE_SECTOR_SIZE
-/* The sectors must be in consecutive memory location */
-#define ITS_NBR_OF_SECTORS      (FLASH_ITS_AREA_SIZE / ITS_SECTOR_SIZE)
-
-/* Number of ITS_SECTOR_SIZE per block */
-#define ITS_SECTORS_PER_BLOCK   (0x1)
-/* Specifies the smallest flash programmable unit in bytes */
-#define ITS_FLASH_PROGRAM_UNIT  (0x8)
+/* In this target the CMSIS driver requires only the offset from the base
+ * address instead of the full memory address.
+ */
+/* Base address of dedicated flash area for ITS */
+#define TFM_HAL_ITS_FLASH_AREA_ADDR    FLASH_ITS_AREA_OFFSET
+/* Size of dedicated flash area for ITS */
+#define TFM_HAL_ITS_FLASH_AREA_SIZE    FLASH_ITS_AREA_SIZE
+#define ITS_RAM_FS_SIZE                TFM_HAL_ITS_FLASH_AREA_SIZE
+/* Number of physical erase sectors per logical FS block */
+#define TFM_HAL_ITS_SECTORS_PER_BLOCK  (1)
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_ITS_PROGRAM_UNIT       (0x8)
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET

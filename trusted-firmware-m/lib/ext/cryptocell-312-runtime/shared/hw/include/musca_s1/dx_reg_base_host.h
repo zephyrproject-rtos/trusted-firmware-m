@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -18,7 +18,7 @@
  * Same as FLASH_TFM_CRYPTO_KEY_AREA as found in
  * platform/ext/target/musca_s1/partition/flash_layout.h
  */
-#define DX_MRAM_CC 0x1A1EE000
+#define DX_MRAM_CC 0x1A1E9000
 
 #define DX_BASE_ENV_REGS 0x500A0000 //TODO need confirm
 

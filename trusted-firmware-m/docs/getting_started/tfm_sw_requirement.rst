@@ -35,7 +35,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1+, v6.11, v6.12, v6.13
+    - Arm Compiler v6.10.1+
     - GNU Arm compiler v7.3.1+
     - IAR Arm compiler v8.42.x, v8.50.x
 
@@ -48,8 +48,12 @@ versions are:
 
     - The GNU Arm compiler can be downloaded from
       `here <https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads>`__.
-      On the page select *GNU Arm Embedded Toolchain: 6-2017-q1-update*
-      or *GNU Arm Embedded Toolchain: 7-2018-q2-update*
+      On the page select *GNU Arm Embedded Toolchain: 7-2018-q2-update* or an
+      above version.
+
+    - GNU Arm compiler version *10-2020-q4-major* has an issue in CMSE support.
+      The bug is reported in `here <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157>`__.
+      Select other GNU Arm compiler versions instead.
 
     - The IAR Arm compilers above are provided via IAR Embedded Workbench (Windows) or
       IAR build tools for linux.
@@ -463,4 +467,4 @@ Dependency chain:
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

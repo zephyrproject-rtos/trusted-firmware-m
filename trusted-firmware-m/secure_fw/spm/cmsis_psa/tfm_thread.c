@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,37 +13,33 @@
 #include "tfm_core_utils.h"
 
 /* Force ZERO in case ZI(bss) clear is missing */
-static struct tfm_core_thread_t *p_thrd_head = NULL;
-static struct tfm_core_thread_t *p_runn_head = NULL;
-static struct tfm_core_thread_t *p_curr_thrd = NULL;
+static struct tfm_core_thread_t *p_thrd_head = NULL; /* Head of all threads */
+static struct tfm_core_thread_t *p_rnbl_head = NULL; /* Head of runnable */
+static struct tfm_core_thread_t *p_curr_thrd = NULL; /* Current running */
 
 /* Define Macro to fetch global to support future expansion (PERCPU e.g.) */
 #define LIST_HEAD   p_thrd_head
-#define RUNN_HEAD   p_runn_head
+#define RNBL_HEAD   p_rnbl_head
 #define CURR_THRD   p_curr_thrd
 
-static struct tfm_core_thread_t *find_next_running_thread(
-                                                struct tfm_core_thread_t *pth)
+/* Get next thread to run for scheduler */
+struct tfm_core_thread_t *tfm_core_thrd_get_next(void)
 {
-    while (pth && pth->state != THRD_STATE_RUNNING) {
+    struct tfm_core_thread_t *pth = RNBL_HEAD;
+
+    /*
+     * First runnable thread has highest priority since threads are sorted with
+     * priority.
+     */
+    while (pth && pth->state != THRD_STATE_RUNNABLE) {
         pth = pth->next;
     }
 
     return pth;
 }
 
-/* To get next running thread for scheduler */
-struct tfm_core_thread_t *tfm_core_thrd_get_next_thread(void)
-{
-    /*
-     * First RUNNING thread has highest priority since threads are sorted with
-     * priority.
-     */
-    return find_next_running_thread(RUNN_HEAD);
-}
-
-/* To get current thread for caller */
-struct tfm_core_thread_t *tfm_core_thrd_get_curr_thread(void)
+/* To get current running thread for caller */
+struct tfm_core_thread_t *tfm_core_thrd_get_curr(void)
 {
     return CURR_THRD;
 }
@@ -63,21 +59,6 @@ static void insert_by_prior(struct tfm_core_thread_t **head,
         }
         node->next = iter->next;
         iter->next = node;
-    }
-}
-
-/*
- * Set first running thread as head to reduce enumerate
- * depth while searching for a first running thread.
- */
-static void update_running_head(struct tfm_core_thread_t **runn,
-                                struct tfm_core_thread_t *node)
-{
-    if ((node->state == THRD_STATE_RUNNING) &&
-        (*runn == NULL || (node->prior < (*runn)->prior))) {
-        *runn = node;
-    } else {
-        *runn = LIST_HEAD;
     }
 }
 
@@ -111,8 +92,8 @@ uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, pth);
 
-    /* Mark it as RUNNING after insertion */
-    tfm_core_thrd_set_state(pth, THRD_STATE_RUNNING);
+    /* Mark it as RUNNABLE after insertion */
+    tfm_core_thrd_set_state(pth, THRD_STATE_RUNNABLE);
 
     return THRD_SUCCESS;
 }
@@ -122,7 +103,17 @@ void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state)
     TFM_CORE_ASSERT(pth != NULL && new_state < THRD_STATE_INVALID);
 
     pth->state = new_state;
-    update_running_head(&RUNN_HEAD, pth);
+
+    /*
+     * Set first runnable thread as head to reduce enumerate
+     * depth while searching for a first runnable thread.
+     */
+    if ((pth->state == THRD_STATE_RUNNABLE) &&
+        (RNBL_HEAD == NULL || (pth->prior < RNBL_HEAD->prior))) {
+        RNBL_HEAD = pth;
+    } else {
+        RNBL_HEAD = LIST_HEAD;
+    }
 }
 
 /* Scheduling won't happen immediately but after the exception returns */

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Arm Limited
- * Copyright (c) 2020 IAR Systems AB
+ * Copyright (c) 2020-2021 IAR Systems AB
+ * Copyright (c) 2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +28,21 @@ define block LR_CODE with fixed order, maximum size = NS_CODE_SIZE {block ER_COD
 place at address NS_CODE_START {block LR_CODE};
 
 define block ER_DATA with alignment = 8 {readwrite};
+#ifdef RAM_VECTORS_SUPPORT
+define block ER_RAM_VECTORS      with alignment = 256 { section .ramvec };
+#endif
+define block TFM_RAM_CODE       with alignment = 32 { readonly section .ramfunc };
 define block ARM_LIB_STACK      with alignment = 32, size = NS_MSP_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = NS_HEAP_SIZE { };
 define block ARM_LIB_HEAP       with alignment = 8, size = NS_HEAP_SIZE { };
 define overlay HEAP_OVL         {block HEAP};
 define overlay HEAP_OVL         {block ARM_LIB_HEAP};
-define block TFM_RAM_CODE       with alignment = 32 { readonly section .ramfunc };
 keep {block ARM_LIB_STACK, block HEAP, block ARM_LIB_HEAP, block TFM_RAM_CODE};
 
-do not initialize  { section .noinit };
+do not initialize  {
+   section .noinit,
+   rw section .ramvec
+   };
 initialize by copy { readwrite };
 if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 {
@@ -44,12 +51,19 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 }
 
 define block DATA with fixed order, maximum size = NS_DATA_SIZE {
+#ifdef RAM_VECTORS_SUPPORT
+       block ER_RAM_VECTORS,
+#endif
+       block TFM_RAM_CODE,
        block ER_DATA,
        block ARM_LIB_STACK,
        overlay HEAP_OVL,
-       block TFM_RAM_CODE
 };
 place at address NS_DATA_START {block DATA};
+
+#if defined(PSA_API_TEST_ENABLED)
+define region PSA_NVMEM_region = mem:[from PSA_API_TEST_NVMEM_START size PSA_API_TEST_NVMEM_SIZE];
+#endif
 
 #if defined (NS_DATA_SHARED_START)
     /* Shared memory data */

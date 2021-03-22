@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,6 @@
 
 #include "cmsis_compiler.h"
 #include "crypto/ps_crypto_interface.h"
-#include "flash_layout.h"
 #include "nv_counters/ps_nv_counters.h"
 #include "psa/internal_trusted_storage.h"
 #include "tfm_memory_utils.h"

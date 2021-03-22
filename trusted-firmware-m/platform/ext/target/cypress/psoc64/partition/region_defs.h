@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017-2020 ARM Limited. All rights reserved.
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,6 @@
 #define NS_HEAP_SIZE            0x0001000
 #define NS_MSP_STACK_SIZE       (0x0000200)
 
-/* Relocation of vectors to RAM support */
-#define RAM_VECTORS_SUPPORT
-
 /*
  * This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
@@ -67,6 +64,7 @@
  *
  * 0x0803_0000 - 0x080E_7FFF Non-secure (736KB)
  *    0x0803_0000 - 0x080E_6FFF Non-secure OS/App (732KB)
+ *      0x080E_6C00 - 0x080E_6FFF PSA NVMEM (PSA_NVMEM_SIZE, 1KB) (if PSA_API_TEST_ENABLED)
  *    0x080E_7000 - 0x080E_7FFF Shared memory (NS_DATA_SHARED_SIZE, 4KB)
  * 0x080E_8000 - 0x080F_FFFF System reserved memory (96KB)
  * 0x0810_0000 End of RAM
@@ -158,6 +156,17 @@
 #define NS_DATA_SHARED_START (NS_DATA_START + NS_DATA_SIZE - \
                               NS_DATA_SHARED_SIZE)
 #define NS_DATA_SHARED_LIMIT (NS_DATA_SHARED_START + NS_DATA_SHARED_SIZE - 1)
+
+/* PSA NVMEM: before Shared memory */
+#ifdef PSA_API_TEST_ENABLED
+#define PSA_API_TEST_NVMEM_SIZE     0x400
+#define PSA_API_TEST_NVMEM_START    \
+        (NS_DATA_SHARED_START - PSA_API_TEST_NVMEM_SIZE)
+/* PSA NVMEM + Shared memory should <= NS_DATA_SIZE */
+#if (PSA_API_TEST_NVMEM_SIZE + NS_DATA_SHARED_SIZE) > NS_DATA_SIZE
+#error "Non-Secure memory usage overflow"
+#endif
+#endif /* PSA_API_TEST_ENABLED */
 
 /* Shared variables addresses */
 /* ipcWaitMessageStc, cy_flash.c */
