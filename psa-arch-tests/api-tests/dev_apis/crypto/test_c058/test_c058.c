@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019-2020, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,15 @@
 #include "test_c058.h"
 #include "test_data.h"
 
-client_test_t test_c058_crypto_list[] = {
+const client_test_t test_c058_crypto_list[] = {
     NULL,
     psa_aead_update_test,
     NULL,
 };
 
-static int g_test_count = 1;
+extern  uint32_t g_test_count;
 
-int32_t psa_aead_update_test(caller_security_t caller)
+int32_t psa_aead_update_test(caller_security_t caller __UNUSED)
 {
     int32_t               i, status;
     uint8_t               output[BUFFER_SIZE];
@@ -36,6 +36,7 @@ int32_t psa_aead_update_test(caller_security_t caller)
     int                   num_checks = sizeof(check1)/sizeof(check1[0]);
     psa_key_attributes_t  attributes = PSA_KEY_ATTRIBUTES_INIT;
     psa_aead_operation_t  operation = PSA_AEAD_OPERATION_INIT;
+    psa_key_handle_t      key_handle;
 
     if (num_checks == 0)
     {
@@ -63,12 +64,12 @@ int32_t psa_aead_update_test(caller_security_t caller)
 
         /* Import the key data into the key slot */
         status = val->crypto_function(VAL_CRYPTO_IMPORT_KEY, &attributes, check1[i].key_data,
-                 check1[i].key_length, &check1[i].key_handle);
+                 check1[i].key_length, &key_handle);
         TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(3));
 
         /* Set the key for a multipart authenticated encryption operation */
         status = val->crypto_function(VAL_CRYPTO_AEAD_ENCRYPT_SETUP, &operation,
-                 check1[i].key_handle, check1[i].alg);
+                 key_handle, check1[i].alg);
         TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(4));
 
         /* Set the nonce for an authenticated encryption operation */
@@ -88,7 +89,7 @@ int32_t psa_aead_update_test(caller_security_t caller)
 
         /* Encrypt or decrypt a message fragment in an active AEAD operation */
         status = val->crypto_function(VAL_CRYPTO_AEAD_UPDATE, &operation,
-                 check1[i].plaintext_length,  check1[i].plaintext, output,
+                 check1[i].plaintext, check1[i].plaintext_length, output,
                  check1[i].output_size, &length);
         TEST_ASSERT_EQUAL(status, check1[i].expected_status, TEST_CHECKPOINT_NUM(8));
 
@@ -96,7 +97,7 @@ int32_t psa_aead_update_test(caller_security_t caller)
         {
             /* Encrypt or decrypt a message fragment in an inactive AEAD operation should fail */
             status = val->crypto_function(VAL_CRYPTO_AEAD_UPDATE, &operation,
-                     check1[i].plaintext_length, check1[i].plaintext, output,
+                     check1[i].plaintext, check1[i].plaintext_length, output,
                      check1[i].output_size, &length);
             TEST_ASSERT_EQUAL(status, PSA_ERROR_BAD_STATE, TEST_CHECKPOINT_NUM(9));
 
@@ -105,7 +106,7 @@ int32_t psa_aead_update_test(caller_security_t caller)
             TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(10));
 
             /* Destroy the key */
-            status = val->crypto_function(VAL_CRYPTO_DESTROY_KEY, check1[i].key_handle);
+            status = val->crypto_function(VAL_CRYPTO_DESTROY_KEY, key_handle);
             TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(11));
 
             /* Reset the key attributes */
@@ -122,7 +123,7 @@ int32_t psa_aead_update_test(caller_security_t caller)
         TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(14));
 
         /* Destroy the key */
-        status = val->crypto_function(VAL_CRYPTO_DESTROY_KEY, check1[i].key_handle);
+        status = val->crypto_function(VAL_CRYPTO_DESTROY_KEY, key_handle);
         TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(15));
 
         /* Reset the key attributes */
