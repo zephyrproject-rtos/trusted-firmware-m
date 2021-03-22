@@ -51,6 +51,10 @@ versions are:
       On the page select *GNU Arm Embedded Toolchain: 7-2018-q2-update* or an
       above version.
 
+    - GNU Arm compiler version *10-2020-q4-major* has an issue in CMSE support.
+      The bug is reported in `here <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157>`__.
+      Select other GNU Arm compiler versions instead.
+
     - The IAR Arm compilers above are provided via IAR Embedded Workbench (Windows) or
       IAR build tools for linux.
       For information, see
